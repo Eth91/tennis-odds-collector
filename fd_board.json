@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T14:14:24Z",
+ "captured_at": "2026-07-25T14:18:37Z",
  "matches": [
-  {
-   "event_id": 35864056,
-   "p1": "Jerzy Pelka",
-   "p2": "Sebastian Szostok",
-   "p1_norm": "jerzy pelka",
-   "p2_norm": "sebastian szostok",
-   "open_date": "2026-07-25T13:55:00.000Z",
-   "line": 99.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35864104,
    "p1": "Kacper Petas",
@@ -19,7 +8,7 @@
    "p1_norm": "kacper petas",
    "p2_norm": "maciej domin",
    "open_date": "2026-07-25T14:10:00.000Z",
-   "line": 75.5,
+   "line": 87.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,9 +19,9 @@
    "p1_norm": "bartosz kwodawski",
    "p2_norm": "dawid kosmal",
    "open_date": "2026-07-25T14:15:00.000Z",
-   "line": 70.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 64.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35864131,
@@ -41,9 +30,9 @@
    "p1_norm": "jacek wieczerzak",
    "p2_norm": "witold buczynski",
    "open_date": "2026-07-25T14:20:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35864132,
@@ -108,6 +97,17 @@
    "p2_norm": "jakub nowak",
    "open_date": "2026-07-25T14:40:00.000Z",
    "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35864175,
+   "p1": "Patryk Jedrzejak",
+   "p2": "Rafal Adach",
+   "p1_norm": "patryk jedrzejak",
+   "p2_norm": "rafal adach",
+   "open_date": "2026-07-25T14:45:00.000Z",
+   "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
   }
