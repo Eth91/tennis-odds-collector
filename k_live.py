@@ -22,6 +22,10 @@ import time
 from pathlib import Path
 
 import requests
+import unicodedata
+
+def _norm(s):
+    return unicodedata.normalize("NFD", s or "").encode("ascii", "ignore").decode().lower().strip()
 
 HERE = Path(__file__).resolve().parent
 DB = HERE / "k_compass.sqlite"
@@ -70,6 +74,11 @@ def _con():
         pitcher TEXT, game_date TEXT, side TEXT, line REAL, odds REAL, book TEXT, score REAL,
         opp TEXT, flagged_at TEXT, skip TEXT, result TEXT, actual INTEGER, pnl REAL,
         graded_at TEXT, log_date TEXT, pinged INTEGER DEFAULT 0,
+        PRIMARY KEY(pitcher, game_date))""")
+    c.execute("""CREATE TABLE IF NOT EXISTS outlier(
+        pitcher TEXT, game_date TEXT, side TEXT, line REAL, odds REAL, book TEXT, edge REAL,
+        opp TEXT, flagged_at TEXT, result TEXT, actual INTEGER, pnl REAL, graded_at TEXT,
+        log_date TEXT, pinged INTEGER DEFAULT 0,
         PRIMARY KEY(pitcher, game_date))""")
     return c
 
@@ -142,7 +151,7 @@ def slate():
             for side_lbl, opp_lbl in (("home", "away"), ("away", "home")):
                 pp = (g["teams"][side_lbl].get("probablePitcher") or {})
                 opp_lu = [p.get("id") for p in (lu.get(f"{opp_lbl}Players") or [])]
-                if not pp.get("id") or len(opp_lu) < 9:
+                if not pp.get("id"):
                     continue
                 out.append({"pitcher": pp.get("fullName"), "pid": pp["id"],
                             "opp_lineup": opp_lu[:9],
@@ -172,7 +181,7 @@ def k_lines():
             latest[k] = (float(od), ca)
     out = {}
     for (bk, pl, ln, sd), (od, _c) in latest.items():
-        out.setdefault(pl, {}).setdefault(bk, {}).setdefault(ln, {})[sd] = od
+        out.setdefault(_norm(pl), {}).setdefault(bk, {}).setdefault(ln, {})[sd] = od
     return out
 
 
@@ -217,7 +226,7 @@ def flag(con):
         # per-book main line (2-sided nearest even), then best price for our side
         best = None
         for bk in BOOKS:
-            lls = (lines.get(g["pitcher"]) or {}).get(bk) or {}
+            lls = (lines.get(_norm(g["pitcher"])) or {}).get(bk) or {}
             two = {ln: v for ln, v in lls.items() if "over" in v and "under" in v}
             if not two:
                 continue
@@ -250,13 +259,78 @@ def flag(con):
         print(f"flagged {new}")
 
 
+def flag_outlier(con):
+    """K price-outlier (holdout +7.3%): at a shared line with >=3 two-sided books, a book whose
+    devigged P(side) is >=4pts BELOW the others' mean is underpricing that side -> bet it there.
+    Pure market signal: needs probables (not lineups)."""
+    import os
+    topic = os.environ.get("NTFY_TOPIC")
+    lines = k_lines()
+    ts = _now()
+    gd = _today_et()
+    new = 0
+    for g in slate():
+        if g["started"]:
+            continue
+        if con.execute("SELECT 1 FROM outlier WHERE pitcher=? AND game_date=?",
+                       (g["pitcher"], gd)).fetchone():
+            continue
+        book_lines = lines.get(_norm(g["pitcher"])) or {}
+        best = None                                  # (edge, side, line, odds, book)
+        byline = {}
+        for bk, lls in book_lines.items():
+            for ln, sides in lls.items():
+                if "over" in sides and "under" in sides:
+                    io, iu = 1 / sides["over"], 1 / sides["under"]
+                    byline.setdefault(ln, {})[bk] = (io / (io + iu), sides)
+        for ln, probs in byline.items():
+            if len(probs) < 3:
+                continue
+            for bk, (pv, sides) in probs.items():
+                om = sum(v for b2, (v, _s) in probs.items() if b2 != bk) / (len(probs) - 1)
+                if om - pv >= 0.04:                  # over cheap at bk
+                    cand = (om - pv, "over", ln, sides["over"], bk)
+                elif pv - om >= 0.04:                # under cheap at bk
+                    cand = (pv - om, "under", ln, sides["under"], bk)
+                else:
+                    continue
+                if best is None or cand[0] > best[0]:
+                    best = cand
+        if not best:
+            continue
+        edge, side, ln, od, bk = best
+        con.execute("INSERT INTO outlier (pitcher, game_date, side, line, odds, book, edge, opp, "
+                    "flagged_at) VALUES (?,?,?,?,?,?,?,?,?)",
+                    (g["pitcher"], gd, side, ln, od, bk, round(edge, 3), g["opp_name"], ts))
+        new += 1
+        if topic:
+            am = f"+{round((od-1)*100)}" if od >= 2 else f"-{round(100/(od-1))}"
+            txt = (f"\U0001f6a8 \u26be\U0001f4b0 {g[chr(39)+chr(111)][0:0]}" if 0 else
+                   f"\U0001f6a8 \u26be\U0001f4b0 {g['opp_name']} {g['pitcher']} "
+                   f"{'O' if side == 'over' else 'U'}{ln:g}K {am} {bk.upper()} +{edge*100:.0f}pt")
+            try:
+                requests.post(f"https://ntfy.sh/{topic}", data=txt.encode(),
+                              params={"title": "Pickz", "priority": "high"}, timeout=15
+                              ).raise_for_status()
+                con.execute("UPDATE outlier SET pinged=1 WHERE pitcher=? AND game_date=?",
+                            (g["pitcher"], gd))
+            except requests.RequestException as e:
+                print(f"outlier ping failed: {str(e)[:60]}")
+    con.commit()
+    if new:
+        print(f"outlier flagged {new}")
+
+
 def grade(con):
-    rows = con.execute("SELECT pitcher, game_date, side, line, odds FROM compass "
-                       "WHERE result IS NULL AND game_date < ?", (_today_et(),)).fetchall()
+    rows = []
+    for table in ("compass", "outlier"):
+        rows += [(table,) + r for r in con.execute(
+            f"SELECT pitcher, game_date, side, line, odds FROM {table} "
+            "WHERE result IS NULL AND game_date < ?", (_today_et(),)).fetchall()]
     if not rows:
         return
     ids = {}
-    for pitcher, gd, side, line, odds in rows:
+    for table, pitcher, gd, side, line, odds in rows:
         pid = ids.get(pitcher)
         if pid is None:
             d = _get("/people/search", names=pitcher)
@@ -267,7 +341,7 @@ def grade(con):
             continue
         d = _get(f"/people/{pid}/stats", stats="gameLog", group="pitching", season=int(gd[:4]))
         claimed = {r[0] for r in con.execute(
-            "SELECT log_date FROM compass WHERE pitcher=? AND log_date IS NOT NULL", (pitcher,))}
+            f"SELECT log_date FROM {table} WHERE pitcher=? AND log_date IS NOT NULL", (pitcher,))}
         g = None
         for s in (d.get("stats") or [{}])[0].get("splits") or []:
             st_ = s.get("stat") or {}
@@ -287,7 +361,7 @@ def grade(con):
             continue
         won = (g[1] > line) if side == "over" else (g[1] < line)
         pnl = (odds - 1) if won else -1.0
-        con.execute("UPDATE compass SET result=?, actual=?, pnl=?, graded_at=?, log_date=? "
+        con.execute(f"UPDATE {table} SET result=?, actual=?, pnl=?, graded_at=?, log_date=? "
                     "WHERE pitcher=? AND game_date=?",
                     ("W" if won else "L", g[1], round(pnl, 2), _now(), g[0], pitcher, gd))
         time.sleep(0.1)
@@ -303,15 +377,23 @@ def board(con):
                                   (_today_et(),))]
     shadow = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) FROM compass "
                          "WHERE result IN ('W','L') AND skip IS NOT NULL").fetchone()
+    orec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) FROM outlier "
+                       "WHERE result IN ('W','L')").fetchone()
+    oflags = [dict(zip(("pitcher", "side", "line", "odds", "book", "edge", "opp"), r))
+              for r in con.execute("SELECT pitcher, side, line, odds, book, edge, opp FROM outlier "
+                                   "WHERE game_date=? ORDER BY edge DESC", (_today_et(),))]
     (HERE / "compass_board.json").write_text(json.dumps(
         {"updated": _now(), "w": rec[0] or 0, "l": rec[1] or 0, "u": rec[2] or 0.0,
          "shadow": {"w": shadow[0] or 0, "l": shadow[1] or 0, "u": shadow[2] or 0.0},
-         "today": flags}))
+         "today": flags,
+         "outlier": {"w": orec[0] or 0, "l": orec[1] or 0, "u": orec[2] or 0.0,
+                     "today": oflags}}))
 
 
 if __name__ == "__main__":
     c = _con()
     flag(c)
+    flag_outlier(c)
     grade(c)
     board(c)
     c.close()
