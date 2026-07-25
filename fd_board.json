@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T09:58:55Z",
+ "captured_at": "2026-07-25T10:03:18Z",
  "matches": [
   {
    "event_id": 35863127,
@@ -8,20 +8,9 @@
    "p1_norm": "alan wos",
    "p2_norm": "radoslaw malinowski",
    "open_date": "2026-07-25T09:45:00.000Z",
-   "line": 88.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
-  {
-   "event_id": 35863093,
-   "p1": "Jacek Wieczerzak",
-   "p2": "Pawel Kurek",
-   "p1_norm": "jacek wieczerzak",
-   "p2_norm": "pawel kurek",
-   "open_date": "2026-07-25T09:50:00.000Z",
-   "line": 52.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 89.5,
+   "over_odds": -145,
+   "under_odds": 105
   },
   {
    "event_id": 35863094,
@@ -30,9 +19,9 @@
    "p1_norm": "mateusz misiak",
    "p2_norm": "artur szoltysek",
    "open_date": "2026-07-25T09:50:00.000Z",
-   "line": 56.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 54.5,
+   "over_odds": 105,
+   "under_odds": -145
   },
   {
    "event_id": 35863100,
@@ -41,9 +30,9 @@
    "p1_norm": "rafal adach",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-25T09:55:00.000Z",
-   "line": 76.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 55.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35863107,
@@ -52,9 +41,9 @@
    "p1_norm": "josef braun",
    "p2_norm": "piotr cyrnek",
    "open_date": "2026-07-25T10:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35863086,
