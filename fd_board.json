@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T22:40:10Z",
+ "captured_at": "2026-07-25T22:45:25Z",
  "matches": [
-  {
-   "event_id": 35866276,
-   "p1": "Robert Szymik",
-   "p2": "Damian Fira",
-   "p1_norm": "robert szymik",
-   "p2_norm": "damian fira",
-   "open_date": "2026-07-25T22:20:00.000Z",
-   "line": 93.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35866299,
    "p1": "Jakub Kuzmicz",
@@ -19,20 +8,9 @@
    "p1_norm": "jakub kuzmicz",
    "p2_norm": "marcin marchlewski",
    "open_date": "2026-07-25T22:30:00.000Z",
-   "line": 84.5,
+   "line": 80.5,
    "over_odds": -120,
    "under_odds": -115
-  },
-  {
-   "event_id": 35866300,
-   "p1": "Karol Sulkowski",
-   "p2": "Dawid Poloszczanski",
-   "p1_norm": "karol sulkowski",
-   "p2_norm": "dawid poloszczanski",
-   "open_date": "2026-07-25T22:35:00.000Z",
-   "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -125
   },
   {
    "event_id": 35866301,
@@ -41,7 +19,7 @@
    "p1_norm": "pawel chojnacki",
    "p2_norm": "andriej fomin",
    "open_date": "2026-07-25T22:35:00.000Z",
-   "line": 82.5,
+   "line": 90.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -53,8 +31,8 @@
    "p2_norm": "marcin lach",
    "open_date": "2026-07-25T22:40:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -116
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35866307,
@@ -108,6 +86,17 @@
    "p2_norm": "kamil durak",
    "open_date": "2026-07-25T23:05:00.000Z",
    "line": 81.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35866329,
+   "p1": "Kacper Kwiatkowski",
+   "p2": "Jakub Skorupa",
+   "p1_norm": "kacper kwiatkowski",
+   "p2_norm": "jakub skorupa",
+   "open_date": "2026-07-25T23:10:00.000Z",
+   "line": 78.5,
    "over_odds": -112,
    "under_odds": -118
   }
