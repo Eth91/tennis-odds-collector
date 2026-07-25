@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T17:20:36Z",
+ "captured_at": "2026-07-25T17:25:31Z",
  "matches": [
   {
    "event_id": 35865042,
@@ -8,9 +8,9 @@
    "p1_norm": "kacper kwiatkowski",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-25T17:10:00.000Z",
-   "line": 89.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 92.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35865253,
@@ -19,9 +19,9 @@
    "p1_norm": "dariusz maszczynski",
    "p2_norm": "andriej fomin",
    "open_date": "2026-07-25T17:20:00.000Z",
-   "line": 69.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 56.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35865258,
@@ -30,9 +30,9 @@
    "p1_norm": "karol strowski",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-25T17:20:00.000Z",
-   "line": 81.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 83.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35865259,
@@ -41,9 +41,9 @@
    "p1_norm": "bartosz kwodawski",
    "p2_norm": "bartosz sulkowski",
    "open_date": "2026-07-25T17:20:00.000Z",
-   "line": 74.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 70.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35865305,
