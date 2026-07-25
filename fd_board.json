@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T02:11:01Z",
+ "captured_at": "2026-07-25T02:15:03Z",
  "matches": [
-  {
-   "event_id": 35862212,
-   "p1": "Maciej Kolek",
-   "p2": "Mateusz Rutkowski",
-   "p1_norm": "maciej kolek",
-   "p2_norm": "mateusz rutkowski",
-   "open_date": "2026-07-25T01:55:00.000Z",
-   "line": 85.5,
-   "over_odds": -135,
-   "under_odds": 100
-  },
   {
    "event_id": 35862275,
    "p1": "Jakub Kuzmicz",
@@ -19,7 +8,7 @@
    "p1_norm": "jakub kuzmicz",
    "p2_norm": "marcin marchlewski",
    "open_date": "2026-07-25T02:15:00.000Z",
-   "line": 76.5,
+   "line": 72.5,
    "over_odds": -112,
    "under_odds": -118
   },
