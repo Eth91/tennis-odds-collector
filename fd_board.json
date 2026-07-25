@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T23:03:11Z",
+ "captured_at": "2026-07-25T23:10:34Z",
  "matches": [
-  {
-   "event_id": 35866307,
-   "p1": "Tomasz Filbrandt",
-   "p2": "Filip Mlynarski",
-   "p1_norm": "tomasz filbrandt",
-   "p2_norm": "filip mlynarski",
-   "open_date": "2026-07-25T22:50:00.000Z",
-   "line": 89.5,
-   "over_odds": -130,
-   "under_odds": -105
-  },
   {
    "event_id": 35866308,
    "p1": "Miroslaw Warzecha",
@@ -20,17 +9,6 @@
    "p2_norm": "michal guzik",
    "open_date": "2026-07-25T22:50:00.000Z",
    "line": 87.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35866317,
-   "p1": "Piotr Gesiarz",
-   "p2": "Tomasz Kocik",
-   "p1_norm": "piotr gesiarz",
-   "p2_norm": "tomasz kocik",
-   "open_date": "2026-07-25T22:55:00.000Z",
-   "line": 60.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -41,20 +19,9 @@
    "p1_norm": "stapor rafal",
    "p2_norm": "jakub glanowski",
    "open_date": "2026-07-25T22:55:00.000Z",
-   "line": 86.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35866328,
-   "p1": "Roman Wiza",
-   "p2": "Kamil Durak",
-   "p1_norm": "roman wiza",
-   "p2_norm": "kamil durak",
-   "open_date": "2026-07-25T23:05:00.000Z",
-   "line": 81.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 93.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35866329,
@@ -64,17 +31,6 @@
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-25T23:10:00.000Z",
    "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
-  {
-   "event_id": 35866330,
-   "p1": "Jakub Kuzmicz",
-   "p2": "Filip Mlynarski",
-   "p1_norm": "jakub kuzmicz",
-   "p2_norm": "filip mlynarski",
-   "open_date": "2026-07-25T23:15:00.000Z",
-   "line": 75.5,
    "over_odds": -112,
    "under_odds": -118
   },
@@ -97,7 +53,7 @@
    "p2_norm": "andriej fomin",
    "open_date": "2026-07-25T23:20:00.000Z",
    "line": 68.5,
-   "over_odds": -116,
+   "over_odds": -118,
    "under_odds": -116
   },
   {
@@ -108,8 +64,30 @@
    "p2_norm": "marcin lach",
    "open_date": "2026-07-25T23:30:00.000Z",
    "line": 71.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -118,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35866341,
+   "p1": "Marcin Marchlewski",
+   "p2": "Tomasz Filbrandt",
+   "p1_norm": "marcin marchlewski",
+   "p2_norm": "tomasz filbrandt",
+   "open_date": "2026-07-25T23:35:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35866342,
+   "p1": "Jacek Oracz",
+   "p2": "Michal Guzik",
+   "p1_norm": "jacek oracz",
+   "p2_norm": "michal guzik",
+   "open_date": "2026-07-25T23:35:00.000Z",
+   "line": 76.5,
+   "over_odds": -110,
+   "under_odds": -120
   }
  ]
 }
