@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T10:20:23Z",
+ "captured_at": "2026-07-25T10:24:30Z",
  "matches": [
-  {
-   "event_id": 35863086,
-   "p1": "Bartosz Kwodawski",
-   "p2": "Maciej Kolek",
-   "p1_norm": "bartosz kwodawski",
-   "p2_norm": "maciej kolek",
-   "open_date": "2026-07-25T10:10:00.000Z",
-   "line": 55.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
   {
    "event_id": 35863179,
    "p1": "Kamil Kowalski",
@@ -20,8 +9,8 @@
    "p2_norm": "mateusz sikon",
    "open_date": "2026-07-25T10:10:00.000Z",
    "line": 91.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35863180,
@@ -30,9 +19,9 @@
    "p1_norm": "mariusz zwolinski",
    "p2_norm": "jaroslaw rolak",
    "open_date": "2026-07-25T10:10:00.000Z",
-   "line": 68.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 81.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35863288,
@@ -41,9 +30,9 @@
    "p1_norm": "jerzy pelka",
    "p2_norm": "rafal wojcik",
    "open_date": "2026-07-25T10:20:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35863297,
@@ -99,6 +88,17 @@
    "line": 81.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35863340,
+   "p1": "Kacper Petas",
+   "p2": "Karol Strowski",
+   "p1_norm": "kacper petas",
+   "p2_norm": "karol strowski",
+   "open_date": "2026-07-25T10:50:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
