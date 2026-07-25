@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-25T23:25:48Z",
+ "captured_at": "2026-07-25T23:33:19Z",
  "matches": [
-  {
-   "event_id": 35866329,
-   "p1": "Kacper Kwiatkowski",
-   "p2": "Jakub Skorupa",
-   "p1_norm": "kacper kwiatkowski",
-   "p2_norm": "jakub skorupa",
-   "open_date": "2026-07-25T23:10:00.000Z",
-   "line": 70.5,
-   "over_odds": -145,
-   "under_odds": 105
-  },
-  {
-   "event_id": 35866330,
-   "p1": "Jakub Kuzmicz",
-   "p2": "Filip Mlynarski",
-   "p1_norm": "jakub kuzmicz",
-   "p2_norm": "filip mlynarski",
-   "open_date": "2026-07-25T23:15:00.000Z",
-   "line": 88.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
   {
    "event_id": 35866340,
    "p1": "Damian Fira",
@@ -30,9 +8,9 @@
    "p1_norm": "damian fira",
    "p2_norm": "marcin lach",
    "open_date": "2026-07-25T23:30:00.000Z",
-   "line": 71.5,
-   "over_odds": -118,
-   "under_odds": -116
+   "line": 73.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35866342,
@@ -66,6 +44,39 @@
    "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35866363,
+   "p1": "Jakub Kuzmicz",
+   "p2": "Tomasz Filbrandt",
+   "p1_norm": "jakub kuzmicz",
+   "p2_norm": "tomasz filbrandt",
+   "open_date": "2026-07-25T23:55:00.000Z",
+   "line": 75.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35866364,
+   "p1": "Robert Szymik",
+   "p2": "Kamil Durak",
+   "p1_norm": "robert szymik",
+   "p2_norm": "kamil durak",
+   "open_date": "2026-07-25T23:55:00.000Z",
+   "line": 81.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35866372,
+   "p1": "Michal Machelski",
+   "p2": "Kacper Kwiatkowski",
+   "p1_norm": "michal machelski",
+   "p2_norm": "kacper kwiatkowski",
+   "open_date": "2026-07-26T00:00:00.000Z",
+   "line": 74.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
