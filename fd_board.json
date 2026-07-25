@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T17:49:05Z",
+ "captured_at": "2026-07-25T17:53:31Z",
  "matches": [
   {
    "event_id": 35865307,
@@ -8,9 +8,9 @@
    "p1_norm": "jacek oracz",
    "p2_norm": "michal guzik",
    "open_date": "2026-07-25T17:35:00.000Z",
-   "line": 91.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 92.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35865316,
@@ -19,9 +19,9 @@
    "p1_norm": "marcin marchlewski",
    "p2_norm": "filip mlynarski",
    "open_date": "2026-07-25T17:40:00.000Z",
-   "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 51.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35865324,
@@ -30,9 +30,9 @@
    "p1_norm": "dawid poloszczanski",
    "p2_norm": "tomasz filbrandt",
    "open_date": "2026-07-25T17:45:00.000Z",
-   "line": 65.5,
-   "over_odds": -115,
-   "under_odds": -115
+   "line": 53.5,
+   "over_odds": -105,
+   "under_odds": -135
   },
   {
    "event_id": 35865325,
@@ -41,9 +41,9 @@
    "p1_norm": "pawel chojnacki",
    "p2_norm": "piotr gesiarz",
    "open_date": "2026-07-25T17:45:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 91.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35865336,
@@ -99,6 +99,17 @@
    "line": 76.5,
    "over_odds": -110,
    "under_odds": -120
+  },
+  {
+   "event_id": 35865486,
+   "p1": "Michal Durda",
+   "p2": "Damian Fira",
+   "p1_norm": "michal durda",
+   "p2_norm": "damian fira",
+   "open_date": "2026-07-25T18:20:00.000Z",
+   "line": 74.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
