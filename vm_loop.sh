@@ -51,8 +51,10 @@ push(){
   git push -q "$URL" HEAD:main 2>/dev/null || echo "[$(date +%H:%M)] push deferred"; }
 
 collectors(){
-  # Absorb Actions' fresh line rows (sha-gated row-merge; see fd_merge.py 2026-07-25 postmortem)
-  # BEFORE local writes, so this VM's next 100MB commit is a superset of origin's snapshot.
+  # Absorb Actions'/Mac's fresh line rows. lines_ingest.py reads the small per-source delta
+  # JSONs (the ONLY way line rows travel now — the 100MB DB hit GitHub's hard file limit
+  # 2026-07-25 and blob pushes are rejected outright); fd_merge stays as legacy-blob belt.
+  python3 lines_ingest.py 2>&1 | grep -v "^$" || true
   python3 fd_merge.py 2>&1 | grep -v "^$" || true
   python3 fd_collect.py --wnba >/dev/null 2>&1 || true
   # NOTE (2026-07-23): MLB FD collection is NOT run here. Tried it for board responsiveness but the
@@ -77,10 +79,19 @@ collectors(){
 # now-disabled wnba-watch.yml, orphaned on the VM migration). Cheap DELETE each cycle; sqlite
 # reuses freed pages so the file stays ~1-2MB after the one-time VACUUM done at deploy.
 prune_lines(){ python3 - >/dev/null 2>&1 <<'PY' || true
-import sqlite3
+import sqlite3, os
 c=sqlite3.connect("wnba_lines.sqlite")
 c.execute("DELETE FROM fd_lines WHERE collected_at < datetime('now','-2 days')")
 c.commit(); c.close()
+# fanduel_props hit GitHub's HARD 100MB blob limit 2026-07-25 (99.x committed, pushes of bigger
+# versions rejected outright -> the 18h line freeze). This VM is now the ONLY committer of the
+# blob: keep 3 days of rows and VACUUM when the file nears the cliff so it never crosses again.
+c=sqlite3.connect("fanduel_props.sqlite"); c.execute("PRAGMA busy_timeout=60000")
+c.execute("DELETE FROM fd_lines WHERE collected_at < datetime('now','-3 days')")
+c.commit()
+if os.path.getsize("fanduel_props.sqlite") > 80*1024*1024:
+    c.execute("VACUUM")
+c.close()
 PY
 }
 

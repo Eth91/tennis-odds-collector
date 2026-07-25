@@ -91,11 +91,27 @@ jobs:
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
         run: python bet_ledger.py || echo "bet ledger skipped"
+      - name: export line delta
+        # 2026-07-25: Actions NO LONGER commits the 100MB fanduel_props.sqlite (three-writer blob
+        # war -> 18h line freeze; even a 10-try push loop lost every race). Instead: export THIS
+        # run's collected rows as a small JSON the VM ingests (lines_ingest.py). Single blob
+        # committer = the VM.
+        run: |
+          python3 - <<'PYEOF'
+          import json, sqlite3, datetime as dt
+          con = sqlite3.connect("fanduel_props.sqlite")
+          cut = (dt.datetime.utcnow() - dt.timedelta(minutes=45)).isoformat()
+          rows = con.execute("SELECT collected_at, sport, event, player, stat, line, side, odds, "
+                             "book FROM fd_lines WHERE collected_at > ?", (cut,)).fetchall()
+          json.dump({"exported_at": dt.datetime.utcnow().isoformat(), "rows": rows},
+                    open("lines_delta.json", "w"))
+          print(f"delta rows {len(rows)}")
+          PYEOF
       - name: commit dbs
         run: |
           git config user.name "odds-bot"
           git config user.email "odds-bot@users.noreply.github.com"
-          for f in odds.sqlite mlb_kprops.sqlite wnba_props.sqlite fanduel_props.sqlite \
+          for f in odds.sqlite mlb_kprops.sqlite wnba_props.sqlite lines_delta.json \
                  wnba_edge_report.md bet_ledger.sqlite bet_ledger_report.md bet_filters.json k_ladder.md mlb_totals.sqlite nfl_totals.sqlite \
                  k_paper.sqlite k_paper_ids.json mlb_notified.json walks_paper.sqlite; do
             git add -f "$f" 2>/dev/null || true
