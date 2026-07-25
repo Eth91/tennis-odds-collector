@@ -2102,7 +2102,10 @@ def build():
     try:
         _cb = json.loads((HERE / "compass_board.json").read_text())
 
-        def _compass_games(flags, stat_lbl, hi_s):
+        def _compass_games(flags, stat_lbl, hi_s, bands):
+            # bands: [(min_S, "~xx%"), ...] high->low — the chip shows the BACKTESTED HIT RATE for
+            # the bet's signal band instead of the raw S (user 2026-07-25: "S3.3 is hard to
+            # understand"); raw S stays in the tooltip.
             groups, order = {}, []
             for f in flags:
                 gk = f.get("game") or f["pitcher"]
@@ -2133,6 +2136,7 @@ def build():
                     bkh = (f'<img class="bklogo" src="book-{bk}.png" alt="{bk.upper()}">'
                            if bk in ("fd", "dk") else '<span class="bktag">MGM</span>')
                     scls = "hi" if (f.get("strong") or f["score"] >= hi_s) else "mid"
+                    pct = next(p for s_, p in bands if f["score"] >= s_)
                     rows += (f'<div class="pblk"><div class="phd">'
                              f'{_mlogo(f.get("team"), "plogo")}'
                              f'<span class="pname">{html.escape(_short(f["pitcher"]))}</span>'
@@ -2143,7 +2147,8 @@ def build():
                              f'<span class="pstat">{stat_lbl}</span>'
                              f'<span class="psp"></span>'
                              f'<span class="podds">{_am(float(f["odds"]))}</span>{bkh}'
-                             f'<span class="pedge {scls}">S{f["score"]:.1f}{star}</span></div></div></div>')
+                             f'<span class="pedge {scls}" title="model signal S={f["score"]:.1f} — '
+                             f'backtested hit rate in this band">{pct}{star}</span></div></div></div>')
                 out += (f'<div class="game"><div class="ghd"><span class="gmatch">'
                         f'{_mlogo(away_ab)}{away_ab or "—"}<span class="gvs">@</span>'
                         f'{_mlogo(home_ab)}{home_ab or "—"}</span>'
@@ -2159,8 +2164,9 @@ def build():
         k_shn = (k_sh.get("w") or 0) + (k_sh.get("l") or 0)
         k_note = (" · shadow " + f'{k_sh["w"]}-{k_sh["l"]}') if k_shn else ""
         mlb_html += (f'<div class="op-title">⚾ K-COMPASS · Strikeouts'
-                     f'<span> · {_rec_str(_cb)}{k_note} · thr 1.6 · flags when lineups post</span></div>')
-        mlb_html += (_compass_games(k_flags, "Strikeouts", 2.2)
+                     f'<span> · {_rec_str(_cb)}{k_note} · %% = backtested hit rate · flags when lineups post</span></div>')
+        mlb_html += (_compass_games(k_flags, "Strikeouts", 2.2,
+                                    [(2.5, "~64%"), (2.0, "~61%"), (-9, "~58%")])
                      or '<div class="xt">no flags yet today</div>')
 
         _ob = _cb.get("outs") or {}
@@ -2169,8 +2175,9 @@ def build():
         o_shn = (o_sh.get("w") or 0) + (o_sh.get("l") or 0)
         o_note = (" · shadow " + f'{o_sh["w"]}-{o_sh["l"]}') if o_shn else ""
         mlb_html += (f'<div class="op-title">⚾ OUTS-COMPASS · Pitcher Outs'
-                     f'<span> · {_rec_str(_ob)}{o_note} · thr 0.97 · ★ = 1.30+</span></div>')
-        mlb_html += (_compass_games(o_flags, "Outs Recorded", 1.30)
+                     f'<span> · {_rec_str(_ob)}{o_note} · %% = backtested hit rate · ★ = strongest tier</span></div>')
+        mlb_html += (_compass_games(o_flags, "Outs Recorded", 1.30,
+                                    [(1.30, "~65%"), (-9, "~63%")])
                      or '<div class="xt">no flags yet today</div>')
 
         # Daily 2-leg parlay as a WNBA-style betslip
