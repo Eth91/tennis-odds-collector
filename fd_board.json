@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T15:42:56Z",
+ "captured_at": "2026-07-25T15:47:08Z",
  "matches": [
   {
    "event_id": 35864316,
@@ -8,9 +8,9 @@
    "p1_norm": "karol strowski",
    "p2_norm": "maciej kolek",
    "open_date": "2026-07-25T15:25:00.000Z",
-   "line": 105.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 107.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35864337,
@@ -19,9 +19,9 @@
    "p1_norm": "jacek oracz",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-25T15:35:00.000Z",
-   "line": 90.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 93.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35864408,
@@ -30,9 +30,9 @@
    "p1_norm": "filip mlynarski",
    "p2_norm": "alan wos",
    "open_date": "2026-07-25T15:45:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 74.5,
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35864609,
