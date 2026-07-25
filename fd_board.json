@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T11:03:12Z",
+ "captured_at": "2026-07-25T11:08:06Z",
  "matches": [
   {
    "event_id": 35863340,
@@ -8,9 +8,9 @@
    "p1_norm": "kacper petas",
    "p2_norm": "karol strowski",
    "open_date": "2026-07-25T10:50:00.000Z",
-   "line": 94.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 100.5,
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35863354,
@@ -19,9 +19,9 @@
    "p1_norm": "bartosz kwodawski",
    "p2_norm": "kamil kostyk",
    "open_date": "2026-07-25T10:55:00.000Z",
-   "line": 61.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 57.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35863370,
@@ -30,7 +30,7 @@
    "p1_norm": "jacek wieczerzak",
    "p2_norm": "jakub nowak",
    "open_date": "2026-07-25T11:00:00.000Z",
-   "line": 82.5,
+   "line": 92.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -41,7 +41,7 @@
    "p1_norm": "mateusz misiak",
    "p2_norm": "tadeusz piotrowski",
    "open_date": "2026-07-25T11:00:00.000Z",
-   "line": 78.5,
+   "line": 93.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -53,8 +53,8 @@
    "p2_norm": "rafal adach",
    "open_date": "2026-07-25T11:05:00.000Z",
    "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35863392,
@@ -99,6 +99,17 @@
    "line": 76.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35863718,
+   "p1": "Rafal Wojcik",
+   "p2": "Sebastian Szostok",
+   "p1_norm": "rafal wojcik",
+   "p2_norm": "sebastian szostok",
+   "open_date": "2026-07-25T11:30:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
