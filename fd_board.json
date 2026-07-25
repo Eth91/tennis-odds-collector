@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T09:45:55Z",
+ "captured_at": "2026-07-25T09:50:03Z",
  "matches": [
-  {
-   "event_id": 35863070,
-   "p1": "Patryk Jedrzejak",
-   "p2": "Rafal Wojcik",
-   "p1_norm": "patryk jedrzejak",
-   "p2_norm": "rafal wojcik",
-   "open_date": "2026-07-25T09:30:00.000Z",
-   "line": 84.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35863080,
    "p1": "Kacper Petas",
@@ -19,9 +8,9 @@
    "p1_norm": "kacper petas",
    "p2_norm": "artur daniel",
    "open_date": "2026-07-25T09:40:00.000Z",
-   "line": 76.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 79.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35863127,
@@ -30,9 +19,9 @@
    "p1_norm": "alan wos",
    "p2_norm": "radoslaw malinowski",
    "open_date": "2026-07-25T09:45:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35863093,
@@ -41,9 +30,9 @@
    "p1_norm": "jacek wieczerzak",
    "p2_norm": "pawel kurek",
    "open_date": "2026-07-25T09:50:00.000Z",
-   "line": 76.5,
+   "line": 77.5,
    "over_odds": -118,
-   "under_odds": -112
+   "under_odds": -116
   },
   {
    "event_id": 35863094,
@@ -84,7 +73,7 @@
    "p2": "Maciej Kolek",
    "p1_norm": "bartosz kwodawski",
    "p2_norm": "maciej kolek",
-   "open_date": "2026-07-25T10:05:00.000Z",
+   "open_date": "2026-07-25T10:10:00.000Z",
    "line": 73.5,
    "over_odds": -118,
    "under_odds": -112
