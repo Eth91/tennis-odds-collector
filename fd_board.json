@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T22:19:14Z",
+ "captured_at": "2026-07-25T22:24:15Z",
  "matches": [
-  {
-   "event_id": 35866254,
-   "p1": "Janus Slawomir",
-   "p2": "Dariusz Maszczynski",
-   "p1_norm": "janus slawomir",
-   "p2_norm": "dariusz maszczynski",
-   "open_date": "2026-07-25T22:10:00.000Z",
-   "line": 60.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
   {
    "event_id": 35866276,
    "p1": "Robert Szymik",
@@ -19,9 +8,9 @@
    "p1_norm": "robert szymik",
    "p2_norm": "damian fira",
    "open_date": "2026-07-25T22:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 71.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35866290,
@@ -77,6 +66,28 @@
    "line": 77.5,
    "over_odds": -118,
    "under_odds": -116
+  },
+  {
+   "event_id": 35866307,
+   "p1": "Tomasz Filbrandt",
+   "p2": "Filip Mlynarski",
+   "p1_norm": "tomasz filbrandt",
+   "p2_norm": "filip mlynarski",
+   "open_date": "2026-07-25T22:50:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35866308,
+   "p1": "Miroslaw Warzecha",
+   "p2": "Michal Guzik",
+   "p1_norm": "miroslaw warzecha",
+   "p2_norm": "michal guzik",
+   "open_date": "2026-07-25T22:50:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -118
   }
  ]
 }
