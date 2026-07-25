@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T03:51:56Z",
+ "captured_at": "2026-07-25T03:56:01Z",
  "matches": [
-  {
-   "event_id": 35862401,
-   "p1": "Tadeusz Piotrowski",
-   "p2": "Artur Szoltysek",
-   "p1_norm": "tadeusz piotrowski",
-   "p2_norm": "artur szoltysek",
-   "open_date": "2026-07-25T03:25:00.000Z",
-   "line": 106.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35862417,
    "p1": "Josef Braun",
@@ -19,7 +8,7 @@
    "p1_norm": "josef braun",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-25T03:45:00.000Z",
-   "line": 76.5,
+   "line": 85.5,
    "over_odds": -110,
    "under_odds": -125
   },
@@ -31,8 +20,8 @@
    "p2_norm": "artur szoltysek",
    "open_date": "2026-07-25T03:50:00.000Z",
    "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35862422,
@@ -41,20 +30,9 @@
    "p1_norm": "jacek wieczerzak",
    "p2_norm": "kamil kowalski",
    "open_date": "2026-07-25T03:50:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35862425,
-   "p1": "Jakub Michalski",
-   "p2": "Adam Ruszkiewicz",
-   "p1_norm": "jakub michalski",
-   "p2_norm": "adam ruszkiewicz",
-   "open_date": "2026-07-25T03:55:00.000Z",
-   "line": 68.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 55.5,
+   "over_odds": -140,
+   "under_odds": 100
   },
   {
    "event_id": 35862432,
@@ -97,6 +75,17 @@
    "p2_norm": "mateusz sikon",
    "open_date": "2026-07-25T04:10:00.000Z",
    "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35862438,
+   "p1": "Tomasz Wrzalik",
+   "p2": "Roman Wiza",
+   "p1_norm": "tomasz wrzalik",
+   "p2_norm": "roman wiza",
+   "open_date": "2026-07-25T04:20:00.000Z",
+   "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
   }
