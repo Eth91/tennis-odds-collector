@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T19:12:12Z",
+ "captured_at": "2026-07-25T19:16:30Z",
  "matches": [
   {
    "event_id": 35865642,
@@ -8,7 +8,7 @@
    "p1_norm": "miroslaw warzecha",
    "p2_norm": "michal machelski",
    "open_date": "2026-07-25T19:10:00.000Z",
-   "line": 76.5,
+   "line": 84.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -19,9 +19,9 @@
    "p1_norm": "damian fira",
    "p2_norm": "marcin lach",
    "open_date": "2026-07-25T19:10:00.000Z",
-   "line": 65.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 50.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35865648,
@@ -30,9 +30,9 @@
    "p1_norm": "maciej kolek",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-25T19:15:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 72.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35865653,
@@ -77,6 +77,39 @@
    "line": 73.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35865685,
+   "p1": "Dariusz Maszczynski",
+   "p2": "Janus Slawomir",
+   "p1_norm": "dariusz maszczynski",
+   "p2_norm": "janus slawomir",
+   "open_date": "2026-07-25T19:40:00.000Z",
+   "line": 73.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35865686,
+   "p1": "Bartosz Kwodawski",
+   "p2": "Kamil Kostyk",
+   "p1_norm": "bartosz kwodawski",
+   "p2_norm": "kamil kostyk",
+   "open_date": "2026-07-25T19:40:00.000Z",
+   "line": 72.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35865687,
+   "p1": "Karol Strowski",
+   "p2": "Alan Wos",
+   "p1_norm": "karol strowski",
+   "p2_norm": "alan wos",
+   "open_date": "2026-07-25T19:40:00.000Z",
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -120
   }
  ]
 }
