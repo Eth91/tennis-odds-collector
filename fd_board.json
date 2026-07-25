@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T03:56:01Z",
+ "captured_at": "2026-07-25T04:00:12Z",
  "matches": [
   {
    "event_id": 35862417,
@@ -8,9 +8,9 @@
    "p1_norm": "josef braun",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-25T03:45:00.000Z",
-   "line": 85.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 69.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35862421,
@@ -19,20 +19,9 @@
    "p1_norm": "mariusz zwolinski",
    "p2_norm": "artur szoltysek",
    "open_date": "2026-07-25T03:50:00.000Z",
-   "line": 78.5,
+   "line": 89.5,
    "over_odds": -115,
    "under_odds": -120
-  },
-  {
-   "event_id": 35862422,
-   "p1": "Jacek Wieczerzak",
-   "p2": "Kamil Kowalski",
-   "p1_norm": "jacek wieczerzak",
-   "p2_norm": "kamil kowalski",
-   "open_date": "2026-07-25T03:50:00.000Z",
-   "line": 55.5,
-   "over_odds": -140,
-   "under_odds": 100
   },
   {
    "event_id": 35862432,
@@ -41,9 +30,9 @@
    "p1_norm": "mateusz misiak",
    "p2_norm": "radoslaw malinowski",
    "open_date": "2026-07-25T04:00:00.000Z",
-   "line": 75.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 74.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35862433,
@@ -88,6 +77,28 @@
    "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35862442,
+   "p1": "Wojciech Urban",
+   "p2": "Mariusz Baron",
+   "p1_norm": "wojciech urban",
+   "p2_norm": "mariusz baron",
+   "open_date": "2026-07-25T04:25:00.000Z",
+   "line": 81.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35862443,
+   "p1": "Dawid Kosmal",
+   "p2": "Dariusz Wrobel",
+   "p1_norm": "dawid kosmal",
+   "p2_norm": "dariusz wrobel",
+   "open_date": "2026-07-25T04:25:00.000Z",
+   "line": 78.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
