@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T15:25:02Z",
+ "captured_at": "2026-07-25T15:29:18Z",
  "matches": [
   {
    "event_id": 35864316,
@@ -8,9 +8,9 @@
    "p1_norm": "karol strowski",
    "p2_norm": "maciej kolek",
    "open_date": "2026-07-25T15:25:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35864317,
@@ -19,9 +19,9 @@
    "p1_norm": "dariusz maszczynski",
    "p2_norm": "tomasz kocik",
    "open_date": "2026-07-25T15:25:00.000Z",
-   "line": 70.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 68.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35864318,
@@ -30,9 +30,9 @@
    "p1_norm": "bartosz kwodawski",
    "p2_norm": "stapor rafal",
    "open_date": "2026-07-25T15:25:00.000Z",
-   "line": 73.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35864383,
@@ -64,8 +64,8 @@
    "p2_norm": "alan wos",
    "open_date": "2026-07-25T15:45:00.000Z",
    "line": 74.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35864609,
@@ -88,6 +88,17 @@
    "line": 79.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35864617,
+   "p1": "Rafal Adach",
+   "p2": "Sebastian Szostok",
+   "p1_norm": "rafal adach",
+   "p2_norm": "sebastian szostok",
+   "open_date": "2026-07-25T15:55:00.000Z",
+   "line": 73.5,
+   "over_odds": -120,
+   "under_odds": -110
   }
  ]
 }
