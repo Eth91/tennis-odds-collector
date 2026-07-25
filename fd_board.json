@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T13:21:25Z",
+ "captured_at": "2026-07-25T13:25:38Z",
  "matches": [
   {
    "event_id": 35863963,
@@ -8,9 +8,9 @@
    "p1_norm": "mariusz zwolinski",
    "p2_norm": "artur szoltysek",
    "open_date": "2026-07-25T13:05:00.000Z",
-   "line": 87.5,
-   "over_odds": -130,
-   "under_odds": -105
+   "line": 86.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35863967,
@@ -19,7 +19,7 @@
    "p1_norm": "patryk jedrzejak",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-25T13:10:00.000Z",
-   "line": 85.5,
+   "line": 88.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -30,9 +30,9 @@
    "p1_norm": "karol strowski",
    "p2_norm": "maciej domin",
    "open_date": "2026-07-25T13:20:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 86.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35863988,
@@ -42,8 +42,8 @@
    "p2_norm": "dawid kosmal",
    "open_date": "2026-07-25T13:25:00.000Z",
    "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35864001,
@@ -88,6 +88,17 @@
    "line": 75.5,
    "over_odds": -118,
    "under_odds": -116
+  },
+  {
+   "event_id": 35864043,
+   "p1": "Radoslaw Malinowski",
+   "p2": "Maciej Kolek",
+   "p1_norm": "radoslaw malinowski",
+   "p2_norm": "maciej kolek",
+   "open_date": "2026-07-25T13:50:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
