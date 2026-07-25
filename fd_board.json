@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T12:16:52Z",
+ "captured_at": "2026-07-25T12:24:30Z",
  "matches": [
-  {
-   "event_id": 35863852,
-   "p1": "Artur Daniel",
-   "p2": "Karol Strowski",
-   "p1_norm": "artur daniel",
-   "p2_norm": "karol strowski",
-   "open_date": "2026-07-25T12:05:00.000Z",
-   "line": 88.5,
-   "over_odds": -130,
-   "under_odds": -105
-  },
   {
    "event_id": 35863872,
    "p1": "Maciej Kolek",
@@ -19,9 +8,9 @@
    "p1_norm": "maciej kolek",
    "p2_norm": "kamil kostyk",
    "open_date": "2026-07-25T12:10:00.000Z",
-   "line": 83.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 85.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35863893,
@@ -30,9 +19,9 @@
    "p1_norm": "pawel kurek",
    "p2_norm": "jakub nowak",
    "open_date": "2026-07-25T12:15:00.000Z",
-   "line": 81.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 85.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35863894,
@@ -41,9 +30,9 @@
    "p1_norm": "artur szoltysek",
    "p2_norm": "tadeusz piotrowski",
    "open_date": "2026-07-25T12:15:00.000Z",
-   "line": 79.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 86.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35863907,
@@ -52,9 +41,9 @@
    "p1_norm": "daniel morawiec",
    "p2_norm": "patryk jedrzejak",
    "open_date": "2026-07-25T12:20:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35863929,
@@ -63,9 +52,9 @@
    "p1_norm": "piotr cyrnek",
    "p2_norm": "kacper petas",
    "open_date": "2026-07-25T12:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35863916,
@@ -99,6 +88,17 @@
    "line": 73.5,
    "over_odds": -120,
    "under_odds": -110
+  },
+  {
+   "event_id": 35863933,
+   "p1": "Rafal Wojcik",
+   "p2": "Jerzy Pelka",
+   "p1_norm": "rafal wojcik",
+   "p2_norm": "jerzy pelka",
+   "open_date": "2026-07-25T12:45:00.000Z",
+   "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
