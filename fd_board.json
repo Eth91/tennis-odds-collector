@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T16:22:58Z",
+ "captured_at": "2026-07-25T16:27:13Z",
  "matches": [
   {
    "event_id": 35864636,
@@ -8,9 +8,9 @@
    "p1_norm": "pawel chojnacki",
    "p2_norm": "dariusz maszczynski",
    "open_date": "2026-07-25T16:15:00.000Z",
-   "line": 73.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 89.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35864637,
@@ -19,9 +19,9 @@
    "p1_norm": "dawid poloszczanski",
    "p2_norm": "bartosz kwodawski",
    "open_date": "2026-07-25T16:15:00.000Z",
-   "line": 77.5,
-   "over_odds": -115,
-   "under_odds": -115
+   "line": 93.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35864639,
@@ -30,7 +30,7 @@
    "p1_norm": "jerzy pelka",
    "p2_norm": "patryk jedrzejak",
    "open_date": "2026-07-25T16:20:00.000Z",
-   "line": 85.5,
+   "line": 73.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -41,9 +41,9 @@
    "p1_norm": "miroslaw warzecha",
    "p2_norm": "jacek oracz",
    "open_date": "2026-07-25T16:25:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35864647,
@@ -52,9 +52,9 @@
    "p1_norm": "alan wos",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-25T16:30:00.000Z",
-   "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 75.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35864650,
@@ -86,6 +86,17 @@
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-25T16:40:00.000Z",
    "line": 80.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35864904,
+   "p1": "Michal Machelski",
+   "p2": "Michal Guzik",
+   "p1_norm": "michal machelski",
+   "p2_norm": "michal guzik",
+   "open_date": "2026-07-25T16:50:00.000Z",
+   "line": 74.5,
    "over_odds": -118,
    "under_odds": -112
   }
