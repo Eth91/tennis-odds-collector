@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-25T14:53:52Z",
+ "captured_at": "2026-07-25T14:58:03Z",
  "matches": [
-  {
-   "event_id": 35864173,
-   "p1": "Kamil Kowalski",
-   "p2": "Jakub Nowak",
-   "p1_norm": "kamil kowalski",
-   "p2_norm": "jakub nowak",
-   "open_date": "2026-07-25T14:40:00.000Z",
-   "line": 88.5,
-   "over_odds": 110,
-   "under_odds": -150
-  },
-  {
-   "event_id": 35864175,
-   "p1": "Patryk Jedrzejak",
-   "p2": "Rafal Adach",
-   "p1_norm": "patryk jedrzejak",
-   "p2_norm": "rafal adach",
-   "open_date": "2026-07-25T14:45:00.000Z",
-   "line": 51.5,
-   "over_odds": 100,
-   "under_odds": -140
-  },
   {
    "event_id": 35864193,
    "p1": "Dawid Poloszczanski",
@@ -77,6 +55,39 @@
    "line": 76.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35864316,
+   "p1": "Karol Strowski",
+   "p2": "Maciej Kolek",
+   "p1_norm": "karol strowski",
+   "p2_norm": "maciej kolek",
+   "open_date": "2026-07-25T15:25:00.000Z",
+   "line": 75.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35864317,
+   "p1": "Dariusz Maszczynski",
+   "p2": "Tomasz Kocik",
+   "p1_norm": "dariusz maszczynski",
+   "p2_norm": "tomasz kocik",
+   "open_date": "2026-07-25T15:25:00.000Z",
+   "line": 70.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35864318,
+   "p1": "Bartosz Kwodawski",
+   "p2": "Stapor Rafal",
+   "p1_norm": "bartosz kwodawski",
+   "p2_norm": "stapor rafal",
+   "open_date": "2026-07-25T15:25:00.000Z",
+   "line": 73.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
