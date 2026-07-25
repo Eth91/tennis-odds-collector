@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T11:08:06Z",
+ "captured_at": "2026-07-25T11:12:22Z",
  "matches": [
   {
    "event_id": 35863340,
@@ -8,18 +8,7 @@
    "p1_norm": "kacper petas",
    "p2_norm": "karol strowski",
    "open_date": "2026-07-25T10:50:00.000Z",
-   "line": 100.5,
-   "over_odds": -130,
-   "under_odds": -105
-  },
-  {
-   "event_id": 35863354,
-   "p1": "Bartosz Kwodawski",
-   "p2": "Kamil Kostyk",
-   "p1_norm": "bartosz kwodawski",
-   "p2_norm": "kamil kostyk",
-   "open_date": "2026-07-25T10:55:00.000Z",
-   "line": 57.5,
+   "line": 103.5,
    "over_odds": null,
    "under_odds": null
   },
@@ -30,9 +19,9 @@
    "p1_norm": "jacek wieczerzak",
    "p2_norm": "jakub nowak",
    "open_date": "2026-07-25T11:00:00.000Z",
-   "line": 92.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 96.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35863371,
@@ -41,9 +30,9 @@
    "p1_norm": "mateusz misiak",
    "p2_norm": "tadeusz piotrowski",
    "open_date": "2026-07-25T11:00:00.000Z",
-   "line": 93.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 102.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35863375,
@@ -53,8 +42,8 @@
    "p2_norm": "rafal adach",
    "open_date": "2026-07-25T11:05:00.000Z",
    "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35863392,
@@ -74,7 +63,7 @@
    "p1_norm": "radoslaw malinowski",
    "p2_norm": "dawid kosmal",
    "open_date": "2026-07-25T11:20:00.000Z",
-   "line": 75.5,
+   "line": 74.5,
    "over_odds": -118,
    "under_odds": -112
   },
@@ -85,9 +74,9 @@
    "p1_norm": "jaroslaw rolak",
    "p2_norm": "bartlomiej wisniewski",
    "open_date": "2026-07-25T11:25:00.000Z",
-   "line": 81.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 82.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35863416,
@@ -107,9 +96,9 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-25T11:30:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 78.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
