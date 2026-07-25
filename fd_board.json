@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T08:09:20Z",
+ "captured_at": "2026-07-25T08:14:06Z",
  "matches": [
   {
    "event_id": 35862875,
@@ -8,9 +8,9 @@
    "p1_norm": "josef braun",
    "p2_norm": "kacper petas",
    "open_date": "2026-07-25T08:05:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35862876,
@@ -19,9 +19,9 @@
    "p1_norm": "mateusz misiak",
    "p2_norm": "dawid kosmal",
    "open_date": "2026-07-25T08:05:00.000Z",
-   "line": 63.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 54.5,
+   "over_odds": 100,
+   "under_odds": -135
   },
   {
    "event_id": 35862883,
@@ -30,9 +30,9 @@
    "p1_norm": "jacek wieczerzak",
    "p2_norm": "witold buczynski",
    "open_date": "2026-07-25T08:10:00.000Z",
-   "line": 76.5,
+   "line": 68.5,
    "over_odds": -110,
-   "under_odds": -120
+   "under_odds": -125
   },
   {
    "event_id": 35862902,
