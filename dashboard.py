@@ -2152,10 +2152,14 @@ def build():
     # the board is served straight off the box (no Pages-rebuild lag); on the tunnel, an SSE stream
     # reloads the instant a new bake lands — same moment as the ntfy ping. Falls back to static Pages
     # if the tunnel is down. Plain strings (not f-interpolated) to avoid brace escaping.
+    # NO ts-staleness gate here (2026-07-25): board_tunnel's publish() only rewrites ts when the
+    # tunnel URL CHANGES, so a long-lived tunnel froze ts at 7/19 and silently disabled this
+    # redirect for 6 days (phones sat on static Pages, no auto-reload -> "board not updating").
+    # The live probe below is the real health check — a dead tunnel fails it and we stay on Pages.
     _live_head = ("<script>(function(){try{"
         "if(!location.hostname.endsWith('github.io'))return;"          # already on the live tunnel
         "fetch('live_board.json',{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){"
-        "if(!d||!d.url)return;if((Date.now()-Date.parse(d.ts))/1000>600)return;"   # tunnel stale >10min
+        "if(!d||!d.url)return;"
         "fetch(d.url+'/live_board.json',{cache:'no-store',signal:AbortSignal.timeout(2500)})"
         ".then(function(){location.replace(d.url)}).catch(function(){});"          # verify then redirect
         "}).catch(function(){});}catch(e){}})();</script>")
