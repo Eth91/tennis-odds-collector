@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T01:11:16Z",
+ "captured_at": "2026-07-25T01:15:19Z",
  "matches": [
   {
    "event_id": 35862073,
@@ -8,9 +8,9 @@
    "p1_norm": "schaniel krzysztof",
    "p2_norm": "jakub jesiek",
    "open_date": "2026-07-25T01:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 69.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35862085,
@@ -19,9 +19,9 @@
    "p1_norm": "maciej kolek",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-25T01:10:00.000Z",
-   "line": 78.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 82.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35862137,
