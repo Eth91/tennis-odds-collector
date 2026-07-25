@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T15:33:38Z",
+ "captured_at": "2026-07-25T15:38:33Z",
  "matches": [
   {
    "event_id": 35864316,
@@ -8,20 +8,9 @@
    "p1_norm": "karol strowski",
    "p2_norm": "maciej kolek",
    "open_date": "2026-07-25T15:25:00.000Z",
-   "line": 89.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35864317,
-   "p1": "Dariusz Maszczynski",
-   "p2": "Tomasz Kocik",
-   "p1_norm": "dariusz maszczynski",
-   "p2_norm": "tomasz kocik",
-   "open_date": "2026-07-25T15:25:00.000Z",
-   "line": 60.5,
-   "over_odds": 100,
-   "under_odds": -140
+   "line": 95.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35864318,
@@ -30,7 +19,7 @@
    "p1_norm": "bartosz kwodawski",
    "p2_norm": "stapor rafal",
    "open_date": "2026-07-25T15:25:00.000Z",
-   "line": 52.5,
+   "line": 55.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -41,7 +30,7 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "patryk jedrzejak",
    "open_date": "2026-07-25T15:30:00.000Z",
-   "line": 76.5,
+   "line": 70.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -52,9 +41,9 @@
    "p1_norm": "jacek oracz",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-25T15:35:00.000Z",
-   "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 80.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35864408,
@@ -64,8 +53,8 @@
    "p2_norm": "alan wos",
    "open_date": "2026-07-25T15:45:00.000Z",
    "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35864609,
@@ -110,6 +99,17 @@
    "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35864625,
+   "p1": "Marcin Marchlewski",
+   "p2": "Karol Strowski",
+   "p1_norm": "marcin marchlewski",
+   "p2_norm": "karol strowski",
+   "open_date": "2026-07-25T16:05:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
