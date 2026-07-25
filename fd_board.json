@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T16:09:37Z",
+ "captured_at": "2026-07-25T16:14:28Z",
  "matches": [
-  {
-   "event_id": 35864617,
-   "p1": "Rafal Adach",
-   "p2": "Sebastian Szostok",
-   "p1_norm": "rafal adach",
-   "p2_norm": "sebastian szostok",
-   "open_date": "2026-07-25T15:55:00.000Z",
-   "line": 91.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35864620,
    "p1": "Kacper Kwiatkowski",
@@ -19,9 +8,9 @@
    "p1_norm": "kacper kwiatkowski",
    "p2_norm": "michal machelski",
    "open_date": "2026-07-25T16:00:00.000Z",
-   "line": 88.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 92.5,
+   "over_odds": 100,
+   "under_odds": -140
   },
   {
    "event_id": 35864625,
@@ -30,9 +19,9 @@
    "p1_norm": "marcin marchlewski",
    "p2_norm": "karol strowski",
    "open_date": "2026-07-25T16:05:00.000Z",
-   "line": 73.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 69.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35864636,
@@ -110,6 +99,17 @@
    "line": 77.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35864674,
+   "p1": "Daniel Morawiec",
+   "p2": "Sebastian Szostok",
+   "p1_norm": "daniel morawiec",
+   "p2_norm": "sebastian szostok",
+   "open_date": "2026-07-25T16:40:00.000Z",
+   "line": 80.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
