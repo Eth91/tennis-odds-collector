@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T08:14:06Z",
+ "captured_at": "2026-07-25T08:18:17Z",
  "matches": [
   {
    "event_id": 35862875,
@@ -8,20 +8,9 @@
    "p1_norm": "josef braun",
    "p2_norm": "kacper petas",
    "open_date": "2026-07-25T08:05:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35862876,
-   "p1": "Mateusz Misiak",
-   "p2": "Dawid Kosmal",
-   "p1_norm": "mateusz misiak",
-   "p2_norm": "dawid kosmal",
-   "open_date": "2026-07-25T08:05:00.000Z",
-   "line": 54.5,
-   "over_odds": 100,
-   "under_odds": -135
+   "line": 61.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35862883,
@@ -30,7 +19,7 @@
    "p1_norm": "jacek wieczerzak",
    "p2_norm": "witold buczynski",
    "open_date": "2026-07-25T08:10:00.000Z",
-   "line": 68.5,
+   "line": 85.5,
    "over_odds": -110,
    "under_odds": -125
   },
@@ -86,6 +75,28 @@
    "p2_norm": "jakub nowak",
    "open_date": "2026-07-25T08:35:00.000Z",
    "line": 72.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35862958,
+   "p1": "Wojciech Urban",
+   "p2": "Wojciech Pytlas",
+   "p1_norm": "wojciech urban",
+   "p2_norm": "wojciech pytlas",
+   "open_date": "2026-07-25T08:45:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35862959,
+   "p1": "Rafal Wojcik",
+   "p2": "Rafal Adach",
+   "p1_norm": "rafal wojcik",
+   "p2_norm": "rafal adach",
+   "open_date": "2026-07-25T08:45:00.000Z",
+   "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
   }
