@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T07:47:26Z",
+ "captured_at": "2026-07-25T07:51:33Z",
  "matches": [
   {
    "event_id": 35862827,
@@ -8,7 +8,7 @@
    "p1_norm": "radoslaw malinowski",
    "p2_norm": "dawid kosmal",
    "open_date": "2026-07-25T07:40:00.000Z",
-   "line": 84.5,
+   "line": 86.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -19,7 +19,7 @@
    "p1_norm": "mateusz sikon",
    "p2_norm": "kamil kowalski",
    "open_date": "2026-07-25T07:45:00.000Z",
-   "line": 73.5,
+   "line": 84.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,7 +30,7 @@
    "p1_norm": "maciej domin",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-25T07:45:00.000Z",
-   "line": 77.5,
+   "line": 82.5,
    "over_odds": -120,
    "under_odds": -115
   },
