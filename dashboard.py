@@ -2063,7 +2063,10 @@ def build():
     tt_json = _load_tt()
     _feed_health_ping(tt_json)                             # once/day ntfy if TT/WNBA is broken (not quiet)
     tt_html = _tt_panel(tt_json)
-    mlb_html = _mlb_plays_card(now)
+    # outs-model plays card BENCHED 2026-07-25 (user: only K-COMPASS flags on the MLB tab).
+    # k_paper keeps logging outs bets silently; the tracker-tab record card stays for history.
+    mlb_html = ""
+
     # K-COMPASS live paper tracker card (k_live.py on the VM writes compass_board.json every 10min;
     # the model: S=.5·z(teamK)+.5·z(lineupK)−.6·z(r5K)+.35·z(park), thr 1.6, twice-OOS-validated).
     try:
@@ -2086,23 +2089,6 @@ def build():
                      f'<div class="ttfoot">paper record {_rec} · lineup-confirmed only · '
                      f'thr 1.6 · skips 2.00+ (shadow) · 62%/+15% on 2026 OOS · flags when lineups post</div></div>')
 
-        _ot = _cb.get("outlier") or {}
-        _orows = ""
-        for f in (_ot.get("today") or [])[:8]:
-            _o = "O" if f["side"] == "over" else "U"
-            _orows += (f'<div class="ttbet"><span class="pind {_o.lower()}">{_o}</span>'
-                       f'<span class="ttbln">{f["line"]:g}K</span>'
-                       f'<div class="ttbmid"><div class="ttbnm"><b>{html.escape(_short(f["pitcher"]))}</b> '
-                       f'<span class="xteam">vs {html.escape(str(f["opp"]))}</span></div>'
-                       f'<div class="ttbsb">K price-outlier · {f["side"]} · +{f["edge"]*100:.0f}pt cheap</div></div>'
-                       f'<span class="podds">{_am(float(f["odds"]))}</span>'
-                       f'<span class="bktag">{html.escape(f["book"][:3].upper())}</span></div>')
-        _on = (_ot.get("w") or 0) + (_ot.get("l") or 0)
-        _orec = (f'{_ot["w"]}-{_ot["l"]} ({_ot["u"]:+.1f}u)' if _on else "0-0 · new")
-        mlb_html += (f'<div class="card"><h3 class="ttlg">⚾ K outlier · off-price book'
-                     f'<span class="ttcnt">{len(_ot.get("today") or [])}</span></h3>{_orows}'
-                     f'<div class="ttfoot">bet the side a book prices ≥4pts cheaper than the other books\u2019 '
-                     f'consensus, at that book · paper record {_orec} · holdout +7.3% (n=140)</div></div>')
     except (OSError, ValueError):
         pass
     tracker_html = _tracker_panel((w, l, u), tt_json)

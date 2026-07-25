@@ -393,7 +393,7 @@ def board(con):
 if __name__ == "__main__":
     c = _con()
     flag(c)
-    flag_outlier(c)
+    # flag_outlier(c)  # BENCHED 2026-07-25 (user: K-COMPASS only) — table/grading stay dormant
     grade(c)
     board(c)
     c.close()

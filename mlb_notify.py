@@ -27,6 +27,10 @@ def _nick(team):
 
 
 def main():
+    # BENCHED 2026-07-25 (user: only K-COMPASS pings for MLB — k_live.py handles those on the VM).
+    # Health alerts and outs-model pings disabled; k_paper keeps logging silently.
+    print("mlb_notify benched (K-COMPASS only)")
+    return
     topic = os.environ.get("NTFY_TOPIC")
     if not topic:
         print("mlb_notify: no NTFY_TOPIC -> benched (no push)")
