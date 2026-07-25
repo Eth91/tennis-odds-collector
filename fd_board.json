@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T13:52:22Z",
+ "captured_at": "2026-07-25T13:56:34Z",
  "matches": [
   {
    "event_id": 35864043,
@@ -8,9 +8,9 @@
    "p1_norm": "radoslaw malinowski",
    "p2_norm": "maciej kolek",
    "open_date": "2026-07-25T13:50:00.000Z",
-   "line": 72.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 66.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35864054,
@@ -20,8 +20,8 @@
    "p2_norm": "pawel kurek",
    "open_date": "2026-07-25T13:55:00.000Z",
    "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35864055,
@@ -30,9 +30,9 @@
    "p1_norm": "jaroslaw rolak",
    "p2_norm": "artur szoltysek",
    "open_date": "2026-07-25T13:55:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 73.5,
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35864056,
@@ -42,8 +42,8 @@
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-25T13:55:00.000Z",
    "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35864104,
@@ -64,6 +64,39 @@
    "p2_norm": "dawid kosmal",
    "open_date": "2026-07-25T14:15:00.000Z",
    "line": 70.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35864131,
+   "p1": "Jacek Wieczerzak",
+   "p2": "Witold Buczynski",
+   "p1_norm": "jacek wieczerzak",
+   "p2_norm": "witold buczynski",
+   "open_date": "2026-07-25T14:20:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35864132,
+   "p1": "Rafal Wojcik",
+   "p2": "Daniel Morawiec",
+   "p1_norm": "rafal wojcik",
+   "p2_norm": "daniel morawiec",
+   "open_date": "2026-07-25T14:20:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35864133,
+   "p1": "Mateusz Misiak",
+   "p2": "Bartlomiej Wisniewski",
+   "p1_norm": "mateusz misiak",
+   "p2_norm": "bartlomiej wisniewski",
+   "open_date": "2026-07-25T14:20:00.000Z",
+   "line": 80.5,
    "over_odds": -118,
    "under_odds": -112
   }
