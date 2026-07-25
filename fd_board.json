@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T14:05:05Z",
+ "captured_at": "2026-07-25T14:10:01Z",
  "matches": [
   {
    "event_id": 35864054,
@@ -8,20 +8,9 @@
    "p1_norm": "mateusz sikon",
    "p2_norm": "pawel kurek",
    "open_date": "2026-07-25T13:55:00.000Z",
-   "line": 92.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35864055,
-   "p1": "Jaroslaw Rolak",
-   "p2": "Artur Szoltysek",
-   "p1_norm": "jaroslaw rolak",
-   "p2_norm": "artur szoltysek",
-   "open_date": "2026-07-25T13:55:00.000Z",
-   "line": 69.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 91.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35864056,
@@ -30,9 +19,9 @@
    "p1_norm": "jerzy pelka",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-25T13:55:00.000Z",
-   "line": 93.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 97.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35864104,
@@ -53,8 +42,8 @@
    "p2_norm": "dawid kosmal",
    "open_date": "2026-07-25T14:15:00.000Z",
    "line": 70.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35864131,
@@ -63,9 +52,9 @@
    "p1_norm": "jacek wieczerzak",
    "p2_norm": "witold buczynski",
    "open_date": "2026-07-25T14:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35864132,
@@ -74,9 +63,9 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "daniel morawiec",
    "open_date": "2026-07-25T14:20:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35864133,
@@ -85,7 +74,29 @@
    "p1_norm": "mateusz misiak",
    "p2_norm": "bartlomiej wisniewski",
    "open_date": "2026-07-25T14:20:00.000Z",
-   "line": 80.5,
+   "line": 81.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35864168,
+   "p1": "Alan Wos",
+   "p2": "Kamil Kostyk",
+   "p1_norm": "alan wos",
+   "p2_norm": "kamil kostyk",
+   "open_date": "2026-07-25T14:35:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35864169,
+   "p1": "Josef Braun",
+   "p2": "Karol Strowski",
+   "p1_norm": "josef braun",
+   "p2_norm": "karol strowski",
+   "open_date": "2026-07-25T14:35:00.000Z",
+   "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
   }
