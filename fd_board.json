@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T09:15:29Z",
+ "captured_at": "2026-07-25T09:19:41Z",
  "matches": [
   {
    "event_id": 35862990,
@@ -13,24 +13,13 @@
    "under_odds": -115
   },
   {
-   "event_id": 35862991,
-   "p1": "Mariusz Zwolinski",
-   "p2": "Bartlomiej Wisniewski",
-   "p1_norm": "mariusz zwolinski",
-   "p2_norm": "bartlomiej wisniewski",
-   "open_date": "2026-07-25T09:00:00.000Z",
-   "line": 91.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
    "event_id": 35862993,
    "p1": "Kamil Kowalski",
    "p2": "Witold Buczynski",
    "p1_norm": "kamil kowalski",
    "p2_norm": "witold buczynski",
    "open_date": "2026-07-25T09:00:00.000Z",
-   "line": 82.5,
+   "line": 95.5,
    "over_odds": -110,
    "under_odds": -125
   },
@@ -41,9 +30,9 @@
    "p1_norm": "jerzy pelka",
    "p2_norm": "daniel morawiec",
    "open_date": "2026-07-25T09:05:00.000Z",
-   "line": 81.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 95.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35863028,
@@ -52,9 +41,9 @@
    "p1_norm": "radoslaw malinowski",
    "p2_norm": "kamil kostyk",
    "open_date": "2026-07-25T09:20:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 77.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35863029,
@@ -110,6 +99,17 @@
    "line": 76.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35863086,
+   "p1": "Bartosz Kwodawski",
+   "p2": "Maciej Kolek",
+   "p1_norm": "bartosz kwodawski",
+   "p2_norm": "maciej kolek",
+   "open_date": "2026-07-25T09:45:00.000Z",
+   "line": 73.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
