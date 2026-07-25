@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T02:46:35Z",
+ "captured_at": "2026-07-25T02:50:39Z",
  "matches": [
   {
    "event_id": 35862323,
@@ -8,9 +8,9 @@
    "p1_norm": "roman wiza",
    "p2_norm": "jakub michalski",
    "open_date": "2026-07-25T02:45:00.000Z",
-   "line": 73.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 71.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35862343,
