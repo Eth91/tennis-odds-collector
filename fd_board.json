@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T17:57:49Z",
+ "captured_at": "2026-07-25T18:02:53Z",
  "matches": [
-  {
-   "event_id": 35865325,
-   "p1": "Pawel Chojnacki",
-   "p2": "Piotr Gesiarz",
-   "p1_norm": "pawel chojnacki",
-   "p2_norm": "piotr gesiarz",
-   "open_date": "2026-07-25T17:45:00.000Z",
-   "line": 77.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
   {
    "event_id": 35865336,
    "p1": "Robert Szymik",
@@ -19,9 +8,9 @@
    "p1_norm": "robert szymik",
    "p2_norm": "kamil durak",
    "open_date": "2026-07-25T17:55:00.000Z",
-   "line": 81.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 56.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35865400,
@@ -30,9 +19,9 @@
    "p1_norm": "miroslaw warzecha",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-25T18:00:00.000Z",
-   "line": 74.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 82.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35865403,
