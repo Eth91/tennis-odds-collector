@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T06:42:00Z",
+ "captured_at": "2026-07-25T06:46:54Z",
  "matches": [
   {
    "event_id": 35862770,
@@ -8,9 +8,9 @@
    "p1_norm": "jaroslaw rolak",
    "p2_norm": "tadeusz piotrowski",
    "open_date": "2026-07-25T06:30:00.000Z",
-   "line": 81.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 59.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35862772,
@@ -19,7 +19,7 @@
    "p1_norm": "maciej domin",
    "p2_norm": "josef braun",
    "open_date": "2026-07-25T06:30:00.000Z",
-   "line": 85.5,
+   "line": 69.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -30,9 +30,9 @@
    "p1_norm": "mariusz baron",
    "p2_norm": "sebastian krupa",
    "open_date": "2026-07-25T06:45:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 79.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35862782,
@@ -42,8 +42,8 @@
    "p2_norm": "jerzy pelka",
    "open_date": "2026-07-25T06:45:00.000Z",
    "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35862785,
@@ -88,6 +88,28 @@
    "line": 73.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35862809,
+   "p1": "Wojciech Urban",
+   "p2": "Marcin Lach",
+   "p1_norm": "wojciech urban",
+   "p2_norm": "marcin lach",
+   "open_date": "2026-07-25T07:10:00.000Z",
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35862810,
+   "p1": "Rafal Wojcik",
+   "p2": "Sebastian Szostok",
+   "p1_norm": "rafal wojcik",
+   "p2_norm": "sebastian szostok",
+   "open_date": "2026-07-25T07:10:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
