@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T10:07:27Z",
+ "captured_at": "2026-07-25T10:11:33Z",
  "matches": [
   {
    "event_id": 35863100,
@@ -8,9 +8,9 @@
    "p1_norm": "rafal adach",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-25T09:55:00.000Z",
-   "line": 70.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 82.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35863107,
@@ -19,7 +19,7 @@
    "p1_norm": "josef braun",
    "p2_norm": "piotr cyrnek",
    "open_date": "2026-07-25T10:00:00.000Z",
-   "line": 68.5,
+   "line": 73.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,9 +30,9 @@
    "p1_norm": "bartosz kwodawski",
    "p2_norm": "maciej kolek",
    "open_date": "2026-07-25T10:10:00.000Z",
-   "line": 73.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 71.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35863179,
@@ -42,8 +42,8 @@
    "p2_norm": "mateusz sikon",
    "open_date": "2026-07-25T10:10:00.000Z",
    "line": 72.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35863180,
@@ -52,9 +52,9 @@
    "p1_norm": "mariusz zwolinski",
    "p2_norm": "jaroslaw rolak",
    "open_date": "2026-07-25T10:10:00.000Z",
-   "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 79.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35863288,
@@ -63,9 +63,9 @@
    "p1_norm": "jerzy pelka",
    "p2_norm": "rafal wojcik",
    "open_date": "2026-07-25T10:20:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35863297,
@@ -98,7 +98,7 @@
    "open_date": "2026-07-25T10:35:00.000Z",
    "line": 77.5,
    "over_odds": -116,
-   "under_odds": -118
+   "under_odds": -116
   },
   {
    "event_id": 35863309,
