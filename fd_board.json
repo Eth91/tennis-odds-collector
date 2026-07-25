@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T06:33:05Z",
+ "captured_at": "2026-07-25T06:37:32Z",
  "matches": [
-  {
-   "event_id": 35862720,
-   "p1": "Mariusz Zwolinski",
-   "p2": "Artur Szoltysek",
-   "p1_norm": "mariusz zwolinski",
-   "p2_norm": "artur szoltysek",
-   "open_date": "2026-07-25T06:05:00.000Z",
-   "line": 89.5,
-   "over_odds": -165,
-   "under_odds": 115
-  },
   {
    "event_id": 35862738,
    "p1": "Daniel Morawiec",
@@ -19,9 +8,9 @@
    "p1_norm": "daniel morawiec",
    "p2_norm": "rafal wojcik",
    "open_date": "2026-07-25T06:20:00.000Z",
-   "line": 98.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 101.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35862755,
@@ -30,9 +19,9 @@
    "p1_norm": "mateusz misiak",
    "p2_norm": "radoslaw malinowski",
    "open_date": "2026-07-25T06:25:00.000Z",
-   "line": 70.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 72.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35862756,
@@ -42,8 +31,8 @@
    "p2_norm": "wojciech pytlas",
    "open_date": "2026-07-25T06:25:00.000Z",
    "line": 70.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35862770,
@@ -53,8 +42,8 @@
    "p2_norm": "tadeusz piotrowski",
    "open_date": "2026-07-25T06:30:00.000Z",
    "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35862771,
@@ -63,9 +52,9 @@
    "p1_norm": "mateusz sikon",
    "p2_norm": "jacek wieczerzak",
    "open_date": "2026-07-25T06:30:00.000Z",
-   "line": 75.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 54.5,
+   "over_odds": -105,
+   "under_odds": -135
   },
   {
    "event_id": 35862772,
@@ -74,9 +63,9 @@
    "p1_norm": "maciej domin",
    "p2_norm": "josef braun",
    "open_date": "2026-07-25T06:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 74.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35862781,
@@ -96,9 +85,9 @@
    "p1_norm": "patryk jedrzejak",
    "p2_norm": "jerzy pelka",
    "open_date": "2026-07-25T06:45:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35862785,
@@ -129,9 +118,9 @@
    "p1_norm": "piotr cyrnek",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-25T06:55:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35862795,
@@ -140,7 +129,7 @@
    "p1_norm": "mariusz zwolinski",
    "p2_norm": "tadeusz piotrowski",
    "open_date": "2026-07-25T06:55:00.000Z",
-   "line": 74.5,
+   "line": 73.5,
    "over_odds": -118,
    "under_odds": -112
   }
