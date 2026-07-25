@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T00:54:08Z",
+ "captured_at": "2026-07-25T00:58:16Z",
  "matches": [
   {
    "event_id": 35862007,
@@ -8,9 +8,9 @@
    "p1_norm": "mateusz rutkowski",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-25T00:45:00.000Z",
-   "line": 74.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 89.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35862008,
@@ -19,9 +19,9 @@
    "p1_norm": "jacek oracz",
    "p2_norm": "michal natkaniec",
    "open_date": "2026-07-25T00:45:00.000Z",
-   "line": 54.5,
-   "over_odds": 115,
-   "under_odds": -160
+   "line": 90.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35862009,
@@ -30,9 +30,9 @@
    "p1_norm": "damian fira",
    "p2_norm": "tomasz wrzalik",
    "open_date": "2026-07-25T00:45:00.000Z",
-   "line": 88.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 98.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35862073,
@@ -44,17 +44,6 @@
    "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
-  },
-  {
-   "event_id": 35862074,
-   "p1": "Mateusz Trela",
-   "p2": "Michal Skorski",
-   "p1_norm": "mateusz trela",
-   "p2_norm": "michal skorski",
-   "open_date": "2026-07-25T01:00:00.000Z",
-   "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
   },
   {
    "event_id": 35862083,
@@ -88,6 +77,28 @@
    "line": 78.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35862137,
+   "p1": "Dariusz Wrobel",
+   "p2": "Stanislaw Wnek",
+   "p1_norm": "dariusz wrobel",
+   "p2_norm": "stanislaw wnek",
+   "open_date": "2026-07-25T01:25:00.000Z",
+   "line": 84.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35862138,
+   "p1": "Wojciech Wojtaszczyk",
+   "p2": "Piotr Przewlocki",
+   "p1_norm": "wojciech wojtaszczyk",
+   "p2_norm": "piotr przewlocki",
+   "open_date": "2026-07-25T01:25:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
