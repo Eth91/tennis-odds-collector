@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T14:10:01Z",
+ "captured_at": "2026-07-25T14:14:24Z",
  "matches": [
-  {
-   "event_id": 35864054,
-   "p1": "Mateusz Sikon",
-   "p2": "Pawel Kurek",
-   "p1_norm": "mateusz sikon",
-   "p2_norm": "pawel kurek",
-   "open_date": "2026-07-25T13:55:00.000Z",
-   "line": 91.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35864056,
    "p1": "Jerzy Pelka",
@@ -19,9 +8,9 @@
    "p1_norm": "jerzy pelka",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-25T13:55:00.000Z",
-   "line": 97.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 99.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35864104,
@@ -30,9 +19,9 @@
    "p1_norm": "kacper petas",
    "p2_norm": "maciej domin",
    "open_date": "2026-07-25T14:10:00.000Z",
-   "line": 73.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35864109,
@@ -97,6 +86,28 @@
    "p2_norm": "karol strowski",
    "open_date": "2026-07-25T14:35:00.000Z",
    "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35864172,
+   "p1": "Mariusz Zwolinski",
+   "p2": "Tadeusz Piotrowski",
+   "p1_norm": "mariusz zwolinski",
+   "p2_norm": "tadeusz piotrowski",
+   "open_date": "2026-07-25T14:40:00.000Z",
+   "line": 71.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35864173,
+   "p1": "Kamil Kowalski",
+   "p2": "Jakub Nowak",
+   "p1_norm": "kamil kowalski",
+   "p2_norm": "jakub nowak",
+   "open_date": "2026-07-25T14:40:00.000Z",
+   "line": 74.5,
    "over_odds": -118,
    "under_odds": -112
   }
