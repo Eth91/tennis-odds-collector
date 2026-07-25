@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T12:42:03Z",
+ "captured_at": "2026-07-25T12:46:14Z",
  "matches": [
   {
    "event_id": 35863929,
@@ -8,7 +8,7 @@
    "p1_norm": "piotr cyrnek",
    "p2_norm": "kacper petas",
    "open_date": "2026-07-25T12:30:00.000Z",
-   "line": 86.5,
+   "line": 90.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -19,9 +19,9 @@
    "p1_norm": "radoslaw malinowski",
    "p2_norm": "bartosz kwodawski",
    "open_date": "2026-07-25T12:35:00.000Z",
-   "line": 72.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 50.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35863931,
@@ -30,7 +30,7 @@
    "p1_norm": "mateusz sikon",
    "p2_norm": "jacek wieczerzak",
    "open_date": "2026-07-25T12:40:00.000Z",
-   "line": 72.5,
+   "line": 81.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -41,9 +41,9 @@
    "p1_norm": "jaroslaw rolak",
    "p2_norm": "mateusz misiak",
    "open_date": "2026-07-25T12:40:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 64.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35863933,
@@ -53,8 +53,8 @@
    "p2_norm": "jerzy pelka",
    "open_date": "2026-07-25T12:45:00.000Z",
    "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35863946,
@@ -97,6 +97,17 @@
    "p2_norm": "artur szoltysek",
    "open_date": "2026-07-25T13:05:00.000Z",
    "line": 78.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35863967,
+   "p1": "Patryk Jedrzejak",
+   "p2": "Sebastian Szostok",
+   "p1_norm": "patryk jedrzejak",
+   "p2_norm": "sebastian szostok",
+   "open_date": "2026-07-25T13:10:00.000Z",
+   "line": 79.5,
    "over_odds": -116,
    "under_odds": -116
   }
