@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T16:58:02Z",
+ "captured_at": "2026-07-25T17:02:29Z",
  "matches": [
   {
    "event_id": 35864904,
@@ -8,7 +8,7 @@
    "p1_norm": "michal machelski",
    "p2_norm": "michal guzik",
    "open_date": "2026-07-25T16:50:00.000Z",
-   "line": 81.5,
+   "line": 93.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -19,7 +19,7 @@
    "p1_norm": "piotr gesiarz",
    "p2_norm": "tomasz kocik",
    "open_date": "2026-07-25T16:55:00.000Z",
-   "line": 75.5,
+   "line": 82.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,9 +30,9 @@
    "p1_norm": "filip mlynarski",
    "p2_norm": "maciej kolek",
    "open_date": "2026-07-25T16:55:00.000Z",
-   "line": 67.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 54.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35864988,
@@ -41,7 +41,7 @@
    "p1_norm": "tomasz filbrandt",
    "p2_norm": "stapor rafal",
    "open_date": "2026-07-25T16:55:00.000Z",
-   "line": 75.5,
+   "line": 86.5,
    "over_odds": -120,
    "under_odds": -115
   },
