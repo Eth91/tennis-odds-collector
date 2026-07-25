@@ -2164,7 +2164,7 @@ def build():
         k_shn = (k_sh.get("w") or 0) + (k_sh.get("l") or 0)
         k_note = (" · shadow " + f'{k_sh["w"]}-{k_sh["l"]}') if k_shn else ""
         mlb_html += (f'<div class="op-title">⚾ K-COMPASS · Strikeouts'
-                     f'<span> · {_rec_str(_cb)}{k_note} · %% = backtested hit rate · flags when lineups post</span></div>')
+                     f'<span> · {_rec_str(_cb)}{k_note} · % = backtested hit rate · flags when lineups post</span></div>')
         mlb_html += (_compass_games(k_flags, "Strikeouts", 2.2,
                                     [(2.5, "~64%"), (2.0, "~61%"), (-9, "~58%")])
                      or '<div class="xt">no flags yet today</div>')
@@ -2175,7 +2175,7 @@ def build():
         o_shn = (o_sh.get("w") or 0) + (o_sh.get("l") or 0)
         o_note = (" · shadow " + f'{o_sh["w"]}-{o_sh["l"]}') if o_shn else ""
         mlb_html += (f'<div class="op-title">⚾ OUTS-COMPASS · Pitcher Outs'
-                     f'<span> · {_rec_str(_ob)}{o_note} · %% = backtested hit rate · ★ = strongest tier</span></div>')
+                     f'<span> · {_rec_str(_ob)}{o_note} · % = backtested hit rate · ★ = strongest tier</span></div>')
         mlb_html += (_compass_games(o_flags, "Outs Recorded", 1.30,
                                     [(1.30, "~65%"), (-9, "~63%")])
                      or '<div class="xt">no flags yet today</div>')
