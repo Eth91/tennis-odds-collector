@@ -37,6 +37,11 @@ THR = FROZEN.get("thr", 1.6)
 PRICE_CAP = FROZEN.get("price_cap", 2.00)
 BK_CACHE = HERE / "k_bk_2026.json"          # batter K rates, refreshed daily
 GL_CACHE = HERE / "k_gl_2026.json"          # pitcher gamelogs, refreshed per cycle day
+OUTS_F = json.loads((HERE / "outs_compass_frozen.json").read_text())
+OB_CACHE = HERE / "outs_bobp_2026.json"     # batter OBP/SLG rates, refreshed daily
+OGL_CACHE = HERE / "outs_gl_2026.json"      # pitcher outs/pitches gamelogs, per day
+LEASH_CACHE = HERE / "outs_leash_cache.json"  # incremental team starter-outs (gitignored)
+LEASH_SEED = HERE / "outs_leash_seed.json"    # committed 2026 bootstrap
 ET = None
 try:
     from zoneinfo import ZoneInfo
@@ -86,6 +91,12 @@ def _con():
         pitcher TEXT, game_date TEXT, side TEXT, line REAL, odds REAL, book TEXT, edge REAL,
         opp TEXT, flagged_at TEXT, result TEXT, actual INTEGER, pnl REAL, graded_at TEXT,
         log_date TEXT, pinged INTEGER DEFAULT 0,
+        PRIMARY KEY(pitcher, game_date))""")
+    c.execute("""CREATE TABLE IF NOT EXISTS outs_compass(
+        pitcher TEXT, game_date TEXT, side TEXT, line REAL, odds REAL, book TEXT, score REAL,
+        strong INTEGER DEFAULT 0, opp TEXT, flagged_at TEXT, skip TEXT, result TEXT,
+        actual INTEGER, pnl REAL, graded_at TEXT, log_date TEXT, pinged INTEGER DEFAULT 0,
+        game TEXT, gap REAL, lslg REAL, penfat REAL,
         PRIMARY KEY(pitcher, game_date))""")
     return c
 
@@ -145,6 +156,126 @@ def r5k(pid):
     return ks[len(ks) // 2] if len(ks) % 2 else (ks[len(ks) // 2 - 1] + ks[len(ks) // 2]) / 2
 
 
+def batter_obp():
+    """{pid: OBP} + {pid: SLG} season-to-date 2026, cached daily (OUTS-COMPASS)."""
+    try:
+        j = json.loads(OB_CACHE.read_text())
+        if j.get("day") == _today_et():
+            return ({int(k): v for k, v in j["obp"].items()},
+                    {int(k): v for k, v in j["slg"].items()})
+    except (OSError, ValueError):
+        pass
+    d = _get("/stats", stats="season", group="hitting", season=2026, sportId=1,
+             playerPool="All", limit=3000)
+    obp, slg = {}, {}
+    for s in (d.get("stats") or [{}])[0].get("splits") or []:
+        stt = s.get("stat") or {}
+        if (stt.get("plateAppearances") or 0) >= 50:
+            for key, m in (("obp", obp), ("slg", slg)):
+                try:
+                    m[s["player"]["id"]] = float(stt.get(key))
+                except (TypeError, ValueError):
+                    pass
+    if obp:
+        OB_CACHE.write_text(json.dumps({"day": _today_et(), "obp": obp, "slg": slg}))
+    return obp, slg
+
+
+def team_obp():
+    """{team_id: OBP} season-to-date."""
+    d = _get("/teams/stats", stats="season", group="hitting", season=2026, sportId=1)
+    out = {}
+    for t in (d.get("stats") or [{}])[0].get("splits") or []:
+        try:
+            out[t["team"]["id"]] = float((t.get("stat") or {}).get("obp"))
+        except (TypeError, ValueError, KeyError):
+            pass
+    return out
+
+
+def r5outs(pid):
+    """(ppo, pitch_budget, med_outs) over last-5 2026 starts; None-tuple if <3 starts."""
+    try:
+        cache = json.loads(OGL_CACHE.read_text())
+        if cache.get("day") != _today_et():
+            cache = {"day": _today_et()}
+    except (OSError, ValueError):
+        cache = {"day": _today_et()}
+    key = str(pid)
+    if key not in cache:
+        d = _get(f"/people/{pid}/stats", stats="gameLog", group="pitching", season=2026)
+        rows = [[s["stat"].get("outs") or 0, s["stat"].get("numberOfPitches") or 0]
+                for s in (d.get("stats") or [{}])[0].get("splits") or []
+                if (s["stat"].get("gamesStarted") or 0) and (s["stat"].get("battersFaced") or 0) >= 5]
+        cache[key] = rows
+        OGL_CACHE.write_text(json.dumps(cache))
+    g5 = cache.get(key) or []
+    g5 = g5[-5:]
+    if len(g5) < 3:
+        return None, None, None
+    outs = sorted(o for o, _ in g5)
+    med = outs[len(outs) // 2] if len(outs) % 2 else (outs[len(outs) // 2 - 1] + outs[len(outs) // 2]) / 2
+    pt = [p for _, p in g5 if p > 0]
+    tot_o = sum(o for o, _ in g5)
+    ppo = (sum(p for _, p in g5 if p > 0) / tot_o) if (tot_o and pt) else None
+    return ppo, (sum(pt) / len(pt)) if pt else None, med
+
+
+def team_leash():
+    """({team_id: season avg starter-outs}, {team_id: pen outs last 3d}) — incremental daily cache
+    seeded from outs_leash_seed.json; processes new FINAL games via boxscore (starter = first
+    pitcher listed)."""
+    try:
+        cache = json.loads(LEASH_CACHE.read_text())
+    except (OSError, ValueError):
+        cache = json.loads(LEASH_SEED.read_text())
+    today = _today_et()
+    d0 = dt.date.fromisoformat(cache["last_date"]) + dt.timedelta(days=1)
+    day = d0
+    while day.isoformat() < today:
+        ds = day.isoformat()
+        sched = _get("/schedule", sportId=1, date=ds)
+        done = True
+        for dd in sched.get("dates") or []:
+            for g in dd.get("games") or []:
+                if (g.get("status") or {}).get("abstractGameState") != "Final":
+                    if g.get("gameType") == "R":
+                        done = False
+                    continue
+                if g.get("gameType") != "R":
+                    continue
+                bx = _get(f"/game/{g['gamePk']}/boxscore")
+                for side in ("home", "away"):
+                    t = (bx.get("teams") or {}).get(side) or {}
+                    tid = str(((t.get("team") or {}).get("id")) or "")
+                    sp = (t.get("pitchers") or [None])[0]
+                    if not tid or not sp:
+                        continue
+                    stt = ((t.get("players") or {}).get(f"ID{sp}") or {}).get("stats", {}).get("pitching", {})
+                    spo = stt.get("outs")
+                    if spo is None:
+                        continue
+                    rec = cache["teams"].setdefault(tid, {"s": 0, "n": 0})
+                    rec["s"] += spo
+                    rec["n"] += 1
+                    r = cache["recent"].setdefault(tid, [])
+                    r.append([ds, spo])
+                    cache["recent"][tid] = r[-10:]
+        if not done:
+            break
+        cache["last_date"] = ds
+        day += dt.timedelta(days=1)
+    try:
+        LEASH_CACHE.write_text(json.dumps(cache))
+    except OSError as e:
+        print(f"leash cache write failed: {e}")
+    leash = {int(t): v["s"] / v["n"] for t, v in cache["teams"].items() if v["n"] >= 20}
+    cut = (dt.date.fromisoformat(today) - dt.timedelta(days=3)).isoformat()
+    pen = {int(t): sum(max(0, 27 - o) for ds, o in v if cut <= ds < today)
+           for t, v in cache.get("recent", {}).items()}
+    return leash, pen
+
+
 def slate():
     """Today's games with probables + POSTED lineups: [{pitcher, pid, opp_lineup_pids, home_team,
     start_iso, started}]. Lineup required — no fallback (matches the validated OOS)."""
@@ -169,6 +300,7 @@ def slate():
                     continue
                 out.append({"pitcher": pp.get("fullName"), "pid": pp["id"],
                             "opp_lineup": opp_lu[:9],
+                            "team_id": g["teams"][side_lbl]["team"]["id"],
                             "opp_id": g["teams"][opp_lbl]["team"]["id"],
                             "opp_name": g["teams"][opp_lbl]["team"].get("abbreviation") or
                                         g["teams"][opp_lbl]["team"]["name"],
@@ -177,14 +309,14 @@ def slate():
     return out
 
 
-def k_lines():
-    """{pitcher_name: {book: {line: {side: odds}}}} — freshest 18h strikeout quotes, all 3 books."""
+def k_lines(stat="strikeouts"):
+    """{pitcher_name: {book: {line: {side: odds}}}} — freshest 18h quotes for one stat, all 3 books."""
     if not FD.exists():
         return {}
     con = sqlite3.connect(f"file:{FD}?mode=ro", uri=True)
     rows = con.execute("SELECT book, player, line, side, odds, collected_at FROM fd_lines "
-                       "WHERE sport='mlb' AND stat='strikeouts' "
-                       "AND collected_at > datetime('now','-18 hours')").fetchall()
+                       "WHERE sport='mlb' AND stat=? "
+                       "AND collected_at > datetime('now','-18 hours')", (stat,)).fetchall()
     con.close()
     latest = {}
     for bk, pl, ln, sd, od, ca in rows:
@@ -276,6 +408,101 @@ def flag(con):
                 print(f"ping failed: {str(e)[:60]}")
     con.commit()
     print(f"funnel pre={fn['pre']} lineup={fn['lu']} gates={fn['ok']} new={new}")
+
+
+def flag_outs(con):
+    """OUTS-COMPASS v5: S = -tw*z(OBP blend) - pw*z(ppo) + lw*z(team leash) + bw*z(pitch budget).
+    Rung rule: no unders at line<=15.5 (skip='rung_cap'). Price>=2.00 -> skip='price_cap'.
+    strong = |S|>=1.30. Shadow cols gap/lslg/penfat observe only."""
+    F = OUTS_F
+    tobp = team_obp()
+    bobp, bslg = batter_obp()
+    leash, pen = team_leash()
+    lines = k_lines(stat="outs")
+    ts = _now()
+    gd = _today_et()
+    import os
+    topic = os.environ.get("NTFY_TOPIC")
+    new = 0
+    fn = {"pre": 0, "lu": 0, "ok": 0}
+    for g in slate():
+        if g["started"]:
+            continue
+        fn["pre"] += 1
+        if len(g["opp_lineup"]) >= 9:
+            fn["lu"] += 1
+        if con.execute("SELECT 1 FROM outs_compass WHERE pitcher=? AND game_date=?",
+                       (g["pitcher"], gd)).fetchone():
+            continue
+        oobp = tobp.get(g["opp_id"])
+        obs = [bobp.get(b) for b in g["opp_lineup"]]
+        obs = [x for x in obs if x is not None]
+        ppo, budget, med = r5outs(g["pid"])
+        le = leash.get(g["team_id"])
+        if oobp is None or len(obs) < 6 or ppo is None or budget is None or le is None:
+            continue
+        fn["ok"] += 1
+        lobp = sum(obs) / len(obs)
+        ot = (1 - F["lblend"]) * z(oobp, F["ob_mu"], F["ob_sd"]) \
+            + F["lblend"] * z(lobp, F["lo_mu"], F["lo_sd"])
+        S = (-F["tw"] * ot - F["pw"] * z(ppo, F["pp_mu"], F["pp_sd"])
+             + F["lw"] * z(le, F["le_mu"], F["le_sd"])
+             + F["bw"] * z(budget, F["bu_mu"], F["bu_sd"]))
+        side = "over" if S > 0 else "under"
+        if abs(S) < F["thr"]:
+            continue
+        best = raw_best = None
+        for bk in BOOKS:
+            lls = (lines.get(_norm(g["pitcher"])) or {}).get(bk) or {}
+            two = {ln: v for ln, v in lls.items() if "over" in v and "under" in v}
+            if not two:
+                continue
+            main = min(two, key=lambda ln: abs(two[ln]["over"] - 1.9))
+            od = two[main].get(side)
+            if not od:
+                continue
+            if raw_best is None or od > raw_best[0]:
+                raw_best = (od, main, bk)
+            # rung rule applies per book: an under is bettable only at a 16.5+ main line
+            if side == "under" and main < F["under_min_line"]:
+                continue
+            if best is None or od > best[0]:
+                best = (od, main, bk)
+        if not best and not raw_best:
+            continue
+        skip = None
+        if not best:
+            best, skip = raw_best, "rung_cap"
+        od, ln, bk = best
+        if skip is None and od >= F["price_cap"]:
+            skip = "price_cap"
+        strong = 1 if abs(S) >= F["strong"] else 0
+        sl = [bslg.get(b) for b in g["opp_lineup"]]
+        sl = [x for x in sl if x is not None]
+        con.execute("INSERT INTO outs_compass (pitcher, game_date, side, line, odds, book, score, "
+                    "strong, opp, flagged_at, skip, game, gap, lslg, penfat) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    (g["pitcher"], gd, side, ln, od, bk, round(abs(S), 2), strong, g["opp_name"],
+                     ts, skip, g["home_team"] + "|" + str(g.get("start") or ""),
+                     (ln - med) if med is not None else None,
+                     (sum(sl) / len(sl)) if len(sl) >= 6 else None,
+                     pen.get(g["team_id"])))
+        new += 1
+        if not skip and topic:
+            am = f"+{round((od-1)*100)}" if od >= 2 else f"-{round(100/(od-1))}"
+            txt = (f"🚨 ⚾O {g['opp_name']} {g['pitcher']} "
+                   f"{'O' if side == 'over' else 'U'}{ln:g} {am} {bk.upper()} S{abs(S):.1f}"
+                   f"{' ★' if strong else ''}")
+            try:
+                requests.post(f"https://ntfy.sh/{topic}", data=txt.encode(),
+                              params={"title": "Pickz", "priority": "high"}, timeout=15
+                              ).raise_for_status()
+                con.execute("UPDATE outs_compass SET pinged=1 WHERE pitcher=? AND game_date=?",
+                            (g["pitcher"], gd))
+            except requests.RequestException as e:
+                print(f"outs ping failed: {str(e)[:60]}")
+    con.commit()
+    print(f"outs funnel pre={fn['pre']} lineup={fn['lu']} gates={fn['ok']} new={new}")
 
 
 def flag_outlier(con):
@@ -411,9 +638,12 @@ def grade_parlay(con):
     con.commit()
 
 
+STAT_FIELD = {"compass": "strikeOuts", "outlier": "strikeOuts", "outs_compass": "outs"}
+
+
 def grade(con):
     rows = []
-    for table in ("compass", "outlier"):
+    for table in ("compass", "outlier", "outs_compass"):
         rows += [(table,) + r for r in con.execute(
             f"SELECT pitcher, game_date, side, line, odds FROM {table} "
             "WHERE result IS NULL AND game_date < ?", (_today_et(),)).fetchall()]
@@ -445,7 +675,7 @@ def grade(con):
             except (TypeError, ValueError):
                 continue
             if dd <= 1:
-                g = (date, st_.get("strikeOuts") or 0)
+                g = (date, st_.get(STAT_FIELD[table]) or 0)
                 break
         if not g:
             continue
@@ -476,10 +706,22 @@ def board(con):
     oflags = [dict(zip(("pitcher", "side", "line", "odds", "book", "edge", "opp"), r))
               for r in con.execute("SELECT pitcher, side, line, odds, book, edge, opp FROM outlier "
                                    "WHERE game_date=? ORDER BY edge DESC", (_today_et(),))]
+    outs_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
+                           "FROM outs_compass WHERE result IN ('W','L') AND skip IS NULL").fetchone()
+    outs_sh = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
+                          "FROM outs_compass WHERE result IN ('W','L') AND skip IS NOT NULL").fetchone()
+    outs_today = [dict(zip(("pitcher", "side", "line", "odds", "book", "score", "strong", "opp",
+                            "skip"), r))
+                  for r in con.execute("SELECT pitcher, side, line, odds, book, score, strong, opp, "
+                                       "skip FROM outs_compass WHERE game_date=? ORDER BY score DESC",
+                                       (_today_et(),))]
     (HERE / "compass_board.json").write_text(json.dumps(
         {"updated": _now(), "w": rec[0] or 0, "l": rec[1] or 0, "u": rec[2] or 0.0,
          "shadow": {"w": shadow[0] or 0, "l": shadow[1] or 0, "u": shadow[2] or 0.0},
          "today": flags,
+         "outs": {"w": outs_rec[0] or 0, "l": outs_rec[1] or 0, "u": outs_rec[2] or 0.0,
+                  "shadow": {"w": outs_sh[0] or 0, "l": outs_sh[1] or 0, "u": outs_sh[2] or 0.0},
+                  "today": outs_today},
          "outlier": {"w": orec[0] or 0, "l": orec[1] or 0, "u": orec[2] or 0.0,
                      "today": oflags},
          "parlay": {"today": (json.loads(prow[0]) if prow else None),
@@ -491,6 +733,7 @@ def board(con):
 if __name__ == "__main__":
     c = _con()
     flag(c)
+    flag_outs(c)
     # flag_outlier(c)  # BENCHED 2026-07-25 (user: K-COMPASS only) — table/grading stay dormant
     build_parlay(c)
     grade(c)

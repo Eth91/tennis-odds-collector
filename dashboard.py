@@ -2102,6 +2102,30 @@ def build():
                      f'<div class="ttfoot">paper record {_rec} · lineup-confirmed only · '
                      f'thr 1.6 · skips 2.00+ (shadow) · 62%/+15% on 2026 OOS · flags when lineups post</div></div>')
 
+        # OUTS-COMPASS v5 card (same board file, "outs" section; wired 2026-07-25)
+        _ob = _cb.get("outs") or {}
+        _orows = ""
+        _SKIPTXT = {"price_cap": "shadow: price cap", "rung_cap": "shadow: under needs 16.5+"}
+        for f in _ob.get("today", [])[:10]:
+            _o = "O" if f["side"] == "over" else "U"
+            _sk = (f' <span class="stalechip">{_SKIPTXT.get(f["skip"], "shadow")}</span>'
+                   if f.get("skip") else "")
+            _star = " ★" if f.get("strong") else ""
+            _orows += (f'<div class="ttbet"><span class="pind {_o.lower()}">{_o}</span>'
+                       f'<span class="ttbln">{f["line"]:g}</span>'
+                       f'<div class="ttbmid"><div class="ttbnm"><b>{html.escape(_short(f["pitcher"]))}</b> '
+                       f'<span class="xteam">vs {html.escape(str(f["opp"]))}</span></div>'
+                       f'<div class="ttbsb">outs · {f["side"]} · S={f["score"]:.1f}{_star}{_sk}</div></div>'
+                       f'<span class="podds">{_am(float(f["odds"]))}</span>'
+                       f'<span class="bktag">{html.escape(f["book"][:3].upper())}</span></div>')
+        _on = (_ob.get("w") or 0) + (_ob.get("l") or 0)
+        _orec = (f'{_ob["w"]}-{_ob["l"]} ({_ob["u"]:+.1f}u)' if _on else "0-0 · new")
+        mlb_html += (f'<div class="card"><h3 class="ttlg">⚾ OUTS-COMPASS · pitcher outs model'
+                     f'<span class="ttcnt">{len(_ob.get("today", []))}</span></h3>{_orows or ""}'
+                     f'<div class="ttfoot">paper record {_orec} · lineup-confirmed only · thr 0.97 '
+                     f'(★ 1.30+) · no unders below 16.5 · skips 2.00+ · 63%/+10% 4-season backtest · '
+                     f'flags when lineups post</div></div>')
+
     except (OSError, ValueError):
         pass
     tracker_html = _tracker_panel((w, l, u), tt_json)

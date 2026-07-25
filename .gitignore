@@ -34,3 +34,4 @@ mlb_odds_hist.sqlite
 wnba_odds_hist.sqlite
 mlb_pen_cache.json
 *_odds_hist.sqlite
+outs_leash_cache.json
