@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-07-25T19:07:43Z",
+ "captured_at": "2026-07-25T19:12:12Z",
  "matches": [
-  {
-   "event_id": 35865518,
-   "p1": "Jacek Oracz",
-   "p2": "Kacper Kwiatkowski",
-   "p1_norm": "jacek oracz",
-   "p2_norm": "kacper kwiatkowski",
-   "open_date": "2026-07-25T18:45:00.000Z",
-   "line": 109.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35865570,
-   "p1": "Marcin Marchlewski",
-   "p2": "Alan Wos",
-   "p1_norm": "marcin marchlewski",
-   "p2_norm": "alan wos",
-   "open_date": "2026-07-25T18:50:00.000Z",
-   "line": 70.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35865607,
-   "p1": "Dawid Poloszczanski",
-   "p2": "Kamil Kostyk",
-   "p1_norm": "dawid poloszczanski",
-   "p2_norm": "kamil kostyk",
-   "open_date": "2026-07-25T18:55:00.000Z",
-   "line": 69.5,
-   "over_odds": 100,
-   "under_odds": -135
-  },
   {
    "event_id": 35865642,
    "p1": "Miroslaw Warzecha",
@@ -41,9 +8,9 @@
    "p1_norm": "miroslaw warzecha",
    "p2_norm": "michal machelski",
    "open_date": "2026-07-25T19:10:00.000Z",
-   "line": 73.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35865644,
@@ -52,8 +19,8 @@
    "p1_norm": "damian fira",
    "p2_norm": "marcin lach",
    "open_date": "2026-07-25T19:10:00.000Z",
-   "line": 73.5,
-   "over_odds": -110,
+   "line": 65.5,
+   "over_odds": -115,
    "under_odds": -120
   },
   {
@@ -86,8 +53,8 @@
    "p2_norm": "andriej fomin",
    "open_date": "2026-07-25T19:20:00.000Z",
    "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -120,
+   "under_odds": -110
   },
   {
    "event_id": 35865672,
@@ -107,9 +74,9 @@
    "p1_norm": "jakub skorupa",
    "p2_norm": "michal guzik",
    "open_date": "2026-07-25T19:35:00.000Z",
-   "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 73.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
