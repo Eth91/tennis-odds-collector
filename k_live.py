@@ -154,10 +154,17 @@ def slate():
         for g in day.get("games") or []:
             state = (g.get("status") or {}).get("abstractGameState")
             lu = g.get("lineups") or {}
+            bx = None  # lazy pre-game boxscore fetch (schedule hydrate is empty until ~start)
             home_team = g["teams"]["home"]["team"]["name"]
             for side_lbl, opp_lbl in (("home", "away"), ("away", "home")):
                 pp = (g["teams"][side_lbl].get("probablePitcher") or {})
                 opp_lu = [p.get("id") for p in (lu.get(f"{opp_lbl}Players") or [])]
+                if len(opp_lu) < 9 and state == "Preview":
+                    if bx is None:
+                        bx = _get(f"/game/{g['gamePk']}/boxscore") or {}
+                    order = ((bx.get("teams") or {}).get(opp_lbl) or {}).get("battingOrder") or []
+                    if len(order) >= 9:
+                        opp_lu = [int(x) for x in order]
                 if not pp.get("id"):
                     continue
                 out.append({"pitcher": pp.get("fullName"), "pid": pp["id"],
@@ -207,9 +214,13 @@ def flag(con):
     import os
     topic = os.environ.get("NTFY_TOPIC")
     new = 0
+    fn = {"pre": 0, "lu": 0, "ok": 0, "smax": 0.0}
     for g in slate():
         if g["started"]:
             continue
+        fn["pre"] += 1
+        if len(g["opp_lineup"]) >= 9:
+            fn["lu"] += 1
         row = con.execute("SELECT 1 FROM compass WHERE pitcher=? AND game_date=?",
                           (g["pitcher"], gd)).fetchone()
         if row:
@@ -220,6 +231,7 @@ def flag(con):
         rk = r5k(g["pid"])
         if oppk is None or len(rates) < 6 or rk is None:
             continue
+        fn["ok"] += 1
         lk = sum(rates) / len(rates)
         S = (F["kw"] * z(oppk, F["ok_mu"], F["ok_sd"])
              + (1 - F["kw"]) * z(lk, F["lk_mu"], F["lk_sd"])
@@ -263,8 +275,7 @@ def flag(con):
             except requests.RequestException as e:
                 print(f"ping failed: {str(e)[:60]}")
     con.commit()
-    if new:
-        print(f"flagged {new}")
+    print(f"funnel pre={fn['pre']} lineup={fn['lu']} gates={fn['ok']} new={new}")
 
 
 def flag_outlier(con):
