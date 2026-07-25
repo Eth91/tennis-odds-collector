@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-25T02:41:54Z",
+ "captured_at": "2026-07-25T02:46:35Z",
  "matches": [
-  {
-   "event_id": 35862308,
-   "p1": "Schaniel Krzysztof",
-   "p2": "Wojciech Wojtaszczyk",
-   "p1_norm": "schaniel krzysztof",
-   "p2_norm": "wojciech wojtaszczyk",
-   "open_date": "2026-07-25T02:35:00.000Z",
-   "line": 54.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35862322,
-   "p1": "Michal Krutak",
-   "p2": "Michal Wolny",
-   "p1_norm": "michal krutak",
-   "p2_norm": "michal wolny",
-   "open_date": "2026-07-25T02:45:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
   {
    "event_id": 35862323,
    "p1": "Roman Wiza",
@@ -31,8 +9,8 @@
    "p2_norm": "jakub michalski",
    "open_date": "2026-07-25T02:45:00.000Z",
    "line": 73.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35862343,
@@ -75,6 +53,17 @@
    "p2_norm": "piotr gumulinski",
    "open_date": "2026-07-25T03:05:00.000Z",
    "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35862348,
+   "p1": "Wojciech Urban",
+   "p2": "Jakub Kaczmarek",
+   "p1_norm": "wojciech urban",
+   "p2_norm": "jakub kaczmarek",
+   "open_date": "2026-07-25T03:10:00.000Z",
+   "line": 80.5,
    "over_odds": -118,
    "under_odds": -112
   }
