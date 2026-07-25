@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-25T03:24:33Z",
+ "captured_at": "2026-07-25T03:28:38Z",
  "matches": [
-  {
-   "event_id": 35862343,
-   "p1": "Mariusz Zwolinski",
-   "p2": "Jaroslaw Rolak",
-   "p1_norm": "mariusz zwolinski",
-   "p2_norm": "jaroslaw rolak",
-   "open_date": "2026-07-25T03:00:00.000Z",
-   "line": 105.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35862399,
-   "p1": "Mateusz Sikon",
-   "p2": "Jakub Nowak",
-   "p1_norm": "mateusz sikon",
-   "p2_norm": "jakub nowak",
-   "open_date": "2026-07-25T03:25:00.000Z",
-   "line": 81.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
   {
    "event_id": 35862400,
    "p1": "Maciej Domin",
@@ -30,9 +8,9 @@
    "p1_norm": "maciej domin",
    "p2_norm": "artur daniel",
    "open_date": "2026-07-25T03:25:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35862401,
@@ -42,8 +20,8 @@
    "p2_norm": "artur szoltysek",
    "open_date": "2026-07-25T03:25:00.000Z",
    "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35862402,
@@ -99,6 +77,17 @@
    "line": 73.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35862425,
+   "p1": "Jakub Michalski",
+   "p2": "Adam Ruszkiewicz",
+   "p1_norm": "jakub michalski",
+   "p2_norm": "adam ruszkiewicz",
+   "open_date": "2026-07-25T03:55:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
