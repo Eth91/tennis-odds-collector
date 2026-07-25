@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T21:41:51Z",
+ "captured_at": "2026-07-25T21:47:33Z",
  "matches": [
   {
    "event_id": 35865940,
@@ -8,9 +8,9 @@
    "p1_norm": "roman wiza",
    "p2_norm": "damian fira",
    "open_date": "2026-07-25T21:30:00.000Z",
-   "line": 90.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 87.5,
+   "over_odds": -140,
+   "under_odds": 100
   },
   {
    "event_id": 35865942,
@@ -19,7 +19,7 @@
    "p1_norm": "jacek oracz",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-25T21:35:00.000Z",
-   "line": 57.5,
+   "line": 78.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -30,9 +30,9 @@
    "p1_norm": "karol sulkowski",
    "p2_norm": "stapor rafal",
    "open_date": "2026-07-25T21:45:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35865948,
@@ -41,9 +41,9 @@
    "p1_norm": "jakub kuzmicz",
    "p2_norm": "tomasz filbrandt",
    "open_date": "2026-07-25T21:45:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 72.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35865949,
@@ -52,9 +52,9 @@
    "p1_norm": "piotr gesiarz",
    "p2_norm": "pawel chojnacki",
    "open_date": "2026-07-25T21:45:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35866152,
@@ -85,7 +85,29 @@
    "p1_norm": "filip mlynarski",
    "p2_norm": "marcin marchlewski",
    "open_date": "2026-07-25T22:05:00.000Z",
+   "line": 68.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35866254,
+   "p1": "Janus Slawomir",
+   "p2": "Dariusz Maszczynski",
+   "p1_norm": "janus slawomir",
+   "p2_norm": "dariusz maszczynski",
+   "open_date": "2026-07-25T22:10:00.000Z",
    "line": 72.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35866255,
+   "p1": "Jakub Glanowski",
+   "p2": "Dawid Poloszczanski",
+   "p1_norm": "jakub glanowski",
+   "p2_norm": "dawid poloszczanski",
+   "open_date": "2026-07-25T22:10:00.000Z",
+   "line": 79.5,
    "over_odds": -118,
    "under_odds": -112
   }
