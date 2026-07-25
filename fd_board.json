@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T20:53:46Z",
+ "captured_at": "2026-07-25T20:59:12Z",
  "matches": [
   {
    "event_id": 35865809,
@@ -19,9 +19,9 @@
    "p1_norm": "miroslaw warzecha",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-25T20:45:00.000Z",
-   "line": 98.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 100.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35865904,
@@ -85,9 +85,9 @@
    "p1_norm": "marcin marchlewski",
    "p2_norm": "tomasz filbrandt",
    "open_date": "2026-07-25T21:20:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 83.5,
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35865916,
@@ -107,9 +107,9 @@
    "p1_norm": "dawid poloszczanski",
    "p2_norm": "stapor rafal",
    "open_date": "2026-07-25T21:20:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -110,
+   "under_odds": -120
   }
  ]
 }
