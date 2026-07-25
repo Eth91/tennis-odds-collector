@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T01:37:00Z",
+ "captured_at": "2026-07-25T01:41:09Z",
  "matches": [
   {
    "event_id": 35862148,
@@ -8,9 +8,9 @@
    "p1_norm": "marcin marchlewski",
    "p2_norm": "mateusz rutkowski",
    "open_date": "2026-07-25T01:30:00.000Z",
-   "line": 74.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 83.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35862190,
@@ -19,9 +19,9 @@
    "p1_norm": "michal wolny",
    "p2_norm": "michal guzik",
    "open_date": "2026-07-25T01:35:00.000Z",
-   "line": 73.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 78.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35862198,
