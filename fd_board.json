@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-07-25T16:05:10Z",
+ "captured_at": "2026-07-25T16:09:37Z",
  "matches": [
-  {
-   "event_id": 35864408,
-   "p1": "Filip Mlynarski",
-   "p2": "Alan Wos",
-   "p1_norm": "filip mlynarski",
-   "p2_norm": "alan wos",
-   "open_date": "2026-07-25T15:45:00.000Z",
-   "line": 75.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35864609,
-   "p1": "Piotr Gesiarz",
-   "p2": "Janus Slawomir",
-   "p1_norm": "piotr gesiarz",
-   "p2_norm": "janus slawomir",
-   "open_date": "2026-07-25T15:50:00.000Z",
-   "line": 90.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35864610,
-   "p1": "Tomasz Filbrandt",
-   "p2": "Kamil Kostyk",
-   "p1_norm": "tomasz filbrandt",
-   "p2_norm": "kamil kostyk",
-   "open_date": "2026-07-25T15:50:00.000Z",
-   "line": 80.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
   {
    "event_id": 35864617,
    "p1": "Rafal Adach",
@@ -41,9 +8,9 @@
    "p1_norm": "rafal adach",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-25T15:55:00.000Z",
-   "line": 90.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 91.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35864620,
@@ -52,7 +19,7 @@
    "p1_norm": "kacper kwiatkowski",
    "p2_norm": "michal machelski",
    "open_date": "2026-07-25T16:00:00.000Z",
-   "line": 84.5,
+   "line": 88.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -63,9 +30,9 @@
    "p1_norm": "marcin marchlewski",
    "p2_norm": "karol strowski",
    "open_date": "2026-07-25T16:05:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 73.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35864636,
@@ -108,6 +75,39 @@
    "p2_norm": "jacek oracz",
    "open_date": "2026-07-25T16:25:00.000Z",
    "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35864647,
+   "p1": "Alan Wos",
+   "p2": "Jakub Kuzmicz",
+   "p1_norm": "alan wos",
+   "p2_norm": "jakub kuzmicz",
+   "open_date": "2026-07-25T16:30:00.000Z",
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35864650,
+   "p1": "Janus Slawomir",
+   "p2": "Andriej Fomin",
+   "p1_norm": "janus slawomir",
+   "p2_norm": "andriej fomin",
+   "open_date": "2026-07-25T16:35:00.000Z",
+   "line": 75.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35864651,
+   "p1": "Kamil Kostyk",
+   "p2": "Bartosz Sulkowski",
+   "p1_norm": "kamil kostyk",
+   "p2_norm": "bartosz sulkowski",
+   "open_date": "2026-07-25T16:35:00.000Z",
+   "line": 77.5,
    "over_odds": -116,
    "under_odds": -116
   }
