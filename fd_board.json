@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T18:15:49Z",
+ "captured_at": "2026-07-25T18:21:03Z",
  "matches": [
-  {
-   "event_id": 35865400,
-   "p1": "Miroslaw Warzecha",
-   "p2": "Kacper Kwiatkowski",
-   "p1_norm": "miroslaw warzecha",
-   "p2_norm": "kacper kwiatkowski",
-   "open_date": "2026-07-25T18:00:00.000Z",
-   "line": 77.5,
-   "over_odds": 120,
-   "under_odds": -165
-  },
   {
    "event_id": 35865403,
    "p1": "Alan Wos",
@@ -19,9 +8,9 @@
    "p1_norm": "alan wos",
    "p2_norm": "maciej kolek",
    "open_date": "2026-07-25T18:05:00.000Z",
-   "line": 59.5,
-   "over_odds": -105,
-   "under_odds": -130
+   "line": 75.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35865407,
@@ -30,7 +19,7 @@
    "p1_norm": "kamil kostyk",
    "p2_norm": "stapor rafal",
    "open_date": "2026-07-25T18:10:00.000Z",
-   "line": 86.5,
+   "line": 87.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -41,7 +30,7 @@
    "p1_norm": "janus slawomir",
    "p2_norm": "tomasz kocik",
    "open_date": "2026-07-25T18:10:00.000Z",
-   "line": 75.5,
+   "line": 82.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -52,9 +41,9 @@
    "p1_norm": "michal durda",
    "p2_norm": "damian fira",
    "open_date": "2026-07-25T18:20:00.000Z",
-   "line": 74.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 73.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35865499,
@@ -99,6 +88,28 @@
    "line": 75.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35865517,
+   "p1": "Roman Wiza",
+   "p2": "Robert Szymik",
+   "p1_norm": "roman wiza",
+   "p2_norm": "robert szymik",
+   "open_date": "2026-07-25T18:45:00.000Z",
+   "line": 72.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35865518,
+   "p1": "Jacek Oracz",
+   "p2": "Kacper Kwiatkowski",
+   "p1_norm": "jacek oracz",
+   "p2_norm": "kacper kwiatkowski",
+   "open_date": "2026-07-25T18:45:00.000Z",
+   "line": 73.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
