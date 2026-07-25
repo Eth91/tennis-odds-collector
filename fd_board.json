@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T13:29:54Z",
+ "captured_at": "2026-07-25T13:34:47Z",
  "matches": [
-  {
-   "event_id": 35863967,
-   "p1": "Patryk Jedrzejak",
-   "p2": "Sebastian Szostok",
-   "p1_norm": "patryk jedrzejak",
-   "p2_norm": "sebastian szostok",
-   "open_date": "2026-07-25T13:10:00.000Z",
-   "line": 90.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35863979,
    "p1": "Karol Strowski",
@@ -19,42 +8,9 @@
    "p1_norm": "karol strowski",
    "p2_norm": "maciej domin",
    "open_date": "2026-07-25T13:20:00.000Z",
-   "line": 87.5,
+   "line": 89.5,
    "over_odds": -115,
    "under_odds": -120
-  },
-  {
-   "event_id": 35864001,
-   "p1": "Tadeusz Piotrowski",
-   "p2": "Bartlomiej Wisniewski",
-   "p1_norm": "tadeusz piotrowski",
-   "p2_norm": "bartlomiej wisniewski",
-   "open_date": "2026-07-25T13:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35864002,
-   "p1": "Jakub Nowak",
-   "p2": "Witold Buczynski",
-   "p1_norm": "jakub nowak",
-   "p2_norm": "witold buczynski",
-   "open_date": "2026-07-25T13:30:00.000Z",
-   "line": 82.5,
-   "over_odds": -116,
-   "under_odds": -116
-  },
-  {
-   "event_id": 35864024,
-   "p1": "Daniel Morawiec",
-   "p2": "Rafal Adach",
-   "p1_norm": "daniel morawiec",
-   "p2_norm": "rafal adach",
-   "open_date": "2026-07-25T13:30:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
   },
   {
    "event_id": 35864032,
@@ -86,8 +42,8 @@
    "p2_norm": "pawel kurek",
    "open_date": "2026-07-25T13:55:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35864055,
