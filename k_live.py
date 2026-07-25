@@ -588,10 +588,13 @@ def build_parlay(con):
     row = con.execute("SELECT frozen FROM parlay WHERE game_date=?", (gd,)).fetchone()
     if row and row[0]:
         return
+    # PARLAY BAR (2026-07-26, user's insight + sim parlay_sim3.py): legs must BOTH clear S>=1.8.
+    # Rolling best-pair stays; the bar kills forced parlays on weak slates (the losing 20% of days).
+    # Honest-timing sim: +25.4% pooled vs +19.2% unbarred, better in ALL 4 years, worst yr +10.9%.
     flags = [dict(zip(("pitcher", "side", "line", "odds", "book", "score", "game", "team"), r))
              for r in con.execute("SELECT pitcher, side, line, odds, book, score, game, team "
-                                  "FROM compass WHERE game_date=? AND skip IS NULL "
-                                  "ORDER BY score DESC", (gd,))]
+                                  "FROM compass WHERE game_date=? AND skip IS NULL AND score >= ? "
+                                  "ORDER BY score DESC", (gd, FROZEN.get("parlay_bar", 1.8)))]
     pick, games = [], set()
     now = dt.datetime.now(dt.timezone.utc)
     for f in flags:

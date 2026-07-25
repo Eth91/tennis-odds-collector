@@ -2196,7 +2196,7 @@ def build():
             _pn = (_pl.get("w") or 0) + (_pl.get("l") or 0)
             prec = f' · {_pl["w"]}-{_pl["l"]} ({_pl["u"]:+.1f}u)' if _pn else ""
             mlb_html += (f'<div class="parlays"><div class="op-title">MLB Parlay'
-                         f'<span> · daily 2-leg · top scores, separate games{prec}</span></div>'
+                         f'<span> · best pair · both legs S≥1.8 · separate games{prec}</span></div>'
                          f'<div class="slips"><div class="slip">'
                          f'<div class="shd"><span class="sn">{len(legs)} Leg Parlay</span>{st_chip}'
                          f'<span class="ssp"></span><span class="sodds">{_am(combo)}</span></div>'
