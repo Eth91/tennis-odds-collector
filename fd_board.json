@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T03:37:17Z",
+ "captured_at": "2026-07-25T03:41:20Z",
  "matches": [
   {
    "event_id": 35862400,
@@ -8,7 +8,7 @@
    "p1_norm": "maciej domin",
    "p2_norm": "artur daniel",
    "open_date": "2026-07-25T03:25:00.000Z",
-   "line": 90.5,
+   "line": 93.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -19,9 +19,9 @@
    "p1_norm": "tadeusz piotrowski",
    "p2_norm": "artur szoltysek",
    "open_date": "2026-07-25T03:25:00.000Z",
-   "line": 86.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 84.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35862402,
@@ -30,9 +30,9 @@
    "p1_norm": "damian fira",
    "p2_norm": "roman wiza",
    "open_date": "2026-07-25T03:30:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 60.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35862417,
@@ -85,9 +85,9 @@
    "p1_norm": "mateusz misiak",
    "p2_norm": "radoslaw malinowski",
    "open_date": "2026-07-25T04:00:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 82.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
