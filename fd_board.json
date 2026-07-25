@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T07:17:00Z",
+ "captured_at": "2026-07-25T07:21:48Z",
  "matches": [
-  {
-   "event_id": 35862795,
-   "p1": "Mariusz Zwolinski",
-   "p2": "Tadeusz Piotrowski",
-   "p1_norm": "mariusz zwolinski",
-   "p2_norm": "tadeusz piotrowski",
-   "open_date": "2026-07-25T06:55:00.000Z",
-   "line": 71.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35862809,
    "p1": "Wojciech Urban",
@@ -19,9 +8,9 @@
    "p1_norm": "wojciech urban",
    "p2_norm": "marcin lach",
    "open_date": "2026-07-25T07:10:00.000Z",
-   "line": 84.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 85.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35862810,
@@ -30,9 +19,9 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-25T07:10:00.000Z",
-   "line": 76.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 57.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35862812,
@@ -41,9 +30,9 @@
    "p1_norm": "mateusz misiak",
    "p2_norm": "dariusz wrobel",
    "open_date": "2026-07-25T07:15:00.000Z",
-   "line": 80.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 53.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35862814,
@@ -53,8 +42,8 @@
    "p2_norm": "jaroslaw rolak",
    "open_date": "2026-07-25T07:20:00.000Z",
    "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35862815,
@@ -64,8 +53,8 @@
    "p2_norm": "kacper petas",
    "open_date": "2026-07-25T07:20:00.000Z",
    "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -118
   },
   {
    "event_id": 35862816,
@@ -75,8 +64,8 @@
    "p2_norm": "witold buczynski",
    "open_date": "2026-07-25T07:20:00.000Z",
    "line": 82.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35862821,
@@ -110,6 +99,28 @@
    "line": 76.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35862835,
+   "p1": "Mateusz Sikon",
+   "p2": "Kamil Kowalski",
+   "p1_norm": "mateusz sikon",
+   "p2_norm": "kamil kowalski",
+   "open_date": "2026-07-25T07:45:00.000Z",
+   "line": 75.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35862836,
+   "p1": "Maciej Domin",
+   "p2": "Marcin Jadczyk",
+   "p1_norm": "maciej domin",
+   "p2_norm": "marcin jadczyk",
+   "open_date": "2026-07-25T07:45:00.000Z",
+   "line": 75.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
