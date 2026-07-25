@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T12:54:37Z",
+ "captured_at": "2026-07-25T12:59:34Z",
  "matches": [
-  {
-   "event_id": 35863933,
-   "p1": "Rafal Wojcik",
-   "p2": "Jerzy Pelka",
-   "p1_norm": "rafal wojcik",
-   "p2_norm": "jerzy pelka",
-   "open_date": "2026-07-25T12:45:00.000Z",
-   "line": 54.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35863946,
    "p1": "Josef Braun",
@@ -19,9 +8,9 @@
    "p1_norm": "josef braun",
    "p2_norm": "artur daniel",
    "open_date": "2026-07-25T12:55:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 80.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35863956,
@@ -75,6 +64,17 @@
    "p2_norm": "maciej domin",
    "open_date": "2026-07-25T13:20:00.000Z",
    "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35863988,
+   "p1": "Kamil Kostyk",
+   "p2": "Dawid Kosmal",
+   "p1_norm": "kamil kostyk",
+   "p2_norm": "dawid kosmal",
+   "open_date": "2026-07-25T13:25:00.000Z",
+   "line": 75.5,
    "over_odds": -118,
    "under_odds": -112
   }
