@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T02:19:06Z",
+ "captured_at": "2026-07-25T02:25:06Z",
  "matches": [
   {
    "event_id": 35862275,
@@ -8,20 +8,9 @@
    "p1_norm": "jakub kuzmicz",
    "p2_norm": "marcin marchlewski",
    "open_date": "2026-07-25T02:15:00.000Z",
-   "line": 78.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35862283,
-   "p1": "Damian Fira",
-   "p2": "Piotr Gumulinski",
-   "p1_norm": "damian fira",
-   "p2_norm": "piotr gumulinski",
-   "open_date": "2026-07-25T02:20:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 93.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35862308,
@@ -30,9 +19,9 @@
    "p1_norm": "schaniel krzysztof",
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-07-25T02:35:00.000Z",
-   "line": 74.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35862322,
