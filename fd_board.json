@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T17:16:21Z",
+ "captured_at": "2026-07-25T17:20:36Z",
  "matches": [
   {
    "event_id": 35865042,
@@ -8,7 +8,7 @@
    "p1_norm": "kacper kwiatkowski",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-25T17:10:00.000Z",
-   "line": 81.5,
+   "line": 89.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -19,9 +19,9 @@
    "p1_norm": "dariusz maszczynski",
    "p2_norm": "andriej fomin",
    "open_date": "2026-07-25T17:20:00.000Z",
-   "line": 67.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 69.5,
+   "over_odds": -120,
+   "under_odds": -110
   },
   {
    "event_id": 35865258,
@@ -41,9 +41,9 @@
    "p1_norm": "bartosz kwodawski",
    "p2_norm": "bartosz sulkowski",
    "open_date": "2026-07-25T17:20:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 74.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35865305,
@@ -77,6 +77,28 @@
    "line": 74.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35865324,
+   "p1": "Dawid Poloszczanski",
+   "p2": "Tomasz Filbrandt",
+   "p1_norm": "dawid poloszczanski",
+   "p2_norm": "tomasz filbrandt",
+   "open_date": "2026-07-25T17:45:00.000Z",
+   "line": 70.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35865325,
+   "p1": "Pawel Chojnacki",
+   "p2": "Piotr Gesiarz",
+   "p1_norm": "pawel chojnacki",
+   "p2_norm": "piotr gesiarz",
+   "open_date": "2026-07-25T17:45:00.000Z",
+   "line": 78.5,
+   "over_odds": -110,
+   "under_odds": -120
   }
  ]
 }
