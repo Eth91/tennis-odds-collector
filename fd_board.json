@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T19:49:10Z",
+ "captured_at": "2026-07-25T19:53:28Z",
  "matches": [
-  {
-   "event_id": 35865676,
-   "p1": "Jakub Skorupa",
-   "p2": "Michal Guzik",
-   "p1_norm": "jakub skorupa",
-   "p2_norm": "michal guzik",
-   "open_date": "2026-07-25T19:35:00.000Z",
-   "line": 91.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35865685,
    "p1": "Dariusz Maszczynski",
@@ -19,7 +8,7 @@
    "p1_norm": "dariusz maszczynski",
    "p2_norm": "janus slawomir",
    "open_date": "2026-07-25T19:40:00.000Z",
-   "line": 88.5,
+   "line": 92.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -30,9 +19,9 @@
    "p1_norm": "bartosz kwodawski",
    "p2_norm": "kamil kostyk",
    "open_date": "2026-07-25T19:40:00.000Z",
-   "line": 76.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 72.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35865687,
@@ -42,8 +31,8 @@
    "p2_norm": "alan wos",
    "open_date": "2026-07-25T19:40:00.000Z",
    "line": 81.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35865700,
@@ -99,6 +88,28 @@
    "line": 75.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35865741,
+   "p1": "Kacper Kwiatkowski",
+   "p2": "Michal Guzik",
+   "p1_norm": "kacper kwiatkowski",
+   "p2_norm": "michal guzik",
+   "open_date": "2026-07-25T20:20:00.000Z",
+   "line": 71.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35865742,
+   "p1": "Roman Wiza",
+   "p2": "Michal Durda",
+   "p1_norm": "roman wiza",
+   "p2_norm": "michal durda",
+   "open_date": "2026-07-25T20:20:00.000Z",
+   "line": 71.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
