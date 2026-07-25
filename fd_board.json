@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T10:58:57Z",
+ "captured_at": "2026-07-25T11:03:12Z",
  "matches": [
   {
    "event_id": 35863340,
@@ -8,9 +8,9 @@
    "p1_norm": "kacper petas",
    "p2_norm": "karol strowski",
    "open_date": "2026-07-25T10:50:00.000Z",
-   "line": 89.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 94.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35863354,
@@ -19,9 +19,9 @@
    "p1_norm": "bartosz kwodawski",
    "p2_norm": "kamil kostyk",
    "open_date": "2026-07-25T10:55:00.000Z",
-   "line": 78.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 61.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35863370,
@@ -30,9 +30,9 @@
    "p1_norm": "jacek wieczerzak",
    "p2_norm": "jakub nowak",
    "open_date": "2026-07-25T11:00:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 82.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35863371,
@@ -41,9 +41,9 @@
    "p1_norm": "mateusz misiak",
    "p2_norm": "tadeusz piotrowski",
    "open_date": "2026-07-25T11:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35863375,
