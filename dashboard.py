@@ -2064,6 +2064,29 @@ def build():
     _feed_health_ping(tt_json)                             # once/day ntfy if TT/WNBA is broken (not quiet)
     tt_html = _tt_panel(tt_json)
     mlb_html = _mlb_plays_card(now)
+    # K-COMPASS live paper tracker card (k_live.py on the VM writes compass_board.json every 10min;
+    # the model: S=.5·z(teamK)+.5·z(lineupK)−.6·z(r5K)+.35·z(park), thr 1.6, twice-OOS-validated).
+    try:
+        _cb = json.loads((HERE / "compass_board.json").read_text())
+        _rows = ""
+        for f in _cb.get("today", [])[:10]:
+            _o = "O" if f["side"] == "over" else "U"
+            _sk = ' <span class="stalechip">shadow: price cap</span>' if f.get("skip") else ""
+            _rows += (f'<div class="ttbet"><span class="pind {_o.lower()}">{_o}</span>'
+                      f'<span class="ttbln">{f["line"]:g}K</span>'
+                      f'<div class="ttbmid"><div class="ttbnm"><b>{html.escape(_short(f["pitcher"]))}</b> '
+                      f'<span class="xteam">vs {html.escape(str(f["opp"]))}</span></div>'
+                      f'<div class="ttbsb">strikeouts · {f["side"]} · S={f["score"]:.1f}{_sk}</div></div>'
+                      f'<span class="podds">{_am(float(f["odds"]))}</span>'
+                      f'<span class="bktag">{html.escape(f["book"][:3].upper())}</span></div>')
+        _n = (_cb.get("w") or 0) + (_cb.get("l") or 0)
+        _rec = (f'{_cb["w"]}-{_cb["l"]} ({_cb["u"]:+.1f}u)' if _n else "0-0 · new")
+        mlb_html += (f'<div class="card"><h3 class="ttlg">⚾ K-COMPASS · strikeout model'
+                     f'<span class="ttcnt">{len(_cb.get("today", []))}</span></h3>{_rows or ""}'
+                     f'<div class="ttfoot">paper record {_rec} · lineup-confirmed only · '
+                     f'thr 1.6 · skips 2.00+ (shadow) · 62%/+15% on 2026 OOS · flags when lineups post</div></div>')
+    except (OSError, ValueError):
+        pass
     tracker_html = _tracker_panel((w, l, u), tt_json)
     # Client-side LIVE pre-match totals: refetch fd_board.json (the VM's FanDuel.ca board) from the
     # raw URL every 60s and re-render #tt-totals, so the totals update on their own between the
