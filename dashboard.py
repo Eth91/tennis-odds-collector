@@ -2082,6 +2082,19 @@ def build():
                       f'<div class="ttbsb">strikeouts · {f["side"]} · S={f["score"]:.1f}{_sk}</div></div>'
                       f'<span class="podds">{_am(float(f["odds"]))}</span>'
                       f'<span class="bktag">{html.escape(f["book"][:3].upper())}</span></div>')
+        _pl = _cb.get("parlay") or {}
+        if _pl.get("today"):
+            _legs = " + ".join(f'{html.escape(p["pitcher"].split()[-1])} '
+                               f'{"O" if p["side"] == "over" else "U"}{p["line"]:g}K'
+                               for p in _pl["today"])
+            _pn = (_pl.get("w") or 0) + (_pl.get("l") or 0)
+            _prec = f' · record {_pl["w"]}-{_pl["l"]} ({_pl["u"]:+.1f}u)' if _pn else ""
+            _st = "🔒" if _pl.get("frozen") else "provisional"
+            _rows += (f'<div class="ttbet"><span class="pind o">2x</span>'
+                      f'<span class="ttbln">{_am(float(_pl["combo"]))}</span>'
+                      f'<div class="ttbmid"><div class="ttbnm"><b>Daily 2-leg</b> '
+                      f'<span class="xteam">{_legs}</span></div>'
+                      f'<div class="ttbsb">top-2 scores · separate games · {_st}{_prec}</div></div></div>')
         _n = (_cb.get("w") or 0) + (_cb.get("l") or 0)
         _rec = (f'{_cb["w"]}-{_cb["l"]} ({_cb["u"]:+.1f}u)' if _n else "0-0 · new")
         mlb_html += (f'<div class="card"><h3 class="ttlg">⚾ K-COMPASS · strikeout model'

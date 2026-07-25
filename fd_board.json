@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T08:18:17Z",
+ "captured_at": "2026-07-25T08:22:29Z",
  "matches": [
-  {
-   "event_id": 35862875,
-   "p1": "Josef Braun",
-   "p2": "Kacper Petas",
-   "p1_norm": "josef braun",
-   "p2_norm": "kacper petas",
-   "open_date": "2026-07-25T08:05:00.000Z",
-   "line": 61.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35862883,
    "p1": "Jacek Wieczerzak",
@@ -19,9 +8,9 @@
    "p1_norm": "jacek wieczerzak",
    "p2_norm": "witold buczynski",
    "open_date": "2026-07-25T08:10:00.000Z",
-   "line": 85.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 82.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35862902,
@@ -30,9 +19,9 @@
    "p1_norm": "sebastian krupa",
    "p2_norm": "jakub kaczmarek",
    "open_date": "2026-07-25T08:20:00.000Z",
-   "line": 75.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 80.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35862903,
@@ -41,9 +30,9 @@
    "p1_norm": "patryk jedrzejak",
    "p2_norm": "daniel morawiec",
    "open_date": "2026-07-25T08:20:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 80.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35862944,

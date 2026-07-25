@@ -75,6 +75,13 @@ def _con():
         opp TEXT, flagged_at TEXT, skip TEXT, result TEXT, actual INTEGER, pnl REAL,
         graded_at TEXT, log_date TEXT, pinged INTEGER DEFAULT 0,
         PRIMARY KEY(pitcher, game_date))""")
+    try:
+        c.execute("ALTER TABLE compass ADD COLUMN game TEXT")
+    except sqlite3.OperationalError:
+        pass
+    c.execute("""CREATE TABLE IF NOT EXISTS parlay(
+        game_date TEXT PRIMARY KEY, legs TEXT, combo REAL, frozen INTEGER DEFAULT 0,
+        result TEXT, pnl REAL, graded_at TEXT, pinged INTEGER DEFAULT 0)""")
     c.execute("""CREATE TABLE IF NOT EXISTS outlier(
         pitcher TEXT, game_date TEXT, side TEXT, line REAL, odds REAL, book TEXT, edge REAL,
         opp TEXT, flagged_at TEXT, result TEXT, actual INTEGER, pnl REAL, graded_at TEXT,
@@ -239,8 +246,9 @@ def flag(con):
         od, ln, bk = best
         skip = "price_cap" if od >= PRICE_CAP else None
         con.execute("INSERT INTO compass (pitcher, game_date, side, line, odds, book, score, opp, "
-                    "flagged_at, skip) VALUES (?,?,?,?,?,?,?,?,?,?)",
-                    (g["pitcher"], gd, side, ln, od, bk, round(abs(S), 2), g["opp_name"], ts, skip))
+                    "flagged_at, skip, game) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                    (g["pitcher"], gd, side, ln, od, bk, round(abs(S), 2), g["opp_name"], ts, skip,
+                     g["home_team"] + "|" + str(g.get("start") or "")))
         new += 1
         if not skip and topic:
             am = f"+{round((od-1)*100)}" if od >= 2 else f"-{round(100/(od-1))}"
@@ -321,6 +329,77 @@ def flag_outlier(con):
         print(f"outlier flagged {new}")
 
 
+def build_parlay(con):
+    """Daily 2-leg parlay = top-2 scores from DIFFERENT games (validated 40-54% hit, +20-65% ROI/yr).
+    Provisional while flags accumulate; FROZEN (and pinged once) when the earliest leg's game is
+    <=45 min out — the last practical bet window, closest to the backtest's end-of-day top-2."""
+    import os
+    gd = _today_et()
+    row = con.execute("SELECT frozen FROM parlay WHERE game_date=?", (gd,)).fetchone()
+    if row and row[0]:
+        return
+    flags = [dict(zip(("pitcher", "side", "line", "odds", "book", "score", "game"), r))
+             for r in con.execute("SELECT pitcher, side, line, odds, book, score, game FROM compass "
+                                  "WHERE game_date=? AND skip IS NULL ORDER BY score DESC", (gd,))]
+    pick, games = [], set()
+    now = dt.datetime.now(dt.timezone.utc)
+    for f in flags:
+        gkey, _, start = (f["game"] or "||").partition("|")
+        try:
+            st_dt = dt.datetime.fromisoformat((start or "").replace("Z", "+00:00"))
+        except ValueError:
+            st_dt = None
+        if st_dt and st_dt < now:                    # game already started — leg unusable
+            continue
+        if gkey in games:
+            continue
+        f["_start"] = st_dt
+        pick.append(f); games.add(gkey)
+        if len(pick) == 2:
+            break
+    if len(pick) < 2:
+        return
+    combo = round(pick[0]["odds"] * pick[1]["odds"], 3)
+    legs = json.dumps([{k: v for k, v in p.items() if k != "_start"} for p in pick])
+    con.execute("INSERT INTO parlay (game_date, legs, combo) VALUES (?,?,?) "
+                "ON CONFLICT(game_date) DO UPDATE SET legs=excluded.legs, combo=excluded.combo "
+                "WHERE frozen=0", (gd, legs, combo))
+    starts = [p["_start"] for p in pick if p["_start"]]
+    if starts and (min(starts) - now).total_seconds() <= 45 * 60:
+        con.execute("UPDATE parlay SET frozen=1 WHERE game_date=?", (gd,))
+        topic = os.environ.get("NTFY_TOPIC")
+        if topic:
+            am = f"+{round((combo-1)*100)}"
+            leg_s = " + ".join(f"{p['pitcher'].split()[-1]} "
+                               f"{'O' if p['side'] == 'over' else 'U'}{p['line']:g}K" for p in pick)
+            try:
+                requests.post(f"https://ntfy.sh/{topic}",
+                              data=f"\U0001f6a8 \u26beK 2-LEG {leg_s} {am}".encode(),
+                              params={"title": "Pickz", "priority": "high"}, timeout=15
+                              ).raise_for_status()
+                con.execute("UPDATE parlay SET pinged=1 WHERE game_date=?", (gd,))
+            except requests.RequestException as e:
+                print(f"parlay ping failed: {str(e)[:60]}")
+    con.commit()
+
+
+def grade_parlay(con):
+    for gd, legs, combo in con.execute("SELECT game_date, legs, combo FROM parlay "
+                                       "WHERE frozen=1 AND result IS NULL AND game_date<?",
+                                       (_today_et(),)).fetchall():
+        res = []
+        for p in json.loads(legs):
+            r = con.execute("SELECT result FROM compass WHERE pitcher=? AND game_date=?",
+                            (p["pitcher"], gd)).fetchone()
+            res.append(r[0] if r else None)
+        if any(x is None for x in res):
+            continue                                  # wait for both legs
+        won = all(x == "W" for x in res)
+        con.execute("UPDATE parlay SET result=?, pnl=?, graded_at=? WHERE game_date=?",
+                    ("W" if won else "L", round((combo - 1) if won else -1.0, 2), _now(), gd))
+    con.commit()
+
+
 def grade(con):
     rows = []
     for table in ("compass", "outlier"):
@@ -377,6 +456,10 @@ def board(con):
                                   (_today_et(),))]
     shadow = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) FROM compass "
                          "WHERE result IN ('W','L') AND skip IS NOT NULL").fetchone()
+    prow = con.execute("SELECT legs, combo, frozen FROM parlay WHERE game_date=?",
+                       (_today_et(),)).fetchone()
+    prec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) FROM parlay "
+                       "WHERE result IN ('W','L')").fetchone()
     orec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) FROM outlier "
                        "WHERE result IN ('W','L')").fetchone()
     oflags = [dict(zip(("pitcher", "side", "line", "odds", "book", "edge", "opp"), r))
@@ -387,14 +470,20 @@ def board(con):
          "shadow": {"w": shadow[0] or 0, "l": shadow[1] or 0, "u": shadow[2] or 0.0},
          "today": flags,
          "outlier": {"w": orec[0] or 0, "l": orec[1] or 0, "u": orec[2] or 0.0,
-                     "today": oflags}}))
+                     "today": oflags},
+         "parlay": {"today": (json.loads(prow[0]) if prow else None),
+                    "combo": (prow[1] if prow else None),
+                    "frozen": (bool(prow[2]) if prow else False),
+                    "w": prec[0] or 0, "l": prec[1] or 0, "u": prec[2] or 0.0}}))
 
 
 if __name__ == "__main__":
     c = _con()
     flag(c)
     # flag_outlier(c)  # BENCHED 2026-07-25 (user: K-COMPASS only) — table/grading stay dormant
+    build_parlay(c)
     grade(c)
+    grade_parlay(c)
     board(c)
     c.close()
     print("k_live cycle done", _now())
