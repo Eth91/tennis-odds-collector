@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T20:00:30Z",
+ "captured_at": "2026-07-25T20:05:39Z",
  "matches": [
   {
    "event_id": 35865686,
@@ -8,9 +8,9 @@
    "p1_norm": "bartosz kwodawski",
    "p2_norm": "kamil kostyk",
    "open_date": "2026-07-25T19:40:00.000Z",
-   "line": 84.5,
-   "over_odds": -135,
-   "under_odds": -105
+   "line": 105.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35865700,
@@ -19,7 +19,7 @@
    "p1_norm": "robert szymik",
    "p2_norm": "marcin lach",
    "open_date": "2026-07-25T19:55:00.000Z",
-   "line": 84.5,
+   "line": 87.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,9 +30,9 @@
    "p1_norm": "jacek oracz",
    "p2_norm": "michal machelski",
    "open_date": "2026-07-25T20:00:00.000Z",
-   "line": 70.5,
+   "line": 72.5,
    "over_odds": -120,
-   "under_odds": -110
+   "under_odds": -115
   },
   {
    "event_id": 35865707,
@@ -42,8 +42,8 @@
    "p2_norm": "bartosz sulkowski",
    "open_date": "2026-07-25T20:05:00.000Z",
    "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35865708,
@@ -63,9 +63,9 @@
    "p1_norm": "filip mlynarski",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-25T20:05:00.000Z",
-   "line": 75.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 72.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35865741,
@@ -88,6 +88,39 @@
    "line": 71.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35865756,
+   "p1": "Marcin Marchlewski",
+   "p2": "Maciej Kolek",
+   "p1_norm": "marcin marchlewski",
+   "p2_norm": "maciej kolek",
+   "open_date": "2026-07-25T20:30:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35865757,
+   "p1": "Dawid Poloszczanski",
+   "p2": "Stapor Rafal",
+   "p1_norm": "dawid poloszczanski",
+   "p2_norm": "stapor rafal",
+   "open_date": "2026-07-25T20:30:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35865758,
+   "p1": "Pawel Chojnacki",
+   "p2": "Tomasz Kocik",
+   "p1_norm": "pawel chojnacki",
+   "p2_norm": "tomasz kocik",
+   "open_date": "2026-07-25T20:30:00.000Z",
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
