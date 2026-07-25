@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T11:55:47Z",
+ "captured_at": "2026-07-25T12:00:49Z",
  "matches": [
   {
    "event_id": 35863787,
@@ -9,8 +9,8 @@
    "p2_norm": "bartosz kwodawski",
    "open_date": "2026-07-25T11:45:00.000Z",
    "line": 85.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35863820,
@@ -19,9 +19,9 @@
    "p1_norm": "mariusz zwolinski",
    "p2_norm": "mateusz misiak",
    "open_date": "2026-07-25T11:50:00.000Z",
-   "line": 85.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 99.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35863821,
@@ -30,9 +30,9 @@
    "p1_norm": "kamil kowalski",
    "p2_norm": "jacek wieczerzak",
    "open_date": "2026-07-25T11:50:00.000Z",
-   "line": 81.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 63.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35863823,
@@ -41,9 +41,9 @@
    "p1_norm": "jerzy pelka",
    "p2_norm": "rafal adach",
    "open_date": "2026-07-25T11:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35863852,
