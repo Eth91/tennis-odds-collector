@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T03:20:27Z",
+ "captured_at": "2026-07-25T03:24:33Z",
  "matches": [
   {
    "event_id": 35862343,
@@ -8,9 +8,9 @@
    "p1_norm": "mariusz zwolinski",
    "p2_norm": "jaroslaw rolak",
    "open_date": "2026-07-25T03:00:00.000Z",
-   "line": 97.5,
-   "over_odds": -140,
-   "under_odds": 100
+   "line": 105.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35862399,
@@ -77,6 +77,28 @@
    "line": 77.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35862421,
+   "p1": "Mariusz Zwolinski",
+   "p2": "Artur Szoltysek",
+   "p1_norm": "mariusz zwolinski",
+   "p2_norm": "artur szoltysek",
+   "open_date": "2026-07-25T03:50:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35862422,
+   "p1": "Jacek Wieczerzak",
+   "p2": "Kamil Kowalski",
+   "p1_norm": "jacek wieczerzak",
+   "p2_norm": "kamil kowalski",
+   "open_date": "2026-07-25T03:50:00.000Z",
+   "line": 73.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
