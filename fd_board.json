@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T04:00:12Z",
+ "captured_at": "2026-07-25T04:04:37Z",
  "matches": [
   {
    "event_id": 35862417,
@@ -8,9 +8,9 @@
    "p1_norm": "josef braun",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-25T03:45:00.000Z",
-   "line": 69.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 63.5,
+   "over_odds": 100,
+   "under_odds": -140
   },
   {
    "event_id": 35862421,
@@ -19,7 +19,7 @@
    "p1_norm": "mariusz zwolinski",
    "p2_norm": "artur szoltysek",
    "open_date": "2026-07-25T03:50:00.000Z",
-   "line": 89.5,
+   "line": 91.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -30,9 +30,9 @@
    "p1_norm": "mateusz misiak",
    "p2_norm": "radoslaw malinowski",
    "open_date": "2026-07-25T04:00:00.000Z",
-   "line": 74.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35862433,
