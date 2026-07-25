@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-25T17:12:01Z",
+ "captured_at": "2026-07-25T17:16:21Z",
  "matches": [
-  {
-   "event_id": 35864904,
-   "p1": "Michal Machelski",
-   "p2": "Michal Guzik",
-   "p1_norm": "michal machelski",
-   "p2_norm": "michal guzik",
-   "open_date": "2026-07-25T16:50:00.000Z",
-   "line": 104.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35865035,
-   "p1": "Rafal Wojcik",
-   "p2": "Rafal Adach",
-   "p1_norm": "rafal wojcik",
-   "p2_norm": "rafal adach",
-   "open_date": "2026-07-25T17:05:00.000Z",
-   "line": 46.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35865042,
    "p1": "Kacper Kwiatkowski",
@@ -30,9 +8,9 @@
    "p1_norm": "kacper kwiatkowski",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-25T17:10:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 81.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35865253,
@@ -64,8 +42,8 @@
    "p2_norm": "bartosz sulkowski",
    "open_date": "2026-07-25T17:20:00.000Z",
    "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35865305,
@@ -86,6 +64,17 @@
    "p2_norm": "michal guzik",
    "open_date": "2026-07-25T17:35:00.000Z",
    "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35865316,
+   "p1": "Marcin Marchlewski",
+   "p2": "Filip Mlynarski",
+   "p1_norm": "marcin marchlewski",
+   "p2_norm": "filip mlynarski",
+   "open_date": "2026-07-25T17:40:00.000Z",
+   "line": 74.5,
    "over_odds": -112,
    "under_odds": -118
   }
