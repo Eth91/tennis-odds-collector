@@ -101,11 +101,17 @@ jobs:
             git add -f "$f" 2>/dev/null || true
           done
           git commit -m "odds snapshot [skip ci]" -q || { echo "no change"; exit 0; }
-          # ROBUST push (was hard-failing on binary-DB rebase conflicts -> repeated failures ->
-          # GitHub throttled the schedule). -X theirs; reset-to-origin as last resort keeps us on
-          # a branch; the final || echo means a lost snapshot never fails the run (next run re-collects).
-          git pull --rebase --autostash -X theirs -q 2>/dev/null || { git rebase --abort 2>/dev/null || true; git reset --hard origin/main -q; }
-          git push -q 2>/dev/null || { git pull --rebase --autostash -X theirs -q 2>/dev/null || git reset --hard origin/main -q; git push -q 2>/dev/null || echo "push skipped (next run retries)"; }
+          # ROBUST push, 2026-07-25 rewrite: the VM loop pushes every ~2min, so two attempts ALWAYS
+          # lost the race ("push skipped" on every run for 18h -> repo-wide MLB line freeze), and the
+          # old reset --hard fallback DESTROYED the snapshot commit it was meant to push. Now: keep
+          # the commit at all costs, rebase (-X theirs keeps our fresh blobs on conflict) + push in a
+          # bounded retry loop. NEVER reset --hard here.
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            git pull --rebase --autostash -X theirs -q 2>/dev/null || { git rebase --abort 2>/dev/null || true; }
+            git push -q 2>/dev/null && { echo "snapshot pushed (try $i)"; exit 0; }
+            sleep $((RANDOM % 8 + 3))
+          done
+          echo "::warning::snapshot push failed after 10 tries (next run retries)"
       - name: self-redispatch — immortal ~30-min chain past the throttled */30 cron
         # collect-odds had NO self-redispatch, so it lived and died by the */30 cron — which GitHub
         # was throttling to every ~4-5h (MLB collection silently stalled for hours). Sleep ~26 min so

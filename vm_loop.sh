@@ -51,6 +51,9 @@ push(){
   git push -q "$URL" HEAD:main 2>/dev/null || echo "[$(date +%H:%M)] push deferred"; }
 
 collectors(){
+  # Absorb Actions' fresh line rows (sha-gated row-merge; see fd_merge.py 2026-07-25 postmortem)
+  # BEFORE local writes, so this VM's next 100MB commit is a superset of origin's snapshot.
+  python3 fd_merge.py 2>&1 | grep -v "^$" || true
   python3 fd_collect.py --wnba >/dev/null 2>&1 || true
   # NOTE (2026-07-23): MLB FD collection is NOT run here. Tried it for board responsiveness but the
   # loop git-commits the 81MB fanduel_props.sqlite every cycle and its conflict-fallback (reset --hard)
