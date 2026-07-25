@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T22:24:15Z",
+ "captured_at": "2026-07-25T22:29:58Z",
  "matches": [
   {
    "event_id": 35866276,
@@ -8,9 +8,9 @@
    "p1_norm": "robert szymik",
    "p2_norm": "damian fira",
    "open_date": "2026-07-25T22:20:00.000Z",
-   "line": 71.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 86.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35866290,
@@ -19,9 +19,9 @@
    "p1_norm": "michal machelski",
    "p2_norm": "jacek oracz",
    "open_date": "2026-07-25T22:25:00.000Z",
-   "line": 71.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35866299,
@@ -42,17 +42,6 @@
    "p2_norm": "dawid poloszczanski",
    "open_date": "2026-07-25T22:35:00.000Z",
    "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
-  {
-   "event_id": 35866301,
-   "p1": "Pawel Chojnacki",
-   "p2": "Andriej Fomin",
-   "p1_norm": "pawel chojnacki",
-   "p2_norm": "andriej fomin",
-   "open_date": "2026-07-25T22:35:00.000Z",
-   "line": 75.5,
    "over_odds": -112,
    "under_odds": -118
   },
@@ -87,6 +76,28 @@
    "open_date": "2026-07-25T22:50:00.000Z",
    "line": 76.5,
    "over_odds": -116,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35866317,
+   "p1": "Piotr Gesiarz",
+   "p2": "Tomasz Kocik",
+   "p1_norm": "piotr gesiarz",
+   "p2_norm": "tomasz kocik",
+   "open_date": "2026-07-25T22:55:00.000Z",
+   "line": 74.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35866318,
+   "p1": "Stapor Rafal",
+   "p2": "Jakub Glanowski",
+   "p1_norm": "stapor rafal",
+   "p2_norm": "jakub glanowski",
+   "open_date": "2026-07-25T22:55:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
    "under_odds": -118
   }
  ]
