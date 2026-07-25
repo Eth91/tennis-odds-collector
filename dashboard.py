@@ -2201,8 +2201,8 @@ def build():
                          f'<div class="shd"><span class="sn">{len(legs)} Leg Parlay</span>{st_chip}'
                          f'<span class="ssp"></span><span class="sodds">{_am(combo)}</span></div>'
                          f'<div class="slegs">{leg_html}</div>'
-                         f'<div class="sft"><span class="sstake">stake <b>1u</b></span>'
-                         f'<span class="spay">→ {combo:.2f}u</span>'
+                         f'<div class="sft"><span class="sstake">stake <b>0.5u</b></span>'
+                         f'<span class="spay">→ {combo * 0.5:.2f}u</span>'
                          f'<span class="sid">#K2</span></div></div></div></div>')
 
     except (OSError, ValueError):
