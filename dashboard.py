@@ -41,6 +41,34 @@ STATKEY = {"points": "pts", "rebounds": "reb", "assists": "ast",
 THIN_EV = 0.35
 # local 96px copies (docs/logos/, fetched from ESPN once) — no hotlinking 100KB+ originals
 LOGO = "logos/{}.png"
+# MLB logos: docs/logos/mlb_{team_id}.svg (fetched from mlbstatic 2026-07-25, id-keyed to avoid
+# abbrev collisions with WNBA files). Maps from statsapi /teams — stable, baked static.
+MLB_AB = {"ATH": 133, "ATL": 144, "AZ": 109, "BAL": 110, "BOS": 111, "CHC": 112, "CIN": 113,
+          "CLE": 114, "COL": 115, "CWS": 145, "DET": 116, "HOU": 117, "KC": 118, "LAA": 108,
+          "LAD": 119, "MIA": 146, "MIL": 158, "MIN": 142, "NYM": 121, "NYY": 147, "PHI": 143,
+          "PIT": 134, "SD": 135, "SEA": 136, "SF": 137, "STL": 138, "TB": 139, "TEX": 140,
+          "TOR": 141, "WSH": 120}
+MLB_NAME = {"Arizona Diamondbacks": (109, "AZ"), "Athletics": (133, "ATH"),
+            "Atlanta Braves": (144, "ATL"), "Baltimore Orioles": (110, "BAL"),
+            "Boston Red Sox": (111, "BOS"), "Chicago Cubs": (112, "CHC"),
+            "Chicago White Sox": (145, "CWS"), "Cincinnati Reds": (113, "CIN"),
+            "Cleveland Guardians": (114, "CLE"), "Colorado Rockies": (115, "COL"),
+            "Detroit Tigers": (116, "DET"), "Houston Astros": (117, "HOU"),
+            "Kansas City Royals": (118, "KC"), "Los Angeles Angels": (108, "LAA"),
+            "Los Angeles Dodgers": (119, "LAD"), "Miami Marlins": (146, "MIA"),
+            "Milwaukee Brewers": (158, "MIL"), "Minnesota Twins": (142, "MIN"),
+            "New York Mets": (121, "NYM"), "New York Yankees": (147, "NYY"),
+            "Philadelphia Phillies": (143, "PHI"), "Pittsburgh Pirates": (134, "PIT"),
+            "San Diego Padres": (135, "SD"), "San Francisco Giants": (137, "SF"),
+            "Seattle Mariners": (136, "SEA"), "St. Louis Cardinals": (138, "STL"),
+            "Tampa Bay Rays": (139, "TB"), "Texas Rangers": (140, "TEX"),
+            "Toronto Blue Jays": (141, "TOR"), "Washington Nationals": (120, "WSH")}
+
+
+def _mlogo(ab, cls="glogo"):
+    tid = MLB_AB.get((ab or "").upper().split()[0] if ab else "")
+    return (f'<img class="{cls}" src="logos/mlb_{tid}.svg" alt="" loading="lazy" '
+            f'onerror="this.style.display=\'none\'">' if tid else "")
 
 # ---- LIVE bar recompute ----------------------------------------------------------------------
 # The dropdown bars are recomputed FRESH on every dashboard build from current game logs + the
@@ -2067,64 +2095,108 @@ def build():
     # k_paper keeps logging outs bets silently; the tracker-tab record card stays for history.
     mlb_html = ""
 
-    # K-COMPASS live paper tracker card (k_live.py on the VM writes compass_board.json every 10min;
-    # the model: S=.5·z(teamK)+.5·z(lineupK)−.6·z(r5K)+.35·z(park), thr 1.6, twice-OOS-validated).
+    # K-COMPASS + OUTS-COMPASS in the WNBA visual language (user 2026-07-25): game-grouped play
+    # cards with team logos, WNBA prop-row markup, betslip-style parlay. SHADOW rows (price_cap /
+    # rung_cap) are NOT rendered (user) — the tracker still logs+grades them; the section footer
+    # keeps the shadow record so the curation stays visible without listing the plays.
     try:
         _cb = json.loads((HERE / "compass_board.json").read_text())
-        _rows = ""
-        for f in _cb.get("today", [])[:10]:
-            _o = "O" if f["side"] == "over" else "U"
-            _sk = ' <span class="stalechip">shadow: price cap</span>' if f.get("skip") else ""
-            _rows += (f'<div class="ttbet"><span class="pind {_o.lower()}">{_o}</span>'
-                      f'<span class="ttbln">{f["line"]:g}K</span>'
-                      f'<div class="ttbmid"><div class="ttbnm"><b>{html.escape(_short(f["pitcher"]))}</b> '
-                      f'<span class="xteam">vs {html.escape(str(f["opp"]))}</span></div>'
-                      f'<div class="ttbsb">strikeouts · {f["side"]} · S={f["score"]:.1f}{_sk}</div></div>'
-                      f'<span class="podds">{_am(float(f["odds"]))}</span>'
-                      f'<span class="bktag">{html.escape(f["book"][:3].upper())}</span></div>')
+
+        def _compass_games(flags, stat_lbl, hi_s):
+            groups, order = {}, []
+            for f in flags:
+                gk = f.get("game") or f["pitcher"]
+                if gk not in groups:
+                    groups[gk] = []
+                    order.append(gk)
+                groups[gk].append(f)
+            out = ""
+            for gk in order:
+                fl = groups[gk]
+                home_name, _, start = (gk or "||").partition("|")
+                _hid, hab = MLB_NAME.get(home_name, (None, ""))
+                f0 = fl[0]
+                tab = (f0.get("team") or "").upper()
+                oab = (str(f0.get("opp") or "")).upper().split()[0] if f0.get("opp") else ""
+                away_ab = tab if (tab and tab != hab) else oab
+                home_ab = hab or (oab if away_ab == tab else tab)
+                try:
+                    _t = dt.datetime.fromisoformat(start.replace("Z", "+00:00")).astimezone(MT)
+                    when = _t.strftime("%-I:%M %p")
+                except (ValueError, TypeError):
+                    when = ""
+                rows = ""
+                for f in fl:
+                    o = "O" if f["side"] == "over" else "U"
+                    star = " ★" if f.get("strong") else ""
+                    bk = f["book"]
+                    bkh = (f'<img class="bklogo" src="book-{bk}.png" alt="{bk.upper()}">'
+                           if bk in ("fd", "dk") else '<span class="bktag">MGM</span>')
+                    scls = "hi" if (f.get("strong") or f["score"] >= hi_s) else "mid"
+                    rows += (f'<div class="pblk"><div class="phd">'
+                             f'{_mlogo(f.get("team"), "plogo")}'
+                             f'<span class="pname">{html.escape(_short(f["pitcher"]))}</span>'
+                             f'<span class="psp2"></span></div>'
+                             f'<div class="prop"><div class="prow">'
+                             f'<span class="pind {o.lower()}">{o}</span>'
+                             f'<span class="plno">{f["line"]:g}</span>'
+                             f'<span class="pstat">{stat_lbl}</span>'
+                             f'<span class="psp"></span>'
+                             f'<span class="podds">{_am(float(f["odds"]))}</span>{bkh}'
+                             f'<span class="pedge {scls}">S{f["score"]:.1f}{star}</span></div></div></div>')
+                out += (f'<div class="game"><div class="ghd"><span class="gmatch">'
+                        f'{_mlogo(away_ab)}{away_ab or "—"}<span class="gvs">@</span>'
+                        f'{_mlogo(home_ab)}{home_ab or "—"}</span>'
+                        f'<span class="gtime">{when}</span></div>{rows}</div>')
+            return out
+
+        def _rec_str(d):
+            n = (d.get("w") or 0) + (d.get("l") or 0)
+            return f'{d["w"]}-{d["l"]} ({d["u"]:+.1f}u)' if n else "0-0 · new"
+
+        k_flags = [f for f in _cb.get("today", []) if not f.get("skip")]
+        k_sh = _cb.get("shadow") or {}
+        k_shn = (k_sh.get("w") or 0) + (k_sh.get("l") or 0)
+        k_note = (" · shadow " + f'{k_sh["w"]}-{k_sh["l"]}') if k_shn else ""
+        mlb_html += (f'<div class="op-title">⚾ K-COMPASS · Strikeouts'
+                     f'<span> · {_rec_str(_cb)}{k_note} · thr 1.6 · flags when lineups post</span></div>')
+        mlb_html += (_compass_games(k_flags, "Strikeouts", 2.2)
+                     or '<div class="xt">no flags yet today</div>')
+
+        _ob = _cb.get("outs") or {}
+        o_flags = [f for f in _ob.get("today", []) if not f.get("skip")]
+        o_sh = _ob.get("shadow") or {}
+        o_shn = (o_sh.get("w") or 0) + (o_sh.get("l") or 0)
+        o_note = (" · shadow " + f'{o_sh["w"]}-{o_sh["l"]}') if o_shn else ""
+        mlb_html += (f'<div class="op-title">⚾ OUTS-COMPASS · Pitcher Outs'
+                     f'<span> · {_rec_str(_ob)}{o_note} · thr 0.97 · ★ = 1.30+</span></div>')
+        mlb_html += (_compass_games(o_flags, "Outs Recorded", 1.30)
+                     or '<div class="xt">no flags yet today</div>')
+
+        # Daily 2-leg parlay as a WNBA-style betslip
         _pl = _cb.get("parlay") or {}
         if _pl.get("today"):
-            _legs = " + ".join(f'{html.escape(p["pitcher"].split()[-1])} '
-                               f'{"O" if p["side"] == "over" else "U"}{p["line"]:g}K'
-                               for p in _pl["today"])
+            legs = _pl["today"]
+            leg_html = "".join(
+                f'<div class="sleg">{_mlogo(l.get("team"), "sllogo")}'
+                f'<div class="slbody"><div class="slp">{html.escape(l["pitcher"])}</div>'
+                f'<div class="slm">{"Over" if l["side"] == "over" else "Under"} {l["line"]:g} '
+                f'Strikeouts</div></div>'
+                f'<span class="slo">{_am(float(l["odds"]))}</span></div>' for l in legs)
+            combo = float(_pl.get("combo") or 1)
+            st_chip = ('<span class="stag">🔒 locked</span>' if _pl.get("frozen")
+                       else '<span class="stag">provisional</span>')
             _pn = (_pl.get("w") or 0) + (_pl.get("l") or 0)
-            _prec = f' · record {_pl["w"]}-{_pl["l"]} ({_pl["u"]:+.1f}u)' if _pn else ""
-            _st = "🔒" if _pl.get("frozen") else "provisional"
-            _rows += (f'<div class="ttbet"><span class="pind o">2x</span>'
-                      f'<span class="ttbln">{_am(float(_pl["combo"]))}</span>'
-                      f'<div class="ttbmid"><div class="ttbnm"><b>Daily 2-leg</b> '
-                      f'<span class="xteam">{_legs}</span></div>'
-                      f'<div class="ttbsb">top-2 scores · separate games · {_st}{_prec}</div></div></div>')
-        _n = (_cb.get("w") or 0) + (_cb.get("l") or 0)
-        _rec = (f'{_cb["w"]}-{_cb["l"]} ({_cb["u"]:+.1f}u)' if _n else "0-0 · new")
-        mlb_html += (f'<div class="card"><h3 class="ttlg">⚾ K-COMPASS · strikeout model'
-                     f'<span class="ttcnt">{len(_cb.get("today", []))}</span></h3>{_rows or ""}'
-                     f'<div class="ttfoot">paper record {_rec} · lineup-confirmed only · '
-                     f'thr 1.6 · skips 2.00+ (shadow) · 62%/+15% on 2026 OOS · flags when lineups post</div></div>')
-
-        # OUTS-COMPASS v5 card (same board file, "outs" section; wired 2026-07-25)
-        _ob = _cb.get("outs") or {}
-        _orows = ""
-        _SKIPTXT = {"price_cap": "shadow: price cap", "rung_cap": "shadow: under needs 16.5+"}
-        for f in _ob.get("today", [])[:10]:
-            _o = "O" if f["side"] == "over" else "U"
-            _sk = (f' <span class="stalechip">{_SKIPTXT.get(f["skip"], "shadow")}</span>'
-                   if f.get("skip") else "")
-            _star = " ★" if f.get("strong") else ""
-            _orows += (f'<div class="ttbet"><span class="pind {_o.lower()}">{_o}</span>'
-                       f'<span class="ttbln">{f["line"]:g}</span>'
-                       f'<div class="ttbmid"><div class="ttbnm"><b>{html.escape(_short(f["pitcher"]))}</b> '
-                       f'<span class="xteam">vs {html.escape(str(f["opp"]))}</span></div>'
-                       f'<div class="ttbsb">outs · {f["side"]} · S={f["score"]:.1f}{_star}{_sk}</div></div>'
-                       f'<span class="podds">{_am(float(f["odds"]))}</span>'
-                       f'<span class="bktag">{html.escape(f["book"][:3].upper())}</span></div>')
-        _on = (_ob.get("w") or 0) + (_ob.get("l") or 0)
-        _orec = (f'{_ob["w"]}-{_ob["l"]} ({_ob["u"]:+.1f}u)' if _on else "0-0 · new")
-        mlb_html += (f'<div class="card"><h3 class="ttlg">⚾ OUTS-COMPASS · pitcher outs model'
-                     f'<span class="ttcnt">{len(_ob.get("today", []))}</span></h3>{_orows or ""}'
-                     f'<div class="ttfoot">paper record {_orec} · lineup-confirmed only · thr 0.97 '
-                     f'(★ 1.30+) · no unders below 16.5 · skips 2.00+ · 63%/+10% 4-season backtest · '
-                     f'flags when lineups post</div></div>')
+            prec = f' · {_pl["w"]}-{_pl["l"]} ({_pl["u"]:+.1f}u)' if _pn else ""
+            mlb_html += (f'<div class="parlays"><div class="op-title">MLB Parlay'
+                         f'<span> · daily 2-leg · top scores, separate games{prec}</span></div>'
+                         f'<div class="slips"><div class="slip">'
+                         f'<div class="shd"><span class="sn">{len(legs)} Leg Parlay</span>{st_chip}'
+                         f'<span class="ssp"></span><span class="sodds">{_am(combo)}</span></div>'
+                         f'<div class="slegs">{leg_html}</div>'
+                         f'<div class="sft"><span class="sstake">stake <b>1u</b></span>'
+                         f'<span class="spay">→ {combo:.2f}u</span>'
+                         f'<span class="sid">#K2</span></div></div></div></div>')
 
     except (OSError, ValueError):
         pass

@@ -33,6 +33,12 @@ FD = HERE / "fanduel_props.sqlite"
 FROZEN = json.loads((HERE / "k_compass_frozen.json").read_text())
 API = "https://statsapi.mlb.com/api/v1"
 BOOKS = ("fd", "dk", "betmgm")
+# static id->abbrev (schedule hydrate omits team abbreviation; ids are always present)
+TEAM_AB = {108: "LAA", 109: "AZ", 110: "BAL", 111: "BOS", 112: "CHC", 113: "CIN", 114: "CLE",
+           115: "COL", 116: "DET", 117: "HOU", 118: "KC", 119: "LAD", 120: "WSH", 121: "NYM",
+           133: "ATH", 134: "PIT", 135: "SD", 136: "SEA", 137: "SF", 138: "STL", 139: "TB",
+           140: "TEX", 141: "TOR", 142: "MIN", 143: "PHI", 144: "ATL", 145: "CWS", 146: "MIA",
+           147: "NYY", 158: "MIL"}
 THR = FROZEN.get("thr", 1.6)
 PRICE_CAP = FROZEN.get("price_cap", 2.00)
 BK_CACHE = HERE / "k_bk_2026.json"          # batter K rates, refreshed daily
@@ -84,6 +90,11 @@ def _con():
         c.execute("ALTER TABLE compass ADD COLUMN game TEXT")
     except sqlite3.OperationalError:
         pass
+    for tbl in ("compass", "outs_compass"):
+        try:
+            c.execute(f"ALTER TABLE {tbl} ADD COLUMN team TEXT")
+        except sqlite3.OperationalError:
+            pass
     c.execute("""CREATE TABLE IF NOT EXISTS parlay(
         game_date TEXT PRIMARY KEY, legs TEXT, combo REAL, frozen INTEGER DEFAULT 0,
         result TEXT, pnl REAL, graded_at TEXT, pinged INTEGER DEFAULT 0)""")
@@ -301,8 +312,9 @@ def slate():
                 out.append({"pitcher": pp.get("fullName"), "pid": pp["id"],
                             "opp_lineup": opp_lu[:9],
                             "team_id": g["teams"][side_lbl]["team"]["id"],
+                            "team_ab": TEAM_AB.get(g["teams"][side_lbl]["team"]["id"], ""),
                             "opp_id": g["teams"][opp_lbl]["team"]["id"],
-                            "opp_name": g["teams"][opp_lbl]["team"].get("abbreviation") or
+                            "opp_name": TEAM_AB.get(g["teams"][opp_lbl]["team"]["id"]) or
                                         g["teams"][opp_lbl]["team"]["name"],
                             "home_team": home_team, "start": g.get("gameDate"),
                             "started": state != "Preview"})
@@ -390,9 +402,9 @@ def flag(con):
         od, ln, bk = best
         skip = "price_cap" if od >= PRICE_CAP else None
         con.execute("INSERT INTO compass (pitcher, game_date, side, line, odds, book, score, opp, "
-                    "flagged_at, skip, game) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                    "flagged_at, skip, game, team) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
                     (g["pitcher"], gd, side, ln, od, bk, round(abs(S), 2), g["opp_name"], ts, skip,
-                     g["home_team"] + "|" + str(g.get("start") or "")))
+                     g["home_team"] + "|" + str(g.get("start") or ""), g.get("team_ab") or ""))
         new += 1
         if not skip and topic:
             am = f"+{round((od-1)*100)}" if od >= 2 else f"-{round(100/(od-1))}"
@@ -480,13 +492,13 @@ def flag_outs(con):
         sl = [bslg.get(b) for b in g["opp_lineup"]]
         sl = [x for x in sl if x is not None]
         con.execute("INSERT INTO outs_compass (pitcher, game_date, side, line, odds, book, score, "
-                    "strong, opp, flagged_at, skip, game, gap, lslg, penfat) "
-                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    "strong, opp, flagged_at, skip, game, gap, lslg, penfat, team) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                     (g["pitcher"], gd, side, ln, od, bk, round(abs(S), 2), strong, g["opp_name"],
                      ts, skip, g["home_team"] + "|" + str(g.get("start") or ""),
                      (ln - med) if med is not None else None,
                      (sum(sl) / len(sl)) if len(sl) >= 6 else None,
-                     pen.get(g["team_id"])))
+                     pen.get(g["team_id"]), g.get("team_ab") or ""))
         new += 1
         if not skip and topic:
             am = f"+{round((od-1)*100)}" if od >= 2 else f"-{round(100/(od-1))}"
@@ -576,9 +588,10 @@ def build_parlay(con):
     row = con.execute("SELECT frozen FROM parlay WHERE game_date=?", (gd,)).fetchone()
     if row and row[0]:
         return
-    flags = [dict(zip(("pitcher", "side", "line", "odds", "book", "score", "game"), r))
-             for r in con.execute("SELECT pitcher, side, line, odds, book, score, game FROM compass "
-                                  "WHERE game_date=? AND skip IS NULL ORDER BY score DESC", (gd,))]
+    flags = [dict(zip(("pitcher", "side", "line", "odds", "book", "score", "game", "team"), r))
+             for r in con.execute("SELECT pitcher, side, line, odds, book, score, game, team "
+                                  "FROM compass WHERE game_date=? AND skip IS NULL "
+                                  "ORDER BY score DESC", (gd,))]
     pick, games = [], set()
     now = dt.datetime.now(dt.timezone.utc)
     for f in flags:
@@ -691,9 +704,10 @@ def grade(con):
 def board(con):
     rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) FROM compass "
                       "WHERE result IN ('W','L') AND skip IS NULL").fetchone()
-    flags = [dict(zip(("pitcher", "side", "line", "odds", "book", "score", "opp", "skip"), r))
-             for r in con.execute("SELECT pitcher, side, line, odds, book, score, opp, skip "
-                                  "FROM compass WHERE game_date=? ORDER BY score DESC",
+    flags = [dict(zip(("pitcher", "side", "line", "odds", "book", "score", "opp", "skip", "team",
+                       "game"), r))
+             for r in con.execute("SELECT pitcher, side, line, odds, book, score, opp, skip, team, "
+                                  "game FROM compass WHERE game_date=? ORDER BY score DESC",
                                   (_today_et(),))]
     shadow = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) FROM compass "
                          "WHERE result IN ('W','L') AND skip IS NOT NULL").fetchone()
@@ -711,10 +725,10 @@ def board(con):
     outs_sh = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
                           "FROM outs_compass WHERE result IN ('W','L') AND skip IS NOT NULL").fetchone()
     outs_today = [dict(zip(("pitcher", "side", "line", "odds", "book", "score", "strong", "opp",
-                            "skip"), r))
+                            "skip", "team", "game"), r))
                   for r in con.execute("SELECT pitcher, side, line, odds, book, score, strong, opp, "
-                                       "skip FROM outs_compass WHERE game_date=? ORDER BY score DESC",
-                                       (_today_et(),))]
+                                       "skip, team, game FROM outs_compass WHERE game_date=? "
+                                       "ORDER BY score DESC", (_today_et(),))]
     (HERE / "compass_board.json").write_text(json.dumps(
         {"updated": _now(), "w": rec[0] or 0, "l": rec[1] or 0, "u": rec[2] or 0.0,
          "shadow": {"w": shadow[0] or 0, "l": shadow[1] or 0, "u": shadow[2] or 0.0},
