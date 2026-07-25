@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T08:22:29Z",
+ "captured_at": "2026-07-25T08:26:50Z",
  "matches": [
   {
    "event_id": 35862883,
@@ -8,9 +8,9 @@
    "p1_norm": "jacek wieczerzak",
    "p2_norm": "witold buczynski",
    "open_date": "2026-07-25T08:10:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 89.5,
+   "over_odds": 105,
+   "under_odds": -145
   },
   {
    "event_id": 35862902,
@@ -19,7 +19,7 @@
    "p1_norm": "sebastian krupa",
    "p2_norm": "jakub kaczmarek",
    "open_date": "2026-07-25T08:20:00.000Z",
-   "line": 80.5,
+   "line": 96.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,9 +30,9 @@
    "p1_norm": "patryk jedrzejak",
    "p2_norm": "daniel morawiec",
    "open_date": "2026-07-25T08:20:00.000Z",
-   "line": 80.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 88.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35862944,
