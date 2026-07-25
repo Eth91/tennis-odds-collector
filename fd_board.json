@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T17:02:29Z",
+ "captured_at": "2026-07-25T17:07:31Z",
  "matches": [
-  {
-   "event_id": 35864904,
-   "p1": "Michal Machelski",
-   "p2": "Michal Guzik",
-   "p1_norm": "michal machelski",
-   "p2_norm": "michal guzik",
-   "open_date": "2026-07-25T16:50:00.000Z",
-   "line": 93.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35864986,
    "p1": "Piotr Gesiarz",
@@ -19,20 +8,9 @@
    "p1_norm": "piotr gesiarz",
    "p2_norm": "tomasz kocik",
    "open_date": "2026-07-25T16:55:00.000Z",
-   "line": 82.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35864987,
-   "p1": "Filip Mlynarski",
-   "p2": "Maciej Kolek",
-   "p1_norm": "filip mlynarski",
-   "p2_norm": "maciej kolek",
-   "open_date": "2026-07-25T16:55:00.000Z",
-   "line": 54.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35864988,
@@ -41,9 +19,9 @@
    "p1_norm": "tomasz filbrandt",
    "p2_norm": "stapor rafal",
    "open_date": "2026-07-25T16:55:00.000Z",
-   "line": 86.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 82.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35865035,
@@ -52,9 +30,9 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "rafal adach",
    "open_date": "2026-07-25T17:05:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 70.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35865042,
@@ -99,6 +77,28 @@
    "line": 74.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35865305,
+   "p1": "Roman Wiza",
+   "p2": "Marcin Lach",
+   "p1_norm": "roman wiza",
+   "p2_norm": "marcin lach",
+   "open_date": "2026-07-25T17:30:00.000Z",
+   "line": 72.5,
+   "over_odds": -118,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35865307,
+   "p1": "Jacek Oracz",
+   "p2": "Michal Guzik",
+   "p1_norm": "jacek oracz",
+   "p2_norm": "michal guzik",
+   "open_date": "2026-07-25T17:35:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
