@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-25T18:21:03Z",
+ "captured_at": "2026-07-25T18:27:09Z",
  "matches": [
-  {
-   "event_id": 35865403,
-   "p1": "Alan Wos",
-   "p2": "Maciej Kolek",
-   "p1_norm": "alan wos",
-   "p2_norm": "maciej kolek",
-   "open_date": "2026-07-25T18:05:00.000Z",
-   "line": 75.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35865407,
-   "p1": "Kamil Kostyk",
-   "p2": "Stapor Rafal",
-   "p1_norm": "kamil kostyk",
-   "p2_norm": "stapor rafal",
-   "open_date": "2026-07-25T18:10:00.000Z",
-   "line": 87.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35865408,
    "p1": "Janus Slawomir",
@@ -30,9 +8,9 @@
    "p1_norm": "janus slawomir",
    "p2_norm": "tomasz kocik",
    "open_date": "2026-07-25T18:10:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 96.5,
+   "over_odds": 100,
+   "under_odds": -140
   },
   {
    "event_id": 35865486,
@@ -41,7 +19,7 @@
    "p1_norm": "michal durda",
    "p2_norm": "damian fira",
    "open_date": "2026-07-25T18:20:00.000Z",
-   "line": 73.5,
+   "line": 81.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -52,9 +30,9 @@
    "p1_norm": "michal machelski",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-25T18:25:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 78.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35865509,
@@ -108,6 +86,39 @@
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-25T18:45:00.000Z",
    "line": 73.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35865570,
+   "p1": "Marcin Marchlewski",
+   "p2": "Alan Wos",
+   "p1_norm": "marcin marchlewski",
+   "p2_norm": "alan wos",
+   "open_date": "2026-07-25T18:50:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35865605,
+   "p1": "Pawel Chojnacki",
+   "p2": "Janus Slawomir",
+   "p1_norm": "pawel chojnacki",
+   "p2_norm": "janus slawomir",
+   "open_date": "2026-07-25T18:55:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35865607,
+   "p1": "Dawid Poloszczanski",
+   "p2": "Kamil Kostyk",
+   "p1_norm": "dawid poloszczanski",
+   "p2_norm": "kamil kostyk",
+   "open_date": "2026-07-25T18:55:00.000Z",
+   "line": 79.5,
    "over_odds": -118,
    "under_odds": -112
   }
