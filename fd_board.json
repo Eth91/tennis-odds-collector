@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T05:57:34Z",
+ "captured_at": "2026-07-25T06:01:43Z",
  "matches": [
   {
    "event_id": 35862703,
@@ -8,9 +8,9 @@
    "p1_norm": "tadeusz piotrowski",
    "p2_norm": "artur szoltysek",
    "open_date": "2026-07-25T05:40:00.000Z",
-   "line": 87.5,
-   "over_odds": -105,
-   "under_odds": -130
+   "line": 90.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35862715,
@@ -20,8 +20,8 @@
    "p2_norm": "radoslaw malinowski",
    "open_date": "2026-07-25T06:00:00.000Z",
    "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35862716,
@@ -30,9 +30,9 @@
    "p1_norm": "wojciech urban",
    "p2_norm": "sebastian krupa",
    "open_date": "2026-07-25T06:00:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 80.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35862720,
