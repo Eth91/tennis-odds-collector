@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T21:36:46Z",
+ "captured_at": "2026-07-25T21:41:51Z",
  "matches": [
-  {
-   "event_id": 35865917,
-   "p1": "Dawid Poloszczanski",
-   "p2": "Stapor Rafal",
-   "p1_norm": "dawid poloszczanski",
-   "p2_norm": "stapor rafal",
-   "open_date": "2026-07-25T21:20:00.000Z",
-   "line": 70.5,
-   "over_odds": -1450,
-   "under_odds": 550
-  },
   {
    "event_id": 35865940,
    "p1": "Roman Wiza",
@@ -20,8 +9,8 @@
    "p2_norm": "damian fira",
    "open_date": "2026-07-25T21:30:00.000Z",
    "line": 90.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35865942,
@@ -30,7 +19,7 @@
    "p1_norm": "jacek oracz",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-25T21:35:00.000Z",
-   "line": 72.5,
+   "line": 57.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -88,6 +77,17 @@
    "line": 72.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35866253,
+   "p1": "Filip Mlynarski",
+   "p2": "Marcin Marchlewski",
+   "p1_norm": "filip mlynarski",
+   "p2_norm": "marcin marchlewski",
+   "open_date": "2026-07-25T22:05:00.000Z",
+   "line": 72.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
