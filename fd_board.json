@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T16:32:04Z",
+ "captured_at": "2026-07-25T16:36:18Z",
  "matches": [
-  {
-   "event_id": 35864637,
-   "p1": "Dawid Poloszczanski",
-   "p2": "Bartosz Kwodawski",
-   "p1_norm": "dawid poloszczanski",
-   "p2_norm": "bartosz kwodawski",
-   "open_date": "2026-07-25T16:15:00.000Z",
-   "line": 74.5,
-   "over_odds": -140,
-   "under_odds": 100
-  },
   {
    "event_id": 35864642,
    "p1": "Miroslaw Warzecha",
@@ -19,9 +8,9 @@
    "p1_norm": "miroslaw warzecha",
    "p2_norm": "jacek oracz",
    "open_date": "2026-07-25T16:25:00.000Z",
-   "line": 78.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 89.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35864647,
@@ -30,9 +19,9 @@
    "p1_norm": "alan wos",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-25T16:30:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 73.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35864650,
@@ -41,9 +30,9 @@
    "p1_norm": "janus slawomir",
    "p2_norm": "andriej fomin",
    "open_date": "2026-07-25T16:35:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 72.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35864651,
@@ -53,8 +42,8 @@
    "p2_norm": "bartosz sulkowski",
    "open_date": "2026-07-25T16:35:00.000Z",
    "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35864674,
@@ -74,9 +63,9 @@
    "p1_norm": "michal machelski",
    "p2_norm": "michal guzik",
    "open_date": "2026-07-25T16:50:00.000Z",
-   "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35864986,
@@ -86,7 +75,7 @@
    "p2_norm": "tomasz kocik",
    "open_date": "2026-07-25T16:55:00.000Z",
    "line": 75.5,
-   "over_odds": -112,
+   "over_odds": -116,
    "under_odds": -118
   },
   {
