@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T14:18:37Z",
+ "captured_at": "2026-07-25T14:22:54Z",
  "matches": [
   {
    "event_id": 35864104,
@@ -8,9 +8,9 @@
    "p1_norm": "kacper petas",
    "p2_norm": "maciej domin",
    "open_date": "2026-07-25T14:10:00.000Z",
-   "line": 87.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35864109,
@@ -19,7 +19,7 @@
    "p1_norm": "bartosz kwodawski",
    "p2_norm": "dawid kosmal",
    "open_date": "2026-07-25T14:15:00.000Z",
-   "line": 64.5,
+   "line": 58.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,8 +30,8 @@
    "p1_norm": "jacek wieczerzak",
    "p2_norm": "witold buczynski",
    "open_date": "2026-07-25T14:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -110,
+   "line": 75.5,
+   "over_odds": -115,
    "under_odds": -120
   },
   {
@@ -41,9 +41,9 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "daniel morawiec",
    "open_date": "2026-07-25T14:20:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 72.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35864133,
@@ -52,9 +52,9 @@
    "p1_norm": "mateusz misiak",
    "p2_norm": "bartlomiej wisniewski",
    "open_date": "2026-07-25T14:20:00.000Z",
-   "line": 81.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 83.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35864168,
