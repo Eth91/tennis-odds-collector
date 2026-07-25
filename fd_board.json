@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-07-25T09:19:41Z",
+ "captured_at": "2026-07-25T09:24:31Z",
  "matches": [
-  {
-   "event_id": 35862990,
-   "p1": "Josef Braun",
-   "p2": "Maciej Domin",
-   "p1_norm": "josef braun",
-   "p2_norm": "maciej domin",
-   "open_date": "2026-07-25T09:00:00.000Z",
-   "line": 92.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35862993,
-   "p1": "Kamil Kowalski",
-   "p2": "Witold Buczynski",
-   "p1_norm": "kamil kowalski",
-   "p2_norm": "witold buczynski",
-   "open_date": "2026-07-25T09:00:00.000Z",
-   "line": 95.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35862994,
-   "p1": "Jerzy Pelka",
-   "p2": "Daniel Morawiec",
-   "p1_norm": "jerzy pelka",
-   "p2_norm": "daniel morawiec",
-   "open_date": "2026-07-25T09:05:00.000Z",
-   "line": 95.5,
-   "over_odds": -115,
-   "under_odds": -115
-  },
   {
    "event_id": 35863028,
    "p1": "Radoslaw Malinowski",
@@ -41,20 +8,9 @@
    "p1_norm": "radoslaw malinowski",
    "p2_norm": "kamil kostyk",
    "open_date": "2026-07-25T09:20:00.000Z",
-   "line": 77.5,
+   "line": 83.5,
    "over_odds": -120,
    "under_odds": -115
-  },
-  {
-   "event_id": 35863029,
-   "p1": "Piotr Cyrnek",
-   "p2": "Karol Strowski",
-   "p1_norm": "piotr cyrnek",
-   "p2_norm": "karol strowski",
-   "open_date": "2026-07-25T09:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
   },
   {
    "event_id": 35863063,
@@ -108,6 +64,28 @@
    "p2_norm": "maciej kolek",
    "open_date": "2026-07-25T09:45:00.000Z",
    "line": 73.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35863093,
+   "p1": "Jacek Wieczerzak",
+   "p2": "Pawel Kurek",
+   "p1_norm": "jacek wieczerzak",
+   "p2_norm": "pawel kurek",
+   "open_date": "2026-07-25T09:50:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35863094,
+   "p1": "Mateusz Misiak",
+   "p2": "Artur Szoltysek",
+   "p1_norm": "mateusz misiak",
+   "p2_norm": "artur szoltysek",
+   "open_date": "2026-07-25T09:50:00.000Z",
+   "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
   }
