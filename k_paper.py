@@ -179,6 +179,37 @@ def _qualifies(market, line):
     return None, None
 
 
+def _vm_lines(market_stat):
+    """{book: {(pitcher, gd): (line, over, under, None)}} from mlb_lines_vm.json — the VM's export of
+    DK/BetMGM quotes (those books IP-block the Actions runner, so board plays flagged off them never
+    reached the tracker: Rodriguez/Sugano 2026-07-24). Folds each (book,pitcher,day) ladder to the
+    main line exactly like the FD branch (over odds nearest ~1.9)."""
+    f = HERE / "mlb_lines_vm.json"
+    if not f.exists():
+        return {}
+    try:
+        rows = json.loads(f.read_text())
+    except (ValueError, OSError):
+        return {}
+    byg = {}
+    for r in rows:
+        if r.get("stat") != market_stat or r.get("line") is None or r.get("odds") is None:
+            continue
+        gd = (r.get("collected_at") or "")[:10]
+        if not gd:
+            continue
+        byg.setdefault((r["book"], r["player"], gd), {}).setdefault(
+            round(float(r["line"]), 1), {})[r.get("side")] = float(r["odds"])
+    out = {}
+    for (book, pitcher, gd), lines in byg.items():
+        two = {ln: v for ln, v in lines.items() if "over" in v and "under" in v}
+        if not two:
+            continue
+        main = min(two, key=lambda ln: abs(two[ln]["over"] - 1.9))
+        out.setdefault(book, {})[(pitcher, gd)] = (main, two[main]["over"], two[main]["under"], None)
+    return out
+
+
 def flag():
     con = sqlite3.connect(DB)
     _ensure(con)
@@ -186,8 +217,11 @@ def flag():
     added = updated = 0
     for market, stat, books in (("k", "strikeouts", ((PINN, "pinn"), (FD, "fd"))),
                                 ("outs", "outs", ((PINN, "pinn"), (FD, "fd")))):
-        for db, book in books:
-            for (pitcher, gd), (line, oo, uo, start) in _closing_lines(db, stat).items():
+        vm = _vm_lines(stat)                          # DK/BetMGM via the VM export (coherence fix)
+        srcs = [(_closing_lines(db, stat), book) for db, book in books]
+        srcs += [(vm.get(b, {}), b) for b in ("dk", "betmgm")]
+        for lines_map, book in srcs:
+            for (pitcher, gd), (line, oo, uo, start) in lines_map.items():
                 side, rule = _qualifies(market, line)
                 if not side:
                     continue
@@ -350,8 +384,15 @@ def grade():
                         won = (actual > line) if side == "over" else (actual < line)
                         res, pnl = ("W", odds - 1) if won else ("L", -1.0)
                     home = 1 if g.get("is_home") else 0
-                    premium = 1 if (market == "outs" and (
-                        (opp_ppa is not None and opp_ppa < ppa_low) or (r5 is not None and line > r5))) else 0
+                    # PREMIUM == THE LIVE MODEL, exactly (coherence fix 2026-07-25; was the stale v2
+                    # "A OR B" with no venue/contact gate, which tracked board-scratched bets like
+                    # Cantillo/Marquez 7/24 as premium wins the user was never pinged for):
+                    # away + contact opp + route A (line > recent-5 median) + NOT route B (patience).
+                    premium = 1 if (market == "outs"
+                                    and not g.get("is_home")
+                                    and opp_k is not None and opp_k < CONTACT_MAX
+                                    and (r5 is not None and line > r5)
+                                    and not (opp_ppa is not None and opp_ppa < ppa_low)) else 0
                     con.execute("UPDATE paper SET result=?, actual=?, pnl=?, graded_at=?, closed=1, "
                                 "home=?, opp_k=?, premium=?, game_total=?, opp_obp=?, pitcher_gs=?, "
                                 "pitcher_avg_outs=?, pitches_per_out=?, pps_ratio=?, log_date=? "

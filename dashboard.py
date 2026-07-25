@@ -2758,6 +2758,29 @@ def build():
 {_live_sse}
 </body></html>"""
     OUT.parent.mkdir(exist_ok=True)
+    # EXPORT VM-ONLY MLB LINES for the Actions-side tracker (ping<->board coherence, 2026-07-25):
+    # k_paper.flag() runs in collect-odds.yml where DK/BetMGM are IP-blocked, so board plays flagged
+    # off DK quotes (Rodriguez/Sugano 7/24) never got tracked. The loop's git push carries this small
+    # JSON to the repo; k_paper._vm_lines() ingests it as extra books. Fail-soft: never break a bake.
+    try:
+        _con = sqlite3.connect(f"file:{FD_PROPS}?mode=ro", uri=True)
+        _rows = _con.execute(
+            "SELECT book, player, stat, line, side, odds, collected_at FROM fd_lines "
+            "WHERE sport='mlb' AND stat IN ('outs','strikeouts') AND book IN ('dk','betmgm') "
+            "AND collected_at > datetime('now','-18 hours')").fetchall()
+        _con.close()
+        _lat = {}
+        for _bk, _pl, _st_, _ln, _sd, _od, _ca in _rows:
+            if _ln is None or _od is None or _sd is None:
+                continue
+            _k = (_bk, _pl, _st_, round(float(_ln), 1), _sd)
+            if _k not in _lat or _ca > _lat[_k][1]:
+                _lat[_k] = (float(_od), _ca)
+        (HERE / "mlb_lines_vm.json").write_text(json.dumps(
+            [{"book": k[0], "player": k[1], "stat": k[2], "line": k[3], "side": k[4],
+              "odds": v[0], "collected_at": v[1]} for k, v in _lat.items()]))
+    except Exception as _e:
+        print(f"vm-lines export skipped: {str(_e)[:60]}")
     # ATOMIC write (2026-07-23): the fast pickz-bake service bakes every ~20s alongside the loop's
     # own bakes and board_server reads on every /bump poll — a plain write_text can be read half-
     # written and flash a broken board. Write a temp then os-level rename (atomic on POSIX) so a
