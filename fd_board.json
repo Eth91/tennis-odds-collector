@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T07:39:06Z",
+ "captured_at": "2026-07-25T07:43:15Z",
  "matches": [
   {
    "event_id": 35862821,
@@ -8,9 +8,9 @@
    "p1_norm": "daniel morawiec",
    "p2_norm": "rafal adach",
    "open_date": "2026-07-25T07:30:00.000Z",
-   "line": 93.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 92.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35862823,
@@ -19,9 +19,9 @@
    "p1_norm": "wojciech pytlas",
    "p2_norm": "jakub kaczmarek",
    "open_date": "2026-07-25T07:35:00.000Z",
-   "line": 78.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 55.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35862827,
@@ -30,9 +30,9 @@
    "p1_norm": "radoslaw malinowski",
    "p2_norm": "dawid kosmal",
    "open_date": "2026-07-25T07:40:00.000Z",
-   "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35862835,
