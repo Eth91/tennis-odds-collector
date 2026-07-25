@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T12:50:26Z",
+ "captured_at": "2026-07-25T12:54:37Z",
  "matches": [
-  {
-   "event_id": 35863931,
-   "p1": "Mateusz Sikon",
-   "p2": "Jacek Wieczerzak",
-   "p1_norm": "mateusz sikon",
-   "p2_norm": "jacek wieczerzak",
-   "open_date": "2026-07-25T12:40:00.000Z",
-   "line": 68.5,
-   "over_odds": -105,
-   "under_odds": -135
-  },
   {
    "event_id": 35863933,
    "p1": "Rafal Wojcik",
@@ -19,9 +8,9 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "jerzy pelka",
    "open_date": "2026-07-25T12:45:00.000Z",
-   "line": 65.5,
-   "over_odds": -115,
-   "under_odds": -115
+   "line": 54.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35863946,
@@ -77,6 +66,17 @@
    "line": 79.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35863979,
+   "p1": "Karol Strowski",
+   "p2": "Maciej Domin",
+   "p1_norm": "karol strowski",
+   "p2_norm": "maciej domin",
+   "open_date": "2026-07-25T13:20:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
