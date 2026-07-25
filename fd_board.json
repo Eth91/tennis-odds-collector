@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-07-25T01:24:09Z",
+ "captured_at": "2026-07-25T01:28:11Z",
  "matches": [
-  {
-   "event_id": 35862085,
-   "p1": "Maciej Kolek",
-   "p2": "Jakub Kuzmicz",
-   "p1_norm": "maciej kolek",
-   "p2_norm": "jakub kuzmicz",
-   "open_date": "2026-07-25T01:10:00.000Z",
-   "line": 86.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35862137,
-   "p1": "Dariusz Wrobel",
-   "p2": "Stanislaw Wnek",
-   "p1_norm": "dariusz wrobel",
-   "p2_norm": "stanislaw wnek",
-   "open_date": "2026-07-25T01:25:00.000Z",
-   "line": 84.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35862138,
-   "p1": "Wojciech Wojtaszczyk",
-   "p2": "Piotr Przewlocki",
-   "p1_norm": "wojciech wojtaszczyk",
-   "p2_norm": "piotr przewlocki",
-   "open_date": "2026-07-25T01:25:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
   {
    "event_id": 35862148,
    "p1": "Marcin Marchlewski",
@@ -77,6 +44,28 @@
    "line": 75.5,
    "over_odds": -118,
    "under_odds": -116
+  },
+  {
+   "event_id": 35862211,
+   "p1": "Tomasz Wrzalik",
+   "p2": "Adam Ruszkiewicz",
+   "p1_norm": "tomasz wrzalik",
+   "p2_norm": "adam ruszkiewicz",
+   "open_date": "2026-07-25T01:55:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35862212,
+   "p1": "Maciej Kolek",
+   "p2": "Mateusz Rutkowski",
+   "p1_norm": "maciej kolek",
+   "p2_norm": "mateusz rutkowski",
+   "open_date": "2026-07-25T01:55:00.000Z",
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -110
   }
  ]
 }
