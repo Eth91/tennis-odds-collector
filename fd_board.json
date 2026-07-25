@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T04:44:14Z",
+ "captured_at": "2026-07-25T04:48:25Z",
  "matches": [
   {
    "event_id": 35862451,
@@ -8,9 +8,9 @@
    "p1_norm": "mariusz zwolinski",
    "p2_norm": "tadeusz piotrowski",
    "open_date": "2026-07-25T04:30:00.000Z",
-   "line": 92.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 103.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35862452,
@@ -19,20 +19,9 @@
    "p1_norm": "marcin jadczyk",
    "p2_norm": "kacper petas",
    "open_date": "2026-07-25T04:30:00.000Z",
-   "line": 70.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35862453,
-   "p1": "Kamil Kowalski",
-   "p2": "Witold Buczynski",
-   "p1_norm": "kamil kowalski",
-   "p2_norm": "witold buczynski",
-   "open_date": "2026-07-25T04:30:00.000Z",
-   "line": 75.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 53.5,
+   "over_odds": -140,
+   "under_odds": 100
   },
   {
    "event_id": 35862461,
@@ -41,9 +30,9 @@
    "p1_norm": "piotr gumulinski",
    "p2_norm": "adam ruszkiewicz",
    "open_date": "2026-07-25T04:40:00.000Z",
-   "line": 83.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 87.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35862464,
@@ -121,6 +110,50 @@
    "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35862594,
+   "p1": "Radoslaw Malinowski",
+   "p2": "Dawid Kosmal",
+   "p1_norm": "radoslaw malinowski",
+   "p2_norm": "dawid kosmal",
+   "open_date": "2026-07-25T05:15:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35862595,
+   "p1": "Maciej Domin",
+   "p2": "Kacper Petas",
+   "p1_norm": "maciej domin",
+   "p2_norm": "kacper petas",
+   "open_date": "2026-07-25T05:15:00.000Z",
+   "line": 78.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35862596,
+   "p1": "Mateusz Sikon",
+   "p2": "Witold Buczynski",
+   "p1_norm": "mateusz sikon",
+   "p2_norm": "witold buczynski",
+   "open_date": "2026-07-25T05:15:00.000Z",
+   "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35862597,
+   "p1": "Mariusz Zwolinski",
+   "p2": "Jaroslaw Rolak",
+   "p1_norm": "mariusz zwolinski",
+   "p2_norm": "jaroslaw rolak",
+   "open_date": "2026-07-25T05:15:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
