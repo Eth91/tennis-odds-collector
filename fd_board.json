@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T06:19:58Z",
+ "captured_at": "2026-07-25T06:24:08Z",
  "matches": [
   {
    "event_id": 35862720,
@@ -8,29 +8,7 @@
    "p1_norm": "mariusz zwolinski",
    "p2_norm": "artur szoltysek",
    "open_date": "2026-07-25T06:05:00.000Z",
-   "line": 69.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35862721,
-   "p1": "Marcin Jadczyk",
-   "p2": "Artur Daniel",
-   "p1_norm": "marcin jadczyk",
-   "p2_norm": "artur daniel",
-   "open_date": "2026-07-25T06:05:00.000Z",
    "line": 85.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35862722,
-   "p1": "Kamil Kowalski",
-   "p2": "Jakub Nowak",
-   "p1_norm": "kamil kowalski",
-   "p2_norm": "jakub nowak",
-   "open_date": "2026-07-25T06:05:00.000Z",
-   "line": 80.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -42,8 +20,8 @@
    "p2_norm": "rafal wojcik",
    "open_date": "2026-07-25T06:20:00.000Z",
    "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35862755,
@@ -75,8 +53,8 @@
    "p2_norm": "tadeusz piotrowski",
    "open_date": "2026-07-25T06:30:00.000Z",
    "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35862771,
@@ -86,8 +64,8 @@
    "p2_norm": "jacek wieczerzak",
    "open_date": "2026-07-25T06:30:00.000Z",
    "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35862772,
@@ -97,8 +75,8 @@
    "p2_norm": "josef braun",
    "open_date": "2026-07-25T06:30:00.000Z",
    "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35862781,
@@ -121,6 +99,17 @@
    "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35862785,
+   "p1": "Dawid Kosmal",
+   "p2": "Dariusz Wrobel",
+   "p1_norm": "dawid kosmal",
+   "p2_norm": "dariusz wrobel",
+   "open_date": "2026-07-25T06:50:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
