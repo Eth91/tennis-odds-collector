@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T13:43:16Z",
+ "captured_at": "2026-07-25T13:47:28Z",
  "matches": [
-  {
-   "event_id": 35864032,
-   "p1": "Piotr Cyrnek",
-   "p2": "Artur Daniel",
-   "p1_norm": "piotr cyrnek",
-   "p2_norm": "artur daniel",
-   "open_date": "2026-07-25T13:45:00.000Z",
-   "line": 76.5,
-   "over_odds": -110,
-   "under_odds": -120
-  },
   {
    "event_id": 35864043,
    "p1": "Radoslaw Malinowski",
@@ -53,6 +42,28 @@
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-25T13:55:00.000Z",
    "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35864104,
+   "p1": "Kacper Petas",
+   "p2": "Maciej Domin",
+   "p1_norm": "kacper petas",
+   "p2_norm": "maciej domin",
+   "open_date": "2026-07-25T14:10:00.000Z",
+   "line": 73.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35864109,
+   "p1": "Bartosz Kwodawski",
+   "p2": "Dawid Kosmal",
+   "p1_norm": "bartosz kwodawski",
+   "p2_norm": "dawid kosmal",
+   "open_date": "2026-07-25T14:15:00.000Z",
+   "line": 70.5,
    "over_odds": -118,
    "under_odds": -112
   }
