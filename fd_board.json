@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T02:54:40Z",
+ "captured_at": "2026-07-25T02:58:46Z",
  "matches": [
   {
    "event_id": 35862323,
@@ -8,9 +8,9 @@
    "p1_norm": "roman wiza",
    "p2_norm": "jakub michalski",
    "open_date": "2026-07-25T02:45:00.000Z",
-   "line": 54.5,
-   "over_odds": -130,
-   "under_odds": -105
+   "line": 77.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35862343,
@@ -66,6 +66,39 @@
    "line": 80.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35862399,
+   "p1": "Mateusz Sikon",
+   "p2": "Jakub Nowak",
+   "p1_norm": "mateusz sikon",
+   "p2_norm": "jakub nowak",
+   "open_date": "2026-07-25T03:25:00.000Z",
+   "line": 81.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35862400,
+   "p1": "Maciej Domin",
+   "p2": "Artur Daniel",
+   "p1_norm": "maciej domin",
+   "p2_norm": "artur daniel",
+   "open_date": "2026-07-25T03:25:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35862401,
+   "p1": "Tadeusz Piotrowski",
+   "p2": "Artur Szoltysek",
+   "p1_norm": "tadeusz piotrowski",
+   "p2_norm": "artur szoltysek",
+   "open_date": "2026-07-25T03:25:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
