@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T19:26:09Z",
+ "captured_at": "2026-07-25T19:30:47Z",
  "matches": [
-  {
-   "event_id": 35865642,
-   "p1": "Miroslaw Warzecha",
-   "p2": "Michal Machelski",
-   "p1_norm": "miroslaw warzecha",
-   "p2_norm": "michal machelski",
-   "open_date": "2026-07-25T19:10:00.000Z",
-   "line": 74.5,
-   "over_odds": -105,
-   "under_odds": -135
-  },
   {
    "event_id": 35865653,
    "p1": "Stapor Rafal",
@@ -19,9 +8,9 @@
    "p1_norm": "stapor rafal",
    "p2_norm": "bartosz sulkowski",
    "open_date": "2026-07-25T19:20:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 87.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35865654,
@@ -30,9 +19,9 @@
    "p1_norm": "tomasz kocik",
    "p2_norm": "andriej fomin",
    "open_date": "2026-07-25T19:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 84.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35865672,
@@ -41,9 +30,9 @@
    "p1_norm": "michal durda",
    "p2_norm": "kamil durak",
    "open_date": "2026-07-25T19:30:00.000Z",
-   "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35865676,
@@ -88,6 +77,17 @@
    "line": 74.5,
    "over_odds": -110,
    "under_odds": -120
+  },
+  {
+   "event_id": 35865700,
+   "p1": "Robert Szymik",
+   "p2": "Marcin Lach",
+   "p1_norm": "robert szymik",
+   "p2_norm": "marcin lach",
+   "open_date": "2026-07-25T19:55:00.000Z",
+   "line": 75.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
