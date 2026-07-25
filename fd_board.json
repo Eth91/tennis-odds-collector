@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T15:02:59Z",
+ "captured_at": "2026-07-25T15:07:13Z",
  "matches": [
   {
    "event_id": 35864193,
@@ -8,9 +8,9 @@
    "p1_norm": "dawid poloszczanski",
    "p2_norm": "bartosz sulkowski",
    "open_date": "2026-07-25T15:00:00.000Z",
-   "line": 81.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 93.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35864194,
@@ -19,9 +19,9 @@
    "p1_norm": "marcin marchlewski",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-25T15:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 72.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35864195,
@@ -30,9 +30,9 @@
    "p1_norm": "pawel chojnacki",
    "p2_norm": "andriej fomin",
    "open_date": "2026-07-25T15:00:00.000Z",
-   "line": 78.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 70.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35864197,
@@ -41,9 +41,9 @@
    "p1_norm": "jerzy pelka",
    "p2_norm": "daniel morawiec",
    "open_date": "2026-07-25T15:05:00.000Z",
-   "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 79.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35864218,
