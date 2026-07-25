@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T10:28:34Z",
+ "captured_at": "2026-07-25T10:33:17Z",
  "matches": [
-  {
-   "event_id": 35863180,
-   "p1": "Mariusz Zwolinski",
-   "p2": "Jaroslaw Rolak",
-   "p1_norm": "mariusz zwolinski",
-   "p2_norm": "jaroslaw rolak",
-   "open_date": "2026-07-25T10:10:00.000Z",
-   "line": 97.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35863288,
    "p1": "Jerzy Pelka",
@@ -19,9 +8,9 @@
    "p1_norm": "jerzy pelka",
    "p2_norm": "rafal wojcik",
    "open_date": "2026-07-25T10:20:00.000Z",
-   "line": 78.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 90.5,
+   "over_odds": -105,
+   "under_odds": -135
   },
   {
    "event_id": 35863297,
@@ -30,8 +19,8 @@
    "p1_norm": "artur daniel",
    "p2_norm": "maciej domin",
    "open_date": "2026-07-25T10:25:00.000Z",
-   "line": 81.5,
-   "over_odds": -115,
+   "line": 89.5,
+   "over_odds": -120,
    "under_odds": -115
   },
   {
@@ -41,9 +30,9 @@
    "p1_norm": "maciej kolek",
    "p2_norm": "dawid kosmal",
    "open_date": "2026-07-25T10:30:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 83.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35863308,
