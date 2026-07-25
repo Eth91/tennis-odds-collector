@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T03:11:45Z",
+ "captured_at": "2026-07-25T03:15:50Z",
  "matches": [
   {
    "event_id": 35862343,
@@ -8,9 +8,9 @@
    "p1_norm": "mariusz zwolinski",
    "p2_norm": "jaroslaw rolak",
    "open_date": "2026-07-25T03:00:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 79.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35862344,
@@ -20,8 +20,8 @@
    "p2_norm": "kacper petas",
    "open_date": "2026-07-25T03:00:00.000Z",
    "line": 86.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35862345,
@@ -30,9 +30,9 @@
    "p1_norm": "pawel kurek",
    "p2_norm": "witold buczynski",
    "open_date": "2026-07-25T03:00:00.000Z",
-   "line": 83.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 75.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35862399,
