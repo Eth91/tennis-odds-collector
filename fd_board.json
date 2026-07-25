@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-25T06:05:50Z",
+ "captured_at": "2026-07-25T06:11:11Z",
  "matches": [
-  {
-   "event_id": 35862703,
-   "p1": "Tadeusz Piotrowski",
-   "p2": "Artur Szoltysek",
-   "p1_norm": "tadeusz piotrowski",
-   "p2_norm": "artur szoltysek",
-   "open_date": "2026-07-25T05:40:00.000Z",
-   "line": 91.5,
-   "over_odds": -185,
-   "under_odds": 130
-  },
   {
    "event_id": 35862715,
    "p1": "Dariusz Wrobel",
@@ -19,9 +8,9 @@
    "p1_norm": "dariusz wrobel",
    "p2_norm": "radoslaw malinowski",
    "open_date": "2026-07-25T06:00:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 84.5,
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35862716,
@@ -30,9 +19,9 @@
    "p1_norm": "wojciech urban",
    "p2_norm": "sebastian krupa",
    "open_date": "2026-07-25T06:00:00.000Z",
-   "line": 72.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 80.5,
+   "over_odds": -105,
+   "under_odds": -135
   },
   {
    "event_id": 35862720,
@@ -41,9 +30,9 @@
    "p1_norm": "mariusz zwolinski",
    "p2_norm": "artur szoltysek",
    "open_date": "2026-07-25T06:05:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35862721,
@@ -52,9 +41,9 @@
    "p1_norm": "marcin jadczyk",
    "p2_norm": "artur daniel",
    "open_date": "2026-07-25T06:05:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 87.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35862722,
@@ -63,9 +52,9 @@
    "p1_norm": "kamil kowalski",
    "p2_norm": "jakub nowak",
    "open_date": "2026-07-25T06:05:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 87.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35862738,
@@ -108,8 +97,8 @@
    "p2_norm": "tadeusz piotrowski",
    "open_date": "2026-07-25T06:30:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35862771,
