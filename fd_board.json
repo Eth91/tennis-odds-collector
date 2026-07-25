@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T18:07:14Z",
+ "captured_at": "2026-07-25T18:11:32Z",
  "matches": [
   {
    "event_id": 35865400,
@@ -8,9 +8,9 @@
    "p1_norm": "miroslaw warzecha",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-25T18:00:00.000Z",
-   "line": 57.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 72.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35865403,
@@ -19,9 +19,9 @@
    "p1_norm": "alan wos",
    "p2_norm": "maciej kolek",
    "open_date": "2026-07-25T18:05:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 78.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35865407,
@@ -31,8 +31,8 @@
    "p2_norm": "stapor rafal",
    "open_date": "2026-07-25T18:10:00.000Z",
    "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35865408,
@@ -41,9 +41,9 @@
    "p1_norm": "janus slawomir",
    "p2_norm": "tomasz kocik",
    "open_date": "2026-07-25T18:10:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35865486,
@@ -64,8 +64,8 @@
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-25T18:25:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35865509,
@@ -75,8 +75,8 @@
    "p2_norm": "tomasz filbrandt",
    "open_date": "2026-07-25T18:30:00.000Z",
    "line": 70.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35865510,
