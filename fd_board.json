@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-25T00:41:16Z",
+ "captured_at": "2026-07-25T00:45:56Z",
  "matches": [
   {
    "event_id": 35862007,
@@ -8,9 +8,9 @@
    "p1_norm": "mateusz rutkowski",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-25T00:45:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35862008,
@@ -19,9 +19,9 @@
    "p1_norm": "jacek oracz",
    "p2_norm": "michal natkaniec",
    "open_date": "2026-07-25T00:45:00.000Z",
-   "line": 71.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 65.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35862009,
@@ -31,8 +31,8 @@
    "p2_norm": "tomasz wrzalik",
    "open_date": "2026-07-25T00:45:00.000Z",
    "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35862073,
@@ -55,6 +55,39 @@
    "line": 80.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35862083,
+   "p1": "Michal Krutak",
+   "p2": "Cezary Pawlik",
+   "p1_norm": "michal krutak",
+   "p2_norm": "cezary pawlik",
+   "open_date": "2026-07-25T01:10:00.000Z",
+   "line": 84.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35862084,
+   "p1": "Roman Wiza",
+   "p2": "Adam Ruszkiewicz",
+   "p1_norm": "roman wiza",
+   "p2_norm": "adam ruszkiewicz",
+   "open_date": "2026-07-25T01:10:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35862085,
+   "p1": "Maciej Kolek",
+   "p2": "Jakub Kuzmicz",
+   "p1_norm": "maciej kolek",
+   "p2_norm": "jakub kuzmicz",
+   "open_date": "2026-07-25T01:10:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
