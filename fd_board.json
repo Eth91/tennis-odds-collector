@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T15:51:54Z",
+ "captured_at": "2026-07-26T15:56:13Z",
  "matches": [
   {
    "event_id": 35868951,
@@ -8,9 +8,9 @@
    "p1_norm": "jakub nosiadek",
    "p2_norm": "bartosz sulkowski",
    "open_date": "2026-07-26T15:50:00.000Z",
-   "line": 77.5,
-   "over_odds": -115,
-   "under_odds": -115
+   "line": 86.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35868952,
@@ -19,7 +19,7 @@
    "p1_norm": "adam staniczek",
    "p2_norm": "pawel chojnacki",
    "open_date": "2026-07-26T15:50:00.000Z",
-   "line": 74.5,
+   "line": 78.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -77,6 +77,17 @@
    "line": 77.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35869276,
+   "p1": "Mariusz Adamus",
+   "p2": "Patryk Jedrzejak",
+   "p1_norm": "mariusz adamus",
+   "p2_norm": "patryk jedrzejak",
+   "open_date": "2026-07-26T16:20:00.000Z",
+   "line": 78.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
