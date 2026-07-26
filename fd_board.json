@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-26T16:32:44Z",
+ "captured_at": "2026-07-26T16:37:30Z",
  "matches": [
-  {
-   "event_id": 35869276,
-   "p1": "Mariusz Adamus",
-   "p2": "Patryk Jedrzejak",
-   "p1_norm": "mariusz adamus",
-   "p2_norm": "patryk jedrzejak",
-   "open_date": "2026-07-26T16:20:00.000Z",
-   "line": 92.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35869284,
-   "p1": "Oskar Sokolowski",
-   "p2": "Mariusz Baron",
-   "p1_norm": "oskar sokolowski",
-   "p2_norm": "mariusz baron",
-   "open_date": "2026-07-26T16:25:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35869307,
    "p1": "Bartosz Sulkowski",
@@ -30,9 +8,9 @@
    "p1_norm": "bartosz sulkowski",
    "p2_norm": "karol sulkowski",
    "open_date": "2026-07-26T16:35:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35869308,
@@ -42,8 +20,8 @@
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-26T16:35:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35869310,
@@ -52,8 +30,8 @@
    "p1_norm": "piotr przewlocki",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-26T16:40:00.000Z",
-   "line": 73.5,
-   "over_odds": -116,
+   "line": 74.5,
+   "over_odds": -112,
    "under_odds": -118
   },
   {
@@ -63,9 +41,9 @@
    "p1_norm": "sebastian krupa",
    "p2_norm": "michal paszkiewicz",
    "open_date": "2026-07-26T16:50:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35869332,
@@ -97,8 +75,19 @@
    "p2_norm": "aleksander lilien",
    "open_date": "2026-07-26T16:55:00.000Z",
    "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35869340,
+   "p1": "Rafal Wojcik",
+   "p2": "Oskar Jadach",
+   "p1_norm": "rafal wojcik",
+   "p2_norm": "oskar jadach",
+   "open_date": "2026-07-26T17:05:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
