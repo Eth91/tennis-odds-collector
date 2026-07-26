@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T23:12:59Z",
+ "captured_at": "2026-07-26T23:17:25Z",
  "matches": [
   {
    "event_id": 35870448,
@@ -9,8 +9,8 @@
    "p2_norm": "mateusz rutkowski",
    "open_date": "2026-07-26T23:15:00.000Z",
    "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870468,
@@ -63,9 +63,31 @@
    "p1_norm": "jakub pruszkowski",
    "p2_norm": "michal paszkiewicz",
    "open_date": "2026-07-26T23:35:00.000Z",
-   "line": 78.5,
+   "line": 74.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35870519,
+   "p1": "Mateusz Trela",
+   "p2": "Kamil Rudomina",
+   "p1_norm": "mateusz trela",
+   "p2_norm": "kamil rudomina",
+   "open_date": "2026-07-26T23:45:00.000Z",
+   "line": 80.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35870520,
+   "p1": "Pawel Chojnacki",
+   "p2": "Adam Staniczek",
+   "p1_norm": "pawel chojnacki",
+   "p2_norm": "adam staniczek",
+   "open_date": "2026-07-26T23:45:00.000Z",
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
