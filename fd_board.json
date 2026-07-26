@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-26T21:21:11Z",
+ "captured_at": "2026-07-26T21:25:33Z",
  "matches": [
-  {
-   "event_id": 35870267,
-   "p1": "Filip Mlynarski",
-   "p2": "Mateusz Rutkowski",
-   "p1_norm": "filip mlynarski",
-   "p2_norm": "mateusz rutkowski",
-   "open_date": "2026-07-26T21:00:00.000Z",
-   "line": 100.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35870270,
-   "p1": "Sebastian Krupa",
-   "p2": "Michal Paszkiewicz",
-   "p1_norm": "sebastian krupa",
-   "p2_norm": "michal paszkiewicz",
-   "open_date": "2026-07-26T21:10:00.000Z",
-   "line": 69.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35870295,
    "p1": "Jacek Zelezik",
@@ -30,7 +8,7 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-07-26T21:20:00.000Z",
-   "line": 76.5,
+   "line": 57.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -41,9 +19,9 @@
    "p1_norm": "mateusz trela",
    "p2_norm": "kamil rudomina",
    "open_date": "2026-07-26T21:20:00.000Z",
-   "line": 73.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 68.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35870314,
