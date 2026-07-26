@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T16:37:30Z",
+ "captured_at": "2026-07-26T16:42:04Z",
  "matches": [
   {
    "event_id": 35869307,
@@ -8,9 +8,9 @@
    "p1_norm": "bartosz sulkowski",
    "p2_norm": "karol sulkowski",
    "open_date": "2026-07-26T16:35:00.000Z",
-   "line": 76.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 60.5,
+   "over_odds": -105,
+   "under_odds": -135
   },
   {
    "event_id": 35869308,
@@ -19,7 +19,7 @@
    "p1_norm": "pawel chojnacki",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-26T16:35:00.000Z",
-   "line": 77.5,
+   "line": 89.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,9 +30,9 @@
    "p1_norm": "piotr przewlocki",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-26T16:40:00.000Z",
-   "line": 74.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 67.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35869330,
