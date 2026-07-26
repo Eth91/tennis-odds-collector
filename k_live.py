@@ -364,6 +364,64 @@ def arsenal_fit(pmap, bmap, pid, lineup_pids):
     return (fit / cov) if cov >= 0.6 else None
 
 
+VELO_CACHE = HERE / "velo_live.json"
+
+
+def velo_trend(pid):
+    """vd_l2p10: mean FF/SI velo of last-2 starts minus mean of last-10 (as-of, current season).
+    OOS-validated 2026-07-26 (+vd w0.25 at S>=2.0 beat baseline hit% in ALL 4 years — the ONLY
+    survivor of the exhaustive statcast sweep; clean by construction, no season-table lookahead).
+    Per-pitcher Savant statcast CSV, 20h disk cache, stream-parsed (VM is memory-tight).
+    None (term contributes 0, matching the backtest) if <4 velo starts or fetch fails."""
+    try:
+        cache = json.loads(VELO_CACHE.read_text())
+    except (OSError, ValueError):
+        cache = {}
+    ent = cache.get(str(pid))
+    now = dt.datetime.now(dt.timezone.utc)
+    if not ent or (now - dt.datetime.fromisoformat(ent["at"])).total_seconds() > 20 * 3600:
+        yr = int(_today_et()[:4])
+        url = ("https://baseballsavant.mlb.com/statcast_search/csv?all=true&hfGT=R%7C"
+               f"&hfSea={yr}%7C&player_type=pitcher&pitchers_lookup%5B%5D={pid}"
+               "&min_pitches=0&min_results=0&group_by=name&sort_col=pitches"
+               "&sort_order=desc&min_abs=0&type=details")
+        try:
+            import csv
+            r = requests.get(url, timeout=90, stream=True)
+            r.raise_for_status()
+            g = {}
+            rd = csv.reader(line.decode("utf-8-sig") for line in r.iter_lines())
+            hdr = next(rd, None) or []
+            try:
+                i_pt, i_gd, i_v = (hdr.index("pitch_type"), hdr.index("game_date"),
+                                   hdr.index("release_speed"))
+            except ValueError:
+                print(f"velo fetch: bad header for {pid}")
+                return None
+            for row in rd:
+                gd_ = row[i_gd]
+                a = g.setdefault(gd_, [0, 0, 0.0])
+                a[0] += 1
+                if row[i_pt] in ("FF", "SI") and row[i_v]:
+                    a[1] += 1
+                    a[2] += float(row[i_v])
+            ent = {"at": now.isoformat(), "g": g}
+            cache[str(pid)] = ent
+            VELO_CACHE.write_text(json.dumps(cache))
+        except (requests.RequestException, ValueError, IndexError) as e:
+            print(f"velo fetch failed ({pid}): {str(e)[:60]}")
+            return ent and None
+    starts = sorted((gd_, a[2] / a[1] if a[1] else None)
+                    for gd_, a in ent["g"].items() if a[0] >= 40)
+    starts = [s for s in starts if s[0] < _today_et()]
+    if len(starts) < 2 or starts[-1][1] is None or starts[-2][1] is None:
+        return None
+    velos = [v for _, v in starts[-10:] if v is not None]
+    if len(velos) < 4:
+        return None
+    return (starts[-1][1] + starts[-2][1]) / 2 - sum(velos) / len(velos)
+
+
 def slate():
     """Today's games with probables + POSTED lineups: [{pitcher, pid, opp_lineup_pids, home_team,
     start_iso, started}]. Lineup required — no fallback (matches the validated OOS)."""
@@ -510,6 +568,11 @@ def flag(con):
         pf = F["park"].get(g["home_team"])
         if pf is not None:
             S += F["pw"] * z(pf, F["park_mu"], F["park_sd"])
+        # velo-trend term (frozen sandbox norm; None -> 0, exactly as backtested)
+        if F.get("vd_w"):
+            vd = velo_trend(g["pid"])
+            if vd is not None:
+                S += F["vd_w"] * z(vd, F["vd_mu"], F["vd_sd"])
         K_DAY_SCORES[(g["pitcher"], gd)] = S       # signed; flag_outs reads for the ★★ tag
         side = "over" if S > 0 else "under"
         if abs(S) < THR:
@@ -531,20 +594,10 @@ def flag(con):
         skip = "price_cap" if od >= PRICE_CAP else None
         cp = cal_p(F, abs(S), 0.64)
         su, _ = stake_tier(cp, od)
-        # LADDER tier (2026-07-26, the 70% challenge winner, 6/6 cells both eras): deep OVER
-        # flags (S>=2.0 or *AR premium) also quote the 1-rung-down over at the posted alt price —
-        # sandbox 77-79% hit / +2.6-6.6% ROI, OOS 81-85% / +10-15%. Overs only (alt Ks are
-        # over-only ladders); logged in ladder_* cols, own record on the board.
-        lad_ln = lad_od = None
-        if side == "over" and (abs(S) >= 2.0 or premium):
-            lls2 = {}
-            for bk2 in BOOKS:
-                for l2, v2 in ((lines.get(_norm(g["pitcher"])) or {}).get(bk2) or {}).items():
-                    if l2 == ln - 1 and "over" in v2:
-                        if lad_od is None or v2["over"] > lad_od:
-                            lad_ln, lad_od = l2, v2["over"]
         # ★ PREMIUM tier (OOS-validated 2026-07-26, beat baseline BOTH held-out years):
         # S>=2.0 AND arsenal fit aligned >=1z. Additive tag — the base record is unchanged.
+        # (Must precede the LADDER block, which reads it — was previously below it, so the
+        # ladder saw the PREVIOUS candidate's premium, or NameError'd on the first sub-2.0 over.)
         ft = arsenal_fit(pmap, bmap, g["pid"], g["opp_lineup"])
         fitz = None
         if ft is not None and F.get("fit_sd"):
@@ -554,6 +607,17 @@ def flag(con):
         premium = 1 if (abs(S) >= 2.0 and fitz is not None
                         and ((fitz >= 0.75 and side == "over")
                              or (fitz <= -0.75 and side == "under"))) else 0
+        # LADDER tier (2026-07-26, the 70% challenge winner, 6/6 cells both eras): deep OVER
+        # flags (S>=2.0 or *AR premium) also quote the 1-rung-down over at the posted alt price —
+        # sandbox 77-79% hit / +2.6-6.6% ROI, OOS 81-85% / +10-15%. Overs only (alt Ks are
+        # over-only ladders); logged in ladder_* cols, own record on the board.
+        lad_ln = lad_od = None
+        if side == "over" and (abs(S) >= 2.0 or premium):
+            for bk2 in BOOKS:
+                for l2, v2 in ((lines.get(_norm(g["pitcher"])) or {}).get(bk2) or {}).items():
+                    if l2 == ln - 1 and "over" in v2:
+                        if lad_od is None or v2["over"] > lad_od:
+                            lad_ln, lad_od = l2, v2["over"]
         tier = tier_of(premium or abs(S) >= 2.4, cp, od)
         con.execute("INSERT INTO compass (pitcher, game_date, side, line, odds, book, score, opp, "
                     "flagged_at, skip, game, team, fitz, premium, cal_p, kelly_u, tier, "
