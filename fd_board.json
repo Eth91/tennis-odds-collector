@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T14:34:42Z",
+ "captured_at": "2026-07-26T14:39:36Z",
  "matches": [
   {
    "event_id": 35868816,
@@ -8,9 +8,9 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-07-26T14:20:00.000Z",
-   "line": 94.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 95.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35868844,
@@ -19,9 +19,9 @@
    "p1_norm": "maciej domin",
    "p2_norm": "karol wisniewski",
    "open_date": "2026-07-26T14:35:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 72.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35868845,
@@ -30,9 +30,9 @@
    "p1_norm": "alan wos",
    "p2_norm": "maciej sinicki",
    "open_date": "2026-07-26T14:35:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 79.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35868850,
@@ -52,7 +52,7 @@
    "p1_norm": "jakub nosiadek",
    "p2_norm": "wojciech gluszek",
    "open_date": "2026-07-26T14:40:00.000Z",
-   "line": 79.5,
+   "line": 78.5,
    "over_odds": -116,
    "under_odds": -116
   },
@@ -64,8 +64,8 @@
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-26T14:45:00.000Z",
    "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35868865,
@@ -99,6 +99,17 @@
    "line": 79.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35868873,
+   "p1": "Mariusz Adamus",
+   "p2": "Piotr Przewlocki",
+   "p1_norm": "mariusz adamus",
+   "p2_norm": "piotr przewlocki",
+   "open_date": "2026-07-26T15:05:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
