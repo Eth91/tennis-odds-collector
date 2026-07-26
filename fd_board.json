@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-26T01:14:47Z",
+ "captured_at": "2026-07-26T01:21:02Z",
  "matches": [
-  {
-   "event_id": 35866430,
-   "p1": "Karol Sulkowski",
-   "p2": "Dawid Poloszczanski",
-   "p1_norm": "karol sulkowski",
-   "p2_norm": "dawid poloszczanski",
-   "open_date": "2026-07-26T01:00:00.000Z",
-   "line": 83.5,
-   "over_odds": -150,
-   "under_odds": 110
-  },
-  {
-   "event_id": 35866431,
-   "p1": "Janus Slawomir",
-   "p2": "Pawel Chojnacki",
-   "p1_norm": "janus slawomir",
-   "p2_norm": "pawel chojnacki",
-   "open_date": "2026-07-26T01:00:00.000Z",
-   "line": 85.5,
-   "over_odds": -130,
-   "under_odds": -105
-  },
   {
    "event_id": 35866448,
    "p1": "Roman Wiza",
@@ -30,9 +8,9 @@
    "p1_norm": "roman wiza",
    "p2_norm": "marcin lach",
    "open_date": "2026-07-26T01:10:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 88.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35866449,
@@ -42,8 +20,8 @@
    "p2_norm": "miroslaw warzecha",
    "open_date": "2026-07-26T01:10:00.000Z",
    "line": 71.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35866466,
@@ -88,6 +66,17 @@
    "line": 74.5,
    "over_odds": -120,
    "under_odds": -110
+  },
+  {
+   "event_id": 35866477,
+   "p1": "Dariusz Maszczynski",
+   "p2": "Pawel Chojnacki",
+   "p1_norm": "dariusz maszczynski",
+   "p2_norm": "pawel chojnacki",
+   "open_date": "2026-07-26T01:45:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
