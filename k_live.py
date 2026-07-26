@@ -984,6 +984,8 @@ def board(con):
                                   "ORDER BY score DESC", (_today_et(),))]
     prem_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) FROM compass "
                            "WHERE result IN ('W','L') AND skip IS NULL AND premium=1").fetchone()
+    lk_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) FROM compass "
+                         "WHERE result IN ('W','L') AND skip IS NULL AND driver='lineupK'").fetchone()
     tier_recs = {}
     for t_ in ("S", "A", "B", "C"):
         w_ = l_ = 0
@@ -1049,6 +1051,7 @@ def board(con):
          "tiers": tier_recs,
          "shadow": {"w": shadow[0] or 0, "l": shadow[1] or 0, "u": shadow[2] or 0.0},
          "premium": {"w": prem_rec[0] or 0, "l": prem_rec[1] or 0, "u": prem_rec[2] or 0.0},
+         "lk": {"w": lk_rec[0] or 0, "l": lk_rec[1] or 0, "u": lk_rec[2] or 0.0},
          "ladder": {"w": lad_rec[0] or 0, "l": lad_rec[1] or 0, "u": lad_rec[2] or 0.0},
          "kagree": {"w": kag_rec[0] or 0, "l": kag_rec[1] or 0, "u": kag_rec[2] or 0.0},
          "today": flags,

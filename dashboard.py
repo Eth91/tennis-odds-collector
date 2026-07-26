@@ -866,6 +866,9 @@ def _tracker_panel(wnba_rec, tt_json):
         knote = "S-composite vs day-of lineups · flag-time price · paper"
         if (_pr.get("w", 0) + _pr.get("l", 0)):
             knote += f" · ★AR premium {_pr['w']}-{_pr['l']} ({_pr['u']:+.1f}u)"
+        _lk = _cbt.get("lk") or {}
+        if (_lk.get("w") or 0) + (_lk.get("l") or 0) >= 3:
+            knote += f" · 💎LK {_lk['w']}-{_lk['l']} ({_lk['u']:+.1f}u)"
         mlb_card += card('<img class="tlogo" src="logos/mlb.png" alt="">', "K-COMPASS",
                          _kk.get("w") or 0, _kk.get("l") or 0, _kk.get("u") or 0.0, knote)
         onote = "traffic+leash composite · no unders &lt;16.5 · paper"
