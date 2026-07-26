@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T23:32:00Z",
+ "captured_at": "2026-07-26T23:36:32Z",
  "matches": [
   {
    "event_id": 35870468,
@@ -8,31 +8,9 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-26T23:20:00.000Z",
-   "line": 83.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35870511,
-   "p1": "Tomasz Filbrandt",
-   "p2": "Jakub Zochniak",
-   "p1_norm": "tomasz filbrandt",
-   "p2_norm": "jakub zochniak",
-   "open_date": "2026-07-26T23:35:00.000Z",
-   "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35870512,
-   "p1": "Jakub Pruszkowski",
-   "p2": "Michal Paszkiewicz",
-   "p1_norm": "jakub pruszkowski",
-   "p2_norm": "michal paszkiewicz",
-   "open_date": "2026-07-26T23:35:00.000Z",
-   "line": 74.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 89.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35870519,
@@ -77,6 +55,17 @@
    "line": 74.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35870548,
+   "p1": "Sebastian Krupa",
+   "p2": "Oskar Sokolowski",
+   "p1_norm": "sebastian krupa",
+   "p2_norm": "oskar sokolowski",
+   "open_date": "2026-07-27T00:00:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -116
   }
  ]
 }
