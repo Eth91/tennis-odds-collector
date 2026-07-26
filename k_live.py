@@ -95,7 +95,7 @@ def _con():
             c.execute(f"ALTER TABLE {tbl} ADD COLUMN team TEXT")
         except sqlite3.OperationalError:
             pass
-    for col in ("fitz REAL", "premium INTEGER DEFAULT 0"):
+    for col in ("fitz REAL", "premium INTEGER DEFAULT 0", "driver TEXT"):
         try:
             c.execute(f"ALTER TABLE compass ADD COLUMN {col}")
         except sqlite3.OperationalError:
@@ -577,6 +577,14 @@ def flag(con):
         side = "over" if S > 0 else "under"
         if abs(S) < THR:
             continue
+        # dominant S-driver (win-decomp 2026-07-27: lineup-K-driven flags run 62-71% in EVERY
+        # year — the model's edge lives where its info is fresher than the book's, i.e. the
+        # posted lineup. Priority tag only; scoring untouched.)
+        sgn = 1 if side == "over" else -1
+        comps = {"oppK": sgn * F["kw"] * z(oppk, F["ok_mu"], F["ok_sd"]),
+                 "lineupK": sgn * (1 - F["kw"]) * z(lk, F["lk_mu"], F["lk_sd"]),
+                 "formFade": sgn * -F["rw"] * z(rk, F["rk_mu"], F["rk_sd"])}
+        driver = max(comps, key=comps.get)
         # per-book main line (2-sided nearest even), then best price for our side
         best = None
         for bk in BOOKS:
@@ -621,11 +629,11 @@ def flag(con):
         tier = tier_of(premium or abs(S) >= 2.4, cp, od)
         con.execute("INSERT INTO compass (pitcher, game_date, side, line, odds, book, score, opp, "
                     "flagged_at, skip, game, team, fitz, premium, cal_p, kelly_u, tier, "
-                    "ladder_ln, ladder_od) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    "ladder_ln, ladder_od, driver) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                     (g["pitcher"], gd, side, ln, od, bk, round(abs(S), 2), g["opp_name"], ts, skip,
                      g["home_team"] + "|" + str(g.get("start") or ""), g.get("team_ab") or "",
                      round(fitz, 2) if fitz is not None else None, premium,
-                     round(cp, 3) if cp else None, su, tier, lad_ln, lad_od))
+                     round(cp, 3) if cp else None, su, tier, lad_ln, lad_od, driver))
         new += 1
         if not skip and topic:
             am = f"+{round((od-1)*100)}" if od >= 2 else f"-{round(100/(od-1))}"
@@ -636,7 +644,8 @@ def flag(con):
                 lad = f" | LDR O{lad_ln:g} {lam}"
             txt = (f"🚨 ⚾K [{tier or '-'}] {g['opp_name']} {g['pitcher']} "
                    f"{'O' if side == 'over' else 'U'}{ln:g}K {am} {bk.upper()} "
-                   f"{su or 0.25}u{' ★AR' if premium else ''}{lad}")
+                   f"{su or 0.25}u{' ★AR' if premium else ''}"
+                   f"{' 💎LK' if driver == 'lineupK' else ''}{lad}")
             try:
                 requests.post(f"https://ntfy.sh/{topic}", data=txt.encode(),
                               params={"title": "Pickz", "priority": "high"}, timeout=15
@@ -968,9 +977,9 @@ def board(con):
     rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) FROM compass "
                       "WHERE result IN ('W','L') AND skip IS NULL").fetchone()
     flags = [dict(zip(("pitcher", "side", "line", "odds", "book", "score", "opp", "skip", "team",
-                       "game", "premium", "tier", "kelly_u", "ladder_ln", "ladder_od"), r))
+                       "game", "premium", "tier", "kelly_u", "ladder_ln", "ladder_od", "driver"), r))
              for r in con.execute("SELECT pitcher, side, line, odds, book, score, opp, skip, team, "
-                                  "game, premium, tier, kelly_u, ladder_ln, ladder_od "
+                                  "game, premium, tier, kelly_u, ladder_ln, ladder_od, driver "
                                   "FROM compass WHERE game_date=? "
                                   "ORDER BY score DESC", (_today_et(),))]
     prem_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) FROM compass "

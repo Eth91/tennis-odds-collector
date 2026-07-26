@@ -2145,6 +2145,8 @@ def build():
                                     or f["score"] >= hi_s) else "mid"
                     pct = next(p for s_, p in bands if f["score"] >= s_)
                     mark = " ★AR" if f.get("premium") else (" ★★K" if f.get("kagree") else "")
+                    if f.get("driver") == "lineupK":
+                        mark += " 💎LK"   # lineup-K-driven: 62-71% every year (win-decomp 7/27)
                     tier = f.get("tier")
                     ku = f.get("kelly_u")
                     lad = ""
