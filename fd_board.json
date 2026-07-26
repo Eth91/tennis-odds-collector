@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T21:39:43Z",
+ "captured_at": "2026-07-26T21:44:08Z",
  "matches": [
   {
    "event_id": 35870314,
@@ -8,9 +8,9 @@
    "p1_norm": "schaniel krzysztof",
    "p2_norm": "grzegorz marud",
    "open_date": "2026-07-26T21:30:00.000Z",
-   "line": 71.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 85.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35870341,
@@ -19,9 +19,9 @@
    "p1_norm": "jakub pruszkowski",
    "p2_norm": "lukasz oracz",
    "open_date": "2026-07-26T21:35:00.000Z",
-   "line": 72.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 55.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35870351,
@@ -88,6 +88,28 @@
    "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35870371,
+   "p1": "Stapor Rafal",
+   "p2": "Mateusz Trela",
+   "p1_norm": "stapor rafal",
+   "p2_norm": "mateusz trela",
+   "open_date": "2026-07-26T22:10:00.000Z",
+   "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35870372,
+   "p1": "Pawel Chojnacki",
+   "p2": "Jacek Zelezik",
+   "p1_norm": "pawel chojnacki",
+   "p2_norm": "jacek zelezik",
+   "open_date": "2026-07-26T22:10:00.000Z",
+   "line": 73.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
