@@ -1064,4 +1064,9 @@ if __name__ == "__main__":
     grade_parlay(c)
     board(c)
     c.close()
+    try:
+        import mlb_meters
+        mlb_meters.run()
+    except Exception as e:  # meters are shadows — must never break the flagger
+        print("meters skipped:", str(e)[:80])
     print("k_live cycle done", _now())
