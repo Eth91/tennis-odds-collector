@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T14:07:40Z",
+ "captured_at": "2026-07-26T14:12:05Z",
  "matches": [
-  {
-   "event_id": 35868753,
-   "p1": "Oliwier Sokolowski",
-   "p2": "Jacek Wieczerzak",
-   "p1_norm": "oliwier sokolowski",
-   "p2_norm": "jacek wieczerzak",
-   "open_date": "2026-07-26T13:55:00.000Z",
-   "line": 72.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35868754,
    "p1": "Bartlomiej Wisniewski",
@@ -19,9 +8,9 @@
    "p1_norm": "bartlomiej wisniewski",
    "p2_norm": "piotr staniszewski",
    "open_date": "2026-07-26T13:55:00.000Z",
-   "line": 96.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 98.5,
+   "over_odds": 105,
+   "under_odds": -145
   },
   {
    "event_id": 35868755,
@@ -31,8 +20,8 @@
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-26T13:55:00.000Z",
    "line": 87.5,
-   "over_odds": -145,
-   "under_odds": 105
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35868797,
@@ -41,9 +30,9 @@
    "p1_norm": "jan zandecki",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-26T14:10:00.000Z",
-   "line": 73.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35868804,
@@ -52,9 +41,9 @@
    "p1_norm": "jakub wozniak",
    "p2_norm": "maciej kolek",
    "open_date": "2026-07-26T14:15:00.000Z",
-   "line": 73.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 74.5,
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35868815,
@@ -64,8 +53,8 @@
    "p2_norm": "igor szymanski",
    "open_date": "2026-07-26T14:20:00.000Z",
    "line": 74.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35868816,
@@ -107,9 +96,9 @@
    "p1_norm": "alan wos",
    "p2_norm": "maciej sinicki",
    "open_date": "2026-07-26T14:35:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
