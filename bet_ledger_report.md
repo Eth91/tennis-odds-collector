@@ -1,6 +1,6 @@
 # Bet ledger — automated results, CLV & P&L
 
-_2026-07-26T12:46:50 UTC_ · 1 unit = $100 · flag threshold +2% EV
+_2026-07-26T12:47:00 UTC_ · 1 unit = $100 · flag threshold +2% EV
 
 - **Record:** 189-297-3  ·  **P&L:** -55.48u ($-5,548)  ·  **ROI:** -11.3%
 - **Avg CLV:** +6.95% over 312 closed bets  ·  **Open:** 14  ·  **Total logged:** 526
