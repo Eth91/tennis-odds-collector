@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T17:43:24Z",
+ "captured_at": "2026-07-26T17:47:26Z",
  "matches": [
   {
    "event_id": 35869442,
@@ -8,7 +8,7 @@
    "p1_norm": "schaniel krzysztof",
    "p2_norm": "wojciech urban",
    "open_date": "2026-07-26T17:30:00.000Z",
-   "line": 96.5,
+   "line": 84.5,
    "over_odds": -110,
    "under_odds": -125
   },
@@ -19,9 +19,9 @@
    "p1_norm": "mariusz baron",
    "p2_norm": "michal paszkiewicz",
    "open_date": "2026-07-26T17:35:00.000Z",
-   "line": 70.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 63.5,
+   "over_odds": -105,
+   "under_odds": -135
   },
   {
    "event_id": 35869544,
@@ -30,9 +30,9 @@
    "p1_norm": "filip mlynarski",
    "p2_norm": "alan wos",
    "open_date": "2026-07-26T17:40:00.000Z",
-   "line": 69.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 68.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35869551,
@@ -42,8 +42,8 @@
    "p2_norm": "jakub nosiadek",
    "open_date": "2026-07-26T17:45:00.000Z",
    "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35869552,
@@ -53,8 +53,8 @@
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-26T17:45:00.000Z",
    "line": 74.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35869572,
@@ -62,7 +62,7 @@
    "p2": "Piotr Gumulinski",
    "p1_norm": "jakub nowak",
    "p2_norm": "piotr gumulinski",
-   "open_date": "2026-07-26T17:55:00.000Z",
+   "open_date": "2026-07-26T18:00:00.000Z",
    "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
