@@ -93,6 +93,7 @@ rw|258|Quiet again off bench
 rw|272|Picks up triple-double Wednesday
 rw|276|Another quality showing Wednesday
 rw|276|Double-doubles in win
+rw|276|Named All-Star Game MVP
 rw|278|Reaches 20-point plateau
 rw|278|Scoreless in road win
 rw|291|Goes for 15 points in loss

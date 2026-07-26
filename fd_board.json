@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T02:33:21Z",
+ "captured_at": "2026-07-26T02:37:52Z",
  "matches": [
   {
    "event_id": 35866524,
@@ -8,9 +8,9 @@
    "p1_norm": "damian fira",
    "p2_norm": "michal durda",
    "open_date": "2026-07-26T02:20:00.000Z",
-   "line": 91.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 97.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35866525,
@@ -19,9 +19,9 @@
    "p1_norm": "kacper kwiatkowski",
    "p2_norm": "michal guzik",
    "open_date": "2026-07-26T02:20:00.000Z",
-   "line": 68.5,
-   "over_odds": -135,
-   "under_odds": -105
+   "line": 75.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35866543,
@@ -30,9 +30,9 @@
    "p1_norm": "janus slawomir",
    "p2_norm": "tomasz kocik",
    "open_date": "2026-07-26T02:35:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35866549,
@@ -42,8 +42,8 @@
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-26T02:45:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35866550,
@@ -53,8 +53,8 @@
    "p2_norm": "kamil durak",
    "open_date": "2026-07-26T02:45:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35866570,
@@ -88,6 +88,17 @@
    "line": 70.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35866576,
+   "p1": "Robert Szymik",
+   "p2": "Michal Durda",
+   "p1_norm": "robert szymik",
+   "p2_norm": "michal durda",
+   "open_date": "2026-07-26T03:05:00.000Z",
+   "line": 73.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
