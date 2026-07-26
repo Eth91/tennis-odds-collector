@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-26T22:48:58Z",
+ "captured_at": "2026-07-26T22:54:01Z",
  "matches": [
-  {
-   "event_id": 35870392,
-   "p1": "Michal Durda",
-   "p2": "Wojciech Urban",
-   "p1_norm": "michal durda",
-   "p2_norm": "wojciech urban",
-   "open_date": "2026-07-26T22:40:00.000Z",
-   "line": 84.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35870399,
-   "p1": "Jakub Zochniak",
-   "p2": "Mateusz Rutkowski",
-   "p1_norm": "jakub zochniak",
-   "p2_norm": "mateusz rutkowski",
-   "open_date": "2026-07-26T22:50:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
   {
    "event_id": 35870400,
    "p1": "Jaroslaw Badura",
@@ -30,9 +8,9 @@
    "p1_norm": "jaroslaw badura",
    "p2_norm": "michal paszkiewicz",
    "open_date": "2026-07-26T22:50:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 79.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35870404,
@@ -88,6 +66,28 @@
    "line": 76.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35870468,
+   "p1": "Jacek Zelezik",
+   "p2": "Kacper Kwiatkowski",
+   "p1_norm": "jacek zelezik",
+   "p2_norm": "kacper kwiatkowski",
+   "open_date": "2026-07-26T23:20:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35870469,
+   "p1": "Arkadiusz Mugowski",
+   "p2": "Stapor Rafal",
+   "p1_norm": "arkadiusz mugowski",
+   "p2_norm": "stapor rafal",
+   "open_date": "2026-07-26T23:20:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
