@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T12:40:52Z",
+ "captured_at": "2026-07-26T12:45:41Z",
  "matches": [
   {
    "event_id": 35868516,
@@ -8,9 +8,9 @@
    "p1_norm": "piotr przewlocki",
    "p2_norm": "patryk jedrzejak",
    "open_date": "2026-07-26T12:20:00.000Z",
-   "line": 71.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 92.5,
+   "over_odds": -140,
+   "under_odds": 100
   },
   {
    "event_id": 35868547,
@@ -19,9 +19,9 @@
    "p1_norm": "kacper petas",
    "p2_norm": "jan zandecki",
    "open_date": "2026-07-26T12:30:00.000Z",
-   "line": 87.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 102.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35868555,
@@ -30,9 +30,9 @@
    "p1_norm": "bartlomiej mleczko",
    "p2_norm": "jakub wozniak",
    "open_date": "2026-07-26T12:35:00.000Z",
-   "line": 81.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 75.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35868561,
@@ -41,9 +41,9 @@
    "p1_norm": "bartlomiej wisniewski",
    "p2_norm": "bartosz sulkowski",
    "open_date": "2026-07-26T12:40:00.000Z",
-   "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 70.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35868562,
@@ -52,9 +52,9 @@
    "p1_norm": "oliwier sokolowski",
    "p2_norm": "marian lebek",
    "open_date": "2026-07-26T12:40:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35868577,
@@ -63,9 +63,9 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "mariusz adamus",
    "open_date": "2026-07-26T12:45:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35868606,
@@ -110,6 +110,17 @@
    "line": 59.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35868638,
+   "p1": "Patryk Jedrzejak",
+   "p2": "Sebastian Szostok",
+   "p1_norm": "patryk jedrzejak",
+   "p2_norm": "sebastian szostok",
+   "open_date": "2026-07-26T13:10:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
