@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-26T23:03:29Z",
+ "captured_at": "2026-07-26T23:07:55Z",
  "matches": [
-  {
-   "event_id": 35870400,
-   "p1": "Jaroslaw Badura",
-   "p2": "Michal Paszkiewicz",
-   "p1_norm": "jaroslaw badura",
-   "p2_norm": "michal paszkiewicz",
-   "open_date": "2026-07-26T22:50:00.000Z",
-   "line": 89.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35870415,
-   "p1": "Schaniel Krzysztof",
-   "p2": "Piotr Gumulinski",
-   "p1_norm": "schaniel krzysztof",
-   "p2_norm": "piotr gumulinski",
-   "open_date": "2026-07-26T23:05:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
   {
    "event_id": 35870423,
    "p1": "Oskar Sokolowski",
@@ -52,9 +30,9 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-26T23:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35870469,
@@ -64,8 +42,8 @@
    "p2_norm": "stapor rafal",
    "open_date": "2026-07-26T23:20:00.000Z",
    "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35870505,
@@ -74,9 +52,31 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "wojciech urban",
    "open_date": "2026-07-26T23:30:00.000Z",
-   "line": 78.5,
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35870511,
+   "p1": "Tomasz Filbrandt",
+   "p2": "Jakub Zochniak",
+   "p1_norm": "tomasz filbrandt",
+   "p2_norm": "jakub zochniak",
+   "open_date": "2026-07-26T23:35:00.000Z",
+   "line": 80.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35870512,
+   "p1": "Jakub Pruszkowski",
+   "p2": "Michal Paszkiewicz",
+   "p1_norm": "jakub pruszkowski",
+   "p2_norm": "michal paszkiewicz",
+   "open_date": "2026-07-26T23:35:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
