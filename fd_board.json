@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T14:57:42Z",
+ "captured_at": "2026-07-26T15:02:08Z",
  "matches": [
-  {
-   "event_id": 35868857,
-   "p1": "Patryk Jedrzejak",
-   "p2": "Oskar Jadach",
-   "p1_norm": "patryk jedrzejak",
-   "p2_norm": "oskar jadach",
-   "open_date": "2026-07-26T14:45:00.000Z",
-   "line": 63.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35868865,
    "p1": "Kazimierz Rybak",
@@ -19,9 +8,9 @@
    "p1_norm": "kazimierz rybak",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-26T15:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35868866,
@@ -31,17 +20,6 @@
    "p2_norm": "mateusz rutkowski",
    "open_date": "2026-07-26T15:00:00.000Z",
    "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
-  },
-  {
-   "event_id": 35868867,
-   "p1": "Arkadiusz Mugowski",
-   "p2": "Karol Sulkowski",
-   "p1_norm": "arkadiusz mugowski",
-   "p2_norm": "karol sulkowski",
-   "open_date": "2026-07-26T15:00:00.000Z",
-   "line": 79.5,
    "over_odds": -118,
    "under_odds": -112
   },
