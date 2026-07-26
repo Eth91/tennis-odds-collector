@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T01:33:20Z",
+ "captured_at": "2026-07-26T01:39:27Z",
  "matches": [
   {
    "event_id": 35866472,
@@ -8,9 +8,9 @@
    "p1_norm": "michal durda",
    "p2_norm": "kamil durak",
    "open_date": "2026-07-26T01:30:00.000Z",
-   "line": 86.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 78.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35866473,
@@ -19,8 +19,8 @@
    "p1_norm": "jakub skorupa",
    "p2_norm": "michal guzik",
    "open_date": "2026-07-26T01:35:00.000Z",
-   "line": 74.5,
-   "over_odds": -120,
+   "line": 67.5,
+   "over_odds": -125,
    "under_odds": -110
   },
   {
@@ -53,8 +53,8 @@
    "p2_norm": "miroslaw warzecha",
    "open_date": "2026-07-26T02:00:00.000Z",
    "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -120,
+   "under_odds": -110
   }
  ]
 }
