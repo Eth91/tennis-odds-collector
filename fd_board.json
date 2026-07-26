@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T17:27:58Z",
+ "captured_at": "2026-07-26T17:32:21Z",
  "matches": [
   {
    "event_id": 35869433,
@@ -8,20 +8,9 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "mateusz rutkowski",
    "open_date": "2026-07-26T17:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35869434,
-   "p1": "Jacek Zelezik",
-   "p2": "Kacper Kwiatkowski",
-   "p1_norm": "jacek zelezik",
-   "p2_norm": "kacper kwiatkowski",
-   "open_date": "2026-07-26T17:20:00.000Z",
-   "line": 73.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 61.5,
+   "over_odds": 100,
+   "under_odds": -140
   },
   {
    "event_id": 35869435,
@@ -30,9 +19,9 @@
    "p1_norm": "jakub glanowski",
    "p2_norm": "karol sulkowski",
    "open_date": "2026-07-26T17:20:00.000Z",
-   "line": 56.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 71.5,
+   "over_odds": 100,
+   "under_odds": -135
   },
   {
    "event_id": 35869442,
@@ -42,8 +31,8 @@
    "p2_norm": "wojciech urban",
    "open_date": "2026-07-26T17:30:00.000Z",
    "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35869491,
@@ -86,8 +75,8 @@
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-26T17:45:00.000Z",
    "line": 74.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35869572,
