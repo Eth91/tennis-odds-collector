@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-26T22:35:29Z",
+ "captured_at": "2026-07-26T22:39:57Z",
  "matches": [
-  {
-   "event_id": 35870384,
-   "p1": "Filip Mlynarski",
-   "p2": "Tomasz Filbrandt",
-   "p1_norm": "filip mlynarski",
-   "p2_norm": "tomasz filbrandt",
-   "open_date": "2026-07-26T22:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35870385,
-   "p1": "Kazimierz Rybak",
-   "p2": "Kacper Kwiatkowski",
-   "p1_norm": "kazimierz rybak",
-   "p2_norm": "kacper kwiatkowski",
-   "open_date": "2026-07-26T22:35:00.000Z",
-   "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
-  },
   {
    "event_id": 35870392,
    "p1": "Michal Durda",
@@ -30,9 +8,9 @@
    "p1_norm": "michal durda",
    "p2_norm": "wojciech urban",
    "open_date": "2026-07-26T22:40:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35870399,
@@ -53,8 +31,8 @@
    "p2_norm": "michal paszkiewicz",
    "open_date": "2026-07-26T22:50:00.000Z",
    "line": 76.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35870404,
@@ -77,6 +55,17 @@
    "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35870415,
+   "p1": "Schaniel Krzysztof",
+   "p2": "Piotr Gumulinski",
+   "p1_norm": "schaniel krzysztof",
+   "p2_norm": "piotr gumulinski",
+   "open_date": "2026-07-26T23:05:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
