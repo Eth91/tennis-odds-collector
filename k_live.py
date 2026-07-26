@@ -320,7 +320,9 @@ def arsenal_maps():
                              params={"type": typ, "pitchType": "", "year": 2026, "team": "",
                                      "min": 25, "csv": "true"}, timeout=60)
             r.raise_for_status()
-            for row in csv.DictReader(io.StringIO(r.text)):
+            # utf-8-sig: Savant's CSV leads with a BOM *before* the first quoted header, which
+            # breaks csv quoting and shifts every fieldname by one (player_id -> team string).
+            for row in csv.DictReader(io.StringIO(r.content.decode("utf-8-sig"))):
                 try:
                     pid = int(row["player_id"])
                     v = float(row[col])
