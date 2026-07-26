@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-07-26T08:40:30Z",
+ "captured_at": "2026-07-26T08:44:47Z",
  "matches": [
-  {
-   "event_id": 35867614,
-   "p1": "Piotr Zemla",
-   "p2": "Jakub Jesiek",
-   "p1_norm": "piotr zemla",
-   "p2_norm": "jakub jesiek",
-   "open_date": "2026-07-26T08:20:00.000Z",
-   "line": 94.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35867621,
-   "p1": "Bartlomiej Mleczko",
-   "p2": "Jakub Wozniak",
-   "p1_norm": "bartlomiej mleczko",
-   "p2_norm": "jakub wozniak",
-   "open_date": "2026-07-26T08:30:00.000Z",
-   "line": 51.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35867622,
-   "p1": "Kacper Petas",
-   "p2": "Jan Zandecki",
-   "p1_norm": "kacper petas",
-   "p2_norm": "jan zandecki",
-   "open_date": "2026-07-26T08:30:00.000Z",
-   "line": 55.5,
-   "over_odds": 100,
-   "under_odds": -140
-  },
   {
    "event_id": 35867637,
    "p1": "Jacek Wieczerzak",
@@ -41,9 +8,9 @@
    "p1_norm": "jacek wieczerzak",
    "p2_norm": "pawel slosarczyk",
    "open_date": "2026-07-26T08:35:00.000Z",
-   "line": 90.5,
+   "line": 85.5,
    "over_odds": -115,
-   "under_odds": -120
+   "under_odds": -115
   },
   {
    "event_id": 35867642,
