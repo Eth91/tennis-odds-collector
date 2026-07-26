@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T04:05:06Z",
+ "captured_at": "2026-07-26T04:09:07Z",
  "matches": [
   {
    "event_id": 35866782,
@@ -8,9 +8,9 @@
    "p1_norm": "waclaw suchecki",
    "p2_norm": "piotr staniszewski",
    "open_date": "2026-07-26T03:50:00.000Z",
-   "line": 88.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 97.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35866790,
@@ -19,7 +19,7 @@
    "p1_norm": "piotr zemla",
    "p2_norm": "wojciech pytlas",
    "open_date": "2026-07-26T04:00:00.000Z",
-   "line": 79.5,
+   "line": 60.5,
    "over_odds": -115,
    "under_odds": -120
   },
