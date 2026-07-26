@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T20:48:24Z",
+ "captured_at": "2026-07-26T20:52:47Z",
  "matches": [
   {
    "event_id": 35870263,
@@ -8,7 +8,7 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "piotr gumulinski",
    "open_date": "2026-07-26T20:45:00.000Z",
-   "line": 80.5,
+   "line": 65.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -19,9 +19,9 @@
    "p1_norm": "oskar sokolowski",
    "p2_norm": "lukasz oracz",
    "open_date": "2026-07-26T20:45:00.000Z",
-   "line": 72.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35870266,
