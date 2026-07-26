@@ -97,7 +97,7 @@ def _con():
             pass
     for tbl in ("compass", "outs_compass", "ethan_k"):
         for col in ("stack INTEGER DEFAULT 0", "rung1_od REAL", "rung2_od REAL",
-                    "rung1_res TEXT", "rung2_res TEXT"):
+                    "rung1_res TEXT", "rung2_res TEXT", "skip TEXT"):
             try:
                 c.execute(f"ALTER TABLE {tbl} ADD COLUMN {col}")
             except sqlite3.OperationalError:
