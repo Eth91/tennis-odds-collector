@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-26T02:37:52Z",
+ "captured_at": "2026-07-26T02:43:31Z",
  "matches": [
-  {
-   "event_id": 35866524,
-   "p1": "Damian Fira",
-   "p2": "Michal Durda",
-   "p1_norm": "damian fira",
-   "p2_norm": "michal durda",
-   "open_date": "2026-07-26T02:20:00.000Z",
-   "line": 97.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35866525,
-   "p1": "Kacper Kwiatkowski",
-   "p2": "Michal Guzik",
-   "p1_norm": "kacper kwiatkowski",
-   "p2_norm": "michal guzik",
-   "open_date": "2026-07-26T02:20:00.000Z",
-   "line": 75.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35866543,
    "p1": "Janus Slawomir",
@@ -30,7 +8,7 @@
    "p1_norm": "janus slawomir",
    "p2_norm": "tomasz kocik",
    "open_date": "2026-07-26T02:35:00.000Z",
-   "line": 77.5,
+   "line": 85.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -99,6 +77,17 @@
    "line": 73.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35866578,
+   "p1": "Rafal Adach",
+   "p2": "Jakub Jesiek",
+   "p1_norm": "rafal adach",
+   "p2_norm": "jakub jesiek",
+   "open_date": "2026-07-26T03:10:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
