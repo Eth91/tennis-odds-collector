@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-26T16:23:27Z",
+ "captured_at": "2026-07-26T16:28:26Z",
  "matches": [
-  {
-   "event_id": 35869258,
-   "p1": "Kazimierz Rybak",
-   "p2": "Jacek Zelezik",
-   "p1_norm": "kazimierz rybak",
-   "p2_norm": "jacek zelezik",
-   "open_date": "2026-07-26T16:15:00.000Z",
-   "line": 68.5,
-   "over_odds": -105,
-   "under_odds": -135
-  },
-  {
-   "event_id": 35869259,
-   "p1": "Arkadiusz Mugowski",
-   "p2": "Jakub Glanowski",
-   "p1_norm": "arkadiusz mugowski",
-   "p2_norm": "jakub glanowski",
-   "open_date": "2026-07-26T16:15:00.000Z",
-   "line": 71.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
   {
    "event_id": 35869276,
    "p1": "Mariusz Adamus",
@@ -30,9 +8,9 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "patryk jedrzejak",
    "open_date": "2026-07-26T16:20:00.000Z",
-   "line": 71.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 73.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35869284,
@@ -41,9 +19,9 @@
    "p1_norm": "oskar sokolowski",
    "p2_norm": "mariusz baron",
    "open_date": "2026-07-26T16:25:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35869307,
@@ -76,6 +54,50 @@
    "open_date": "2026-07-26T16:40:00.000Z",
    "line": 73.5,
    "over_odds": -116,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35869330,
+   "p1": "Sebastian Krupa",
+   "p2": "Michal Paszkiewicz",
+   "p1_norm": "sebastian krupa",
+   "p2_norm": "michal paszkiewicz",
+   "open_date": "2026-07-26T16:50:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35869332,
+   "p1": "Adam Staniczek",
+   "p2": "Henryk Tkaczyk",
+   "p1_norm": "adam staniczek",
+   "p2_norm": "henryk tkaczyk",
+   "open_date": "2026-07-26T16:55:00.000Z",
+   "line": 70.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35869333,
+   "p1": "Alan Wos",
+   "p2": "Tomasz Filbrandt",
+   "p1_norm": "alan wos",
+   "p2_norm": "tomasz filbrandt",
+   "open_date": "2026-07-26T16:55:00.000Z",
+   "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35869334,
+   "p1": "Jakub Nosiadek",
+   "p2": "Aleksander Lilien",
+   "p1_norm": "jakub nosiadek",
+   "p2_norm": "aleksander lilien",
+   "open_date": "2026-07-26T16:55:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
    "under_odds": -118
   }
  ]
