@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T12:32:08Z",
+ "captured_at": "2026-07-26T12:36:35Z",
  "matches": [
   {
    "event_id": 35868516,
@@ -8,7 +8,7 @@
    "p1_norm": "piotr przewlocki",
    "p2_norm": "patryk jedrzejak",
    "open_date": "2026-07-26T12:20:00.000Z",
-   "line": 79.5,
+   "line": 82.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -19,9 +19,9 @@
    "p1_norm": "kacper petas",
    "p2_norm": "jan zandecki",
    "open_date": "2026-07-26T12:30:00.000Z",
-   "line": 76.5,
+   "line": 83.5,
    "over_odds": -115,
-   "under_odds": -115
+   "under_odds": -120
   },
   {
    "event_id": 35868555,
@@ -30,9 +30,9 @@
    "p1_norm": "bartlomiej mleczko",
    "p2_norm": "jakub wozniak",
    "open_date": "2026-07-26T12:35:00.000Z",
-   "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 79.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35868561,
@@ -77,6 +77,17 @@
    "line": 73.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35868624,
+   "p1": "Alan Wos",
+   "p2": "Aleksander Lilien",
+   "p1_norm": "alan wos",
+   "p2_norm": "aleksander lilien",
+   "open_date": "2026-07-26T13:00:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
