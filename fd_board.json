@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T18:39:31Z",
+ "captured_at": "2026-07-26T18:44:28Z",
  "matches": [
-  {
-   "event_id": 35869981,
-   "p1": "Sebastian Krupa",
-   "p2": "Lukasz Oracz",
-   "p1_norm": "sebastian krupa",
-   "p2_norm": "lukasz oracz",
-   "open_date": "2026-07-26T18:25:00.000Z",
-   "line": 89.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35870014,
    "p1": "Jacek Zelezik",
@@ -19,9 +8,9 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-26T18:30:00.000Z",
-   "line": 56.5,
-   "over_odds": 110,
-   "under_odds": -155
+   "line": 80.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870068,
@@ -30,7 +19,7 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "alan wos",
    "open_date": "2026-07-26T18:30:00.000Z",
-   "line": 58.5,
+   "line": 78.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -77,6 +66,28 @@
    "line": 78.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35870145,
+   "p1": "Oskar Sokolowski",
+   "p2": "Sebastian Krupa",
+   "p1_norm": "oskar sokolowski",
+   "p2_norm": "sebastian krupa",
+   "open_date": "2026-07-26T19:10:00.000Z",
+   "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35870146,
+   "p1": "Grzegorz Marud",
+   "p2": "Wojciech Urban",
+   "p1_norm": "grzegorz marud",
+   "p2_norm": "wojciech urban",
+   "open_date": "2026-07-26T19:10:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
