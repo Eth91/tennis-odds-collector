@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T14:03:23Z",
+ "captured_at": "2026-07-26T14:07:40Z",
  "matches": [
-  {
-   "event_id": 35868729,
-   "p1": "Bartlomiej Mleczko",
-   "p2": "Aleksander Lilien",
-   "p1_norm": "bartlomiej mleczko",
-   "p2_norm": "aleksander lilien",
-   "open_date": "2026-07-26T13:50:00.000Z",
-   "line": 95.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
   {
    "event_id": 35868753,
    "p1": "Oliwier Sokolowski",
@@ -19,9 +8,9 @@
    "p1_norm": "oliwier sokolowski",
    "p2_norm": "jacek wieczerzak",
    "open_date": "2026-07-26T13:55:00.000Z",
-   "line": 87.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 72.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35868754,
@@ -30,9 +19,9 @@
    "p1_norm": "bartlomiej wisniewski",
    "p2_norm": "piotr staniszewski",
    "open_date": "2026-07-26T13:55:00.000Z",
-   "line": 94.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 96.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35868755,
@@ -41,9 +30,9 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-26T13:55:00.000Z",
-   "line": 91.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 87.5,
+   "over_odds": -145,
+   "under_odds": 105
   },
   {
    "event_id": 35868797,
@@ -99,6 +88,28 @@
    "line": 78.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35868844,
+   "p1": "Maciej Domin",
+   "p2": "Karol Wisniewski",
+   "p1_norm": "maciej domin",
+   "p2_norm": "karol wisniewski",
+   "open_date": "2026-07-26T14:35:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35868845,
+   "p1": "Alan Wos",
+   "p2": "Maciej Sinicki",
+   "p1_norm": "alan wos",
+   "p2_norm": "maciej sinicki",
+   "open_date": "2026-07-26T14:35:00.000Z",
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -110
   }
  ]
 }
