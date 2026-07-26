@@ -211,6 +211,12 @@ def _vm_lines(market_stat):
 
 
 def flag():
+    # RETIRED 2026-07-26 (user): the u15.5 route-A outs model is replaced by the live COMPASS
+    # pair (k_live.py on the VM). No new paper flags; grade() still settles pending rows and
+    # the historical record stays queryable. Reverse by deleting this return.
+    print("k_paper.flag benched (COMPASS models replaced the u15.5 route-A model)")
+    return
+
     con = sqlite3.connect(DB)
     _ensure(con)
     ts = _now()

@@ -854,21 +854,27 @@ def _tracker_panel(wnba_rec, tt_json):
     w, l, u = wnba_rec
     wnba_card = card('<img class="tlogo" src="logos/wnba.png" alt="">', "WNBA", w, l, u, "current-model picks (overs · thin-sample & over-stack filtered) · 1u base + declining rungs · since 7/9", recent=_wnba_recent())
 
-    # 2) MLB outs-under — headline the ★★ PREMIUM tier; base away+contact in the note
+    # 2) MLB = the two live COMPASS models (u15.5 route-A model RETIRED by user 2026-07-26 —
+    # k_paper flagging benched; its 12-3 era lives in git history)
     mlb_card = ""
-    pw, pl, pu = _mlb_record(premium=True)
-    bw, bl, bu = _mlb_record()                                       # base away+contact
-    prec = _mlb_recent(premium=True)
-    plays_now = _mlb_plays()
-    ppend = sum(1 for p in plays_now if p.get("premium"))
-    if (pw + pl + bw + bl) or ppend or prec:
-        note = (f"★★ = away+contact + line&gt;recent-5, capped at u{OUTS_UNDER_MAX:g} · base "
-                f"away+contact {bw}-{bl} ({bu:+.1f}u) · flag-time price · paper")
-        sw, sl, su = _mlb_record(premium=True, shadow=True)          # the unflagged 16.5 rung
-        note += (f" · shadow u{SHADOW_MAX:g} (logged, not flagged) {sw}-{sl} ({su:+.1f}u)"
-                 if sw + sl else "")
-        note += f" · {ppend} premium pending" if ppend else ""
-        mlb_card = card('<img class="tlogo" src="logos/mlb.png" alt="">', "MLB", pw, pl, pu, note, recent=prec)
+    try:
+        _cbt = json.loads((HERE / "compass_board.json").read_text())
+        _kk = _cbt
+        _oo = _cbt.get("outs") or {}
+        _pr = _cbt.get("premium") or {}
+        _ka = _cbt.get("kagree") or {}
+        knote = "S-composite vs day-of lineups · flag-time price · paper"
+        if (_pr.get("w", 0) + _pr.get("l", 0)):
+            knote += f" · ★AR premium {_pr['w']}-{_pr['l']} ({_pr['u']:+.1f}u)"
+        mlb_card += card('<img class="tlogo" src="logos/mlb.png" alt="">', "K-COMPASS",
+                         _kk.get("w") or 0, _kk.get("l") or 0, _kk.get("u") or 0.0, knote)
+        onote = "traffic+leash composite · no unders &lt;16.5 · paper"
+        if (_ka.get("w", 0) + _ka.get("l", 0)):
+            onote += f" · ★★K agree {_ka['w']}-{_ka['l']} ({_ka['u']:+.1f}u)"
+        mlb_card += card('<img class="tlogo" src="logos/mlb.png" alt="">', "OUTS-COMPASS",
+                         _oo.get("w") or 0, _oo.get("l") or 0, _oo.get("u") or 0.0, onote)
+    except (OSError, ValueError):
+        pass
 
     # 3) TT Elite (real FanDuel line) + shadow leagues sub-table
     tt_card = ""
