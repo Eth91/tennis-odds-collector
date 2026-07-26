@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T09:40:51Z",
+ "captured_at": "2026-07-26T09:44:57Z",
  "matches": [
   {
    "event_id": 35867708,
@@ -8,9 +8,9 @@
    "p1_norm": "bartlomiej wisniewski",
    "p2_norm": "wojciech gluszek",
    "open_date": "2026-07-26T09:25:00.000Z",
-   "line": 96.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 103.5,
+   "over_odds": 105,
+   "under_odds": -145
   },
   {
    "event_id": 35867710,
@@ -19,20 +19,9 @@
    "p1_norm": "oliwier sokolowski",
    "p2_norm": "pawel slosarczyk",
    "open_date": "2026-07-26T09:25:00.000Z",
-   "line": 94.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
-  {
-   "event_id": 35867722,
-   "p1": "Patryk Jedrzejak",
-   "p2": "Rafal Wojcik",
-   "p1_norm": "patryk jedrzejak",
-   "p2_norm": "rafal wojcik",
-   "open_date": "2026-07-26T09:30:00.000Z",
-   "line": 80.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 98.5,
+   "over_odds": 135,
+   "under_odds": -190
   },
   {
    "event_id": 35867728,
@@ -41,9 +30,9 @@
    "p1_norm": "jan zandecki",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-26T09:40:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35867735,
@@ -52,9 +41,9 @@
    "p1_norm": "jakub wozniak",
    "p2_norm": "aleksander lilien",
    "open_date": "2026-07-26T09:45:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35867750,
@@ -110,6 +99,28 @@
    "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35867797,
+   "p1": "Jakub Nosiadek",
+   "p2": "Bartlomiej Wisniewski",
+   "p1_norm": "jakub nosiadek",
+   "p2_norm": "bartlomiej wisniewski",
+   "open_date": "2026-07-26T10:10:00.000Z",
+   "line": 81.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35867798,
+   "p1": "Kamil Kowalski",
+   "p2": "Oliwier Sokolowski",
+   "p1_norm": "kamil kowalski",
+   "p2_norm": "oliwier sokolowski",
+   "open_date": "2026-07-26T10:10:00.000Z",
+   "line": 75.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
