@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-26T15:38:01Z",
+ "captured_at": "2026-07-26T15:42:36Z",
  "matches": [
-  {
-   "event_id": 35868890,
-   "p1": "Jacek Zelezik",
-   "p2": "Henryk Tkaczyk",
-   "p1_norm": "jacek zelezik",
-   "p2_norm": "henryk tkaczyk",
-   "open_date": "2026-07-26T15:25:00.000Z",
-   "line": 73.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
-  {
-   "event_id": 35868891,
-   "p1": "Jakub Glanowski",
-   "p2": "Aleksander Lilien",
-   "p1_norm": "jakub glanowski",
-   "p2_norm": "aleksander lilien",
-   "open_date": "2026-07-26T15:25:00.000Z",
-   "line": 91.5,
-   "over_odds": -155,
-   "under_odds": 110
-  },
   {
    "event_id": 35868929,
    "p1": "Rafal Wojcik",
@@ -30,9 +8,9 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "patryk jedrzejak",
    "open_date": "2026-07-26T15:30:00.000Z",
-   "line": 53.5,
-   "over_odds": -140,
-   "under_odds": 100
+   "line": 79.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35868925,
@@ -41,9 +19,9 @@
    "p1_norm": "mariusz baron",
    "p2_norm": "lukasz oracz",
    "open_date": "2026-07-26T15:35:00.000Z",
-   "line": 79.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35868951,
