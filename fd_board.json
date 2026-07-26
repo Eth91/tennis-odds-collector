@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T00:03:40Z",
+ "captured_at": "2026-07-26T00:10:31Z",
  "matches": [
   {
    "event_id": 35866363,
@@ -8,9 +8,9 @@
    "p1_norm": "jakub kuzmicz",
    "p2_norm": "tomasz filbrandt",
    "open_date": "2026-07-25T23:55:00.000Z",
-   "line": 85.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 94.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35866372,
@@ -19,7 +19,7 @@
    "p1_norm": "michal machelski",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-26T00:00:00.000Z",
-   "line": 77.5,
+   "line": 86.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,7 +30,7 @@
    "p1_norm": "karol sulkowski",
    "p2_norm": "stapor rafal",
    "open_date": "2026-07-26T00:10:00.000Z",
-   "line": 78.5,
+   "line": 73.5,
    "over_odds": -112,
    "under_odds": -118
   },
@@ -42,8 +42,8 @@
    "p2_norm": "tomasz kocik",
    "open_date": "2026-07-26T00:10:00.000Z",
    "line": 73.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35866379,
@@ -63,9 +63,9 @@
    "p1_norm": "michal durda",
    "p2_norm": "roman wiza",
    "open_date": "2026-07-26T00:20:00.000Z",
-   "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 73.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35866389,
@@ -74,9 +74,31 @@
    "p1_norm": "miroslaw warzecha",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-26T00:25:00.000Z",
-   "line": 74.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 75.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35866409,
+   "p1": "Jakub Glanowski",
+   "p2": "Dawid Poloszczanski",
+   "p1_norm": "jakub glanowski",
+   "p2_norm": "dawid poloszczanski",
+   "open_date": "2026-07-26T00:35:00.000Z",
+   "line": 80.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35866410,
+   "p1": "Dariusz Maszczynski",
+   "p2": "Piotr Gesiarz",
+   "p1_norm": "dariusz maszczynski",
+   "p2_norm": "piotr gesiarz",
+   "open_date": "2026-07-26T00:35:00.000Z",
+   "line": 67.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
