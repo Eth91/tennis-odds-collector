@@ -115,6 +115,11 @@ def _con():
         c.execute("ALTER TABLE outs_compass ADD COLUMN kagree INTEGER DEFAULT 0")
     except sqlite3.OperationalError:
         pass
+    c.execute("""CREATE TABLE IF NOT EXISTS ethan_k(
+        pitcher TEXT, game_date TEXT, side TEXT, line REAL, odds REAL, book TEXT,
+        hi_ct INTEGER, pk_rate REAL, opp TEXT, flagged_at TEXT, result TEXT, actual INTEGER,
+        pnl REAL, graded_at TEXT, log_date TEXT,
+        PRIMARY KEY(pitcher, game_date))""")
     c.execute("""CREATE TABLE IF NOT EXISTS parlay(
         game_date TEXT PRIMARY KEY, legs TEXT, combo REAL, frozen INTEGER DEFAULT 0,
         result TEXT, pnl REAL, graded_at TEXT, pinged INTEGER DEFAULT 0)""")
@@ -766,6 +771,97 @@ def flag_outs(con):
     print(f"outs funnel pre={fn['pre']} lineup={fn['lu']} gates={fn['ok']} new={new}")
 
 
+ETHAN_VS_CACHE = HERE / "ethan_vshand.json"
+
+
+def _vshand_rates():
+    """{('L'|'R'): {batter_pid: K% vs that hand}} season-to-date, cached daily."""
+    try:
+        j = json.loads(ETHAN_VS_CACHE.read_text())
+        if j.get("day") == _today_et():
+            return {h: {int(k): v for k, v in m.items()} for h, m in j["m"].items()}
+    except (OSError, ValueError):
+        pass
+    out = {}
+    for code, hand in (("vl", "L"), ("vr", "R")):
+        d = _get("/stats", stats="statSplits", sitCodes=code, group="hitting", season=2026,
+                 sportId=1, playerPool="All", limit=3000)
+        m = {}
+        for s in (d.get("stats") or [{}])[0].get("splits") or []:
+            stt = s.get("stat") or {}
+            if (stt.get("plateAppearances") or 0) >= 30:
+                m[s["player"]["id"]] = (stt.get("strikeOuts") or 0) / stt["plateAppearances"]
+        out[hand] = m
+    if out.get("L") and out.get("R"):
+        ETHAN_VS_CACHE.write_text(json.dumps({"day": _today_et(), "m": out}))
+    return out
+
+
+def flag_ethan(con):
+    """ETHAN'S K MODEL (shadow — never pings): >=4/9 posted lineup at 23%+ season K AND worse
+    vs pitcher's hand, rest >=19%, pitcher season K/BF >= .25 (>=100 BF). Backtest: 23-24
+    breakeven, 25-26 = 66.7% pooled +25% ROI, ~0 overlap with compass flags. Board record
+    adjudicates; promote to pings only if live holds (same road ★★K walked)."""
+    br = batter_rates()
+    vs = _vshand_rates()
+    lines = k_lines()
+    gd, ts = _today_et(), _now()
+    new = 0
+    for g in slate():
+        if g["started"] or len(g["opp_lineup"]) < 9:
+            continue
+        if con.execute("SELECT 1 FROM ethan_k WHERE pitcher=? AND game_date=?",
+                       (g["pitcher"], gd)).fetchone():
+            continue
+        pd = _get(f"/people/{g['pid']}", hydrate="stats(group=[pitching],type=[season],season=2026)")
+        ppl = (pd.get("people") or [{}])[0]
+        hand = (ppl.get("pitchHand") or {}).get("code")
+        stt = {}
+        for s_ in (ppl.get("stats") or []):
+            for sp in s_.get("splits") or []:
+                stt = sp.get("stat") or {}
+        bf = stt.get("battersFaced") or 0
+        if not hand or bf < 100:
+            continue
+        pk_rate = (stt.get("strikeOuts") or 0) / bf
+        if pk_rate < 0.25:
+            continue
+        vm = vs.get(hand) or {}
+        hi = rest = known = 0
+        for b in g["opp_lineup"][:9]:
+            gen = br.get(b)
+            if gen is None:
+                continue
+            known += 1
+            v = vm.get(b)
+            if gen >= 0.23 and v is not None and v > gen:
+                hi += 1
+            elif gen >= 0.19:
+                rest += 1
+        if known < 8 or hi < 4 or hi + rest < known - 1:
+            continue
+        best = None
+        for bk in BOOKS:
+            lls = (lines.get(_norm(g["pitcher"])) or {}).get(bk) or {}
+            two = {ln: v2 for ln, v2 in lls.items() if "over" in v2 and "under" in v2}
+            if not two:
+                continue
+            main = min(two, key=lambda ln: abs(two[ln]["over"] - 1.9))
+            od = two[main].get("over")
+            if od and 1.4 <= od < 2.3 and (best is None or od > best[1]):
+                best = (main, od, bk)
+        if not best:
+            continue
+        con.execute("INSERT INTO ethan_k (pitcher, game_date, side, line, odds, book, hi_ct, "
+                    "pk_rate, opp, flagged_at) VALUES (?,?,?,?,?,?,?,?,?,?)",
+                    (g["pitcher"], gd, "over", best[0], best[1], best[2], hi,
+                     round(pk_rate, 3), g["opp_name"], ts))
+        new += 1
+    con.commit()
+    if new:
+        print(f"ethan_k: +{new} shadow flags")
+
+
 def flag_outlier(con):
     """K price-outlier (holdout +7.3%): at a shared line with >=3 two-sided books, a book whose
     devigged P(side) is >=4pts BELOW the others' mean is underpricing that side -> bet it there.
@@ -903,12 +999,13 @@ def grade_parlay(con):
     con.commit()
 
 
-STAT_FIELD = {"compass": "strikeOuts", "outlier": "strikeOuts", "outs_compass": "outs"}
+STAT_FIELD = {"compass": "strikeOuts", "outlier": "strikeOuts", "outs_compass": "outs",
+              "ethan_k": "strikeOuts"}
 
 
 def grade(con):
     rows = []
-    for table in ("compass", "outlier", "outs_compass"):
+    for table in ("compass", "outlier", "outs_compass", "ethan_k"):
         rows += [(table,) + r for r in con.execute(
             f"SELECT pitcher, game_date, side, line, odds FROM {table} "
             "WHERE result IS NULL AND game_date < ?", (_today_et(),)).fetchall()]
@@ -986,6 +1083,11 @@ def board(con):
                            "WHERE result IN ('W','L') AND skip IS NULL AND premium=1").fetchone()
     lk_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) FROM compass "
                          "WHERE result IN ('W','L') AND skip IS NULL AND driver='lineupK'").fetchone()
+    eth_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
+                          "FROM ethan_k WHERE result IN ('W','L')").fetchone()
+    eth_today = [dict(zip(("pitcher", "line", "odds", "book", "opp", "hi_ct", "pk_rate"), r))
+                 for r in con.execute("SELECT pitcher, line, odds, book, opp, hi_ct, pk_rate "
+                                      "FROM ethan_k WHERE game_date=?", (_today_et(),))]
     tier_recs = {}
     for t_ in ("S", "A", "B", "C"):
         w_ = l_ = 0
@@ -1052,6 +1154,8 @@ def board(con):
          "shadow": {"w": shadow[0] or 0, "l": shadow[1] or 0, "u": shadow[2] or 0.0},
          "premium": {"w": prem_rec[0] or 0, "l": prem_rec[1] or 0, "u": prem_rec[2] or 0.0},
          "lk": {"w": lk_rec[0] or 0, "l": lk_rec[1] or 0, "u": lk_rec[2] or 0.0},
+         "ethan": {"w": eth_rec[0] or 0, "l": eth_rec[1] or 0, "u": eth_rec[2] or 0.0,
+                   "today": eth_today},
          "ladder": {"w": lad_rec[0] or 0, "l": lad_rec[1] or 0, "u": lad_rec[2] or 0.0},
          "kagree": {"w": kag_rec[0] or 0, "l": kag_rec[1] or 0, "u": kag_rec[2] or 0.0},
          "today": flags,
@@ -1070,6 +1174,7 @@ if __name__ == "__main__":
     c = _con()
     flag(c)
     flag_outs(c)
+    flag_ethan(c)
     # flag_outlier(c)  # BENCHED 2026-07-25 (user: K-COMPASS only) — table/grading stay dormant
     build_parlay(c)
     grade(c)
