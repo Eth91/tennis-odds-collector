@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T14:16:39Z",
+ "captured_at": "2026-07-26T14:21:35Z",
  "matches": [
   {
    "event_id": 35868797,
@@ -8,9 +8,9 @@
    "p1_norm": "jan zandecki",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-26T14:10:00.000Z",
-   "line": 68.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 62.5,
+   "over_odds": 110,
+   "under_odds": -155
   },
   {
    "event_id": 35868804,
@@ -19,7 +19,7 @@
    "p1_norm": "jakub wozniak",
    "p2_norm": "maciej kolek",
    "open_date": "2026-07-26T14:15:00.000Z",
-   "line": 74.5,
+   "line": 84.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,9 +30,9 @@
    "p1_norm": "marian lebek",
    "p2_norm": "igor szymanski",
    "open_date": "2026-07-26T14:20:00.000Z",
-   "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 69.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35868816,
@@ -41,9 +41,9 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-07-26T14:20:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 80.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35868817,
@@ -52,9 +52,9 @@
    "p1_norm": "bartosz sulkowski",
    "p2_norm": "waclaw suchecki",
    "open_date": "2026-07-26T14:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35868844,
@@ -99,6 +99,17 @@
    "line": 79.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35868857,
+   "p1": "Patryk Jedrzejak",
+   "p2": "Oskar Jadach",
+   "p1_norm": "patryk jedrzejak",
+   "p2_norm": "oskar jadach",
+   "open_date": "2026-07-26T14:45:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
