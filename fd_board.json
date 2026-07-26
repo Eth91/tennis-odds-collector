@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-26T14:48:34Z",
+ "captured_at": "2026-07-26T14:52:53Z",
  "matches": [
-  {
-   "event_id": 35868844,
-   "p1": "Maciej Domin",
-   "p2": "Karol Wisniewski",
-   "p1_norm": "maciej domin",
-   "p2_norm": "karol wisniewski",
-   "open_date": "2026-07-26T14:35:00.000Z",
-   "line": 70.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35868850,
-   "p1": "Kamil Kowalski",
-   "p2": "Pawel Slosarczyk",
-   "p1_norm": "kamil kowalski",
-   "p2_norm": "pawel slosarczyk",
-   "open_date": "2026-07-26T14:40:00.000Z",
-   "line": 66.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
   {
    "event_id": 35868851,
    "p1": "Jakub Nosiadek",
@@ -30,9 +8,9 @@
    "p1_norm": "jakub nosiadek",
    "p2_norm": "wojciech gluszek",
    "open_date": "2026-07-26T14:40:00.000Z",
-   "line": 81.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 89.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35868857,
@@ -41,9 +19,9 @@
    "p1_norm": "patryk jedrzejak",
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-26T14:45:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 50.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35868865,
