@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T03:36:35Z",
+ "captured_at": "2026-07-26T03:40:58Z",
  "matches": [
   {
    "event_id": 35866724,
@@ -8,9 +8,9 @@
    "p1_norm": "maciej domin",
    "p2_norm": "jan zandecki",
    "open_date": "2026-07-26T03:25:00.000Z",
-   "line": 87.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 88.5,
+   "over_odds": -105,
+   "under_odds": -135
   },
   {
    "event_id": 35866725,
@@ -19,9 +19,9 @@
    "p1_norm": "oliwier sokolowski",
    "p2_norm": "pawel slosarczyk",
    "open_date": "2026-07-26T03:25:00.000Z",
-   "line": 101.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 102.5,
+   "over_odds": 100,
+   "under_odds": -140
   },
   {
    "event_id": 35866753,
@@ -30,9 +30,9 @@
    "p1_norm": "damian fira",
    "p2_norm": "roman wiza",
    "open_date": "2026-07-26T03:30:00.000Z",
-   "line": 66.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 64.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35866766,
