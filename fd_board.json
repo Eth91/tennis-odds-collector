@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T17:14:23Z",
+ "captured_at": "2026-07-26T17:18:44Z",
  "matches": [
   {
    "event_id": 35869340,
@@ -8,9 +8,9 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-26T17:05:00.000Z",
-   "line": 74.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 87.5,
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35869410,
@@ -19,9 +19,9 @@
    "p1_norm": "jaroslaw badura",
    "p2_norm": "lukasz oracz",
    "open_date": "2026-07-26T17:10:00.000Z",
-   "line": 71.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 57.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35869433,
@@ -88,6 +88,28 @@
    "line": 74.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35869551,
+   "p1": "Arkadiusz Mugowski",
+   "p2": "Jakub Nosiadek",
+   "p1_norm": "arkadiusz mugowski",
+   "p2_norm": "jakub nosiadek",
+   "open_date": "2026-07-26T17:45:00.000Z",
+   "line": 80.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35869552,
+   "p1": "Kazimierz Rybak",
+   "p2": "Adam Staniczek",
+   "p1_norm": "kazimierz rybak",
+   "p2_norm": "adam staniczek",
+   "open_date": "2026-07-26T17:45:00.000Z",
+   "line": 74.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
