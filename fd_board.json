@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T20:06:56Z",
+ "captured_at": "2026-07-26T20:11:17Z",
  "matches": [
   {
    "event_id": 35870237,
@@ -8,9 +8,9 @@
    "p1_norm": "jakub nowak",
    "p2_norm": "wojciech urban",
    "open_date": "2026-07-26T19:55:00.000Z",
-   "line": 92.5,
-   "over_odds": -105,
-   "under_odds": -130
+   "line": 95.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35870238,
@@ -30,9 +30,9 @@
    "p1_norm": "jakub nosiadek",
    "p2_norm": "karol sulkowski",
    "open_date": "2026-07-26T20:05:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870243,
@@ -41,7 +41,7 @@
    "p1_norm": "alan wos",
    "p2_norm": "mateusz rutkowski",
    "open_date": "2026-07-26T20:05:00.000Z",
-   "line": 73.5,
+   "line": 81.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -52,7 +52,7 @@
    "p1_norm": "adam staniczek",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-26T20:05:00.000Z",
-   "line": 76.5,
+   "line": 73.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -96,7 +96,18 @@
    "p1_norm": "arkadiusz mugowski",
    "p2_norm": "aleksander lilien",
    "open_date": "2026-07-26T20:30:00.000Z",
-   "line": 75.5,
+   "line": 71.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35870259,
+   "p1": "Kazimierz Rybak",
+   "p2": "Henryk Tkaczyk",
+   "p1_norm": "kazimierz rybak",
+   "p2_norm": "henryk tkaczyk",
+   "open_date": "2026-07-26T20:30:00.000Z",
+   "line": 66.5,
    "over_odds": -118,
    "under_odds": -112
   }
