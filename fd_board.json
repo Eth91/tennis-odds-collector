@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T19:12:11Z",
+ "captured_at": "2026-07-26T19:16:36Z",
  "matches": [
   {
    "event_id": 35870145,
@@ -8,9 +8,9 @@
    "p1_norm": "oskar sokolowski",
    "p2_norm": "sebastian krupa",
    "open_date": "2026-07-26T19:10:00.000Z",
-   "line": 77.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 80.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35870146,
@@ -19,9 +19,9 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "wojciech urban",
    "open_date": "2026-07-26T19:10:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 77.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35870154,
@@ -75,6 +75,28 @@
    "p2_norm": "michal paszkiewicz",
    "open_date": "2026-07-26T19:35:00.000Z",
    "line": 73.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35870196,
+   "p1": "Jakub Glanowski",
+   "p2": "Bartosz Sulkowski",
+   "p1_norm": "jakub glanowski",
+   "p2_norm": "bartosz sulkowski",
+   "open_date": "2026-07-26T19:40:00.000Z",
+   "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35870197,
+   "p1": "Jacek Zelezik",
+   "p2": "Pawel Chojnacki",
+   "p1_norm": "jacek zelezik",
+   "p2_norm": "pawel chojnacki",
+   "open_date": "2026-07-26T19:40:00.000Z",
+   "line": 74.5,
    "over_odds": -118,
    "under_odds": -112
   }
