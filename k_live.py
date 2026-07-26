@@ -100,6 +100,11 @@ def _con():
             c.execute(f"ALTER TABLE compass ADD COLUMN {col}")
         except sqlite3.OperationalError:
             pass
+    for col in ("ladder_ln REAL", "ladder_od REAL", "ladder_result TEXT"):
+        try:
+            c.execute(f"ALTER TABLE compass ADD COLUMN {col}")
+        except sqlite3.OperationalError:
+            pass
     for tbl in ("compass", "outs_compass"):
         for col in ("cal_p REAL", "kelly_u REAL", "tier TEXT"):
             try:
@@ -514,6 +519,18 @@ def flag(con):
         skip = "price_cap" if od >= PRICE_CAP else None
         cp = cal_p(F, abs(S), 0.64)
         su, tier = stake_tier(cp, od)
+        # LADDER tier (2026-07-26, the 70% challenge winner, 6/6 cells both eras): deep OVER
+        # flags (S>=2.0 or *AR premium) also quote the 1-rung-down over at the posted alt price —
+        # sandbox 77-79% hit / +2.6-6.6% ROI, OOS 81-85% / +10-15%. Overs only (alt Ks are
+        # over-only ladders); logged in ladder_* cols, own record on the board.
+        lad_ln = lad_od = None
+        if side == "over" and (abs(S) >= 2.0 or premium):
+            lls2 = {}
+            for bk2 in BOOKS:
+                for l2, v2 in ((lines.get(_norm(g["pitcher"])) or {}).get(bk2) or {}).items():
+                    if l2 == ln - 1 and "over" in v2:
+                        if lad_od is None or v2["over"] > lad_od:
+                            lad_ln, lad_od = l2, v2["over"]
         # ★ PREMIUM tier (OOS-validated 2026-07-26, beat baseline BOTH held-out years):
         # S>=2.0 AND arsenal fit aligned >=1z. Additive tag — the base record is unchanged.
         ft = arsenal_fit(pmap, bmap, g["pid"], g["opp_lineup"])
@@ -524,18 +541,23 @@ def flag(con):
                         and ((fitz >= 1.0 and side == "over")
                              or (fitz <= -1.0 and side == "under"))) else 0
         con.execute("INSERT INTO compass (pitcher, game_date, side, line, odds, book, score, opp, "
-                    "flagged_at, skip, game, team, fitz, premium, cal_p, kelly_u, tier) "
-                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    "flagged_at, skip, game, team, fitz, premium, cal_p, kelly_u, tier, "
+                    "ladder_ln, ladder_od) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                     (g["pitcher"], gd, side, ln, od, bk, round(abs(S), 2), g["opp_name"], ts, skip,
                      g["home_team"] + "|" + str(g.get("start") or ""), g.get("team_ab") or "",
                      round(fitz, 2) if fitz is not None else None, premium,
-                     round(cp, 3) if cp else None, su, tier))
+                     round(cp, 3) if cp else None, su, tier, lad_ln, lad_od))
         new += 1
         if not skip and topic:
             am = f"+{round((od-1)*100)}" if od >= 2 else f"-{round(100/(od-1))}"
+            lad = ""
+            if lad_od:
+                lam = (f"+{round((lad_od-1)*100)}" if lad_od >= 2
+                       else f"-{round(100/(lad_od-1))}")
+                lad = f" | LDR O{lad_ln:g} {lam}"
             txt = (f"🚨 ⚾K [{tier or '-'}] {g['opp_name']} {g['pitcher']} "
                    f"{'O' if side == 'over' else 'U'}{ln:g}K {am} {bk.upper()} "
-                   f"{su or 0.25}u{' ★AR' if premium else ''}")
+                   f"{su or 0.25}u{' ★AR' if premium else ''}{lad}")
             try:
                 requests.post(f"https://ntfy.sh/{topic}", data=txt.encode(),
                               params={"title": "Pickz", "priority": "high"}, timeout=15
@@ -836,6 +858,12 @@ def grade(con):
         con.execute(f"UPDATE {table} SET result=?, actual=?, pnl=?, graded_at=?, log_date=? "
                     "WHERE pitcher=? AND game_date=?",
                     ("W" if won else "L", g[1], round(pnl, 2), _now(), g[0], pitcher, gd))
+        if table == "compass":
+            lrow = con.execute("SELECT ladder_ln FROM compass WHERE pitcher=? AND game_date=?",
+                               (pitcher, gd)).fetchone()
+            if lrow and lrow[0] is not None:
+                con.execute("UPDATE compass SET ladder_result=? WHERE pitcher=? AND game_date=?",
+                            ("W" if g[1] > lrow[0] else "L", pitcher, gd))
         time.sleep(0.1)
     con.commit()
 
@@ -858,12 +886,16 @@ def board(con):
     rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) FROM compass "
                       "WHERE result IN ('W','L') AND skip IS NULL").fetchone()
     flags = [dict(zip(("pitcher", "side", "line", "odds", "book", "score", "opp", "skip", "team",
-                       "game", "premium", "tier", "kelly_u"), r))
+                       "game", "premium", "tier", "kelly_u", "ladder_ln", "ladder_od"), r))
              for r in con.execute("SELECT pitcher, side, line, odds, book, score, opp, skip, team, "
-                                  "game, premium, tier, kelly_u FROM compass WHERE game_date=? "
+                                  "game, premium, tier, kelly_u, ladder_ln, ladder_od "
+                                  "FROM compass WHERE game_date=? "
                                   "ORDER BY score DESC", (_today_et(),))]
     prem_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) FROM compass "
                            "WHERE result IN ('W','L') AND skip IS NULL AND premium=1").fetchone()
+    lad_rec = con.execute("SELECT SUM(ladder_result='W'), SUM(ladder_result='L'), "
+                          "ROUND(SUM(CASE WHEN ladder_result='W' THEN ladder_od-1 ELSE -1 END),1) "
+                          "FROM compass WHERE ladder_result IN ('W','L')").fetchone()
     shadow = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) FROM compass "
                          "WHERE result IN ('W','L') AND skip IS NOT NULL").fetchone()
     prow = con.execute("SELECT legs, combo, frozen FROM parlay WHERE game_date=?",
@@ -913,6 +945,7 @@ def board(con):
          "drift": {"k": dz_k, "outs": dz_o},
          "shadow": {"w": shadow[0] or 0, "l": shadow[1] or 0, "u": shadow[2] or 0.0},
          "premium": {"w": prem_rec[0] or 0, "l": prem_rec[1] or 0, "u": prem_rec[2] or 0.0},
+         "ladder": {"w": lad_rec[0] or 0, "l": lad_rec[1] or 0, "u": lad_rec[2] or 0.0},
          "kagree": {"w": kag_rec[0] or 0, "l": kag_rec[1] or 0, "u": kag_rec[2] or 0.0},
          "today": flags,
          "outs": {"w": outs_rec[0] or 0, "l": outs_rec[1] or 0, "u": outs_rec[2] or 0.0,

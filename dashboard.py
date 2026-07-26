@@ -2147,6 +2147,11 @@ def build():
                     mark = " ★AR" if f.get("premium") else (" ★★K" if f.get("kagree") else "")
                     tier = f.get("tier")
                     ku = f.get("kelly_u")
+                    lad = ""
+                    if f.get("ladder_od"):
+                        lad = (f'<span class="stag" title="70-80% cushion expression (validated '
+                               f'6/6 cells both eras)">LDR O{f["ladder_ln"]:g} '
+                               f'{_am(float(f["ladder_od"]))}</span>')
                     rows += (f'<div class="pblk"><div class="phd">'
                              f'{_mlogo(f.get("team"), "plogo")}'
                              f'<span class="pname">{html.escape(_short(f["pitcher"]))}</span>'
@@ -2161,7 +2166,7 @@ def build():
                                 f'suggested {ku}u · S={f["score"]:.1f}">{tier}</span>' if tier else
                                 f'<span class="pedge {scls}" title="S={f["score"]:.1f}">{pct}</span>')
                              + f'<span class="pedge {scls}" style="font-size:14px">{ku}u{star}{mark}</span>'
-                             '</div></div></div>')
+                             + lad + '</div></div></div>')
                 out += (f'<div class="game"><div class="ghd"><span class="gmatch">'
                         f'{_mlogo(away_ab)}{away_ab or "—"}<span class="gvs">@</span>'
                         f'{_mlogo(home_ab)}{home_ab or "—"}</span>'
@@ -2181,7 +2186,8 @@ def build():
         k_shn = (k_sh.get("w") or 0) + (k_sh.get("l") or 0)
         k_note = (" · shadow " + f'{k_sh["w"]}-{k_sh["l"]}') if k_shn else ""
         mlb_html += (f'<div class="op-title">⚾ K-COMPASS · Strikeouts'
-                     f'<span> · {_rec_str(_cb)}{k_note}{_tier_note(_cb.get("premium"), "★AR")} · '
+                     f'<span> · {_rec_str(_cb)}{k_note}{_tier_note(_cb.get("premium"), "★AR")}'
+                     f'{_tier_note(_cb.get("ladder"), "LDR")} · '
                      f'% = backtested hit rate · ★AR = arsenal premium (~65%)</span></div>')
         mlb_html += (_compass_games(k_flags, "Strikeouts", 2.2,
                                     [(2.5, "~64%"), (2.0, "~61%"), (-9, "~58%")])
