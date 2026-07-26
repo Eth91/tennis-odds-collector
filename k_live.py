@@ -95,6 +95,11 @@ def _con():
             c.execute(f"ALTER TABLE {tbl} ADD COLUMN team TEXT")
         except sqlite3.OperationalError:
             pass
+    for tbl in ("compass", "outs_compass", "ethan_k"):
+        try:
+            c.execute(f"ALTER TABLE {tbl} ADD COLUMN stack INTEGER DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass
     for col in ("fitz REAL", "premium INTEGER DEFAULT 0", "driver TEXT"):
         try:
             c.execute(f"ALTER TABLE compass ADD COLUMN {col}")
@@ -857,21 +862,6 @@ def flag_ethan(con):
                     (g["pitcher"], gd, "over", best[0], best[1], best[2], hi,
                      round(pk_rate, 3), g["opp_name"], ts))
         new += 1
-        import os
-        topic = os.environ.get("NTFY_TOPIC")
-        if topic:
-            od = best[1]
-            am = f"+{round((od-1)*100)}" if od >= 2 else f"-{round(100/(od-1))}"
-            txt = (f"🧪 ETHAN ⚾K {g['opp_name']} {g['pitcher']} "
-                   f"O{best[0]:g}K {am} {best[2].upper()} 0.5u (hi{hi} pk{round(100*pk_rate)}%)")
-            try:
-                requests.post(f"https://ntfy.sh/{topic}", data=txt.encode(),
-                              params={"title": "Pickz", "priority": "high"}, timeout=15
-                              ).raise_for_status()
-                con.execute("UPDATE ethan_k SET pinged=1 WHERE pitcher=? AND game_date=?",
-                            (g["pitcher"], gd))
-            except requests.RequestException as e:
-                print(f"ethan ping failed: {str(e)[:60]}")
     con.commit()
     if new:
         print(f"ethan_k: +{new} shadow flags")
@@ -1098,6 +1088,14 @@ def board(con):
                            "WHERE result IN ('W','L') AND skip IS NULL AND premium=1").fetchone()
     lk_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) FROM compass "
                          "WHERE result IN ('W','L') AND skip IS NULL AND driver='lineupK'").fetchone()
+    stk_rec = con.execute(
+        "SELECT SUM(w), SUM(l), ROUND(SUM(u),1) FROM ("
+        "SELECT SUM(result='W') w, SUM(result='L') l, SUM(COALESCE(pnl,0)) u FROM compass "
+        "WHERE stack=1 AND result IN ('W','L') UNION ALL "
+        "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM outs_compass "
+        "WHERE stack=1 AND result IN ('W','L') UNION ALL "
+        "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM ethan_k "
+        "WHERE stack=1 AND result IN ('W','L'))").fetchone()
     eth_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
                           "FROM ethan_k WHERE result IN ('W','L')").fetchone()
     eth_today = [dict(zip(("pitcher", "line", "odds", "book", "opp", "hi_ct", "pk_rate"), r))
@@ -1171,6 +1169,7 @@ def board(con):
          "lk": {"w": lk_rec[0] or 0, "l": lk_rec[1] or 0, "u": lk_rec[2] or 0.0},
          "ethan": {"w": eth_rec[0] or 0, "l": eth_rec[1] or 0, "u": eth_rec[2] or 0.0,
                    "today": eth_today},
+         "stack": {"w": stk_rec[0] or 0, "l": stk_rec[1] or 0, "u": stk_rec[2] or 0.0},
          "ladder": {"w": lad_rec[0] or 0, "l": lad_rec[1] or 0, "u": lad_rec[2] or 0.0},
          "kagree": {"w": kag_rec[0] or 0, "l": kag_rec[1] or 0, "u": kag_rec[2] or 0.0},
          "today": flags,
@@ -1185,11 +1184,99 @@ def board(con):
                     "w": prec[0] or 0, "l": prec[1] or 0, "u": prec[2] or 0.0}}))
 
 
+def stack_ping(con):
+    """⚡STACK (2026-07-27, the 65%-at-2-3/day challenge): priority-ranked union of validated
+    slices, capped per day. Backtest 25-26: cap3 = 65.1% +17.2% (64.8/65.7 by year).
+    Priority: ETH > K-LK > K-★AR > K-S2 > outs-★★K > K-rest > outs-rest. Prices 1.667-2.00,
+    K ln<7.5, no formFade-driven K unders. Over-flags quote +1/+2 rung alt prices
+    (25-26: 44.8% @+177, 26.0% @+385 — both ~+20% ROI)."""
+    import os
+    topic = os.environ.get("NTFY_TOPIC")
+    ST = FROZEN.get("stack") or {}
+    cap = ST.get("cap", 3)
+    plo, phi = ST.get("plo", 1.667), ST.get("phi", 2.00)
+    gd = _today_et()
+    npinged = con.execute(
+        "SELECT (SELECT COUNT(*) FROM compass WHERE game_date=? AND stack=1)"
+        " + (SELECT COUNT(*) FROM outs_compass WHERE game_date=? AND stack=1)"
+        " + (SELECT COUNT(*) FROM ethan_k WHERE game_date=? AND stack=1)",
+        (gd, gd, gd)).fetchone()[0]
+    cands = []
+    for p, ln, od, bk, opp in con.execute(
+            "SELECT pitcher, line, odds, book, opp FROM ethan_k WHERE game_date=? AND stack=0",
+            (gd,)):
+        cands.append({"tbl": "ethan_k", "pri": 1, "fam": "ETH", "p": p, "side": "over",
+                      "ln": ln, "od": od, "bk": bk, "mag": 9, "opp": opp})
+    for r in con.execute("SELECT pitcher, side, line, odds, book, score, opp, driver, premium "
+                         "FROM compass WHERE game_date=? AND stack=0 AND skip IS NULL", (gd,)):
+        p, side, ln, od, bk, sc, opp, drv, prem = r
+        if not (plo <= (od or 0) < phi) or (ln or 0) >= 7.5:
+            continue
+        if drv == "formFade" and side == "under":
+            continue
+        if drv == "lineupK":
+            pri, fam = 2, "LK"
+        elif prem:
+            pri, fam = 3, "AR"
+        elif (sc or 0) >= 2.0:
+            pri, fam = 4, "S2"
+        else:
+            pri, fam = 6, "K"
+        cands.append({"tbl": "compass", "pri": pri, "fam": fam, "p": p, "side": side,
+                      "ln": ln, "od": od, "bk": bk, "mag": sc or 0, "opp": opp})
+    for r in con.execute("SELECT pitcher, side, line, odds, book, score, opp, kagree, strong "
+                         "FROM outs_compass WHERE game_date=? AND stack=0 AND skip IS NULL", (gd,)):
+        p, side, ln, od, bk, sc, opp, kag, strong = r
+        if not (plo <= (od or 0) < phi) or not strong:
+            continue
+        cands.append({"tbl": "outs_compass", "pri": 5 if kag else 7, "fam": "O★★K" if kag else "O",
+                      "p": p, "side": side, "ln": ln, "od": od, "bk": bk, "mag": sc or 0,
+                      "opp": opp})
+    cands.sort(key=lambda c: (c["pri"], -c["mag"]))
+    lines = k_lines() if any(c["side"] == "over" and c["tbl"] != "outs_compass" for c in cands) else {}
+    for c in cands:
+        if npinged >= cap:
+            break
+        rung = ""
+        if c["side"] == "over" and c["tbl"] != "outs_compass" and lines:
+            qs = []
+            for up in (1, 2):
+                best = None
+                for bk2 in BOOKS:
+                    v = ((lines.get(_norm(c["p"])) or {}).get(bk2) or {}).get(c["ln"] + up)
+                    if v and v.get("over") and (best is None or v["over"] > best):
+                        best = v["over"]
+                if best and best >= 1.5:
+                    am2 = f"+{round((best-1)*100)}" if best >= 2 else f"-{round(100/(best-1))}"
+                    qs.append(f"O{c['ln']+up:g} {am2}")
+            if qs:
+                rung = " | LDR↑ " + " · ".join(qs)
+        am = f"+{round((c['od']-1)*100)}" if c["od"] >= 2 else f"-{round(100/(c['od']-1))}"
+        mk = "K" if c["tbl"] != "outs_compass" else ""
+        txt = (f"⚡STACK [{c['fam']}] {c['opp'] or ''} {c['p']} "
+               f"{'O' if c['side'] == 'over' else 'U'}{c['ln']:g}{mk} {am} {c['bk'].upper()} "
+               f"0.5u{rung}")
+        if topic:
+            try:
+                requests.post(f"https://ntfy.sh/{topic}", data=txt.encode(),
+                              params={"title": "Pickz", "priority": "high"}, timeout=15
+                              ).raise_for_status()
+            except requests.RequestException as e:
+                print(f"stack ping failed: {str(e)[:60]}")
+                continue
+        con.execute(f"UPDATE {c['tbl']} SET stack=1 WHERE pitcher=? AND game_date=?",
+                    (c["p"], gd))
+        npinged += 1
+        print(f"stack ping: {txt}")
+    con.commit()
+
+
 if __name__ == "__main__":
     c = _con()
     flag(c)
     flag_outs(c)
     flag_ethan(c)
+    stack_ping(c)
     # flag_outlier(c)  # BENCHED 2026-07-25 (user: K-COMPASS only) — table/grading stay dormant
     build_parlay(c)
     grade(c)
