@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T02:53:31Z",
+ "captured_at": "2026-07-26T02:59:10Z",
  "matches": [
   {
    "event_id": 35866549,
@@ -8,9 +8,9 @@
    "p1_norm": "michal machelski",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-26T02:45:00.000Z",
-   "line": 67.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 83.5,
+   "over_odds": -105,
+   "under_odds": -135
   },
   {
    "event_id": 35866570,
@@ -66,6 +66,39 @@
    "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35866724,
+   "p1": "Maciej Domin",
+   "p2": "Jan Zandecki",
+   "p1_norm": "maciej domin",
+   "p2_norm": "jan zandecki",
+   "open_date": "2026-07-26T03:25:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35866725,
+   "p1": "Oliwier Sokolowski",
+   "p2": "Pawel Slosarczyk",
+   "p1_norm": "oliwier sokolowski",
+   "p2_norm": "pawel slosarczyk",
+   "open_date": "2026-07-26T03:25:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35866726,
+   "p1": "Wojciech Gluszek",
+   "p2": "Piotr Staniszewski",
+   "p1_norm": "wojciech gluszek",
+   "p2_norm": "piotr staniszewski",
+   "open_date": "2026-07-26T03:25:00.000Z",
+   "line": 79.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
