@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T02:23:05Z",
+ "captured_at": "2026-07-26T02:27:42Z",
  "matches": [
   {
    "event_id": 35866524,
@@ -8,9 +8,9 @@
    "p1_norm": "damian fira",
    "p2_norm": "michal durda",
    "open_date": "2026-07-26T02:20:00.000Z",
-   "line": 80.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 91.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35866525,
@@ -19,9 +19,9 @@
    "p1_norm": "kacper kwiatkowski",
    "p2_norm": "michal guzik",
    "open_date": "2026-07-26T02:20:00.000Z",
-   "line": 67.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 49.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35866543,
