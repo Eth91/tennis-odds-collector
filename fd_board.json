@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T16:28:26Z",
+ "captured_at": "2026-07-26T16:32:44Z",
  "matches": [
   {
    "event_id": 35869276,
@@ -8,9 +8,9 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "patryk jedrzejak",
    "open_date": "2026-07-26T16:20:00.000Z",
-   "line": 73.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 92.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35869284,
@@ -19,9 +19,9 @@
    "p1_norm": "oskar sokolowski",
    "p2_norm": "mariusz baron",
    "open_date": "2026-07-26T16:25:00.000Z",
-   "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 79.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35869307,
