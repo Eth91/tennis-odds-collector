@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T05:58:37Z",
+ "captured_at": "2026-07-26T06:02:45Z",
  "matches": [
-  {
-   "event_id": 35867255,
-   "p1": "Kacper Petas",
-   "p2": "Karol Wisniewski",
-   "p1_norm": "kacper petas",
-   "p2_norm": "karol wisniewski",
-   "open_date": "2026-07-26T05:40:00.000Z",
-   "line": 97.5,
-   "over_odds": 105,
-   "under_odds": -145
-  },
   {
    "event_id": 35867282,
    "p1": "Mariusz Adamus",
@@ -19,9 +8,9 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-26T05:55:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 89.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35867299,
@@ -30,9 +19,9 @@
    "p1_norm": "bartlomiej mleczko",
    "p2_norm": "jakub wozniak",
    "open_date": "2026-07-26T06:00:00.000Z",
-   "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -118
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35867300,
@@ -41,9 +30,9 @@
    "p1_norm": "rafal adach",
    "p2_norm": "piotr zemla",
    "open_date": "2026-07-26T06:00:00.000Z",
-   "line": 70.5,
-   "over_odds": -118,
-   "under_odds": -116
+   "line": 75.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35867351,
