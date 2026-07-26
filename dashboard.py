@@ -2135,8 +2135,10 @@ def build():
                     bk = f["book"]
                     bkh = (f'<img class="bklogo" src="book-{bk}.png" alt="{bk.upper()}">'
                            if bk in ("fd", "dk") else '<span class="bktag">MGM</span>')
-                    scls = "hi" if (f.get("strong") or f["score"] >= hi_s) else "mid"
+                    scls = "hi" if (f.get("strong") or f.get("premium")
+                                    or f["score"] >= hi_s) else "mid"
                     pct = next(p for s_, p in bands if f["score"] >= s_)
+                    mark = " ★AR" if f.get("premium") else (" ★★K" if f.get("kagree") else "")
                     rows += (f'<div class="pblk"><div class="phd">'
                              f'{_mlogo(f.get("team"), "plogo")}'
                              f'<span class="pname">{html.escape(_short(f["pitcher"]))}</span>'
@@ -2148,12 +2150,16 @@ def build():
                              f'<span class="psp"></span>'
                              f'<span class="podds">{_am(float(f["odds"]))}</span>{bkh}'
                              f'<span class="pedge {scls}" title="model signal S={f["score"]:.1f} — '
-                             f'backtested hit rate in this band">{pct}{star}</span></div></div></div>')
+                             f'backtested hit rate in this band">{pct}{star}{mark}</span></div></div></div>')
                 out += (f'<div class="game"><div class="ghd"><span class="gmatch">'
                         f'{_mlogo(away_ab)}{away_ab or "—"}<span class="gvs">@</span>'
                         f'{_mlogo(home_ab)}{home_ab or "—"}</span>'
                         f'<span class="gtime">{when}</span></div>{rows}</div>')
             return out
+
+        def _tier_note(d, lbl):
+            n = ((d or {}).get("w") or 0) + ((d or {}).get("l") or 0)
+            return f' · {lbl} {d["w"]}-{d["l"]} ({d["u"]:+.1f}u)' if n else ""
 
         def _rec_str(d):
             n = (d.get("w") or 0) + (d.get("l") or 0)
@@ -2164,7 +2170,8 @@ def build():
         k_shn = (k_sh.get("w") or 0) + (k_sh.get("l") or 0)
         k_note = (" · shadow " + f'{k_sh["w"]}-{k_sh["l"]}') if k_shn else ""
         mlb_html += (f'<div class="op-title">⚾ K-COMPASS · Strikeouts'
-                     f'<span> · {_rec_str(_cb)}{k_note} · % = backtested hit rate · flags when lineups post</span></div>')
+                     f'<span> · {_rec_str(_cb)}{k_note}{_tier_note(_cb.get("premium"), "★AR")} · '
+                     f'% = backtested hit rate · ★AR = arsenal premium (~65%)</span></div>')
         mlb_html += (_compass_games(k_flags, "Strikeouts", 2.2,
                                     [(2.5, "~64%"), (2.0, "~61%"), (-9, "~58%")])
                      or '<div class="xt">no flags yet today</div>')
@@ -2175,7 +2182,8 @@ def build():
         o_shn = (o_sh.get("w") or 0) + (o_sh.get("l") or 0)
         o_note = (" · shadow " + f'{o_sh["w"]}-{o_sh["l"]}') if o_shn else ""
         mlb_html += (f'<div class="op-title">⚾ OUTS-COMPASS · Pitcher Outs'
-                     f'<span> · {_rec_str(_ob)}{o_note} · % = backtested hit rate · ★ = strongest tier</span></div>')
+                     f'<span> · {_rec_str(_ob)}{o_note}{_tier_note(_cb.get("kagree"), "★★K")} · '
+                     f'% = backtested hit rate · ★ strong · ★★K = both models agree</span></div>')
         mlb_html += (_compass_games(o_flags, "Outs Recorded", 1.30,
                                     [(1.30, "~65%"), (-9, "~63%")])
                      or '<div class="xt">no flags yet today</div>')

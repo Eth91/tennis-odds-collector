@@ -95,6 +95,15 @@ def _con():
             c.execute(f"ALTER TABLE {tbl} ADD COLUMN team TEXT")
         except sqlite3.OperationalError:
             pass
+    for col in ("fitz REAL", "premium INTEGER DEFAULT 0"):
+        try:
+            c.execute(f"ALTER TABLE compass ADD COLUMN {col}")
+        except sqlite3.OperationalError:
+            pass
+    try:
+        c.execute("ALTER TABLE outs_compass ADD COLUMN kagree INTEGER DEFAULT 0")
+    except sqlite3.OperationalError:
+        pass
     c.execute("""CREATE TABLE IF NOT EXISTS parlay(
         game_date TEXT PRIMARY KEY, legs TEXT, combo REAL, frozen INTEGER DEFAULT 0,
         result TEXT, pnl REAL, graded_at TEXT, pinged INTEGER DEFAULT 0)""")
@@ -287,6 +296,61 @@ def team_leash():
     return leash, pen
 
 
+ARSENAL_CACHE = HERE / "arsenal_live.json"   # weekly-cached Savant tables (gitignored)
+
+
+def arsenal_maps():
+    """({pitcher_pid: {pitch_type: usage_frac}}, {batter_pid: {pitch_type: k_percent}}) —
+    season-to-date Savant pitch-arsenal tables, 7-day disk cache, plain csv (no pandas: the
+    VM is memory-tight). OOS-validated 2026-07-26: the K fit-gate beat baseline ROI in BOTH
+    held-out years (+22.8/+18.9 vs +12.4/+15.3)."""
+    try:
+        j = json.loads(ARSENAL_CACHE.read_text())
+        if (dt.date.today() - dt.date.fromisoformat(j["day"])).days < 7:
+            return ({int(k): v for k, v in j["p"].items()},
+                    {int(k): v for k, v in j["b"].items()})
+    except (OSError, ValueError, KeyError):
+        pass
+    import csv
+    import io
+    pmap, bmap = {}, {}
+    for typ, m, col in (("pitcher", pmap, "pitch_usage"), ("batter", bmap, "k_percent")):
+        try:
+            r = requests.get("https://baseballsavant.mlb.com/leaderboard/pitch-arsenal-stats",
+                             params={"type": typ, "pitchType": "", "year": 2026, "team": "",
+                                     "min": 25, "csv": "true"}, timeout=60)
+            r.raise_for_status()
+            for row in csv.DictReader(io.StringIO(r.text)):
+                try:
+                    pid = int(row["player_id"])
+                    v = float(row[col])
+                    m.setdefault(pid, {})[row["pitch_type"]] = (v / 100.0 if typ == "pitcher" else v)
+                except (KeyError, TypeError, ValueError):
+                    continue
+        except requests.RequestException as e:
+            print(f"arsenal fetch failed ({typ}): {str(e)[:60]}")
+            return {}, {}
+    if pmap:
+        ARSENAL_CACHE.write_text(json.dumps(
+            {"day": dt.date.today().isoformat(), "p": pmap, "b": bmap}))
+    return pmap, bmap
+
+
+def arsenal_fit(pmap, bmap, pid, lineup_pids):
+    """Usage-weighted lineup K rate vs THIS pitcher's arsenal; None if <60% usage covered."""
+    use = pmap.get(pid)
+    if not use or not lineup_pids:
+        return None
+    cov = 0.0
+    fit = 0.0
+    for pt, u in use.items():
+        vals = [bmap[b][pt] for b in lineup_pids if b in bmap and pt in bmap[b]]
+        if len(vals) >= 5:
+            fit += u * (sum(vals) / len(vals))
+            cov += u
+    return (fit / cov) if cov >= 0.6 else None
+
+
 def slate():
     """Today's games with probables + POSTED lineups: [{pitcher, pid, opp_lineup_pids, home_team,
     start_iso, started}]. Lineup required — no fallback (matches the validated OOS)."""
@@ -347,11 +411,15 @@ def z(v, mu, sd):
     return (v - mu) / (sd or 1)
 
 
+K_DAY_SCORES = {}   # (pitcher, gd) -> signed K score for ALL gated candidates (not just flags)
+
+
 def flag(con):
     F = FROZEN
     tk = team_k()
     br = batter_rates()
     lines = k_lines()
+    pmap, bmap = arsenal_maps()
     ts = _now()
     gd = _today_et()
     topic = None
@@ -383,6 +451,7 @@ def flag(con):
         pf = F["park"].get(g["home_team"])
         if pf is not None:
             S += F["pw"] * z(pf, F["park_mu"], F["park_sd"])
+        K_DAY_SCORES[(g["pitcher"], gd)] = S       # signed; flag_outs reads for the ★★ tag
         side = "over" if S > 0 else "under"
         if abs(S) < THR:
             continue
@@ -401,15 +470,27 @@ def flag(con):
             continue
         od, ln, bk = best
         skip = "price_cap" if od >= PRICE_CAP else None
+        # ★ PREMIUM tier (OOS-validated 2026-07-26, beat baseline BOTH held-out years):
+        # S>=2.0 AND arsenal fit aligned >=1z. Additive tag — the base record is unchanged.
+        ft = arsenal_fit(pmap, bmap, g["pid"], g["opp_lineup"])
+        fitz = None
+        if ft is not None and F.get("fit_sd"):
+            fitz = (ft - F["fit_mu"]) / F["fit_sd"]
+        premium = 1 if (abs(S) >= 2.0 and fitz is not None
+                        and ((fitz >= 1.0 and side == "over")
+                             or (fitz <= -1.0 and side == "under"))) else 0
         con.execute("INSERT INTO compass (pitcher, game_date, side, line, odds, book, score, opp, "
-                    "flagged_at, skip, game, team) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                    "flagged_at, skip, game, team, fitz, premium) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                     (g["pitcher"], gd, side, ln, od, bk, round(abs(S), 2), g["opp_name"], ts, skip,
-                     g["home_team"] + "|" + str(g.get("start") or ""), g.get("team_ab") or ""))
+                     g["home_team"] + "|" + str(g.get("start") or ""), g.get("team_ab") or "",
+                     round(fitz, 2) if fitz is not None else None, premium))
         new += 1
         if not skip and topic:
             am = f"+{round((od-1)*100)}" if od >= 2 else f"-{round(100/(od-1))}"
             txt = (f"🚨 ⚾K {g['opp_name']} {g['pitcher']} "
-                   f"{'O' if side == 'over' else 'U'}{ln:g}K {am} {bk.upper()} S{abs(S):.1f}")
+                   f"{'O' if side == 'over' else 'U'}{ln:g}K {am} {bk.upper()} S{abs(S):.1f}"
+                   f"{' ★AR' if premium else ''}")
             try:
                 requests.post(f"https://ntfy.sh/{topic}", data=txt.encode(),
                               params={"title": "Pickz", "priority": "high"}, timeout=15
@@ -489,22 +570,29 @@ def flag_outs(con):
         if skip is None and od >= F["price_cap"]:
             skip = "price_cap"
         strong = 1 if abs(S) >= F["strong"] else 0
+        # ★★ K-AGREEMENT tag (informational shadow — OOS 62-67% hit both years but missed the
+        # beat-baseline bar by 0.8pt in 2026; forward data decides a promotion): the K model's
+        # signed score for the SAME pitcher points the same way with |Sk| >= 1.0. flag() runs
+        # first in the cycle and stashes every gated candidate's score in K_DAY_SCORES.
+        ks = K_DAY_SCORES.get((g["pitcher"], gd))
+        kagree = 1 if (ks is not None and abs(ks) >= 1.0
+                       and ("over" if ks > 0 else "under") == side) else 0
         sl = [bslg.get(b) for b in g["opp_lineup"]]
         sl = [x for x in sl if x is not None]
         con.execute("INSERT INTO outs_compass (pitcher, game_date, side, line, odds, book, score, "
-                    "strong, opp, flagged_at, skip, game, gap, lslg, penfat, team) "
-                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    "strong, opp, flagged_at, skip, game, gap, lslg, penfat, team, kagree) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                     (g["pitcher"], gd, side, ln, od, bk, round(abs(S), 2), strong, g["opp_name"],
                      ts, skip, g["home_team"] + "|" + str(g.get("start") or ""),
                      (ln - med) if med is not None else None,
                      (sum(sl) / len(sl)) if len(sl) >= 6 else None,
-                     pen.get(g["team_id"]), g.get("team_ab") or ""))
+                     pen.get(g["team_id"]), g.get("team_ab") or "", kagree))
         new += 1
         if not skip and topic:
             am = f"+{round((od-1)*100)}" if od >= 2 else f"-{round(100/(od-1))}"
             txt = (f"🚨 ⚾O {g['opp_name']} {g['pitcher']} "
                    f"{'O' if side == 'over' else 'U'}{ln:g} {am} {bk.upper()} S{abs(S):.1f}"
-                   f"{' ★' if strong else ''}")
+                   f"{' ★' if strong else ''}{' ★★K' if kagree else ''}")
             try:
                 requests.post(f"https://ntfy.sh/{topic}", data=txt.encode(),
                               params={"title": "Pickz", "priority": "high"}, timeout=15
@@ -708,10 +796,12 @@ def board(con):
     rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) FROM compass "
                       "WHERE result IN ('W','L') AND skip IS NULL").fetchone()
     flags = [dict(zip(("pitcher", "side", "line", "odds", "book", "score", "opp", "skip", "team",
-                       "game"), r))
+                       "game", "premium"), r))
              for r in con.execute("SELECT pitcher, side, line, odds, book, score, opp, skip, team, "
-                                  "game FROM compass WHERE game_date=? ORDER BY score DESC",
+                                  "game, premium FROM compass WHERE game_date=? ORDER BY score DESC",
                                   (_today_et(),))]
+    prem_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) FROM compass "
+                           "WHERE result IN ('W','L') AND skip IS NULL AND premium=1").fetchone()
     shadow = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) FROM compass "
                          "WHERE result IN ('W','L') AND skip IS NOT NULL").fetchone()
     prow = con.execute("SELECT legs, combo, frozen FROM parlay WHERE game_date=?",
@@ -728,13 +818,18 @@ def board(con):
     outs_sh = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
                           "FROM outs_compass WHERE result IN ('W','L') AND skip IS NOT NULL").fetchone()
     outs_today = [dict(zip(("pitcher", "side", "line", "odds", "book", "score", "strong", "opp",
-                            "skip", "team", "game"), r))
+                            "skip", "team", "game", "kagree"), r))
                   for r in con.execute("SELECT pitcher, side, line, odds, book, score, strong, opp, "
-                                       "skip, team, game FROM outs_compass WHERE game_date=? "
+                                       "skip, team, game, kagree FROM outs_compass WHERE game_date=? "
                                        "ORDER BY score DESC", (_today_et(),))]
+    kag_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
+                          "FROM outs_compass WHERE result IN ('W','L') AND skip IS NULL "
+                          "AND kagree=1").fetchone()
     (HERE / "compass_board.json").write_text(json.dumps(
         {"updated": _now(), "w": rec[0] or 0, "l": rec[1] or 0, "u": rec[2] or 0.0,
          "shadow": {"w": shadow[0] or 0, "l": shadow[1] or 0, "u": shadow[2] or 0.0},
+         "premium": {"w": prem_rec[0] or 0, "l": prem_rec[1] or 0, "u": prem_rec[2] or 0.0},
+         "kagree": {"w": kag_rec[0] or 0, "l": kag_rec[1] or 0, "u": kag_rec[2] or 0.0},
          "today": flags,
          "outs": {"w": outs_rec[0] or 0, "l": outs_rec[1] or 0, "u": outs_rec[2] or 0.0,
                   "shadow": {"w": outs_sh[0] or 0, "l": outs_sh[1] or 0, "u": outs_sh[2] or 0.0},
