@@ -1,61 +1,6 @@
 {
- "captured_at": "2026-07-26T06:15:41Z",
+ "captured_at": "2026-07-26T06:20:07Z",
  "matches": [
-  {
-   "event_id": 35867282,
-   "p1": "Mariusz Adamus",
-   "p2": "Oskar Jadach",
-   "p1_norm": "mariusz adamus",
-   "p2_norm": "oskar jadach",
-   "open_date": "2026-07-26T05:55:00.000Z",
-   "line": 99.5,
-   "over_odds": 105,
-   "under_odds": -140
-  },
-  {
-   "event_id": 35867299,
-   "p1": "Bartlomiej Mleczko",
-   "p2": "Jakub Wozniak",
-   "p1_norm": "bartlomiej mleczko",
-   "p2_norm": "jakub wozniak",
-   "open_date": "2026-07-26T06:00:00.000Z",
-   "line": 91.5,
-   "over_odds": 110,
-   "under_odds": -155
-  },
-  {
-   "event_id": 35867300,
-   "p1": "Rafal Adach",
-   "p2": "Piotr Zemla",
-   "p1_norm": "rafal adach",
-   "p2_norm": "piotr zemla",
-   "open_date": "2026-07-26T06:00:00.000Z",
-   "line": 61.5,
-   "over_odds": 100,
-   "under_odds": -140
-  },
-  {
-   "event_id": 35867351,
-   "p1": "Marcin Jadczyk",
-   "p2": "Jan Zandecki",
-   "p1_norm": "marcin jadczyk",
-   "p2_norm": "jan zandecki",
-   "open_date": "2026-07-26T06:05:00.000Z",
-   "line": 88.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
-  {
-   "event_id": 35867352,
-   "p1": "Waclaw Suchecki",
-   "p2": "Piotr Staniszewski",
-   "p1_norm": "waclaw suchecki",
-   "p2_norm": "piotr staniszewski",
-   "open_date": "2026-07-26T06:05:00.000Z",
-   "line": 63.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35867444,
    "p1": "Piotr Przewlocki",
@@ -64,8 +9,8 @@
    "p2_norm": "rafal wojcik",
    "open_date": "2026-07-26T06:20:00.000Z",
    "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35867447,
@@ -96,9 +41,9 @@
    "p1_norm": "oliwier sokolowski",
    "p2_norm": "marian lebek",
    "open_date": "2026-07-26T06:30:00.000Z",
-   "line": 76.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 75.5,
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35867456,
@@ -119,6 +64,28 @@
    "p2_norm": "karol wisniewski",
    "open_date": "2026-07-26T06:30:00.000Z",
    "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35867465,
+   "p1": "Mariusz Koczyba",
+   "p2": "Piotr Zemla",
+   "p1_norm": "mariusz koczyba",
+   "p2_norm": "piotr zemla",
+   "open_date": "2026-07-26T06:45:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35867466,
+   "p1": "Patryk Jedrzejak",
+   "p2": "Mariusz Adamus",
+   "p1_norm": "patryk jedrzejak",
+   "p2_norm": "mariusz adamus",
+   "open_date": "2026-07-26T06:45:00.000Z",
+   "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
   }
