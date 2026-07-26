@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T16:55:53Z",
+ "captured_at": "2026-07-26T17:00:08Z",
  "matches": [
-  {
-   "event_id": 35869310,
-   "p1": "Piotr Przewlocki",
-   "p2": "Sebastian Szostok",
-   "p1_norm": "piotr przewlocki",
-   "p2_norm": "sebastian szostok",
-   "open_date": "2026-07-26T16:40:00.000Z",
-   "line": 76.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35869330,
    "p1": "Sebastian Krupa",
@@ -19,9 +8,9 @@
    "p1_norm": "sebastian krupa",
    "p2_norm": "michal paszkiewicz",
    "open_date": "2026-07-26T16:50:00.000Z",
-   "line": 70.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 60.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35869332,
@@ -30,9 +19,9 @@
    "p1_norm": "adam staniczek",
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-07-26T16:55:00.000Z",
-   "line": 69.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 72.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35869333,
@@ -42,8 +31,8 @@
    "p2_norm": "tomasz filbrandt",
    "open_date": "2026-07-26T16:55:00.000Z",
    "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35869334,
@@ -52,9 +41,9 @@
    "p1_norm": "jakub nosiadek",
    "p2_norm": "aleksander lilien",
    "open_date": "2026-07-26T16:55:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 86.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35869340,
