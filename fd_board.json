@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-26T07:06:36Z",
+ "captured_at": "2026-07-26T07:13:50Z",
  "matches": [
-  {
-   "event_id": 35867465,
-   "p1": "Mariusz Koczyba",
-   "p2": "Piotr Zemla",
-   "p1_norm": "mariusz koczyba",
-   "p2_norm": "piotr zemla",
-   "open_date": "2026-07-26T06:45:00.000Z",
-   "line": 100.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
-  {
-   "event_id": 35867472,
-   "p1": "Maciej Sinicki",
-   "p2": "Bartlomiej Mleczko",
-   "p1_norm": "maciej sinicki",
-   "p2_norm": "bartlomiej mleczko",
-   "open_date": "2026-07-26T06:50:00.000Z",
-   "line": 76.5,
-   "over_odds": -145,
-   "under_odds": 105
-  },
   {
    "event_id": 35867475,
    "p1": "Waclaw Suchecki",
@@ -30,9 +8,9 @@
    "p1_norm": "waclaw suchecki",
    "p2_norm": "wojciech gluszek",
    "open_date": "2026-07-26T06:55:00.000Z",
-   "line": 74.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 97.5,
+   "over_odds": 120,
+   "under_odds": -165
   },
   {
    "event_id": 35867476,
@@ -41,9 +19,9 @@
    "p1_norm": "kacper petas",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-26T06:55:00.000Z",
-   "line": 75.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 86.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35867488,
@@ -52,9 +30,9 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-26T07:10:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 70.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35867489,
@@ -63,9 +41,9 @@
    "p1_norm": "rafal adach",
    "p2_norm": "wojciech pytlas",
    "open_date": "2026-07-26T07:10:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35867496,
@@ -121,6 +99,28 @@
    "line": 77.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35867508,
+   "p1": "Jakub Nowak",
+   "p2": "Jakub Jesiek",
+   "p1_norm": "jakub nowak",
+   "p2_norm": "jakub jesiek",
+   "open_date": "2026-07-26T07:35:00.000Z",
+   "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35867545,
+   "p1": "Jakub Wozniak",
+   "p2": "Maciej Sinicki",
+   "p1_norm": "jakub wozniak",
+   "p2_norm": "maciej sinicki",
+   "open_date": "2026-07-26T07:40:00.000Z",
+   "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
