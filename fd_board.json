@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T11:34:36Z",
+ "captured_at": "2026-07-26T11:39:03Z",
  "matches": [
-  {
-   "event_id": 35867970,
-   "p1": "Kacper Petas",
-   "p2": "Jakub Kuzmicz",
-   "p1_norm": "kacper petas",
-   "p2_norm": "jakub kuzmicz",
-   "open_date": "2026-07-26T11:15:00.000Z",
-   "line": 98.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35868010,
    "p1": "Oliwier Sokolowski",
@@ -19,9 +8,9 @@
    "p1_norm": "oliwier sokolowski",
    "p2_norm": "igor szymanski",
    "open_date": "2026-07-26T11:25:00.000Z",
-   "line": 64.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 79.5,
+   "over_odds": 120,
+   "under_odds": -165
   },
   {
    "event_id": 35868011,
@@ -30,9 +19,9 @@
    "p1_norm": "bartlomiej wisniewski",
    "p2_norm": "waclaw suchecki",
    "open_date": "2026-07-26T11:25:00.000Z",
-   "line": 92.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 94.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35868021,
@@ -41,9 +30,9 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-26T11:30:00.000Z",
-   "line": 86.5,
-   "over_odds": -115,
-   "under_odds": -115
+   "line": 65.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35868039,
@@ -64,8 +53,8 @@
    "p2_norm": "jakub wozniak",
    "open_date": "2026-07-26T11:45:00.000Z",
    "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35868072,
