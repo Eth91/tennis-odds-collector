@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T04:45:26Z",
+ "captured_at": "2026-07-26T04:49:29Z",
  "matches": [
-  {
-   "event_id": 35866814,
-   "p1": "Waclaw Suchecki",
-   "p2": "Wojciech Gluszek",
-   "p1_norm": "waclaw suchecki",
-   "p2_norm": "wojciech gluszek",
-   "open_date": "2026-07-26T04:30:00.000Z",
-   "line": 75.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
   {
    "event_id": 35866816,
    "p1": "Marcin Jadczyk",
@@ -19,9 +8,9 @@
    "p1_norm": "marcin jadczyk",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-26T04:30:00.000Z",
-   "line": 56.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 73.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35866818,
@@ -30,9 +19,9 @@
    "p1_norm": "michal durda",
    "p2_norm": "marcin lach",
    "open_date": "2026-07-26T04:40:00.000Z",
-   "line": 80.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 88.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35866819,
@@ -108,6 +97,50 @@
    "p2_norm": "jakub nowak",
    "open_date": "2026-07-26T05:10:00.000Z",
    "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35867039,
+   "p1": "Oliwier Sokolowski",
+   "p2": "Igor Szymanski",
+   "p1_norm": "oliwier sokolowski",
+   "p2_norm": "igor szymanski",
+   "open_date": "2026-07-26T05:15:00.000Z",
+   "line": 71.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35867040,
+   "p1": "Maciej Domin",
+   "p2": "Jakub Kuzmicz",
+   "p1_norm": "maciej domin",
+   "p2_norm": "jakub kuzmicz",
+   "open_date": "2026-07-26T05:15:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35867041,
+   "p1": "Waclaw Suchecki",
+   "p2": "Bartlomiej Wisniewski",
+   "p1_norm": "waclaw suchecki",
+   "p2_norm": "bartlomiej wisniewski",
+   "open_date": "2026-07-26T05:15:00.000Z",
+   "line": 80.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35867042,
+   "p1": "Jakub Wozniak",
+   "p2": "Maciej Sinicki",
+   "p1_norm": "jakub wozniak",
+   "p2_norm": "maciej sinicki",
+   "open_date": "2026-07-26T05:15:00.000Z",
+   "line": 79.5,
    "over_odds": -118,
    "under_odds": -112
   }
