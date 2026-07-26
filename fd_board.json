@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T13:03:40Z",
+ "captured_at": "2026-07-26T13:07:55Z",
  "matches": [
-  {
-   "event_id": 35868577,
-   "p1": "Rafal Wojcik",
-   "p2": "Mariusz Adamus",
-   "p1_norm": "rafal wojcik",
-   "p2_norm": "mariusz adamus",
-   "open_date": "2026-07-26T12:45:00.000Z",
-   "line": 85.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35868606,
    "p1": "Maciej Domin",
@@ -19,9 +8,9 @@
    "p1_norm": "maciej domin",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-26T12:55:00.000Z",
-   "line": 87.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 76.5,
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35868624,
@@ -30,7 +19,7 @@
    "p1_norm": "alan wos",
    "p2_norm": "aleksander lilien",
    "open_date": "2026-07-26T13:00:00.000Z",
-   "line": 72.5,
+   "line": 71.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -42,8 +31,8 @@
    "p2_norm": "piotr staniszewski",
    "open_date": "2026-07-26T13:05:00.000Z",
    "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35868629,
@@ -52,9 +41,9 @@
    "p1_norm": "kamil kowalski",
    "p2_norm": "jacek wieczerzak",
    "open_date": "2026-07-26T13:05:00.000Z",
-   "line": 59.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 53.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35868638,
