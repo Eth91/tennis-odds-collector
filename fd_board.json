@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T14:30:26Z",
+ "captured_at": "2026-07-26T14:34:42Z",
  "matches": [
-  {
-   "event_id": 35868815,
-   "p1": "Marian Lebek",
-   "p2": "Igor Szymanski",
-   "p1_norm": "marian lebek",
-   "p2_norm": "igor szymanski",
-   "open_date": "2026-07-26T14:20:00.000Z",
-   "line": 64.5,
-   "over_odds": -105,
-   "under_odds": -135
-  },
   {
    "event_id": 35868816,
    "p1": "Rafal Wojcik",
@@ -19,20 +8,9 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-07-26T14:20:00.000Z",
-   "line": 90.5,
+   "line": 94.5,
    "over_odds": -110,
    "under_odds": -125
-  },
-  {
-   "event_id": 35868817,
-   "p1": "Bartosz Sulkowski",
-   "p2": "Waclaw Suchecki",
-   "p1_norm": "bartosz sulkowski",
-   "p2_norm": "waclaw suchecki",
-   "open_date": "2026-07-26T14:20:00.000Z",
-   "line": 75.5,
-   "over_odds": -115,
-   "under_odds": -120
   },
   {
    "event_id": 35868844,
@@ -86,6 +64,39 @@
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-26T14:45:00.000Z",
    "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35868865,
+   "p1": "Kazimierz Rybak",
+   "p2": "Kacper Kwiatkowski",
+   "p1_norm": "kazimierz rybak",
+   "p2_norm": "kacper kwiatkowski",
+   "open_date": "2026-07-26T15:00:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35868866,
+   "p1": "Filip Mlynarski",
+   "p2": "Mateusz Rutkowski",
+   "p1_norm": "filip mlynarski",
+   "p2_norm": "mateusz rutkowski",
+   "open_date": "2026-07-26T15:00:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35868867,
+   "p1": "Arkadiusz Mugowski",
+   "p2": "Karol Sulkowski",
+   "p1_norm": "arkadiusz mugowski",
+   "p2_norm": "karol sulkowski",
+   "open_date": "2026-07-26T15:00:00.000Z",
+   "line": 79.5,
    "over_odds": -118,
    "under_odds": -112
   }
