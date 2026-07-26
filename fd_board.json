@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-07-26T05:45:20Z",
+ "captured_at": "2026-07-26T05:49:25Z",
  "matches": [
-  {
-   "event_id": 35867248,
-   "p1": "Patryk Jedrzejak",
-   "p2": "Sebastian Szostok",
-   "p1_norm": "patryk jedrzejak",
-   "p2_norm": "sebastian szostok",
-   "open_date": "2026-07-26T05:30:00.000Z",
-   "line": 91.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35867249,
-   "p1": "Mariusz Koczyba",
-   "p2": "Jakub Jesiek",
-   "p1_norm": "mariusz koczyba",
-   "p2_norm": "jakub jesiek",
-   "open_date": "2026-07-26T05:35:00.000Z",
-   "line": 79.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35867250,
-   "p1": "Maciej Kolek",
-   "p2": "Maciej Sinicki",
-   "p1_norm": "maciej kolek",
-   "p2_norm": "maciej sinicki",
-   "open_date": "2026-07-26T05:35:00.000Z",
-   "line": 59.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35867253,
    "p1": "Wojciech Gluszek",
@@ -41,7 +8,7 @@
    "p1_norm": "wojciech gluszek",
    "p2_norm": "piotr staniszewski",
    "open_date": "2026-07-26T05:40:00.000Z",
-   "line": 68.5,
+   "line": 56.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -52,7 +19,7 @@
    "p1_norm": "jacek wieczerzak",
    "p2_norm": "marian lebek",
    "open_date": "2026-07-26T05:40:00.000Z",
-   "line": 82.5,
+   "line": 84.5,
    "over_odds": -110,
    "under_odds": -125
   },
@@ -63,9 +30,9 @@
    "p1_norm": "kacper petas",
    "p2_norm": "karol wisniewski",
    "open_date": "2026-07-26T05:40:00.000Z",
-   "line": 67.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35867282,
