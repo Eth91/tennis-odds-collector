@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T15:24:32Z",
+ "captured_at": "2026-07-26T15:28:51Z",
  "matches": [
-  {
-   "event_id": 35868878,
-   "p1": "Oskar Sokolowski",
-   "p2": "Michal Paszkiewicz",
-   "p1_norm": "oskar sokolowski",
-   "p2_norm": "michal paszkiewicz",
-   "open_date": "2026-07-26T15:10:00.000Z",
-   "line": 80.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35868890,
    "p1": "Jacek Zelezik",
@@ -19,9 +8,9 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-07-26T15:25:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 69.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35868891,
@@ -30,20 +19,9 @@
    "p1_norm": "jakub glanowski",
    "p2_norm": "aleksander lilien",
    "open_date": "2026-07-26T15:25:00.000Z",
-   "line": 81.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
-  {
-   "event_id": 35868892,
-   "p1": "Jakub Zochniak",
-   "p2": "Tomasz Filbrandt",
-   "p1_norm": "jakub zochniak",
-   "p2_norm": "tomasz filbrandt",
-   "open_date": "2026-07-26T15:25:00.000Z",
-   "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 83.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35868929,
@@ -52,9 +30,9 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "patryk jedrzejak",
    "open_date": "2026-07-26T15:30:00.000Z",
-   "line": 74.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 73.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35868925,
