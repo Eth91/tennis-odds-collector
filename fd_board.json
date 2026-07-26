@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T22:44:23Z",
+ "captured_at": "2026-07-26T22:48:58Z",
  "matches": [
   {
    "event_id": 35870392,
@@ -8,9 +8,9 @@
    "p1_norm": "michal durda",
    "p2_norm": "wojciech urban",
    "open_date": "2026-07-26T22:40:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 84.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35870399,
@@ -77,6 +77,17 @@
    "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35870448,
+   "p1": "Filip Mlynarski",
+   "p2": "Mateusz Rutkowski",
+   "p1_norm": "filip mlynarski",
+   "p2_norm": "mateusz rutkowski",
+   "open_date": "2026-07-26T23:15:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
