@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T18:07:41Z",
+ "captured_at": "2026-07-26T18:11:46Z",
  "matches": [
-  {
-   "event_id": 35869572,
-   "p1": "Jakub Nowak",
-   "p2": "Piotr Gumulinski",
-   "p1_norm": "jakub nowak",
-   "p2_norm": "piotr gumulinski",
-   "open_date": "2026-07-26T18:00:00.000Z",
-   "line": 60.5,
-   "over_odds": -105,
-   "under_odds": -135
-  },
   {
    "event_id": 35869575,
    "p1": "Oskar Sokolowski",
@@ -19,9 +8,9 @@
    "p1_norm": "oskar sokolowski",
    "p2_norm": "jaroslaw badura",
    "open_date": "2026-07-26T18:00:00.000Z",
-   "line": 79.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 99.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35869940,
@@ -33,17 +22,6 @@
    "line": 76.5,
    "over_odds": -112,
    "under_odds": -118
-  },
-  {
-   "event_id": 35869941,
-   "p1": "Pawel Chojnacki",
-   "p2": "Henryk Tkaczyk",
-   "p1_norm": "pawel chojnacki",
-   "p2_norm": "henryk tkaczyk",
-   "open_date": "2026-07-26T18:10:00.000Z",
-   "line": 72.5,
-   "over_odds": -118,
-   "under_odds": -112
   },
   {
    "event_id": 35869972,
@@ -74,9 +52,9 @@
    "p1_norm": "jakub glanowski",
    "p2_norm": "jakub nosiadek",
    "open_date": "2026-07-26T18:30:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35870014,
@@ -88,6 +66,17 @@
    "line": 74.5,
    "over_odds": -120,
    "under_odds": -110
+  },
+  {
+   "event_id": 35870068,
+   "p1": "Jakub Zochniak",
+   "p2": "Alan Wos",
+   "p1_norm": "jakub zochniak",
+   "p2_norm": "alan wos",
+   "open_date": "2026-07-26T18:30:00.000Z",
+   "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
