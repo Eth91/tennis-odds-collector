@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T22:21:11Z",
+ "captured_at": "2026-07-26T22:25:34Z",
  "matches": [
   {
    "event_id": 35870370,
@@ -8,9 +8,9 @@
    "p1_norm": "mateusz rutkowski",
    "p2_norm": "tomasz filbrandt",
    "open_date": "2026-07-26T22:05:00.000Z",
-   "line": 73.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 83.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35870372,
@@ -19,9 +19,9 @@
    "p1_norm": "pawel chojnacki",
    "p2_norm": "jacek zelezik",
    "open_date": "2026-07-26T22:10:00.000Z",
-   "line": 86.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 90.5,
+   "over_odds": 115,
+   "under_odds": -160
   },
   {
    "event_id": 35870381,
@@ -31,8 +31,8 @@
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-07-26T22:25:00.000Z",
    "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -116
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35870384,
@@ -77,6 +77,28 @@
    "line": 75.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35870399,
+   "p1": "Jakub Zochniak",
+   "p2": "Mateusz Rutkowski",
+   "p1_norm": "jakub zochniak",
+   "p2_norm": "mateusz rutkowski",
+   "open_date": "2026-07-26T22:50:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35870400,
+   "p1": "Jaroslaw Badura",
+   "p2": "Michal Paszkiewicz",
+   "p1_norm": "jaroslaw badura",
+   "p2_norm": "michal paszkiewicz",
+   "open_date": "2026-07-26T22:50:00.000Z",
+   "line": 75.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
