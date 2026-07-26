@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T20:34:09Z",
+ "captured_at": "2026-07-26T20:38:51Z",
  "matches": [
-  {
-   "event_id": 35870251,
-   "p1": "Jaroslaw Badura",
-   "p2": "Michal Paszkiewicz",
-   "p1_norm": "jaroslaw badura",
-   "p2_norm": "michal paszkiewicz",
-   "open_date": "2026-07-26T20:20:00.000Z",
-   "line": 73.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35870256,
    "p1": "Filip Mlynarski",
@@ -19,9 +8,9 @@
    "p1_norm": "filip mlynarski",
    "p2_norm": "tomasz filbrandt",
    "open_date": "2026-07-26T20:30:00.000Z",
-   "line": 73.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 56.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35870257,
@@ -30,9 +19,9 @@
    "p1_norm": "arkadiusz mugowski",
    "p2_norm": "aleksander lilien",
    "open_date": "2026-07-26T20:30:00.000Z",
-   "line": 52.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 70.5,
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35870259,
@@ -41,9 +30,9 @@
    "p1_norm": "kazimierz rybak",
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-07-26T20:30:00.000Z",
-   "line": 66.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 58.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35870263,
@@ -64,7 +53,7 @@
    "p2_norm": "lukasz oracz",
    "open_date": "2026-07-26T20:45:00.000Z",
    "line": 76.5,
-   "over_odds": -116,
+   "over_odds": -112,
    "under_odds": -118
   },
   {
@@ -85,9 +74,9 @@
    "p1_norm": "filip mlynarski",
    "p2_norm": "mateusz rutkowski",
    "open_date": "2026-07-26T21:00:00.000Z",
-   "line": 76.5,
+   "line": 75.5,
    "over_odds": -118,
-   "under_odds": -116
+   "under_odds": -112
   },
   {
    "event_id": 35870268,
@@ -97,8 +86,19 @@
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-26T21:00:00.000Z",
    "line": 78.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35870269,
+   "p1": "Jakub Nowak",
+   "p2": "Michal Durda",
+   "p1_norm": "jakub nowak",
+   "p2_norm": "michal durda",
+   "open_date": "2026-07-26T21:05:00.000Z",
+   "line": 72.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
