@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T23:36:32Z",
+ "captured_at": "2026-07-26T23:41:00Z",
  "matches": [
-  {
-   "event_id": 35870468,
-   "p1": "Jacek Zelezik",
-   "p2": "Kacper Kwiatkowski",
-   "p1_norm": "jacek zelezik",
-   "p2_norm": "kacper kwiatkowski",
-   "open_date": "2026-07-26T23:20:00.000Z",
-   "line": 89.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35870519,
    "p1": "Mateusz Trela",
