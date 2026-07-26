@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T11:43:15Z",
+ "captured_at": "2026-07-26T11:47:27Z",
  "matches": [
   {
    "event_id": 35868039,
@@ -8,9 +8,9 @@
    "p1_norm": "maciej domin",
    "p2_norm": "jan zandecki",
    "open_date": "2026-07-26T11:40:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 70.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35868053,
@@ -20,8 +20,8 @@
    "p2_norm": "jakub wozniak",
    "open_date": "2026-07-26T11:45:00.000Z",
    "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35868072,
@@ -64,6 +64,39 @@
    "p2_norm": "karol wisniewski",
    "open_date": "2026-07-26T12:05:00.000Z",
    "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35868498,
+   "p1": "Aleksander Lilien",
+   "p2": "Maciej Sinicki",
+   "p1_norm": "aleksander lilien",
+   "p2_norm": "maciej sinicki",
+   "open_date": "2026-07-26T12:10:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35868504,
+   "p1": "Jacek Wieczerzak",
+   "p2": "Pawel Slosarczyk",
+   "p1_norm": "jacek wieczerzak",
+   "p2_norm": "pawel slosarczyk",
+   "open_date": "2026-07-26T12:15:00.000Z",
+   "line": 75.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35868505,
+   "p1": "Piotr Staniszewski",
+   "p2": "Wojciech Gluszek",
+   "p1_norm": "piotr staniszewski",
+   "p2_norm": "wojciech gluszek",
+   "open_date": "2026-07-26T12:15:00.000Z",
+   "line": 79.5,
    "over_odds": -112,
    "under_odds": -118
   }
