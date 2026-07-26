@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T08:52:59Z",
+ "captured_at": "2026-07-26T08:57:40Z",
  "matches": [
   {
    "event_id": 35867642,
@@ -8,20 +8,9 @@
    "p1_norm": "rafal adach",
    "p2_norm": "jakub nowak",
    "open_date": "2026-07-26T08:45:00.000Z",
-   "line": 91.5,
+   "line": 97.5,
    "over_odds": -120,
    "under_odds": -115
-  },
-  {
-   "event_id": 35867643,
-   "p1": "Rafal Wojcik",
-   "p2": "Oskar Jadach",
-   "p1_norm": "rafal wojcik",
-   "p2_norm": "oskar jadach",
-   "open_date": "2026-07-26T08:45:00.000Z",
-   "line": 51.5,
-   "over_odds": -125,
-   "under_odds": -110
   },
   {
    "event_id": 35867650,
@@ -77,6 +66,50 @@
    "line": 80.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35867700,
+   "p1": "Bartlomiej Mleczko",
+   "p2": "Maciej Sinicki",
+   "p1_norm": "bartlomiej mleczko",
+   "p2_norm": "maciej sinicki",
+   "open_date": "2026-07-26T09:20:00.000Z",
+   "line": 79.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35867701,
+   "p1": "Kacper Petas",
+   "p2": "Karol Wisniewski",
+   "p1_norm": "kacper petas",
+   "p2_norm": "karol wisniewski",
+   "open_date": "2026-07-26T09:20:00.000Z",
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -110
+  },
+  {
+   "event_id": 35867708,
+   "p1": "Bartlomiej Wisniewski",
+   "p2": "Wojciech Gluszek",
+   "p1_norm": "bartlomiej wisniewski",
+   "p2_norm": "wojciech gluszek",
+   "open_date": "2026-07-26T09:25:00.000Z",
+   "line": 75.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35867710,
+   "p1": "Oliwier Sokolowski",
+   "p2": "Pawel Slosarczyk",
+   "p1_norm": "oliwier sokolowski",
+   "p2_norm": "pawel slosarczyk",
+   "open_date": "2026-07-26T09:25:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
