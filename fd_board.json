@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T17:51:28Z",
+ "captured_at": "2026-07-26T17:55:34Z",
  "matches": [
   {
    "event_id": 35869491,
@@ -8,9 +8,9 @@
    "p1_norm": "mariusz baron",
    "p2_norm": "michal paszkiewicz",
    "open_date": "2026-07-26T17:35:00.000Z",
-   "line": 101.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 102.5,
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35869544,
@@ -19,7 +19,7 @@
    "p1_norm": "filip mlynarski",
    "p2_norm": "alan wos",
    "open_date": "2026-07-26T17:40:00.000Z",
-   "line": 87.5,
+   "line": 80.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,7 +30,7 @@
    "p1_norm": "arkadiusz mugowski",
    "p2_norm": "jakub nosiadek",
    "open_date": "2026-07-26T17:45:00.000Z",
-   "line": 85.5,
+   "line": 93.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -41,9 +41,9 @@
    "p1_norm": "kazimierz rybak",
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-26T17:45:00.000Z",
-   "line": 87.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 90.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35869572,
@@ -86,6 +86,17 @@
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-07-26T18:10:00.000Z",
    "line": 72.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35869972,
+   "p1": "Michal Durda",
+   "p2": "Grzegorz Marud",
+   "p1_norm": "michal durda",
+   "p2_norm": "grzegorz marud",
+   "open_date": "2026-07-26T18:20:00.000Z",
+   "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
   }
