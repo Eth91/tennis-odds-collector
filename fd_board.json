@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T04:53:45Z",
+ "captured_at": "2026-07-26T04:57:53Z",
  "matches": [
-  {
-   "event_id": 35866816,
-   "p1": "Marcin Jadczyk",
-   "p2": "Jakub Kuzmicz",
-   "p1_norm": "marcin jadczyk",
-   "p2_norm": "jakub kuzmicz",
-   "open_date": "2026-07-26T04:30:00.000Z",
-   "line": 74.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35866818,
    "p1": "Michal Durda",
@@ -19,9 +8,9 @@
    "p1_norm": "michal durda",
    "p2_norm": "marcin lach",
    "open_date": "2026-07-26T04:40:00.000Z",
-   "line": 89.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 90.5,
+   "over_odds": 100,
+   "under_odds": -140
   },
   {
    "event_id": 35866819,
@@ -30,7 +19,7 @@
    "p1_norm": "wojciech pytlas",
    "p2_norm": "jakub jesiek",
    "open_date": "2026-07-26T04:50:00.000Z",
-   "line": 81.5,
+   "line": 87.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -41,9 +30,9 @@
    "p1_norm": "karol wisniewski",
    "p2_norm": "jan zandecki",
    "open_date": "2026-07-26T04:55:00.000Z",
-   "line": 71.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 68.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35866828,
@@ -52,9 +41,9 @@
    "p1_norm": "marian lebek",
    "p2_norm": "pawel slosarczyk",
    "open_date": "2026-07-26T04:55:00.000Z",
-   "line": 71.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 74.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35866829,
@@ -63,9 +52,9 @@
    "p1_norm": "piotr staniszewski",
    "p2_norm": "bartlomiej wisniewski",
    "open_date": "2026-07-26T04:55:00.000Z",
-   "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35866831,
