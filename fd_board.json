@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T16:04:57Z",
+ "captured_at": "2026-07-26T16:09:56Z",
  "matches": [
-  {
-   "event_id": 35868951,
-   "p1": "Jakub Nosiadek",
-   "p2": "Bartosz Sulkowski",
-   "p1_norm": "jakub nosiadek",
-   "p2_norm": "bartosz sulkowski",
-   "open_date": "2026-07-26T15:50:00.000Z",
-   "line": 93.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
   {
    "event_id": 35868952,
    "p1": "Adam Staniczek",
@@ -19,9 +8,9 @@
    "p1_norm": "adam staniczek",
    "p2_norm": "pawel chojnacki",
    "open_date": "2026-07-26T15:50:00.000Z",
-   "line": 91.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 92.5,
+   "over_odds": -185,
+   "under_odds": 130
   },
   {
    "event_id": 35868979,
@@ -30,9 +19,9 @@
    "p1_norm": "oskar jadach",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-26T15:55:00.000Z",
-   "line": 73.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 80.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35869036,
@@ -41,20 +30,9 @@
    "p1_norm": "jaroslaw badura",
    "p2_norm": "sebastian krupa",
    "open_date": "2026-07-26T16:00:00.000Z",
-   "line": 84.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35869244,
-   "p1": "Filip Mlynarski",
-   "p2": "Jakub Zochniak",
-   "p1_norm": "filip mlynarski",
-   "p2_norm": "jakub zochniak",
-   "open_date": "2026-07-26T16:05:00.000Z",
-   "line": 71.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 90.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35869258,
