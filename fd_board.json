@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T17:37:03Z",
+ "captured_at": "2026-07-26T17:43:24Z",
  "matches": [
   {
    "event_id": 35869442,
@@ -8,9 +8,9 @@
    "p1_norm": "schaniel krzysztof",
    "p2_norm": "wojciech urban",
    "open_date": "2026-07-26T17:30:00.000Z",
-   "line": 86.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 96.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35869491,
@@ -19,9 +19,9 @@
    "p1_norm": "mariusz baron",
    "p2_norm": "michal paszkiewicz",
    "open_date": "2026-07-26T17:35:00.000Z",
-   "line": 74.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 70.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35869544,
@@ -30,9 +30,9 @@
    "p1_norm": "filip mlynarski",
    "p2_norm": "alan wos",
    "open_date": "2026-07-26T17:40:00.000Z",
-   "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 69.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35869551,
@@ -77,6 +77,28 @@
    "line": 78.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35869940,
+   "p1": "Bartosz Sulkowski",
+   "p2": "Aleksander Lilien",
+   "p1_norm": "bartosz sulkowski",
+   "p2_norm": "aleksander lilien",
+   "open_date": "2026-07-26T18:10:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35869941,
+   "p1": "Pawel Chojnacki",
+   "p2": "Henryk Tkaczyk",
+   "p1_norm": "pawel chojnacki",
+   "p2_norm": "henryk tkaczyk",
+   "open_date": "2026-07-26T18:10:00.000Z",
+   "line": 72.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
