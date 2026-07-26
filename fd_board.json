@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-07-26T11:39:03Z",
+ "captured_at": "2026-07-26T11:43:15Z",
  "matches": [
-  {
-   "event_id": 35868010,
-   "p1": "Oliwier Sokolowski",
-   "p2": "Igor Szymanski",
-   "p1_norm": "oliwier sokolowski",
-   "p2_norm": "igor szymanski",
-   "open_date": "2026-07-26T11:25:00.000Z",
-   "line": 79.5,
-   "over_odds": 120,
-   "under_odds": -165
-  },
-  {
-   "event_id": 35868011,
-   "p1": "Bartlomiej Wisniewski",
-   "p2": "Waclaw Suchecki",
-   "p1_norm": "bartlomiej wisniewski",
-   "p2_norm": "waclaw suchecki",
-   "open_date": "2026-07-26T11:25:00.000Z",
-   "line": 94.5,
-   "over_odds": -115,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35868021,
-   "p1": "Rafal Wojcik",
-   "p2": "Sebastian Szostok",
-   "p1_norm": "rafal wojcik",
-   "p2_norm": "sebastian szostok",
-   "open_date": "2026-07-26T11:30:00.000Z",
-   "line": 65.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35868039,
    "p1": "Maciej Domin",
@@ -41,9 +8,9 @@
    "p1_norm": "maciej domin",
    "p2_norm": "jan zandecki",
    "open_date": "2026-07-26T11:40:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35868053,
@@ -86,6 +53,17 @@
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-26T11:55:00.000Z",
    "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35868417,
+   "p1": "Marcin Jadczyk",
+   "p2": "Karol Wisniewski",
+   "p1_norm": "marcin jadczyk",
+   "p2_norm": "karol wisniewski",
+   "open_date": "2026-07-26T12:05:00.000Z",
+   "line": 76.5,
    "over_odds": -112,
    "under_odds": -118
   }
