@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T11:17:17Z",
+ "captured_at": "2026-07-26T11:21:27Z",
  "matches": [
-  {
-   "event_id": 35867937,
-   "p1": "Marian Lebek",
-   "p2": "Pawel Slosarczyk",
-   "p1_norm": "marian lebek",
-   "p2_norm": "pawel slosarczyk",
-   "open_date": "2026-07-26T11:00:00.000Z",
-   "line": 84.5,
-   "over_odds": 110,
-   "under_odds": -155
-  },
   {
    "event_id": 35867970,
    "p1": "Kacper Petas",
@@ -19,9 +8,9 @@
    "p1_norm": "kacper petas",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-26T11:15:00.000Z",
-   "line": 70.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35867987,
@@ -30,9 +19,9 @@
    "p1_norm": "bartlomiej mleczko",
    "p2_norm": "maciej kolek",
    "open_date": "2026-07-26T11:20:00.000Z",
-   "line": 74.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 83.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35868010,
