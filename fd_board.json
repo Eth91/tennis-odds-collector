@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T07:56:56Z",
+ "captured_at": "2026-07-26T08:01:04Z",
  "matches": [
   {
    "event_id": 35867569,
@@ -8,9 +8,9 @@
    "p1_norm": "oliwier sokolowski",
    "p2_norm": "kamil kowalski",
    "open_date": "2026-07-26T07:45:00.000Z",
-   "line": 86.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 87.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35867570,
@@ -20,8 +20,8 @@
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-26T07:45:00.000Z",
    "line": 87.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35867578,
@@ -30,9 +30,9 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-26T07:55:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35867584,
@@ -42,8 +42,8 @@
    "p2_norm": "wojciech pytlas",
    "open_date": "2026-07-26T08:00:00.000Z",
    "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35867589,
