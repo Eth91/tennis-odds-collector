@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T18:44:28Z",
+ "captured_at": "2026-07-26T18:48:49Z",
  "matches": [
-  {
-   "event_id": 35870014,
-   "p1": "Jacek Zelezik",
-   "p2": "Adam Staniczek",
-   "p1_norm": "jacek zelezik",
-   "p2_norm": "adam staniczek",
-   "open_date": "2026-07-26T18:30:00.000Z",
-   "line": 80.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35870068,
    "p1": "Jakub Zochniak",
@@ -19,31 +8,9 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "alan wos",
    "open_date": "2026-07-26T18:30:00.000Z",
-   "line": 78.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35870093,
-   "p1": "Mariusz Baron",
-   "p2": "Jaroslaw Badura",
-   "p1_norm": "mariusz baron",
-   "p2_norm": "jaroslaw badura",
-   "open_date": "2026-07-26T18:45:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35870094,
-   "p1": "Schaniel Krzysztof",
-   "p2": "Jakub Nowak",
-   "p1_norm": "schaniel krzysztof",
-   "p2_norm": "jakub nowak",
-   "open_date": "2026-07-26T18:45:00.000Z",
-   "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 86.5,
+   "over_odds": -140,
+   "under_odds": 100
   },
   {
    "event_id": 35870128,
@@ -88,6 +55,17 @@
    "line": 79.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35870154,
+   "p1": "Tomasz Filbrandt",
+   "p2": "Mateusz Rutkowski",
+   "p1_norm": "tomasz filbrandt",
+   "p2_norm": "mateusz rutkowski",
+   "open_date": "2026-07-26T19:15:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
