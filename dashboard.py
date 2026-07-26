@@ -2189,11 +2189,34 @@ def build():
             n = (d.get("w") or 0) + (d.get("l") or 0)
             return f'{d["w"]}-{d["l"]} ({d["u"]:+.1f}u)' if n else "0-0 · new"
 
+        # ETHAN'S K — the primary MLB stream (user's model, pings live 2026-07-27;
+        # compass/outs benched to board-only). Rendered FIRST.
+        _et = _cb.get("ethan") or {}
+        et_today = _et.get("today") or []
+        mlb_html += (f'<div class="op-title">🧪 ETHAN\'S K · Strikeout Overs'
+                     f'<span> · {_rec_str(_et) if (_et.get("w") or _et.get("l")) else "0-0 · new"}'
+                     f' · whiffy lineup + 25%+ K pitcher · 25-26 backtest 66.7% (+25%)</span></div>')
+        if et_today:
+            for f in et_today:
+                mlb_html += (f'<div class="pblk"><div class="phd">'
+                             f'<span class="pname">{html.escape(_short(f["pitcher"]))}</span>'
+                             f'<span class="psp2"></span></div>'
+                             f'<div class="prop"><div class="prow">'
+                             f'<span class="pind over">O</span>'
+                             f'<span class="plno">{f["line"]:g}</span>'
+                             f'<span class="pstat">Strikeouts</span><span class="psp"></span>'
+                             f'<span class="podds">{_am(float(f["odds"]))}</span>'
+                             f'<span class="pedge hi" title="{f["hi_ct"]} whiffy bats · pitcher '
+                             f'{round(100 * f["pk_rate"])}% K">0.5u vs {html.escape(f.get("opp") or "")}'
+                             f'</span></div></div></div>')
+        else:
+            mlb_html += '<div class="xt">no Ethan flags yet today</div>'
+
         k_flags = [f for f in _cb.get("today", []) if not f.get("skip")]
         k_sh = _cb.get("shadow") or {}
         k_shn = (k_sh.get("w") or 0) + (k_sh.get("l") or 0)
         k_note = (" · shadow " + f'{k_sh["w"]}-{k_sh["l"]}') if k_shn else ""
-        mlb_html += (f'<div class="op-title">⚾ K-COMPASS · Strikeouts'
+        mlb_html += (f'<div class="op-title">⚾ K-COMPASS · Strikeouts (benched · board-only)'
                      f'<span> · {_rec_str(_cb)}{k_note}{_tier_note(_cb.get("premium"), "★AR")}'
                      f'{_tier_note(_cb.get("ladder"), "LDR")} · '
                      f'% = backtested hit rate · ★AR = arsenal premium (~65%)</span></div>')
@@ -2206,7 +2229,7 @@ def build():
         o_sh = _ob.get("shadow") or {}
         o_shn = (o_sh.get("w") or 0) + (o_sh.get("l") or 0)
         o_note = (" · shadow " + f'{o_sh["w"]}-{o_sh["l"]}') if o_shn else ""
-        mlb_html += (f'<div class="op-title">⚾ OUTS-COMPASS · Pitcher Outs'
+        mlb_html += (f'<div class="op-title">⚾ OUTS-COMPASS · Pitcher Outs (benched · board-only)'
                      f'<span> · {_rec_str(_ob)}{o_note}{_tier_note(_cb.get("kagree"), "★★K")} · '
                      f'% = hit rate · ★★K = both models agree (only these ping) · cap 2.30</span></div>')
         mlb_html += (_compass_games(o_flags, "Outs Recorded", 1.30,

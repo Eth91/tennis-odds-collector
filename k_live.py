@@ -118,7 +118,7 @@ def _con():
     c.execute("""CREATE TABLE IF NOT EXISTS ethan_k(
         pitcher TEXT, game_date TEXT, side TEXT, line REAL, odds REAL, book TEXT,
         hi_ct INTEGER, pk_rate REAL, opp TEXT, flagged_at TEXT, result TEXT, actual INTEGER,
-        pnl REAL, graded_at TEXT, log_date TEXT,
+        pnl REAL, graded_at TEXT, log_date TEXT, pinged INTEGER DEFAULT 0,
         PRIMARY KEY(pitcher, game_date))""")
     c.execute("""CREATE TABLE IF NOT EXISTS parlay(
         game_date TEXT PRIMARY KEY, legs TEXT, combo REAL, frozen INTEGER DEFAULT 0,
@@ -640,7 +640,7 @@ def flag(con):
                      round(fitz, 2) if fitz is not None else None, premium,
                      round(cp, 3) if cp else None, su, tier, lad_ln, lad_od, driver))
         new += 1
-        if not skip and topic:
+        if not skip and topic and FROZEN.get("pings", True):
             am = f"+{round((od-1)*100)}" if od >= 2 else f"-{round(100/(od-1))}"
             lad = ""
             if lad_od:
@@ -754,7 +754,7 @@ def flag_outs(con):
         new += 1
         # PING POLICY (user 2026-07-26, "optimal hit/volume"): outs pings ONLY on ★★K agreement
         # (66.7%/+29% '26; 62-67% both OOS yrs). All other outs flags stay board+tracker only.
-        if not skip and kagree and topic:
+        if not skip and kagree and topic and OUTS_F.get("pings", True):
             am = f"+{round((od-1)*100)}" if od >= 2 else f"-{round(100/(od-1))}"
             txt = (f"🚨 ⚾O [{tier or '-'}] {g['opp_name']} {g['pitcher']} "
                    f"{'O' if side == 'over' else 'U'}{ln:g} {am} {bk.upper()} "
@@ -857,6 +857,21 @@ def flag_ethan(con):
                     (g["pitcher"], gd, "over", best[0], best[1], best[2], hi,
                      round(pk_rate, 3), g["opp_name"], ts))
         new += 1
+        import os
+        topic = os.environ.get("NTFY_TOPIC")
+        if topic:
+            od = best[1]
+            am = f"+{round((od-1)*100)}" if od >= 2 else f"-{round(100/(od-1))}"
+            txt = (f"🧪 ETHAN ⚾K {g['opp_name']} {g['pitcher']} "
+                   f"O{best[0]:g}K {am} {best[2].upper()} 0.5u (hi{hi} pk{round(100*pk_rate)}%)")
+            try:
+                requests.post(f"https://ntfy.sh/{topic}", data=txt.encode(),
+                              params={"title": "Pickz", "priority": "high"}, timeout=15
+                              ).raise_for_status()
+                con.execute("UPDATE ethan_k SET pinged=1 WHERE pitcher=? AND game_date=?",
+                            (g["pitcher"], gd))
+            except requests.RequestException as e:
+                print(f"ethan ping failed: {str(e)[:60]}")
     con.commit()
     if new:
         print(f"ethan_k: +{new} shadow flags")
@@ -967,7 +982,7 @@ def build_parlay(con):
     if starts and (min(starts) - now).total_seconds() <= 45 * 60:
         con.execute("UPDATE parlay SET frozen=1 WHERE game_date=?", (gd,))
         topic = os.environ.get("NTFY_TOPIC")
-        if topic:
+        if topic and FROZEN.get("pings", True):
             am = f"+{round((combo-1)*100)}"
             leg_s = " + ".join(f"{p['pitcher'].split()[-1]} "
                                f"{'O' if p['side'] == 'over' else 'U'}{p['line']:g}K" for p in pick)
