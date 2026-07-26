@@ -1,23 +1,39 @@
 # Pitcher strikeout alt-ladder scan (cross-book line-shopping)
 
-_2026-07-26 02:07 UTC · fair = vig-stripped consensus of the books posting each rung. NO projection model (backtest: corr 0.37, too weak to price K tails; and pricing a book's unique rung off a model just bets our own error). Only rungs >=2 books agree on can be flagged._
+_2026-07-26 02:34 UTC · fair = vig-stripped consensus of the books posting each rung. NO projection model (backtest: corr 0.37, too weak to price K tails; and pricing a book's unique rung off a model just bets our own error). Only rungs >=2 books agree on can be flagged._
 
 **No +EV rung tonight** — the K market is efficient; even the best of 3 books is -EV on every agreeing rung. This is a SHOPPING sheet (best book per rung to minimize vig), not a bet list. A genuine +EV rung (a slow book) would ⭐ here.
 
-**Jose Soriano**
-  O2.5: FD -1401 (1 book, no consensus)
-  O3.5: FD -430 (1 book, no consensus)
-  O4.5: fair 56% · FD -150 DK -154 → best FD
-  O5.5: FD +132 (1 book, no consensus)
-  O6.5: FD +285 (1 book, no consensus)
-  O7.5: FD +600 (1 book, no consensus)
+**Braxton Ashcraft**
+  O2.5: FD -4000 (1 book, no consensus)
+  O3.5: FD -900 (1 book, no consensus)
+  O4.5: FD -310 (1 book, no consensus)
+  O5.5: fair 53% · FD -122 DK -141 → best FD
+  O6.5: FD +164 (1 book, no consensus)
+  O7.5: FD +350 (1 book, no consensus)
+  O8.5: FD +680 (1 book, no consensus)
+
+**Jameson Taillon**
+  O2.5: FD -850 (1 book, no consensus)
+  O3.5: FD -290 (1 book, no consensus)
+  O4.5: fair 50% · FD -115 DK -123 → best FD
+  O5.5: FD +196 (1 book, no consensus)
+  O6.5: FD +420 (1 book, no consensus)
 
 **Carson Whisenhunt**
   O2.5: FD -670 (1 book, no consensus)
   O3.5: FD -245 (1 book, no consensus)
-  O4.5: fair 45% · DK +105 FD +102 → best DK
+  O4.5: fair 45% · DK +110 FD +102 → best DK
   O5.5: FD +230 (1 book, no consensus)
   O6.5: FD +480 (1 book, no consensus)
+
+**Jose Soriano**
+  O2.5: FD -1401 (1 book, no consensus)
+  O3.5: FD -430 (1 book, no consensus)
+  O4.5: fair 56% · DK -149 FD -150 → best DK
+  O5.5: FD +132 (1 book, no consensus)
+  O6.5: FD +285 (1 book, no consensus)
+  O7.5: FD +600 (1 book, no consensus)
 
 **Andre Pallante**
   O2.5: BETMGM -400 (1 book, no consensus)
@@ -129,15 +145,8 @@ _2026-07-26 02:07 UTC · fair = vig-stripped consensus of the books posting each
   O8.5: FD +250 (1 book, no consensus)
   O9.5: FD +480 (1 book, no consensus)
 
-**Jameson Taillon**
-  O2.5: FD -900 (1 book, no consensus)
-  O3.5: FD -295 (1 book, no consensus)
-  O4.5: FD -118 (1 book, no consensus)
-  O5.5: FD +190 (1 book, no consensus)
-  O6.5: FD +400 (1 book, no consensus)
-
 **Janson Junk**
-  O2.5: FD -350 (1 book, no consensus)
+  O2.5: FD -360 (1 book, no consensus)
   O3.5: FD -128 (1 book, no consensus)
   O4.5: FD +196 (1 book, no consensus)
   O5.5: FD +450 (1 book, no consensus)
@@ -159,8 +168,8 @@ _2026-07-26 02:07 UTC · fair = vig-stripped consensus of the books posting each
   O9.5: FD +680 (1 book, no consensus)
 
 **Walker Buehler**
-  O2.5: FD -460 (1 book, no consensus)
-  O3.5: FD -164 (1 book, no consensus)
+  O2.5: FD -440 (1 book, no consensus)
+  O3.5: FD -166 (1 book, no consensus)
   O4.5: FD +142 (1 book, no consensus)
   O5.5: FD +330 (1 book, no consensus)
   O6.5: FD +750 (1 book, no consensus)
@@ -171,9 +180,6 @@ _2026-07-26 02:07 UTC · fair = vig-stripped consensus of the books posting each
   O4.5: FD +102 (1 book, no consensus)
   O5.5: FD +220 (1 book, no consensus)
   O6.5: FD +470 (1 book, no consensus)
-
-**Braxton Ashcraft**
-  O5.5: DK -135 (1 book, no consensus)
 
 **Connor Prielipp**
   O3.5: DK -167 (1 book, no consensus)
