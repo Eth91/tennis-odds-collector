@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T10:59:30Z",
+ "captured_at": "2026-07-26T11:03:42Z",
  "matches": [
-  {
-   "event_id": 35867912,
-   "p1": "Piotr Przewlocki",
-   "p2": "Sebastian Szostok",
-   "p1_norm": "piotr przewlocki",
-   "p2_norm": "sebastian szostok",
-   "open_date": "2026-07-26T10:40:00.000Z",
-   "line": 76.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35867924,
    "p1": "Jan Zandecki",
@@ -19,9 +8,9 @@
    "p1_norm": "jan zandecki",
    "p2_norm": "karol wisniewski",
    "open_date": "2026-07-26T10:50:00.000Z",
-   "line": 81.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 83.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35867935,
@@ -30,9 +19,9 @@
    "p1_norm": "jakub wozniak",
    "p2_norm": "maciej sinicki",
    "open_date": "2026-07-26T10:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 91.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35867937,
@@ -41,9 +30,9 @@
    "p1_norm": "marian lebek",
    "p2_norm": "pawel slosarczyk",
    "open_date": "2026-07-26T11:00:00.000Z",
-   "line": 73.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 72.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35867938,
@@ -52,9 +41,9 @@
    "p1_norm": "bartosz sulkowski",
    "p2_norm": "wojciech gluszek",
    "open_date": "2026-07-26T11:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 79.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35867948,
@@ -108,6 +97,17 @@
    "p2_norm": "waclaw suchecki",
    "open_date": "2026-07-26T11:25:00.000Z",
    "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35868021,
+   "p1": "Rafal Wojcik",
+   "p2": "Sebastian Szostok",
+   "p1_norm": "rafal wojcik",
+   "p2_norm": "sebastian szostok",
+   "open_date": "2026-07-26T11:30:00.000Z",
+   "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
   }
