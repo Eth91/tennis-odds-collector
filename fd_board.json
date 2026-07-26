@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T00:36:21Z",
+ "captured_at": "2026-07-26T00:42:47Z",
  "matches": [
-  {
-   "event_id": 35866389,
-   "p1": "Miroslaw Warzecha",
-   "p2": "Jakub Skorupa",
-   "p1_norm": "miroslaw warzecha",
-   "p2_norm": "jakub skorupa",
-   "open_date": "2026-07-26T00:25:00.000Z",
-   "line": 54.5,
-   "over_odds": -105,
-   "under_odds": -135
-  },
   {
    "event_id": 35866409,
    "p1": "Jakub Glanowski",
@@ -19,9 +8,9 @@
    "p1_norm": "jakub glanowski",
    "p2_norm": "dawid poloszczanski",
    "open_date": "2026-07-26T00:35:00.000Z",
-   "line": 71.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 90.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35866410,
@@ -30,9 +19,9 @@
    "p1_norm": "dariusz maszczynski",
    "p2_norm": "piotr gesiarz",
    "open_date": "2026-07-26T00:35:00.000Z",
-   "line": 65.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 54.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35866411,
