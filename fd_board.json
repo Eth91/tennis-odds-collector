@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T18:28:59Z",
+ "captured_at": "2026-07-26T18:35:03Z",
  "matches": [
-  {
-   "event_id": 35869972,
-   "p1": "Michal Durda",
-   "p2": "Grzegorz Marud",
-   "p1_norm": "michal durda",
-   "p2_norm": "grzegorz marud",
-   "open_date": "2026-07-26T18:20:00.000Z",
-   "line": 55.5,
-   "over_odds": 105,
-   "under_odds": -145
-  },
   {
    "event_id": 35869981,
    "p1": "Sebastian Krupa",
@@ -19,20 +8,9 @@
    "p1_norm": "sebastian krupa",
    "p2_norm": "lukasz oracz",
    "open_date": "2026-07-26T18:25:00.000Z",
-   "line": 80.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35870013,
-   "p1": "Jakub Glanowski",
-   "p2": "Jakub Nosiadek",
-   "p1_norm": "jakub glanowski",
-   "p2_norm": "jakub nosiadek",
-   "open_date": "2026-07-26T18:30:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 84.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35870014,
@@ -42,8 +20,8 @@
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-26T18:30:00.000Z",
    "line": 74.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870068,
@@ -52,9 +30,9 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "alan wos",
    "open_date": "2026-07-26T18:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 73.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35870093,
