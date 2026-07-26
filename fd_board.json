@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T20:52:47Z",
+ "captured_at": "2026-07-26T20:57:14Z",
  "matches": [
-  {
-   "event_id": 35870263,
-   "p1": "Grzegorz Marud",
-   "p2": "Piotr Gumulinski",
-   "p1_norm": "grzegorz marud",
-   "p2_norm": "piotr gumulinski",
-   "open_date": "2026-07-26T20:45:00.000Z",
-   "line": 65.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35870264,
    "p1": "Oskar Sokolowski",
@@ -19,9 +8,9 @@
    "p1_norm": "oskar sokolowski",
    "p2_norm": "lukasz oracz",
    "open_date": "2026-07-26T20:45:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 88.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870266,
@@ -77,6 +66,39 @@
    "line": 77.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35870294,
+   "p1": "Tomasz Filbrandt",
+   "p2": "Jakub Zochniak",
+   "p1_norm": "tomasz filbrandt",
+   "p2_norm": "jakub zochniak",
+   "open_date": "2026-07-26T21:20:00.000Z",
+   "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35870295,
+   "p1": "Jacek Zelezik",
+   "p2": "Henryk Tkaczyk",
+   "p1_norm": "jacek zelezik",
+   "p2_norm": "henryk tkaczyk",
+   "open_date": "2026-07-26T21:20:00.000Z",
+   "line": 76.5,
+   "over_odds": -110,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35870296,
+   "p1": "Mateusz Trela",
+   "p2": "Kamil Rudomina",
+   "p1_norm": "mateusz trela",
+   "p2_norm": "kamil rudomina",
+   "open_date": "2026-07-26T21:20:00.000Z",
+   "line": 81.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
