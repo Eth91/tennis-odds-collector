@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T08:44:47Z",
+ "captured_at": "2026-07-26T08:48:51Z",
  "matches": [
   {
    "event_id": 35867637,
@@ -8,9 +8,9 @@
    "p1_norm": "jacek wieczerzak",
    "p2_norm": "pawel slosarczyk",
    "open_date": "2026-07-26T08:35:00.000Z",
-   "line": 85.5,
-   "over_odds": -115,
-   "under_odds": -115
+   "line": 87.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35867642,
@@ -19,9 +19,9 @@
    "p1_norm": "rafal adach",
    "p2_norm": "jakub nowak",
    "open_date": "2026-07-26T08:45:00.000Z",
-   "line": 82.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 80.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35867643,
@@ -30,9 +30,9 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-26T08:45:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 71.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35867650,
