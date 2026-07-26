@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T05:49:25Z",
+ "captured_at": "2026-07-26T05:54:20Z",
  "matches": [
   {
    "event_id": 35867253,
@@ -8,20 +8,9 @@
    "p1_norm": "wojciech gluszek",
    "p2_norm": "piotr staniszewski",
    "open_date": "2026-07-26T05:40:00.000Z",
-   "line": 56.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35867254,
-   "p1": "Jacek Wieczerzak",
-   "p2": "Marian Lebek",
-   "p1_norm": "jacek wieczerzak",
-   "p2_norm": "marian lebek",
-   "open_date": "2026-07-26T05:40:00.000Z",
-   "line": 84.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 71.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35867255,
@@ -30,9 +19,9 @@
    "p1_norm": "kacper petas",
    "p2_norm": "karol wisniewski",
    "open_date": "2026-07-26T05:40:00.000Z",
-   "line": 78.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 93.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35867282,
@@ -99,6 +88,17 @@
    "line": 75.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35867444,
+   "p1": "Piotr Przewlocki",
+   "p2": "Rafal Wojcik",
+   "p1_norm": "piotr przewlocki",
+   "p2_norm": "rafal wojcik",
+   "open_date": "2026-07-26T06:20:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
