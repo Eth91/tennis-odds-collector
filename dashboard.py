@@ -2145,6 +2145,8 @@ def build():
                                     or f["score"] >= hi_s) else "mid"
                     pct = next(p for s_, p in bands if f["score"] >= s_)
                     mark = " ★AR" if f.get("premium") else (" ★★K" if f.get("kagree") else "")
+                    tier = f.get("tier")
+                    ku = f.get("kelly_u")
                     rows += (f'<div class="pblk"><div class="phd">'
                              f'{_mlogo(f.get("team"), "plogo")}'
                              f'<span class="pname">{html.escape(_short(f["pitcher"]))}</span>'
@@ -2155,8 +2157,11 @@ def build():
                              f'<span class="pstat">{stat_lbl}</span>'
                              f'<span class="psp"></span>'
                              f'<span class="podds">{_am(float(f["odds"]))}</span>{bkh}'
-                             f'<span class="pedge {scls}" title="model signal S={f["score"]:.1f} — '
-                             f'backtested hit rate in this band">{pct}{star}{mark}</span></div></div></div>')
+                             + (f'<span class="tchip t{tier}" title="calibrated {pct} hit · '
+                                f'suggested {ku}u · S={f["score"]:.1f}">{tier}</span>' if tier else
+                                f'<span class="pedge {scls}" title="S={f["score"]:.1f}">{pct}</span>')
+                             + f'<span class="pedge {scls}" style="font-size:14px">{ku}u{star}{mark}</span>'
+                             '</div></div></div>')
                 out += (f'<div class="game"><div class="ghd"><span class="gmatch">'
                         f'{_mlogo(away_ab)}{away_ab or "—"}<span class="gvs">@</span>'
                         f'{_mlogo(home_ab)}{home_ab or "—"}</span>'
@@ -2358,6 +2363,7 @@ def build():
   .swo {{ color:#7d8696; font-size:12px; margin-top:4px; }}
   .swo b {{ color:#c3c9d4; font-weight:700; }}
   .wl-title span {{ color:#7d8696; font-weight:600; text-transform:none; letter-spacing:0; }}
+  .tchip.tS {{ background:#8a6d1a; color:#ffd75e; }}
   .op-title {{ color:#5b9dff; font-size:12px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; margin:16px 2px 11px; }}
   .op-title span {{ color:#7d8696; font-weight:600; text-transform:none; letter-spacing:0; }}
   .parlays, .ladders {{ margin-top:22px; }}
