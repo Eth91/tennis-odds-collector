@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T19:21:31Z",
+ "captured_at": "2026-07-26T19:26:44Z",
  "matches": [
   {
    "event_id": 35870145,
@@ -8,18 +8,7 @@
    "p1_norm": "oskar sokolowski",
    "p2_norm": "sebastian krupa",
    "open_date": "2026-07-26T19:10:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35870146,
-   "p1": "Grzegorz Marud",
-   "p2": "Wojciech Urban",
-   "p1_norm": "grzegorz marud",
-   "p2_norm": "wojciech urban",
-   "open_date": "2026-07-26T19:10:00.000Z",
-   "line": 82.5,
+   "line": 88.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -30,9 +19,9 @@
    "p1_norm": "tomasz filbrandt",
    "p2_norm": "mateusz rutkowski",
    "open_date": "2026-07-26T19:15:00.000Z",
-   "line": 75.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 91.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35870161,
@@ -41,9 +30,9 @@
    "p1_norm": "henryk tkaczyk",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-26T19:20:00.000Z",
-   "line": 66.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 48.5,
+   "over_odds": 100,
+   "under_odds": -140
   },
   {
    "event_id": 35870162,
@@ -52,9 +41,9 @@
    "p1_norm": "aleksander lilien",
    "p2_norm": "karol sulkowski",
    "open_date": "2026-07-26T19:20:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 88.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870182,
@@ -86,8 +75,8 @@
    "p2_norm": "bartosz sulkowski",
    "open_date": "2026-07-26T19:40:00.000Z",
    "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35870197,
