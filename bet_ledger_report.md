@@ -1,13 +1,13 @@
 # Bet ledger — automated results, CLV & P&L
 
-_2026-07-26T20:35:25 UTC_ · 1 unit = $100 · flag threshold +2% EV
+_2026-07-26T21:03:20 UTC_ · 1 unit = $100 · flag threshold +2% EV
 
 - **Record:** 190-303-3  ·  **P&L:** -60.59u ($-6,059)  ·  **ROI:** -12.2%
 - **Avg CLV:** +6.95% over 312 closed bets  ·  **Open:** 29  ·  **Total logged:** 548
 
 > CLV is the signal that matters — positive average CLV means the edge is real even before the W-L catches up. W-L over small samples is noise.
 
-Data OK — FanDuel 662 lines @ `2026-07-26T20:34:28`.
+Data OK — FanDuel 662 lines @ `2026-07-26T21:02:42`.
 
 ### by sport / stat
 
