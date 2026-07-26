@@ -1,16 +1,16 @@
 {
- "captured_at": "2026-07-26T22:07:17Z",
+ "captured_at": "2026-07-26T22:11:44Z",
  "matches": [
   {
-   "event_id": 35870371,
-   "p1": "Stapor Rafal",
-   "p2": "Mateusz Trela",
-   "p1_norm": "stapor rafal",
-   "p2_norm": "mateusz trela",
-   "open_date": "2026-07-26T22:10:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "event_id": 35870370,
+   "p1": "Mateusz Rutkowski",
+   "p2": "Tomasz Filbrandt",
+   "p1_norm": "mateusz rutkowski",
+   "p2_norm": "tomasz filbrandt",
+   "open_date": "2026-07-26T22:05:00.000Z",
+   "line": 80.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870372,
@@ -19,9 +19,9 @@
    "p1_norm": "pawel chojnacki",
    "p2_norm": "jacek zelezik",
    "open_date": "2026-07-26T22:10:00.000Z",
-   "line": 73.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 77.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35870375,
@@ -43,7 +43,7 @@
    "open_date": "2026-07-26T22:25:00.000Z",
    "line": 78.5,
    "over_odds": -118,
-   "under_odds": -112
+   "under_odds": -116
   },
   {
    "event_id": 35870384,
