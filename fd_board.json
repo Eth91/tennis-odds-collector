@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T04:13:41Z",
+ "captured_at": "2026-07-26T04:19:39Z",
  "matches": [
-  {
-   "event_id": 35866790,
-   "p1": "Piotr Zemla",
-   "p2": "Wojciech Pytlas",
-   "p1_norm": "piotr zemla",
-   "p2_norm": "wojciech pytlas",
-   "open_date": "2026-07-26T04:00:00.000Z",
-   "line": 75.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
   {
    "event_id": 35866792,
    "p1": "Kacper Petas",
@@ -19,9 +8,9 @@
    "p1_norm": "kacper petas",
    "p2_norm": "maciej domin",
    "open_date": "2026-07-26T04:10:00.000Z",
-   "line": 72.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 83.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35866793,
@@ -30,20 +19,9 @@
    "p1_norm": "jacek wieczerzak",
    "p2_norm": "oliwier sokolowski",
    "open_date": "2026-07-26T04:10:00.000Z",
-   "line": 78.5,
+   "line": 80.5,
    "over_odds": -115,
    "under_odds": -120
-  },
-  {
-   "event_id": 35866794,
-   "p1": "Bartlomiej Wisniewski",
-   "p2": "Wojciech Gluszek",
-   "p1_norm": "bartlomiej wisniewski",
-   "p2_norm": "wojciech gluszek",
-   "open_date": "2026-07-26T04:10:00.000Z",
-   "line": 83.5,
-   "over_odds": -115,
-   "under_odds": -115
   },
   {
    "event_id": 35866797,
