@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T18:48:49Z",
+ "captured_at": "2026-07-26T18:53:10Z",
  "matches": [
   {
    "event_id": 35870068,
@@ -8,9 +8,9 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "alan wos",
    "open_date": "2026-07-26T18:30:00.000Z",
-   "line": 86.5,
-   "over_odds": -140,
-   "under_odds": 100
+   "line": 88.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35870128,
