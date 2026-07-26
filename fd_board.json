@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T19:40:55Z",
+ "captured_at": "2026-07-26T19:48:22Z",
  "matches": [
-  {
-   "event_id": 35870182,
-   "p1": "Michal Durda",
-   "p2": "Piotr Gumulinski",
-   "p1_norm": "michal durda",
-   "p2_norm": "piotr gumulinski",
-   "open_date": "2026-07-26T19:30:00.000Z",
-   "line": 87.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
   {
    "event_id": 35870185,
    "p1": "Lukasz Oracz",
@@ -19,8 +8,8 @@
    "p1_norm": "lukasz oracz",
    "p2_norm": "michal paszkiewicz",
    "open_date": "2026-07-26T19:35:00.000Z",
-   "line": 72.5,
-   "over_odds": -120,
+   "line": 92.5,
+   "over_odds": -115,
    "under_odds": -115
   },
   {
@@ -30,9 +19,9 @@
    "p1_norm": "jakub glanowski",
    "p2_norm": "bartosz sulkowski",
    "open_date": "2026-07-26T19:40:00.000Z",
-   "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 86.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35870197,
@@ -41,9 +30,9 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "pawel chojnacki",
    "open_date": "2026-07-26T19:40:00.000Z",
-   "line": 74.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 69.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870237,
