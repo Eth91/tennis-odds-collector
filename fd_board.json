@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T00:56:07Z",
+ "captured_at": "2026-07-26T01:02:27Z",
  "matches": [
   {
    "event_id": 35866411,
@@ -8,20 +8,9 @@
    "p1_norm": "jacek oracz",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-26T00:45:00.000Z",
-   "line": 91.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
-  {
-   "event_id": 35866412,
-   "p1": "Damian Fira",
-   "p2": "Robert Szymik",
-   "p1_norm": "damian fira",
-   "p2_norm": "robert szymik",
-   "open_date": "2026-07-26T00:45:00.000Z",
-   "line": 70.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 96.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35866430,
@@ -30,9 +19,9 @@
    "p1_norm": "karol sulkowski",
    "p2_norm": "dawid poloszczanski",
    "open_date": "2026-07-26T01:00:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35866431,
@@ -41,9 +30,9 @@
    "p1_norm": "janus slawomir",
    "p2_norm": "pawel chojnacki",
    "open_date": "2026-07-26T01:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 79.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35866448,
@@ -77,6 +66,28 @@
    "line": 80.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35866466,
+   "p1": "Stapor Rafal",
+   "p2": "Jakub Glanowski",
+   "p1_norm": "stapor rafal",
+   "p2_norm": "jakub glanowski",
+   "open_date": "2026-07-26T01:25:00.000Z",
+   "line": 80.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35866467,
+   "p1": "Tomasz Kocik",
+   "p2": "Andriej Fomin",
+   "p1_norm": "tomasz kocik",
+   "p2_norm": "andriej fomin",
+   "open_date": "2026-07-26T01:25:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
