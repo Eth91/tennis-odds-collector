@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T15:10:39Z",
+ "captured_at": "2026-07-26T15:15:52Z",
  "matches": [
   {
    "event_id": 35868865,
@@ -8,9 +8,9 @@
    "p1_norm": "kazimierz rybak",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-26T15:00:00.000Z",
-   "line": 94.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 79.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35868866,
@@ -19,20 +19,9 @@
    "p1_norm": "filip mlynarski",
    "p2_norm": "mateusz rutkowski",
    "open_date": "2026-07-26T15:00:00.000Z",
-   "line": 88.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35868867,
-   "p1": "Arkadiusz Mugowski",
-   "p2": "Karol Sulkowski",
-   "p1_norm": "arkadiusz mugowski",
-   "p2_norm": "karol sulkowski",
-   "open_date": "2026-07-26T15:00:00.000Z",
-   "line": 82.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 103.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35868873,
@@ -41,7 +30,7 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-07-26T15:05:00.000Z",
-   "line": 90.5,
+   "line": 84.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -52,9 +41,9 @@
    "p1_norm": "oskar sokolowski",
    "p2_norm": "michal paszkiewicz",
    "open_date": "2026-07-26T15:10:00.000Z",
-   "line": 78.5,
+   "line": 70.5,
    "over_odds": -115,
-   "under_odds": -120
+   "under_odds": -115
   },
   {
    "event_id": 35868890,
@@ -96,9 +85,9 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "patryk jedrzejak",
    "open_date": "2026-07-26T15:30:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 74.5,
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35868925,
