@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T06:24:17Z",
+ "captured_at": "2026-07-26T06:28:57Z",
  "matches": [
   {
    "event_id": 35867444,
@@ -8,9 +8,9 @@
    "p1_norm": "piotr przewlocki",
    "p2_norm": "rafal wojcik",
    "open_date": "2026-07-26T06:20:00.000Z",
-   "line": 82.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 91.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35867447,
@@ -19,9 +19,9 @@
    "p1_norm": "wojciech pytlas",
    "p2_norm": "jakub nowak",
    "open_date": "2026-07-26T06:25:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 70.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35867448,
@@ -30,9 +30,9 @@
    "p1_norm": "maciej kolek",
    "p2_norm": "jakub wozniak",
    "open_date": "2026-07-26T06:25:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 73.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35867455,
@@ -97,6 +97,39 @@
    "p2_norm": "bartlomiej mleczko",
    "open_date": "2026-07-26T06:50:00.000Z",
    "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35867474,
+   "p1": "Jacek Wieczerzak",
+   "p2": "Kamil Kowalski",
+   "p1_norm": "jacek wieczerzak",
+   "p2_norm": "kamil kowalski",
+   "open_date": "2026-07-26T06:55:00.000Z",
+   "line": 68.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35867475,
+   "p1": "Waclaw Suchecki",
+   "p2": "Wojciech Gluszek",
+   "p1_norm": "waclaw suchecki",
+   "p2_norm": "wojciech gluszek",
+   "open_date": "2026-07-26T06:55:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35867476,
+   "p1": "Kacper Petas",
+   "p2": "Marcin Jadczyk",
+   "p1_norm": "kacper petas",
+   "p2_norm": "marcin jadczyk",
+   "open_date": "2026-07-26T06:55:00.000Z",
+   "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
   }
