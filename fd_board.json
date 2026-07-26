@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T02:16:55Z",
+ "captured_at": "2026-07-26T02:23:05Z",
  "matches": [
   {
    "event_id": 35866524,
@@ -8,9 +8,9 @@
    "p1_norm": "damian fira",
    "p2_norm": "michal durda",
    "open_date": "2026-07-26T02:20:00.000Z",
-   "line": 73.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 80.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35866525,
@@ -19,9 +19,9 @@
    "p1_norm": "kacper kwiatkowski",
    "p2_norm": "michal guzik",
    "open_date": "2026-07-26T02:20:00.000Z",
-   "line": 71.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 67.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35866543,
@@ -31,6 +31,28 @@
    "p2_norm": "tomasz kocik",
    "open_date": "2026-07-26T02:35:00.000Z",
    "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35866549,
+   "p1": "Michal Machelski",
+   "p2": "Jakub Skorupa",
+   "p1_norm": "michal machelski",
+   "p2_norm": "jakub skorupa",
+   "open_date": "2026-07-26T02:45:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35866550,
+   "p1": "Roman Wiza",
+   "p2": "Kamil Durak",
+   "p1_norm": "roman wiza",
+   "p2_norm": "kamil durak",
+   "open_date": "2026-07-26T02:45:00.000Z",
+   "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
   }
