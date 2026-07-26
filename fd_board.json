@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T02:49:08Z",
+ "captured_at": "2026-07-26T02:53:31Z",
  "matches": [
-  {
-   "event_id": 35866543,
-   "p1": "Janus Slawomir",
-   "p2": "Tomasz Kocik",
-   "p1_norm": "janus slawomir",
-   "p2_norm": "tomasz kocik",
-   "open_date": "2026-07-26T02:35:00.000Z",
-   "line": 85.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35866549,
    "p1": "Michal Machelski",
@@ -19,9 +8,9 @@
    "p1_norm": "michal machelski",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-26T02:45:00.000Z",
-   "line": 84.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 67.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35866570,
@@ -54,7 +43,7 @@
    "open_date": "2026-07-26T03:00:00.000Z",
    "line": 70.5,
    "over_odds": -118,
-   "under_odds": -112
+   "under_odds": -116
   },
   {
    "event_id": 35866576,
