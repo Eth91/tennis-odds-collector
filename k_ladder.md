@@ -1,6 +1,6 @@
 # Pitcher strikeout alt-ladder scan (cross-book line-shopping)
 
-_2026-07-26 00:44 UTC · fair = vig-stripped consensus of the books posting each rung. NO projection model (backtest: corr 0.37, too weak to price K tails; and pricing a book's unique rung off a model just bets our own error). Only rungs >=2 books agree on can be flagged._
+_2026-07-26 01:12 UTC · fair = vig-stripped consensus of the books posting each rung. NO projection model (backtest: corr 0.37, too weak to price K tails; and pricing a book's unique rung off a model just bets our own error). Only rungs >=2 books agree on can be flagged._
 
 **No +EV rung tonight** — the K market is efficient; even the best of 3 books is -EV on every agreeing rung. This is a SHOPPING sheet (best book per rung to minimize vig), not a bet list. A genuine +EV rung (a slow book) would ⭐ here.
 
@@ -74,26 +74,59 @@ _2026-07-26 00:44 UTC · fair = vig-stripped consensus of the books posting each
   O7.5: BETMGM +200 (1 book, no consensus)
   O8.5: BETMGM +360 (1 book, no consensus)
 
+**Cristopher Sanchez**
+  O4.5: FD -1200 (1 book, no consensus)
+  O5.5: FD -430 (1 book, no consensus)
+  O6.5: FD -166 (1 book, no consensus)
+  O7.5: FD +108 (1 book, no consensus)
+  O8.5: FD +220 (1 book, no consensus)
+  O9.5: FD +420 (1 book, no consensus)
+
 **Emmet Sheehan**
   O2.5: FD -2500 (1 book, no consensus)
   O3.5: FD -700 (1 book, no consensus)
   O4.5: FD -290 (1 book, no consensus)
   O5.5: FD -130 (1 book, no consensus)
   O6.5: FD +164 (1 book, no consensus)
-  O7.5: FD +340 (1 book, no consensus)
+  O7.5: FD +330 (1 book, no consensus)
   O8.5: FD +680 (1 book, no consensus)
 
 **Freddy Peralta**
   O2.5: FD -2000 (1 book, no consensus)
   O3.5: FD -520 (1 book, no consensus)
   O4.5: FD -210 (1 book, no consensus)
-  O5.5: FD +108 (1 book, no consensus)
+  O5.5: FD +106 (1 book, no consensus)
   O6.5: FD +230 (1 book, no consensus)
-  O7.5: FD +480 (1 book, no consensus)
+  O7.5: FD +460 (1 book, no consensus)
+
+**Jacob deGrom**
+  O3.5: FD -4505 (1 book, no consensus)
+  O4.5: FD -1200 (1 book, no consensus)
+  O5.5: FD -410 (1 book, no consensus)
+  O6.5: FD -184 (1 book, no consensus)
+  O7.5: FD +128 (1 book, no consensus)
+  O8.5: FD +235 (1 book, no consensus)
+  O9.5: FD +470 (1 book, no consensus)
+
+**Logan Gilbert**
+  O3.5: FD -3497 (1 book, no consensus)
+  O4.5: FD -850 (1 book, no consensus)
+  O5.5: FD -330 (1 book, no consensus)
+  O6.5: FD -142 (1 book, no consensus)
+  O7.5: FD +148 (1 book, no consensus)
+  O8.5: FD +300 (1 book, no consensus)
+  O9.5: FD +560 (1 book, no consensus)
+
+**Will Warren**
+  O2.5: FD -650 (1 book, no consensus)
+  O3.5: FD -235 (1 book, no consensus)
+  O4.5: FD +102 (1 book, no consensus)
+  O5.5: FD +220 (1 book, no consensus)
+  O6.5: FD +470 (1 book, no consensus)
 
 **Kevin Gausman**
   O5.5: DK +106 (1 book, no consensus)
 
 **Ranger Suarez**
-  O4.5: DK +106 (1 book, no consensus)
+  O4.5: DK +102 (1 book, no consensus)
 
