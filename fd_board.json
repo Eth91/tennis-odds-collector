@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T23:22:02Z",
+ "captured_at": "2026-07-26T23:26:52Z",
  "matches": [
   {
    "event_id": 35870448,
@@ -8,9 +8,9 @@
    "p1_norm": "filip mlynarski",
    "p2_norm": "mateusz rutkowski",
    "open_date": "2026-07-26T23:15:00.000Z",
-   "line": 69.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 48.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35870468,
@@ -19,9 +19,9 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-26T23:20:00.000Z",
-   "line": 74.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 69.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870505,
