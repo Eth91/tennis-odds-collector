@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T19:48:22Z",
+ "captured_at": "2026-07-26T19:52:41Z",
  "matches": [
   {
    "event_id": 35870185,
@@ -8,8 +8,8 @@
    "p1_norm": "lukasz oracz",
    "p2_norm": "michal paszkiewicz",
    "open_date": "2026-07-26T19:35:00.000Z",
-   "line": 92.5,
-   "over_odds": -115,
+   "line": 102.5,
+   "over_odds": -120,
    "under_odds": -115
   },
   {
@@ -19,9 +19,9 @@
    "p1_norm": "jakub glanowski",
    "p2_norm": "bartosz sulkowski",
    "open_date": "2026-07-26T19:40:00.000Z",
-   "line": 86.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 74.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35870197,
@@ -30,9 +30,9 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "pawel chojnacki",
    "open_date": "2026-07-26T19:40:00.000Z",
-   "line": 69.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 65.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35870237,
