@@ -2205,6 +2205,24 @@ def build():
                                     [(1.30, "~65%"), (-9, "~63%")])
                      or '<div class="xt">no flags yet today</div>')
 
+        # MLB tier legend (user 2026-07-26: mirror the WNBA tier-record block)
+        _tr = _cb.get("tiers") or {}
+        _TDESC = {"S": "premium family · ★AR / deep score / ★★K",
+                  "A": "solid — calibrated edge ≥6pts",
+                  "B": "thin edge — small stakes",
+                  "C": "price beat the model — caution, not a bet"}
+        _trows = ""
+        for _t in ("S", "A", "B", "C"):
+            _d = _tr.get(_t) or {}
+            _n = (_d.get("w") or 0) + (_d.get("l") or 0)
+            _rec = (f'{_d["w"]}-{_d["l"]} · {100*_d["w"]/_n:.0f}% · {_d["u"]:+.1f}u'
+                    if _n else "no graded bets yet")
+            _trows += (f'<div class="tlrow"><span class="tchip t{_t}">{_t}</span>'
+                       f'<span class="tld">{_TDESC[_t]}</span>'
+                       f'<span class="tlr">{_rec}</span></div>')
+        mlb_html += ('<div class="tierleg"><div class="xt">MLB tiers · live record at flagged '
+                     'prices</div>' + _trows + '</div>')
+
         # Daily 2-leg parlay as a WNBA-style betslip
         _pl = _cb.get("parlay") or {}
         if _pl.get("today"):

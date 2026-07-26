@@ -911,6 +911,18 @@ def board(con):
                                   "ORDER BY score DESC", (_today_et(),))]
     prem_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) FROM compass "
                            "WHERE result IN ('W','L') AND skip IS NULL AND premium=1").fetchone()
+    tier_recs = {}
+    for t_ in ("S", "A", "B", "C"):
+        w_ = l_ = 0
+        u_ = 0.0
+        for tbl_ in ("compass", "outs_compass"):
+            r_ = con.execute(f"SELECT SUM(result='W'), SUM(result='L'), COALESCE(SUM(pnl),0) "
+                             f"FROM {tbl_} WHERE result IN ('W','L') AND skip IS NULL AND tier=?",
+                             (t_,)).fetchone()
+            w_ += r_[0] or 0
+            l_ += r_[1] or 0
+            u_ += r_[2] or 0
+        tier_recs[t_] = {"w": w_, "l": l_, "u": round(u_, 1)}
     lad_rec = con.execute("SELECT SUM(ladder_result='W'), SUM(ladder_result='L'), "
                           "ROUND(SUM(CASE WHEN ladder_result='W' THEN ladder_od-1 ELSE -1 END),1) "
                           "FROM compass WHERE ladder_result IN ('W','L')").fetchone()
@@ -961,6 +973,7 @@ def board(con):
     (HERE / "compass_board.json").write_text(json.dumps(
         {"updated": _now(), "w": rec[0] or 0, "l": rec[1] or 0, "u": rec[2] or 0.0,
          "drift": {"k": dz_k, "outs": dz_o},
+         "tiers": tier_recs,
          "shadow": {"w": shadow[0] or 0, "l": shadow[1] or 0, "u": shadow[2] or 0.0},
          "premium": {"w": prem_rec[0] or 0, "l": prem_rec[1] or 0, "u": prem_rec[2] or 0.0},
          "ladder": {"w": lad_rec[0] or 0, "l": lad_rec[1] or 0, "u": lad_rec[2] or 0.0},
