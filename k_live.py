@@ -457,8 +457,20 @@ def stake_tier(p, price):
         return None, None
     f = (p * b - (1 - p)) / b
     u = min(2.0, max(0.0, f * 0.25 * 100))
-    tier = "S" if u >= 1.5 else ("A" if u >= 0.9 else ("B" if u >= 0.5 else "C"))
-    return round(u, 2) if u > 0 else 0.25, tier
+    return round(u, 2) if u > 0 else 0.25, None
+
+
+def tier_of(is_premium, cp, price):
+    """Quality-family tiers (2026-07-26 recut — validated components only, no re-tuning):
+    S = OOS-validated premium family · A = calibrated edge >= 6pts · B = thin positive edge ·
+    C = price beat the calibration (direction liked, number gone). Era check: S tops every era
+    (62.5/66.5/73.8% hit, best ROI throughout)."""
+    if is_premium:
+        return "S"
+    if cp is None:
+        return "B"
+    edge = cp * price - 1
+    return "A" if edge >= 0.06 else ("B" if edge > 0 else "C")
 
 
 def flag(con):
@@ -518,7 +530,7 @@ def flag(con):
         od, ln, bk = best
         skip = "price_cap" if od >= PRICE_CAP else None
         cp = cal_p(F, abs(S), 0.64)
-        su, tier = stake_tier(cp, od)
+        su, _ = stake_tier(cp, od)
         # LADDER tier (2026-07-26, the 70% challenge winner, 6/6 cells both eras): deep OVER
         # flags (S>=2.0 or *AR premium) also quote the 1-rung-down over at the posted alt price —
         # sandbox 77-79% hit / +2.6-6.6% ROI, OOS 81-85% / +10-15%. Overs only (alt Ks are
@@ -542,6 +554,7 @@ def flag(con):
         premium = 1 if (abs(S) >= 2.0 and fitz is not None
                         and ((fitz >= 0.75 and side == "over")
                              or (fitz <= -0.75 and side == "under"))) else 0
+        tier = tier_of(premium or abs(S) >= 2.4, cp, od)
         con.execute("INSERT INTO compass (pitcher, game_date, side, line, odds, book, score, opp, "
                     "flagged_at, skip, game, team, fitz, premium, cal_p, kelly_u, tier, "
                     "ladder_ln, ladder_od) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
@@ -640,7 +653,7 @@ def flag_outs(con):
             skip = "price_cap"
         strong = 1 if abs(S) >= F["strong"] else 0
         cp = cal_p(F, abs(S), 0.66)
-        su, tier = stake_tier(cp, od)
+        su, _ = stake_tier(cp, od)
         # ★★ K-AGREEMENT tag (informational shadow — OOS 62-67% hit both years but missed the
         # beat-baseline bar by 0.8pt in 2026; forward data decides a promotion): the K model's
         # signed score for the SAME pitcher points the same way with |Sk| >= 1.0. flag() runs
@@ -648,6 +661,7 @@ def flag_outs(con):
         ks = K_DAY_SCORES.get((g["pitcher"], gd))
         kagree = 1 if (ks is not None and abs(ks) >= 1.0
                        and ("over" if ks > 0 else "under") == side) else 0
+        tier = tier_of(kagree, cp, od)
         sl = [bslg.get(b) for b in g["opp_lineup"]]
         sl = [x for x in sl if x is not None]
         con.execute("INSERT INTO outs_compass (pitcher, game_date, side, line, odds, book, score, "
