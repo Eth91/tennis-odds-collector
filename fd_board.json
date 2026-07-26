@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T03:46:39Z",
+ "captured_at": "2026-07-26T03:52:17Z",
  "matches": [
-  {
-   "event_id": 35866724,
-   "p1": "Maciej Domin",
-   "p2": "Jan Zandecki",
-   "p1_norm": "maciej domin",
-   "p2_norm": "jan zandecki",
-   "open_date": "2026-07-26T03:25:00.000Z",
-   "line": 93.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35866766,
    "p1": "Karol Wisniewski",
@@ -20,8 +9,8 @@
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-26T03:45:00.000Z",
    "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35866782,
@@ -30,9 +19,9 @@
    "p1_norm": "waclaw suchecki",
    "p2_norm": "piotr staniszewski",
    "open_date": "2026-07-26T03:50:00.000Z",
-   "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35866783,
@@ -41,9 +30,9 @@
    "p1_norm": "marian lebek",
    "p2_norm": "kamil kowalski",
    "open_date": "2026-07-26T03:50:00.000Z",
-   "line": 75.5,
+   "line": 70.5,
    "over_odds": -110,
-   "under_odds": -120
+   "under_odds": -125
   },
   {
    "event_id": 35866789,
