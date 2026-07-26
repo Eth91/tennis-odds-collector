@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-26T20:43:54Z",
+ "captured_at": "2026-07-26T20:48:24Z",
  "matches": [
-  {
-   "event_id": 35870257,
-   "p1": "Arkadiusz Mugowski",
-   "p2": "Aleksander Lilien",
-   "p1_norm": "arkadiusz mugowski",
-   "p2_norm": "aleksander lilien",
-   "open_date": "2026-07-26T20:30:00.000Z",
-   "line": 89.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35870259,
-   "p1": "Kazimierz Rybak",
-   "p2": "Henryk Tkaczyk",
-   "p1_norm": "kazimierz rybak",
-   "p2_norm": "henryk tkaczyk",
-   "open_date": "2026-07-26T20:30:00.000Z",
-   "line": 75.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
   {
    "event_id": 35870263,
    "p1": "Grzegorz Marud",
@@ -30,9 +8,9 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "piotr gumulinski",
    "open_date": "2026-07-26T20:45:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 80.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35870264,
@@ -41,9 +19,9 @@
    "p1_norm": "oskar sokolowski",
    "p2_norm": "lukasz oracz",
    "open_date": "2026-07-26T20:45:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 72.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35870266,
