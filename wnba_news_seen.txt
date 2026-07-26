@@ -82,6 +82,7 @@ rw|1075|Pops for season-high 15 points
 rw|1078|Available to play
 rw|1078|Listed out Wednesday
 rw|1087|Quiet rookie season continues
+rw|1088|Joins Phoenix on developmental deal
 rw|1093|Fades injury report
 rw|1093|Not listed on injury report
 rw|1093|Sitting out Wednesday
