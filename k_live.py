@@ -96,10 +96,12 @@ def _con():
         except sqlite3.OperationalError:
             pass
     for tbl in ("compass", "outs_compass", "ethan_k"):
-        try:
-            c.execute(f"ALTER TABLE {tbl} ADD COLUMN stack INTEGER DEFAULT 0")
-        except sqlite3.OperationalError:
-            pass
+        for col in ("stack INTEGER DEFAULT 0", "rung1_od REAL", "rung2_od REAL",
+                    "rung1_res TEXT", "rung2_res TEXT"):
+            try:
+                c.execute(f"ALTER TABLE {tbl} ADD COLUMN {col}")
+            except sqlite3.OperationalError:
+                pass
     for col in ("fitz REAL", "premium INTEGER DEFAULT 0", "driver TEXT"):
         try:
             c.execute(f"ALTER TABLE compass ADD COLUMN {col}")
@@ -1057,6 +1059,14 @@ def grade(con):
             if lrow and lrow[0] is not None:
                 con.execute("UPDATE compass SET ladder_result=? WHERE pitcher=? AND game_date=?",
                             ("W" if g[1] > lrow[0] else "L", pitcher, gd))
+        if table in ("compass", "ethan_k") and side == "over":
+            rr = con.execute(f"SELECT rung1_od, rung2_od FROM {table} "
+                             "WHERE pitcher=? AND game_date=?", (pitcher, gd)).fetchone()
+            if rr and (rr[0] or rr[1]):
+                con.execute(f"UPDATE {table} SET rung1_res=?, rung2_res=? "
+                            "WHERE pitcher=? AND game_date=?",
+                            (("W" if g[1] > line + 1 else "L") if rr[0] else None,
+                             ("W" if g[1] > line + 2 else "L") if rr[1] else None, pitcher, gd))
         time.sleep(0.1)
     con.commit()
 
@@ -1088,6 +1098,27 @@ def board(con):
                            "WHERE result IN ('W','L') AND skip IS NULL AND premium=1").fetchone()
     lk_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) FROM compass "
                          "WHERE result IN ('W','L') AND skip IS NULL AND driver='lineupK'").fetchone()
+    # stack decay tripwire: below 52% after 30 graded -> one-shot alarm
+    _sr = con.execute(
+        "SELECT SUM(w), SUM(l) FROM ("
+        "SELECT SUM(result='W') w, SUM(result='L') l FROM compass WHERE stack=1 AND result IN ('W','L') "
+        "UNION ALL SELECT SUM(result='W'), SUM(result='L') FROM outs_compass WHERE stack=1 AND result IN ('W','L') "
+        "UNION ALL SELECT SUM(result='W'), SUM(result='L') FROM ethan_k WHERE stack=1 AND result IN ('W','L'))"
+    ).fetchone()
+    _sw, _sl = _sr[0] or 0, _sr[1] or 0
+    if _sw + _sl >= 30 and _sw / (_sw + _sl) < 0.52:
+        import os as _os
+        _t = _os.environ.get("NTFY_TOPIC")
+        _gate = HERE / "stack_alarm.json"
+        if _t and not _gate.exists():
+            try:
+                requests.post(f"https://ntfy.sh/{_t}",
+                              data=f"⚠️ STACK DECAY: {_sw}-{_sl} "
+                                   f"({100*_sw/(_sw+_sl):.0f}%) — review before betting".encode(),
+                              params={"title": "Pickz", "priority": "high"}, timeout=15)
+                _gate.write_text("1")
+            except requests.RequestException:
+                pass
     stk_rec = con.execute(
         "SELECT SUM(w), SUM(l), ROUND(SUM(u),1) FROM ("
         "SELECT SUM(result='W') w, SUM(result='L') l, SUM(COALESCE(pnl,0)) u FROM compass "
@@ -1097,7 +1128,8 @@ def board(con):
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM ethan_k "
         "WHERE stack=1 AND result IN ('W','L'))").fetchone()
     eth_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
-                          "FROM ethan_k WHERE result IN ('W','L')").fetchone()
+                          "FROM ethan_k WHERE result IN ('W','L') "
+                          "AND (skip IS NULL OR skip='')").fetchone()
     eth_today = [dict(zip(("pitcher", "line", "odds", "book", "opp", "hi_ct", "pk_rate"), r))
                  for r in con.execute("SELECT pitcher, line, odds, book, opp, hi_ct, pk_rate "
                                       "FROM ethan_k WHERE game_date=?", (_today_et(),))]
@@ -1184,6 +1216,54 @@ def board(con):
                     "w": prec[0] or 0, "l": prec[1] or 0, "u": prec[2] or 0.0}}))
 
 
+def ethan_revalidate(con):
+    """HOLE FIX 4: Ethan/lineup flags are bets on the POSTED nine. Before first pitch,
+    re-check qualification against the CURRENT lineup; if broken (scratches), mark
+    skip='lineup_changed' + ping a retraction. Retracted flags are excluded from the record."""
+    import os
+    topic = os.environ.get("NTFY_TOPIC")
+    gd = _today_et()
+    rows = con.execute("SELECT pitcher FROM ethan_k WHERE game_date=? AND result IS NULL "
+                       "AND (skip IS NULL OR skip='')", (gd,)).fetchall()
+    if not rows:
+        return
+    flagged = {r[0] for r in rows}
+    br = batter_rates()
+    vs = _vshand_rates()
+    for g in slate():
+        if g["pitcher"] not in flagged or g["started"] or len(g["opp_lineup"]) < 9:
+            continue
+        pd = _get(f"/people/{g['pid']}")
+        hand = ((pd.get("people") or [{}])[0].get("pitchHand") or {}).get("code")
+        if not hand:
+            continue
+        vm = vs.get(hand) or {}
+        hi = rest = known = 0
+        for b in g["opp_lineup"][:9]:
+            gen = br.get(b)
+            if gen is None:
+                continue
+            known += 1
+            v = vm.get(b)
+            if gen >= 0.23 and v is not None and v > gen:
+                hi += 1
+            elif gen >= 0.19:
+                rest += 1
+        if known >= 8 and (hi < 4 or hi + rest < known - 1):
+            con.execute("UPDATE ethan_k SET skip='lineup_changed' WHERE pitcher=? AND game_date=?",
+                        (g["pitcher"], gd))
+            if topic:
+                try:
+                    requests.post(f"https://ntfy.sh/{topic}",
+                                  data=f"⚠️ RETRACT ⚡STACK {g['pitcher']} — lineup changed, "
+                                       f"whiff core broke ({hi} left)".encode(),
+                                  params={"title": "Pickz", "priority": "high"}, timeout=15)
+                except requests.RequestException:
+                    pass
+            print(f"ethan retract: {g['pitcher']} (hi now {hi})")
+    con.commit()
+
+
 def stack_ping(con):
     """⚡STACK (2026-07-27, the 65%-at-2-3/day challenge): priority-ranked union of validated
     slices, capped per day. Backtest 25-26: cap3 = 65.1% +17.2% (64.8/65.7 by year).
@@ -1233,11 +1313,24 @@ def stack_ping(con):
                       "p": p, "side": side, "ln": ln, "od": od, "bk": bk, "mag": sc or 0,
                       "opp": opp})
     cands.sort(key=lambda c: (c["pri"], -c["mag"]))
+    # HOLE FIX 2 (2026-07-27): one stack bet per pitcher/day — K+outs on the same arm lose
+    # together on an early hook; the backtest counted them independent.
+    taken = {r[0] for t in ("compass", "outs_compass", "ethan_k") for r in con.execute(
+        f"SELECT pitcher FROM {t} WHERE game_date=? AND stack=1", (gd,))}
+    cands = [c for c in cands if c["p"] not in taken]
+    seen_p = set()
+    cands = [c for c in cands if not (c["p"] in seen_p or seen_p.add(c["p"]))]
+    # HOLE FIX 1: before 21:00 UTC, low-priority families may use at most cap-1 slots —
+    # the last slot is held for ETH/LK/AR (the backtest ranked per-day; live arrives in order).
+    hold_slot = dt.datetime.utcnow().hour < 21
     lines = k_lines() if any(c["side"] == "over" and c["tbl"] != "outs_compass" for c in cands) else {}
     for c in cands:
         if npinged >= cap:
             break
+        if hold_slot and c["pri"] > 3 and npinged >= cap - 1:
+            continue
         rung = ""
+        r1 = r2 = None
         if c["side"] == "over" and c["tbl"] != "outs_compass" and lines:
             qs = []
             for up in (1, 2):
@@ -1247,10 +1340,17 @@ def stack_ping(con):
                     if v and v.get("over") and (best is None or v["over"] > best):
                         best = v["over"]
                 if best and best >= 1.5:
+                    if up == 1:
+                        r1 = best
+                    else:
+                        r2 = best
                     am2 = f"+{round((best-1)*100)}" if best >= 2 else f"-{round(100/(best-1))}"
                     qs.append(f"O{c['ln']+up:g} {am2}")
             if qs:
                 rung = " | LDR↑ " + " · ".join(qs)
+            if r1 or r2:      # HOLE FIX 3: log rung prices for grading
+                con.execute(f"UPDATE {c['tbl']} SET rung1_od=?, rung2_od=? "
+                            "WHERE pitcher=? AND game_date=?", (r1, r2, c["p"], gd))
         am = f"+{round((c['od']-1)*100)}" if c["od"] >= 2 else f"-{round(100/(c['od']-1))}"
         mk = "K" if c["tbl"] != "outs_compass" else ""
         txt = (f"⚡STACK [{c['fam']}] {c['opp'] or ''} {c['p']} "
@@ -1276,6 +1376,7 @@ if __name__ == "__main__":
     flag(c)
     flag_outs(c)
     flag_ethan(c)
+    ethan_revalidate(c)
     stack_ping(c)
     # flag_outlier(c)  # BENCHED 2026-07-25 (user: K-COMPASS only) — table/grading stay dormant
     build_parlay(c)
