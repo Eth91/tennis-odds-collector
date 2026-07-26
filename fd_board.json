@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T06:20:07Z",
+ "captured_at": "2026-07-26T06:24:17Z",
  "matches": [
   {
    "event_id": 35867444,
@@ -8,9 +8,9 @@
    "p1_norm": "piotr przewlocki",
    "p2_norm": "rafal wojcik",
    "open_date": "2026-07-26T06:20:00.000Z",
-   "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 82.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35867447,
@@ -86,6 +86,17 @@
    "p2_norm": "mariusz adamus",
    "open_date": "2026-07-26T06:45:00.000Z",
    "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35867472,
+   "p1": "Maciej Sinicki",
+   "p2": "Bartlomiej Mleczko",
+   "p1_norm": "maciej sinicki",
+   "p2_norm": "bartlomiej mleczko",
+   "open_date": "2026-07-26T06:50:00.000Z",
+   "line": 79.5,
    "over_odds": -118,
    "under_odds": -112
   }
