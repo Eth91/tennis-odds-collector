@@ -537,9 +537,11 @@ def flag(con):
         fitz = None
         if ft is not None and F.get("fit_sd"):
             fitz = (ft - F["fit_mu"]) / F["fit_sd"]
+        # fit bar 1.0 -> 0.75 (2026-07-26 widening grid: sandbox hit -0.4pt, '26 70.6%,
+        # +~36% volume; S>=2.0 depth is load-bearing — every S-relaxation loses 5pts in 2023)
         premium = 1 if (abs(S) >= 2.0 and fitz is not None
-                        and ((fitz >= 1.0 and side == "over")
-                             or (fitz <= -1.0 and side == "under"))) else 0
+                        and ((fitz >= 0.75 and side == "over")
+                             or (fitz <= -0.75 and side == "under"))) else 0
         con.execute("INSERT INTO compass (pitcher, game_date, side, line, odds, book, score, opp, "
                     "flagged_at, skip, game, team, fitz, premium, cal_p, kelly_u, tier, "
                     "ladder_ln, ladder_od) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
