@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T23:45:27Z",
+ "captured_at": "2026-07-26T23:50:34Z",
  "matches": [
-  {
-   "event_id": 35870520,
-   "p1": "Pawel Chojnacki",
-   "p2": "Adam Staniczek",
-   "p1_norm": "pawel chojnacki",
-   "p2_norm": "adam staniczek",
-   "open_date": "2026-07-26T23:45:00.000Z",
-   "line": 74.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35870543,
    "p1": "Jakub Nowak",
