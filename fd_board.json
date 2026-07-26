@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-26T12:54:34Z",
+ "captured_at": "2026-07-26T12:58:49Z",
  "matches": [
-  {
-   "event_id": 35868547,
-   "p1": "Kacper Petas",
-   "p2": "Jan Zandecki",
-   "p1_norm": "kacper petas",
-   "p2_norm": "jan zandecki",
-   "open_date": "2026-07-26T12:30:00.000Z",
-   "line": 111.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35868562,
-   "p1": "Oliwier Sokolowski",
-   "p2": "Marian Lebek",
-   "p1_norm": "oliwier sokolowski",
-   "p2_norm": "marian lebek",
-   "open_date": "2026-07-26T12:40:00.000Z",
-   "line": 79.5,
-   "over_odds": -140,
-   "under_odds": 100
-  },
   {
    "event_id": 35868577,
    "p1": "Rafal Wojcik",
@@ -30,9 +8,9 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "mariusz adamus",
    "open_date": "2026-07-26T12:45:00.000Z",
-   "line": 78.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 94.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35868606,
@@ -42,8 +20,8 @@
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-26T12:55:00.000Z",
    "line": 73.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35868624,
@@ -99,6 +77,17 @@
    "line": 77.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35868661,
+   "p1": "Maciej Sinicki",
+   "p2": "Maciej Kolek",
+   "p1_norm": "maciej sinicki",
+   "p2_norm": "maciej kolek",
+   "open_date": "2026-07-26T13:25:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
