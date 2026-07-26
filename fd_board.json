@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T10:11:15Z",
+ "captured_at": "2026-07-26T10:15:24Z",
  "matches": [
   {
    "event_id": 35867755,
@@ -9,19 +9,8 @@
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-26T09:55:00.000Z",
    "line": 101.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35867763,
-   "p1": "Maciej Domin",
-   "p2": "Kacper Petas",
-   "p1_norm": "maciej domin",
-   "p2_norm": "kacper petas",
-   "open_date": "2026-07-26T10:00:00.000Z",
-   "line": 72.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35867782,
@@ -30,7 +19,7 @@
    "p1_norm": "alan wos",
    "p2_norm": "bartlomiej mleczko",
    "open_date": "2026-07-26T10:05:00.000Z",
-   "line": 86.5,
+   "line": 87.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -41,9 +30,9 @@
    "p1_norm": "jakub nosiadek",
    "p2_norm": "bartlomiej wisniewski",
    "open_date": "2026-07-26T10:10:00.000Z",
-   "line": 81.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35867798,
@@ -52,9 +41,9 @@
    "p1_norm": "kamil kowalski",
    "p2_norm": "oliwier sokolowski",
    "open_date": "2026-07-26T10:10:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 72.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35867815,
@@ -110,6 +99,17 @@
    "line": 79.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35867912,
+   "p1": "Piotr Przewlocki",
+   "p2": "Sebastian Szostok",
+   "p1_norm": "piotr przewlocki",
+   "p2_norm": "sebastian szostok",
+   "open_date": "2026-07-26T10:40:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
