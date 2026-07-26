@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T03:40:58Z",
+ "captured_at": "2026-07-26T03:46:39Z",
  "matches": [
   {
    "event_id": 35866724,
@@ -8,31 +8,9 @@
    "p1_norm": "maciej domin",
    "p2_norm": "jan zandecki",
    "open_date": "2026-07-26T03:25:00.000Z",
-   "line": 88.5,
-   "over_odds": -105,
-   "under_odds": -135
-  },
-  {
-   "event_id": 35866725,
-   "p1": "Oliwier Sokolowski",
-   "p2": "Pawel Slosarczyk",
-   "p1_norm": "oliwier sokolowski",
-   "p2_norm": "pawel slosarczyk",
-   "open_date": "2026-07-26T03:25:00.000Z",
-   "line": 102.5,
-   "over_odds": 100,
-   "under_odds": -140
-  },
-  {
-   "event_id": 35866753,
-   "p1": "Damian Fira",
-   "p2": "Roman Wiza",
-   "p1_norm": "damian fira",
-   "p2_norm": "roman wiza",
-   "open_date": "2026-07-26T03:30:00.000Z",
-   "line": 64.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 93.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35866766,
@@ -42,8 +20,8 @@
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-26T03:45:00.000Z",
    "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35866782,
@@ -86,6 +64,39 @@
    "p2_norm": "wojciech pytlas",
    "open_date": "2026-07-26T04:00:00.000Z",
    "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35866792,
+   "p1": "Kacper Petas",
+   "p2": "Maciej Domin",
+   "p1_norm": "kacper petas",
+   "p2_norm": "maciej domin",
+   "open_date": "2026-07-26T04:10:00.000Z",
+   "line": 73.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35866793,
+   "p1": "Jacek Wieczerzak",
+   "p2": "Oliwier Sokolowski",
+   "p1_norm": "jacek wieczerzak",
+   "p2_norm": "oliwier sokolowski",
+   "open_date": "2026-07-26T04:10:00.000Z",
+   "line": 75.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35866794,
+   "p1": "Bartlomiej Wisniewski",
+   "p2": "Wojciech Gluszek",
+   "p1_norm": "bartlomiej wisniewski",
+   "p2_norm": "wojciech gluszek",
+   "open_date": "2026-07-26T04:10:00.000Z",
+   "line": 79.5,
    "over_odds": -118,
    "under_odds": -112
   }
