@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T02:10:38Z",
+ "captured_at": "2026-07-26T02:16:55Z",
  "matches": [
-  {
-   "event_id": 35866492,
-   "p1": "Jacek Oracz",
-   "p2": "Miroslaw Warzecha",
-   "p1_norm": "jacek oracz",
-   "p2_norm": "miroslaw warzecha",
-   "open_date": "2026-07-26T02:00:00.000Z",
-   "line": 87.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35866524,
    "p1": "Damian Fira",
