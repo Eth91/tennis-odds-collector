@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T16:14:41Z",
+ "captured_at": "2026-07-26T16:19:04Z",
  "matches": [
   {
    "event_id": 35868979,
@@ -8,20 +8,9 @@
    "p1_norm": "oskar jadach",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-26T15:55:00.000Z",
-   "line": 90.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
-  {
-   "event_id": 35869036,
-   "p1": "Jaroslaw Badura",
-   "p2": "Sebastian Krupa",
-   "p1_norm": "jaroslaw badura",
-   "p2_norm": "sebastian krupa",
-   "open_date": "2026-07-26T16:00:00.000Z",
-   "line": 82.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 92.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35869258,
@@ -30,9 +19,9 @@
    "p1_norm": "kazimierz rybak",
    "p2_norm": "jacek zelezik",
    "open_date": "2026-07-26T16:15:00.000Z",
-   "line": 70.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 65.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35869259,
@@ -41,9 +30,9 @@
    "p1_norm": "arkadiusz mugowski",
    "p2_norm": "jakub glanowski",
    "open_date": "2026-07-26T16:15:00.000Z",
-   "line": 81.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35869276,
@@ -66,6 +55,39 @@
    "line": 79.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35869307,
+   "p1": "Bartosz Sulkowski",
+   "p2": "Karol Sulkowski",
+   "p1_norm": "bartosz sulkowski",
+   "p2_norm": "karol sulkowski",
+   "open_date": "2026-07-26T16:35:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35869308,
+   "p1": "Pawel Chojnacki",
+   "p2": "Kacper Kwiatkowski",
+   "p1_norm": "pawel chojnacki",
+   "p2_norm": "kacper kwiatkowski",
+   "open_date": "2026-07-26T16:35:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35869310,
+   "p1": "Piotr Przewlocki",
+   "p2": "Sebastian Szostok",
+   "p1_norm": "piotr przewlocki",
+   "p2_norm": "sebastian szostok",
+   "open_date": "2026-07-26T16:40:00.000Z",
+   "line": 73.5,
+   "over_odds": -116,
+   "under_odds": -118
   }
  ]
 }
