@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T23:41:00Z",
+ "captured_at": "2026-07-26T23:45:27Z",
  "matches": [
-  {
-   "event_id": 35870519,
-   "p1": "Mateusz Trela",
-   "p2": "Kamil Rudomina",
-   "p1_norm": "mateusz trela",
-   "p2_norm": "kamil rudomina",
-   "open_date": "2026-07-26T23:45:00.000Z",
-   "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
   {
    "event_id": 35870520,
    "p1": "Pawel Chojnacki",
@@ -20,8 +9,8 @@
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-26T23:45:00.000Z",
    "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870543,
@@ -54,6 +43,28 @@
    "open_date": "2026-07-27T00:00:00.000Z",
    "line": 76.5,
    "over_odds": -118,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35870553,
+   "p1": "Kazimierz Rybak",
+   "p2": "Henryk Tkaczyk",
+   "p1_norm": "kazimierz rybak",
+   "p2_norm": "henryk tkaczyk",
+   "open_date": "2026-07-27T00:10:00.000Z",
+   "line": 66.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35870554,
+   "p1": "Arkadiusz Mugowski",
+   "p2": "Kamil Rudomina",
+   "p1_norm": "arkadiusz mugowski",
+   "p2_norm": "kamil rudomina",
+   "open_date": "2026-07-27T00:10:00.000Z",
+   "line": 78.5,
+   "over_odds": -116,
    "under_odds": -116
   }
  ]
