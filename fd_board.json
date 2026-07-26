@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T09:57:59Z",
+ "captured_at": "2026-07-26T10:02:12Z",
  "matches": [
   {
    "event_id": 35867750,
@@ -8,7 +8,7 @@
    "p1_norm": "marian lebek",
    "p2_norm": "jacek wieczerzak",
    "open_date": "2026-07-26T09:50:00.000Z",
-   "line": 87.5,
+   "line": 91.5,
    "over_odds": -110,
    "under_odds": -125
   },
@@ -20,8 +20,8 @@
    "p2_norm": "piotr staniszewski",
    "open_date": "2026-07-26T09:50:00.000Z",
    "line": 84.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35867755,
@@ -30,20 +30,9 @@
    "p1_norm": "oskar jadach",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-26T09:55:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35867763,
-   "p1": "Maciej Domin",
-   "p2": "Kacper Petas",
-   "p1_norm": "maciej domin",
-   "p2_norm": "kacper petas",
-   "open_date": "2026-07-26T10:00:00.000Z",
-   "line": 73.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 85.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35867782,
