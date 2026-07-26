@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T12:50:15Z",
+ "captured_at": "2026-07-26T12:54:34Z",
  "matches": [
   {
    "event_id": 35868547,
@@ -8,20 +8,9 @@
    "p1_norm": "kacper petas",
    "p2_norm": "jan zandecki",
    "open_date": "2026-07-26T12:30:00.000Z",
-   "line": 108.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35868561,
-   "p1": "Bartlomiej Wisniewski",
-   "p2": "Bartosz Sulkowski",
-   "p1_norm": "bartlomiej wisniewski",
-   "p2_norm": "bartosz sulkowski",
-   "open_date": "2026-07-26T12:40:00.000Z",
-   "line": 71.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 111.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35868562,
@@ -30,9 +19,9 @@
    "p1_norm": "oliwier sokolowski",
    "p2_norm": "marian lebek",
    "open_date": "2026-07-26T12:40:00.000Z",
-   "line": 57.5,
-   "over_odds": -105,
-   "under_odds": -130
+   "line": 79.5,
+   "over_odds": -140,
+   "under_odds": 100
   },
   {
    "event_id": 35868577,
@@ -41,7 +30,7 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "mariusz adamus",
    "open_date": "2026-07-26T12:45:00.000Z",
-   "line": 79.5,
+   "line": 78.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -64,8 +53,8 @@
    "p2_norm": "aleksander lilien",
    "open_date": "2026-07-26T13:00:00.000Z",
    "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35868628,
@@ -99,6 +88,17 @@
    "line": 79.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35868658,
+   "p1": "Karol Wisniewski",
+   "p2": "Jakub Kuzmicz",
+   "p1_norm": "karol wisniewski",
+   "p2_norm": "jakub kuzmicz",
+   "open_date": "2026-07-26T13:20:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
