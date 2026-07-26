@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-26T20:57:14Z",
+ "captured_at": "2026-07-26T21:02:24Z",
  "matches": [
-  {
-   "event_id": 35870264,
-   "p1": "Oskar Sokolowski",
-   "p2": "Lukasz Oracz",
-   "p1_norm": "oskar sokolowski",
-   "p2_norm": "lukasz oracz",
-   "open_date": "2026-07-26T20:45:00.000Z",
-   "line": 88.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35870266,
-   "p1": "Arkadiusz Mugowski",
-   "p2": "Stapor Rafal",
-   "p1_norm": "arkadiusz mugowski",
-   "p2_norm": "stapor rafal",
-   "open_date": "2026-07-26T21:00:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
-  },
   {
    "event_id": 35870267,
    "p1": "Filip Mlynarski",
@@ -30,20 +8,9 @@
    "p1_norm": "filip mlynarski",
    "p2_norm": "mateusz rutkowski",
    "open_date": "2026-07-26T21:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -116
-  },
-  {
-   "event_id": 35870268,
-   "p1": "Pawel Chojnacki",
-   "p2": "Kacper Kwiatkowski",
-   "p1_norm": "pawel chojnacki",
-   "p2_norm": "kacper kwiatkowski",
-   "open_date": "2026-07-26T21:00:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870269,
