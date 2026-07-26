@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-26T23:07:55Z",
+ "captured_at": "2026-07-26T23:12:59Z",
  "matches": [
-  {
-   "event_id": 35870423,
-   "p1": "Oskar Sokolowski",
-   "p2": "Lukasz Oracz",
-   "p1_norm": "oskar sokolowski",
-   "p2_norm": "lukasz oracz",
-   "open_date": "2026-07-26T23:10:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
   {
    "event_id": 35870448,
    "p1": "Filip Mlynarski",
