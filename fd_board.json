@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T10:42:03Z",
+ "captured_at": "2026-07-26T10:46:14Z",
  "matches": [
   {
    "event_id": 35867815,
@@ -8,20 +8,9 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "rafal wojcik",
    "open_date": "2026-07-26T10:20:00.000Z",
-   "line": 101.5,
-   "over_odds": -145,
-   "under_odds": 105
-  },
-  {
-   "event_id": 35867898,
-   "p1": "Jacek Wieczerzak",
-   "p2": "Igor Szymanski",
-   "p1_norm": "jacek wieczerzak",
-   "p2_norm": "igor szymanski",
-   "open_date": "2026-07-26T10:35:00.000Z",
-   "line": 50.5,
-   "over_odds": -135,
-   "under_odds": 100
+   "line": 105.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35867899,
@@ -30,7 +19,7 @@
    "p1_norm": "piotr staniszewski",
    "p2_norm": "waclaw suchecki",
    "open_date": "2026-07-26T10:35:00.000Z",
-   "line": 67.5,
+   "line": 79.5,
    "over_odds": -120,
    "under_odds": -115
   },
