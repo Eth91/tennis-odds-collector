@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T22:16:47Z",
+ "captured_at": "2026-07-26T22:21:11Z",
  "matches": [
   {
    "event_id": 35870370,
@@ -8,8 +8,8 @@
    "p1_norm": "mateusz rutkowski",
    "p2_norm": "tomasz filbrandt",
    "open_date": "2026-07-26T22:05:00.000Z",
-   "line": 85.5,
-   "over_odds": -115,
+   "line": 73.5,
+   "over_odds": -120,
    "under_odds": -115
   },
   {
@@ -19,20 +19,9 @@
    "p1_norm": "pawel chojnacki",
    "p2_norm": "jacek zelezik",
    "open_date": "2026-07-26T22:10:00.000Z",
-   "line": 78.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35870375,
-   "p1": "Jakub Nowak",
-   "p2": "Grzegorz Marud",
-   "p1_norm": "jakub nowak",
-   "p2_norm": "grzegorz marud",
-   "open_date": "2026-07-26T22:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 86.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870381,
