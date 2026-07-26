@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-26T19:57:06Z",
+ "captured_at": "2026-07-26T20:01:57Z",
  "matches": [
   {
    "event_id": 35870237,
@@ -8,7 +8,7 @@
    "p1_norm": "jakub nowak",
    "p2_norm": "wojciech urban",
    "open_date": "2026-07-26T19:55:00.000Z",
-   "line": 82.5,
+   "line": 88.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -19,9 +19,9 @@
    "p1_norm": "mariusz baron",
    "p2_norm": "sebastian krupa",
    "open_date": "2026-07-26T20:00:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35870242,
@@ -31,8 +31,8 @@
    "p2_norm": "karol sulkowski",
    "open_date": "2026-07-26T20:05:00.000Z",
    "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35870243,
