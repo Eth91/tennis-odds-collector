@@ -2200,7 +2200,7 @@ def build():
         o_note = (" · shadow " + f'{o_sh["w"]}-{o_sh["l"]}') if o_shn else ""
         mlb_html += (f'<div class="op-title">⚾ OUTS-COMPASS · Pitcher Outs'
                      f'<span> · {_rec_str(_ob)}{o_note}{_tier_note(_cb.get("kagree"), "★★K")} · '
-                     f'% = backtested hit rate · ★ strong · ★★K = both models agree</span></div>')
+                     f'% = hit rate · ★★K = both models agree (only these ping) · cap 2.30</span></div>')
         mlb_html += (_compass_games(o_flags, "Outs Recorded", 1.30,
                                     [(1.30, "~65%"), (-9, "~63%")])
                      or '<div class="xt">no flags yet today</div>')

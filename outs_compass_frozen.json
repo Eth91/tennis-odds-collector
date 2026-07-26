@@ -20,7 +20,7 @@
  "lblend": 0.65,
  "thr": 0.97,
  "strong": 1.3,
- "price_cap": 2.0,
+ "price_cap": 2.3,
  "under_min_line": 16.5,
  "cal": {
   "x": [

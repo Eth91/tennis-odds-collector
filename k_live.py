@@ -660,7 +660,9 @@ def flag_outs(con):
                      pen.get(g["team_id"]), g.get("team_ab") or "", kagree,
                      round(cp, 3) if cp else None, su, tier))
         new += 1
-        if not skip and topic:
+        # PING POLICY (user 2026-07-26, "optimal hit/volume"): outs pings ONLY on ★★K agreement
+        # (66.7%/+29% '26; 62-67% both OOS yrs). All other outs flags stay board+tracker only.
+        if not skip and kagree and topic:
             am = f"+{round((od-1)*100)}" if od >= 2 else f"-{round(100/(od-1))}"
             txt = (f"🚨 ⚾O [{tier or '-'}] {g['opp_name']} {g['pitcher']} "
                    f"{'O' if side == 'over' else 'U'}{ln:g} {am} {bk.upper()} "
