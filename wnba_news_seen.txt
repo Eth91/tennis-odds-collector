@@ -125,6 +125,7 @@ rw|394|Downgraded to doubtful
 rw|394|Iffy for Wednesday
 rw|394|Ruled out Wednesday
 rw|394|Shines in return to Phoenix
+rw|394|Won't play Tuesday
 rw|401|Phased out in defeat
 rw|412|Let go by Toronto
 rw|413|Leads Lynx with 24 points

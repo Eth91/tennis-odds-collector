@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T20:36:42Z",
+ "captured_at": "2026-07-27T20:41:09Z",
  "matches": [
   {
    "event_id": 35873808,
@@ -8,7 +8,7 @@
    "p1_norm": "kacper marchlewski",
    "p2_norm": "bartlomiej mrugala",
    "open_date": "2026-07-27T20:30:00.000Z",
-   "line": 87.5,
+   "line": 80.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -19,9 +19,9 @@
    "p1_norm": "michal guzik",
    "p2_norm": "artur kubiak",
    "open_date": "2026-07-27T20:30:00.000Z",
-   "line": 76.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 70.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35873810,
@@ -30,9 +30,9 @@
    "p1_norm": "lukasz jarocki",
    "p2_norm": "michal olbrycht",
    "open_date": "2026-07-27T20:30:00.000Z",
-   "line": 75.5,
-   "over_odds": -105,
-   "under_odds": -125
+   "line": 80.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35873819,
@@ -75,6 +75,28 @@
    "p2_norm": "jakub zochniak",
    "open_date": "2026-07-27T21:00:00.000Z",
    "line": 81.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35873840,
+   "p1": "Jakub Nowak",
+   "p2": "Michal Durda",
+   "p1_norm": "jakub nowak",
+   "p2_norm": "michal durda",
+   "open_date": "2026-07-27T21:05:00.000Z",
+   "line": 73.5,
+   "over_odds": -110,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35873841,
+   "p1": "Bartlomiej Mrugala",
+   "p2": "Adrian Eliasz",
+   "p1_norm": "bartlomiej mrugala",
+   "p2_norm": "adrian eliasz",
+   "open_date": "2026-07-27T21:05:00.000Z",
+   "line": 80.5,
    "over_odds": -112,
    "under_odds": -118
   }
