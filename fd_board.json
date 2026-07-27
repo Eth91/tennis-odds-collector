@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T21:14:31Z",
+ "captured_at": "2026-07-27T21:18:59Z",
  "matches": [
-  {
-   "event_id": 35873837,
-   "p1": "Adam Linek",
-   "p2": "Jakub Zochniak",
-   "p1_norm": "adam linek",
-   "p2_norm": "jakub zochniak",
-   "open_date": "2026-07-27T21:00:00.000Z",
-   "line": 98.5,
-   "over_odds": -145,
-   "under_odds": 105
-  },
   {
    "event_id": 35873841,
    "p1": "Bartlomiej Mrugala",
@@ -19,7 +8,7 @@
    "p1_norm": "bartlomiej mrugala",
    "p2_norm": "adrian eliasz",
    "open_date": "2026-07-27T21:05:00.000Z",
-   "line": 89.5,
+   "line": 91.5,
    "over_odds": -110,
    "under_odds": -125
   },
@@ -30,9 +19,9 @@
    "p1_norm": "aleksander barton",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-27T21:10:00.000Z",
-   "line": 60.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 52.5,
+   "over_odds": -145,
+   "under_odds": 105
   },
   {
    "event_id": 35873861,
@@ -86,6 +75,17 @@
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-27T21:35:00.000Z",
    "line": 73.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35874088,
+   "p1": "Michal Krutak",
+   "p2": "Michal Guzik",
+   "p1_norm": "michal krutak",
+   "p2_norm": "michal guzik",
+   "open_date": "2026-07-27T21:45:00.000Z",
+   "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
   }
