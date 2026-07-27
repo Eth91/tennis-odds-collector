@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-27T04:11:22Z",
+ "captured_at": "2026-07-27T04:15:55Z",
  "matches": [
-  {
-   "event_id": 35870776,
-   "p1": "Rafal Niemiec",
-   "p2": "Jakub Pruszkowski",
-   "p1_norm": "rafal niemiec",
-   "p2_norm": "jakub pruszkowski",
-   "open_date": "2026-07-27T03:50:00.000Z",
-   "line": 105.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35870780,
-   "p1": "Michal Machelski",
-   "p2": "Dariusz Maszczynski",
-   "p1_norm": "michal machelski",
-   "p2_norm": "dariusz maszczynski",
-   "open_date": "2026-07-27T04:00:00.000Z",
-   "line": 82.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35870781,
    "p1": "Wojciech Wojtaszczyk",
@@ -30,8 +8,8 @@
    "p1_norm": "wojciech wojtaszczyk",
    "p2_norm": "oliwier sokolowski",
    "open_date": "2026-07-27T04:10:00.000Z",
-   "line": 74.5,
-   "over_odds": -110,
+   "line": 75.5,
+   "over_odds": -115,
    "under_odds": -120
   },
   {
@@ -41,9 +19,9 @@
    "p1_norm": "milosz piecowski",
    "p2_norm": "igor dabrowski",
    "open_date": "2026-07-27T04:10:00.000Z",
-   "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 89.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870783,
@@ -52,9 +30,9 @@
    "p1_norm": "karol wisniewski",
    "p2_norm": "grzegorz poliniewicz",
    "open_date": "2026-07-27T04:10:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 84.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870784,
@@ -121,6 +99,17 @@
    "line": 78.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35870806,
+   "p1": "Michal Durda",
+   "p2": "Wojciech Urban",
+   "p1_norm": "michal durda",
+   "p2_norm": "wojciech urban",
+   "open_date": "2026-07-27T04:40:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
