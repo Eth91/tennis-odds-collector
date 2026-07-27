@@ -1213,8 +1213,46 @@ def board(con):
                     gate.write_text(json.dumps(seen))
                 except requests.RequestException:
                     pass
+    comb = con.execute(
+        "SELECT SUM(w), SUM(l), ROUND(SUM(u),1) FROM ("
+        "SELECT SUM(result='W') w, SUM(result='L') l, SUM(COALESCE(pnl,0)) u FROM compass "
+        "WHERE stack=1 AND result IN ('W','L') AND (skip IS NULL OR skip='') UNION ALL "
+        "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM outs_compass "
+        "WHERE stack=1 AND result IN ('W','L') AND (skip IS NULL OR skip='') UNION ALL "
+        "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM ethan_k "
+        "WHERE stack=1 AND result IN ('W','L') AND (skip IS NULL OR skip='') UNION ALL "
+        "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM opener_k "
+        "WHERE result IN ('W','L') UNION ALL "
+        "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM route_a "
+        "WHERE result IN ('W','L'))").fetchone()
+    comb_today = []
+    gd_ = _today_et()
+    for p_, sd_, ln_, od_, bk_, opp_, drv_, prem_ in con.execute(
+            "SELECT pitcher, side, line, odds, book, opp, driver, premium FROM compass "
+            "WHERE game_date=? AND stack=1", (gd_,)):
+        tag = "💎LK" if drv_ == "lineupK" else ("★AR" if prem_ else "⚡STK")
+        comb_today.append({"pitcher": p_, "side": sd_, "line": ln_, "odds": od_, "book": bk_,
+                           "opp": opp_, "mkt": "K", "tag": tag})
+    for p_, sd_, ln_, od_, bk_, opp_ in con.execute(
+            "SELECT pitcher, side, line, odds, book, opp FROM outs_compass "
+            "WHERE game_date=? AND stack=1", (gd_,)):
+        comb_today.append({"pitcher": p_, "side": sd_, "line": ln_, "odds": od_, "book": bk_,
+                           "opp": opp_, "mkt": "Outs", "tag": "★★K"})
+    for p_, ln_, od_, bk_, opp_ in con.execute(
+            "SELECT pitcher, line, odds, book, opp FROM ethan_k WHERE game_date=? AND stack=1",
+            (gd_,)):
+        comb_today.append({"pitcher": p_, "side": "over", "line": ln_, "odds": od_, "book": bk_,
+                           "opp": opp_, "mkt": "K", "tag": "🧪ETH"})
+    for f_ in opn_today:
+        comb_today.append({**{k: f_[k] for k in ("pitcher", "side", "line", "odds", "book", "opp")},
+                           "mkt": "K", "tag": "⚡OPN"})
+    for f_ in ra_today:
+        comb_today.append({**{k: f_[k] for k in ("pitcher", "side", "line", "odds", "book", "opp")},
+                           "mkt": "Outs", "tag": "💠PO"})
     (HERE / "compass_board.json").write_text(json.dumps(
         {"updated": _now(), "w": rec[0] or 0, "l": rec[1] or 0, "u": rec[2] or 0.0,
+         "combined": {"w": comb[0] or 0, "l": comb[1] or 0, "u": comb[2] or 0.0,
+                      "today": comb_today},
          "drift": {"k": dz_k, "outs": dz_o},
          "tiers": tier_recs,
          "shadow": {"w": shadow[0] or 0, "l": shadow[1] or 0, "u": shadow[2] or 0.0},
