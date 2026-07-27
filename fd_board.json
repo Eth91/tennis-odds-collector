@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T09:24:39Z",
+ "captured_at": "2026-07-27T09:29:21Z",
  "matches": [
   {
    "event_id": 35871689,
@@ -8,9 +8,9 @@
    "p1_norm": "grzegorz adamiak",
    "p2_norm": "josef braun",
    "open_date": "2026-07-27T09:20:00.000Z",
-   "line": 78.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 73.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35871691,
@@ -19,9 +19,9 @@
    "p1_norm": "oliwier sokolowski",
    "p2_norm": "pawel slosarczyk",
    "open_date": "2026-07-27T09:25:00.000Z",
-   "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 74.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35871693,
@@ -30,9 +30,9 @@
    "p1_norm": "milosz piecowski",
    "p2_norm": "artur sobel",
    "open_date": "2026-07-27T09:25:00.000Z",
-   "line": 74.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 53.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35871700,
@@ -88,6 +88,17 @@
    "line": 80.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35871754,
+   "p1": "Piotr Przewlocki",
+   "p2": "Oskar Jadach",
+   "p1_norm": "piotr przewlocki",
+   "p2_norm": "oskar jadach",
+   "open_date": "2026-07-27T09:55:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
