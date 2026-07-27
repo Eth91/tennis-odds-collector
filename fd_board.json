@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T09:18:49Z",
+ "captured_at": "2026-07-27T09:24:39Z",
  "matches": [
   {
    "event_id": 35871689,
@@ -8,9 +8,9 @@
    "p1_norm": "grzegorz adamiak",
    "p2_norm": "josef braun",
    "open_date": "2026-07-27T09:20:00.000Z",
-   "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35871691,
@@ -66,6 +66,28 @@
    "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35871733,
+   "p1": "Rafal Niemiec",
+   "p2": "Wojciech Wojtaszczyk",
+   "p1_norm": "rafal niemiec",
+   "p2_norm": "wojciech wojtaszczyk",
+   "open_date": "2026-07-27T09:50:00.000Z",
+   "line": 73.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35871734,
+   "p1": "Aleksander Lilien",
+   "p2": "Przemyslaw Perzynski",
+   "p1_norm": "aleksander lilien",
+   "p2_norm": "przemyslaw perzynski",
+   "open_date": "2026-07-27T09:50:00.000Z",
+   "line": 80.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
