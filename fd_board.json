@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T23:11:14Z",
+ "captured_at": "2026-07-27T23:17:10Z",
  "matches": [
-  {
-   "event_id": 35874136,
-   "p1": "Adam Linek",
-   "p2": "Mateusz Rutkowski",
-   "p1_norm": "adam linek",
-   "p2_norm": "mateusz rutkowski",
-   "open_date": "2026-07-27T22:55:00.000Z",
-   "line": 94.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
   {
    "event_id": 35874138,
    "p1": "Mateusz Sikon",
@@ -19,9 +8,9 @@
    "p1_norm": "mateusz sikon",
    "p2_norm": "piotr gumulinski",
    "open_date": "2026-07-27T23:05:00.000Z",
-   "line": 80.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 66.5,
+   "over_odds": -105,
+   "under_odds": -135
   },
   {
    "event_id": 35874143,
@@ -30,9 +19,9 @@
    "p1_norm": "michal machelski",
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-27T23:10:00.000Z",
-   "line": 70.5,
-   "over_odds": -115,
-   "under_odds": -115
+   "line": 50.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35874146,
@@ -52,9 +41,9 @@
    "p1_norm": "michal olbrycht",
    "p2_norm": "jakub zochniak",
    "open_date": "2026-07-27T23:20:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -110
   },
   {
    "event_id": 35874148,
@@ -88,6 +77,39 @@
    "line": 72.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35874158,
+   "p1": "Bartlomiej Mrugala",
+   "p2": "Kuba Golaszewski",
+   "p1_norm": "bartlomiej mrugala",
+   "p2_norm": "kuba golaszewski",
+   "open_date": "2026-07-27T23:45:00.000Z",
+   "line": 80.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35874159,
+   "p1": "Pawel Chojnacki",
+   "p2": "Michal Krutak",
+   "p1_norm": "pawel chojnacki",
+   "p2_norm": "michal krutak",
+   "open_date": "2026-07-27T23:45:00.000Z",
+   "line": 75.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35874160,
+   "p1": "Adam Linek",
+   "p2": "Jakub Glanowski",
+   "p1_norm": "adam linek",
+   "p2_norm": "jakub glanowski",
+   "open_date": "2026-07-27T23:45:00.000Z",
+   "line": 81.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
