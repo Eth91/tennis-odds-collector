@@ -1,0 +1,15 @@
+{
+ "updated": "2026-07-27T23:00:04",
+ "markets": {
+  "TOP_REGION_IMG": {
+   "n": 89,
+   "mean_open_over_close": 1.0082,
+   "median": 1.0
+  },
+  "OUTRIGHT_BETTING": {
+   "n": 88,
+   "mean_open_over_close": 1.0087,
+   "median": 1.0
+  }
+ }
+}
