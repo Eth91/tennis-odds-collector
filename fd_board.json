@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T00:42:26Z",
+ "captured_at": "2026-07-27T00:47:55Z",
  "matches": [
-  {
-   "event_id": 35870563,
-   "p1": "Jacek Zelezik",
-   "p2": "Adam Staniczek",
-   "p1_norm": "jacek zelezik",
-   "p2_norm": "adam staniczek",
-   "open_date": "2026-07-27T00:35:00.000Z",
-   "line": 56.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
   {
    "event_id": 35870573,
    "p1": "Filip Mlynarski",
@@ -19,31 +8,9 @@
    "p1_norm": "filip mlynarski",
    "p2_norm": "tomasz filbrandt",
    "open_date": "2026-07-27T00:45:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35870574,
-   "p1": "Jakub Pruszkowski",
-   "p2": "Oskar Sokolowski",
-   "p1_norm": "jakub pruszkowski",
-   "p2_norm": "oskar sokolowski",
-   "open_date": "2026-07-27T00:45:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35870575,
-   "p1": "Grzegorz Marud",
-   "p2": "Jakub Nowak",
-   "p1_norm": "grzegorz marud",
-   "p2_norm": "jakub nowak",
-   "open_date": "2026-07-27T00:45:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 73.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35870585,
@@ -66,6 +33,39 @@
    "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35870597,
+   "p1": "Schaniel Krzysztof",
+   "p2": "Wojciech Urban",
+   "p1_norm": "schaniel krzysztof",
+   "p2_norm": "wojciech urban",
+   "open_date": "2026-07-27T01:10:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35870598,
+   "p1": "Sebastian Krupa",
+   "p2": "Jaroslaw Badura",
+   "p1_norm": "sebastian krupa",
+   "p2_norm": "jaroslaw badura",
+   "open_date": "2026-07-27T01:10:00.000Z",
+   "line": 78.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35870599,
+   "p1": "Jakub Zochniak",
+   "p2": "Mateusz Rutkowski",
+   "p1_norm": "jakub zochniak",
+   "p2_norm": "mateusz rutkowski",
+   "open_date": "2026-07-27T01:10:00.000Z",
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -110
   }
  ]
 }
