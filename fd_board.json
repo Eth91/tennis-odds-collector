@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T19:11:14Z",
+ "captured_at": "2026-07-27T19:16:58Z",
  "matches": [
   {
    "event_id": 35873719,
@@ -8,9 +8,9 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "robert kostepski",
    "open_date": "2026-07-27T19:10:00.000Z",
-   "line": 78.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 73.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35873720,
@@ -19,7 +19,7 @@
    "p1_norm": "miroslaw warzecha",
    "p2_norm": "dariusz maszczynski",
    "open_date": "2026-07-27T19:10:00.000Z",
-   "line": 64.5,
+   "line": 60.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,9 +30,9 @@
    "p1_norm": "michal olbrycht",
    "p2_norm": "maciej domin",
    "open_date": "2026-07-27T19:15:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 82.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35873728,
@@ -77,6 +77,39 @@
    "line": 75.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35873762,
+   "p1": "Marcin Kowalczyk",
+   "p2": "Adrian Fabis",
+   "p1_norm": "marcin kowalczyk",
+   "p2_norm": "adrian fabis",
+   "open_date": "2026-07-27T19:40:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35873763,
+   "p1": "Andriej Fomin",
+   "p2": "Pawel Chojnacki",
+   "p1_norm": "andriej fomin",
+   "p2_norm": "pawel chojnacki",
+   "open_date": "2026-07-27T19:40:00.000Z",
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35873764,
+   "p1": "Miroslav Sklensky",
+   "p2": "Adrian Spychala",
+   "p1_norm": "miroslav sklensky",
+   "p2_norm": "adrian spychala",
+   "open_date": "2026-07-27T19:40:00.000Z",
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
