@@ -1,27 +1,16 @@
 {
- "captured_at": "2026-07-27T07:56:40Z",
+ "captured_at": "2026-07-27T08:01:20Z",
  "matches": [
   {
-   "event_id": 35871399,
-   "p1": "Stapor Rafal",
-   "p2": "Artur Sobel",
-   "p1_norm": "stapor rafal",
-   "p2_norm": "artur sobel",
-   "open_date": "2026-07-27T07:40:00.000Z",
-   "line": 75.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35871404,
-   "p1": "Oliwier Sokolowski",
-   "p2": "Jakub Pruszkowski",
-   "p1_norm": "oliwier sokolowski",
-   "p2_norm": "jakub pruszkowski",
-   "open_date": "2026-07-27T07:45:00.000Z",
-   "line": 73.5,
-   "over_odds": null,
-   "under_odds": null
+   "event_id": 35871410,
+   "p1": "Patryk Mecik",
+   "p2": "Oskar Jadach",
+   "p1_norm": "patryk mecik",
+   "p2_norm": "oskar jadach",
+   "open_date": "2026-07-27T07:55:00.000Z",
+   "line": 87.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35871413,
@@ -30,9 +19,9 @@
    "p1_norm": "janus slawomir",
    "p2_norm": "dariusz maszczynski",
    "open_date": "2026-07-27T08:00:00.000Z",
-   "line": 75.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35871414,
