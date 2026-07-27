@@ -2254,25 +2254,22 @@ def build():
                                   f'<span class="bp">{x[1]}p</span>'
                                   f'<span class="bv">{v:g}</span></div></div>')
                     _opps = "".join(f'<span>{html.escape(str(x[4] or ""))}'
-                                    f'<i>{html.escape(str(x[3] or ""))}</i></span>' for x in _l5)
-                    _wh = (f'<div class="why">{html.escape(f.get("why") or "")}</div>'
-                           if f.get("why") else "")
-                    _drawer = (f'<div class="bars"><div class="bwrap">{_wh}<div class="chart">'
+                                    f'<i>{html.escape(str(x[3] or "").replace("-", "/"))}</i>'
+                                    f'</span>' for x in _l5)
+                    _drawer = (f'<div class="bars"><div class="bwrap"><div class="chart">'
                                f'<div class="pline" style="bottom:{_ln / _mx * 100:.1f}%">'
                                f'</div>{_cols}</div>'
                                f'<div class="opps">{_opps}</div>'
                                f'<div class="bnote">{_hits}/{len(_l5)} '
-                               f'{"over" if _o == "O" else "under"} {_ln:g} · dashed = tonight\'s '
-                               f'line · bar = {"strikeouts" if _isk else "outs"} · '
-                               f'pitch count above</div>'
+                               f'{"over" if _o == "O" else "under"} {_ln:g}</div>'
                                f'</div></div>')
                     _chev = '<span class="pchev">›</span>'
                     _click = ' onclick="this.nextElementSibling.classList.toggle(\'open\')"'
                 mlb_html += (f'<div class="pblk"><div class="phd">'
                              f'{_mlogo(f.get("team"), "plogo")}'
-                             f'<span class="tchip t{_tl}" title="{_pct}" '
-                             f'style="margin-right:6px">{_tl}</span>'
                              f'<span class="pname">{html.escape(_short(f["pitcher"]))}</span>'
+                             f'<span class="tchip t{_tl}" title="{_pct}" '
+                             f'style="margin-left:7px">{_tl}</span>'
                              f'<span class="psp2"></span>'
                              f'<span class="stag">{_TAGLBL.get(f.get("tag"), f.get("tag") or "")}'
                              f'</span></div>'
@@ -2328,32 +2325,25 @@ def build():
                              + f'<div class="chart">{_bars}</div>'
                              f'<div class="opps">'
                              + "".join(f'<span>{html.escape(str(a[4] or ""))}'
-                                       f'<i>{html.escape(str(a[3] or ""))}'
-                                       f'{"" if a[5] else " · R"}</i></span>'
+                                       f'<i>{html.escape(str(a[3] or "").replace("-", "/"))}'
+                                       f'{"" if a[5] else " R"}</i></span>'
                                        for a in _ap)
-                             + f'</div><div class="bnote">bar = outs · pitch count above · '
-                             f'R = relief outing · vs {html.escape(t.get("opp") or "")}</div>'
+                             + f'</div>'
                              + (f'<div class="bnote">{" &nbsp;|&nbsp; ".join(_lines)}</div>'
                                 if _lines else "")
                              + '</div></div></div>')
 
         # MLB tier legend (user 2026-07-26: mirror the WNBA tier-record block)
         _tr = _cb.get("tiers") or {}
-        _TDESC = {"S": "premium family · ★AR / deep score / ★★K",
-                  "A": "solid — calibrated edge ≥6pts",
-                  "B": "thin edge — small stakes",
-                  "C": "price beat the model — caution, not a bet"}
         _trows = ""
         for _t in ("S", "A", "B", "C"):
             _d = _tr.get(_t) or {}
             _n = (_d.get("w") or 0) + (_d.get("l") or 0)
             _rec = (f'{_d["w"]}-{_d["l"]} · {100*_d["w"]/_n:.0f}% · {_d["u"]:+.1f}u'
-                    if _n else "no graded bets yet")
+                    if _n else "—")
             _trows += (f'<div class="tlrow"><span class="tchip t{_t}">{_t}</span>'
-                       f'<span class="tld">{_TDESC[_t]}</span>'
                        f'<span class="tlr">{_rec}</span></div>')
-        mlb_html += ('<div class="tierleg"><div class="xt">MLB tiers · live record at flagged '
-                     'prices</div>' + _trows + '</div>')
+        mlb_html += ('<div class="tierleg">' + _trows + '</div>')
 
         # Daily 2-leg parlay as a WNBA-style betslip
         _pl = _cb.get("parlay") or {}
@@ -2651,6 +2641,10 @@ def build():
     font-size:15px; font-weight:900; flex:none; }}
   .pind.o {{ color:#5ad98a; background:rgba(90,217,138,.16); }}
   .pind.u {{ color:#74a8ef; background:rgba(116,168,239,.16); }}
+  #mlb .pind {{ width:auto; height:auto; background:none; font-size:24px; font-weight:800;
+                letter-spacing:-.015em; margin-right:2px; }}
+  #mlb .pind.over {{ color:#5ad98a; }}
+  #mlb .pind.under {{ color:#ef6a6a; }}
   /* TT likely-flag bet row — mirrors the WNBA prop-row design system */
   .ttbet {{ display:flex; align-items:center; gap:11px; padding:11px 0 10px; border-bottom:1px solid #161d28; }}
   .ttbet:last-of-type {{ border-bottom:none; }}
