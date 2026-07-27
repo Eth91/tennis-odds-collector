@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-27T10:24:39Z",
+ "captured_at": "2026-07-27T10:29:21Z",
  "matches": [
-  {
-   "event_id": 35871785,
-   "p1": "Wojciech Gluszek",
-   "p2": "Milosz Piecowski",
-   "p1_norm": "wojciech gluszek",
-   "p2_norm": "milosz piecowski",
-   "open_date": "2026-07-27T10:10:00.000Z",
-   "line": 79.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35871786,
-   "p1": "Jakub Kaczmarek",
-   "p2": "Oliwier Sokolowski",
-   "p1_norm": "jakub kaczmarek",
-   "p2_norm": "oliwier sokolowski",
-   "open_date": "2026-07-27T10:10:00.000Z",
-   "line": 95.5,
-   "over_odds": -115,
-   "under_odds": -115
-  },
   {
    "event_id": 35871808,
    "p1": "Patryk Mecik",
@@ -30,9 +8,9 @@
    "p1_norm": "patryk mecik",
    "p2_norm": "wojciech tobiasz",
    "open_date": "2026-07-27T10:20:00.000Z",
-   "line": 81.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 87.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35871810,
@@ -41,9 +19,9 @@
    "p1_norm": "marcin jadczyk",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-27T10:25:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 74.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35871822,
