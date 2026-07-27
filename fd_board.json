@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T08:28:35Z",
+ "captured_at": "2026-07-27T08:35:43Z",
  "matches": [
   {
    "event_id": 35871430,
@@ -8,9 +8,9 @@
    "p1_norm": "michal machelski",
    "p2_norm": "michal wolny",
    "open_date": "2026-07-27T08:20:00.000Z",
-   "line": 91.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 95.5,
+   "over_odds": -165,
+   "under_odds": 120
   },
   {
    "event_id": 35871431,
@@ -19,9 +19,9 @@
    "p1_norm": "grzegorz wichowski",
    "p2_norm": "wiktor ptak",
    "open_date": "2026-07-27T08:20:00.000Z",
-   "line": 60.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 76.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35871442,
@@ -30,9 +30,9 @@
    "p1_norm": "przemyslaw perzynski",
    "p2_norm": "michal minda",
    "open_date": "2026-07-27T08:30:00.000Z",
-   "line": 81.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 69.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35871443,
@@ -41,9 +41,9 @@
    "p1_norm": "karol wisniewski",
    "p2_norm": "grzegorz adamiak",
    "open_date": "2026-07-27T08:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 74.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35871446,
@@ -53,8 +53,8 @@
    "p2_norm": "pawel slosarczyk",
    "open_date": "2026-07-27T08:35:00.000Z",
    "line": 71.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35871447,
@@ -86,6 +86,50 @@
    "p2_norm": "jerzy michalik",
    "open_date": "2026-07-27T08:45:00.000Z",
    "line": 73.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35871543,
+   "p1": "Wojciech Gluszek",
+   "p2": "Miroslaw Piecowski",
+   "p1_norm": "wojciech gluszek",
+   "p2_norm": "miroslaw piecowski",
+   "open_date": "2026-07-27T09:00:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35871544,
+   "p1": "Grzegorz Poliniewicz",
+   "p2": "Jakub Kuzmicz",
+   "p1_norm": "grzegorz poliniewicz",
+   "p2_norm": "jakub kuzmicz",
+   "open_date": "2026-07-27T09:00:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35871545,
+   "p1": "Adrian Spychala",
+   "p2": "Kamil Kostyk",
+   "p1_norm": "adrian spychala",
+   "p2_norm": "kamil kostyk",
+   "open_date": "2026-07-27T09:00:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35871546,
+   "p1": "Jakub Kaczmarek",
+   "p2": "Krzysztof Juszczyk",
+   "p1_norm": "jakub kaczmarek",
+   "p2_norm": "krzysztof juszczyk",
+   "open_date": "2026-07-27T09:00:00.000Z",
+   "line": 76.5,
    "over_odds": -116,
    "under_odds": -116
   }
