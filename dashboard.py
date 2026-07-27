@@ -2331,7 +2331,7 @@ def build():
                                        f'<i>{html.escape(str(a[3] or ""))}'
                                        f'{"" if a[5] else " · R"}</i></span>'
                                        for a in _ap)
-                             + f'</div><div class="bnote">grey = pitch count · bar = outs · '
+                             + f'</div><div class="bnote">bar = outs · pitch count above · '
                              f'R = relief outing · vs {html.escape(t.get("opp") or "")}</div>'
                              + (f'<div class="bnote">{" &nbsp;|&nbsp; ".join(_lines)}</div>'
                                 if _lines else "")
