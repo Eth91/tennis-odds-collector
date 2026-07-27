@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T02:49:58Z",
+ "captured_at": "2026-07-27T02:54:24Z",
  "matches": [
-  {
-   "event_id": 35870717,
-   "p1": "Pawel Chojnacki",
-   "p2": "Henryk Tkaczyk",
-   "p1_norm": "pawel chojnacki",
-   "p2_norm": "henryk tkaczyk",
-   "open_date": "2026-07-27T02:35:00.000Z",
-   "line": 86.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35870728,
    "p1": "Wojciech Wojtaszczyk",
@@ -64,6 +53,17 @@
    "p2_norm": "michal wolny",
    "open_date": "2026-07-27T03:10:00.000Z",
    "line": 70.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35870735,
+   "p1": "Stapor Rafal",
+   "p2": "Michal Minda",
+   "p1_norm": "stapor rafal",
+   "p2_norm": "michal minda",
+   "open_date": "2026-07-27T03:20:00.000Z",
+   "line": 79.5,
    "over_odds": -112,
    "under_odds": -118
   }
