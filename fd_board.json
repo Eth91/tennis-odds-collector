@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T16:11:21Z",
+ "captured_at": "2026-07-27T16:17:30Z",
  "matches": [
-  {
-   "event_id": 35872981,
-   "p1": "Piotr Gesiarz",
-   "p2": "Dariusz Maszczynski",
-   "p1_norm": "piotr gesiarz",
-   "p2_norm": "dariusz maszczynski",
-   "open_date": "2026-07-27T16:00:00.000Z",
-   "line": 55.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35872985,
    "p1": "Lukasz Jarocki",
@@ -19,7 +8,7 @@
    "p1_norm": "lukasz jarocki",
    "p2_norm": "miroslav sklensky",
    "open_date": "2026-07-27T16:05:00.000Z",
-   "line": 75.5,
+   "line": 87.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,9 +19,9 @@
    "p1_norm": "michal guzik",
    "p2_norm": "andriej fomin",
    "open_date": "2026-07-27T16:15:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 79.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35873006,
@@ -41,9 +30,9 @@
    "p1_norm": "kacper marchlewski",
    "p2_norm": "marcin kowalczyk",
    "open_date": "2026-07-27T16:15:00.000Z",
-   "line": 76.5,
+   "line": 77.5,
    "over_odds": -120,
-   "under_odds": -110
+   "under_odds": -115
   },
   {
    "event_id": 35873012,
@@ -96,7 +85,18 @@
    "p1_norm": "pawel chojnacki",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-27T16:35:00.000Z",
-   "line": 77.5,
+   "line": 81.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35873324,
+   "p1": "Wiktor Ptak",
+   "p2": "Oskar Jadach",
+   "p1_norm": "wiktor ptak",
+   "p2_norm": "oskar jadach",
+   "open_date": "2026-07-27T16:40:00.000Z",
+   "line": 79.5,
    "over_odds": -118,
    "under_odds": -112
   }
