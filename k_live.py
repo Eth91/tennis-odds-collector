@@ -1279,6 +1279,42 @@ def board(con):
                     "w": prec[0] or 0, "l": prec[1] or 0, "u": prec[2] or 0.0}}))
 
 
+MLB_REASON = {
+    "ETH": "whiffy lineup vs 25%+ K arm (66% family)",
+    "LK": "lineup much whiffier than the line assumes (65-70% family)",
+    "AR": "arsenal matches lineup holes (65-70% family)",
+    "S2": "deep composite signal (~65% family)",
+    "O★★K": "K + outs models agree (63-67% family)",
+    "K": "composite signal (~62% family)",
+    "O": "outs composite (~63% family)",
+    "OPN": "early strike at soft pre-lineup price (58% family, +9% ROI)",
+    "PO": "away arm vs contact bats, line above his norm (LIVE 25-9, 73%)",
+}
+
+
+def mlb_ping(con, table, pitcher, gd, tag, opp, side, ln, mkt, od, bk, extra=""):
+    """ONE ping format for the whole MLB model. Returns True if sent+marked."""
+    import os
+    topic = os.environ.get("NTFY_TOPIC")
+    if not topic:
+        return False
+    am = f"+{round((od-1)*100)}" if od >= 2 else f"-{round(100/(od-1))}"
+    why = MLB_REASON.get(tag, tag)
+    txt = (f"⚾ MLB · {opp} · {pitcher} {'O' if side == 'over' else 'U'}{ln:g} {mkt} "
+           f"{am} {bk.upper()} · 0.5u — {why}{extra}")
+    try:
+        requests.post(f"https://ntfy.sh/{topic}", data=txt.encode(),
+                      params={"title": "Pickz", "priority": "high"}, timeout=15
+                      ).raise_for_status()
+        if table:
+            con.execute(f"UPDATE {table} SET pinged=1 WHERE pitcher=? AND game_date=?",
+                        (pitcher, gd))
+        return True
+    except requests.RequestException as e:
+        print(f"mlb ping failed: {str(e)[:60]}")
+        return False
+
+
 def flag_route_a(con):
     """💠PO — ROUTE-A PREMIUM OUTS, now live with its own pings (was paper-only; forward
     record 25-9/73.5% since 7/7, THE best live evidence in the system). Spec mirrors
@@ -1331,35 +1367,13 @@ def flag_route_a(con):
                     "oppk, opp, flagged_at) VALUES (?,?,?,?,?,?,?,?,?,?)",
                     (g["pitcher"], gd, "under", best[0], best[1], best[2], med,
                      round(oppk, 3), g["opp_name"], ts))
-        if topic:
-            od = best[1]
-            am = f"+{round((od-1)*100)}" if od >= 2 else f"-{round(100/(od-1))}"
-            txt = (f"💠PO ⚾OUTS {g['opp_name']} {g['pitcher']} U{best[0]:g} {am} "
-                   f"{best[2].upper()} 0.5u (away·contact·line>med — live 25-9)")
-            try:
-                requests.post(f"https://ntfy.sh/{topic}", data=txt.encode(),
-                              params={"title": "Pickz", "priority": "high"}, timeout=15
-                              ).raise_for_status()
-                con.execute("UPDATE route_a SET pinged=1 WHERE pitcher=? AND game_date=?",
-                            (g["pitcher"], gd))
-            except requests.RequestException as e:
-                print(f"route_a ping failed: {str(e)[:60]}")
+        mlb_ping(con, "route_a", g["pitcher"], gd, "PO", g["opp_name"], "under",
+                 best[0], "Outs", best[1], best[2])
         print(f"route_a: {g['pitcher']} U{best[0]}")
-    if topic:
-        for p_, ln_, od_, bk_, opp_ in con.execute(
-                "SELECT pitcher, line, odds, book, opp FROM route_a "
-                "WHERE game_date=? AND pinged=0", (gd,)).fetchall():
-            am = f"+{round((od_-1)*100)}" if od_ >= 2 else f"-{round(100/(od_-1))}"
-            try:
-                requests.post(f"https://ntfy.sh/{topic}",
-                              data=(f"💠PO ⚾OUTS {opp_} {p_} U{ln_:g} {am} {bk_.upper()} "
-                                    f"0.5u (away·contact·line>med — live 25-9)").encode(),
-                              params={"title": "Pickz", "priority": "high"}, timeout=15
-                              ).raise_for_status()
-                con.execute("UPDATE route_a SET pinged=1 WHERE pitcher=? AND game_date=?",
-                            (p_, gd))
-            except requests.RequestException:
-                pass
+    for p_, ln_, od_, bk_, opp_ in con.execute(
+            "SELECT pitcher, line, odds, book, opp FROM route_a "
+            "WHERE game_date=? AND pinged=0", (gd,)).fetchall():
+        mlb_ping(con, "route_a", p_, gd, "PO", opp_, "under", ln_, "Outs", od_, bk_)
     con.commit()
 
 
@@ -1425,36 +1439,13 @@ def opener_strike(con):
                     "opp, flagged_at) VALUES (?,?,?,?,?,?,?,?,?)",
                     (g["pitcher"], gd, side, best[0], best[1], best[2], round(abs(S), 2),
                      g["opp_name"], ts))
-        if topic:
-            od = best[1]
-            am = f"+{round((od-1)*100)}" if od >= 2 else f"-{round(100/(od-1))}"
-            txt = (f"⚡OPENER ⚾K {g['opp_name']} {g['pitcher']} "
-                   f"{'O' if side == 'over' else 'U'}{best[0]:g}K {am} {best[2].upper()} "
-                   f"0.5u (early strike, pre-lineup)")
-            try:
-                requests.post(f"https://ntfy.sh/{topic}", data=txt.encode(),
-                              params={"title": "Pickz", "priority": "high"}, timeout=15
-                              ).raise_for_status()
-                con.execute("UPDATE opener_k SET pinged=1 WHERE pitcher=? AND game_date=?",
-                            (g["pitcher"], gd))
-            except requests.RequestException as e:
-                print(f"opener ping failed: {str(e)[:60]}")
+        mlb_ping(con, "opener_k", g["pitcher"], gd, "OPN", g["opp_name"], side,
+                 best[0], "K", best[1], best[2])
         print(f"opener strike: {g['pitcher']} {side} {best[0]}")
-    if topic:   # retry any unsent pings (rows flagged during manual/env-less runs)
-        for p_, sd_, ln_, od_, bk_, opp_ in con.execute(
-                "SELECT pitcher, side, line, odds, book, opp FROM opener_k "
-                "WHERE game_date=? AND pinged=0 AND (skip IS NULL OR skip='')", (gd,)).fetchall():
-            am = f"+{round((od_-1)*100)}" if od_ >= 2 else f"-{round(100/(od_-1))}"
-            try:
-                requests.post(f"https://ntfy.sh/{topic}",
-                              data=(f"⚡OPENER ⚾K {opp_} {p_} {'O' if sd_ == 'over' else 'U'}"
-                                    f"{ln_:g}K {am} {bk_.upper()} 0.5u (early strike)").encode(),
-                              params={"title": "Pickz", "priority": "high"}, timeout=15
-                              ).raise_for_status()
-                con.execute("UPDATE opener_k SET pinged=1 WHERE pitcher=? AND game_date=?",
-                            (p_, gd))
-            except requests.RequestException:
-                pass
+    for p_, sd_, ln_, od_, bk_, opp_ in con.execute(
+            "SELECT pitcher, side, line, odds, book, opp FROM opener_k "
+            "WHERE game_date=? AND pinged=0 AND (skip IS NULL OR skip='')", (gd,)).fetchall():
+        mlb_ping(con, "opener_k", p_, gd, "OPN", opp_, sd_, ln_, "K", od_, bk_)
     con.commit()
 
 
@@ -1599,23 +1590,14 @@ def stack_ping(con):
             if r1 or r2:      # HOLE FIX 3: log rung prices for grading
                 con.execute(f"UPDATE {c['tbl']} SET rung1_od=?, rung2_od=? "
                             "WHERE pitcher=? AND game_date=?", (r1, r2, c["p"], gd))
-        am = f"+{round((c['od']-1)*100)}" if c["od"] >= 2 else f"-{round(100/(c['od']-1))}"
-        mk = "K" if c["tbl"] != "outs_compass" else ""
-        txt = (f"⚡STACK [{c['fam']}] {c['opp'] or ''} {c['p']} "
-               f"{'O' if c['side'] == 'over' else 'U'}{c['ln']:g}{mk} {am} {c['bk'].upper()} "
-               f"0.5u{rung}")
-        if topic:
-            try:
-                requests.post(f"https://ntfy.sh/{topic}", data=txt.encode(),
-                              params={"title": "Pickz", "priority": "high"}, timeout=15
-                              ).raise_for_status()
-            except requests.RequestException as e:
-                print(f"stack ping failed: {str(e)[:60]}")
-                continue
+        mk = "K" if c["tbl"] != "outs_compass" else "Outs"
+        if not mlb_ping(con, None, c["p"], gd, c["fam"], c["opp"] or "", c["side"],
+                        c["ln"], mk, c["od"], c["bk"], extra=rung):
+            continue
         con.execute(f"UPDATE {c['tbl']} SET stack=1 WHERE pitcher=? AND game_date=?",
                     (c["p"], gd))
         npinged += 1
-        print(f"stack ping: {txt}")
+        print(f"stack ping: {c['fam']} {c['p']}")
     con.commit()
 
 

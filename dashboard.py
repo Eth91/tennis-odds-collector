@@ -2199,8 +2199,11 @@ def build():
             _n2 = (_d2.get("w") or 0) + (_d2.get("l") or 0)
             if _n2:
                 _subs.append(f'{_lbl2} {_d2["w"]}-{_d2["l"]}')
-        mlb_html += (f'<div class="op-title">⚾ MLB PLAYS · all streams'
-                     f'<span> · combined {_crec}'
+        _TAGLBL = {"💎LK": "lineup edge", "★AR": "arsenal fit", "⚡STK": "composite",
+                   "★★K": "double signal", "🧪ETH": "whiff stack", "⚡OPN": "early strike",
+                   "💠PO": "short-start"}
+        mlb_html += (f'<div class="op-title">⚾ MLB MODEL'
+                     f'<span> · {_crec}'
                      + (" · " + " · ".join(_subs) if _subs else "") + '</span></div>')
         _ctod = _cmb.get("today") or []
         if _ctod:
@@ -2209,7 +2212,8 @@ def build():
                 mlb_html += (f'<div class="pblk"><div class="phd">'
                              f'<span class="pname">{html.escape(_short(f["pitcher"]))}</span>'
                              f'<span class="psp2"></span>'
-                             f'<span class="stag">{f.get("tag") or ""}</span></div>'
+                             f'<span class="stag">{_TAGLBL.get(f.get("tag"), f.get("tag") or "")}'
+                             f'</span></div>'
                              f'<div class="prop"><div class="prow">'
                              f'<span class="pind {"over" if _o == "O" else "under"}">{_o}</span>'
                              f'<span class="plno">{f["line"]:g}</span>'
