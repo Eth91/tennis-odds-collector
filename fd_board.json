@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T01:38:53Z",
+ "captured_at": "2026-07-27T01:44:22Z",
  "matches": [
   {
    "event_id": 35870625,
@@ -8,9 +8,9 @@
    "p1_norm": "henryk tkaczyk",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-27T01:25:00.000Z",
-   "line": 75.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 91.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35870680,
@@ -44,6 +44,17 @@
    "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35870707,
+   "p1": "Adam Staniczek",
+   "p2": "Kacper Kwiatkowski",
+   "p1_norm": "adam staniczek",
+   "p2_norm": "kacper kwiatkowski",
+   "open_date": "2026-07-27T02:10:00.000Z",
+   "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
