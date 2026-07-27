@@ -122,6 +122,11 @@ def _con():
         c.execute("ALTER TABLE outs_compass ADD COLUMN kagree INTEGER DEFAULT 0")
     except sqlite3.OperationalError:
         pass
+    c.execute("""CREATE TABLE IF NOT EXISTS opener_k(
+        pitcher TEXT, game_date TEXT, side TEXT, line REAL, odds REAL, book TEXT,
+        score REAL, opp TEXT, flagged_at TEXT, result TEXT, actual INTEGER, pnl REAL,
+        graded_at TEXT, log_date TEXT, pinged INTEGER DEFAULT 0,
+        PRIMARY KEY(pitcher, game_date))""")
     c.execute("""CREATE TABLE IF NOT EXISTS ethan_k(
         pitcher TEXT, game_date TEXT, side TEXT, line REAL, odds REAL, book TEXT,
         hi_ct INTEGER, pk_rate REAL, opp TEXT, flagged_at TEXT, result TEXT, actual INTEGER,
@@ -1007,12 +1012,12 @@ def grade_parlay(con):
 
 
 STAT_FIELD = {"compass": "strikeOuts", "outlier": "strikeOuts", "outs_compass": "outs",
-              "ethan_k": "strikeOuts"}
+              "ethan_k": "strikeOuts", "opener_k": "strikeOuts"}
 
 
 def grade(con):
     rows = []
-    for table in ("compass", "outlier", "outs_compass", "ethan_k"):
+    for table in ("compass", "outlier", "outs_compass", "ethan_k", "opener_k"):
         rows += [(table,) + r for r in con.execute(
             f"SELECT pitcher, game_date, side, line, odds FROM {table} "
             "WHERE result IS NULL AND game_date < ?", (_today_et(),)).fetchall()]
@@ -1127,6 +1132,8 @@ def board(con):
         "WHERE stack=1 AND result IN ('W','L') UNION ALL "
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM ethan_k "
         "WHERE stack=1 AND result IN ('W','L'))").fetchone()
+    opn_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
+                          "FROM opener_k WHERE result IN ('W','L')").fetchone()
     eth_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
                           "FROM ethan_k WHERE result IN ('W','L') "
                           "AND (skip IS NULL OR skip='')").fetchone()
@@ -1202,6 +1209,7 @@ def board(con):
          "ethan": {"w": eth_rec[0] or 0, "l": eth_rec[1] or 0, "u": eth_rec[2] or 0.0,
                    "today": eth_today},
          "stack": {"w": stk_rec[0] or 0, "l": stk_rec[1] or 0, "u": stk_rec[2] or 0.0},
+         "opener": {"w": opn_rec[0] or 0, "l": opn_rec[1] or 0, "u": opn_rec[2] or 0.0},
          "ladder": {"w": lad_rec[0] or 0, "l": lad_rec[1] or 0, "u": lad_rec[2] or 0.0},
          "kagree": {"w": kag_rec[0] or 0, "l": kag_rec[1] or 0, "u": kag_rec[2] or 0.0},
          "today": flags,
@@ -1214,6 +1222,83 @@ def board(con):
                     "combo": (prow[1] if prow else None),
                     "frozen": (bool(prow[2]) if prow else False),
                     "w": prec[0] or 0, "l": prec[1] or 0, "u": prec[2] or 0.0}}))
+
+
+def opener_strike(con):
+    """⚡OPENER (validated 2026-07-28 at T-12h historical prices: 58.1%/+9.4% '25,
+    56.5%/+8.9% '26 one-shot): lineup-FREE composite (team K + form fade + park + velo,
+    thr 1.3) struck EARLY, before lineups post and the market sharpens. Own record;
+    stack dedups against it (no double-betting the same arm at lineup-post)."""
+    import os
+    topic = os.environ.get("NTFY_TOPIC")
+    F = FROZEN
+    if not F.get("opener", {}).get("on", True):
+        return
+    thr = F.get("opener", {}).get("thr", 1.3)
+    tk = team_k()
+    lines = k_lines()
+    gd, ts = _today_et(), _now()
+    now_utc = dt.datetime.now(dt.timezone.utc)
+    for g in slate():
+        if g["started"]:
+            continue
+        # strike window: >5h before first pitch (pre-lineup regime)
+        try:
+            st_dt = dt.datetime.fromisoformat((g.get("start") or "").replace("Z", "+00:00"))
+            if (st_dt - now_utc).total_seconds() < 5 * 3600:
+                continue
+        except ValueError:
+            continue
+        if con.execute("SELECT 1 FROM opener_k WHERE pitcher=? AND game_date=?",
+                       (g["pitcher"], gd)).fetchone():
+            continue
+        oppk = tk.get(g["opp_id"])
+        rk = r5k(g["pid"])
+        if oppk is None or rk is None:
+            continue
+        S = F["kw"] * z(oppk, F["ok_mu"], F["ok_sd"]) - F["rw"] * z(rk, F["rk_mu"], F["rk_sd"])
+        pf = F["park"].get(g["home_team"])
+        if pf is not None:
+            S += F["pw"] * z(pf, F["park_mu"], F["park_sd"])
+        if F.get("vd_w"):
+            vd = velo_trend(g["pid"])
+            if vd is not None:
+                S += F["vd_w"] * z(vd, F["vd_mu"], F["vd_sd"])
+        if abs(S) < thr:
+            continue
+        side = "over" if S > 0 else "under"
+        best = None
+        for bk in BOOKS:
+            lls = (lines.get(_norm(g["pitcher"])) or {}).get(bk) or {}
+            two = {ln: v for ln, v in lls.items() if "over" in v and "under" in v}
+            if not two:
+                continue
+            main = min(two, key=lambda ln: abs(two[ln]["over"] - 1.9))
+            od = two[main].get(side)
+            if od and 1.55 <= od < 2.30 and (best is None or od > best[1]):
+                best = (main, od, bk)
+        if not best:
+            continue
+        con.execute("INSERT INTO opener_k (pitcher, game_date, side, line, odds, book, score, "
+                    "opp, flagged_at) VALUES (?,?,?,?,?,?,?,?,?)",
+                    (g["pitcher"], gd, side, best[0], best[1], best[2], round(abs(S), 2),
+                     g["opp_name"], ts))
+        if topic:
+            od = best[1]
+            am = f"+{round((od-1)*100)}" if od >= 2 else f"-{round(100/(od-1))}"
+            txt = (f"⚡OPENER ⚾K {g['opp_name']} {g['pitcher']} "
+                   f"{'O' if side == 'over' else 'U'}{best[0]:g}K {am} {best[2].upper()} "
+                   f"0.5u (early strike, pre-lineup)")
+            try:
+                requests.post(f"https://ntfy.sh/{topic}", data=txt.encode(),
+                              params={"title": "Pickz", "priority": "high"}, timeout=15
+                              ).raise_for_status()
+                con.execute("UPDATE opener_k SET pinged=1 WHERE pitcher=? AND game_date=?",
+                            (g["pitcher"], gd))
+            except requests.RequestException as e:
+                print(f"opener ping failed: {str(e)[:60]}")
+        print(f"opener strike: {g['pitcher']} {side} {best[0]}")
+    con.commit()
 
 
 def ethan_revalidate(con):
@@ -1317,6 +1402,8 @@ def stack_ping(con):
     # together on an early hook; the backtest counted them independent.
     taken = {r[0] for t in ("compass", "outs_compass", "ethan_k") for r in con.execute(
         f"SELECT pitcher FROM {t} WHERE game_date=? AND stack=1", (gd,))}
+    taken |= {r[0] for r in con.execute(
+        "SELECT pitcher FROM opener_k WHERE game_date=?", (gd,))}
     cands = [c for c in cands if c["p"] not in taken]
     seen_p = set()
     cands = [c for c in cands if not (c["p"] in seen_p or seen_p.add(c["p"]))]
@@ -1373,6 +1460,7 @@ def stack_ping(con):
 
 if __name__ == "__main__":
     c = _con()
+    opener_strike(c)
     flag(c)
     flag_outs(c)
     flag_ethan(c)

@@ -869,6 +869,9 @@ def _tracker_panel(wnba_rec, tt_json):
         _lk = _cbt.get("lk") or {}
         if (_lk.get("w") or 0) + (_lk.get("l") or 0) >= 3:
             knote += f" · 💎LK {_lk['w']}-{_lk['l']} ({_lk['u']:+.1f}u)"
+        _opn = _cbt.get("opener") or {}
+        if (_opn.get("w") or 0) + (_opn.get("l") or 0) >= 1:
+            knote += f" · ⚡OPN {_opn['w']}-{_opn['l']} ({_opn['u']:+.1f}u)"
         _stk = _cbt.get("stack") or {}
         if (_stk.get("w") or 0) + (_stk.get("l") or 0) >= 1:
             knote += f" · ⚡STACK {_stk['w']}-{_stk['l']} ({_stk['u']:+.1f}u)"
