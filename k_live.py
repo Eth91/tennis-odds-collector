@@ -389,13 +389,24 @@ def transition_watch(con):
         if gap is not None and gap >= 18:
             tags.append("IL/REHAB RETURN")
             notes.append(f"{gap} days since his last MLB appearance")
-        # still climbing the pitch ladder?
-        if starts:
+        # still climbing the pitch ladder — ONLY meaningful alongside a real disruption
+        # (layoff / relief stint / new arm); a lone short start is just an early hook.
+        max_gap = 0
+        for a, b in zip(apps[-4:], apps[-3:]):
+            try:
+                d1 = dt.date.fromisoformat(f"{gd[:4]}-{a[3]}")
+                d2 = dt.date.fromisoformat(f"{gd[:4]}-{b[3]}")
+                max_gap = max(max_gap, (d2 - d1).days)
+            except ValueError:
+                pass
+        disrupted = bool(tags) or max_gap >= 10
+        if starts and disrupted:
             mx = max(a[1] for a in starts)
             lastp = starts[-1][1]
             if mx - lastp >= 15 and lastp:
                 tags.append("PITCH-COUNT CLIMB")
-                notes.append(f"last start {lastp}p vs his {mx}p peak")
+                notes.append(f"last start {lastp}p vs his {mx}p peak"
+                             + (f" · {max_gap}d layoff in there" if max_gap >= 10 else ""))
         if not tags:
             continue
         def main_line(lines):
