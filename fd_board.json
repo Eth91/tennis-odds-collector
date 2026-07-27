@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T00:29:05Z",
+ "captured_at": "2026-07-27T00:33:30Z",
  "matches": [
   {
    "event_id": 35870558,
@@ -8,7 +8,7 @@
    "p1_norm": "michal durda",
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-07-27T00:20:00.000Z",
-   "line": 81.5,
+   "line": 84.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -66,6 +66,28 @@
    "line": 78.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35870585,
+   "p1": "Arkadiusz Mugowski",
+   "p2": "Mateusz Trela",
+   "p1_norm": "arkadiusz mugowski",
+   "p2_norm": "mateusz trela",
+   "open_date": "2026-07-27T01:00:00.000Z",
+   "line": 81.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35870586,
+   "p1": "Pawel Chojnacki",
+   "p2": "Kazimierz Rybak",
+   "p1_norm": "pawel chojnacki",
+   "p2_norm": "kazimierz rybak",
+   "open_date": "2026-07-27T01:00:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
