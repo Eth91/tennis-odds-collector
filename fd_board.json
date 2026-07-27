@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-07-27T09:14:10Z",
+ "captured_at": "2026-07-27T09:18:49Z",
  "matches": [
-  {
-   "event_id": 35871544,
-   "p1": "Grzegorz Poliniewicz",
-   "p2": "Jakub Kuzmicz",
-   "p1_norm": "grzegorz poliniewicz",
-   "p2_norm": "jakub kuzmicz",
-   "open_date": "2026-07-27T09:00:00.000Z",
-   "line": 79.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35871546,
-   "p1": "Jakub Kaczmarek",
-   "p2": "Krzysztof Juszczyk",
-   "p1_norm": "jakub kaczmarek",
-   "p2_norm": "krzysztof juszczyk",
-   "open_date": "2026-07-27T09:00:00.000Z",
-   "line": 75.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35871551,
-   "p1": "Patryk Mecik",
-   "p2": "Wiktor Ptak",
-   "p1_norm": "patryk mecik",
-   "p2_norm": "wiktor ptak",
-   "open_date": "2026-07-27T09:05:00.000Z",
-   "line": 52.5,
-   "over_odds": 115,
-   "under_odds": -160
-  },
   {
    "event_id": 35871689,
    "p1": "Grzegorz Adamiak",
@@ -88,6 +55,17 @@
    "line": 73.5,
    "over_odds": -120,
    "under_odds": -110
+  },
+  {
+   "event_id": 35871721,
+   "p1": "Lukasz Jarocki",
+   "p2": "Karol Wisniewski",
+   "p1_norm": "lukasz jarocki",
+   "p2_norm": "karol wisniewski",
+   "open_date": "2026-07-27T09:45:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
