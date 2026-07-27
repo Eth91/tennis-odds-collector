@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T22:32:59Z",
+ "captured_at": "2026-07-27T22:40:01Z",
  "matches": [
-  {
-   "event_id": 35874109,
-   "p1": "Adrian Eliasz",
-   "p2": "Adrian Fabis",
-   "p1_norm": "adrian eliasz",
-   "p2_norm": "adrian fabis",
-   "open_date": "2026-07-27T22:15:00.000Z",
-   "line": 96.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35874120,
    "p1": "Jakub Nowak",
@@ -19,20 +8,9 @@
    "p1_norm": "jakub nowak",
    "p2_norm": "grzegorz marud",
    "open_date": "2026-07-27T22:20:00.000Z",
-   "line": 88.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35874121,
-   "p1": "Aleksander Barton",
-   "p2": "Jakub Cyndera",
-   "p1_norm": "aleksander barton",
-   "p2_norm": "jakub cyndera",
-   "open_date": "2026-07-27T22:25:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 94.5,
+   "over_odds": 140,
+   "under_odds": -195
   },
   {
    "event_id": 35874128,
@@ -41,9 +19,9 @@
    "p1_norm": "michal guzik",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-27T22:35:00.000Z",
-   "line": 70.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 66.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35874129,
@@ -52,9 +30,9 @@
    "p1_norm": "jakub glanowski",
    "p2_norm": "jakub zochniak",
    "open_date": "2026-07-27T22:35:00.000Z",
-   "line": 81.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35874130,
@@ -63,9 +41,9 @@
    "p1_norm": "kuba golaszewski",
    "p2_norm": "adrian eliasz",
    "open_date": "2026-07-27T22:35:00.000Z",
-   "line": 81.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 80.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35874131,
@@ -86,8 +64,8 @@
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-27T22:50:00.000Z",
    "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35874134,
@@ -121,6 +99,17 @@
    "line": 73.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35874138,
+   "p1": "Mateusz Sikon",
+   "p2": "Piotr Gumulinski",
+   "p1_norm": "mateusz sikon",
+   "p2_norm": "piotr gumulinski",
+   "open_date": "2026-07-27T23:05:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
