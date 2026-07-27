@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T00:04:55Z",
+ "captured_at": "2026-07-27T00:10:09Z",
  "matches": [
-  {
-   "event_id": 35870544,
-   "p1": "Filip Mlynarski",
-   "p2": "Jakub Zochniak",
-   "p1_norm": "filip mlynarski",
-   "p2_norm": "jakub zochniak",
-   "open_date": "2026-07-26T23:55:00.000Z",
-   "line": 81.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35870548,
    "p1": "Sebastian Krupa",
@@ -19,9 +8,9 @@
    "p1_norm": "sebastian krupa",
    "p2_norm": "oskar sokolowski",
    "open_date": "2026-07-27T00:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 85.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35870553,
@@ -30,9 +19,9 @@
    "p1_norm": "kazimierz rybak",
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-07-27T00:10:00.000Z",
-   "line": 66.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 71.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870554,
@@ -41,9 +30,9 @@
    "p1_norm": "arkadiusz mugowski",
    "p2_norm": "kamil rudomina",
    "open_date": "2026-07-27T00:10:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 79.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35870557,
@@ -64,8 +53,8 @@
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-07-27T00:20:00.000Z",
    "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35870559,
@@ -75,8 +64,30 @@
    "p2_norm": "lukasz oracz",
    "open_date": "2026-07-27T00:25:00.000Z",
    "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35870562,
+   "p1": "Stapor Rafal",
+   "p2": "Mateusz Trela",
+   "p1_norm": "stapor rafal",
+   "p2_norm": "mateusz trela",
+   "open_date": "2026-07-27T00:35:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35870563,
+   "p1": "Jacek Zelezik",
+   "p2": "Adam Staniczek",
+   "p1_norm": "jacek zelezik",
+   "p2_norm": "adam staniczek",
+   "open_date": "2026-07-27T00:35:00.000Z",
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -120
   }
  ]
 }
