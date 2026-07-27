@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T06:21:04Z",
+ "captured_at": "2026-07-27T06:25:41Z",
  "matches": [
   {
    "event_id": 35871302,
@@ -9,8 +9,8 @@
    "p2_norm": "kamil rudomina",
    "open_date": "2026-07-27T06:25:00.000Z",
    "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35871303,
@@ -19,9 +19,9 @@
    "p1_norm": "dariusz maszczynski",
    "p2_norm": "jerzy michalik",
    "open_date": "2026-07-27T06:25:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 73.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35871306,
@@ -75,6 +75,17 @@
    "p2_norm": "michal machelski",
    "open_date": "2026-07-27T06:45:00.000Z",
    "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35871325,
+   "p1": "Przemyslaw Perzynski",
+   "p2": "Artur Sobel",
+   "p1_norm": "przemyslaw perzynski",
+   "p2_norm": "artur sobel",
+   "open_date": "2026-07-27T06:50:00.000Z",
+   "line": 80.5,
    "over_odds": -118,
    "under_odds": -112
   }
