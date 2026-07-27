@@ -161,5 +161,6 @@ watch|2026-07-22|Sabrina Ionescu|points|19.5
 watch|2026-07-22|Sydney Taylor|points|16.5
 watch|2026-07-28|Breanna Stewart|reb_ast|12.5
 watch|2026-07-28|Isabelle Harrison|points|11.5
+watch|2026-07-28|Isabelle Harrison|pts_reb|17.5
 watch|2026-07-28|Marina Mabrey|assists|3.5
 watch|2026-07-28|Marina Mabrey|pra|28.5
