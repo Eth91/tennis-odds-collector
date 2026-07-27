@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T16:59:22Z",
+ "captured_at": "2026-07-27T17:05:26Z",
  "matches": [
   {
    "event_id": 35873438,
@@ -8,31 +8,9 @@
    "p1_norm": "michal krutak",
    "p2_norm": "artur kubiak",
    "open_date": "2026-07-27T16:55:00.000Z",
-   "line": 77.5,
+   "line": 87.5,
    "over_odds": -120,
    "under_odds": -115
-  },
-  {
-   "event_id": 35873440,
-   "p1": "Adrian Eliasz",
-   "p2": "Bartlomiej Mrugala",
-   "p1_norm": "adrian eliasz",
-   "p2_norm": "bartlomiej mrugala",
-   "open_date": "2026-07-27T16:55:00.000Z",
-   "line": 84.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35873461,
-   "p1": "Wojciech Tobiasz",
-   "p2": "Piotr Przewlocki",
-   "p1_norm": "wojciech tobiasz",
-   "p2_norm": "piotr przewlocki",
-   "open_date": "2026-07-27T17:05:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
   },
   {
    "event_id": 35873468,
@@ -42,6 +20,17 @@
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-27T17:10:00.000Z",
    "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35873497,
+   "p1": "Mateusz Sikon",
+   "p2": "Robert Kostepski",
+   "p1_norm": "mateusz sikon",
+   "p2_norm": "robert kostepski",
+   "open_date": "2026-07-27T17:30:00.000Z",
+   "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
   }
