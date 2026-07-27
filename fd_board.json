@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-27T20:58:03Z",
+ "captured_at": "2026-07-27T21:05:26Z",
  "matches": [
-  {
-   "event_id": 35873819,
-   "p1": "Grzegorz Marud",
-   "p2": "Piotr Gumulinski",
-   "p1_norm": "grzegorz marud",
-   "p2_norm": "piotr gumulinski",
-   "open_date": "2026-07-27T20:45:00.000Z",
-   "line": 69.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35873820,
-   "p1": "Miroslaw Warzecha",
-   "p2": "Adam Staniczek",
-   "p1_norm": "miroslaw warzecha",
-   "p2_norm": "adam staniczek",
-   "open_date": "2026-07-27T20:45:00.000Z",
-   "line": 55.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35873836,
    "p1": "Pawel Chojnacki",
@@ -30,9 +8,9 @@
    "p1_norm": "pawel chojnacki",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-27T21:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 73.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35873837,
@@ -41,9 +19,9 @@
    "p1_norm": "adam linek",
    "p2_norm": "jakub zochniak",
    "open_date": "2026-07-27T21:00:00.000Z",
-   "line": 81.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 86.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35873840,
@@ -53,8 +31,8 @@
    "p2_norm": "michal durda",
    "open_date": "2026-07-27T21:05:00.000Z",
    "line": 69.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35873841,
@@ -64,8 +42,8 @@
    "p2_norm": "adrian eliasz",
    "open_date": "2026-07-27T21:05:00.000Z",
    "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35873852,
@@ -99,6 +77,28 @@
    "line": 77.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35873948,
+   "p1": "Mateusz Sikon",
+   "p2": "Grzegorz Marud",
+   "p1_norm": "mateusz sikon",
+   "p2_norm": "grzegorz marud",
+   "open_date": "2026-07-27T21:30:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35873949,
+   "p1": "Kacper Marchlewski",
+   "p2": "Adrian Fabis",
+   "p1_norm": "kacper marchlewski",
+   "p2_norm": "adrian fabis",
+   "open_date": "2026-07-27T21:30:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
