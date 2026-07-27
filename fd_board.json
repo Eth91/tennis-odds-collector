@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-07-27T12:33:48Z",
+ "captured_at": "2026-07-27T12:39:30Z",
  "matches": [
-  {
-   "event_id": 35872502,
-   "p1": "Przemyslaw Perzynski",
-   "p2": "Artur Sobel",
-   "p1_norm": "przemyslaw perzynski",
-   "p2_norm": "artur sobel",
-   "open_date": "2026-07-27T12:15:00.000Z",
-   "line": 96.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35872503,
-   "p1": "Wojciech Wojtaszczyk",
-   "p2": "Pawel Slosarczyk",
-   "p1_norm": "wojciech wojtaszczyk",
-   "p2_norm": "pawel slosarczyk",
-   "open_date": "2026-07-27T12:15:00.000Z",
-   "line": 88.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35872510,
-   "p1": "Wiktor Ptak",
-   "p2": "Grzegorz Wichowski",
-   "p1_norm": "wiktor ptak",
-   "p2_norm": "grzegorz wichowski",
-   "open_date": "2026-07-27T12:20:00.000Z",
-   "line": 91.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35872520,
    "p1": "Grzegorz Adamiak",
@@ -41,9 +8,9 @@
    "p1_norm": "grzegorz adamiak",
    "p2_norm": "maciej domin",
    "open_date": "2026-07-27T12:30:00.000Z",
-   "line": 76.5,
+   "line": 75.5,
    "over_odds": -115,
-   "under_odds": -115
+   "under_odds": -120
   },
   {
    "event_id": 35872524,
@@ -52,9 +19,9 @@
    "p1_norm": "miroslav sklensky",
    "p2_norm": "lukasz jarocki",
    "open_date": "2026-07-27T12:35:00.000Z",
-   "line": 76.5,
+   "line": 75.5,
    "over_odds": -120,
-   "under_odds": -110
+   "under_odds": -115
   },
   {
    "event_id": 35872536,
@@ -110,6 +77,28 @@
    "line": 77.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35872558,
+   "p1": "Wojciech Gluszek",
+   "p2": "Przemyslaw Perzynski",
+   "p1_norm": "wojciech gluszek",
+   "p2_norm": "przemyslaw perzynski",
+   "open_date": "2026-07-27T13:05:00.000Z",
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35872559,
+   "p1": "Jakub Kaczmarek",
+   "p2": "Wojciech Wojtaszczyk",
+   "p1_norm": "jakub kaczmarek",
+   "p2_norm": "wojciech wojtaszczyk",
+   "open_date": "2026-07-27T13:05:00.000Z",
+   "line": 69.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
