@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T12:04:51Z",
+ "captured_at": "2026-07-27T12:10:25Z",
  "matches": [
-  {
-   "event_id": 35872458,
-   "p1": "Patryk Mecik",
-   "p2": "Piotr Przewlocki",
-   "p1_norm": "patryk mecik",
-   "p2_norm": "piotr przewlocki",
-   "open_date": "2026-07-27T11:55:00.000Z",
-   "line": 91.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35872470,
    "p1": "Marcin Jadczyk",
@@ -19,9 +8,9 @@
    "p1_norm": "marcin jadczyk",
    "p2_norm": "josef braun",
    "open_date": "2026-07-27T12:05:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 71.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35872502,
@@ -53,7 +42,7 @@
    "p2_norm": "grzegorz wichowski",
    "open_date": "2026-07-27T12:20:00.000Z",
    "line": 77.5,
-   "over_odds": -112,
+   "over_odds": -116,
    "under_odds": -118
   },
   {
@@ -66,6 +55,17 @@
    "line": 76.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35872524,
+   "p1": "Miroslav Sklensky",
+   "p2": "Lukasz Jarocki",
+   "p1_norm": "miroslav sklensky",
+   "p2_norm": "lukasz jarocki",
+   "open_date": "2026-07-27T12:35:00.000Z",
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -110
   }
  ]
 }
