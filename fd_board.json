@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T23:43:20Z",
+ "captured_at": "2026-07-27T23:50:39Z",
  "matches": [
   {
    "event_id": 35874152,
@@ -8,20 +8,9 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "robert kostepski",
    "open_date": "2026-07-27T23:30:00.000Z",
-   "line": 85.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35874156,
-   "p1": "Jakub Cyndera",
-   "p2": "Jakub Skorupa",
-   "p1_norm": "jakub cyndera",
-   "p2_norm": "jakub skorupa",
-   "open_date": "2026-07-27T23:35:00.000Z",
-   "line": 84.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 102.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35874158,
@@ -30,9 +19,9 @@
    "p1_norm": "bartlomiej mrugala",
    "p2_norm": "kuba golaszewski",
    "open_date": "2026-07-27T23:45:00.000Z",
-   "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 85.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35874159,
@@ -41,9 +30,9 @@
    "p1_norm": "pawel chojnacki",
    "p2_norm": "michal krutak",
    "open_date": "2026-07-27T23:45:00.000Z",
-   "line": 74.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 70.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35874160,
@@ -52,9 +41,9 @@
    "p1_norm": "adam linek",
    "p2_norm": "jakub glanowski",
    "open_date": "2026-07-27T23:45:00.000Z",
-   "line": 81.5,
-   "over_odds": -116,
-   "under_odds": -118
+   "line": 89.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35874161,
