@@ -277,7 +277,9 @@ def r5outs(pid):
     key = str(pid)
     if key not in cache:
         d = _get(f"/people/{pid}/stats", stats="gameLog", group="pitching", season=2026)
-        rows = [[s["stat"].get("outs") or 0, s["stat"].get("numberOfPitches") or 0]
+        rows = [[s["stat"].get("outs") or 0, s["stat"].get("numberOfPitches") or 0,
+                 s["stat"].get("strikeOuts") or 0, (s.get("date") or "")[5:],
+                 TEAM_AB.get((s.get("opponent") or {}).get("id"), "")]
                 for s in (d.get("stats") or [{}])[0].get("splits") or []
                 if (s["stat"].get("gamesStarted") or 0) and (s["stat"].get("battersFaced") or 0) >= 5]
         cache[key] = rows
@@ -286,12 +288,25 @@ def r5outs(pid):
     g5 = g5[-5:]
     if len(g5) < 3:
         return None, None, None
-    outs = sorted(o for o, _ in g5)
+    outs = sorted(r[0] for r in g5)
     med = outs[len(outs) // 2] if len(outs) % 2 else (outs[len(outs) // 2 - 1] + outs[len(outs) // 2]) / 2
-    pt = [p for _, p in g5 if p > 0]
-    tot_o = sum(o for o, _ in g5)
-    ppo = (sum(p for _, p in g5 if p > 0) / tot_o) if (tot_o and pt) else None
+    pt = [r[1] for r in g5 if r[1] > 0]
+    tot_o = sum(r[0] for r in g5)
+    ppo = (sum(pt) / tot_o) if (tot_o and pt) else None
     return ppo, (sum(pt) / len(pt)) if pt else None, med
+
+
+def last5(pid):
+    """[[outs, pitches, ks, mm-dd, opp], ...] — last 5 starts for the board drawer.
+    Reads the same daily cache r5outs builds (no extra API calls)."""
+    try:
+        cache = json.loads(OGL_CACHE.read_text())
+        if cache.get("day") != _today_et():
+            return []
+    except (OSError, ValueError):
+        return []
+    rows = cache.get(str(pid)) or []
+    return [r for r in rows[-5:] if len(r) >= 5]
 
 
 def team_leash():
@@ -1323,6 +1338,10 @@ def board(con):
         "WHERE result IN ('W','L'))").fetchone()
     comb_today = []
     gd_ = _today_et()
+    try:
+        _pids = {g["pitcher"]: g["pid"] for g in slate()}
+    except Exception:
+        _pids = {}
     for p_, sd_, ln_, od_, bk_, opp_, drv_, prem_, tm_ in con.execute(
             "SELECT pitcher, side, line, odds, book, opp, driver, premium, team FROM compass "
             "WHERE game_date=? AND stack=1", (gd_,)):
@@ -1355,6 +1374,10 @@ def board(con):
         tm_, pm_ = rb_t.get(f_["pitcher"], (None, None))
         comb_today.append({**{k: f_[k] for k in ("pitcher", "side", "line", "odds", "book", "opp")},
                            "team": tm_, "mkt": "Outs", "tag": "🐴WO+" if pm_ else "🐴WO"})
+    for _f in comb_today:                       # last-5 drawer data (outs/pitches/K per start)
+        _pid = _pids.get(_f["pitcher"])
+        if _pid:
+            _f["last5"] = last5(_pid)
     (HERE / "compass_board.json").write_text(json.dumps(
         {"updated": _now(), "w": rec[0] or 0, "l": rec[1] or 0, "u": rec[2] or 0.0,
          "combined": {"w": comb[0] or 0, "l": comb[1] or 0, "u": comb[2] or 0.0,

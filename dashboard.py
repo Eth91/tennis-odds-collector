@@ -2225,6 +2225,40 @@ def build():
             for f in _ctod:
                 _o = "O" if f.get("side") == "over" else "U"
                 _rk, _tl, _pct = _CONF.get(f.get("tag"), (9, "C", ""))
+                _bk = (f.get("book") or "").lower()
+                _bkh = (f'<img class="bklogo" src="book-{_bk}.png" alt="{_bk.upper()}">'
+                        if _bk in ("fd", "dk") else
+                        ('<span class="bktag">MGM</span>' if _bk else ""))
+                # last-5 starts drawer: grey bar = pitch count (0-110), colored = outs/Ks vs line
+                _l5 = [x for x in (f.get("last5") or []) if len(x) >= 5]
+                _isk = (f.get("mkt") or "") == "K"
+                _ln = float(f["line"])
+                _drawer = _chev = _click = ""
+                if _l5:
+                    _vals = [(x[2] if _isk else x[0]) for x in _l5]
+                    _mx = (max(max(_vals), _ln) * 1.62) or 1
+                    _on = (lambda v: v > _ln) if _o == "O" else (lambda v: v < _ln)
+                    _hits = sum(1 for v in _vals if _on(v))
+                    _cols = ""
+                    for x in _l5:
+                        v = x[2] if _isk else x[0]
+                        _cols += (f'<div class="col">'
+                                  f'<div class="m" style="height:{min(x[1] / 110 * 100, 97):.0f}%" '
+                                  f'title="{x[1]} pitches"></div>'
+                                  f'<div class="b {"o" if _on(v) else "u"}" '
+                                  f'style="height:{v / _mx * 100:.1f}%">'
+                                  f'<span class="bv">{v:g}</span></div></div>')
+                    _opps = "".join(f'<span>{html.escape(str(x[4] or ""))}</span>' for x in _l5)
+                    _drawer = (f'<div class="bars"><div class="bwrap"><div class="chart">'
+                               f'<div class="pline" style="bottom:{_ln / _mx * 100:.1f}%">'
+                               f'<span>{_ln:g}</span></div>{_cols}</div>'
+                               f'<div class="opps">{_opps}</div>'
+                               f'<div class="bnote">{_hits}/{len(_l5)} '
+                               f'{"over" if _o == "O" else "under"} {_ln:g} · grey bar = pitch '
+                               f'count · green = {"strikeouts" if _isk else "outs"}</div>'
+                               f'</div></div>')
+                    _chev = '<span class="pchev">›</span>'
+                    _click = ' onclick="this.nextElementSibling.classList.toggle(\'open\')"'
                 mlb_html += (f'<div class="pblk"><div class="phd">'
                              f'{_mlogo(f.get("team"), "plogo")}'
                              f'<span class="tchip t{_tl}" title="{_pct}" '
@@ -2233,14 +2267,14 @@ def build():
                              f'<span class="psp2"></span>'
                              f'<span class="stag">{_TAGLBL.get(f.get("tag"), f.get("tag") or "")}'
                              f'</span></div>'
-                             f'<div class="prop"><div class="prow">'
+                             f'<div class="prop"{_click}><div class="prow">'
                              f'<span class="pind {"over" if _o == "O" else "under"}">{_o}</span>'
                              f'<span class="plno">{f["line"]:g}</span>'
                              f'<span class="pstat">{f.get("mkt") or ""}</span>'
                              f'<span class="psp"></span>'
-                             f'<span class="podds">{_am(float(f["odds"]))}</span>'
-                             f'<span class="pedge hi">0.5u vs {html.escape(f.get("opp") or "")}'
-                             f'</span></div></div></div>')
+                             f'<span class="podds">{_am(float(f["odds"]))}</span>{_bkh}'
+                             f'<span class="pnote">0.5u · {html.escape(f.get("opp") or "")}</span>'
+                             f'{_chev}</div></div>{_drawer}</div>')
         else:
             mlb_html += '<div class="xt">no plays yet today — opener strikes land in the morning, '
             mlb_html += 'lineup plays in the afternoon</div>'
@@ -2611,6 +2645,7 @@ def build():
   .prop:has(.plno.rng) .pedge {{ font-size:18px; }}
   .prop:has(.plno.rng) .podds {{ font-size:15px; }}
   .pedge.hi {{ color:#37d67f; }} .pedge.mid {{ color:#c3cdda; }} .pedge.lo {{ color:#6b7484; }}
+  .pnote {{ color:#6b7484; font-size:10.5px; margin-left:7px; white-space:nowrap; }}
   .pchev {{ color:#3b4452; font-size:18px; transition:transform .15s; margin-left:-2px; }}
   .prop:has(+ .bars.open) .pchev {{ transform:rotate(90deg); }}
   .pv {{ color:#78818f; font-weight:800; font-size:13px; }}
