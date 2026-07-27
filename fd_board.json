@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T08:58:41Z",
+ "captured_at": "2026-07-27T09:04:26Z",
  "matches": [
   {
    "event_id": 35871452,
@@ -8,20 +8,9 @@
    "p1_norm": "wojciech tobiasz",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-07-27T08:45:00.000Z",
-   "line": 100.5,
-   "over_odds": -135,
-   "under_odds": 100
-  },
-  {
-   "event_id": 35871453,
-   "p1": "Witold Stechly",
-   "p2": "Jerzy Michalik",
-   "p1_norm": "witold stechly",
-   "p2_norm": "jerzy michalik",
-   "open_date": "2026-07-27T08:45:00.000Z",
-   "line": 87.5,
-   "over_odds": -150,
-   "under_odds": 110
+   "line": 104.5,
+   "over_odds": 140,
+   "under_odds": -210
   },
   {
    "event_id": 35871543,
@@ -31,8 +20,8 @@
    "p2_norm": "miroslaw piecowski",
    "open_date": "2026-07-27T09:00:00.000Z",
    "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35871544,
@@ -41,9 +30,9 @@
    "p1_norm": "grzegorz poliniewicz",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-27T09:00:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 82.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35871545,
@@ -52,9 +41,9 @@
    "p1_norm": "adrian spychala",
    "p2_norm": "kamil kostyk",
    "open_date": "2026-07-27T09:00:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 82.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35871546,
@@ -63,9 +52,9 @@
    "p1_norm": "jakub kaczmarek",
    "p2_norm": "krzysztof juszczyk",
    "open_date": "2026-07-27T09:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 75.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35871551,
@@ -107,6 +96,17 @@
    "p1_norm": "milosz piecowski",
    "p2_norm": "artur sobel",
    "open_date": "2026-07-27T09:25:00.000Z",
+   "line": 74.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35871700,
+   "p1": "Grzegorz Wichowski",
+   "p2": "Wojciech Tobiasz",
+   "p1_norm": "grzegorz wichowski",
+   "p2_norm": "wojciech tobiasz",
+   "open_date": "2026-07-27T09:30:00.000Z",
    "line": 74.5,
    "over_odds": -116,
    "under_odds": -116
