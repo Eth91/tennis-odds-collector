@@ -1,23 +1,22 @@
 # Pitcher strikeout alt-ladder scan (cross-book line-shopping)
 
-_2026-07-27 17:51 UTC · fair = vig-stripped consensus of the books posting each rung. NO projection model (backtest: corr 0.37, too weak to price K tails; and pricing a book's unique rung off a model just bets our own error). Only rungs >=2 books agree on can be flagged._
+_2026-07-27 18:19 UTC · fair = vig-stripped consensus of the books posting each rung. NO projection model (backtest: corr 0.37, too weak to price K tails; and pricing a book's unique rung off a model just bets our own error). Only rungs >=2 books agree on can be flagged._
 
 **No +EV rung tonight** — the K market is efficient; even the best of 3 books is -EV on every agreeing rung. This is a SHOPPING sheet (best book per rung to minimize vig), not a bet list. A genuine +EV rung (a slow book) would ⭐ here.
 
 **Merrill Kelly**
   O2.5: fair 81% · BETMGM -455 FD -700 → best BETMGM
   O3.5: fair 63% · BETMGM -175 FD -240 → best BETMGM
-  O4.5: fair 45% · BETMGM +125 DK +105 FD +102 → best BETMGM
+  O4.5: fair 45% · BETMGM +120 DK +105 FD +102 → best BETMGM
   O5.5: fair 25% · BETMGM +250 FD +240 → best BETMGM
   O6.5: fair 13% · FD +520 BETMGM +475 → best FD
 
-**Chase Burns**
-  O3.5: FD -1600 (1 book, no consensus)
-  O4.5: fair 77% · BETMGM -357 FD -500 → best BETMGM
-  O5.5: fair 61% · BETMGM -167 FD -210 → best BETMGM
-  O6.5: fair 43% · BETMGM +115 FD +114 DK +110 → best BETMGM
-  O7.5: fair 28% · FD +220 BETMGM +210 → best FD
-  O8.5: fair 15% · FD +440 BETMGM +400 → best FD
+**Keider Montero**
+  O2.5: fair 83% · BETMGM -556 FD -900 → best BETMGM
+  O3.5: fair 68% · BETMGM -222 FD -290 → best BETMGM
+  O4.5: fair 49% · BETMGM -105 DK -112 FD -113 → best BETMGM
+  O5.5: fair 30% · FD +200 BETMGM +195 → best FD
+  O6.5: fair 16% · FD +420 BETMGM +360 → best FD
 
 **Walbert Urena**
   O2.5: fair 85% · BETMGM -625 FD -1000 → best BETMGM
@@ -28,19 +27,11 @@ _2026-07-27 17:51 UTC · fair = vig-stripped consensus of the books posting each
 
 **Payton Tolle**
   O2.5: FD -3497 (1 book, no consensus)
-  O3.5: fair 84% · BETMGM -588 FD -800 → best BETMGM
-  O4.5: fair 70% · BETMGM -250 FD -295 → best BETMGM
-  O5.5: fair 51% · BETMGM -115 FD -115 DK -125 → best BETMGM
-  O6.5: fair 34% · FD +176 BETMGM +165 → best FD
-  O7.5: fair 19% · FD +360 BETMGM +325 → best FD
-  O8.5: FD +750 (1 book, no consensus)
-
-**Keider Montero**
-  O2.5: fair 83% · BETMGM -556 FD -850 → best BETMGM
-  O3.5: fair 67% · BETMGM -222 FD -280 → best BETMGM
-  O4.5: fair 49% · BETMGM -105 DK -112 FD -113 → best BETMGM
-  O5.5: fair 30% · FD +200 BETMGM +195 → best FD
-  O6.5: fair 16% · FD +420 BETMGM +360 → best FD
+  O3.5: fair 84% · BETMGM -588 FD -850 → best BETMGM
+  O4.5: fair 70% · BETMGM -250 FD -310 → best BETMGM
+  O5.5: fair 52% · FD -118 BETMGM -120 DK -125 → best FD
+  O6.5: fair 34% · FD +172 BETMGM +165 → best FD
+  O7.5: fair 19% · FD +350 BETMGM +325 → best FD
 
 **Tyler Mahle**
   O2.5: fair 85% · BETMGM -667 FD -1000 → best BETMGM
@@ -58,13 +49,20 @@ _2026-07-27 17:51 UTC · fair = vig-stripped consensus of the books posting each
   O6.5: FD +390 (1 book, no consensus)
 
 **Zack Wheeler**
-  O3.5: FD -4505 (1 book, no consensus)
   O4.5: fair 86% · BETMGM -769 FD -1200 → best BETMGM
   O5.5: fair 76% · BETMGM -357 FD -430 → best BETMGM
-  O6.5: fair 60% · BETMGM -175 FD -186 → best BETMGM
-  O7.5: fair 43% · DK +117 FD +114 BETMGM +105 → best DK
+  O6.5: fair 60% · BETMGM -175 FD -184 → best BETMGM
+  O7.5: fair 44% · FD +114 DK +113 BETMGM +105 → best FD
   O8.5: fair 28% · FD +230 BETMGM +200 → best FD
   O9.5: FD +430 (1 book, no consensus)
+
+**Chase Burns**
+  O3.5: FD -1600 (1 book, no consensus)
+  O4.5: fair 77% · BETMGM -385 FD -500 → best BETMGM
+  O5.5: fair 62% · BETMGM -182 FD -210 → best BETMGM
+  O6.5: fair 44% · FD +114 DK +110 BETMGM +105 → best FD
+  O7.5: fair 28% · FD +220 BETMGM +200 → best FD
+  O8.5: fair 16% · FD +440 BETMGM +360 → best FD
 
 **Martin Perez**
   O2.5: fair 73% · BETMGM -333 FD -340 → best BETMGM
@@ -78,13 +76,13 @@ _2026-07-27 17:51 UTC · fair = vig-stripped consensus of the books posting each
   O3.5: fair 72% · BETMGM -294 FD -340 → best BETMGM
   O4.5: fair 54% · BETMGM -133 FD -142 DK -147 → best BETMGM
   O5.5: fair 36% · FD +158 BETMGM +145 → best FD
-  O6.5: fair 21% · FD +330 BETMGM +275 → best FD
+  O6.5: fair 21% · FD +340 BETMGM +275 → best FD
   O7.5: FD +680 (1 book, no consensus)
 
 **Kumar Rocker**
   O2.5: fair 84% · BETMGM -625 FD -850 → best BETMGM
   O3.5: fair 68% · BETMGM -250 FD -280 → best BETMGM
-  O4.5: fair 50% · FD -113 DK -114 BETMGM -120 → best FD
+  O4.5: fair 49% · DK -104 FD -113 BETMGM -120 → best DK
   O5.5: fair 31% · FD +210 BETMGM +165 → best FD
   O6.5: FD +430 (1 book, no consensus)
 
@@ -92,15 +90,15 @@ _2026-07-27 17:51 UTC · fair = vig-stripped consensus of the books posting each
   O2.5: FD -2500 (1 book, no consensus)
   O3.5: fair 79% · BETMGM -455 FD -560 → best BETMGM
   O4.5: fair 64% · BETMGM -200 FD -225 → best BETMGM
-  O5.5: fair 45% · DK +111 BETMGM +105 FD +104 → best DK
+  O5.5: fair 45% · DK +106 BETMGM +105 FD +104 → best DK
   O6.5: fair 28% · FD +230 BETMGM +200 → best FD
   O7.5: FD +460 (1 book, no consensus)
 
 **David Peterson**
   O2.5: fair 65% · BETMGM -208 FD -250 → best BETMGM
-  O3.5: fair 43% · DK +115 BETMGM +115 FD +114 → best DK
-  O4.5: fair 23% · FD +285 BETMGM +250 → best FD
-  O5.5: fair 11% · FD +630 BETMGM +525 → best FD
+  O3.5: fair 42% · BETMGM +120 DK +119 FD +116 → best BETMGM
+  O4.5: fair 23% · FD +285 BETMGM +260 → best FD
+  O5.5: FD +680 (1 book, no consensus)
   O6.5: BETMGM +950 (1 book, no consensus)
 
 **Tatsuya Imai**
@@ -111,20 +109,20 @@ _2026-07-27 17:51 UTC · fair = vig-stripped consensus of the books posting each
   O7.5: fair 27% · FD +240 BETMGM +200 → best FD
   O8.5: FD +470 (1 book, no consensus)
 
+**Kyle Bradish**
+  O2.5: FD -2500 (1 book, no consensus)
+  O3.5: fair 82% · BETMGM -588 FD -620 → best BETMGM
+  O4.5: fair 68% · BETMGM -250 FD -260 → best BETMGM
+  O5.5: fair 51% · FD -111 BETMGM -118 DK -119 → best FD
+  O6.5: fair 33% · FD +190 BETMGM +160 → best FD
+  O7.5: FD +400 (1 book, no consensus)
+
 **Mitch Keller**
   O2.5: fair 76% · BETMGM -385 FD -440 → best BETMGM
   O3.5: fair 58% · BETMGM -161 FD -162 DK -164 → best BETMGM
   O4.5: fair 37% · FD +154 BETMGM +130 → best FD
   O5.5: FD +340 (1 book, no consensus)
   O6.5: FD +750 (1 book, no consensus)
-
-**Kyle Bradish**
-  O2.5: FD -2500 (1 book, no consensus)
-  O3.5: fair 82% · BETMGM -588 FD -650 → best BETMGM
-  O4.5: fair 68% · BETMGM -250 FD -260 → best BETMGM
-  O5.5: fair 51% · FD -113 DK -116 BETMGM -118 → best FD
-  O6.5: fair 32% · FD +196 BETMGM +160 → best FD
-  O7.5: FD +400 (1 book, no consensus)
 
 **Slade Cecconi**
   O2.5: fair 83% · BETMGM -667 FD -720 → best BETMGM
@@ -150,16 +148,16 @@ _2026-07-27 17:51 UTC · fair = vig-stripped consensus of the books posting each
 
 **Max Scherzer**
   O2.5: fair 64% · FD -210 BETMGM -222 → best FD
-  O3.5: fair 41% · FD +126 BETMGM +125 DK +124 → best FD
+  O3.5: fair 40% · DK +136 FD +126 BETMGM +125 → best DK
   O4.5: fair 21% · FD +300 BETMGM +300 → best FD
   O5.5: fair 9% · FD +700 BETMGM +650 → best FD
   O6.5: BETMGM +1250 (1 book, no consensus)
 
 **Tyler Phillips**
-  O2.5: FD -430 (1 book, no consensus)
-  O3.5: fair 55% · FD -142 DK -145 → best FD
-  O4.5: FD +162 (1 book, no consensus)
-  O5.5: FD +370 (1 book, no consensus)
+  O2.5: FD -400 (1 book, no consensus)
+  O3.5: fair 55% · FD -136 DK -145 → best FD
+  O4.5: FD +168 (1 book, no consensus)
+  O5.5: FD +390 (1 book, no consensus)
 
 **Zac Thornton**
   O2.5: FD -670 (1 book, no consensus)
@@ -170,10 +168,10 @@ _2026-07-27 17:51 UTC · fair = vig-stripped consensus of the books posting each
 
 **Matt Liberatore**
   O2.5: BETMGM -455 (1 book, no consensus)
-  O3.5: BETMGM -175 (1 book, no consensus)
-  O4.5: BETMGM +125 (1 book, no consensus)
-  O5.5: BETMGM +240 (1 book, no consensus)
-  O6.5: BETMGM +450 (1 book, no consensus)
+  O3.5: BETMGM -182 (1 book, no consensus)
+  O4.5: BETMGM +115 (1 book, no consensus)
+  O5.5: BETMGM +230 (1 book, no consensus)
+  O6.5: BETMGM +425 (1 book, no consensus)
 
 **Zach Thornton**
   O2.5: BETMGM -455 (1 book, no consensus)
