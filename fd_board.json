@@ -1,36 +1,14 @@
 {
- "captured_at": "2026-07-27T12:57:23Z",
+ "captured_at": "2026-07-27T13:03:11Z",
  "matches": [
   {
-   "event_id": 35872536,
-   "p1": "Oliwier Sokolowski",
-   "p2": "Rafal Niemiec",
-   "p1_norm": "oliwier sokolowski",
-   "p2_norm": "rafal niemiec",
-   "open_date": "2026-07-27T12:40:00.000Z",
-   "line": 87.5,
-   "over_odds": -160,
-   "under_odds": 115
-  },
-  {
-   "event_id": 35872537,
-   "p1": "Milosz Piecowski",
-   "p2": "Aleksander Lilien",
-   "p1_norm": "milosz piecowski",
-   "p2_norm": "aleksander lilien",
-   "open_date": "2026-07-27T12:40:00.000Z",
-   "line": 101.5,
-   "over_odds": -145,
-   "under_odds": 105
-  },
-  {
-   "event_id": 35872541,
-   "p1": "Wojciech Tobiasz",
-   "p2": "Patryk Mecik",
-   "p1_norm": "wojciech tobiasz",
-   "p2_norm": "patryk mecik",
-   "open_date": "2026-07-27T12:45:00.000Z",
-   "line": 77.5,
+   "event_id": 35872552,
+   "p1": "Grzegorz Poliniewicz",
+   "p2": "Marcin Jadczyk",
+   "p1_norm": "grzegorz poliniewicz",
+   "p2_norm": "marcin jadczyk",
+   "open_date": "2026-07-27T12:55:00.000Z",
+   "line": 84.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -41,9 +19,9 @@
    "p1_norm": "adrian spychala",
    "p2_norm": "karol wisniewski",
    "open_date": "2026-07-27T13:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35872558,
@@ -64,8 +42,8 @@
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-07-27T13:05:00.000Z",
    "line": 69.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35872561,
