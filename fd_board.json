@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T05:39:45Z",
+ "captured_at": "2026-07-27T05:44:31Z",
  "matches": [
   {
    "event_id": 35871156,
@@ -8,7 +8,7 @@
    "p1_norm": "grzegorz wichowski",
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-27T05:30:00.000Z",
-   "line": 89.5,
+   "line": 93.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -19,9 +19,9 @@
    "p1_norm": "janus slawomir",
    "p2_norm": "michal wolny",
    "open_date": "2026-07-27T05:35:00.000Z",
-   "line": 78.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 80.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35871167,
@@ -30,9 +30,9 @@
    "p1_norm": "przemyslaw perzynski",
    "p2_norm": "kamil rudomina",
    "open_date": "2026-07-27T05:35:00.000Z",
-   "line": 83.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 70.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35871170,
@@ -41,9 +41,9 @@
    "p1_norm": "milosz piecowski",
    "p2_norm": "wojciech gluszek",
    "open_date": "2026-07-27T05:40:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 79.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35871171,
@@ -52,9 +52,9 @@
    "p1_norm": "wojciech wojtaszczyk",
    "p2_norm": "rafal niemiec",
    "open_date": "2026-07-27T05:40:00.000Z",
-   "line": 73.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 55.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35871172,
@@ -63,9 +63,9 @@
    "p1_norm": "karol wisniewski",
    "p2_norm": "josef braun",
    "open_date": "2026-07-27T05:40:00.000Z",
-   "line": 74.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 56.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35871178,
