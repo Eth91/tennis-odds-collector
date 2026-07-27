@@ -1,6 +1,6 @@
 # Pitcher strikeout alt-ladder scan (cross-book line-shopping)
 
-_2026-07-26 23:48 UTC · fair = vig-stripped consensus of the books posting each rung. NO projection model (backtest: corr 0.37, too weak to price K tails; and pricing a book's unique rung off a model just bets our own error). Only rungs >=2 books agree on can be flagged._
+_2026-07-27 00:15 UTC · fair = vig-stripped consensus of the books posting each rung. NO projection model (backtest: corr 0.37, too weak to price K tails; and pricing a book's unique rung off a model just bets our own error). Only rungs >=2 books agree on can be flagged._
 
 **No +EV rung tonight** — the K market is efficient; even the best of 3 books is -EV on every agreeing rung. This is a SHOPPING sheet (best book per rung to minimize vig), not a bet list. A genuine +EV rung (a slow book) would ⭐ here.
 
@@ -13,18 +13,31 @@ _2026-07-26 23:48 UTC · fair = vig-stripped consensus of the books posting each
   O7.5: FD +320 (1 book, no consensus)
   O8.5: FD +680 (1 book, no consensus)
 
+**Zac Thornton**
+  O2.5: FD -700 (1 book, no consensus)
+  O3.5: FD -230 (1 book, no consensus)
+  O4.5: fair 45% · DK +112 FD +102 → best DK
+  O5.5: FD +240 (1 book, no consensus)
+  O6.5: FD +520 (1 book, no consensus)
+
 **Jack Perkins**
   O2.5: FD -1000 (1 book, no consensus)
   O3.5: FD -340 (1 book, no consensus)
-  O4.5: fair 54% · DK -132 FD -140 → best DK
+  O4.5: fair 55% · FD -140 DK -141 → best FD
   O5.5: FD +158 (1 book, no consensus)
   O6.5: FD +330 (1 book, no consensus)
   O7.5: FD +680 (1 book, no consensus)
 
+**Martin Perez**
+  O2.5: FD -350 (1 book, no consensus)
+  O3.5: fair 52% · FD -128 DK -128 → best FD
+  O4.5: FD +190 (1 book, no consensus)
+  O5.5: FD +430 (1 book, no consensus)
+
 **Slade Cecconi**
   O2.5: FD -720 (1 book, no consensus)
   O3.5: FD -250 (1 book, no consensus)
-  O4.5: fair 46% · DK +100 FD -102 → best DK
+  O4.5: fair 47% · FD -102 DK -104 → best FD
   O5.5: FD +215 (1 book, no consensus)
   O6.5: FD +470 (1 book, no consensus)
 
@@ -32,7 +45,7 @@ _2026-07-26 23:48 UTC · fair = vig-stripped consensus of the books posting each
   O3.5: FD -1600 (1 book, no consensus)
   O4.5: FD -460 (1 book, no consensus)
   O5.5: FD -200 (1 book, no consensus)
-  O6.5: fair 44% · FD +112 DK +108 → best FD
+  O6.5: fair 43% · DK +115 FD +112 → best DK
   O7.5: FD +240 (1 book, no consensus)
   O8.5: FD +470 (1 book, no consensus)
 
@@ -62,15 +75,15 @@ _2026-07-26 23:48 UTC · fair = vig-stripped consensus of the books posting each
 **Kumar Rocker**
   O4.5: DK -118 (1 book, no consensus)
 
-**Martin Perez**
-  O3.5: DK -118 (1 book, no consensus)
-
 **Max Scherzer**
   O3.5: DK +136 (1 book, no consensus)
 
+**Merrill Kelly**
+  O4.5: DK +115 (1 book, no consensus)
+
+**Mitch Keller**
+  O3.5: DK -175 (1 book, no consensus)
+
 **Tyler Mahle**
   O4.5: DK -137 (1 book, no consensus)
-
-**Zac Thornton**
-  O4.5: DK +112 (1 book, no consensus)
 
