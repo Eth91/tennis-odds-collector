@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-27T00:33:30Z",
+ "captured_at": "2026-07-27T00:37:57Z",
  "matches": [
-  {
-   "event_id": 35870558,
-   "p1": "Michal Durda",
-   "p2": "Schaniel Krzysztof",
-   "p1_norm": "michal durda",
-   "p2_norm": "schaniel krzysztof",
-   "open_date": "2026-07-27T00:20:00.000Z",
-   "line": 84.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35870562,
-   "p1": "Stapor Rafal",
-   "p2": "Mateusz Trela",
-   "p1_norm": "stapor rafal",
-   "p2_norm": "mateusz trela",
-   "open_date": "2026-07-27T00:35:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
   {
    "event_id": 35870563,
    "p1": "Jacek Zelezik",
@@ -30,9 +8,9 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-27T00:35:00.000Z",
-   "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 73.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35870573,
@@ -53,8 +31,8 @@
    "p2_norm": "oskar sokolowski",
    "open_date": "2026-07-27T00:45:00.000Z",
    "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35870575,
@@ -64,8 +42,8 @@
    "p2_norm": "jakub nowak",
    "open_date": "2026-07-27T00:45:00.000Z",
    "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35870585,
@@ -74,9 +52,9 @@
    "p1_norm": "arkadiusz mugowski",
    "p2_norm": "mateusz trela",
    "open_date": "2026-07-27T01:00:00.000Z",
-   "line": 81.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 82.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35870586,
