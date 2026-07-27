@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T03:46:09Z",
+ "captured_at": "2026-07-27T03:50:40Z",
  "matches": [
   {
    "event_id": 35870764,
@@ -8,9 +8,9 @@
    "p1_norm": "josef braun",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-27T03:45:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -116
+   "line": 78.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35870776,
@@ -19,20 +19,9 @@
    "p1_norm": "rafal niemiec",
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-07-27T03:50:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35870777,
-   "p1": "Wojciech Gluszek",
-   "p2": "Mateusz Trela",
-   "p1_norm": "wojciech gluszek",
-   "p2_norm": "mateusz trela",
-   "open_date": "2026-07-27T03:50:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 74.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870778,
