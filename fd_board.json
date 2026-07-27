@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T13:39:32Z",
+ "captured_at": "2026-07-27T13:45:16Z",
  "matches": [
   {
    "event_id": 35872570,
@@ -8,9 +8,9 @@
    "p1_norm": "josef braun",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-27T13:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -130,
-   "under_odds": -105
+   "line": 93.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35872580,
@@ -19,20 +19,9 @@
    "p1_norm": "wiktor ptak",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-07-27T13:30:00.000Z",
-   "line": 99.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35872581,
-   "p1": "Pawel Slosarczyk",
-   "p2": "Krzysztof Juszczyk",
-   "p1_norm": "pawel slosarczyk",
-   "p2_norm": "krzysztof juszczyk",
-   "open_date": "2026-07-27T13:30:00.000Z",
-   "line": 58.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 95.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35872593,
@@ -88,6 +77,17 @@
    "line": 77.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35872670,
+   "p1": "Maciej Domin",
+   "p2": "Jakub Kuzmicz",
+   "p1_norm": "maciej domin",
+   "p2_norm": "jakub kuzmicz",
+   "open_date": "2026-07-27T14:10:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
