@@ -1171,7 +1171,7 @@ def clv_pass(con):
     for tbl, stat in CLV_STAT.items():
         rows = con.execute(
             f"SELECT pitcher, game_date, side, line, odds FROM {tbl} "
-            "WHERE result IN ('W','L') AND close_ln IS NULL").fetchall()
+            "WHERE result IN ('W','L') AND (close_ln IS NULL OR best_ln IS NULL)").fetchall()
         for p, gd, side, ln, od in rows:
             np_ = _norm(p)
             try:
