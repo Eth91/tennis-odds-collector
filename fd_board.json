@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T15:43:05Z",
+ "captured_at": "2026-07-27T15:48:57Z",
  "matches": [
   {
    "event_id": 35872914,
@@ -8,9 +8,9 @@
    "p1_norm": "miroslav sklensky",
    "p2_norm": "michal olbrycht",
    "open_date": "2026-07-27T15:25:00.000Z",
-   "line": 91.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 95.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35872939,
@@ -19,9 +19,9 @@
    "p1_norm": "jakub cyndera",
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-27T15:35:00.000Z",
-   "line": 83.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 62.5,
+   "over_odds": 100,
+   "under_odds": -140
   },
   {
    "event_id": 35872964,
@@ -77,6 +77,28 @@
    "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35873005,
+   "p1": "Michal Guzik",
+   "p2": "Andriej Fomin",
+   "p1_norm": "michal guzik",
+   "p2_norm": "andriej fomin",
+   "open_date": "2026-07-27T16:15:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35873006,
+   "p1": "Kacper Marchlewski",
+   "p2": "Marcin Kowalczyk",
+   "p1_norm": "kacper marchlewski",
+   "p2_norm": "marcin kowalczyk",
+   "open_date": "2026-07-27T16:15:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
