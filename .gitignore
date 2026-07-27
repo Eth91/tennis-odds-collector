@@ -36,3 +36,6 @@ mlb_pen_cache.json
 *_odds_hist.sqlite
 outs_leash_cache.json
 arsenal_live.json
+fanduel_props.sqlite
+fanduel_props.sqlite-wal
+fanduel_props.sqlite-shm
