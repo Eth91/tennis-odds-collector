@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T04:41:08Z",
+ "captured_at": "2026-07-27T04:45:37Z",
  "matches": [
-  {
-   "event_id": 35870801,
-   "p1": "Jakub Pruszkowski",
-   "p2": "Krzysztof Juszczyk",
-   "p1_norm": "jakub pruszkowski",
-   "p2_norm": "krzysztof juszczyk",
-   "open_date": "2026-07-27T04:30:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35870802,
    "p1": "Mateusz Trela",
@@ -19,9 +8,9 @@
    "p1_norm": "mateusz trela",
    "p2_norm": "miroslaw piecowski",
    "open_date": "2026-07-27T04:30:00.000Z",
-   "line": 94.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 80.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35870803,
@@ -30,9 +19,20 @@
    "p1_norm": "marcin jadczyk",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-27T04:30:00.000Z",
-   "line": 89.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 92.5,
+   "over_odds": -130,
+   "under_odds": -105
+  },
+  {
+   "event_id": 35870806,
+   "p1": "Michal Durda",
+   "p2": "Wojciech Urban",
+   "p1_norm": "michal durda",
+   "p2_norm": "wojciech urban",
+   "open_date": "2026-07-27T04:40:00.000Z",
+   "line": 79.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870809,
@@ -99,6 +99,17 @@
    "line": 78.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35870863,
+   "p1": "Michal Machelski",
+   "p2": "Jerzy Michalik",
+   "p1_norm": "michal machelski",
+   "p2_norm": "jerzy michalik",
+   "open_date": "2026-07-27T05:10:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
