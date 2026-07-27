@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T09:29:21Z",
+ "captured_at": "2026-07-27T09:34:00Z",
  "matches": [
   {
    "event_id": 35871689,
@@ -8,9 +8,9 @@
    "p1_norm": "grzegorz adamiak",
    "p2_norm": "josef braun",
    "open_date": "2026-07-27T09:20:00.000Z",
-   "line": 73.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 63.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35871691,
@@ -19,9 +19,9 @@
    "p1_norm": "oliwier sokolowski",
    "p2_norm": "pawel slosarczyk",
    "open_date": "2026-07-27T09:25:00.000Z",
-   "line": 74.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 88.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35871693,
@@ -30,7 +30,7 @@
    "p1_norm": "milosz piecowski",
    "p2_norm": "artur sobel",
    "open_date": "2026-07-27T09:25:00.000Z",
-   "line": 53.5,
+   "line": 88.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -41,9 +41,9 @@
    "p1_norm": "grzegorz wichowski",
    "p2_norm": "wojciech tobiasz",
    "open_date": "2026-07-27T09:30:00.000Z",
-   "line": 74.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 69.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35871713,
