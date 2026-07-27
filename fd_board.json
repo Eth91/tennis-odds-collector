@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T15:31:09Z",
+ "captured_at": "2026-07-27T15:36:49Z",
  "matches": [
   {
    "event_id": 35872914,
@@ -8,7 +8,7 @@
    "p1_norm": "miroslav sklensky",
    "p2_norm": "michal olbrycht",
    "open_date": "2026-07-27T15:25:00.000Z",
-   "line": 81.5,
+   "line": 80.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -19,9 +19,9 @@
    "p1_norm": "andriej fomin",
    "p2_norm": "artur kubiak",
    "open_date": "2026-07-27T15:25:00.000Z",
-   "line": 77.5,
-   "over_odds": -115,
-   "under_odds": -115
+   "line": 70.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35872916,
@@ -30,9 +30,20 @@
    "p1_norm": "marcin kowalczyk",
    "p2_norm": "bartlomiej mrugala",
    "open_date": "2026-07-27T15:25:00.000Z",
-   "line": 79.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
+  },
+  {
+   "event_id": 35872932,
+   "p1": "Wojciech Tobiasz",
+   "p2": "Grzegorz Wichowski",
+   "p1_norm": "wojciech tobiasz",
+   "p2_norm": "grzegorz wichowski",
+   "open_date": "2026-07-27T15:30:00.000Z",
+   "line": 58.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35872939,
@@ -41,9 +52,9 @@
    "p1_norm": "jakub cyndera",
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-27T15:35:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 77.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35872964,
@@ -77,6 +88,17 @@
    "line": 74.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35872981,
+   "p1": "Piotr Gesiarz",
+   "p2": "Dariusz Maszczynski",
+   "p1_norm": "piotr gesiarz",
+   "p2_norm": "dariusz maszczynski",
+   "open_date": "2026-07-27T16:00:00.000Z",
+   "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
