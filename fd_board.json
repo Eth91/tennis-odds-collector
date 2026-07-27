@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T15:55:45Z",
+ "captured_at": "2026-07-27T15:59:57Z",
  "matches": [
   {
    "event_id": 35872964,
@@ -8,9 +8,9 @@
    "p1_norm": "michal krutak",
    "p2_norm": "pawel chojnacki",
    "open_date": "2026-07-27T15:50:00.000Z",
-   "line": 72.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 87.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35872965,
@@ -19,9 +19,9 @@
    "p1_norm": "adrian eliasz",
    "p2_norm": "adrian fabis",
    "open_date": "2026-07-27T15:50:00.000Z",
-   "line": 86.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 93.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35872975,
@@ -30,9 +30,9 @@
    "p1_norm": "piotr przewlocki",
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-27T15:55:00.000Z",
-   "line": 73.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 51.5,
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35872981,
@@ -42,8 +42,8 @@
    "p2_norm": "dariusz maszczynski",
    "open_date": "2026-07-27T16:00:00.000Z",
    "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35872985,
@@ -88,6 +88,17 @@
    "line": 69.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35873019,
+   "p1": "Miroslaw Warzecha",
+   "p2": "Jakub Cyndera",
+   "p1_norm": "miroslaw warzecha",
+   "p2_norm": "jakub cyndera",
+   "open_date": "2026-07-27T16:25:00.000Z",
+   "line": 73.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
