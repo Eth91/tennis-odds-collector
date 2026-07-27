@@ -130,7 +130,7 @@ def _con():
     c.execute("""CREATE TABLE IF NOT EXISTS opener_k(
         pitcher TEXT, game_date TEXT, side TEXT, line REAL, odds REAL, book TEXT,
         score REAL, opp TEXT, flagged_at TEXT, result TEXT, actual INTEGER, pnl REAL,
-        graded_at TEXT, log_date TEXT, pinged INTEGER DEFAULT 0,
+        graded_at TEXT, log_date TEXT, pinged INTEGER DEFAULT 0, skip TEXT,
         PRIMARY KEY(pitcher, game_date))""")
     c.execute("""CREATE TABLE IF NOT EXISTS ethan_k(
         pitcher TEXT, game_date TEXT, side TEXT, line REAL, odds REAL, book TEXT,
@@ -1145,9 +1145,9 @@ def board(con):
                                      "WHERE game_date=?", (_today_et(),))]
     opn_today = [dict(zip(("pitcher", "side", "line", "odds", "book", "opp", "score"), r))
                  for r in con.execute("SELECT pitcher, side, line, odds, book, opp, score "
-                                      "FROM opener_k WHERE game_date=?", (_today_et(),))]
+                                      "FROM opener_k WHERE game_date=? AND (skip IS NULL OR skip='')", (_today_et(),))]
     opn_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
-                          "FROM opener_k WHERE result IN ('W','L')").fetchone()
+                          "FROM opener_k WHERE result IN ('W','L') AND (skip IS NULL OR skip='')").fetchone()
     eth_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
                           "FROM ethan_k WHERE result IN ('W','L') "
                           "AND (skip IS NULL OR skip='')").fetchone()
@@ -1222,7 +1222,7 @@ def board(con):
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM ethan_k "
         "WHERE stack=1 AND result IN ('W','L') AND (skip IS NULL OR skip='') UNION ALL "
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM opener_k "
-        "WHERE result IN ('W','L') UNION ALL "
+        "WHERE result IN ('W','L') AND (skip IS NULL OR skip='') UNION ALL "
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM route_a "
         "WHERE result IN ('W','L'))").fetchone()
     comb_today = []
@@ -1406,6 +1406,9 @@ def opener_strike(con):
         if abs(S) < thr:
             continue
         side = "over" if S > 0 else "under"
+        fade = -F["rw"] * z(rk, F["rk_mu"], F["rk_sd"])
+        if side == "under" and fade < 0 and abs(fade) / abs(S) >= 0.6:
+            continue    # fade-dominant under veto (2026-07-28: 50.0%/-6.7% family, user-caught)
         best = None
         for bk in BOOKS:
             lls = (lines.get(_norm(g["pitcher"])) or {}).get(bk) or {}
@@ -1440,7 +1443,7 @@ def opener_strike(con):
     if topic:   # retry any unsent pings (rows flagged during manual/env-less runs)
         for p_, sd_, ln_, od_, bk_, opp_ in con.execute(
                 "SELECT pitcher, side, line, odds, book, opp FROM opener_k "
-                "WHERE game_date=? AND pinged=0", (gd,)).fetchall():
+                "WHERE game_date=? AND pinged=0 AND (skip IS NULL OR skip='')", (gd,)).fetchall():
             am = f"+{round((od_-1)*100)}" if od_ >= 2 else f"-{round(100/(od_-1))}"
             try:
                 requests.post(f"https://ntfy.sh/{topic}",

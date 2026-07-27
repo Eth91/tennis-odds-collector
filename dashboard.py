@@ -863,31 +863,19 @@ def _tracker_panel(wnba_rec, tt_json):
         _oo = _cbt.get("outs") or {}
         _pr = _cbt.get("premium") or {}
         _ka = _cbt.get("kagree") or {}
-        knote = "S-composite vs day-of lineups · flag-time price · paper"
-        if (_pr.get("w", 0) + _pr.get("l", 0)):
-            knote += f" · ★AR premium {_pr['w']}-{_pr['l']} ({_pr['u']:+.1f}u)"
-        _lk = _cbt.get("lk") or {}
-        if (_lk.get("w") or 0) + (_lk.get("l") or 0) >= 3:
-            knote += f" · 💎LK {_lk['w']}-{_lk['l']} ({_lk['u']:+.1f}u)"
-        _ra = _cbt.get("route_a") or {}
-        if (_ra.get("w") or 0) + (_ra.get("l") or 0) >= 1:
-            knote += f" · 💠PO {_ra['w']}-{_ra['l']} ({_ra['u']:+.1f}u)"
-        _opn = _cbt.get("opener") or {}
-        if (_opn.get("w") or 0) + (_opn.get("l") or 0) >= 1:
-            knote += f" · ⚡OPN {_opn['w']}-{_opn['l']} ({_opn['u']:+.1f}u)"
-        _stk = _cbt.get("stack") or {}
-        if (_stk.get("w") or 0) + (_stk.get("l") or 0) >= 1:
-            knote += f" · ⚡STACK {_stk['w']}-{_stk['l']} ({_stk['u']:+.1f}u)"
-        _eth = _cbt.get("ethan") or {}
-        if (_eth.get("w") or 0) + (_eth.get("l") or 0) >= 3:
-            knote += f" · 🧪Ethan {_eth['w']}-{_eth['l']} ({_eth['u']:+.1f}u)"
-        mlb_card += card('<img class="tlogo" src="logos/mlb.png" alt="">', "K-COMPASS",
-                         _kk.get("w") or 0, _kk.get("l") or 0, _kk.get("u") or 0.0, knote)
-        onote = "traffic+leash composite · no unders &lt;16.5 · paper"
-        if (_ka.get("w", 0) + _ka.get("l", 0)):
-            onote += f" · ★★K agree {_ka['w']}-{_ka['l']} ({_ka['u']:+.1f}u)"
-        mlb_card += card('<img class="tlogo" src="logos/mlb.png" alt="">', "OUTS-COMPASS",
-                         _oo.get("w") or 0, _oo.get("l") or 0, _oo.get("u") or 0.0, onote)
+        _cmb = _cbt.get("combined") or {}
+        knote = "one record · all live streams"
+        _mini = []
+        for _k2, _lb2 in (("stack", "⚡STK"), ("opener", "⚡OPN"), ("route_a", "💠PO"),
+                          ("ethan", "🧪"), ("lk", "💎LK")):
+            _d2 = _cbt.get(_k2) or {}
+            _n2 = (_d2.get("w") or 0) + (_d2.get("l") or 0)
+            if _n2:
+                _mini.append(f'{_lb2} {_d2["w"]}-{_d2["l"]}')
+        if _mini:
+            knote += " · " + " · ".join(_mini)
+        mlb_card += card('<img class="tlogo" src="logos/mlb.png" alt="">', "MLB",
+                         _cmb.get("w") or 0, _cmb.get("l") or 0, _cmb.get("u") or 0.0, knote)
     except (OSError, ValueError):
         pass
 
