@@ -277,15 +277,19 @@ def r5outs(pid):
     key = str(pid)
     if key not in cache:
         d = _get(f"/people/{pid}/stats", stats="gameLog", group="pitching", season=2026)
+        # ALL appearances (relief included) — the role-change guard needs to SEE bullpen
+        # stints (2026-07-27 Montero: 4 relief outings between starts made his "last-5
+        # starts" median 7 weeks stale). Downstream filters to starts via r[5].
         rows = [[s["stat"].get("outs") or 0, s["stat"].get("numberOfPitches") or 0,
                  s["stat"].get("strikeOuts") or 0, (s.get("date") or "")[5:],
-                 TEAM_AB.get((s.get("opponent") or {}).get("id"), "")]
-                for s in (d.get("stats") or [{}])[0].get("splits") or []
-                if (s["stat"].get("gamesStarted") or 0) and (s["stat"].get("battersFaced") or 0) >= 5]
+                 TEAM_AB.get((s.get("opponent") or {}).get("id"), ""),
+                 1 if (s["stat"].get("gamesStarted") or 0) else 0,
+                 s["stat"].get("battersFaced") or 0]
+                for s in (d.get("stats") or [{}])[0].get("splits") or []]
         cache[key] = rows
         OGL_CACHE.write_text(json.dumps(cache))
-    g5 = cache.get(key) or []
-    g5 = g5[-5:]
+    rows_ = [r for r in (cache.get(key) or []) if len(r) >= 7 and r[5] and r[6] >= 5]
+    g5 = rows_[-5:]
     if len(g5) < 3:
         return None, None, None
     outs = sorted(r[0] for r in g5)
@@ -305,8 +309,25 @@ def last5(pid):
             return []
     except (OSError, ValueError):
         return []
-    rows = cache.get(str(pid)) or []
-    return [r for r in rows[-5:] if len(r) >= 5]
+    rows = [r for r in (cache.get(str(pid)) or []) if len(r) >= 7 and r[5] and r[6] >= 5]
+    return rows[-5:]
+
+
+def rotation_ok(pid):
+    """Is he a CURRENT rotation regular? >=3 of his last 5 appearances must be starts.
+    Guards the r5-median premise: a swing-man's 'last 5 starts' can be weeks stale with a
+    bullpen stint in between (Montero 2026-07-27: 4 relief outings, median from June).
+    None = not enough data (treated as pass)."""
+    r5outs(pid)                                   # ensures today's cache row exists
+    try:
+        cache = json.loads(OGL_CACHE.read_text())
+    except (OSError, ValueError):
+        return None
+    rows = [r for r in (cache.get(str(pid)) or []) if len(r) >= 7 and r[6] >= 1]
+    last = rows[-5:]
+    if len(last) < 4:
+        return None
+    return sum(1 for r in last if r[5]) >= 3
 
 
 def team_leash():
@@ -1485,8 +1506,8 @@ def flag_route_a(con):
         if opp_ppa is not None and opp_ppa < p25:
             continue
         _, _, med = r5outs(g["pid"])
-        if med is None:
-            continue
+        if med is None or rotation_ok(g["pid"]) is False:
+            continue                              # swing-man / just back from the bullpen
         best = None
         for bk in BOOKS:
             lls = (lines.get(_norm(g["pitcher"])) or {}).get(bk) or {}
@@ -1526,8 +1547,8 @@ def flag_route_b(con):
                        (g["pitcher"], gd)).fetchone():
             continue
         _, _, med = r5outs(g["pid"])
-        if med is None:
-            continue
+        if med is None or rotation_ok(g["pid"]) is False:
+            continue                              # swing-man / just back from the bullpen
         best = None
         for bk in BOOKS:
             lls = (lines.get(_norm(g["pitcher"])) or {}).get(bk) or {}
