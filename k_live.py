@@ -1219,11 +1219,30 @@ STAT_FIELD = {"compass": "strikeOuts", "outlier": "strikeOuts", "outs_compass": 
 
 
 def grade(con):
+    # same-day grading (2026-07-27): games that are already FINAL grade tonight instead of
+    # waiting for tomorrow's cycle — the record should reflect today's results today.
+    # Guarded by the schedule's Final state so an in-progress gamelog row can never grade.
+    gd_now = _today_et()
+    finals = set()
+    _sched = _get("/schedule", sportId=1, date=gd_now)
+    for _day in _sched.get("dates") or []:
+        for _g in _day.get("games") or []:
+            if ((_g.get("status") or {}).get("abstractGameState")) == "Final":
+                for _s in ("home", "away"):
+                    finals.add(TEAM_AB.get(_g["teams"][_s]["team"]["id"]))
     rows = []
     for table in ("compass", "outlier", "outs_compass", "ethan_k", "opener_k", "route_a", "route_b"):
+        try:
+            same_day = [(table,) + r[:5] for r in con.execute(
+                f"SELECT pitcher, game_date, side, line, odds, team FROM {table} "
+                "WHERE result IS NULL AND game_date = ?", (gd_now,)).fetchall()
+                if r[5] and r[5] in finals]
+        except sqlite3.OperationalError:
+            same_day = []                       # table without a team column (outlier)
+        rows += same_day
         rows += [(table,) + r for r in con.execute(
             f"SELECT pitcher, game_date, side, line, odds FROM {table} "
-            "WHERE result IS NULL AND game_date < ?", (_today_et(),)).fetchall()]
+            "WHERE result IS NULL AND game_date < ?", (gd_now,)).fetchall()]
     if not rows:
         return
     ids = {}
