@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T07:01:00Z",
+ "captured_at": "2026-07-27T07:05:35Z",
  "matches": [
   {
    "event_id": 35871325,
@@ -8,9 +8,9 @@
    "p1_norm": "przemyslaw perzynski",
    "p2_norm": "artur sobel",
    "open_date": "2026-07-27T06:50:00.000Z",
-   "line": 87.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 88.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35871329,
@@ -19,9 +19,9 @@
    "p1_norm": "wojciech wojtaszczyk",
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-07-27T06:55:00.000Z",
-   "line": 86.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 59.5,
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35871331,
@@ -30,9 +30,9 @@
    "p1_norm": "karol wisniewski",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-27T06:55:00.000Z",
-   "line": 74.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 59.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35871332,
@@ -41,7 +41,7 @@
    "p1_norm": "milosz piecowski",
    "p2_norm": "mateusz trela",
    "open_date": "2026-07-27T06:55:00.000Z",
-   "line": 79.5,
+   "line": 89.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -110,6 +110,17 @@
    "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35871390,
+   "p1": "Wiktor Ptak",
+   "p2": "Piotr Przewlocki",
+   "p1_norm": "wiktor ptak",
+   "p2_norm": "piotr przewlocki",
+   "open_date": "2026-07-27T07:30:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
