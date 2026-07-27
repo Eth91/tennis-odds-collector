@@ -122,6 +122,11 @@ def _con():
         c.execute("ALTER TABLE outs_compass ADD COLUMN kagree INTEGER DEFAULT 0")
     except sqlite3.OperationalError:
         pass
+    c.execute("""CREATE TABLE IF NOT EXISTS route_a(
+        pitcher TEXT, game_date TEXT, side TEXT, line REAL, odds REAL, book TEXT,
+        r5med REAL, oppk REAL, opp TEXT, flagged_at TEXT, result TEXT, actual INTEGER,
+        pnl REAL, graded_at TEXT, log_date TEXT, pinged INTEGER DEFAULT 0,
+        PRIMARY KEY(pitcher, game_date))""")
     c.execute("""CREATE TABLE IF NOT EXISTS opener_k(
         pitcher TEXT, game_date TEXT, side TEXT, line REAL, odds REAL, book TEXT,
         score REAL, opp TEXT, flagged_at TEXT, result TEXT, actual INTEGER, pnl REAL,
@@ -462,6 +467,7 @@ def slate():
                 if not pp.get("id"):
                     continue
                 out.append({"pitcher": pp.get("fullName"), "pid": pp["id"],
+                            "is_home": side_lbl == "home",
                             "opp_lineup": opp_lu[:9],
                             "team_id": g["teams"][side_lbl]["team"]["id"],
                             "team_ab": TEAM_AB.get(g["teams"][side_lbl]["team"]["id"], ""),
@@ -1012,12 +1018,12 @@ def grade_parlay(con):
 
 
 STAT_FIELD = {"compass": "strikeOuts", "outlier": "strikeOuts", "outs_compass": "outs",
-              "ethan_k": "strikeOuts", "opener_k": "strikeOuts"}
+              "ethan_k": "strikeOuts", "opener_k": "strikeOuts", "route_a": "outs"}
 
 
 def grade(con):
     rows = []
-    for table in ("compass", "outlier", "outs_compass", "ethan_k", "opener_k"):
+    for table in ("compass", "outlier", "outs_compass", "ethan_k", "opener_k", "route_a"):
         rows += [(table,) + r for r in con.execute(
             f"SELECT pitcher, game_date, side, line, odds FROM {table} "
             "WHERE result IS NULL AND game_date < ?", (_today_et(),)).fetchall()]
@@ -1132,6 +1138,8 @@ def board(con):
         "WHERE stack=1 AND result IN ('W','L') UNION ALL "
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM ethan_k "
         "WHERE stack=1 AND result IN ('W','L'))").fetchone()
+    ra_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
+                         "FROM route_a WHERE result IN ('W','L')").fetchone()
     opn_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
                           "FROM opener_k WHERE result IN ('W','L')").fetchone()
     eth_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
@@ -1210,6 +1218,7 @@ def board(con):
                    "today": eth_today},
          "stack": {"w": stk_rec[0] or 0, "l": stk_rec[1] or 0, "u": stk_rec[2] or 0.0},
          "opener": {"w": opn_rec[0] or 0, "l": opn_rec[1] or 0, "u": opn_rec[2] or 0.0},
+         "route_a": {"w": ra_rec[0] or 0, "l": ra_rec[1] or 0, "u": ra_rec[2] or 0.0},
          "ladder": {"w": lad_rec[0] or 0, "l": lad_rec[1] or 0, "u": lad_rec[2] or 0.0},
          "kagree": {"w": kag_rec[0] or 0, "l": kag_rec[1] or 0, "u": kag_rec[2] or 0.0},
          "today": flags,
@@ -1222,6 +1231,75 @@ def board(con):
                     "combo": (prow[1] if prow else None),
                     "frozen": (bool(prow[2]) if prow else False),
                     "w": prec[0] or 0, "l": prec[1] or 0, "u": prec[2] or 0.0}}))
+
+
+def flag_route_a(con):
+    """💠PO — ROUTE-A PREMIUM OUTS, now live with its own pings (was paper-only; forward
+    record 25-9/73.5% since 7/7, THE best live evidence in the system). Spec mirrors
+    k_paper exactly: AWAY start + CONTACT offense (opp team K% < .225) + line > recent-5
+    MEDIAN outs + NOT a genuinely-low-patience opp (ppa >= p25). Under at main outs line,
+    price 1.50-2.30. Full volume (not stack-capped); stack dedups same-arm."""
+    import os
+    topic = os.environ.get("NTFY_TOPIC")
+    tk = team_k()
+    ppa = {}
+    d = _get("/teams/stats", stats="season", group="hitting", season=2026, sportId=1)
+    for t in (d.get("stats") or [{}])[0].get("splits") or []:
+        stt = t.get("stat") or {}
+        pa_ = stt.get("plateAppearances") or 0
+        pit = stt.get("numberOfPitches") or 0
+        if pa_ and pit:
+            ppa[t["team"]["id"]] = pit / pa_
+    vals = sorted(ppa.values())
+    p25 = vals[int(len(vals) * 0.25)] if vals else 3.82
+    lines = k_lines("outs")
+    gd, ts = _today_et(), _now()
+    for g in slate():
+        if g["started"] or g.get("is_home"):
+            continue
+        if con.execute("SELECT 1 FROM route_a WHERE pitcher=? AND game_date=?",
+                       (g["pitcher"], gd)).fetchone():
+            continue
+        oppk = tk.get(g["opp_id"])
+        opp_ppa = ppa.get(g["opp_id"])
+        if oppk is None or oppk >= 0.225:
+            continue
+        if opp_ppa is not None and opp_ppa < p25:
+            continue
+        _, _, med = r5outs(g["pid"])
+        if med is None:
+            continue
+        best = None
+        for bk in BOOKS:
+            lls = (lines.get(_norm(g["pitcher"])) or {}).get(bk) or {}
+            two = {ln: v for ln, v in lls.items() if "over" in v and "under" in v}
+            if not two:
+                continue
+            main = min(two, key=lambda ln: abs(two[ln]["over"] - 1.9))
+            od = two[main].get("under")
+            if od and main > med and 1.50 <= od < 2.30 and (best is None or od > best[1]):
+                best = (main, od, bk)
+        if not best:
+            continue
+        con.execute("INSERT INTO route_a (pitcher, game_date, side, line, odds, book, r5med, "
+                    "oppk, opp, flagged_at) VALUES (?,?,?,?,?,?,?,?,?,?)",
+                    (g["pitcher"], gd, "under", best[0], best[1], best[2], med,
+                     round(oppk, 3), g["opp_name"], ts))
+        if topic:
+            od = best[1]
+            am = f"+{round((od-1)*100)}" if od >= 2 else f"-{round(100/(od-1))}"
+            txt = (f"💠PO ⚾OUTS {g['opp_name']} {g['pitcher']} U{best[0]:g} {am} "
+                   f"{best[2].upper()} 0.5u (away·contact·line>med — live 25-9)")
+            try:
+                requests.post(f"https://ntfy.sh/{topic}", data=txt.encode(),
+                              params={"title": "Pickz", "priority": "high"}, timeout=15
+                              ).raise_for_status()
+                con.execute("UPDATE route_a SET pinged=1 WHERE pitcher=? AND game_date=?",
+                            (g["pitcher"], gd))
+            except requests.RequestException as e:
+                print(f"route_a ping failed: {str(e)[:60]}")
+        print(f"route_a: {g['pitcher']} U{best[0]}")
+    con.commit()
 
 
 def opener_strike(con):
@@ -1404,6 +1482,8 @@ def stack_ping(con):
         f"SELECT pitcher FROM {t} WHERE game_date=? AND stack=1", (gd,))}
     taken |= {r[0] for r in con.execute(
         "SELECT pitcher FROM opener_k WHERE game_date=?", (gd,))}
+    taken |= {r[0] for r in con.execute(
+        "SELECT pitcher FROM route_a WHERE game_date=?", (gd,))}
     cands = [c for c in cands if c["p"] not in taken]
     seen_p = set()
     cands = [c for c in cands if not (c["p"] in seen_p or seen_p.add(c["p"]))]
@@ -1461,6 +1541,7 @@ def stack_ping(con):
 if __name__ == "__main__":
     c = _con()
     opener_strike(c)
+    flag_route_a(c)
     flag(c)
     flag_outs(c)
     flag_ethan(c)
