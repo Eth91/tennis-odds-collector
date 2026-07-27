@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T09:44:40Z",
+ "captured_at": "2026-07-27T09:49:19Z",
  "matches": [
   {
    "event_id": 35871713,
@@ -8,9 +8,9 @@
    "p1_norm": "maciej domin",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-27T09:40:00.000Z",
-   "line": 71.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 57.5,
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35871721,
@@ -19,9 +19,9 @@
    "p1_norm": "lukasz jarocki",
    "p2_norm": "karol wisniewski",
    "open_date": "2026-07-27T09:45:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 80.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35871733,
