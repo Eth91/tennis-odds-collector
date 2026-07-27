@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T14:15:24Z",
+ "captured_at": "2026-07-27T14:21:25Z",
  "matches": [
-  {
-   "event_id": 35872626,
-   "p1": "Oliwier Sokolowski",
-   "p2": "Wojciech Wojtaszczyk",
-   "p1_norm": "oliwier sokolowski",
-   "p2_norm": "wojciech wojtaszczyk",
-   "open_date": "2026-07-27T13:55:00.000Z",
-   "line": 95.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35872670,
    "p1": "Maciej Domin",
@@ -19,9 +8,9 @@
    "p1_norm": "maciej domin",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-27T14:10:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 75.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35872677,
@@ -30,9 +19,9 @@
    "p1_norm": "lukasz jarocki",
    "p2_norm": "kamil kostyk",
    "open_date": "2026-07-27T14:15:00.000Z",
-   "line": 78.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 68.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35872685,
@@ -41,9 +30,9 @@
    "p1_norm": "rafal niemiec",
    "p2_norm": "krzysztof juszczyk",
    "open_date": "2026-07-27T14:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 77.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35872686,
@@ -52,9 +41,9 @@
    "p1_norm": "aleksander lilien",
    "p2_norm": "miroslaw piecowski",
    "open_date": "2026-07-27T14:20:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35872687,
@@ -63,9 +52,9 @@
    "p1_norm": "wojciech tobiasz",
    "p2_norm": "wiktor ptak",
    "open_date": "2026-07-27T14:20:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35872703,
@@ -99,6 +88,17 @@
    "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35872733,
+   "p1": "Grzegorz Wichowski",
+   "p2": "Piotr Przewlocki",
+   "p1_norm": "grzegorz wichowski",
+   "p2_norm": "piotr przewlocki",
+   "open_date": "2026-07-27T14:45:00.000Z",
+   "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
