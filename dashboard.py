@@ -2242,20 +2242,19 @@ def build():
                 _drawer = _chev = _click = ""
                 if _l5:
                     _vals = [(x[2] if _isk else x[0]) for x in _l5]
-                    _mx = (max(max(_vals), _ln) * 1.62) or 1
+                    _mx = (max(max(_vals), _ln) * 1.30) or 1
                     _on = (lambda v: v > _ln) if _o == "O" else (lambda v: v < _ln)
                     _hits = sum(1 for v in _vals if _on(v))
                     _cols = ""
                     for x in _l5:
                         v = x[2] if _isk else x[0]
                         _cols += (f'<div class="col">'
-                                  f'<div class="m" style="height:{min(x[1] / 115 * 100, 96):.0f}%"'
-                                  f'></div>'
                                   f'<div class="b {"o" if _on(v) else "u"}" '
                                   f'style="height:{v / _mx * 100:.1f}%">'
+                                  f'<span class="bp">{x[1]}p</span>'
                                   f'<span class="bv">{v:g}</span></div></div>')
-                    _opps = "".join(f'<span>{html.escape(str(x[4] or ""))}<i>{x[1]}p</i></span>'
-                                    for x in _l5)
+                    _opps = "".join(f'<span>{html.escape(str(x[4] or ""))}'
+                                    f'<i>{html.escape(str(x[3] or ""))}</i></span>' for x in _l5)
                     _wh = (f'<div class="why">{html.escape(f.get("why") or "")}</div>'
                            if f.get("why") else "")
                     _drawer = (f'<div class="bars"><div class="bwrap">{_wh}<div class="chart">'
@@ -2264,8 +2263,8 @@ def build():
                                f'<div class="opps">{_opps}</div>'
                                f'<div class="bnote">{_hits}/{len(_l5)} '
                                f'{"over" if _o == "O" else "under"} {_ln:g} · dashed = tonight\'s '
-                               f'line · bars = {"strikeouts" if _isk else "outs"} · '
-                               f'labels = pitch count</div>'
+                               f'line · bar = {"strikeouts" if _isk else "outs"} · '
+                               f'pitch count above</div>'
                                f'</div></div>')
                     _chev = '<span class="pchev">›</span>'
                     _click = ' onclick="this.nextElementSibling.classList.toggle(\'open\')"'
@@ -2301,13 +2300,12 @@ def build():
                 _bars = ""
                 _ap = t.get("apps") or []
                 if _ap:
-                    _mx = max([a[1] for a in _ap] + [1])
+                    _mo = max([a[0] for a in _ap] + [1]) * 1.30
                     for a in _ap:
                         _bars += (f'<div class="col">'
-                                  f'<div class="m" style="height:{min(a[1]/115*100, 96):.0f}%"'
-                                  f'></div>'
                                   f'<div class="b {"o" if a[5] else "u"}" '
-                                  f'style="height:{min(a[0]/24*100, 96):.0f}%">'
+                                  f'style="height:{min(a[0]/_mo*100, 96):.0f}%">'
+                                  f'<span class="bp">{a[1]}p</span>'
                                   f'<span class="bv">{a[0]}</span></div></div>')
                 _lines = []
                 if t.get("outs_ln") is not None:
@@ -2330,7 +2328,8 @@ def build():
                              + f'<div class="chart">{_bars}</div>'
                              f'<div class="opps">'
                              + "".join(f'<span>{html.escape(str(a[4] or ""))}'
-                                       f'<i>{a[1]}p{"" if a[5] else " R"}</i></span>'
+                                       f'<i>{html.escape(str(a[3] or ""))}'
+                                       f'{"" if a[5] else " · R"}</i></span>'
                                        for a in _ap)
                              + f'</div><div class="bnote">grey = pitch count · bar = outs · '
                              f'R = relief outing · vs {html.escape(t.get("opp") or "")}</div>'
@@ -2731,11 +2730,14 @@ def build():
   .bars.open {{ display:block; }}
   .chart {{ position:relative; display:flex; gap:5px; height:104px; overflow:visible; }}
   .col {{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; position:relative; }}
-  .b {{ width:100%; max-width:26px; border-radius:4px 4px 0 0; position:relative; min-height:3px; z-index:1; }}
+  .b {{ width:100%; max-width:30px; border-radius:5px 5px 0 0; position:relative;
+        min-height:26px; z-index:1; }}
   .b.o {{ background:#2f9e63; }}
   .b.u {{ background:#8a3b46; }}
-  .bv {{ position:absolute; top:-16px; left:0; right:0; text-align:center; font-size:11px;
-         font-weight:600; color:#c2cad6; }}
+  .bv {{ position:absolute; bottom:4px; left:0; right:0; text-align:center; font-size:11.5px;
+         font-weight:700; color:rgba(255,255,255,.96); text-shadow:0 1px 2px rgba(0,0,0,.35); }}
+  .bp {{ position:absolute; top:-16px; left:0; right:0; text-align:center; font-size:10px;
+         font-weight:600; color:#8b94a3; letter-spacing:-.2px; }}
   .m {{ position:absolute; bottom:0; left:3px; right:3px; background:rgba(255,255,255,.055);
         border-radius:3px 3px 0 0; z-index:0; }}
   .mv {{ position:absolute; top:3px; left:0; right:0; text-align:center; font-size:10px;
