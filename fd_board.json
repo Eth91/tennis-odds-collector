@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T00:00:02Z",
+ "captured_at": "2026-07-27T00:04:55Z",
  "matches": [
   {
    "event_id": 35870544,
@@ -8,9 +8,9 @@
    "p1_norm": "filip mlynarski",
    "p2_norm": "jakub zochniak",
    "open_date": "2026-07-26T23:55:00.000Z",
-   "line": 66.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870548,
@@ -19,8 +19,8 @@
    "p1_norm": "sebastian krupa",
    "p2_norm": "oskar sokolowski",
    "open_date": "2026-07-27T00:00:00.000Z",
-   "line": 72.5,
-   "over_odds": -110,
+   "line": 76.5,
+   "over_odds": -115,
    "under_odds": -120
   },
   {
