@@ -1,6 +1,6 @@
 # Pitcher strikeout alt-ladder scan (cross-book line-shopping)
 
-_2026-07-27 05:45 UTC · fair = vig-stripped consensus of the books posting each rung. NO projection model (backtest: corr 0.37, too weak to price K tails; and pricing a book's unique rung off a model just bets our own error). Only rungs >=2 books agree on can be flagged._
+_2026-07-27 06:14 UTC · fair = vig-stripped consensus of the books posting each rung. NO projection model (backtest: corr 0.37, too weak to price K tails; and pricing a book's unique rung off a model just bets our own error). Only rungs >=2 books agree on can be flagged._
 
 **No +EV rung tonight** — the K market is efficient; even the best of 3 books is -EV on every agreeing rung. This is a SHOPPING sheet (best book per rung to minimize vig), not a bet list. A genuine +EV rung (a slow book) would ⭐ here.
 
@@ -30,10 +30,10 @@ _2026-07-27 05:45 UTC · fair = vig-stripped consensus of the books posting each
 
 **Brandon Sproat**
   O2.5: FD -670 (1 book, no consensus)
-  O3.5: FD -230 (1 book, no consensus)
+  O3.5: FD -240 (1 book, no consensus)
   O4.5: fair 46% · FD +104 DK -105 → best FD
   O5.5: FD +240 (1 book, no consensus)
-  O6.5: FD +500 (1 book, no consensus)
+  O6.5: FD +480 (1 book, no consensus)
 
 **Tatsuya Imai**
   O2.5: FD -4505 (1 book, no consensus)
@@ -58,22 +58,6 @@ _2026-07-27 05:45 UTC · fair = vig-stripped consensus of the books posting each
   O5.5: FD +220 (1 book, no consensus)
   O6.5: FD +470 (1 book, no consensus)
 
-**Tyler Mahle**
-  O2.5: FD -1000 (1 book, no consensus)
-  O3.5: FD -330 (1 book, no consensus)
-  O4.5: fair 53% · DK -132 FD -136 → best DK
-  O5.5: FD +164 (1 book, no consensus)
-  O6.5: FD +340 (1 book, no consensus)
-  O7.5: FD +750 (1 book, no consensus)
-
-**Chase Burns**
-  O3.5: FD -1600 (1 book, no consensus)
-  O4.5: FD -480 (1 book, no consensus)
-  O5.5: FD -200 (1 book, no consensus)
-  O6.5: fair 44% · FD +114 DK +105 → best FD
-  O7.5: FD +235 (1 book, no consensus)
-  O8.5: FD +470 (1 book, no consensus)
-
 **Walbert Urena**
   O2.5: FD -720 (1 book, no consensus)
   O3.5: FD -250 (1 book, no consensus)
@@ -96,11 +80,27 @@ _2026-07-27 05:45 UTC · fair = vig-stripped consensus of the books posting each
   O4.5: FD +186 (1 book, no consensus)
   O5.5: FD +400 (1 book, no consensus)
 
+**Chase Burns**
+  O3.5: FD -1600 (1 book, no consensus)
+  O4.5: FD -500 (1 book, no consensus)
+  O5.5: FD -205 (1 book, no consensus)
+  O6.5: fair 44% · FD +112 DK +105 → best FD
+  O7.5: FD +235 (1 book, no consensus)
+  O8.5: FD +470 (1 book, no consensus)
+
 **Andrew Alvarez**
   O2.5: FD -290 (1 book, no consensus)
   O3.5: fair 48% · FD -104 DK -109 → best FD
   O4.5: FD +235 (1 book, no consensus)
   O5.5: FD +540 (1 book, no consensus)
+
+**Tyler Mahle**
+  O2.5: FD -1000 (1 book, no consensus)
+  O3.5: FD -320 (1 book, no consensus)
+  O4.5: fair 53% · DK -132 FD -132 → best DK
+  O5.5: FD +168 (1 book, no consensus)
+  O6.5: FD +350 (1 book, no consensus)
+  O7.5: FD +750 (1 book, no consensus)
 
 **Kumar Rocker**
   O2.5: FD -770 (1 book, no consensus)
@@ -155,9 +155,9 @@ _2026-07-27 05:45 UTC · fair = vig-stripped consensus of the books posting each
   O6.5: FD +470 (1 book, no consensus)
 
 **Slade Cecconi**
-  O2.5: FD -700 (1 book, no consensus)
-  O3.5: FD -245 (1 book, no consensus)
-  O4.5: fair 46% · FD +100 DK -102 → best FD
+  O2.5: FD -720 (1 book, no consensus)
+  O3.5: FD -260 (1 book, no consensus)
+  O4.5: fair 47% · FD -102 DK -102 → best FD
   O5.5: FD +230 (1 book, no consensus)
   O6.5: FD +480 (1 book, no consensus)
 
@@ -166,18 +166,4 @@ _2026-07-27 05:45 UTC · fair = vig-stripped consensus of the books posting each
   O3.5: fair 40% · DK +129 FD +128 → best DK
   O4.5: FD +310 (1 book, no consensus)
   O5.5: FD +750 (1 book, no consensus)
-
-**Cristopher Sanchez**
-  O4.5: BETMGM -1111 (1 book, no consensus)
-  O5.5: BETMGM -526 (1 book, no consensus)
-  O6.5: BETMGM -278 (1 book, no consensus)
-  O7.5: BETMGM -154 (1 book, no consensus)
-  O8.5: BETMGM +115 (1 book, no consensus)
-
-**Will Warren**
-  O2.5: BETMGM -625 (1 book, no consensus)
-  O3.5: BETMGM -227 (1 book, no consensus)
-  O4.5: BETMGM +105 (1 book, no consensus)
-  O5.5: BETMGM +230 (1 book, no consensus)
-  O6.5: BETMGM +500 (1 book, no consensus)
 
