@@ -39,3 +39,5 @@ arsenal_live.json
 fanduel_props.sqlite
 fanduel_props.sqlite-wal
 fanduel_props.sqlite-shm
+fanduel_props.bak.sqlite
+fanduel_props.tmp
