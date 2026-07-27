@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T04:20:37Z",
+ "captured_at": "2026-07-27T04:25:30Z",
  "matches": [
   {
    "event_id": 35870781,
@@ -8,9 +8,9 @@
    "p1_norm": "wojciech wojtaszczyk",
    "p2_norm": "oliwier sokolowski",
    "open_date": "2026-07-27T04:10:00.000Z",
-   "line": 85.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 82.5,
+   "over_odds": 100,
+   "under_odds": -140
   },
   {
    "event_id": 35870782,
@@ -19,9 +19,9 @@
    "p1_norm": "milosz piecowski",
    "p2_norm": "igor dabrowski",
    "open_date": "2026-07-27T04:10:00.000Z",
-   "line": 92.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 95.5,
+   "over_odds": -105,
+   "under_odds": -135
   },
   {
    "event_id": 35870783,
@@ -30,7 +30,7 @@
    "p1_norm": "karol wisniewski",
    "p2_norm": "grzegorz poliniewicz",
    "open_date": "2026-07-27T04:10:00.000Z",
-   "line": 88.5,
+   "line": 92.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -41,9 +41,9 @@
    "p1_norm": "jakub nowak",
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-07-27T04:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 80.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35870788,
@@ -63,9 +63,9 @@
    "p1_norm": "artur sobel",
    "p2_norm": "kamil kostyk",
    "open_date": "2026-07-27T04:25:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 79.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35870801,
@@ -110,6 +110,28 @@
    "line": 75.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35870809,
+   "p1": "Kamil Rudomina",
+   "p2": "Michal Minda",
+   "p1_norm": "kamil rudomina",
+   "p2_norm": "michal minda",
+   "open_date": "2026-07-27T04:50:00.000Z",
+   "line": 79.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35870810,
+   "p1": "Dariusz Maszczynski",
+   "p2": "Michal Wolny",
+   "p1_norm": "dariusz maszczynski",
+   "p2_norm": "michal wolny",
+   "open_date": "2026-07-27T04:50:00.000Z",
+   "line": 75.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
