@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T18:23:10Z",
+ "captured_at": "2026-07-27T18:29:01Z",
  "matches": [
-  {
-   "event_id": 35873609,
-   "p1": "Pawel Chojnacki",
-   "p2": "Artur Kubiak",
-   "p1_norm": "pawel chojnacki",
-   "p2_norm": "artur kubiak",
-   "open_date": "2026-07-27T18:10:00.000Z",
-   "line": 100.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
   {
    "event_id": 35873636,
    "p1": "Michal Durda",
@@ -19,9 +8,9 @@
    "p1_norm": "michal durda",
    "p2_norm": "grzegorz marud",
    "open_date": "2026-07-27T18:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 60.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35873657,
@@ -31,8 +20,8 @@
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-27T18:25:00.000Z",
    "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35873663,
@@ -77,6 +66,39 @@
    "line": 76.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35873699,
+   "p1": "Lukasz Jarocki",
+   "p2": "Adrian Spychala",
+   "p1_norm": "lukasz jarocki",
+   "p2_norm": "adrian spychala",
+   "open_date": "2026-07-27T18:50:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35873701,
+   "p1": "Kacper Marchlewski",
+   "p2": "Adrian Fabis",
+   "p1_norm": "kacper marchlewski",
+   "p2_norm": "adrian fabis",
+   "open_date": "2026-07-27T18:55:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35873702,
+   "p1": "Michal Guzik",
+   "p2": "Pawel Chojnacki",
+   "p1_norm": "michal guzik",
+   "p2_norm": "pawel chojnacki",
+   "open_date": "2026-07-27T18:55:00.000Z",
+   "line": 71.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
