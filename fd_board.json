@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T05:49:57Z",
+ "captured_at": "2026-07-27T05:55:02Z",
  "matches": [
   {
    "event_id": 35871166,
@@ -8,20 +8,9 @@
    "p1_norm": "janus slawomir",
    "p2_norm": "michal wolny",
    "open_date": "2026-07-27T05:35:00.000Z",
-   "line": 87.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35871167,
-   "p1": "Przemyslaw Perzynski",
-   "p2": "Kamil Rudomina",
-   "p1_norm": "przemyslaw perzynski",
-   "p2_norm": "kamil rudomina",
-   "open_date": "2026-07-27T05:35:00.000Z",
-   "line": 86.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 92.5,
+   "over_odds": -145,
+   "under_odds": 105
   },
   {
    "event_id": 35871170,
@@ -30,20 +19,9 @@
    "p1_norm": "milosz piecowski",
    "p2_norm": "wojciech gluszek",
    "open_date": "2026-07-27T05:40:00.000Z",
-   "line": 90.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35871172,
-   "p1": "Karol Wisniewski",
-   "p2": "Josef Braun",
-   "p1_norm": "karol wisniewski",
-   "p2_norm": "josef braun",
-   "open_date": "2026-07-27T05:40:00.000Z",
-   "line": 48.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 94.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35871178,
@@ -53,8 +31,8 @@
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-07-27T05:55:00.000Z",
    "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35871181,
