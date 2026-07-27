@@ -2249,13 +2249,13 @@ def build():
                     for x in _l5:
                         v = x[2] if _isk else x[0]
                         _cols += (f'<div class="col">'
-                                  f'<div class="m" style="height:{max(min(x[1] / 110 * 100, 97), 18):.0f}%" '
-                                  f'title="{x[1]} pitches">'
-                                  f'<span class="mv">{x[1]}p</span></div>'
+                                  f'<div class="m" style="height:{min(x[1] / 115 * 100, 96):.0f}%"'
+                                  f'></div>'
                                   f'<div class="b {"o" if _on(v) else "u"}" '
                                   f'style="height:{v / _mx * 100:.1f}%">'
                                   f'<span class="bv">{v:g}</span></div></div>')
-                    _opps = "".join(f'<span>{html.escape(str(x[4] or ""))}</span>' for x in _l5)
+                    _opps = "".join(f'<span>{html.escape(str(x[4] or ""))}<i>{x[1]}p</i></span>'
+                                    for x in _l5)
                     _wh = (f'<div class="why">{html.escape(f.get("why") or "")}</div>'
                            if f.get("why") else "")
                     _drawer = (f'<div class="bars"><div class="bwrap">{_wh}<div class="chart">'
@@ -2302,15 +2302,12 @@ def build():
                 if _ap:
                     _mx = max([a[1] for a in _ap] + [1])
                     for a in _ap:
-                        _rel = "" if a[5] else '<span class="bv" style="top:-27px;'\
-                                               'color:#c98a3d">R</span>'
                         _bars += (f'<div class="col">'
-                                  f'<div class="m" style="height:{max(min(a[1]/110*100, 97), 18):.0f}%" '
-                                  f'title="{a[1]} pitches">'
-                                  f'<span class="mv">{a[1]}p</span></div>'
+                                  f'<div class="m" style="height:{min(a[1]/115*100, 96):.0f}%"'
+                                  f'></div>'
                                   f'<div class="b {"o" if a[5] else "u"}" '
-                                  f'style="height:{a[0]/24*100:.0f}%">'
-                                  f'<span class="bv">{a[0]}</span></div>{_rel}</div>')
+                                  f'style="height:{min(a[0]/24*100, 96):.0f}%">'
+                                  f'<span class="bv">{a[0]}</span></div></div>')
                 _lines = []
                 if t.get("outs_ln") is not None:
                     _lines.append(f'Outs {t["outs_ln"]:g} · O {_am(float(t["outs_o"]))} / '
@@ -2331,7 +2328,9 @@ def build():
                                 if t.get("why") else "")
                              + f'<div class="chart">{_bars}</div>'
                              f'<div class="opps">'
-                             + "".join(f'<span>{html.escape(str(a[4] or ""))}</span>' for a in _ap)
+                             + "".join(f'<span>{html.escape(str(a[4] or ""))}'
+                                       f'<i>{a[1]}p{"" if a[5] else " R"}</i></span>'
+                                       for a in _ap)
                              + f'</div><div class="bnote">grey = pitch count · bar = outs · '
                              f'R = relief outing · vs {html.escape(t.get("opp") or "")}</div>'
                              + (f'<div class="bnote">{" &nbsp;|&nbsp; ".join(_lines)}</div>'
@@ -2734,16 +2733,21 @@ def build():
   .b {{ width:100%; max-width:26px; border-radius:4px 4px 0 0; position:relative; min-height:3px; z-index:1; }}
   .b.o {{ background:#2f9e63; }}
   .b.u {{ background:#8a3b46; }}
-  .bv {{ position:absolute; top:-15px; left:0; right:0; text-align:center; font-size:10.5px; color:#aab3c1; }}
-  .m {{ position:absolute; bottom:0; left:0; right:0; background:#222b38; border-radius:3px 3px 0 0; z-index:0; }}
+  .bv {{ position:absolute; top:-16px; left:0; right:0; text-align:center; font-size:11px;
+         font-weight:600; color:#c2cad6; }}
+  .m {{ position:absolute; bottom:0; left:3px; right:3px; background:rgba(255,255,255,.055);
+        border-radius:3px 3px 0 0; z-index:0; }}
   .mv {{ position:absolute; top:3px; left:0; right:0; text-align:center; font-size:10px;
          font-weight:700; color:#aeb7c6; letter-spacing:-.2px; }}
   .why {{ color:#9aa3b2; font-size:12.5px; line-height:1.55; margin:0 2px 14px; }}
   .why b {{ color:#d3dae4; font-weight:700; }}
-  .opps {{ display:flex; gap:5px; margin-top:5px; }}
-  .opps span {{ flex:1; text-align:center; font-size:9.5px; color:#6b7484; }}
+  .opps {{ display:flex; gap:5px; margin-top:7px; }}
+  .opps span {{ flex:1; text-align:center; font-size:10px; color:#7d8696; line-height:1.25; }}
+  .opps span i {{ display:block; font-style:normal; font-size:9.5px; color:#59616f;
+                  font-weight:600; letter-spacing:-.2px; }}
   .pline {{ position:absolute; left:0; right:0; height:0; border-top:1.5px dashed #5b9dff88; z-index:2; }}
-  .pline span {{ position:absolute; right:0; top:-8px; font-size:9.5px; color:#5b9dff; background:#08090c; padding:0 3px; }}
+  .pline span {{ position:absolute; left:0; top:-8px; font-size:9.5px; color:#5b9dff;
+                 background:#08090c; padding:0 4px; border-radius:3px; }}
   .bnote {{ color:#7d8696; font-size:11.5px; margin-top:9px; text-align:center; }}
   .regime {{ margin:10px 0 4px; padding:9px 11px; background:#141c28; border:1px solid #223047; border-radius:8px; }}
 .rgh {{ font-size:12px; color:#aab3c1; margin-bottom:7px; }}
