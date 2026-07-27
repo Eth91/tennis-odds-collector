@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T15:17:37Z",
+ "captured_at": "2026-07-27T15:23:42Z",
  "matches": [
-  {
-   "event_id": 35872806,
-   "p1": "Kacper Marchlewski",
-   "p2": "Bartlomiej Wisniewski",
-   "p1_norm": "kacper marchlewski",
-   "p2_norm": "bartlomiej wisniewski",
-   "open_date": "2026-07-27T15:00:00.000Z",
-   "line": 86.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
   {
    "event_id": 35872850,
    "p1": "Patryk Mecik",
@@ -19,18 +8,7 @@
    "p1_norm": "patryk mecik",
    "p2_norm": "wiktor ptak",
    "open_date": "2026-07-27T15:05:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35872859,
-   "p1": "Miroslaw Warzecha",
-   "p2": "Jakub Skorupa",
-   "p1_norm": "miroslaw warzecha",
-   "p2_norm": "jakub skorupa",
-   "open_date": "2026-07-27T15:10:00.000Z",
-   "line": 82.5,
+   "line": 88.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -52,9 +30,9 @@
    "p1_norm": "andriej fomin",
    "p2_norm": "artur kubiak",
    "open_date": "2026-07-27T15:25:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35872916,
@@ -63,8 +41,8 @@
    "p1_norm": "marcin kowalczyk",
    "p2_norm": "bartlomiej mrugala",
    "open_date": "2026-07-27T15:25:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
+   "line": 75.5,
+   "over_odds": -118,
    "under_odds": -116
   },
   {
@@ -86,6 +64,28 @@
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-27T15:35:00.000Z",
    "line": 75.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35872964,
+   "p1": "Michal Krutak",
+   "p2": "Pawel Chojnacki",
+   "p1_norm": "michal krutak",
+   "p2_norm": "pawel chojnacki",
+   "open_date": "2026-07-27T15:50:00.000Z",
+   "line": 75.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35872965,
+   "p1": "Adrian Eliasz",
+   "p2": "Adrian Fabis",
+   "p1_norm": "adrian eliasz",
+   "p2_norm": "adrian fabis",
+   "open_date": "2026-07-27T15:50:00.000Z",
+   "line": 81.5,
    "over_odds": -112,
    "under_odds": -118
   }
