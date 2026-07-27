@@ -1,6 +1,6 @@
 # Pitcher strikeout alt-ladder scan (cross-book line-shopping)
 
-_2026-07-27 12:16 UTC · fair = vig-stripped consensus of the books posting each rung. NO projection model (backtest: corr 0.37, too weak to price K tails; and pricing a book's unique rung off a model just bets our own error). Only rungs >=2 books agree on can be flagged._
+_2026-07-27 13:12 UTC · fair = vig-stripped consensus of the books posting each rung. NO projection model (backtest: corr 0.37, too weak to price K tails; and pricing a book's unique rung off a model just bets our own error). Only rungs >=2 books agree on can be flagged._
 
 **No +EV rung tonight** — the K market is efficient; even the best of 3 books is -EV on every agreeing rung. This is a SHOPPING sheet (best book per rung to minimize vig), not a bet list. A genuine +EV rung (a slow book) would ⭐ here.
 
@@ -17,7 +17,7 @@ _2026-07-27 12:16 UTC · fair = vig-stripped consensus of the books posting each
   O4.5: fair 70% · BETMGM -250 FD -320 → best BETMGM
   O5.5: fair 53% · BETMGM -115 DK -135 FD -136 → best BETMGM
   O6.5: fair 34% · BETMGM +170 FD +162 → best BETMGM
-  O7.5: fair 19% · FD +340 BETMGM +325 → best FD
+  O7.5: fair 20% · FD +340 BETMGM +325 → best FD
   O8.5: FD +680 (1 book, no consensus)
 
 **Martin Perez**
@@ -51,10 +51,17 @@ _2026-07-27 12:16 UTC · fair = vig-stripped consensus of the books posting each
 
 **Max Scherzer**
   O2.5: fair 67% · FD -210 BETMGM -278 → best FD
-  O3.5: fair 43% · FD +126 DK +118 BETMGM +115 → best FD
+  O3.5: fair 40% · BETMGM +130 FD +126 DK +118 → best BETMGM
   O4.5: FD +300 (1 book, no consensus)
   O5.5: FD +750 (1 book, no consensus)
   O6.5: BETMGM +950 (1 book, no consensus)
+
+**Tyler Phillips**
+  O2.5: fair 72% · BETMGM -278 FD -370 → best BETMGM
+  O3.5: fair 53% · BETMGM -120 FD -136 DK -139 → best BETMGM
+  O4.5: fair 32% · FD +182 BETMGM +175 → best FD
+  O5.5: fair 16% · FD +430 BETMGM +350 → best FD
+  O6.5: BETMGM +650 (1 book, no consensus)
 
 **Walbert Urena**
   O2.5: fair 83% · BETMGM -625 FD -720 → best BETMGM
@@ -100,6 +107,14 @@ _2026-07-27 12:16 UTC · fair = vig-stripped consensus of the books posting each
   O5.5: FD +215 (1 book, no consensus)
   O6.5: FD +450 (1 book, no consensus)
 
+**Tyler Mahle**
+  O2.5: fair 86% · BETMGM -769 FD -1000 → best BETMGM
+  O3.5: fair 72% · BETMGM -303 FD -330 → best BETMGM
+  O4.5: fair 54% · DK -135 FD -136 BETMGM -149 → best DK
+  O5.5: fair 36% · FD +164 BETMGM +135 → best FD
+  O6.5: FD +350 (1 book, no consensus)
+  O7.5: FD +750 (1 book, no consensus)
+
 **Zack Wheeler**
   O3.5: FD -4000 (1 book, no consensus)
   O4.5: fair 85% · BETMGM -769 FD -950 → best BETMGM
@@ -109,39 +124,9 @@ _2026-07-27 12:16 UTC · fair = vig-stripped consensus of the books posting each
   O8.5: fair 26% · FD +250 BETMGM +210 → best FD
   O9.5: FD +480 (1 book, no consensus)
 
-**Tyler Mahle**
-  O2.5: fair 86% · BETMGM -833 FD -1000 → best BETMGM
-  O3.5: fair 72% · BETMGM -303 FD -330 → best BETMGM
-  O4.5: fair 54% · DK -135 FD -136 BETMGM -149 → best DK
-  O5.5: fair 37% · FD +164 BETMGM +130 → best FD
-  O6.5: FD +350 (1 book, no consensus)
-  O7.5: FD +750 (1 book, no consensus)
-
-**Max Fried**
-  O2.5: FD -2198 (1 book, no consensus)
-  O3.5: fair 80% · BETMGM -500 FD -520 → best BETMGM
-  O4.5: fair 64% · BETMGM -208 FD -215 → best BETMGM
-  O5.5: fair 46% · FD +108 DK +103 BETMGM +100 → best FD
-  O6.5: fair 28% · FD +230 BETMGM +195 → best FD
-  O7.5: FD +470 (1 book, no consensus)
-
-**Tyler Phillips**
-  O2.5: fair 74% · BETMGM -333 FD -370 → best BETMGM
-  O3.5: fair 54% · BETMGM -133 FD -136 DK -139 → best BETMGM
-  O4.5: fair 33% · FD +182 BETMGM +155 → best FD
-  O5.5: FD +430 (1 book, no consensus)
-  O6.5: BETMGM +575 (1 book, no consensus)
-
-**Andrew Alvarez**
-  O2.5: fair 68% · BETMGM -238 FD -265 → best BETMGM
-  O3.5: fair 46% · BETMGM +105 FD -102 DK -119 → best BETMGM
-  O4.5: fair 27% · FD +235 BETMGM +210 → best FD
-  O5.5: FD +540 (1 book, no consensus)
-  O6.5: BETMGM +775 (1 book, no consensus)
-
 **Brandon Sproat**
   O2.5: fair 83% · BETMGM -625 FD -670 → best BETMGM
-  O3.5: fair 66% · FD -235 BETMGM -238 → best FD
+  O3.5: fair 66% · BETMGM -227 FD -235 → best BETMGM
   O4.5: fair 46% · FD +104 BETMGM +100 DK -104 → best FD
   O5.5: fair 27% · FD +240 BETMGM +200 → best FD
   O6.5: FD +520 (1 book, no consensus)
@@ -161,6 +146,21 @@ _2026-07-27 12:16 UTC · fair = vig-stripped consensus of the books posting each
   O5.5: fair 46% · FD +104 BETMGM +100 DK -108 → best FD
   O6.5: fair 28% · FD +230 BETMGM +195 → best FD
   O7.5: FD +470 (1 book, no consensus)
+
+**Max Fried**
+  O2.5: FD -2198 (1 book, no consensus)
+  O3.5: fair 79% · BETMGM -500 FD -520 → best BETMGM
+  O4.5: fair 64% · BETMGM -208 FD -215 → best BETMGM
+  O5.5: fair 44% · BETMGM +110 FD +108 DK +103 → best BETMGM
+  O6.5: fair 28% · FD +230 BETMGM +195 → best FD
+  O7.5: FD +470 (1 book, no consensus)
+
+**Andrew Alvarez**
+  O2.5: fair 69% · FD -265 BETMGM -278 → best FD
+  O3.5: fair 48% · FD -102 BETMGM -105 DK -119 → best FD
+  O4.5: fair 28% · FD +235 BETMGM +195 → best FD
+  O5.5: FD +540 (1 book, no consensus)
+  O6.5: BETMGM +700 (1 book, no consensus)
 
 **Zac Thornton**
   O2.5: FD -670 (1 book, no consensus)
