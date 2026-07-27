@@ -1,16 +1,16 @@
 {
- "captured_at": "2026-07-27T17:05:26Z",
+ "captured_at": "2026-07-27T17:12:43Z",
  "matches": [
   {
-   "event_id": 35873438,
-   "p1": "Michal Krutak",
-   "p2": "Artur Kubiak",
-   "p1_norm": "michal krutak",
-   "p2_norm": "artur kubiak",
-   "open_date": "2026-07-27T16:55:00.000Z",
+   "event_id": 35873461,
+   "p1": "Wojciech Tobiasz",
+   "p2": "Piotr Przewlocki",
+   "p1_norm": "wojciech tobiasz",
+   "p2_norm": "piotr przewlocki",
+   "open_date": "2026-07-27T17:05:00.000Z",
    "line": 87.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35873468,
@@ -19,9 +19,9 @@
    "p1_norm": "piotr gesiarz",
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-27T17:10:00.000Z",
-   "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35873497,
@@ -31,6 +31,17 @@
    "p2_norm": "robert kostepski",
    "open_date": "2026-07-27T17:30:00.000Z",
    "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35873508,
+   "p1": "Jakub Cyndera",
+   "p2": "Jakub Skorupa",
+   "p1_norm": "jakub cyndera",
+   "p2_norm": "jakub skorupa",
+   "open_date": "2026-07-27T17:35:00.000Z",
+   "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
   }
