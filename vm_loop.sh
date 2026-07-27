@@ -17,7 +17,7 @@ push(){
   # dropped on the VM migration). `git add -A -f` force-re-adds it every cycle despite the
   # ignore -> committing/hashing 100MB every 75s + git auto-gc repacking those blobs = the
   # swap-thrash. Unstage it here each cycle (keeps -f for the small caches the digests need).
-  git rm --cached -q wnba_lines.sqlite wnba_glog_cache.json 2>/dev/null || true
+  git rm --cached -q wnba_lines.sqlite wnba_glog_cache.json fanduel_props.sqlite fanduel_props.bak.sqlite 2>/dev/null || true
   # NOTE: use `|| true`, NOT `|| return 0`. Since wnba_lines.sqlite (the file that changed every
   # cycle) is now excluded, many cycles have "nothing to commit" — returning early there SKIPS the
   # push, so any already-committed-but-unpushed commits (e.g. a fresh dashboard from fullscan, or a
@@ -42,9 +42,10 @@ push(){
     # NEVER replay Actions-owned snapshots backwards (2026-07-17 disk-full postmortem: replaying
     # the 45MB fanduel_props over origin every cycle ping-ponged with Actions' fresh commits ->
     # a new 45MB blob per cycle with gc off -> 39GB of loose objects -> disk 100% -> loop dead).
-    git checkout FETCH_HEAD -- fanduel_props.sqlite 2>/dev/null || true
+    # (2026-07-27) fanduel_props.sqlite is VM-LOCAL now (untracked, 100MB vs
+    # GitHub hard limit); never replay it from origin.
     git add -A -f 2>/dev/null
-    git rm --cached -q wnba_lines.sqlite wnba_glog_cache.json 2>/dev/null || true
+    git rm --cached -q wnba_lines.sqlite wnba_glog_cache.json fanduel_props.sqlite fanduel_props.bak.sqlite 2>/dev/null || true
     git commit -qm "vm loop data (replayed after failed rebase) [skip ci]" 2>/dev/null || true
     echo "[$(date +%H:%M)] rebase failed -> data replayed onto origin tip"
   }
