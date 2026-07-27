@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T02:54:24Z",
+ "captured_at": "2026-07-27T02:58:57Z",
  "matches": [
   {
    "event_id": 35870728,
@@ -66,6 +66,39 @@
    "line": 79.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35870738,
+   "p1": "Igor Dabrowski",
+   "p2": "Aleksander Lilien",
+   "p1_norm": "igor dabrowski",
+   "p2_norm": "aleksander lilien",
+   "open_date": "2026-07-27T03:25:00.000Z",
+   "line": 79.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35870739,
+   "p1": "Grzegorz Poliniewicz",
+   "p2": "Grzegorz Adamiak",
+   "p1_norm": "grzegorz poliniewicz",
+   "p2_norm": "grzegorz adamiak",
+   "open_date": "2026-07-27T03:25:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35870740,
+   "p1": "Oliwier Sokolowski",
+   "p2": "Pawel Slosarczyk",
+   "p1_norm": "oliwier sokolowski",
+   "p2_norm": "pawel slosarczyk",
+   "open_date": "2026-07-27T03:25:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
