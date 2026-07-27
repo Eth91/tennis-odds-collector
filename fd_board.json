@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T14:27:05Z",
+ "captured_at": "2026-07-27T14:34:07Z",
  "matches": [
-  {
-   "event_id": 35872670,
-   "p1": "Maciej Domin",
-   "p2": "Jakub Kuzmicz",
-   "p1_norm": "maciej domin",
-   "p2_norm": "jakub kuzmicz",
-   "open_date": "2026-07-27T14:10:00.000Z",
-   "line": 73.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
   {
    "event_id": 35872685,
    "p1": "Rafal Niemiec",
@@ -19,9 +8,9 @@
    "p1_norm": "rafal niemiec",
    "p2_norm": "krzysztof juszczyk",
    "open_date": "2026-07-27T14:20:00.000Z",
-   "line": 72.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 62.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35872686,
@@ -30,9 +19,9 @@
    "p1_norm": "aleksander lilien",
    "p2_norm": "miroslaw piecowski",
    "open_date": "2026-07-27T14:20:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 94.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35872687,
@@ -41,9 +30,9 @@
    "p1_norm": "wojciech tobiasz",
    "p2_norm": "wiktor ptak",
    "open_date": "2026-07-27T14:20:00.000Z",
-   "line": 86.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 87.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35872703,
@@ -86,6 +75,39 @@
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-07-27T14:45:00.000Z",
    "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35872804,
+   "p1": "Lukasz Jarocki",
+   "p2": "Maciej Domin",
+   "p1_norm": "lukasz jarocki",
+   "p2_norm": "maciej domin",
+   "open_date": "2026-07-27T15:00:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35872805,
+   "p1": "Michal Guzik",
+   "p2": "Kacper Kwiatkowski",
+   "p1_norm": "michal guzik",
+   "p2_norm": "kacper kwiatkowski",
+   "open_date": "2026-07-27T15:00:00.000Z",
+   "line": 72.5,
+   "over_odds": -110,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35872806,
+   "p1": "Kacper Marchlewski",
+   "p2": "Bartlomiej Wisniewski",
+   "p1_norm": "kacper marchlewski",
+   "p2_norm": "bartlomiej wisniewski",
+   "open_date": "2026-07-27T15:00:00.000Z",
+   "line": 80.5,
    "over_odds": -112,
    "under_odds": -118
   }
