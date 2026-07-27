@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T14:00:24Z",
+ "captured_at": "2026-07-27T14:05:26Z",
  "matches": [
   {
    "event_id": 35872593,
@@ -8,9 +8,9 @@
    "p1_norm": "grzegorz adamiak",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-27T13:45:00.000Z",
-   "line": 60.5,
-   "over_odds": -105,
-   "under_odds": -130
+   "line": 58.5,
+   "over_odds": 100,
+   "under_odds": -140
   },
   {
    "event_id": 35872625,
@@ -19,9 +19,9 @@
    "p1_norm": "milosz piecowski",
    "p2_norm": "przemyslaw perzynski",
    "open_date": "2026-07-27T13:55:00.000Z",
-   "line": 81.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 77.5,
+   "over_odds": 100,
+   "under_odds": -140
   },
   {
    "event_id": 35872626,
@@ -30,9 +30,9 @@
    "p1_norm": "oliwier sokolowski",
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-07-27T13:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 82.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35872627,
@@ -41,9 +41,9 @@
    "p1_norm": "patryk mecik",
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-27T13:55:00.000Z",
-   "line": 73.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 55.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35872670,
