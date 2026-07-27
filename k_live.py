@@ -1439,11 +1439,11 @@ def board(con):
     stk_rec = con.execute(
         "SELECT SUM(w), SUM(l), ROUND(SUM(u),1) FROM ("
         "SELECT SUM(result='W') w, SUM(result='L') l, SUM(COALESCE(pnl,0)) u FROM compass "
-        "WHERE stack=1 AND result IN ('W','L') UNION ALL "
+        "WHERE stack=1 AND result IN ('W','L')" + _RF + " UNION ALL "
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM outs_compass "
-        "WHERE stack=1 AND result IN ('W','L') UNION ALL "
+        "WHERE stack=1 AND result IN ('W','L')" + _RF + " UNION ALL "
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM ethan_k "
-        "WHERE stack=1 AND result IN ('W','L'))").fetchone()
+        "WHERE stack=1 AND result IN ('W','L')" + _RF + ")").fetchone()
     rb_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
                          "FROM route_b WHERE result IN ('W','L') AND (skip IS NULL OR skip='')" + _RF).fetchone()
     rb_today = [dict(zip(("pitcher", "side", "line", "odds", "book", "opp"), r))
