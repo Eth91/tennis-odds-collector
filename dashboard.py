@@ -2274,7 +2274,7 @@ def build():
                              f'<span class="stag">{_TAGLBL.get(f.get("tag"), f.get("tag") or "")}'
                              f'</span></div>'
                              f'<div class="prop"{_click}><div class="prow">'
-                             f'<span class="pind {"over" if _o == "O" else "under"}">{_o}</span>'
+                             f'<span class="pind {"o" if _o == "O" else "u"}">{_o}</span>'
                              f'<span class="plno">{f["line"]:g}</span>'
                              f'<span class="pstat">{f.get("mkt") or ""}</span>'
                              f'<span class="psp"></span>'
@@ -2641,10 +2641,7 @@ def build():
     font-size:15px; font-weight:900; flex:none; }}
   .pind.o {{ color:#5ad98a; background:rgba(90,217,138,.16); }}
   .pind.u {{ color:#74a8ef; background:rgba(116,168,239,.16); }}
-  #mlb .pind {{ width:auto; height:auto; background:none; font-size:24px; font-weight:800;
-                letter-spacing:-.015em; margin-right:2px; }}
-  #mlb .pind.over {{ color:#5ad98a; }}
-  #mlb .pind.under {{ color:#ef6a6a; }}
+  #mlb .pind.u {{ color:#ef6a6a; background:rgba(239,106,106,.16); }}   /* MLB: unders RED */
   /* TT likely-flag bet row — mirrors the WNBA prop-row design system */
   .ttbet {{ display:flex; align-items:center; gap:11px; padding:11px 0 10px; border-bottom:1px solid #161d28; }}
   .ttbet:last-of-type {{ border-bottom:none; }}

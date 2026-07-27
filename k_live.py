@@ -1505,20 +1505,22 @@ def board(con):
                     gate.write_text(json.dumps(seen))
                 except requests.RequestException:
                     pass
+    _rf = FROZEN.get("record_from") or "2000-01-01"
     comb = con.execute(
         "SELECT SUM(w), SUM(l), ROUND(SUM(u),1) FROM ("
         "SELECT SUM(result='W') w, SUM(result='L') l, SUM(COALESCE(pnl,0)) u FROM compass "
-        "WHERE stack=1 AND result IN ('W','L') AND (skip IS NULL OR skip='') UNION ALL "
+        "WHERE stack=1 AND result IN ('W','L') AND (skip IS NULL OR skip='') AND game_date >= ? UNION ALL "
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM outs_compass "
-        "WHERE stack=1 AND result IN ('W','L') AND (skip IS NULL OR skip='') UNION ALL "
+        "WHERE stack=1 AND result IN ('W','L') AND (skip IS NULL OR skip='') AND game_date >= ? UNION ALL "
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM ethan_k "
-        "WHERE stack=1 AND result IN ('W','L') AND (skip IS NULL OR skip='') UNION ALL "
+        "WHERE stack=1 AND result IN ('W','L') AND (skip IS NULL OR skip='') AND game_date >= ? UNION ALL "
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM opener_k "
-        "WHERE result IN ('W','L') AND pinged=1 AND (skip IS NULL OR skip='') UNION ALL "
+        "WHERE result IN ('W','L') AND pinged=1 AND (skip IS NULL OR skip='') AND game_date >= ? UNION ALL "
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM route_a "
-        "WHERE result IN ('W','L') AND pinged=1 AND (skip IS NULL OR skip='') UNION ALL "
+        "WHERE result IN ('W','L') AND pinged=1 AND (skip IS NULL OR skip='') AND game_date >= ? UNION ALL "
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM route_b "
-        "WHERE result IN ('W','L') AND pinged=1 AND (skip IS NULL OR skip=''))").fetchone()
+        "WHERE result IN ('W','L') AND pinged=1 AND (skip IS NULL OR skip='') AND game_date >= ?)",
+        (_rf,) * 6).fetchone()
     comb_today = []
     gd_ = _today_et()
     try:
