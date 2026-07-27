@@ -2198,6 +2198,32 @@ def build():
             n = (d.get("w") or 0) + (d.get("l") or 0)
             return f'{d["w"]}-{d["l"]} ({d["u"]:+.1f}u)' if n else "0-0 · new"
 
+        # ⚡OPENER + 💠PO play strips (ping<->board coherence)
+        for _key, _ttl, _sub in (("opener", "⚡ OPENER · Early K Strikes",
+                                  "pre-lineup, soft price · bt 57-58% +9%"),
+                                 ("route_a", "💠 PREMIUM OUTS · Route-A",
+                                  "away + contact + line&gt;median · LIVE 25-9 (73.5%)")):
+            _sec = _cb.get(_key) or {}
+            _tod = _sec.get("today") or []
+            _rc = f'{_sec.get("w", 0)}-{_sec.get("l", 0)}'
+            mlb_html += (f'<div class="op-title">{_ttl}<span> · record {_rc} · {_sub}</span></div>')
+            if _tod:
+                for f in _tod:
+                    _o = "O" if f.get("side") == "over" else "U"
+                    mlb_html += (f'<div class="pblk"><div class="phd">'
+                                 f'<span class="pname">{html.escape(_short(f["pitcher"]))}</span>'
+                                 f'<span class="psp2"></span></div>'
+                                 f'<div class="prop"><div class="prow">'
+                                 f'<span class="pind {"over" if _o == "O" else "under"}">{_o}</span>'
+                                 f'<span class="plno">{f["line"]:g}</span>'
+                                 f'<span class="pstat">{"Strikeouts" if _key == "opener" else "Outs"}</span>'
+                                 f'<span class="psp"></span>'
+                                 f'<span class="podds">{_am(float(f["odds"]))}</span>'
+                                 f'<span class="pedge hi">0.5u vs {html.escape(f.get("opp") or "")}'
+                                 f'</span></div></div></div>')
+            else:
+                mlb_html += '<div class="xt">no strikes yet today</div>'
+
         # ETHAN'S K — the primary MLB stream (user's model, pings live 2026-07-27;
         # compass/outs benched to board-only). Rendered FIRST.
         _et = _cb.get("ethan") or {}

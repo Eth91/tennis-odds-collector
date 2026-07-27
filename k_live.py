@@ -1140,6 +1140,12 @@ def board(con):
         "WHERE stack=1 AND result IN ('W','L'))").fetchone()
     ra_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
                          "FROM route_a WHERE result IN ('W','L')").fetchone()
+    ra_today = [dict(zip(("pitcher", "side", "line", "odds", "book", "opp"), r))
+                for r in con.execute("SELECT pitcher, side, line, odds, book, opp FROM route_a "
+                                     "WHERE game_date=?", (_today_et(),))]
+    opn_today = [dict(zip(("pitcher", "side", "line", "odds", "book", "opp", "score"), r))
+                 for r in con.execute("SELECT pitcher, side, line, odds, book, opp, score "
+                                      "FROM opener_k WHERE game_date=?", (_today_et(),))]
     opn_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
                           "FROM opener_k WHERE result IN ('W','L')").fetchone()
     eth_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
@@ -1217,8 +1223,10 @@ def board(con):
          "ethan": {"w": eth_rec[0] or 0, "l": eth_rec[1] or 0, "u": eth_rec[2] or 0.0,
                    "today": eth_today},
          "stack": {"w": stk_rec[0] or 0, "l": stk_rec[1] or 0, "u": stk_rec[2] or 0.0},
-         "opener": {"w": opn_rec[0] or 0, "l": opn_rec[1] or 0, "u": opn_rec[2] or 0.0},
-         "route_a": {"w": ra_rec[0] or 0, "l": ra_rec[1] or 0, "u": ra_rec[2] or 0.0},
+         "opener": {"w": opn_rec[0] or 0, "l": opn_rec[1] or 0, "u": opn_rec[2] or 0.0,
+                    "today": opn_today},
+         "route_a": {"w": ra_rec[0] or 0, "l": ra_rec[1] or 0, "u": ra_rec[2] or 0.0,
+                     "today": ra_today},
          "ladder": {"w": lad_rec[0] or 0, "l": lad_rec[1] or 0, "u": lad_rec[2] or 0.0},
          "kagree": {"w": kag_rec[0] or 0, "l": kag_rec[1] or 0, "u": kag_rec[2] or 0.0},
          "today": flags,
@@ -1299,6 +1307,21 @@ def flag_route_a(con):
             except requests.RequestException as e:
                 print(f"route_a ping failed: {str(e)[:60]}")
         print(f"route_a: {g['pitcher']} U{best[0]}")
+    if topic:
+        for p_, ln_, od_, bk_, opp_ in con.execute(
+                "SELECT pitcher, line, odds, book, opp FROM route_a "
+                "WHERE game_date=? AND pinged=0", (gd,)).fetchall():
+            am = f"+{round((od_-1)*100)}" if od_ >= 2 else f"-{round(100/(od_-1))}"
+            try:
+                requests.post(f"https://ntfy.sh/{topic}",
+                              data=(f"💠PO ⚾OUTS {opp_} {p_} U{ln_:g} {am} {bk_.upper()} "
+                                    f"0.5u (away·contact·line>med — live 25-9)").encode(),
+                              params={"title": "Pickz", "priority": "high"}, timeout=15
+                              ).raise_for_status()
+                con.execute("UPDATE route_a SET pinged=1 WHERE pitcher=? AND game_date=?",
+                            (p_, gd))
+            except requests.RequestException:
+                pass
     con.commit()
 
 
@@ -1376,6 +1399,21 @@ def opener_strike(con):
             except requests.RequestException as e:
                 print(f"opener ping failed: {str(e)[:60]}")
         print(f"opener strike: {g['pitcher']} {side} {best[0]}")
+    if topic:   # retry any unsent pings (rows flagged during manual/env-less runs)
+        for p_, sd_, ln_, od_, bk_, opp_ in con.execute(
+                "SELECT pitcher, side, line, odds, book, opp FROM opener_k "
+                "WHERE game_date=? AND pinged=0", (gd,)).fetchall():
+            am = f"+{round((od_-1)*100)}" if od_ >= 2 else f"-{round(100/(od_-1))}"
+            try:
+                requests.post(f"https://ntfy.sh/{topic}",
+                              data=(f"⚡OPENER ⚾K {opp_} {p_} {'O' if sd_ == 'over' else 'U'}"
+                                    f"{ln_:g}K {am} {bk_.upper()} 0.5u (early strike)").encode(),
+                              params={"title": "Pickz", "priority": "high"}, timeout=15
+                              ).raise_for_status()
+                con.execute("UPDATE opener_k SET pinged=1 WHERE pitcher=? AND game_date=?",
+                            (p_, gd))
+            except requests.RequestException:
+                pass
     con.commit()
 
 
@@ -1436,6 +1474,8 @@ def stack_ping(con):
     import os
     topic = os.environ.get("NTFY_TOPIC")
     ST = FROZEN.get("stack") or {}
+    if not topic:
+        return          # never consume stack slots silently (manual runs lack NTFY_TOPIC)
     cap = ST.get("cap", 3)
     plo, phi = ST.get("plo", 1.667), ST.get("phi", 2.00)
     gd = _today_et()
