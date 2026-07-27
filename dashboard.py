@@ -2202,7 +2202,7 @@ def build():
                 _subs.append(f'{_lbl2} {_d2["w"]}-{_d2["l"]}')
         _TAGLBL = {"💎LK": "lineup edge", "★AR": "arsenal fit", "⚡STK": "composite",
                    "★★K": "double signal", "🧪ETH": "whiff stack", "⚡OPN": "early strike",
-                   "💠PO": "short-start"}
+                   "💠PO": "short-start", "🐴WO": "workhorse"}
         _cnote = ""
         if (_clv.get("n") or 0) >= 3:
             _cnote = (f' · CLV {_clv["toward"]}/{_clv["n"]} toward us'

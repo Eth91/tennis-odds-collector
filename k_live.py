@@ -95,7 +95,7 @@ def _con():
             c.execute(f"ALTER TABLE {tbl} ADD COLUMN team TEXT")
         except sqlite3.OperationalError:
             pass
-    for tbl in ("compass", "outs_compass", "ethan_k", "opener_k", "route_a"):
+    for tbl in ("compass", "outs_compass", "ethan_k", "opener_k", "route_a", "route_b"):
         for col in ("close_ln REAL", "close_od REAL", "clv_dir INTEGER", "clv_pct REAL"):
             try:
                 c.execute(f"ALTER TABLE {tbl} ADD COLUMN {col}")
@@ -131,6 +131,11 @@ def _con():
     c.execute("""CREATE TABLE IF NOT EXISTS route_a(
         pitcher TEXT, game_date TEXT, side TEXT, line REAL, odds REAL, book TEXT,
         r5med REAL, oppk REAL, opp TEXT, flagged_at TEXT, result TEXT, actual INTEGER,
+        pnl REAL, graded_at TEXT, log_date TEXT, pinged INTEGER DEFAULT 0,
+        PRIMARY KEY(pitcher, game_date))""")
+    c.execute("""CREATE TABLE IF NOT EXISTS route_b(
+        pitcher TEXT, game_date TEXT, side TEXT, line REAL, odds REAL, book TEXT,
+        r5med REAL, opp TEXT, flagged_at TEXT, result TEXT, actual INTEGER,
         pnl REAL, graded_at TEXT, log_date TEXT, pinged INTEGER DEFAULT 0,
         PRIMARY KEY(pitcher, game_date))""")
     c.execute("""CREATE TABLE IF NOT EXISTS opener_k(
@@ -1024,12 +1029,13 @@ def grade_parlay(con):
 
 
 STAT_FIELD = {"compass": "strikeOuts", "outlier": "strikeOuts", "outs_compass": "outs",
-              "ethan_k": "strikeOuts", "opener_k": "strikeOuts", "route_a": "outs"}
+              "ethan_k": "strikeOuts", "opener_k": "strikeOuts", "route_a": "outs",
+              "route_b": "outs"}
 
 
 def grade(con):
     rows = []
-    for table in ("compass", "outlier", "outs_compass", "ethan_k", "opener_k", "route_a"):
+    for table in ("compass", "outlier", "outs_compass", "ethan_k", "opener_k", "route_a", "route_b"):
         rows += [(table,) + r for r in con.execute(
             f"SELECT pitcher, game_date, side, line, odds FROM {table} "
             "WHERE result IS NULL AND game_date < ?", (_today_et(),)).fetchall()]
@@ -1089,7 +1095,7 @@ def grade(con):
 
 
 CLV_STAT = {"compass": "strikeouts", "ethan_k": "strikeouts", "opener_k": "strikeouts",
-            "outs_compass": "outs", "route_a": "outs"}
+            "outs_compass": "outs", "route_a": "outs", "route_b": "outs"}
 
 
 def clv_pass(con):
@@ -1201,7 +1207,7 @@ def board(con):
     _cq = " UNION ALL ".join(
         f"SELECT clv_dir, clv_pct FROM {t} WHERE clv_dir IS NOT NULL AND "
         f"({'stack=1' if t in ('compass', 'outs_compass', 'ethan_k') else 'pinged=1'})"
-        for t in ("compass", "outs_compass", "ethan_k", "opener_k", "route_a"))
+        for t in ("compass", "outs_compass", "ethan_k", "opener_k", "route_a", "route_b"))
     _cv = con.execute(f"SELECT COUNT(*), SUM(clv_dir>0), SUM(clv_dir<0), "
                       f"ROUND(AVG(clv_pct),2) FROM ({_cq})").fetchone()
     stk_rec = con.execute(
@@ -1212,6 +1218,11 @@ def board(con):
         "WHERE stack=1 AND result IN ('W','L') UNION ALL "
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM ethan_k "
         "WHERE stack=1 AND result IN ('W','L'))").fetchone()
+    rb_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
+                         "FROM route_b WHERE result IN ('W','L')").fetchone()
+    rb_today = [dict(zip(("pitcher", "side", "line", "odds", "book", "opp"), r))
+                for r in con.execute("SELECT pitcher, side, line, odds, book, opp FROM route_b "
+                                     "WHERE game_date=?", (_today_et(),))]
     ra_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
                          "FROM route_a WHERE result IN ('W','L')").fetchone()
     ra_today = [dict(zip(("pitcher", "side", "line", "odds", "book", "opp"), r))
@@ -1298,6 +1309,8 @@ def board(con):
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM opener_k "
         "WHERE result IN ('W','L') AND (skip IS NULL OR skip='') UNION ALL "
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM route_a "
+        "WHERE result IN ('W','L') UNION ALL "
+        "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM route_b "
         "WHERE result IN ('W','L'))").fetchone()
     comb_today = []
     gd_ = _today_et()
@@ -1323,6 +1336,9 @@ def board(con):
     for f_ in ra_today:
         comb_today.append({**{k: f_[k] for k in ("pitcher", "side", "line", "odds", "book", "opp")},
                            "mkt": "Outs", "tag": "💠PO"})
+    for f_ in rb_today:
+        comb_today.append({**{k: f_[k] for k in ("pitcher", "side", "line", "odds", "book", "opp")},
+                           "mkt": "Outs", "tag": "🐴WO"})
     (HERE / "compass_board.json").write_text(json.dumps(
         {"updated": _now(), "w": rec[0] or 0, "l": rec[1] or 0, "u": rec[2] or 0.0,
          "combined": {"w": comb[0] or 0, "l": comb[1] or 0, "u": comb[2] or 0.0,
@@ -1341,6 +1357,8 @@ def board(con):
                     "today": opn_today},
          "route_a": {"w": ra_rec[0] or 0, "l": ra_rec[1] or 0, "u": ra_rec[2] or 0.0,
                      "today": ra_today},
+         "route_b": {"w": rb_rec[0] or 0, "l": rb_rec[1] or 0, "u": rb_rec[2] or 0.0,
+                     "today": rb_today},
          "ladder": {"w": lad_rec[0] or 0, "l": lad_rec[1] or 0, "u": lad_rec[2] or 0.0},
          "kagree": {"w": kag_rec[0] or 0, "l": kag_rec[1] or 0, "u": kag_rec[2] or 0.0},
          "today": flags,
@@ -1365,6 +1383,7 @@ MLB_REASON = {
     "O": "outs composite (~63% family)",
     "OPN": "early strike at soft pre-lineup price (58% family, +9% ROI)",
     "PO": "away arm vs contact bats, line above his norm (LIVE 25-9, 73%)",
+    "WO": "workhorse — line 2.5+ under his recent median (58%, positive 4/4 yrs)",
 }
 
 
@@ -1450,6 +1469,45 @@ def flag_route_a(con):
             "SELECT pitcher, line, odds, book, opp FROM route_a "
             "WHERE game_date=? AND pinged=0", (gd,)).fetchall():
         mlb_ping(con, "route_a", p_, gd, "PO", opp_, "under", ln_, "Outs", od_, bk_)
+    con.commit()
+
+
+def flag_route_b(con):
+    """🐴 ROUTE-B WORKHORSE OVERS (user-found 2026-07-28, the route-A mirror): over when the
+    main outs line sits >=2.5 BELOW the pitcher's recent-5 MEDIAN outs — the line-ceiling
+    residual. 4/4 years positive at real prices (57.9/57.2/62.7/55.6%). Price 1.55-2.15."""
+    lines = k_lines("outs")
+    gd, ts = _today_et(), _now()
+    for g in slate():
+        if g["started"]:
+            continue
+        if con.execute("SELECT 1 FROM route_b WHERE pitcher=? AND game_date=?",
+                       (g["pitcher"], gd)).fetchone():
+            continue
+        _, _, med = r5outs(g["pid"])
+        if med is None:
+            continue
+        best = None
+        for bk in BOOKS:
+            lls = (lines.get(_norm(g["pitcher"])) or {}).get(bk) or {}
+            two = {ln: v for ln, v in lls.items() if "over" in v and "under" in v}
+            if not two:
+                continue
+            main = min(two, key=lambda ln: abs(two[ln]["over"] - 1.9))
+            od = two[main].get("over")
+            if od and main <= med - 2.5 and 1.55 <= od <= 2.15 and (best is None or od > best[1]):
+                best = (main, od, bk)
+        if not best:
+            continue
+        con.execute("INSERT INTO route_b (pitcher, game_date, side, line, odds, book, r5med, "
+                    "opp, flagged_at) VALUES (?,?,?,?,?,?,?,?,?)",
+                    (g["pitcher"], gd, "over", best[0], best[1], best[2], med,
+                     g["opp_name"], ts))
+        print(f"route_b: {g['pitcher']} O{best[0]} (med {med})")
+    for p_, ln_, od_, bk_, opp_ in con.execute(
+            "SELECT pitcher, line, odds, book, opp FROM route_b "
+            "WHERE game_date=? AND pinged=0", (gd,)).fetchall():
+        mlb_ping(con, "route_b", p_, gd, "WO", opp_, "over", ln_, "Outs", od_, bk_)
     con.commit()
 
 
@@ -1632,6 +1690,8 @@ def stack_ping(con):
         "SELECT pitcher FROM opener_k WHERE game_date=?", (gd,))}
     taken |= {r[0] for r in con.execute(
         "SELECT pitcher FROM route_a WHERE game_date=?", (gd,))}
+    taken |= {r[0] for r in con.execute(
+        "SELECT pitcher FROM route_b WHERE game_date=?", (gd,))}
     cands = [c for c in cands if c["p"] not in taken]
     seen_p = set()
     cands = [c for c in cands if not (c["p"] in seen_p or seen_p.add(c["p"]))]
@@ -1681,6 +1741,7 @@ if __name__ == "__main__":
     c = _con()
     opener_strike(c)
     flag_route_a(c)
+    flag_route_b(c)
     flag(c)
     flag_outs(c)
     flag_ethan(c)
