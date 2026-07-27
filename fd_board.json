@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T00:47:55Z",
+ "captured_at": "2026-07-27T00:52:27Z",
  "matches": [
-  {
-   "event_id": 35870573,
-   "p1": "Filip Mlynarski",
-   "p2": "Tomasz Filbrandt",
-   "p1_norm": "filip mlynarski",
-   "p2_norm": "tomasz filbrandt",
-   "open_date": "2026-07-27T00:45:00.000Z",
-   "line": 73.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35870585,
    "p1": "Arkadiusz Mugowski",
