@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-07-27T14:47:58Z",
+ "captured_at": "2026-07-27T14:52:07Z",
  "matches": [
-  {
-   "event_id": 35872703,
-   "p1": "Grzegorz Poliniewicz",
-   "p2": "Josef Braun",
-   "p1_norm": "grzegorz poliniewicz",
-   "p2_norm": "josef braun",
-   "open_date": "2026-07-27T14:35:00.000Z",
-   "line": 78.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
-  {
-   "event_id": 35872715,
-   "p1": "Wojciech Gluszek",
-   "p2": "Artur Sobel",
-   "p1_norm": "wojciech gluszek",
-   "p2_norm": "artur sobel",
-   "open_date": "2026-07-27T14:40:00.000Z",
-   "line": 62.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35872716,
-   "p1": "Jakub Kaczmarek",
-   "p2": "Pawel Slosarczyk",
-   "p1_norm": "jakub kaczmarek",
-   "p2_norm": "pawel slosarczyk",
-   "open_date": "2026-07-27T14:40:00.000Z",
-   "line": 56.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
   {
    "event_id": 35872733,
    "p1": "Grzegorz Wichowski",
@@ -41,9 +8,9 @@
    "p1_norm": "grzegorz wichowski",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-07-27T14:45:00.000Z",
-   "line": 81.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 90.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35872804,
@@ -63,9 +30,9 @@
    "p1_norm": "michal guzik",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-27T15:00:00.000Z",
-   "line": 72.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 70.5,
+   "over_odds": -120,
+   "under_odds": -110
   },
   {
    "event_id": 35872806,
