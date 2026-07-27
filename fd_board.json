@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T01:15:42Z",
+ "captured_at": "2026-07-27T01:20:17Z",
  "matches": [
   {
    "event_id": 35870598,
@@ -8,9 +8,9 @@
    "p1_norm": "sebastian krupa",
    "p2_norm": "jaroslaw badura",
    "open_date": "2026-07-27T01:10:00.000Z",
-   "line": 75.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35870599,
@@ -19,9 +19,9 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "mateusz rutkowski",
    "open_date": "2026-07-27T01:10:00.000Z",
-   "line": 84.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 93.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35870625,
@@ -64,6 +64,17 @@
    "p2_norm": "michal paszkiewicz",
    "open_date": "2026-07-27T01:35:00.000Z",
    "line": 73.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35870680,
+   "p1": "Jacek Zelezik",
+   "p2": "Kazimierz Rybak",
+   "p1_norm": "jacek zelezik",
+   "p2_norm": "kazimierz rybak",
+   "open_date": "2026-07-27T01:45:00.000Z",
+   "line": 72.5,
    "over_odds": -118,
    "under_odds": -112
   }
