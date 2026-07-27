@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T17:30:11Z",
+ "captured_at": "2026-07-27T17:37:10Z",
  "matches": [
-  {
-   "event_id": 35873468,
-   "p1": "Piotr Gesiarz",
-   "p2": "Adam Staniczek",
-   "p1_norm": "piotr gesiarz",
-   "p2_norm": "adam staniczek",
-   "open_date": "2026-07-27T17:10:00.000Z",
-   "line": 95.5,
-   "over_odds": 115,
-   "under_odds": -160
-  },
   {
    "event_id": 35873497,
    "p1": "Mateusz Sikon",
@@ -19,9 +8,9 @@
    "p1_norm": "mateusz sikon",
    "p2_norm": "robert kostepski",
    "open_date": "2026-07-27T17:30:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35873508,
@@ -30,9 +19,9 @@
    "p1_norm": "jakub cyndera",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-27T17:35:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35873520,
@@ -66,6 +55,17 @@
    "line": 76.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35873576,
+   "p1": "Miroslaw Warzecha",
+   "p2": "Piotr Gesiarz",
+   "p1_norm": "miroslaw warzecha",
+   "p2_norm": "piotr gesiarz",
+   "open_date": "2026-07-27T18:00:00.000Z",
+   "line": 73.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
