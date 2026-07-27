@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T11:52:05Z",
+ "captured_at": "2026-07-27T11:57:47Z",
  "matches": [
   {
    "event_id": 35872427,
@@ -8,7 +8,7 @@
    "p1_norm": "grzegorz poliniewicz",
    "p2_norm": "maciej domin",
    "open_date": "2026-07-27T11:40:00.000Z",
-   "line": 91.5,
+   "line": 92.5,
    "over_odds": -110,
    "under_odds": -125
   },
@@ -19,7 +19,7 @@
    "p1_norm": "adrian spychala",
    "p2_norm": "lukasz jarocki",
    "open_date": "2026-07-27T11:45:00.000Z",
-   "line": 88.5,
+   "line": 94.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -30,9 +30,9 @@
    "p1_norm": "jakub kaczmarek",
    "p2_norm": "rafal niemiec",
    "open_date": "2026-07-27T11:50:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 87.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35872440,
@@ -41,9 +41,9 @@
    "p1_norm": "wojciech gluszek",
    "p2_norm": "aleksander lilien",
    "open_date": "2026-07-27T11:50:00.000Z",
-   "line": 71.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 57.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35872458,
@@ -53,8 +53,8 @@
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-07-27T11:55:00.000Z",
    "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35872470,
@@ -86,6 +86,17 @@
    "p2_norm": "pawel slosarczyk",
    "open_date": "2026-07-27T12:15:00.000Z",
    "line": 71.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35872510,
+   "p1": "Wiktor Ptak",
+   "p2": "Grzegorz Wichowski",
+   "p1_norm": "wiktor ptak",
+   "p2_norm": "grzegorz wichowski",
+   "open_date": "2026-07-27T12:20:00.000Z",
+   "line": 77.5,
    "over_odds": -112,
    "under_odds": -118
   }
