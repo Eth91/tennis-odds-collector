@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T00:19:27Z",
+ "captured_at": "2026-07-27T00:23:59Z",
  "matches": [
-  {
-   "event_id": 35870548,
-   "p1": "Sebastian Krupa",
-   "p2": "Oskar Sokolowski",
-   "p1_norm": "sebastian krupa",
-   "p2_norm": "oskar sokolowski",
-   "open_date": "2026-07-27T00:00:00.000Z",
-   "line": 94.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35870553,
    "p1": "Kazimierz Rybak",
@@ -19,20 +8,9 @@
    "p1_norm": "kazimierz rybak",
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-07-27T00:10:00.000Z",
-   "line": 76.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35870557,
-   "p1": "Mateusz Rutkowski",
-   "p2": "Tomasz Filbrandt",
-   "p1_norm": "mateusz rutkowski",
-   "p2_norm": "tomasz filbrandt",
-   "open_date": "2026-07-27T00:20:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 93.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35870558,
@@ -41,9 +19,9 @@
    "p1_norm": "michal durda",
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-07-27T00:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870559,
