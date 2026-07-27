@@ -425,7 +425,24 @@ def transition_watch(con):
         if mk and mk[0] >= 5.5 and season_starts < 4:
             notes.append("hype-fade angle: K line 5.5+ on a <4-start arm went UNDER "
                          "59%/57% (23-24 / 25-26)")
-        out.append({"pitcher": g["pitcher"], "team": g.get("team_ab") or "",
+        why = ""
+        if "IL/REHAB RETURN" in tags:
+            why = (f"After {gap} days out, the book is pricing a rehab leash — "
+                   + (f"{mk[0]:g} K" if mk else "")
+                   + (f" / {mo[0]:g} outs (~{mo[0]/3:.1f} innings)" if mo else "")
+                   + " is a short-outing number, not his normal workload. The question is "
+                     "whether the club actually caps him.")
+        elif "BP→SP" in tags:
+            why = ("The line leans on his RELIEF outings — short, low pitch counts — rather than "
+                   "his starter form. If he's genuinely stretched back out, the number is stale.")
+        elif "NEW ARM" in tags:
+            why = ("Almost no MLB book on him, so the line is a projection off minor-league and "
+                   "scouting inputs. Note: blindly betting debut arms is EFFICIENT (−3 to −5%); "
+                   "the one edge found was fading hyped K lines.")
+        elif "PITCH-COUNT CLIMB" in tags:
+            why = ("The line discounts his last short start; if the leash is back to normal he "
+                   "clears it comfortably, and if the club is still ramping him he doesn't.")
+        out.append({"why": why, "pitcher": g["pitcher"], "team": g.get("team_ab") or "",
                     "opp": g["opp_name"], "tags": tags, "note": " · ".join(notes),
                     "starts": season_starts,
                     "outs_ln": mo[0] if mo else None, "outs_o": mo[1] if mo else None,
@@ -1512,40 +1529,65 @@ def board(con):
             "SELECT pitcher, side, line, odds, book, opp, driver, premium, team FROM compass "
             "WHERE game_date=? AND stack=1", (gd_,)):
         tag = "💎LK" if drv_ == "lineupK" else ("★AR" if prem_ else "⚡STK")
+        _kwhy = {"💎LK": "Book priced this off the opponent's SEASON K rate; tonight's posted "
+                         "nine is materially whiffier than that average — the edge is the "
+                         "lineup card, not the team.",
+                 "★AR": "Book priced the matchup generically; his specific pitch mix maps onto "
+                        "this lineup's per-pitch holes.",
+                 "⚡STK": "Composite of opponent K rate, his recent form and park sits far enough "
+                         "from the posted number to flag."}.get(tag, "")
         comb_today.append({"pitcher": p_, "side": sd_, "line": ln_, "odds": od_, "book": bk_,
                            "opp": opp_, "team": tm_, "mkt": "K", "tag": tag,
-                           "pinged": True})
+                           "pinged": True, "why": _kwhy})
     for p_, sd_, ln_, od_, bk_, opp_, tm_ in con.execute(
             "SELECT pitcher, side, line, odds, book, opp, team FROM outs_compass "
             "WHERE game_date=? AND stack=1", (gd_,)):
         comb_today.append({"pitcher": p_, "side": sd_, "line": ln_, "odds": od_, "book": bk_,
                            "opp": opp_, "team": tm_, "mkt": "Outs", "tag": "★★K",
-                           "pinged": True})
+                           "pinged": True,
+                           "why": "Both the K and outs models point the same direction on this "
+                                  "arm — one mispricing showing up in two markets."})
     for p_, ln_, od_, bk_, opp_, tm_ in con.execute(
             "SELECT pitcher, line, odds, book, opp, team FROM ethan_k WHERE game_date=? AND stack=1",
             (gd_,)):
         comb_today.append({"pitcher": p_, "side": "over", "line": ln_, "odds": od_, "book": bk_,
                            "opp": opp_, "team": tm_, "mkt": "K", "tag": "🧪ETH",
-                           "pinged": True})
+                           "pinged": True,
+                           "why": "Four-plus of tonight's nine strike out 23%+ and are worse vs "
+                                  "this hand, against a 25%+ K arm — the book's line reflects "
+                                  "team averages, not this specific card."})
     opn_t = {r[0]: r[1] for r in con.execute(
         "SELECT pitcher, team FROM opener_k WHERE game_date=?", (gd_,))}
     for f_ in opn_today:
         comb_today.append({**{k: f_[k] for k in ("pitcher", "side", "line", "odds", "book", "opp")},
                            "team": opn_t.get(f_["pitcher"]), "mkt": "K", "tag": "⚡OPN",
-                           "pinged": False})
-    ra_t = {r[0]: r[1] for r in con.execute(
-        "SELECT pitcher, team FROM route_a WHERE game_date=?", (gd_,))}
+                           "pinged": False,
+                           "why": "Struck at the opening number, hours before lineups post and "
+                                  "the market sharpens."})
+    ra_t = {r[0]: (r[1], r[2], r[3]) for r in con.execute(
+        "SELECT pitcher, team, r5med, oppk FROM route_a WHERE game_date=?", (gd_,))}
     for f_ in ra_today:
+        _tm, _med, _ok = ra_t.get(f_["pitcher"], (None, None, None))
+        _why = (f"Book hung {f_['line']:g} — around his season norm. But he's on the road vs a "
+                f"contact-heavy {f_['opp']} lineup (team K {100*_ok:.0f}%), and the line sits "
+                f"ABOVE his recent-5 median of {_med:g} outs: balls in play run the pitch count "
+                f"up and the hook comes early." if _med and _ok else "")
         comb_today.append({**{k: f_[k] for k in ("pitcher", "side", "line", "odds", "book", "opp")},
-                           "team": ra_t.get(f_["pitcher"]), "mkt": "Outs", "tag": "💠PO",
-                           "pinged": True})
-    rb_t = {r[0]: (r[1], r[2], r[3]) for r in con.execute(
-        "SELECT pitcher, team, prime, pinged FROM route_b WHERE game_date=?", (gd_,))}
+                           "team": _tm, "mkt": "Outs", "tag": "💠PO", "pinged": True,
+                           "why": _why})
+    rb_t = {r[0]: (r[1], r[2], r[3], r[4]) for r in con.execute(
+        "SELECT pitcher, team, prime, pinged, r5med FROM route_b WHERE game_date=?", (gd_,))}
     for f_ in rb_today:
-        tm_, pm_, pg_ = rb_t.get(f_["pitcher"], (None, None, 0))
+        tm_, pm_, pg_, med_ = rb_t.get(f_["pitcher"], (None, None, 0, None))
+        why_ = (f"Book set {f_['line']:g} — {med_ - f_['line']:.1f} outs BELOW his recent-5 median "
+                f"of {med_:g}. They're discounting a short recent start or a cautious leash; his "
+                f"actual workload says he pitches past this number."
+                + (f" Tonight's {f_['opp']} lineup is weak on-base and he's efficient per out — "
+                   f"the setup that lets a workhorse go deep." if pm_ else "")
+                if med_ else "")
         comb_today.append({**{k: f_[k] for k in ("pitcher", "side", "line", "odds", "book", "opp")},
                            "team": tm_, "mkt": "Outs", "tag": "🐴WO+" if pm_ else "🐴WO",
-                           "pinged": bool(pg_)})
+                           "pinged": bool(pg_), "why": why_})
     try:
         trans = transition_watch(con)
     except Exception as e:

@@ -2249,13 +2249,16 @@ def build():
                     for x in _l5:
                         v = x[2] if _isk else x[0]
                         _cols += (f'<div class="col">'
-                                  f'<div class="m" style="height:{min(x[1] / 110 * 100, 97):.0f}%" '
-                                  f'title="{x[1]} pitches"></div>'
+                                  f'<div class="m" style="height:{max(min(x[1] / 110 * 100, 97), 18):.0f}%" '
+                                  f'title="{x[1]} pitches">'
+                                  f'<span class="mv">{x[1]}p</span></div>'
                                   f'<div class="b {"o" if _on(v) else "u"}" '
                                   f'style="height:{v / _mx * 100:.1f}%">'
                                   f'<span class="bv">{v:g}</span></div></div>')
                     _opps = "".join(f'<span>{html.escape(str(x[4] or ""))}</span>' for x in _l5)
-                    _drawer = (f'<div class="bars"><div class="bwrap"><div class="chart">'
+                    _wh = (f'<div class="why">{html.escape(f.get("why") or "")}</div>'
+                           if f.get("why") else "")
+                    _drawer = (f'<div class="bars"><div class="bwrap">{_wh}<div class="chart">'
                                f'<div class="pline" style="bottom:{_ln / _mx * 100:.1f}%">'
                                f'<span>{_ln:g}</span></div>{_cols}</div>'
                                f'<div class="opps">{_opps}</div>'
@@ -2302,8 +2305,9 @@ def build():
                         _rel = "" if a[5] else '<span class="bv" style="top:-27px;'\
                                                'color:#c98a3d">R</span>'
                         _bars += (f'<div class="col">'
-                                  f'<div class="m" style="height:{min(a[1]/110*100, 97):.0f}%" '
-                                  f'title="{a[1]} pitches"></div>'
+                                  f'<div class="m" style="height:{max(min(a[1]/110*100, 97), 18):.0f}%" '
+                                  f'title="{a[1]} pitches">'
+                                  f'<span class="mv">{a[1]}p</span></div>'
                                   f'<div class="b {"o" if a[5] else "u"}" '
                                   f'style="height:{a[0]/24*100:.0f}%">'
                                   f'<span class="bv">{a[0]}</span></div>{_rel}</div>')
@@ -2323,7 +2327,9 @@ def build():
                              f'<span class="pnote" style="margin-left:0">'
                              f'{html.escape(t.get("note") or "")}</span></div></div>'
                              f'<div class="bars open"><div class="bwrap">'
-                             f'<div class="chart">{_bars}</div>'
+                             + (f'<div class="why">{html.escape(t.get("why") or "")}</div>'
+                                if t.get("why") else "")
+                             + f'<div class="chart">{_bars}</div>'
                              f'<div class="opps">'
                              + "".join(f'<span>{html.escape(str(a[4] or ""))}</span>' for a in _ap)
                              + f'</div><div class="bnote">grey = pitch count · bar = outs · '
@@ -2723,14 +2729,15 @@ def build():
   .cdvp.soft {{ color:#79b598; }} .cdvp.tough {{ color:#d9a05f; }}
   .bars {{ display:none; padding:20px 2px 4px; }}
   .bars.open {{ display:block; }}
-  .chart {{ position:relative; display:flex; gap:5px; height:88px; overflow:visible; }}
+  .chart {{ position:relative; display:flex; gap:5px; height:104px; overflow:visible; }}
   .col {{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; position:relative; }}
   .b {{ width:100%; max-width:26px; border-radius:4px 4px 0 0; position:relative; min-height:3px; z-index:1; }}
   .b.o {{ background:#2f9e63; }}
   .b.u {{ background:#8a3b46; }}
   .bv {{ position:absolute; top:-15px; left:0; right:0; text-align:center; font-size:10.5px; color:#aab3c1; }}
   .m {{ position:absolute; bottom:0; left:0; right:0; background:#222b38; border-radius:3px 3px 0 0; z-index:0; }}
-  .mv {{ position:absolute; top:2px; left:0; right:0; text-align:center; font-size:9.5px; font-weight:600; color:#8b94a3; }}
+  .mv {{ position:absolute; top:3px; left:0; right:0; text-align:center; font-size:10px;
+         font-weight:700; color:#aeb7c6; letter-spacing:-.2px; }}
   .why {{ color:#9aa3b2; font-size:12.5px; line-height:1.55; margin:0 2px 14px; }}
   .why b {{ color:#d3dae4; font-weight:700; }}
   .opps {{ display:flex; gap:5px; margin-top:5px; }}
