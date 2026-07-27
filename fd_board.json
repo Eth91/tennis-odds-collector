@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-27T03:17:41Z",
+ "captured_at": "2026-07-27T03:22:11Z",
  "matches": [
-  {
-   "event_id": 35870733,
-   "p1": "Jakub Nowak",
-   "p2": "Michal Durda",
-   "p1_norm": "jakub nowak",
-   "p2_norm": "michal durda",
-   "open_date": "2026-07-27T03:05:00.000Z",
-   "line": 72.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35870735,
-   "p1": "Stapor Rafal",
-   "p2": "Michal Minda",
-   "p1_norm": "stapor rafal",
-   "p2_norm": "michal minda",
-   "open_date": "2026-07-27T03:20:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
   {
    "event_id": 35870738,
    "p1": "Igor Dabrowski",
