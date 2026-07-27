@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T17:18:24Z",
+ "captured_at": "2026-07-27T17:24:12Z",
  "matches": [
-  {
-   "event_id": 35873461,
-   "p1": "Wojciech Tobiasz",
-   "p2": "Piotr Przewlocki",
-   "p1_norm": "wojciech tobiasz",
-   "p2_norm": "piotr przewlocki",
-   "open_date": "2026-07-27T17:05:00.000Z",
-   "line": 71.5,
-   "over_odds": -130,
-   "under_odds": -105
-  },
   {
    "event_id": 35873468,
    "p1": "Piotr Gesiarz",
@@ -19,9 +8,9 @@
    "p1_norm": "piotr gesiarz",
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-27T17:10:00.000Z",
-   "line": 88.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35873497,
