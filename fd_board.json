@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T05:00:56Z",
+ "captured_at": "2026-07-27T05:05:28Z",
  "matches": [
   {
    "event_id": 35870809,
@@ -8,20 +8,9 @@
    "p1_norm": "kamil rudomina",
    "p2_norm": "michal minda",
    "open_date": "2026-07-27T04:50:00.000Z",
-   "line": 93.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35870810,
-   "p1": "Dariusz Maszczynski",
-   "p2": "Michal Wolny",
-   "p1_norm": "dariusz maszczynski",
-   "p2_norm": "michal wolny",
-   "open_date": "2026-07-27T04:50:00.000Z",
-   "line": 79.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 96.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35870811,
@@ -30,9 +19,9 @@
    "p1_norm": "wojciech gluszek",
    "p2_norm": "aleksander lilien",
    "open_date": "2026-07-27T04:55:00.000Z",
-   "line": 54.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 51.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35870812,
@@ -41,20 +30,9 @@
    "p1_norm": "josef braun",
    "p2_norm": "grzegorz adamiak",
    "open_date": "2026-07-27T04:55:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35870813,
-   "p1": "Rafal Niemiec",
-   "p2": "Pawel Slosarczyk",
-   "p1_norm": "rafal niemiec",
-   "p2_norm": "pawel slosarczyk",
-   "open_date": "2026-07-27T04:55:00.000Z",
-   "line": 73.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 87.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35870838,
@@ -64,8 +42,8 @@
    "p2_norm": "piotr gumulinski",
    "open_date": "2026-07-27T05:05:00.000Z",
    "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35870863,
@@ -121,6 +99,17 @@
    "line": 75.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35871156,
+   "p1": "Grzegorz Wichowski",
+   "p2": "Oskar Jadach",
+   "p1_norm": "grzegorz wichowski",
+   "p2_norm": "oskar jadach",
+   "open_date": "2026-07-27T05:30:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
