@@ -80,6 +80,7 @@ n1|2026-07-20|Arike Ogunbowale|points|14.5
 n1|2026-07-20|Arike Ogunbowale|points|15.5
 n1|2026-07-20|Arike Ogunbowale|points|16.5
 n1|2026-07-28|Megan DiLeo|points|12.5
+n1|2026-07-28|Megan DiLeo|points|13.5
 timing|2026-07-18|Aaliyah Edwards|points|9.5
 timing|2026-07-18|DeWanna Bonner|pra|20.5
 timing|2026-07-18|Jonquel Jones|pra|25.5
