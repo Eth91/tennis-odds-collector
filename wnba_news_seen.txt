@@ -40,6 +40,7 @@ rw|1015|Not listed on injury report
 rw|1015|Won't play Wednesday
 rw|1016|Available to play
 rw|1016|Out Wednesday
+rw|1018|Omitted from injury report
 rw|1018|Sitting out Wednesday
 rw|1021|Paces Golden State off bench
 rw|1043|Not listed on injury report
