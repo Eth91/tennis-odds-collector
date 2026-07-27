@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T02:26:11Z",
+ "captured_at": "2026-07-27T02:31:15Z",
  "matches": [
   {
    "event_id": 35870713,
@@ -8,9 +8,9 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "michal durda",
    "open_date": "2026-07-27T02:20:00.000Z",
-   "line": 64.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 69.5,
+   "over_odds": -160,
+   "under_odds": 115
   },
   {
    "event_id": 35870714,
@@ -19,7 +19,7 @@
    "p1_norm": "oskar sokolowski",
    "p2_norm": "michal paszkiewicz",
    "open_date": "2026-07-27T02:20:00.000Z",
-   "line": 85.5,
+   "line": 94.5,
    "over_odds": -125,
    "under_odds": -110
   },
