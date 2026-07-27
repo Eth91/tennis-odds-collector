@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T00:10:09Z",
+ "captured_at": "2026-07-27T00:14:39Z",
  "matches": [
   {
    "event_id": 35870548,
@@ -8,8 +8,8 @@
    "p1_norm": "sebastian krupa",
    "p2_norm": "oskar sokolowski",
    "open_date": "2026-07-27T00:00:00.000Z",
-   "line": 85.5,
-   "over_odds": -120,
+   "line": 89.5,
+   "over_odds": -115,
    "under_odds": -115
   },
   {
@@ -19,20 +19,9 @@
    "p1_norm": "kazimierz rybak",
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-07-27T00:10:00.000Z",
-   "line": 71.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35870554,
-   "p1": "Arkadiusz Mugowski",
-   "p2": "Kamil Rudomina",
-   "p1_norm": "arkadiusz mugowski",
-   "p2_norm": "kamil rudomina",
-   "open_date": "2026-07-27T00:10:00.000Z",
-   "line": 79.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 76.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35870557,
