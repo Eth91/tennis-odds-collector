@@ -1393,11 +1393,11 @@ def board(con):
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM ethan_k "
         "WHERE stack=1 AND result IN ('W','L') AND (skip IS NULL OR skip='') UNION ALL "
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM opener_k "
-        "WHERE result IN ('W','L') AND (skip IS NULL OR skip='') UNION ALL "
+        "WHERE result IN ('W','L') AND pinged=1 AND (skip IS NULL OR skip='') UNION ALL "
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM route_a "
-        "WHERE result IN ('W','L') AND (skip IS NULL OR skip='') UNION ALL "
+        "WHERE result IN ('W','L') AND pinged=1 AND (skip IS NULL OR skip='') UNION ALL "
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM route_b "
-        "WHERE result IN ('W','L') AND (skip IS NULL OR skip=''))").fetchone()
+        "WHERE result IN ('W','L') AND pinged=1 AND (skip IS NULL OR skip=''))").fetchone()
     comb_today = []
     gd_ = _today_et()
     try:
@@ -1409,33 +1409,39 @@ def board(con):
             "WHERE game_date=? AND stack=1", (gd_,)):
         tag = "💎LK" if drv_ == "lineupK" else ("★AR" if prem_ else "⚡STK")
         comb_today.append({"pitcher": p_, "side": sd_, "line": ln_, "odds": od_, "book": bk_,
-                           "opp": opp_, "team": tm_, "mkt": "K", "tag": tag})
+                           "opp": opp_, "team": tm_, "mkt": "K", "tag": tag,
+                           "pinged": True})
     for p_, sd_, ln_, od_, bk_, opp_, tm_ in con.execute(
             "SELECT pitcher, side, line, odds, book, opp, team FROM outs_compass "
             "WHERE game_date=? AND stack=1", (gd_,)):
         comb_today.append({"pitcher": p_, "side": sd_, "line": ln_, "odds": od_, "book": bk_,
-                           "opp": opp_, "team": tm_, "mkt": "Outs", "tag": "★★K"})
+                           "opp": opp_, "team": tm_, "mkt": "Outs", "tag": "★★K",
+                           "pinged": True})
     for p_, ln_, od_, bk_, opp_, tm_ in con.execute(
             "SELECT pitcher, line, odds, book, opp, team FROM ethan_k WHERE game_date=? AND stack=1",
             (gd_,)):
         comb_today.append({"pitcher": p_, "side": "over", "line": ln_, "odds": od_, "book": bk_,
-                           "opp": opp_, "team": tm_, "mkt": "K", "tag": "🧪ETH"})
+                           "opp": opp_, "team": tm_, "mkt": "K", "tag": "🧪ETH",
+                           "pinged": True})
     opn_t = {r[0]: r[1] for r in con.execute(
         "SELECT pitcher, team FROM opener_k WHERE game_date=?", (gd_,))}
     for f_ in opn_today:
         comb_today.append({**{k: f_[k] for k in ("pitcher", "side", "line", "odds", "book", "opp")},
-                           "team": opn_t.get(f_["pitcher"]), "mkt": "K", "tag": "⚡OPN"})
+                           "team": opn_t.get(f_["pitcher"]), "mkt": "K", "tag": "⚡OPN",
+                           "pinged": False})
     ra_t = {r[0]: r[1] for r in con.execute(
         "SELECT pitcher, team FROM route_a WHERE game_date=?", (gd_,))}
     for f_ in ra_today:
         comb_today.append({**{k: f_[k] for k in ("pitcher", "side", "line", "odds", "book", "opp")},
-                           "team": ra_t.get(f_["pitcher"]), "mkt": "Outs", "tag": "💠PO"})
-    rb_t = {r[0]: (r[1], r[2]) for r in con.execute(
-        "SELECT pitcher, team, prime FROM route_b WHERE game_date=?", (gd_,))}
+                           "team": ra_t.get(f_["pitcher"]), "mkt": "Outs", "tag": "💠PO",
+                           "pinged": True})
+    rb_t = {r[0]: (r[1], r[2], r[3]) for r in con.execute(
+        "SELECT pitcher, team, prime, pinged FROM route_b WHERE game_date=?", (gd_,))}
     for f_ in rb_today:
-        tm_, pm_ = rb_t.get(f_["pitcher"], (None, None))
+        tm_, pm_, pg_ = rb_t.get(f_["pitcher"], (None, None, 0))
         comb_today.append({**{k: f_[k] for k in ("pitcher", "side", "line", "odds", "book", "opp")},
-                           "team": tm_, "mkt": "Outs", "tag": "🐴WO+" if pm_ else "🐴WO"})
+                           "team": tm_, "mkt": "Outs", "tag": "🐴WO+" if pm_ else "🐴WO",
+                           "pinged": bool(pg_)})
     for _f in comb_today:                       # last-5 drawer data (outs/pitches/K per start)
         _pid = _pids.get(_f["pitcher"])
         if _pid:
@@ -1609,11 +1615,7 @@ def flag_route_b(con):
                     (g["pitcher"], gd, "over", best[0], best[1], best[2], med,
                      g["opp_name"], ts, g.get("team_ab") or ""))
         print(f"route_b: {g['pitcher']} O{best[0]} (med {med})")
-    for p_, ln_, od_, bk_, opp_ in con.execute(
-            "SELECT pitcher, line, odds, book, opp FROM route_b "
-            "WHERE game_date=? AND pinged=0 AND (skip IS NULL OR skip='')",
-            (gd,)).fetchall():
-        mlb_ping(con, "route_b", p_, gd, "WO", opp_, "over", ln_, "Outs", od_, bk_)
+    # base 🐴WO (~58%) is BOARD-ONLY under the 65% bar; only the PRIME upgrade pings below.
     # 🐴WO+ PRIME upgrade (4/4-yr combo: lineup OBP <= .3197 AND ppo <= 5.0272 —
     # 63.4% pooled +14.5%): needs the POSTED lineup, so runs as a later-cycle upgrade.
     RB_LOBP_MED, RB_PPO_MED = 0.3197, 5.0272
@@ -1637,8 +1639,8 @@ def flag_route_b(con):
                 r = con.execute("SELECT line, odds, book, opp FROM route_b WHERE pitcher=? "
                                 "AND game_date=?", (g["pitcher"], gd)).fetchone()
                 if r:
-                    mlb_ping(con, None, g["pitcher"], gd, "WO+", r[3], "over", r[0], "Outs",
-                             r[1], r[2], extra=" — UPGRADED: weak lineup + efficient arm")
+                    mlb_ping(con, "route_b", g["pitcher"], gd, "WO+", r[3], "over", r[0],
+                             "Outs", r[1], r[2], extra=" — weak lineup + efficient arm")
     con.commit()
 
 
@@ -1704,13 +1706,15 @@ def opener_strike(con):
                     "opp, flagged_at, team) VALUES (?,?,?,?,?,?,?,?,?,?)",
                     (g["pitcher"], gd, side, best[0], best[1], best[2], round(abs(S), 2),
                      g["opp_name"], ts, g.get("team_ab") or ""))
-        mlb_ping(con, "opener_k", g["pitcher"], gd, "OPN", g["opp_name"], side,
-                 best[0], "K", best[1], best[2])
+        if FROZEN.get("opener", {}).get("ping"):
+            mlb_ping(con, "opener_k", g["pitcher"], gd, "OPN", g["opp_name"], side,
+                     best[0], "K", best[1], best[2])
         print(f"opener strike: {g['pitcher']} {side} {best[0]}")
-    for p_, sd_, ln_, od_, bk_, opp_ in con.execute(
-            "SELECT pitcher, side, line, odds, book, opp FROM opener_k "
-            "WHERE game_date=? AND pinged=0 AND (skip IS NULL OR skip='')", (gd,)).fetchall():
-        mlb_ping(con, "opener_k", p_, gd, "OPN", opp_, sd_, ln_, "K", od_, bk_)
+    if FROZEN.get("opener", {}).get("ping"):
+        for p_, sd_, ln_, od_, bk_, opp_ in con.execute(
+                "SELECT pitcher, side, line, odds, book, opp FROM opener_k "
+                "WHERE game_date=? AND pinged=0 AND (skip IS NULL OR skip='')", (gd,)).fetchall():
+            mlb_ping(con, "opener_k", p_, gd, "OPN", opp_, sd_, ln_, "K", od_, bk_)
     con.commit()
 
 
@@ -1812,6 +1816,12 @@ def stack_ping(con):
         cands.append({"tbl": "outs_compass", "pri": 5 if kag else 7, "fam": "O★★K" if kag else "O",
                       "p": p, "side": side, "ln": ln, "od": od, "bk": bk, "mag": sc or 0,
                       "opp": opp})
+    # 65%+ BAR (user 2026-07-27: "if we can't pick direction 70% the model's poor"):
+    # only families with a real 65%+ record reach the phone. The rest keep flagging into
+    # their own tables + the board for the 8/23 review, but never ping and never count
+    # toward the combined (bet) record.
+    PING_FAMS = set(FROZEN.get("ping_fams") or ["ETH", "LK", "AR"])
+    cands = [c for c in cands if c["fam"] in PING_FAMS]
     cands.sort(key=lambda c: (c["pri"], -c["mag"]))
     # HOLE FIX 2 (2026-07-27): one stack bet per pitcher/day — K+outs on the same arm lose
     # together on an early hook; the backtest counted them independent.

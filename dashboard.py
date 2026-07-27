@@ -2225,7 +2225,8 @@ def build():
                      f'<span> · {_crec}{_cnote}'
                      + (" · " + " · ".join(_subs) if _subs else "") + '</span></div>')
         _ctod = sorted(_cmb.get("today") or [],
-                       key=lambda f: (_CONF.get(f.get("tag"), (9,))[0], f.get("odds") or 9))
+                       key=lambda f: (0 if f.get("pinged", True) else 1,
+                                      _CONF.get(f.get("tag"), (9,))[0], f.get("odds") or 9))
         if _ctod:
             for f in _ctod:
                 _o = "O" if f.get("side") == "over" else "U"
@@ -2278,7 +2279,8 @@ def build():
                              f'<span class="pstat">{f.get("mkt") or ""}</span>'
                              f'<span class="psp"></span>'
                              f'<span class="podds">{_am(float(f["odds"]))}</span>{_bkh}'
-                             f'<span class="pnote">0.5u · {html.escape(f.get("opp") or "")}</span>'
+                             f'<span class="pnote">{"0.5u" if f.get("pinged", True) else "board only"}'
+                             f' · {html.escape(f.get("opp") or "")}</span>'
                              f'{_chev}</div></div>{_drawer}</div>')
         else:
             mlb_html += '<div class="xt">no plays yet today — opener strikes land in the morning, '
