@@ -136,8 +136,12 @@ def _con():
     c.execute("""CREATE TABLE IF NOT EXISTS route_b(
         pitcher TEXT, game_date TEXT, side TEXT, line REAL, odds REAL, book TEXT,
         r5med REAL, opp TEXT, flagged_at TEXT, result TEXT, actual INTEGER,
-        pnl REAL, graded_at TEXT, log_date TEXT, pinged INTEGER DEFAULT 0,
+        pnl REAL, graded_at TEXT, log_date TEXT, pinged INTEGER DEFAULT 0, prime INTEGER,
         PRIMARY KEY(pitcher, game_date))""")
+    try:
+        c.execute("ALTER TABLE route_b ADD COLUMN prime INTEGER")
+    except sqlite3.OperationalError:
+        pass
     c.execute("""CREATE TABLE IF NOT EXISTS opener_k(
         pitcher TEXT, game_date TEXT, side TEXT, line REAL, odds REAL, book TEXT,
         score REAL, opp TEXT, flagged_at TEXT, result TEXT, actual INTEGER, pnl REAL,
@@ -1384,6 +1388,7 @@ MLB_REASON = {
     "OPN": "early strike at soft pre-lineup price (58% family, +9% ROI)",
     "PO": "away arm vs contact bats, line above his norm (LIVE 25-9, 73%)",
     "WO": "workhorse — line 2.5+ under his recent median (58%, positive 4/4 yrs)",
+    "WO+": "PRIME workhorse — weak lineup + efficient arm on top (63%, +15% 4/4 yrs)",
 }
 
 
@@ -1508,6 +1513,31 @@ def flag_route_b(con):
             "SELECT pitcher, line, odds, book, opp FROM route_b "
             "WHERE game_date=? AND pinged=0", (gd,)).fetchall():
         mlb_ping(con, "route_b", p_, gd, "WO", opp_, "over", ln_, "Outs", od_, bk_)
+    # 🐴WO+ PRIME upgrade (4/4-yr combo: lineup OBP <= .3197 AND ppo <= 5.0272 —
+    # 63.4% pooled +14.5%): needs the POSTED lineup, so runs as a later-cycle upgrade.
+    RB_LOBP_MED, RB_PPO_MED = 0.3197, 5.0272
+    pend = {r[0] for r in con.execute("SELECT pitcher FROM route_b WHERE game_date=? "
+                                      "AND prime IS NULL", (gd,))}
+    if pend:
+        obp_m, _slg = batter_obp()
+        for g in slate():
+            if g["pitcher"] not in pend or len(g["opp_lineup"]) < 9:
+                continue
+            rates = [obp_m.get(b) for b in g["opp_lineup"][:9]]
+            rates = [x for x in rates if x is not None]
+            ppo, _, _ = r5outs(g["pid"])
+            if len(rates) < 6 or ppo is None:
+                continue
+            lobp = sum(rates) / len(rates)
+            prime = 1 if (lobp <= RB_LOBP_MED and ppo <= RB_PPO_MED) else 0
+            con.execute("UPDATE route_b SET prime=? WHERE pitcher=? AND game_date=?",
+                        (prime, g["pitcher"], gd))
+            if prime:
+                r = con.execute("SELECT line, odds, book, opp FROM route_b WHERE pitcher=? "
+                                "AND game_date=?", (g["pitcher"], gd)).fetchone()
+                if r:
+                    mlb_ping(con, None, g["pitcher"], gd, "WO+", r[3], "over", r[0], "Outs",
+                             r[1], r[2], extra=" — UPGRADED: weak lineup + efficient arm")
     con.commit()
 
 
