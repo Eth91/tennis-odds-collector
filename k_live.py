@@ -332,6 +332,99 @@ def last5(pid):
     return rows[-5:]
 
 
+def recent_apps(pid, n=6):
+    """Last n appearances (relief included) from the daily cache: [outs, pitches, ks, mm-dd,
+    opp, gs, bf]."""
+    r5outs(pid)
+    try:
+        cache = json.loads(OGL_CACHE.read_text())
+    except (OSError, ValueError):
+        return []
+    return [r for r in (cache.get(str(pid)) or []) if len(r) >= 7 and r[6] >= 1][-n:]
+
+
+def transition_watch(con):
+    """🔄 TRANSITION WATCH (user 2026-07-27): pitchers BOTH the model and the book struggle to
+    price — rookies/<5 starts, bullpen→rotation converts still stretching out, IL/rehab
+    returns. No bet is auto-flagged (the models correctly abstain: thin or stale history);
+    these are surfaced with their workload evidence for the user's own read. Backtest note
+    (`_agents/debut_scan.py`): blind debut betting is EFFICIENT (−2.6 to −4.9%), but the
+    HYPE-FADE slice — under when the book hangs a K line >=5.5 on a <4-start arm — ran
+    59.3% (23-24) / 56.5% (25-26), so that angle is annotated when it applies."""
+    gd = _today_et()
+    lines_o = k_lines("outs")
+    lines_k = k_lines("strikeouts")
+    out = []
+    for g in slate():
+        if g["started"]:
+            continue
+        apps = recent_apps(g["pid"], 8)
+        if not apps:
+            continue
+        starts = [a for a in apps if a[5] and a[6] >= 5]
+        season_starts = 0
+        try:
+            cache = json.loads(OGL_CACHE.read_text())
+            season_starts = sum(1 for r in (cache.get(str(g["pid"])) or [])
+                                if len(r) >= 7 and r[5] and r[6] >= 5)
+        except (OSError, ValueError):
+            pass
+        tags, notes = [], []
+        if season_starts < 5:
+            tags.append("NEW ARM")
+            notes.append(f"only {season_starts} start{'s' if season_starts != 1 else ''} this year")
+        last5 = apps[-5:]
+        n_rel = sum(1 for a in last5 if not a[5])
+        if n_rel >= 2 and last5 and last5[-1][5]:
+            tags.append("BP→SP")
+            notes.append(f"{n_rel} relief outings in his last 5 — stretching back out")
+        # days since last appearance (IL / rehab gap)
+        gap = None
+        if apps and apps[-1][3]:
+            try:
+                last_d = dt.date.fromisoformat(f"{gd[:4]}-{apps[-1][3]}")
+                gap = (dt.date.fromisoformat(gd) - last_d).days
+            except ValueError:
+                pass
+        if gap is not None and gap >= 18:
+            tags.append("IL/REHAB RETURN")
+            notes.append(f"{gap} days since his last MLB appearance")
+        # still climbing the pitch ladder?
+        if starts:
+            mx = max(a[1] for a in starts)
+            lastp = starts[-1][1]
+            if mx - lastp >= 15 and lastp:
+                tags.append("PITCH-COUNT CLIMB")
+                notes.append(f"last start {lastp}p vs his {mx}p peak")
+        if not tags:
+            continue
+        def main_line(lines):
+            best = None
+            for bk in BOOKS:
+                lls = (lines.get(_norm(g["pitcher"])) or {}).get(bk) or {}
+                two = {ln: v for ln, v in lls.items() if "over" in v and "under" in v}
+                if not two:
+                    continue
+                m = min(two, key=lambda ln: abs(two[ln]["over"] - 1.9))
+                if best is None or abs(two[m]["over"] - 1.9) < best[3]:
+                    best = (m, two[m].get("over"), two[m].get("under"),
+                            abs(two[m]["over"] - 1.9), bk)
+            return best
+        mo, mk = main_line(lines_o), main_line(lines_k)
+        if mk and mk[0] >= 5.5 and season_starts < 4:
+            notes.append("hype-fade angle: K line 5.5+ on a <4-start arm went UNDER "
+                         "59%/57% (23-24 / 25-26)")
+        out.append({"pitcher": g["pitcher"], "team": g.get("team_ab") or "",
+                    "opp": g["opp_name"], "tags": tags, "note": " · ".join(notes),
+                    "starts": season_starts,
+                    "outs_ln": mo[0] if mo else None, "outs_o": mo[1] if mo else None,
+                    "outs_u": mo[2] if mo else None, "outs_bk": mo[4] if mo else None,
+                    "k_ln": mk[0] if mk else None, "k_o": mk[1] if mk else None,
+                    "k_u": mk[2] if mk else None, "k_bk": mk[4] if mk else None,
+                    "apps": last5})
+    return out
+
+
 def rotation_ok(pid):        # kept for diagnostics; the window rule in r5outs now governs
     """Is he a CURRENT rotation regular? >=3 of his last 5 appearances must be starts.
     Guards the r5-median premise: a swing-man's 'last 5 starts' can be weeks stale with a
@@ -1442,6 +1535,11 @@ def board(con):
         comb_today.append({**{k: f_[k] for k in ("pitcher", "side", "line", "odds", "book", "opp")},
                            "team": tm_, "mkt": "Outs", "tag": "🐴WO+" if pm_ else "🐴WO",
                            "pinged": bool(pg_)})
+    try:
+        trans = transition_watch(con)
+    except Exception as e:
+        print("transition watch skipped:", str(e)[:70])
+        trans = []
     for _f in comb_today:                       # last-5 drawer data (outs/pitches/K per start)
         _pid = _pids.get(_f["pitcher"])
         if _pid:
@@ -1453,6 +1551,7 @@ def board(con):
                       "today": comb_today},
          "clv": {"n": _cv[0] or 0, "toward": _cv[1] or 0, "against": _cv[2] or 0,
                  "avg_pct": _cv[3]},
+         "transition": trans,
          "strike": {"n": _sqr[0] or 0, "best": _sqr[1] or 0, "better_ln": _sqr[2] or 0},
          "drift": {"k": dz_k, "outs": dz_o},
          "tiers": tier_recs,

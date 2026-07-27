@@ -2286,6 +2286,52 @@ def build():
             mlb_html += '<div class="xt">no plays yet today — opener strikes land in the morning, '
             mlb_html += 'lineup plays in the afternoon</div>'
 
+        # 🔄 TRANSITION WATCH — pitchers the models correctly abstain on (thin/stale history)
+        # and the books have to guess at. Evidence surfaced; no auto-bet.
+        _tw = _cb.get("transition") or []
+        if _tw:
+            mlb_html += ('<div class="op-title">🔄 TRANSITION WATCH'
+                         '<span> · new arms · bullpen→rotation · IL &amp; rehab returns · '
+                         'model abstains, book is guessing — your read</span></div>')
+            for t in _tw:
+                _bars = ""
+                _ap = t.get("apps") or []
+                if _ap:
+                    _mx = max([a[1] for a in _ap] + [1])
+                    for a in _ap:
+                        _rel = "" if a[5] else '<span class="bv" style="top:-27px;'\
+                                               'color:#c98a3d">R</span>'
+                        _bars += (f'<div class="col">'
+                                  f'<div class="m" style="height:{min(a[1]/110*100, 97):.0f}%" '
+                                  f'title="{a[1]} pitches"></div>'
+                                  f'<div class="b {"o" if a[5] else "u"}" '
+                                  f'style="height:{a[0]/24*100:.0f}%">'
+                                  f'<span class="bv">{a[0]}</span></div>{_rel}</div>')
+                _lines = []
+                if t.get("outs_ln") is not None:
+                    _lines.append(f'Outs {t["outs_ln"]:g} · O {_am(float(t["outs_o"]))} / '
+                                  f'U {_am(float(t["outs_u"]))} ({(t.get("outs_bk") or "").upper()})')
+                if t.get("k_ln") is not None:
+                    _lines.append(f'K {t["k_ln"]:g} · O {_am(float(t["k_o"]))} / '
+                                  f'U {_am(float(t["k_u"]))} ({(t.get("k_bk") or "").upper()})')
+                mlb_html += (f'<div class="pblk"><div class="phd">'
+                             f'{_mlogo(t.get("team"), "plogo")}'
+                             f'<span class="pname">{html.escape(_short(t["pitcher"]))}</span>'
+                             f'<span class="psp2"></span>'
+                             f'<span class="stag">{" · ".join(t.get("tags") or [])}</span></div>'
+                             f'<div class="prop"><div class="prow">'
+                             f'<span class="pnote" style="margin-left:0">'
+                             f'{html.escape(t.get("note") or "")}</span></div></div>'
+                             f'<div class="bars open"><div class="bwrap">'
+                             f'<div class="chart">{_bars}</div>'
+                             f'<div class="opps">'
+                             + "".join(f'<span>{html.escape(str(a[4] or ""))}</span>' for a in _ap)
+                             + f'</div><div class="bnote">grey = pitch count · bar = outs · '
+                             f'R = relief outing · vs {html.escape(t.get("opp") or "")}</div>'
+                             + (f'<div class="bnote">{" &nbsp;|&nbsp; ".join(_lines)}</div>'
+                                if _lines else "")
+                             + '</div></div></div>')
+
         # MLB tier legend (user 2026-07-26: mirror the WNBA tier-record block)
         _tr = _cb.get("tiers") or {}
         _TDESC = {"S": "premium family · ★AR / deep score / ★★K",
