@@ -2212,7 +2212,12 @@ def build():
                  "⚡STK": (3, "B", "~62%"),
                  "⚡OPN": (3, "B", "~57% + soft price"),
                  "🐴WO": (3, "B", "~58%")}
+        _stq = _cb.get("strike") or {}
         _cnote = ""
+        if (_stq.get("n") or 0) >= 5:
+            _cnote += (f' · best number {_stq["best"]}/{_stq["n"]}'
+                       + (f" ({_stq['better_ln']} better line existed)"
+                          if _stq.get("better_ln") else ""))
         if (_clv.get("n") or 0) >= 3:
             _cnote = (f' · CLV {_clv["toward"]}/{_clv["n"]} toward us'
                       + (f' ({_clv["avg_pct"]:+.1f}%)' if _clv.get("avg_pct") is not None else ""))

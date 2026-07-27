@@ -102,7 +102,7 @@ def _con():
             pass
     for tbl in ("compass", "outs_compass", "ethan_k", "opener_k", "route_a", "route_b"):
         for col in ("close_ln REAL", "close_od REAL", "clv_dir INTEGER", "clv_pct REAL",
-                    "skip TEXT"):
+                    "skip TEXT", "best_ln REAL", "best_od REAL"):
             try:
                 c.execute(f"ALTER TABLE {tbl} ADD COLUMN {col}")
             except sqlite3.OperationalError:
@@ -1214,8 +1214,20 @@ def clv_pass(con):
             sgn = 1 if side == "over" else -1
             clv_dir = 1 if sgn * (cl - ln) > 0 else (-1 if sgn * (cl - ln) < 0 else 0)
             clv_pct = round((od / cod - 1) * 100, 2) if (cl == ln and cod) else None
-            con.execute(f"UPDATE {tbl} SET close_ln=?, close_od=?, clv_dir=?, clv_pct=? "
-                        "WHERE pitcher=? AND game_date=?", (cl, cod, clv_dir, clv_pct, p, gd))
+            # STRIKE QUALITY (2026-07-27, user: "opening lines are soft"): the BEST number
+            # our side saw all day across books — did the once-only strike leave value?
+            best = None
+            for ts, bk, l2, sd, o2 in snaps:
+                if sd != side or not o2 or o2 < 1.55:
+                    continue
+                # favorability: unders want the HIGHEST line, overs the LOWEST
+                rank = (l2 if side == "under" else -l2, o2)
+                if best is None or rank > best[0]:
+                    best = (rank, l2, o2)
+            b_ln, b_od = (best[1], best[2]) if best else (None, None)
+            con.execute(f"UPDATE {tbl} SET close_ln=?, close_od=?, clv_dir=?, clv_pct=?, "
+                        "best_ln=?, best_od=? WHERE pitcher=? AND game_date=?",
+                        (cl, cod, clv_dir, clv_pct, b_ln, b_od, p, gd))
     con.commit()
     fdc.close()
 
@@ -1274,6 +1286,14 @@ def board(con):
         for t in ("compass", "outs_compass", "ethan_k", "opener_k", "route_a", "route_b"))
     _cv = con.execute(f"SELECT COUNT(*), SUM(clv_dir>0), SUM(clv_dir<0), "
                       f"ROUND(AVG(clv_pct),2) FROM ({_cq})").fetchone()
+    _sq = " UNION ALL ".join(
+        f"SELECT line, odds, best_ln, best_od, side FROM {t} WHERE best_ln IS NOT NULL AND "
+        f"({'stack=1' if t in ('compass', 'outs_compass', 'ethan_k') else 'pinged=1'})"
+        for t in ("compass", "outs_compass", "ethan_k", "opener_k", "route_a", "route_b"))
+    _sqr = con.execute(
+        f"SELECT COUNT(*), SUM(CASE WHEN line=best_ln AND odds>=best_od-0.01 THEN 1 ELSE 0 END), "
+        f"SUM(CASE WHEN (side='under' AND best_ln>line) OR (side='over' AND best_ln<line) "
+        f"THEN 1 ELSE 0 END) FROM ({_sq})").fetchone()
     stk_rec = con.execute(
         "SELECT SUM(w), SUM(l), ROUND(SUM(u),1) FROM ("
         "SELECT SUM(result='W') w, SUM(result='L') l, SUM(COALESCE(pnl,0)) u FROM compass "
@@ -1427,6 +1447,7 @@ def board(con):
                       "today": comb_today},
          "clv": {"n": _cv[0] or 0, "toward": _cv[1] or 0, "against": _cv[2] or 0,
                  "avg_pct": _cv[3]},
+         "strike": {"n": _sqr[0] or 0, "best": _sqr[1] or 0, "better_ln": _sqr[2] or 0},
          "drift": {"k": dz_k, "outs": dz_o},
          "tiers": tier_recs,
          "shadow": {"w": shadow[0] or 0, "l": shadow[1] or 0, "u": shadow[2] or 0.0},
