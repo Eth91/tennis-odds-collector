@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T01:10:55Z",
+ "captured_at": "2026-07-27T01:15:42Z",
  "matches": [
-  {
-   "event_id": 35870586,
-   "p1": "Pawel Chojnacki",
-   "p2": "Kazimierz Rybak",
-   "p1_norm": "pawel chojnacki",
-   "p2_norm": "kazimierz rybak",
-   "open_date": "2026-07-27T01:00:00.000Z",
-   "line": 73.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35870598,
    "p1": "Sebastian Krupa",
@@ -19,7 +8,7 @@
    "p1_norm": "sebastian krupa",
    "p2_norm": "jaroslaw badura",
    "open_date": "2026-07-27T01:10:00.000Z",
-   "line": 78.5,
+   "line": 75.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -30,9 +19,9 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "mateusz rutkowski",
    "open_date": "2026-07-27T01:10:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 84.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870625,
@@ -74,9 +63,9 @@
    "p1_norm": "lukasz oracz",
    "p2_norm": "michal paszkiewicz",
    "open_date": "2026-07-27T01:35:00.000Z",
-   "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 73.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
