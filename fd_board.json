@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T01:01:21Z",
+ "captured_at": "2026-07-27T01:06:28Z",
  "matches": [
   {
    "event_id": 35870586,
@@ -8,7 +8,7 @@
    "p1_norm": "pawel chojnacki",
    "p2_norm": "kazimierz rybak",
    "open_date": "2026-07-27T01:00:00.000Z",
-   "line": 78.5,
+   "line": 87.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -66,6 +66,17 @@
    "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35870631,
+   "p1": "Michal Durda",
+   "p2": "Piotr Gumulinski",
+   "p1_norm": "michal durda",
+   "p2_norm": "piotr gumulinski",
+   "open_date": "2026-07-27T01:30:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
