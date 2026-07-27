@@ -1387,8 +1387,10 @@ def drift_z(con, table):
 
 
 def board(con):
+    _rf = FROZEN.get("record_from") or "2000-01-01"      # MLB records start here (user reset)
+    _RF = f" AND game_date >= '{_rf}'"
     rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) FROM compass "
-                      "WHERE result IN ('W','L') AND skip IS NULL").fetchone()
+                      "WHERE result IN ('W','L') AND skip IS NULL" + _RF).fetchone()
     flags = [dict(zip(("pitcher", "side", "line", "odds", "book", "score", "opp", "skip", "team",
                        "game", "premium", "tier", "kelly_u", "ladder_ln", "ladder_od", "driver"), r))
              for r in con.execute("SELECT pitcher, side, line, odds, book, score, opp, skip, team, "
@@ -1396,9 +1398,9 @@ def board(con):
                                   "FROM compass WHERE game_date=? "
                                   "ORDER BY score DESC", (_today_et(),))]
     prem_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) FROM compass "
-                           "WHERE result IN ('W','L') AND skip IS NULL AND premium=1").fetchone()
+                           "WHERE result IN ('W','L') AND skip IS NULL AND premium=1" + _RF).fetchone()
     lk_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) FROM compass "
-                         "WHERE result IN ('W','L') AND skip IS NULL AND driver='lineupK'").fetchone()
+                         "WHERE result IN ('W','L') AND skip IS NULL AND driver='lineupK'" + _RF).fetchone()
     # stack decay tripwire: below 52% after 30 graded -> one-shot alarm
     _sr = con.execute(
         "SELECT SUM(w), SUM(l) FROM ("
@@ -1443,13 +1445,13 @@ def board(con):
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM ethan_k "
         "WHERE stack=1 AND result IN ('W','L'))").fetchone()
     rb_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
-                         "FROM route_b WHERE result IN ('W','L') AND (skip IS NULL OR skip='')").fetchone()
+                         "FROM route_b WHERE result IN ('W','L') AND (skip IS NULL OR skip='')" + _RF).fetchone()
     rb_today = [dict(zip(("pitcher", "side", "line", "odds", "book", "opp"), r))
                 for r in con.execute("SELECT pitcher, side, line, odds, book, opp FROM route_b "
                                      "WHERE game_date=? AND (skip IS NULL OR skip='')",
                                      (_today_et(),))]
     ra_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
-                         "FROM route_a WHERE result IN ('W','L') AND (skip IS NULL OR skip='')").fetchone()
+                         "FROM route_a WHERE result IN ('W','L') AND (skip IS NULL OR skip='')" + _RF).fetchone()
     ra_today = [dict(zip(("pitcher", "side", "line", "odds", "book", "opp"), r))
                 for r in con.execute("SELECT pitcher, side, line, odds, book, opp FROM route_a "
                                      "WHERE game_date=? AND (skip IS NULL OR skip='')",
@@ -1458,10 +1460,10 @@ def board(con):
                  for r in con.execute("SELECT pitcher, side, line, odds, book, opp, score "
                                       "FROM opener_k WHERE game_date=? AND (skip IS NULL OR skip='')", (_today_et(),))]
     opn_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
-                          "FROM opener_k WHERE result IN ('W','L') AND (skip IS NULL OR skip='')").fetchone()
+                          "FROM opener_k WHERE result IN ('W','L') AND (skip IS NULL OR skip='')" + _RF).fetchone()
     eth_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
                           "FROM ethan_k WHERE result IN ('W','L') "
-                          "AND (skip IS NULL OR skip='')").fetchone()
+                          "AND (skip IS NULL OR skip='')" + _RF).fetchone()
     eth_today = [dict(zip(("pitcher", "line", "odds", "book", "opp", "hi_ct", "pk_rate"), r))
                  for r in con.execute("SELECT pitcher, line, odds, book, opp, hi_ct, pk_rate "
                                       "FROM ethan_k WHERE game_date=?", (_today_et(),))]
@@ -1471,7 +1473,7 @@ def board(con):
         u_ = 0.0
         for tbl_ in ("compass", "outs_compass"):
             r_ = con.execute(f"SELECT SUM(result='W'), SUM(result='L'), COALESCE(SUM(pnl),0) "
-                             f"FROM {tbl_} WHERE result IN ('W','L') AND skip IS NULL AND tier=?",
+                             f"FROM {tbl_} WHERE result IN ('W','L') AND skip IS NULL AND tier=?" + _RF,
                              (t_,)).fetchone()
             w_ += r_[0] or 0
             l_ += r_[1] or 0
@@ -1524,7 +1526,6 @@ def board(con):
                     gate.write_text(json.dumps(seen))
                 except requests.RequestException:
                     pass
-    _rf = FROZEN.get("record_from") or "2000-01-01"
     comb = con.execute(
         "SELECT SUM(w), SUM(l), ROUND(SUM(u),1) FROM ("
         "SELECT SUM(result='W') w, SUM(result='L') l, SUM(COALESCE(pnl,0)) u FROM compass "
