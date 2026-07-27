@@ -1,6 +1,6 @@
 # Pitcher strikeout alt-ladder scan (cross-book line-shopping)
 
-_2026-07-27 08:06 UTC · fair = vig-stripped consensus of the books posting each rung. NO projection model (backtest: corr 0.37, too weak to price K tails; and pricing a book's unique rung off a model just bets our own error). Only rungs >=2 books agree on can be flagged._
+_2026-07-27 08:35 UTC · fair = vig-stripped consensus of the books posting each rung. NO projection model (backtest: corr 0.37, too weak to price K tails; and pricing a book's unique rung off a model just bets our own error). Only rungs >=2 books agree on can be flagged._
 
 **No +EV rung tonight** — the K market is efficient; even the best of 3 books is -EV on every agreeing rung. This is a SHOPPING sheet (best book per rung to minimize vig), not a bet list. A genuine +EV rung (a slow book) would ⭐ here.
 
@@ -31,6 +31,13 @@ _2026-07-27 08:06 UTC · fair = vig-stripped consensus of the books posting each
   O5.5: fair 47% · FD +104 DK -110 → best FD
   O6.5: FD +230 (1 book, no consensus)
   O7.5: FD +460 (1 book, no consensus)
+
+**Keider Montero**
+  O2.5: FD -750 (1 book, no consensus)
+  O3.5: FD -250 (1 book, no consensus)
+  O4.5: fair 48% · FD -102 DK -115 → best FD
+  O5.5: FD +220 (1 book, no consensus)
+  O6.5: FD +480 (1 book, no consensus)
 
 **Zack Wheeler**
   O3.5: FD -4000 (1 book, no consensus)
@@ -74,11 +81,11 @@ _2026-07-27 08:06 UTC · fair = vig-stripped consensus of the books posting each
 
 **George Kirby**
   O2.5: FD -2500 (1 book, no consensus)
-  O3.5: FD -560 (1 book, no consensus)
+  O3.5: FD -530 (1 book, no consensus)
   O4.5: FD -215 (1 book, no consensus)
   O5.5: fair 45% · FD +112 DK +101 → best FD
   O6.5: FD +240 (1 book, no consensus)
-  O7.5: FD +500 (1 book, no consensus)
+  O7.5: FD +520 (1 book, no consensus)
 
 **Tyler Mahle**
   O2.5: FD -1000 (1 book, no consensus)
@@ -96,13 +103,6 @@ _2026-07-27 08:06 UTC · fair = vig-stripped consensus of the books posting each
   O6.5: FD +340 (1 book, no consensus)
   O7.5: FD +700 (1 book, no consensus)
 
-**Kumar Rocker**
-  O2.5: FD -770 (1 book, no consensus)
-  O3.5: FD -265 (1 book, no consensus)
-  O4.5: fair 47% · DK +102 FD -106 → best DK
-  O5.5: FD +220 (1 book, no consensus)
-  O6.5: FD +480 (1 book, no consensus)
-
 **Merrill Kelly**
   O2.5: FD -770 (1 book, no consensus)
   O3.5: FD -250 (1 book, no consensus)
@@ -110,10 +110,10 @@ _2026-07-27 08:06 UTC · fair = vig-stripped consensus of the books posting each
   O5.5: FD +235 (1 book, no consensus)
   O6.5: FD +500 (1 book, no consensus)
 
-**Keider Montero**
-  O2.5: FD -750 (1 book, no consensus)
-  O3.5: FD -250 (1 book, no consensus)
-  O4.5: fair 47% · FD -102 DK -108 → best FD
+**Kumar Rocker**
+  O2.5: FD -770 (1 book, no consensus)
+  O3.5: FD -265 (1 book, no consensus)
+  O4.5: fair 46% · DK +102 FD -104 → best DK
   O5.5: FD +220 (1 book, no consensus)
   O6.5: FD +480 (1 book, no consensus)
 
