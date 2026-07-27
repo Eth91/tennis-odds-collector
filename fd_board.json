@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T07:05:35Z",
+ "captured_at": "2026-07-27T07:11:08Z",
  "matches": [
-  {
-   "event_id": 35871325,
-   "p1": "Przemyslaw Perzynski",
-   "p2": "Artur Sobel",
-   "p1_norm": "przemyslaw perzynski",
-   "p2_norm": "artur sobel",
-   "open_date": "2026-07-27T06:50:00.000Z",
-   "line": 88.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
   {
    "event_id": 35871329,
    "p1": "Wojciech Wojtaszczyk",
@@ -19,9 +8,9 @@
    "p1_norm": "wojciech wojtaszczyk",
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-07-27T06:55:00.000Z",
-   "line": 59.5,
-   "over_odds": -130,
-   "under_odds": -105
+   "line": 89.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35871331,
@@ -30,9 +19,9 @@
    "p1_norm": "karol wisniewski",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-27T06:55:00.000Z",
-   "line": 59.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 56.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35871332,
@@ -41,9 +30,9 @@
    "p1_norm": "milosz piecowski",
    "p2_norm": "mateusz trela",
    "open_date": "2026-07-27T06:55:00.000Z",
-   "line": 89.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 93.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35871342,
@@ -52,9 +41,9 @@
    "p1_norm": "witold stechly",
    "p2_norm": "dariusz maszczynski",
    "open_date": "2026-07-27T07:10:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35871343,
@@ -64,8 +53,8 @@
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-27T07:10:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35871348,
@@ -121,6 +110,17 @@
    "line": 80.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35871393,
+   "p1": "Jerzy Michalik",
+   "p2": "Michal Wolny",
+   "p1_norm": "jerzy michalik",
+   "p2_norm": "michal wolny",
+   "open_date": "2026-07-27T07:35:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
