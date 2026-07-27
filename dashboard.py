@@ -2202,7 +2202,16 @@ def build():
                 _subs.append(f'{_lbl2} {_d2["w"]}-{_d2["l"]}')
         _TAGLBL = {"💎LK": "lineup edge", "★AR": "arsenal fit", "⚡STK": "composite",
                    "★★K": "double signal", "🧪ETH": "whiff stack", "⚡OPN": "early strike",
-                   "💠PO": "short-start", "🐴WO": "workhorse"}
+                   "💠PO": "short-start", "🐴WO": "workhorse", "🐴WO+": "prime workhorse"}
+        _CONF = {"💠PO": (0, "S", "~66-73% · live 25-9"),
+                 "🐴WO+": (1, "S", "~63% · 4/4 yrs"),
+                 "💎LK": (1, "S", "~65-70% every yr"),
+                 "★AR": (2, "A", "~65-70% current era"),
+                 "🧪ETH": (2, "A", "~62-66% era-dependent"),
+                 "★★K": (2, "A", "~63-67%"),
+                 "⚡STK": (3, "B", "~62%"),
+                 "⚡OPN": (3, "B", "~57% + soft price"),
+                 "🐴WO": (3, "B", "~58%")}
         _cnote = ""
         if (_clv.get("n") or 0) >= 3:
             _cnote = (f' · CLV {_clv["toward"]}/{_clv["n"]} toward us'
@@ -2210,11 +2219,16 @@ def build():
         mlb_html += (f'<div class="op-title">⚾ MLB MODEL'
                      f'<span> · {_crec}{_cnote}'
                      + (" · " + " · ".join(_subs) if _subs else "") + '</span></div>')
-        _ctod = _cmb.get("today") or []
+        _ctod = sorted(_cmb.get("today") or [],
+                       key=lambda f: (_CONF.get(f.get("tag"), (9,))[0], f.get("odds") or 9))
         if _ctod:
             for f in _ctod:
                 _o = "O" if f.get("side") == "over" else "U"
+                _rk, _tl, _pct = _CONF.get(f.get("tag"), (9, "C", ""))
                 mlb_html += (f'<div class="pblk"><div class="phd">'
+                             f'{_mlogo(f.get("team"), "plogo")}'
+                             f'<span class="tchip t{_tl}" title="{_pct}" '
+                             f'style="margin-right:6px">{_tl}</span>'
                              f'<span class="pname">{html.escape(_short(f["pitcher"]))}</span>'
                              f'<span class="psp2"></span>'
                              f'<span class="stag">{_TAGLBL.get(f.get("tag"), f.get("tag") or "")}'
