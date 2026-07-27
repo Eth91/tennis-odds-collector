@@ -1377,7 +1377,8 @@ def board(con):
     for _f in comb_today:                       # last-5 drawer data (outs/pitches/K per start)
         _pid = _pids.get(_f["pitcher"])
         if _pid:
-            _f["last5"] = last5(_pid)
+            r5outs(_pid)                        # ensure today's cache row exists (started games
+            _f["last5"] = last5(_pid)           # are skipped by the flaggers, so may be uncached)
     (HERE / "compass_board.json").write_text(json.dumps(
         {"updated": _now(), "w": rec[0] or 0, "l": rec[1] or 0, "u": rec[2] or 0.0,
          "combined": {"w": comb[0] or 0, "l": comb[1] or 0, "u": comb[2] or 0.0,
