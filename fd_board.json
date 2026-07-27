@@ -1,50 +1,6 @@
 {
- "captured_at": "2026-07-27T14:34:07Z",
+ "captured_at": "2026-07-27T14:39:49Z",
  "matches": [
-  {
-   "event_id": 35872685,
-   "p1": "Rafal Niemiec",
-   "p2": "Krzysztof Juszczyk",
-   "p1_norm": "rafal niemiec",
-   "p2_norm": "krzysztof juszczyk",
-   "open_date": "2026-07-27T14:20:00.000Z",
-   "line": 62.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35872686,
-   "p1": "Aleksander Lilien",
-   "p2": "Miroslaw Piecowski",
-   "p1_norm": "aleksander lilien",
-   "p2_norm": "miroslaw piecowski",
-   "open_date": "2026-07-27T14:20:00.000Z",
-   "line": 94.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35872687,
-   "p1": "Wojciech Tobiasz",
-   "p2": "Wiktor Ptak",
-   "p1_norm": "wojciech tobiasz",
-   "p2_norm": "wiktor ptak",
-   "open_date": "2026-07-27T14:20:00.000Z",
-   "line": 87.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35872703,
-   "p1": "Grzegorz Poliniewicz",
-   "p2": "Josef Braun",
-   "p1_norm": "grzegorz poliniewicz",
-   "p2_norm": "josef braun",
-   "open_date": "2026-07-27T14:35:00.000Z",
-   "line": 74.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
   {
    "event_id": 35872715,
    "p1": "Wojciech Gluszek",
@@ -53,8 +9,8 @@
    "p2_norm": "artur sobel",
    "open_date": "2026-07-27T14:40:00.000Z",
    "line": 71.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35872716,
@@ -108,6 +64,17 @@
    "p2_norm": "bartlomiej wisniewski",
    "open_date": "2026-07-27T15:00:00.000Z",
    "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35872850,
+   "p1": "Patryk Mecik",
+   "p2": "Wiktor Ptak",
+   "p1_norm": "patryk mecik",
+   "p2_norm": "wiktor ptak",
+   "open_date": "2026-07-27T15:05:00.000Z",
+   "line": 77.5,
    "over_odds": -112,
    "under_odds": -118
   }
