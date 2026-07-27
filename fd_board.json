@@ -1,6 +1,17 @@
 {
- "captured_at": "2026-07-27T19:57:48Z",
+ "captured_at": "2026-07-27T20:04:24Z",
  "matches": [
+  {
+   "event_id": 35873781,
+   "p1": "Jakub Nowak",
+   "p2": "Robert Kostepski",
+   "p1_norm": "jakub nowak",
+   "p2_norm": "robert kostepski",
+   "open_date": "2026-07-27T19:55:00.000Z",
+   "line": 58.5,
+   "over_odds": -110,
+   "under_odds": -125
+  },
   {
    "event_id": 35873787,
    "p1": "Jakub Cyndera",
@@ -8,9 +19,9 @@
    "p1_norm": "jakub cyndera",
    "p2_norm": "dariusz maszczynski",
    "open_date": "2026-07-27T20:00:00.000Z",
-   "line": 75.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 82.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35873791,
@@ -53,6 +64,39 @@
    "p2_norm": "michal durda",
    "open_date": "2026-07-27T20:20:00.000Z",
    "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35873808,
+   "p1": "Kacper Marchlewski",
+   "p2": "Bartlomiej Mrugala",
+   "p1_norm": "kacper marchlewski",
+   "p2_norm": "bartlomiej mrugala",
+   "open_date": "2026-07-27T20:30:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35873809,
+   "p1": "Michal Guzik",
+   "p2": "Artur Kubiak",
+   "p1_norm": "michal guzik",
+   "p2_norm": "artur kubiak",
+   "open_date": "2026-07-27T20:30:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35873810,
+   "p1": "Lukasz Jarocki",
+   "p2": "Michal Olbrycht",
+   "p1_norm": "lukasz jarocki",
+   "p2_norm": "michal olbrycht",
+   "open_date": "2026-07-27T20:30:00.000Z",
+   "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
   }
