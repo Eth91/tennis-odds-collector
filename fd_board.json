@@ -1,50 +1,6 @@
 {
- "captured_at": "2026-07-27T08:35:43Z",
+ "captured_at": "2026-07-27T08:44:44Z",
  "matches": [
-  {
-   "event_id": 35871430,
-   "p1": "Michal Machelski",
-   "p2": "Michal Wolny",
-   "p1_norm": "michal machelski",
-   "p2_norm": "michal wolny",
-   "open_date": "2026-07-27T08:20:00.000Z",
-   "line": 95.5,
-   "over_odds": -165,
-   "under_odds": 120
-  },
-  {
-   "event_id": 35871431,
-   "p1": "Grzegorz Wichowski",
-   "p2": "Wiktor Ptak",
-   "p1_norm": "grzegorz wichowski",
-   "p2_norm": "wiktor ptak",
-   "open_date": "2026-07-27T08:20:00.000Z",
-   "line": 76.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35871442,
-   "p1": "Przemyslaw Perzynski",
-   "p2": "Michal Minda",
-   "p1_norm": "przemyslaw perzynski",
-   "p2_norm": "michal minda",
-   "open_date": "2026-07-27T08:30:00.000Z",
-   "line": 69.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35871443,
-   "p1": "Karol Wisniewski",
-   "p2": "Grzegorz Adamiak",
-   "p1_norm": "karol wisniewski",
-   "p2_norm": "grzegorz adamiak",
-   "open_date": "2026-07-27T08:30:00.000Z",
-   "line": 74.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35871446,
    "p1": "Wojciech Wojtaszczyk",
@@ -52,9 +8,9 @@
    "p1_norm": "wojciech wojtaszczyk",
    "p2_norm": "pawel slosarczyk",
    "open_date": "2026-07-27T08:35:00.000Z",
-   "line": 71.5,
+   "line": 67.5,
    "over_odds": -110,
-   "under_odds": -120
+   "under_odds": -125
   },
   {
    "event_id": 35871447,
@@ -63,9 +19,9 @@
    "p1_norm": "milosz piecowski",
    "p2_norm": "aleksander lilien",
    "open_date": "2026-07-27T08:35:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 90.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35871452,
@@ -85,9 +41,9 @@
    "p1_norm": "witold stechly",
    "p2_norm": "jerzy michalik",
    "open_date": "2026-07-27T08:45:00.000Z",
-   "line": 73.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 78.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35871543,
@@ -132,6 +88,17 @@
    "line": 76.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35871551,
+   "p1": "Patryk Mecik",
+   "p2": "Wiktor Ptak",
+   "p1_norm": "patryk mecik",
+   "p2_norm": "wiktor ptak",
+   "open_date": "2026-07-27T09:05:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
