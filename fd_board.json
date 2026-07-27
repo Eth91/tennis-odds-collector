@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T09:53:56Z",
+ "captured_at": "2026-07-27T09:58:43Z",
  "matches": [
-  {
-   "event_id": 35871713,
-   "p1": "Maciej Domin",
-   "p2": "Marcin Jadczyk",
-   "p1_norm": "maciej domin",
-   "p2_norm": "marcin jadczyk",
-   "open_date": "2026-07-27T09:40:00.000Z",
-   "line": 71.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35871721,
    "p1": "Lukasz Jarocki",
@@ -19,8 +8,8 @@
    "p1_norm": "lukasz jarocki",
    "p2_norm": "karol wisniewski",
    "open_date": "2026-07-27T09:45:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
+   "line": 78.5,
+   "over_odds": -115,
    "under_odds": -115
   },
   {
@@ -30,9 +19,9 @@
    "p1_norm": "rafal niemiec",
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-07-27T09:50:00.000Z",
-   "line": 82.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 86.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35871734,
@@ -41,9 +30,9 @@
    "p1_norm": "aleksander lilien",
    "p2_norm": "przemyslaw perzynski",
    "open_date": "2026-07-27T09:50:00.000Z",
-   "line": 88.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 82.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35871754,
@@ -52,9 +41,9 @@
    "p1_norm": "piotr przewlocki",
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-27T09:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35871766,
@@ -63,9 +52,9 @@
    "p1_norm": "grzegorz poliniewicz",
    "p2_norm": "grzegorz adamiak",
    "open_date": "2026-07-27T10:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35871773,
@@ -108,6 +97,17 @@
    "p2_norm": "wojciech tobiasz",
    "open_date": "2026-07-27T10:20:00.000Z",
    "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35871810,
+   "p1": "Marcin Jadczyk",
+   "p2": "Jakub Kuzmicz",
+   "p1_norm": "marcin jadczyk",
+   "p2_norm": "jakub kuzmicz",
+   "open_date": "2026-07-27T10:25:00.000Z",
+   "line": 78.5,
    "over_odds": -112,
    "under_odds": -118
   }
