@@ -101,7 +101,8 @@ def _con():
         except sqlite3.OperationalError:
             pass
     for tbl in ("compass", "outs_compass", "ethan_k", "opener_k", "route_a", "route_b"):
-        for col in ("close_ln REAL", "close_od REAL", "clv_dir INTEGER", "clv_pct REAL"):
+        for col in ("close_ln REAL", "close_od REAL", "clv_dir INTEGER", "clv_pct REAL",
+                    "skip TEXT"):
             try:
                 c.execute(f"ALTER TABLE {tbl} ADD COLUMN {col}")
             except sqlite3.OperationalError:
@@ -1264,15 +1265,17 @@ def board(con):
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM ethan_k "
         "WHERE stack=1 AND result IN ('W','L'))").fetchone()
     rb_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
-                         "FROM route_b WHERE result IN ('W','L')").fetchone()
+                         "FROM route_b WHERE result IN ('W','L') AND (skip IS NULL OR skip='')").fetchone()
     rb_today = [dict(zip(("pitcher", "side", "line", "odds", "book", "opp"), r))
                 for r in con.execute("SELECT pitcher, side, line, odds, book, opp FROM route_b "
-                                     "WHERE game_date=?", (_today_et(),))]
+                                     "WHERE game_date=? AND (skip IS NULL OR skip='')",
+                                     (_today_et(),))]
     ra_rec = con.execute("SELECT SUM(result='W'), SUM(result='L'), ROUND(SUM(pnl),1) "
-                         "FROM route_a WHERE result IN ('W','L')").fetchone()
+                         "FROM route_a WHERE result IN ('W','L') AND (skip IS NULL OR skip='')").fetchone()
     ra_today = [dict(zip(("pitcher", "side", "line", "odds", "book", "opp"), r))
                 for r in con.execute("SELECT pitcher, side, line, odds, book, opp FROM route_a "
-                                     "WHERE game_date=?", (_today_et(),))]
+                                     "WHERE game_date=? AND (skip IS NULL OR skip='')",
+                                     (_today_et(),))]
     opn_today = [dict(zip(("pitcher", "side", "line", "odds", "book", "opp", "score"), r))
                  for r in con.execute("SELECT pitcher, side, line, odds, book, opp, score "
                                       "FROM opener_k WHERE game_date=? AND (skip IS NULL OR skip='')", (_today_et(),))]
@@ -1354,9 +1357,9 @@ def board(con):
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM opener_k "
         "WHERE result IN ('W','L') AND (skip IS NULL OR skip='') UNION ALL "
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM route_a "
-        "WHERE result IN ('W','L') UNION ALL "
+        "WHERE result IN ('W','L') AND (skip IS NULL OR skip='') UNION ALL "
         "SELECT SUM(result='W'), SUM(result='L'), SUM(COALESCE(pnl,0)) FROM route_b "
-        "WHERE result IN ('W','L'))").fetchone()
+        "WHERE result IN ('W','L') AND (skip IS NULL OR skip=''))").fetchone()
     comb_today = []
     gd_ = _today_et()
     try:
@@ -1529,7 +1532,8 @@ def flag_route_a(con):
         print(f"route_a: {g['pitcher']} U{best[0]}")
     for p_, ln_, od_, bk_, opp_ in con.execute(
             "SELECT pitcher, line, odds, book, opp FROM route_a "
-            "WHERE game_date=? AND pinged=0", (gd,)).fetchall():
+            "WHERE game_date=? AND pinged=0 AND (skip IS NULL OR skip='')",
+            (gd,)).fetchall():
         mlb_ping(con, "route_a", p_, gd, "PO", opp_, "under", ln_, "Outs", od_, bk_)
     con.commit()
 
@@ -1568,7 +1572,8 @@ def flag_route_b(con):
         print(f"route_b: {g['pitcher']} O{best[0]} (med {med})")
     for p_, ln_, od_, bk_, opp_ in con.execute(
             "SELECT pitcher, line, odds, book, opp FROM route_b "
-            "WHERE game_date=? AND pinged=0", (gd,)).fetchall():
+            "WHERE game_date=? AND pinged=0 AND (skip IS NULL OR skip='')",
+            (gd,)).fetchall():
         mlb_ping(con, "route_b", p_, gd, "WO", opp_, "over", ln_, "Outs", od_, bk_)
     # 🐴WO+ PRIME upgrade (4/4-yr combo: lineup OBP <= .3197 AND ppo <= 5.0272 —
     # 63.4% pooled +14.5%): needs the POSTED lineup, so runs as a later-cycle upgrade.
