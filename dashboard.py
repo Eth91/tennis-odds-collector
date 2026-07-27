@@ -2188,6 +2188,7 @@ def build():
 
         # ONE COMBINED MLB BOARD (user 2026-07-28): all live streams in a single
         # play list + combined record; per-stream records tracked separately (tracker card).
+        _clv = _cb.get("clv") or {}
         _cmb = _cb.get("combined") or {}
         _cn = (_cmb.get("w") or 0) + (_cmb.get("l") or 0)
         _crec = (f'{_cmb["w"]}-{_cmb["l"]} ({_cmb["u"]:+.1f}u · '
@@ -2202,8 +2203,12 @@ def build():
         _TAGLBL = {"💎LK": "lineup edge", "★AR": "arsenal fit", "⚡STK": "composite",
                    "★★K": "double signal", "🧪ETH": "whiff stack", "⚡OPN": "early strike",
                    "💠PO": "short-start"}
+        _cnote = ""
+        if (_clv.get("n") or 0) >= 3:
+            _cnote = (f' · CLV {_clv["toward"]}/{_clv["n"]} toward us'
+                      + (f' ({_clv["avg_pct"]:+.1f}%)' if _clv.get("avg_pct") is not None else ""))
         mlb_html += (f'<div class="op-title">⚾ MLB MODEL'
-                     f'<span> · {_crec}'
+                     f'<span> · {_crec}{_cnote}'
                      + (" · " + " · ".join(_subs) if _subs else "") + '</span></div>')
         _ctod = _cmb.get("today") or []
         if _ctod:

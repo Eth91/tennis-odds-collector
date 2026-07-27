@@ -95,6 +95,12 @@ def _con():
             c.execute(f"ALTER TABLE {tbl} ADD COLUMN team TEXT")
         except sqlite3.OperationalError:
             pass
+    for tbl in ("compass", "outs_compass", "ethan_k", "opener_k", "route_a"):
+        for col in ("close_ln REAL", "close_od REAL", "clv_dir INTEGER", "clv_pct REAL"):
+            try:
+                c.execute(f"ALTER TABLE {tbl} ADD COLUMN {col}")
+            except sqlite3.OperationalError:
+                pass
     for tbl in ("compass", "outs_compass", "ethan_k"):
         for col in ("stack INTEGER DEFAULT 0", "rung1_od REAL", "rung2_od REAL",
                     "rung1_res TEXT", "rung2_res TEXT", "skip TEXT"):
@@ -1082,6 +1088,68 @@ def grade(con):
     con.commit()
 
 
+CLV_STAT = {"compass": "strikeouts", "ethan_k": "strikeouts", "opener_k": "strikeouts",
+            "outs_compass": "outs", "route_a": "outs"}
+
+
+def clv_pass(con):
+    """MLB CLV tracker (user 2026-07-27): for every graded flag, pull the CLOSING main line
+    from our own fd_lines collection and record (a) line bumps toward/away from our side
+    (bet O15.5, closed 16.5 -> market followed us: clv_dir=+1) and (b) price CLV at the
+    same line (clv_pct = our odds vs close odds). The early-warning meter for every stream."""
+    fdc = sqlite3.connect(f"file:{FD}?mode=ro", uri=True)
+    for tbl, stat in CLV_STAT.items():
+        rows = con.execute(
+            f"SELECT pitcher, game_date, side, line, odds FROM {tbl} "
+            "WHERE result IN ('W','L') AND close_ln IS NULL").fetchall()
+        for p, gd, side, ln, od in rows:
+            np_ = _norm(p)
+            try:
+                nxt = (dt.date.fromisoformat(gd) + dt.timedelta(days=1)).isoformat()
+            except ValueError:
+                continue
+            snaps = fdc.execute(
+                "SELECT collected_at, book, line, side, odds FROM fd_lines WHERE sport='mlb' "
+                "AND stat=? AND player=? AND collected_at >= ? AND collected_at < ? "
+                "ORDER BY collected_at",
+                (stat, p, gd + "T10:00", nxt + "T08:00")).fetchall()
+            if not snaps:
+                snaps = [r for r in fdc.execute(
+                    "SELECT collected_at, book, line, side, odds, player FROM fd_lines "
+                    "WHERE sport='mlb' AND stat=? AND collected_at >= ? AND collected_at < ?",
+                    (stat, gd + "T10:00", nxt + "T08:00")) if _norm(r[5]) == np_]
+                snaps = [r[:5] for r in snaps]
+            if not snaps:
+                continue
+            last_ts = {}
+            for ts, bk, l2, sd, o2 in snaps:
+                if ts > last_ts.get(bk, ""):
+                    last_ts[bk] = ts
+            close_two = {}
+            for ts, bk, l2, sd, o2 in snaps:
+                if ts == last_ts.get(bk):
+                    close_two.setdefault(bk, {}).setdefault(l2, {})[sd] = o2
+            best_main = None
+            for bk, lns in close_two.items():
+                two = {l2: v for l2, v in lns.items() if "over" in v and "under" in v}
+                if not two:
+                    continue
+                m2 = min(two, key=lambda l2: abs(two[l2]["over"] - 1.9))
+                o_side = two[m2].get(side)
+                if o_side and (best_main is None or o_side > best_main[1]):
+                    best_main = (m2, o_side)
+            if not best_main:
+                continue
+            cl, cod = best_main
+            sgn = 1 if side == "over" else -1
+            clv_dir = 1 if sgn * (cl - ln) > 0 else (-1 if sgn * (cl - ln) < 0 else 0)
+            clv_pct = round((od / cod - 1) * 100, 2) if (cl == ln and cod) else None
+            con.execute(f"UPDATE {tbl} SET close_ln=?, close_od=?, clv_dir=?, clv_pct=? "
+                        "WHERE pitcher=? AND game_date=?", (cl, cod, clv_dir, clv_pct, p, gd))
+    con.commit()
+    fdc.close()
+
+
 def drift_z(con, table):
     """Rolling-60d realized-vs-calibrated z on graded flags (validated 2026-07-26: fires on the
     K ump break a year early, silent on healthy OUTS). Needs cal_p rows -> quiet until ~40 accrue."""
@@ -1130,6 +1198,12 @@ def board(con):
                 _gate.write_text("1")
             except requests.RequestException:
                 pass
+    _cq = " UNION ALL ".join(
+        f"SELECT clv_dir, clv_pct FROM {t} WHERE clv_dir IS NOT NULL AND "
+        f"({'stack=1' if t in ('compass', 'outs_compass', 'ethan_k') else 'pinged=1'})"
+        for t in ("compass", "outs_compass", "ethan_k", "opener_k", "route_a"))
+    _cv = con.execute(f"SELECT COUNT(*), SUM(clv_dir>0), SUM(clv_dir<0), "
+                      f"ROUND(AVG(clv_pct),2) FROM ({_cq})").fetchone()
     stk_rec = con.execute(
         "SELECT SUM(w), SUM(l), ROUND(SUM(u),1) FROM ("
         "SELECT SUM(result='W') w, SUM(result='L') l, SUM(COALESCE(pnl,0)) u FROM compass "
@@ -1253,6 +1327,8 @@ def board(con):
         {"updated": _now(), "w": rec[0] or 0, "l": rec[1] or 0, "u": rec[2] or 0.0,
          "combined": {"w": comb[0] or 0, "l": comb[1] or 0, "u": comb[2] or 0.0,
                       "today": comb_today},
+         "clv": {"n": _cv[0] or 0, "toward": _cv[1] or 0, "against": _cv[2] or 0,
+                 "avg_pct": _cv[3]},
          "drift": {"k": dz_k, "outs": dz_o},
          "tiers": tier_recs,
          "shadow": {"w": shadow[0] or 0, "l": shadow[1] or 0, "u": shadow[2] or 0.0},
@@ -1613,6 +1689,7 @@ if __name__ == "__main__":
     # flag_outlier(c)  # BENCHED 2026-07-25 (user: K-COMPASS only) — table/grading stay dormant
     build_parlay(c)
     grade(c)
+    clv_pass(c)
     grade_parlay(c)
     board(c)
     c.close()
