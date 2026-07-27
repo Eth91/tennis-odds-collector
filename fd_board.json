@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T04:31:35Z",
+ "captured_at": "2026-07-27T04:36:25Z",
  "matches": [
-  {
-   "event_id": 35870784,
-   "p1": "Jakub Nowak",
-   "p2": "Schaniel Krzysztof",
-   "p1_norm": "jakub nowak",
-   "p2_norm": "schaniel krzysztof",
-   "open_date": "2026-07-27T04:20:00.000Z",
-   "line": 67.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35870788,
    "p1": "Witold Stechly",
@@ -19,9 +8,9 @@
    "p1_norm": "witold stechly",
    "p2_norm": "janus slawomir",
    "open_date": "2026-07-27T04:25:00.000Z",
-   "line": 63.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 56.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870789,
@@ -30,9 +19,9 @@
    "p1_norm": "artur sobel",
    "p2_norm": "kamil kostyk",
    "open_date": "2026-07-27T04:25:00.000Z",
-   "line": 89.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 63.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870801,
@@ -41,9 +30,9 @@
    "p1_norm": "jakub pruszkowski",
    "p2_norm": "krzysztof juszczyk",
    "open_date": "2026-07-27T04:30:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 83.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35870802,
@@ -52,9 +41,9 @@
    "p1_norm": "mateusz trela",
    "p2_norm": "miroslaw piecowski",
    "open_date": "2026-07-27T04:30:00.000Z",
-   "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 85.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870803,
@@ -63,7 +52,7 @@
    "p1_norm": "marcin jadczyk",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-27T04:30:00.000Z",
-   "line": 80.5,
+   "line": 71.5,
    "over_odds": -120,
    "under_odds": -115
   },
