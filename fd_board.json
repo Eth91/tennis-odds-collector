@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T19:16:58Z",
+ "captured_at": "2026-07-27T19:21:21Z",
  "matches": [
-  {
-   "event_id": 35873719,
-   "p1": "Grzegorz Marud",
-   "p2": "Robert Kostepski",
-   "p1_norm": "grzegorz marud",
-   "p2_norm": "robert kostepski",
-   "open_date": "2026-07-27T19:10:00.000Z",
-   "line": 73.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35873720,
    "p1": "Miroslaw Warzecha",
@@ -19,9 +8,9 @@
    "p1_norm": "miroslaw warzecha",
    "p2_norm": "dariusz maszczynski",
    "open_date": "2026-07-27T19:10:00.000Z",
-   "line": 60.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 63.5,
+   "over_odds": 105,
+   "under_odds": -145
   },
   {
    "event_id": 35873726,
@@ -30,7 +19,7 @@
    "p1_norm": "michal olbrycht",
    "p2_norm": "maciej domin",
    "open_date": "2026-07-27T19:15:00.000Z",
-   "line": 82.5,
+   "line": 87.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -42,8 +31,8 @@
    "p2_norm": "bartlomiej wisniewski",
    "open_date": "2026-07-27T19:20:00.000Z",
    "line": 81.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35873729,
@@ -52,9 +41,9 @@
    "p1_norm": "artur kubiak",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-27T19:20:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -110
   },
   {
    "event_id": 35873753,
