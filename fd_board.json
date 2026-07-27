@@ -1,50 +1,6 @@
 {
- "captured_at": "2026-07-27T19:50:06Z",
+ "captured_at": "2026-07-27T19:57:48Z",
  "matches": [
-  {
-   "event_id": 35873762,
-   "p1": "Marcin Kowalczyk",
-   "p2": "Adrian Fabis",
-   "p1_norm": "marcin kowalczyk",
-   "p2_norm": "adrian fabis",
-   "open_date": "2026-07-27T19:40:00.000Z",
-   "line": 79.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35873763,
-   "p1": "Andriej Fomin",
-   "p2": "Pawel Chojnacki",
-   "p1_norm": "andriej fomin",
-   "p2_norm": "pawel chojnacki",
-   "open_date": "2026-07-27T19:40:00.000Z",
-   "line": 71.5,
-   "over_odds": 100,
-   "under_odds": -140
-  },
-  {
-   "event_id": 35873764,
-   "p1": "Miroslav Sklensky",
-   "p2": "Adrian Spychala",
-   "p1_norm": "miroslav sklensky",
-   "p2_norm": "adrian spychala",
-   "open_date": "2026-07-27T19:40:00.000Z",
-   "line": 73.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35873781,
-   "p1": "Jakub Nowak",
-   "p2": "Robert Kostepski",
-   "p1_norm": "jakub nowak",
-   "p2_norm": "robert kostepski",
-   "open_date": "2026-07-27T19:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
   {
    "event_id": 35873787,
    "p1": "Jakub Cyndera",
@@ -77,6 +33,28 @@
    "line": 82.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35873802,
+   "p1": "Piotr Gesiarz",
+   "p2": "Jakub Skorupa",
+   "p1_norm": "piotr gesiarz",
+   "p2_norm": "jakub skorupa",
+   "open_date": "2026-07-27T20:20:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35873803,
+   "p1": "Mateusz Sikon",
+   "p2": "Michal Durda",
+   "p1_norm": "mateusz sikon",
+   "p2_norm": "michal durda",
+   "open_date": "2026-07-27T20:20:00.000Z",
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
