@@ -212,6 +212,7 @@ rw|751|Upgraded to available
 rw|755|Cools off Wednesday
 rw|755|Double-doubles off bench
 rw|757|Logs 28 minutes in win
+rw|782|Not listed on injury report
 rw|782|Out Wednesday
 rw|785|Productive in win over Tempo
 rw|786|Grabs 15 boards in win
