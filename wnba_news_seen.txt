@@ -130,6 +130,7 @@ rw|413|Nets 20 points in road win
 rw|413|Scores 33 points in win Monday
 rw|415|Records double-double Wednesday
 rw|415|Totals 16 points in loss in Dallas
+rw|416|Dealing with knee issue
 rw|416|Posts career-high 26 points
 rw|423|Moving to bench
 rw|432|Available for Wednesday
@@ -204,6 +205,7 @@ rw|782|Out Wednesday
 rw|785|Productive in win over Tempo
 rw|786|Grabs 15 boards in win
 rw|786|Paces Mystics with 25 points
+rw|789|Goes through practice
 rw|792|Won't play Wednesday
 rw|793|Keeps picking up steals
 rw|797|Scores team-high 20 points
