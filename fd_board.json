@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T01:44:22Z",
+ "captured_at": "2026-07-27T01:50:43Z",
  "matches": [
-  {
-   "event_id": 35870625,
-   "p1": "Henryk Tkaczyk",
-   "p2": "Kacper Kwiatkowski",
-   "p1_norm": "henryk tkaczyk",
-   "p2_norm": "kacper kwiatkowski",
-   "open_date": "2026-07-27T01:25:00.000Z",
-   "line": 91.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35870680,
    "p1": "Jacek Zelezik",
@@ -19,9 +8,9 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "kazimierz rybak",
    "open_date": "2026-07-27T01:45:00.000Z",
-   "line": 68.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 71.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870683,
