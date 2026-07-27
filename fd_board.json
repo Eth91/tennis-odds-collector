@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T02:58:57Z",
+ "captured_at": "2026-07-27T03:03:37Z",
  "matches": [
   {
    "event_id": 35870728,
@@ -8,31 +8,9 @@
    "p1_norm": "wojciech wojtaszczyk",
    "p2_norm": "krzysztof juszczyk",
    "open_date": "2026-07-27T03:00:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
-  {
-   "event_id": 35870729,
-   "p1": "Milosz Piecowski",
-   "p2": "Miroslaw Piecowski",
-   "p1_norm": "milosz piecowski",
-   "p2_norm": "miroslaw piecowski",
-   "open_date": "2026-07-27T03:00:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
-  },
-  {
-   "event_id": 35870730,
-   "p1": "Karol Wisniewski",
-   "p2": "Jakub Kuzmicz",
-   "p1_norm": "karol wisniewski",
-   "p2_norm": "jakub kuzmicz",
-   "open_date": "2026-07-27T03:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 74.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35870733,
@@ -99,6 +77,17 @@
    "line": 76.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35870741,
+   "p1": "Grzegorz Marud",
+   "p2": "Schaniel Krzysztof",
+   "p1_norm": "grzegorz marud",
+   "p2_norm": "schaniel krzysztof",
+   "open_date": "2026-07-27T03:30:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
