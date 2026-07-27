@@ -289,7 +289,18 @@ def r5outs(pid):
                 for s in (d.get("stats") or [{}])[0].get("splits") or []]
         cache[key] = rows
         OGL_CACHE.write_text(json.dumps(cache))
-    rows_ = [r for r in (cache.get(key) or []) if len(r) >= 7 and r[5] and r[6] >= 5]
+    # POST-RETURN WINDOW (2026-07-27, user-argued): use only the TRAILING run of starts —
+    # a relief appearance ends the window. A regular's log is all starts, so this is a no-op
+    # for him; a bullpen returnee is judged on his starts SINCE returning (Montero: 1 start
+    # back -> too thin to flag, instead of a 7-week-stale 19-out median from June).
+    all_ = [r for r in (cache.get(key) or []) if len(r) >= 7 and r[6] >= 1]
+    rows_ = []
+    for r in reversed(all_):
+        if r[5] and r[6] >= 5:
+            rows_.append(r)
+        elif not r[5]:
+            break                                  # relief outing = end of the current window
+    rows_.reverse()
     g5 = rows_[-5:]
     if len(g5) < 3:
         return None, None, None
@@ -310,11 +321,18 @@ def last5(pid):
             return []
     except (OSError, ValueError):
         return []
-    rows = [r for r in (cache.get(str(pid)) or []) if len(r) >= 7 and r[5] and r[6] >= 5]
+    all_ = [r for r in (cache.get(str(pid)) or []) if len(r) >= 7 and r[6] >= 1]
+    rows = []
+    for r in reversed(all_):
+        if r[5] and r[6] >= 5:
+            rows.append(r)
+        elif not r[5]:
+            break
+    rows.reverse()
     return rows[-5:]
 
 
-def rotation_ok(pid):
+def rotation_ok(pid):        # kept for diagnostics; the window rule in r5outs now governs
     """Is he a CURRENT rotation regular? >=3 of his last 5 appearances must be starts.
     Guards the r5-median premise: a swing-man's 'last 5 starts' can be weeks stale with a
     bullpen stint in between (Montero 2026-07-27: 4 relief outings, median from June).
@@ -1509,8 +1527,8 @@ def flag_route_a(con):
         if opp_ppa is not None and opp_ppa < p25:
             continue
         _, _, med = r5outs(g["pid"])
-        if med is None or rotation_ok(g["pid"]) is False:
-            continue                              # swing-man / just back from the bullpen
+        if med is None:
+            continue
         best = None
         for bk in BOOKS:
             lls = (lines.get(_norm(g["pitcher"])) or {}).get(bk) or {}
@@ -1551,8 +1569,8 @@ def flag_route_b(con):
                        (g["pitcher"], gd)).fetchone():
             continue
         _, _, med = r5outs(g["pid"])
-        if med is None or rotation_ok(g["pid"]) is False:
-            continue                              # swing-man / just back from the bullpen
+        if med is None:
+            continue
         best = None
         for bk in BOOKS:
             lls = (lines.get(_norm(g["pitcher"])) or {}).get(bk) or {}
