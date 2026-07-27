@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T10:05:02Z",
+ "captured_at": "2026-07-27T10:09:40Z",
  "matches": [
-  {
-   "event_id": 35871733,
-   "p1": "Rafal Niemiec",
-   "p2": "Wojciech Wojtaszczyk",
-   "p1_norm": "rafal niemiec",
-   "p2_norm": "wojciech wojtaszczyk",
-   "open_date": "2026-07-27T09:50:00.000Z",
-   "line": 78.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35871754,
    "p1": "Piotr Przewlocki",
@@ -19,9 +8,9 @@
    "p1_norm": "piotr przewlocki",
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-27T09:55:00.000Z",
-   "line": 68.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 86.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35871766,
@@ -30,9 +19,9 @@
    "p1_norm": "grzegorz poliniewicz",
    "p2_norm": "grzegorz adamiak",
    "open_date": "2026-07-27T10:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 89.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35871773,
@@ -41,9 +30,9 @@
    "p1_norm": "adrian spychala",
    "p2_norm": "miroslav sklensky",
    "open_date": "2026-07-27T10:05:00.000Z",
-   "line": 73.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 83.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35871785,
@@ -96,6 +85,28 @@
    "p1_norm": "karol wisniewski",
    "p2_norm": "kamil kostyk",
    "open_date": "2026-07-27T10:30:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35871834,
+   "p1": "Wojciech Wojtaszczyk",
+   "p2": "Krzysztof Juszczyk",
+   "p1_norm": "wojciech wojtaszczyk",
+   "p2_norm": "krzysztof juszczyk",
+   "open_date": "2026-07-27T10:35:00.000Z",
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -110
+  },
+  {
+   "event_id": 35871835,
+   "p1": "Przemyslaw Perzynski",
+   "p2": "Miroslaw Piecowski",
+   "p1_norm": "przemyslaw perzynski",
+   "p2_norm": "miroslaw piecowski",
+   "open_date": "2026-07-27T10:35:00.000Z",
    "line": 77.5,
    "over_odds": -116,
    "under_odds": -116
