@@ -2260,11 +2260,12 @@ def build():
                            if f.get("why") else "")
                     _drawer = (f'<div class="bars"><div class="bwrap">{_wh}<div class="chart">'
                                f'<div class="pline" style="bottom:{_ln / _mx * 100:.1f}%">'
-                               f'<span>{_ln:g}</span></div>{_cols}</div>'
+                               f'</div>{_cols}</div>'
                                f'<div class="opps">{_opps}</div>'
                                f'<div class="bnote">{_hits}/{len(_l5)} '
-                               f'{"over" if _o == "O" else "under"} {_ln:g} · grey bar = pitch '
-                               f'count · green = {"strikeouts" if _isk else "outs"}</div>'
+                               f'{"over" if _o == "O" else "under"} {_ln:g} · dashed = tonight\'s '
+                               f'line · bars = {"strikeouts" if _isk else "outs"} · '
+                               f'labels = pitch count</div>'
                                f'</div></div>')
                     _chev = '<span class="pchev">›</span>'
                     _click = ' onclick="this.nextElementSibling.classList.toggle(\'open\')"'
