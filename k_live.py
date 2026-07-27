@@ -95,6 +95,11 @@ def _con():
             c.execute(f"ALTER TABLE {tbl} ADD COLUMN team TEXT")
         except sqlite3.OperationalError:
             pass
+    for tbl in ("ethan_k", "opener_k", "route_a", "route_b"):
+        try:
+            c.execute(f"ALTER TABLE {tbl} ADD COLUMN team TEXT")
+        except sqlite3.OperationalError:
+            pass
     for tbl in ("compass", "outs_compass", "ethan_k", "opener_k", "route_a", "route_b"):
         for col in ("close_ln REAL", "close_od REAL", "clv_dir INTEGER", "clv_pct REAL"):
             try:
@@ -886,9 +891,9 @@ def flag_ethan(con):
         if not best:
             continue
         con.execute("INSERT INTO ethan_k (pitcher, game_date, side, line, odds, book, hi_ct, "
-                    "pk_rate, opp, flagged_at) VALUES (?,?,?,?,?,?,?,?,?,?)",
+                    "pk_rate, opp, flagged_at, team) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
                     (g["pitcher"], gd, "over", best[0], best[1], best[2], hi,
-                     round(pk_rate, 3), g["opp_name"], ts))
+                     round(pk_rate, 3), g["opp_name"], ts, g.get("team_ab") or ""))
         new += 1
     con.commit()
     if new:
@@ -1318,31 +1323,38 @@ def board(con):
         "WHERE result IN ('W','L'))").fetchone()
     comb_today = []
     gd_ = _today_et()
-    for p_, sd_, ln_, od_, bk_, opp_, drv_, prem_ in con.execute(
-            "SELECT pitcher, side, line, odds, book, opp, driver, premium FROM compass "
+    for p_, sd_, ln_, od_, bk_, opp_, drv_, prem_, tm_ in con.execute(
+            "SELECT pitcher, side, line, odds, book, opp, driver, premium, team FROM compass "
             "WHERE game_date=? AND stack=1", (gd_,)):
         tag = "💎LK" if drv_ == "lineupK" else ("★AR" if prem_ else "⚡STK")
         comb_today.append({"pitcher": p_, "side": sd_, "line": ln_, "odds": od_, "book": bk_,
-                           "opp": opp_, "mkt": "K", "tag": tag})
-    for p_, sd_, ln_, od_, bk_, opp_ in con.execute(
-            "SELECT pitcher, side, line, odds, book, opp FROM outs_compass "
+                           "opp": opp_, "team": tm_, "mkt": "K", "tag": tag})
+    for p_, sd_, ln_, od_, bk_, opp_, tm_ in con.execute(
+            "SELECT pitcher, side, line, odds, book, opp, team FROM outs_compass "
             "WHERE game_date=? AND stack=1", (gd_,)):
         comb_today.append({"pitcher": p_, "side": sd_, "line": ln_, "odds": od_, "book": bk_,
-                           "opp": opp_, "mkt": "Outs", "tag": "★★K"})
-    for p_, ln_, od_, bk_, opp_ in con.execute(
-            "SELECT pitcher, line, odds, book, opp FROM ethan_k WHERE game_date=? AND stack=1",
+                           "opp": opp_, "team": tm_, "mkt": "Outs", "tag": "★★K"})
+    for p_, ln_, od_, bk_, opp_, tm_ in con.execute(
+            "SELECT pitcher, line, odds, book, opp, team FROM ethan_k WHERE game_date=? AND stack=1",
             (gd_,)):
         comb_today.append({"pitcher": p_, "side": "over", "line": ln_, "odds": od_, "book": bk_,
-                           "opp": opp_, "mkt": "K", "tag": "🧪ETH"})
+                           "opp": opp_, "team": tm_, "mkt": "K", "tag": "🧪ETH"})
+    opn_t = {r[0]: r[1] for r in con.execute(
+        "SELECT pitcher, team FROM opener_k WHERE game_date=?", (gd_,))}
     for f_ in opn_today:
         comb_today.append({**{k: f_[k] for k in ("pitcher", "side", "line", "odds", "book", "opp")},
-                           "mkt": "K", "tag": "⚡OPN"})
+                           "team": opn_t.get(f_["pitcher"]), "mkt": "K", "tag": "⚡OPN"})
+    ra_t = {r[0]: r[1] for r in con.execute(
+        "SELECT pitcher, team FROM route_a WHERE game_date=?", (gd_,))}
     for f_ in ra_today:
         comb_today.append({**{k: f_[k] for k in ("pitcher", "side", "line", "odds", "book", "opp")},
-                           "mkt": "Outs", "tag": "💠PO"})
+                           "team": ra_t.get(f_["pitcher"]), "mkt": "Outs", "tag": "💠PO"})
+    rb_t = {r[0]: (r[1], r[2]) for r in con.execute(
+        "SELECT pitcher, team, prime FROM route_b WHERE game_date=?", (gd_,))}
     for f_ in rb_today:
+        tm_, pm_ = rb_t.get(f_["pitcher"], (None, None))
         comb_today.append({**{k: f_[k] for k in ("pitcher", "side", "line", "odds", "book", "opp")},
-                           "mkt": "Outs", "tag": "🐴WO"})
+                           "team": tm_, "mkt": "Outs", "tag": "🐴WO+" if pm_ else "🐴WO"})
     (HERE / "compass_board.json").write_text(json.dumps(
         {"updated": _now(), "w": rec[0] or 0, "l": rec[1] or 0, "u": rec[2] or 0.0,
          "combined": {"w": comb[0] or 0, "l": comb[1] or 0, "u": comb[2] or 0.0,
@@ -1464,9 +1476,9 @@ def flag_route_a(con):
         if not best:
             continue
         con.execute("INSERT INTO route_a (pitcher, game_date, side, line, odds, book, r5med, "
-                    "oppk, opp, flagged_at) VALUES (?,?,?,?,?,?,?,?,?,?)",
+                    "oppk, opp, flagged_at, team) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
                     (g["pitcher"], gd, "under", best[0], best[1], best[2], med,
-                     round(oppk, 3), g["opp_name"], ts))
+                     round(oppk, 3), g["opp_name"], ts, g.get("team_ab") or ""))
         mlb_ping(con, "route_a", g["pitcher"], gd, "PO", g["opp_name"], "under",
                  best[0], "Outs", best[1], best[2])
         print(f"route_a: {g['pitcher']} U{best[0]}")
@@ -1505,9 +1517,9 @@ def flag_route_b(con):
         if not best:
             continue
         con.execute("INSERT INTO route_b (pitcher, game_date, side, line, odds, book, r5med, "
-                    "opp, flagged_at) VALUES (?,?,?,?,?,?,?,?,?)",
+                    "opp, flagged_at, team) VALUES (?,?,?,?,?,?,?,?,?,?)",
                     (g["pitcher"], gd, "over", best[0], best[1], best[2], med,
-                     g["opp_name"], ts))
+                     g["opp_name"], ts, g.get("team_ab") or ""))
         print(f"route_b: {g['pitcher']} O{best[0]} (med {med})")
     for p_, ln_, od_, bk_, opp_ in con.execute(
             "SELECT pitcher, line, odds, book, opp FROM route_b "
@@ -1600,9 +1612,9 @@ def opener_strike(con):
         if not best:
             continue
         con.execute("INSERT INTO opener_k (pitcher, game_date, side, line, odds, book, score, "
-                    "opp, flagged_at) VALUES (?,?,?,?,?,?,?,?,?)",
+                    "opp, flagged_at, team) VALUES (?,?,?,?,?,?,?,?,?,?)",
                     (g["pitcher"], gd, side, best[0], best[1], best[2], round(abs(S), 2),
-                     g["opp_name"], ts))
+                     g["opp_name"], ts, g.get("team_ab") or ""))
         mlb_ping(con, "opener_k", g["pitcher"], gd, "OPN", g["opp_name"], side,
                  best[0], "K", best[1], best[2])
         print(f"opener strike: {g['pitcher']} {side} {best[0]}")
