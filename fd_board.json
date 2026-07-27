@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T03:41:07Z",
+ "captured_at": "2026-07-27T03:46:09Z",
  "matches": [
-  {
-   "event_id": 35870742,
-   "p1": "Janus Slawomir",
-   "p2": "Jerzy Michalik",
-   "p1_norm": "janus slawomir",
-   "p2_norm": "jerzy michalik",
-   "open_date": "2026-07-27T03:35:00.000Z",
-   "line": 65.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35870764,
    "p1": "Josef Braun",
@@ -20,8 +9,8 @@
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-27T03:45:00.000Z",
    "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -118,
+   "under_odds": -116
   },
   {
    "event_id": 35870776,
@@ -75,6 +64,39 @@
    "p2_norm": "dariusz maszczynski",
    "open_date": "2026-07-27T04:00:00.000Z",
    "line": 74.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35870781,
+   "p1": "Wojciech Wojtaszczyk",
+   "p2": "Oliwier Sokolowski",
+   "p1_norm": "wojciech wojtaszczyk",
+   "p2_norm": "oliwier sokolowski",
+   "open_date": "2026-07-27T04:10:00.000Z",
+   "line": 73.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35870782,
+   "p1": "Milosz Piecowski",
+   "p2": "Igor Dabrowski",
+   "p1_norm": "milosz piecowski",
+   "p2_norm": "igor dabrowski",
+   "open_date": "2026-07-27T04:10:00.000Z",
+   "line": 79.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35870783,
+   "p1": "Karol Wisniewski",
+   "p2": "Grzegorz Poliniewicz",
+   "p1_norm": "karol wisniewski",
+   "p2_norm": "grzegorz poliniewicz",
+   "open_date": "2026-07-27T04:10:00.000Z",
+   "line": 79.5,
    "over_odds": -112,
    "under_odds": -118
   }
