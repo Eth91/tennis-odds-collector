@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T11:31:04Z",
+ "captured_at": "2026-07-27T11:36:38Z",
  "matches": [
   {
    "event_id": 35872094,
@@ -8,9 +8,9 @@
    "p1_norm": "miroslav sklensky",
    "p2_norm": "kamil kostyk",
    "open_date": "2026-07-27T11:20:00.000Z",
-   "line": 96.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 97.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35872309,
@@ -19,9 +19,9 @@
    "p1_norm": "milosz piecowski",
    "p2_norm": "miroslaw piecowski",
    "open_date": "2026-07-27T11:25:00.000Z",
-   "line": 85.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 77.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35872310,
@@ -30,9 +30,42 @@
    "p1_norm": "oliwier sokolowski",
    "p2_norm": "krzysztof juszczyk",
    "open_date": "2026-07-27T11:25:00.000Z",
-   "line": 72.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 73.5,
+   "over_odds": null,
+   "under_odds": null
+  },
+  {
+   "event_id": 35872427,
+   "p1": "Grzegorz Poliniewicz",
+   "p2": "Maciej Domin",
+   "p1_norm": "grzegorz poliniewicz",
+   "p2_norm": "maciej domin",
+   "open_date": "2026-07-27T11:40:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35872439,
+   "p1": "Jakub Kaczmarek",
+   "p2": "Rafal Niemiec",
+   "p1_norm": "jakub kaczmarek",
+   "p2_norm": "rafal niemiec",
+   "open_date": "2026-07-27T11:50:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35872458,
+   "p1": "Patryk Mecik",
+   "p2": "Piotr Przewlocki",
+   "p1_norm": "patryk mecik",
+   "p2_norm": "piotr przewlocki",
+   "open_date": "2026-07-27T11:55:00.000Z",
+   "line": 81.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
