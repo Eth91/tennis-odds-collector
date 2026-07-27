@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-27T08:44:44Z",
+ "captured_at": "2026-07-27T08:49:27Z",
  "matches": [
-  {
-   "event_id": 35871446,
-   "p1": "Wojciech Wojtaszczyk",
-   "p2": "Pawel Slosarczyk",
-   "p1_norm": "wojciech wojtaszczyk",
-   "p2_norm": "pawel slosarczyk",
-   "open_date": "2026-07-27T08:35:00.000Z",
-   "line": 67.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35871447,
    "p1": "Milosz Piecowski",
@@ -19,7 +8,7 @@
    "p1_norm": "milosz piecowski",
    "p2_norm": "aleksander lilien",
    "open_date": "2026-07-27T08:35:00.000Z",
-   "line": 90.5,
+   "line": 92.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,9 +19,9 @@
    "p1_norm": "wojciech tobiasz",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-07-27T08:45:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 83.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35871453,
@@ -41,9 +30,9 @@
    "p1_norm": "witold stechly",
    "p2_norm": "jerzy michalik",
    "open_date": "2026-07-27T08:45:00.000Z",
-   "line": 78.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 89.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35871543,
