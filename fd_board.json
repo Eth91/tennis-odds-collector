@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-27T02:12:42Z",
+ "captured_at": "2026-07-27T02:17:15Z",
  "matches": [
   {
    "event_id": 35870707,
@@ -8,9 +8,9 @@
    "p1_norm": "adam staniczek",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-27T02:10:00.000Z",
-   "line": 79.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 82.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35870713,
@@ -20,8 +20,8 @@
    "p2_norm": "michal durda",
    "open_date": "2026-07-27T02:20:00.000Z",
    "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35870714,
@@ -44,6 +44,28 @@
    "line": 72.5,
    "over_odds": -110,
    "under_odds": -120
+  },
+  {
+   "event_id": 35870720,
+   "p1": "Schaniel Krzysztof",
+   "p2": "Piotr Gumulinski",
+   "p1_norm": "schaniel krzysztof",
+   "p2_norm": "piotr gumulinski",
+   "open_date": "2026-07-27T02:45:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35870721,
+   "p1": "Sebastian Krupa",
+   "p2": "Lukasz Oracz",
+   "p1_norm": "sebastian krupa",
+   "p2_norm": "lukasz oracz",
+   "open_date": "2026-07-27T02:45:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
