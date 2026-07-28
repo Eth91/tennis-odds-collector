@@ -39,6 +39,18 @@ try:
     con = sqlite3.connect(HERE / "fanduel_props.sqlite")
     con.execute("PRAGMA busy_timeout=60000")
     con.execute("ATTACH ? AS o", (str(TMP),))
+    # fanduel_props.sqlite was UNTRACKED 2026-07-28 (blob war: 117MB > GitHub's 100MB limit),
+    # so the committed blob this merges from may be empty or absent. That is expected, not an
+    # error -- exit quietly rather than raising "no such table: o.fd_lines" every cycle.
+    if not con.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='fd_lines'"
+                       ).fetchone():
+        con.close()
+        TMP.unlink(missing_ok=True)
+        sys.exit(0)
+    con.execute("""CREATE TABLE IF NOT EXISTS fd_lines (
+        collected_at TEXT, sport TEXT, event TEXT, player TEXT, stat TEXT, line REAL,
+        side TEXT, odds REAL, book TEXT DEFAULT 'fd',
+        PRIMARY KEY (collected_at, sport, player, stat, line, side))""")
     ins = 0
     for sport, book in con.execute("SELECT DISTINCT sport, book FROM o.fd_lines").fetchall():
         wm = con.execute("SELECT COALESCE(MAX(collected_at),'') FROM fd_lines "

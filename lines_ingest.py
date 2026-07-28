@@ -30,6 +30,15 @@ for src, gate in SOURCES:
     if con is None:
         con = sqlite3.connect(HERE / "fanduel_props.sqlite")
         con.execute("PRAGMA busy_timeout=60000")
+        # SELF-HEAL (2026-07-28): this queries fd_lines directly, so an EMPTY or missing DB
+        # was a hard crash EVERY loop cycle -- which is exactly what happened when the file
+        # got zeroed during git surgery: ~2h of "no such table: fd_lines" spam that would
+        # have masked a real failure. Creating the table makes a lost DB self-repair and
+        # simply resume collecting.
+        con.execute("""CREATE TABLE IF NOT EXISTS fd_lines (
+        collected_at TEXT, sport TEXT, event TEXT, player TEXT, stat TEXT, line REAL,
+        side TEXT, odds REAL, book TEXT DEFAULT 'fd',
+        PRIMARY KEY (collected_at, sport, player, stat, line, side))""")
     wm = {}
     ins = 0
     for r in rows:
