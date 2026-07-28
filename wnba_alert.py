@@ -163,11 +163,34 @@ def collect():
         # edge is REACTING TO NEWS. A cascade emits flags only if >=1 out's absence is fresh
         # (last appearance within 21 days of the slate). Stale outs still shape the
         # projection when combined with a fresh one.
+        # 2026-07-28 FIX (All-Star break): calendar days conflate "the market has priced this
+        # vacancy for weeks" with "the league simply was not playing". Coming out of the break,
+        # players ruled out THAT MORNING (Plum, Sabally, Griner, Sykes) read as 21+ days stale
+        # and the entire slate was suppressed. Count the TEAM GAMES the out player has missed
+        # instead — a gameless break contributes zero, so freshness survives it. Same intent,
+        # correct unit (and it matches the NBA-port finding that absence-game index, not
+        # elapsed time, is what carries the edge).
+        _team_dates = set()
+        for _n2, _v2 in pl.items():
+            if _v2.get("team") == team:
+                for _g2 in (glog(_v2["id"]) or []):
+                    _d2 = (_g2.get("date") or "")[:10]
+                    if _d2:
+                        _team_dates.add(_d2)
+
+        def _missed(lg):
+            if not lg:
+                return 99
+            last = (lg[0].get("date") or "")[:10]
+            return sum(1 for d in _team_dates if last < d < slate_date)
         try:
-            _sd = datetime.date.fromisoformat(slate_date)
-            all_stale = all(
-                (not lg) or (_sd - datetime.date.fromisoformat(lg[0]["date"][:10])).days > 21
-                for lg in out_logs)
+            if len(_team_dates) >= 3:
+                all_stale = all(_missed(lg) > MAX_GAMES_MISSED for lg in out_logs)
+            else:                                   # thin log coverage -> old calendar rule
+                _sd = datetime.date.fromisoformat(slate_date)
+                all_stale = all(
+                    (not lg) or (_sd - datetime.date.fromisoformat(lg[0]["date"][:10])).days > 21
+                    for lg in out_logs)
         except (ValueError, KeyError, IndexError):
             all_stale = False
         if all_stale:
@@ -761,6 +784,9 @@ def push_plays(fresh, preds, topic):
         except requests.RequestException as e:
             print("push failed — not marking SEEN, will retry:", str(e)[:80])
     return delivered
+
+
+MAX_GAMES_MISSED = 8      # ~2.5 weeks of WNBA games; a vacancy older than this is priced
 
 
 def main():
