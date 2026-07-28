@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-28T01:17:54Z",
+ "captured_at": "2026-07-28T01:23:56Z",
  "matches": [
   {
    "event_id": 35874246,
@@ -8,9 +8,9 @@
    "p1_norm": "aleksander barton",
    "p2_norm": "miroslaw warzecha",
    "open_date": "2026-07-28T01:10:00.000Z",
-   "line": 56.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 66.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35874247,
@@ -20,19 +20,8 @@
    "p2_norm": "piotr gumulinski",
    "open_date": "2026-07-28T01:10:00.000Z",
    "line": 81.5,
-   "over_odds": -115,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35874248,
-   "p1": "Artur Kubiak",
-   "p2": "Kacper Kwiatkowski",
-   "p1_norm": "artur kubiak",
-   "p2_norm": "kacper kwiatkowski",
-   "open_date": "2026-07-28T01:10:00.000Z",
-   "line": 83.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "over_odds": -165,
+   "under_odds": 120
   },
   {
    "event_id": 35874259,
@@ -63,6 +52,28 @@
    "p1_norm": "adam staniczek",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-28T01:35:00.000Z",
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35874263,
+   "p1": "Grzegorz Marud",
+   "p2": "Michal Durda",
+   "p1_norm": "grzegorz marud",
+   "p2_norm": "michal durda",
+   "open_date": "2026-07-28T01:50:00.000Z",
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35874264,
+   "p1": "Michal Krutak",
+   "p2": "Kacper Kwiatkowski",
+   "p1_norm": "michal krutak",
+   "p2_norm": "kacper kwiatkowski",
+   "open_date": "2026-07-28T01:50:00.000Z",
    "line": 74.5,
    "over_odds": -118,
    "under_odds": -112
