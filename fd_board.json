@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-28T03:32:35Z",
+ "captured_at": "2026-07-28T03:36:39Z",
  "matches": [
-  {
-   "event_id": 35874366,
-   "p1": "Milosz Cesarz",
-   "p2": "Oliver Vincenec",
-   "p1_norm": "milosz cesarz",
-   "p2_norm": "oliver vincenec",
-   "open_date": "2026-07-28T03:10:00.000Z",
-   "line": 84.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35874374,
    "p1": "Kamil Rudomina",
@@ -19,9 +8,9 @@
    "p1_norm": "kamil rudomina",
    "p2_norm": "adam linek",
    "open_date": "2026-07-28T03:20:00.000Z",
-   "line": 80.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 79.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35874377,
@@ -30,9 +19,9 @@
    "p1_norm": "dariusz wrobel",
    "p2_norm": "kamil klocek",
    "open_date": "2026-07-28T03:25:00.000Z",
-   "line": 61.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 51.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35874378,
@@ -41,9 +30,9 @@
    "p1_norm": "kacper glazowski",
    "p2_norm": "dawid michna",
    "open_date": "2026-07-28T03:25:00.000Z",
-   "line": 86.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 91.5,
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35874379,
@@ -52,9 +41,9 @@
    "p1_norm": "waldemar glanowski",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-28T03:25:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 69.5,
+   "over_odds": 100,
+   "under_odds": -140
   },
   {
    "event_id": 35874383,
@@ -63,7 +52,7 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "mateusz sikon",
    "open_date": "2026-07-28T03:30:00.000Z",
-   "line": 79.5,
+   "line": 71.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -75,8 +64,8 @@
    "p2_norm": "jakub kaczmarek",
    "open_date": "2026-07-28T03:35:00.000Z",
    "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35874395,
@@ -132,6 +121,28 @@
    "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35874403,
+   "p1": "Przemyslaw Perzynski",
+   "p2": "Kamil Rudomina",
+   "p1_norm": "przemyslaw perzynski",
+   "p2_norm": "kamil rudomina",
+   "open_date": "2026-07-28T04:00:00.000Z",
+   "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35874404,
+   "p1": "Dawid Jendrysik",
+   "p2": "Michal Paszkiewicz",
+   "p1_norm": "dawid jendrysik",
+   "p2_norm": "michal paszkiewicz",
+   "open_date": "2026-07-28T04:00:00.000Z",
+   "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
