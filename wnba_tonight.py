@@ -753,111 +753,44 @@ def confirmed_for(date_iso):
 
 
 def injuries():
-    """{player_name: status} — ESPN's league feed UNION RotoWire's game-day lineup out-list.
-    RotoWire is FASTER and more reliable on game day (7/14 Griner: RW right, ESPN wrong;
-    7/16 Gustafson: ESPN's injuries API had nothing for POR while RW's lineup page ruled her
-    out) — but it only covers today's slate, so ESPN stays for earlier/multi-day tags.
-    Earliest source triggers (⚡ speed doctrine: race the book, never wait for it). RW's
-    abbreviated names ('M. Gustafson') resolve to full ESPN names via the roster cache,
-    TEAM-SCOPED, skipping ambiguous initial+lastname collisions (the RotoWire lesson)."""
+    """{player_name: status} — the OFFICIAL WNBA INJURY REPORT, and nothing else.
+
+    2026-07-28, user, emphatic: "the wnba injury report is the official report i dont care
+    about espn or rotowire. the minute a new report comes out that says the player wont play
+    then they are out. drop rotowire and espn scans."
+
+    ESPN + RotoWire injury scans REMOVED. They earned it: on an audited night ESPN disagreed
+    with the league on 4 of 22 rows, ALWAYS over-reporting Out (Hall listed Out but officially
+    Probable; Johannes / Rice / N.Sabally Out vs officially Questionable). The official
+    override was already silently correcting every one of them, so the aggregators were
+    contributing noise plus a stale-confirmation problem rather than speed.
+
+    This SIMPLIFIES the hardest part: the league PDF is GAME-DATED and refreshes on the
+    :00/:15/:30/:45 marks, so an official Out IS confirmed for that game by construction. The
+    old machinery (RW page-flip guard, ESPN returnDate inference, first-seen-today stamping)
+    existed only because a rolling feed cannot distinguish "out tonight" from "was out last
+    game". That ambiguity no longer exists — every official Out for today is confirmed now.
+
+    Precedence: official report, then the user's manual overrides last.
+    RotoWire is still used ELSEWHERE for CONFIRMED STARTING LINEUPS only (user 2026-07-18:
+    "don't rely on RotoWire for anything but CONFIRMED starters") — a lineup signal, not an
+    injury status, and untouched by this change."""
     out = {}
-    _rw_conf, _ovr_out, _ret_conf, _ret_by = set(), set(), set(), {}
-    _today_ret = dt.datetime.now(ET).date().isoformat()
-    for t in _espn("injuries").get("injuries", []):
-        for p in t.get("injuries") or []:
-            nm = p.get("athlete", {}).get("displayName")
-            status = p.get("status")
-            # ESPN's WNBA GTD tag is "Day-To-Day" (not "Questionable") — it was being dropped
-            # entirely, so ESPN-sourced GTD stars never reached the watchlist (7/16: Oblak).
-            # Map it to Questionable so the watchlist/sit-prob machinery just works.
-            if status == "Day-To-Day":
-                status = "Questionable"
-            # ESPN returnDate = a game-specific signal hiding in the feed (2026-07-18 audit):
-            # return AFTER today -> officially expected out THROUGH tonight (Sabally 7/28,
-            # Collier 7/20, season-enders 2027) = CONFIRMED for today; return == today
-            # (Boston) -> expected BACK, never confirm. Out-status only, not Doubtful.
-            _ret = ((p.get("details") or {}).get("returnDate") or "")[:10]
-            if nm and status == "Out" and _ret and _ret > _today_ret:
-                _ret_conf.add(nm)
-            if nm and status == "Out" and _ret:
-                _ret_by[nm] = _ret          # long-term outs: confirmed for every date < return
-            if nm and status in ("Out", "Doubtful", "Questionable"):
-                out[nm] = status
-    try:                                    # RotoWire game-day outs = first-class triggers
-        pl = json.loads((Path(__file__).resolve().parent
-                         / "wnba_players_cache.json").read_text()).get("players", {})
-        # PAGE-FLIP GUARD (2026-07-18): overnight, RW still serves YESTERDAY'S slate — on a
-        # back-to-back (IND tonight) yesterday's outs (Boston) would falsely count as game-day
-        # confirmations for today. RW outs only CONFIRM when its board matches today's games;
-        # they always still TRIGGER (merge into the injury view -> contingent scouting).
-        try:
-            _today_teams = set(tonight_matchups())
-        except Exception:
-            _today_teams = set()
-        _rw_teams = {t.get("team") for t in rw_lineups() or []}
-        _board_is_today = bool(_today_teams) and             len(_rw_teams & _today_teams) >= max(2, len(_rw_teams) // 2)
-        for t in rw_lineups() or []:
-            team = t.get("team")
-            for abbr in t.get("out") or []:
-                key = RW.norm(abbr)
-                full = [n for n, v in pl.items()
-                        if v.get("team") == team and RW.norm(n) == key]
-                if len(full) == 1:          # team-scoped; ambiguous collision -> skip
-                    out[full[0]] = "Out"    # RW lineup OUT is firm — beats ESPN's softer tag
-                    if _board_is_today:
-                        _rw_conf.add(full[0])
-    except Exception:
-        pass
-    # ── OFFICIAL LEAGUE INJURY REPORT (2026-07-18, user-sourced — the #1 source) ──
-    # Game-dated PDF, 15-min refresh, explicit NOT-YET-SUBMITTED state. Official statuses
-    # override the aggregator feeds (below only the user's manual overrides). Official OUT
-    # for a game = CONFIRMED for that game — INCLUDING tomorrow (night-before submissions =
-    # the official night-before window). Probable/Available for TODAY clears the premise.
+    _ovr_out = set()
+    today_iso = dt.datetime.now(ET).date().isoformat()
+    # ── THE ONLY INJURY SOURCE: the official league report ──
     _official = {}
     try:
         import wnba_injury_report as IR
         _official = IR.confirmed_by_date()               # {date: {player: status}}
-        today_off = _official.get(dt.datetime.now(ET).date().isoformat(), {})
-        for nm, stt in today_off.items():
+        for nm, stt in (_official.get(today_iso) or {}).items():
             if stt in ("Out", "Doubtful", "Questionable"):
                 out[nm] = stt
-            elif stt in ("Probable", "Available"):
-                out.pop(nm, None)
+            # Probable / Available => plays; never enters the injury view at all
     except Exception:
         pass
-    # ── FAST-NEWS OVERRIDES (2026-07-22, the Griner miss) — Underdog/RotoWire breaking "ruled
-    # out" writes wnba_news_overrides.json the instant it's detected, so injuries() reflects the
-    # OUT at NEWS-time instead of waiting ~10-15 min for the official PDF / RW lineup page to catch
-    # up (that lag was the value window we lost). Speed doctrine: news OUT wins UNLESS the official
-    # report explicitly cleared the player today (Probable/Available = independent veto). FULLY
-    # try-wrapped (broad except): any error here falls back to the feed-only view, never breaks flagging.
-    try:
-        _nov = json.loads((Path(__file__).resolve().parent
-                           / "wnba_news_overrides.json").read_text())
-        _td = dt.datetime.now(ET).date().isoformat()
-        _off_avail = {n for n, st_ in (_official.get(_td, {}) or {}).items()
-                      if st_ in ("Probable", "Available", "Playing")}
-        try:
-            _pl = json.loads((Path(__file__).resolve().parent
-                              / "wnba_players_cache.json").read_text()).get("players", {})
-        except (OSError, ValueError):
-            _pl = {}
-        for _nm, _o in (_nov or {}).items():
-            if (_o.get("date") or "") != _td:
-                continue                                   # only today's fresh rulings
-            if (_o.get("status") or "Out") not in ("Out", "Doubtful"):
-                continue
-            _cano = _nm
-            if _nm not in out:                             # resolve to the roster name if needed
-                _m = [n for n in _pl if RW.norm(n) == RW.norm(_nm)]
-                if len(_m) == 1:
-                    _cano = _m[0]
-            if _cano in _off_avail:
-                continue                                   # official says available -> veto the news
-            if out.get(_cano) not in ("Out", "Doubtful"):
-                out[_cano] = "Out"                         # promote at news-time (fs stamps it fresh->confirmed)
-    except Exception:
-        pass
+    # (FAST-NEWS OVERRIDES removed 2026-07-28 — they were RotoWire/Underdog sourced. The
+    # official report refreshes every 15 minutes and is the authority per the user.)
     # MANUAL STATUS OVERRIDES — applied LAST (2026-07-18 fix: the RW merge ran after this
     # block and re-marked Boston Out, silently demoting the user's override; highest
     # precedence means highest, so overrides now run after every feed source): wnba_status_overrides.json — {"Player": {"status":
@@ -897,31 +830,21 @@ def injuries():
     # chance to play IS that game" — Morrow/Mack — and correctly stays unconfirmed). Filtered
     # by post-override status so a user override or an official-report downgrade always wins.
     global RET_OUT_BY
-    RET_OUT_BY = {n: r for n, r in _ret_by.items() if out.get(n) == "Out"}
+    RET_OUT_BY = {}          # was ESPN returnDate; ESPN is no longer consumed
     global CONFIRMED_OUT_TODAY
+    # Official Outs are GAME-DATED => confirmed for that game by construction. No first-seen
+    # stamping, no page-flip guard, no returnDate inference: all of that dated a rolling
+    # feed's status, and we no longer consume one.
     try:
-        fsp = Path(__file__).resolve().parent / "wnba_out_first_seen.json"
-        today_iso = dt.datetime.now(ET).date().isoformat()
-        try:
-            fs = json.loads(fsp.read_text())
-        except (OSError, ValueError):
-            fs = {}
-        cur = {n for n, s in out.items() if s in ("Out", "Doubtful")}
-        fs = {n: dt_ for n, dt_ in fs.items() if n in cur}   # cleared status -> re-stamps fresh later
-        for n in cur:
-            fs.setdefault(n, today_iso)
-        fsp.write_text(json.dumps(fs, indent=0))
-        _off_today = {n for n, s in _official.get(today_iso, {}).items() if s == "Out"}
-        CONFIRMED_OUT_TODAY = ((set(_rw_conf) | _ovr_out | _ret_conf | _off_today
-                                | {n for n in cur if fs.get(n) == today_iso
-                                   and out.get(n) == "Out"}) & cur) | _ovr_out
+        _off_today = {n for n, st_ in (_official.get(today_iso) or {}).items() if st_ == "Out"}
+        CONFIRMED_OUT_TODAY = ((_off_today | _ovr_out)
+                               & {n for n, s_ in out.items() if s_ in ("Out", "Doubtful")}) | _ovr_out
         global CONFIRMED_OUT_BY_DATE
-        CONFIRMED_OUT_BY_DATE = {dte: ({n for n, s in mp.items() if s == "Out"} | _ovr_out)
+        CONFIRMED_OUT_BY_DATE = {dte: ({n for n, st_ in mp.items() if st_ == "Out"} | _ovr_out)
                                  for dte, mp in _official.items()}
         CONFIRMED_OUT_BY_DATE[today_iso] = CONFIRMED_OUT_TODAY
     except Exception:
-        CONFIRMED_OUT_TODAY = ((set(_rw_conf) | _ret_conf)
-                               & {n for n, s in out.items() if s in ("Out", "Doubtful")}) | _ovr_out
+        CONFIRMED_OUT_TODAY = set(_ovr_out)
     return out
 
 

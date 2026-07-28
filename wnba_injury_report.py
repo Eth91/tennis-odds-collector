@@ -155,7 +155,18 @@ def report(max_age_min=14):
             return c
     except (OSError, ValueError, KeyError):
         c = None
-    for d, h12, m, ap, t in _marks(now):
+    # LOOKBACK WIDENED 2026-07-28 (back=10 -> 96 = 24h). The league does NOT publish on every
+    # 15-min mark all day: on 7/28 the last report of the day was 12:00PM, so by 18:20 ET the
+    # 10-mark (2.5h) window found only 403s and silently served a 02:15AM cache -- 16 HOURS
+    # stale. That is invisible and, on a day where the report DOES change, means betting a
+    # lineup that no longer exists. HEAD-probe first so a long walk back is cheap (one GET).
+    for d, h12, m, ap, t in _marks(now, 96):
+        try:
+            if requests.head(BASE.format(d=d, h=h12, m=m, ap=ap), timeout=8,
+                             headers={"User-Agent": "Mozilla/5.0"}).status_code != 200:
+                continue
+        except requests.RequestException:
+            continue
         url = BASE.format(d=d, h=h12, m=m, ap=ap)
         try:
             r = requests.get(url, timeout=15, headers={"User-Agent": "Mozilla/5.0"})
