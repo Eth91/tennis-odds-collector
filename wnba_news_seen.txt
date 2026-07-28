@@ -252,6 +252,7 @@ rw|911|Double-double in blowout win
 rw|911|Expected to play Tuesday
 rw|911|Probable for Wednesday
 rw|912|Logs 21 minutes Sunday
+rw|912|Minutes restriction lifted
 rw|912|Records five points in loss
 rw|914|Probable for Tuesday
 rw|914|Ruled out for Wednesday
