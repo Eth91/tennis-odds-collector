@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-28T05:55:30Z",
+ "captured_at": "2026-07-28T06:03:20Z",
  "matches": [
-  {
-   "event_id": 35874851,
-   "p1": "Grzegorz Adamiak",
-   "p2": "Martin Olejnik",
-   "p1_norm": "grzegorz adamiak",
-   "p2_norm": "martin olejnik",
-   "open_date": "2026-07-28T05:40:00.000Z",
-   "line": 71.5,
-   "over_odds": -115,
-   "under_odds": -115
-  },
   {
    "event_id": 35874870,
    "p1": "Rafal Gajda",
@@ -19,9 +8,9 @@
    "p1_norm": "rafal gajda",
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-07-28T05:55:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 52.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35874872,
@@ -30,9 +19,9 @@
    "p1_norm": "milosz cesarz",
    "p2_norm": "dawid jendrysik",
    "open_date": "2026-07-28T06:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 74.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35874873,
@@ -41,9 +30,9 @@
    "p1_norm": "stapor rafal",
    "p2_norm": "adam linek",
    "open_date": "2026-07-28T06:00:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35874885,
@@ -87,6 +76,28 @@
    "open_date": "2026-07-28T06:20:00.000Z",
    "line": 81.5,
    "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35874927,
+   "p1": "Kamil Rudomina",
+   "p2": "Michal Minda",
+   "p1_norm": "kamil rudomina",
+   "p2_norm": "michal minda",
+   "open_date": "2026-07-28T06:25:00.000Z",
+   "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35874928,
+   "p1": "Michal Paszkiewicz",
+   "p2": "Jakub Kaczmarek",
+   "p1_norm": "michal paszkiewicz",
+   "p2_norm": "jakub kaczmarek",
+   "open_date": "2026-07-28T06:25:00.000Z",
+   "line": 74.5,
+   "over_odds": -118,
    "under_odds": -116
   }
  ]
