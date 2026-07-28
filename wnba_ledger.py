@@ -375,6 +375,26 @@ def grade():
                 if pa is not None:
                     actual = pa.get(stat)
             if actual is None:
+                # DNP VOID (2026-07-28, the Marine Johannes 7/20 case): the sweeps above cover a
+                # POSTPONED game and a broken premise, but nothing covered a game that was PLAYED
+                # while the player sat. NY@DAL 7/20 went Final and Johannes never appeared, so
+                # there was no stat line to read and `continue` parked the row as pending FOREVER
+                # (it was still open 8 days later). A book voids a prop when the player doesn't
+                # play, so we do too.
+                # Guarded so an in-progress game or a failed box fetch can never void a live bet:
+                # only fires >=2 days after the slate AND only when that date's box scores parsed
+                # non-empty (i.e. the day really was played and we simply are not in it).
+                try:
+                    import datetime as _dt
+                    _age = (_dt.date.today() - _dt.date.fromisoformat(pred_date)).days
+                    if _age >= 2 and box_actuals(pred_date):
+                        con.execute("UPDATE predictions SET result='void', graded=1 "
+                                    "WHERE rowid=? AND graded=0", (rowid,))
+                        graded += 1
+                        print(f"grade: voided {player} {stat} {pred_date} — DNP "
+                              f"(game played, player absent from the box)")
+                except Exception as _e:
+                    print(f"grade: DNP check skipped for row {rowid}: {str(_e)[:60]}")
                 continue                       # game not final yet / player not found — leave open
             res = "over" if actual > line else ("push" if actual == line else "under")
             con.execute("UPDATE predictions SET result=?, actual=?, graded=1 WHERE rowid=?",
