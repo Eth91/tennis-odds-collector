@@ -190,7 +190,11 @@ def posted_props(player):
     con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
     rows = con.execute(
         "SELECT stat, line, side, odds, COALESCE(book,'fd'), collected_at FROM fd_lines "
-        "WHERE sport='wnba' AND player=? AND collected_at > datetime('now','-1 day')",
+        "WHERE sport='wnba' AND player=? AND collected_at > datetime('now','-1 day') "
+        # live=1 rows are IN-PLAY prices (collected since 2026-07-28). A pre-game projection
+        # knows nothing about the score, foul trouble, or minutes already played, so these
+        # are captured for CLV/post-mortems and never priced into a bet.
+        "AND COALESCE(live,0)=0",
         (player,)).fetchall()
     con.close()
     if not rows:

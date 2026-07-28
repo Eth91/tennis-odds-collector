@@ -209,11 +209,17 @@ def collect_page(customPageId, sport, is_match):
         # the event's markets to live/in-play; those lines churn every possession and were firing
         # false "opening line" alerts for the game being played RIGHT NOW. We bet PRE-GAME openers
         # (incl. next-day), so only keep events that haven't started.
+        # IN-PLAY (2026-07-28): we used to `continue` here, which meant we stopped
+        # collecting an event AT TIP -- and FanDuel posts/re-prices the definitive player
+        # lines at lineup lock, right around tip. That is how Rivers pts 6.5 existed on the
+        # site and never in our DB. Keep collecting; tag the rows live=1 so the opener/stale
+        # logic and posted_props() can ignore them (that was the real reason for the skip).
+        is_live = 0
         od = e.get("openDate")
         if od:
             try:
                 if dt.datetime.fromisoformat(od.replace("Z", "+00:00")) <= now:
-                    continue
+                    is_live = 1
             except ValueError:
                 pass
         try:
@@ -235,7 +241,7 @@ def collect_page(customPageId, sport, is_match):
                     continue
                 seen.add(mid)
                 for (pl, st, ln, sd, od) in extract(m, sport, nm):
-                    out.append((sport, nm, pl, st, ln, sd, od))
+                    out.append((sport, nm, pl, st, ln, sd, od, is_live))
     return out
 
 
@@ -272,18 +278,21 @@ def main():
     con = sqlite3.connect(DB)
     con.execute("""CREATE TABLE IF NOT EXISTS fd_lines (
         collected_at TEXT, sport TEXT, event TEXT, player TEXT, stat TEXT, line REAL,
-        side TEXT, odds REAL, book TEXT DEFAULT 'fd',
+        side TEXT, odds REAL, book TEXT DEFAULT 'fd', live INTEGER DEFAULT 0,
         PRIMARY KEY (collected_at, sport, player, stat, line, side))""")
     # a PRE-book DB (e.g. recreated from scratch during the 2026-07-17 disk-full recovery)
     # crashes every posted_props() consumer with "no such column: book" — self-heal it here.
-    if "book" not in {r[1] for r in con.execute("PRAGMA table_info(fd_lines)")}:
+    _cols = {r[1] for r in con.execute("PRAGMA table_info(fd_lines)")}
+    if "book" not in _cols:
         con.execute("ALTER TABLE fd_lines ADD COLUMN book TEXT DEFAULT 'fd'")
+    if "live" not in _cols:                     # in-play tag (2026-07-28)
+        con.execute("ALTER TABLE fd_lines ADD COLUMN live INTEGER DEFAULT 0")
     # explicit column list: dk_collect added a 'book' column (DEFAULT 'fd'), so a
     # positional 8-value insert crashes against the 9-column table
     con.executemany("INSERT OR REPLACE INTO fd_lines "
-                    "(collected_at,sport,event,player,stat,line,side,odds) "
-                    "VALUES (?,?,?,?,?,?,?,?)",
-                    [(ts, *r) for r in rows])
+                    "(collected_at,sport,event,player,stat,line,side,odds,live) "
+                    "VALUES (?,?,?,?,?,?,?,?,?)",
+                    [(ts, *r) if len(r) == 8 else (ts, *r, 0) for r in rows])
     con.commit()
     con.close()
     by = Counter((r[0], r[3]) for r in rows)
