@@ -786,7 +786,19 @@ def push_plays(fresh, preds, topic):
     return delivered
 
 
-MAX_GAMES_MISSED = 8      # ~2.5 weeks of WNBA games; a vacancy older than this is priced
+# Tightened 8 -> 3 on 2026-07-28 against the live ledger (128 graded bets, 15 vacancy
+# spells). Hit rate decays monotonically with how long the vacancy has been open:
+#   gm<=1 64.9% (+35% ROI) | gm<=2 64.6% (+28%) | gm<=3 63.6% (+26%) | gm>=4 37.5% (-26%)
+# The cliff sits between 3 and 4, so 3 keeps every demonstrably-positive bucket and cuts
+# the negative one (43% of volume retained). De-confounded: freshness holds WITHIN cascade
+# size (1-out 50% vs 32%, 2-out 63% vs 48%), so it is not a proxy for "bigger cascade".
+# Cluster-bootstrapped over spells (bets inside a spell are correlated, so bet-level p's
+# lie): fresh-minus-stale = +21pt, 90% CI [+5, +34].
+# WHY it decays is pricing, not basketball: the 2023-25 backtest at SETTLED prices found
+# absence-game-1-2 was NOT better than all (41.7% vs 42.7%). The gradient only exists at
+# flag-time prices => this gate protects the timing edge [[feedback_speed_is_the_edge]],
+# and it matches the NBA port's validated absence-game-1-2 sweet spot (gm 0-1 here).
+MAX_GAMES_MISSED = 3
 
 
 def main():
