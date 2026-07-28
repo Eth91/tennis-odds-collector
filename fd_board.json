@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-28T02:31:29Z",
+ "captured_at": "2026-07-28T02:37:04Z",
  "matches": [
   {
    "event_id": 35874289,
@@ -8,9 +8,9 @@
    "p1_norm": "michal machelski",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-28T02:20:00.000Z",
-   "line": 91.5,
-   "over_odds": -105,
-   "under_odds": -135
+   "line": 96.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35874301,
@@ -19,9 +19,9 @@
    "p1_norm": "jakub nowak",
    "p2_norm": "michal durda",
    "open_date": "2026-07-28T02:30:00.000Z",
-   "line": 70.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 48.5,
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35874343,
@@ -31,8 +31,52 @@
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-28T02:45:00.000Z",
    "line": 72.5,
+   "over_odds": -120,
+   "under_odds": -110
+  },
+  {
+   "event_id": 35874360,
+   "p1": "Przemyslaw Perzynski",
+   "p2": "Artur Sobel",
+   "p1_norm": "przemyslaw perzynski",
+   "p2_norm": "artur sobel",
+   "open_date": "2026-07-28T03:00:00.000Z",
+   "line": 79.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35874361,
+   "p1": "Grzegorz Adamiak",
+   "p2": "Grzegorz Felkel",
+   "p1_norm": "grzegorz adamiak",
+   "p2_norm": "grzegorz felkel",
+   "open_date": "2026-07-28T03:00:00.000Z",
+   "line": 64.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35874362,
+   "p1": "Witold Buczynski",
+   "p2": "Lukasz Oracz",
+   "p1_norm": "witold buczynski",
+   "p2_norm": "lukasz oracz",
+   "open_date": "2026-07-28T03:00:00.000Z",
+   "line": 77.5,
+   "over_odds": -110,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35874363,
+   "p1": "Igor Dabrowski",
+   "p2": "Waclaw Suchecki",
+   "p1_norm": "igor dabrowski",
+   "p2_norm": "waclaw suchecki",
+   "open_date": "2026-07-28T03:00:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
