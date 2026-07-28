@@ -930,8 +930,17 @@ def flag_outs(con):
                 continue
             if raw_best is None or od > raw_best[0]:
                 raw_best = (od, main, bk)
-            # rung rule applies per book: an under is bettable only at a 16.5+ main line
-            if side == "under" and main < F["under_min_line"]:
+            # RUNG RULE (rewritten 2026-07-28) — was `main < under_min_line(16.5) -> skip`, i.e. it
+            # bet u16.5+ and skipped u15.5. That is BACKWARDS: u15.5 is the only rung that wins, on
+            # two independent datasets.
+            #   live outs_compass 7/25-27: u15.5 6-2 (75%) SKIPPED | u16.5+ 1-3 (25%) BET | u14.5 2-4
+            #   k_paper FD real lines    : u15.5 19-11 (63.3%, +7.8% ROI) | u16.5 12-11 (52.2%, -1.6%)
+            #                              | u14.5 9-11 (45.0%, -2.4%)
+            # It also contradicted the route-A finding already in the notes (cap at u15.5, demote
+            # u16.5 to shadow). So the rule becomes a WINDOW, not a floor: bet unders ONLY at the
+            # u15.5 rung. u14.5 stays out — it loses on both datasets, so "cap at 15.5" must mean
+            # exactly 15.5, not "15.5 and below".
+            if side == "under" and not (F["under_line_lo"] <= main <= F["under_line_hi"]):
                 continue
             if best is None or od > best[0]:
                 best = (od, main, bk)
