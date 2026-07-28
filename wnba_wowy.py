@@ -237,6 +237,124 @@ def wowy(player_log, teammate_log):
     return wowy_multi(player_log, [teammate_log])
 
 
+def peer_regime(player_log, peer_log, peer_plays_tonight, out_game_ids, min_gap=3.0):
+    """⚠ REGIME WARNING — is the elevated sample borrowed from the WRONG lineup?
+
+    `wowy_multi` conditions ONLY on the out player(s) and lets every other teammate float.
+    That is the Edwards case (2026-07-28, user-caught): Griner out projected her +5.0 min /
+    13.1 pts, but 5 of those 7 elevated games ALSO had Aneesah Morrow out. Morrow — not Griner
+    — is the forward she actually competes with for minutes. Holding Morrow ON the floor,
+    Griner's absence is worth only +1.8 min and her scoring DROPS 9.3 -> 7.2. Morrow played
+    that night, so the projection was priced off a lineup that was not happening.
+
+    Checks ONE peer — the highest-minutes same-position teammate — because that is who
+    contests the minutes, and because a full out-set match is combinatorially rare: a
+    match-ALL-peers version scored <0.25 on 84% of historical bets, too degenerate to test.
+
+    DISPLAY ONLY — returns a warning, never a veto. The selected-bet ledger (~51 rows) cannot
+    validate a hard gate, and this session produced three examples of a filter fit on a thin
+    sample costing money. Let it accrue, then test it on the post-selection universe.
+
+    Returns None when the sample is fine, else a dict; `gap_min` is roughly how many minutes
+    the projection is borrowing from the wrong regime.
+    """
+    elev = [g for g in player_log
+            if g["game_id"] not in out_game_ids and (g.get("min") or 0) > 0]
+    if len(elev) < 3 or not peer_log:
+        return None
+    peer_games = {g["game_id"] for g in peer_log if (g.get("min") or 0) > 0}
+    want = bool(peer_plays_tonight)
+    match = [g for g in elev if (g["game_id"] in peer_games) == want]
+    other = [g for g in elev if (g["game_id"] in peer_games) != want]
+    frac = len(match) / len(elev)
+    if not other:
+        return None                                   # whole sample matches tonight -> fine
+    mm = (sum(g["min"] for g in match) / len(match)) if match else None
+    mo = sum(g["min"] for g in other) / len(other)
+    gap = (mo - mm) if mm is not None else None
+    # Trigger on the GAP, not the match fraction. First version returned early when >=50% of
+    # the sample matched -- which silently passed the very case this exists for: Edwards was
+    # 5/9 matching (55.6%) yet the projection still averaged all 9 games, 18.8 min in the
+    # matching lineup vs 25.5 in the wrong one. What matters is that a material share of the
+    # sample comes from a lineup that is not happening AND moves the minutes.
+    if len(other) / len(elev) < 0.25:
+        return None                                   # mismatched games too rare to distort
+    if gap is None or gap < min_gap:
+        return None                                   # peer state barely moves the minutes
+    return {"peer_match": round(frac, 2), "n_elev": len(elev), "n_match": len(match),
+            "peer_plays_tonight": want,
+            "min_match": round(mm, 1) if mm is not None else None,
+            "min_other": round(mo, 1), "gap_min": round(gap, 1) if gap is not None else None}
+
+
+def peer_regime_scan(bene, team_players, out_names, logs, pos_of, plays_tonight, min_gap=3.0):
+    """Run peer_regime against EVERY same-position peer and return the worst mismatch.
+
+    Picking one "top peer" first was the wrong shape twice: by minutes it chose the teammate
+    who never misses a game (no availability variance -> can never explain the role change),
+    and by whole-season minutes-gap it still chose Nelson-Ododa over Morrow because the gap
+    was measured across ALL games rather than inside the elevated sample the projection is
+    actually built from. Scanning sidesteps the choice: every peer is checked against the
+    elevated games, and the biggest borrowed-minutes gap is what gets surfaced.
+
+    `plays_tonight(name) -> bool`. Returns the worst warning dict (with `peer` added) or None.
+    """
+    grp = {"G": "G", "F": "F", "C": "F"}
+
+    def g_of(n):
+        return grp.get((pos_of(n) or "?")[:1].upper(), "?")
+
+    mine = g_of(bene)
+    blog = logs.get(bene) or []
+    out_ids = {g["game_id"] for o in out_names
+               for g in (logs.get(o) or []) if (g.get("min") or 0) > 0}
+    worst = None
+    for n in team_players:
+        if n == bene or n in out_names or g_of(n) != mine:
+            continue
+        w = peer_regime(blog, logs.get(n), plays_tonight(n), out_ids, min_gap=min_gap)
+        if w and (worst is None or (w["gap_min"] or 0) > (worst["gap_min"] or 0)):
+            w = dict(w, peer=n)
+            worst = w
+    return worst
+
+
+def top_peer(bene, team_players, out_names, logs, pos_of, min_each=2):
+    """The same-position teammate whose ABSENCE actually moves `bene`'s minutes most.
+
+    NOT "whoever plays the most minutes" — that was the first version and it picks the wrong
+    player. For Edwards it returned Nelson-Ododa, who never misses a game: a teammate with no
+    variance in availability cannot explain any variance in Edwards' role, so the check never
+    fired. What matters is the peer whose availability VARIES and co-moves with bene's minutes
+    — Morrow, worth ~+8.9 min when she sits.
+
+    Requires >=`min_each` games on each side of the split so a one-game absence can't win.
+    Returns None when no peer has a usable both-ways sample (then there is nothing to warn on).
+    """
+    grp = {"G": "G", "F": "F", "C": "F"}      # bigs share a minute pool; guards are separate
+
+    def g_of(n):
+        return grp.get((pos_of(n) or "?")[:1].upper(), "?")
+
+    mine = g_of(bene)
+    blog = logs.get(bene) or []
+    best, best_gap = None, 0.0
+    for n in team_players:
+        if n == bene or n in out_names or g_of(n) != mine:
+            continue
+        pg = {g["game_id"] for g in (logs.get(n) or []) if (g.get("min") or 0) > 0}
+        if not pg:
+            continue
+        with_p = [g["min"] for g in blog if (g.get("min") or 0) > 0 and g["game_id"] in pg]
+        without_p = [g["min"] for g in blog if (g.get("min") or 0) > 0 and g["game_id"] not in pg]
+        if len(with_p) < min_each or len(without_p) < min_each:
+            continue                            # no usable both-ways sample
+        gap = sum(without_p) / len(without_p) - sum(with_p) / len(with_p)
+        if gap > best_gap:
+            best, best_gap = n, gap
+    return best
+
+
 def minutes_bands(pl_log, width=4):
     """Production bucketed by minutes played — the 'similar-minutes games' lookup."""
     bands = {}

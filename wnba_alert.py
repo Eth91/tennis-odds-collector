@@ -163,34 +163,11 @@ def collect():
         # edge is REACTING TO NEWS. A cascade emits flags only if >=1 out's absence is fresh
         # (last appearance within 21 days of the slate). Stale outs still shape the
         # projection when combined with a fresh one.
-        # 2026-07-28 FIX (All-Star break): calendar days conflate "the market has priced this
-        # vacancy for weeks" with "the league simply was not playing". Coming out of the break,
-        # players ruled out THAT MORNING (Plum, Sabally, Griner, Sykes) read as 21+ days stale
-        # and the entire slate was suppressed. Count the TEAM GAMES the out player has missed
-        # instead — a gameless break contributes zero, so freshness survives it. Same intent,
-        # correct unit (and it matches the NBA-port finding that absence-game index, not
-        # elapsed time, is what carries the edge).
-        _team_dates = set()
-        for _n2, _v2 in pl.items():
-            if _v2.get("team") == team:
-                for _g2 in (glog(_v2["id"]) or []):
-                    _d2 = (_g2.get("date") or "")[:10]
-                    if _d2:
-                        _team_dates.add(_d2)
-
-        def _missed(lg):
-            if not lg:
-                return 99
-            last = (lg[0].get("date") or "")[:10]
-            return sum(1 for d in _team_dates if last < d < slate_date)
         try:
-            if len(_team_dates) >= 3:
-                all_stale = all(_missed(lg) > MAX_GAMES_MISSED for lg in out_logs)
-            else:                                   # thin log coverage -> old calendar rule
-                _sd = datetime.date.fromisoformat(slate_date)
-                all_stale = all(
-                    (not lg) or (_sd - datetime.date.fromisoformat(lg[0]["date"][:10])).days > 21
-                    for lg in out_logs)
+            _sd = datetime.date.fromisoformat(slate_date)
+            all_stale = all(
+                (not lg) or (_sd - datetime.date.fromisoformat(lg[0]["date"][:10])).days > 21
+                for lg in out_logs)
         except (ValueError, KeyError, IndexError):
             all_stale = False
         if all_stale:
@@ -395,11 +372,30 @@ def collect():
                 rec = f"{hits}-{e['n']-hits}"
                 ctag = {"confirmed": " ✓STARTING", "bench": " ⚠NOT STARTING",
                         "likely": " (likely starts)", "projected": " (lineup TBD)"}[conf]
+                # ⚠ PEER-REGIME WARNING (2026-07-28, user-caught on Edwards) — the elevated
+                # sample conditions on the OUT player only, so it can be built on games where a
+                # positional PEER was also out. If that peer plays tonight, the projected
+                # minutes are borrowed from a lineup that is not happening. DISPLAY ONLY: it
+                # tags the ping, never suppresses the flag (~51 selected bets can't validate a
+                # hard gate). Fully guarded — a failure here must never cost a flag.
+                rtag = ""
+                try:
+                    _rw = W.peer_regime_scan(
+                        n, [x for x, vv in pl.items() if vv.get("team") == team],
+                        [nm for nm, _ in outs], {x: glog(vv["id"]) for x, vv in pl.items()
+                                                 if vv.get("team") == team},
+                        lambda x: (pl.get(x) or {}).get("position"),
+                        lambda x: inj.get(x) not in ("Out", "Doubtful"))
+                    if _rw:
+                        rtag = (f" ⚠REGIME({_rw['peer']} plays; sample {_rw['n_match']}/"
+                                f"{_rw['n_elev']}, ~{_rw['gap_min']:g}min borrowed)")
+                except Exception:
+                    rtag = ""
                 sd = "o" if e["side"] == "over" else "u"   # over/under prefix on the line
                 alerts.append((e["ev"], key,
                     f"{out_label} OUT -> {_short(n)} {e['stat'][:3]} {sd}{e['line']:g} "
                     f"{T._am(e['dec'])}{wo} | {rec} {e['hit']*100:.0f}% "
-                    f"| proj {e['elev_avg']:g} +{e['ev']*100:.0f}%EV{ctag}{tag}{env_tag}"))
+                    f"| proj {e['elev_avg']:g} +{e['ev']*100:.0f}%EV{ctag}{tag}{env_tag}{rtag}"))
                 preds.append({"pred_date": slate_date, "out_player": out_full, "player": n,
                               "team": team, "opp": matchups_by[slate_date].get(team, ""),
                               "stat": e["stat"], "line": e["line"], "odds": e["dec"],
@@ -784,26 +780,6 @@ def push_plays(fresh, preds, topic):
         except requests.RequestException as e:
             print("push failed — not marking SEEN, will retry:", str(e)[:80])
     return delivered
-
-
-# ~2.5 weeks of WNBA games; a vacancy older than this is priced. Skips only when ALL of a
-# team's outs are stale.
-#
-# 2026-07-28: tried tightening to 3 and REVERTED the same day. The raw ledger looks like it
-# justifies it (gm<=3 63.6% vs gm>=4 37.5%/-26% ROI), but that fit was run on the WRONG
-# UNIVERSE. The tracked record is not the raw ledger — it is overs-only passed through
-# `wnba_slip.current_selection` (thin-sample guard + correlated over-stack dedup). On that
-# actual bet universe (34-17) the decay VANISHES: gm=4 goes 8-2 (+53% ROI) and the whole
-# gm>3 set is 16-10 (+16.7% ROI, +4.34u) — profitable, not toxic. Cutting it costs a median
-# 4.2u; P(tightening is an improvement) = 13.6%.
-#
-# WHY the raw fit lied: current_selection ALREADY removes the bad stale bets (they were
-# mostly thin-sample over-extrapolations the guard kills). A games-missed gate on top just
-# re-filters an already-filtered population and takes good volume with it.
-# ⇒ RULE: fit any selection filter on the POST-selection universe. An upstream filter
-# changes the population, so a threshold tuned on raw rows is measuring the upstream
-# filter's work, not its own.
-MAX_GAMES_MISSED = 8
 
 
 def main():
