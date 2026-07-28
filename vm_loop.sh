@@ -17,7 +17,7 @@ push(){
   # dropped on the VM migration). `git add -A -f` force-re-adds it every cycle despite the
   # ignore -> committing/hashing 100MB every 75s + git auto-gc repacking those blobs = the
   # swap-thrash. Unstage it here each cycle (keeps -f for the small caches the digests need).
-  git rm --cached -q wnba_lines.sqlite wnba_glog_cache.json fanduel_props.sqlite fanduel_props.bak.sqlite 2>/dev/null || true
+  git rm --cached -q wnba_lines.sqlite wnba_glog_cache.json fanduel_props.sqlite fanduel_props.bak.sqlite tt.sqlite tt.sqlite-wal tt.sqlite-shm 2>/dev/null || true
   # NOTE: use `|| true`, NOT `|| return 0`. Since wnba_lines.sqlite (the file that changed every
   # cycle) is now excluded, many cycles have "nothing to commit" — returning early there SKIPS the
   # push, so any already-committed-but-unpushed commits (e.g. a fresh dashboard from fullscan, or a
@@ -45,7 +45,7 @@ push(){
     # (2026-07-27) fanduel_props.sqlite is VM-LOCAL now (untracked, 100MB vs
     # GitHub hard limit); never replay it from origin.
     git add -A -f 2>/dev/null
-    git rm --cached -q wnba_lines.sqlite wnba_glog_cache.json fanduel_props.sqlite fanduel_props.bak.sqlite 2>/dev/null || true
+    git rm --cached -q wnba_lines.sqlite wnba_glog_cache.json fanduel_props.sqlite fanduel_props.bak.sqlite tt.sqlite tt.sqlite-wal tt.sqlite-shm 2>/dev/null || true
     git commit -qm "vm loop data (replayed after failed rebase) [skip ci]" 2>/dev/null || true
     echo "[$(date +%H:%M)] rebase failed -> data replayed onto origin tip"
   }
@@ -103,7 +103,7 @@ PY
 # memory pressure on the 956MB box — TT lines don't need 75s freshness.
 board(){ local f=/tmp/.fd_board_last now last; now=$(date +%s); last=$(cat "$f" 2>/dev/null || echo 0)
   [ $((now - last)) -lt 240 ] && return 0
-  python3 fd_tt.py --board --captured-at "$(date -u +%FT%TZ)" >/dev/null 2>&1 && echo "$now" > "$f" || true; }
+  python3 fd_tt.py --write --board --captured-at "$(date -u +%FT%TZ)" >/dev/null 2>&1 && echo "$now" > "$f" || true; }
 
 fullscan(){
   if ! python3 wnba_alert.py >/dev/null 2>/tmp/.alert_err; then

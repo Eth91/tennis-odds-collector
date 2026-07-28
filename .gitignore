@@ -41,3 +41,8 @@ fanduel_props.sqlite-wal
 fanduel_props.sqlite-shm
 fanduel_props.bak.sqlite
 fanduel_props.tmp
+# VM-local TT Elite FanDuel line store (fd_tt.py --write). Binary + rewritten
+# every cycle -> must never be committed; see the git rm --cached guard in vm_loop.sh.
+tt.sqlite
+tt.sqlite-wal
+tt.sqlite-shm
