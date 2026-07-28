@@ -1,6 +1,6 @@
 # Pitcher strikeout alt-ladder scan (cross-book line-shopping)
 
-_2026-07-28 02:23 UTC · fair = vig-stripped consensus of the books posting each rung. NO projection model (backtest: corr 0.37, too weak to price K tails; and pricing a book's unique rung off a model just bets our own error). Only rungs >=2 books agree on can be flagged._
+_2026-07-28 02:51 UTC · fair = vig-stripped consensus of the books posting each rung. NO projection model (backtest: corr 0.37, too weak to price K tails; and pricing a book's unique rung off a model just bets our own error). Only rungs >=2 books agree on can be flagged._
 
 **No +EV rung tonight** — the K market is efficient; even the best of 3 books is -EV on every agreeing rung. This is a SHOPPING sheet (best book per rung to minimize vig), not a bet list. A genuine +EV rung (a slow book) would ⭐ here.
 
@@ -17,7 +17,7 @@ _2026-07-28 02:23 UTC · fair = vig-stripped consensus of the books posting each
   O2.5: FD -1799 (1 book, no consensus)
   O3.5: FD -500 (1 book, no consensus)
   O4.5: FD -192 (1 book, no consensus)
-  O5.5: fair 43% · FD +116 DK +108 → best FD
+  O5.5: fair 44% · FD +116 DK -101 → best FD
   O6.5: FD +255 (1 book, no consensus)
   O7.5: FD +560 (1 book, no consensus)
 
@@ -84,14 +84,26 @@ _2026-07-28 02:23 UTC · fair = vig-stripped consensus of the books posting each
   O6.5: FD +260 (1 book, no consensus)
   O7.5: FD +540 (1 book, no consensus)
 
+**Cal Quantrill**
+  O2.5: DK -179 (1 book, no consensus)
+
 **Dean Kremer**
   O4.5: DK -123 (1 book, no consensus)
+
+**Griffin Jax**
+  O5.5: DK -119 (1 book, no consensus)
 
 **Michael King**
   O5.5: DK -102 (1 book, no consensus)
 
 **Michael Lorenzen**
-  O3.5: DK -147 (1 book, no consensus)
+  O3.5: DK -139 (1 book, no consensus)
+
+**Peter Lambert**
+  O5.5: DK +109 (1 book, no consensus)
+
+**Reid Detmers**
+  O6.5: DK -101 (1 book, no consensus)
 
 **Seth Lugo**
   O4.5: DK +117 (1 book, no consensus)
