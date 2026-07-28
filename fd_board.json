@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-28T01:42:45Z",
+ "captured_at": "2026-07-28T01:48:28Z",
  "matches": [
-  {
-   "event_id": 35874259,
-   "p1": "Jakub Nowak",
-   "p2": "Robert Kostepski",
-   "p1_norm": "jakub nowak",
-   "p2_norm": "robert kostepski",
-   "open_date": "2026-07-28T01:30:00.000Z",
-   "line": 71.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35874260,
    "p1": "Jerzy Michalik",
@@ -19,9 +8,9 @@
    "p1_norm": "jerzy michalik",
    "p2_norm": "michal guzik",
    "open_date": "2026-07-28T01:30:00.000Z",
-   "line": 85.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 101.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35874261,
@@ -30,9 +19,9 @@
    "p1_norm": "adam staniczek",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-28T01:35:00.000Z",
-   "line": 82.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 91.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35874263,
@@ -66,6 +55,28 @@
    "line": 74.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35874283,
+   "p1": "Mateusz Sikon",
+   "p2": "Piotr Gumulinski",
+   "p1_norm": "mateusz sikon",
+   "p2_norm": "piotr gumulinski",
+   "open_date": "2026-07-28T02:10:00.000Z",
+   "line": 76.5,
+   "over_odds": -110,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35874284,
+   "p1": "Pawel Chojnacki",
+   "p2": "Artur Kubiak",
+   "p1_norm": "pawel chojnacki",
+   "p2_norm": "artur kubiak",
+   "open_date": "2026-07-28T02:10:00.000Z",
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
