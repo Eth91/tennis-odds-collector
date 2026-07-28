@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-28T20:57:45Z",
+ "captured_at": "2026-07-28T21:02:55Z",
  "matches": [
-  {
-   "event_id": 35878385,
-   "p1": "Dariusz Molenda",
-   "p2": "Zbigniew Nocun",
-   "p1_norm": "dariusz molenda",
-   "p2_norm": "zbigniew nocun",
-   "open_date": "2026-07-28T20:45:00.000Z",
-   "line": 65.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35878388,
    "p1": "Grzegorz Marud",
@@ -19,20 +8,9 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-07-28T20:45:00.000Z",
-   "line": 71.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35878405,
-   "p1": "Mateusz Sikon",
-   "p2": "Piotr Przewlocki",
-   "p1_norm": "mateusz sikon",
-   "p2_norm": "piotr przewlocki",
-   "open_date": "2026-07-28T21:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 88.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35878406,
@@ -41,9 +19,9 @@
    "p1_norm": "jakub glanowski",
    "p2_norm": "michal olbrycht",
    "open_date": "2026-07-28T21:00:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 73.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35878411,
