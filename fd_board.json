@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-28T04:18:52Z",
+ "captured_at": "2026-07-28T04:25:54Z",
  "matches": [
-  {
-   "event_id": 35874411,
-   "p1": "Grzegorz Adamiak",
-   "p2": "Kacper Glazowski",
-   "p1_norm": "grzegorz adamiak",
-   "p2_norm": "kacper glazowski",
-   "open_date": "2026-07-28T04:10:00.000Z",
-   "line": 63.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35874412,
    "p1": "Igor Dabrowski",
@@ -19,9 +8,9 @@
    "p1_norm": "igor dabrowski",
    "p2_norm": "dariusz wrobel",
    "open_date": "2026-07-28T04:10:00.000Z",
-   "line": 74.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 89.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35874413,
@@ -31,8 +20,8 @@
    "p2_norm": "waldemar glanowski",
    "open_date": "2026-07-28T04:10:00.000Z",
    "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "over_odds": -105,
+   "under_odds": -135
   },
   {
    "event_id": 35874441,
@@ -41,9 +30,9 @@
    "p1_norm": "jakub nowak",
    "p2_norm": "mateusz sikon",
    "open_date": "2026-07-28T04:20:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 73.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35874444,
@@ -64,8 +53,8 @@
    "p2_norm": "artur sobel",
    "open_date": "2026-07-28T04:25:00.000Z",
    "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35874447,
@@ -75,8 +64,8 @@
    "p2_norm": "waclaw suchecki",
    "open_date": "2026-07-28T04:30:00.000Z",
    "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35874448,
@@ -86,8 +75,8 @@
    "p2_norm": "grzegorz felkel",
    "open_date": "2026-07-28T04:30:00.000Z",
    "line": 82.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35874449,
@@ -108,6 +97,28 @@
    "p2_norm": "robert kostepski",
    "open_date": "2026-07-28T04:40:00.000Z",
    "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35874465,
+   "p1": "Michal Paszkiewicz",
+   "p2": "Oliver Vincenec",
+   "p1_norm": "michal paszkiewicz",
+   "p2_norm": "oliver vincenec",
+   "open_date": "2026-07-28T04:50:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35874466,
+   "p1": "Michal Minda",
+   "p2": "Adam Linek",
+   "p1_norm": "michal minda",
+   "p2_norm": "adam linek",
+   "open_date": "2026-07-28T04:50:00.000Z",
+   "line": 81.5,
    "over_odds": -118,
    "under_odds": -112
   }
