@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-28T05:40:34Z",
+ "captured_at": "2026-07-28T05:48:05Z",
  "matches": [
   {
    "event_id": 35874845,
@@ -8,9 +8,9 @@
    "p1_norm": "przemyslaw perzynski",
    "p2_norm": "michal minda",
    "open_date": "2026-07-28T05:35:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 102.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35874846,
@@ -19,9 +19,9 @@
    "p1_norm": "adam ruszkiewicz",
    "p2_norm": "oliver vincenec",
    "open_date": "2026-07-28T05:35:00.000Z",
-   "line": 82.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 94.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35874848,
@@ -30,9 +30,9 @@
    "p1_norm": "witold buczynski",
    "p2_norm": "pawel slosarczyk",
    "open_date": "2026-07-28T05:40:00.000Z",
-   "line": 77.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 80.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35874850,
@@ -41,9 +41,9 @@
    "p1_norm": "igor dabrowski",
    "p2_norm": "blazej warpas",
    "open_date": "2026-07-28T05:40:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 67.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35874851,
@@ -52,9 +52,9 @@
    "p1_norm": "grzegorz adamiak",
    "p2_norm": "martin olejnik",
    "open_date": "2026-07-28T05:40:00.000Z",
-   "line": 73.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 71.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35874870,
