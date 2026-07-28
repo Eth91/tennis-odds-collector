@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-28T19:36:45Z",
+ "captured_at": "2026-07-28T19:40:58Z",
  "matches": [
-  {
-   "event_id": 35877881,
-   "p1": "Jaroslaw Rolak",
-   "p2": "Kacper Marchlewski",
-   "p1_norm": "jaroslaw rolak",
-   "p2_norm": "kacper marchlewski",
-   "open_date": "2026-07-28T19:20:00.000Z",
-   "line": 88.5,
-   "over_odds": -140,
-   "under_odds": 100
-  },
   {
    "event_id": 35877893,
    "p1": "Kamil Delikatny",
@@ -19,9 +8,9 @@
    "p1_norm": "kamil delikatny",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-07-28T19:30:00.000Z",
-   "line": 70.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 79.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35877897,
@@ -30,7 +19,18 @@
    "p1_norm": "jakub pruszkowski",
    "p2_norm": "kaczynski piotr",
    "open_date": "2026-07-28T19:35:00.000Z",
-   "line": 76.5,
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -125
+  },
+  {
+   "event_id": 35878284,
+   "p1": "Oliwier Sokolowski",
+   "p2": "Piotr Przewlocki",
+   "p1_norm": "oliwier sokolowski",
+   "p2_norm": "piotr przewlocki",
+   "open_date": "2026-07-28T19:35:00.000Z",
+   "line": 84.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -41,9 +41,9 @@
    "p1_norm": "lukasz jarocki",
    "p2_norm": "miroslav sklensky",
    "open_date": "2026-07-28T19:40:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35877922,
@@ -77,6 +77,39 @@
    "line": 73.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35878304,
+   "p1": "Krystian Kolodziej",
+   "p2": "Karol Strowski",
+   "p1_norm": "krystian kolodziej",
+   "p2_norm": "karol strowski",
+   "open_date": "2026-07-28T20:05:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35878305,
+   "p1": "Kacper Adamus",
+   "p2": "Piotr Przewlocki",
+   "p1_norm": "kacper adamus",
+   "p2_norm": "piotr przewlocki",
+   "open_date": "2026-07-28T20:05:00.000Z",
+   "line": 78.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35878306,
+   "p1": "Dariusz Szlubowski",
+   "p2": "Kacper Marchlewski",
+   "p1_norm": "dariusz szlubowski",
+   "p2_norm": "kacper marchlewski",
+   "open_date": "2026-07-28T20:05:00.000Z",
+   "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
