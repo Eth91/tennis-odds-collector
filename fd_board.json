@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-28T19:12:35Z",
+ "captured_at": "2026-07-28T19:18:47Z",
  "matches": [
   {
    "event_id": 35877845,
@@ -8,9 +8,9 @@
    "p1_norm": "jacek przewlocki",
    "p2_norm": "bartlomiej mrugala",
    "open_date": "2026-07-28T18:55:00.000Z",
-   "line": 92.5,
-   "over_odds": -105,
-   "under_odds": -130
+   "line": 95.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35877889,
@@ -19,9 +19,9 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "kacper adamus",
    "open_date": "2026-07-28T19:05:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 90.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35877865,
@@ -30,9 +30,9 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "mariusz koczyba",
    "open_date": "2026-07-28T19:10:00.000Z",
-   "line": 74.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 48.5,
+   "over_odds": -175,
+   "under_odds": 125
   },
   {
    "event_id": 35877866,
@@ -41,9 +41,9 @@
    "p1_norm": "dariusz molenda",
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-07-28T19:10:00.000Z",
-   "line": 76.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35877874,
@@ -52,8 +52,8 @@
    "p1_norm": "adrian spychala",
    "p2_norm": "karol strowski",
    "open_date": "2026-07-28T19:15:00.000Z",
-   "line": 77.5,
-   "over_odds": -110,
+   "line": 76.5,
+   "over_odds": -115,
    "under_odds": -120
   },
   {
@@ -88,6 +88,28 @@
    "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35877921,
+   "p1": "Lukasz Jarocki",
+   "p2": "Miroslav Sklensky",
+   "p1_norm": "lukasz jarocki",
+   "p2_norm": "miroslav sklensky",
+   "open_date": "2026-07-28T19:40:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35877922,
+   "p1": "Marcin Kowalczyk",
+   "p2": "Bartlomiej Mrugala",
+   "p1_norm": "marcin kowalczyk",
+   "p2_norm": "bartlomiej mrugala",
+   "open_date": "2026-07-28T19:40:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
