@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-28T06:12:03Z",
+ "captured_at": "2026-07-28T06:19:21Z",
  "matches": [
-  {
-   "event_id": 35874872,
-   "p1": "Milosz Cesarz",
-   "p2": "Dawid Jendrysik",
-   "p1_norm": "milosz cesarz",
-   "p2_norm": "dawid jendrysik",
-   "open_date": "2026-07-28T06:00:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35874885,
    "p1": "Adrian Wiecek",
@@ -19,7 +8,7 @@
    "p1_norm": "adrian wiecek",
    "p2_norm": "dawid michna",
    "open_date": "2026-07-28T06:05:00.000Z",
-   "line": 79.5,
+   "line": 87.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -30,7 +19,7 @@
    "p1_norm": "aleksander lilien",
    "p2_norm": "kamil klocek",
    "open_date": "2026-07-28T06:05:00.000Z",
-   "line": 75.5,
+   "line": 98.5,
    "over_odds": -110,
    "under_odds": -125
   },
@@ -99,6 +88,28 @@
    "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35874969,
+   "p1": "Adam Ruszkiewicz",
+   "p2": "Dawid Jendrysik",
+   "p1_norm": "adam ruszkiewicz",
+   "p2_norm": "dawid jendrysik",
+   "open_date": "2026-07-28T06:45:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35874970,
+   "p1": "Karol Jablonski",
+   "p2": "Rafal Gajda",
+   "p1_norm": "karol jablonski",
+   "p2_norm": "rafal gajda",
+   "open_date": "2026-07-28T06:45:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
