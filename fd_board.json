@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-28T04:55:59Z",
+ "captured_at": "2026-07-28T05:04:32Z",
  "matches": [
-  {
-   "event_id": 35874465,
-   "p1": "Michal Paszkiewicz",
-   "p2": "Oliver Vincenec",
-   "p1_norm": "michal paszkiewicz",
-   "p2_norm": "oliver vincenec",
-   "open_date": "2026-07-28T04:50:00.000Z",
-   "line": 65.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35874466,
-   "p1": "Michal Minda",
-   "p2": "Adam Linek",
-   "p1_norm": "michal minda",
-   "p2_norm": "adam linek",
-   "open_date": "2026-07-28T04:50:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35874470,
    "p1": "Martin Olejnik",
@@ -30,9 +8,9 @@
    "p1_norm": "martin olejnik",
    "p2_norm": "dawid michna",
    "open_date": "2026-07-28T04:55:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 76.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35874471,
@@ -41,9 +19,9 @@
    "p1_norm": "blazej warpas",
    "p2_norm": "kamil klocek",
    "open_date": "2026-07-28T04:55:00.000Z",
-   "line": 76.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 87.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35874472,
@@ -52,9 +30,9 @@
    "p1_norm": "pawel slosarczyk",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-28T04:55:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 60.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35874484,
@@ -121,6 +99,17 @@
    "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35874828,
+   "p1": "Karol Jablonski",
+   "p2": "Wojciech Wojtaszczyk",
+   "p1_norm": "karol jablonski",
+   "p2_norm": "wojciech wojtaszczyk",
+   "open_date": "2026-07-28T05:30:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
