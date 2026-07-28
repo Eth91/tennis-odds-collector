@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-28T03:51:45Z",
+ "captured_at": "2026-07-28T03:57:34Z",
  "matches": [
-  {
-   "event_id": 35874394,
-   "p1": "Adam Ruszkiewicz",
-   "p2": "Jakub Kaczmarek",
-   "p1_norm": "adam ruszkiewicz",
-   "p2_norm": "jakub kaczmarek",
-   "open_date": "2026-07-28T03:35:00.000Z",
-   "line": 96.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35874395,
    "p1": "Michal Minda",
@@ -19,9 +8,9 @@
    "p1_norm": "michal minda",
    "p2_norm": "stapor rafal",
    "open_date": "2026-07-28T03:40:00.000Z",
-   "line": 84.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 85.5,
+   "over_odds": -145,
+   "under_odds": 105
   },
   {
    "event_id": 35874396,
@@ -30,9 +19,9 @@
    "p1_norm": "martin olejnik",
    "p2_norm": "adrian wiecek",
    "open_date": "2026-07-28T03:45:00.000Z",
-   "line": 81.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 89.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35874397,
@@ -41,9 +30,9 @@
    "p1_norm": "blazej warpas",
    "p2_norm": "aleksander lilien",
    "open_date": "2026-07-28T03:50:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35874398,
@@ -52,7 +41,7 @@
    "p1_norm": "pawel slosarczyk",
    "p2_norm": "wojciech urban",
    "open_date": "2026-07-28T03:50:00.000Z",
-   "line": 76.5,
+   "line": 87.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -64,8 +53,8 @@
    "p2_norm": "robert kostepski",
    "open_date": "2026-07-28T03:55:00.000Z",
    "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35874403,
@@ -121,6 +110,39 @@
    "line": 75.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35874441,
+   "p1": "Jakub Nowak",
+   "p2": "Mateusz Sikon",
+   "p1_norm": "jakub nowak",
+   "p2_norm": "mateusz sikon",
+   "open_date": "2026-07-28T04:20:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35874444,
+   "p1": "Milosz Cesarz",
+   "p2": "Adam Ruszkiewicz",
+   "p1_norm": "milosz cesarz",
+   "p2_norm": "adam ruszkiewicz",
+   "open_date": "2026-07-28T04:25:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35874445,
+   "p1": "Stapor Rafal",
+   "p2": "Artur Sobel",
+   "p1_norm": "stapor rafal",
+   "p2_norm": "artur sobel",
+   "open_date": "2026-07-28T04:25:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
