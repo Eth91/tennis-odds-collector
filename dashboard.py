@@ -39,6 +39,19 @@ STAT = {"points": "PTS", "rebounds": "REB", "assists": "AST",
 STATKEY = {"points": "pts", "rebounds": "reb", "assists": "ast",
            "pra": "pra", "pts_reb": "pts_reb", "pts_ast": "pts_ast", "reb_ast": "reb_ast"}
 THIN_EV = 0.35
+# ── MLB RETIRED 2026-07-28 (user: "kill the mlb model then, focus on wnba and tt") ──
+# Killed on evidence, not vibes. A leak-free 2023-25 test (49,055 rows / 7,706 pitcher-games,
+# prior-starts-only features, prior-season opponent K%, pre-first-pitch prices) found ONE gate
+# that held across both sandbox seasons at 66.9% -- and it FAILED its pre-registered one-shot
+# 2025 holdout at 59.9% / -0.99u, against a 60.06% breakeven at the 1.665 avg price it needs.
+# Slicing 2025 by price band, hit rate tracks breakeven everywhere: the gates carry real
+# information (50% -> 60% at short prices) and the market prices it exactly. The FD-only audit
+# agreed independently: 51-51 at OUR book, profitable only at Pinnacle, which we cannot bet.
+# `k-compass.timer` is stopped+disabled on the VM (no more flags or pings); this flag drops the
+# board section and tracker card. Code, ledgers and git history are all intact -- set True to
+# revive. Any future MLB work should be TIMING (openers/scratches/lineups), never a public-data
+# model, which is now disproven three separate ways.
+MLB_LIVE = False
 # local 96px copies (docs/logos/, fetched from ESPN once) — no hotlinking 100KB+ originals
 LOGO = "logos/{}.png"
 # MLB logos: docs/logos/mlb_{team_id}.svg (fetched from mlbstatic 2026-07-25, id-keyed to avoid
@@ -858,6 +871,8 @@ def _tracker_panel(wnba_rec, tt_json):
     # k_paper flagging benched; its 12-3 era lives in git history)
     mlb_card = ""
     try:
+        if not MLB_LIVE:
+            raise ValueError("mlb retired")     # skip the card; caught below like a bad read
         _cbt = json.loads((HERE / "compass_board.json").read_text())
         _kk = _cbt
         _oo = _cbt.get("outs") or {}
@@ -2372,6 +2387,11 @@ def build():
 
     except (OSError, ValueError):
         pass
+    if not MLB_LIVE:
+        mlb_html = ""          # MLB retired 2026-07-28 (see MLB_LIVE) — render nothing
+    # drop the nav tab too, or it points at an empty pane
+    mlb_tab = ('<div class="tab" data-tab="mlb" onclick="showTab(\'mlb\')">'
+               f'{ICON_MLB}<span>MLB</span></div>' if MLB_LIVE else "")
     tracker_html = _tracker_panel((w, l, u), tt_json)
     # Client-side LIVE pre-match totals: refetch fd_board.json (the VM's FanDuel.ca board) from the
     # raw URL every 60s and re-render #tt-totals, so the totals update on their own between the
@@ -2966,7 +2986,7 @@ def build():
     <div class="tabthumb" id="tabthumb"></div>
     <div class="tab active" data-tab="wnba" onclick="showTab('wnba')">{ICON_WNBA}<span>WNBA</span></div>
     <div class="tab" data-tab="tt" onclick="showTab('tt')">{ICON_TT}<span>TT</span></div>
-    <div class="tab" data-tab="mlb" onclick="showTab('mlb')">{ICON_MLB}<span>MLB</span></div>
+    {mlb_tab}
     <div class="tab" data-tab="tracker" onclick="showTab('tracker')">{ICON_TRK}<span>Tracker</span></div>
   </div>
   <div class="panel" id="wnba">
