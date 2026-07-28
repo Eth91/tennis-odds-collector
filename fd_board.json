@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-28T01:36:47Z",
+ "captured_at": "2026-07-28T01:42:45Z",
  "matches": [
   {
    "event_id": 35874259,
@@ -8,9 +8,9 @@
    "p1_norm": "jakub nowak",
    "p2_norm": "robert kostepski",
    "open_date": "2026-07-28T01:30:00.000Z",
-   "line": 85.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 71.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35874260,
@@ -19,7 +19,7 @@
    "p1_norm": "jerzy michalik",
    "p2_norm": "michal guzik",
    "open_date": "2026-07-28T01:30:00.000Z",
-   "line": 84.5,
+   "line": 85.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,9 +30,9 @@
    "p1_norm": "adam staniczek",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-28T01:35:00.000Z",
-   "line": 74.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 82.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35874263,
