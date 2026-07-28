@@ -115,6 +115,7 @@ def collect():
                 outs_by_team[(sdate, p["team"])].append((name, p))
 
     alerts, preds, proj_rows, cold_spots = [], [], [], []
+    n1_spots = []                                    # ⚡1G speed pilots -> board (they PING)
     _band_shadowed = set()
     _band_seen = {}
     _tmrw_seen = {}                                      # next-day CONTINGENT spots (not bets)
@@ -285,6 +286,13 @@ def collect():
                                         "assists": pa1["proj_ast"]}, pn,
                                        tip=tips_by[slate_date].get(team), tier="n1_speed")
                     for e in e1:
+                        # COHERENCE (2026-07-28): this tier PINGS, so it must render. It used
+                        # to exist only in `alerts` and vanished from the board entirely.
+                        n1_spots.append({"player": n, "team": team, "star": out_full,
+                                         "status": "OUT", "sit": 1.0, "lead": None,
+                                         "conf": T.starter_label(n, team, starters, proj),
+                                         "proj_min": round(proj, 1), "date": slate_date,
+                                         "n1": True, **e})
                         alerts.append((e["ev"], f"n1|{slate_date}|{n}|{e['stat']}|{e['line']:g}",
                             f"⚡1G {out_label} OUT -> {_short(n)} {e['stat'][:3]} o{e['line']:g} "
                             f"{T._am(e['dec'])} | proj {e['elev_avg']:g} +{e['ev']*100:.0f}%EV "
@@ -610,6 +618,7 @@ def collect():
                 scen.append(s)
     except Exception as e:
         print(f"tomorrow watchlist skipped: {str(e)[:80]}")
+    watch += n1_spots                                    # ⚡1G pilots -> dashboard (they ping)
     watch += cold_spots                                  # ⚡COLD spots -> dashboard too
     watch += list(_band_seen.values())                   # ⚡BAND shadows -> dashboard (no ping)
     watch += list(_tmrw_seen.values())                   # next-day CONTINGENT spots -> dashboard
@@ -626,6 +635,7 @@ def collect():
                              "status": ss[0].get("status") or "", "sit": ss[0].get("sit"),
                              "firm_outs": [], "play": play})
     _fold(_tmrw_seen.values(), "contingent")
+    _fold(n1_spots, "n1", band_gate=False)               # pilots are out-of-band by nature
     _fold(cold_spots, "cold")
     _fold(_band_seen.values(), "band", band_gate=False)  # band = out-of-band by definition
 

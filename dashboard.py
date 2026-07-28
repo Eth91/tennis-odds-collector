@@ -1720,7 +1720,7 @@ def _watchlist_html(firm_keys=frozenset(), tips=None):
         return (f'<img class="glogo" src="{LOGO.format(ab.lower())}" alt="" loading="lazy" '
                 f'onerror="this.style.display=\'none\'">' if ab else "")
 
-    KIND_ORD = {"q": 0, "contingent": 1, "cold": 2, "band": 3}
+    KIND_ORD = {"q": 0, "contingent": 1, "n1": 2, "cold": 3, "band": 4}
     games = defaultdict(list)                        # (date, frozenset(pair)) -> rows
     for s in scen:
         tm, op = (s.get("team") or "").upper(), (s.get("opp") or "").upper()
@@ -1764,13 +1764,16 @@ def _watchlist_html(firm_keys=frozenset(), tips=None):
                         cond += f'<span class="wlin"> · {html.escape(", ".join(also))} in</span>'
             elif kind == "contingent":
                 cond = f'if <b>{html.escape("+".join(stars))}</b> confirmed out'
+            elif kind == "n1":
+                cond = (f'<b>{html.escape("+".join(stars))}</b> out · 1-game sample '
+                        f'<span class="wlin">· stale line · speed pilot, not in record</span>')
             elif kind == "cold":
                 cond = (f'<b>{html.escape("+".join(stars))}</b> out · cold '
                         f'<span class="wlin">· no sample · shadow</span>')
             else:
                 cond = (f'<b>{html.escape("+".join(stars))}</b> out '
                         f'<span class="wlin">· out of band · shadow, not a bet</span>')
-            shadow = " wlshadow" if kind in ("cold", "band") else ""
+            shadow = " wlshadow" if kind in ("cold", "band", "n1") else ""
             rows += (f'<div class="wlrow{shadow}"{ttl}>'
                      f'<div class="wlcond">{cond}</div>'
                      f'<div class="wlplay"><b>{html.escape(p.get("player") or "")}</b> '

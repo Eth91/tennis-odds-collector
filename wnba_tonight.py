@@ -760,7 +760,7 @@ OFFICIAL_BY_DATE = {}
 CONFIRMED_OUT_BY_DATE = {}           # {game_date: set(names)} — official report + overrides
 # RotoWire fallback: how stale the official PDF must be before RW may override an official
 # Probable/Available. RW UPGRADES of Questionable/absent players are never gated on this.
-RW_FALLBACK_STALE_HRS = 3.0
+RW_FALLBACK_STALE_HRS = 3.0   # report-age reporting only; RotoWire is rank 3 by gap-fill now
 RW_FALLBACK_OUTS = set()             # names RW ruled out that the official report had not
 NEWS_OUTS = set()                    # names @UnderdogWNBA ruled out (beat-reporter speed)
 NEWS_LOG = 'underdog_log.jsonl'      # written by underdog_watch.service, one JSON per ruling
@@ -855,11 +855,11 @@ def injuries():
                 if len(_full) != 1:          # team-scoped; ambiguous collision -> skip
                     continue
                 _nm = _full[0]
-                _off = today_off.get(_nm)
-                if _off == "Out":
-                    continue                 # already official; nothing to add
-                if _off in ("Probable", "Available") and not _stale:
-                    continue                 # fresh official clearance beats RW
+                # RANK 3: RotoWire fills only what the league report is SILENT about.
+                # Any official status for this player -- Out, Questionable, Probable --
+                # outranks RotoWire outright.
+                if today_off.get(_nm) is not None:
+                    continue
                 out[_nm] = "Out"
                 RW_FALLBACK_OUTS.add(_nm)
         if RW_FALLBACK_OUTS:
@@ -930,18 +930,22 @@ def injuries():
                 print("underdog: unmatched name in %r" % _txt[:60], flush=True)
                 continue
             if _e["st"] == "out":
-                # TIME-AWARE VETO: an official Probable/Available only outranks a ruling the
-                # league published BEFORE. Edwards sat 'Probable' on the 12:00 PM report and
-                # was ruled out at 6:53 PM -- vetoing on the stale status is how we stayed
-                # blind to a ruling the whole market already had.
+                # RANK 1: a news ruling wins outright. No veto -- the old time-aware one let a
+                # noon "Probable" outrank a 6:53pm "ruled out" (the Edwards miss). If the league
+                # published AFTER the tweet and disagrees, say so but still trust the news.
                 if (_nm in _off_avail and _rep_dt is not None
                         and _e.get("_dt") is not None and _rep_dt > _e["_dt"]):
-                    continue
+                    print("CONFLICT: report (%s) later than news, says %s is %s -- "
+                          "taking the news OUT anyway (rank 1)"
+                          % (_stamp, _nm, today_off.get(_nm)), flush=True)
                 out[_nm] = "Out"
                 NEWS_OUTS.add(_nm)
             else:                              # "available to play"
+                # RANK 1 both ways: a news clearance also outranks the report. An official Out
+                # that a beat reporter later contradicts is a stale row, not a live ruling.
                 if _nm in _off_out:
-                    continue                   # official Out outranks a news clearance
+                    print("CONFLICT: report says %s Out, news says available -- "
+                          "taking the news (rank 1)" % _nm, flush=True)
                 out.pop(_nm, None)
                 NEWS_OUTS.discard(_nm)
         if NEWS_OUTS:

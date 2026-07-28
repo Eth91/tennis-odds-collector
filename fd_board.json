@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-28T23:48:19Z",
+ "captured_at": "2026-07-28T23:52:57Z",
  "matches": [
   {
    "event_id": 35878524,
@@ -8,9 +8,9 @@
    "p1_norm": "tomasz wrzalik",
    "p2_norm": "marek tkocz",
    "open_date": "2026-07-28T23:35:00.000Z",
-   "line": 70.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 86.5,
+   "over_odds": -150,
+   "under_odds": 110
   },
   {
    "event_id": 35878535,
@@ -19,9 +19,9 @@
    "p1_norm": "kacper marchlewski",
    "p2_norm": "jacek przewlocki",
    "open_date": "2026-07-28T23:45:00.000Z",
-   "line": 78.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35878541,
