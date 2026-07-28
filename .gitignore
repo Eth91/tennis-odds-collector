@@ -52,3 +52,8 @@ tt.sqlite-shm
 wnba_ledger.sqlite
 wnba_proj_log.sqlite
 wnba_clv.sqlite
+
+# stat substrates for NFL/NHL prop backtesting (nfl_stats_pull.py / nhl_stats_pull.py).
+# Local analysis DBs -- rebuildable from nflverse / the NHL API, never committed.
+nfl_stats.sqlite
+nhl_stats.sqlite
