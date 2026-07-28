@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-27T23:58:16Z",
+ "captured_at": "2026-07-28T00:05:31Z",
  "matches": [
-  {
-   "event_id": 35874158,
-   "p1": "Bartlomiej Mrugala",
-   "p2": "Kuba Golaszewski",
-   "p1_norm": "bartlomiej mrugala",
-   "p2_norm": "kuba golaszewski",
-   "open_date": "2026-07-27T23:45:00.000Z",
-   "line": 85.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35874160,
-   "p1": "Adam Linek",
-   "p2": "Jakub Glanowski",
-   "p1_norm": "adam linek",
-   "p2_norm": "jakub glanowski",
-   "open_date": "2026-07-27T23:45:00.000Z",
-   "line": 79.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35874161,
    "p1": "Jakub Nowak",
@@ -30,9 +8,9 @@
    "p1_norm": "jakub nowak",
    "p2_norm": "piotr gumulinski",
    "open_date": "2026-07-27T23:50:00.000Z",
-   "line": 74.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 75.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35874169,
@@ -41,9 +19,9 @@
    "p1_norm": "aleksander barton",
    "p2_norm": "michal machelski",
    "open_date": "2026-07-28T00:00:00.000Z",
-   "line": 69.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 71.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35874170,
@@ -97,6 +75,28 @@
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-28T00:25:00.000Z",
    "line": 68.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35874213,
+   "p1": "Jerzy Michalik",
+   "p2": "Michal Krutak",
+   "p1_norm": "jerzy michalik",
+   "p2_norm": "michal krutak",
+   "open_date": "2026-07-28T00:30:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35874214,
+   "p1": "Grzegorz Marud",
+   "p2": "Jakub Nowak",
+   "p1_norm": "grzegorz marud",
+   "p2_norm": "jakub nowak",
+   "open_date": "2026-07-28T00:30:00.000Z",
+   "line": 79.5,
    "over_odds": -112,
    "under_odds": -118
   }

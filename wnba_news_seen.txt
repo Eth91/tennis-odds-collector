@@ -99,6 +99,7 @@ rw|1100|Muted output in win
 rw|1134|Off injury report
 rw|1134|Won't play Wednesday
 rw|228|Listed out for Wednesday
+rw|228|Out for Tuesday
 rw|233|Chips in with season-high 12 points
 rw|238|No timetable for return
 rw|246|Records season-high 14 points
@@ -242,6 +243,7 @@ rw|863|Explodes for 18 points off bench
 rw|911|Available against Connecticut
 rw|911|Dishes seven dimes Saturday
 rw|911|Double-double in blowout win
+rw|911|Expected to play Tuesday
 rw|911|Probable for Wednesday
 rw|912|Logs 21 minutes Sunday
 rw|912|Records five points in loss
