@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-28T04:11:52Z",
+ "captured_at": "2026-07-28T04:18:52Z",
  "matches": [
-  {
-   "event_id": 35874400,
-   "p1": "Piotr Gumulinski",
-   "p2": "Robert Kostepski",
-   "p1_norm": "piotr gumulinski",
-   "p2_norm": "robert kostepski",
-   "open_date": "2026-07-28T03:55:00.000Z",
-   "line": 93.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
-  {
-   "event_id": 35874404,
-   "p1": "Dawid Jendrysik",
-   "p2": "Michal Paszkiewicz",
-   "p1_norm": "dawid jendrysik",
-   "p2_norm": "michal paszkiewicz",
-   "open_date": "2026-07-28T04:00:00.000Z",
-   "line": 92.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35874411,
    "p1": "Grzegorz Adamiak",
@@ -30,9 +8,9 @@
    "p1_norm": "grzegorz adamiak",
    "p2_norm": "kacper glazowski",
    "open_date": "2026-07-28T04:10:00.000Z",
-   "line": 74.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 63.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35874412,
@@ -41,9 +19,9 @@
    "p1_norm": "igor dabrowski",
    "p2_norm": "dariusz wrobel",
    "open_date": "2026-07-28T04:10:00.000Z",
-   "line": 73.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 74.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35874413,
@@ -52,7 +30,7 @@
    "p1_norm": "witold buczynski",
    "p2_norm": "waldemar glanowski",
    "open_date": "2026-07-28T04:10:00.000Z",
-   "line": 72.5,
+   "line": 79.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -121,6 +99,17 @@
    "line": 77.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35874458,
+   "p1": "Michal Durda",
+   "p2": "Robert Kostepski",
+   "p1_norm": "michal durda",
+   "p2_norm": "robert kostepski",
+   "open_date": "2026-07-28T04:40:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
