@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-28T02:37:04Z",
+ "captured_at": "2026-07-28T02:42:44Z",
  "matches": [
-  {
-   "event_id": 35874289,
-   "p1": "Michal Machelski",
-   "p2": "Jakub Skorupa",
-   "p1_norm": "michal machelski",
-   "p2_norm": "jakub skorupa",
-   "open_date": "2026-07-28T02:20:00.000Z",
-   "line": 96.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35874301,
-   "p1": "Jakub Nowak",
-   "p2": "Michal Durda",
-   "p1_norm": "jakub nowak",
-   "p2_norm": "michal durda",
-   "open_date": "2026-07-28T02:30:00.000Z",
-   "line": 48.5,
-   "over_odds": -130,
-   "under_odds": -105
-  },
   {
    "event_id": 35874343,
    "p1": "Aleksander Barton",
