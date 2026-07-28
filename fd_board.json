@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-28T00:23:49Z",
+ "captured_at": "2026-07-28T00:29:31Z",
  "matches": [
-  {
-   "event_id": 35874170,
-   "p1": "Kacper Marchlewski",
-   "p2": "Bartlomiej Mrugala",
-   "p1_norm": "kacper marchlewski",
-   "p2_norm": "bartlomiej mrugala",
-   "open_date": "2026-07-28T00:10:00.000Z",
-   "line": 88.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35874171,
-   "p1": "Michal Guzik",
-   "p2": "Artur Kubiak",
-   "p1_norm": "michal guzik",
-   "p2_norm": "artur kubiak",
-   "open_date": "2026-07-28T00:10:00.000Z",
-   "line": 63.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35874180,
    "p1": "Miroslaw Warzecha",
@@ -30,9 +8,9 @@
    "p1_norm": "miroslaw warzecha",
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-28T00:25:00.000Z",
-   "line": 68.5,
-   "over_odds": -118,
-   "under_odds": -116
+   "line": 58.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35874213,
@@ -85,9 +63,9 @@
    "p1_norm": "jakub cyndera",
    "p2_norm": "michal machelski",
    "open_date": "2026-07-28T00:45:00.000Z",
-   "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35874234,
