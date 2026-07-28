@@ -42,8 +42,11 @@ try:
     # fanduel_props.sqlite was UNTRACKED 2026-07-28 (blob war: 117MB > GitHub's 100MB limit),
     # so the committed blob this merges from may be empty or absent. That is expected, not an
     # error -- exit quietly rather than raising "no such table: o.fd_lines" every cycle.
-    if not con.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='fd_lines'"
-                       ).fetchone():
+    # NOTE: must query the ATTACHED db's schema (o.sqlite_master), not the main one -- the
+    # main DB always has fd_lines, so checking it passed the guard and still blew up on
+    # o.fd_lines (caught in deploy verification).
+    if not con.execute("SELECT name FROM o.sqlite_master WHERE type='table' "
+                       "AND name='fd_lines'").fetchone():
         con.close()
         TMP.unlink(missing_ok=True)
         sys.exit(0)
