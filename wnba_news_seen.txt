@@ -36,10 +36,12 @@ gn|Wings star Paige Bueckers out Monday vs. Liberty despite cle
 gn|“Figure That Out Now”: WNBA Legend Raises Concern Over Fever
 rw|1002|Considered week-to-week
 rw|1007|Adds 13 points off bench
+rw|1007|Available Tuesday
 rw|1007|Available to play
 rw|1007|Likely to play Tuesday
 rw|1007|Questionable for Wednesday
 rw|1015|Not listed on injury report
+rw|1015|Won't play Tuesday
 rw|1015|Won't play Wednesday
 rw|1016|Available to play
 rw|1016|Out Wednesday
@@ -49,6 +51,7 @@ rw|1021|Paces Golden State off bench
 rw|1043|Not listed on injury report
 rw|1043|Not on injury report
 rw|1043|Off injury report
+rw|1043|Out Tuesday
 rw|1043|Ruled out Wednesday
 rw|1045|Racks up 13 points in victory
 rw|1047|Records double-double in home loss
@@ -72,8 +75,10 @@ rw|1055|Sniffs triple-double in ASG win
 rw|1056|Produces 14 points in 11 minutes
 rw|1057|Full practice participant Sunday
 rw|1057|Iffy for Tuesday
+rw|1057|Will play on minutes restriction
 rw|1058|Agrees to new seven-day deal
 rw|1058|Let go by Mercury
+rw|1061|Left off injury report
 rw|1061|Not on injury report
 rw|1061|Ruled out for Wednesday
 rw|1064|Cut loose by Lynx
@@ -93,6 +98,7 @@ rw|1075|Pops for season-high 15 points
 rw|1078|Available to play
 rw|1078|Listed out Wednesday
 rw|1078|Out again Tuesday
+rw|1084|Won't play Tuesday
 rw|1087|Quiet rookie season continues
 rw|1088|Joins Phoenix on developmental deal
 rw|1093|Fades injury report
@@ -134,6 +140,7 @@ rw|331|Strong line in win
 rw|344|Available for Wednesday
 rw|354|Chips in with 11 points
 rw|354|Very efficient in home victory
+rw|358|Starting versus Minnesota
 rw|378|Starting Monday
 rw|394|Downgraded to doubtful
 rw|394|Iffy for Wednesday
@@ -150,6 +157,7 @@ rw|415|Totals 16 points in loss in Dallas
 rw|416|Dealing with knee issue
 rw|416|Posts career-high 26 points
 rw|416|Questionable for Tuesday
+rw|416|Ruled out Tuesday
 rw|423|Moving to bench
 rw|425|Remains out Tuesday
 rw|425|Remains out for Tuesday
@@ -232,6 +240,7 @@ rw|786|Grabs 15 boards in win
 rw|786|Paces Mystics with 25 points
 rw|789|Goes through practice
 rw|789|Questionable for Tuesday
+rw|789|Won't play Tuesday
 rw|792|Ruled out for Tuesday
 rw|792|Won't play Wednesday
 rw|793|Keeps picking up steals
@@ -258,6 +267,7 @@ rw|911|Probable for Wednesday
 rw|912|Logs 21 minutes Sunday
 rw|912|Minutes restriction lifted
 rw|912|Records five points in loss
+rw|914|Downgraded to out
 rw|914|Probable for Tuesday
 rw|914|Ruled out for Wednesday
 rw|915|Available for All-Star Game
@@ -298,11 +308,13 @@ rw|998|Could return Sunday
 rw|998|Nears double-double in return
 rw|998|Removed from injury report
 rw|998|Starting against Indiana
+rw|aaliyahedwards|Edwards (knee) is out for Tuesday's game
 rw|aaliyahedwards|Edwards (knee) is out for Wednesday's ga
 rw|aaliyahedwards|Edwards (knee) won't return to Sunday's 
 rw|alannasmith|Smith (leg) is doubtful for Monday's gam
 rw|alannasmith|Smith (leg) is listed as out for Wednesd
 rw|alannasmith|Smith (leg) is out for Monday's game ver
+rw|alannasmith|Smith (leg) is probable for Wednesday's 
 rw|alannasmith|Smith (leg) is questionable for Wednesda
 rw|alissapili|Pili (coach's decision) is out for Wedne
 rw|aneesahmorrow|Morrow (reconditioning) is listed as que
@@ -323,15 +335,18 @@ rw|costanzaverona|Verona (coach's decision) won't play Wed
 rw|courtneyvandersloot|Vandersloot (illness) is questionable to
 rw|damirisdantas|Dantas (knee) has been ruled out for Tue
 rw|damirisdantas|Dantas (knee) is out for Wednesday's gam
+rw|dariannalittlepagebuggs|Littlepage-Buggs (coach's decision) has 
 rw|dijonaicarrington|Carrington (foot), who is out for Wednes
 rw|dominiquemalonga|Malonga (back) is listed as questionable
 rw|haileyvanlith|Van Lith (coach's decision) has been rul
 rw|haileyvanlith|Van Lith (coach's decision) is out for W
 rw|haleyjones|Jones (coach's decision) is listed as ou
 rw|indyanivar|Nivar (coach's decision) has been ruled 
+rw|isabelleharrison|Harrison (knee) has been ruled out for T
 rw|isabelleharrison|Harrison (knee) is listed as questionabl
 rw|jordanharrison|Harrison (coach's decision) is out for W
 rw|justejocyte|Jocyte is out for Saturday's game agains
+rw|kelseyplum|Plum (leg) is listed as out for Tuesday'
 rw|kianawilliams|Williams (hand) is questionable for Wedn
 rw|kierstanbell|Bell (leg) has been ruled out for Tuesda
 rw|kierstanbell|Bell (leg) is out for Wednesday's game a
@@ -346,6 +361,7 @@ rw|napheesacollier|Collier (ankle) is probable for Wednesda
 rw|natashamack|Mack (foot) has been ruled out for Frida
 rw|natashamack|Mack (foot) is listed as probable for Su
 rw|nyarasabally|Sabally (ribs) is questionable for Tuesd
+rw|nyarasabally|Sabally (ribs) won't play in Tuesday's g
 rw|paigebueckers|Bueckers (rest) is questionable for Wedn
 rw|paigebueckers|Bueckers won't play in Monday's game aga
 rw|quionchecarter|Carter (coach's decision) has been ruled
@@ -363,4 +379,4 @@ rw|tainamair|Mair (coach's decision) is listed as out
 rw|tainamair|Mair (coach's decision) is out for Wedne
 rw|taniyalatson|Latson (coach's decision) is out for Wed
 rw|toniemorgan|Morgan (coach's decision) is out for Wed
-rw|toniemorgan|Morgan (coach's decision) is out for Wedrw|tainamair|Mair (coach's decision) is out for Wednerw|tainamair|Mair (coach's decision) is out for Wednerw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedgn|Paige Bueckers 'questionable' for WNBA return after missing gn|Paige Bueckers 'questionable' for WNBA return after missing gn|Paige Bueckers 'questionable' for WNBA return after missing gn|Paige Bueckers 'questionable' for WNBA return after missing gn|Paige Bueckers 'questionable' for WNBA return after missing rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|brittneygriner|Griner (knee) is doubtful for Wednesday'rw|brittneygriner|Griner (knee) is doubtful for Wednesday'rw|brittneygriner|Griner (knee) is doubtful for Wednesday'rw|brittneygriner|Griner (knee) is doubtful for Wednesday'rw|brittneygriner|Griner (knee) is doubtful for Wednesday'rw|brittneygriner|Griner (knee) is doubtful for Wednesday'rw|brittneygriner|Griner (knee) is doubtful for Wednesday'rw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|annelimaley|Maley (coach's decision) is out for Wednrw|annelimaley|Maley (coach's decision) is out for Wednrw|annelimaley|Maley (coach's decision) is out for Wednrw|annelimaley|Maley (coach's decision) is out for Wednrw|annelimaley|Maley (coach's decision) is out for Wednrw|annelimaley|Maley (coach's decision) is out for Wednrw|haileyvanlith|Van Lith (coach's decision) is out for Wrw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ravenjohnson|Johnson (lower body) is listed as out forw|ravenjohnson|Johnson (lower body) is listed as out forw|taniyalatson|Latson (coach's decision) is out for Wedrw|taniyalatson|Latson (coach's decision) is out for Wedrw|taniyalatson|Latson (coach's decision) is out for Wedrw|taniyalatson|Latson (coach's decision) is out for Wedrw|taniyalatson|Latson (coach's decision) is out for Wedrw|taniyalatson|Latson (coach's decision) is out for Wedrw|alannasmith|Smith (leg) is listed as out for Wednesdrw|alannasmith|Smith (leg) is listed as out for Wednesdrw|costanzaverona|Verona (coach's decision) won't play Wedrw|haleyjones|Jones (coach's decision) is listed as ourw|jordanharrison|Harrison (coach's decision) is out for Wrw|kelseyplum|Plum (leg) is listed as out for Tuesday'rw|kelseyplum|Plum (leg) is listed as out for Tuesday'rw|kelseyplum|Plum (leg) is listed as out for Tuesday'
+rw|toniemorgan|Morgan (coach's decision) is out for Wedrw|tainamair|Mair (coach's decision) is out for Wednerw|tainamair|Mair (coach's decision) is out for Wednerw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedgn|Paige Bueckers 'questionable' for WNBA return after missing gn|Paige Bueckers 'questionable' for WNBA return after missing gn|Paige Bueckers 'questionable' for WNBA return after missing gn|Paige Bueckers 'questionable' for WNBA return after missing gn|Paige Bueckers 'questionable' for WNBA return after missing rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|brittneygriner|Griner (knee) is doubtful for Wednesday'rw|brittneygriner|Griner (knee) is doubtful for Wednesday'rw|brittneygriner|Griner (knee) is doubtful for Wednesday'rw|brittneygriner|Griner (knee) is doubtful for Wednesday'rw|brittneygriner|Griner (knee) is doubtful for Wednesday'rw|brittneygriner|Griner (knee) is doubtful for Wednesday'rw|brittneygriner|Griner (knee) is doubtful for Wednesday'rw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|annelimaley|Maley (coach's decision) is out for Wednrw|annelimaley|Maley (coach's decision) is out for Wednrw|annelimaley|Maley (coach's decision) is out for Wednrw|annelimaley|Maley (coach's decision) is out for Wednrw|annelimaley|Maley (coach's decision) is out for Wednrw|annelimaley|Maley (coach's decision) is out for Wednrw|haileyvanlith|Van Lith (coach's decision) is out for Wrw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ravenjohnson|Johnson (lower body) is listed as out forw|ravenjohnson|Johnson (lower body) is listed as out forw|taniyalatson|Latson (coach's decision) is out for Wedrw|taniyalatson|Latson (coach's decision) is out for Wedrw|taniyalatson|Latson (coach's decision) is out for Wedrw|taniyalatson|Latson (coach's decision) is out for Wedrw|taniyalatson|Latson (coach's decision) is out for Wedrw|taniyalatson|Latson (coach's decision) is out for Wedrw|alannasmith|Smith (leg) is listed as out for Wednesdrw|alannasmith|Smith (leg) is listed as out for Wednesdrw|costanzaverona|Verona (coach's decision) won't play Wedrw|haleyjones|Jones (coach's decision) is listed as ourw|jordanharrison|Harrison (coach's decision) is out for Wrw|kelseyplum|Plum (leg) is listed as out for Tuesday'rw|kelseyplum|Plum (leg) is listed as out for Tuesday'rw|kelseyplum|Plum (leg) is listed as out for Tuesday'rw|ashlonjackson|Jackson (coach's decision) is out for Turw|ashlonjackson|Jackson (coach's decision) is out for Tu
