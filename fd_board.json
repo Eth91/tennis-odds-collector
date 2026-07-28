@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-28T02:49:30Z",
+ "captured_at": "2026-07-28T02:55:25Z",
  "matches": [
   {
    "event_id": 35874343,
@@ -8,9 +8,9 @@
    "p1_norm": "aleksander barton",
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-28T02:45:00.000Z",
-   "line": 75.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 80.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35874360,
@@ -41,9 +41,9 @@
    "p1_norm": "witold buczynski",
    "p2_norm": "lukasz oracz",
    "open_date": "2026-07-28T03:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35874363,
@@ -66,6 +66,17 @@
    "line": 75.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35874374,
+   "p1": "Kamil Rudomina",
+   "p2": "Adam Linek",
+   "p1_norm": "kamil rudomina",
+   "p2_norm": "adam linek",
+   "open_date": "2026-07-28T03:20:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
