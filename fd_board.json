@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-28T00:53:36Z",
+ "captured_at": "2026-07-28T00:59:25Z",
  "matches": [
-  {
-   "event_id": 35874221,
-   "p1": "Jakub Cyndera",
-   "p2": "Michal Machelski",
-   "p1_norm": "jakub cyndera",
-   "p2_norm": "michal machelski",
-   "open_date": "2026-07-28T00:45:00.000Z",
-   "line": 78.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35874234,
    "p1": "Pawel Chojnacki",
@@ -19,7 +8,7 @@
    "p1_norm": "pawel chojnacki",
    "p2_norm": "michal guzik",
    "open_date": "2026-07-28T00:50:00.000Z",
-   "line": 66.5,
+   "line": 83.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,9 +19,9 @@
    "p1_norm": "mateusz sikon",
    "p2_norm": "robert kostepski",
    "open_date": "2026-07-28T00:50:00.000Z",
-   "line": 79.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 73.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35874246,
