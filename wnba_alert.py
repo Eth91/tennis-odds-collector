@@ -786,19 +786,24 @@ def push_plays(fresh, preds, topic):
     return delivered
 
 
-# Tightened 8 -> 3 on 2026-07-28 against the live ledger (128 graded bets, 15 vacancy
-# spells). Hit rate decays monotonically with how long the vacancy has been open:
-#   gm<=1 64.9% (+35% ROI) | gm<=2 64.6% (+28%) | gm<=3 63.6% (+26%) | gm>=4 37.5% (-26%)
-# The cliff sits between 3 and 4, so 3 keeps every demonstrably-positive bucket and cuts
-# the negative one (43% of volume retained). De-confounded: freshness holds WITHIN cascade
-# size (1-out 50% vs 32%, 2-out 63% vs 48%), so it is not a proxy for "bigger cascade".
-# Cluster-bootstrapped over spells (bets inside a spell are correlated, so bet-level p's
-# lie): fresh-minus-stale = +21pt, 90% CI [+5, +34].
-# WHY it decays is pricing, not basketball: the 2023-25 backtest at SETTLED prices found
-# absence-game-1-2 was NOT better than all (41.7% vs 42.7%). The gradient only exists at
-# flag-time prices => this gate protects the timing edge [[feedback_speed_is_the_edge]],
-# and it matches the NBA port's validated absence-game-1-2 sweet spot (gm 0-1 here).
-MAX_GAMES_MISSED = 3
+# ~2.5 weeks of WNBA games; a vacancy older than this is priced. Skips only when ALL of a
+# team's outs are stale.
+#
+# 2026-07-28: tried tightening to 3 and REVERTED the same day. The raw ledger looks like it
+# justifies it (gm<=3 63.6% vs gm>=4 37.5%/-26% ROI), but that fit was run on the WRONG
+# UNIVERSE. The tracked record is not the raw ledger — it is overs-only passed through
+# `wnba_slip.current_selection` (thin-sample guard + correlated over-stack dedup). On that
+# actual bet universe (34-17) the decay VANISHES: gm=4 goes 8-2 (+53% ROI) and the whole
+# gm>3 set is 16-10 (+16.7% ROI, +4.34u) — profitable, not toxic. Cutting it costs a median
+# 4.2u; P(tightening is an improvement) = 13.6%.
+#
+# WHY the raw fit lied: current_selection ALREADY removes the bad stale bets (they were
+# mostly thin-sample over-extrapolations the guard kills). A games-missed gate on top just
+# re-filters an already-filtered population and takes good volume with it.
+# ⇒ RULE: fit any selection filter on the POST-selection universe. An upstream filter
+# changes the population, so a threshold tuned on raw rows is measuring the upstream
+# filter's work, not its own.
+MAX_GAMES_MISSED = 8
 
 
 def main():
