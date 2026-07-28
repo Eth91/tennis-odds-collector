@@ -52,6 +52,20 @@ def _parse(pdf_bytes):
     toks = []
     for pg in PdfReader(io.BytesIO(pdf_bytes)).pages:
         toks += [w for w in (pg.extract_text() or "").split("\n") if w.strip()]
+    # HYPHEN-WRAP JOIN (2026-07-28): the PDF breaks hyphenated surnames across lines, so
+    # "Parker-Tyus, Cheyenne" arrives as ['Parker-', 'Tyus,', 'Cheyenne']. Player rows are
+    # split on a token ending in ',', so 'Parker-' bled into the PREVIOUS player's reason and
+    # 'Tyus,' opened a phantom "Cheyenne Tyus" — a name matching no roster player, so the
+    # vacancy is invisible to the model unless an aggregator happens to also carry it. Glue a
+    # token ending in '-' to the next one. The ' - ' field separator is a bare 1-char token,
+    # so len>1 keeps it out.
+    _j = []
+    for w in toks:
+        if _j and len(_j[-1]) > 1 and _j[-1].endswith("-"):
+            _j[-1] += w
+        else:
+            _j.append(w)
+    toks = _j
     rows, submitted = [], {}
     gdate = matchup = None
     team = None
@@ -111,6 +125,10 @@ def _parse(pdf_bytes):
                     nxt = toks[m2].strip()
                     if (nxt.endswith(",") or nxt in ("NOT",) or "@" in nxt
                             or (len(nxt) == 10 and nxt[2:3] == "/")
+                            # page footer ("Injury Report: 07/28/26 01:00 AM Page 2 of 2") is
+                            # not a structural marker, so it used to bleed into the reason of
+                            # whichever player straddled the page break (7/28: Satou Sabally)
+                            or (nxt == "Injury" and toks[m2 + 1:m2 + 2] == ["Report:"])
                             or any(toks[m2:m2 + len(nm.split())] == nm.split() for nm in tnames)):
                         break
                     r.append(nxt)
