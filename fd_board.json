@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-28T21:38:44Z",
+ "captured_at": "2026-07-28T21:44:25Z",
  "matches": [
-  {
-   "event_id": 35878426,
-   "p1": "Jakub Kuzmicz",
-   "p2": "Mateusz Rutkowski",
-   "p1_norm": "jakub kuzmicz",
-   "p2_norm": "mateusz rutkowski",
-   "open_date": "2026-07-28T21:25:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35878436,
    "p1": "Marcin Kowalczyk",
@@ -19,9 +8,9 @@
    "p1_norm": "marcin kowalczyk",
    "p2_norm": "bartlomiej mrugala",
    "open_date": "2026-07-28T21:30:00.000Z",
-   "line": 60.5,
-   "over_odds": -105,
-   "under_odds": -135
+   "line": 77.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35878442,
@@ -41,7 +30,7 @@
    "p1_norm": "zbigniew nocun",
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-07-28T21:55:00.000Z",
-   "line": 76.5,
+   "line": 72.5,
    "over_odds": -112,
    "under_odds": -118
   },
@@ -66,6 +55,28 @@
    "line": 72.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35878461,
+   "p1": "Mateusz Sikon",
+   "p2": "Mariusz Adamus",
+   "p1_norm": "mateusz sikon",
+   "p2_norm": "mariusz adamus",
+   "open_date": "2026-07-28T22:10:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35878462,
+   "p1": "Michal Olbrycht",
+   "p2": "Mateusz Rutkowski",
+   "p1_norm": "michal olbrycht",
+   "p2_norm": "mateusz rutkowski",
+   "open_date": "2026-07-28T22:10:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
