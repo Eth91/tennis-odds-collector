@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-28T20:51:57Z",
+ "captured_at": "2026-07-28T20:57:45Z",
  "matches": [
   {
    "event_id": 35878385,
@@ -8,9 +8,9 @@
    "p1_norm": "dariusz molenda",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-07-28T20:45:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 65.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35878388,
@@ -19,7 +19,7 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-07-28T20:45:00.000Z",
-   "line": 73.5,
+   "line": 71.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -31,8 +31,8 @@
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-07-28T21:00:00.000Z",
    "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35878406,
@@ -77,6 +77,28 @@
    "line": 74.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35878422,
+   "p1": "Mariusz Adamus",
+   "p2": "Oliwier Sokolowski",
+   "p1_norm": "mariusz adamus",
+   "p2_norm": "oliwier sokolowski",
+   "open_date": "2026-07-28T21:20:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35878426,
+   "p1": "Jakub Kuzmicz",
+   "p2": "Mateusz Rutkowski",
+   "p1_norm": "jakub kuzmicz",
+   "p2_norm": "mateusz rutkowski",
+   "open_date": "2026-07-28T21:25:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
