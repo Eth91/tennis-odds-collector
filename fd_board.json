@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-28T21:50:05Z",
+ "captured_at": "2026-07-28T21:55:42Z",
  "matches": [
   {
    "event_id": 35878442,
@@ -8,9 +8,9 @@
    "p1_norm": "kacper adamus",
    "p2_norm": "pawel kurek",
    "open_date": "2026-07-28T21:45:00.000Z",
-   "line": 82.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 87.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35878448,
@@ -77,6 +77,17 @@
    "line": 79.5,
    "over_odds": -116,
    "under_odds": -118
+  },
+  {
+   "event_id": 35878467,
+   "p1": "Marian Brunner",
+   "p2": "Dariusz Molenda",
+   "p1_norm": "marian brunner",
+   "p2_norm": "dariusz molenda",
+   "open_date": "2026-07-28T22:20:00.000Z",
+   "line": 69.5,
+   "over_odds": -120,
+   "under_odds": -110
   }
  ]
 }
