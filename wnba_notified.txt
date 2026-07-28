@@ -76,6 +76,7 @@
 2026-07-22|Sabrina Ionescu|points|16.5
 2026-07-22|Sabrina Ionescu|points|17.5
 2026-07-22|Sabrina Ionescu|points|19.5
+2026-07-28|Aaliyah Edwards|points|9.5
 n1|2026-07-20|Arike Ogunbowale|points|14.5
 n1|2026-07-20|Arike Ogunbowale|points|15.5
 n1|2026-07-20|Arike Ogunbowale|points|16.5

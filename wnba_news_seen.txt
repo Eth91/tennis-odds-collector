@@ -210,6 +210,7 @@ rw|641|Season-high 29 points in win
 rw|642|Not traveling with team
 rw|647|Plays well off bench
 rw|678|Closing in on return
+rw|678|Hopeful for season debut Thursday
 rw|703|Another quiet effort
 rw|733|Swats four shots in loss
 rw|735|Limited production in return
