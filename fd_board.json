@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-28T05:21:47Z",
+ "captured_at": "2026-07-28T05:27:15Z",
  "matches": [
   {
    "event_id": 35874553,
@@ -8,9 +8,9 @@
    "p1_norm": "kacper glazowski",
    "p2_norm": "grzegorz felkel",
    "open_date": "2026-07-28T05:15:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 86.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35874554,
@@ -19,9 +19,9 @@
    "p1_norm": "dariusz wrobel",
    "p2_norm": "waclaw suchecki",
    "open_date": "2026-07-28T05:15:00.000Z",
-   "line": 76.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 90.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35874555,
@@ -30,9 +30,9 @@
    "p1_norm": "kamil rudomina",
    "p2_norm": "artur sobel",
    "open_date": "2026-07-28T05:15:00.000Z",
-   "line": 85.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 87.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35874556,
@@ -41,9 +41,9 @@
    "p1_norm": "waldemar glanowski",
    "p2_norm": "lukasz oracz",
    "open_date": "2026-07-28T05:15:00.000Z",
-   "line": 86.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 89.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35874828,
@@ -110,6 +110,17 @@
    "line": 73.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35874870,
+   "p1": "Rafal Gajda",
+   "p2": "Schaniel Krzysztof",
+   "p1_norm": "rafal gajda",
+   "p2_norm": "schaniel krzysztof",
+   "open_date": "2026-07-28T05:55:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
