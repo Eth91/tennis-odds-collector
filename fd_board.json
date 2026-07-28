@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-28T19:57:06Z",
+ "captured_at": "2026-07-28T20:03:17Z",
  "matches": [
-  {
-   "event_id": 35877921,
-   "p1": "Lukasz Jarocki",
-   "p2": "Miroslav Sklensky",
-   "p1_norm": "lukasz jarocki",
-   "p2_norm": "miroslav sklensky",
-   "open_date": "2026-07-28T19:40:00.000Z",
-   "line": 99.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35878325,
    "p1": "Mariusz Adamus",
@@ -19,9 +8,9 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "mateusz sikon",
    "open_date": "2026-07-28T19:50:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35878257,
@@ -30,9 +19,9 @@
    "p1_norm": "marian brunner",
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-07-28T19:55:00.000Z",
-   "line": 72.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 55.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35878293,
@@ -41,9 +30,9 @@
    "p1_norm": "tomasz wrzalik",
    "p2_norm": "mariusz koczyba",
    "open_date": "2026-07-28T20:00:00.000Z",
-   "line": 73.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35878304,
@@ -86,6 +75,39 @@
    "p2_norm": "kaczynski piotr",
    "open_date": "2026-07-28T20:20:00.000Z",
    "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35878370,
+   "p1": "Michal Olbrycht",
+   "p2": "Adrian Spychala",
+   "p1_norm": "michal olbrycht",
+   "p2_norm": "adrian spychala",
+   "open_date": "2026-07-28T20:30:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35878371,
+   "p1": "Pawel Kurek",
+   "p2": "Oliwier Sokolowski",
+   "p1_norm": "pawel kurek",
+   "p2_norm": "oliwier sokolowski",
+   "open_date": "2026-07-28T20:30:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35878372,
+   "p1": "Jacek Przewlocki",
+   "p2": "Jaroslaw Rolak",
+   "p1_norm": "jacek przewlocki",
+   "p2_norm": "jaroslaw rolak",
+   "open_date": "2026-07-28T20:30:00.000Z",
+   "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
   }
