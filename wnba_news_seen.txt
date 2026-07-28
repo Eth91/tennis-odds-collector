@@ -280,6 +280,7 @@ rw|982|To undergo season-ending surgery
 rw|982|Won't return Wednesday
 rw|984|Falls just short of double-double
 rw|984|Fills box score in win
+rw|987|Probable versus Seattle
 rw|991|Posts another double-double
 rw|991|Posts double-double Monday
 rw|998|Could return Sunday
