@@ -37,6 +37,10 @@ push(){
     git fetch -q "$URL" main 2>/dev/null && git reset --hard FETCH_HEAD -q 2>/dev/null
     git checkout "$C" -- "*.sqlite" 2>/dev/null || true
     git checkout "$C" -- "*.json"   2>/dev/null || true
+    # *.jsonl is NOT matched by *.json (2026-07-28): the recovery reset
+    # underdog_log.jsonl to origin and destroyed two breaking rulings whose tweet ids
+    # were already in the replayed underdog_seen.txt, so they could never re-arrive.
+    git checkout "$C" -- "*.jsonl"  2>/dev/null || true
     git checkout "$C" -- "*.txt"    2>/dev/null || true
     git checkout "$C" -- "*.md"     2>/dev/null || true
     git checkout "$C" -- docs/     2>/dev/null || true

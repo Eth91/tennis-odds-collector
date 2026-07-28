@@ -317,6 +317,15 @@ def grade():
         import wnba_tonight as _T
         _inj = _T.injuries()
         _today_et = _T.dt.datetime.now(_T.ET).date().isoformat()
+        # BLIND-READ GUARD (2026-07-28): the sweep voids a bet when its out-basis player is
+        # NOT in the injury view -- which is indistinguishable from the view failing to load.
+        # It did fail: while the official-report cache was being rebuilt, injuries() returned
+        # {} for a few minutes and a live +31%EV bet (A.Edwards off Griner, who WAS out) was
+        # voided with graded=1, so it could never resurrect. An empty view is a SOURCE
+        # OUTAGE, never evidence that every injured player suddenly cleared -- refuse to
+        # void anything on it. Same discipline as the roster-map guard below.
+        if not _inj:
+            raise RuntimeError("injury view empty (source outage) -- refusing to void")
         swept = 0
         for rowid, pd_, player, stat, line, opp, team in rows:
             if pd_ < _today_et:
@@ -336,7 +345,7 @@ def grade():
                     if con.execute("SELECT graded FROM predictions WHERE rowid=?",
                                    (r[0],)).fetchone()[0] == 0]
     except Exception as e:
-        print(f"grade: premise sweep skipped: {str(e)[:80]}")
+        print(f"grade: premise sweep SKIPPED (no bets voided): {str(e)[:90]}")
     # name->id from the cheap guarded roster map (NOT players()'s ~180-call rebuild, which throttles
     # and used to abort the whole pass -> final bets sat ungraded, inflating the record).
     ids = W.roster_ids()

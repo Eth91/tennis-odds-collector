@@ -742,6 +742,12 @@ CONFIRMED_OUT_TODAY = set()          # populated by injuries() each call
 RET_OUT_BY = {}
 OFFICIAL_BY_DATE = {}
 CONFIRMED_OUT_BY_DATE = {}           # {game_date: set(names)} — official report + overrides
+# RotoWire fallback: how stale the official PDF must be before RW may override an official
+# Probable/Available. RW UPGRADES of Questionable/absent players are never gated on this.
+RW_FALLBACK_STALE_HRS = 3.0
+RW_FALLBACK_OUTS = set()             # names RW ruled out that the official report had not
+NEWS_OUTS = set()                    # names @UnderdogWNBA ruled out (beat-reporter speed)
+NEWS_LOG = 'underdog_log.jsonl'      # written by underdog_watch.service, one JSON per ruling
 
 
 def confirmed_for(date_iso):
@@ -779,16 +785,153 @@ def injuries():
     _ovr_out = set()
     today_iso = dt.datetime.now(ET).date().isoformat()
     # ── THE ONLY INJURY SOURCE: the official league report ──
-    _official = {}
+    _official, today_off = {}, {}
+    RW_FALLBACK_OUTS.clear()
+    NEWS_OUTS.clear()
     try:
         import wnba_injury_report as IR
         _official = IR.confirmed_by_date()               # {date: {player: status}}
-        for nm, stt in (_official.get(today_iso) or {}).items():
+        today_off = _official.get(today_iso) or {}
+        for nm, stt in today_off.items():
             if stt in ("Out", "Doubtful", "Questionable"):
                 out[nm] = stt
             # Probable / Available => plays; never enters the injury view at all
     except Exception:
         pass
+    # ── ROTOWIRE FALLBACK — STALE-REPORT ONLY (2026-07-28, user) ──────────────────
+    # "the wnba injury report hasnt updated since 12:00 ET. use rotowire as a fallback if its
+    #  not up to date. Sabally and Harrison are out, wnba underdog tweeted it."
+    # The league PDF stays the authority — but it CAN GO STALE. On 7/28 the newest published
+    # report was the 12:00 PM ET one while beat reporters had already ruled two officially-
+    # Questionable players out for an 8pm tip. Waiting for the next PDF mark forfeits exactly
+    # the window the edge lives in (⚡ speed doctrine: race the reprice, never follow it).
+    #
+    # RW is ADD-ONLY here and can never clear an official Out:
+    #   official Out                   -> unchanged (RW cannot un-rule-out)
+    #   official Questionable/Doubtful -> RW Out UPGRADES to Out, always. "Questionable" is
+    #                                     not a ruling; a beat-confirmed ruling-out is
+    #                                     strictly later information.
+    #   absent from the report         -> RW Out adds it (the 7/16 Gustafson case: the league
+    #                                     row simply was not there yet)
+    #   official Probable/Available    -> RW Out wins ONLY once the report is STALE. A FRESH
+    #                                     official clearance outranks RW — that clearance is
+    #                                     what caught ESPN phantom Outs like Hall on 7/28.
+    # ESPN stays dropped entirely; it was the source that over-reported Out.
+    _rep_age_h, _rep_dt = None, None
+    try:
+        _now_et = dt.datetime.now(ET)
+        _stamp = (IR.report() or {}).get("stamp") or ""
+        _rep_dt = (dt.datetime.strptime(_stamp, "%Y-%m-%d_%I_%M%p")
+                   .replace(tzinfo=_now_et.tzinfo))
+        _rep_age_h = (_now_et - _rep_dt).total_seconds() / 3600.0
+    except Exception:
+        pass
+    _stale = _rep_age_h is None or _rep_age_h > RW_FALLBACK_STALE_HRS
+    try:
+        _pl = json.loads((Path(__file__).resolve().parent
+                          / "wnba_players_cache.json").read_text()).get("players", {})
+        for _t in rw_lineups() or []:
+            _team = _t.get("team")
+            for _abbr in _t.get("out") or []:
+                _key = RW.norm(_abbr)
+                _full = [n for n, v in _pl.items()
+                         if v.get("team") == _team and RW.norm(n) == _key]
+                if len(_full) != 1:          # team-scoped; ambiguous collision -> skip
+                    continue
+                _nm = _full[0]
+                _off = today_off.get(_nm)
+                if _off == "Out":
+                    continue                 # already official; nothing to add
+                if _off in ("Probable", "Available") and not _stale:
+                    continue                 # fresh official clearance beats RW
+                out[_nm] = "Out"
+                RW_FALLBACK_OUTS.add(_nm)
+        if RW_FALLBACK_OUTS:
+            print("RW FALLBACK OUT (report age %s): %s"
+                  % ("?" if _rep_age_h is None else ("%.1fh" % _rep_age_h),
+                     ", ".join(sorted(RW_FALLBACK_OUTS))), flush=True)
+    except Exception:
+        pass
+    # ── @UnderdogWNBA BREAKING RULINGS (2026-07-28, user) ────────────────────────────
+    # "we need to just watch underdog wnba on twitter, they have the quickest up to date
+    #  starting lineups and injury information."
+    # underdog_watch.service has been polling @UnderdogWNBA every ~60s and logging every
+    # ruling to underdog_log.jsonl -- but it only ever touched /tmp/.force_fullscan to kick
+    # a rescan. Nothing CONSUMED it, so the rescan re-read the same stale official PDF and
+    # learned nothing. On 7/28 it caught "Aaliyah Edwards (knee) ruled out Tuesday" at 22:53
+    # UTC while the league report sat frozen at its 12:00 PM mark and RotoWire had nothing.
+    # That is the whole edge: a beat-confirmed ruling is the FASTEST signal we get.
+    #
+    # Precedence — a ruling is later information than a status, never the reverse:
+    #   official Out                  -> unchanged
+    #   news "out"                    -> Out, UNLESS the official report cleared them TODAY
+    #                                    (Probable/Available = an independent veto)
+    #   news "in" (available to play) -> clears them, UNLESS the official report says Out
+    # News outs are game-dated ("ruled out Tuesday") => CONFIRMED by construction, same as
+    # an official Out, so they produce FIRM flags rather than contingent ones.
+    try:
+        _ud = Path(__file__).resolve().parent / NEWS_LOG
+        _off_avail = {n for n, st_ in today_off.items()
+                      if st_ in ("Probable", "Available", "Playing")}
+        _off_out = {n for n, st_ in today_off.items() if st_ == "Out"}
+        _roster = json.loads((Path(__file__).resolve().parent
+                              / "wnba_players_cache.json").read_text()).get("players", {})
+        _by_norm = {}
+        for _n in _roster:
+            _by_norm.setdefault(RW.norm(_n), []).append(_n)
+        _news = []
+        for _ln in _ud.read_text().splitlines():
+            if not _ln.strip():
+                continue
+            try:
+                _e = json.loads(_ln)
+            except ValueError:
+                continue
+            # tweet time is UTC; the slate date is ET
+            try:
+                _when = dt.datetime.fromisoformat(_e["t"]).astimezone(ET).date().isoformat()
+            except Exception:
+                continue
+            if _when != today_iso or _e.get("st") not in ("out", "in"):
+                continue
+            try:
+                _e["_dt"] = dt.datetime.fromisoformat(_e["t"]).astimezone(ET)
+            except Exception:
+                _e["_dt"] = None
+            _news.append(_e)
+        for _e in _news:                       # oldest -> newest, so the latest ruling wins
+            _txt = (_e.get("text") or "").strip()
+            # the tweet opens with the player's name ("Aaliyah Edwards (knee) ruled out..."),
+            # so match the LONGEST roster name that prefixes it — no brittle regex, and it
+            # handles both the parenthetical and bare forms.
+            _low = _txt.lower()
+            _nm = None
+            for _full in _roster:              # longest literal prefix wins (handles
+                if _low.startswith(_full.lower()):   # 'Alyssa Thomas' vs 'Alyssa Thom')
+                    if _nm is None or len(_full) > len(_nm):
+                        _nm = _full
+            if not _nm:
+                print("underdog: unmatched name in %r" % _txt[:60], flush=True)
+                continue
+            if _e["st"] == "out":
+                # TIME-AWARE VETO: an official Probable/Available only outranks a ruling the
+                # league published BEFORE. Edwards sat 'Probable' on the 12:00 PM report and
+                # was ruled out at 6:53 PM -- vetoing on the stale status is how we stayed
+                # blind to a ruling the whole market already had.
+                if (_nm in _off_avail and _rep_dt is not None
+                        and _e.get("_dt") is not None and _rep_dt > _e["_dt"]):
+                    continue
+                out[_nm] = "Out"
+                NEWS_OUTS.add(_nm)
+            else:                              # "available to play"
+                if _nm in _off_out:
+                    continue                   # official Out outranks a news clearance
+                out.pop(_nm, None)
+                NEWS_OUTS.discard(_nm)
+        if NEWS_OUTS:
+            print("NEWS OUT @UnderdogWNBA: %s" % ", ".join(sorted(NEWS_OUTS)), flush=True)
+    except Exception as _ex:
+        print("underdog feed skipped: %s" % str(_ex)[:70], flush=True)
     # (FAST-NEWS OVERRIDES removed 2026-07-28 — they were RotoWire/Underdog sourced. The
     # official report refreshes every 15 minutes and is the authority per the user.)
     # MANUAL STATUS OVERRIDES — applied LAST (2026-07-18 fix: the RW merge ran after this
@@ -837,14 +980,15 @@ def injuries():
     # feed's status, and we no longer consume one.
     try:
         _off_today = {n for n, st_ in (_official.get(today_iso) or {}).items() if st_ == "Out"}
-        CONFIRMED_OUT_TODAY = ((_off_today | _ovr_out)
-                               & {n for n, s_ in out.items() if s_ in ("Out", "Doubtful")}) | _ovr_out
+        CONFIRMED_OUT_TODAY = (((_off_today | _ovr_out | RW_FALLBACK_OUTS | NEWS_OUTS)
+                                & {n for n, s_ in out.items() if s_ in ("Out", "Doubtful")})
+                               | _ovr_out | RW_FALLBACK_OUTS | NEWS_OUTS)
         global CONFIRMED_OUT_BY_DATE
         CONFIRMED_OUT_BY_DATE = {dte: ({n for n, st_ in mp.items() if st_ == "Out"} | _ovr_out)
                                  for dte, mp in _official.items()}
         CONFIRMED_OUT_BY_DATE[today_iso] = CONFIRMED_OUT_TODAY
     except Exception:
-        CONFIRMED_OUT_TODAY = set(_ovr_out)
+        CONFIRMED_OUT_TODAY = set(_ovr_out) | RW_FALLBACK_OUTS | NEWS_OUTS
     return out
 
 
