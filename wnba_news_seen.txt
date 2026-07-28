@@ -149,6 +149,7 @@ rw|416|Posts career-high 26 points
 rw|416|Questionable for Tuesday
 rw|423|Moving to bench
 rw|425|Remains out Tuesday
+rw|425|Remains out for Tuesday
 rw|432|Available for Wednesday
 rw|432|Logs 18 minutes in return
 rw|432|Probable for Sunday
