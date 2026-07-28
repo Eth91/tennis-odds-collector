@@ -72,7 +72,7 @@ POINTS_PREF_MARGIN = 0.08   # prefer a POINTS anchor over a points-containing co
                             # volume edge; a combo is largely its components repackaged and can't ladder
 
 
-def _main_line(ladder):
+def _main_line(ladder, allow_alt=False):
     """The ORIGINAL line: the rung whose over price sits closest to even (~2.0 dec) — i.e. FanDuel's
     posted o/u number, the anchor the user bets. Returns the line (float) or None if the ladder is too
     skewed to have a real main line (only deep alt rungs). Mirrors wnba_clv.book_line."""
@@ -80,7 +80,13 @@ def _main_line(ladder):
     if not cand:
         return None
     line, o = min(cand, key=lambda x: abs(x[1] - 2.0))
-    return line if 1.6 <= o <= 2.6 else None
+    if 1.6 <= o <= 2.6:
+        return line
+    # ALT/MILESTONE LADDER (2026-07-28): FanDuel posts bench + role players as one-sided
+    # "5+ / 10+ / 15+" rungs, which never land in the even-money band, so this returned None
+    # and _select_player_bets dropped the player entirely. With allow_alt we anchor on the
+    # nearest-to-even rung anyway; the caller raises the EV bar to pay for the fatter hold.
+    return line if allow_alt else None
 
 
 PLAY_PROB_GATE = 0.85   # only DNP-discount OVERS whose role-realization is below this (the fringe tail);
@@ -217,6 +223,8 @@ ROLE_FLOOR = 22.0
 # OVERS have ~no edge (elevated roles regress). So take the side minutes-honest favors, but
 # demand much more edge to bet an over than an under.
 OVER_EV_MIN = 0.10
+ALT_LADDER_LIVE = True   # bet FanDuel's one-sided milestone ladders (user call 2026-07-28)
+LADDER_EV_MIN = 0.20     # 2x the two-way floor: one-sided => no devig, no hold estimate
 UNDER_EV_MIN = 0.04
 THIN_SAMPLE_N = 7      # fewer elevated games than this = an unreliable projection...
 BIG_JUMP_MIN = 10.0    # ...and combined with a huge projected minutes jump = over-extrapolation, skip
@@ -381,6 +389,10 @@ def prop_edges(player, log, proj_min, w=None, vacated=None, ctx=None, out_logs=N
     for stat, best in posted_props(player).items():
         key = PROP_STATS[stat]
         orig_line = _main_line(best)          # the ORIGINAL (posted o/u) line = the anchor for this stat
+        alt_ladder = False
+        if orig_line is None and ALT_LADDER_LIVE:
+            orig_line = _main_line(best, allow_alt=True)   # one-sided milestone ladder
+            alt_ladder = orig_line is not None
         season_avg = st.mean([g[key] for g in log]) if log else 0
         vals = [val(g, key) for g in sample]
         # plain minutes-honest mean. Context-weighting is dropped: the backtest showed it
@@ -549,9 +561,13 @@ def prop_edges(player, log, proj_min, w=None, vacated=None, ctx=None, out_logs=N
             stale = abs(elev_avg - season_avg) >= 1.0 and (
                 (side == "over" and line <= mid) or (side == "under" and line >= mid))
             ev_bar = VOL_EV_MIN if use_vol else (OVER_EV_MIN if side == "over" else UNDER_EV_MIN)
+            if alt_ladder:
+                if side != "over":
+                    continue              # one-sided market: there is no under to bet
+                ev_bar = max(ev_bar, LADDER_EV_MIN)
             if ev >= ev_bar:
                 spot = {"ev": ev, "stat": stat, "line": line, "dec": dec, "hit": hit,
-                        "band_pilot": band_pilot,
+                        "band_pilot": band_pilot, "alt_ladder": alt_ladder,
                         "odds_other": (under_dec if side == "over" else over_dec),
                         "side": side, "orig_line": orig_line, "pi_role": round(play_prob, 2),
                         "n": n, "fga": fga, "season_avg": round(season_avg, 1),

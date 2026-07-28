@@ -5,6 +5,20 @@ GHREPO="github.com/fgf9p6ks2f-ux/tennis-odds-collector.git"
 git config user.name "odds-bot" 2>/dev/null; git config user.email "odds-bot@users.noreply.github.com" 2>/dev/null
 URL="https://x-access-token:${GIT_PAT}@${GHREPO}"
 
+# SIZE GUARD (2026-07-28): unstage ANY blob >90MB before commit. GitHub hard-rejects >100MB,
+# and a rejected push is not a no-op here -- the rebase-recovery restores code from origin,
+# so a blocked push silently reverts deploys. Name-based `git rm --cached` lists only catch
+# what someone remembered; this catches whatever actually grew.
+unstage_big(){
+  git diff --cached --name-only 2>/dev/null | while read -r f; do
+    [ -f "$f" ] || continue
+    sz=$(stat -c%s "$f" 2>/dev/null || echo 0)
+    if [ "$sz" -gt 94371840 ]; then
+      git rm --cached -q "$f" 2>/dev/null && echo "size-guard: unstaged $f ($((sz/1048576))MB)"
+    fi
+  done
+}
+
 push(){
   # disk guard (same postmortem): if the root FS dips under 2GB free, repack immediately —
   # bounded by pack.threads=1 / windowMemory=32m so it can't swap-storm the 956MB box.
@@ -24,6 +38,7 @@ push(){
   # push, so any already-committed-but-unpushed commits (e.g. a fresh dashboard from fullscan, or a
   # push that failed during a thrash) pile up and origin/Pages/Actions all lag the VM. Always fall
   # through to pull+push so pending commits flush even on a no-change cycle.
+  unstage_big
   git commit -m "vm loop data [skip ci]" -q 2>/dev/null || true
   git pull --rebase --autostash -X theirs -q "$URL" main 2>/dev/null || {
     # Rebase wedged (usually an OOM kill mid-rebase on this 956MB box). Unwedge WITHOUT losing

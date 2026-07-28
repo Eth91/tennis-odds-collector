@@ -361,6 +361,8 @@ def collect():
                 # mainstream line = a thin-sample over-projection, not real. Warn on it.
                 if e["ev"] > 0.35 or e["n"] < 6:
                     tag += " [thin-sample, be skeptical]"
+                if e.get("alt_ladder"):
+                    tag += " [ALT ladder — one-sided, fatter hold]"
                 # per-stat driver: points shows FGA (+FTA/3PA), rebounds reb, assists ast
                 dl = {"points": "FGA", "rebounds": "reb", "assists": "ast"}.get(e["stat"], "FGA")
                 bits = [f"{dl} {e['driver']:+g}" if e["driver"] is not None else "",
