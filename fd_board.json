@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-28T21:08:08Z",
+ "captured_at": "2026-07-28T21:15:28Z",
  "matches": [
-  {
-   "event_id": 35878406,
-   "p1": "Jakub Glanowski",
-   "p2": "Michal Olbrycht",
-   "p1_norm": "jakub glanowski",
-   "p2_norm": "michal olbrycht",
-   "open_date": "2026-07-28T21:00:00.000Z",
-   "line": 75.5,
-   "over_odds": -115,
-   "under_odds": -115
-  },
   {
    "event_id": 35878411,
    "p1": "Kacper Marchlewski",
@@ -19,9 +8,9 @@
    "p1_norm": "kacper marchlewski",
    "p2_norm": "jaroslaw rolak",
    "open_date": "2026-07-28T21:05:00.000Z",
-   "line": 73.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 80.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35878412,
@@ -30,7 +19,7 @@
    "p1_norm": "marian brunner",
    "p2_norm": "kamil delikatny",
    "open_date": "2026-07-28T21:05:00.000Z",
-   "line": 76.5,
+   "line": 84.5,
    "over_odds": -110,
    "under_odds": -125
   },
@@ -41,9 +30,9 @@
    "p1_norm": "oliver vincenec",
    "p2_norm": "marek tkocz",
    "open_date": "2026-07-28T21:10:00.000Z",
-   "line": 74.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 53.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35878422,
