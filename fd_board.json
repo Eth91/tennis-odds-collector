@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-28T06:03:20Z",
+ "captured_at": "2026-07-28T06:12:03Z",
  "matches": [
-  {
-   "event_id": 35874870,
-   "p1": "Rafal Gajda",
-   "p2": "Schaniel Krzysztof",
-   "p1_norm": "rafal gajda",
-   "p2_norm": "schaniel krzysztof",
-   "open_date": "2026-07-28T05:55:00.000Z",
-   "line": 52.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35874872,
    "p1": "Milosz Cesarz",
@@ -19,20 +8,9 @@
    "p1_norm": "milosz cesarz",
    "p2_norm": "dawid jendrysik",
    "open_date": "2026-07-28T06:00:00.000Z",
-   "line": 74.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35874873,
-   "p1": "Stapor Rafal",
-   "p2": "Adam Linek",
-   "p1_norm": "stapor rafal",
-   "p2_norm": "adam linek",
-   "open_date": "2026-07-28T06:00:00.000Z",
-   "line": 81.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35874885,
@@ -41,9 +19,9 @@
    "p1_norm": "adrian wiecek",
    "p2_norm": "dawid michna",
    "open_date": "2026-07-28T06:05:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 79.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35874886,
@@ -52,20 +30,9 @@
    "p1_norm": "aleksander lilien",
    "p2_norm": "kamil klocek",
    "open_date": "2026-07-28T06:05:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35874887,
-   "p1": "Wojciech Urban",
-   "p2": "Sebastian Szostok",
-   "p1_norm": "wojciech urban",
-   "p2_norm": "sebastian szostok",
-   "open_date": "2026-07-28T06:05:00.000Z",
-   "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 75.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35874925,
@@ -85,9 +52,9 @@
    "p1_norm": "kamil rudomina",
    "p2_norm": "michal minda",
    "open_date": "2026-07-28T06:25:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35874928,
@@ -99,6 +66,39 @@
    "line": 74.5,
    "over_odds": -118,
    "under_odds": -116
+  },
+  {
+   "event_id": 35874929,
+   "p1": "Dariusz Wrobel",
+   "p2": "Blazej Warpas",
+   "p1_norm": "dariusz wrobel",
+   "p2_norm": "blazej warpas",
+   "open_date": "2026-07-28T06:30:00.000Z",
+   "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35874930,
+   "p1": "Kacper Glazowski",
+   "p2": "Martin Olejnik",
+   "p1_norm": "kacper glazowski",
+   "p2_norm": "martin olejnik",
+   "open_date": "2026-07-28T06:30:00.000Z",
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35874931,
+   "p1": "Waldemar Glanowski",
+   "p2": "Pawel Slosarczyk",
+   "p1_norm": "waldemar glanowski",
+   "p2_norm": "pawel slosarczyk",
+   "open_date": "2026-07-28T06:30:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
