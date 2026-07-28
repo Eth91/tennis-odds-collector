@@ -165,6 +165,7 @@ watch|2026-07-28|Isabelle Harrison|points|11.5
 watch|2026-07-28|Isabelle Harrison|pts_reb|17.5
 watch|2026-07-28|Jonquel Jones|assists|1.5
 watch|2026-07-28|Marina Mabrey|assists|3.5
+watch|2026-07-28|Marina Mabrey|pra|26.5
 watch|2026-07-28|Marina Mabrey|pra|27.5
 watch|2026-07-28|Marina Mabrey|pra|28.5
 watch|2026-07-28|Olivia Nelson-Ododa|rebounds|6.5
