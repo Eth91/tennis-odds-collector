@@ -46,3 +46,9 @@ fanduel_props.tmp
 tt.sqlite
 tt.sqlite-wal
 tt.sqlite-shm
+# WNBA state DBs travel as TEXT artifacts in data/*/ (db_sync.py), never as binaries:
+# 176K x 2578 commits bloated .git to 1.0GB, and with two writers on one binary the
+# nightly `-X theirs` rebase silently discarded a whole side's grading.
+wnba_ledger.sqlite
+wnba_proj_log.sqlite
+wnba_clv.sqlite

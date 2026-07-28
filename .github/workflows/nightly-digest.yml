@@ -32,6 +32,11 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install requests
+      - name: restore the WNBA DBs from their text artifacts
+        # Stateless runner + the DBs are no longer committed as binaries. --build UNIONs
+        # data/*/ into whatever is here, so this job and the VM loop can never clobber
+        # each other the way `-X theirs` on a binary did.
+        run: python db_sync.py --build
       - name: settle any remaining bets first (grade + CLV)
         run: python bet_ledger.py || echo "ledger pass skipped"
       - name: grade the WNBA autobetter ledger off box scores
@@ -53,7 +58,9 @@ jobs:
           # tolerate not-yet-existing files (wnba_learn.json only appears after ~40 graded
           # bets) — an unqualified `git add` on a missing path exits 128 under `bash -e` and
           # kills the whole step, which is exactly what broke this workflow.
-          git add -f digests.md bet_ledger.sqlite bet_ledger_report.md wnba_ledger.sqlite wnba_learn.json docs/index.html 2>/dev/null || true
+          python db_sync.py --export >/dev/null 2>&1 || true   # WNBA DBs -> data/*/ text
+          git add -f digests.md bet_ledger.sqlite bet_ledger_report.md data wnba_learn.json docs/index.html 2>/dev/null || true
+          git rm --cached -q wnba_ledger.sqlite wnba_proj_log.sqlite wnba_clv.sqlite 2>/dev/null || true
           git commit -m "nightly digest [skip ci]" || { echo "no change"; exit 0; }
           git pull --rebase --autostash -X theirs -q || git rebase --abort 2>/dev/null || true
           git push -q || true

@@ -85,6 +85,13 @@ def export_one(name, cfg):
                 "SELECT sql FROM sqlite_master WHERE type IN ('table','index') "
                 "AND tbl_name=? AND sql IS NOT NULL", (t,)):
             ddl.append(sql.strip() + ";")
+    # Make the DDL idempotent so it can be applied to an EXISTING db during a merge. sqlite
+    # emits plain "CREATE TABLE"/"CREATE INDEX", which throws "table already exists" the moment
+    # build_one runs against a runner that already has state — the exact case merging exists for.
+    ddl = [s.replace("CREATE TABLE ", "CREATE TABLE IF NOT EXISTS ", 1)
+            .replace("CREATE INDEX ", "CREATE INDEX IF NOT EXISTS ", 1)
+            .replace("CREATE UNIQUE INDEX ", "CREATE UNIQUE INDEX IF NOT EXISTS ", 1)
+           if "IF NOT EXISTS" not in s else s for s in ddl]
     (cfg["data"] / "schema.sql").write_text("\n".join(ddl) + "\n")
     total = 0
     for t in tables(con):
@@ -114,7 +121,15 @@ def build_one(name, cfg, target=None):
         return 0
     fresh = not target.exists() or target.stat().st_size == 0
     con = sqlite3.connect(target)
-    con.executescript(schema.read_text())          # CREATE TABLE IF NOT EXISTS — safe on both
+    # statement-by-statement so one already-exists (or an older artifact set missing a newer
+    # index) can never abort the whole restore
+    for stmt in schema.read_text().split(";\n"):
+        if stmt.strip():
+            try:
+                con.execute(stmt)
+            except sqlite3.OperationalError as e:
+                if "already exists" not in str(e):
+                    print(f"  ! schema stmt skipped: {str(e)[:70]}")
     total = 0
     for f in sorted(cfg["data"].glob("*.jsonl")):
         t = f.stem
