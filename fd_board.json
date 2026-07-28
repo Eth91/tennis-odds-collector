@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-28T20:08:51Z",
+ "captured_at": "2026-07-28T20:14:10Z",
  "matches": [
-  {
-   "event_id": 35877921,
-   "p1": "Lukasz Jarocki",
-   "p2": "Miroslav Sklensky",
-   "p1_norm": "lukasz jarocki",
-   "p2_norm": "miroslav sklensky",
-   "open_date": "2026-07-28T19:40:00.000Z",
-   "line": 109.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35878293,
    "p1": "Tomasz Wrzalik",
@@ -19,9 +8,9 @@
    "p1_norm": "tomasz wrzalik",
    "p2_norm": "mariusz koczyba",
    "open_date": "2026-07-28T20:00:00.000Z",
-   "line": 64.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 85.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35878304,
@@ -30,9 +19,9 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "karol strowski",
    "open_date": "2026-07-28T20:05:00.000Z",
-   "line": 81.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 80.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35878305,
@@ -41,7 +30,7 @@
    "p1_norm": "kacper adamus",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-07-28T20:05:00.000Z",
-   "line": 77.5,
+   "line": 73.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -52,9 +41,9 @@
    "p1_norm": "dariusz szlubowski",
    "p2_norm": "kacper marchlewski",
    "open_date": "2026-07-28T20:05:00.000Z",
-   "line": 77.5,
+   "line": 71.5,
    "over_odds": -115,
-   "under_odds": -120
+   "under_odds": -115
   },
   {
    "event_id": 35878332,
