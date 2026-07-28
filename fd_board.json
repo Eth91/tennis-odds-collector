@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-28T02:42:44Z",
+ "captured_at": "2026-07-28T02:49:30Z",
  "matches": [
   {
    "event_id": 35874343,
@@ -8,8 +8,8 @@
    "p1_norm": "aleksander barton",
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-28T02:45:00.000Z",
-   "line": 72.5,
-   "over_odds": -120,
+   "line": 75.5,
+   "over_odds": -125,
    "under_odds": -110
   },
   {
@@ -53,6 +53,17 @@
    "p2_norm": "waclaw suchecki",
    "open_date": "2026-07-28T03:00:00.000Z",
    "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35874366,
+   "p1": "Milosz Cesarz",
+   "p2": "Oliver Vincenec",
+   "p1_norm": "milosz cesarz",
+   "p2_norm": "oliver vincenec",
+   "open_date": "2026-07-28T03:10:00.000Z",
+   "line": 75.5,
    "over_odds": -116,
    "under_odds": -116
   }
