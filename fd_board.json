@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-28T20:47:27Z",
+ "captured_at": "2026-07-28T20:51:57Z",
  "matches": [
-  {
-   "event_id": 35878372,
-   "p1": "Jacek Przewlocki",
-   "p2": "Jaroslaw Rolak",
-   "p1_norm": "jacek przewlocki",
-   "p2_norm": "jaroslaw rolak",
-   "open_date": "2026-07-28T20:30:00.000Z",
-   "line": 98.5,
-   "over_odds": -140,
-   "under_odds": 100
-  },
   {
    "event_id": 35878385,
    "p1": "Dariusz Molenda",
@@ -19,9 +8,9 @@
    "p1_norm": "dariusz molenda",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-07-28T20:45:00.000Z",
-   "line": 73.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 79.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35878388,
@@ -30,9 +19,9 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-07-28T20:45:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 73.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35878405,
