@@ -171,4 +171,5 @@ watch|2026-07-28|Marina Mabrey|assists|3.5
 watch|2026-07-28|Marina Mabrey|pra|26.5
 watch|2026-07-28|Marina Mabrey|pra|27.5
 watch|2026-07-28|Marina Mabrey|pra|28.5
+watch|2026-07-28|Megan DiLeo|points|12.5
 watch|2026-07-28|Olivia Nelson-Ododa|rebounds|6.5
