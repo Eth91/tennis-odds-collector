@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-07-29T16:22:03Z",
+ "captured_at": "2026-07-29T16:27:13Z",
  "matches": [
-  {
-   "event_id": 35880403,
-   "p1": "Krzysztof Juszczyk",
-   "p2": "Pawel Gasiorski",
-   "p1_norm": "krzysztof juszczyk",
-   "p2_norm": "pawel gasiorski",
-   "open_date": "2026-07-29T16:00:00.000Z",
-   "line": 95.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
-  {
-   "event_id": 35880416,
-   "p1": "Mateusz Rutkowski",
-   "p2": "Lukasz Pietraszko",
-   "p1_norm": "mateusz rutkowski",
-   "p2_norm": "lukasz pietraszko",
-   "open_date": "2026-07-29T16:05:00.000Z",
-   "line": 55.5,
-   "over_odds": 100,
-   "under_odds": -135
-  },
-  {
-   "event_id": 35880478,
-   "p1": "Kamil Delikatny",
-   "p2": "Kacper Kwiatkowski",
-   "p1_norm": "kamil delikatny",
-   "p2_norm": "kacper kwiatkowski",
-   "open_date": "2026-07-29T16:15:00.000Z",
-   "line": 66.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35880479,
    "p1": "Michal Skorski",
@@ -52,20 +19,9 @@
    "p1_norm": "rafal gajda",
    "p2_norm": "jakub kaczmarek",
    "open_date": "2026-07-29T16:20:00.000Z",
-   "line": 81.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35880486,
-   "p1": "Jakub Pruszkowski",
-   "p2": "Mariusz Koczyba",
-   "p1_norm": "jakub pruszkowski",
-   "p2_norm": "mariusz koczyba",
-   "open_date": "2026-07-29T16:25:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35880685,
@@ -97,6 +53,17 @@
    "p2_norm": "krzysztof hetnar",
    "open_date": "2026-07-29T16:40:00.000Z",
    "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35880835,
+   "p1": "Pawel Gasiorski",
+   "p2": "Wojciech Pytlas",
+   "p1_norm": "pawel gasiorski",
+   "p2_norm": "wojciech pytlas",
+   "open_date": "2026-07-29T16:50:00.000Z",
+   "line": 75.5,
    "over_odds": -112,
    "under_odds": -118
   }
