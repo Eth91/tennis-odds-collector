@@ -244,6 +244,47 @@ def tier_map(rows):
             tier_of(r, (r["pred_date"], r["player"], r["stat"]) in favs) for r in rows}
 
 
+PLAYED_MARKS = HERE / "wnba_played.txt"      # durable "I actually placed this" marks
+
+
+def _played_marks():
+    """{(date, player_lastname_lower, stat, line)} from wnba_played.txt.
+
+    Plain text on purpose: it merges cleanly across the VM/Actions/Mac writers where a sqlite
+    blob would not. Matched on SURNAME because the file is hand-edited and the ledger spells
+    names in full ("Nelson-Ododa" vs "Olivia Nelson-Ododa").
+    """
+    out = set()
+    try:
+        for ln in PLAYED_MARKS.read_text().splitlines():
+            ln = ln.strip()
+            if not ln or ln.startswith("#"):
+                continue
+            parts = [x.strip() for x in ln.split("|")]
+            if len(parts) < 4:
+                continue
+            d, name, stat, line = parts[0], parts[1], parts[2], parts[3]
+            try:
+                line = float(line)
+            except ValueError:
+                continue
+            out.add((d, name.split()[-1].lower(), stat, line))
+    except OSError:
+        pass
+    return out
+
+
+def _is_played(r, marks):
+    nm = str(r.get("player") or "").split()
+    if not nm:
+        return False
+    try:
+        ln = float(r.get("line"))
+    except (TypeError, ValueError):
+        return False
+    return (r.get("pred_date"), nm[-1].lower(), r.get("stat"), ln) in marks
+
+
 def current_selection(rows, commit=False):
     """The subset of OVER rows the CURRENT model would actually pick — used to restate the tracked
     record to the new bot's selection. Three rule-based stages (returns (kept, dropped) where
@@ -257,6 +298,16 @@ def current_selection(rows, commit=False):
     from collections import defaultdict
     overs = [r for r in rows if (r.get("side") or "over") == "over"]
     kept, dropped = [], []
+
+    # PLACED BETS BYPASS EVERY GATE (2026-07-29). A mark in wnba_played.txt means the user put
+    # real money on it; the record must show it whatever the model thought. These are pulled out
+    # BEFORE the gates and re-added at the end, so they also never consume a TOP-2 slot from a
+    # play the model did pick. Nothing here changes what gets flagged or pinged.
+    _marks = _played_marks()
+    forced = [r for r in overs if _is_played(r, _marks)] if _marks else []
+    if forced:
+        _fid = {id(r) for r in forced}
+        overs = [r for r in overs if id(r) not in _fid]
 
     # 0. OUT-OF-BAND GATE at the selection layer too (2026-07-18): the flag-time gate stops NEW
     # d_min <0 / >8 bets, but pre-gate rows (and any future leak) must not ride the board or the
@@ -376,6 +427,9 @@ def current_selection(rows, commit=False):
         spaced += keep_r
         dropped += [(x, "ladder rung too close (min-gap rule)") for x in rr if id(x) not in keep_ids]
     kept = spaced
+    if forced:
+        _k, _d = kept, dropped
+        return forced + list(_k), _d
     return kept, dropped
 
 
