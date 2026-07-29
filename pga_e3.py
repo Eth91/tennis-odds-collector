@@ -139,8 +139,12 @@ def main():
             BR, _fr = B.rates()
             BRn = {RU.norm(k): v for k, v in BR.items()}
             try:
-                import pga_field as _F
-                _mix = B.mix_for(_F.event().get("id") or "")
+                # resolve the ORCHESTRATOR tid from the event name — ESPN ids are a
+                # different namespace and silently defaulted every course to par 72.
+                _tid = B.tid_for_name(evn)
+                _mix = B.mix_for(_tid) if _tid else None
+                if _mix:
+                    print(f"  birdies: course {_tid} par mix {_mix}")
             except Exception:
                 _mix = None
             if not _mix:

@@ -196,6 +196,44 @@ def mix_for(tid):
     return harvest_mix(tid) or par_mix(course_par(tid))
 
 
+def tid_for_name(name, cache=HERE / "pga_tid_cache.json"):
+    """Orchestrator tournament id (R2026xxx) for an event NAME.
+
+    ⚠️ ESPN ids (401811960) and orchestrator ids (R2026524) are DIFFERENT NAMESPACES —
+    passing the ESPN id into course_par() silently returned None and every course fell
+    back to par-72, which is exactly the bug that made the birdie model run hot. Match
+    on name tokens against the schedule (upcoming first: that is the bettable one).
+    """
+    key = " ".join(str(name or "").lower().split())
+    try:
+        c = json.loads(cache.read_text())
+    except Exception:
+        c = {}
+    if key in c:
+        return c[key]
+    d = gql('{schedule(tourCode: "R") {upcoming {tournaments {id tournamentName}} '
+            'completed {tournaments {id tournamentName}}}}')
+    sd = (d.get("data") or {}).get("schedule") or {}
+    cands = []
+    for grp in (sd.get("upcoming") or []) + (sd.get("completed") or []):
+        for t in grp.get("tournaments") or []:
+            cands.append((t.get("id"), " ".join(str(t.get("tournamentName") or "").lower().split())))
+    toks = [w for w in key.replace("pga", "").split() if len(w) > 3 and not w.isdigit()]
+    best = None
+    for tid, tn in cands:
+        hits = sum(1 for w in toks if w in tn)
+        if hits and (best is None or hits > best[0]):
+            best = (hits, tid)
+    tid = best[1] if best else None
+    if tid:
+        c[key] = tid
+        try:
+            cache.write_text(json.dumps(c))
+        except OSError:
+            pass
+    return tid
+
+
 def p_x_or_more(player_rates, k_target, mix=None):
     """Exact P(birdies-or-better >= k) in one round via DP over the course's par mix."""
     mix = mix or DEFAULT_MIX
