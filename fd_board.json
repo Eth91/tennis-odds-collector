@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T13:19:27Z",
+ "captured_at": "2026-07-29T13:24:27Z",
  "matches": [
   {
    "event_id": 35880111,
@@ -8,9 +8,9 @@
    "p1_norm": "michal durda",
    "p2_norm": "witold buczynski",
    "open_date": "2026-07-29T13:05:00.000Z",
-   "line": 93.5,
-   "over_odds": -130,
-   "under_odds": -105
+   "line": 99.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35880138,
@@ -19,9 +19,9 @@
    "p1_norm": "grzegorz adamiak",
    "p2_norm": "krystian kolodziej",
    "open_date": "2026-07-29T13:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 78.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35880148,
@@ -76,6 +76,17 @@
    "open_date": "2026-07-29T13:45:00.000Z",
    "line": 84.5,
    "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35880178,
+   "p1": "Stapor Rafal",
+   "p2": "Kacper Glazowski",
+   "p1_norm": "stapor rafal",
+   "p2_norm": "kacper glazowski",
+   "open_date": "2026-07-29T13:50:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
    "under_odds": -118
   }
  ]
