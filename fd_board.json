@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-29T15:20:34Z",
+ "captured_at": "2026-07-29T15:25:50Z",
  "matches": [
-  {
-   "event_id": 35880290,
-   "p1": "Mateusz Rutkowski",
-   "p2": "Jakub Zochniak",
-   "p1_norm": "mateusz rutkowski",
-   "p2_norm": "jakub zochniak",
-   "open_date": "2026-07-29T15:00:00.000Z",
-   "line": 80.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35880317,
    "p1": "Rafal Gajda",
@@ -19,20 +8,9 @@
    "p1_norm": "rafal gajda",
    "p2_norm": "kamil smolka",
    "open_date": "2026-07-29T15:05:00.000Z",
-   "line": 90.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
-  {
-   "event_id": 35880322,
-   "p1": "Jakub Pruszkowski",
-   "p2": "Wojciech Pytlas",
-   "p1_norm": "jakub pruszkowski",
-   "p2_norm": "wojciech pytlas",
-   "open_date": "2026-07-29T15:10:00.000Z",
-   "line": 78.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 88.5,
+   "over_odds": -180,
+   "under_odds": 125
   },
   {
    "event_id": 35880339,
@@ -41,9 +19,9 @@
    "p1_norm": "marcin kowalczyk",
    "p2_norm": "adrian fabis",
    "open_date": "2026-07-29T15:25:00.000Z",
-   "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 80.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35880340,
@@ -52,9 +30,9 @@
    "p1_norm": "lukasz pietraszko",
    "p2_norm": "patryk jendrzejewski",
    "open_date": "2026-07-29T15:25:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35880341,
@@ -88,6 +66,28 @@
    "line": 77.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35880367,
+   "p1": "Adrian Eliasz",
+   "p2": "Kuba Golaszewski",
+   "p1_norm": "adrian eliasz",
+   "p2_norm": "kuba golaszewski",
+   "open_date": "2026-07-29T15:50:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35880368,
+   "p1": "Michal Machelski",
+   "p2": "Adam Staniczek",
+   "p1_norm": "michal machelski",
+   "p2_norm": "adam staniczek",
+   "open_date": "2026-07-29T15:50:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
