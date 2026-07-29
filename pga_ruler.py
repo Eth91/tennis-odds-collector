@@ -80,13 +80,35 @@ def crawl(seasons=(2023, 2024, 2025, 2026)):
     con.close()
 
 
-def fit(asof=None):
-    """{player: (rating, sigma, n_rounds)} using ONLY rounds strictly before `asof`."""
-    asof = asof or "9999"
+def all_rows():
+    """Every round, sorted by date — pass to fit(rows=...) to avoid re-querying per as-of
+    fit. A half-life grid search is ~350 fits and the query dominates otherwise."""
     con = sqlite3.connect(DB)
     rows = con.execute("SELECT event_id, date, player, rnd, score FROM rounds "
-                       "WHERE date < ? ORDER BY date", (asof,)).fetchall()
+                       "ORDER BY date").fetchall()
     con.close()
+    return rows
+
+
+def fit(asof=None, rows=None, half_life=None, k_shrink=None, sig_shrink=None,
+        min_rounds=None):
+    """{player: (rating, sigma, n_rounds)} using ONLY rounds strictly before `asof`.
+
+    The four constants are overridable so pga_calib can measure them; passing None keeps the
+    module default, so every existing caller is unaffected.
+    """
+    asof = asof or "9999"
+    HL = float(half_life if half_life is not None else HALF_LIFE_D)
+    KS = float(k_shrink if k_shrink is not None else K_SHRINK)
+    SS = float(sig_shrink if sig_shrink is not None else SIG_SHRINK)
+    MR = int(min_rounds if min_rounds is not None else MIN_ROUNDS)
+    if rows is None:
+        con = sqlite3.connect(DB)
+        rows = con.execute("SELECT event_id, date, player, rnd, score FROM rounds "
+                           "WHERE date < ? ORDER BY date", (asof,)).fetchall()
+        con.close()
+    else:
+        rows = [r for r in rows if r[1] < asof]
     by_er = defaultdict(list)
     for eid, date, nm, rnd, sc in rows:
         by_er[(eid, rnd)].append(sc)
@@ -106,7 +128,7 @@ def fit(asof=None):
         if fm is not None:
             tmp[nm].append(sc - fm)
     for nm, v in tmp.items():
-        prov[nm] = st.mean(v) * len(v) / (len(v) + K_SHRINK)
+        prov[nm] = st.mean(v) * len(v) / (len(v) + KS)
     fq = defaultdict(list)
     for eid, date, nm, rnd, sc in rows:
         if nm in prov:
@@ -125,18 +147,18 @@ def fit(asof=None):
             age = (ref - dt.date.fromisoformat(date)).days
         except ValueError:
             continue
-        w = 0.5 ** (max(age, 0) / HALF_LIFE_D)
+        w = 0.5 ** (max(age, 0) / HL)
         per[nm].append((sc - fm, w))
     g_sd = st.pstdev([d for v in per.values() for d, _ in v]) or 2.8
     out = {}
     for nm, v in per.items():
         sw = sum(w for _, w in v)
         mu = sum(d * w for d, w in v) / sw if sw else 0.0
-        rating = mu * sw / (sw + K_SHRINK)               # shrink to field average
+        rating = mu * sw / (sw + KS)                     # shrink to field average
         n = len(v)
         sd = st.pstdev([d for d, _ in v]) if n >= 5 else g_sd
-        sigma = (sd * n + g_sd * SIG_SHRINK) / (n + SIG_SHRINK)
-        if n < MIN_ROUNDS:
+        sigma = (sd * n + g_sd * SS) / (n + SS)
+        if n < MR:
             rating, sigma = rating * 0.5, max(sigma, g_sd * 1.15)
         out[nm] = (rating, sigma, n)
     return out, g_sd
@@ -272,7 +294,8 @@ def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
     return out
 
 
-def walk_forward(seasons=(2025, 2026), verbose=True):
+def walk_forward(seasons=(2025, 2026), verbose=True, season_max=None, rows=None,
+                 **fitkw):
     """Validation that does NOT wait on odds. G2 needs settled matchup closes and sat at
     n=3 for weeks, which makes it unfalsifiable today. This scores the ruler against actual
     ROUND SCORES it never saw: for each event, fit strictly as-of its start date, then
@@ -280,15 +303,24 @@ def walk_forward(seasons=(2025, 2026), verbose=True):
     (share of same-round player pairs where the better-rated player actually shot lower)
     plus RMSE against the field-relative score."""
     con = sqlite3.connect(DB)
-    evs = con.execute("SELECT event_id, MIN(date) d, event FROM rounds GROUP BY event_id "
-                      "HAVING d >= ? ORDER BY d", ("%d-01-01" % min(seasons),)).fetchall()
+    if season_max:
+        evs = con.execute(
+            "SELECT event_id, MIN(date) d, event FROM rounds GROUP BY event_id "
+            "HAVING d >= ? AND d <= ? ORDER BY d",
+            ("%d-01-01" % min(seasons), "%d-12-31" % int(season_max))).fetchall()
+    else:
+        evs = con.execute(
+            "SELECT event_id, MIN(date) d, event FROM rounds GROUP BY event_id "
+            "HAVING d >= ? ORDER BY d", ("%d-01-01" % min(seasons),)).fetchall()
     con.close()
+    if rows is None and fitkw:
+        rows = all_rows()          # only worth pre-loading when a grid is being searched
     import random
     random.seed(11)
     hits = tot = 0
     errs = []
     for eid, d0, ev in evs:
-        R, _ = fit(asof=d0)
+        R, _ = fit(asof=d0, rows=rows, **fitkw)
         Rn = {norm(k): v for k, v in R.items()}
         con = sqlite3.connect(DB)
         rows = con.execute("SELECT player, rnd, score FROM rounds WHERE event_id=?",
