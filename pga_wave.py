@@ -382,7 +382,7 @@ def wave_shift_for(tid, rnd=None, lat=None, lon=None, day=None, verbose=False):
                    for m in tees.values()})
     if lat is None or lon is None or not days:
         return wv, 0.0, "wave split known, no coords for exposure"
-    wind_h = _wind_hourly(lat, lon, days[0].isoformat(), days[-1].isoformat())
+    wind_h = _wind_for_days(lat, lon, days)
     if not wind_h:
         return wv, 0.0, "wave split known, wind unavailable"
     ea = [_exposure(wind_h, t) for p, t in tees.items() if wv.get(p) == "am"]
