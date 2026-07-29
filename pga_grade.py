@@ -78,7 +78,25 @@ def main():
         if (w / n) < 0.52 * be * 2:                       # <52% of breakeven pace
             print(f"🚨 E1 TRIPWIRE: {w}-{l} ({100*w/n:.0f}%) vs breakeven {100*be:.0f}% "
                   f"after {n} graded — BENCH this stream (PGA_PLAN law 7)")
+    # PRESERVE THE E3 BLOCK (2026-07-29): _write_board rebuilds pga_board.json from
+    # scratch, and grading runs AFTER pga_e3 in the cron — so it was wiping the E3
+    # preview every pass. The board showed 0 rows while e3 had just produced 15.
+    try:
+        import json as _j
+        _prev = _j.loads(E1.BOARD.read_text()).get("e3")
+    except Exception:
+        _prev = None
     E1._write_board(name)
+    if _prev:
+        try:
+            import json as _j
+            _b = _j.loads(E1.BOARD.read_text())
+            _b["e3"] = _prev
+            _t = E1.BOARD.with_suffix(".tmp")
+            _t.write_text(_j.dumps(_b))
+            _t.replace(E1.BOARD)
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":
