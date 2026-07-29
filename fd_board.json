@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T15:09:47Z",
+ "captured_at": "2026-07-29T15:14:54Z",
  "matches": [
   {
    "event_id": 35880290,
@@ -8,31 +8,9 @@
    "p1_norm": "mateusz rutkowski",
    "p2_norm": "jakub zochniak",
    "open_date": "2026-07-29T15:00:00.000Z",
-   "line": 80.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35880291,
-   "p1": "Michal Skorski",
-   "p2": "Kacper Marchlewski",
-   "p1_norm": "michal skorski",
-   "p2_norm": "kacper marchlewski",
-   "open_date": "2026-07-29T15:00:00.000Z",
-   "line": 54.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35880292,
-   "p1": "Kamil Delikatny",
-   "p2": "Kazimierz Rybak",
-   "p1_norm": "kamil delikatny",
-   "p2_norm": "kazimierz rybak",
-   "open_date": "2026-07-29T15:00:00.000Z",
-   "line": 73.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 59.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35880317,
@@ -41,9 +19,9 @@
    "p1_norm": "rafal gajda",
    "p2_norm": "kamil smolka",
    "open_date": "2026-07-29T15:05:00.000Z",
-   "line": 85.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35880322,
@@ -52,9 +30,9 @@
    "p1_norm": "jakub pruszkowski",
    "p2_norm": "wojciech pytlas",
    "open_date": "2026-07-29T15:10:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 68.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35880339,
