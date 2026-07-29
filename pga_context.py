@@ -185,7 +185,11 @@ def course_factor(event_name, verbose=False):
     diffs = []
     for (ev, yr), (m, n) in ev_mean.items():
         el = ev.lower()
-        if toks and sum(1 for w in toks if w in el) >= max(1, len(toks) // 2):
+        # EVERY token must appear. Half-token matching made Wyndham Championship and THE
+        # PLAYERS Championship both report 57 "prior editions" of themselves with the same
+        # scoring diff, because both matched on the word "Championship" — an average over
+        # most of the tour, dressed up as this course's history.
+        if toks and all(w in el for w in toks):
             diffs.append(m - base.get(yr, m))
     if not diffs or not br:
         if verbose:
