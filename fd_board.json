@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-29T21:06:47Z",
+ "captured_at": "2026-07-29T21:11:08Z",
  "matches": [
-  {
-   "event_id": 35881384,
-   "p1": "Jakub Pruszkowski",
-   "p2": "Oskar Jadach",
-   "p1_norm": "jakub pruszkowski",
-   "p2_norm": "oskar jadach",
-   "open_date": "2026-07-29T20:45:00.000Z",
-   "line": 95.5,
-   "over_odds": 140,
-   "under_odds": -195
-  },
   {
    "event_id": 35881406,
    "p1": "Mateusz Rutkowski",
@@ -19,9 +8,9 @@
    "p1_norm": "mateusz rutkowski",
    "p2_norm": "lukasz pietraszko",
    "open_date": "2026-07-29T21:00:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 61.5,
+   "over_odds": 100,
+   "under_odds": -140
   },
   {
    "event_id": 35881407,
@@ -30,9 +19,9 @@
    "p1_norm": "adam staniczek",
    "p2_norm": "kazimierz rybak",
    "open_date": "2026-07-29T21:00:00.000Z",
-   "line": 79.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 66.5,
+   "over_odds": -105,
+   "under_odds": -135
   },
   {
    "event_id": 35881409,
@@ -41,9 +30,9 @@
    "p1_norm": "janus slawomir",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-07-29T21:05:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 68.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35881416,
@@ -99,6 +88,17 @@
    "line": 75.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35881444,
+   "p1": "Mariusz Koczyba",
+   "p2": "Adrian Burkacki",
+   "p1_norm": "mariusz koczyba",
+   "p2_norm": "adrian burkacki",
+   "open_date": "2026-07-29T21:35:00.000Z",
+   "line": 74.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
