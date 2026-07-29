@@ -142,6 +142,60 @@ def rates():
     return out, frate
 
 
+# ---------------------------------------------------------------------------
+# COURSE STRUCTURE (2026-07-29). v1 priced EVERY course as par-72 4/10/4, which
+# over-counted par-5s (47% birdie rate each) at every shorter venue — Detroit GC is
+# par 70, so v1 handed players two phantom par-5s and ran +11.3pts hot on every Over.
+# The par->mix rule is VALIDATED against the harvest's own hole counts:
+#     par 72 -> 4/10/4 (8/8 events)   par 71 -> 4/11/3 (4/5)   par 70 -> 4/12/2
+# Exact hole pars are used whenever the event is in our harvest; the rule is the
+# fallback for an UPCOMING course (which is the case that matters for betting).
+PAR_MIX_RULE = {70: {3: 4, 4: 12, 5: 2}, 71: {3: 4, 4: 11, 5: 3},
+                72: {3: 4, 4: 10, 5: 4}, 73: {3: 4, 4: 9, 5: 5}}
+
+
+def par_mix(par_total):
+    return dict(PAR_MIX_RULE.get(int(par_total or 72), PAR_MIX_RULE[72]))
+
+
+def course_par(tid, cache=HERE / "pga_course_cache.json"):
+    """Par total for a tournament's host course via the orchestrator (cached per tid)."""
+    try:
+        c = json.loads(cache.read_text())
+    except Exception:
+        c = {}
+    if str(tid) in c:
+        return c[str(tid)]
+    d = gql('query C(: ID!) {courseStats(tournamentId: ) '
+            '{courses {courseId courseName par hostCourse}}}', {"t": tid})
+    cs = ((d.get("data") or {}).get("courseStats") or {}).get("courses") or []
+    host = next((x for x in cs if x.get("hostCourse")), cs[0] if cs else None)
+    par = (host or {}).get("par")
+    if par:
+        c[str(tid)] = par
+        try:
+            cache.write_text(json.dumps(c))
+        except OSError:
+            pass
+    return par
+
+
+def harvest_mix(tid):
+    """Exact mix from our own harvested hole counts (played events only)."""
+    con = sqlite3.connect(DB)
+    r = con.execute("SELECT AVG(p3h), AVG(p4h), AVG(p5h) FROM birdie_rounds WHERE tid=?",
+                    (tid,)).fetchone()
+    con.close()
+    if not r or r[0] is None:
+        return None
+    return {3: round(r[0]), 4: round(r[1]), 5: round(r[2])}
+
+
+def mix_for(tid):
+    """Best available par mix: exact from harvest, else inferred from the par total."""
+    return harvest_mix(tid) or par_mix(course_par(tid))
+
+
 def p_x_or_more(player_rates, k_target, mix=None):
     """Exact P(birdies-or-better >= k) in one round via DP over the course's par mix."""
     mix = mix or DEFAULT_MIX

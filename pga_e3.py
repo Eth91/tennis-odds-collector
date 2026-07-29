@@ -116,14 +116,19 @@ def main():
                 preview.append({"stream": "E3-top%d" % N, "runner": run, "market": mt,
                                 "odds": od, "edge": round(ours - fair, 3)})
 
-    # ---- birdies-or-better (Poisson-binomial vs FD's per-player round ladder) ----
-    # Real market shape, captured 2026-07-29 via competition-page:
-    #   marketType PLAYER_BIRDIES_OR_BETTER
-    #   marketName '<Player> Total Birdies or Better Round N'
-    #   runners    '<Player> Over 3.5' / '<Player> Under 3.5'   (handicap sits on the runner)
-    # v1 read the player from the RUNNER and therefore matched nothing. The player is in
-    # the MARKET name; the line is parsed from the runner text (FD sends handicap=0 here).
-    # Both sides priced off P(k+) so a fat under is catchable too.
+    # ---- birdies-or-better: MARKET-ANCHORED LEVEL, player-relative edges ----
+    # Two corrections after v1 ran +11.3pts hot on every Over (one-sided = model error):
+    #  1. PAR MIX. v1 priced every course as par-72 4/10/4. Detroit GC is par 70 (4/12/2),
+    #     so v1 invented two par-5s at a 47% birdie rate each. Now uses mix_for(tid):
+    #     exact hole counts from our harvest, else the par-total rule (validated 8/8 at
+    #     par 72 against real hole counts).
+    #  2. COURSE LEVEL IS NOT KNOWABLE PRE-TOURNAMENT. Measured on 15 harvested events,
+    #     courses vary 0.78x-1.29x in birdie rate BEYOND their par mix (sd 13%) — larger
+    #     than any player edge we could carry. The market CAN see this (course history,
+    #     setup, agronomy); we cannot. So we solve one multiplier LAM that makes our
+    #     field-average P(over) match the market's, and bet only DEVIATIONS from it.
+    #     This is the plan's "mispricing detector, not oracle" made literal: we never
+    #     claim to know the course level, only who beats it.
     try:
         import pga_birdies as B
         import re as _re
@@ -133,21 +138,49 @@ def main():
         if brows:
             BR, _fr = B.rates()
             BRn = {RU.norm(k): v for k, v in BR.items()}
-            seen_b = set()
+            try:
+                import pga_field as _F
+                _mix = B.mix_for(_F.event().get("id") or "")
+            except Exception:
+                _mix = None
+            if not _mix:
+                _mix = B.DEFAULT_MIX
+            # parse the board once
+            parsed = []
             for mkt, mt, run, od in brows:
                 pm = _re.match(r"(.+?)\s+Total Birdies or Better", mkt)
-                if not pm:
-                    continue
-                player = pm.group(1).strip()
-                rr = BRn.get(RU.norm(player))
-                if not rr:
-                    continue                       # unrated (harvest hasn't reached him)
                 sm = _re.search(r"(Over|Under)\s+([\d.]+)", run)
-                if not sm:
+                if not pm or not sm:
                     continue
-                side, line = sm.group(1).lower(), float(sm.group(2))
-                k_t = int(line + 0.5)              # o3.5 -> P(4+)
-                p_over = B.p_x_or_more(rr, k_t)
+                rr = BRn.get(RU.norm(pm.group(1).strip()))
+                if not rr:
+                    continue
+                parsed.append((pm.group(1).strip(), sm.group(1).lower(),
+                               float(sm.group(2)), od, mkt, rr))
+            overs = [x for x in parsed if x[1] == "over"]
+            LAM = 1.0
+            if len(overs) >= 8:
+                # bisect LAM so mean model P(over) == mean market implied P(over)
+                tgt = sum(1 / x[3] for x in overs) / len(overs)
+                lo, hi = 0.5, 1.6
+                for _ in range(28):
+                    LAM = (lo + hi) / 2
+                    scaled = {p: min(v * LAM, 0.95) for p, v in ()} if False else None
+                    m = 0.0
+                    for _pl, _sd, ln, _od, _mk, rr in overs:
+                        rs = {k: min(v * LAM, 0.95) for k, v in rr.items()}
+                        m += B.p_x_or_more(rs, int(ln + 0.5), _mix)
+                    m /= len(overs)
+                    if m > tgt:
+                        hi = LAM
+                    else:
+                        lo = LAM
+                print(f"  birdies: course-level LAM={LAM:.3f} "
+                      f"(market-anchored on {len(overs)} Over lines, mix {_mix})")
+            seen_b = set()
+            for player, side, line, od, mkt, rr in parsed:
+                rs = {k: min(v * LAM, 0.95) for k, v in rr.items()}
+                p_over = B.p_x_or_more(rs, int(line + 0.5), _mix)
                 ours = p_over if side == "over" else 1 - p_over
                 edge = ours - 1 / od
                 key = (RU.norm(player), side, line)
