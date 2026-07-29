@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-29T14:55:24Z",
+ "captured_at": "2026-07-29T15:00:27Z",
  "matches": [
-  {
-   "event_id": 35880258,
-   "p1": "Jakub Kaczmarek",
-   "p2": "Schaniel Krzysztof",
-   "p1_norm": "jakub kaczmarek",
-   "p2_norm": "schaniel krzysztof",
-   "open_date": "2026-07-29T14:45:00.000Z",
-   "line": 86.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35880290,
    "p1": "Mateusz Rutkowski",
@@ -20,8 +9,8 @@
    "p2_norm": "jakub zochniak",
    "open_date": "2026-07-29T15:00:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -120,
+   "under_odds": -110
   },
   {
    "event_id": 35880291,
@@ -30,9 +19,9 @@
    "p1_norm": "michal skorski",
    "p2_norm": "kacper marchlewski",
    "open_date": "2026-07-29T15:00:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35880292,
@@ -41,9 +30,9 @@
    "p1_norm": "kamil delikatny",
    "p2_norm": "kazimierz rybak",
    "open_date": "2026-07-29T15:00:00.000Z",
-   "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 73.5,
+   "over_odds": -120,
+   "under_odds": -110
   },
   {
    "event_id": 35880317,
@@ -64,6 +53,39 @@
    "p2_norm": "wojciech pytlas",
    "open_date": "2026-07-29T15:10:00.000Z",
    "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35880339,
+   "p1": "Marcin Kowalczyk",
+   "p2": "Adrian Fabis",
+   "p1_norm": "marcin kowalczyk",
+   "p2_norm": "adrian fabis",
+   "open_date": "2026-07-29T15:25:00.000Z",
+   "line": 79.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35880340,
+   "p1": "Lukasz Pietraszko",
+   "p2": "Patryk Jendrzejewski",
+   "p1_norm": "lukasz pietraszko",
+   "p2_norm": "patryk jendrzejewski",
+   "open_date": "2026-07-29T15:25:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35880341,
+   "p1": "Kacper Kwiatkowski",
+   "p2": "Andriej Fomin",
+   "p1_norm": "kacper kwiatkowski",
+   "p2_norm": "andriej fomin",
+   "open_date": "2026-07-29T15:25:00.000Z",
+   "line": 75.5,
    "over_odds": -118,
    "under_odds": -112
   }
