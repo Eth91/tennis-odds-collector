@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T17:04:14Z",
+ "captured_at": "2026-07-29T17:09:20Z",
  "matches": [
   {
    "event_id": 35880835,
@@ -8,9 +8,9 @@
    "p1_norm": "pawel gasiorski",
    "p2_norm": "wojciech pytlas",
    "open_date": "2026-07-29T16:50:00.000Z",
-   "line": 94.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 84.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35880841,
@@ -19,9 +19,9 @@
    "p1_norm": "michal machelski",
    "p2_norm": "andriej fomin",
    "open_date": "2026-07-29T16:55:00.000Z",
-   "line": 83.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 84.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35880842,
@@ -30,9 +30,9 @@
    "p1_norm": "adrian eliasz",
    "p2_norm": "adrian fabis",
    "open_date": "2026-07-29T16:55:00.000Z",
-   "line": 85.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 89.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35880843,
@@ -41,9 +41,9 @@
    "p1_norm": "jakub kuzmicz",
    "p2_norm": "patryk jendrzejewski",
    "open_date": "2026-07-29T16:55:00.000Z",
-   "line": 89.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 88.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35880853,
@@ -52,9 +52,9 @@
    "p1_norm": "sebastian juzek",
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-07-29T17:05:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 80.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35880859,
@@ -99,6 +99,28 @@
    "line": 76.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35880920,
+   "p1": "Miroslaw Warzecha",
+   "p2": "Jerzy Michalik",
+   "p1_norm": "miroslaw warzecha",
+   "p2_norm": "jerzy michalik",
+   "open_date": "2026-07-29T17:30:00.000Z",
+   "line": 75.5,
+   "over_odds": -110,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35880924,
+   "p1": "Mariusz Koczyba",
+   "p2": "Wojciech Pytlas",
+   "p1_norm": "mariusz koczyba",
+   "p2_norm": "wojciech pytlas",
+   "open_date": "2026-07-29T17:35:00.000Z",
+   "line": 76.5,
+   "over_odds": -110,
+   "under_odds": -120
   }
  ]
 }
