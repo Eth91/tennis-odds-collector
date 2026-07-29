@@ -31,10 +31,7 @@ jobs:
         env:
           DB_PATH: ${{ github.workspace }}/odds.sqlite
         run: python collect.py || echo "tennis collect skipped"   # never let one scrape kill the run
-      - name: collect mlb props (pinnacle)
-        env:
-          MLB_DB: ${{ github.workspace }}/mlb_kprops.sqlite
-        run: python mlb_collect.py || echo "mlb collect skipped"
+
       - name: collect wnba props (pinnacle)
         env:
           WNBA_DB: ${{ github.workspace }}/wnba_props.sqlite
@@ -67,26 +64,13 @@ jobs:
       # GG esports REMOVED 2026-07-19 (user: "remove GG esports completely — don't care to bet on
       # it and it's not that profitable"). Collector step deleted; gg_collect/gg_timing/gg.sqlite
       # left dormant in-repo but never run.
-      - name: "collect mlb totals (benched, no push)"
-        env:
-          FD_DB: ${{ github.workspace }}/fanduel_props.sqlite
-          MLB_TOTALS_DB: ${{ github.workspace }}/mlb_totals.sqlite
-        run: python mlb_totals.py || echo "mlb totals skipped"
+
       - name: "collect nfl totals (dormant until Sept; benched, no push)"
         env:
           FD_DB: ${{ github.workspace }}/fanduel_props.sqlite
           NFL_TOTALS_DB: ${{ github.workspace }}/nfl_totals.sqlite
         run: python nfl_totals.py || echo "nfl totals skipped"
-      - name: pitcher-K alt-ladder line-shop sheet
-        run: python k_ladder.py || echo "k_ladder skipped"
-      - name: "pitcher-prop edge paper-tracker (K over>=6.5 / outs under<=16.5, OOS forward)"
-        run: python k_paper.py || echo "k_paper skipped"
-      - name: "walks paper-tracker (DK Walks Allowed O/U unders, OOS forward — unvalidated)"
-        run: python walks_paper.py || echo "walks_paper skipped"
-      - name: "MLB outs-under model notifications (ntfy, same format as WNBA)"
-        env:
-          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
-        run: python mlb_notify.py || echo "mlb notify skipped"
+
       - name: update bet ledger (flag / CLV / grade / P&L)
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
