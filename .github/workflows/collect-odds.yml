@@ -1,5 +1,8 @@
 name: collect-odds
-# Serverless free collector: GitHub runs this on a schedule (no server, no billing).
+# THIN SHIM (2026-07-29): everything that CAN run on the Oracle VM now does.
+# What is left is only what Oracle physically cannot reach: DraftKings, which
+# Akamai 403s from Oracle IPs but serves normally to Azure runners. The delta
+# export is how those lines reach the VM (lines_ingest.py).
 # Commits the growing odds.sqlite back to the repo each run.
 #
 # Caveats: scheduled runs are best-effort (GitHub may delay them a few minutes);
@@ -27,48 +30,17 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install requests curl_cffi
-      - name: collect tennis
-        env:
-          DB_PATH: ${{ github.workspace }}/odds.sqlite
-        run: python collect.py || echo "tennis collect skipped"   # never let one scrape kill the run
-
-      - name: collect fanduel props (mlb + wnba + tennis)
-        env:
-          FD_DB: ${{ github.workspace }}/fanduel_props.sqlite
-        run: python fd_collect.py || echo "fanduel collect skipped (endpoint may have changed)"
-      - name: collect betmgm props (line-shopping book #3, ready for AB 7/13)
-        env:
-          FD_DB: ${{ github.workspace }}/fanduel_props.sqlite
-        run: python betmgm_collect.py || echo "betmgm collect skipped"
       - name: collect draftkings props (2nd soft book, best-price line shopping)
         env:
           FD_DB: ${{ github.workspace }}/fanduel_props.sqlite
-        run: python dk_collect.py || echo "draftkings collect skipped"
+        run: python dk_collect.py --wnba || echo "draftkings collect skipped"
       # BENCHED 2026-07-09 (focus = TT + WNBA): esports/MLB/NFL still COLLECT (data + grading
       # of existing bets preserved) but no NTFY_TOPIC -> no phone pushes. Un-bench = restore
       # NTFY_TOPIC here and drop --no-flags / ACTIVE_SPORTS.
       # NBA port P1 (2026-07-16): injury feed plumbing — offseason output is stale
       # season-enders (harmless); proves the feed long before opening night.
-      - name: "NBA injuries (P1 plumbing)"
-        run: python nba_injuries.py || echo "nba injuries skipped"
       # NBA flag-time engine (paper): injuries x WOWY priors x live FD/DK lines -> ledger.
       # Offseason = clean no-op (no games / no posted props); armed for October.
-      - name: "NBA flags (paper, WOWY engine)"
-        run: python nba_flags.py || echo "nba flags skipped"
-      # GG esports REMOVED 2026-07-19 (user: "remove GG esports completely — don't care to bet on
-      # it and it's not that profitable"). Collector step deleted; gg_collect/gg_timing/gg.sqlite
-      # left dormant in-repo but never run.
-
-      - name: "collect nfl totals (dormant until Sept; benched, no push)"
-        env:
-          FD_DB: ${{ github.workspace }}/fanduel_props.sqlite
-          NFL_TOTALS_DB: ${{ github.workspace }}/nfl_totals.sqlite
-        run: python nfl_totals.py || echo "nfl totals skipped"
-
-      - name: update bet ledger (flag / CLV / grade / P&L)
-        env:
-          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
-        run: python bet_ledger.py || echo "bet ledger skipped"
       - name: export line delta
         # 2026-07-25: Actions NO LONGER commits the 100MB fanduel_props.sqlite (three-writer blob
         # war -> 18h line freeze; even a 10-try push loop lost every race). Instead: export THIS
@@ -89,9 +61,7 @@ jobs:
         run: |
           git config user.name "odds-bot"
           git config user.email "odds-bot@users.noreply.github.com"
-          for f in odds.sqlite mlb_kprops.sqlite wnba_props.sqlite lines_delta.json \
-                 wnba_edge_report.md bet_ledger.sqlite bet_ledger_report.md bet_filters.json k_ladder.md mlb_totals.sqlite nfl_totals.sqlite \
-                 k_paper.sqlite k_paper_ids.json mlb_notified.json walks_paper.sqlite; do
+          for f in lines_delta.json; do
             git add -f "$f" 2>/dev/null || true
           done
           git commit -m "odds snapshot [skip ci]" -q || { echo "no change"; exit 0; }
