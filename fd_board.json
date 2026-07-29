@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T21:31:32Z",
+ "captured_at": "2026-07-29T21:35:49Z",
  "matches": [
   {
    "event_id": 35881427,
@@ -8,9 +8,9 @@
    "p1_norm": "kacper kwiatkowski",
    "p2_norm": "andriej fomin",
    "open_date": "2026-07-29T21:20:00.000Z",
-   "line": 80.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 98.5,
+   "over_odds": 105,
+   "under_odds": -145
   },
   {
    "event_id": 35881429,
@@ -19,7 +19,7 @@
    "p1_norm": "patryk jendrzejewski",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-29T21:25:00.000Z",
-   "line": 78.5,
+   "line": 96.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,9 +30,9 @@
    "p1_norm": "miroslaw warzecha",
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-07-29T21:30:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 86.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35881444,
@@ -42,8 +42,8 @@
    "p2_norm": "adrian burkacki",
    "open_date": "2026-07-29T21:35:00.000Z",
    "line": 70.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35881454,
@@ -88,6 +88,17 @@
    "line": 78.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35881471,
+   "p1": "Rafal Niemiec",
+   "p2": "Jakub Pruszkowski",
+   "p1_norm": "rafal niemiec",
+   "p2_norm": "jakub pruszkowski",
+   "open_date": "2026-07-29T22:00:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
