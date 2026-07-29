@@ -329,6 +329,6 @@ while true; do i=$((i+1))
       echo "[$(date +%H:%M)] TRIGGERED full scan (fresh out / new lines)"; fullscan
     fi
 if [ $((cold_i % 8)) -eq 1 ]; then echo "[$(date +%H:%M)] full scan (cold iter $cold_i)"; fullscan; fi
-    push; sleep 60
+    push; wait_trig 60
   fi
 done
