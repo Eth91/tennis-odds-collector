@@ -183,3 +183,4 @@ watch|2026-07-28|Olivia Nelson-Ododa|rebounds|6.5
 watch|2026-07-30|Breanna Stewart|assists|3.5
 watch|2026-07-30|Jonquel Jones|assists|1.5
 watch|2026-07-30|Jonquel Jones|assists|2.5
+watch|2026-07-30|Kamilla Cardoso|pra|23.5
