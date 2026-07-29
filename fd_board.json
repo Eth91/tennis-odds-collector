@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T20:21:38Z",
+ "captured_at": "2026-07-29T20:29:01Z",
  "matches": [
   {
    "event_id": 35881320,
@@ -8,9 +8,9 @@
    "p1_norm": "miroslaw warzecha",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-07-29T20:20:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 80.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35881321,
@@ -19,9 +19,9 @@
    "p1_norm": "krzysztof juszczyk",
    "p2_norm": "wojciech pytlas",
    "open_date": "2026-07-29T20:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 72.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35881346,
