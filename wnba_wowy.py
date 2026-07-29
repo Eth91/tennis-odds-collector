@@ -66,13 +66,22 @@ def flush_glog_cache():
     except OSError:
         pass
 H = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
+
+# Pooled session (2026-07-29 latency work): a fresh requests.get() per call rebuilt the SSL
+# context and re-read the CA bundle every time — profiled at 166ms of load_verify_locations
+# PER CALL, ~4.3s across one scan. One Session keeps the connection alive to ESPN and builds
+# that context once. Pool sized for the per-player fan-out.
+_SESSION = requests.Session()
+_SESSION.mount("https://", requests.adapters.HTTPAdapter(
+    pool_connections=4, pool_maxsize=8, max_retries=0))
+
 _PLAYERS_CACHE = {}
 
 
 def _get(url):
     for attempt in range(3):
         try:
-            r = requests.get(url, headers=H, timeout=30)
+            r = _SESSION.get(url, headers=H, timeout=30)
             if r.status_code == 200:
                 return r.json()
         except requests.RequestException:
@@ -149,6 +158,10 @@ def game_log(pid, max_age_h=6.0):
                             "result": m.get("gameResult", "")})   # 'W'/'L' once FINAL, '' if not
     _glog_load()[str(pid)] = {
         "fetched_at": _dt.datetime.now(_dt.timezone.utc).isoformat(), "log": out}
+    # Throttle lives HERE, next to the request that earns it. It used to sit in players()
+    # and fired once per player even when this function returned a cached log without
+    # touching the network — ~10s of sleeping against nothing on a full roster sweep.
+    time.sleep(0.05)
     return out
 
 
@@ -182,7 +195,6 @@ def players():
                          "pts": st.mean([g["pts"] for g in log]),
                          "reb": st.mean([g["reb"] for g in log]),
                          "ast": st.mean([g["ast"] for g in log])}
-            time.sleep(0.05)
     _PLAYERS_CACHE.update(out)
     return out
 

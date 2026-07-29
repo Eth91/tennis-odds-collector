@@ -677,12 +677,21 @@ def double_double_rate(log, proj_min, w=None):
 
 ESPN = "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba"
 EH = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
+
+# Pooled session (2026-07-29 latency work): a fresh requests.get() per call rebuilt the SSL
+# context and re-read the CA bundle every time — profiled at 166ms of load_verify_locations
+# PER CALL, ~4.3s across one scan. One Session keeps the connection alive to ESPN and builds
+# that context once. Pool sized for the per-player fan-out.
+_SESSION = requests.Session()
+_SESSION.mount("https://", requests.adapters.HTTPAdapter(
+    pool_connections=4, pool_maxsize=8, max_retries=0))
+
 # players() and the scoreboard are both ESPN now — abbrevs already match, no remap.
 TEAM_FIX = {}
 
 
 def _espn(path):
-    r = requests.get(f"{ESPN}/{path}", headers=EH, timeout=20)
+    r = _SESSION.get(f"{ESPN}/{path}", headers=EH, timeout=20)
     return r.json() if r.status_code == 200 else {}
 
 
