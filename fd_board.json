@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T10:41:44Z",
+ "captured_at": "2026-07-29T10:45:49Z",
  "matches": [
   {
    "event_id": 35879563,
@@ -8,9 +8,9 @@
    "p1_norm": "marcin jadczyk",
    "p2_norm": "krystian kolodziej",
    "open_date": "2026-07-29T10:25:00.000Z",
-   "line": 85.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 72.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35879570,
@@ -19,9 +19,9 @@
    "p1_norm": "kacper glazowski",
    "p2_norm": "adam linek",
    "open_date": "2026-07-29T10:30:00.000Z",
-   "line": 55.5,
-   "over_odds": 100,
-   "under_odds": -140
+   "line": 70.5,
+   "over_odds": -165,
+   "under_odds": 120
   },
   {
    "event_id": 35879574,
@@ -30,7 +30,7 @@
    "p1_norm": "przemyslaw perzynski",
    "p2_norm": "kamil rudomina",
    "open_date": "2026-07-29T10:35:00.000Z",
-   "line": 88.5,
+   "line": 95.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -44,6 +44,17 @@
    "line": 84.5,
    "over_odds": -115,
    "under_odds": -120
+  },
+  {
+   "event_id": 35879560,
+   "p1": "Rafal Gajda",
+   "p2": "Sebastian Juzek",
+   "p1_norm": "rafal gajda",
+   "p2_norm": "sebastian juzek",
+   "open_date": "2026-07-29T10:40:00.000Z",
+   "line": 86.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35879587,
