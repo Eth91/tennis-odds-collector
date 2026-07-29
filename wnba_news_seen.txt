@@ -256,6 +256,7 @@ rw|647|Plays well off bench
 rw|678|Closing in on return
 rw|678|Hopeful for season debut Thursday
 rw|703|Another quiet effort
+rw|720|Lacking clear role
 rw|733|Swats four shots in loss
 rw|735|Limited production in return
 rw|735|Notches 10 points
@@ -342,6 +343,7 @@ rw|980|Huge two-way showing in loss
 rw|980|Questionable against Fever
 rw|980|Won't play Tuesday
 rw|981|Nearly double-doubles
+rw|981|Sees 25 minutes in win
 rw|982|Leaves for locker room
 rw|982|Rolls up 21 points in road loss
 rw|982|To undergo season-ending surgery
