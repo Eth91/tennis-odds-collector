@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-29T06:09:46Z",
+ "captured_at": "2026-07-29T06:13:46Z",
  "matches": [
-  {
-   "event_id": 35879130,
-   "p1": "Adrian Wiecek",
-   "p2": "Grzegorz Felkel",
-   "p1_norm": "adrian wiecek",
-   "p2_norm": "grzegorz felkel",
-   "open_date": "2026-07-29T05:40:00.000Z",
-   "line": 98.5,
-   "over_odds": 130,
-   "under_odds": -180
-  },
   {
    "event_id": 35879139,
    "p1": "Rafal Gajda",
@@ -19,9 +8,9 @@
    "p1_norm": "rafal gajda",
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-07-29T05:55:00.000Z",
-   "line": 91.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 94.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35879141,
@@ -30,20 +19,9 @@
    "p1_norm": "kamil rudomina",
    "p2_norm": "stapor rafal",
    "open_date": "2026-07-29T06:00:00.000Z",
-   "line": 88.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35879142,
-   "p1": "Michal Paszkiewicz",
-   "p2": "Marian Lebek",
-   "p1_norm": "michal paszkiewicz",
-   "p2_norm": "marian lebek",
-   "open_date": "2026-07-29T06:00:00.000Z",
-   "line": 49.5,
-   "over_odds": 100,
-   "under_odds": -140
+   "line": 72.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35879150,
@@ -52,7 +30,7 @@
    "p1_norm": "artur szoltysek",
    "p2_norm": "kuba golaszewski",
    "open_date": "2026-07-29T06:05:00.000Z",
-   "line": 81.5,
+   "line": 64.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -64,8 +42,8 @@
    "p2_norm": "kacper petas",
    "open_date": "2026-07-29T06:05:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35879152,
@@ -74,9 +52,9 @@
    "p1_norm": "michal durda",
    "p2_norm": "kamil kowalski",
    "open_date": "2026-07-29T06:05:00.000Z",
-   "line": 63.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 68.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35879168,
@@ -96,9 +74,9 @@
    "p1_norm": "adam linek",
    "p2_norm": "michal minda",
    "open_date": "2026-07-29T06:25:00.000Z",
-   "line": 82.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 81.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35879170,
@@ -118,9 +96,9 @@
    "p1_norm": "mateusz trela",
    "p2_norm": "mariusz zwolinski",
    "open_date": "2026-07-29T06:30:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35879173,
