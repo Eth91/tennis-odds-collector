@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-29T14:44:46Z",
+ "captured_at": "2026-07-29T14:50:14Z",
  "matches": [
-  {
-   "event_id": 35880243,
-   "p1": "Grzegorz Felkel",
-   "p2": "Grzegorz Adamiak",
-   "p1_norm": "grzegorz felkel",
-   "p2_norm": "grzegorz adamiak",
-   "open_date": "2026-07-29T14:35:00.000Z",
-   "line": 58.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
   {
    "event_id": 35880252,
    "p1": "Mariusz Zwolinski",
@@ -19,9 +8,9 @@
    "p1_norm": "mariusz zwolinski",
    "p2_norm": "artur szoltysek",
    "open_date": "2026-07-29T14:40:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 51.5,
+   "over_odds": 105,
+   "under_odds": -145
   },
   {
    "event_id": 35880258,
@@ -30,9 +19,9 @@
    "p1_norm": "jakub kaczmarek",
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-07-29T14:45:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 84.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35880290,
