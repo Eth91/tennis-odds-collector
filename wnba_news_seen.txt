@@ -211,6 +211,7 @@ rw|577|Out again Wednesday
 rw|577|Probable for Wednesday
 rw|577|Questionable for Wednesday
 rw|577|Unlikely to play Monday
+rw|578|Plays well off bench
 rw|579|Fares well in loss
 rw|579|Not listed on injury report
 rw|579|Paces Portland in loss

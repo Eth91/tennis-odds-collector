@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-29T15:25:50Z",
+ "captured_at": "2026-07-29T15:30:59Z",
  "matches": [
-  {
-   "event_id": 35880317,
-   "p1": "Rafal Gajda",
-   "p2": "Kamil Smolka",
-   "p1_norm": "rafal gajda",
-   "p2_norm": "kamil smolka",
-   "open_date": "2026-07-29T15:05:00.000Z",
-   "line": 88.5,
-   "over_odds": -180,
-   "under_odds": 125
-  },
   {
    "event_id": 35880339,
    "p1": "Marcin Kowalczyk",
@@ -19,9 +8,9 @@
    "p1_norm": "marcin kowalczyk",
    "p2_norm": "adrian fabis",
    "open_date": "2026-07-29T15:25:00.000Z",
-   "line": 80.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 73.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35880340,
@@ -30,7 +19,7 @@
    "p1_norm": "lukasz pietraszko",
    "p2_norm": "patryk jendrzejewski",
    "open_date": "2026-07-29T15:25:00.000Z",
-   "line": 76.5,
+   "line": 72.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -41,9 +30,9 @@
    "p1_norm": "kacper kwiatkowski",
    "p2_norm": "andriej fomin",
    "open_date": "2026-07-29T15:25:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 86.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35880345,
@@ -52,9 +41,9 @@
    "p1_norm": "sebastian juzek",
    "p2_norm": "jakub kaczmarek",
    "open_date": "2026-07-29T15:30:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35880348,
@@ -86,6 +75,17 @@
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-29T15:50:00.000Z",
    "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35880382,
+   "p1": "Schaniel Krzysztof",
+   "p2": "Krzysztof Hetnar",
+   "p1_norm": "schaniel krzysztof",
+   "p2_norm": "krzysztof hetnar",
+   "open_date": "2026-07-29T15:55:00.000Z",
+   "line": 77.5,
    "over_odds": -116,
    "under_odds": -116
   }
