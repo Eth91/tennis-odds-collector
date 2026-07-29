@@ -215,103 +215,168 @@ def _archive_wind(lat, lon, day):
         return None
 
 
-def _course_latlon(tid, cache_key="courses"):
-    """(lat, lon) for a tournament's host course: courseStats name -> open-meteo geocode."""
-    import pga_birdies as B
+def _espn_event_id(tname):
+    """ESPN event_id for a harvested tournament name (we store these in `rounds`)."""
+    con = sqlite3.connect(DB)
+    like = "%" + str(tname or "")[:14].lower() + "%"
+    r = con.execute("SELECT event_id, MIN(date) FROM rounds WHERE LOWER(event) LIKE ? "
+                    "GROUP BY event_id ORDER BY MIN(date) DESC LIMIT 1", (like,)).fetchone()
+    con.close()
+    return (r[0], r[1]) if r else (None, None)
+
+
+def _walk_key(o, key, out):
+    if isinstance(o, dict):
+        for k, v in o.items():
+            if k == key and v:
+                out.append(v)
+            _walk_key(v, key, out)
+    elif isinstance(o, list):
+        for v in o:
+            _walk_key(v, key, out)
+
+
+def _course_latlon(tname, cache_key="latlon"):
+    """(lat, lon) via ESPN's venue chain, then geocode the CITY.
+
+    Geocoding the course NAME fails (geocoders index places, not courses), so we resolve
+    the venue's city/state from ESPN's core API — the same chain pga_field already uses for
+    the live event — and geocode that.
+    """
     c = _cache()
     store = c.get(cache_key) or {}
-    if str(tid) in store:
-        return tuple(store[str(tid)])
-    name = None
-    try:
-        d = B.gql('query C(' + chr(36) + 't: ID!) {courseStats(tournamentId: ' + chr(36)
-                  + 't) {courses {courseName hostCourse}}}', {"t": tid})
-        cs = ((d.get("data") or {}).get("courseStats") or {}).get("courses") or []
-        host = next((x for x in cs if x.get("hostCourse")), cs[0] if cs else None)
-        name = (host or {}).get("courseName")
-    except Exception:                                              # noqa: BLE001
-        pass
-    if not name:
-        return None, None
-    try:
-        u = ("https://geocoding-api.open-meteo.com/v1/search?count=1&name="
-             + urllib.request.quote(name))
-        g = json.load(urllib.request.urlopen(
-            urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"}), timeout=25))
-        r0 = (g.get("results") or [{}])[0]
-        lat, lon = r0.get("latitude"), r0.get("longitude")
-    except Exception:                                              # noqa: BLE001
-        return None, None
-    if lat is not None:
-        store[str(tid)] = [lat, lon]
-        c[cache_key] = store
-        _save(c)
+    k = str(tname)
+    if k in store:
+        v = store[k]
+        return (v[0], v[1]) if v else (None, None)
+    eid, _d = _espn_event_id(tname)
+    lat = lon = None
+    if eid:
+        try:
+            core = json.load(urllib.request.urlopen(urllib.request.Request(
+                "https://sports.core.api.espn.com/v2/sports/golf/leagues/pga/events/%s" % eid,
+                headers={"User-Agent": "Mozilla/5.0"}), timeout=25))
+            refs = []
+            _walk_key(core, "$ref", refs)
+            vref = next((str(r) for r in refs if "/venues/" in str(r)), None)
+            if vref:
+                ven = json.load(urllib.request.urlopen(urllib.request.Request(
+                    vref.replace("http://", "https://"),
+                    headers={"User-Agent": "Mozilla/5.0"}), timeout=25))
+                la, lo = [], []
+                _walk_key(ven, "latitude", la)
+                _walk_key(ven, "longitude", lo)
+                if la and lo:
+                    lat, lon = float(la[0]), float(lo[0])
+                else:
+                    a = ven.get("address") or {}
+                    city = a.get("city")
+                    if city:
+                        q = city + ("," + a["state"] if a.get("state") else "")
+                        g = json.load(urllib.request.urlopen(urllib.request.Request(
+                            "https://geocoding-api.open-meteo.com/v1/search?count=1&name="
+                            + urllib.request.quote(q.split(",")[0]),
+                            headers={"User-Agent": "Mozilla/5.0"}), timeout=25))
+                        r0 = (g.get("results") or [{}])[0]
+                        lat, lon = r0.get("latitude"), r0.get("longitude")
+        except Exception:                                          # noqa: BLE001
+            pass
+    store[k] = [lat, lon] if lat is not None else None
+    c[cache_key] = store
+    _save(c)
     return lat, lon
 
 
+def _archive_wind_range(lat, lon, d0, d1):
+    """{date: max wind km/h} over a date range — one call covers a whole tournament week."""
+    u = ("https://archive-api.open-meteo.com/v1/archive?latitude=%s&longitude=%s"
+         "&start_date=%s&end_date=%s&daily=wind_speed_10m_max&timezone=UTC"
+         % (lat, lon, d0, d1))
+    try:
+        d = json.load(urllib.request.urlopen(
+            urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"}), timeout=30))
+        dd = d.get("daily") or {}
+        return dict(zip(dd.get("time") or [], dd.get("wind_speed_10m_max") or []))
+    except Exception:                                              # noqa: BLE001
+        return {}
+
+
 def fit_wind(verbose=True, refit=False):
-    """Fit birdie_factor ~ 1 + w*(wind - WIND_REF) on harvested events using REAL archived
-    wind at EACH event's own course. A non-negative coefficient is REJECTED (wind does not
-    make golf easier) and replaced by a small negative default flagged assumed=True."""
+    """WITHIN-EVENT fit of birdie rate vs wind. Demeaning inside each event removes course
+    difficulty, par mix and field strength as confounders, so the surviving slope is
+    weather. A non-negative slope is REJECTED (wind cannot make golf easier)."""
     c = _cache()
     if "wind" in c and not refit:
         return c["wind"]
-    import pga_birdies as B
     con = sqlite3.connect(DB)
-    evs = con.execute("SELECT tid, tname FROM birdie_rounds GROUP BY tid").fetchall()
-    rows = con.execute(
-        "SELECT tid, SUM(p3h), SUM(p3b), SUM(p4h), SUM(p4b), SUM(p5h), SUM(p5b) "
-        "FROM birdie_rounds GROUP BY tid").fetchall()
+    per = con.execute(
+        "SELECT tid, tname, rnd, SUM(p3h+p4h+p5h), SUM(p3b+p4b+p5b) "
+        "FROM birdie_rounds GROUP BY tid, rnd ORDER BY tid, rnd").fetchall()
     con.close()
-    agg = {r[0]: r[1:] for r in rows}
-    _, fr = B.rates()
-    xs, ys, seen = [], [], []
-    for tid, tname in evs:
-        a3, b3, a4, b4, a5, b5 = agg.get(tid, (0,) * 6)
-        holes = a3 + a4 + a5
-        if not holes:
+    by_ev = {}
+    for tid, tname, rnd, holes, birds in per:
+        if holes and rnd and 1 <= rnd <= 4:
+            by_ev.setdefault((tid, tname), []).append((rnd, birds / holes))
+    xs, ys, used = [], [], 0
+    for (tid, tname), rr in by_ev.items():
+        if len(rr) < 3:
             continue
-        obs = (b3 + b4 + b5) / holes
-        exp = (a3 * fr[3] + a4 * fr[4] + a5 * fr[5]) / holes
-        if exp <= 0:
-            continue
-        lat, lon = _course_latlon(tid)
+        lat, lon = _course_latlon(tname)
         if lat is None:
             continue
-        con = sqlite3.connect(DB)
-        d0 = con.execute("SELECT MIN(date), MAX(date) FROM rounds WHERE LOWER(event) LIKE ?",
-                         ("%" + (tname or "")[:14].lower() + "%",)).fetchone()
-        con.close()
-        if not d0 or not d0[0]:
+        _eid, d0 = _espn_event_id(tname)
+        if not d0:
             continue
-        w = _archive_wind(lat, lon, d0[0])
-        if w is None:
+        try:
+            start = dt.date.fromisoformat(d0[:10])
+        except ValueError:
             continue
-        xs.append(w)
-        ys.append(obs / exp)
-        seen.append((tname[:26], round(w, 1), round(obs / exp, 3)))
+        wm = _archive_wind_range(lat, lon, start.isoformat(),
+                                 (start + dt.timedelta(days=5)).isoformat())
+        if not wm:
+            continue
+        pairs = []
+        for rnd, rate in rr:
+            day = (start + dt.timedelta(days=rnd - 1)).isoformat()
+            w = wm.get(day)
+            if w is not None:
+                pairs.append((w, rate))
+        if len(pairs) < 3:
+            continue
+        mw = st.mean(p[0] for p in pairs)
+        mr = st.mean(p[1] for p in pairs)
+        if mr <= 0:
+            continue
+        for w, rate in pairs:
+            xs.append(w - mw)                 # within-event wind deviation
+            ys.append(rate / mr - 1.0)        # within-event relative birdie deviation
+        used += 1
+        if verbose:
+            print("     %-28s %d rounds, wind %.0f-%.0f km/h"
+                  % (tname[:28], len(pairs), min(p[0] for p in pairs),
+                     max(p[0] for p in pairs)))
     out = None
-    if len(xs) >= 6:
+    if len(xs) >= 20:
         mx, my = st.mean(xs), st.mean(ys)
         den = sum((x - mx) ** 2 for x in xs)
         b = (sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / den) if den else 0.0
         sx, sy = (st.pstdev(xs) or 1), (st.pstdev(ys) or 1)
         r = (sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / len(xs)) / (sx * sy)
         if verbose:
-            for t, w_, f_ in sorted(seen, key=lambda z: z[1]):
-                print(f"     {t:<28} wind {w_:>5} km/h  factor {f_:.3f}")
-            print(f"  fit: n={len(xs)} coefficient {b:+.5f}/km/h  r={r:+.2f}")
+            print("  WITHIN-EVENT fit: %d events, %d round-observations" % (used, len(xs)))
+            print("     slope %+.5f per km/h   r=%+.3f" % (b, r))
         if b < 0:
-            out = {"w": b, "n": len(xs), "assumed": False, "r": r}
+            out = {"w": b, "n": len(xs), "events": used, "assumed": False, "r": r,
+                   "design": "within-event"}
         else:
             if verbose:
-                print("  REJECTED: non-negative coefficient (wind cannot make golf easier)"
-                      " -> pinning a small negative default, flagged assumed")
-            out = {"w": -0.003, "n": len(xs), "assumed": True, "r": r}
+                print("  REJECTED: non-negative slope -> conservative default kept")
+            out = {"w": -0.003, "n": len(xs), "events": used, "assumed": True, "r": r,
+                   "design": "within-event(rejected)"}
     else:
         if verbose:
-            print(f"  fit_wind: only {len(xs)} usable events -> conservative default")
-        out = {"w": -0.003, "n": len(xs), "assumed": True}
+            print("  fit_wind: only %d observations -> conservative default" % len(xs))
+        out = {"w": -0.003, "n": len(xs), "events": used, "assumed": True}
     c["wind"] = out
     _save(c)
     return out
