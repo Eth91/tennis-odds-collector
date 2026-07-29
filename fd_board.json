@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T16:48:16Z",
+ "captured_at": "2026-07-29T16:53:31Z",
  "matches": [
   {
    "event_id": 35880686,
@@ -8,9 +8,9 @@
    "p1_norm": "kuba golaszewski",
    "p2_norm": "kacper marchlewski",
    "open_date": "2026-07-29T16:35:00.000Z",
-   "line": 89.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 92.5,
+   "over_odds": -145,
+   "under_odds": 105
   },
   {
    "event_id": 35880761,
@@ -19,9 +19,9 @@
    "p1_norm": "kamil smolka",
    "p2_norm": "krzysztof hetnar",
    "open_date": "2026-07-29T16:40:00.000Z",
-   "line": 70.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 71.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35880835,
@@ -30,9 +30,9 @@
    "p1_norm": "pawel gasiorski",
    "p2_norm": "wojciech pytlas",
    "open_date": "2026-07-29T16:50:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 82.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35880841,
@@ -85,9 +85,20 @@
    "p1_norm": "krzysztof juszczyk",
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-29T17:10:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 71.5,
+   "over_odds": -120,
+   "under_odds": -110
+  },
+  {
+   "event_id": 35880876,
+   "p1": "Lukasz Pietraszko",
+   "p2": "Jakub Zochniak",
+   "p1_norm": "lukasz pietraszko",
+   "p2_norm": "jakub zochniak",
+   "open_date": "2026-07-29T17:20:00.000Z",
+   "line": 79.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
