@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T19:32:52Z",
+ "captured_at": "2026-07-29T19:38:15Z",
  "matches": [
   {
    "event_id": 35881166,
@@ -8,20 +8,9 @@
    "p1_norm": "jakub pruszkowski",
    "p2_norm": "pawel gasiorski",
    "open_date": "2026-07-29T19:10:00.000Z",
-   "line": 104.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
-  {
-   "event_id": 35881179,
-   "p1": "Adrian Fabis",
-   "p2": "Kacper Marchlewski",
-   "p1_norm": "adrian fabis",
-   "p2_norm": "kacper marchlewski",
-   "open_date": "2026-07-29T19:20:00.000Z",
-   "line": 74.5,
-   "over_odds": 110,
-   "under_odds": -155
+   "line": 107.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35881197,
@@ -32,7 +21,7 @@
    "open_date": "2026-07-29T19:30:00.000Z",
    "line": 77.5,
    "over_odds": -115,
-   "under_odds": -115
+   "under_odds": -120
   },
   {
    "event_id": 35881204,
@@ -41,9 +30,9 @@
    "p1_norm": "oskar jadach",
    "p2_norm": "wojciech pytlas",
    "open_date": "2026-07-29T19:35:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35881235,
@@ -74,9 +63,53 @@
    "p1_norm": "janus slawomir",
    "p2_norm": "jerzy michalik",
    "open_date": "2026-07-29T19:55:00.000Z",
-   "line": 77.5,
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35881273,
+   "p1": "Mariusz Koczyba",
+   "p2": "Pawel Gasiorski",
+   "p1_norm": "mariusz koczyba",
+   "p2_norm": "pawel gasiorski",
+   "open_date": "2026-07-29T20:00:00.000Z",
+   "line": 71.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35881285,
+   "p1": "Adrian Eliasz",
+   "p2": "Kacper Marchlewski",
+   "p1_norm": "adrian eliasz",
+   "p2_norm": "kacper marchlewski",
+   "open_date": "2026-07-29T20:05:00.000Z",
+   "line": 78.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35881286,
+   "p1": "Jakub Kuzmicz",
+   "p2": "Jakub Zochniak",
+   "p1_norm": "jakub kuzmicz",
+   "p2_norm": "jakub zochniak",
+   "open_date": "2026-07-29T20:05:00.000Z",
+   "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35881287,
+   "p1": "Michal Machelski",
+   "p2": "Kazimierz Rybak",
+   "p1_norm": "michal machelski",
+   "p2_norm": "kazimierz rybak",
+   "open_date": "2026-07-29T20:05:00.000Z",
+   "line": 71.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
