@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T15:00:27Z",
+ "captured_at": "2026-07-29T15:04:30Z",
  "matches": [
   {
    "event_id": 35880290,
@@ -8,9 +8,9 @@
    "p1_norm": "mateusz rutkowski",
    "p2_norm": "jakub zochniak",
    "open_date": "2026-07-29T15:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 79.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35880291,
@@ -19,9 +19,9 @@
    "p1_norm": "michal skorski",
    "p2_norm": "kacper marchlewski",
    "open_date": "2026-07-29T15:00:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 78.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35880292,
@@ -30,9 +30,9 @@
    "p1_norm": "kamil delikatny",
    "p2_norm": "kazimierz rybak",
    "open_date": "2026-07-29T15:00:00.000Z",
-   "line": 73.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 80.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35880317,
@@ -88,6 +88,17 @@
    "line": 75.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35880345,
+   "p1": "Sebastian Juzek",
+   "p2": "Jakub Kaczmarek",
+   "p1_norm": "sebastian juzek",
+   "p2_norm": "jakub kaczmarek",
+   "open_date": "2026-07-29T15:30:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
