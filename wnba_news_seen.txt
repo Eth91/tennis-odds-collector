@@ -139,6 +139,7 @@ rw|297|Generates 29 points against Chicago
 rw|297|Rolls up 29 points against Sky
 rw|309|Another single-digit scoring effort
 rw|309|Just misses double-double
+rw|309|Plays well in loss
 rw|326|Another double-double Wednesday
 rw|326|Another double-double in loss
 rw|326|Misses practice with illness
@@ -196,6 +197,7 @@ rw|485|Hits game-winning shot at buzzer
 rw|488|Double-double in win
 rw|488|Fares well in win
 rw|498|Strong effort in loss
+rw|498|Strong line in loss
 rw|539|Another 30-point performance
 rw|539|Drops 28 points in ASG loss
 rw|539|Nets 28 points in win
