@@ -73,6 +73,11 @@ def position_compat(bene_pos, out_positions):
                 for op in out_positions), default=0.5)
 
 
+# How many prior games with the EXACT absence set before we call it priced. Below this the
+# combination is novel -> a stale cascade still runs (2026-07-28 combination-novelty rule).
+COMBO_PRICED_N = 6
+
+
 def collect():
     """Returns (alerts, preds): alerts are ntfy message tuples, preds are the full
     prediction rows logged to the ledger so every flagged spot gets graded and fed back
@@ -172,9 +177,30 @@ def collect():
         except (ValueError, KeyError, IndexError):
             all_stale = False
         if all_stale:
-            print(f"stale-vacancy cascade skipped: {team} {slate_date} "
-                  f"({', '.join(nm for nm, _ in outs)})")
-            continue
+            # COMBINATION NOVELTY (2026-07-28, user: "the unique combo of players out
+            # matters"). Per-player recency is the wrong question -- what the market prices
+            # is the SET. NY: 12 games without Fiebich+Sabally (priced) vs 4 without
+            # Fiebich+Sabally+Johannes (not). So only skip when the books have had the reps
+            # with THIS exact absence set; a rare combination is unpriced no matter how long
+            # each individual has been out.
+            _tdates = set()
+            for _tn, _tv in pl.items():
+                if _tv.get("team") != team:
+                    continue
+                for _g in glog(_tv["id"]) or []:
+                    _tdates.add(_g["date"][:10])
+            _absent = []
+            for _ol in out_logs:
+                _absent.append({g["date"][:10] for g in _ol if (g.get("min") or 0) > 0})
+            _n_combo = sum(1 for d in _tdates
+                           if d < slate_date and all(d not in a for a in _absent))
+            if _n_combo >= COMBO_PRICED_N:
+                print(f"stale-vacancy cascade skipped: {team} {slate_date} "
+                      f"({', '.join(nm for nm, _ in outs)}) — combo seen {_n_combo}x, priced")
+                continue
+            print(f"stale outs but NOVEL combination: {team} {slate_date} "
+                  f"({', '.join(nm for nm, _ in outs)}) — only {_n_combo} prior game(s) "
+                  f"with this exact set, running cascade")
         out_label = "+".join(_short(nm) for nm, _ in outs)      # "C.Clark+A.Boston"
         out_full = ", ".join(nm for nm, _ in outs)
         # combined vacated pool = all the out players' production is up for grabs tonight
