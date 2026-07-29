@@ -10,6 +10,7 @@ at://did:plc:p7aohoffitierwrxuud3sptd/app.bsky.feed.post/3mrsvyvoicc2i
 at://did:plc:rp4ituzorpuyyk5wmaitxx4d/app.bsky.feed.post/3mrqtcr3g522y
 at://did:plc:rwx7lnjebqrm6cozzjqobqvd/app.bsky.feed.post/3mr3umardoc2q
 at://did:plc:rwx7lnjebqrm6cozzjqobqvd/app.bsky.feed.post/3mrbgxtiusk2v
+at://did:plc:tlmzz5zhk4vlbutyjsvj2hso/app.bsky.feed.post/3mrswfklbic2a
 at://did:plc:uf6566ur4zv2h7yl4les2ygh/app.bsky.feed.post/3mr3wwnlyfh2c
 at://did:plc:ugoqmdaxl4utnj4csujswwlj/app.bsky.feed.post/3mrb4jesr3i2v
 at://did:plc:ugoqmdaxl4utnj4csujswwlj/app.bsky.feed.post/3mrbde3yxlq26
@@ -205,6 +206,7 @@ rw|462|Drops 21 points against former team
 rw|481|Dominant in win Monday
 rw|481|Leads all scorers Tuesday
 rw|481|Posts 38 points in road loss
+rw|483|Out for personal reasons
 rw|483|Paces Sky with 20 points
 rw|483|Stuffs stat sheet in defeat
 rw|484|Iffy for Wednesday

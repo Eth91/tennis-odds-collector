@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-29T21:56:51Z",
+ "captured_at": "2026-07-29T22:03:26Z",
  "matches": [
-  {
-   "event_id": 35881454,
-   "p1": "Michal Machelski",
-   "p2": "Kamil Delikatny",
-   "p1_norm": "michal machelski",
-   "p2_norm": "kamil delikatny",
-   "open_date": "2026-07-29T21:45:00.000Z",
-   "line": 52.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35881463,
-   "p1": "Patryk Jendrzejewski",
-   "p2": "Jakub Glanowski",
-   "p1_norm": "patryk jendrzejewski",
-   "p2_norm": "jakub glanowski",
-   "open_date": "2026-07-29T21:50:00.000Z",
-   "line": 58.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35881471,
    "p1": "Rafal Niemiec",
@@ -30,9 +8,9 @@
    "p1_norm": "rafal niemiec",
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-07-29T22:00:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 71.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35881487,
@@ -77,6 +55,17 @@
    "line": 75.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35881497,
+   "p1": "Wojciech Urban",
+   "p2": "Mariusz Koczyba",
+   "p1_norm": "wojciech urban",
+   "p2_norm": "mariusz koczyba",
+   "open_date": "2026-07-29T22:25:00.000Z",
+   "line": 75.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
