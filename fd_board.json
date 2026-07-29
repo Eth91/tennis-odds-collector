@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-29T23:45:50Z",
+ "captured_at": "2026-07-29T23:51:38Z",
  "matches": [
-  {
-   "event_id": 35881540,
-   "p1": "Patryk Jendrzejewski",
-   "p2": "Lukasz Pietraszko",
-   "p1_norm": "patryk jendrzejewski",
-   "p2_norm": "lukasz pietraszko",
-   "open_date": "2026-07-29T23:20:00.000Z",
-   "line": 101.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35881659,
-   "p1": "Mariusz Koczyba",
-   "p2": "Marian Lebek",
-   "p1_norm": "mariusz koczyba",
-   "p2_norm": "marian lebek",
-   "open_date": "2026-07-29T23:35:00.000Z",
-   "line": 55.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35881680,
    "p1": "Adam Staniczek",
@@ -31,8 +9,8 @@
    "p2_norm": "michal machelski",
    "open_date": "2026-07-29T23:45:00.000Z",
    "line": 76.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35881681,
@@ -41,9 +19,9 @@
    "p1_norm": "mateusz rutkowski",
    "p2_norm": "jakub glanowski",
    "open_date": "2026-07-29T23:45:00.000Z",
-   "line": 74.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 79.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35881759,
