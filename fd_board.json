@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-29T00:31:33Z",
+ "captured_at": "2026-07-29T00:36:19Z",
  "matches": [
-  {
-   "event_id": 35878573,
-   "p1": "Pawel Kurek",
-   "p2": "Oliwier Sokolowski",
-   "p1_norm": "pawel kurek",
-   "p2_norm": "oliwier sokolowski",
-   "open_date": "2026-07-29T00:10:00.000Z",
-   "line": 111.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
-  {
-   "event_id": 35878587,
-   "p1": "Mariusz Adamus",
-   "p2": "Kacper Adamus",
-   "p1_norm": "mariusz adamus",
-   "p2_norm": "kacper adamus",
-   "open_date": "2026-07-29T00:35:00.000Z",
-   "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
-  },
   {
    "event_id": 35878588,
    "p1": "Jacek Przewlocki",
@@ -31,8 +9,8 @@
    "p2_norm": "bartlomiej mrugala",
    "open_date": "2026-07-29T00:35:00.000Z",
    "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35878590,
@@ -42,8 +20,8 @@
    "p2_norm": "marian brunner",
    "open_date": "2026-07-29T00:45:00.000Z",
    "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35878591,
@@ -55,6 +33,17 @@
    "line": 76.5,
    "over_odds": -116,
    "under_odds": -118
+  },
+  {
+   "event_id": 35878610,
+   "p1": "Mateusz Sikon",
+   "p2": "Pawel Kurek",
+   "p1_norm": "mateusz sikon",
+   "p2_norm": "pawel kurek",
+   "open_date": "2026-07-29T01:00:00.000Z",
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
