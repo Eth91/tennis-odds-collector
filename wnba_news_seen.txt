@@ -186,6 +186,7 @@ rw|483|Paces Sky with 20 points
 rw|483|Stuffs stat sheet in defeat
 rw|484|Iffy for Wednesday
 rw|485|Hits game-winning shot at buzzer
+rw|488|Double-double in win
 rw|488|Fares well in win
 rw|498|Strong effort in loss
 rw|539|Another 30-point performance
