@@ -122,6 +122,7 @@ rw|1093|Sitting out Wednesday
 rw|1095|Provides spark defensively
 rw|1098|Headed to bench
 rw|1100|Muted output in win
+rw|1120|Scores six points off bench
 rw|1134|Off injury report
 rw|1134|Won't play Wednesday
 rw|228|Listed out for Wednesday
