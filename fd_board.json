@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T04:18:50Z",
+ "captured_at": "2026-07-29T04:24:26Z",
  "matches": [
   {
    "event_id": 35878919,
@@ -8,18 +8,7 @@
    "p1_norm": "witold buczynski",
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-07-29T04:10:00.000Z",
-   "line": 76.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35878920,
-   "p1": "Adrian Myszewski",
-   "p2": "Mateusz Trela",
-   "p1_norm": "adrian myszewski",
-   "p2_norm": "mateusz trela",
-   "open_date": "2026-07-29T04:10:00.000Z",
-   "line": 86.5,
+   "line": 80.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -30,9 +19,9 @@
    "p1_norm": "adrian wiecek",
    "p2_norm": "grzegorz adamiak",
    "open_date": "2026-07-29T04:10:00.000Z",
-   "line": 90.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 94.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35878944,
@@ -74,9 +63,9 @@
    "p1_norm": "michal durda",
    "p2_norm": "lukasz oracz",
    "open_date": "2026-07-29T04:30:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35879044,
@@ -99,6 +88,28 @@
    "line": 73.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35879077,
+   "p1": "Oliver Vincenec",
+   "p2": "Marek Tkocz",
+   "p1_norm": "oliver vincenec",
+   "p2_norm": "marek tkocz",
+   "open_date": "2026-07-29T04:50:00.000Z",
+   "line": 73.5,
+   "over_odds": -110,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35879078,
+   "p1": "Michal Minda",
+   "p2": "Stapor Rafal",
+   "p1_norm": "michal minda",
+   "p2_norm": "stapor rafal",
+   "open_date": "2026-07-29T04:50:00.000Z",
+   "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
