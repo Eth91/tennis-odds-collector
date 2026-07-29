@@ -19,6 +19,23 @@ unstage_big(){
   done
 }
 
+# DB SYMLINK GUARD (2026-07-29): the live databases live in ~/wnba_data and the repo holds
+# symlinks, so a git checkout/reset can only overwrite a POINTER. If that happens, re-link.
+# A real file found in the link's place is an old tracked blob -- park it, never delete it.
+db_guard(){
+  for f in wnba_ledger.sqlite wnba_clv.sqlite wnba_proj_log.sqlite fanduel_props.sqlite wnba_lines.sqlite; do
+    [ -L "$f" ] && continue
+    if [ -e "$HOME/wnba_data/$f" ]; then
+      if [ -f "$f" ]; then
+        mkdir -p .git-clobbered
+        mv "$f" ".git-clobbered/$f.$(date -u +%H%M%S)" 2>/dev/null
+        echo "db-guard: git clobbered $f — parked the stale copy, re-linking"
+      fi
+      ln -sfn "$HOME/wnba_data/$f" "$f" 2>/dev/null
+    fi
+  done
+}
+
 push(){
   # disk guard (same postmortem): if the root FS dips under 2GB free, repack immediately —
   # bounded by pack.threads=1 / windowMemory=32m so it can't swap-storm the 956MB box.
@@ -166,6 +183,7 @@ while true; do i=$((i+1))
     # Refresh odds/grade + dashboard + push every 3rd tick (~75s) so the board tracks the action.
     if [ "$was_hot" != "1" ]; then echo "[$(date +%H:%M)] >>> HOT window (25s scratch polling)"; hot_ticks=0; fi
     was_hot=1; hot_ticks=$((hot_ticks+1))
+    db_guard
     # TRIGGER FIRST (2026-07-29): push() can block for minutes on a slow git op, and while it
     # does, a fresh @UnderdogWNBA ruling sits unserved. Check the flag before ANY git work so
     # breaking news always gets its scan on the very next tick.
