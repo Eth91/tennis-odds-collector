@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T23:51:38Z",
+ "captured_at": "2026-07-29T23:58:31Z",
  "matches": [
   {
    "event_id": 35881680,
@@ -8,9 +8,9 @@
    "p1_norm": "adam staniczek",
    "p2_norm": "michal machelski",
    "open_date": "2026-07-29T23:45:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 91.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35881681,
@@ -19,7 +19,7 @@
    "p1_norm": "mateusz rutkowski",
    "p2_norm": "jakub glanowski",
    "open_date": "2026-07-29T23:45:00.000Z",
-   "line": 79.5,
+   "line": 68.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -30,9 +30,9 @@
    "p1_norm": "witold stechly",
    "p2_norm": "michal wolny",
    "open_date": "2026-07-29T23:55:00.000Z",
-   "line": 70.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 67.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35881766,
@@ -74,6 +74,28 @@
    "p1_norm": "kamil delikatny",
    "p2_norm": "andriej fomin",
    "open_date": "2026-07-30T00:10:00.000Z",
+   "line": 75.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35881801,
+   "p1": "Zbigniew Nocun",
+   "p2": "Miroslaw Warzecha",
+   "p1_norm": "zbigniew nocun",
+   "p2_norm": "miroslaw warzecha",
+   "open_date": "2026-07-30T00:20:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35881803,
+   "p1": "Jakub Pruszkowski",
+   "p2": "Adrian Burkacki",
+   "p1_norm": "jakub pruszkowski",
+   "p2_norm": "adrian burkacki",
+   "open_date": "2026-07-30T00:25:00.000Z",
    "line": 75.5,
    "over_odds": -112,
    "under_odds": -118
