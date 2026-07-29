@@ -146,7 +146,9 @@ def simulate(R, field, n_sims=8000, seed=7):
     if k < 30:
         return {}
     wk = rng.normal(0, sig * math.sqrt(RHO), (n_sims, k))
-    eps = rng.normal(0, sig * math.sqrt(1 - RHO), (n_sims, k, 4))
+    # per-player sigma must broadcast across the ROUND axis; numpy cannot align a
+    # (k,) scale against (n_sims, k, 4), so draw unit normals and scale explicitly.
+    eps = rng.normal(0, 1, (n_sims, k, 4)) * (sig * math.sqrt(1 - RHO))[None, :, None]
     tot2 = 2 * (mus + wk) + eps[:, :, :2].sum(2)          # 36-hole totals
     cutline = np.sort(tot2, axis=1)[:, min(69, k - 1)][:, None]
     made = tot2 <= cutline
