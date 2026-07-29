@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-07-29T02:55:17Z",
+ "captured_at": "2026-07-29T03:01:36Z",
  "matches": [
-  {
-   "event_id": 35878778,
-   "p1": "Mateusz Sikon",
-   "p2": "Oliwier Sokolowski",
-   "p1_norm": "mateusz sikon",
-   "p2_norm": "oliwier sokolowski",
-   "open_date": "2026-07-29T02:35:00.000Z",
-   "line": 109.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
-  {
-   "event_id": 35878809,
-   "p1": "Adrian Wiecek",
-   "p2": "Kacper Glazowski",
-   "p1_norm": "adrian wiecek",
-   "p2_norm": "kacper glazowski",
-   "open_date": "2026-07-29T03:00:00.000Z",
-   "line": 82.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
-  {
-   "event_id": 35878810,
-   "p1": "Witold Buczynski",
-   "p2": "Lukasz Oracz",
-   "p1_norm": "witold buczynski",
-   "p2_norm": "lukasz oracz",
-   "open_date": "2026-07-29T03:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
-  },
   {
    "event_id": 35878811,
    "p1": "Adrian Myszewski",
@@ -41,9 +8,9 @@
    "p1_norm": "adrian myszewski",
    "p2_norm": "blazej warpas",
    "open_date": "2026-07-29T03:00:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 79.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35878821,
@@ -53,8 +20,8 @@
    "p2_norm": "kamil delikatny",
    "open_date": "2026-07-29T03:05:00.000Z",
    "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35878827,
@@ -77,6 +44,39 @@
    "line": 80.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35878861,
+   "p1": "Grzegorz Adamiak",
+   "p2": "Kacper Petas",
+   "p1_norm": "grzegorz adamiak",
+   "p2_norm": "kacper petas",
+   "open_date": "2026-07-29T03:25:00.000Z",
+   "line": 73.5,
+   "over_odds": -120,
+   "under_odds": -110
+  },
+  {
+   "event_id": 35878862,
+   "p1": "Mateusz Trela",
+   "p2": "Kuba Golaszewski",
+   "p1_norm": "mateusz trela",
+   "p2_norm": "kuba golaszewski",
+   "open_date": "2026-07-29T03:25:00.000Z",
+   "line": 81.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35878863,
+   "p1": "Wojciech Wojtaszczyk",
+   "p2": "Kamil Kowalski",
+   "p1_norm": "wojciech wojtaszczyk",
+   "p2_norm": "kamil kowalski",
+   "open_date": "2026-07-29T03:25:00.000Z",
+   "line": 67.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
