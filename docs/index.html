@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-title" content="Pickz">
 <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="64x64" href="icon-64.png">
-<meta name="bv" content="b0196c8ab9">
+<meta name="bv" content="f6607d7eb9">
 <title>Today's Plays</title>
 <style>
   :root { color-scheme: dark; }
@@ -82,6 +82,8 @@
   .swstat { font-size:9px; font-weight:800; letter-spacing:.04em; padding:1.5px 5px; border-radius:4px; }
   .swstat.out { color:#ef8f6a; background:rgba(239,143,106,.13); }
   .swstat.q { color:#d7ad63; background:rgba(215,173,99,.13); }
+  .swn { font-size:9px; font-weight:800; padding:1.5px 5px; border-radius:4px; color:#7d8696; background:rgba(125,134,150,.12); }
+  .swn.hot { color:#6aa5ef; background:rgba(106,165,239,.16); }
   .swvs { color:#6b7484; font-size:11.5px; }
   .swday { color:#6b7484; font-size:10.5px; }
   .swusg { margin-left:auto; color:#8b94a3; font-size:11.5px; font-variant-numeric:tabular-nums; white-space:nowrap; }
@@ -537,7 +539,7 @@
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
-    <div class="live"><span class="dot"></span>3:08 AM MT
+    <div class="live"><span class="dot"></span>3:09 AM MT
       <button class="rfrsh" onclick="manualRefresh(this)" title="Pull new plays now" aria-label="Refresh now">↻</button>
       <span id="rfchk"></span></div>
   </header>
@@ -555,6 +557,7 @@
     
     
     <div class="watchlist"><div class="wl-title">Watchlist <span>· if they sit, play this</span></div><div class="wlg"><div class="wlg-hd"><span class="gmatch"><img class="glogo" src="logos/gs.png" alt="" loading="lazy" onerror="this.style.display='none'">GS<span class="gvs">vs</span><img class="glogo" src="logos/phx.png" alt="" loading="lazy" onerror="this.style.display='none'">PHX</span><span class="gtime">8:00 PM</span></div><div class="wlrow" title="~50% to sit · +12%EV"><div class="wlcond">if <b>Williams</b> out</div><div class="wlplay"><b>Veronica Burton</b> Over 15.5 Pts + Reb<span class="wlright"><span class="wlodds">-128</span><span class="tchip tB">B</span></span></div></div></div></div>
+    <div class="starwatch"><div class="sw-title">🏥 Injury report <span>· every impact player with a status · n = team games without her (n&le;2 ⇒ model can't project — your call) · scan 1m ago</span></div><div class="swo">No impact players carry an injury status right now.</div></div>
     <div class="tierleg"><div class="xt">confidence tiers · live record at real lines</div><div class="tlrow"><span class="tchip tA">A</span><span class="tld">3-8 bump · favorite · single stat</span><span class="tlr">14-3 · 82% · +12.1u</span></div><div class="tlrow"><span class="tchip tB">B</span><span class="tld">3-8 others · cold-vetted · supported 0-3</span><span class="tlr">21-13 · 62% · +7.4u</span></div><div class="tlrow"><span class="tchip tC">C</span><span class="tld">combos · marginal</span><span class="tlr">2-1 · 67% · +1.0u</span></div></div>
     
   </div>

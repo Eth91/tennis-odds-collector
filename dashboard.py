@@ -1867,6 +1867,61 @@ def _starwatch_html():
             + rows + '</div>')
 
 
+def _injury_html():
+    """🏥 INJURY REPORT (2026-07-29, user): every impact player (the scan's own gate,
+    >=20mpg or >=10ppg) carrying ANY status, straight from the scan's last pass
+    (wnba_injuries_board.json). Purpose: reviewable coverage on quiet nights + the user's
+    manual n=1/n=2 research — n<=2 is exactly what the model can't project, so those get
+    the hot badge. Staleness is shown LOUDLY, never hidden: a stale snapshot rendered as
+    current would defeat the whole point."""
+    f = HERE / "wnba_injuries_board.json"
+    if not f.exists():
+        return ""
+    try:
+        d = json.loads(f.read_text())
+    except (ValueError, OSError):
+        return ""
+    rows_d = d.get("rows") or []
+    age_min = None
+    try:
+        _t = dt.datetime.fromisoformat((d.get("ts") or "").replace("Z", "+00:00"))
+        age_min = (dt.datetime.now(dt.timezone.utc) - _t).total_seconds() / 60
+    except ValueError:
+        pass
+    agetxt = f"scan {age_min:.0f}m ago" if age_min is not None else ""
+    stale = ""
+    if age_min is not None and age_min > 180:
+        stale = (f'<div class="mlbwarn">⚠️ injury snapshot is {age_min/60:.1f}h old — the scan '
+                 f'may be down. Do NOT read this list as current.</div>')
+
+    def _logo(ab):
+        ab = (ab or "").lower()
+        return (f'<img class="glogo" src="{LOGO.format(ab)}" alt="" loading="lazy" '
+                f'onerror="this.style.display=\'none\'">' if ab else "")
+
+    body = ""
+    for r in rows_d:
+        stt = r.get("status") or ""
+        scls = "out" if stt.lower().startswith(("out", "doubt")) else "q"
+        nw = r.get("n_without")
+        if nw is None:
+            nb = ""
+        else:
+            hot = " hot" if 0 <= nw <= 2 else ""
+            nb = (f'<span class="swn{hot}" title="games her team has played without her — '
+                  f'n&le;2 means the model cannot project the beneficiaries">n={nw}</span>')
+        body += (f'<div class="swrow"><div class="swhd">{_logo(r.get("team"))}'
+                 f'<b>{html.escape(_short(r.get("player") or ""))}</b>'
+                 f'<span class="swstat {scls}">{html.escape(stt)}</span>{nb}'
+                 f'<span class="swusg">{r.get("mpg")}\' · {r.get("ppg")}p</span></div></div>')
+    if not body:
+        body = '<div class="swo">No impact players carry an injury status right now.</div>'
+    return ('<div class="starwatch"><div class="sw-title">🏥 Injury report '
+            f'<span>· every impact player with a status · n = team games without her '
+            f'(n&le;2 ⇒ model can\'t project — your call) · {agetxt}</span></div>'
+            + stale + body + '</div>')
+
+
 STAT_FULL = {"points": "Points", "rebounds": "Rebounds", "assists": "Assists",
              "pts_ast": "Pts + Ast", "pts_reb": "Pts + Reb", "reb_ast": "Reb + Ast",
              "pra": "Pts + Reb + Ast"}
@@ -2166,6 +2221,7 @@ def build():
     slip_html = _slip_html(rows)
     wl_html = _watchlist_html({(r.get("pred_date"), r.get("player"), r.get("stat")) for r in rows}, tips)
     starwatch_html = _starwatch_html()
+    injury_html = _injury_html()
     tt_json = _load_tt()
     _feed_health_ping(tt_json)                             # once/day ntfy if TT/WNBA is broken (not quiet)
     tt_html = _tt_panel(tt_json)
@@ -2583,6 +2639,8 @@ def build():
   .swstat {{ font-size:9px; font-weight:800; letter-spacing:.04em; padding:1.5px 5px; border-radius:4px; }}
   .swstat.out {{ color:#ef8f6a; background:rgba(239,143,106,.13); }}
   .swstat.q {{ color:#d7ad63; background:rgba(215,173,99,.13); }}
+  .swn {{ font-size:9px; font-weight:800; padding:1.5px 5px; border-radius:4px; color:#7d8696; background:rgba(125,134,150,.12); }}
+  .swn.hot {{ color:#6aa5ef; background:rgba(106,165,239,.16); }}
   .swvs {{ color:#6b7484; font-size:11.5px; }}
   .swday {{ color:#6b7484; font-size:10.5px; }}
   .swusg {{ margin-left:auto; color:#8b94a3; font-size:11.5px; font-variant-numeric:tabular-nums; white-space:nowrap; }}
@@ -3056,6 +3114,7 @@ def build():
     {ladders_html}
     {slip_html}
     {wl_html}
+    {injury_html}
     {tier_legend}
     {extras_html}
   </div>
