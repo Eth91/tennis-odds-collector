@@ -155,7 +155,9 @@ def direct_course_birdie_factor(event_name):
     eds = nrd = 0
     for _tid, tname, nr, a3, b3, a4, b4, a5, b5 in rows:
         el = str(tname or "").lower()
-        if sum(1 for w in toks if w in el) < max(1, len(toks) // 2):
+        # EVERY token must appear. Half-token matching made "Classic" pool six unrelated
+        # courses into what is supposed to be this course's own birdie history.
+        if not all(w in el for w in toks):
             continue
         h = (a3 or 0) + (a4 or 0) + (a5 or 0)
         if not h:
