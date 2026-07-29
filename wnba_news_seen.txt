@@ -252,6 +252,7 @@ rw|789|Won't play Tuesday
 rw|792|Ruled out for Tuesday
 rw|792|Won't play Wednesday
 rw|793|Keeps picking up steals
+rw|797|Returns after brief exit
 rw|797|Scores team-high 20 points
 rw|798|Stumbles in loss
 rw|807|Posts double-double in road loss
