@@ -23,6 +23,7 @@ import json
 import math
 import sqlite3
 import statistics as st
+import time
 import urllib.request
 from pathlib import Path
 
@@ -31,7 +32,8 @@ import pga_context as C
 import pga_ruler as RU
 
 HERE = Path(__file__).resolve().parent
-DB = HERE / "pga_model.sqlite"
+DB = HERE / "pga_model.sqlite"          # read-only here: rounds / birdie_rounds live in it
+TEEDB = HERE / "pga_tees.sqlite"        # our own, gitignored: never in the reset/replay race
 UA = {"User-Agent": "Mozilla/5.0"}
 
 D = chr(36)                       # keep '$' out of any shell that transports this file
@@ -71,7 +73,7 @@ def fetch_sheet(tid):
 def harvest_tees(tids=None, years=(2024, 2025, 2026), verbose=True):
     """Store tee sheets. Idempotent: an event already stored is skipped, so this is safe to
     call from the loop. Historical sheets are what make fit_wave possible at all."""
-    con = sqlite3.connect(DB)
+    con = sqlite3.connect(TEEDB, timeout=30)
     con.execute(DDL)
     con.commit()
     have = {r[0] for r in con.execute("SELECT DISTINCT tid FROM tee_sheet").fetchall()}
@@ -96,11 +98,26 @@ def harvest_tees(tids=None, years=(2024, 2025, 2026), verbose=True):
             continue
         if not rows:
             continue
-        con.executemany(
-            "INSERT OR REPLACE INTO tee_sheet(tid,tname,rnd,player,tee_ms,start_tee,tz) "
-            "VALUES(?,?,?,?,?,?,?)",
-            [(tid, tname, rnd, nm, ms, stee, tz) for rnd, nm, ms, stee in rows])
-        con.commit()
+        payload = [(tid, tname, rnd, nm, ms, stee, tz) for rnd, nm, ms, stee in rows]
+        for attempt in range(6):
+            try:
+                con.executemany(
+                    "INSERT OR REPLACE INTO tee_sheet(tid,tname,rnd,player,tee_ms,"
+                    "start_tee,tz) VALUES(?,?,?,?,?,?,?)", payload)
+                con.commit()
+                break
+            except sqlite3.OperationalError as e:      # reset window: reconnect and retry
+                if attempt == 5:
+                    raise
+                if verbose:
+                    print("   %s write retry %d (%s)" % (tid, attempt + 1, str(e)[:40]))
+                time.sleep(2.0 * (attempt + 1))
+                try:
+                    con.close()
+                except Exception:                                   # noqa: BLE001
+                    pass
+                con = sqlite3.connect(TEEDB, timeout=30)
+                con.execute(DDL)
         new += 1
         if verbose:
             print("   %-10s %-30s %d tee rows" % (tid, str(tname)[:30], len(rows)))
@@ -115,7 +132,7 @@ def harvest_tees(tids=None, years=(2024, 2025, 2026), verbose=True):
 def tees_for(tid, rnd=None):
     """{player_norm: tee_ms} for one round. Orchestrator-backed, so this is populated days
     before ESPN's competitor stamp — the reason the wave path is no longer dormant."""
-    con = sqlite3.connect(DB)
+    con = sqlite3.connect(TEEDB, timeout=30)
     con.execute(DDL)
     if rnd is None:
         r = con.execute("SELECT MIN(rnd) FROM tee_sheet WHERE tid=?", (tid,)).fetchone()
@@ -235,7 +252,7 @@ def fit_wave(verbose=True, refit=False):
         return c["wave"]
     rel = _rel_scores()
     evs = _event_ids()
-    con = sqlite3.connect(DB)
+    con = sqlite3.connect(TEEDB, timeout=30)
     con.execute(DDL)
     sheets = {}
     for tid, tname, rnd, pl, ms, tz in con.execute(

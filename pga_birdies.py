@@ -136,9 +136,26 @@ def harvest(max_events=None, years=(2026,)):
         with ThreadPoolExecutor(max_workers=4) as ex:
             for rr in ex.map(one, ps):
                 rows += rr
-        con.executemany("INSERT OR REPLACE INTO birdie_rounds VALUES (?,?,?,?,?,?,?,?,?,?)",
-                        rows)
-        con.commit()
+        for attempt in range(6):
+            try:
+                con.executemany(
+                    "INSERT OR REPLACE INTO birdie_rounds VALUES (?,?,?,?,?,?,?,?,?,?)", rows)
+                con.commit()
+                break
+            except sqlite3.OperationalError as e:
+                # the loop's `git reset --hard` briefly swaps this tracked DB under us and
+                # sqlite reports it readonly. Reconnect and retry rather than losing an
+                # entire backfill run to a one-second window.
+                if attempt == 5:
+                    raise
+                print(f"  write retry {attempt + 1} ({str(e)[:40]})", flush=True)
+                time.sleep(2.0 * (attempt + 1))
+                try:
+                    con.close()
+                except Exception:                                  # noqa: BLE001
+                    pass
+                con = sqlite3.connect(DB, timeout=30)
+                con.execute(DDL)
         print(f"  {tname}: {len(ps)} players, {len(rows)} rounds", flush=True)
     n = con.execute("SELECT COUNT(*), COUNT(DISTINCT player) FROM birdie_rounds").fetchone()
     print(f"birdie_rounds: {n[0]} rows, {n[1]} players")
