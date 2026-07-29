@@ -15,6 +15,7 @@ at://did:plc:uf6566ur4zv2h7yl4les2ygh/app.bsky.feed.post/3mr3wwnlyfh2c
 at://did:plc:ugoqmdaxl4utnj4csujswwlj/app.bsky.feed.post/3mrb4jesr3i2v
 at://did:plc:ugoqmdaxl4utnj4csujswwlj/app.bsky.feed.post/3mrbde3yxlq26
 at://did:plc:ugoqmdaxl4utnj4csujswwlj/app.bsky.feed.post/3mrqeegrad622
+at://did:plc:ugoqmdaxl4utnj4csujswwlj/app.bsky.feed.post/3mrswqsb7zf2u
 at://did:plc:xpez3ourgb6u7hoiqwvq4mlz/app.bsky.feed.post/3mr63yklzt42a
 at://did:plc:ywnkvncvnvg326vjtxfolose/app.bsky.feed.post/3mraf7rggfk26
 gn|"It’s those brick shoes", "Took her out cuz she suck" - WNBA
@@ -276,6 +277,7 @@ rw|647|Plays well off bench
 rw|661|Stuck in backup role
 rw|678|Closing in on return
 rw|678|Hopeful for season debut Thursday
+rw|678|Officially listed as questionable
 rw|703|Another quiet effort
 rw|720|Lacking clear role
 rw|724|Full stat line Tuesday
