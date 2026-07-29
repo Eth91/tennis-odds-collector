@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-29T00:25:44Z",
+ "captured_at": "2026-07-29T00:31:33Z",
  "matches": [
-  {
-   "event_id": 35878572,
-   "p1": "Jakub Kuzmicz",
-   "p2": "Jakub Glanowski",
-   "p1_norm": "jakub kuzmicz",
-   "p2_norm": "jakub glanowski",
-   "open_date": "2026-07-29T00:10:00.000Z",
-   "line": 84.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35878573,
    "p1": "Pawel Kurek",
@@ -19,20 +8,9 @@
    "p1_norm": "pawel kurek",
    "p2_norm": "oliwier sokolowski",
    "open_date": "2026-07-29T00:10:00.000Z",
-   "line": 105.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35878574,
-   "p1": "Marcin Kowalczyk",
-   "p2": "Kacper Marchlewski",
-   "p1_norm": "marcin kowalczyk",
-   "p2_norm": "kacper marchlewski",
-   "open_date": "2026-07-29T00:10:00.000Z",
-   "line": 87.5,
-   "over_odds": 110,
-   "under_odds": -150
+   "line": 111.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35878587,
