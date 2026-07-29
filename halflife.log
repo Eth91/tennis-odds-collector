@@ -1,12 +1,1 @@
   HALF_LIFE_D grid on (2024, 2025) events (2026 held out)
-Traceback (most recent call last):
-  File "<string>", line 3, in <module>
-  File "/home/ubuntu/tennis-odds-collector/pga_calib.py", line 318, in tune_half_life
-    acc, rmse, n = RU.walk_forward(seasons=tune_seasons, season_max=max(tune_seasons),
-  File "/home/ubuntu/tennis-odds-collector/pga_ruler.py", line 323, in walk_forward
-    R, _ = fit(asof=d0, rows=rows, **fitkw)
-  File "/home/ubuntu/tennis-odds-collector/pga_ruler.py", line 111, in fit
-    rows = [r for r in rows if r[1] < asof]
-  File "/home/ubuntu/tennis-odds-collector/pga_ruler.py", line 111, in <listcomp>
-    rows = [r for r in rows if r[1] < asof]
-TypeError: '<' not supported between instances of 'int' and 'str'
