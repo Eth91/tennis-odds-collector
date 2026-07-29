@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-29T02:22:24Z",
+ "captured_at": "2026-07-29T02:28:21Z",
  "matches": [
-  {
-   "event_id": 35878766,
-   "p1": "Marian Lebek",
-   "p2": "Marek Tkocz",
-   "p1_norm": "marian lebek",
-   "p2_norm": "marek tkocz",
-   "open_date": "2026-07-29T02:20:00.000Z",
-   "line": 79.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35878778,
    "p1": "Mateusz Sikon",

@@ -1,5 +1,5 @@
 # WNBA prop context report
-_updated 2026-07-29 02:07 UTC · 130 graded props (130 matched to finals)_
+_updated 2026-07-29 02:25 UTC · 130 graded props (130 matched to finals)_
 
 Overall **68-62 (52%)** · OVER 53-48 (52%) · UNDER 15-14 (52%)
 
@@ -16,7 +16,7 @@ Overall **68-62 (52%)** · OVER 53-48 (52%) · UNDER 15-14 (52%)
 |---|---|---|---|
 | favorite (<0) (n=17) | 11-6 (65%) | 11-6 (65%) | 0-0 (--) |
 | dog 0-8 (n=7) | 1-6 (14%) | 1-6 (14%) | 0-0 (--) |
-| DOG 8+ (n=18) | 7-11 (39%) | 6-8 (43%) | 1-3 (25%) |
+| DOG 8+ (n=19) | 8-11 (42%) | 7-8 (47%) | 1-3 (25%) |
 
 **By ACTUAL total (realized; terciles 179/189)**
 

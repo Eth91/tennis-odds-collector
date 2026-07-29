@@ -318,6 +318,7 @@ rw|984|Solid on both ends Tuesday
 rw|987|Probable versus Seattle
 rw|991|Posts another double-double
 rw|991|Posts double-double Monday
+rw|991|Records another double-double
 rw|998|Could return Sunday
 rw|998|Nears double-double in return
 rw|998|Removed from injury report
