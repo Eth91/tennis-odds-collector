@@ -151,6 +151,7 @@ rw|344|Available for Wednesday
 rw|354|Chips in with 11 points
 rw|354|Very efficient in home victory
 rw|358|Starting versus Minnesota
+rw|378|Muted effort in win
 rw|378|Starting Monday
 rw|394|Downgraded to doubtful
 rw|394|Iffy for Wednesday
