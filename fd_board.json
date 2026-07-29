@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T23:11:23Z",
+ "captured_at": "2026-07-29T23:18:12Z",
  "matches": [
   {
    "event_id": 35881526,
@@ -8,9 +8,9 @@
    "p1_norm": "mateusz rutkowski",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-29T22:55:00.000Z",
-   "line": 87.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 72.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35881536,
@@ -19,9 +19,9 @@
    "p1_norm": "miroslaw warzecha",
    "p2_norm": "michal wolny",
    "open_date": "2026-07-29T23:05:00.000Z",
-   "line": 82.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 69.5,
+   "over_odds": 100,
+   "under_odds": -140
   },
   {
    "event_id": 35881537,
@@ -30,9 +30,9 @@
    "p1_norm": "rafal niemiec",
    "p2_norm": "adrian burkacki",
    "open_date": "2026-07-29T23:10:00.000Z",
-   "line": 79.5,
-   "over_odds": -115,
-   "under_odds": -115
+   "line": 89.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35881540,
@@ -88,6 +88,39 @@
    "line": 72.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35881679,
+   "p1": "Michal Skorski",
+   "p2": "Adrian Eliasz",
+   "p1_norm": "michal skorski",
+   "p2_norm": "adrian eliasz",
+   "open_date": "2026-07-29T23:45:00.000Z",
+   "line": 80.5,
+   "over_odds": -116,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35881680,
+   "p1": "Adam Staniczek",
+   "p2": "Michal Machelski",
+   "p1_norm": "adam staniczek",
+   "p2_norm": "michal machelski",
+   "open_date": "2026-07-29T23:45:00.000Z",
+   "line": 75.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35881681,
+   "p1": "Mateusz Rutkowski",
+   "p2": "Jakub Glanowski",
+   "p1_norm": "mateusz rutkowski",
+   "p2_norm": "jakub glanowski",
+   "open_date": "2026-07-29T23:45:00.000Z",
+   "line": 73.5,
+   "over_odds": -120,
+   "under_odds": -110
   }
  ]
 }
