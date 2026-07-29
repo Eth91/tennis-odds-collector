@@ -166,7 +166,7 @@ def course_par(tid, cache=HERE / "pga_course_cache.json"):
         c = {}
     if str(tid) in c:
         return c[str(tid)]
-    d = gql('query C(: ID!) {courseStats(tournamentId: ) '
+    d = gql('query C($t: ID!) {courseStats(tournamentId: $t) '
             '{courses {courseId courseName par hostCourse}}}', {"t": tid})
     cs = ((d.get("data") or {}).get("courseStats") or {}).get("courses") or []
     host = next((x for x in cs if x.get("hostCourse")), cs[0] if cs else None)
