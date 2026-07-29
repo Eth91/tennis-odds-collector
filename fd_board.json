@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T02:34:24Z",
+ "captured_at": "2026-07-29T02:40:15Z",
  "matches": [
   {
    "event_id": 35878778,
@@ -8,9 +8,9 @@
    "p1_norm": "mateusz sikon",
    "p2_norm": "oliwier sokolowski",
    "open_date": "2026-07-29T02:35:00.000Z",
-   "line": 72.5,
+   "line": 75.5,
    "over_odds": -120,
-   "under_odds": -110
+   "under_odds": -115
   },
   {
    "event_id": 35878800,
@@ -42,8 +42,8 @@
    "p2_norm": "lukasz oracz",
    "open_date": "2026-07-29T03:00:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35878811,
@@ -55,6 +55,17 @@
    "line": 80.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35878821,
+   "p1": "Marian Brunner",
+   "p2": "Kamil Delikatny",
+   "p1_norm": "marian brunner",
+   "p2_norm": "kamil delikatny",
+   "open_date": "2026-07-29T03:05:00.000Z",
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -120
   }
  ]
 }

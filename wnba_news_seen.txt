@@ -260,6 +260,7 @@ rw|836|Inactive versus Liberty
 rw|852|Drops 22 points in blowout win
 rw|852|Exits to locker room Tuesday
 rw|852|Logs 15 points vs. New York
+rw|853|Another double-digit scoring effort
 rw|853|Paces Connecticut in loss
 rw|854|Available for Monday
 rw|854|Not listed on injury report
