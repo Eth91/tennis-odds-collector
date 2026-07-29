@@ -313,6 +313,7 @@ rw|923|Off injury report for Tuesday
 rw|926|Starting against Aces
 rw|927|Double-double in defeat
 rw|927|Leads team with seven assists
+rw|927|Notches 11 points in loss
 rw|935|Commits nine turnovers in loss
 rw|935|Makes most of playing time
 rw|969|Manages 11 points in loss
