@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-29T05:02:21Z",
+ "captured_at": "2026-07-29T05:06:42Z",
  "matches": [
-  {
-   "event_id": 35879077,
-   "p1": "Oliver Vincenec",
-   "p2": "Marek Tkocz",
-   "p1_norm": "oliver vincenec",
-   "p2_norm": "marek tkocz",
-   "open_date": "2026-07-29T04:50:00.000Z",
-   "line": 60.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35879081,
    "p1": "Piotr Gumulinski",
@@ -19,9 +8,9 @@
    "p1_norm": "piotr gumulinski",
    "p2_norm": "kamil kowalski",
    "open_date": "2026-07-29T04:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 74.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35879082,
@@ -30,9 +19,9 @@
    "p1_norm": "grzegorz felkel",
    "p2_norm": "kacper petas",
    "open_date": "2026-07-29T04:55:00.000Z",
-   "line": 80.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 62.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35879083,
@@ -41,7 +30,7 @@
    "p1_norm": "mariusz zwolinski",
    "p2_norm": "kuba golaszewski",
    "open_date": "2026-07-29T04:55:00.000Z",
-   "line": 90.5,
+   "line": 92.5,
    "over_odds": -110,
    "under_odds": -125
   },
@@ -52,9 +41,9 @@
    "p1_norm": "jerzy michalik",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-07-29T05:05:00.000Z",
-   "line": 73.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 70.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35879104,
@@ -108,6 +97,17 @@
    "p2_norm": "lukasz oracz",
    "open_date": "2026-07-29T05:15:00.000Z",
    "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35879119,
+   "p1": "Jakub Kaczmarek",
+   "p2": "Krzysztof Hetnar",
+   "p1_norm": "jakub kaczmarek",
+   "p2_norm": "krzysztof hetnar",
+   "open_date": "2026-07-29T05:30:00.000Z",
+   "line": 69.5,
    "over_odds": -112,
    "under_odds": -118
   }
