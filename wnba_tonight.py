@@ -745,6 +745,16 @@ def starter_label(name, team, starters, proj_min):
        likely     — RotoWire has them in a PROJECTED five, or lineup TBD w/ starter-sized proj
        bench      — a lineup is posted for their team and they're NOT in it (proj too high)
        projected  — lineup TBD, a rotation bump (minutes less certain)"""
+    # @UnderdogWNBA CONFIRMED FIVE first (2026-07-29, user: Underdog is source #1). They post
+    # the locked five ~30-60 min pre-tip, ahead of RotoWire, and it is unambiguous: in it =
+    # confirmed, a five exists without you = bench. No five -> RotoWire, unchanged.
+    try:
+        import wnba_lineups as _LU
+        _five = (_LU.lineups(tz=ET) or {}).get((team or "").upper())
+        if _five:
+            return "confirmed" if name in _five else "bench"
+    except Exception:
+        pass
     board = rw_lineups()
     st = RW.starter_status(board, team, name) if (board and team) else None
     if st == "confirmed":

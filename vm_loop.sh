@@ -26,7 +26,7 @@ push(){
     echo "[$(date +%H:%M)] low disk -> git gc"; git gc --prune=now -q 2>/dev/null || true
   fi
   python3 db_sync.py --export >/dev/null 2>&1 || true   # WNBA DBs -> data/*/
-  git add -A -f 2>/dev/null
+  git add -A -f -- . ':(exclude)fanduel_props.sqlite' ':(exclude)fanduel_props.bak.sqlite' ':(exclude)wnba_lines.sqlite' 2>/dev/null
   # NEVER commit wnba_lines.sqlite: it's the VM-local WNBA lines DB, gitignored, and was
   # ballooning to 100MB (the 2-day prune lived in the now-disabled wnba-watch.yml and was
   # dropped on the VM migration). `git add -A -f` force-re-adds it every cycle despite the
@@ -65,7 +65,7 @@ push(){
     # (2026-07-27) fanduel_props.sqlite is VM-LOCAL now (untracked, 100MB vs
     # GitHub hard limit); never replay it from origin.
     python3 db_sync.py --export >/dev/null 2>&1 || true   # WNBA DBs -> data/*/
-  git add -A -f 2>/dev/null
+  git add -A -f -- . ':(exclude)fanduel_props.sqlite' ':(exclude)fanduel_props.bak.sqlite' ':(exclude)wnba_lines.sqlite' 2>/dev/null
     git rm --cached -q wnba_lines.sqlite wnba_glog_cache.json fanduel_props.sqlite fanduel_props.bak.sqlite tt.sqlite tt.sqlite-wal tt.sqlite-shm wnba_ledger.sqlite wnba_proj_log.sqlite wnba_clv.sqlite 2>/dev/null || true
     git commit -qm "vm loop data (replayed after failed rebase) [skip ci]" 2>/dev/null || true
     echo "[$(date +%H:%M)] rebase failed -> data replayed onto origin tip"
@@ -166,6 +166,13 @@ while true; do i=$((i+1))
     # Refresh odds/grade + dashboard + push every 3rd tick (~75s) so the board tracks the action.
     if [ "$was_hot" != "1" ]; then echo "[$(date +%H:%M)] >>> HOT window (25s scratch polling)"; hot_ticks=0; fi
     was_hot=1; hot_ticks=$((hot_ticks+1))
+    # TRIGGER FIRST (2026-07-29): push() can block for minutes on a slow git op, and while it
+    # does, a fresh @UnderdogWNBA ruling sits unserved. Check the flag before ANY git work so
+    # breaking news always gets its scan on the very next tick.
+    if [ -f /tmp/.force_fullscan ]; then
+      rm -f /tmp/.force_fullscan
+      echo "[$(date +%H:%M)] TRIGGERED full scan (fresh out / new lines)"; fullscan
+    fi
     python3 wnba_watch.py >/dev/null 2>&1 || true
     python3 wnba_news_watch.py 2>&1 | grep -i "NEWS\|trigger" || true
     # underdog_watch runs as its own systemd daemon (underdog-watch.service, --loop 10s) — NOT here,

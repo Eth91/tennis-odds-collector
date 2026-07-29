@@ -78,6 +78,28 @@ def position_compat(bene_pos, out_positions):
 COMBO_PRICED_N = 6
 
 
+# n1 BY STAT (backtest 2023-26, real FanDuel tip lines): rebounds 8-2 (+41.6% ROI),
+# assists 2-1 (+31.0%), POINTS 4-4 (50%, -3.5%). The points family is the losing half of the
+# tier, so every points-family pilot carries a visible warning.
+N1_WEAK_STATS = ("points", "pra", "pts_reb", "pts_ast")
+
+
+# PEER GATE (2026-07-29): stats whose production a positional teammate can cannibalise
+# WITHOUT taking minutes -- the Nelson-Ododa/Morrow shape the minutes-based peer_regime_scan
+# is blind to. Pure points is exempt, same reasoning as the role-depth cap.
+_PEER_GATED = {"rebounds": lambda g: g["reb"],
+               "assists": lambda g: g["ast"],
+               "reb_ast": lambda g: g["reb"] + g["ast"],
+               "pts_reb": lambda g: g["pts"] + g["reb"],
+               "pts_ast": lambda g: g["pts"] + g["ast"],
+               "pra": lambda g: g["pts"] + g["reb"] + g["ast"]}
+
+
+def _n1_warn(stat):
+    return (" ⚠ n1 POINTS — backtest 4-4 / -3.5% ROI on this stat (reb is the edge, 8-2)"
+            if stat in N1_WEAK_STATS else "")
+
+
 def collect():
     """Returns (alerts, preds): alerts are ntfy message tuples, preds are the full
     prediction rows logged to the ledger so every flagged spot gets graded and fed back
@@ -340,7 +362,8 @@ def collect():
                         alerts.append((e["ev"], f"n1|{slate_date}|{n}|{e['stat']}|{e['line']:g}",
                             f"⚡1G {out_label} OUT -> {_short(n)} {e['stat'][:3]} o{e['line']:g} "
                             f"{T._am(e['dec'])} | proj {e['elev_avg']:g} +{e['ev']*100:.0f}%EV "
-                            f"· 1-game sample · STALE line — SPEED PILOT (graded, tier n1)"))
+                            f"· 1-game sample · STALE line — SPEED PILOT (graded, tier n1)"
+                            + _n1_warn(e["stat"])))
                 continue
             conf = T.starter_label(n, team, starters, proj)  # RotoWire-first confirmed/likely/bench
             # PROJECTION TRACKER: log this beneficiary's FULL projection (min + pts/reb/ast +
@@ -406,6 +429,28 @@ def collect():
                                            "date": slate_date, **e}
                     # contingent = BOARD-ONLY (user 2026-07-18: ping only when it turns firm)
                     continue
+                # PEER GATE: kill an over whose edge exists only when a rotation teammate
+                # sits -- and that teammate plays tonight. Fully guarded: any failure here
+                # must never cost a flag.
+                if e["side"] == "over" and e["stat"] in _PEER_GATED:
+                    try:
+                        import peer_gate as _PG
+                        _tlogs = {x: glog(vv["id"]) for x, vv in pl.items()
+                                  if vv.get("team") == team and x != n
+                                  and (vv.get("gp") or 0) >= 5}
+                        _hit = _PG.peer_stat_gate(
+                            blog, _PEER_GATED[e["stat"]], e["line"], e["dec"], _tlogs,
+                            lambda x: inj.get(x) not in ("Out", "Doubtful"),
+                            exclude=[nm for nm, _ in outs], proj_min=proj,
+                            mpg_of=lambda x: (pl.get(x) or {}).get("min"))
+                    except Exception:
+                        _hit = None
+                    if _hit:
+                        print(f"peer-gate SUPPRESSED {n} {e['stat']} o{e['line']:g}: "
+                              f"{_hit['peer']} plays — {_hit['rate_with']*100:.0f}% with vs "
+                              f"{_hit['rate_without']*100:.0f}% without "
+                              f"(breakeven {_hit['breakeven']*100:.0f}%)", flush=True)
+                        continue
                 # beneficiary+stat+line, dated (re-fires next slate)
                 key = f"{slate_date}|{n}|{e['stat']}|{e['line']}"
                 tag = " [stale line]" if e["stale"] else ""

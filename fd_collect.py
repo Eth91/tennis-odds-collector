@@ -211,17 +211,17 @@ def collect_page(customPageId, sport, is_match):
         # the event's markets to live/in-play; those lines churn every possession and were firing
         # false "opening line" alerts for the game being played RIGHT NOW. We bet PRE-GAME openers
         # (incl. next-day), so only keep events that haven't started.
-        # IN-PLAY (2026-07-28): we used to `continue` here, which meant we stopped
-        # collecting an event AT TIP -- and FanDuel posts/re-prices the definitive player
-        # lines at lineup lock, right around tip. That is how Rivers pts 6.5 existed on the
-        # site and never in our DB. Keep collecting; tag the rows live=1 so the opener/stale
-        # logic and posted_props() can ignore them (that was the real reason for the skip).
+        # STOP AT TIP (user 2026-07-29: "stop collecting fd odds once the game starts").
+        # In-play capture was added earlier tonight (tagged live=1) to close the window where
+        # FanDuel posts its definitive lines at lineup lock; the user does not want in-play
+        # prices banked at all, so we skip the event again the moment openDate passes.
+        # posted_props() keeps its live=0 filter as a guard on rows already banked.
         is_live = 0
         od = e.get("openDate")
         if od:
             try:
                 if dt.datetime.fromisoformat(od.replace("Z", "+00:00")) <= now:
-                    is_live = 1
+                    continue
             except ValueError:
                 pass
         try:
