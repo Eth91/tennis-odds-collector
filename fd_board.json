@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-29T03:15:37Z",
+ "captured_at": "2026-07-29T03:21:31Z",
  "matches": [
-  {
-   "event_id": 35878811,
-   "p1": "Adrian Myszewski",
-   "p2": "Blazej Warpas",
-   "p1_norm": "adrian myszewski",
-   "p2_norm": "blazej warpas",
-   "open_date": "2026-07-29T03:00:00.000Z",
-   "line": 101.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35878821,
    "p1": "Marian Brunner",
@@ -19,9 +8,9 @@
    "p1_norm": "marian brunner",
    "p2_norm": "kamil delikatny",
    "open_date": "2026-07-29T03:05:00.000Z",
-   "line": 88.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 99.5,
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35878827,
@@ -30,9 +19,9 @@
    "p1_norm": "michal paszkiewicz",
    "p2_norm": "marek tkocz",
    "open_date": "2026-07-29T03:10:00.000Z",
-   "line": 84.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 81.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35878834,
@@ -42,8 +31,8 @@
    "p2_norm": "stapor rafal",
    "open_date": "2026-07-29T03:20:00.000Z",
    "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35878861,
@@ -96,9 +85,20 @@
    "p1_norm": "michal minda",
    "p2_norm": "kamil rudomina",
    "open_date": "2026-07-29T03:40:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 82.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35878877,
+   "p1": "Grzegorz Felkel",
+   "p2": "Marcin Jadczyk",
+   "p1_norm": "grzegorz felkel",
+   "p2_norm": "marcin jadczyk",
+   "open_date": "2026-07-29T03:45:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
