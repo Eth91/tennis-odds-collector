@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-29T09:41:37Z",
+ "captured_at": "2026-07-29T09:47:52Z",
  "matches": [
-  {
-   "event_id": 35879448,
-   "p1": "Adrian Myszewski",
-   "p2": "Artur Szoltysek",
-   "p1_norm": "adrian myszewski",
-   "p2_norm": "artur szoltysek",
-   "open_date": "2026-07-29T09:25:00.000Z",
-   "line": 102.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35879451,
    "p1": "Jakub Kaczmarek",
@@ -19,9 +8,9 @@
    "p1_norm": "jakub kaczmarek",
    "p2_norm": "sebastian juzek",
    "open_date": "2026-07-29T09:30:00.000Z",
-   "line": 96.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 98.5,
+   "over_odds": -160,
+   "under_odds": 115
   },
   {
    "event_id": 35879454,
@@ -30,9 +19,9 @@
    "p1_norm": "kacper petas",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-29T09:40:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 88.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35879461,
@@ -41,9 +30,9 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "kacper glazowski",
    "open_date": "2026-07-29T09:45:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 80.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35879523,
@@ -99,6 +88,28 @@
    "line": 80.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35879543,
+   "p1": "Mariusz Zwolinski",
+   "p2": "Adrian Myszewski",
+   "p1_norm": "mariusz zwolinski",
+   "p2_norm": "adrian myszewski",
+   "open_date": "2026-07-29T10:10:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35879544,
+   "p1": "Michal Durda",
+   "p2": "Wojciech Wojtaszczyk",
+   "p1_norm": "michal durda",
+   "p2_norm": "wojciech wojtaszczyk",
+   "open_date": "2026-07-29T10:10:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
