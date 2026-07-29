@@ -81,11 +81,14 @@ def upcoming_tournaments(year=None):
 
 
 def players_of(tid):
+    """[] for any event without a modelled leaderboard (team formats, abandoned events) —
+    a skip, not a crash: one odd event must not cost an entire season backfill."""
     d = gql('query L($id: ID!) {leaderboardV2(id: $id) {players '
             '{... on PlayerRowV2 {player {id displayName}}}}}', {"id": tid})
+    lb = (d.get("data") or {}).get("leaderboardV2") or {}
     return [(p["player"]["id"], p["player"]["displayName"])
-            for p in (d.get("data", {}).get("leaderboardV2", {}) or {}).get("players") or []
-            if p and p.get("player")]
+            for p in (lb.get("players") or [])
+            if p and p.get("player") and p["player"].get("id")]
 
 
 def scorecard_rows(tid, tname, pid, pname):
@@ -127,7 +130,14 @@ def harvest(max_events=None, years=(2026,)):
         evs = evs[:max_events]
     print(f"harvest: {len(evs)} new events (of {len(allev)} completed in {list(years)})")
     for tid, tname in evs:
-        ps = players_of(tid)
+        try:
+            ps = players_of(tid)
+        except Exception as e:                                      # noqa: BLE001
+            print(f"  {tname}: leaderboard unavailable ({str(e)[:40]}) - skipped", flush=True)
+            continue
+        if not ps:
+            print(f"  {tname}: no player rows - skipped", flush=True)
+            continue
         rows = []
 
         def one(a):
