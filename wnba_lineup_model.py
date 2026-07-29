@@ -46,7 +46,16 @@ def _load(days_pad=70):
     players = W.players()
     n2team = {n: str(v.get("team", "")) for n, v in players.items()}
     n2pos = {n: D._pos(v.get("position")) for n, v in players.items()}
-    cache = json.loads(CACHE.read_text()) if CACHE.exists() else {}
+    # SELF-HEAL (2026-07-29): an empty/corrupt cache raised JSONDecodeError and killed the
+    # whole model run. The cache is a rebuildable convenience, never a source of truth, so a
+    # bad one is dropped and refetched rather than propagated as a crash.
+    try:
+        cache = json.loads(CACHE.read_text()) if CACHE.exists() else {}
+        if not isinstance(cache, dict):
+            cache = {}
+    except (OSError, ValueError):
+        print("  (starter cache unreadable — rebuilding)")
+        cache = {}
     dirty = False
     tg = defaultdict(list)
     for gid, date in B.game_ids(days_pad):
