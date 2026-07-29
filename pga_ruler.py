@@ -323,11 +323,11 @@ def walk_forward(seasons=(2025, 2026), verbose=True, season_max=None, rows=None,
         R, _ = fit(asof=d0, rows=rows, **fitkw)
         Rn = {norm(k): v for k, v in R.items()}
         con = sqlite3.connect(DB)
-        rows = con.execute("SELECT player, rnd, score FROM rounds WHERE event_id=?",
-                           (eid,)).fetchall()
+        erows = con.execute("SELECT player, rnd, score FROM rounds WHERE event_id=?",
+                            (eid,)).fetchall()
         con.close()
         by_r = defaultdict(list)
-        for pl, rnd, sc in rows:
+        for pl, rnd, sc in erows:
             r = Rn.get(norm(pl))
             if r:
                 by_r[rnd].append((pl, r[0], sc))
