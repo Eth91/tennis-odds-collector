@@ -25,6 +25,18 @@ unstage_big(){
 # SLOW BLOCK (ported from Actions 2026-07-29): model fits and recalibration. Expensive and
 # slow-moving, so ~every 4h rather than on the hot path. Marker file keeps it honest across
 # restarts so a bouncing service cannot refit every boot.
+# PINNACLE + EDGE SCAN (ported from collect-odds.yml 2026-07-29). Verified reachable from
+# Oracle first: guest.api.arcadia HTTP 200 / 63 sports, so an empty result is a real empty
+# slate, not a silent datacenter-IP block.
+pin_block(){
+  local m="$HOME/.wnba_pin_last" now; now=$(date -u +%s)
+  local last; last=$(cat "$m" 2>/dev/null || echo 0)
+  [ $(( now - last )) -lt 600 ] && return 0
+  echo "$now" > "$m"
+  python3 wnba_collect.py   >/dev/null 2>&1 || true
+  python3 wnba_edge_scan.py >/dev/null 2>&1 || true
+}
+
 slow_block(){
   local m="$HOME/.wnba_slow_last" now; now=$(date -u +%s)
   local last; last=$(cat "$m" 2>/dev/null || echo 0)
@@ -33,6 +45,7 @@ slow_block(){
   echo "[$(date -u +%H:%M)] slow block: clv report + model fits"
   python3 wnba_clv.py --report >/dev/null 2>&1 || true
   python3 wnba_question_log.py --resolve --recalibrate >/dev/null 2>&1 || true
+  python3 wnba_ledger.py --learn >/dev/null 2>&1 || true
   python3 wnba_lineup_model.py >/dev/null 2>&1 || true
   python3 wnba_redist.py --fit --teams ATL,CHI,CON,DAL,GS,IND,LA,LV,MIN,NY,PHX,POR,SEA,TOR,WSH >/dev/null 2>&1 || true
 }
@@ -210,6 +223,7 @@ while true; do i=$((i+1))
   # WINDOW-INDEPENDENT (2026-07-29): must run in COLD windows too — the watchlist digest
   # fires at 16:00 UTC, which is not a hot window, and a self-check that only runs while
   # the loop is already busy is not a health check.
+  pin_block
   slow_block
   digest_block
   python3 wnba_watch.py --watchdog >/dev/null 2>&1 || true

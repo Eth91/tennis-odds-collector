@@ -1,21 +1,21 @@
 {
- "n": 129,
- "w": 67,
+ "n": 132,
+ "w": 70,
  "l": 62,
  "separations": {
-  "d_stat": -0.347,
-  "driver": -0.279,
-  "total": -0.194,
-  "proj_min": 0.166,
-  "d_fga": -0.145,
-  "vac": 0.139,
-  "ev": 0.1,
-  "pace": 0.048,
-  "opp_def": 0.047,
-  "season_avg": 0.03,
-  "elev_avg": -0.023,
-  "n_elev": 0.022,
-  "d_min": -0.003,
-  "proj_hit": 0.002
+  "d_stat": -0.348,
+  "driver": -0.285,
+  "d_fga": -0.173,
+  "total": -0.133,
+  "proj_min": 0.127,
+  "vac": 0.125,
+  "ev": 0.082,
+  "pace": 0.066,
+  "elev_avg": -0.052,
+  "opp_def": 0.034,
+  "d_min": -0.032,
+  "season_avg": 0.018,
+  "n_elev": 0.016,
+  "proj_hit": -0.014
  }
 }

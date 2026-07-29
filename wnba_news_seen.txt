@@ -71,6 +71,7 @@ rw|1053|Won't play Wednesday
 rw|1054|Chips in seven points in upset win
 rw|1055|Explodes for 32 points
 rw|1055|Mild effort in win
+rw|1055|Paces Minnesota in win
 rw|1055|Records double-double in win
 rw|1055|Sniffs triple-double in ASG win
 rw|1056|Produces 14 points in 11 minutes
@@ -152,6 +153,7 @@ rw|394|Shines in return to Phoenix
 rw|394|Won't play Tuesday
 rw|401|Phased out in defeat
 rw|412|Let go by Toronto
+rw|413|Buries four triples Tuesday
 rw|413|Leads Lynx with 24 points
 rw|413|Nets 20 points in road win
 rw|413|Scores 33 points in win Monday
