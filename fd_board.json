@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-29T18:38:46Z",
+ "captured_at": "2026-07-29T18:44:07Z",
  "matches": [
-  {
-   "event_id": 35881022,
-   "p1": "Zbigniew Nocun",
-   "p2": "Henryk Tkaczyk",
-   "p1_norm": "zbigniew nocun",
-   "p2_norm": "henryk tkaczyk",
-   "open_date": "2026-07-29T18:20:00.000Z",
-   "line": 74.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35881025,
-   "p1": "Pawel Gasiorski",
-   "p2": "Oskar Jadach",
-   "p1_norm": "pawel gasiorski",
-   "p2_norm": "oskar jadach",
-   "open_date": "2026-07-29T18:25:00.000Z",
-   "line": 88.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
   {
    "event_id": 35881045,
    "p1": "Marcin Kowalczyk",
@@ -30,31 +8,9 @@
    "p1_norm": "marcin kowalczyk",
    "p2_norm": "adrian eliasz",
    "open_date": "2026-07-29T18:30:00.000Z",
-   "line": 88.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
-  {
-   "event_id": 35881046,
-   "p1": "Lukasz Pietraszko",
-   "p2": "Jakub Kuzmicz",
-   "p1_norm": "lukasz pietraszko",
-   "p2_norm": "jakub kuzmicz",
-   "open_date": "2026-07-29T18:30:00.000Z",
-   "line": 52.5,
-   "over_odds": 110,
-   "under_odds": -150
-  },
-  {
-   "event_id": 35881047,
-   "p1": "Kacper Kwiatkowski",
-   "p2": "Michal Machelski",
-   "p1_norm": "kacper kwiatkowski",
-   "p2_norm": "michal machelski",
-   "open_date": "2026-07-29T18:30:00.000Z",
-   "line": 72.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 91.5,
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35881076,
@@ -99,6 +55,28 @@
    "line": 75.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35881165,
+   "p1": "Henryk Tkaczyk",
+   "p2": "Jerzy Michalik",
+   "p1_norm": "henryk tkaczyk",
+   "p2_norm": "jerzy michalik",
+   "open_date": "2026-07-29T19:10:00.000Z",
+   "line": 74.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35881166,
+   "p1": "Jakub Pruszkowski",
+   "p2": "Pawel Gasiorski",
+   "p1_norm": "jakub pruszkowski",
+   "p2_norm": "pawel gasiorski",
+   "open_date": "2026-07-29T19:10:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
