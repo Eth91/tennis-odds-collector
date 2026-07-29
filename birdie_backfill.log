@@ -3,8 +3,9 @@ harvest: 102 new events (of 102 completed in [2025, 2024])
   Sony Open in Hawaii: 143 players, 436 rounds
   The American Express: 156 players, 536 rounds
   Farmers Insurance Open: 155 players, 446 rounds
-Traceback (most recent call last):
-  File "<string>", line 1, in <module>
-  File "/home/ubuntu/tennis-odds-collector/pga_birdies.py", line 139, in harvest
-    con.executemany("INSERT OR REPLACE INTO birdie_rounds VALUES (?,?,?,?,?,?,?,?,?,?)",
-sqlite3.OperationalError: attempt to write a readonly database
+  AT&T Pebble Beach Pro-Am: 80 players, 316 rounds
+  WM Phoenix Open: 132 players, 416 rounds
+  The Genesis Invitational: 72 players, 252 rounds
+  Mexico Open at VidantaWorld: 132 players, 418 rounds
+  Cognizant Classic in The Palm Beaches: 144 players, 424 rounds
+  Arnold Palmer Invitational presented by Mastercard: 72 players, 246 rounds

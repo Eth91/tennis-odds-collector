@@ -1,8 +1,3 @@
-Traceback (most recent call last):
-  File "<string>", line 1, in <module>
-  File "/home/ubuntu/tennis-odds-collector/pga_wave.py", line 99, in harvest_tees
-    con.executemany(
-sqlite3.OperationalError: attempt to write a readonly database
    R2024016   The Sentry                     236 tee rows
    R2024006   Sony Open in Hawaii            452 tee rows
    R2024002   The American Express           535 tee rows
@@ -116,3 +111,26 @@ sqlite3.OperationalError: attempt to write a readonly database
    R2026483   Puerto Rico Open               375 tee rows
    R2026011   THE PLAYERS Championship       391 tee rows
    R2026475   Valspar Championship           418 tee rows
+   R2026020   Texas Children's Houston Open  419 tee rows
+   R2026041   Valero Texas Open              404 tee rows
+   R2026014   Masters Tournament             290 tee rows
+   R2026012   RBC Heritage                   328 tee rows
+   R2026018   Zurich Classic of New Orleans  436 tee rows
+   R2026556   Cadillac Championship          288 tee rows
+   R2026480   Truist Championship            288 tee rows
+   R2026553   ONEflight Myrtle Beach Classic 398 tee rows
+   R2026033   PGA Championship               476 tee rows
+   R2026019   THE CJ CUP Byron Nelson        433 tee rows
+   R2026021   Charles Schwab Challenge       414 tee rows
+   R2026023   the Memorial Tournament presen 250 tee rows
+   R2026032   RBC Canadian Open              442 tee rows
+   R2026026   U.S. Open                      455 tee rows
+   R2026034   Travelers Championship         288 tee rows
+   R2026030   John Deere Classic             445 tee rows
+   R2026541   Genesis Scottish Open          454 tee rows
+   R2026518   ISCO Championship              420 tee rows
+   R2026100   The Open Championship          467 tee rows
+   R2026522   Corales Puntacana Championship 452 tee rows
+   R2026525   3M Open                        419 tee rows
+   R2026524   Rocket Classic                 294 tee rows
+  tee_sheet: 50471 rows over 135 events (+135 new)
