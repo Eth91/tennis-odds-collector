@@ -238,6 +238,19 @@ fullscan(){
   python3 wnba_context_report.py >/dev/null 2>&1 || true; }
 
 # exit 0 when a game is live or tips within ~75min -> switch to fast scratch polling
+# Sleep, but wake every second to look for a fresh @UnderdogWNBA ruling. The flag used to be
+# checked once per tick, so a ruling that landed just after a tick waited the full 25s (75s
+# cold) before anything happened — pure dead time on the one path where speed IS the edge.
+# The scan still runs in the LOOP, never in the watcher: one writer to the sqlite files.
+wait_trig(){
+  local n="$1" i=0
+  while [ "$i" -lt "$n" ]; do
+    [ -f /tmp/.force_fullscan ] && return 0
+    sleep 1; i=$((i+1))
+  done
+  return 0
+}
+
 in_hot(){ python3 hot_window.py >/dev/null 2>&1; }
 
 # liveness heartbeat: one parentless commit force-pushed to the `heartbeat` branch each cycle
@@ -300,7 +313,7 @@ while true; do i=$((i+1))
     # every 6 hot ticks (~2.5 min) instead of ~17 min. ~52s/pass on this box = ~35% duty,
     # hot windows only.
     if [ $((hot_ticks % 6)) -eq 0 ]; then echo "[$(date +%H:%M)] full scan (hot fast-probe)"; fullscan; fi
-    sleep 25
+    wait_trig 25
   else
     # COLD PATH: normal 75s cycle; heavy full scan every 25 cold iterations.
     if [ "$was_hot" != "0" ]; then echo "[$(date +%H:%M)] <<< COLD window (75s cycle)"; fi

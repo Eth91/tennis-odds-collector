@@ -151,6 +151,7 @@ def _uid(ids, ct0):
     url = (f"https://x.com/i/api/graphql/{ids['UserByScreenName']}/UserByScreenName"
            f"?variables={requests.utils.quote(json.dumps(var))}&features={requests.utils.quote(json.dumps(feat))}")
     r = requests.get(url, headers=_headers(ct0), timeout=15)
+    _note_rate_limit(r)
     if r.status_code in (401, 403):
         return "AUTH"
     try:
@@ -316,6 +317,40 @@ def run(test=False, force=False):
     print(f"underdog_watch: {len(tw)} tweets, {len(fresh)} new, {hits} injury hits")
 
 
+# X publishes its budget on every response: 50 requests per 15-min window for UserTweets.
+# We track what is left so the daemon can slow ITSELF down rather than discovering the limit
+# by getting 429'd — a rate-limited token looks exactly like a dead one, and this is the
+# rank-1 injury source, so it must never be the thing that breaks.
+_RL_REMAINING = None
+_RL_RESET = None
+
+
+def _note_rate_limit(r):
+    global _RL_REMAINING, _RL_RESET
+    try:
+        rem = r.headers.get("x-rate-limit-remaining")
+        rst = r.headers.get("x-rate-limit-reset")
+        if rem is not None:
+            _RL_REMAINING = int(rem)
+        if rst is not None:
+            _RL_RESET = int(rst)
+    except (TypeError, ValueError):
+        pass
+
+
+def _adaptive_sleep(base):
+    """Normally `base`. When the window is nearly spent, stretch to exactly cover the time
+    left in it, so we glide to the reset instead of slamming into a 429."""
+    import time as _t
+    if _RL_REMAINING is None or _RL_RESET is None:
+        return base
+    left = _RL_RESET - int(_t.time())
+    if left <= 0 or _RL_REMAINING > 8:
+        return base                      # plenty of budget — poll at full speed
+    need = left / float(max(1, _RL_REMAINING))
+    return max(base, min(need, 120.0))   # never slower than 2 min; never faster than base
+
+
 def loop(interval):
     """Persistent daemon: poll every `interval` seconds in ONE process (no per-poll process spawn),
     so it's light on the box even at 10s. Errors are swallowed so a transient X hiccup can't kill it."""
@@ -325,7 +360,7 @@ def loop(interval):
             run(force=True)
         except Exception as e:
             print("underdog_watch loop error:", str(e)[:120])
-        time.sleep(interval)
+        time.sleep(_adaptive_sleep(interval))
 
 
 if __name__ == "__main__":

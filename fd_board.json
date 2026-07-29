@@ -1,27 +1,4 @@
 {
- "captured_at": "2026-07-29T07:55:47Z",
- "matches": [
-  {
-   "event_id": 35879333,
-   "p1": "Jakub Kaczmarek",
-   "p2": "Kamil Smolka",
-   "p1_norm": "jakub kaczmarek",
-   "p2_norm": "kamil smolka",
-   "open_date": "2026-07-29T08:20:00.000Z",
-   "line": 78.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35879334,
-   "p1": "Marian Lebek",
-   "p2": "Marek Tkocz",
-   "p1_norm": "marian lebek",
-   "p2_norm": "marek tkocz",
-   "open_date": "2026-07-29T08:20:00.000Z",
-   "line": 75.5,
-   "over_odds": null,
-   "under_odds": null
-  }
- ]
+ "captured_at": "2026-07-29T08:01:08Z",
+ "matches": []
 }
