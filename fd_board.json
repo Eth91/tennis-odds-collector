@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T19:54:41Z",
+ "captured_at": "2026-07-29T20:01:02Z",
  "matches": [
   {
    "event_id": 35881204,
@@ -8,29 +8,7 @@
    "p1_norm": "oskar jadach",
    "p2_norm": "wojciech pytlas",
    "open_date": "2026-07-29T19:35:00.000Z",
-   "line": 93.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35881235,
-   "p1": "Kacper Kwiatkowski",
-   "p2": "Adam Staniczek",
-   "p1_norm": "kacper kwiatkowski",
-   "p2_norm": "adam staniczek",
-   "open_date": "2026-07-29T19:40:00.000Z",
-   "line": 84.5,
-   "over_odds": -115,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35881236,
-   "p1": "Marcin Kowalczyk",
-   "p2": "Kuba Golaszewski",
-   "p1_norm": "marcin kowalczyk",
-   "p2_norm": "kuba golaszewski",
-   "open_date": "2026-07-29T19:40:00.000Z",
-   "line": 74.5,
+   "line": 98.5,
    "over_odds": -130,
    "under_odds": -105
   },
@@ -41,9 +19,9 @@
    "p1_norm": "janus slawomir",
    "p2_norm": "jerzy michalik",
    "open_date": "2026-07-29T19:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 87.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35881273,
@@ -53,7 +31,7 @@
    "p2_norm": "pawel gasiorski",
    "open_date": "2026-07-29T20:00:00.000Z",
    "line": 71.5,
-   "over_odds": -116,
+   "over_odds": -118,
    "under_odds": -116
   },
   {
