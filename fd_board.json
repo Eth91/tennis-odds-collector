@@ -1,50 +1,6 @@
 {
- "captured_at": "2026-07-29T17:09:20Z",
+ "captured_at": "2026-07-29T17:14:34Z",
  "matches": [
-  {
-   "event_id": 35880835,
-   "p1": "Pawel Gasiorski",
-   "p2": "Wojciech Pytlas",
-   "p1_norm": "pawel gasiorski",
-   "p2_norm": "wojciech pytlas",
-   "open_date": "2026-07-29T16:50:00.000Z",
-   "line": 84.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35880841,
-   "p1": "Michal Machelski",
-   "p2": "Andriej Fomin",
-   "p1_norm": "michal machelski",
-   "p2_norm": "andriej fomin",
-   "open_date": "2026-07-29T16:55:00.000Z",
-   "line": 84.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35880842,
-   "p1": "Adrian Eliasz",
-   "p2": "Adrian Fabis",
-   "p1_norm": "adrian eliasz",
-   "p2_norm": "adrian fabis",
-   "open_date": "2026-07-29T16:55:00.000Z",
-   "line": 89.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
-  {
-   "event_id": 35880843,
-   "p1": "Jakub Kuzmicz",
-   "p2": "Patryk Jendrzejewski",
-   "p1_norm": "jakub kuzmicz",
-   "p2_norm": "patryk jendrzejewski",
-   "open_date": "2026-07-29T16:55:00.000Z",
-   "line": 88.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35880853,
    "p1": "Sebastian Juzek",
@@ -52,9 +8,9 @@
    "p1_norm": "sebastian juzek",
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-07-29T17:05:00.000Z",
-   "line": 80.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 58.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35880859,
@@ -63,9 +19,9 @@
    "p1_norm": "krzysztof juszczyk",
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-29T17:10:00.000Z",
-   "line": 71.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 72.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35880876,
@@ -121,6 +77,17 @@
    "line": 76.5,
    "over_odds": -110,
    "under_odds": -120
+  },
+  {
+   "event_id": 35880944,
+   "p1": "Mateusz Rutkowski",
+   "p2": "Jakub Kuzmicz",
+   "p1_norm": "mateusz rutkowski",
+   "p2_norm": "jakub kuzmicz",
+   "open_date": "2026-07-29T17:40:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
