@@ -1,38 +1,16 @@
 {
- "captured_at": "2026-07-29T20:39:52Z",
+ "captured_at": "2026-07-29T20:45:25Z",
  "matches": [
   {
-   "event_id": 35881346,
-   "p1": "Kamil Delikatny",
-   "p2": "Andriej Fomin",
-   "p1_norm": "kamil delikatny",
-   "p2_norm": "andriej fomin",
-   "open_date": "2026-07-29T20:30:00.000Z",
-   "line": 88.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35881347,
-   "p1": "Michal Skorski",
-   "p2": "Adrian Fabis",
-   "p1_norm": "michal skorski",
-   "p2_norm": "adrian fabis",
-   "open_date": "2026-07-29T20:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
-  {
-   "event_id": 35881348,
-   "p1": "Mateusz Rutkowski",
-   "p2": "Patryk Jendrzejewski",
-   "p1_norm": "mateusz rutkowski",
-   "p2_norm": "patryk jendrzejewski",
-   "open_date": "2026-07-29T20:30:00.000Z",
-   "line": 71.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "event_id": 35881320,
+   "p1": "Miroslaw Warzecha",
+   "p2": "Zbigniew Nocun",
+   "p1_norm": "miroslaw warzecha",
+   "p2_norm": "zbigniew nocun",
+   "open_date": "2026-07-29T20:20:00.000Z",
+   "line": 99.5,
+   "over_odds": -145,
+   "under_odds": 105
   },
   {
    "event_id": 35881384,
@@ -42,8 +20,8 @@
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-29T20:45:00.000Z",
    "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35881385,
@@ -52,9 +30,9 @@
    "p1_norm": "henryk tkaczyk",
    "p2_norm": "michal wolny",
    "open_date": "2026-07-29T20:45:00.000Z",
-   "line": 73.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35881406,
@@ -97,6 +75,17 @@
    "p2_norm": "kuba golaszewski",
    "open_date": "2026-07-29T21:05:00.000Z",
    "line": 80.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35881416,
+   "p1": "Wojciech Urban",
+   "p2": "Marian Lebek",
+   "p1_norm": "wojciech urban",
+   "p2_norm": "marian lebek",
+   "open_date": "2026-07-29T21:10:00.000Z",
+   "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
   }
