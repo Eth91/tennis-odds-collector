@@ -3,3 +3,8 @@ harvest: 102 new events (of 102 completed in [2025, 2024])
   Sony Open in Hawaii: 143 players, 436 rounds
   The American Express: 156 players, 536 rounds
   Farmers Insurance Open: 155 players, 446 rounds
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/ubuntu/tennis-odds-collector/pga_birdies.py", line 139, in harvest
+    con.executemany("INSERT OR REPLACE INTO birdie_rounds VALUES (?,?,?,?,?,?,?,?,?,?)",
+sqlite3.OperationalError: attempt to write a readonly database

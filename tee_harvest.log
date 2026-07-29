@@ -1,0 +1,118 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/ubuntu/tennis-odds-collector/pga_wave.py", line 99, in harvest_tees
+    con.executemany(
+sqlite3.OperationalError: attempt to write a readonly database
+   R2024016   The Sentry                     236 tee rows
+   R2024006   Sony Open in Hawaii            452 tee rows
+   R2024002   The American Express           535 tee rows
+   R2024004   Farmers Insurance Open         470 tee rows
+   R2024005   AT&T Pebble Beach Pro-Am       240 tee rows
+   R2024003   WM Phoenix Open                410 tee rows
+   R2024007   The Genesis Invitational       242 tee rows
+   R2024540   Mexico Open at Vidanta         394 tee rows
+   R2024010   Cognizant Classic in The Palm  424 tee rows
+   R2024009   Arnold Palmer Invitational pre 254 tee rows
+   R2024483   Puerto Rico Open               408 tee rows
+   R2024011   THE PLAYERS Championship       433 tee rows
+   R2024475   Valspar Championship           458 tee rows
+   R2024020   Texas Children's Houston Open  454 tee rows
+   R2024041   Valero Texas Open              476 tee rows
+   R2024014   Masters Tournament             298 tee rows
+   R2024012   RBC Heritage                   276 tee rows
+   R2024522   Corales Puntacana Championship 404 tee rows
+   R2024018   Zurich Classic of New Orleans  240 tee rows
+   R2024019   THE CJ CUP Byron Nelson        444 tee rows
+   R2024480   Wells Fargo Championship       272 tee rows
+   R2024553   Myrtle Beach Classic           404 tee rows
+   R2024033   PGA Championship               468 tee rows
+   R2024021   Charles Schwab Challenge       406 tee rows
+   R2024032   RBC Canadian Open              450 tee rows
+   R2024023   the Memorial Tournament presen 250 tee rows
+   R2024026   U.S. Open                      460 tee rows
+   R2024034   Travelers Championship         281 tee rows
+   R2024524   Rocket Mortgage Classic        461 tee rows
+   R2024030   John Deere Classic             466 tee rows
+   R2024541   Genesis Scottish Open          460 tee rows
+   R2024518   ISCO Championship              446 tee rows
+   R2024100   The Open Championship          473 tee rows
+   R2024472   Barracuda Championship         443 tee rows
+   R2024525   3M Open                        461 tee rows
+   R2024519   Men’s Olympic Golf Competition 239 tee rows
+   R2024013   Wyndham Championship           442 tee rows
+   R2024027   FedEx St. Jude Championship    280 tee rows
+   R2024028   BMW Championship               197 tee rows
+   R2024060   TOUR Championship              120 tee rows
+   R2024464   Procore Championship           418 tee rows
+   R2024500   Presidents Cup                 96 tee rows
+   R2024054   Sanderson Farms Championship   400 tee rows
+   R2024554   Black Desert Championship      401 tee rows
+   R2024047   Shriners Children's Open       396 tee rows
+   R2024527   ZOZO CHAMPIONSHIP              310 tee rows
+   R2024457   World Wide Technology Champion 376 tee rows
+   R2024528   Butterfield Bermuda Championsh 390 tee rows
+   R2024493   The RSM Classic                450 tee rows
+   R2024478   Hero World Challenge           80 tee rows
+   R2024088   PGA TOUR Q-School presented by 660 tee rows
+   R2024551   Grant Thornton Invitational    48 tee rows
+   R2025016   The Sentry                     236 tee rows
+   R2025006   Sony Open in Hawaii            436 tee rows
+   R2025002   The American Express           536 tee rows
+   R2025004   Farmers Insurance Open         449 tee rows
+   R2025005   AT&T Pebble Beach Pro-Am       316 tee rows
+   R2025003   WM Phoenix Open                417 tee rows
+   R2025007   The Genesis Invitational       252 tee rows
+   R2025540   Mexico Open at VidantaWorld    418 tee rows
+   R2025010   Cognizant Classic in The Palm  424 tee rows
+   R2025009   Arnold Palmer Invitational pre 246 tee rows
+   R2025483   Puerto Rico Open               420 tee rows
+   R2025011   THE PLAYERS Championship       432 tee rows
+   R2025475   Valspar Championship           462 tee rows
+   R2025020   Texas Children's Houston Open  443 tee rows
+   R2025041   Valero Texas Open              420 tee rows
+   R2025014   Masters Tournament             296 tee rows
+   R2025012   RBC Heritage                   288 tee rows
+   R2025522   Corales Puntacana Championship 404 tee rows
+   R2025018   Zurich Classic of New Orleans  464 tee rows
+   R2025019   THE CJ CUP Byron Nelson        452 tee rows
+   R2025480   Truist Championship            284 tee rows
+   R2025553   ONEflight Myrtle Beach Classic 402 tee rows
+   R2025033   PGA Championship               460 tee rows
+   R2025021   Charles Schwab Challenge       425 tee rows
+   R2025023   the Memorial Tournament presen 258 tee rows
+   R2025032   RBC Canadian Open              446 tee rows
+   R2025026   U.S. Open                      445 tee rows
+   R2025034   Travelers Championship         283 tee rows
+   R2025524   Rocket Classic                 484 tee rows
+   R2025030   John Deere Classic             439 tee rows
+   R2025541   Genesis Scottish Open          471 tee rows
+   R2025518   ISCO Championship              448 tee rows
+   R2025100   The Open Championship          452 tee rows
+   R2025472   Barracuda Championship         443 tee rows
+   R2025525   3M Open                        463 tee rows
+   R2025013   Wyndham Championship           460 tee rows
+   R2025027   FedEx St. Jude Championship    276 tee rows
+   R2025028   BMW Championship               195 tee rows
+   R2025060   TOUR Championship              120 tee rows
+   R2025464   Procore Championship           432 tee rows
+   R2025468   Ryder Cup                      88 tee rows
+   R2025054   Sanderson Farms Championship   398 tee rows
+   R2025527   Baycurrent Classic             312 tee rows
+   R2025554   Bank of Utah Championship      395 tee rows
+   R2025457   World Wide Technology Champion 390 tee rows
+   R2025528   Butterfield Bermuda Championsh 379 tee rows
+   R2025493   The RSM Classic                458 tee rows
+   R2025478   Hero World Challenge           80 tee rows
+   R2025088   PGA TOUR Q-School presented by 684 tee rows
+   R2025551   Grant Thornton Invitational    48 tee rows
+   R2026006   Sony Open in Hawaii            388 tee rows
+   R2026002   The American Express           536 tee rows
+   R2026004   Farmers Insurance Open         441 tee rows
+   R2026003   WM Phoenix Open                391 tee rows
+   R2026005   AT&T Pebble Beach Pro-Am       320 tee rows
+   R2026007   The Genesis Invitational       246 tee rows
+   R2026010   Cognizant Classic in The Palm  379 tee rows
+   R2026009   Arnold Palmer Invitational pre 245 tee rows
+   R2026483   Puerto Rico Open               375 tee rows
+   R2026011   THE PLAYERS Championship       391 tee rows
+   R2026475   Valspar Championship           418 tee rows
