@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T18:07:19Z",
+ "captured_at": "2026-07-29T18:12:29Z",
  "matches": [
   {
    "event_id": 35880986,
@@ -8,9 +8,9 @@
    "p1_norm": "jakub pruszkowski",
    "p2_norm": "krzysztof juszczyk",
    "open_date": "2026-07-29T18:00:00.000Z",
-   "line": 86.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 73.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35881001,
@@ -19,9 +19,9 @@
    "p1_norm": "adam staniczek",
    "p2_norm": "andriej fomin",
    "open_date": "2026-07-29T18:10:00.000Z",
-   "line": 70.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35881002,
@@ -30,9 +30,9 @@
    "p1_norm": "kuba golaszewski",
    "p2_norm": "adrian fabis",
    "open_date": "2026-07-29T18:10:00.000Z",
-   "line": 81.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 80.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35881022,
