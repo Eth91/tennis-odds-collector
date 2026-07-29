@@ -294,6 +294,7 @@ rw|798|Stumbles in loss
 rw|807|Posts double-double in road loss
 rw|807|Productive in loss to Mystics
 rw|807|Settling into starting lineup
+rw|809|Scoreless in 17 minutes
 rw|836|Inactive versus Liberty
 rw|852|Doesn't return Tuesday
 rw|852|Drops 22 points in blowout win
