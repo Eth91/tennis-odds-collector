@@ -103,25 +103,46 @@ def main():
             if n_ >= 2:
                 cfit[p_] = d_
         import pga_field as _PF, pga_e1 as _E1, statistics as _st
-        tt = _PF.tee_times()
-        if tt:
-            hrs = sorted(tt.values())
-            med = hrs[len(hrs) // 2]
-            for p_, t_ in tt.items():
-                wave[p_] = "am" if t_ <= med else "pm"
-            la, lo = _PF.coords()
-            if la is not None:
-                w_ = _E1.wind_hours(la, lo, days=3)
-                am = [_E1.exposure(w_, t_) for p_, t_ in tt.items() if wave.get(p_) == "am"]
-                pm = [_E1.exposure(w_, t_) for p_, t_ in tt.items() if wave.get(p_) == "pm"]
-                am = [x for x in am if x is not None]
-                pm = [x for x in pm if x is not None]
-                if am and pm:
-                    # ~0.04 strokes per km/h of wind gap (conservative; the plan's E1 thesis
-                    # is 0.5-1.5 strokes for a real wave split, which this reproduces)
-                    wshift = 0.04 * (_st.mean(pm) - _st.mean(am))
+        import pga_wave as _W, pga_birdies as _B
+        la, lo = _PF.coords()
+        wnote = "no orchestrator id"
+        tid_ = None
+        try:
+            tid_ = _B.tid_for_name(evn)
+        except Exception:                                          # noqa: BLE001
+            tid_ = None
+        if tid_:
+            # refresh THIS event's sheet every run: tee times post Tue/Wed and the whole
+            # point of reading the orchestrator is to see them the moment they land
+            try:
+                _W.harvest_tees(tids=[(tid_, evn)], verbose=False)
+            except Exception:                                      # noqa: BLE001
+                pass
+            wave, wshift, wnote = _W.wave_shift_for(tid_, lat=la, lon=lo)
+        if not wave:
+            # FALLBACK: ESPN's competitor stamp, which only fills in late. Uses the fitted
+            # beta, not the old 0.04 placeholder, so the degraded path is still defensible.
+            tt = _PF.tee_times()
+            if tt:
+                hrs = sorted(tt.values())
+                med = hrs[len(hrs) // 2]
+                for p_, t_ in tt.items():
+                    wave[p_] = "am" if t_ <= med else "pm"
+                if la is not None:
+                    w_ = _E1.wind_hours(la, lo, days=3)
+                    am = [_E1.exposure(w_, t_) for p_, t_ in tt.items()
+                          if wave.get(p_) == "am"]
+                    pm = [_E1.exposure(w_, t_) for p_, t_ in tt.items()
+                          if wave.get(p_) == "pm"]
+                    am = [x for x in am if x is not None]
+                    pm = [x for x in pm if x is not None]
+                    if am and pm:
+                        _f = _W.fit_wave(verbose=False)
+                        wshift = (_f.get("beta", 0.02) * (_st.mean(pm) - _st.mean(am))
+                                  + _f.get("intercept", 0.0))
+                        wnote = "ESPN fallback sheet"
         print(f"  ruler: course-fit players {len(cfit)}, wave split {len(wave)}, "
-              f"wave shift {wshift:+.2f} strokes")
+              f"wave shift {wshift:+.2f} strokes [{wnote}]")
     except Exception as _xe:
         print(f"  ruler: context unavailable ({str(_xe)[:40]})")
     sim = RU.simulate(R, field, course_fit=cfit, wave=wave,

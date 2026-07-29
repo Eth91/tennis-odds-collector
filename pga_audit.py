@@ -84,8 +84,26 @@ have = [(p, d) for p, (d, n) in fits if n >= 2]
 print("    course fit              : %d/%d players with >=2 rounds here, range %+.2f..%+.2f"
       % (len(have), len(field), min([d for _, d in have] or [0]), max([d for _, d in have] or [0])))
 tt = F.tee_times()
-print("    wave terms              : %d tee times known -> %s"
-      % (len(tt), "ACTIVE" if tt else "dormant until Tue/Wed release"))
+try:
+    import pga_wave as W
+    import pga_birdies as _B
+    wf = W.fit_wave(verbose=False)
+    tid_now = _B.tid_for_name(ev)
+    sheet = W.tees_for(tid_now) if tid_now else {}
+    print("    wave gap (fitted)       : beta %+.4f str per km/h  r=%s  n=%d event-rounds "
+          "over %d events  %s"
+          % (wf.get("beta") or 0,
+             ("%+.3f" % wf["r"]) if wf.get("r") is not None else "n/a",
+             wf.get("n_gaps") or 0, wf.get("events") or 0,
+             "ASSUMED" if wf.get("assumed") else "FITTED"))
+    if wf.get("mean_abs_gap"):
+        print("       mean |AM-PM| gap %.3f str, sd %.3f -> a real wave split is worth "
+              "about %.2f strokes" % (wf["mean_abs_gap"], wf.get("sd_gap") or 0,
+                                      wf["mean_abs_gap"]))
+    print("    tee sheet               : orchestrator %d players, ESPN %d -> %s"
+          % (len(sheet), len(tt), "ACTIVE" if sheet or tt else "not posted yet"))
+except Exception as _e:
+    print("    wave terms              : unavailable (%s)" % str(_e)[:60])
 
 # ---------------------------------------------------------------- 6. birdie bias
 print("\n[6] BIRDIE BIAS vs REAL FD LINES (the check that caught v1)")
