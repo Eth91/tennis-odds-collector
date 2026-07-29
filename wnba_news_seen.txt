@@ -176,6 +176,7 @@ rw|453|Scores nine points in loss
 rw|462|Cools off Wednesday
 rw|462|Drops 21 points against former team
 rw|481|Dominant in win Monday
+rw|481|Leads all scorers Tuesday
 rw|481|Posts 38 points in road loss
 rw|483|Paces Sky with 20 points
 rw|483|Stuffs stat sheet in defeat
