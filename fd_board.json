@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-29T20:34:51Z",
+ "captured_at": "2026-07-29T20:39:52Z",
  "matches": [
-  {
-   "event_id": 35881320,
-   "p1": "Miroslaw Warzecha",
-   "p2": "Zbigniew Nocun",
-   "p1_norm": "miroslaw warzecha",
-   "p2_norm": "zbigniew nocun",
-   "open_date": "2026-07-29T20:20:00.000Z",
-   "line": 73.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
   {
    "event_id": 35881346,
    "p1": "Kamil Delikatny",
@@ -19,9 +8,9 @@
    "p1_norm": "kamil delikatny",
    "p2_norm": "andriej fomin",
    "open_date": "2026-07-29T20:30:00.000Z",
-   "line": 75.5,
+   "line": 88.5,
    "over_odds": -115,
-   "under_odds": -115
+   "under_odds": -120
   },
   {
    "event_id": 35881347,
@@ -30,9 +19,9 @@
    "p1_norm": "michal skorski",
    "p2_norm": "adrian fabis",
    "open_date": "2026-07-29T20:30:00.000Z",
-   "line": 80.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 77.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35881348,
@@ -41,9 +30,9 @@
    "p1_norm": "mateusz rutkowski",
    "p2_norm": "patryk jendrzejewski",
    "open_date": "2026-07-29T20:30:00.000Z",
-   "line": 80.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 71.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35881384,
@@ -53,8 +42,8 @@
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-29T20:45:00.000Z",
    "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35881385,
@@ -86,6 +75,28 @@
    "p2_norm": "kazimierz rybak",
    "open_date": "2026-07-29T21:00:00.000Z",
    "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35881409,
+   "p1": "Janus Slawomir",
+   "p2": "Zbigniew Nocun",
+   "p1_norm": "janus slawomir",
+   "p2_norm": "zbigniew nocun",
+   "open_date": "2026-07-29T21:05:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35881411,
+   "p1": "Michal Skorski",
+   "p2": "Kuba Golaszewski",
+   "p1_norm": "michal skorski",
+   "p2_norm": "kuba golaszewski",
+   "open_date": "2026-07-29T21:05:00.000Z",
+   "line": 80.5,
    "over_odds": -118,
    "under_odds": -112
   }
