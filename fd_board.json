@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-29T16:27:13Z",
+ "captured_at": "2026-07-29T16:32:44Z",
  "matches": [
-  {
-   "event_id": 35880479,
-   "p1": "Michal Skorski",
-   "p2": "Marcin Kowalczyk",
-   "p1_norm": "michal skorski",
-   "p2_norm": "marcin kowalczyk",
-   "open_date": "2026-07-29T16:15:00.000Z",
-   "line": 85.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
   {
    "event_id": 35880482,
    "p1": "Rafal Gajda",
@@ -19,9 +8,20 @@
    "p1_norm": "rafal gajda",
    "p2_norm": "jakub kaczmarek",
    "open_date": "2026-07-29T16:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 81.5,
+   "over_odds": -120,
+   "under_odds": -115
+  },
+  {
+   "event_id": 35880486,
+   "p1": "Jakub Pruszkowski",
+   "p2": "Mariusz Koczyba",
+   "p1_norm": "jakub pruszkowski",
+   "p2_norm": "mariusz koczyba",
+   "open_date": "2026-07-29T16:25:00.000Z",
+   "line": 88.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35880685,
@@ -66,6 +66,39 @@
    "line": 75.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35880841,
+   "p1": "Michal Machelski",
+   "p2": "Andriej Fomin",
+   "p1_norm": "michal machelski",
+   "p2_norm": "andriej fomin",
+   "open_date": "2026-07-29T16:55:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35880842,
+   "p1": "Adrian Eliasz",
+   "p2": "Adrian Fabis",
+   "p1_norm": "adrian eliasz",
+   "p2_norm": "adrian fabis",
+   "open_date": "2026-07-29T16:55:00.000Z",
+   "line": 81.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35880843,
+   "p1": "Jakub Kuzmicz",
+   "p2": "Patryk Jendrzejewski",
+   "p1_norm": "jakub kuzmicz",
+   "p2_norm": "patryk jendrzejewski",
+   "open_date": "2026-07-29T16:55:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
