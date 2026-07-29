@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T10:14:56Z",
+ "captured_at": "2026-07-29T10:19:36Z",
  "matches": [
   {
    "event_id": 35879534,
@@ -8,9 +8,9 @@
    "p1_norm": "michal minda",
    "p2_norm": "stapor rafal",
    "open_date": "2026-07-29T10:05:00.000Z",
-   "line": 98.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 103.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35879543,
@@ -19,9 +19,9 @@
    "p1_norm": "mariusz zwolinski",
    "p2_norm": "adrian myszewski",
    "open_date": "2026-07-29T10:10:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35879544,
@@ -30,7 +30,7 @@
    "p1_norm": "michal durda",
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-07-29T10:10:00.000Z",
-   "line": 78.5,
+   "line": 79.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -53,8 +53,8 @@
    "p2_norm": "krystian kolodziej",
    "open_date": "2026-07-29T10:25:00.000Z",
    "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35879570,
