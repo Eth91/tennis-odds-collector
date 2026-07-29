@@ -43,6 +43,7 @@ N1_PILOT = True
 # NBA-validated cold-start cell (proj-line margin >=5 -> 63.7-67.8%, +17-24% ROI on 1,345
 # flags). ⚡COLD alert + CLV shadow (tier='n0_cold') ONLY — never the firm record.
 N0_COLD = True
+USG_SHADOW = True     # ⚡USG n<=2 usage-bump shadow (board+CLV only, never pings/record)
 
 HERE = Path(__file__).resolve().parent
 SEEN = HERE / "wnba_notified.txt"
@@ -142,6 +143,7 @@ def collect():
                 outs_by_team[(sdate, p["team"])].append((name, p))
 
     alerts, preds, proj_rows, cold_spots = [], [], [], []
+    usg_spots = []                                   # ⚡USG shadows (board + CLV only)
     n1_spots = []                                    # ⚡1G speed pilots -> board (they PING)
     _band_shadowed = set()
     _band_seen = {}
@@ -266,6 +268,58 @@ def collect():
                 cands = [(W.wowy(blog, ol), nm) for (nm, _), ol in zip(outs, out_logs)]
                 w = max(cands, key=lambda x: x[0]["n_without"])[0]
             n1 = (w["n_without"] == 1)                     # first-occurrence speed-pilot tier (below)
+            # ── ⚡USG SHADOW (2026-07-29, user; the "Ionescu hole") ── n=1/n=2 without-samples
+            # showing a real USAGE bump (FGA+FTA >= +3) with or without a minutes bump. The firm
+            # engine cannot see these (elevated basis needs n>=3; its fallback is minutes-scaled
+            # season rates ~= the book's line). Backtest: the cell is 1-0 ALL-TIME at tip lines —
+            # unvalidatable from history, so this accrues FORWARD evidence only: board + CLV
+            # shadow, never a ping, never the record. Points only.
+            try:
+                _nwo = w["n_without"]
+                if USG_SHADOW and _nwo in (1, 2):
+                    _vw = ((w["with"].get("fga") or {}).get("mean") or 0) + \
+                          ((w["with"].get("fta") or {}).get("mean") or 0)
+                    _vo = ((w["without"].get("fga") or {}).get("mean") or 0) + \
+                          ((w["without"].get("fta") or {}).get("mean") or 0)
+                    _dvol = _vo - _vw
+                    if _dvol >= 3.0 and _vw > 0:
+                        _sv = [(g["fga"] + g["fta"], g["pts"]) for g in blog if g["min"] > 8]
+                        _tvol = sum(x for x, _ in _sv)
+                        if len(_sv) >= 5 and _tvol > 0:
+                            _pps = sum(pt for _, pt in _sv) / _tvol   # season pts per FGA+FTA
+                            _proj = _pps * _vo
+                            _sig = max(st.pstdev([pt for _, pt in _sv]), 4.0)
+                            _pn = T.posted_props(n)
+                            _best = None
+                            for _ln, _pair in ((_pn or {}).get("points") or {}).items():
+                                _od = _pair[0]
+                                if not _od or _od < 1.05:
+                                    continue
+                                _pp = T._norm_sf((_ln - _proj) / _sig)
+                                _e2 = _pp * _od - 1
+                                if _pp >= (1 / _od) + 0.02 and (_best is None or _e2 > _best["ev"]):
+                                    _best = {"stat": "points", "line": _ln, "dec": _od,
+                                             "side": "over", "hit": round(_pp, 3),
+                                             "ev": round(_e2, 3), "elev_avg": round(_proj, 1),
+                                             "season_avg": v["pts"], "stale": False, "n": _nwo,
+                                             "d_min": round((w["without"]["min"]["mean"] or 0)
+                                                            - (w["with"]["min"]["mean"] or 0), 1),
+                                             "d_vol": round(_dvol, 1)}
+                            if _best:
+                                if _pn:
+                                    CLV.log_shadow(slate_date, n, out_full, {"points": _proj},
+                                                   _pn, tip=tips_by[slate_date].get(team),
+                                                   tier="usg")
+                                usg_spots.append({"player": n, "team": team, "star": out_full,
+                                                  "status": "OUT", "sit": 1.0, "lead": None,
+                                                  "conf": T.starter_label(n, team, starters, 0),
+                                                  "date": slate_date, "usg": True, **_best})
+                                print(f"⚡USG shadow: {n} pts o{_best['line']:g} "
+                                      f"proj {_proj:.1f} (vol {_vw:.1f}->{_vo:.1f}, "
+                                      f"n={_nwo}, dmin {_best['d_min']:+g})")
+            except Exception as _ue:
+                print(f"usg shadow skipped: {str(_ue)[:60]}")
+
             if w["n_without"] < 1:
                 # ── COLD-START n=0 ── the team has never played without this star. Only a
                 # RotoWire-NAMED promoted starter qualifies (that answers "which of the two
@@ -716,6 +770,7 @@ def collect():
         print(f"tomorrow watchlist skipped: {str(e)[:80]}")
     watch += n1_spots                                    # ⚡1G pilots -> dashboard (they ping)
     watch += cold_spots                                  # ⚡COLD spots -> dashboard too
+    watch += usg_spots                                   # ⚡USG shadows -> dashboard (no ping)
     watch += list(_band_seen.values())                   # ⚡BAND shadows -> dashboard (no ping)
     watch += list(_tmrw_seen.values())                   # next-day CONTINGENT spots -> dashboard
 
@@ -733,6 +788,7 @@ def collect():
     _fold(_tmrw_seen.values(), "contingent")
     _fold(n1_spots, "n1", band_gate=False)               # pilots are out-of-band by nature
     _fold(cold_spots, "cold")
+    _fold(usg_spots, "usg", band_gate=False)             # usage shadows are out-of-band by design
     _fold(_band_seen.values(), "band", band_gate=False)  # band = out-of-band by definition
 
     # STAR WATCH (2026-07-19, user): Q/Out top-scorers the WOWY CAN'T project (a star who's barely
