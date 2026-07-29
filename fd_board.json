@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-29T14:11:28Z",
+ "captured_at": "2026-07-29T14:18:05Z",
  "matches": [
-  {
-   "event_id": 35880181,
-   "p1": "Rafal Gajda",
-   "p2": "Krzysztof Hetnar",
-   "p1_norm": "rafal gajda",
-   "p2_norm": "krzysztof hetnar",
-   "open_date": "2026-07-29T13:55:00.000Z",
-   "line": 89.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
   {
    "event_id": 35880200,
    "p1": "Kacper Petas",
@@ -19,9 +8,9 @@
    "p1_norm": "kacper petas",
    "p2_norm": "krystian kolodziej",
    "open_date": "2026-07-29T14:10:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 73.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35880208,
@@ -30,9 +19,9 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "adam linek",
    "open_date": "2026-07-29T14:15:00.000Z",
-   "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 77.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35880215,
@@ -88,6 +77,39 @@
    "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35880252,
+   "p1": "Mariusz Zwolinski",
+   "p2": "Artur Szoltysek",
+   "p1_norm": "mariusz zwolinski",
+   "p2_norm": "artur szoltysek",
+   "open_date": "2026-07-29T14:40:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35880253,
+   "p1": "Michal Durda",
+   "p2": "Kamil Kowalski",
+   "p1_norm": "michal durda",
+   "p2_norm": "kamil kowalski",
+   "open_date": "2026-07-29T14:40:00.000Z",
+   "line": 68.5,
+   "over_odds": -102,
+   "under_odds": -130
+  },
+  {
+   "event_id": 35880258,
+   "p1": "Jakub Kaczmarek",
+   "p2": "Schaniel Krzysztof",
+   "p1_norm": "jakub kaczmarek",
+   "p2_norm": "schaniel krzysztof",
+   "open_date": "2026-07-29T14:45:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
