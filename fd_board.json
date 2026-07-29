@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T18:55:15Z",
+ "captured_at": "2026-07-29T19:00:54Z",
  "matches": [
   {
    "event_id": 35881076,
@@ -8,9 +8,9 @@
    "p1_norm": "miroslaw warzecha",
    "p2_norm": "janus slawomir",
    "open_date": "2026-07-29T18:45:00.000Z",
-   "line": 78.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 68.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35881077,
@@ -19,9 +19,9 @@
    "p1_norm": "mariusz koczyba",
    "p2_norm": "krzysztof juszczyk",
    "open_date": "2026-07-29T18:45:00.000Z",
-   "line": 80.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 91.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35881109,
@@ -30,9 +30,9 @@
    "p1_norm": "michal skorski",
    "p2_norm": "kuba golaszewski",
    "open_date": "2026-07-29T18:55:00.000Z",
-   "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 81.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35881110,
@@ -41,9 +41,9 @@
    "p1_norm": "kamil delikatny",
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-29T18:55:00.000Z",
-   "line": 75.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 82.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35881165,
