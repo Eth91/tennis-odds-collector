@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T07:39:54Z",
+ "captured_at": "2026-07-29T07:44:49Z",
  "matches": [
   {
    "event_id": 35879291,
@@ -33,6 +33,28 @@
    "line": 71.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35879295,
+   "p1": "Mariusz Zwolinski",
+   "p2": "Blazej Warpas",
+   "p1_norm": "mariusz zwolinski",
+   "p2_norm": "blazej warpas",
+   "open_date": "2026-07-29T08:10:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35879296,
+   "p1": "Piotr Gumulinski",
+   "p2": "Lukasz Oracz",
+   "p1_norm": "piotr gumulinski",
+   "p2_norm": "lukasz oracz",
+   "open_date": "2026-07-29T08:10:00.000Z",
+   "line": 79.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
