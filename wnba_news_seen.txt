@@ -55,6 +55,7 @@ rw|1043|Off injury report
 rw|1043|Out Tuesday
 rw|1043|Ruled out Wednesday
 rw|1045|Racks up 13 points in victory
+rw|1047|Ends with 11 points Tuesday
 rw|1047|Records double-double in home loss
 rw|1047|Season-high 11 rebounds
 rw|1048|Crowned 3-Point Contest champ
