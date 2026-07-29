@@ -93,6 +93,33 @@ def main():
                                          r.get("runnerName") or "?", r.get("handicap"),
                                          round(float(odds), 4)))
         con.commit()
+        # COUPON-HYDRATION WATCH (2026-07-29): the pga page's "Birdies or Better" module
+        # (id 2240) carries coupons that are isCollapsed:true = content withheld from every
+        # API shape we could name (~30 tried, both .com and .ca hosts). The default tab's
+        # coupons sit isCollapsed:false + hasAttachments:true = hydrated inline — FD flips
+        # this server-side when a tab is promoted (typically Wed). Watch the flip: the
+        # moment ANY birdie-module coupon uncollapses, the same page fetch will contain the
+        # markets and this collector captures them automatically — announce it loudly.
+        try:
+            mods = []
+            def _wm(o):
+                if isinstance(o, dict):
+                    if o.get("type") == "COUPON" and "irdie" in str(o.get("title", "")):
+                        mods.append(o)
+                    for v in o.values():
+                        _wm(v)
+                elif isinstance(o, list):
+                    for v in o:
+                        _wm(v)
+            _wm(d0)
+            for mo in mods:
+                open_c = [c.get("id") for c in mo.get("coupons") or []
+                          if not c.get("isCollapsed")]
+                if open_c or mo.get("hasAttachments"):
+                    print(f"golf trap: 🐦 BIRDIES COUPON HYDRATING (module {mo.get('id')}, "
+                          f"open coupons {open_c}) — markets should land this pass or next")
+        except Exception:
+            pass
         if new_types:
             print(f"golf trap: NEW MARKET TYPES seen: {sorted(new_types)[:6]}")
             if any("BIRD" in t.upper() for t in new_types):
