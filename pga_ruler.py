@@ -38,7 +38,10 @@ HALF_LIFE_D = 120.0     # recency half-life for the rating (form vs ability bala
 K_SHRINK = 12.0         # pseudo-rounds of field-average shrinkage
 RHO = 0.25              # share of round variance that is player-week form (round dependence)
 SIG_SHRINK = 20.0       # rounds of shrinkage of player sd toward the global sd
-MIN_ROUNDS = 8          # below this a player prices as field-average (wide sigma)
+MIN_ROUNDS = 20         # user 2026-07-29: '20 rounds or less is a good rule'. Below
+                        # this a rating is HALVED toward field-average and sigma widens
+                        # — it still prices (Koivun at 46 rounds is genuinely good and
+                        # unaffected), it just stops speaking with unearned confidence.
 
 
 def _get(url):
@@ -88,11 +91,35 @@ def fit(asof=None):
         by_er[(eid, rnd)].append(sc)
     fmean = {k: st.mean(v) for k, v in by_er.items() if len(v) >= 20}
     ref = dt.date.fromisoformat(asof[:10]) if asof != "9999" else dt.date.today()
+
+    # TWO-PASS FIELD-STRENGTH CORRECTION (2026-07-29 audit, blindness #4). Ratings are
+    # strokes-vs-field-mean, so beating a Korn-Ferry-grade field by 2 counted the same as
+    # beating a signature field by 2 — opposite-field regulars were systematically
+    # flattered. Pass 1 = the naive fit; pass 2 subtracts each event-round's OWN field
+    # quality (the mean pass-1 rating of everyone who teed off in it), so the baseline a
+    # player is measured against reflects who he actually played.
+    prov = {}
+    tmp = defaultdict(list)
+    for eid, date, nm, rnd, sc in rows:
+        fm = fmean.get((eid, rnd))
+        if fm is not None:
+            tmp[nm].append(sc - fm)
+    for nm, v in tmp.items():
+        prov[nm] = st.mean(v) * len(v) / (len(v) + K_SHRINK)
+    fq = defaultdict(list)
+    for eid, date, nm, rnd, sc in rows:
+        if nm in prov:
+            fq[(eid, rnd)].append(prov[nm])
+    fieldq = {k: st.mean(v) for k, v in fq.items() if len(v) >= 20}
+
     per = defaultdict(list)
     for eid, date, nm, rnd, sc in rows:
         fm = fmean.get((eid, rnd))
         if fm is None:
             continue
+        # a round's baseline is its field mean OFFSET by that field's quality: a strong
+        # field's mean score is low because the field is strong, not because it was easy.
+        fm = fm - fieldq.get((eid, rnd), 0.0)
         try:
             age = (ref - dt.date.fromisoformat(date)).days
         except ValueError:
@@ -122,7 +149,7 @@ def _phi(z):
     return 0.5 * (1.0 + math.erf(z / math.sqrt(2)))
 
 
-def matchup_prob(R, a, b, rounds=1):
+def matchup_prob(R, a, b, rounds=1, course_fit=None):
     """P(A beats B) over `rounds` rounds, ties excluded (two-way no-push price).
     The player-week effect is fresh each event, so it adds variance but cancels nothing."""
     ra = R.get(norm(a)) or R.get(a)
@@ -130,22 +157,38 @@ def matchup_prob(R, a, b, rounds=1):
     if not ra or not rb:
         return None
     (ma, sa, _), (mb, sb, _) = ra, rb
+    cf = course_fit or {}
+    ma = ma + cf.get(a, cf.get(norm(a), 0.0))
+    mb = mb + cf.get(b, cf.get(norm(b), 0.0))
     mu = (mb - ma) * rounds
     var = rounds * (sa * sa + sb * sb) + RHO * (sa * sa + sb * sb) * (rounds - 1)
     return _phi(mu / math.sqrt(max(var, 1e-6)))
 
 
-def simulate(R, field, n_sims=8000, seed=7):
+def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
+             wave_shift=0.0):
     """Win/top5/10/20/make-cut probs via MC: 4 rounds, player-week effect, top-70 cut."""
     import numpy as np
     rng = np.random.default_rng(seed)
     names = [p for p in field if (norm(p) in R or p in R)]
-    mus = np.array([(R.get(norm(p)) or R[p])[0] for p in names])
+    # COURSE FIT (blindness #3): per-player strokes/round adjustment at THIS venue,
+    # already shrunk by pga_context (course history is the most over-claimed golf edge).
+    cf = course_fit or {}
+    mus = np.array([(R.get(norm(p)) or R[p])[0] + cf.get(p, cf.get(norm(p), 0.0))
+                    for p in names])
     sig = np.array([(R.get(norm(p)) or R[p])[1] for p in names])
     k = len(names)
     if k < 30:
         return {}
     wk = rng.normal(0, sig * math.sqrt(RHO), (n_sims, k))
+    # WAVE-CORRELATED CUT (blindness #5): a windy wave misses the cut TOGETHER. Adding a
+    # shared per-wave shift makes the cut line correlate within wave instead of treating
+    # 143 players as independent draws — which is what made make-cut and top-N prices
+    # over-confident in the tails.
+    if wave and wave_shift:
+        wv = np.array([1.0 if wave.get(p, wave.get(norm(p), "am")) == "pm" else -1.0
+                       for p in names])
+        wk = wk + (wave_shift / 2.0) * wv[None, :]
     # per-player sigma must broadcast across the ROUND axis; numpy cannot align a
     # (k,) scale against (n_sims, k, 4), so draw unit normals and scale explicitly.
     eps = rng.normal(0, 1, (n_sims, k, 4)) * (sig * math.sqrt(1 - RHO))[None, :, None]
@@ -162,6 +205,55 @@ def simulate(R, field, n_sims=8000, seed=7):
                   "top20": float((order[:, i] < 20).mean()),
                   "cut": float(made[:, i].mean())}
     return out
+
+
+def walk_forward(seasons=(2025, 2026), verbose=True):
+    """Validation that does NOT wait on odds. G2 needs settled matchup closes and sat at
+    n=3 for weeks, which makes it unfalsifiable today. This scores the ruler against actual
+    ROUND SCORES it never saw: for each event, fit strictly as-of its start date, then
+    measure how well the predicted score ordering holds. Reported as pairwise accuracy
+    (share of same-round player pairs where the better-rated player actually shot lower)
+    plus RMSE against the field-relative score."""
+    con = sqlite3.connect(DB)
+    evs = con.execute("SELECT event_id, MIN(date) d, event FROM rounds GROUP BY event_id "
+                      "HAVING d >= ? ORDER BY d", ("%d-01-01" % min(seasons),)).fetchall()
+    con.close()
+    import random
+    random.seed(11)
+    hits = tot = 0
+    errs = []
+    for eid, d0, ev in evs:
+        R, _ = fit(asof=d0)
+        Rn = {norm(k): v for k, v in R.items()}
+        con = sqlite3.connect(DB)
+        rows = con.execute("SELECT player, rnd, score FROM rounds WHERE event_id=?",
+                           (eid,)).fetchall()
+        con.close()
+        by_r = defaultdict(list)
+        for pl, rnd, sc in rows:
+            r = Rn.get(norm(pl))
+            if r:
+                by_r[rnd].append((pl, r[0], sc))
+        for rnd, lst in by_r.items():
+            if len(lst) < 20:
+                continue
+            fm = st.mean(x[2] for x in lst)
+            for pl, rt, sc in lst:
+                errs.append((sc - fm) - rt)
+            pairs = [(random.choice(lst), random.choice(lst)) for _ in range(60)]
+            for (p1, r1, s1), (p2, r2, s2) in pairs:
+                if p1 == p2 or s1 == s2 or abs(r1 - r2) < 0.15:
+                    continue
+                tot += 1
+                if (r1 < r2) == (s1 < s2):
+                    hits += 1
+    acc = hits / tot if tot else 0.0
+    rmse = (sum(e * e for e in errs) / len(errs)) ** 0.5 if errs else 0.0
+    if verbose:
+        print(f"  WALK-FORWARD (as-of fits, {len(evs)} events, no odds needed):")
+        print(f"    pairwise ordering accuracy {acc:.3f} on {tot} pairs  (0.5 = worthless)")
+        print(f"    field-relative score RMSE  {rmse:.2f} strokes over {len(errs)} rounds")
+    return acc, rmse, tot
 
 
 def g2_gate(verbose=True):

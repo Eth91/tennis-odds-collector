@@ -121,25 +121,64 @@ def harvest(max_events=None):
     con.close()
 
 
-def rates():
-    """{player: {par: shrunk_rate}} + field rates. Recency not weighted in v1 — birdie
-    ability is stabler than form, and 2026-only data is already a form window."""
+def rates(course_factor=1.0, wind_kmh=None, half_life_d=120.0):
+    """{player: {par: rate}} + field rates, with RECENCY WEIGHTING and context.
+
+    course_factor  multiplies every rate (1.0 = neutral). Comes from pga_context, which
+                   measured a 0.78x-1.29x spread between courses BEYOND their par mix —
+                   larger than any player edge, so pricing a course as average was the
+                   single biggest error in the v1 birdie model.
+    wind_kmh       shades rates by pga_context.wind_factor for the player's exposure.
+    half_life_d    recency weight on rounds. v1 was unweighted on the theory that birdie
+                   ability is stabler than form; that is a claim, not a finding, and the
+                   ruler already weights, so the two now agree.
+    """
     con = sqlite3.connect(DB)
-    field = {3: [0, 0], 4: [0, 0], 5: [0, 0]}
+    field = {3: [0.0, 0.0], 4: [0.0, 0.0], 5: [0.0, 0.0]}
     per = {}
-    for pl, p3h, p3b, p4h, p4b, p5h, p5b in con.execute(
-            "SELECT player, SUM(p3h), SUM(p3b), SUM(p4h), SUM(p4b), SUM(p5h), SUM(p5b) "
-            "FROM birdie_rounds GROUP BY player"):
-        per[pl] = {3: (p3h, p3b), 4: (p4h, p4b), 5: (p5h, p5b)}
-        for par, (h, b) in per[pl].items():
-            field[par][0] += h
-            field[par][1] += b
+    # recency weight per event = 0.5 ** (age_days / half_life); event date via rounds table
+    ed = {}
+    try:
+        for tid, tn in con.execute("SELECT DISTINCT tid, tname FROM birdie_rounds"):
+            r = con.execute("SELECT MIN(date) FROM rounds WHERE LOWER(event) LIKE ?",
+                            ("%" + str(tn or "")[:14].lower() + "%",)).fetchone()
+            ed[tid] = (r or [None])[0]
+    except Exception:                                              # noqa: BLE001
+        pass
+    today = dt.date.today()
+    acc = {}
+    for tid, pl, p3h, p3b, p4h, p4b, p5h, p5b in con.execute(
+            "SELECT tid, player, SUM(p3h), SUM(p3b), SUM(p4h), SUM(p4b), SUM(p5h), SUM(p5b) "
+            "FROM birdie_rounds GROUP BY tid, player"):
+        w = 1.0
+        d = ed.get(tid)
+        if d:
+            try:
+                w = 0.5 ** (max((today - dt.date.fromisoformat(d)).days, 0) / half_life_d)
+            except ValueError:
+                w = 1.0
+        a = acc.setdefault(pl, {3: [0.0, 0.0], 4: [0.0, 0.0], 5: [0.0, 0.0]})
+        for par, (h, b) in ((3, (p3h, p3b)), (4, (p4h, p4b)), (5, (p5h, p5b))):
+            a[par][0] += (h or 0) * w
+            a[par][1] += (b or 0) * w
+            field[par][0] += (h or 0) * w
+            field[par][1] += (b or 0) * w
+    for pl, a in acc.items():
+        per[pl] = {par: (v[0], v[1]) for par, v in a.items()}
     con.close()
     frate = {par: (b / h if h else 0.15) for par, (h, b) in field.items()}
+    ctx = float(course_factor or 1.0)
+    if wind_kmh is not None:
+        try:
+            import pga_context as _C
+            ctx *= _C.wind_factor(wind_kmh)
+        except Exception:                                          # noqa: BLE001
+            pass
     out = {}
     for pl, agg in per.items():
-        out[pl] = {par: (b + K_H * frate[par]) / (h + K_H) for par, (h, b) in agg.items()}
-    return out, frate
+        out[pl] = {par: min(((b + K_H * frate[par]) / (h + K_H)) * ctx, 0.95)
+                   for par, (h, b) in agg.items()}
+    return out, {par: min(v * ctx, 0.95) for par, v in frate.items()}
 
 
 # ---------------------------------------------------------------------------

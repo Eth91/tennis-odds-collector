@@ -56,7 +56,16 @@ def main():
                 a, b = sum(rs), sum(os_)                  # both missed the cut
                 res = "W" if a < b else ("L" if a > b else "P")
             elif state == "post":
-                res = "V"                                 # WD/short data -> void, honestly
+                # WD RULE (2026-07-29): FanDuel voids a matchup only if a player never
+                # STARTS. Once both have a round on the board, a mid-event WD loses to the
+                # completer. v1 voided all of these, which quietly under-counted real
+                # losses and flattered the paper record.
+                if len(rs) >= 1 and len(os_) >= 4:
+                    res = "L"
+                elif len(os_) >= 1 and len(rs) >= 4:
+                    res = "W"
+                else:
+                    res = "V"
         if res is None:
             continue
         pnl = (odds - 1) if res == "W" else (-1.0 if res == "L" else 0.0)
