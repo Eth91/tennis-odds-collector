@@ -122,7 +122,7 @@ push(){
   # dropped on the VM migration). `git add -A -f` force-re-adds it every cycle despite the
   # ignore -> committing/hashing 100MB every 75s + git auto-gc repacking those blobs = the
   # swap-thrash. Unstage it here each cycle (keeps -f for the small caches the digests need).
-  git rm --cached -q wnba_lines.sqlite wnba_glog_cache.json fanduel_props.sqlite fanduel_props.bak.sqlite tt.sqlite tt.sqlite-wal tt.sqlite-shm wnba_ledger.sqlite wnba_proj_log.sqlite wnba_clv.sqlite 2>/dev/null || true
+  git rm --cached -q wnba_lines.sqlite wnba_glog_cache.json fanduel_props.sqlite fanduel_props.bak.sqlite tt.sqlite tt.sqlite-wal tt.sqlite-shm wnba_ledger.sqlite wnba_proj_log.sqlite wnba_clv.sqlite pga_model.sqlite 2>/dev/null || true
   # NOTE: use `|| true`, NOT `|| return 0`. Since wnba_lines.sqlite (the file that changed every
   # cycle) is now excluded, many cycles have "nothing to commit" — returning early there SKIPS the
   # push, so any already-committed-but-unpushed commits (e.g. a fresh dashboard from fullscan, or a

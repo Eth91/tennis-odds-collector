@@ -47,6 +47,60 @@ def main():
                                 (ts, ev, mname, mtype, r.get("runnerName") or "?",
                                  r.get("handicap"), round(float(odds), 4)))
                     n += 1
+
+    # DISCOVERY TRAP (2026-07-29): the user sees a birdies-or-better market in-app
+    # ($2,880 limit) that none of the page slugs above have EVER returned. Sweep the
+    # busiest current event's event-page across candidate tabs, store what appears, and
+    # shout on any marketType never seen before — so the day FD posts it, we have it.
+    try:
+        seenf = HERE / ".golf_mtypes_seen.json"
+        try:
+            seen = set(json.loads(seenf.read_text()))
+        except Exception:
+            seen = set()
+        row = con.execute("SELECT event, COUNT(*) c FROM golf_lines WHERE collected_at=? "
+                          "AND event LIKE '%PGA%' GROUP BY event ORDER BY c DESC LIMIT 1",
+                          (ts,)).fetchone()
+        d0 = get(f"https://sbapi.ny.sportsbook.fanduel.com/api/content-managed-page?"
+                 f"page=CUSTOM&customPageId=pga&pbHorizontal=false&_ak={AK}"
+                 f"&timezone=America%2FNew_York")
+        evs0 = (d0.get("attachments") or {}).get("events") or {}
+        eid0 = next((k for k, v in evs0.items()
+                     if row and (v.get("name") or "").strip() == row[0].strip()),
+                    next(iter(evs0), None))
+        new_types = set()
+        if eid0:
+            for tab in ("", "player-props", "props", "specials", "scoring", "performances",
+                        "round-1", "round-leader", "to-make-the-cut", "player-performance"):
+                tq = f"&tab={tab}" if tab else ""
+                try:
+                    e2 = get(f"https://sbapi.ny.sportsbook.fanduel.com/api/event-page?"
+                             f"eventId={eid0}{tq}&_ak={AK}&timezone=America%2FNew_York")
+                except Exception:
+                    continue
+                att2 = e2.get("attachments") or {}
+                evn2 = ((att2.get("events") or {}).get(str(eid0)) or {}).get("name") or "?"
+                for m in (att2.get("markets") or {}).values():
+                    mt2 = m.get("marketType") or "?"
+                    if mt2 not in seen:
+                        new_types.add(mt2)
+                    for r in m.get("runners") or []:
+                        odds = (((r.get("winRunnerOdds") or {}).get("trueOdds") or {})
+                                .get("decimalOdds") or {}).get("decimalOdds")
+                        if odds:
+                            con.execute("INSERT INTO golf_lines VALUES (?,?,?,?,?,?,?)",
+                                        (ts, evn2, m.get("marketName") or "?", mt2,
+                                         r.get("runnerName") or "?", r.get("handicap"),
+                                         round(float(odds), 4)))
+        con.commit()
+        if new_types:
+            print(f"golf trap: NEW MARKET TYPES seen: {sorted(new_types)[:6]}")
+            if any("BIRD" in t.upper() for t in new_types):
+                print("golf trap: 🐦 BIRDIES MARKET CAPTURED — the pricer can start calibrating")
+        seen |= new_types
+        seenf.write_text(json.dumps(sorted(seen)))
+    except Exception as _te:
+        print(f"golf trap skipped: {str(_te)[:60]}")
     con.commit()
     print(f"golf_collect {ts}: {n} rows")
 

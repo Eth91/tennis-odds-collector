@@ -116,6 +116,46 @@ def main():
                 preview.append({"stream": "E3-top%d" % N, "runner": run, "market": mt,
                                 "odds": od, "edge": round(ours - fair, 3)})
 
+    # ---- birdies-or-better (Poisson-binomial; its own gate — currently zero captured
+    # FD rows, so structurally preview-only until the trap catches the market) ----
+    try:
+        import pga_birdies as B
+        b_armed, _bn = B.birdie_gate()
+        brows = [(mkt, mt, run, od, hc) for mkt, mt, run, od in rows
+                 for hc in [None]] if False else []
+        brows = [(mkt, mt, run, od) for mkt, mt, run, od in rows
+                 if "BIRD" in (mt or "").upper() or "irdie" in (mkt or "")]
+        if brows:
+            BR, _fr = B.rates()
+            BRn = {RU.norm(k): v for k, v in BR.items()}
+            con_h = sqlite3.connect(HERE / "golf_lines.sqlite")
+            for mkt, mt, run, od in brows:
+                rr = BRn.get(RU.norm(run))
+                if not rr or not od or od < 1.3:
+                    continue
+                hc = con_h.execute("SELECT handicap FROM golf_lines WHERE market=? AND "
+                                   "runner=? ORDER BY collected_at DESC LIMIT 1",
+                                   (mkt, run)).fetchone()
+                import re as _re
+                k_t = None
+                if hc and hc[0] is not None:
+                    k_t = int(float(hc[0]) + 0.5)             # o3.5 -> P(4+)
+                else:
+                    m_ = _re.search(r"(\d+)\+", str(run) + " " + str(mkt))
+                    if m_:
+                        k_t = int(m_.group(1))
+                if not k_t:
+                    continue
+                ours = B.p_x_or_more(rr, k_t)
+                fair = 1 / od                                  # one-sided; vig-uncorrected v1
+                if ours - fair >= 0.05:
+                    preview.append({"stream": "E3-birdies", "runner": run,
+                                    "market": mkt[:60], "odds": od,
+                                    "edge": round(ours - fair, 3)})
+            con_h.close()
+    except Exception as _be:
+        print(f"  birdie pricing skipped: {str(_be)[:60]}")
+
     preview.sort(key=lambda x: -x["edge"])
     preview = preview[:15]
     if armed and preview:
