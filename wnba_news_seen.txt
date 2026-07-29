@@ -106,6 +106,7 @@ rw|1074|Not listed on injury report
 rw|1074|Ruled out Wednesday
 rw|1075|Pops for season-high 15 points
 rw|1075|Strong line off bench
+rw|1077|Continues cooling off
 rw|1078|Available to play
 rw|1078|Listed out Wednesday
 rw|1078|Out again Tuesday
@@ -202,6 +203,7 @@ rw|484|Iffy for Wednesday
 rw|485|Hits game-winning shot at buzzer
 rw|488|Double-double in win
 rw|488|Fares well in win
+rw|489|Logs 14 minutes in loss
 rw|498|Strong effort in loss
 rw|498|Strong line in loss
 rw|539|Another 30-point performance
