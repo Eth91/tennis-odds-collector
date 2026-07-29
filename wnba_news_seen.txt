@@ -318,6 +318,7 @@ rw|856|Plays well off bench
 rw|860|Back with 12 points off bench
 rw|860|Logs 15 minutes in win
 rw|863|Explodes for 18 points off bench
+rw|863|Reaches double figures off bench
 rw|911|Available against Connecticut
 rw|911|Dishes seven dimes Saturday
 rw|911|Double-double in blowout win
