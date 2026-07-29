@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-29T22:59:42Z",
+ "captured_at": "2026-07-29T23:06:36Z",
  "matches": [
-  {
-   "event_id": 35881504,
-   "p1": "Jakub Glanowski",
-   "p2": "Lukasz Pietraszko",
-   "p1_norm": "jakub glanowski",
-   "p2_norm": "lukasz pietraszko",
-   "open_date": "2026-07-29T22:35:00.000Z",
-   "line": 103.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35881526,
    "p1": "Mateusz Rutkowski",
@@ -19,9 +8,9 @@
    "p1_norm": "mateusz rutkowski",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-29T22:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35881536,
@@ -31,8 +20,8 @@
    "p2_norm": "michal wolny",
    "open_date": "2026-07-29T23:05:00.000Z",
    "line": 72.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35881537,
@@ -77,6 +66,17 @@
    "line": 78.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35881657,
+   "p1": "Henryk Tkaczyk",
+   "p2": "Jerzy Michalik",
+   "p1_norm": "henryk tkaczyk",
+   "p2_norm": "jerzy michalik",
+   "open_date": "2026-07-29T23:30:00.000Z",
+   "line": 73.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
