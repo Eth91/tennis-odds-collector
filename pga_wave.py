@@ -166,6 +166,36 @@ def _wind_hourly(lat, lon, d0, d1):
         return {}
 
 
+def _wind_forecast(lat, lon, days=10):
+    """{iso_hour_utc: wind km/h} from the FORECAST endpoint — the archive has nothing for a
+    tournament that has not been played yet, which is the live case that matters."""
+    u = ("https://api.open-meteo.com/v1/forecast?latitude=%s&longitude=%s"
+         "&hourly=wind_speed_10m&forecast_days=%d&timezone=UTC"
+         % (lat, lon, max(1, min(16, int(days)))))
+    try:
+        d = json.load(urllib.request.urlopen(
+            urllib.request.Request(u, headers=UA), timeout=30))
+        h = d.get("hourly") or {}
+        return dict(zip(h.get("time") or [], h.get("wind_speed_10m") or []))
+    except Exception:                                               # noqa: BLE001
+        return {}
+
+
+def _wind_for_days(lat, lon, days):
+    """Archive for past dates, forecast for future ones, merged. A tournament straddling
+    today (round 1 played, round 2 tomorrow) needs both."""
+    out = {}
+    today = dt.datetime.now(dt.timezone.utc).date()
+    past = [d for d in days if d < today]
+    fut = [d for d in days if d >= today]
+    if past:
+        out.update(_wind_hourly(lat, lon, min(past).isoformat(), max(past).isoformat()))
+    if fut:
+        span = (max(fut) - today).days + 2
+        out.update(_wind_forecast(lat, lon, days=span))
+    return out
+
+
 def _exposure(wind_h, tee_ms):
     """Mean wind over the EXPOSURE_H hours a group is actually on the course."""
     if not tee_ms:

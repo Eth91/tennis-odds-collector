@@ -1,0 +1,8 @@
+  wave gaps: n=479 event-rounds over 120 events
+     mean PM-AM gap +0.127 str   sd 0.841   mean |gap| 0.671
+     Butterfield Bermuda Champi R1  -2.97 str  (59 am / 57 pm)
+     WM Phoenix Open            R1  -2.59 str  (66 am / 64 pm)
+     Shriners Children's Open   R1  +2.44 str  (64 am / 65 pm)
+     RBC Heritage               R4  +2.34 str  (42 am / 39 pm)
+     RBC Heritage               R1  +2.27 str  (35 am / 36 pm)
+     beta +0.1007 str per km/h exposure gap  r=+0.375  n_wind=455  FITTED
