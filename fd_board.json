@@ -1,4 +1,38 @@
 {
- "captured_at": "2026-07-29T06:42:52Z",
- "matches": []
+ "captured_at": "2026-07-29T06:50:15Z",
+ "matches": [
+  {
+   "event_id": 35879218,
+   "p1": "Sebastian Juzek",
+   "p2": "Krzysztof Hetnar",
+   "p1_norm": "sebastian juzek",
+   "p2_norm": "krzysztof hetnar",
+   "open_date": "2026-07-29T07:10:00.000Z",
+   "line": 73.5,
+   "over_odds": -110,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35879219,
+   "p1": "Michal Paszkiewicz",
+   "p2": "Oliver Vincenec",
+   "p1_norm": "michal paszkiewicz",
+   "p2_norm": "oliver vincenec",
+   "open_date": "2026-07-29T07:10:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35879221,
+   "p1": "Stapor Rafal",
+   "p2": "Kamil Klocek",
+   "p1_norm": "stapor rafal",
+   "p2_norm": "kamil klocek",
+   "open_date": "2026-07-29T07:15:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  }
+ ]
 }

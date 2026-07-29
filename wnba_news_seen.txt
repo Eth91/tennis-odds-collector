@@ -62,6 +62,7 @@ rw|1048|Crowned three-point champ
 rw|1048|Goes for 11 points in victory
 rw|1048|Miled effort in win
 rw|1048|Records 11 points in victory
+rw|1050|Active at charity stripe Tuesday
 rw|1050|Provides scoring punch
 rw|1050|Scores team-high 26 points
 rw|1051|Left off injury report
