@@ -1,6 +1,17 @@
 {
- "captured_at": "2026-07-29T10:55:31Z",
+ "captured_at": "2026-07-29T11:01:10Z",
  "matches": [
+  {
+   "event_id": 35879587,
+   "p1": "Kacper Petas",
+   "p2": "Grzegorz Adamiak",
+   "p1_norm": "kacper petas",
+   "p2_norm": "grzegorz adamiak",
+   "open_date": "2026-07-29T10:50:00.000Z",
+   "line": 58.5,
+   "over_odds": -115,
+   "under_odds": -120
+  },
   {
    "event_id": 35879592,
    "p1": "Jakub Zochniak",
@@ -8,9 +19,9 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "grzegorz poliniewicz",
    "open_date": "2026-07-29T10:55:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 74.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35879578,
@@ -30,9 +41,9 @@
    "p1_norm": "piotr gumulinski",
    "p2_norm": "kamil kowalski",
    "open_date": "2026-07-29T11:00:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 69.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35879598,
@@ -41,9 +52,9 @@
    "p1_norm": "kamil klocek",
    "p2_norm": "artur szoltysek",
    "open_date": "2026-07-29T11:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35879622,
@@ -64,6 +75,28 @@
    "p2_norm": "adam linek",
    "open_date": "2026-07-29T11:20:00.000Z",
    "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35879635,
+   "p1": "Adrian Myszewski",
+   "p2": "Kamil Rudomina",
+   "p1_norm": "adrian myszewski",
+   "p2_norm": "kamil rudomina",
+   "open_date": "2026-07-29T11:25:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35879636,
+   "p1": "Wojciech Wojtaszczyk",
+   "p2": "Lukasz Oracz",
+   "p1_norm": "wojciech wojtaszczyk",
+   "p2_norm": "lukasz oracz",
+   "open_date": "2026-07-29T11:25:00.000Z",
+   "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
   }
