@@ -33,10 +33,13 @@ winner = min(fin, key=fin.get)
 print("actual winner: %s (%d)" % (winner, fin[winner]))
 
 pre = RU.simulate(R, field, n_sims=6000, seed=3)
-prog2 = {p: [d.get(1), d.get(2)] for p, d in scores.items() if d.get(1) and d.get(2)}
+# a live caller passes every posted round (this is what pga_field.round_scores gives),
+# including the two rounds of players who went on to miss the cut
+prog2 = {p: [d[r] for r in (1, 2) if d.get(r)] for p, d in scores.items()}
+prog2 = {p: v for p, v in prog2.items() if v}
 mid = RU.simulate(R, field, n_sims=6000, seed=3, progress=prog2)
-prog3 = {p: [d.get(1), d.get(2), d.get(3)] for p, d in scores.items()
-         if d.get(1) and d.get(2) and d.get(3)}
+prog3 = {p: [d[r] for r in (1, 2, 3) if d.get(r)] for p, d in scores.items()}
+prog3 = {p: v for p, v in prog3.items() if v}
 aft3 = RU.simulate(R, field, n_sims=6000, seed=3, progress=prog3)
 
 print("\n[1] CALIBRATION SURVIVES CONDITIONING")
@@ -77,10 +80,16 @@ for p in back:
           % (p, t36[p] - lead, 100 * a, 100 * b, "OK" if b < a else "FAIL"))
 
 print("\n[4] A POSTED THIRD ROUND IS A FACT, NOT A FORECAST")
-cuts = [aft3[p]["cut"] for p in prog3 if p in aft3]
-print("    %d players with R3 posted: min cut prob %.3f (must be 1.000)"
+made3 = [p for p in prog3 if len(prog3[p]) >= 3 and p in aft3]
+missed = [p for p in prog3 if len(prog3[p]) < 3 and p in aft3]
+cuts = [aft3[p]["cut"] for p in made3]
+elim = [aft3[p]["cut"] for p in missed]
+print("    %d players WITH an R3: min cut prob %.3f (must be 1.000)"
       % (len(cuts), min(cuts) if cuts else -1))
-print("    -> %s" % ("OK" if cuts and min(cuts) > 0.999 else "FAIL"))
+print("    %d players WITHOUT an R3: max cut prob %.3f (must be 0.000)"
+      % (len(elim), max(elim) if elim else -1))
+ok4 = bool(cuts) and min(cuts) > 0.999 and (not elim or max(elim) < 0.001)
+print("    -> %s" % ("OK" if ok4 else "FAIL"))
 
 print("\n[5] A PARTIAL ROUND LANDS BETWEEN NOT-STARTED AND FINISHED")
 # give the winner a hot 9 holes of round 3 (relative to field pace) and check ordering

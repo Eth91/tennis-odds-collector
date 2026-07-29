@@ -193,7 +193,7 @@ def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
     # per-player sigma must broadcast across the ROUND axis; numpy cannot align a
     # (k,) scale against (n_sims, k, 4), so draw unit normals and scale explicitly.
     eps = rng.normal(0, 1, (n_sims, k, 4)) * (sig * math.sqrt(1 - RHO))[None, :, None]
-    forced = None
+    forced = gone = None
     if not progress:
         # PRE-TOURNAMENT PATH — unchanged. This runs every loop tick on a memory-capped
         # cgroup, so it deliberately never materialises a full (n_sims, k, 4) round array.
@@ -247,10 +247,19 @@ def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
         rest = r_all[:, :, 2:].sum(2)
         # a third round on the board is proof the cut was made
         forced = np.array([kmask[i, 2] > 0 for i in range(k)])
+        # ELIMINATED PLAYERS CANNOT WIN. If the field has completed round j and a player has
+        # no score for it, they missed the cut or withdrew. Without this they keep every
+        # unplayed round as a simulated draw and free-roll a whole tournament: on the 2025
+        # Rocket Classic that handed 70 eliminated players a 4-round run and pushed the
+        # actual 54-hole leader down to a 1.5% win probability.
+        maxj = max(means) if means else -1
+        gone = np.array([any(kmask[i, j] <= 0 for j in range(maxj + 1)) for i in range(k)])
     cutline = np.sort(tot2, axis=1)[:, min(69, k - 1)][:, None]
     made = tot2 <= cutline
     if forced is not None and forced.any():
         made = made | forced[None, :]
+    if gone is not None and gone.any():
+        made = made & ~gone[None, :]
     tot4 = tot2 + np.where(made, rest, 1e6)
     order = tot4.argsort(1).argsort(1)                    # finishing rank per sim
     out = {}
