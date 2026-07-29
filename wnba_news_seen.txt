@@ -337,6 +337,7 @@ rw|923|Listed out for Wednesday
 rw|923|Not listed on injury report
 rw|923|Off injury report for Tuesday
 rw|926|Starting against Aces
+rw|926|Stumbles in first unit
 rw|927|Double-double in defeat
 rw|927|Leads team with seven assists
 rw|927|Notches 11 points in loss
