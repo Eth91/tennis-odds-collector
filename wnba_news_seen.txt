@@ -82,6 +82,7 @@ rw|1055|Sniffs triple-double in ASG win
 rw|1056|Produces 14 points in 11 minutes
 rw|1057|Full practice participant Sunday
 rw|1057|Iffy for Tuesday
+rw|1057|Quiet outing in loss
 rw|1057|Will play on minutes restriction
 rw|1058|Agrees to new seven-day deal
 rw|1058|Let go by Mercury
@@ -116,6 +117,7 @@ rw|1093|Avoids injury report for Wednesday
 rw|1093|Fades injury report
 rw|1093|Not listed on injury report
 rw|1093|Sitting out Wednesday
+rw|1095|Provides spark defensively
 rw|1098|Headed to bench
 rw|1100|Muted output in win
 rw|1134|Off injury report
