@@ -25,6 +25,37 @@ unstage_big(){
 # SLOW BLOCK (ported from Actions 2026-07-29): model fits and recalibration. Expensive and
 # slow-moving, so ~every 4h rather than on the hot path. Marker file keeps it honest across
 # restarts so a bouncing service cannot refit every boot.
+# CROSS-SPORT COLLECTORS (ported from collect-odds.yml 2026-07-29). ~30 min, the cadence
+# Actions ran them at. All five verified from Oracle before the cron was cut.
+cross_sport_block(){
+  local m="$HOME/.wnba_xsport_last" now; now=$(date -u +%s)
+  local last; last=$(cat "$m" 2>/dev/null || echo 0)
+  [ $(( now - last )) -lt 1800 ] && return 0
+  echo "$now" > "$m"
+  python3 collect.py       >/dev/null 2>&1 || true   # tennis (Pinnacle)
+  python3 nba_injuries.py  >/dev/null 2>&1 || true
+  python3 nba_flags.py     >/dev/null 2>&1 || true
+  python3 nfl_totals.py    >/dev/null 2>&1 || true
+  python3 bet_ledger.py    >/dev/null 2>&1 || true
+}
+
+# NIGHTLY DIGEST (ported from nightly-digest.yml). Actions needed five crons because its
+# scheduler silently drops runs; a systemd loop does not, so one firing + a date marker is
+# both simpler and more reliable. 05:40 UTC == 11:40pm MT.
+nightly_block(){
+  local h; h=$(date -u +%H%M)
+  case "$h" in 054*) ;; *) return 0 ;; esac
+  local m="$HOME/.wnba_nightly_last" key; key="$(date -u +%F)"
+  [ "$(cat "$m" 2>/dev/null)" = "$key" ] && return 0
+  echo "$key" > "$m"
+  echo "[$(date -u +%H:%M)] nightly digest"
+  python3 db_sync.py --build  >/dev/null 2>&1 || true
+  python3 bet_ledger.py       >/dev/null 2>&1 || true
+  python3 daily_digest.py     >/dev/null 2>&1 || true
+  python3 dashboard.py        >/dev/null 2>&1 || true
+  python3 db_sync.py --export >/dev/null 2>&1 || true
+}
+
 # PINNACLE + EDGE SCAN (ported from collect-odds.yml 2026-07-29). Verified reachable from
 # Oracle first: guest.api.arcadia HTTP 200 / 63 sports, so an empty result is a real empty
 # slate, not a silent datacenter-IP block.
@@ -46,6 +77,8 @@ slow_block(){
   python3 wnba_clv.py --report >/dev/null 2>&1 || true
   python3 wnba_question_log.py --resolve --recalibrate >/dev/null 2>&1 || true
   python3 wnba_ledger.py --learn >/dev/null 2>&1 || true
+  python3 learn.py     >/dev/null 2>&1 || true   # benches negative-CLV markets
+  python3 gg_timing.py >/dev/null 2>&1 || true   # NBA line-timing (name is legacy)
   python3 wnba_lineup_model.py >/dev/null 2>&1 || true
   python3 wnba_redist.py --fit --teams ATL,CHI,CON,DAL,GS,IND,LA,LV,MIN,NY,PHX,POR,SEA,TOR,WSH >/dev/null 2>&1 || true
 }
@@ -224,6 +257,8 @@ while true; do i=$((i+1))
   # fires at 16:00 UTC, which is not a hot window, and a self-check that only runs while
   # the loop is already busy is not a health check.
   date -u +%s > "$HOME/.wnba_loop_beat"   # local liveness (survives a wedged git)
+  cross_sport_block
+  nightly_block
   pin_block
   slow_block
   date -u +%s > "$HOME/.wnba_loop_beat"   # re-stamp: the 4h slow block is a legitimately long tick
