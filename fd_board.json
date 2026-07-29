@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T16:32:44Z",
+ "captured_at": "2026-07-29T16:37:50Z",
  "matches": [
   {
    "event_id": 35880482,
@@ -8,7 +8,7 @@
    "p1_norm": "rafal gajda",
    "p2_norm": "jakub kaczmarek",
    "open_date": "2026-07-29T16:20:00.000Z",
-   "line": 81.5,
+   "line": 95.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -19,9 +19,9 @@
    "p1_norm": "jakub pruszkowski",
    "p2_norm": "mariusz koczyba",
    "open_date": "2026-07-29T16:25:00.000Z",
-   "line": 88.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 90.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35880685,
@@ -30,9 +30,9 @@
    "p1_norm": "adam staniczek",
    "p2_norm": "kazimierz rybak",
    "open_date": "2026-07-29T16:35:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35880686,
@@ -42,8 +42,8 @@
    "p2_norm": "kacper marchlewski",
    "open_date": "2026-07-29T16:35:00.000Z",
    "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35880761,
