@@ -40,6 +40,7 @@ rw|1007|Adds 13 points off bench
 rw|1007|Available Tuesday
 rw|1007|Available to play
 rw|1007|Likely to play Tuesday
+rw|1007|Notches 11 points
 rw|1007|Questionable for Wednesday
 rw|1015|Not listed on injury report
 rw|1015|Won't play Tuesday
