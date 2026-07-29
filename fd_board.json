@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T11:14:45Z",
+ "captured_at": "2026-07-29T11:19:12Z",
  "matches": [
   {
    "event_id": 35879598,
@@ -8,9 +8,9 @@
    "p1_norm": "kamil klocek",
    "p2_norm": "artur szoltysek",
    "open_date": "2026-07-29T11:00:00.000Z",
-   "line": 96.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 95.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35879622,
@@ -20,8 +20,8 @@
    "p2_norm": "krystian kolodziej",
    "open_date": "2026-07-29T11:15:00.000Z",
    "line": 76.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35879628,
@@ -65,6 +65,17 @@
    "open_date": "2026-07-29T11:40:00.000Z",
    "line": 77.5,
    "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35880016,
+   "p1": "Michal Minda",
+   "p2": "Jakub Zochniak",
+   "p1_norm": "michal minda",
+   "p2_norm": "jakub zochniak",
+   "open_date": "2026-07-29T11:45:00.000Z",
+   "line": 80.5,
+   "over_odds": -116,
    "under_odds": -118
   }
  ]
