@@ -335,6 +335,7 @@ rw|912|Records five points in loss
 rw|914|Downgraded to out
 rw|914|Probable for Tuesday
 rw|914|Ruled out for Wednesday
+rw|914|Won't play Thursday
 rw|915|Available for All-Star Game
 rw|916|Posts 15 points despite restriction
 rw|916|Scores 10 points in loss
