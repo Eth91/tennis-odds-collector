@@ -1330,7 +1330,17 @@ def _pga_panel():
                 body += (f'<div class="swo">softest openers (Mon→close drift): {html.escape(lbl)}</div>')
     except Exception:
         pass
+    e3 = d.get("e3") or {}
+    if e3.get("rows"):
+        tag = ("E3 ruler — ARMED" if e3.get("armed")
+               else f"E3 ruler preview — pre-G2 (n={e3.get('g2_n', 0)}), NOT flagged")
+        body += f'<div class="swo"><b>{tag}</b></div>'
+        for r in e3["rows"][:6]:
+            body += (f'<div class="swrow"><div class="swhd"><b>{html.escape(r.get("runner") or "")}</b>'
+                     f'<span class="swusg">{html.escape((r.get("stream") or "").replace("E3-", ""))} · '
+                     f'{r.get("odds"):.2f} · edge {r.get("edge"):+.1%}</span></div></div>')
     return f'<div class="starwatch">{head}{body}</div>'
+
 
 
 def _tt_panel(data):
