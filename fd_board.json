@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-29T03:39:08Z",
+ "captured_at": "2026-07-29T03:44:51Z",
  "matches": [
-  {
-   "event_id": 35878861,
-   "p1": "Grzegorz Adamiak",
-   "p2": "Kacper Petas",
-   "p1_norm": "grzegorz adamiak",
-   "p2_norm": "kacper petas",
-   "open_date": "2026-07-29T03:25:00.000Z",
-   "line": 57.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
-  {
-   "event_id": 35878863,
-   "p1": "Wojciech Wojtaszczyk",
-   "p2": "Kamil Kowalski",
-   "p1_norm": "wojciech wojtaszczyk",
-   "p2_norm": "kamil kowalski",
-   "open_date": "2026-07-29T03:25:00.000Z",
-   "line": 84.5,
-   "over_odds": 100,
-   "under_odds": -135
-  },
   {
    "event_id": 35878870,
    "p1": "Piotr Zemla",
@@ -30,7 +8,7 @@
    "p1_norm": "piotr zemla",
    "p2_norm": "jakub nowak",
    "open_date": "2026-07-29T03:35:00.000Z",
-   "line": 80.5,
+   "line": 86.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -41,9 +19,9 @@
    "p1_norm": "michal minda",
    "p2_norm": "kamil rudomina",
    "open_date": "2026-07-29T03:40:00.000Z",
-   "line": 82.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 84.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35878877,
@@ -53,8 +31,8 @@
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-29T03:45:00.000Z",
    "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35878880,
@@ -110,6 +88,39 @@
    "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35878919,
+   "p1": "Witold Buczynski",
+   "p2": "Wojciech Wojtaszczyk",
+   "p1_norm": "witold buczynski",
+   "p2_norm": "wojciech wojtaszczyk",
+   "open_date": "2026-07-29T04:10:00.000Z",
+   "line": 70.5,
+   "over_odds": -110,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35878920,
+   "p1": "Adrian Myszewski",
+   "p2": "Mateusz Trela",
+   "p1_norm": "adrian myszewski",
+   "p2_norm": "mateusz trela",
+   "open_date": "2026-07-29T04:10:00.000Z",
+   "line": 82.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35878921,
+   "p1": "Adrian Wiecek",
+   "p2": "Grzegorz Adamiak",
+   "p1_norm": "adrian wiecek",
+   "p2_norm": "grzegorz adamiak",
+   "open_date": "2026-07-29T04:10:00.000Z",
+   "line": 81.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
