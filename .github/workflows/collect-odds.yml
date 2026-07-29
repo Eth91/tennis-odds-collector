@@ -76,7 +76,7 @@ jobs:
             sleep $((RANDOM % 8 + 3))
           done
           echo "::warning::snapshot push failed after 10 tries (next run retries)"
-      - name: self-redispatch — immortal ~30-min chain past the throttled */30 cron
+      - name: self-redispatch — immortal ~10-min chain past the throttled */30 cron
         # collect-odds had NO self-redispatch, so it lived and died by the */30 cron — which GitHub
         # was throttling to every ~4-5h (MLB collection silently stalled for hours). Sleep ~26 min so
         # each cycle lands ~30 min, then dispatch ourselves -> an immortal chain independent of the
@@ -86,7 +86,7 @@ jobs:
         env:
           TOKEN: ${{ github.token }}
         run: |
-          sleep 1560
+          sleep 480
           code=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
             -H "Authorization: Bearer $TOKEN" \
             -H "Accept: application/vnd.github+json" \
