@@ -172,72 +172,12 @@ def collect():
         with ThreadPoolExecutor(max_workers=6) as ex:
             list(ex.map(glog, want))
     print(f"prefetched {len(want)} game logs in {time.time()-t0:.1f}s")
-    # 🏥 BOARD INJURY SNAPSHOT (2026-07-29, user): every IMPACT player (this scan's exact
-    # gate: >=20mpg or >=10ppg) carrying ANY injury status, plus n = team games played
-    # without them — the user's n=1/n=2 manual-research number, and n<3 is the population
-    # the model cannot project. The dashboard renders THIS file, never its own fetch, so
-    # the section proves what the bot actually covered. A failure here must never cost a scan.
-    try:
-        _team_dates = {}
-
-        def _tdates(_tm):
-            if _tm not in _team_dates:
-                _mates = sorted((v for v in pl.values()
-                                 if v.get("team") == _tm and (v.get("gp") or 0) >= 3),
-                                key=lambda v: -(v.get("min") or 0))[:5]
-                _ds = set()
-                for _v2 in _mates:
-                    for _g in glog(_v2["id"]) or []:
-                        if _g.get("date"):
-                            _ds.add(_g["date"][:10])
-                _team_dates[_tm] = _ds
-            return _team_dates[_tm]
-
-        # merge: official-report rows first (they carry the injury REASON), then live
-        # rulings overlaid — a fresh @UnderdogWNBA/RotoWire ruling beats a 16h-old report
-        # line. Every row keeps its provenance so the board can mark report-only rows.
-        _merged = {}
-        _rep_stamp = ""
-        try:
-            _rc = json.loads((HERE / "wnba_injury_report_cache.json").read_text())
-            _rep_stamp = str(_rc.get("stamp") or "")
-            for _rr in _rc.get("rows") or []:
-                _rsn = str(_rr.get("reason") or "")
-                _rsn = _rsn.replace("Injury/Illness - ", "").replace("; -", "").strip(" ;-")
-                _merged[_rr.get("player")] = {"status": str(_rr.get("status") or ""),
-                                             "reason": _rsn, "src": "report"}
-        except Exception:
-            pass
-        for _nm2, _st2 in inj.items():
-            _pv = _merged.get(_nm2) or {}
-            _merged[_nm2] = {"status": str(_st2), "reason": _pv.get("reason", ""),
-                             "src": "live"}
-        _snap = []
-        for _nm2, _rec2 in _merged.items():
-            _st2 = _rec2["status"]
-            _v = pl.get(_nm2)
-            if not _v or not ((_v.get("min") or 0) >= 20 or (_v.get("pts") or 0) >= 10):
-                continue
-            _nw = None
-            try:
-                _mine = {g["date"][:10] for g in glog(_v["id"]) or [] if g.get("date")}
-                _td = _tdates(_v.get("team"))
-                if _td:
-                    _nw = len(_td - _mine)
-            except Exception:
-                _nw = None
-            _snap.append({"player": _nm2, "team": _v.get("team"), "status": _st2,
-                          "reason": _rec2.get("reason", ""), "src": _rec2.get("src", ""),
-                          "mpg": round(_v.get("min") or 0, 1),
-                          "ppg": round(_v.get("pts") or 0, 1), "n_without": _nw})
-        _snap.sort(key=lambda r: (0 if r["status"].lower().startswith(("out", "doubt")) else 1,
-                                  r["team"] or "", -(r["mpg"] or 0)))
-        (HERE / "wnba_injuries_board.json").write_text(json.dumps(
-            {"ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-             "report_stamp": _rep_stamp, "rows": _snap}))
-        print(f"injury snapshot: {len(_snap)} impact players")
-    except Exception as _ie:
-        print(f"injury snapshot skipped: {_ie}")
+    # 🏥 BOARD INJURY SNAPSHOT — shared module; wnba_watch calls the same writer every
+    # ~25s in hot windows, so the board section live-updates between fullscans too.
+    import wnba_injury_snapshot as SNAP
+    _n_inj = SNAP.write_snapshot(pl, inj, glog)
+    if _n_inj is not None:
+        print(f"injury snapshot: {_n_inj} impact players")
 
     for (slate_date, team), outs in outs_by_team.items():
         # CONFIRMED-OUT gate (2026-07-18): any out in this cascade not confirmed for its game

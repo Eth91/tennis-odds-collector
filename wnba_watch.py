@@ -394,6 +394,15 @@ def main():
             print("official-designation log skipped:", str(e)[:60])
     except Exception as e:
         print("question-log record skipped:", str(e)[:60])
+    # 🏥 LIVE INJURY SNAPSHOT (2026-07-29): this watcher already polls every injury source
+    # each ~25s pass — writing the board snapshot here makes the injury section live-update
+    # as players go on/off the report or @UnderdogWNBA rules someone out, instead of waiting
+    # for a fullscan. cached_glog = disk-cache only, so this can never slow a scratch pass.
+    try:
+        import wnba_injury_snapshot as SNAP
+        SNAP.write_snapshot(pl, inj, SNAP.cached_glog)
+    except Exception as _se:
+        print("injury snapshot (watch) skipped:", str(_se)[:60])
     if first_run:
         # cold start: baseline the whole report, don't fire it all as "news". The 4x/day full board
         # covers already-known tags; from here on this watcher pushes only genuine deltas.
