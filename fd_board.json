@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-29T17:14:34Z",
+ "captured_at": "2026-07-29T17:19:44Z",
  "matches": [
-  {
-   "event_id": 35880853,
-   "p1": "Sebastian Juzek",
-   "p2": "Schaniel Krzysztof",
-   "p1_norm": "sebastian juzek",
-   "p2_norm": "schaniel krzysztof",
-   "open_date": "2026-07-29T17:05:00.000Z",
-   "line": 58.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
   {
    "event_id": 35880859,
    "p1": "Krzysztof Juszczyk",
@@ -19,9 +8,9 @@
    "p1_norm": "krzysztof juszczyk",
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-29T17:10:00.000Z",
-   "line": 72.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 55.5,
+   "over_odds": -145,
+   "under_odds": 105
   },
   {
    "event_id": 35880876,
@@ -74,9 +63,9 @@
    "p1_norm": "mariusz koczyba",
    "p2_norm": "wojciech pytlas",
    "open_date": "2026-07-29T17:35:00.000Z",
-   "line": 76.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35880944,
@@ -88,6 +77,28 @@
    "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35880955,
+   "p1": "Kamil Delikatny",
+   "p2": "Michal Machelski",
+   "p1_norm": "kamil delikatny",
+   "p2_norm": "michal machelski",
+   "open_date": "2026-07-29T17:45:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35880956,
+   "p1": "Michal Skorski",
+   "p2": "Adrian Eliasz",
+   "p1_norm": "michal skorski",
+   "p2_norm": "adrian eliasz",
+   "open_date": "2026-07-29T17:45:00.000Z",
+   "line": 81.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
