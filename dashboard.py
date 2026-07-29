@@ -284,6 +284,19 @@ def _load(mt_date):
         (mt_date,))]
     g = [dict(r) for r in con.execute("SELECT result,odds,side,pred_date,player,team,stat,line,n_elev,d_min,ev,elev_avg "
                                       "FROM predictions WHERE graded=1 AND pred_date>='2026-07-09'")]
+    # IN-PROGRESS MARK (2026-07-29): once a bet's game tips it is a POSITION, not a shoppable
+    # rung. Everything below keys off this: it survives the live-line filter and renders at the
+    # price we struck rather than whatever the in-play market is quoting.
+    try:
+        _tp = _tip_times()
+        _now_u = dt.datetime.now(dt.timezone.utc)
+        for _r in rows:
+            _t = (_tp.get((_r.get("pred_date"), (_r.get("team") or "").upper()))
+                  or _tp.get((_r.get("pred_date"), (_r.get("opp") or "").upper())))
+            _r["_tipped"] = bool(_t and _t <= _now_u)
+    except Exception:
+        for _r in rows:
+            _r["_tipped"] = False
     con.close()
     # LIVE-LINE FILTER (2026-07-22, the Nelson-Ododa o18.5 case): the ledger accumulates EVERY rung
     # ever flagged, but the board must only show a play whose FanDuel rung is LIVE right now. Without
@@ -304,7 +317,9 @@ def _load(mt_date):
             if pp is None:
                 return True
             return round(float(ln), 1) in (pp.get(stt) or {})
-        rows = [r for r in rows if _live(r)]
+        # a tipped bet is locked in -- posted_props is stale by design after tip, so the
+        # live-line test cannot speak to it. Never let it delete a position.
+        rows = [r for r in rows if r.get("_tipped") or _live(r)]
     except Exception:
         pass
     # durable user-played marks (wnba_played.txt) — read-only, so the ✓ shows on the board
@@ -636,7 +651,11 @@ def _prop_row(r, rungs=None):
     if r.get("elev_avg") is not None:
         ctx.append(f'proj {r["elev_avg"]:g}')
     # BEST PRICE across books — show WHICH book has the best number, runner-up in the context line
-    bp = _book_prices(r)
+    # IN PROGRESS: freeze the price at what we flagged. _book_prices would quote the in-play
+    # market (Mabrey read -440 on the board against +116 in the ledger).
+    if r.get("_tipped"):
+        ctx.append('<span class="cdrv">● IN PROGRESS · price at flag</span>')
+    bp = None if r.get("_tipped") else _book_prices(r)
     if bp:
         best_bk, best_dec = bp[0]
         # BOOK-COLORED ODDS + LOGO (2026-07-19): FanDuel blue, DraftKings green, with the book's

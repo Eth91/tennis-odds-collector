@@ -289,6 +289,11 @@ def run(test=False, force=False):
         if first:
             continue                     # no push storm on the historical timeline
         st, pri = _ud_status(txt)
+        if not st and "lineup alert" in txt.lower():
+            # CONFIRMED FIVE (2026-07-29). Not an injury status -- a ROLE signal. Logged for
+            # wnba_lineups.py and worth a rescan, because a starter missing from the five
+            # changes the projection even when no source has ruled them out.
+            st = "lineup"
         if not st:
             continue                                   # not an actionable injury status
         hits += 1
