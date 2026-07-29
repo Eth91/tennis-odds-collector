@@ -39,10 +39,6 @@ jobs:
         run: python db_sync.py --build
       - name: settle any remaining bets first (grade + CLV)
         run: python bet_ledger.py || echo "ledger pass skipped"
-      - name: grade the WNBA autobetter ledger off box scores
-        run: python wnba_ledger.py --grade || echo "wnba grade skipped"
-      - name: learn the winner/loser profile from graded bets
-        run: python wnba_ledger.py --learn || echo "wnba learn skipped"
       - name: build + push digest
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}

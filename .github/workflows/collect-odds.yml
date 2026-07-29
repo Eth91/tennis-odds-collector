@@ -32,10 +32,6 @@ jobs:
           DB_PATH: ${{ github.workspace }}/odds.sqlite
         run: python collect.py || echo "tennis collect skipped"   # never let one scrape kill the run
 
-      - name: collect wnba props (pinnacle)
-        env:
-          WNBA_DB: ${{ github.workspace }}/wnba_props.sqlite
-        run: python wnba_collect.py || echo "wnba collect skipped"
       - name: collect fanduel props (mlb + wnba + tennis)
         env:
           FD_DB: ${{ github.workspace }}/fanduel_props.sqlite
@@ -48,8 +44,6 @@ jobs:
         env:
           FD_DB: ${{ github.workspace }}/fanduel_props.sqlite
         run: python dk_collect.py || echo "draftkings collect skipped"
-      - name: scan wnba edges (fanduel vs pinnacle)
-        run: python wnba_edge_scan.py || echo "wnba edge scan skipped"
       # BENCHED 2026-07-09 (focus = TT + WNBA): esports/MLB/NFL still COLLECT (data + grading
       # of existing bets preserved) but no NTFY_TOPIC -> no phone pushes. Un-bench = restore
       # NTFY_TOPIC here and drop --no-flags / ACTIVE_SPORTS.
