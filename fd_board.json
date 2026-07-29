@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T09:21:30Z",
+ "captured_at": "2026-07-29T09:26:20Z",
  "matches": [
   {
    "event_id": 35879435,
@@ -8,9 +8,9 @@
    "p1_norm": "stapor rafal",
    "p2_norm": "grzegorz poliniewicz",
    "open_date": "2026-07-29T09:20:00.000Z",
-   "line": 75.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 73.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35879436,
@@ -19,9 +19,9 @@
    "p1_norm": "adrian wiecek",
    "p2_norm": "grzegorz adamiak",
    "open_date": "2026-07-29T09:20:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 83.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35879448,
@@ -30,20 +30,9 @@
    "p1_norm": "adrian myszewski",
    "p2_norm": "artur szoltysek",
    "open_date": "2026-07-29T09:25:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
-  {
-   "event_id": 35879449,
-   "p1": "Wojciech Wojtaszczyk",
-   "p2": "Kamil Kowalski",
-   "p1_norm": "wojciech wojtaszczyk",
-   "p2_norm": "kamil kowalski",
-   "open_date": "2026-07-29T09:25:00.000Z",
-   "line": 65.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35879451,
@@ -77,6 +66,28 @@
    "line": 79.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35879523,
+   "p1": "Kamil Klocek",
+   "p2": "Przemyslaw Perzynski",
+   "p1_norm": "kamil klocek",
+   "p2_norm": "przemyslaw perzynski",
+   "open_date": "2026-07-29T09:50:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35879524,
+   "p1": "Piotr Gumulinski",
+   "p2": "Witold Buczynski",
+   "p1_norm": "piotr gumulinski",
+   "p2_norm": "witold buczynski",
+   "open_date": "2026-07-29T09:50:00.000Z",
+   "line": 77.5,
+   "over_odds": -120,
+   "under_odds": -110
   }
  ]
 }
