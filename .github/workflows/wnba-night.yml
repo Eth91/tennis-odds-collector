@@ -5,9 +5,11 @@ name: wnba-night
 # push + logs a CLV shadow on any new out, using fresh in-job lines) and refreshes FanDuel WNBA
 # lines every ~12 min. Lighter than the day loop (no live games -> no grading/dashboard regen);
 # collect-odds still owns the persistent 24MB snapshot, so this only commits the small state files.
+# CRONS CUT 2026-07-29: every step below now runs on the Oracle VM (vm_loop.sh).
+# Kept dispatch-only as a manual fallback if the VM is down. Do NOT re-add a
+# schedule without first removing the step from vm_loop.sh -- two writers on the
+# same SQLite files and the same git remote is what caused the fd_lines blob war.
 on:
-  schedule:
-    - cron: "0 5-14 * * *"     # hourly starts ~1am-10am ET; a ~5h loop makes ONE start cover the gap
   workflow_dispatch: {}
 
 concurrency:

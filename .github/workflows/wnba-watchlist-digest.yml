@@ -5,10 +5,11 @@ name: wnba-watchlist-digest
 # pushes NEW questionables in real time; this is the tidy periodic snapshot of the whole board.
 # Fires only when there are questionable stars (never spams an empty slate). Times cover the usual
 # WNBA shape (afternoon + evening ET); workflow_dispatch to send one on demand.
+# CRONS CUT 2026-07-29: every step below now runs on the Oracle VM (vm_loop.sh).
+# Kept dispatch-only as a manual fallback if the VM is down. Do NOT re-add a
+# schedule without first removing the step from vm_loop.sh -- two writers on the
+# same SQLite files and the same git remote is what caused the fd_lines blob war.
 on:
-  schedule:
-    - cron: "0 16 * * *"    # 12:00 ET — ahead of afternoon games
-    - cron: "0 20 * * *"    # 16:00 ET — ahead of evening games
   workflow_dispatch:
     inputs:
       test:

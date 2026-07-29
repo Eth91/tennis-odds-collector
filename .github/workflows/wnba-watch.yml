@@ -9,10 +9,11 @@ name: wnba-watch
 # Notifications are robust to git hiccups: wnba_watch.py fires the ntfy push BEFORE any
 # commit, so a rebase/conflict never costs an alert. Commits use -X theirs so the binary
 # ledger never hard-fails the run (the ledger self-heals — dedup makes re-logging idempotent).
+# CRONS CUT 2026-07-29: every step below now runs on the Oracle VM (vm_loop.sh).
+# Kept dispatch-only as a manual fallback if the VM is down. Do NOT re-add a
+# schedule without first removing the step from vm_loop.sh -- two writers on the
+# same SQLite files and the same git remote is what caused the fd_lines blob war.
 on:
-  schedule:
-    - cron: "0 15-23 * * *"   # hourly, ~11am-7pm ET (matinee prep through evening tips)
-    - cron: "0 0-4 * * *"     # hourly, ~8pm-1am ET (late / West-coast games)
   workflow_dispatch: {}
 
 concurrency:

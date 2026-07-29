@@ -3,10 +3,11 @@ name: wnba-props
 # the late runs catch confirmed lineups (~30 min pre-tip) — the speed window the edge
 # lives in. Also refreshes the DvP cache (position defense) from GitHub's IP, which
 # isn't rate-limited the way a local dev machine gets after heavy use.
+# CRONS CUT 2026-07-29: every step below now runs on the Oracle VM (vm_loop.sh).
+# Kept dispatch-only as a manual fallback if the VM is down. Do NOT re-add a
+# schedule without first removing the step from vm_loop.sh -- two writers on the
+# same SQLite files and the same git remote is what caused the fd_lines blob war.
 on:
-  schedule:
-    - cron: "0 16,18,20,22 * * *"   # ~10am/12/2/4pm MT — refresh the board through the day
-    - cron: "30 0,2 * * *"          # ~6:30/8:30pm MT — confirmed-lineup sweeps
   workflow_dispatch: {}
 
 concurrency:
