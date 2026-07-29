@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-29T14:50:14Z",
+ "captured_at": "2026-07-29T14:55:24Z",
  "matches": [
-  {
-   "event_id": 35880252,
-   "p1": "Mariusz Zwolinski",
-   "p2": "Artur Szoltysek",
-   "p1_norm": "mariusz zwolinski",
-   "p2_norm": "artur szoltysek",
-   "open_date": "2026-07-29T14:40:00.000Z",
-   "line": 51.5,
-   "over_odds": 105,
-   "under_odds": -145
-  },
   {
    "event_id": 35880258,
    "p1": "Jakub Kaczmarek",
@@ -19,9 +8,9 @@
    "p1_norm": "jakub kaczmarek",
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-07-29T14:45:00.000Z",
-   "line": 84.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 86.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35880290,
@@ -52,9 +41,9 @@
    "p1_norm": "kamil delikatny",
    "p2_norm": "kazimierz rybak",
    "open_date": "2026-07-29T15:00:00.000Z",
-   "line": 73.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35880317,
