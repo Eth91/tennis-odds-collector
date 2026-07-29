@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T02:28:21Z",
+ "captured_at": "2026-07-29T02:34:24Z",
  "matches": [
   {
    "event_id": 35878778,
@@ -20,6 +20,39 @@
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-07-29T02:45:00.000Z",
    "line": 82.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35878809,
+   "p1": "Adrian Wiecek",
+   "p2": "Kacper Glazowski",
+   "p1_norm": "adrian wiecek",
+   "p2_norm": "kacper glazowski",
+   "open_date": "2026-07-29T03:00:00.000Z",
+   "line": 82.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35878810,
+   "p1": "Witold Buczynski",
+   "p2": "Lukasz Oracz",
+   "p1_norm": "witold buczynski",
+   "p2_norm": "lukasz oracz",
+   "open_date": "2026-07-29T03:00:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35878811,
+   "p1": "Adrian Myszewski",
+   "p2": "Blazej Warpas",
+   "p1_norm": "adrian myszewski",
+   "p2_norm": "blazej warpas",
+   "open_date": "2026-07-29T03:00:00.000Z",
+   "line": 80.5,
    "over_odds": -112,
    "under_odds": -118
   }
