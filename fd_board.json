@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T06:02:08Z",
+ "captured_at": "2026-07-29T06:09:46Z",
  "matches": [
   {
    "event_id": 35879130,
@@ -8,20 +8,9 @@
    "p1_norm": "adrian wiecek",
    "p2_norm": "grzegorz felkel",
    "open_date": "2026-07-29T05:40:00.000Z",
-   "line": 71.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35879131,
-   "p1": "Witold Buczynski",
-   "p2": "Piotr Gumulinski",
-   "p1_norm": "witold buczynski",
-   "p2_norm": "piotr gumulinski",
-   "open_date": "2026-07-29T05:40:00.000Z",
-   "line": 100.5,
-   "over_odds": 100,
-   "under_odds": -140
+   "line": 98.5,
+   "over_odds": 130,
+   "under_odds": -180
   },
   {
    "event_id": 35879139,
@@ -30,7 +19,7 @@
    "p1_norm": "rafal gajda",
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-07-29T05:55:00.000Z",
-   "line": 78.5,
+   "line": 91.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -41,9 +30,20 @@
    "p1_norm": "kamil rudomina",
    "p2_norm": "stapor rafal",
    "open_date": "2026-07-29T06:00:00.000Z",
-   "line": 77.5,
+   "line": 88.5,
    "over_odds": -120,
    "under_odds": -115
+  },
+  {
+   "event_id": 35879142,
+   "p1": "Michal Paszkiewicz",
+   "p2": "Marian Lebek",
+   "p1_norm": "michal paszkiewicz",
+   "p2_norm": "marian lebek",
+   "open_date": "2026-07-29T06:00:00.000Z",
+   "line": 49.5,
+   "over_odds": 100,
+   "under_odds": -140
   },
   {
    "event_id": 35879150,
@@ -52,9 +52,9 @@
    "p1_norm": "artur szoltysek",
    "p2_norm": "kuba golaszewski",
    "open_date": "2026-07-29T06:05:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 81.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35879151,
@@ -64,8 +64,8 @@
    "p2_norm": "kacper petas",
    "open_date": "2026-07-29T06:05:00.000Z",
    "line": 77.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35879152,
@@ -74,9 +74,9 @@
    "p1_norm": "michal durda",
    "p2_norm": "kamil kowalski",
    "open_date": "2026-07-29T06:05:00.000Z",
-   "line": 67.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 63.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35879168,
@@ -110,6 +110,39 @@
    "line": 80.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35879172,
+   "p1": "Mateusz Trela",
+   "p2": "Mariusz Zwolinski",
+   "p1_norm": "mateusz trela",
+   "p2_norm": "mariusz zwolinski",
+   "open_date": "2026-07-29T06:30:00.000Z",
+   "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35879173,
+   "p1": "Wojciech Wojtaszczyk",
+   "p2": "Piotr Gumulinski",
+   "p1_norm": "wojciech wojtaszczyk",
+   "p2_norm": "piotr gumulinski",
+   "open_date": "2026-07-29T06:30:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35879174,
+   "p1": "Grzegorz Adamiak",
+   "p2": "Grzegorz Felkel",
+   "p1_norm": "grzegorz adamiak",
+   "p2_norm": "grzegorz felkel",
+   "open_date": "2026-07-29T06:30:00.000Z",
+   "line": 69.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
