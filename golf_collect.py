@@ -129,6 +129,60 @@ def main():
     except Exception as _te:
         print(f"golf trap skipped: {str(_te)[:60]}")
     con.commit()
+    # COMPETITION-PAGE SWEEP (2026-07-29) - THE CRACK for golf player props.
+    # Three weeks of lobby/coupon/tab/event-page probing failed because player props
+    # hydrate on a COMPETITION page, not an event page and not the lobby:
+    #     /api/competition-page?competitionId=<id>&eventTypeId=3
+    # eventTypeId=3 is REQUIRED - the same call without it returns 400. Verified live:
+    # 250 markets incl. PLAYER_BIRDIES_OR_BETTER with both Over/Under runners priced.
+    # competitionIds are harvested from the lobby JSON, so this generalizes to every
+    # future tournament with zero per-week config.
+    try:
+        comps = {}
+        def _wc(o):
+            if isinstance(o, dict):
+                cid = o.get("competitionId")
+                if cid:
+                    comps[str(cid)] = str(o.get("competitionName") or o.get("name") or "")[:60]
+                for v in o.values():
+                    _wc(v)
+            elif isinstance(o, list):
+                for v in o:
+                    _wc(v)
+        for slug in ("pga", "golf-props", "golf-matchups"):
+            try:
+                _wc(get(f"https://sbapi.ab.sportsbook.fanduel.ca/api/content-managed-page?page=CUSTOM&customPageId={slug}&pbHorizontal=false&_ak={AK}&timezone=America%2FEdmonton"))
+            except Exception:
+                pass
+        n3 = 0
+        for cid in list(comps)[:14]:
+            d3 = None
+            for hq in (f"https://sbapi.ab.sportsbook.fanduel.ca/api/competition-page?competitionId={cid}&eventTypeId=3&_ak={AK}&timezone=America%2FEdmonton",
+                       f"https://sbapi.ny.sportsbook.fanduel.com/api/competition-page?competitionId={cid}&eventTypeId=3&_ak={AK}&timezone=America%2FNew_York"):
+                try:
+                    d3 = get(hq); break
+                except Exception:
+                    continue
+            if not d3:
+                continue
+            att3 = d3.get("attachments") or {}
+            evs3 = {str(k): (v.get("name") or "?") for k, v in (att3.get("events") or {}).items()}
+            for m in (att3.get("markets") or {}).values():
+                ev3 = evs3.get(str(m.get("eventId")), comps.get(cid) or "?")
+                for r in m.get("runners") or []:
+                    odds = (((r.get("winRunnerOdds") or {}).get("trueOdds") or {}).get("decimalOdds") or {}).get("decimalOdds")
+                    if odds:
+                        con.execute("INSERT INTO golf_lines VALUES (?,?,?,?,?,?,?)",
+                                    (ts, ev3, m.get("marketName") or "?", m.get("marketType") or "?",
+                                     r.get("runnerName") or "?", r.get("handicap"), round(float(odds), 4)))
+                        n3 += 1
+        con.commit()
+        nb = con.execute("SELECT COUNT(*) FROM golf_lines WHERE collected_at=? AND (market LIKE '%irdie%' OR mtype LIKE '%BIRD%')", (ts,)).fetchone()[0]
+        print(f"competition sweep: {len(comps)} comps, +{n3} rows ({nb} birdie rows)")
+        if nb:
+            print("golf: BIRDIES MARKET CAPTURED - calibration data accruing")
+    except Exception as _ce:
+        print(f"competition sweep skipped: {str(_ce)[:70]}")
     print(f"golf_collect {ts}: {n} rows")
 
 if __name__ == "__main__":
