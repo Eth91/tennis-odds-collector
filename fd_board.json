@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T12:48:27Z",
+ "captured_at": "2026-07-29T12:53:52Z",
  "matches": [
   {
    "event_id": 35880094,
@@ -8,9 +8,9 @@
    "p1_norm": "adrian myszewski",
    "p2_norm": "kamil klocek",
    "open_date": "2026-07-29T12:40:00.000Z",
-   "line": 60.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 84.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35880095,
@@ -19,9 +19,9 @@
    "p1_norm": "wojciech wojtaszczyk",
    "p2_norm": "piotr gumulinski",
    "open_date": "2026-07-29T12:40:00.000Z",
-   "line": 90.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35880096,
@@ -30,7 +30,7 @@
    "p1_norm": "sebastian juzek",
    "p2_norm": "rafal gajda",
    "open_date": "2026-07-29T12:45:00.000Z",
-   "line": 79.5,
+   "line": 89.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -77,6 +77,17 @@
    "line": 73.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35880138,
+   "p1": "Grzegorz Adamiak",
+   "p2": "Krystian Kolodziej",
+   "p1_norm": "grzegorz adamiak",
+   "p2_norm": "krystian kolodziej",
+   "open_date": "2026-07-29T13:20:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
