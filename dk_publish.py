@@ -70,20 +70,37 @@ def publish(lines):
         print(f"no change ({len(lines)} lines) — skip commit")
         return
     body["hash"] = digest
-    BOARD.write_text(json.dumps(body))
+    # SYNC-THEN-WRITE (2026-07-29). The old flow committed locally first and then tried
+    # `pull --rebase -X ours` — once this clone drifted (it reached 2,172 commits behind),
+    # every rebase blew its 90s timeout and the push failed SILENTLY every 5 minutes for
+    # 3 days while the VM read a stale board. This clone only ever authors dk_board.json,
+    # so the right move is: adopt origin's tip wholesale, THEN write the board on top.
+    # A local commit that never leaves this Mac has negative value — don't create one.
     for attempt in range(4):
         try:
+            subprocess.run(["git", "fetch", "-q", "origin", "main"], cwd=HERE, check=True, timeout=60)
+            subprocess.run(["git", "reset", "--hard", "FETCH_HEAD", "-q"], cwd=HERE, check=True, timeout=60)
+            BOARD.write_text(json.dumps(body))
             subprocess.run(["git", "add", "dk_board.json"], cwd=HERE, check=True, timeout=30)
             subprocess.run(["git", "commit", "-q", "-m", "dk board [skip ci]"],
                            cwd=HERE, check=False, timeout=30)
-            subprocess.run(["git", "pull", "--rebase", "--autostash", "-q", "-X", "ours",
-                            "origin", "main"], cwd=HERE, check=True, timeout=90)
-            subprocess.run(["git", "push", "-q", "origin", "main"], cwd=HERE, check=True, timeout=90)
+            subprocess.run(["git", "push", "-q", "origin", "HEAD:main"], cwd=HERE, check=True, timeout=90)
             print(f"published {len(lines)} DK lines")
             return
         except subprocess.CalledProcessError:
-            continue
-    print("push failed after retries — next timer run retries")
+            continue                       # lost a race with the VM's push — refetch and retry
+    # Total failure is worth a phone ping: this exact path failed silently for 3 days once.
+    BOARD.write_text(json.dumps(body))     # keep the local copy current even when unpublished
+    print("PUSH FAILED 4x — DK board NOT published; VM will degrade to FanDuel-only")
+    try:
+        import urllib.request
+        topic = "ttelite-bets-f2002ae9"
+        req = urllib.request.Request("https://ntfy.sh/" + topic,
+                                     data=b"dk_publish: 4 push attempts failed - DK board is not reaching the VM. Best-price line shopping is degraded to FanDuel-only until this is fixed.",
+                                     headers={"Title": "DK board push failing", "Tags": "warning"})
+        urllib.request.urlopen(req, timeout=10)
+    except Exception:
+        pass
 
 
 def main():
