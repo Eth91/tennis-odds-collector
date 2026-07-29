@@ -116,6 +116,9 @@ def _con():
         con.execute("ALTER TABLE predictions ADD COLUMN played INTEGER DEFAULT 0")
     if "side" not in have:        # which side we bet ('over'/'under'); win = (result == side)
         con.execute("ALTER TABLE predictions ADD COLUMN side TEXT DEFAULT 'over'")
+    if "tier" not in have:        # 'firm' = the validated record; 'n1' = the ⚡1G speed pilot,
+        # graded and tracked but reported SEPARATELY so it never moves the headline number
+        con.execute("ALTER TABLE predictions ADD COLUMN tier TEXT DEFAULT 'firm'")
     con.commit()
     _apply_played(con)            # re-derive played marks from the durable text file
     return con
@@ -166,7 +169,7 @@ def log_predictions(rows):
             "book", "proj_hit", "season_avg", "elev_avg", "proj_min", "n_elev", "ev", "stale",
             "d_stat", "d_fga", "d_min", "driver", "vac",
             "total", "pace", "opp_def", "spread", "d_fta", "d_3pa", "basis", "samples", "confidence",
-            "side", "regime", "vol", "pi_role")
+            "side", "regime", "vol", "pi_role", "tier")
     n = 0
     # LOCK THE PLAY (2026-07-13, user): a player's play (stat+side) is fixed at FIRST flag. Later
     # scans may add more ladder RUNGS of that SAME play, but must NEVER introduce a different stat/

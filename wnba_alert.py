@@ -314,6 +314,24 @@ def collect():
                     for e in e1:
                         # COHERENCE (2026-07-28): this tier PINGS, so it must render. It used
                         # to exist only in `alerts` and vanished from the board entirely.
+                        _c1 = T.starter_label(n, team, starters, proj)
+                        preds.append({
+                            "pred_date": slate_date, "out_player": out_full, "player": n,
+                            "tier": "n1",              # graded, but never in the firm record
+                            "team": team, "opp": matchups_by[slate_date].get(team, ""),
+                            "stat": e["stat"], "line": e["line"], "odds": e["dec"],
+                            "odds_other": e.get("odds_other"), "book": "fd",
+                            "proj_hit": round(e["hit"], 3), "side": e["side"],
+                            "pi_role": e.get("pi_role"), "season_avg": e["season_avg"],
+                            "elev_avg": e["elev_avg"], "proj_min": round(proj, 1),
+                            "n_elev": e["n"], "ev": round(e["ev"], 3),
+                            "stale": int(e["stale"]), "d_stat": e["d_stat"],
+                            "d_fga": e["d_fga"], "d_min": e["d_min"], "driver": e["driver"],
+                            "vac": e["vac"], "total": e["total"], "pace": e["pace"],
+                            "opp_def": e["opp_def"], "spread": e.get("spread"),
+                            "d_fta": e["d_fta"], "d_3pa": e["d_3pa"], "basis": e["basis"],
+                            "samples": json.dumps(e["samples"]),
+                            "vol": json.dumps(e.get("vol") or {}), "confidence": _c1})
                         n1_spots.append({"player": n, "team": team, "star": out_full,
                                          "status": "OUT", "sit": 1.0, "lead": None,
                                          "conf": T.starter_label(n, team, starters, proj),
@@ -322,7 +340,7 @@ def collect():
                         alerts.append((e["ev"], f"n1|{slate_date}|{n}|{e['stat']}|{e['line']:g}",
                             f"⚡1G {out_label} OUT -> {_short(n)} {e['stat'][:3]} o{e['line']:g} "
                             f"{T._am(e['dec'])} | proj {e['elev_avg']:g} +{e['ev']*100:.0f}%EV "
-                            f"· 1-game sample · STALE line — SPEED PILOT (not in record)"))
+                            f"· 1-game sample · STALE line — SPEED PILOT (graded, tier n1)"))
                 continue
             conf = T.starter_label(n, team, starters, proj)  # RotoWire-first confirmed/likely/bench
             # PROJECTION TRACKER: log this beneficiary's FULL projection (min + pts/reb/ast +
@@ -433,6 +451,7 @@ def collect():
                     f"{T._am(e['dec'])}{wo} | {rec} {e['hit']*100:.0f}% "
                     f"| proj {e['elev_avg']:g} +{e['ev']*100:.0f}%EV{ctag}{tag}{env_tag}{rtag}"))
                 preds.append({"pred_date": slate_date, "out_player": out_full, "player": n,
+                              "tier": "firm",
                               "team": team, "opp": matchups_by[slate_date].get(team, ""),
                               "stat": e["stat"], "line": e["line"], "odds": e["dec"],
                               "odds_other": e.get("odds_other"),

@@ -321,7 +321,18 @@ def _load(mt_date):
     # and the correlated over-stacks (Copper's points+pts_reb+pra -> keep best only). Rule-based +
     # outcome-blind (it also drops a lucky thin-sample WIN), so it's the new bot's selection, not
     # cherry-picking. The ledger keeps every real bet; this only restates the headline record.
-    overs = [r for r in g if r["result"] in ("over", "under") and (r["side"] or "over") == "over"]
+    # tier='n1' (⚡1G speed pilots) are GRADED but never counted here — different tier, its own
+    # (much thinner) evidence base. Merging them would corrupt the number the filters are tuned
+    # against. Reported separately below.
+    overs = [r for r in g if r["result"] in ("over", "under") and (r["side"] or "over") == "over"
+             and (r.get("tier") or "firm") != "n1"]
+    _n1 = [r for r in g if r["result"] in ("over", "under") and (r.get("tier") or "") == "n1"]
+    if _n1:
+        _w = sum(1 for r in _n1 if r["result"] == (r["side"] or "over"))
+        _u = sum((float(r.get("odds") or 0) - 1) if r["result"] == (r["side"] or "over") else -1.0
+                 for r in _n1)
+        print("n1 speed-pilot record (separate from the headline): %d-%d, %+.2fu"
+              % (_w, len(_n1) - _w, _u), flush=True)
     try:
         import wnba_slip as _SL
         dec, _dropped = _SL.current_selection(overs)
