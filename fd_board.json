@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-29T03:27:21Z",
+ "captured_at": "2026-07-29T03:33:21Z",
  "matches": [
-  {
-   "event_id": 35878834,
-   "p1": "Adam Linek",
-   "p2": "Stapor Rafal",
-   "p1_norm": "adam linek",
-   "p2_norm": "stapor rafal",
-   "open_date": "2026-07-29T03:20:00.000Z",
-   "line": 67.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35878861,
    "p1": "Grzegorz Adamiak",
@@ -19,9 +8,9 @@
    "p1_norm": "grzegorz adamiak",
    "p2_norm": "kacper petas",
    "open_date": "2026-07-29T03:25:00.000Z",
-   "line": 72.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 79.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35878863,
@@ -30,9 +19,9 @@
    "p1_norm": "wojciech wojtaszczyk",
    "p2_norm": "kamil kowalski",
    "open_date": "2026-07-29T03:25:00.000Z",
-   "line": 66.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 69.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35878870,
@@ -99,6 +88,28 @@
    "line": 76.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35878893,
+   "p1": "Przemyslaw Perzynski",
+   "p2": "Adam Linek",
+   "p1_norm": "przemyslaw perzynski",
+   "p2_norm": "adam linek",
+   "open_date": "2026-07-29T04:00:00.000Z",
+   "line": 81.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35878894,
+   "p1": "Marian Lebek",
+   "p2": "Oliver Vincenec",
+   "p1_norm": "marian lebek",
+   "p2_norm": "oliver vincenec",
+   "open_date": "2026-07-29T04:00:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
