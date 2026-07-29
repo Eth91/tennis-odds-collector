@@ -22,6 +22,33 @@ unstage_big(){
 # DB SYMLINK GUARD (2026-07-29): the live databases live in ~/wnba_data and the repo holds
 # symlinks, so a git checkout/reset can only overwrite a POINTER. If that happens, re-link.
 # A real file found in the link's place is an old tracked blob -- park it, never delete it.
+# SLOW BLOCK (ported from Actions 2026-07-29): model fits and recalibration. Expensive and
+# slow-moving, so ~every 4h rather than on the hot path. Marker file keeps it honest across
+# restarts so a bouncing service cannot refit every boot.
+slow_block(){
+  local m="$HOME/.wnba_slow_last" now; now=$(date -u +%s)
+  local last; last=$(cat "$m" 2>/dev/null || echo 0)
+  [ $(( now - last )) -lt 14400 ] && return 0
+  echo "$now" > "$m"
+  echo "[$(date -u +%H:%M)] slow block: clv report + model fits"
+  python3 wnba_clv.py --report >/dev/null 2>&1 || true
+  python3 wnba_question_log.py --resolve --recalibrate >/dev/null 2>&1 || true
+  python3 wnba_lineup_model.py >/dev/null 2>&1 || true
+  python3 wnba_redist.py --fit --teams ATL,CHI,CON,DAL,GS,IND,LA,LV,MIN,NY,PHX,POR,SEA,TOR,WSH >/dev/null 2>&1 || true
+}
+
+# WATCHLIST DIGEST (ported): fires once per target UTC hour. TIME-based, not tick-based, and
+# marker-guarded so a restart inside the hour cannot double-push to the phone.
+digest_block(){
+  local h; h=$(date -u +%H)
+  case "$h" in 16|20) ;; *) return 0 ;; esac
+  local m="$HOME/.wnba_digest_last" key; key="$(date -u +%F)-$h"
+  [ "$(cat "$m" 2>/dev/null)" = "$key" ] && return 0
+  echo "$key" > "$m"
+  echo "[$(date -u +%H:%M)] watchlist digest -> ntfy"
+  python3 show_watchlist.py --push >/dev/null 2>&1 || true
+}
+
 db_guard(){
   for f in wnba_ledger.sqlite wnba_clv.sqlite wnba_proj_log.sqlite fanduel_props.sqlite wnba_lines.sqlite; do
     [ -L "$f" ] && continue
@@ -112,6 +139,9 @@ collectors(){
   # python3 dk_collect.py --wnba >/dev/null 2>&1 || true
   python3 wnba_ledger.py --grade >/dev/null 2>&1 || true
   python3 wnba_clv.py --close >/dev/null 2>&1 || true
+  # PORTED FROM ACTIONS 2026-07-29 — cheap grading belongs next to the action, not on a cron.
+  python3 wnba_clv.py --grade >/dev/null 2>&1 || true
+  python3 wnba_proj_log.py --grade >/dev/null 2>&1 || true
   prune_lines; board; }
 
 # Keep wnba_lines.sqlite at its intended ~2-day WNBA window (the retention that lived in the
@@ -177,6 +207,12 @@ beat(){
 echo "[$(date)] wnba-loop up (topic:$([ -n "$NTFY_TOPIC" ]&&echo yes||echo NO) pat:$([ -n "$GIT_PAT" ]&&echo yes||echo NO))"
 i=0; hot_ticks=0; cold_i=0; was_hot=2
 while true; do i=$((i+1))
+  # WINDOW-INDEPENDENT (2026-07-29): must run in COLD windows too — the watchlist digest
+  # fires at 16:00 UTC, which is not a hot window, and a self-check that only runs while
+  # the loop is already busy is not a health check.
+  slow_block
+  digest_block
+  python3 wnba_watch.py --watchdog >/dev/null 2>&1 || true
   beat
   if in_hot; then
     # HOT PATH: wnba_watch (scratch detector -> instant ntfy) every ~25s.
