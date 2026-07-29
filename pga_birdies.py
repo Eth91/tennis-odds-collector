@@ -51,13 +51,32 @@ def gql(query, variables=None, tries=3):
     return {}
 
 
-def completed_tournaments():
-    d = gql('{schedule(tourCode: "R") {completed {tournaments {id tournamentName}}}}')
+def completed_tournaments(year=None):
+    """Completed events for a season. `schedule` takes a year argument, which is what makes
+    the 2024-25 backfill possible — v1 hard-coded the R2026 prefix and could only ever see
+    the current season, so every course birdie factor had to come through the bridge."""
+    q = ('{schedule(tourCode: "R"%s) {completed {tournaments {id tournamentName}}}}'
+         % ((', year: "%d"' % int(year)) if year else ""))
+    d = gql(q)
+    pref = "R%d" % int(year) if year else "R2026"
     out = []
     for grp in (d.get("data", {}).get("schedule", {}) or {}).get("completed") or []:
         for t in grp.get("tournaments") or []:
-            if str(t.get("id", "")).startswith("R2026"):
+            if str(t.get("id", "")).startswith(pref):
                 out.append((t["id"], t["tournamentName"]))
+    return out
+
+
+def upcoming_tournaments(year=None):
+    """Upcoming events — the bettable ones, and the tee sheets worth polling."""
+    q = ('{schedule(tourCode: "R"%s) {upcoming {tournaments {id tournamentName}}}}'
+         % ((', year: "%d"' % int(year)) if year else ""))
+    d = gql(q)
+    out = []
+    for grp in (d.get("data", {}).get("schedule", {}) or {}).get("upcoming") or []:
+        for t in grp.get("tournaments") or []:
+            if t.get("id"):
+                out.append((t["id"], t.get("tournamentName") or ""))
     return out
 
 
@@ -94,14 +113,19 @@ def scorecard_rows(tid, tname, pid, pname):
     return rows
 
 
-def harvest(max_events=None):
+def harvest(max_events=None, years=(2026,)):
+    """Default stays 2026 so the loop's behaviour is unchanged; pass years=(2024, 2025) for
+    the backfill. Idempotent by tid, so re-running only fetches what is missing."""
     con = sqlite3.connect(DB)
     con.execute(DDL)
     done = {r[0] for r in con.execute("SELECT DISTINCT tid FROM birdie_rounds")}
-    evs = [e for e in completed_tournaments() if e[0] not in done]
+    allev = []
+    for yr in years:
+        allev += completed_tournaments(year=yr)
+    evs = [e for e in allev if e[0] not in done]
     if max_events:
         evs = evs[:max_events]
-    print(f"harvest: {len(evs)} new events (of {len(completed_tournaments())} completed 2026)")
+    print(f"harvest: {len(evs)} new events (of {len(allev)} completed in {list(years)})")
     for tid, tname in evs:
         ps = players_of(tid)
         rows = []

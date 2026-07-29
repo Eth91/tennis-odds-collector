@@ -131,6 +131,48 @@ def _birdie_bridge():
     return out
 
 
+def direct_course_birdie_factor(event_name):
+    """Observed/expected BIRDIE rate at this course from prior editions we hold hole-level
+    data for. This is the measurement the bridge was standing in for: the bridge infers
+    birdies from scoring (r=-0.68 — good, but lossy), while this counts the actual holes.
+    Returns (factor, n_editions, n_rounds); factor is None with no direct history."""
+    key = (event_name or "").strip().lower()
+    toks = [w for w in key.replace("pga", "").split() if len(w) > 3 and not w.isdigit()]
+    if not toks:
+        return None, 0, 0
+    con = sqlite3.connect(DB)
+    rows = con.execute(
+        "SELECT tid, tname, COUNT(*), SUM(p3h), SUM(p3b), SUM(p4h), SUM(p4b), "
+        "SUM(p5h), SUM(p5b) FROM birdie_rounds GROUP BY tid").fetchall()
+    tot = con.execute("SELECT SUM(p3h), SUM(p3b), SUM(p4h), SUM(p4b), SUM(p5h), SUM(p5b) "
+                      "FROM birdie_rounds").fetchone()
+    con.close()
+    if not tot or not tot[0]:
+        return None, 0, 0
+    g = {3: tot[1] / tot[0] if tot[0] else .15, 4: tot[3] / tot[2] if tot[2] else .15,
+         5: tot[5] / tot[4] if tot[4] else .15}
+    obs_h = obs_b = exp_b = 0.0
+    eds = nrd = 0
+    for _tid, tname, nr, a3, b3, a4, b4, a5, b5 in rows:
+        el = str(tname or "").lower()
+        if sum(1 for w in toks if w in el) < max(1, len(toks) // 2):
+            continue
+        h = (a3 or 0) + (a4 or 0) + (a5 or 0)
+        if not h:
+            continue
+        eds += 1
+        nrd += nr or 0
+        obs_h += h
+        obs_b += (b3 or 0) + (b4 or 0) + (b5 or 0)
+        exp_b += (a3 or 0) * g[3] + (a4 or 0) * g[4] + (a5 or 0) * g[5]
+    if not obs_h or exp_b <= 0:
+        return None, 0, 0
+    raw = obs_b / exp_b
+    # shrink on ROUNDS, not editions: four rounds of one edition is not a course read
+    w = nrd / (nrd + 300.0)
+    return max(0.75, min(1.30, 1.0 + (raw - 1.0) * w)), eds, nrd
+
+
 def course_factor(event_name, verbose=False):
     """Birdie-rate multiplier for a course, from PRIOR editions' scoring. 1.0 = neutral.
     Shrunk toward 1.0 by K_COURSE pseudo-editions so one weird year cannot dominate."""
@@ -152,6 +194,16 @@ def course_factor(event_name, verbose=False):
     n = len(diffs)
     fac = 1.0 + (raw - 1.0) * n / (n + K_COURSE)
     fac = max(0.75, min(1.30, fac))
+    # PREFER DIRECT HOLE HISTORY where we hold it (blind spot #2). The bridge is an
+    # inference from scoring; counted birdies are the thing itself. Blend on rounds so one
+    # thin edition cannot outvote a well-fit bridge.
+    dfac, deds, dnrd = direct_course_birdie_factor(event_name)
+    if dfac is not None and dnrd >= 200:
+        wd = dnrd / (dnrd + 400.0)
+        fac = fac * (1 - wd) + dfac * wd
+        if verbose:
+            print(f"  direct birdie history: {deds} edition(s), {dnrd} rounds -> "
+                  f"{dfac:.3f}, blended weight {wd:.2f} -> {fac:.3f}")
     if verbose:
         print(f"  course_factor({event_name}): {n} prior edition(s), scoring {d:+.2f} "
               f"vs season -> factor {fac:.3f}  (bridge n={br['n']}, r={br.get('r')})")

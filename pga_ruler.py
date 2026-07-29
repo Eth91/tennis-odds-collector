@@ -23,6 +23,7 @@ top-65-and-ties-proxy cut after R2.
 import datetime as dt
 import json
 import math
+import re
 import sqlite3
 import statistics as st
 import urllib.request
@@ -166,7 +167,7 @@ def matchup_prob(R, a, b, rounds=1, course_fit=None):
 
 
 def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
-             wave_shift=0.0):
+             wave_shift=0.0, progress=None, partial=None):
     """Win/top5/10/20/make-cut probs via MC: 4 rounds, player-week effect, top-70 cut."""
     import numpy as np
     rng = np.random.default_rng(seed)
@@ -192,10 +193,65 @@ def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
     # per-player sigma must broadcast across the ROUND axis; numpy cannot align a
     # (k,) scale against (n_sims, k, 4), so draw unit normals and scale explicitly.
     eps = rng.normal(0, 1, (n_sims, k, 4)) * (sig * math.sqrt(1 - RHO))[None, :, None]
-    tot2 = 2 * (mus + wk) + eps[:, :, :2].sum(2)          # 36-hole totals
+    forced = None
+    if not progress:
+        # PRE-TOURNAMENT PATH — unchanged. This runs every loop tick on a memory-capped
+        # cgroup, so it deliberately never materialises a full (n_sims, k, 4) round array.
+        tot2 = 2 * (mus + wk) + eps[:, :, :2].sum(2)      # 36-hole totals
+        rest = 2 * (mus + wk) + eps[:, :, 2:].sum(2)
+    else:
+        # IN-PLAY CONDITIONING (blind spot #4). A posted round is a FACT, so it replaces its
+        # simulated draw instead of being re-rolled. Scores arrive as raw strokes while the
+        # ruler lives in field-relative space, so each round is demeaned by that round's own
+        # field mean — computed from the posted scores themselves, the same baseline fit()
+        # uses. A partially played round carries its strokes-so-far plus a variance-scaled
+        # draw for the holes that remain (mu*f, sd*sqrt(f)).
+        prog = {norm(p): list(v or []) for p, v in progress.items()}
+        means = {}
+        for j in range(4):
+            vals = [v[j] for v in prog.values() if len(v) > j and v[j]]
+            if len(vals) >= 20:
+                means[j] = float(np.mean(vals))
+        known = np.zeros((k, 4))
+        kmask = np.zeros((k, 4))
+        frac = np.ones((k, 4))
+        for i, p in enumerate(names):
+            v = prog.get(norm(p)) or []
+            for j in range(4):
+                if len(v) > j and v[j] and j in means:
+                    known[i, j] = v[j] - means[j]
+                    kmask[i, j] = 1.0
+        if partial:
+            part = {norm(p): v for p, v in partial.items()}
+            for i, p in enumerate(names):
+                pv = part.get(norm(p))
+                if not pv:
+                    continue
+                thru, rel_thru = pv
+                j = int(kmask[i].sum())
+                if not (0 < thru < 18) or j > 3:
+                    continue
+                frac[i, j] = (18.0 - thru) / 18.0
+                known[i, j] = rel_thru
+                kmask[i, j] = 0.5                         # half-known: keep a scaled draw
+        full = (kmask == 1.0)[None, :, :]
+        half = (kmask == 0.5)[None, :, :]
+        r_all = (mus + wk)[:, :, None] + eps
+        if half.any():
+            sc = np.sqrt(frac)[None, :, :]
+            r_all = np.where(half, known[None, :, :] + (mus[None, :, None] * frac[None, :, :]
+                                                        + wk[:, :, None] * frac[None, :, :]
+                                                        + eps * sc), r_all)
+        r_all = np.where(full, known[None, :, :], r_all)
+        tot2 = r_all[:, :, :2].sum(2)
+        rest = r_all[:, :, 2:].sum(2)
+        # a third round on the board is proof the cut was made
+        forced = np.array([kmask[i, 2] > 0 for i in range(k)])
     cutline = np.sort(tot2, axis=1)[:, min(69, k - 1)][:, None]
     made = tot2 <= cutline
-    tot4 = tot2 + np.where(made, 2 * (mus + wk) + eps[:, :, 2:].sum(2), 1e6)
+    if forced is not None and forced.any():
+        made = made | forced[None, :]
+    tot4 = tot2 + np.where(made, rest, 1e6)
     order = tot4.argsort(1).argsort(1)                    # finishing rank per sim
     out = {}
     for i, p in enumerate(names):
@@ -256,6 +312,77 @@ def walk_forward(seasons=(2025, 2026), verbose=True):
     return acc, rmse, tot
 
 
+def noise_floor(verbose=True):
+    """How much of round-to-round scoring is knowable AT ALL.
+
+    The audit flagged RMSE 2.82 against a global round sd of 2.92 as a weakness. That
+    framing assumes the whole gap is model error. Decompose it instead: the variance of
+    field-relative scores splits into BETWEEN-player (skill, learnable) and WITHIN-player
+    (day-to-day noise, learnable by nothing). sqrt(within) is the RMSE floor for ANY
+    predictor, and it also caps pairwise ordering, because two players whose true skills
+    differ by d only order correctly with probability Phi(d / (sd_noise * sqrt(2))).
+
+    If our RMSE sits at that floor and our accuracy sits at that ceiling, the weakness is
+    golf rather than the ruler — and more work on the round model is wasted motion.
+    """
+    con = sqlite3.connect(DB)
+    raw = {}
+    for eid, rnd, pl, sc in con.execute(
+            "SELECT event_id, rnd, player, score FROM rounds WHERE score > 0"):
+        raw.setdefault((eid, rnd), {})[norm(pl)] = sc
+    con.close()
+    per = defaultdict(list)
+    allrel = []
+    for _k, d in raw.items():
+        if len(d) < 40:
+            continue
+        m = st.mean(d.values())
+        for p, s in d.items():
+            per[p].append(s - m)
+            allrel.append(s - m)
+    if len(allrel) < 500:
+        if verbose:
+            print("  noise_floor: not enough rounds")
+        return None
+    var_tot = st.pvariance(allrel)
+    # pooled UNBIASED within-player variance over players with enough rounds to estimate it
+    num = den = 0.0
+    skill = []
+    for p, v in per.items():
+        if len(v) >= 8:
+            num += st.variance(v) * (len(v) - 1)
+            den += len(v) - 1
+            skill.append(st.mean(v))
+    var_within = num / den if den else var_tot
+    # the observed spread of player means overstates skill by var_within/n_rounds per player
+    ns = [len(per[p]) for p in per if len(per[p]) >= 8]
+    nbar = st.mean(ns) if ns else 1
+    var_between = max(st.pvariance(skill) - var_within / nbar, 0.0) if len(skill) > 2 else 0.0
+    sd_noise = math.sqrt(var_within)
+    sd_skill = math.sqrt(var_between)
+    # ceiling on pairwise ordering accuracy, averaged over the REAL distribution of skill
+    # gaps rather than an assumed one
+    import random as _rnd
+    rr = _rnd.Random(11)
+    acc_cap, N = 0.0, 20000
+    for _ in range(N):
+        a, b = rr.choice(skill), rr.choice(skill)
+        acc_cap += _phi(abs(a - b) / (sd_noise * math.sqrt(2)))
+    acc_cap /= N
+    out = {"sd_total": math.sqrt(var_tot), "sd_noise": sd_noise, "sd_skill": sd_skill,
+           "acc_cap": acc_cap, "n_rounds": len(allrel), "n_players": len(skill),
+           "skill_share": var_between / max(var_tot, 1e-9)}
+    if verbose:
+        print("  VARIANCE DECOMPOSITION (%d rounds, %d players with >=8 rounds)"
+              % (len(allrel), len(skill)))
+        print("     total sd             %.3f strokes" % out["sd_total"])
+        print("     within-player noise  %.3f  <- IRREDUCIBLE RMSE floor" % sd_noise)
+        print("     between-player skill %.3f  <- the only learnable part" % sd_skill)
+        print("     skill share of variance %.1f%%" % (100 * out["skill_share"]))
+        print("     => pairwise accuracy CEILING %.3f  (0.5 = coin flip)" % acc_cap)
+    return out
+
+
 def g2_gate(verbose=True):
     """GATE G2 on REAL collected FanDuel 72-hole matchbet CLOSES: ruler log-loss vs the
     devigged close, on events whose results are now in the rounds table. The ruler is fit
@@ -272,11 +399,18 @@ def g2_gate(verbose=True):
     conr = sqlite3.connect(DB)
     ll_book, ll_ruler, n_used = [], [], 0
     fits = {}
+    n_fam = defaultdict(int)
     for (evn, mkt), rr in by_m.items():
-        if len(rr) != 2 or "Round" in mkt:
+        if len(rr) != 2:
             continue
+        # ROUND matchbets count too (blind spot #5). v1 graded 72-hole markets only, which
+        # settle once a week and left G2 at n=3 for weeks — while '18 Hole Matchbet (Round
+        # N)', the softest book on the sheet, settled daily and was thrown away. Same
+        # rigour either way: real collected closes, as-of ratings, actual scores.
+        rm = re.search(r"\(Round (\d)\)", mkt)
+        rn = int(rm.group(1)) if rm else None
         (a, oa, _), (b, ob, _) = rr
-        # results: both players' 72-hole totals at an event matching by fuzzy name + recency
+        # results at an event matched by fuzzy name + recency
         toks = [t for t in evn.replace("PGA", "").split() if len(t) > 3 and not t.isdigit()]
         if not toks:
             continue
@@ -286,27 +420,37 @@ def g2_gate(verbose=True):
         if not row:
             continue
         eid, edate = row
-        sa = conr.execute("SELECT SUM(score), COUNT(*) FROM rounds WHERE event_id=? AND "
-                          "player=?", (eid, a)).fetchone()
-        sb = conr.execute("SELECT SUM(score), COUNT(*) FROM rounds WHERE event_id=? AND "
-                          "player=?", (eid, b)).fetchone()
-        if not sa[0] or not sb[0] or sa[1] != 4 or sb[1] != 4 or sa[0] == sb[0]:
-            continue
+        if rn:
+            sa = conr.execute("SELECT score, 1 FROM rounds WHERE event_id=? AND player=? "
+                              "AND rnd=?", (eid, a, rn)).fetchone()
+            sb = conr.execute("SELECT score, 1 FROM rounds WHERE event_id=? AND player=? "
+                              "AND rnd=?", (eid, b, rn)).fetchone()
+            if not sa or not sb or not sa[0] or not sb[0] or sa[0] == sb[0]:
+                continue
+        else:
+            sa = conr.execute("SELECT SUM(score), COUNT(*) FROM rounds WHERE event_id=? AND "
+                              "player=?", (eid, a)).fetchone()
+            sb = conr.execute("SELECT SUM(score), COUNT(*) FROM rounds WHERE event_id=? AND "
+                              "player=?", (eid, b)).fetchone()
+            if not sa[0] or not sb[0] or sa[1] != 4 or sb[1] != 4 or sa[0] == sb[0]:
+                continue
         y = 1.0 if sa[0] < sb[0] else 0.0
         p_book = (1 / oa) / (1 / oa + 1 / ob)             # devig close
         if edate not in fits:
             R, _ = fit(asof=edate)
             fits[edate] = {norm(k): v for k, v in R.items()}
-        p_rul = matchup_prob(fits[edate], a, b, rounds=4)
+        p_rul = matchup_prob(fits[edate], a, b, rounds=(1 if rn else 4))
         if p_rul is None:
             continue
+        n_fam["R%d" % rn if rn else "72H"] += 1
         ll_book.append(-(y * math.log(p_book) + (1 - y) * math.log(1 - p_book)))
         ll_ruler.append(-(y * math.log(p_rul) + (1 - y) * math.log(1 - p_rul)))
         n_used += 1
     if verbose:
+        fam = " ".join("%s=%d" % kv for kv in sorted(n_fam.items()))
         if n_used < 15:
-            print(f"G2: only {n_used} gradeable closed matchups so far — gate INCONCLUSIVE, "
-                  f"keep collecting (it self-answers as tournaments settle)")
+            print(f"G2: only {n_used} gradeable closed matchups so far [{fam}] — gate "
+                  f"INCONCLUSIVE, keep collecting (it self-answers as events settle)")
         else:
             lb, lr = st.mean(ll_book), st.mean(ll_ruler)
             gap = (lr - lb) * 100
