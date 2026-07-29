@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T03:50:46Z",
+ "captured_at": "2026-07-29T03:56:38Z",
  "matches": [
   {
    "event_id": 35878870,
@@ -8,9 +8,9 @@
    "p1_norm": "piotr zemla",
    "p2_norm": "jakub nowak",
    "open_date": "2026-07-29T03:35:00.000Z",
-   "line": 87.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 89.5,
+   "over_odds": -145,
+   "under_odds": 105
   },
   {
    "event_id": 35878877,
@@ -19,9 +19,9 @@
    "p1_norm": "grzegorz felkel",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-29T03:45:00.000Z",
-   "line": 76.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 68.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35878880,
@@ -30,9 +30,9 @@
    "p1_norm": "mariusz zwolinski",
    "p2_norm": "artur szoltysek",
    "open_date": "2026-07-29T03:50:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 88.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35878881,
@@ -42,8 +42,8 @@
    "p2_norm": "michal durda",
    "open_date": "2026-07-29T03:50:00.000Z",
    "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35878889,
@@ -53,8 +53,8 @@
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-07-29T03:55:00.000Z",
    "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35878893,
