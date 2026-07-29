@@ -116,48 +116,60 @@ def main():
                 preview.append({"stream": "E3-top%d" % N, "runner": run, "market": mt,
                                 "odds": od, "edge": round(ours - fair, 3)})
 
-    # ---- birdies-or-better (Poisson-binomial; its own gate — currently zero captured
-    # FD rows, so structurally preview-only until the trap catches the market) ----
+    # ---- birdies-or-better (Poisson-binomial vs FD's per-player round ladder) ----
+    # Real market shape, captured 2026-07-29 via competition-page:
+    #   marketType PLAYER_BIRDIES_OR_BETTER
+    #   marketName '<Player> Total Birdies or Better Round N'
+    #   runners    '<Player> Over 3.5' / '<Player> Under 3.5'   (handicap sits on the runner)
+    # v1 read the player from the RUNNER and therefore matched nothing. The player is in
+    # the MARKET name; the line is parsed from the runner text (FD sends handicap=0 here).
+    # Both sides priced off P(k+) so a fat under is catchable too.
     try:
         import pga_birdies as B
-        b_armed, _bn = B.birdie_gate()
-        brows = [(mkt, mt, run, od, hc) for mkt, mt, run, od in rows
-                 for hc in [None]] if False else []
+        import re as _re
         brows = [(mkt, mt, run, od) for mkt, mt, run, od in rows
-                 if "BIRD" in (mt or "").upper() or "irdie" in (mkt or "")]
+                 if ("BIRDIES" in (mt or "").upper() or "irdie" in (mkt or ""))
+                 and od and od > 1.0]
         if brows:
             BR, _fr = B.rates()
             BRn = {RU.norm(k): v for k, v in BR.items()}
-            con_h = sqlite3.connect(HERE / "golf_lines.sqlite")
+            seen_b = set()
             for mkt, mt, run, od in brows:
-                rr = BRn.get(RU.norm(run))
-                if not rr or not od or od < 1.3:
+                pm = _re.match(r"(.+?)\s+Total Birdies or Better", mkt)
+                if not pm:
                     continue
-                hc = con_h.execute("SELECT handicap FROM golf_lines WHERE market=? AND "
-                                   "runner=? ORDER BY collected_at DESC LIMIT 1",
-                                   (mkt, run)).fetchone()
-                import re as _re
-                k_t = None
-                if hc and hc[0] is not None:
-                    k_t = int(float(hc[0]) + 0.5)             # o3.5 -> P(4+)
-                else:
-                    m_ = _re.search(r"(\d+)\+", str(run) + " " + str(mkt))
-                    if m_:
-                        k_t = int(m_.group(1))
-                if not k_t:
+                player = pm.group(1).strip()
+                rr = BRn.get(RU.norm(player))
+                if not rr:
+                    continue                       # unrated (harvest hasn't reached him)
+                sm = _re.search(r"(Over|Under)\s+([\d.]+)", run)
+                if not sm:
                     continue
-                ours = B.p_x_or_more(rr, k_t)
-                fair = 1 / od                                  # one-sided; vig-uncorrected v1
-                if ours - fair >= 0.05:
-                    preview.append({"stream": "E3-birdies", "runner": run,
+                side, line = sm.group(1).lower(), float(sm.group(2))
+                k_t = int(line + 0.5)              # o3.5 -> P(4+)
+                p_over = B.p_x_or_more(rr, k_t)
+                ours = p_over if side == "over" else 1 - p_over
+                edge = ours - 1 / od
+                key = (RU.norm(player), side, line)
+                if edge >= 0.05 and key not in seen_b:
+                    seen_b.add(key)
+                    preview.append({"stream": "E3-birdies",
+                                    "runner": f"{player} {side} {line:g}",
                                     "market": mkt[:60], "odds": od,
-                                    "edge": round(ours - fair, 3)})
-            con_h.close()
+                                    "edge": round(edge, 3)})
     except Exception as _be:
-        print(f"  birdie pricing skipped: {str(_be)[:60]}")
+        print(f"  birdie pricing skipped: {str(_be)[:70]}")
 
-    preview.sort(key=lambda x: -x["edge"])
-    preview = preview[:15]
+    # DEDUPE (2026-07-29): the same underlying market reaches us under several mtypes
+    # (TOP_20_FINISH_IMG vs TOP_20_FINISH_(INCL._TIES)) and again from the competition
+    # page, so an un-deduped preview showed the same play eight times and crowded out
+    # every other stream. Keep the best-edge instance per (stream, runner, line).
+    _best = {}
+    for _pv in preview:
+        _k = (_pv["stream"], RU.norm(_pv["runner"]), _pv.get("odds"))
+        if _k not in _best or _pv["edge"] > _best[_k]["edge"]:
+            _best[_k] = _pv
+    preview = sorted(_best.values(), key=lambda x: -x["edge"])[:15]
     if armed and preview:
         con = sqlite3.connect(PAPER)
         con.execute(E1.DDL)
