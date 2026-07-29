@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T18:17:53Z",
+ "captured_at": "2026-07-29T18:25:10Z",
  "matches": [
   {
    "event_id": 35881001,
@@ -8,20 +8,9 @@
    "p1_norm": "adam staniczek",
    "p2_norm": "andriej fomin",
    "open_date": "2026-07-29T18:10:00.000Z",
-   "line": 62.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35881002,
-   "p1": "Kuba Golaszewski",
-   "p2": "Adrian Fabis",
-   "p1_norm": "kuba golaszewski",
-   "p2_norm": "adrian fabis",
-   "open_date": "2026-07-29T18:10:00.000Z",
-   "line": 87.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 73.5,
+   "over_odds": 110,
+   "under_odds": -155
   },
   {
    "event_id": 35881022,
@@ -30,9 +19,9 @@
    "p1_norm": "zbigniew nocun",
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-07-29T18:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 73.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35881025,
@@ -42,8 +31,8 @@
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-29T18:25:00.000Z",
    "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35881045,
