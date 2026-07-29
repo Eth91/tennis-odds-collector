@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T08:15:51Z",
+ "captured_at": "2026-07-29T08:21:01Z",
  "matches": [
   {
    "event_id": 35879361,
@@ -44,6 +44,28 @@
    "line": 70.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35879383,
+   "p1": "Michal Paszkiewicz",
+   "p2": "Jakub Nowak",
+   "p1_norm": "michal paszkiewicz",
+   "p2_norm": "jakub nowak",
+   "open_date": "2026-07-29T08:45:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35879384,
+   "p1": "Sebastian Juzek",
+   "p2": "Schaniel Krzysztof",
+   "p1_norm": "sebastian juzek",
+   "p2_norm": "schaniel krzysztof",
+   "open_date": "2026-07-29T08:45:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
