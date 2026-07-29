@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-07-29T11:54:16Z",
+ "captured_at": "2026-07-29T12:00:02Z",
  "matches": [
-  {
-   "event_id": 35879743,
-   "p1": "Grzegorz Felkel",
-   "p2": "Kacper Petas",
-   "p1_norm": "grzegorz felkel",
-   "p2_norm": "kacper petas",
-   "open_date": "2026-07-29T11:40:00.000Z",
-   "line": 56.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35880041,
-   "p1": "Sebastian Juzek",
-   "p2": "Krzysztof Hetnar",
-   "p1_norm": "sebastian juzek",
-   "p2_norm": "krzysztof hetnar",
-   "open_date": "2026-07-29T11:40:00.000Z",
-   "line": 75.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
-  {
-   "event_id": 35880016,
-   "p1": "Michal Minda",
-   "p2": "Jakub Zochniak",
-   "p1_norm": "michal minda",
-   "p2_norm": "jakub zochniak",
-   "open_date": "2026-07-29T11:45:00.000Z",
-   "line": 82.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
   {
    "event_id": 35880029,
    "p1": "Michal Durda",
@@ -41,9 +8,9 @@
    "p1_norm": "michal durda",
    "p2_norm": "piotr gumulinski",
    "open_date": "2026-07-29T11:50:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 90.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35880030,
@@ -52,9 +19,9 @@
    "p1_norm": "mariusz zwolinski",
    "p2_norm": "kamil klocek",
    "open_date": "2026-07-29T11:50:00.000Z",
-   "line": 71.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 87.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35880033,
@@ -63,9 +30,9 @@
    "p1_norm": "rafal gajda",
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-07-29T11:55:00.000Z",
-   "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 81.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35880050,
