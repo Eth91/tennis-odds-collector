@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T08:11:04Z",
+ "captured_at": "2026-07-29T08:15:51Z",
  "matches": [
   {
    "event_id": 35879361,
@@ -22,6 +22,28 @@
    "line": 84.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35879370,
+   "p1": "Adrian Myszewski",
+   "p2": "Kuba Golaszewski",
+   "p1_norm": "adrian myszewski",
+   "p2_norm": "kuba golaszewski",
+   "open_date": "2026-07-29T08:35:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35879371,
+   "p1": "Witold Buczynski",
+   "p2": "Kamil Kowalski",
+   "p1_norm": "witold buczynski",
+   "p2_norm": "kamil kowalski",
+   "open_date": "2026-07-29T08:35:00.000Z",
+   "line": 70.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
