@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-29T21:15:27Z",
+ "captured_at": "2026-07-29T21:19:33Z",
  "matches": [
-  {
-   "event_id": 35881407,
-   "p1": "Adam Staniczek",
-   "p2": "Kazimierz Rybak",
-   "p1_norm": "adam staniczek",
-   "p2_norm": "kazimierz rybak",
-   "open_date": "2026-07-29T21:00:00.000Z",
-   "line": 66.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35881409,
    "p1": "Janus Slawomir",
@@ -19,9 +8,9 @@
    "p1_norm": "janus slawomir",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-07-29T21:05:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 83.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35881416,
@@ -30,9 +19,9 @@
    "p1_norm": "wojciech urban",
    "p2_norm": "marian lebek",
    "open_date": "2026-07-29T21:10:00.000Z",
-   "line": 77.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 84.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35881427,
@@ -85,9 +74,20 @@
    "p1_norm": "mariusz koczyba",
    "p2_norm": "adrian burkacki",
    "open_date": "2026-07-29T21:35:00.000Z",
-   "line": 74.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 70.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35881454,
+   "p1": "Michal Machelski",
+   "p2": "Kamil Delikatny",
+   "p1_norm": "michal machelski",
+   "p2_norm": "kamil delikatny",
+   "open_date": "2026-07-29T21:45:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
