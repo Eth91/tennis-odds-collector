@@ -1,4 +1,27 @@
 {
- "captured_at": "2026-07-29T08:01:08Z",
- "matches": []
+ "captured_at": "2026-07-29T08:06:08Z",
+ "matches": [
+  {
+   "event_id": 35879361,
+   "p1": "Przemyslaw Perzynski",
+   "p2": "Stapor Rafal",
+   "p1_norm": "przemyslaw perzynski",
+   "p2_norm": "stapor rafal",
+   "open_date": "2026-07-29T08:30:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35879362,
+   "p1": "Adrian Wiecek",
+   "p2": "Kacper Petas",
+   "p1_norm": "adrian wiecek",
+   "p2_norm": "kacper petas",
+   "open_date": "2026-07-29T08:30:00.000Z",
+   "line": 84.5,
+   "over_odds": -116,
+   "under_odds": -116
+  }
+ ]
 }
