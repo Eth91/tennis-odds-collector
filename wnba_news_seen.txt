@@ -335,6 +335,7 @@ rw|alannasmith|Smith (leg) is out for Monday's game ver
 rw|alannasmith|Smith (leg) is probable for Wednesday's 
 rw|alannasmith|Smith (leg) is questionable for Wednesda
 rw|alissapili|Pili (coach's decision) is out for Wedne
+rw|aliyahboston|Boston is questionable to return to Tues
 rw|aneesahmorrow|Morrow (reconditioning) is listed as que
 rw|angelreese|Reese won't return to Sunday's game agai
 rw|annelimaley|Maley (coach's decision) is out for Wedn
