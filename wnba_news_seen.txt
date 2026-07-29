@@ -126,6 +126,7 @@ rw|252|Won't play Tuesday
 rw|254|Produces 18 points in win
 rw|254|Scores game-high 21 points
 rw|258|Quiet again off bench
+rw|258|Terrific outing in win
 rw|272|Picks up triple-double Wednesday
 rw|276|Another quality showing Wednesday
 rw|276|Double-doubles in win
