@@ -1,9 +1,9 @@
 # Bet ledger — automated results, CLV & P&L
 
-_2026-07-29T20:57:03 UTC_ · 1 unit = $100 · flag threshold +2% EV
+_2026-07-29T21:29:03 UTC_ · 1 unit = $100 · flag threshold +2% EV
 
-- **Record:** 232-341-3  ·  **P&L:** -62.01u ($-6,201)  ·  **ROI:** -10.8%
-- **Avg CLV:** +6.95% over 312 closed bets  ·  **Open:** 11  ·  **Total logged:** 610
+- **Record:** 234-342-3  ·  **P&L:** -61.21u ($-6,121)  ·  **ROI:** -10.6%
+- **Avg CLV:** +6.95% over 312 closed bets  ·  **Open:** 8  ·  **Total logged:** 610
 
 > CLV is the signal that matters — positive average CLV means the edge is real even before the W-L catches up. W-L over small samples is noise.
 
@@ -16,7 +16,7 @@ Data OK — FanDuel 422 lines @ `2026-07-29T20:51:54`.
 | ebasketball | total | 37 | +5.95 | -4.65% |
 | efootball | total | 3 | +0.74 | — |
 | mlb | f5_total | 85 | +7.05 | — |
-| mlb | game_total | 193 | -3.89 | — |
+| mlb | game_total | 193 | -3.09 | — |
 | mlb | strikeouts | 29 | -5.91 | +3.87% |
 | mlb | total_bases | 253 | -61.42 | +8.10% |
 | tennis | player_games | 10 | -4.54 | +11.06% |
@@ -25,6 +25,9 @@ Data OK — FanDuel 422 lines @ `2026-07-29T20:51:54`.
 
 | date | sport | player | bet | odds | result | got | P&L | CLV |
 |---|---|---|---|---|---|---|---|---|
+| 2026-07-29 | mlb | GAME (game_total) | game_total under 10.0 | 1.82 | W | 7 | +0.82u | — |
+| 2026-07-29 | mlb | GAME (game_total) | game_total under 9.5 | 1.98 | W | 7 | +0.98u | — |
+| 2026-07-29 | mlb | GAME (game_total) | game_total over 9.5 | 1.95 | L | 7 | -1.00u | — |
 | 2026-07-29 | mlb | GAME (game_total) | game_total over 8.0 | 1.91 | W | 14 | +0.91u | — |
 | 2026-07-29 | mlb | GAME (game_total) | game_total over 7.5 | 1.82 | W | 10 | +0.82u | — |
 | 2026-07-29 | mlb | GAME (f5_total) | f5_total over 4.5 | 2.14 | W | 5 | +1.14u | — |
@@ -47,7 +50,4 @@ Data OK — FanDuel 422 lines @ `2026-07-29T20:51:54`.
 | 2026-07-28 | mlb | GAME (f5_total) | f5_total over 7.5 | 2.08 | W | 10 | +1.08u | — |
 | 2026-07-28 | mlb | GAME (f5_total) | f5_total over 6.5 | 1.88 | W | 10 | +0.88u | — |
 | 2026-07-28 | mlb | GAME (game_total) | game_total under 14.5 | 1.89 | W | 11 | +0.89u | — |
-| 2026-07-28 | mlb | GAME (game_total) | game_total over 8.5 | 1.93 | L | 3 | -1.00u | — |
-| 2026-07-28 | mlb | GAME (f5_total) | f5_total under 4.5 | 1.96 | L | 5 | -1.00u | — |
-| 2026-07-28 | mlb | GAME (game_total) | game_total over 9.5 | 2.06 | L | 6 | -1.00u | — |
 
