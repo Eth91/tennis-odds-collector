@@ -92,16 +92,34 @@ def main():
     field = [(c.get("athlete") or {}).get("displayName") for c in F.competitors()]
     field = [f for f in field if f]
     sim = RU.simulate(R, field) if field else {}
-    groups = defaultdict(list)
+    # DEDUPE BEFORE DEVIG (2026-07-29) — this was manufacturing fake +20-27% edges.
+    # The one-sided devig normalizes by sum(1/odds) over the market, so DUPLICATE runners
+    # (the same top-20 market arrives as TOP_20_FINISH_IMG, TOP_20_FINISH_(INCL._TIES),
+    # AND again from the competition page) inflate the normalizer: a pool that should imply
+    # ~20 qualifiers implied 434, which crushed every `fair` and made the sim look like it
+    # had a huge edge on everyone. The sim itself is sound — it sums to exactly 1/5/10/20/70
+    # across the field — so the error was entirely in this pooling. Keep ONE price per
+    # (market-family, runner): the SHORTEST (the sharpest posted number).
+    groups = defaultdict(dict)
     for mkt, mt, run, od in rows:
         if od and od > 1.0 and mt and ("TOP_" in mt and "FINISH" in mt or mt == "OUTRIGHT_BETTING"):
-            groups[mt].append((run, od))
+            fam = ("OUTRIGHT" if mt == "OUTRIGHT_BETTING"
+                   else "TOP_%s" % "".join(ch for ch in mt.split("_FINISH")[0] if ch.isdigit()))
+            cur = groups[fam].get(run)
+            if cur is None or od < cur:
+                groups[fam][run] = od
+    groups = {k: list(v.items()) for k, v in groups.items()}
     NMAP = {"TOP_5": 5, "TOP_10": 10, "TOP_20": 20, "OUTRIGHT": 1}
     for mt, rr in groups.items():
-        N = next((v for k, v in NMAP.items() if mt.startswith(k)), None)
+        N = NMAP.get(mt)
         if not N or len(rr) < 25 or not sim:
             continue
         inv = sum(1 / od for _, od in rr)
+        if inv > N * 3 or inv < N * 0.4:
+            # the pool does not resemble an N-winner market (duplicates, or several events
+            # merged). Pricing it would fabricate edges, so skip and say so.
+            print(f"  skip {mt}: pool implies {inv:.1f} qualifiers, expected ~{N}")
+            continue
         key = {1: "win", 5: "top5", 10: "top10", 20: "top20"}[N]
         for run, od in rr:
             fair = (1 / od) * N / inv
