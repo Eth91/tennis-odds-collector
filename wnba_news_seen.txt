@@ -221,6 +221,7 @@ rw|574|Full stat line in win
 rw|574|Probable for Wednesday
 rw|574|Shines in season debut
 rw|574|To make season debut
+rw|576|Matches season high in boards
 rw|577|Downgraded to out
 rw|577|Out again Wednesday
 rw|577|Probable for Wednesday
