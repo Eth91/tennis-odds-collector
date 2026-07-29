@@ -1287,6 +1287,52 @@ def _feed_health_ping(tt_json):
             pass
 
 
+def _pga_panel():
+    """⛳ PGA (2026-07-29, user): E1 wave/weather paper meter + opener-softness readout, in
+    the board's flat-card language. Fed by pga_board.json (baked by pga_e1/pga_grade on the
+    golf cron) — render-only here, same discipline as the TT panel. PAPER: no play here is
+    a bet recommendation until the meter clears the PGA_PLAN promotion bar."""
+    f = HERE / "pga_board.json"
+    if not f.exists():
+        return ""
+    try:
+        d = json.loads(f.read_text())
+    except (ValueError, OSError):
+        return ""
+    rec = d.get("record") or {}
+    w, l, u = rec.get("w", 0), rec.get("l", 0), rec.get("units", 0.0)
+    ucls = "pos" if u >= 0 else "neg"
+    lg = (f'<img class="glogo" src="logos/pga.png" alt="" loading="lazy" '
+          f'onerror="this.style.display=\'none\'">'
+          f'<img class="glogo" src="logos/fd.png" alt="" loading="lazy" '
+          f'onerror="this.style.display=\'none\'">')
+    head = (f'<div class="sw-title">{lg}⛳ PGA · E1 wave meter '
+            f'<span>· {html.escape(d.get("event") or "")} · PAPER — not bets · '
+            f'{w}-{l} · <b class="{ucls}">{u:+.2f}u</b></span></div>')
+    body = ""
+    if d.get("note"):
+        body += f'<div class="swo">{html.escape(d["note"])}</div>'
+    for o in (d.get("open") or [])[:8]:
+        body += (f'<div class="swrow"><div class="swhd"><b>{html.escape(o.get("runner") or "")}</b>'
+                 f'<span class="swusg">over {html.escape(o.get("opp") or "")} · '
+                 f'{o.get("odds"):.2f} · wind {o.get("d_wind"):+.1f} km/h/rd</span></div></div>')
+    if not (d.get("open") or d.get("note")):
+        body += '<div class="swo">No wave edges flagged — the meter fires once tee times + a wind split line up.</div>'
+    # opener softness (E2 recon, live): golf_clv.py ranks markets by open->close drift
+    try:
+        clv = d.get("clv") or {}
+        rows = clv.get("markets") if isinstance(clv, dict) else None
+        if isinstance(rows, dict):
+            top = sorted(rows.items(), key=lambda kv: -abs(kv[1] if isinstance(kv[1], (int, float))
+                         else (kv[1].get("drift") or 0)))[:2]
+            if top:
+                lbl = " · ".join(f"{k[:26]}" for k, _ in top)
+                body += (f'<div class="swo">softest openers (Mon→close drift): {html.escape(lbl)}</div>')
+    except Exception:
+        pass
+    return f'<div class="starwatch">{head}{body}</div>'
+
+
 def _tt_panel(data):
     """Table Tennis tab — TT Elite FLAGGED BETS at the FanDuel line ONLY (in the #tt-totals card:
     server-baked here for instant paint, then re-rendered live by the tt-live script). The other TT
@@ -2227,6 +2273,7 @@ def build():
     tt_json = _load_tt()
     _feed_health_ping(tt_json)                             # once/day ntfy if TT/WNBA is broken (not quiet)
     tt_html = _tt_panel(tt_json)
+    pga_html = _pga_panel()
     # outs-model plays card BENCHED 2026-07-25 (user: only K-COMPASS flags on the MLB tab).
     # k_paper keeps logging outs bets silently; the tracker-tab record card stays for history.
     mlb_html = ""
@@ -3123,6 +3170,7 @@ def build():
   <div class="panel hidden" id="tt">
     <h2>Table tennis · real FD lines</h2>
     {tt_html}
+    {pga_html}
   </div>
   <div class="panel hidden" id="mlb">
     <h2>MLB pitcher props · best book</h2>
