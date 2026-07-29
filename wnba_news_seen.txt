@@ -264,6 +264,7 @@ rw|678|Closing in on return
 rw|678|Hopeful for season debut Thursday
 rw|703|Another quiet effort
 rw|720|Lacking clear role
+rw|724|Full stat line Tuesday
 rw|733|Swats four shots in loss
 rw|735|Limited production in return
 rw|735|Notches 10 points
@@ -308,6 +309,7 @@ rw|855|Starting against Indiana
 rw|855|Stuck in reserve role
 rw|856|Plays well off bench
 rw|860|Back with 12 points off bench
+rw|860|Logs 15 minutes in win
 rw|863|Explodes for 18 points off bench
 rw|911|Available against Connecticut
 rw|911|Dishes seven dimes Saturday
