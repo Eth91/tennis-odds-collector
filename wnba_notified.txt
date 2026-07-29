@@ -78,10 +78,14 @@
 2026-07-22|Sabrina Ionescu|points|19.5
 2026-07-28|Aaliyah Edwards|points|9.5
 2026-07-28|Marina Mabrey|rebounds|3.5
+2026-07-28|Olivia Nelson-Ododa|assists|1.5
+2026-07-28|Olivia Nelson-Ododa|rebounds|5.5
 2026-07-28|Olivia Nelson-Ododa|rebounds|6.5
+2026-07-28|Olivia Nelson-Ododa|rebounds|7.5
 n1|2026-07-20|Arike Ogunbowale|points|14.5
 n1|2026-07-20|Arike Ogunbowale|points|15.5
 n1|2026-07-20|Arike Ogunbowale|points|16.5
+n1|2026-07-28|Bridget Carleton|pts_ast|14.5
 n1|2026-07-28|Megan DiLeo|points|12.5
 n1|2026-07-28|Megan DiLeo|points|13.5
 timing|2026-07-18|Aaliyah Edwards|points|9.5
@@ -164,6 +168,7 @@ watch|2026-07-22|Pauline Astier|reb_ast|5.5
 watch|2026-07-22|Sabrina Ionescu|points|19.5
 watch|2026-07-22|Sydney Taylor|points|16.5
 watch|2026-07-28|Breanna Stewart|reb_ast|12.5
+watch|2026-07-28|Bridget Carleton|pts_ast|14.5
 watch|2026-07-28|Isabelle Harrison|points|11.5
 watch|2026-07-28|Isabelle Harrison|pts_reb|17.5
 watch|2026-07-28|Jonquel Jones|assists|1.5
@@ -172,4 +177,5 @@ watch|2026-07-28|Marina Mabrey|pra|26.5
 watch|2026-07-28|Marina Mabrey|pra|27.5
 watch|2026-07-28|Marina Mabrey|pra|28.5
 watch|2026-07-28|Megan DiLeo|points|12.5
+watch|2026-07-28|Megan DiLeo|points|13.5
 watch|2026-07-28|Olivia Nelson-Ododa|rebounds|6.5
