@@ -158,6 +158,7 @@ rw|331|Nets 19 points in Washington
 rw|331|Strong line in win
 rw|331|Strong outing in win
 rw|344|Available for Wednesday
+rw|344|Subdued campaign continues
 rw|354|Chips in with 11 points
 rw|354|Very efficient in home victory
 rw|358|Starting versus Minnesota

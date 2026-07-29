@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-29T17:51:17Z",
+ "captured_at": "2026-07-29T17:56:39Z",
  "matches": [
-  {
-   "event_id": 35880955,
-   "p1": "Kamil Delikatny",
-   "p2": "Michal Machelski",
-   "p1_norm": "kamil delikatny",
-   "p2_norm": "michal machelski",
-   "open_date": "2026-07-29T17:45:00.000Z",
-   "line": 73.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35880956,
    "p1": "Michal Skorski",
@@ -19,9 +8,9 @@
    "p1_norm": "michal skorski",
    "p2_norm": "adrian eliasz",
    "open_date": "2026-07-29T17:45:00.000Z",
-   "line": 64.5,
-   "over_odds": -115,
-   "under_odds": -115
+   "line": 85.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35880974,
@@ -30,9 +19,9 @@
    "p1_norm": "janus slawomir",
    "p2_norm": "michal wolny",
    "open_date": "2026-07-29T17:55:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35880986,
@@ -66,6 +55,17 @@
    "line": 81.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35881022,
+   "p1": "Zbigniew Nocun",
+   "p2": "Henryk Tkaczyk",
+   "p1_norm": "zbigniew nocun",
+   "p2_norm": "henryk tkaczyk",
+   "open_date": "2026-07-29T18:20:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
