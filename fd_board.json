@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-29T13:24:27Z",
+ "captured_at": "2026-07-29T13:29:24Z",
  "matches": [
   {
    "event_id": 35880111,
@@ -8,9 +8,9 @@
    "p1_norm": "michal durda",
    "p2_norm": "witold buczynski",
    "open_date": "2026-07-29T13:05:00.000Z",
-   "line": 99.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 100.5,
+   "over_odds": -145,
+   "under_odds": 105
   },
   {
    "event_id": 35880138,
@@ -19,20 +19,9 @@
    "p1_norm": "grzegorz adamiak",
    "p2_norm": "krystian kolodziej",
    "open_date": "2026-07-29T13:20:00.000Z",
-   "line": 78.5,
+   "line": 72.5,
    "over_odds": -120,
    "under_odds": -115
-  },
-  {
-   "event_id": 35880148,
-   "p1": "Grzegorz Poliniewicz",
-   "p2": "Adam Linek",
-   "p1_norm": "grzegorz poliniewicz",
-   "p2_norm": "adam linek",
-   "open_date": "2026-07-29T13:25:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
   },
   {
    "event_id": 35880156,
@@ -75,8 +64,8 @@
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-29T13:45:00.000Z",
    "line": 84.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35880178,
@@ -87,6 +76,39 @@
    "open_date": "2026-07-29T13:50:00.000Z",
    "line": 77.5,
    "over_odds": -116,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35880179,
+   "p1": "Wojciech Wojtaszczyk",
+   "p2": "Witold Buczynski",
+   "p1_norm": "wojciech wojtaszczyk",
+   "p2_norm": "witold buczynski",
+   "open_date": "2026-07-29T13:55:00.000Z",
+   "line": 73.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35880180,
+   "p1": "Adrian Myszewski",
+   "p2": "Przemyslaw Perzynski",
+   "p1_norm": "adrian myszewski",
+   "p2_norm": "przemyslaw perzynski",
+   "open_date": "2026-07-29T13:55:00.000Z",
+   "line": 75.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35880181,
+   "p1": "Rafal Gajda",
+   "p2": "Krzysztof Hetnar",
+   "p1_norm": "rafal gajda",
+   "p2_norm": "krzysztof hetnar",
+   "open_date": "2026-07-29T13:55:00.000Z",
+   "line": 75.5,
+   "over_odds": -112,
    "under_odds": -118
   }
  ]
