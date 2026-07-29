@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-29T00:42:11Z",
+ "captured_at": "2026-07-29T00:48:02Z",
  "matches": [
-  {
-   "event_id": 35878588,
-   "p1": "Jacek Przewlocki",
-   "p2": "Bartlomiej Mrugala",
-   "p1_norm": "jacek przewlocki",
-   "p2_norm": "bartlomiej mrugala",
-   "open_date": "2026-07-29T00:35:00.000Z",
-   "line": 73.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35878590,
-   "p1": "Jerzy Michalik",
-   "p2": "Marian Brunner",
-   "p1_norm": "jerzy michalik",
-   "p2_norm": "marian brunner",
-   "open_date": "2026-07-29T00:45:00.000Z",
-   "line": 77.5,
-   "over_odds": -110,
-   "under_odds": -120
-  },
   {
    "event_id": 35878591,
    "p1": "Tomasz Wrzalik",
@@ -31,8 +9,8 @@
    "p2_norm": "marian lebek",
    "open_date": "2026-07-29T00:45:00.000Z",
    "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -118
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35878610,

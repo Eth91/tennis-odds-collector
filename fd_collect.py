@@ -79,7 +79,9 @@ def extract(m, sport, event_name=""):
         # substring-match "points"/"rebounds" and leak in as phantom low even-odds rungs that hijack
         # full-game main-line detection (a 20-pt scorer's "points" main line reading 5.5). Full-game
         # markets only — reject anything period-qualified before the WNBA_STATS substring match.
-        if re.search(r"\b(quarter|half|period)\b", low):
+        # "Qtr" is FanDuel's abbreviation in the PLAYER markets ("Megan DiLeo - 1st Qtr
+        # Points") and was never matched by the spelled-out pattern -- 2026-07-29.
+        if re.search(r"\b(quarter|qtr|half|period|[1-4]q|q[1-4])\b", low):
             return rows
         wstat = next((v for k, v in WNBA_STATS.items() if k in low), None)
         if not wstat:
