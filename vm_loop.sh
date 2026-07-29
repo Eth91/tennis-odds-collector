@@ -223,8 +223,10 @@ while true; do i=$((i+1))
   # WINDOW-INDEPENDENT (2026-07-29): must run in COLD windows too — the watchlist digest
   # fires at 16:00 UTC, which is not a hot window, and a self-check that only runs while
   # the loop is already busy is not a health check.
+  date -u +%s > "$HOME/.wnba_loop_beat"   # local liveness (survives a wedged git)
   pin_block
   slow_block
+  date -u +%s > "$HOME/.wnba_loop_beat"   # re-stamp: the 4h slow block is a legitimately long tick
   digest_block
   python3 wnba_watch.py --watchdog >/dev/null 2>&1 || true
   beat
