@@ -1913,17 +1913,11 @@ def _injury_html():
         body += (f'<div class="swrow"><div class="swhd">{_logo(r.get("team"))}'
                  f'<b>{html.escape(_short(r.get("player") or ""))}</b>'
                  f'<span class="swstat {scls}">{html.escape(stt)}</span>{nb}'
-                 f'<span class="swusg">{r.get("mpg")}\' · {r.get("ppg")}p'
-                 + (f' · {html.escape(r.get("reason"))}' if r.get("reason") else "")
-                 + (' · <i>report</i>' if r.get("src") == "report" else "")
-                 + '</span></div></div>')
+                 + '</div></div>')
     if not body:
         body = '<div class="swo">No impact players carry an injury status right now.</div>'
     return ('<div class="starwatch"><div class="sw-title">🏥 Injury report '
-            f'<span>· every impact player with a status · n = team games without her '
-            f'(n&le;2 ⇒ model can\'t project — your call) · {agetxt}'
-            + (f' · report {html.escape(d.get("report_stamp") or "")}' if d.get("report_stamp") else '')
-            + '</span></div>'
+            '<span>· n = team games without her</span></div>'
             + stale + body + '</div>')
 
 
