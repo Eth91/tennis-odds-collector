@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-title" content="Pickz">
 <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="64x64" href="icon-64.png">
-<meta name="bv" content="ac82b6f64c">
+<meta name="bv" content="b0196c8ab9">
 <title>Today's Plays</title>
 <style>
   :root { color-scheme: dark; }
@@ -39,6 +39,12 @@
     border-top:1px solid #232a35; color:#eef1f6; font-size:16.5px; font-weight:800; letter-spacing:-.01em; }
   .dayhdr:first-of-type { border-top:none; padding-top:2px; margin-top:2px; }
   .dayhdr span { color:#6b7484; font-size:12px; font-weight:600; letter-spacing:0; }
+  /* IN PROGRESS: positions already running. Muted so it never competes with the live board,
+     with a pulsing dot so it reads as in-flight rather than as another slate day. */
+  .dayhdr.live { color:#8a93a6; }
+  .dayhdr.live::before { content:""; width:7px; height:7px; border-radius:50%;
+      background:#e0a04a; display:inline-block; margin-right:2px; animation:lvpulse 2s infinite; }
+  @keyframes lvpulse { 0%,100% { opacity:1; } 50% { opacity:.35; } }
   /* GAME group — the top of the hierarchy: logos + matchup, hairline rule, generous separation */
   .game { margin-bottom:22px; }
   .ghd { display:flex; justify-content:space-between; align-items:center; padding:0 2px 9px;
@@ -531,7 +537,7 @@
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
-    <div class="live"><span class="dot"></span>9:04 PM MT
+    <div class="live"><span class="dot"></span>9:05 PM MT
       <button class="rfrsh" onclick="manualRefresh(this)" title="Pull new plays now" aria-label="Refresh now">↻</button>
       <span id="rfchk"></span></div>
   </header>
@@ -544,7 +550,7 @@
   </div>
   <div class="panel" id="wnba">
     <div class="recstrip" onclick="showTab('tracker')"><b>34-17</b> · 67% hit · <b class="up">+13.4u</b><span>since 7/9 · Tracker →</span></div>
-    <div id="games"><div class="dayhdr">Today<span>Tue · Jul 28</span></div>
+    <div id="games"><div class="dayhdr live">In progress<span>2 games · 2 open positions · price at flag</span></div>
 <div class="game" data-edge="0.1980" data-tip="1785290400" style="--i:0"><div class="ghd"><span class="gmatch"><img class="glogo" src="logos/por.png" alt="" loading="lazy" onerror="this.style.display='none'">POR<span class="gvs">vs</span><img class="glogo" src="logos/lv.png" alt="" loading="lazy" onerror="this.style.display='none'">LV</span><span class="gtime">8:00 PM</span></div><div class="gout"><i class="sdot warn"></i>S. Barker out</div><div class="pblk"><div class="phd"><img class="plogo" src="logos/por.png" alt="" loading="lazy" onerror="this.style.display='none'"><span class="pname">M. DiLeo</span><span class="pflag"><i class="sdot ok"></i>starting</span><span class="psp2"></span><span class="pmin">~27' <span class="tup">▲+4</span></span></div>
       <div class="prop" data-side="over" data-k="2026-07-28|Megan DiLeo|points|12.5" onclick="this.nextElementSibling.classList.toggle('open')">
         <div class="prow">

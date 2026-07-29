@@ -2129,12 +2129,33 @@ def build():
                "Tomorrow" if tod and dd == tod + dt.timedelta(days=1) else dd.strftime("%A"))
         return f'<div class="dayhdr">{lab}<span>{dd.strftime("%a · %b %-d")}</span></div>'
 
-    _parts, _lastday = [], None
-    for i, ((pd_, _tm), pl) in enumerate(order):          # order is already sorted by date+tip
+    # IN PROGRESS SECTION (2026-07-29): a game that has tipped holds POSITIONS, not
+    # recommendations. Leaving them inline in tip order put bets you already hold above games
+    # that have not started. Upcoming keeps the day dividers; everything underway drops to its
+    # own labelled section at the foot, priced at flag time.
+    def _live_game(kv):
+        _key, _pl = kv
+        return any(r.get("_tipped") for _p, _prs in _pl for r in _prs)
+
+    _upcoming = [kv for kv in order if not _live_game(kv)]
+    _live = [kv for kv in order if _live_game(kv)]
+
+    _parts, _lastday, _i = [], None, 0
+    for (pd_, _tm), pl in _upcoming:                      # already sorted by date+tip
         if pd_ != _lastday:
             _parts.append(_daydiv(pd_))
             _lastday = pd_
-        _parts.append(_game_group(pl, tips, today, i))
+        _parts.append(_game_group(pl, tips, today, _i))
+        _i += 1
+    if _live:
+        _npos = sum(len(prs) for _k, _pl in _live for _p, prs in _pl)
+        _parts.append(
+            f'<div class="dayhdr live">In progress'
+            f'<span>{len(_live)} game{"s" if len(_live) != 1 else ""} · '
+            f'{_npos} open position{"s" if _npos != 1 else ""} · price at flag</span></div>')
+        for _key, pl in _live:
+            _parts.append(_game_group(pl, tips, today, _i))
+            _i += 1
     cards = "\n".join(p for p in _parts if p) if order else \
         '<div class="empty">No plays flagged yet.<br><span>The watcher checks every ~60s and fills this in the moment a key player is ruled out.</span></div>'
     _wh = _wnba_health()                                   # LOUD: broken scan feed != a quiet slate
@@ -2519,6 +2540,12 @@ def build():
     border-top:1px solid #232a35; color:#eef1f6; font-size:16.5px; font-weight:800; letter-spacing:-.01em; }}
   .dayhdr:first-of-type {{ border-top:none; padding-top:2px; margin-top:2px; }}
   .dayhdr span {{ color:#6b7484; font-size:12px; font-weight:600; letter-spacing:0; }}
+  /* IN PROGRESS: positions already running. Muted so it never competes with the live board,
+     with a pulsing dot so it reads as in-flight rather than as another slate day. */
+  .dayhdr.live {{ color:#8a93a6; }}
+  .dayhdr.live::before {{ content:""; width:7px; height:7px; border-radius:50%;
+      background:#e0a04a; display:inline-block; margin-right:2px; animation:lvpulse 2s infinite; }}
+  @keyframes lvpulse {{ 0%,100% {{ opacity:1; }} 50% {{ opacity:.35; }} }}
   /* GAME group — the top of the hierarchy: logos + matchup, hairline rule, generous separation */
   .game {{ margin-bottom:22px; }}
   .ghd {{ display:flex; justify-content:space-between; align-items:center; padding:0 2px 9px;
