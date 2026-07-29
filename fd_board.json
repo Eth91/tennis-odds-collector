@@ -1,50 +1,6 @@
 {
- "captured_at": "2026-07-29T11:35:03Z",
+ "captured_at": "2026-07-29T11:42:00Z",
  "matches": [
-  {
-   "event_id": 35879622,
-   "p1": "Adrian Wiecek",
-   "p2": "Krystian Kolodziej",
-   "p1_norm": "adrian wiecek",
-   "p2_norm": "krystian kolodziej",
-   "open_date": "2026-07-29T11:15:00.000Z",
-   "line": 80.5,
-   "over_odds": 100,
-   "under_odds": -140
-  },
-  {
-   "event_id": 35880015,
-   "p1": "Jakub Kaczmarek",
-   "p2": "Schaniel Krzysztof",
-   "p1_norm": "jakub kaczmarek",
-   "p2_norm": "schaniel krzysztof",
-   "open_date": "2026-07-29T11:20:00.000Z",
-   "line": 79.5,
-   "over_odds": 100,
-   "under_odds": -140
-  },
-  {
-   "event_id": 35879635,
-   "p1": "Adrian Myszewski",
-   "p2": "Kamil Rudomina",
-   "p1_norm": "adrian myszewski",
-   "p2_norm": "kamil rudomina",
-   "open_date": "2026-07-29T11:25:00.000Z",
-   "line": 87.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
-  {
-   "event_id": 35879636,
-   "p1": "Wojciech Wojtaszczyk",
-   "p2": "Lukasz Oracz",
-   "p1_norm": "wojciech wojtaszczyk",
-   "p2_norm": "lukasz oracz",
-   "open_date": "2026-07-29T11:25:00.000Z",
-   "line": 51.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35879743,
    "p1": "Grzegorz Felkel",
@@ -53,8 +9,8 @@
    "p2_norm": "kacper petas",
    "open_date": "2026-07-29T11:40:00.000Z",
    "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35880016,
@@ -65,7 +21,7 @@
    "open_date": "2026-07-29T11:45:00.000Z",
    "line": 80.5,
    "over_odds": -116,
-   "under_odds": -116
+   "under_odds": -118
   },
   {
    "event_id": 35880029,
