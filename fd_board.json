@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-29T20:45:25Z",
+ "captured_at": "2026-07-29T20:49:39Z",
  "matches": [
-  {
-   "event_id": 35881320,
-   "p1": "Miroslaw Warzecha",
-   "p2": "Zbigniew Nocun",
-   "p1_norm": "miroslaw warzecha",
-   "p2_norm": "zbigniew nocun",
-   "open_date": "2026-07-29T20:20:00.000Z",
-   "line": 99.5,
-   "over_odds": -145,
-   "under_odds": 105
-  },
   {
    "event_id": 35881384,
    "p1": "Jakub Pruszkowski",
@@ -19,9 +8,9 @@
    "p1_norm": "jakub pruszkowski",
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-29T20:45:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35881385,
