@@ -55,9 +55,10 @@ def _walk(o, key, out):
 
 
 def coords(ev=None):
-    """(lat, lon) for the course. ESPN embeds them inconsistently, so: walk the event for
-    latitude/longitude; else geocode the venue city (open-meteo, free); cache the answer
-    per event id so the lookup happens once a week."""
+    """(lat, lon) for the course, resolved once per event and cached in pga_meta.json.
+    Chain: (1) walk the scoreboard event; (2) CORE api event -> venue $ref -> walk the venue
+    (also captures grass type); (3) venue address city+state -> open-meteo geocoding;
+    (4) pga_coords_override.json {event_id: [lat, lon]} — the operator escape hatch."""
     ev = ev or event()
     eid = str(ev.get("id") or "")
     try:
@@ -67,47 +68,49 @@ def coords(ev=None):
     except (OSError, ValueError):
         pass
     lat = lon = None
+    grass = city = None
     lats, lons = [], []
-    _walk(ev, "latitude", lats)
-    _walk(ev, "longitude", lons)
-    if not lats:
-        # scoreboard rarely carries the venue pre-tournament; the CORE api event links it.
-        # Follow the venue , then fall through to city geocoding below if needed.
+    _walk(ev, "latitude", lats); _walk(ev, "longitude", lons)
+    if lats and lons:
+        lat, lon = float(lats[0]), float(lons[0])
+    if lat is None:
         try:
             core = _get("https://sports.core.api.espn.com/v2/sports/golf/leagues/pga/events/" + eid)
             refs = []
-            _walk(core, "", refs)
-            for r in refs:
-                if "/venues/" in str(r):
-                    ven = _get(str(r).replace("http://", "https://"))
-                    _walk(ven, "latitude", lats)
-                    _walk(ven, "longitude", lons)
-                    if not lats:
-                        ev = {"id": eid, "name": ev.get("name"), "_venue": ven, **ev}
-                    break
+            _walk(core, "$ref", refs)
+            vref = next((str(r) for r in refs if "/venues/" in str(r)), None)
+            if vref:
+                ven = _get(vref.replace("http://", "https://"))
+                grass = ven.get("grass")
+                vl, vn = [], []
+                _walk(ven, "latitude", vl); _walk(ven, "longitude", vn)
+                if vl and vn:
+                    lat, lon = float(vl[0]), float(vn[0])
+                else:
+                    a = ven.get("address") or {}
+                    if a.get("city"):
+                        city = a["city"] + "," + (a.get("state") or "")
         except Exception:                                     # noqa: BLE001
             pass
-    if lats and lons:
-        lat, lon = float(lats[0]), float(lons[0])
-    else:
-        addrs = []
-        _walk(ev, "address", addrs)
-        q = None
-        for a in addrs:
-            if isinstance(a, dict) and a.get("city"):
-                q = a["city"]
-                break
-        if q:
-            try:
-                g = _get("https://geocoding-api.open-meteo.com/v1/search?name="
-                         + urllib.request.quote(q) + "&count=1")
-                r0 = (g.get("results") or [{}])[0]
-                lat, lon = r0.get("latitude"), r0.get("longitude")
-            except Exception:                                 # noqa: BLE001
-                pass
+    if lat is None and city:
+        try:
+            import urllib.parse
+            g = _get("https://geocoding-api.open-meteo.com/v1/search?count=1&name="
+                     + urllib.parse.quote(city.split(",")[0]))
+            r0 = (g.get("results") or [{}])[0]
+            lat, lon = r0.get("latitude"), r0.get("longitude")
+        except Exception:                                     # noqa: BLE001
+            pass
+    if lat is None:
+        try:
+            ov = json.loads((HERE / "pga_coords_override.json").read_text())
+            if eid in ov:
+                lat, lon = ov[eid]
+        except (OSError, ValueError):
+            pass
     if lat is not None:
         META.write_text(json.dumps({"id": eid, "name": ev.get("name"),
-                                    "lat": lat, "lon": lon}))
+                                    "lat": lat, "lon": lon, "grass": grass}))
     return lat, lon
 
 
