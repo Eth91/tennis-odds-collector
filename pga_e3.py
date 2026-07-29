@@ -66,6 +66,7 @@ def main():
     print(f"e3: pricing {evn}  (G2 {'PASS — flags ARMED' if armed else 'pending n=%d — preview only' % n_g2})")
 
     preview, flags = [], []
+    cfit = {}                     # filled by the field block below; matchups tolerate empty
     now = dt.datetime.utcnow().replace(microsecond=0).isoformat()
 
     # ---- matchbets (two-way) ----
@@ -78,7 +79,7 @@ def main():
             continue
         (a, oa), (b, ob) = rr
         nrounds = 1 if ("Round" in mkt or "1st" in mkt) else 4
-        p = RU.matchup_prob(R, a, b, rounds=nrounds)
+        p = RU.matchup_prob(R, a, b, rounds=nrounds, course_fit=cfit)
         if p is None:
             continue
         fair = (1 / oa) / (1 / oa + 1 / ob)
@@ -91,7 +92,40 @@ def main():
     # ---- top-N + outrights (one-sided) ----
     field = [(c.get("athlete") or {}).get("displayName") for c in F.competitors()]
     field = [f for f in field if f]
-    sim = RU.simulate(R, field) if field else {}
+    # COURSE FIT + WAVE-CORRELATED CUT (blind spots #3 and #5). course_fit is already
+    # shrunk inside pga_context; wave comes from the real tee sheet, and wave_shift scales
+    # the measured wind gap between the two waves into strokes.
+    cfit, wave, wshift = {}, {}, 0.0
+    try:
+        import pga_context as C
+        for p_ in field:
+            d_, n_ = C.course_fit(p_, evn)
+            if n_ >= 2:
+                cfit[p_] = d_
+        import pga_field as _PF, pga_e1 as _E1, statistics as _st
+        tt = _PF.tee_times()
+        if tt:
+            hrs = sorted(tt.values())
+            med = hrs[len(hrs) // 2]
+            for p_, t_ in tt.items():
+                wave[p_] = "am" if t_ <= med else "pm"
+            la, lo = _PF.coords()
+            if la is not None:
+                w_ = _E1.wind_hours(la, lo, days=3)
+                am = [_E1.exposure(w_, t_) for p_, t_ in tt.items() if wave.get(p_) == "am"]
+                pm = [_E1.exposure(w_, t_) for p_, t_ in tt.items() if wave.get(p_) == "pm"]
+                am = [x for x in am if x is not None]
+                pm = [x for x in pm if x is not None]
+                if am and pm:
+                    # ~0.04 strokes per km/h of wind gap (conservative; the plan's E1 thesis
+                    # is 0.5-1.5 strokes for a real wave split, which this reproduces)
+                    wshift = 0.04 * (_st.mean(pm) - _st.mean(am))
+        print(f"  ruler: course-fit players {len(cfit)}, wave split {len(wave)}, "
+              f"wave shift {wshift:+.2f} strokes")
+    except Exception as _xe:
+        print(f"  ruler: context unavailable ({str(_xe)[:40]})")
+    sim = RU.simulate(R, field, course_fit=cfit, wave=wave,
+                      wave_shift=wshift) if field else {}
     # DEDUPE BEFORE DEVIG (2026-07-29) — this was manufacturing fake +20-27% edges.
     # The one-sided devig normalizes by sum(1/odds) over the market, so DUPLICATE runners
     # (the same top-20 market arrives as TOP_20_FINISH_IMG, TOP_20_FINISH_(INCL._TIES),
@@ -154,7 +188,24 @@ def main():
                  if ("BIRDIES" in (mt or "").upper() or "irdie" in (mkt or ""))
                  and od and od > 1.0]
         if brows:
-            BR, _fr = B.rates()
+            # CONTEXT (2026-07-29): course factor + wind now enter the RATES themselves,
+            # so the market anchor only has to absorb what we genuinely cannot know. Before
+            # this the anchor was silently doing the course's whole job.
+            _cf, _cn, _wind = 1.0, 0, None
+            try:
+                import pga_context as C
+                _cf, _cn = C.course_factor(evn)
+                import pga_e1 as _E1, pga_field as _PF
+                _la, _lo = _PF.coords()
+                if _la is not None:
+                    _w = _E1.wind_hours(_la, _lo, days=3)
+                    if _w:
+                        _wind = sum(_w.values()) / len(_w)
+                print(f"  birdies: course factor {_cf:.3f} ({_cn} prior editions), "
+                      f"wind {_wind if _wind is None else round(_wind, 1)} km/h")
+            except Exception as _ce:
+                print(f"  birdies: context unavailable ({str(_ce)[:40]})")
+            BR, _fr = B.rates(course_factor=_cf, wind_kmh=_wind)
             BRn = {RU.norm(k): v for k, v in BR.items()}
             try:
                 # resolve the ORCHESTRATOR tid from the event name — ESPN ids are a
