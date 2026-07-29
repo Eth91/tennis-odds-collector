@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-07-29T04:40:24Z",
+ "captured_at": "2026-07-29T04:46:03Z",
  "matches": [
-  {
-   "event_id": 35878921,
-   "p1": "Adrian Wiecek",
-   "p2": "Grzegorz Adamiak",
-   "p1_norm": "adrian wiecek",
-   "p2_norm": "grzegorz adamiak",
-   "open_date": "2026-07-29T04:10:00.000Z",
-   "line": 99.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35878945,
-   "p1": "Kamil Rudomina",
-   "p2": "Kamil Klocek",
-   "p1_norm": "kamil rudomina",
-   "p2_norm": "kamil klocek",
-   "open_date": "2026-07-29T04:25:00.000Z",
-   "line": 84.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
-  {
-   "event_id": 35879042,
-   "p1": "Artur Szoltysek",
-   "p2": "Blazej Warpas",
-   "p1_norm": "artur szoltysek",
-   "p2_norm": "blazej warpas",
-   "open_date": "2026-07-29T04:30:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35879043,
    "p1": "Michal Durda",
@@ -41,9 +8,9 @@
    "p1_norm": "michal durda",
    "p2_norm": "lukasz oracz",
    "open_date": "2026-07-29T04:30:00.000Z",
-   "line": 84.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 88.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35879044,
@@ -52,9 +19,9 @@
    "p1_norm": "marcin jadczyk",
    "p2_norm": "kacper glazowski",
    "open_date": "2026-07-29T04:30:00.000Z",
-   "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 84.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35879071,
@@ -63,9 +30,9 @@
    "p1_norm": "kamil delikatny",
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-07-29T04:40:00.000Z",
-   "line": 73.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 78.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35879077,
@@ -130,6 +97,17 @@
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-07-29T05:05:00.000Z",
    "line": 73.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35879104,
+   "p1": "Marian Lebek",
+   "p2": "Jakub Nowak",
+   "p1_norm": "marian lebek",
+   "p2_norm": "jakub nowak",
+   "open_date": "2026-07-29T05:10:00.000Z",
+   "line": 77.5,
    "over_odds": -116,
    "under_odds": -116
   }
