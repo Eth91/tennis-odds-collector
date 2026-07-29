@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-29T16:37:50Z",
+ "captured_at": "2026-07-29T16:43:10Z",
  "matches": [
-  {
-   "event_id": 35880482,
-   "p1": "Rafal Gajda",
-   "p2": "Jakub Kaczmarek",
-   "p1_norm": "rafal gajda",
-   "p2_norm": "jakub kaczmarek",
-   "open_date": "2026-07-29T16:20:00.000Z",
-   "line": 95.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35880486,
    "p1": "Jakub Pruszkowski",
@@ -19,9 +8,9 @@
    "p1_norm": "jakub pruszkowski",
    "p2_norm": "mariusz koczyba",
    "open_date": "2026-07-29T16:25:00.000Z",
-   "line": 90.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 94.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35880685,
@@ -30,9 +19,9 @@
    "p1_norm": "adam staniczek",
    "p2_norm": "kazimierz rybak",
    "open_date": "2026-07-29T16:35:00.000Z",
-   "line": 76.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 63.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35880686,
@@ -41,9 +30,9 @@
    "p1_norm": "kuba golaszewski",
    "p2_norm": "kacper marchlewski",
    "open_date": "2026-07-29T16:35:00.000Z",
-   "line": 78.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 79.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35880761,
@@ -53,8 +42,8 @@
    "p2_norm": "krzysztof hetnar",
    "open_date": "2026-07-29T16:40:00.000Z",
    "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35880835,
@@ -64,8 +53,8 @@
    "p2_norm": "wojciech pytlas",
    "open_date": "2026-07-29T16:50:00.000Z",
    "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35880841,
@@ -96,6 +85,17 @@
    "p1_norm": "jakub kuzmicz",
    "p2_norm": "patryk jendrzejewski",
    "open_date": "2026-07-29T16:55:00.000Z",
+   "line": 78.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35880853,
+   "p1": "Sebastian Juzek",
+   "p2": "Schaniel Krzysztof",
+   "p1_norm": "sebastian juzek",
+   "p2_norm": "schaniel krzysztof",
+   "open_date": "2026-07-29T17:05:00.000Z",
    "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
