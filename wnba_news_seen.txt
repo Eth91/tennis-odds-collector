@@ -382,6 +382,7 @@ rw|977|Fares well against Sparks
 rw|979|Good to go Wednesday
 rw|979|Nets 21 points Wednesday
 rw|979|Not on injury report
+rw|979|Off night in loss to Atlanta
 rw|979|Questionable for Wednesday
 rw|979|Sitting out Monday
 rw|980|Flirts with double-double
