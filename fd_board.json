@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T09:53:45Z",
+ "captured_at": "2026-07-30T09:59:03Z",
  "matches": [
-  {
-   "event_id": 35882895,
-   "p1": "Krystian Kolodziej",
-   "p2": "Marcin Jadczyk",
-   "p1_norm": "krystian kolodziej",
-   "p2_norm": "marcin jadczyk",
-   "open_date": "2026-07-30T09:40:00.000Z",
-   "line": 87.5,
-   "over_odds": -115,
-   "under_odds": -115
-  },
   {
    "event_id": 35882896,
    "p1": "Krzysztof Wloczko",
@@ -20,8 +9,8 @@
    "p2_norm": "kacper petas",
    "open_date": "2026-07-30T09:45:00.000Z",
    "line": 79.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35882899,
@@ -30,9 +19,9 @@
    "p1_norm": "krzysztof juszczyk",
    "p2_norm": "wojciech urban",
    "open_date": "2026-07-30T09:50:00.000Z",
-   "line": 74.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 53.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35882900,
@@ -41,9 +30,9 @@
    "p1_norm": "oliwier sokolowski",
    "p2_norm": "rafal gajda",
    "open_date": "2026-07-30T09:50:00.000Z",
-   "line": 75.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 79.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35882905,
@@ -52,9 +41,9 @@
    "p1_norm": "oskar jadach",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-07-30T09:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 70.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882906,
@@ -63,9 +52,9 @@
    "p1_norm": "blazej warpas",
    "p2_norm": "radoslaw malinowski",
    "open_date": "2026-07-30T09:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35882910,
@@ -121,6 +110,17 @@
    "line": 75.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35882950,
+   "p1": "Marcin Jadczyk",
+   "p2": "Jan Zandecki",
+   "p1_norm": "marcin jadczyk",
+   "p2_norm": "jan zandecki",
+   "open_date": "2026-07-30T10:25:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
