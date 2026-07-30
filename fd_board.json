@@ -1,6 +1,17 @@
 {
- "captured_at": "2026-07-30T09:14:51Z",
+ "captured_at": "2026-07-30T09:20:43Z",
  "matches": [
+  {
+   "event_id": 35882815,
+   "p1": "Rafal Niemiec",
+   "p2": "Jakub Kaczmarek",
+   "p1_norm": "rafal niemiec",
+   "p2_norm": "jakub kaczmarek",
+   "open_date": "2026-07-30T09:10:00.000Z",
+   "line": 96.5,
+   "over_odds": -120,
+   "under_odds": -115
+  },
   {
    "event_id": 35882806,
    "p1": "Wojciech Gluszek",
@@ -9,8 +20,8 @@
    "p2_norm": "kamil klocek",
    "open_date": "2026-07-30T09:15:00.000Z",
    "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35882838,
@@ -19,9 +30,9 @@
    "p1_norm": "grzegorz poliniewicz",
    "p2_norm": "josef braun",
    "open_date": "2026-07-30T09:20:00.000Z",
-   "line": 73.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 71.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882839,
@@ -30,9 +41,9 @@
    "p1_norm": "artur grela",
    "p2_norm": "karol strowski",
    "open_date": "2026-07-30T09:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35882844,
@@ -88,6 +99,17 @@
    "line": 74.5,
    "over_odds": -120,
    "under_odds": -110
+  },
+  {
+   "event_id": 35882896,
+   "p1": "Krzysztof Wloczko",
+   "p2": "Kacper Petas",
+   "p1_norm": "krzysztof wloczko",
+   "p2_norm": "kacper petas",
+   "open_date": "2026-07-30T09:45:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
