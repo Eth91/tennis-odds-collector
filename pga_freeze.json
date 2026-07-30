@@ -1,7 +1,8 @@
 {
   "birdies": {
-    "BIRDIE_RELIABILITY": 0.61,
+    "BIRDIE_RELIABILITY": 1.06,
     "BIRDIE_RELIABILITY_MIN": 0.85,
+    "CPAR_K": 400.0,
     "DEFAULT_MIX": {
       "3": 4,
       "4": 10,
@@ -35,7 +36,8 @@
         "4": 11,
         "5": 4
       }
-    }
+    },
+    "PHI_ROUND": 0.0233
   },
   "context": {
     "K_COURSE": 2.0,
@@ -80,7 +82,7 @@
       "w": -0.005152079885619044
     }
   },
-  "git_sha": "c466deac34a276d5a8f2f3a29f91992f3586207e",
+  "git_sha": "312468f6ece15773766400a399e608a899dc7479",
   "purpose": "frozen for the 2026 Rocket Classic G2 read (event unplayed at freeze time)",
   "ruler": {
     "HALF_LIFE_D": 270.0,
