@@ -147,9 +147,32 @@ def round_scores(ev=None):
         rs = []
         for ls in c.get("linescores") or []:
             v = ls.get("value")
-            if isinstance(v, (int, float)) and v > 0:
+            # COMPLETED ROUNDS ONLY. `value` is a RUNNING stroke total, so mid-round it is a
+            # partial sum (Ben Griffin read 11.0 three holes into Rocket Classic R1). Each round
+            # nests its own per-hole scores, so hole count is exact; status.thru is None here.
+            holes = ls.get("linescores") or []
+            if isinstance(v, (int, float)) and v > 0 and len(holes) >= 18:
                 rs.append(v)
         out[nm] = rs
+    return out
+
+
+def partial_rounds(ev=None):
+    """{player: (holes_played, strokes_so_far)} for rounds IN PROGRESS.
+
+    Split out from round_scores deliberately: a partial round is useful to simulate() via its
+    `partial=` argument, but it must never be mistaken for a finished one.
+    """
+    out = {}
+    for c in competitors(ev):
+        nm = ((c.get("athlete") or {}).get("displayName") or "").strip()
+        if not nm:
+            continue
+        for ls in c.get("linescores") or []:
+            v = ls.get("value")
+            holes = ls.get("linescores") or []
+            if isinstance(v, (int, float)) and v > 0 and 0 < len(holes) < 18:
+                out[nm] = (len(holes), v)
     return out
 
 
