@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T00:27:09Z",
+ "captured_at": "2026-07-30T00:35:09Z",
  "matches": [
   {
    "event_id": 35881801,
@@ -8,9 +8,9 @@
    "p1_norm": "zbigniew nocun",
    "p2_norm": "miroslaw warzecha",
    "open_date": "2026-07-30T00:20:00.000Z",
-   "line": 80.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 73.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35881803,
@@ -19,9 +19,9 @@
    "p1_norm": "jakub pruszkowski",
    "p2_norm": "adrian burkacki",
    "open_date": "2026-07-30T00:25:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 88.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35881812,
@@ -42,8 +42,8 @@
    "p2_norm": "adrian fabis",
    "open_date": "2026-07-30T00:35:00.000Z",
    "line": 81.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35881814,
@@ -52,9 +52,9 @@
    "p1_norm": "jakub glanowski",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-30T00:35:00.000Z",
-   "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 71.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35881834,
@@ -75,6 +75,17 @@
    "p2_norm": "witold stechly",
    "open_date": "2026-07-30T00:45:00.000Z",
    "line": 66.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35881916,
+   "p1": "Adam Staniczek",
+   "p2": "Kamil Delikatny",
+   "p1_norm": "adam staniczek",
+   "p2_norm": "kamil delikatny",
+   "open_date": "2026-07-30T01:00:00.000Z",
+   "line": 75.5,
    "over_odds": -118,
    "under_odds": -112
   }
