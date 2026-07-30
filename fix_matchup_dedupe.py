@@ -81,12 +81,17 @@ else:
                   '''                            "p_raw": round(_ours_side, 4), "p_bet": round(_bet, 4),
                             "p_fair": round(_fair_side, 6),
                             "ev": round(_bet * odds - 1.0, 4)})''', 1)
-    # birdies are priced against the RAW offered price, so that IS their fair reference
-    s = s.replace('''                                      "market": mkt[:60], "odds": od,
-                                      "edge": round(edge, 3)})''',
-                  '''                                      "market": mkt[:60], "odds": od,
-                                      "p_bet": round(ours, 4), "p_fair": round(1.0 / od, 6),
-                                      "edge": round(edge, 3)})''', 1)
+    # birdies are priced against the RAW offered price, so that IS their fair reference.
+    # ASSERTED, not a bare replace: this one silently no-opped on a 2-space indent mismatch
+    # and shipped an uninstrumented stream.
+    _ob = ('                                    "market": mkt[:60], "odds": od,\n'
+           '                                    "edge": round(edge, 3)})')
+    _nb = ('                                    "market": mkt[:60], "odds": od,\n'
+           '                                    "p_bet": round(ours, 4),\n'
+           '                                    "p_fair": round(1.0 / od, 6),\n'
+           '                                    "edge": round(edge, 3)})')
+    assert _ob in s, "birdie preview append moved"
+    s = s.replace(_ob, _nb, 1)
     old_ins = (
         '            cur = con.execute(\n'
         '                "INSERT OR IGNORE INTO flags VALUES '

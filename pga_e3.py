@@ -134,11 +134,19 @@ def main():
     now = dt.datetime.utcnow().replace(microsecond=0).isoformat()
 
     # ---- matchbets (two-way) ----
-    by_m = defaultdict(list)
+    # DEDUPE FIRST (2026-07-30). golf_lines stores every (market, runner) ~6x per
+    # snapshot, so 12 of 14 matchup markets arrived with 4 rows and were dropped by the
+    # len(rr) != 2 test below — and the 2 survivors were whichever markets happened to be
+    # MISSING their duplicate copy, i.e. a sample selected by collector completeness.
+    # Same rule the top-N path already uses: one price per runner, the shortest posted.
+    by_m = defaultdict(dict)
     for mkt, mt, run, od in rows:
         if "Matchbet" in mkt and od and od > 1.0:
-            by_m[mkt].append((run, od))
-    for mkt, rr in by_m.items():
+            cur = by_m[mkt].get(run)
+            if cur is None or od < cur:
+                by_m[mkt][run] = od
+    for mkt, _dd in by_m.items():
+        rr = list(_dd.items())
         if len(rr) != 2:
             continue
         (a, oa), (b, ob) = rr
@@ -158,6 +166,7 @@ def main():
             preview.append({"stream": "E3-match", "runner": side, "market": mkt[:60],
                             "odds": odds, "edge": round(_bet - _fair_side, 3),
                             "p_raw": round(_ours_side, 4), "p_bet": round(_bet, 4),
+                            "p_fair": round(_fair_side, 6),
                             "ev": round(_bet * odds - 1.0, 4)})
 
     # ---- top-N + outrights (one-sided) ----
@@ -327,6 +336,7 @@ def main():
                 preview.append({"stream": "E3-top%d" % N, "runner": run, "market": mt[:40],
                                 "odds": od, "edge": round(_pb - fair, 3),
                                 "p_raw": round(ours, 4), "p_bet": round(_pb, 4),
+                                "p_fair": round(fair, 6),
                                 "ev": round(_pb * od - 1.0, 4)})
 
     # ---- birdies-or-better: MARKET-ANCHORED LEVEL, player-relative edges ----
@@ -463,6 +473,8 @@ def main():
                                     "runner": f"{player} {side} {line:g}",
                                     "armable": _ok_b,
                                     "market": mkt[:60], "odds": od,
+                                    "p_bet": round(ours, 4),
+                                    "p_fair": round(1.0 / od, 6),
                                     "edge": round(edge, 3)})
             # ONE-SIDEDNESS IS A LEVEL ALARM. With a devigged anchor both sides start
             # from the same handicap, so a persistent all-one-way split means the LEVEL is
@@ -488,12 +500,22 @@ def main():
     if armed and preview:
         con = sqlite3.connect(PAPER)
         con.execute(E1.DDL)
+        # migrate an existing ledger in place; pure instrumentation for the
+        # frozen-model validation - changes no probability, gate or constant
+        for _c in ("p_bet", "p_fair"):
+            try:
+                con.execute("ALTER TABLE flags ADD COLUMN %s REAL" % _c)
+            except sqlite3.OperationalError:
+                pass
         for pv in preview:
             key = f"{evn}|{pv['market']}|{pv['runner']}|{pv['stream']}"
             cur = con.execute(
-                "INSERT OR IGNORE INTO flags VALUES (?,?,?,?,?,?,?,?,?,?,?,NULL,NULL,NULL)",
+                "INSERT OR IGNORE INTO flags(key,flagged_at,event,market,stream,"
+                "runner,opp,odds,d_wind,tee_r,tee_o,p_bet,p_fair) "
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (key, now, evn, pv["market"], pv["stream"], pv["runner"], "",
-                 pv["odds"], pv["edge"], "", ""))
+                 pv["odds"], pv["edge"], "", "",
+                 pv.get("p_bet"), pv.get("p_fair")))
             flags.append(pv) if cur.rowcount else None
         con.commit()
         con.close()
