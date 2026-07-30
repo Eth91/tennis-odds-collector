@@ -71,6 +71,16 @@ SPREAD = 1.30           # TUNED 2026-07-30 on 2025, HELD-OUT confirmed on 2026 (
                         # estimate but a rank sim is non-linear, so shrunk inputs made the field
                         # look homogeneous and compressed every tournament probability toward its
                         # base rate. Sigma was ruled out first: it tests clean in every rating bin.
+SHAPE_SLOPE = 1.30      # MEASURED 2026-07-30 on 986 runners / 9 majors with REAL closes,
+                        # graded on actual finishes. Logistic slope on logit(p) fitted WITH EVENT
+                        # FIXED EFFECTS so it captures SHAPE only — the per-event level is absorbed
+                        # by the dummies, which matters because the backtest field is truncated to
+                        # priced+rated runners and that biases level, not shape. Estimates: win
+                        # 1.485 (se .310), top-20 1.527 (se .144), top-10 1.280 (se .151) — all
+                        # overlapping, so ONE pooled value beats three noisy per-market slopes.
+                        # >1 means our log-odds are too FLAT: the tail needs pushing down. Measured
+                        # effect on the top-20 bottom quintile: .055 -> .028 (realised .010), and
+                        # log-likelihood improves on both top-20 and top-10. Set to 1.0 to disable.
 MIN_ROUNDS = 20         # user 2026-07-29: '20 rounds or less is a good rule'. Below
                         # this a rating is HALVED toward field-average and sigma widens
                         # — it still prices (Koivun at 46 rounds is genuinely good and
@@ -236,6 +246,45 @@ def matchup_prob(R, a, b, rounds=1, course_fit=None):
     return _phi(mu / math.sqrt(max(var, 1e-6)))
 
 
+def _recal_shape(out, keys, slope=None):
+    """Stretch each probability's log-odds by `slope`, preserving the field total exactly.
+
+    The total is what makes these numbers coherent — win sums to 1, top20 to 20, and the
+    ties-inclusive variants to their own (larger) totals. So rather than renormalising to a
+    nominal N, this re-solves a single additive intercept per key so the NEW sum equals the OLD
+    sum. Shape changes; coherence does not.
+    """
+    sl = SHAPE_SLOPE if slope is None else slope
+    if not out or abs(sl - 1.0) < 1e-9:
+        return out
+    for key in keys:
+        ps = [(out[p_] or {}).get(key) for p_ in out]
+        ps = [v for v in ps if v is not None]
+        if len(ps) < 10:
+            continue
+        target = sum(ps)
+        if target <= 0:
+            continue
+        lg = []
+        for p_ in out:
+            v = (out[p_] or {}).get(key)
+            lg.append(None if v is None
+                      else math.log(min(max(v, 1e-9), 1 - 1e-9) / (1 - min(max(v, 1e-9), 1 - 1e-9))))
+        lo, hi = -40.0, 40.0
+        for _ in range(200):
+            c = (lo + hi) / 2.0
+            tot = sum(1.0 / (1.0 + math.exp(-(sl * l + c))) for l in lg if l is not None)
+            if tot > target:
+                hi = c
+            else:
+                lo = c
+        c = (lo + hi) / 2.0
+        for p_, l in zip(list(out), lg):
+            if l is not None:
+                out[p_][key] = 1.0 / (1.0 + math.exp(-(sl * l + c)))
+    return out
+
+
 def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
              wave_shift=0.0, progress=None, partial=None, reps=1):
     """reps>1 averages independent runs to cut Monte Carlo noise at CONSTANT peak memory.
@@ -374,6 +423,12 @@ def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
                   "top10_ties": float((pos[:, i] <= 10).mean()),
                   "top20_ties": float((pos[:, i] <= 20).mean()),
                   "cut": float(made[:, i].mean())}
+    # TAIL RECALIBRATION (2026-07-30). Skipped in-play: SHAPE_SLOPE was fitted on pre-tournament
+    # sims, and once posted scores condition the distribution it is already sharp — stretching it
+    # would distort a number that is no longer a forecast of 4 unknown rounds.
+    if progress is None and partial is None:
+        _recal_shape(out, ("win", "top5", "top10", "top20",
+                           "win_ties", "top5_ties", "top10_ties", "top20_ties"))
     return out
 
 

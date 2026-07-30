@@ -30,13 +30,58 @@ LINES = HERE / "golf_lines.sqlite"
 PAPER = HERE / "pga_paper.sqlite"
 
 M_EDGE = 0.06
-TN_EDGE = 0.04
+M_RATIO_MAX = 1.6       # PRUDENTIAL, not measured — G2 is still n=0, so there is no matchup-specific
+                        # evidence. Carried over from the top-N ratio result because the audit found
+                        # the same signature: the model backed the UNDERDOG in 12 of 14 markets, with
+                        # every model probability inside 0.430-0.599 against a market spanning
+                        # 0.211-0.682. Revisit once G2 has a real sample.
+B_RATIO_MAX = 1.6       # loose guard-rail only. Birdies are the one stream that HAS passed a
+                        # probability-space reliability test (1.06 vs the 0.85 bar, leak-free), so
+                        # they are deliberately not retuned on evidence borrowed from top-N.
+TN_EDGE = 0.02          # LOWERED 2026-07-30 from 0.04. The absolute test is no longer doing the
+                        # selecting — the ratio band below is — so this is now just a floor that
+                        # keeps trivial absolute edges out. Floor and cap together imply a minimum
+                        # fair probability with no extra constant: fair*(RATIO_MAX-1) >= TN_EDGE,
+                        # i.e. fair >= 0.02. The tail exclusion is DERIVED, not asserted.
+BLEND_W = 0.40          # MEASURED 2026-07-30. We bet the BLEND of market and model, never the raw
+                        # model. Joint unstandardised fit on 986 runners / 9 majors with real closes,
+                        # on already-recalibrated probabilities:
+                        #     logit P(top20) = 2.329 + 0.602*logit(mkt) + 0.544*logit(model)
+                        # -> model weight 0.474. Set BELOW it at 0.40 because the market predictor
+                        # available for fitting is the OUTRIGHT close, not a top-20 price (no
+                        # historical top-N golf prices exist — h2h returns 422), so a matched price
+                        # would score better and 0.474 is an UPPER bound. Set to 1.0 to bet the raw
+                        # model again, which the audit showed is not defensible.
+TN_RATIO_MIN = 1.15     # MEASURED 2026-07-30. Bucketing 986 runners by (model/market) and grading
+TN_RATIO_MAX = 2.0      # on top-20 (162 positives): inside 2x the model is accurate (1.06-1.10x
+                        # realised), beyond 2x it over-predicts by 2.08x (n=134) and 2.48x (n=192).
+                        # Past 2x the disagreement IS our error, so refuse to bet it. This replaces
+                        # `ours - fair >= 0.04`, which on a 5x-inflated tail fired 11 flags in the
+                        # longest-odds quartile against 3 in the shortest — structurally excluding
+                        # favourites, the only region where this model is calibrated.
 TN_MIN_ODDS = 1.5
 OUT_EV = 0.15
 OUT_RATIO = 1.3
 # Gated off 2026-07-30 by the real-price backtest above: 55% of the field
 # flagged, -85.6% ROI on 528 bets, and a 39.5% median overround.
 OUTRIGHT_ARMABLE = False
+
+
+
+def _blend(fair, ours, w=None):
+    """Convex blend of market and model in LOG-ODDS space.
+
+    Self-anchoring by construction: ours == fair returns fair exactly, so agreeing with the market
+    can never manufacture an edge. Using the raw fitted regression instead would, since its
+    intercept is non-zero and its coefficients do not sum to 1.
+    """
+    import math as _m
+    w = BLEND_W if w is None else w
+    f = min(max(float(fair), 1e-9), 1 - 1e-9)
+    o = min(max(float(ours), 1e-9), 1 - 1e-9)
+    lf = _m.log(f / (1 - f))
+    lo = _m.log(o / (1 - o))
+    return 1.0 / (1.0 + _m.exp(-((1.0 - w) * lf + w * lo)))
 
 
 def latest_event_rows():
@@ -88,9 +133,15 @@ def main():
         fair = (1 / oa) / (1 / oa + 1 / ob)
         edge = p - fair
         side, odds, pe = (a, oa, edge) if edge > 0 else (b, ob, -edge)
-        if pe >= M_EDGE:
+        _ours_side = p if side == a else (1 - p)
+        _fair_side = fair if side == a else (1 - fair)
+        _bet = _blend(_fair_side, _ours_side)
+        if (_bet - _fair_side >= M_EDGE
+                and _ours_side / max(_fair_side, 1e-9) <= M_RATIO_MAX):
             preview.append({"stream": "E3-match", "runner": side, "market": mkt[:60],
-                            "odds": odds, "edge": round(pe, 3)})
+                            "odds": odds, "edge": round(_bet - _fair_side, 3),
+                            "p_raw": round(_ours_side, 4), "p_bet": round(_bet, 4),
+                            "ev": round(_bet * odds - 1.0, 4)})
 
     # ---- top-N + outrights (one-sided) ----
     field = [(c.get("athlete") or {}).get("displayName") for c in F.competitors()]
@@ -244,9 +295,16 @@ def main():
                 elif ours >= OUT_RATIO * fair and ours * od - 1 >= OUT_EV:
                     preview.append({"stream": "E3-outright", "runner": run, "market": mt,
                                     "odds": od, "edge": round(ours - fair, 3)})
-            elif ours - fair >= TN_EDGE and od >= TN_MIN_ODDS:
+            elif (od >= TN_MIN_ODDS
+                  and TN_RATIO_MIN <= ours / max(fair, 1e-9) <= TN_RATIO_MAX
+                  and _blend(fair, ours) - fair >= TN_EDGE):
+                # gate on the RAW ratio (that is what the 2.0 cap was measured against), but
+                # price off the BLEND — what we actually believe once the market is weighted in
+                _pb = _blend(fair, ours)
                 preview.append({"stream": "E3-top%d" % N, "runner": run, "market": mt[:40],
-                                "odds": od, "edge": round(ours - fair, 3)})
+                                "odds": od, "edge": round(_pb - fair, 3),
+                                "p_raw": round(ours, 4), "p_bet": round(_pb, 4),
+                                "ev": round(_pb * od - 1.0, 4)})
 
     # ---- birdies-or-better: MARKET-ANCHORED LEVEL, player-relative edges ----
     # Two corrections after v1 ran +11.3pts hot on every Over (one-sided = model error):
@@ -374,7 +432,8 @@ def main():
                 ours = p_over if side == "over" else 1 - p_over
                 edge = ours - 1 / od
                 key = (RU.norm(player), side, line)
-                if edge >= 0.05 and key not in seen_b:
+                if (edge >= 0.05 and ours <= B_RATIO_MAX * (1.0 / od)
+                        and key not in seen_b):
                     seen_b.add(key)
                     _nb[side] = _nb.get(side, 0) + 1
                     preview.append({"stream": "E3-birdies",
