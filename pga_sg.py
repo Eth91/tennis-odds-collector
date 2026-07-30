@@ -94,7 +94,18 @@ def harvest(years=(2023, 2024, 2025, 2026), tour="R", verbose=True):
                 if not pid:
                     continue
                 vals = {s.get("statName"): s.get("statValue") for s in (r.get("stats") or [])}
+                # percentage-style stats (Driving Accuracy, GIR, Scrambling) report under their
+                # own header rather than "Avg"; take the first numeric value as the per-round
+                # figure instead of silently dropping the row
                 avg = _num(vals.get("Avg"))
+                if avg is None:
+                    for _k, _v in vals.items():
+                        if _k and str(_k).lower().startswith("total"):
+                            continue
+                        _n = _num(_v)
+                        if _n is not None:
+                            avg = _n
+                            break
                 tot = next((_num(v) for k, v in vals.items()
                             if k and k.lower().startswith("total")), None)
                 rnds = next((_num(v) for k, v in vals.items()
