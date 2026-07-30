@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T17:54:12Z",
+ "captured_at": "2026-07-30T17:59:35Z",
  "matches": [
-  {
-   "event_id": 35884932,
-   "p1": "Mateusz Trela",
-   "p2": "Dariusz Szlubowski",
-   "p1_norm": "mateusz trela",
-   "p2_norm": "dariusz szlubowski",
-   "open_date": "2026-07-30T17:45:00.000Z",
-   "line": 83.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35884933,
    "p1": "Marian Brunner",
@@ -19,9 +8,9 @@
    "p1_norm": "marian brunner",
    "p2_norm": "michal guzik",
    "open_date": "2026-07-30T17:45:00.000Z",
-   "line": 74.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 81.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35884950,
@@ -30,9 +19,9 @@
    "p1_norm": "jakub cyndera",
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-30T17:55:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 67.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35884954,
@@ -53,8 +42,8 @@
    "p2_norm": "patryk jendrzejewski",
    "open_date": "2026-07-30T18:05:00.000Z",
    "line": 74.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35884963,
@@ -86,6 +75,17 @@
    "p2_norm": "dariusz molenda",
    "open_date": "2026-07-30T18:20:00.000Z",
    "line": 71.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35884985,
+   "p1": "Patryk Mecik",
+   "p2": "Pawel Slosarczyk",
+   "p1_norm": "patryk mecik",
+   "p2_norm": "pawel slosarczyk",
+   "open_date": "2026-07-30T18:25:00.000Z",
+   "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
   }
