@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-30T04:38:20Z",
+ "captured_at": "2026-07-30T04:42:38Z",
  "matches": [
-  {
-   "event_id": 35882188,
-   "p1": "Rafal Gajda",
-   "p2": "Jakub Nowak",
-   "p1_norm": "rafal gajda",
-   "p2_norm": "jakub nowak",
-   "open_date": "2026-07-30T04:10:00.000Z",
-   "line": 95.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35882448,
-   "p1": "Kamil Klocek",
-   "p2": "Adam Linek",
-   "p1_norm": "kamil klocek",
-   "p2_norm": "adam linek",
-   "open_date": "2026-07-30T04:25:00.000Z",
-   "line": 59.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35882452,
    "p1": "Pawel Kurek",
@@ -41,20 +19,9 @@
    "p1_norm": "krzysztof juszczyk",
    "p2_norm": "marian lebek",
    "open_date": "2026-07-30T04:30:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35882455,
-   "p1": "Szymon Kolasa",
-   "p2": "Jan Zandecki",
-   "p1_norm": "szymon kolasa",
-   "p2_norm": "jan zandecki",
-   "open_date": "2026-07-30T04:30:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 86.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35882465,
@@ -63,9 +30,9 @@
    "p1_norm": "zbigniew nocun",
    "p2_norm": "jerzy michalik",
    "open_date": "2026-07-30T04:40:00.000Z",
-   "line": 73.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882469,
