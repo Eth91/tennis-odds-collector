@@ -70,46 +70,68 @@ def event_scoring():
     return ev_mean, base
 
 
+def _ev_tokens(name):
+    return [w for w in str(name or "").lower().replace("pga", "").split()
+            if len(w) > 3 and not w.isdigit()]
+
+
+def _ev_match(a, b):
+    """True when two event names plausibly denote the same tournament. Token containment in
+    either direction, so 'Sony Open' matches 'Sony Open in Hawaii' and 'Rocket Classic'
+    matches 'Rocket Mortgage Classic' — both of which the old 14-char prefix test missed."""
+    ta, tb = _ev_tokens(a), _ev_tokens(b)
+    if not ta or not tb:
+        return False
+    return all(t in tb for t in ta) or all(t in ta for t in tb)
+
+
 def _birdie_bridge():
-    """Fit birdie_factor ~ a + b * (scoring_diff). Uses only events where we hold BOTH
-    hole-level birdie data and round scores — that's what makes the bridge honest, and it
-    lets any course with mere SCORES be priced for birdies."""
+    """Fit birdie_factor ~ a + b * (scoring_diff) so any course with mere SCORES can be
+    priced for birdies.
+
+    One point per EDITION (grouped by tid), with the edition's year taken from the tid and
+    matched exactly against the scoring table. v1 grouped by name — collapsing three editions
+    into one point — and then took the first fuzzy name match, which could pair a 2024 harvest
+    with a 2019 scoring diff.
+    """
     c = _cache()
     if "bridge" in c:
         return c["bridge"]
     con = sqlite3.connect(DB)
     hole = con.execute(
-        "SELECT tname, SUM(p3h), SUM(p3b), SUM(p4h), SUM(p4b), SUM(p5h), SUM(p5b) "
-        "FROM birdie_rounds GROUP BY tname").fetchall()
+        "SELECT tid, tname, SUM(p3h), SUM(p3b), SUM(p4h), SUM(p4b), SUM(p5h), SUM(p5b) "
+        "FROM birdie_rounds GROUP BY tid").fetchall()
     con.close()
     if not hole:
         return None
-    # global per-par rates as the neutral expectation
     tot = defaultdict(lambda: [0, 0])
-    for _t, a3, b3, a4, b4, a5, b5 in hole:
+    for _t, _n, a3, b3, a4, b4, a5, b5 in hole:
         for par, (h, b) in ((3, (a3, b3)), (4, (a4, b4)), (5, (a5, b5))):
-            tot[par][0] += h
-            tot[par][1] += b
+            tot[par][0] += h or 0
+            tot[par][1] += b or 0
     g = {p: (v[1] / v[0] if v[0] else 0.15) for p, v in tot.items()}
     ev_mean, base = event_scoring()
     xs, ys = [], []
-    for tname, a3, b3, a4, b4, a5, b5 in hole:
-        holes = a3 + a4 + a5
+    misses = 0
+    for tid, tname, a3, b3, a4, b4, a5, b5 in hole:
+        holes = (a3 or 0) + (a4 or 0) + (a5 or 0)
         if not holes:
             continue
-        obs = (b3 + b4 + b5) / holes
-        exp = (a3 * g[3] + a4 * g[4] + a5 * g[5]) / holes
+        obs = ((b3 or 0) + (b4 or 0) + (b5 or 0)) / holes
+        exp = ((a3 or 0) * g[3] + (a4 or 0) * g[4] + (a5 or 0) * g[5]) / holes
         if exp <= 0:
             continue
-        # match the event's scoring diff by fuzzy name
+        yr_t = None
+        d = "".join(ch for ch in str(tid or "") if ch.isdigit())[:4]
+        if len(d) == 4:
+            yr_t = int(d)
         cand = [(m, yr) for (ev, yr), (m, n) in ev_mean.items()
-                if ev and tname and (ev.lower()[:14] in tname.lower()
-                                     or tname.lower()[:14] in ev.lower())]
+                if _ev_match(ev, tname) and (yr_t is None or int(yr) == yr_t)]
         if not cand:
+            misses += 1
             continue
         m, yr = cand[0]
-        diff = m - base.get(yr, m)
-        xs.append(diff)
+        xs.append(m - base.get(yr, m))
         ys.append(obs / exp)
     if len(xs) < 6:
         return None
@@ -122,10 +144,9 @@ def _birdie_bridge():
         sx, sy = st.pstdev(xs), st.pstdev(ys)
         if sx and sy:
             r = (sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / len(xs)) / (sx * sy)
-        pass
     except Exception:                                              # noqa: BLE001
         pass
-    out = {"a": a, "b": b, "n": len(xs), "r": r}
+    out = {"a": a, "b": b, "n": len(xs), "r": r, "unmatched": misses}
     c["bridge"] = out
     _save(c)
     return out
