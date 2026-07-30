@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-30T06:44:35Z",
+ "captured_at": "2026-07-30T06:52:17Z",
  "matches": [
-  {
-   "event_id": 35882618,
-   "p1": "Grzegorz Felkel",
-   "p2": "Josef Braun",
-   "p1_norm": "grzegorz felkel",
-   "p2_norm": "josef braun",
-   "open_date": "2026-07-30T06:30:00.000Z",
-   "line": 60.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35882619,
-   "p1": "Wojciech Urban",
-   "p2": "Marian Lebek",
-   "p1_norm": "wojciech urban",
-   "p2_norm": "marian lebek",
-   "open_date": "2026-07-30T06:30:00.000Z",
-   "line": 75.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35882630,
    "p1": "Blazej Warpas",
@@ -30,9 +8,9 @@
    "p1_norm": "blazej warpas",
    "p2_norm": "wojciech gluszek",
    "open_date": "2026-07-30T06:40:00.000Z",
-   "line": 80.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 84.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35882668,
@@ -41,7 +19,7 @@
    "p1_norm": "jakub nowak",
    "p2_norm": "oliwier sokolowski",
    "open_date": "2026-07-30T06:40:00.000Z",
-   "line": 80.5,
+   "line": 76.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -52,9 +30,9 @@
    "p1_norm": "piotr gumulinski",
    "p2_norm": "lukasz oracz",
    "open_date": "2026-07-30T06:45:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 68.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882638,
@@ -63,9 +41,9 @@
    "p1_norm": "stapor rafal",
    "p2_norm": "kamil klocek",
    "open_date": "2026-07-30T06:50:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 70.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35882639,
@@ -74,9 +52,9 @@
    "p1_norm": "rafal niemiec",
    "p2_norm": "krzysztof juszczyk",
    "open_date": "2026-07-30T06:50:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35882644,
@@ -134,6 +112,17 @@
    "under_odds": -118
   },
   {
+   "event_id": 35882680,
+   "p1": "Kamil Rudomina",
+   "p2": "Adam Linek",
+   "p1_norm": "kamil rudomina",
+   "p2_norm": "adam linek",
+   "open_date": "2026-07-30T07:15:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
    "event_id": 35882570,
    "p1": "Blazej Warpas",
    "p2": "Bartlomiej Wisniewski",
@@ -141,8 +130,8 @@
    "p2_norm": "bartlomiej wisniewski",
    "open_date": "2026-07-30T08:50:00.000Z",
    "line": 81.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": null,
+   "under_odds": null
   }
  ]
 }
