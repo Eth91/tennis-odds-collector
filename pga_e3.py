@@ -328,6 +328,13 @@ def main():
                         lo = LAM
                 print(f"  birdies: course-level LAM={LAM:.3f} "
                       f"(market-anchored on {len(overs)} Over lines, mix {_mix})")
+            # CALIBRATION GATE, separate from G2 (2026-07-30). G2 asks whether the ruler
+            # matches the book on matchups; it says nothing about whether birdie TAIL
+            # probabilities are calibrated, and they are not — measured reliability slope 0.61
+            # against a 0.85 bar. Preview still prints so the numbers stay visible.
+            _ok_b, _why_b = B.birdie_stream_armable()
+            if not _ok_b:
+                print("  birdies: NOT ARMABLE — %s" % _why_b)
             seen_b = set()
             _nb = {"over": 0, "under": 0}
             for player, side, line, od, mkt, rr in parsed:
@@ -341,6 +348,7 @@ def main():
                     _nb[side] = _nb.get(side, 0) + 1
                     preview.append({"stream": "E3-birdies",
                                     "runner": f"{player} {side} {line:g}",
+                                    "armable": _ok_b,
                                     "market": mkt[:60], "odds": od,
                                     "edge": round(edge, 3)})
             # ONE-SIDEDNESS IS A LEVEL ALARM. With a devigged anchor both sides start

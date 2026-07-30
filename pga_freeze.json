@@ -1,5 +1,13 @@
 {
   "birdies": {
+    "BIRDIE_RELIABILITY": 0.61,
+    "BIRDIE_RELIABILITY_MIN": 0.85,
+    "DEFAULT_MIX": {
+      "3": 4,
+      "4": 10,
+      "5": 4
+    },
+    "DISPERSION": 0.552,
     "K_H": 106.0,
     "K_H_PAR": {
       "3": 593.0,
@@ -34,6 +42,18 @@
     "K_FIT": 105.0,
     "WIND_REF": 15.0
   },
+  "e1": {
+    "MIN_ODDS": 1.6,
+    "THRESH_KMH": 6.0,
+    "WINDOW_H": 5
+  },
+  "e3": {
+    "M_EDGE": 0.06,
+    "OUT_EV": 0.15,
+    "OUT_RATIO": 1.3,
+    "TN_EDGE": 0.04,
+    "TN_MIN_ODDS": 1.5
+  },
   "fitted": {
     "bridge": {
       "a": 1.051324612381659,
@@ -60,7 +80,7 @@
       "w": -0.005152079885619044
     }
   },
-  "git_sha": "3b0fd822f8b538ef3953b63d866c6413b1d38699",
+  "git_sha": "4bff1421397536d12b3f3cc55d3045506527b46f",
   "purpose": "frozen for the 2026 Rocket Classic G2 read (event unplayed at freeze time)",
   "ruler": {
     "HALF_LIFE_D": 270.0,
@@ -76,5 +96,10 @@
     "THRESH_KMH": 6.0,
     "TN_EDGE": 0.04,
     "TN_MIN_ODDS": 1.5
+  },
+  "wave": {
+    "EXPOSURE_H": 5,
+    "FIT_MIN_OBS": 20,
+    "SPLIT_MIN": 20
   }
 }

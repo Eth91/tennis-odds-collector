@@ -381,6 +381,32 @@ def p_x_or_more(player_rates, k_target, mix=None):
     return sum(dist[int(k_target):])
 
 
+# PRE-REGISTERED BIRDIE CALIBRATION GATE (2026-07-30). Measured out of sample on 19,942
+# leak-free player-rounds, the reliability slope of realized on predicted P(>=4 birdies) is
+# 0.61 — the model's tail probabilities are systematically too extreme. Solving DISPERSION on
+# the probability scale showed the slope peaks at ~0.608 and NEVER reaches 1.0 even when every
+# player is collapsed to the field rate, so this is NOT player over-dispersion: p_x_or_more
+# assumes 18 INDEPENDENT holes while real birdie counts are correlated within a round. A scalar
+# cannot repair a wrong dependence structure — that needs a per-round random effect
+# (beta-binomial). Every birdie edge sits in exactly the tails this miscalibrates, so:
+BIRDIE_RELIABILITY = 0.61        # measured; re-measure with test_reliability.py after any change
+BIRDIE_RELIABILITY_MIN = 0.85    # the bar to arm this stream
+
+
+def birdie_stream_armable():
+    """(ok, reason) — whether the birdie stream may be bet at all, on calibration grounds.
+
+    Deliberately independent of G2: G2 asks whether the RULER matches the book on matchups and
+    says nothing about whether birdie TAIL probabilities are calibrated.
+    """
+    if BIRDIE_RELIABILITY < BIRDIE_RELIABILITY_MIN:
+        return False, ("birdie reliability slope %.2f < %.2f — tail probabilities are too "
+                       "extreme (18-hole independence assumption); needs a per-round random "
+                       "effect before this stream can be bet"
+                       % (BIRDIE_RELIABILITY, BIRDIE_RELIABILITY_MIN))
+    return True, "birdie calibration ok"
+
+
 def birdie_gate():
     """Armed only after >=15 SETTLED FanDuel birdie closes grade within 2pts logloss of the
     devig. Zero birdie rows have ever been captured, so: not armed, and says why."""

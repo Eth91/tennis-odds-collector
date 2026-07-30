@@ -38,17 +38,40 @@ def snapshot():
     import pga_ruler as RU
     import pga_wave as W
 
+    def _consts(mod):
+        """Every module-level constant, discovered rather than listed.
+
+        The first version enumerated a fixed list, so adding DISPERSION — a pricing parameter —
+        left the verifier reporting "FREEZE INTACT" after prices had already moved. Anything
+        upper-case and numeric (or a small numeric container) is a parameter and is captured.
+        """
+        out = {}
+        for k in dir(mod):
+            if not k.isupper() or k.startswith("_"):
+                continue
+            v = getattr(mod, k, None)
+            if isinstance(v, bool):
+                continue
+            if isinstance(v, (int, float)):
+                out[k] = v
+            elif isinstance(v, dict) and v and len(v) <= 12 and all(
+                    isinstance(x, (int, float)) or isinstance(x, dict) for x in v.values()):
+                out[k] = {str(a): b for a, b in v.items()}
+        return out
+
     wind = C.fit_wind(verbose=False) or {}
     wave = W.fit_wave(verbose=False) or {}
     bridge = C._birdie_bridge() or {}
     return {
         "git_sha": _sha(),
         "purpose": "frozen for the 2026 Rocket Classic G2 read (event unplayed at freeze time)",
-        "ruler": {"RHO": RU.RHO, "K_SHRINK": RU.K_SHRINK, "SIG_SHRINK": RU.SIG_SHRINK,
-                  "MIN_ROUNDS": RU.MIN_ROUNDS, "HALF_LIFE_D": RU.HALF_LIFE_D},
-        "context": {"K_COURSE": C.K_COURSE, "K_FIT": C.K_FIT, "WIND_REF": C.WIND_REF},
-        "birdies": {"K_H": B.K_H, "K_H_PAR": B.K_H_PAR,
-                    "PAR_MIX_RULE": {str(k): v for k, v in B.PAR_MIX_RULE.items()}},
+        # discovered, not listed: a new pricing parameter must not be able to hide
+        "ruler": _consts(RU),
+        "context": _consts(C),
+        "birdies": _consts(B),
+        "wave": _consts(W),
+        "e1": _consts(E1),
+        "e3": _consts(E3),
         "fitted": {
             "wind": {k: wind.get(k) for k in ("w", "r", "n", "events", "mean_wind", "assumed")},
             "wave": {k: wave.get(k) for k in ("beta", "intercept", "r", "n_gaps", "events",
