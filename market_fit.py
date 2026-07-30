@@ -104,8 +104,13 @@ for eid, d0 in evs:
         pr = RU.matchup_prob(Rn, a, b, rounds=4)
         if pr is not None:
             buckets["matchup_72h"].append((pr, 1.0 if full[a] < full[b] else 0.0))
+    # ROUND-1 pairs must come from EVERYONE who played round 1, not from `fl` (players with four
+    # rounds). Restricting to cut-makers conditions on an outcome downstream of round 1 and
+    # inverted the verdict: measured on identical events, cut-makers-only gave slope 0.275 while
+    # the unselected pool gave 1.265. The 0.310 this section used to print was that artefact.
+    r1pool = [p for p in r1 if p in Rn]
     for _ in range(300):
-        a, b = random.choice(fl), random.choice(fl)
+        a, b = random.choice(r1pool), random.choice(r1pool)
         if a == b:
             continue
         pr = RU.matchup_prob(Rn, a, b, rounds=1)
