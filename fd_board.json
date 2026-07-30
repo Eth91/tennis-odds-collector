@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T19:53:48Z",
+ "captured_at": "2026-07-30T19:59:35Z",
  "matches": [
-  {
-   "event_id": 35885454,
-   "p1": "Karol Strowski",
-   "p2": "Krystian Kolodziej",
-   "p1_norm": "karol strowski",
-   "p2_norm": "krystian kolodziej",
-   "open_date": "2026-07-30T19:40:00.000Z",
-   "line": 84.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35885466,
    "p1": "Wojciech Pytlas",
@@ -55,6 +44,39 @@
    "line": 75.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35885491,
+   "p1": "Mariusz Baron",
+   "p2": "Krzysztof Juszczyk",
+   "p1_norm": "mariusz baron",
+   "p2_norm": "krzysztof juszczyk",
+   "open_date": "2026-07-30T20:20:00.000Z",
+   "line": 78.5,
+   "over_odds": -116,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35885455,
+   "p1": "Piotr Gesiarz",
+   "p2": "Jacek Zelezik",
+   "p1_norm": "piotr gesiarz",
+   "p2_norm": "jacek zelezik",
+   "open_date": "2026-07-30T20:25:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35885456,
+   "p1": "Marcin Kowalczyk",
+   "p2": "Arkadiusz Mugowski",
+   "p1_norm": "marcin kowalczyk",
+   "p2_norm": "arkadiusz mugowski",
+   "open_date": "2026-07-30T20:25:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
