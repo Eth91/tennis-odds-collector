@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T20:12:04Z",
+ "captured_at": "2026-07-30T20:17:59Z",
  "matches": [
   {
    "event_id": 35885466,
@@ -8,9 +8,9 @@
    "p1_norm": "wojciech pytlas",
    "p2_norm": "patryk mecik",
    "open_date": "2026-07-30T20:00:00.000Z",
-   "line": 68.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 87.5,
+   "over_odds": -155,
+   "under_odds": 110
   },
   {
    "event_id": 35885084,
@@ -19,9 +19,9 @@
    "p1_norm": "jerzy michalik",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-30T20:05:00.000Z",
-   "line": 76.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 92.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35885085,
@@ -30,7 +30,7 @@
    "p1_norm": "jaroslaw rolak",
    "p2_norm": "dawid kotwica",
    "open_date": "2026-07-30T20:05:00.000Z",
-   "line": 74.5,
+   "line": 91.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -41,9 +41,9 @@
    "p1_norm": "jakub skorupa",
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-30T20:10:00.000Z",
-   "line": 76.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 52.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35885491,
@@ -53,8 +53,8 @@
    "p2_norm": "krzysztof juszczyk",
    "open_date": "2026-07-30T20:20:00.000Z",
    "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35885455,
