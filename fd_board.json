@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T18:53:45Z",
+ "captured_at": "2026-07-30T18:58:15Z",
  "matches": [
-  {
-   "event_id": 35885012,
-   "p1": "Wojciech Pytlas",
-   "p2": "Mariusz Baron",
-   "p1_norm": "wojciech pytlas",
-   "p2_norm": "mariusz baron",
-   "open_date": "2026-07-30T18:45:00.000Z",
-   "line": 52.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35885013,
    "p1": "Kazimierz Rybak",
@@ -19,9 +8,9 @@
    "p1_norm": "kazimierz rybak",
    "p2_norm": "jakub cyndera",
    "open_date": "2026-07-30T18:45:00.000Z",
-   "line": 71.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 69.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35885034,
@@ -41,9 +30,9 @@
    "p1_norm": "mateusz trela",
    "p2_norm": "arkadiusz mugowski",
    "open_date": "2026-07-30T18:55:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 74.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885040,
@@ -52,9 +41,9 @@
    "p1_norm": "marian brunner",
    "p2_norm": "jacek zelezik",
    "open_date": "2026-07-30T18:55:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 72.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885070,
