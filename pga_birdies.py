@@ -19,6 +19,7 @@ not-armed until >=15 settled FD birdie closes grade within 2pts logloss — same
 """
 import datetime as dt
 import json
+import math
 import sqlite3
 import time
 import urllib.request
@@ -279,6 +280,72 @@ PAR_MIX_RULE = {70: {3: 4, 4: 12, 5: 2}, 71: {3: 4, 4: 11, 5: 3},
 #             with no hole data at all — rare now that 114 events are harvested.
 
 
+PHI_ROUND = 0.0233              # MEASURED 2026-07-30 on 39,722 player-rounds: per-round shared
+                                # day factor, Var(theta)=PHI (theta sd 15.3%). Rounds are NOT
+                                # independent hole-by-hole — a soft calm day lifts every hole.
+                                # Secondary to the course-par fix (0.608->0.644 on its own) but
+                                # real, and it widens the count distribution correctly.
+CPAR_K = 400.0                  # holes of shrinkage of a course's par rates toward global. Keeps a
+                                # thin course, or one that was RECONFIGURED (Detroit 2026 moved
+                                # courseId 876->947, par 72->70), from being trusted outright.
+
+
+def _ckey(tname):
+    """Course key: sorted distinctive tokens, so editions of one venue pool together."""
+    return " ".join(sorted(w for w in str(tname or "").lower().split() if len(w) > 3))
+
+
+def course_par_rates(cache={}):
+    """{course_key: {par: birdie rate}} measured per COURSE, shrunk toward the global rate.
+
+    Par-class difficulty is strongly course-specific (par-5 ranges .325-.624 across 56 courses vs
+    a global .470). Using the global rate made P(>=k) over-respond to par mix and was the whole
+    reason the birdie reliability slope sat at 0.617 instead of ~1.0.
+    """
+    if cache:
+        return cache
+    con = sqlite3.connect(DB)
+    rows = con.execute("SELECT tname, SUM(p3h), SUM(p3b), SUM(p4h), SUM(p4b), SUM(p5h), "
+                       "SUM(p5b) FROM birdie_rounds GROUP BY tname").fetchall()
+    con.close()
+    tot = {3: [0.0, 0.0], 4: [0.0, 0.0], 5: [0.0, 0.0]}
+    per = {}
+    for tn, a3, b3, a4, b4, a5, b5 in rows:
+        k = _ckey(tn)
+        d = per.setdefault(k, {3: [0.0, 0.0], 4: [0.0, 0.0], 5: [0.0, 0.0]})
+        for par, (h, b) in ((3, (a3, b3)), (4, (a4, b4)), (5, (a5, b5))):
+            d[par][0] += h or 0
+            d[par][1] += b or 0
+            tot[par][0] += h or 0
+            tot[par][1] += b or 0
+    g = {par: (v[1] / v[0] if v[0] else 0.15) for par, v in tot.items()}
+    out = {"__global__": g}
+    for k, d in per.items():
+        out[k] = {par: (((d[par][1] + CPAR_K * g[par]) / (d[par][0] + CPAR_K))
+                        if d[par][0] else g[par]) for par in (3, 4, 5)}
+    cache.update(out)
+    return cache
+
+
+def _theta_nodes(phi=PHI_ROUND, n=11, cache={}):
+    """Equal-weight discretisation of a mean-1, variance-phi day factor."""
+    if phi <= 1e-9:
+        return [(1.0, 1.0)]
+    if n in cache:
+        return cache[n]
+    import statistics as _st
+    k = 1.0 / phi
+    nodes = []
+    for i in range(n):
+        q = (i + 0.5) / n
+        z = _st.NormalDist().inv_cdf(q)
+        x = (1 - 1 / (9 * k) + z * math.sqrt(1 / (9 * k))) ** 3
+        nodes.append((max(x, 1e-6), 1.0 / n))
+    m = sum(w * x for x, w in nodes)
+    cache[n] = [(x / m, w) for x, w in nodes]
+    return cache[n]
+
+
 def par_mix(par_total):
     return dict(PAR_MIX_RULE.get(int(par_total or 72), PAR_MIX_RULE[72]))
 
@@ -365,7 +432,24 @@ def tid_for_name(name, cache=HERE / "pga_tid_cache.json"):
     return tid
 
 
-def p_x_or_more(player_rates, k_target, mix=None):
+def p_x_or_more(player_rates, k_target, mix=None, phi=None):
+    """P(at least k birdies-or-better), integrated over the per-round DAY FACTOR.
+
+    Holes are not independent: a soft, calm day lifts every hole at once. Measured
+    Var(theta)=0.0233 (sd 15.3%) over 39,722 rounds. Ignoring it made the count
+    distribution too narrow. Pass phi=0 for the old independent behaviour.
+    """
+    ph = PHI_ROUND if phi is None else phi
+    if ph <= 1e-9:
+        return _p_x_indep(player_rates, k_target, mix)
+    tot = 0.0
+    for th, w in _theta_nodes(ph):
+        r = {p: min(v * th, 0.98) for p, v in player_rates.items()}
+        tot += w * _p_x_indep(r, k_target, mix)
+    return tot
+
+
+def _p_x_indep(player_rates, k_target, mix=None):
     """Exact P(birdies-or-better >= k) in one round via DP over the course's par mix."""
     mix = mix or DEFAULT_MIX
     probs = []
