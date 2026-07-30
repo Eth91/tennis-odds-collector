@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T19:47:34Z",
+ "captured_at": "2026-07-30T19:53:48Z",
  "matches": [
-  {
-   "event_id": 35885440,
-   "p1": "Pawel Slosarczyk",
-   "p2": "Krzysztof Juszczyk",
-   "p1_norm": "pawel slosarczyk",
-   "p2_norm": "krzysztof juszczyk",
-   "open_date": "2026-07-30T19:35:00.000Z",
-   "line": 58.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35885454,
    "p1": "Karol Strowski",
@@ -19,7 +8,7 @@
    "p1_norm": "karol strowski",
    "p2_norm": "krystian kolodziej",
    "open_date": "2026-07-30T19:40:00.000Z",
-   "line": 72.5,
+   "line": 84.5,
    "over_odds": -115,
    "under_odds": -120
   },
