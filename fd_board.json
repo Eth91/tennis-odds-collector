@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-07-30T06:35:20Z",
+ "captured_at": "2026-07-30T06:39:38Z",
  "matches": [
-  {
-   "event_id": 35882609,
-   "p1": "Igor Dabrowski",
-   "p2": "Radoslaw Malinowski",
-   "p1_norm": "igor dabrowski",
-   "p2_norm": "radoslaw malinowski",
-   "open_date": "2026-07-30T06:20:00.000Z",
-   "line": 92.5,
-   "over_odds": -150,
-   "under_odds": 110
-  },
-  {
-   "event_id": 35882610,
-   "p1": "Jerzy Pelka",
-   "p2": "Waldemar Glanowski",
-   "p1_norm": "jerzy pelka",
-   "p2_norm": "waldemar glanowski",
-   "open_date": "2026-07-30T06:25:00.000Z",
-   "line": 86.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35882612,
-   "p1": "Dominik Solilo",
-   "p2": "Michal Minda",
-   "p1_norm": "dominik solilo",
-   "p2_norm": "michal minda",
-   "open_date": "2026-07-30T06:25:00.000Z",
-   "line": 72.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35882618,
    "p1": "Grzegorz Felkel",
@@ -41,9 +8,9 @@
    "p1_norm": "grzegorz felkel",
    "p2_norm": "josef braun",
    "open_date": "2026-07-30T06:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882619,
@@ -52,7 +19,7 @@
    "p1_norm": "wojciech urban",
    "p2_norm": "marian lebek",
    "open_date": "2026-07-30T06:30:00.000Z",
-   "line": 66.5,
+   "line": 65.5,
    "over_odds": -110,
    "under_odds": -125
   },
@@ -75,8 +42,8 @@
    "p2_norm": "lukasz oracz",
    "open_date": "2026-07-30T06:45:00.000Z",
    "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35882638,
@@ -86,8 +53,8 @@
    "p2_norm": "kamil klocek",
    "open_date": "2026-07-30T06:50:00.000Z",
    "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35882639,
@@ -97,8 +64,8 @@
    "p2_norm": "krzysztof juszczyk",
    "open_date": "2026-07-30T06:50:00.000Z",
    "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -118
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35882644,
@@ -130,8 +97,8 @@
    "p2_norm": "igor dabrowski",
    "open_date": "2026-07-30T07:00:00.000Z",
    "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35882570,
