@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T03:10:50Z",
+ "captured_at": "2026-07-30T03:14:57Z",
  "matches": [
   {
    "event_id": 35882054,
@@ -8,7 +8,7 @@
    "p1_norm": "kacper petas",
    "p2_norm": "jan zandecki",
    "open_date": "2026-07-30T03:00:00.000Z",
-   "line": 84.5,
+   "line": 87.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -20,8 +20,8 @@
    "p2_norm": "adam linek",
    "open_date": "2026-07-30T03:00:00.000Z",
    "line": 86.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35882059,
@@ -30,9 +30,9 @@
    "p1_norm": "witold stechly",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-07-30T03:05:00.000Z",
-   "line": 85.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882069,
@@ -41,9 +41,9 @@
    "p1_norm": "rafal niemiec",
    "p2_norm": "marian lebek",
    "open_date": "2026-07-30T03:10:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 68.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882078,
@@ -99,6 +99,17 @@
    "line": 75.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35882099,
+   "p1": "Michal Minda",
+   "p2": "Kamil Klocek",
+   "p1_norm": "michal minda",
+   "p2_norm": "kamil klocek",
+   "open_date": "2026-07-30T03:40:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
