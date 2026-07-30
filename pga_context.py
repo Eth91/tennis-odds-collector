@@ -112,6 +112,7 @@ def _birdie_bridge():
     g = {p: (v[1] / v[0] if v[0] else 0.15) for p, v in tot.items()}
     ev_mean, base = event_scoring()
     xs, ys = [], []
+    percourse = {}
     misses = 0
     for tid, tname, a3, b3, a4, b4, a5, b5 in hole:
         holes = (a3 or 0) + (a4 or 0) + (a5 or 0)
@@ -133,8 +134,28 @@ def _birdie_bridge():
         m, yr = cand[0]
         xs.append(m - base.get(yr, m))
         ys.append(obs / exp)
+        ckey = " ".join(sorted(_ev_tokens(tname)))
+        percourse.setdefault(ckey, []).append((m - base.get(yr, m), obs / exp))
     if len(xs) < 6:
         return None
+    # per-edition slope, kept only for the diagnostic below
+    def _lin(pts):
+        ax = [q[0] for q in pts]
+        ay = [q[1] for q in pts]
+        m1, m2 = st.mean(ax), st.mean(ay)
+        d = sum((x - m1) ** 2 for x in ax)
+        sl = (sum((x - m1) * (y - m2) for x, y in pts) / d) if d else 0.0
+        s1, s2 = st.pstdev(ax), st.pstdev(ay)
+        rr = ((sum((x - m1) * (y - m2) for x, y in pts) / len(pts)) / (s1 * s2)
+              if s1 and s2 else None)
+        return sl, m2 - sl * m1, rr
+    ed_slope, _ed_a, ed_r = _lin(list(zip(xs, ys)))
+    # AVERAGE WITHIN COURSE, then fit: this is the level course_factor() applies the bridge at
+    agg = [(st.mean([q[0] for q in v]), st.mean([q[1] for q in v]))
+           for v in percourse.values() if v]
+    if len(agg) >= 6:
+        xs = [q[0] for q in agg]
+        ys = [q[1] for q in agg]
     mx, my = st.mean(xs), st.mean(ys)
     den = sum((x - mx) ** 2 for x in xs)
     b = (sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / den) if den else 0.0
@@ -146,7 +167,9 @@ def _birdie_bridge():
             r = (sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / len(xs)) / (sx * sy)
     except Exception:                                              # noqa: BLE001
         pass
-    out = {"a": a, "b": b, "n": len(xs), "r": r, "unmatched": misses}
+    out = {"a": a, "b": b, "n": len(xs), "r": r, "unmatched": misses,
+           "n_editions": len(percourse), "edition_slope": ed_slope, "edition_r": ed_r,
+           "level": "per-course-mean"}
     c["bridge"] = out
     _save(c)
     return out
