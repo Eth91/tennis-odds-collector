@@ -2787,9 +2787,9 @@ def build():
   .swn.hot {{ color:#6aa5ef; background:rgba(106,165,239,.16); }}
   .swvs {{ color:#6b7484; font-size:11.5px; }}
   .swday {{ color:#6b7484; font-size:10.5px; }}
-  .pgamkt { margin:10px 0 4px; font-size:11px; letter-spacing:.08em; font-weight:700;
-             color:#8b94a3; text-transform:uppercase; }
-  .pgaline { margin-left:8px; color:#c8cfda; font-size:12.5px; }
+  .pgamkt {{ margin:10px 0 4px; font-size:11px; letter-spacing:.08em; font-weight:700;
+             color:#8b94a3; text-transform:uppercase; }}
+  .pgaline {{ margin-left:8px; color:#c8cfda; font-size:12.5px; }}
   .swusg {{ margin-left:auto; color:#8b94a3; font-size:11.5px; font-variant-numeric:tabular-nums; white-space:nowrap; }}
   .swo {{ color:#7d8696; font-size:12px; margin-top:4px; }}
   .swo b {{ color:#c3c9d4; font-weight:700; }}

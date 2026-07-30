@@ -166,10 +166,14 @@ s = s[:start] + new + s[end:]
 
 # minimal CSS for the market heading + the line detail, next to the existing .swusg rule
 css_anchor = "  .swusg {"
+# NOTE: this CSS block lives inside a large f-string, so literal braces MUST stay DOUBLED.
+# An earlier version .replace()d them down to single braces, which made Python read
+# "{ margin:10px 0 4px; }" as an expression -> NameError: name 'margin' is not defined at
+# RUNTIME. py_compile passed; the dashboard died on every bake and the deployed page froze.
 css_new = ('''  .pgamkt {{ margin:10px 0 4px; font-size:11px; letter-spacing:.08em; font-weight:700;
              color:#8b94a3; text-transform:uppercase; }}
   .pgaline {{ margin-left:8px; color:#c8cfda; font-size:12.5px; }}
-'''.replace("{{", "{").replace("}}", "}") + css_anchor)
+''' + css_anchor)
 assert css_anchor in s, "css anchor missing"
 s = s.replace(css_anchor, css_new, 1)
 
