@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T05:47:37Z",
+ "captured_at": "2026-07-30T05:52:43Z",
  "matches": [
   {
    "event_id": 35882558,
@@ -8,9 +8,9 @@
    "p1_norm": "stapor rafal",
    "p2_norm": "michal minda",
    "open_date": "2026-07-30T05:35:00.000Z",
-   "line": 71.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 97.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35882571,
@@ -19,9 +19,9 @@
    "p1_norm": "kacper petas",
    "p2_norm": "josef braun",
    "open_date": "2026-07-30T05:40:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 73.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882570,
@@ -41,9 +41,9 @@
    "p1_norm": "piotr gumulinski",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-07-30T05:45:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 80.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35882578,
@@ -52,9 +52,9 @@
    "p1_norm": "jakub kaczmarek",
    "p2_norm": "marian lebek",
    "open_date": "2026-07-30T05:50:00.000Z",
-   "line": 72.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 73.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35882588,

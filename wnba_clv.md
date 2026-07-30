@@ -1,6 +1,6 @@
 # WNBA injury-timing CLV — does the line move our way, open to close?
 
-_2026-07-30 01:50 UTC · 398 closed shadows (opening line vs closing line)_
+_2026-07-30 05:51 UTC · 398 closed shadows (opening line vs closing line)_
 
 ## Does the line move toward our read from open to close?
 ```
@@ -14,9 +14,9 @@ The line moving toward our read between the flag (open) and the close = we price
 
 ### ⚡ n1 speed-tier pilot — EXPERIMENTAL, separate from the firm number above
 ```
-closed pilot shadows:      7 over 2 slate(s)
-avg line move toward us:   -0.86 pts
-positive-CLV rate:         29%
+closed pilot shadows:      15 over 3 slate(s)
+avg line move toward us:   -0.13 pts
+positive-CLV rate:         40%
 ```
 First-occurrence (1-game-sample) plays, flagged only on a STALE line. Judge the pilot HERE before trusting it — positive pilot CLV = the speed thesis holds for thin samples too.
 
