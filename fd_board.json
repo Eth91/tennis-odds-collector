@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-30T23:06:44Z",
+ "captured_at": "2026-07-30T23:15:35Z",
  "matches": [
-  {
-   "event_id": 35885655,
-   "p1": "Kacper Adamus",
-   "p2": "Marek Tkocz",
-   "p1_norm": "kacper adamus",
-   "p2_norm": "marek tkocz",
-   "open_date": "2026-07-30T22:50:00.000Z",
-   "line": 86.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35885665,
-   "p1": "Michal Guzik",
-   "p2": "Jerzy Michalik",
-   "p1_norm": "michal guzik",
-   "p2_norm": "jerzy michalik",
-   "open_date": "2026-07-30T22:55:00.000Z",
-   "line": 89.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35885670,
    "p1": "Kazimierz Rybak",
@@ -30,9 +8,9 @@
    "p1_norm": "kazimierz rybak",
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-30T23:05:00.000Z",
-   "line": 73.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 85.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885682,
@@ -41,9 +19,9 @@
    "p1_norm": "mariusz baron",
    "p2_norm": "pawel slosarczyk",
    "open_date": "2026-07-30T23:10:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885689,
@@ -52,7 +30,7 @@
    "p1_norm": "piotr gesiarz",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-30T23:20:00.000Z",
-   "line": 77.5,
+   "line": 78.5,
    "over_odds": -116,
    "under_odds": -116
   },
@@ -88,6 +66,17 @@
    "line": 65.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35885697,
+   "p1": "Marian Lebek",
+   "p2": "Marek Tkocz",
+   "p1_norm": "marian lebek",
+   "p2_norm": "marek tkocz",
+   "open_date": "2026-07-30T23:35:00.000Z",
+   "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -116
   }
  ]
 }
