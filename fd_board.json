@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-30T07:36:38Z",
+ "captured_at": "2026-07-30T07:42:34Z",
  "matches": [
-  {
-   "event_id": 35882687,
-   "p1": "Radoslaw Malinowski",
-   "p2": "Bartlomiej Wisniewski",
-   "p1_norm": "radoslaw malinowski",
-   "p2_norm": "bartlomiej wisniewski",
-   "open_date": "2026-07-30T07:20:00.000Z",
-   "line": 95.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35882701,
-   "p1": "Adrian Burkacki",
-   "p2": "Marian Lebek",
-   "p1_norm": "adrian burkacki",
-   "p2_norm": "marian lebek",
-   "open_date": "2026-07-30T07:30:00.000Z",
-   "line": 68.5,
-   "over_odds": -115,
-   "under_odds": -115
-  },
   {
    "event_id": 35882702,
    "p1": "Jerzy Pelka",
@@ -30,7 +8,7 @@
    "p1_norm": "jerzy pelka",
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-30T07:35:00.000Z",
-   "line": 78.5,
+   "line": 81.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -41,9 +19,9 @@
    "p1_norm": "blazej warpas",
    "p2_norm": "igor dabrowski",
    "open_date": "2026-07-30T07:40:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 80.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882713,
@@ -52,9 +30,9 @@
    "p1_norm": "dominik solilo",
    "p2_norm": "kamil klocek",
    "open_date": "2026-07-30T07:40:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 73.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35882715,
@@ -75,8 +53,8 @@
    "p2_norm": "szymon kolasa",
    "open_date": "2026-07-30T07:45:00.000Z",
    "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35882718,
@@ -86,8 +64,8 @@
    "p2_norm": "mariusz adamus",
    "open_date": "2026-07-30T07:50:00.000Z",
    "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35882730,
@@ -96,9 +74,31 @@
    "p1_norm": "lukasz oracz",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-07-30T07:55:00.000Z",
-   "line": 79.5,
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35882739,
+   "p1": "Michal Minda",
+   "p2": "Adam Linek",
+   "p1_norm": "michal minda",
+   "p2_norm": "adam linek",
+   "open_date": "2026-07-30T08:05:00.000Z",
+   "line": 82.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35882740,
+   "p1": "Josef Braun",
+   "p2": "Jan Zandecki",
+   "p1_norm": "josef braun",
+   "p2_norm": "jan zandecki",
+   "open_date": "2026-07-30T08:05:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
