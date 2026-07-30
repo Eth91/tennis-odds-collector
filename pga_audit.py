@@ -251,27 +251,38 @@ print("    flag-worthy: %d overs / %d unders  -> %s"
 print("\n[7] DEVIG POOL SANITY (the source of the fake +20-27% edges)")
 con = sqlite3.connect("golf_lines.sqlite")
 ts2 = con.execute("SELECT MAX(collected_at) FROM golf_lines").fetchone()[0]
+# BUG #9: LIKE '%PGA%' also matches "LPGA AIG Women's Open" — so this check, whose entire
+# job is to catch pooling errors, could itself pool a women's event into the men's pool.
 ev_fd = con.execute("SELECT event, COUNT(*) c FROM golf_lines WHERE collected_at=? AND "
-                    "event LIKE '%PGA%' GROUP BY event ORDER BY c DESC LIMIT 1", (ts2,)).fetchone()
+                    "TRIM(event) LIKE 'PGA %' GROUP BY event ORDER BY c DESC LIMIT 1",
+                    (ts2,)).fetchone()
 rows2 = con.execute("SELECT market, mtype, runner, odds FROM golf_lines WHERE event=? AND "
                     "collected_at=?", (ev_fd[0], ts2)).fetchall() if ev_fd else []
 con.close()
 fam = {}
 for mkt, mt, run, od in rows2:
     if od and od > 1 and mt and (("TOP_" in mt and "FINISH" in mt) or mt == "OUTRIGHT_BETTING"):
-        f = ("OUTRIGHT" if mt == "OUTRIGHT_BETTING"
-             else "TOP_%s" % "".join(ch for ch in mt.split("_FINISH")[0] if ch.isdigit()))
+        # key on the FULL mtype: "Top 20" and "Top 20 Finish (Incl. Ties)" are different
+        # products and pooling them is bug #8
+        f = mt
         d = fam.setdefault(f, {})
         if run not in d or od < d[run]:
             d[run] = od
-NM = {"TOP_5": 5, "TOP_10": 10, "TOP_20": 20, "OUTRIGHT": 1}
+def _nfor(f):
+    if f == "OUTRIGHT_BETTING":
+        return 1
+    dd = "".join(ch for ch in str(f).split("_FINISH")[0] if ch.isdigit())
+    return int(dd) if dd in ("5", "10", "20") else None
+
+
 for f, d in sorted(fam.items()):
-    N = NM.get(f)
+    N = _nfor(f)
     if not N:
         continue
     inv = sum(1 / o for o in d.values())
-    print("    %-9s %3d runners  implies %6.1f qualifiers  target %2d  %s"
-          % (f, len(d), inv, N, "OK" if 0.4 * N <= inv <= 3 * N else "SKIPPED by guard"))
+    print("    %-30s %4d runners  implies %6.1f  target %2d  %s"
+          % (str(f)[:30], len(d), inv, N,
+             "OK" if 0.4 * N <= inv <= 3 * N else "SKIPPED by guard"))
 
 # ------------------------------------------------------ 8. in-play conditioning
 print("\n[8] IN-PLAY CONDITIONING (blind spot #4)")

@@ -157,25 +157,43 @@ def main():
     # had a huge edge on everyone. The sim itself is sound — it sums to exactly 1/5/10/20/70
     # across the field — so the error was entirely in this pooling. Keep ONE price per
     # (market-family, runner): the SHORTEST (the sharpest posted number).
+    # SEPARATE PRODUCTS DEVIG SEPARATELY (2026-07-30, bug #8). "Top 20" and "Top 20 Finish
+    # (Incl. Ties)" are DIFFERENT markets with different payouts. Collapsing them into one
+    # family and keeping the shortest price per runner inflated the normaliser: measured live,
+    # 1,620 rows implying 343 qualifiers plus 253 implying 45, merged to imply 29.2 against a
+    # target of 20. Because fair = (1/od) * N / inv, that DEFLATED every fair probability ~28%
+    # and the flag is `ours - fair >= TN_EDGE` — so a true fair of 0.30 read 0.216 and handed
+    # out +8.4 points of edge that did not exist. Same mechanism as the original +20-27% bug;
+    # the 0.4N-3N guard passes 29.2. Keying on the FULL mtype keeps the products apart.
+    # Also restrict each pool to runners actually in this event's field: a pool with more
+    # entrants than the field is pooling something foreign.
+    field_norm = {RU.norm(f) for f in field} if field else set()
     groups = defaultdict(dict)
     for mkt, mt, run, od in rows:
         if od and od > 1.0 and mt and ("TOP_" in mt and "FINISH" in mt or mt == "OUTRIGHT_BETTING"):
-            fam = ("OUTRIGHT" if mt == "OUTRIGHT_BETTING"
-                   else "TOP_%s" % "".join(ch for ch in mt.split("_FINISH")[0] if ch.isdigit()))
-            cur = groups[fam].get(run)
+            if field_norm and RU.norm(run) not in field_norm:
+                continue
+            cur = groups[mt].get(run)
             if cur is None or od < cur:
-                groups[fam][run] = od
+                groups[mt][run] = od
     groups = {k: list(v.items()) for k, v in groups.items()}
-    NMAP = {"TOP_5": 5, "TOP_10": 10, "TOP_20": 20, "OUTRIGHT": 1}
+
+    def _n_for(mt_):
+        if mt_ == "OUTRIGHT_BETTING":
+            return 1
+        d = "".join(ch for ch in str(mt_).split("_FINISH")[0] if ch.isdigit())
+        return int(d) if d in ("5", "10", "20") else None
+
     for mt, rr in groups.items():
-        N = NMAP.get(mt)
+        N = _n_for(mt)
         if not N or len(rr) < 25 or not sim:
             continue
         inv = sum(1 / od for _, od in rr)
         if inv > N * 3 or inv < N * 0.4:
             # the pool does not resemble an N-winner market (duplicates, or several events
             # merged). Pricing it would fabricate edges, so skip and say so.
-            print(f"  skip {mt}: pool implies {inv:.1f} qualifiers, expected ~{N}")
+            print(f"  skip {mt}: pool implies {inv:.1f} qualifiers, expected ~{N} "
+                      f"({len(rr)} runners)")
             continue
         key = {1: "win", 5: "top5", 10: "top10", 20: "top20"}[N]
         for run, od in rr:
@@ -188,7 +206,7 @@ def main():
                     preview.append({"stream": "E3-outright", "runner": run, "market": mt,
                                     "odds": od, "edge": round(ours - fair, 3)})
             elif ours - fair >= TN_EDGE and od >= TN_MIN_ODDS:
-                preview.append({"stream": "E3-top%d" % N, "runner": run, "market": mt,
+                preview.append({"stream": "E3-top%d" % N, "runner": run, "market": mt[:40],
                                 "odds": od, "edge": round(ours - fair, 3)})
 
     # ---- birdies-or-better: MARKET-ANCHORED LEVEL, player-relative edges ----
