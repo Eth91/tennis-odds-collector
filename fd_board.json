@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T05:31:24Z",
+ "captured_at": "2026-07-30T05:37:39Z",
  "matches": [
-  {
-   "event_id": 35882508,
-   "p1": "Grzegorz Felkel",
-   "p2": "Jan Zandecki",
-   "p1_norm": "grzegorz felkel",
-   "p2_norm": "jan zandecki",
-   "open_date": "2026-07-30T05:15:00.000Z",
-   "line": 71.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
   {
    "event_id": 35882557,
    "p1": "Rafal Niemiec",
@@ -19,9 +8,9 @@
    "p1_norm": "rafal niemiec",
    "p2_norm": "wojciech urban",
    "open_date": "2026-07-30T05:30:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 73.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35882558,
@@ -31,8 +20,8 @@
    "p2_norm": "michal minda",
    "open_date": "2026-07-30T05:35:00.000Z",
    "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -116
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882570,
@@ -75,8 +64,41 @@
    "p2_norm": "marian lebek",
    "open_date": "2026-07-30T05:50:00.000Z",
    "line": 72.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35882588,
+   "p1": "Kamil Klocek",
+   "p2": "Kamil Rudomina",
+   "p1_norm": "kamil klocek",
+   "p2_norm": "kamil rudomina",
+   "open_date": "2026-07-30T06:00:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35882589,
+   "p1": "Milosz Piecowski",
+   "p2": "Wojciech Gluszek",
+   "p1_norm": "milosz piecowski",
+   "p2_norm": "wojciech gluszek",
+   "open_date": "2026-07-30T06:00:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35882590,
+   "p1": "Lukasz Oracz",
+   "p2": "Oskar Jadach",
+   "p1_norm": "lukasz oracz",
+   "p2_norm": "oskar jadach",
+   "open_date": "2026-07-30T06:00:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
