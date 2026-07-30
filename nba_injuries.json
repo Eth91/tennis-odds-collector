@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-07-30T12:01:41+00:00",
+ "fetched_at": "2026-07-30T18:16:04+00:00",
  "injuries": {
   "Mouhamed Gueye": {
    "team": "",
@@ -553,6 +553,12 @@
    "detail": "Wrist",
    "date": "2026-07-07"
   },
+  "Ajay Mitchell": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Calf",
+   "date": "2026-07-30"
+  },
   "Otega Oweh": {
    "team": "",
    "status": "Day-To-Day",
@@ -564,12 +570,6 @@
    "status": "Day-To-Day",
    "detail": "Rest",
    "date": "2026-07-16"
-  },
-  "Ajay Mitchell": {
-   "team": "",
-   "status": "Day-To-Day",
-   "detail": "Calf",
-   "date": "2026-07-14"
   },
   "Thomas Sorber": {
    "team": "",
