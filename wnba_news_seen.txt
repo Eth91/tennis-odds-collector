@@ -308,6 +308,7 @@ rw|647|Plays well off bench
 rw|661|Stuck in backup role
 rw|663|Posts double-double as starter
 rw|663|Starting Wednesday
+rw|678|Cleared to play Thursday
 rw|678|Closing in on return
 rw|678|Hopeful for season debut Thursday
 rw|678|Intends to play Thursday
