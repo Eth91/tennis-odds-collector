@@ -197,20 +197,34 @@ def main():
         # ties-EXCLUSIVE quantity. Comparing that to a ties-inclusive price is a category
         # error in the direction that manufactures edge. Pricing these needs integer-score
         # simulation with tied ranks; until then, skip. Skipping a market is free.
-        if "TIE" in str(mt).upper():
-            print(f"  skip {mt}: ties-inclusive product, simulator has no ties "
-                  f"(pool implies {sum(1 / od for _, od in rr):.1f} vs nominal {N})")
-            continue
+        # TIES-INCLUSIVE PRODUCTS ARE NOW PRICEABLE. simulate() returns tie-aware probabilities
+        # (integer scores), so use the *_ties key AND replace the nominal N with the model's own
+        # expected qualifier count — these products pay 22-26 players, not 20, and devigging
+        # against 20 is exactly what inflated the edge before.
+        is_ties = "TIE" in str(mt).upper()
+        if is_ties:
+            tkey = {1: "win_ties", 5: "top5_ties", 10: "top10_ties", 20: "top20_ties"}[N]
+            if not any(tkey in (v or {}) for v in sim.values()):
+                print(f"  skip {mt}: sim has no {tkey}")
+                continue
+            N_eff = sum((v or {}).get(tkey, 0.0) for v in sim.values())
+            if N_eff <= 0:
+                continue
+            print(f"  {mt}: ties-inclusive -> pricing on {tkey}, expected qualifiers "
+                  f"{N_eff:.1f} (nominal {N})")
+        else:
+            N_eff = float(N)
         inv = sum(1 / od for _, od in rr)
-        if inv > N * 3 or inv < N * 0.4:
+        if inv > N_eff * 3 or inv < N_eff * 0.4:
             # the pool does not resemble an N-winner market (duplicates, or several events
             # merged). Pricing it would fabricate edges, so skip and say so.
-            print(f"  skip {mt}: pool implies {inv:.1f} qualifiers, expected ~{N} "
+            print(f"  skip {mt}: pool implies {inv:.1f} qualifiers, expected ~{N_eff:.1f} "
                       f"({len(rr)} runners)")
             continue
-        key = {1: "win", 5: "top5", 10: "top10", 20: "top20"}[N]
+        key = ({1: "win_ties", 5: "top5_ties", 10: "top10_ties", 20: "top20_ties"}[N]
+               if is_ties else {1: "win", 5: "top5", 10: "top10", 20: "top20"}[N])
         for run, od in rr:
-            fair = (1 / od) * N / inv
+            fair = (1 / od) * N_eff / inv
             ours = (sim.get(run) or sim.get(RU.norm(run)) or {}).get(key)
             if ours is None:
                 continue
