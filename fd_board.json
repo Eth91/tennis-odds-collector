@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T02:54:11Z",
+ "captured_at": "2026-07-30T02:59:33Z",
  "matches": [
   {
    "event_id": 35882041,
@@ -8,20 +8,9 @@
    "p1_norm": "wojciech urban",
    "p2_norm": "adrian burkacki",
    "open_date": "2026-07-30T02:45:00.000Z",
-   "line": 86.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
-  {
-   "event_id": 35882042,
-   "p1": "Miroslaw Warzecha",
-   "p2": "Michal Wolny",
-   "p1_norm": "miroslaw warzecha",
-   "p2_norm": "michal wolny",
-   "open_date": "2026-07-30T02:45:00.000Z",
-   "line": 57.5,
-   "over_odds": 100,
-   "under_odds": -140
+   "line": 94.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35882052,
@@ -96,6 +85,28 @@
    "p1_norm": "dominik solilo",
    "p2_norm": "kamil rudomina",
    "open_date": "2026-07-30T03:20:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35882079,
+   "p1": "Jakub Nowak",
+   "p2": "Oliver Vincenec",
+   "p1_norm": "jakub nowak",
+   "p2_norm": "oliver vincenec",
+   "open_date": "2026-07-30T03:25:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35882080,
+   "p1": "Grzegorz Felkel",
+   "p2": "Artur Grela",
+   "p1_norm": "grzegorz felkel",
+   "p2_norm": "artur grela",
+   "open_date": "2026-07-30T03:25:00.000Z",
    "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
