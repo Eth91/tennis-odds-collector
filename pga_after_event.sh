@@ -20,13 +20,27 @@ def consts(m):
 snap = {"pga_ruler": consts(R), "pga_e3": consts(E),
         "pga_birdies": consts(B), "pga_context": consts(C)}
 now = hashlib.sha256(json.dumps(snap, sort_keys=True, default=str).encode()).hexdigest()[:16]
+import io as _io
+src = {f: hashlib.sha256(_io.open(f, "rb").read()).hexdigest()[:16]
+       for f in ("pga_ruler.py", "pga_e3.py", "pga_birdies.py", "pga_context.py")}
+now_src = hashlib.sha256(json.dumps(src, sort_keys=True).encode()).hexdigest()[:16]
 try:
-    want = json.load(open("pga_v1_freeze.json"))["sha256_16"]
+    _fz = json.load(open("pga_v1_freeze.json"))
+    want, want_src = _fz["sha256_16"], _fz["source_sha256_16"]
 except Exception as e:
     print("  cannot read pga_v1_freeze.json (%s) — treating as DRIFT" % e); sys.exit(1)
-if now == want:
-    print("  OK  v1.0 fingerprint %s intact" % now)
+# SOURCE hash matters as much as the constants: a drift check that only reads uppercase
+# module attributes passed while a whole dedupe block was missing from pga_e3.py.
+if now == want and now_src == want_src:
+    print("  OK  v1.0 constants %s + source %s intact" % (now, now_src))
 else:
+    if now != want:
+        print("  constants drifted: %s != %s" % (now, want))
+    if now_src != want_src:
+        print("  SOURCE drifted: %s != %s" % (now_src, want_src))
+        for f, h in src.items():
+            if _fz["source_files"].get(f) != h:
+                print("    changed: %s" % f)
     print("  *** DRIFT: fingerprint %s != frozen %s ***" % (now, want))
     print("  The model has changed. Any evidence collected after this point belongs to a")
     print("  DIFFERENT model and cannot be pooled with the v1.0 record. Either revert, or")
