@@ -137,7 +137,24 @@ push(){
     # Proven live 2026-07-17 04:00 (ate a dashboard-bake commit). So: reset to origin's tip to
     # unwedge, then REPLAY this VM's data files from the pre-reset tip and recommit. Code
     # (.py/.sh/.yml) is deliberately NOT replayed — fresh deploys from origin must win.
-    git rebase --abort 2>/dev/null || true
+    # SELF-HEAL A CORRUPT REBASE DIR (2026-07-30). `git rebase --abort` FAILS with exit 1 when
+    # the rebase was killed mid-flight (OOM on this 956MB box) and .git/rebase-merge is left
+    # holding only `autostash` with no `head-name`. It then cannot self-clean, every subsequent
+    # `git pull --rebase` dies on the directory's mere EXISTENCE, and the loop is pinned in this
+    # recovery path forever -- silently reverting code from origin every couple of minutes.
+    # Observed live: 25+ minutes of "rebase failed -> data replayed onto origin tip", which ate a
+    # deployed wnba_alert patch twice. Preserve any autostash as a ref (it is a real commit
+    # object and would otherwise be gc'd), then remove the directory so the next pull is clean.
+    git rebase --abort 2>/dev/null || {
+      for _d in rebase-merge rebase-apply; do
+        if [ -f ".git/$_d/autostash" ]; then
+          git update-ref "refs/wedged/$_d-$(date +%Y%m%d%H%M%S)" \
+            "$(cat ".git/$_d/autostash")" 2>/dev/null || true
+        fi
+        rm -rf ".git/$_d"
+      done
+      echo "[$(date +%H:%M)] cleared a corrupt rebase dir (abort could not)"
+    }
     C=$(git rev-parse HEAD)
     git fetch -q "$URL" main 2>/dev/null && git reset --hard FETCH_HEAD -q 2>/dev/null
     git checkout "$C" -- "*.sqlite" 2>/dev/null || true
