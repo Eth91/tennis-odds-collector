@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T01:16:21Z",
+ "captured_at": "2026-07-30T01:21:11Z",
  "matches": [
-  {
-   "event_id": 35881916,
-   "p1": "Adam Staniczek",
-   "p2": "Kamil Delikatny",
-   "p1_norm": "adam staniczek",
-   "p2_norm": "kamil delikatny",
-   "open_date": "2026-07-30T01:00:00.000Z",
-   "line": 80.5,
-   "over_odds": -105,
-   "under_odds": -135
-  },
   {
    "event_id": 35881937,
    "p1": "Miroslaw Warzecha",
@@ -19,9 +8,9 @@
    "p1_norm": "miroslaw warzecha",
    "p2_norm": "jerzy michalik",
    "open_date": "2026-07-30T01:10:00.000Z",
-   "line": 56.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 70.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35881947,
@@ -55,6 +44,17 @@
    "line": 75.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35881980,
+   "p1": "Kacper Kwiatkowski",
+   "p2": "Kamil Delikatny",
+   "p1_norm": "kacper kwiatkowski",
+   "p2_norm": "kamil delikatny",
+   "open_date": "2026-07-30T01:45:00.000Z",
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -110
   }
  ]
 }
