@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T02:13:20Z",
+ "captured_at": "2026-07-30T02:19:22Z",
  "matches": [
-  {
-   "event_id": 35882004,
-   "p1": "Witold Stechly",
-   "p2": "Jerzy Michalik",
-   "p1_norm": "witold stechly",
-   "p2_norm": "jerzy michalik",
-   "open_date": "2026-07-30T01:55:00.000Z",
-   "line": 96.5,
-   "over_odds": 110,
-   "under_odds": -150
-  },
   {
    "event_id": 35882013,
    "p1": "Michal Machelski",
@@ -19,9 +8,9 @@
    "p1_norm": "michal machelski",
    "p2_norm": "kazimierz rybak",
    "open_date": "2026-07-30T02:10:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 70.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35882018,
@@ -55,6 +44,28 @@
    "line": 73.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35882041,
+   "p1": "Wojciech Urban",
+   "p2": "Adrian Burkacki",
+   "p1_norm": "wojciech urban",
+   "p2_norm": "adrian burkacki",
+   "open_date": "2026-07-30T02:45:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35882042,
+   "p1": "Miroslaw Warzecha",
+   "p2": "Michal Wolny",
+   "p1_norm": "miroslaw warzecha",
+   "p2_norm": "michal wolny",
+   "open_date": "2026-07-30T02:45:00.000Z",
+   "line": 72.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
