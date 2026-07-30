@@ -203,6 +203,10 @@ def _verdict(m):
 
 def report():
     rows, graded, excluded = _rows()
+    # SHADOW STREAMS are candidate hypotheses and NEVER enter the v1.0 SPRT. They are
+    # scored separately so the paired-adoption rule has a prospective record to read.
+    shadow = [r for r in rows if str(r[1]).endswith("-shadow")]
+    rows = [r for r in rows if not str(r[1]).endswith("-shadow")]
     m = _metrics(rows)
     v, notes = _verdict(m)
     ts = dt.datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
@@ -262,6 +266,19 @@ def report():
                   f"| unanchored (n_lines < 8) | {len(una)} | "
                   f"{sum(float(r[8] or 0) for r in una):+.2f}u | LAM held at 1.000 |", "",
                   "Covariate, not a filter — both are in the SPRT above.", ""]
+    ms = _metrics(shadow) if shadow else None
+    L += ["## Shadow streams (candidate hypotheses — NOT in the v1.0 test)", ""]
+    if ms is None:
+        L += ["No settled shadow bets yet. `E3-cut-shadow` logs but cannot arm until it "
+              f"beats the frozen baseline on a paired SPRT over >= {MIN_N_ADOPT} "
+              "prospective settled bets.", ""]
+    else:
+        L += [f"| stream | n | P&L | logloss vs market | LLR |", "|---|---|---|---|---|",
+              f"| all shadow | {ms[chr(39)+chr(39)] if False else ms['n_scored']} | "
+              f"{ms['pnl']:+.2f}u | {ms['logloss_model']:.5f} vs {ms['logloss_market']:.5f} | "
+              f"{ms['llr']:+.4f} |", "",
+              f"Adoption needs LLR >= +{UPPER:.3f} on a PAIRED comparison over >= "
+              f"{MIN_N_ADOPT} settled bets. Currently {ms['n_scored']}.", ""]
     L += ["## Standing instruction", "",
           "No model change is proposed or adopted on this evidence. Every modification is a new "
           "hypothesis and must clear the adoption rule above on PROSPECTIVE data. Retrospective "

@@ -1,6 +1,6 @@
 # PGA v1.0  frozen 2026-07-30 — cumulative evidence
 
-_updated 2026-07-30T20:43:53Z · measurement only; the model is frozen and this file never tunes it_
+_updated 2026-07-30T20:51:18Z · measurement only; the model is frozen and this file never tunes it_
 
 ## Verdict
 
@@ -24,6 +24,10 @@ _updated 2026-07-30T20:43:53Z · measurement only; the model is frozen and this 
 No scored bets yet. Settled rows in the ledger: **0**
 
 Nothing can be concluded. The first scorable bets arrive when a tournament settles with `p_bet`/`p_fair` recorded.
+
+## Shadow streams (candidate hypotheses — NOT in the v1.0 test)
+
+No settled shadow bets yet. `E3-cut-shadow` logs but cannot arm until it beats the frozen baseline on a paired SPRT over >= 100 prospective settled bets.
 
 ## Standing instruction
 

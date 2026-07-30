@@ -519,6 +519,21 @@ def main():
     except Exception as _be:
         print(f"  birdie pricing skipped: {str(_be)[:70]}")
 
+    # ---- make-the-cut: SHADOW STREAM (candidate hypothesis, never armed) ----
+    # A new stream is a new hypothesis under the v1.0 freeze. It prices and LOGS so a
+    # prospective record accumulates toward the paired-SPRT adoption rule, but it is tagged
+    # `-shadow` and pga_validate keeps it out of the v1.0 SPRT entirely. Constants live in
+    # pga_cut so the v1.0 constant fingerprint stays byte-identical.
+    try:
+        import pga_cut as _CUT
+        _fn = {RU.norm(f) for f in field} if field else None
+        _cutrows = _CUT.price(rows, sim, _blend, field_norm=_fn)
+        if _cutrows:
+            preview.extend(_cutrows)
+        print(f"  make-cut [SHADOW, armable={_CUT.ARMABLE}]: {len(_cutrows)} flags")
+    except Exception as _ce:
+        print(f"  make-cut pricing skipped: {str(_ce)[:70]}")
+
     # DEDUPE (2026-07-29): the same underlying market reaches us under several mtypes
     # (TOP_20_FINISH_IMG vs TOP_20_FINISH_(INCL._TIES)) and again from the competition
     # page, so an un-deduped preview showed the same play eight times and crowded out
@@ -528,7 +543,14 @@ def main():
         _k = (_pv["stream"], RU.norm(_pv["runner"]), _pv.get("odds"))
         if _k not in _best or _pv["edge"] > _best[_k]["edge"]:
             _best[_k] = _pv
-    preview = sorted(_best.values(), key=lambda x: -x["edge"])[:15]
+    # SHADOW ROWS MUST NOT COMPETE WITH v1.0 FOR THE 15 SLOTS. Truncating a mixed list would
+    # let a candidate hypothesis push a frozen-baseline bet off the board and out of the ledger —
+    # silently altering the very record it is supposed to be compared against. Rank and cap the
+    # two populations separately.
+    _v1 = [v for v in _best.values() if not v.get("shadow")]
+    _sh = [v for v in _best.values() if v.get("shadow")]
+    preview = (sorted(_v1, key=lambda x: -x["edge"])[:15]
+               + sorted(_sh, key=lambda x: -x["edge"])[:15])
     if armed and preview:
         con = sqlite3.connect(PAPER)
         con.execute(E1.DDL)
@@ -554,7 +576,9 @@ def main():
                  snap_ts, _first_tee,
                  _bird_lam if pv["stream"] == "E3-birdies" else None,
                  _bird_nlines if pv["stream"] == "E3-birdies" else None))
-            flags.append(pv) if cur.rowcount else None
+            # shadow rows are persisted for the adoption test but are NOT v1.0 flags
+            if cur.rowcount and not pv.get("shadow"):
+                flags.append(pv)
         con.commit()
         con.close()
         print(f"  E3 flags logged: {len(flags)}")
