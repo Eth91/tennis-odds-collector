@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-07-30T08:48:53Z",
+ "captured_at": "2026-07-30T08:54:54Z",
  "matches": [
-  {
-   "event_id": 35882777,
-   "p1": "Kacper Petas",
-   "p2": "Artur Grela",
-   "p1_norm": "kacper petas",
-   "p2_norm": "artur grela",
-   "open_date": "2026-07-30T08:30:00.000Z",
-   "line": 90.5,
-   "over_odds": -105,
-   "under_odds": -135
-  },
-  {
-   "event_id": 35882782,
-   "p1": "Rafal Gajda",
-   "p2": "Oliver Vincenec",
-   "p1_norm": "rafal gajda",
-   "p2_norm": "oliver vincenec",
-   "open_date": "2026-07-30T08:35:00.000Z",
-   "line": 68.5,
-   "over_odds": -140,
-   "under_odds": 100
-  },
-  {
-   "event_id": 35882783,
-   "p1": "Milosz Piecowski",
-   "p2": "Radoslaw Malinowski",
-   "p1_norm": "milosz piecowski",
-   "p2_norm": "radoslaw malinowski",
-   "open_date": "2026-07-30T08:35:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35882789,
    "p1": "Waldemar Glanowski",
@@ -41,9 +8,9 @@
    "p1_norm": "waldemar glanowski",
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-30T08:45:00.000Z",
-   "line": 81.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 90.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35882801,
@@ -52,9 +19,9 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "marian lebek",
    "open_date": "2026-07-30T08:50:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882803,
@@ -121,6 +88,28 @@
    "line": 73.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35882838,
+   "p1": "Grzegorz Poliniewicz",
+   "p2": "Josef Braun",
+   "p1_norm": "grzegorz poliniewicz",
+   "p2_norm": "josef braun",
+   "open_date": "2026-07-30T09:20:00.000Z",
+   "line": 73.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35882839,
+   "p1": "Artur Grela",
+   "p2": "Karol Strowski",
+   "p1_norm": "artur grela",
+   "p2_norm": "karol strowski",
+   "open_date": "2026-07-30T09:20:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
