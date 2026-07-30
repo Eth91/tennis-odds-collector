@@ -2611,6 +2611,9 @@ def build():
                  '<path d="M18.8 5.2C16 8 15 12 15 12s1 4 3.8 6.8"/></svg>')
     ICON_TT = (f'<svg {_ic}><circle cx="9.6" cy="9.6" r="5.6"/><path d="M13.6 13.6l4.6 5"/>'
                '<circle cx="16.4" cy="6.6" r="1.35" fill="currentColor" stroke="none"/></svg>')
+    # flagstick + pennant + ball, drawn on the same 24x24 grid and stroke as the others
+    ICON_PGA = (f'<svg {_ic}><path d="M7.4 20.4V3.6l8.4 3-8.4 3"/>'
+                '<circle cx="16.2" cy="17.8" r="2.1"/><path d="M3.6 20.4h16.8"/></svg>')
     ICON_TRK = f'<svg {_ic}><path d="M4 4v16h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/></svg>'
     ICON_MLB = (f'<svg {_ic}><circle cx="12" cy="12" r="9.2"/>'
                 '<path d="M5.4 5.4C9 8 9 16 5.4 18.6"/><path d="M18.6 5.4C15 8 15 16 18.6 18.6"/></svg>')
@@ -3163,6 +3166,7 @@ def build():
     <div class="tabthumb" id="tabthumb"></div>
     <div class="tab active" data-tab="wnba" onclick="showTab('wnba')">{ICON_WNBA}<span>WNBA</span></div>
     <div class="tab" data-tab="tt" onclick="showTab('tt')">{ICON_TT}<span>TT</span></div>
+    <div class="tab" data-tab="pga" onclick="showTab('pga')">{ICON_PGA}<span>PGA</span></div>
     {mlb_tab}
     <div class="tab" data-tab="tracker" onclick="showTab('tracker')">{ICON_TRK}<span>Tracker</span></div>
   </div>
@@ -3180,6 +3184,9 @@ def build():
   <div class="panel hidden" id="tt">
     <h2>Table tennis · real FD lines</h2>
     {tt_html}
+  </div>
+  <div class="panel hidden" id="pga">
+    <h2>PGA Tour · FanDuel</h2>
     {pga_html}
   </div>
   <div class="panel hidden" id="mlb">
