@@ -1373,14 +1373,12 @@ def _pga_panel():
     w, l, u = rec.get("w", 0), rec.get("l", 0), rec.get("units", 0.0)
     ucls = "pos" if u >= 0 else "neg"
     armed = bool((d.get("e3") or {}).get("armed"))
-    status = "LIVE" if armed else "PAPER — tracking only, not live bets"
-    lg = (f'<img class="glogo" src="logos/pga.png" alt="" loading="lazy" '
-          f'onerror="this.style.display=\'none\'">'
-          f'<img class="glogo" src="logos/fd.png" alt="" loading="lazy" '
-          f'onerror="this.style.display=\'none\'">')
-    head = (f'<div class="sw-title">{lg}⛳ PGA '
-            f'<span>· {html.escape(d.get("event") or "")} · {status} · '
-            f'{w}-{l} · <b class="{ucls}">{u:+.2f}u</b></span></div>')
+    chip = ("" if armed else '<span class="pgapaper">PAPER</span>')
+    recd = (f'<span class="pgarec">{w}-{l} <b class="{ucls}">{u:+.2f}u</b></span>'
+            if (w or l or u) else "")
+    head = (f'<div class="pgahead"><span class="pgatitle">'
+            f'PGA {html.escape(d.get("event") or "")}</span>{chip}'
+            f'<span class="pgasp"></span>{recd}</div>')
 
     plays = []
     # The `open` list is the PAPER LEDGER and already carries every market type. Pass its real
@@ -1413,13 +1411,16 @@ def _pga_panel():
     for mkt in sorted(groups, key=_rank):
         body += (f'<div class="pgamkt">{html.escape(mkt)}</div>')
         for who, line, od in sorted(groups[mkt], key=lambda x: x[2]):
-            det = f'<span class="pgaline">{html.escape(line)}</span>' if line else ""
-            body += (f'<div class="swrow"><div class="swhd">'
-                     f'<b>{html.escape(who)}</b>{det}'
-                     f'<span class="pgaodds" title="{od:.2f} decimal">'
+            # detail on its own line, and omitted entirely when there is none — a top-20
+            # finish is just a name, and an empty sub-row leaves a dead gap
+            sub = f'<div class="pgasub">{html.escape(line)}</div>' if line else ""
+            body += (f'<div class="pgabet"><div class="pgatop">'
+                     f'<span class="pgasel">{html.escape(who)}</span>'
+                     f'<span class="pgasp"></span>'
+                     f'<span title="{od:.2f} decimal">'
                      f'<span class="podds fd">{html.escape(_am(od))}</span>'
                      f'<img class="bklogo" src="book-fd.png" alt="FD"></span>'
-                     f'</div></div>')
+                     f'</div>{sub}</div>')
     if not groups:
         body = '<div class="swo">No plays on the board right now.</div>'
     return f'<div class="starwatch">{head}{body}</div>'
@@ -2789,10 +2790,19 @@ def build():
   .swn.hot {{ color:#6aa5ef; background:rgba(106,165,239,.16); }}
   .swvs {{ color:#6b7484; font-size:11.5px; }}
   .swday {{ color:#6b7484; font-size:10.5px; }}
-  .pgamkt {{ margin:10px 0 4px; font-size:11px; letter-spacing:.08em; font-weight:700;
-             color:#8b94a3; text-transform:uppercase; }}
-  .pgaline {{ margin-left:8px; color:#c8cfda; font-size:12.5px; }}
-  .pgaodds {{ margin-left:auto; white-space:nowrap; }}
+  .pgahead {{ display:flex; align-items:center; gap:8px; padding-bottom:2px; }}
+  .pgatitle {{ color:#e8ecf2; font-size:15px; font-weight:800; letter-spacing:-.01em; }}
+  .pgapaper {{ font-size:9px; font-weight:800; letter-spacing:.06em; color:#d0a45e;
+               border:1px solid #d0a45e55; border-radius:5px; padding:2px 5px; }}
+  .pgarec {{ color:#7d8696; font-size:11.5px; font-variant-numeric:tabular-nums; }}
+  .pgamkt {{ margin:17px 0 1px; font-size:10px; letter-spacing:.09em; font-weight:800;
+             color:#79828f; text-transform:uppercase; }}
+  .pgamkt:first-of-type {{ margin-top:11px; }}
+  .pgabet {{ padding:10px 0 9px; border-top:1px solid #1a1f28; }}
+  .pgatop {{ display:flex; align-items:center; gap:8px; }}
+  .pgasel {{ color:#e8ecf2; font-size:14.5px; font-weight:700; letter-spacing:-.01em; }}
+  .pgasp {{ flex:1 1 auto; }}
+  .pgasub {{ color:#7d8696; font-size:12px; margin-top:2px; }}
   .swusg {{ margin-left:auto; color:#8b94a3; font-size:11.5px; font-variant-numeric:tabular-nums; white-space:nowrap; }}
   .swo {{ color:#7d8696; font-size:12px; margin-top:4px; }}
   .swo b {{ color:#c3c9d4; font-weight:700; }}
