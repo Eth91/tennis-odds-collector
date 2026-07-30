@@ -1,49 +1,16 @@
 {
- "captured_at": "2026-07-30T21:22:27Z",
+ "captured_at": "2026-07-30T21:29:29Z",
  "matches": [
   {
-   "event_id": 35885525,
-   "p1": "Jakub Chmielowski",
-   "p2": "Mateusz Rutkowski",
-   "p1_norm": "jakub chmielowski",
-   "p2_norm": "mateusz rutkowski",
-   "open_date": "2026-07-30T21:00:00.000Z",
-   "line": 95.5,
+   "event_id": 35885578,
+   "p1": "Jacek Zelezik",
+   "p2": "Kacper Kwiatkowski",
+   "p1_norm": "jacek zelezik",
+   "p2_norm": "kacper kwiatkowski",
+   "open_date": "2026-07-30T21:15:00.000Z",
+   "line": 75.5,
    "over_odds": -110,
    "under_odds": -125
-  },
-  {
-   "event_id": 35885559,
-   "p1": "Marian Brunner",
-   "p2": "Jerzy Michalik",
-   "p1_norm": "marian brunner",
-   "p2_norm": "jerzy michalik",
-   "open_date": "2026-07-30T21:00:00.000Z",
-   "line": 92.5,
-   "over_odds": -145,
-   "under_odds": 105
-  },
-  {
-   "event_id": 35885536,
-   "p1": "Jakub Pruszkowski",
-   "p2": "Marek Tkocz",
-   "p1_norm": "jakub pruszkowski",
-   "p2_norm": "marek tkocz",
-   "open_date": "2026-07-30T21:10:00.000Z",
-   "line": 82.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35885568,
-   "p1": "Dariusz Molenda",
-   "p2": "Adam Staniczek",
-   "p1_norm": "dariusz molenda",
-   "p2_norm": "adam staniczek",
-   "open_date": "2026-07-30T21:10:00.000Z",
-   "line": 66.5,
-   "over_odds": -115,
-   "under_odds": -120
   },
   {
    "event_id": 35885577,
@@ -52,9 +19,20 @@
    "p1_norm": "dawid kotwica",
    "p2_norm": "mateusz trela",
    "open_date": "2026-07-30T21:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 76.5,
+   "over_odds": -110,
+   "under_odds": -125
+  },
+  {
+   "event_id": 35885590,
+   "p1": "Jakub Cyndera",
+   "p2": "Jakub Skorupa",
+   "p1_norm": "jakub cyndera",
+   "p2_norm": "jakub skorupa",
+   "open_date": "2026-07-30T21:25:00.000Z",
+   "line": 75.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885570,
@@ -66,6 +44,28 @@
    "line": 73.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35885588,
+   "p1": "Patryk Jendrzejewski",
+   "p2": "Jakub Glanowski",
+   "p1_norm": "patryk jendrzejewski",
+   "p2_norm": "jakub glanowski",
+   "open_date": "2026-07-30T21:50:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35885591,
+   "p1": "Jaroslaw Rolak",
+   "p2": "Adrian Eliasz",
+   "p1_norm": "jaroslaw rolak",
+   "p2_norm": "adrian eliasz",
+   "open_date": "2026-07-30T21:55:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
