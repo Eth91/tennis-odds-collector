@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T10:30:56Z",
+ "captured_at": "2026-07-30T10:36:37Z",
  "matches": [
   {
    "event_id": 35882931,
@@ -8,9 +8,9 @@
    "p1_norm": "lukasz oracz",
    "p2_norm": "waldemar glanowski",
    "open_date": "2026-07-30T10:20:00.000Z",
-   "line": 83.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 86.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35882950,
@@ -19,7 +19,7 @@
    "p1_norm": "marcin jadczyk",
    "p2_norm": "jan zandecki",
    "open_date": "2026-07-30T10:25:00.000Z",
-   "line": 81.5,
+   "line": 97.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -30,9 +30,9 @@
    "p1_norm": "kacper petas",
    "p2_norm": "karol wisniewski",
    "open_date": "2026-07-30T10:30:00.000Z",
-   "line": 69.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 71.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882977,
@@ -41,9 +41,9 @@
    "p1_norm": "radoslaw malinowski",
    "p2_norm": "kamil klocek",
    "open_date": "2026-07-30T10:35:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882978,
@@ -52,9 +52,9 @@
    "p1_norm": "rafal gajda",
    "p2_norm": "michal durda",
    "open_date": "2026-07-30T10:35:00.000Z",
-   "line": 73.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 70.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882986,
@@ -63,7 +63,7 @@
    "p1_norm": "jerzy pelka",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-07-30T10:40:00.000Z",
-   "line": 79.5,
+   "line": 78.5,
    "over_odds": -112,
    "under_odds": -118
   },
@@ -88,6 +88,28 @@
    "line": 76.5,
    "over_odds": -120,
    "under_odds": -110
+  },
+  {
+   "event_id": 35883324,
+   "p1": "Blazej Warpas",
+   "p2": "Dominik Solilo",
+   "p1_norm": "blazej warpas",
+   "p2_norm": "dominik solilo",
+   "open_date": "2026-07-30T11:00:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35883325,
+   "p1": "Oliwier Sokolowski",
+   "p2": "Oliver Vincenec",
+   "p1_norm": "oliwier sokolowski",
+   "p2_norm": "oliver vincenec",
+   "open_date": "2026-07-30T11:00:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
