@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T11:27:41Z",
+ "captured_at": "2026-07-30T11:34:19Z",
  "matches": [
-  {
-   "event_id": 35883329,
-   "p1": "Piotr Gumulinski",
-   "p2": "Oskar Jadach",
-   "p1_norm": "piotr gumulinski",
-   "p2_norm": "oskar jadach",
-   "open_date": "2026-07-30T11:05:00.000Z",
-   "line": 89.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35883357,
    "p1": "Grzegorz Poliniewicz",
@@ -19,7 +8,18 @@
    "p1_norm": "grzegorz poliniewicz",
    "p2_norm": "karol wisniewski",
    "open_date": "2026-07-30T11:20:00.000Z",
-   "line": 77.5,
+   "line": 73.5,
+   "over_odds": -115,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35883358,
+   "p1": "Milosz Piecowski",
+   "p2": "Kamil Klocek",
+   "p1_norm": "milosz piecowski",
+   "p2_norm": "kamil klocek",
+   "open_date": "2026-07-30T11:25:00.000Z",
+   "line": 74.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,9 +30,9 @@
    "p1_norm": "jakub nowak",
    "p2_norm": "michal durda",
    "open_date": "2026-07-30T11:25:00.000Z",
-   "line": 73.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 52.5,
+   "over_odds": 100,
+   "under_odds": -140
   },
   {
    "event_id": 35883373,
@@ -41,9 +41,9 @@
    "p1_norm": "waldemar glanowski",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-07-30T11:30:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 71.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35883436,
