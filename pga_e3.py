@@ -52,6 +52,12 @@ BLEND_W = 0.40          # MEASURED 2026-07-30. We bet the BLEND of market and mo
                         # historical top-N golf prices exist — h2h returns 422), so a matched price
                         # would score better and 0.474 is an UPPER bound. Set to 1.0 to bet the raw
                         # model again, which the audit showed is not defensible.
+VIG_MIN = 1.01          # implied overround = inv / N_eff, now that both cover the SAME runners.
+VIG_MAX = 1.75          # MEASURED across all six live top-N products: 1.209-1.373. Below 1.0 the
+                        # book would be paying out more than it takes, which is a data error, not a
+                        # gift. Above 1.75 the pool is not one N-winner market — duplicated or merged
+                        # pools land at 2.4x+. Replaces the old inv-vs-3*N_eff net, which could not
+                        # mean anything while N_eff and inv were counted over different populations.
 TN_RATIO_MIN = 1.15     # MEASURED 2026-07-30. Bucketing 986 runners by (model/market) and grading
 TN_RATIO_MAX = 2.0      # on top-20 (162 positives): inside 2x the model is accurate (1.06-1.10x
                         # realised), beyond 2x it over-predicts by 2.08x (n=134) and 2.48x (n=192).
@@ -253,27 +259,29 @@ def main():
         # expected qualifier count — these products pay 22-26 players, not 20, and devigging
         # against 20 is exactly what inflated the edge before.
         is_ties = "TIE" in str(mt).upper()
-        if is_ties:
-            tkey = {1: "win_ties", 5: "top5_ties", 10: "top10_ties", 20: "top20_ties"}[N]
-            if not any(tkey in (v or {}) for v in sim.values()):
-                print(f"  skip {mt}: sim has no {tkey}")
-                continue
-            N_eff = sum((v or {}).get(tkey, 0.0) for v in sim.values())
-            if N_eff <= 0:
-                continue
-            print(f"  {mt}: ties-inclusive -> pricing on {tkey}, expected qualifiers "
-                  f"{N_eff:.1f} (nominal {N})")
-        else:
-            N_eff = float(N)
-        inv = sum(1 / od for _, od in rr)
-        if inv > N_eff * 3 or inv < N_eff * 0.4:
-            # the pool does not resemble an N-winner market (duplicates, or several events
-            # merged). Pricing it would fabricate edges, so skip and say so.
-            print(f"  skip {mt}: pool implies {inv:.1f} qualifiers, expected ~{N_eff:.1f} "
-                      f"({len(rr)} runners)")
+        key = ({1: "win_ties", 5: "top5_ties", 10: "top10_ties", 20: "top20_ties"}
+               if is_ties else {1: "win", 5: "top5", 10: "top10", 20: "top20"})[N]
+        if not any(key in (v or {}) for v in sim.values()):
+            print(f"  skip {mt}: sim has no {key}")
             continue
-        key = ({1: "win_ties", 5: "top5_ties", 10: "top10_ties", 20: "top20_ties"}[N]
-               if is_ties else {1: "win", 5: "top5", 10: "top10", 20: "top20"}[N])
+        # NORMALISER OVER THE PRICED SUBSET (2026-07-30). `inv` only ever covered the runners the
+        # book prices, so N_eff must too. Normalising 102 priced runners — who hold 17.07 of the 20
+        # top-20 slots — as if they held all 20 inflated every fair by ~17%, which DEFLATED every
+        # ours/fair ratio by ~15% and made the ratio gate read low on the market carrying most of
+        # the board. Conservative for the edge, permissive for the safety gate; the gate matters.
+        N_eff = sum((sim.get(run) or sim.get(RU.norm(run)) or {}).get(key, 0.0)
+                    for run, _od in rr)
+        if N_eff <= 0:
+            continue
+        inv = sum(1 / od for _, od in rr)
+        _vig = inv / N_eff
+        if not (VIG_MIN <= _vig <= VIG_MAX):
+            # inv/N_eff is now a like-for-like overround, so an implausible value means the pool is
+            # not one N-winner market (duplicated, merged, or partially collected).
+            print(f"  skip {mt}: implied vig {_vig:.3f} outside [{VIG_MIN}, {VIG_MAX}] "
+                  f"({len(rr)} priced, N_eff {N_eff:.2f})")
+            continue
+        print(f"  {mt}: {len(rr)} priced, N_eff {N_eff:.2f} (nominal {N}), implied vig {_vig:.3f}")
         for run, od in rr:
             fair = (1 / od) * N_eff / inv
             ours = (sim.get(run) or sim.get(RU.norm(run)) or {}).get(key)
