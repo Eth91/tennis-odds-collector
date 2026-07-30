@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T09:34:25Z",
+ "captured_at": "2026-07-30T09:38:26Z",
  "matches": [
   {
    "event_id": 35882839,
@@ -8,8 +8,8 @@
    "p1_norm": "artur grela",
    "p2_norm": "karol strowski",
    "open_date": "2026-07-30T09:20:00.000Z",
-   "line": 92.5,
-   "over_odds": -120,
+   "line": 95.5,
+   "over_odds": -115,
    "under_odds": -115
   },
   {
@@ -19,9 +19,9 @@
    "p1_norm": "jakub nowak",
    "p2_norm": "oliver vincenec",
    "open_date": "2026-07-30T09:25:00.000Z",
-   "line": 81.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 88.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882846,
@@ -30,9 +30,9 @@
    "p1_norm": "piotr gumulinski",
    "p2_norm": "waldemar glanowski",
    "open_date": "2026-07-30T09:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 84.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882847,
@@ -41,9 +41,9 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "adrian burkacki",
    "open_date": "2026-07-30T09:30:00.000Z",
-   "line": 72.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 71.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35882855,
@@ -52,9 +52,9 @@
    "p1_norm": "milosz piecowski",
    "p2_norm": "dominik solilo",
    "open_date": "2026-07-30T09:35:00.000Z",
-   "line": 72.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35882895,
@@ -118,9 +118,9 @@
    "p1_norm": "blazej warpas",
    "p2_norm": "radoslaw malinowski",
    "open_date": "2026-07-30T09:55:00.000Z",
-   "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35882910,
@@ -129,7 +129,18 @@
    "p1_norm": "szymon kolasa",
    "p2_norm": "artur grela",
    "open_date": "2026-07-30T10:00:00.000Z",
-   "line": 79.5,
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35882918,
+   "p1": "Jakub Zochniak",
+   "p2": "Grzegorz Poliniewicz",
+   "p1_norm": "jakub zochniak",
+   "p2_norm": "grzegorz poliniewicz",
+   "open_date": "2026-07-30T10:05:00.000Z",
+   "line": 75.5,
    "over_odds": -118,
    "under_odds": -112
   }
