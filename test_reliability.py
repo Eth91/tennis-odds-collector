@@ -22,14 +22,14 @@ import pga_ruler as RU
 
 K_TARGET = 4                      # P(>= 4 birdies), near the typical posted line
 con = sqlite3.connect(B.DB)
+# no date subquery: it was a correlated LIKE over 42k rows (O(n*m)) and the value was never
+# used — tid embeds the season (R2024/R2025/R2026) so sorting on (tid, rnd) is chronological.
 rows = con.execute(
-    "SELECT br.player, br.tid, br.rnd, br.p3h, br.p3b, br.p4h, br.p4b, br.p5h, br.p5b, "
-    "       (SELECT MIN(date) FROM rounds r WHERE LOWER(r.event) LIKE '%'||LOWER(SUBSTR(br.tname,1,12))||'%') d "
-    "FROM birdie_rounds br").fetchall()
+    "SELECT player, tid, rnd, p3h, p3b, p4h, p4b, p5h, p5b FROM birdie_rounds").fetchall()
 con.close()
 
 by_pl = defaultdict(list)
-for pl, tid, rnd, a3, b3, a4, b4, a5, b5 in ((r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8]) for r in rows):
+for pl, tid, rnd, a3, b3, a4, b4, a5, b5 in rows:
     by_pl[RU.norm(pl)].append((str(tid), rnd, a3 or 0, b3 or 0, a4 or 0, b4 or 0, a5 or 0, b5 or 0))
 
 # global per-par field rates, for shrinkage
