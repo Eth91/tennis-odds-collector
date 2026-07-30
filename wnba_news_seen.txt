@@ -279,6 +279,7 @@ rw|642|Not traveling with team
 rw|642|Still out Thursday
 rw|647|Plays well off bench
 rw|661|Stuck in backup role
+rw|663|Starting Wednesday
 rw|678|Closing in on return
 rw|678|Hopeful for season debut Thursday
 rw|678|Officially listed as questionable
