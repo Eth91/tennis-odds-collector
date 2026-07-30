@@ -9,9 +9,12 @@ on judgment calls):
   round-N matchbet   graded when both have that round's score.
   ties -> push (pnl 0).
 
-TRIPWIRE (PGA_PLAN law 7, defined BEFORE launch): after 25 graded, if the win rate is
-below 52% of the implied-breakeven pace, print the BENCH alarm loudly. No auto-ntfy —
-the nightly digest and the board carry it; this stream never had ping rights to lose.
+TRIPWIRE (PGA_PLAN law 7, defined BEFORE launch): after 25 graded, bench the stream when
+break-even can be STATISTICALLY RULED OUT — the observed win rate more than 2 standard
+errors below the implied breakeven. (v1 said "below 52% of the breakeven pace" but the code
+fired at 1.04x breakeven, a 4x discrepancy, and that threshold sits ABOVE breakeven so it
+benched an exactly-break-even stream 58% of the time at n=25 and 85% at n=600.) No
+auto-ntfy — the nightly digest and the board carry it; this stream never had ping rights.
 """
 import datetime as dt
 import re
@@ -84,9 +87,22 @@ def main():
     n = w + l
     if n >= 25:
         be = 1 / avg_odds
-        if (w / n) < 0.52 * be * 2:                       # <52% of breakeven pace
+        # PROPER ONE-SIDED TEST (2026-07-30). The old rule fired below 0.52*be*2 = 1.04*be —
+        # a threshold ABOVE breakeven, so it was not testing "is this broken" but "is this
+        # comfortably profitable", and it benched a stream that was EXACTLY break-even 58% of
+        # the time at n=25 rising to 85% at n=600. It also contradicted its own docstring
+        # ("52% of the breakeven pace" = 0.52*be), a 4x discrepancy. Now: bench only when the
+        # observed rate is more than 2 standard errors BELOW breakeven, i.e. break-even can
+        # be statistically ruled out. That holds the false-bench rate near 2% at every n.
+        se = (be * (1 - be) / n) ** 0.5
+        z = (w / n - be) / se if se > 0 else 0.0
+        if z <= -2.0:
             print(f"🚨 E1 TRIPWIRE: {w}-{l} ({100*w/n:.0f}%) vs breakeven {100*be:.0f}% "
-                  f"after {n} graded — BENCH this stream (PGA_PLAN law 7)")
+                  f"after {n} graded, z={z:+.2f} — break-even RULED OUT, BENCH this stream "
+                  f"(PGA_PLAN law 7)")
+        elif w / n < be:
+            print(f"   E1 below breakeven ({100*w/n:.0f}% vs {100*be:.0f}%, z={z:+.2f}) but "
+                  f"not yet distinguishable from noise at n={n} — keep collecting")
     # PRESERVE THE E3 BLOCK (2026-07-29): _write_board rebuilds pga_board.json from
     # scratch, and grading runs AFTER pga_e3 in the cron — so it was wiping the E3
     # preview every pass. The board showed 0 rows while e3 had just produced 15.

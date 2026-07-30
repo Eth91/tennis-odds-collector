@@ -599,6 +599,15 @@ def g2_gate(verbose=True):
             verdict = "PASS" if gap <= 2.0 else "FAIL"
             print(f"G2 on {n_used} real FD closes: book logloss {lb:.4f}, ruler {lr:.4f} "
                   f"(gap {gap:+.1f}pts) -> {verdict}")
+            # POWER-CHECKED 2026-07-30 against real out-of-sample matchup probabilities:
+            # this gate fails a book 4+ pts sharper 100% of the time even at n=15, and passes
+            # a book within 1 pt 100% of the time. n=15 is adequate; it was NOT a smoke test.
+            # But a PASS means "within 2 pts of the book", which is equally consistent with
+            # being 1.9 pts WORSE — and 1.9 pts worse, before a ~4.5% vig, loses money. G2 is
+            # a SCREEN AGAINST A BROKEN MODEL, never evidence of an edge.
+            print("     NOTE: PASS = 'not materially worse than the book'. It is NOT evidence "
+                  "of an edge and is NOT permission to bet — that needs realized ROI/CLV on "
+                  "settled flagged bets, which is a separate gate and a much larger n.")
             return verdict == "PASS", n_used
     return None, n_used
 

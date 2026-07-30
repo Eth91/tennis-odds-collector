@@ -326,10 +326,16 @@ def tid_for_name(name, cache=HERE / "pga_tid_cache.json"):
         for t in grp.get("tournaments") or []:
             cands.append((t.get("id"), " ".join(str(t.get("tournamentName") or "").lower().split())))
     toks = [w for w in key.replace("pga", "").split() if len(w) > 3 and not w.isdigit()]
+    # REQUIRE A MAJORITY OF TOKENS (2026-07-30). A single hit used to be enough, so an event
+    # missing from the schedule would silently resolve to any tournament sharing one word —
+    # and this tid drives the par mix, the course factor AND the wave tee sheet. Same
+    # contamination class as the course-name and LPGA bugs. Refusing beats guessing: every
+    # caller already handles a None tid by falling back to a documented default.
+    need = max(1, (len(toks) + 1) // 2) if toks else 0
     best = None
     for tid, tn in cands:
         hits = sum(1 for w in toks if w in tn)
-        if hits and (best is None or hits > best[0]):
+        if hits >= need and (best is None or hits > best[0]):
             best = (hits, tid)
     tid = best[1] if best else None
     if tid:
