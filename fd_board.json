@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T11:50:48Z",
+ "captured_at": "2026-07-30T12:05:37Z",
  "matches": [
-  {
-   "event_id": 35883436,
-   "p1": "Szymon Kolasa",
-   "p2": "Krystian Kolodziej",
-   "p1_norm": "szymon kolasa",
-   "p2_norm": "krystian kolodziej",
-   "open_date": "2026-07-30T11:40:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35883438,
    "p1": "Jakub Zochniak",
@@ -19,9 +8,9 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-07-30T11:45:00.000Z",
-   "line": 82.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 94.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35883450,
@@ -30,20 +19,9 @@
    "p1_norm": "wojciech gluszek",
    "p2_norm": "blazej warpas",
    "open_date": "2026-07-30T11:50:00.000Z",
-   "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
-  },
-  {
-   "event_id": 35883451,
-   "p1": "Pawel Kurek",
-   "p2": "Oliwier Sokolowski",
-   "p1_norm": "pawel kurek",
-   "p2_norm": "oliwier sokolowski",
-   "open_date": "2026-07-30T11:50:00.000Z",
    "line": 76.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35883456,
@@ -52,9 +30,9 @@
    "p1_norm": "lukasz oracz",
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-30T11:55:00.000Z",
-   "line": 77.5,
+   "line": 86.5,
    "over_odds": -120,
-   "under_odds": -110
+   "under_odds": -115
   },
   {
    "event_id": 35883463,
@@ -99,6 +77,28 @@
    "line": 75.5,
    "over_odds": -120,
    "under_odds": -110
+  },
+  {
+   "event_id": 35883481,
+   "p1": "Jerzy Pelka",
+   "p2": "Piotr Gumulinski",
+   "p1_norm": "jerzy pelka",
+   "p2_norm": "piotr gumulinski",
+   "open_date": "2026-07-30T12:20:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35883491,
+   "p1": "Artur Grela",
+   "p2": "Krystian Kolodziej",
+   "p1_norm": "artur grela",
+   "p2_norm": "krystian kolodziej",
+   "open_date": "2026-07-30T12:30:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
