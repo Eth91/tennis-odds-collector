@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T02:26:03Z",
+ "captured_at": "2026-07-30T02:34:53Z",
  "matches": [
-  {
-   "event_id": 35882013,
-   "p1": "Michal Machelski",
-   "p2": "Kazimierz Rybak",
-   "p1_norm": "michal machelski",
-   "p2_norm": "kazimierz rybak",
-   "open_date": "2026-07-30T02:10:00.000Z",
-   "line": 88.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
   {
    "event_id": 35882018,
    "p1": "Henryk Tkaczyk",
@@ -19,20 +8,9 @@
    "p1_norm": "henryk tkaczyk",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-07-30T02:20:00.000Z",
-   "line": 70.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35882019,
-   "p1": "Rafal Niemiec",
-   "p2": "Marian Lebek",
-   "p1_norm": "rafal niemiec",
-   "p2_norm": "marian lebek",
-   "open_date": "2026-07-30T02:20:00.000Z",
-   "line": 73.5,
-   "over_odds": -115,
-   "under_odds": -115
+   "line": 98.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35882026,
@@ -42,8 +20,8 @@
    "p2_norm": "andriej fomin",
    "open_date": "2026-07-30T02:35:00.000Z",
    "line": 73.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -120,
+   "under_odds": -110
   },
   {
    "event_id": 35882041,
@@ -66,6 +44,50 @@
    "line": 72.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35882052,
+   "p1": "Milosz Piecowski",
+   "p2": "Bartlomiej Wisniewski",
+   "p1_norm": "milosz piecowski",
+   "p2_norm": "bartlomiej wisniewski",
+   "open_date": "2026-07-30T03:00:00.000Z",
+   "line": 81.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35882053,
+   "p1": "Rafal Gajda",
+   "p2": "Michal Durda",
+   "p1_norm": "rafal gajda",
+   "p2_norm": "michal durda",
+   "open_date": "2026-07-30T03:00:00.000Z",
+   "line": 73.5,
+   "over_odds": -120,
+   "under_odds": -110
+  },
+  {
+   "event_id": 35882054,
+   "p1": "Kacper Petas",
+   "p2": "Jan Zandecki",
+   "p1_norm": "kacper petas",
+   "p2_norm": "jan zandecki",
+   "open_date": "2026-07-30T03:00:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35882055,
+   "p1": "Stapor Rafal",
+   "p2": "Adam Linek",
+   "p1_norm": "stapor rafal",
+   "p2_norm": "adam linek",
+   "open_date": "2026-07-30T03:00:00.000Z",
+   "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
