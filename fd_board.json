@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T21:39:09Z",
+ "captured_at": "2026-07-30T21:44:35Z",
  "matches": [
   {
    "event_id": 35885577,
@@ -8,9 +8,9 @@
    "p1_norm": "dawid kotwica",
    "p2_norm": "mateusz trela",
    "open_date": "2026-07-30T21:20:00.000Z",
-   "line": 89.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 94.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35885590,
@@ -19,9 +19,9 @@
    "p1_norm": "jakub cyndera",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-30T21:25:00.000Z",
-   "line": 91.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 106.5,
+   "over_odds": 115,
+   "under_odds": -160
   },
   {
    "event_id": 35885570,
@@ -30,9 +30,20 @@
    "p1_norm": "marian lebek",
    "p2_norm": "pawel slosarczyk",
    "open_date": "2026-07-30T21:35:00.000Z",
-   "line": 75.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35885593,
+   "p1": "Piotr Gesiarz",
+   "p2": "Jerzy Michalik",
+   "p1_norm": "piotr gesiarz",
+   "p2_norm": "jerzy michalik",
+   "open_date": "2026-07-30T21:35:00.000Z",
+   "line": 56.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35885588,
