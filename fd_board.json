@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-30T23:23:43Z",
+ "captured_at": "2026-07-30T23:31:34Z",
  "matches": [
-  {
-   "event_id": 35885670,
-   "p1": "Kazimierz Rybak",
-   "p2": "Adam Staniczek",
-   "p1_norm": "kazimierz rybak",
-   "p2_norm": "adam staniczek",
-   "open_date": "2026-07-30T23:05:00.000Z",
-   "line": 83.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
-  {
-   "event_id": 35885682,
-   "p1": "Mariusz Baron",
-   "p2": "Pawel Slosarczyk",
-   "p1_norm": "mariusz baron",
-   "p2_norm": "pawel slosarczyk",
-   "open_date": "2026-07-30T23:10:00.000Z",
-   "line": 79.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35885689,
    "p1": "Piotr Gesiarz",
@@ -30,7 +8,7 @@
    "p1_norm": "piotr gesiarz",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-30T23:20:00.000Z",
-   "line": 76.5,
+   "line": 85.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -41,9 +19,9 @@
    "p1_norm": "patryk jendrzejewski",
    "p2_norm": "mateusz rutkowski",
    "open_date": "2026-07-30T23:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 67.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35885694,
@@ -52,9 +30,9 @@
    "p1_norm": "aleksander barton",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-07-30T23:30:00.000Z",
-   "line": 65.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 66.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35885697,
@@ -97,6 +75,17 @@
    "p2_norm": "adrian eliasz",
    "open_date": "2026-07-30T23:45:00.000Z",
    "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35885704,
+   "p1": "Jakub Cyndera",
+   "p2": "Adam Staniczek",
+   "p1_norm": "jakub cyndera",
+   "p2_norm": "adam staniczek",
+   "open_date": "2026-07-30T23:55:00.000Z",
+   "line": 75.5,
    "over_odds": -118,
    "under_odds": -112
   }
