@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T21:55:12Z",
+ "captured_at": "2026-07-30T22:02:49Z",
  "matches": [
   {
    "event_id": 35885588,
@@ -8,20 +8,9 @@
    "p1_norm": "patryk jendrzejewski",
    "p2_norm": "jakub glanowski",
    "open_date": "2026-07-30T21:50:00.000Z",
-   "line": 87.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35885591,
-   "p1": "Jaroslaw Rolak",
-   "p2": "Adrian Eliasz",
-   "p1_norm": "jaroslaw rolak",
-   "p2_norm": "adrian eliasz",
-   "open_date": "2026-07-30T21:55:00.000Z",
-   "line": 77.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 89.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35885613,
@@ -30,20 +19,20 @@
    "p1_norm": "michal guzik",
    "p2_norm": "marian brunner",
    "open_date": "2026-07-30T21:55:00.000Z",
-   "line": 74.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 63.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
-   "event_id": 35885594,
-   "p1": "Mariusz Baron",
-   "p2": "Kacper Adamus",
-   "p1_norm": "mariusz baron",
-   "p2_norm": "kacper adamus",
+   "event_id": 35885627,
+   "p1": "Adam Staniczek",
+   "p2": "Zbigniew Nocun",
+   "p1_norm": "adam staniczek",
+   "p2_norm": "zbigniew nocun",
    "open_date": "2026-07-30T22:00:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 71.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35885611,
@@ -66,6 +55,17 @@
    "line": 68.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35885624,
+   "p1": "Jakub Pruszkowski",
+   "p2": "Marian Lebek",
+   "p1_norm": "jakub pruszkowski",
+   "p2_norm": "marian lebek",
+   "open_date": "2026-07-30T22:25:00.000Z",
+   "line": 78.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
