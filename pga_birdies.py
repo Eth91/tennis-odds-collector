@@ -28,6 +28,17 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 DB = HERE / "pga_model.sqlite"
 KEY = "da2-gsrx5bibzbb4njvhl7t37wqyl4"
+DISPERSION = 0.552              # MEASURED 2026-07-30 out of sample. The model separated
+                                # players 1.81x more than reality: reliability slope of
+                                # realized on predicted = 0.552 over 19,942 leak-free
+                                # player-rounds (early-half rates -> late-half rounds), and
+                                # independently our sd of P(over) was 1.81x the devigged
+                                # market's with r=0.664. 1/0.552 = 1.81 — the two agree, so
+                                # the spread was noise and the market's was right. Applied to
+                                # the per-par rate DEVIATION from the field, because K_H
+                                # shrinks the rate under a binomial-noise assumption while
+                                # birdie counts are over-dispersed (correlated holes) AND
+                                # P(>=k) over 18 holes amplifies small rate gaps.
 K_H = 106.0                     # MEASURED 2026-07-29 (was 60.0 flat). Per-par, because
                                 # birdie skill separates players very differently by par:
 K_H_PAR = {3: 593.0, 4: 106.0, 5: 162.0}
@@ -236,9 +247,16 @@ def rates(course_factor=1.0, wind_kmh=None, half_life_d=120.0):
             pass
     out = {}
     for pl, agg in per.items():
-        out[pl] = {par: min(((b + K_H_PAR.get(par, K_H) * frate[par])
-                             / (h + K_H_PAR.get(par, K_H))) * ctx, 0.95)
-                   for par, (h, b) in agg.items()}
+        row = {}
+        for par, (h, b) in agg.items():
+            kh = K_H_PAR.get(par, K_H)
+            r_ = (b + kh * frate[par]) / (h + kh)
+            # DISPERSION CORRECTION: pull the deviation from the field toward the field by the
+            # measured out-of-sample factor. Without this the model separated players 1.81x
+            # more than reality and every flagged birdie edge was a tail artefact.
+            r_ = frate[par] + DISPERSION * (r_ - frate[par])
+            row[par] = min(r_ * ctx, 0.95)
+        out[pl] = row
     return out, {par: min(v * ctx, 0.95) for par, v in frate.items()}
 
 
