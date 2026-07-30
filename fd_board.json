@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T21:50:08Z",
+ "captured_at": "2026-07-30T21:55:12Z",
  "matches": [
-  {
-   "event_id": 35885570,
-   "p1": "Marian Lebek",
-   "p2": "Pawel Slosarczyk",
-   "p1_norm": "marian lebek",
-   "p2_norm": "pawel slosarczyk",
-   "open_date": "2026-07-30T21:35:00.000Z",
-   "line": 69.5,
-   "over_odds": -130,
-   "under_odds": -105
-  },
   {
    "event_id": 35885588,
    "p1": "Patryk Jendrzejewski",
@@ -19,9 +8,9 @@
    "p1_norm": "patryk jendrzejewski",
    "p2_norm": "jakub glanowski",
    "open_date": "2026-07-30T21:50:00.000Z",
-   "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 87.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885591,
@@ -31,8 +20,19 @@
    "p2_norm": "adrian eliasz",
    "open_date": "2026-07-30T21:55:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": null,
+   "under_odds": null
+  },
+  {
+   "event_id": 35885613,
+   "p1": "Michal Guzik",
+   "p2": "Marian Brunner",
+   "p1_norm": "michal guzik",
+   "p2_norm": "marian brunner",
+   "open_date": "2026-07-30T21:55:00.000Z",
+   "line": 74.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35885594,
@@ -52,7 +52,18 @@
    "p1_norm": "mateusz trela",
    "p2_norm": "arkadiusz mugowski",
    "open_date": "2026-07-30T22:15:00.000Z",
-   "line": 81.5,
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35885615,
+   "p1": "Jakub Cyndera",
+   "p2": "Dariusz Molenda",
+   "p1_norm": "jakub cyndera",
+   "p2_norm": "dariusz molenda",
+   "open_date": "2026-07-30T22:20:00.000Z",
+   "line": 68.5,
    "over_odds": -112,
    "under_odds": -118
   }
