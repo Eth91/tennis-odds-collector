@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T10:56:28Z",
+ "captured_at": "2026-07-30T11:01:29Z",
  "matches": [
-  {
-   "event_id": 35882986,
-   "p1": "Jerzy Pelka",
-   "p2": "Piotr Przewlocki",
-   "p1_norm": "jerzy pelka",
-   "p2_norm": "piotr przewlocki",
-   "open_date": "2026-07-30T10:40:00.000Z",
-   "line": 101.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35883314,
    "p1": "Krzysztof Wloczko",
@@ -19,7 +8,7 @@
    "p1_norm": "krzysztof wloczko",
    "p2_norm": "josef braun",
    "open_date": "2026-07-30T10:55:00.000Z",
-   "line": 76.5,
+   "line": 80.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -30,9 +19,9 @@
    "p1_norm": "blazej warpas",
    "p2_norm": "dominik solilo",
    "open_date": "2026-07-30T11:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35883325,
@@ -41,9 +30,9 @@
    "p1_norm": "oliwier sokolowski",
    "p2_norm": "oliver vincenec",
    "open_date": "2026-07-30T11:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35883329,
@@ -75,6 +64,28 @@
    "p2_norm": "karol wisniewski",
    "open_date": "2026-07-30T11:20:00.000Z",
    "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35883358,
+   "p1": "Milosz Piecowski",
+   "p2": "Kamil Klocek",
+   "p1_norm": "milosz piecowski",
+   "p2_norm": "kamil klocek",
+   "open_date": "2026-07-30T11:25:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35883359,
+   "p1": "Jakub Nowak",
+   "p2": "Michal Durda",
+   "p1_norm": "jakub nowak",
+   "p2_norm": "michal durda",
+   "open_date": "2026-07-30T11:25:00.000Z",
+   "line": 70.5,
    "over_odds": -118,
    "under_odds": -112
   }
