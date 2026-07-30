@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T08:37:40Z",
+ "captured_at": "2026-07-30T08:43:06Z",
  "matches": [
   {
    "event_id": 35882776,
@@ -8,9 +8,9 @@
    "p1_norm": "wojciech urban",
    "p2_norm": "adrian burkacki",
    "open_date": "2026-07-30T08:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 102.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35882777,
@@ -19,9 +19,9 @@
    "p1_norm": "kacper petas",
    "p2_norm": "artur grela",
    "open_date": "2026-07-30T08:30:00.000Z",
-   "line": 85.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 92.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35882778,
@@ -30,9 +30,9 @@
    "p1_norm": "stapor rafal",
    "p2_norm": "kamil rudomina",
    "open_date": "2026-07-30T08:30:00.000Z",
-   "line": 58.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 86.5,
+   "over_odds": -145,
+   "under_odds": 105
   },
   {
    "event_id": 35882782,
@@ -41,9 +41,9 @@
    "p1_norm": "rafal gajda",
    "p2_norm": "oliver vincenec",
    "open_date": "2026-07-30T08:35:00.000Z",
-   "line": 78.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 87.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35882783,
@@ -52,7 +52,7 @@
    "p1_norm": "milosz piecowski",
    "p2_norm": "radoslaw malinowski",
    "open_date": "2026-07-30T08:35:00.000Z",
-   "line": 79.5,
+   "line": 61.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -130,6 +130,17 @@
    "p2_norm": "jerzy pelka",
    "open_date": "2026-07-30T09:05:00.000Z",
    "line": 78.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35882815,
+   "p1": "Rafal Niemiec",
+   "p2": "Jakub Kaczmarek",
+   "p1_norm": "rafal niemiec",
+   "p2_norm": "jakub kaczmarek",
+   "open_date": "2026-07-30T09:10:00.000Z",
+   "line": 73.5,
    "over_odds": -116,
    "under_odds": -116
   }
