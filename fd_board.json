@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T23:19:35Z",
+ "captured_at": "2026-07-30T23:23:43Z",
  "matches": [
   {
    "event_id": 35885670,
@@ -8,9 +8,9 @@
    "p1_norm": "kazimierz rybak",
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-30T23:05:00.000Z",
-   "line": 63.5,
-   "over_odds": -145,
-   "under_odds": 105
+   "line": 83.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35885682,
@@ -19,9 +19,9 @@
    "p1_norm": "mariusz baron",
    "p2_norm": "pawel slosarczyk",
    "open_date": "2026-07-30T23:10:00.000Z",
-   "line": 89.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 79.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35885689,
@@ -30,9 +30,9 @@
    "p1_norm": "piotr gesiarz",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-30T23:20:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35885690,
@@ -41,20 +41,9 @@
    "p1_norm": "patryk jendrzejewski",
    "p2_norm": "mateusz rutkowski",
    "open_date": "2026-07-30T23:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35885691,
-   "p1": "Jaroslaw Rolak",
-   "p2": "Mateusz Trela",
-   "p1_norm": "jaroslaw rolak",
-   "p2_norm": "mateusz trela",
-   "open_date": "2026-07-30T23:20:00.000Z",
-   "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35885694,
@@ -74,9 +63,9 @@
    "p1_norm": "marian lebek",
    "p2_norm": "marek tkocz",
    "open_date": "2026-07-30T23:35:00.000Z",
-   "line": 79.5,
+   "line": 83.5,
    "over_odds": -118,
-   "under_odds": -116
+   "under_odds": -112
   },
   {
    "event_id": 35885701,
