@@ -80,14 +80,15 @@
       "w": -0.005152079885619044
     }
   },
-  "git_sha": "4bff1421397536d12b3f3cc55d3045506527b46f",
+  "git_sha": "4344255f84d510e4ed663c354b2bb307e904bfdc",
   "purpose": "frozen for the 2026 Rocket Classic G2 read (event unplayed at freeze time)",
   "ruler": {
     "HALF_LIFE_D": 270.0,
     "K_SHRINK": 11.0,
     "MIN_ROUNDS": 20,
     "RHO": 0.05,
-    "SIG_SHRINK": 78.0
+    "SIG_SHRINK": 78.0,
+    "SPREAD": 1.3
   },
   "thresholds": {
     "M_EDGE": 0.06,

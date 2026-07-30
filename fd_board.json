@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T05:37:39Z",
+ "captured_at": "2026-07-30T05:43:09Z",
  "matches": [
   {
    "event_id": 35882557,
@@ -8,9 +8,9 @@
    "p1_norm": "rafal niemiec",
    "p2_norm": "wojciech urban",
    "open_date": "2026-07-30T05:30:00.000Z",
-   "line": 73.5,
-   "over_odds": -115,
-   "under_odds": -115
+   "line": 79.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35882558,
@@ -19,20 +19,9 @@
    "p1_norm": "stapor rafal",
    "p2_norm": "michal minda",
    "open_date": "2026-07-30T05:35:00.000Z",
-   "line": 79.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35882570,
-   "p1": "Blazej Warpas",
-   "p2": "Bartlomiej Wisniewski",
-   "p1_norm": "blazej warpas",
-   "p2_norm": "bartlomiej wisniewski",
-   "open_date": "2026-07-30T05:40:00.000Z",
-   "line": 81.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 82.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35882571,
@@ -42,8 +31,19 @@
    "p2_norm": "josef braun",
    "open_date": "2026-07-30T05:40:00.000Z",
    "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35882570,
+   "p1": "Blazej Warpas",
+   "p2": "Bartlomiej Wisniewski",
+   "p1_norm": "blazej warpas",
+   "p2_norm": "bartlomiej wisniewski",
+   "open_date": "2026-07-30T05:45:00.000Z",
+   "line": 81.5,
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35882572,
@@ -51,10 +51,21 @@
    "p2": "Piotr Przewlocki",
    "p1_norm": "piotr gumulinski",
    "p2_norm": "piotr przewlocki",
-   "open_date": "2026-07-30T05:40:00.000Z",
+   "open_date": "2026-07-30T05:45:00.000Z",
    "line": 79.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35882587,
+   "p1": "Jakub Nowak",
+   "p2": "Michal Durda",
+   "p1_norm": "jakub nowak",
+   "p2_norm": "michal durda",
+   "open_date": "2026-07-30T05:45:00.000Z",
+   "line": 71.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35882578,
@@ -99,6 +110,17 @@
    "line": 78.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35882594,
+   "p1": "Szymon Kolasa",
+   "p2": "Artur Grela",
+   "p1_norm": "szymon kolasa",
+   "p2_norm": "artur grela",
+   "open_date": "2026-07-30T06:05:00.000Z",
+   "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
