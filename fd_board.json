@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T02:19:22Z",
+ "captured_at": "2026-07-30T02:26:03Z",
  "matches": [
   {
    "event_id": 35882013,
@@ -8,9 +8,9 @@
    "p1_norm": "michal machelski",
    "p2_norm": "kazimierz rybak",
    "open_date": "2026-07-30T02:10:00.000Z",
-   "line": 70.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 88.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35882018,
@@ -19,9 +19,9 @@
    "p1_norm": "henryk tkaczyk",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-07-30T02:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 70.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35882019,
@@ -30,9 +30,9 @@
    "p1_norm": "rafal niemiec",
    "p2_norm": "marian lebek",
    "open_date": "2026-07-30T02:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 73.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35882026,
@@ -42,8 +42,8 @@
    "p2_norm": "andriej fomin",
    "open_date": "2026-07-30T02:35:00.000Z",
    "line": 73.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35882041,
