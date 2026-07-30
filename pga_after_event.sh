@@ -63,6 +63,11 @@ PY
 echo
 echo "=== 2/3  grade settled flags ==="
 nice -n 8 python3 -u pga_grade.py 2>&1 | tail -12
+echo
+echo "--- E3 streams (birdies / matchups / top-N / cut) ---"
+# pga_grade.py only settles E1 matchbets: it requires a populated `opp`, and e3 writes
+# an empty string, so it silently skips every e3 row. This grades what e3 actually logs.
+nice -n 8 python3 -u pga_grade_e3.py 2>&1 | tail -12
 
 echo
 echo "=== 3/3  cumulative evidence report ==="
