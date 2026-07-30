@@ -1287,11 +1287,81 @@ def _feed_health_ping(tt_json):
             pass
 
 
+def _pga_market_of(row):
+    """(market heading, selection, line) for one board row — no model vocabulary.
+
+    Rows arrive from several internal streams with different shapes; a bettor should not have to
+    know that. Everything is normalised to: which market, who, and at what line.
+    """
+    market = str(row.get("market") or "")
+    runner = str(row.get("runner") or "").strip()
+    # INFER FROM THE MARKET STRING, not the stream tag. The board's `open` list is the paper
+    # ledger and carries every market type with NO stream field at all, so keying on stream put
+    # birdies, round scores and top-20 all under MATCHUPS.
+    stream = str(row.get("stream") or "")
+    if not stream:
+        up = market.upper()
+        stream = ("E3-birdies" if "BIRDIES" in up else
+                  "E3-rscore" if re.search(r"ROUND\s+\d\s+SCORE", up) else
+                  "E3-match" if "MATCHBET" in up else
+                  "E3-cut" if "CUT" in up else
+                  "E3-outright" if "OUTRIGHT" in up else
+                  ("E3-top" + (re.search(r"TOP_?(\d+)", up).group(1))
+                   if re.search(r"TOP_?(\d+)", up) else ""))
+
+    m = re.search(r"Round\s+(\d)", market)
+    rnd = m.group(1) if m else None
+
+    if "birdies" in stream:
+        mm = re.match(r"^(.*?)\s+(over|under)\s+([\d.]+)$", runner, re.I)
+        who, line = (mm.group(1), f"{mm.group(2).lower()} {mm.group(3)}") if mm else (runner, "")
+        return (f"ROUND {rnd} BIRDIES" if rnd else "BIRDIES"), who, line
+
+    if "rscore" in stream:
+        mm = re.match(r"^(.*?)\s+(over|under)\s+([\d.]+)$", runner, re.I)
+        who, line = (mm.group(1), f"{mm.group(2).lower()} {mm.group(3)}") if mm else (runner, "")
+        return (f"ROUND {rnd} SCORE" if rnd else "ROUND SCORE"), who, line
+
+    if "cut" in stream:
+        mm = re.match(r"^(.*?)\s+(make|miss)$", runner, re.I)
+        who = mm.group(1) if mm else runner
+        line = ("to make the cut" if (mm and mm.group(2).lower() == "make")
+                else "to miss the cut" if mm else "")
+        return "MAKE THE CUT", who, line
+
+    if "match" in stream:
+        opp = ""
+        mm = re.search(r"vs\.?\s+(.+)$", market)
+        if mm:
+            other = mm.group(1).strip()
+            opp = other if _norm_name(other) != _norm_name(runner) else ""
+            if not opp:
+                head = re.sub(r"^.*?Matchbet\s*(?:\([^)]*\))?\s*", "", market).split(" vs ")[0]
+                opp = head.strip()
+        span = "72 holes" if "72" in market else (f"round {rnd}" if rnd else "")
+        return "MATCHUPS", runner, (f"{span} vs {opp}".strip() if opp else span)
+
+    if "top" in stream:
+        n = re.search(r"top(\d+)", stream)
+        tie = " (incl. ties)" if "TIE" in market.upper() else ""
+        return (f"TOP {n.group(1)} FINISH{tie}".upper() if n else "TOP FINISH"), runner, ""
+
+    if "outright" in stream:
+        return "OUTRIGHT WINNER", runner, ""
+    return "OTHER", runner, ""
+
+
+def _norm_name(x):
+    return re.sub(r"[^a-z]", "", str(x or "").lower())
+
+
 def _pga_panel():
-    """⛳ PGA (2026-07-29, user): E1 wave/weather paper meter + opener-softness readout, in
-    the board's flat-card language. Fed by pga_board.json (baked by pga_e1/pga_grade on the
-    golf cron) — render-only here, same discipline as the TT panel. PAPER: no play here is
-    a bet recommendation until the meter clears the PGA_PLAN promotion bar."""
+    """⛳ PGA board — a plain bet card.
+
+    Market heading, then one line per play: who, what line, what price, which book. Model
+    diagnostics (edge, projected probability, wave shift, gate state) are deliberately absent;
+    they live in the logs and the evidence report. Render-only — fed by pga_board.json.
+    """
     f = HERE / "pga_board.json"
     if not f.exists():
         return ""
@@ -1302,44 +1372,56 @@ def _pga_panel():
     rec = d.get("record") or {}
     w, l, u = rec.get("w", 0), rec.get("l", 0), rec.get("units", 0.0)
     ucls = "pos" if u >= 0 else "neg"
+    armed = bool((d.get("e3") or {}).get("armed"))
+    status = "LIVE" if armed else "PAPER — tracking only, not live bets"
     lg = (f'<img class="glogo" src="logos/pga.png" alt="" loading="lazy" '
           f'onerror="this.style.display=\'none\'">'
           f'<img class="glogo" src="logos/fd.png" alt="" loading="lazy" '
           f'onerror="this.style.display=\'none\'">')
-    head = (f'<div class="sw-title">{lg}⛳ PGA · E1 wave meter '
-            f'<span>· {html.escape(d.get("event") or "")} · PAPER — not bets · '
+    head = (f'<div class="sw-title">{lg}⛳ PGA '
+            f'<span>· {html.escape(d.get("event") or "")} · {status} · '
             f'{w}-{l} · <b class="{ucls}">{u:+.2f}u</b></span></div>')
+
+    plays = []
+    # The `open` list is the PAPER LEDGER and already carries every market type. Pass its real
+    # market string straight through and let _pga_market_of infer — an earlier version stamped
+    # every one of these as a matchup and fabricated a "Matchbet X vs Y" string, which put
+    # birdies, round scores and top-20 finishes all under MATCHUPS.
+    for o in (d.get("open") or []):
+        plays.append({"runner": o.get("runner") or "",
+                      "market": o.get("market") or "",
+                      "odds": o.get("odds")})
+    plays += list((d.get("e3") or {}).get("rows") or [])
+
+    groups = {}
+    for r in plays:
+        if not r.get("odds"):
+            continue
+        mkt, who, line = _pga_market_of(r)
+        groups.setdefault(mkt, []).append((who, line, float(r["odds"])))
+
     body = ""
-    if d.get("note"):
-        body += f'<div class="swo">{html.escape(d["note"])}</div>'
-    for o in (d.get("open") or [])[:8]:
-        body += (f'<div class="swrow"><div class="swhd"><b>{html.escape(o.get("runner") or "")}</b>'
-                 f'<span class="swusg">over {html.escape(o.get("opp") or "")} · '
-                 f'{o.get("odds"):.2f} · wind {o.get("d_wind"):+.1f} km/h/rd</span></div></div>')
-    if not (d.get("open") or d.get("note")):
-        body += '<div class="swo">No wave edges flagged — the meter fires once tee times + a wind split line up.</div>'
-    # opener softness (E2 recon, live): golf_clv.py ranks markets by open->close drift
-    try:
-        clv = d.get("clv") or {}
-        rows = clv.get("markets") if isinstance(clv, dict) else None
-        if isinstance(rows, dict):
-            top = sorted(rows.items(), key=lambda kv: -abs(kv[1] if isinstance(kv[1], (int, float))
-                         else (kv[1].get("drift") or 0)))[:2]
-            if top:
-                lbl = " · ".join(f"{k[:26]}" for k, _ in top)
-                body += (f'<div class="swo">softest openers (Mon→close drift): {html.escape(lbl)}</div>')
-    except Exception:
-        pass
-    e3 = d.get("e3") or {}
-    if e3.get("rows"):
-        tag = ("E3 ruler — ARMED" if e3.get("armed")
-               else f"E3 ruler preview — pre-G2 (n={e3.get('g2_n', 0)}), NOT flagged")
-        body += f'<div class="swo"><b>{tag}</b></div>'
-        for r in e3["rows"][:6]:
-            body += (f'<div class="swrow"><div class="swhd"><b>{html.escape(r.get("runner") or "")}</b>'
-                     f'<span class="swusg">{html.escape((r.get("stream") or "").replace("E3-", ""))} · '
-                     f'{r.get("odds"):.2f} · edge {r.get("edge"):+.1%}</span></div></div>')
+    ORDER = ["MATCHUPS", "MAKE THE CUT", "TOP 5 FINISH", "TOP 10 FINISH", "TOP 20 FINISH",
+             "OUTRIGHT WINNER"]
+
+    def _rank(k):
+        for i, o in enumerate(ORDER):
+            if k.startswith(o):
+                return (i, k)
+        return (len(ORDER), k)
+
+    for mkt in sorted(groups, key=_rank):
+        body += (f'<div class="pgamkt">{html.escape(mkt)}</div>')
+        for who, line, od in sorted(groups[mkt], key=lambda x: x[2]):
+            det = f'<span class="pgaline">{html.escape(line)}</span>' if line else ""
+            body += (f'<div class="swrow"><div class="swhd">'
+                     f'<b>{html.escape(who)}</b>{det}'
+                     f'<span class="swusg" title="{od:.2f} decimal">'
+                     f'{html.escape(_am(od))} · FanDuel</span></div></div>')
+    if not groups:
+        body = '<div class="swo">No plays on the board right now.</div>'
     return f'<div class="starwatch">{head}{body}</div>'
+
 
 
 
@@ -2705,6 +2787,9 @@ def build():
   .swn.hot {{ color:#6aa5ef; background:rgba(106,165,239,.16); }}
   .swvs {{ color:#6b7484; font-size:11.5px; }}
   .swday {{ color:#6b7484; font-size:10.5px; }}
+  .pgamkt { margin:10px 0 4px; font-size:11px; letter-spacing:.08em; font-weight:700;
+             color:#8b94a3; text-transform:uppercase; }
+  .pgaline { margin-left:8px; color:#c8cfda; font-size:12.5px; }
   .swusg {{ margin-left:auto; color:#8b94a3; font-size:11.5px; font-variant-numeric:tabular-nums; white-space:nowrap; }}
   .swo {{ color:#7d8696; font-size:12px; margin-top:4px; }}
   .swo b {{ color:#c3c9d4; font-weight:700; }}
