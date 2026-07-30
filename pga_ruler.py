@@ -35,7 +35,16 @@ DB = HERE / "pga_model.sqlite"
 LINES = HERE / "golf_lines.sqlite"
 UA = {"User-Agent": "Mozilla/5.0"}
 
-HALF_LIFE_D = 120.0     # recency half-life for the rating (form vs ability balance)
+HALF_LIFE_D = 270.0     # TUNED 2026-07-29 on 2024-25 with 2026 HELD OUT — the only tuned
+                        # constant here. Tune-set curve is a clean interior peak:
+                        #   45d .5721  60d .5779  90d .5809  120d .5833  180d .5847
+                        #   270d .5862 <-best  365d .5849  no-decay .5811
+                        # 'No decay' scoring worse than 120 shows recency IS real; it just
+                        # acts over ~9 months, and 120 sat on the wrong side of the peak.
+                        # HELD-OUT 2026: .5885 -> .5967 (+.0082), i.e. 85% -> 93% of the
+                        # measured 0.604 ordering ceiling. RMSE prefers ~90-120 and gives up
+                        # 0.0003 here; taken deliberately, since matchups and top-N are
+                        # priced off ordering and the ordering gain is ~15x the RMSE cost.
 K_SHRINK = 11.0         # MEASURED 2026-07-29 (was 12.0, a guess that turned out close).
                         # Empirical-Bayes optimum k = noise var / true between-player var =
                         # 7.786 / 0.709 over 659 players with >=8 rounds.
