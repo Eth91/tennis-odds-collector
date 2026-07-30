@@ -188,6 +188,16 @@ def main():
         N = _n_for(mt)
         if not N or len(rr) < 25 or not sim:
             continue
+        # TIES-INCLUSIVE PRODUCTS ARE NOT PRICEABLE HERE (bug #10). "Top 20 Finish (Incl.
+        # Ties)" pays on 22-26 players, not 20, so N is wrong AND simulate() draws continuous
+        # normals — exact ties have probability zero and its top20 is strictly rank<20, a
+        # ties-EXCLUSIVE quantity. Comparing that to a ties-inclusive price is a category
+        # error in the direction that manufactures edge. Pricing these needs integer-score
+        # simulation with tied ranks; until then, skip. Skipping a market is free.
+        if "TIE" in str(mt).upper():
+            print(f"  skip {mt}: ties-inclusive product, simulator has no ties "
+                  f"(pool implies {sum(1 / od for _, od in rr):.1f} vs nominal {N})")
+            continue
         inv = sum(1 / od for _, od in rr)
         if inv > N * 3 or inv < N * 0.4:
             # the pool does not resemble an N-winner market (duplicates, or several events
