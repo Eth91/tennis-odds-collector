@@ -113,7 +113,10 @@ def latest_event_rows():
     rows = con.execute("SELECT market, mtype, runner, odds FROM golf_lines "
                        "WHERE event=? AND collected_at=?", (evn, ts)).fetchall()
     con.close()
-    return evn.strip(), rows
+    # `ts` is returned so every flag can record WHICH price snapshot it was priced on. The
+    # pre-registered capture rule selects one snapshot per event; without this the record
+    # would silently depend on cron timing.
+    return evn.strip(), rows, ts
 
 
 def main():
@@ -123,11 +126,37 @@ def main():
     passed, n_g2 = RU.g2_gate(verbose=True)
     armed = bool(passed)
 
-    evn, rows = latest_event_rows()
+    evn, rows, snap_ts = latest_event_rows()
     if not evn:
         print("e3: no active PGA event in the collector — nothing to price")
         return
     print(f"e3: pricing {evn}  (G2 {'PASS — flags ARMED' if armed else 'pending n=%d — preview only' % n_g2})")
+
+    # FIRST R1 TEE TIME — defines the pre-registered capture boundary. Orchestrator sheet
+    # first (pga_tees.sqlite, epoch ms), ESPN stamp as fallback. If neither is available the
+    # value stays None and the validator EXCLUDES the event rather than guessing a capture.
+    _first_tee = None
+    try:
+        import pga_birdies as _B0
+        _tid0 = _B0.tid_for_name(evn)
+        if _tid0:
+            _c0 = sqlite3.connect(HERE / "pga_tees.sqlite")
+            _r0 = _c0.execute("SELECT MIN(tee_ms) FROM tee_sheet WHERE tid=? AND rnd=1",
+                              (str(_tid0),)).fetchone()
+            _c0.close()
+            if _r0 and _r0[0]:
+                _first_tee = dt.datetime.utcfromtimestamp(
+                    float(_r0[0]) / 1000.0).replace(microsecond=0).isoformat()
+    except Exception:                                               # noqa: BLE001
+        _first_tee = None
+    if _first_tee is None:
+        try:
+            _tt0 = F.tee_times()
+            if _tt0:
+                _first_tee = min(_tt0.values())
+        except Exception:                                           # noqa: BLE001
+            _first_tee = None
+    print(f"  capture: snapshot {snap_ts} | first R1 tee {_first_tee or 'UNKNOWN'}")
 
     preview, flags = [], []
     cfit = {}                     # filled by the field block below; matchups tolerate empty
@@ -339,6 +368,7 @@ def main():
                                 "p_fair": round(fair, 6),
                                 "ev": round(_pb * od - 1.0, 4)})
 
+    _bird_lam, _bird_nlines = None, 0
     # ---- birdies-or-better: MARKET-ANCHORED LEVEL, player-relative edges ----
     # Two corrections after v1 ran +11.3pts hot on every Over (one-sided = model error):
     #  1. PAR MIX. v1 priced every course as par-72 4/10/4. Detroit GC is par 70 (4/12/2),
@@ -431,6 +461,7 @@ def main():
                       "%.4f (vig %.2f pts)"
                       % (len(_pairs), len(overs), _rawm, _fairm, 100 * (_rawm - _fairm)))
             LAM = 1.0
+            _bird_nlines = len(_pairs)
             if len(_pairs) >= 8:
                 # bisect LAM so mean model P(over) == mean FAIR P(over)
                 overs = _pairs
@@ -454,6 +485,7 @@ def main():
             # matches the book on matchups; it says nothing about whether birdie TAIL
             # probabilities are calibrated, and they are not — measured reliability slope 0.61
             # against a 0.85 bar. Preview still prints so the numbers stay visible.
+            _bird_lam = LAM
             _ok_b, _why_b = B.birdie_stream_armable()
             if not _ok_b:
                 print("  birdies: NOT ARMABLE — %s" % _why_b)
@@ -502,20 +534,26 @@ def main():
         con.execute(E1.DDL)
         # migrate an existing ledger in place; pure instrumentation for the
         # frozen-model validation - changes no probability, gate or constant
-        for _c in ("p_bet", "p_fair"):
+        for _c in ("p_bet", "p_fair", "snapshot_ts", "first_tee", "lam", "n_lines"):
             try:
-                con.execute("ALTER TABLE flags ADD COLUMN %s REAL" % _c)
+                con.execute("ALTER TABLE flags ADD COLUMN %s %s"
+                            % (_c, "TEXT" if _c in ("snapshot_ts", "first_tee")
+                               else "REAL"))
             except sqlite3.OperationalError:
                 pass
         for pv in preview:
             key = f"{evn}|{pv['market']}|{pv['runner']}|{pv['stream']}"
             cur = con.execute(
                 "INSERT OR IGNORE INTO flags(key,flagged_at,event,market,stream,"
-                "runner,opp,odds,d_wind,tee_r,tee_o,p_bet,p_fair) "
-                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                "runner,opp,odds,d_wind,tee_r,tee_o,p_bet,p_fair,"
+                "snapshot_ts,first_tee,lam,n_lines) "
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (key, now, evn, pv["market"], pv["stream"], pv["runner"], "",
                  pv["odds"], pv["edge"], "", "",
-                 pv.get("p_bet"), pv.get("p_fair")))
+                 pv.get("p_bet"), pv.get("p_fair"),
+                 snap_ts, _first_tee,
+                 _bird_lam if pv["stream"] == "E3-birdies" else None,
+                 _bird_nlines if pv["stream"] == "E3-birdies" else None))
             flags.append(pv) if cur.rowcount else None
         con.commit()
         con.close()
