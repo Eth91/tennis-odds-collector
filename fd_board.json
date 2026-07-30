@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T20:24:24Z",
+ "captured_at": "2026-07-30T20:30:58Z",
  "matches": [
-  {
-   "event_id": 35885085,
-   "p1": "Jaroslaw Rolak",
-   "p2": "Dawid Kotwica",
-   "p1_norm": "jaroslaw rolak",
-   "p2_norm": "dawid kotwica",
-   "open_date": "2026-07-30T20:05:00.000Z",
-   "line": 88.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35885491,
    "p1": "Mariusz Baron",
@@ -19,9 +8,9 @@
    "p1_norm": "mariusz baron",
    "p2_norm": "krzysztof juszczyk",
    "open_date": "2026-07-30T20:20:00.000Z",
-   "line": 70.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 88.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885455,
@@ -31,8 +20,8 @@
    "p2_norm": "jacek zelezik",
    "open_date": "2026-07-30T20:25:00.000Z",
    "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885456,
@@ -41,20 +30,9 @@
    "p1_norm": "marcin kowalczyk",
    "p2_norm": "arkadiusz mugowski",
    "open_date": "2026-07-30T20:25:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35885495,
-   "p1": "Mateusz Rutkowski",
-   "p2": "Patryk Jendrzejewski",
-   "p1_norm": "mateusz rutkowski",
-   "p2_norm": "patryk jendrzejewski",
-   "open_date": "2026-07-30T20:30:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885502,
