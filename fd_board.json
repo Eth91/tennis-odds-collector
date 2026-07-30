@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T18:05:30Z",
+ "captured_at": "2026-07-30T18:10:27Z",
  "matches": [
-  {
-   "event_id": 35884950,
-   "p1": "Jakub Cyndera",
-   "p2": "Adam Staniczek",
-   "p1_norm": "jakub cyndera",
-   "p2_norm": "adam staniczek",
-   "open_date": "2026-07-30T17:55:00.000Z",
-   "line": 53.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35884954,
    "p1": "Kacper Adamus",
@@ -19,9 +8,9 @@
    "p1_norm": "kacper adamus",
    "p2_norm": "mariusz baron",
    "open_date": "2026-07-30T18:00:00.000Z",
-   "line": 83.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 90.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35884956,
@@ -30,9 +19,9 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "patryk jendrzejewski",
    "open_date": "2026-07-30T18:05:00.000Z",
-   "line": 75.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 67.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35884963,
@@ -41,9 +30,9 @@
    "p1_norm": "arkadiusz mugowski",
    "p2_norm": "jaroslaw rolak",
    "open_date": "2026-07-30T18:10:00.000Z",
-   "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 76.5,
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35884964,
@@ -53,8 +42,8 @@
    "p2_norm": "jerzy michalik",
    "open_date": "2026-07-30T18:10:00.000Z",
    "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35884976,
