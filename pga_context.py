@@ -33,7 +33,17 @@ DB = HERE / "pga_model.sqlite"
 CACHE = HERE / "pga_context_cache.json"
 
 K_COURSE = 2.0       # pseudo-editions of shrinkage on the course factor
-K_FIT = 8.0          # pseudo-rounds of shrinkage on personal course fit (history is noisy)
+K_FIT = 105.0        # MEASURED 2026-07-29 (was 8.0 — a 13x error). Personal course fit
+                     # is very nearly noise, confirmed two independent ways:
+                     #   empirical Bayes over 8,257 player-course cells -> k = 104.8
+                     #     (true affinity sd only 0.267 strokes vs 7.49 round variance)
+                     #   OUT-OF-SAMPLE: split each cell by date, regress the LATE course
+                     #     deviation on the EARLY one over 2,979 cells -> slope +0.0605,
+                     #     r=+0.058, implying k = 80. An early course read predicts ~6% of
+                     #     the later one.
+                     # At 8.0 the code trusted 33% of a 4-round course deviation and was
+                     # injecting up to 1.2 strokes of noise into ratings; at 105 it trusts
+                     # 3.7%. Course history really is the most over-claimed edge in golf.
 WIND_REF = 15.0      # km/h reference: factors are relative to this
 
 
@@ -149,6 +159,7 @@ def _birdie_bridge():
         rr = ((sum((x - m1) * (y - m2) for x, y in pts) / len(pts)) / (s1 * s2)
               if s1 and s2 else None)
         return sl, m2 - sl * m1, rr
+    ys_ed = list(ys)
     ed_slope, _ed_a, ed_r = _lin(list(zip(xs, ys)))
     # AVERAGE WITHIN COURSE, then fit: this is the level course_factor() applies the bridge at
     agg = [(st.mean([q[0] for q in v]), st.mean([q[1] for q in v]))
@@ -168,8 +179,8 @@ def _birdie_bridge():
     except Exception:                                              # noqa: BLE001
         pass
     out = {"a": a, "b": b, "n": len(xs), "r": r, "unmatched": misses,
-           "n_editions": len(percourse), "edition_slope": ed_slope, "edition_r": ed_r,
-           "level": "per-course-mean"}
+           "n_courses": len(percourse), "n_editions": len(ys_ed),
+           "edition_slope": ed_slope, "edition_r": ed_r, "level": "per-course-mean"}
     c["bridge"] = out
     _save(c)
     return out
@@ -214,8 +225,13 @@ def direct_course_birdie_factor(event_name):
     if not obs_h or exp_b <= 0:
         return None, 0, 0
     raw = obs_b / exp_b
-    # shrink on ROUNDS, not editions: four rounds of one edition is not a course read
-    w = nrd / (nrd + 300.0)
+    # shrink on ROUNDS, not editions: four rounds of one edition is not a course read.
+    # 100.0 is MEASURED (2026-07-29): the empirical-Bayes optimum for the course birdie
+    # factor is 0.21 pseudo-EDITIONS, and an edition carries ~470 player-rounds, so
+    # 0.21 * 470 ~= 100 pseudo-rounds. Courses genuinely differ a lot (between-course true
+    # variance 0.038, i.e. +/-19%, against within-course noise of only 0.008), so the 300 I
+    # first guessed was over-shrinking a signal that is actually strong.
+    w = nrd / (nrd + 100.0)
     return max(0.75, min(1.30, 1.0 + (raw - 1.0) * w)), eds, nrd
 
 

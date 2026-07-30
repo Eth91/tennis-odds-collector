@@ -28,7 +28,16 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 DB = HERE / "pga_model.sqlite"
 KEY = "da2-gsrx5bibzbb4njvhl7t37wqyl4"
-K_H = 60.0                      # pseudo-holes of shrinkage toward the field rate
+K_H = 106.0                     # MEASURED 2026-07-29 (was 60.0 flat). Per-par, because
+                                # birdie skill separates players very differently by par:
+K_H_PAR = {3: 593.0, 4: 106.0, 5: 162.0}
+# Empirical Bayes on binomial noise p(1-p) over true between-player variance, players with
+# >=40 holes of that par:
+#   par 3: field p=0.133, true between-player var 0.0002 (sd 1.4 percentage points) -> k=593
+#   par 4: field p=0.175, true var 0.0014 -> k=106
+#   par 5: field p=0.470, true var 0.0015 -> k=162
+# Par-3 birdie ability is almost entirely luck — nearly a tenth of what 60 assumed — while
+# par 4s carry most of the real signal. A flat 60 over-trusted par 3s badly.
 DEFAULT_MIX = {3: 4, 4: 10, 5: 4}
 
 DDL = """CREATE TABLE IF NOT EXISTS birdie_rounds(

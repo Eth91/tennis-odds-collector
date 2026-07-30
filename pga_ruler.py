@@ -36,9 +36,26 @@ LINES = HERE / "golf_lines.sqlite"
 UA = {"User-Agent": "Mozilla/5.0"}
 
 HALF_LIFE_D = 120.0     # recency half-life for the rating (form vs ability balance)
-K_SHRINK = 12.0         # pseudo-rounds of field-average shrinkage
-RHO = 0.25              # share of round variance that is player-week form (round dependence)
-SIG_SHRINK = 20.0       # rounds of shrinkage of player sd toward the global sd
+K_SHRINK = 11.0         # MEASURED 2026-07-29 (was 12.0, a guess that turned out close).
+                        # Empirical-Bayes optimum k = noise var / true between-player var =
+                        # 7.786 / 0.709 over 659 players with >=8 rounds.
+RHO = 0.05              # MEASURED 2026-07-29, was 0.25 — FIVE TIMES too high. Three
+                        # independent estimates: nested ANOVA on rounds within vs across
+                        # events = 0.055 (44,580 dof, and the only one that needs no
+                        # ratings); raw round-pair correlation r=+0.039 on 57,015 pairs;
+                        # selection-free 36-hole total spread implies +0.109. All in
+                        # [0.034, 0.109]. A player's four rounds are very nearly
+                        # independent. At 0.25 the model inflated 72-hole variance ~14%,
+                        # which pushed matchup prices toward 50/50 and fattened the top-N
+                        # tails. (The first attempt at this used 72-hole totals and implied
+                        # a NEGATIVE rho — an artefact of cut selection, since only
+                        # cut-makers have four rounds.)
+SIG_SHRINK = 78.0       # MEASURED 2026-07-29 (was 20.0). The TRUE spread of player
+                        # volatility is tiny: between-player variance of sd is 0.052
+                        # (sd 0.23) around a mean sd of 2.81 — an 8% spread — against
+                        # sampling noise of 4.02 per observation. So 'some players are
+                        # streakier' is mostly an illusion and own-sd deserves far less
+                        # weight. k = 4.020 / 0.052.
 MIN_ROUNDS = 20         # user 2026-07-29: '20 rounds or less is a good rule'. Below
                         # this a rating is HALVED toward field-average and sigma widens
                         # — it still prices (Koivun at 46 rounds is genuinely good and
