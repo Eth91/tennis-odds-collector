@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T08:59:25Z",
+ "captured_at": "2026-07-30T09:04:22Z",
  "matches": [
-  {
-   "event_id": 35882789,
-   "p1": "Waldemar Glanowski",
-   "p2": "Oskar Jadach",
-   "p1_norm": "waldemar glanowski",
-   "p2_norm": "oskar jadach",
-   "open_date": "2026-07-30T08:45:00.000Z",
-   "line": 87.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
   {
    "event_id": 35882801,
    "p1": "Mariusz Adamus",
@@ -19,9 +8,9 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "marian lebek",
    "open_date": "2026-07-30T08:50:00.000Z",
-   "line": 87.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 91.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35882803,
@@ -30,9 +19,9 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "karol wisniewski",
    "open_date": "2026-07-30T09:00:00.000Z",
-   "line": 78.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35882804,
@@ -41,9 +30,9 @@
    "p1_norm": "szymon kolasa",
    "p2_norm": "jan zandecki",
    "open_date": "2026-07-30T09:00:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 79.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35882805,
@@ -52,9 +41,9 @@
    "p1_norm": "pawel kurek",
    "p2_norm": "michal durda",
    "open_date": "2026-07-30T09:00:00.000Z",
-   "line": 73.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 57.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882808,
@@ -121,6 +110,28 @@
    "line": 79.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35882846,
+   "p1": "Piotr Gumulinski",
+   "p2": "Waldemar Glanowski",
+   "p1_norm": "piotr gumulinski",
+   "p2_norm": "waldemar glanowski",
+   "open_date": "2026-07-30T09:30:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35882847,
+   "p1": "Mariusz Adamus",
+   "p2": "Adrian Burkacki",
+   "p1_norm": "mariusz adamus",
+   "p2_norm": "adrian burkacki",
+   "open_date": "2026-07-30T09:30:00.000Z",
+   "line": 79.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
