@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T02:08:34Z",
+ "captured_at": "2026-07-30T02:13:20Z",
  "matches": [
   {
    "event_id": 35882004,
@@ -8,9 +8,9 @@
    "p1_norm": "witold stechly",
    "p2_norm": "jerzy michalik",
    "open_date": "2026-07-30T01:55:00.000Z",
-   "line": 94.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 96.5,
+   "over_odds": 110,
+   "under_odds": -150
   },
   {
    "event_id": 35882013,
@@ -19,9 +19,9 @@
    "p1_norm": "michal machelski",
    "p2_norm": "kazimierz rybak",
    "open_date": "2026-07-30T02:10:00.000Z",
-   "line": 73.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35882018,
