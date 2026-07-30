@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T01:01:08Z",
+ "captured_at": "2026-07-30T01:06:53Z",
  "matches": [
-  {
-   "event_id": 35881834,
-   "p1": "Mariusz Koczyba",
-   "p2": "Rafal Niemiec",
-   "p1_norm": "mariusz koczyba",
-   "p2_norm": "rafal niemiec",
-   "open_date": "2026-07-30T00:45:00.000Z",
-   "line": 93.5,
-   "over_odds": 100,
-   "under_odds": -140
-  },
   {
    "event_id": 35881835,
    "p1": "Henryk Tkaczyk",
@@ -19,9 +8,9 @@
    "p1_norm": "henryk tkaczyk",
    "p2_norm": "witold stechly",
    "open_date": "2026-07-30T00:45:00.000Z",
-   "line": 83.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 88.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35881916,
@@ -30,9 +19,9 @@
    "p1_norm": "adam staniczek",
    "p2_norm": "kamil delikatny",
    "open_date": "2026-07-30T01:00:00.000Z",
-   "line": 71.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35881936,
@@ -64,6 +53,17 @@
    "p2_norm": "kazimierz rybak",
    "open_date": "2026-07-30T01:25:00.000Z",
    "line": 71.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35881952,
+   "p1": "Zbigniew Nocun",
+   "p2": "Michal Wolny",
+   "p1_norm": "zbigniew nocun",
+   "p2_norm": "michal wolny",
+   "open_date": "2026-07-30T01:30:00.000Z",
+   "line": 75.5,
    "over_odds": -112,
    "under_odds": -118
   }
