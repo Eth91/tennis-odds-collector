@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T09:38:26Z",
+ "captured_at": "2026-07-30T09:43:00Z",
  "matches": [
-  {
-   "event_id": 35882839,
-   "p1": "Artur Grela",
-   "p2": "Karol Strowski",
-   "p1_norm": "artur grela",
-   "p2_norm": "karol strowski",
-   "open_date": "2026-07-30T09:20:00.000Z",
-   "line": 95.5,
-   "over_odds": -115,
-   "under_odds": -115
-  },
   {
    "event_id": 35882844,
    "p1": "Jakub Nowak",
@@ -19,9 +8,9 @@
    "p1_norm": "jakub nowak",
    "p2_norm": "oliver vincenec",
    "open_date": "2026-07-30T09:25:00.000Z",
-   "line": 88.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 92.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35882846,
@@ -30,20 +19,9 @@
    "p1_norm": "piotr gumulinski",
    "p2_norm": "waldemar glanowski",
    "open_date": "2026-07-30T09:30:00.000Z",
-   "line": 84.5,
+   "line": 90.5,
    "over_odds": -115,
    "under_odds": -120
-  },
-  {
-   "event_id": 35882847,
-   "p1": "Mariusz Adamus",
-   "p2": "Adrian Burkacki",
-   "p1_norm": "mariusz adamus",
-   "p2_norm": "adrian burkacki",
-   "open_date": "2026-07-30T09:30:00.000Z",
-   "line": 71.5,
-   "over_odds": -120,
-   "under_odds": -115
   },
   {
    "event_id": 35882855,
@@ -52,7 +30,7 @@
    "p1_norm": "milosz piecowski",
    "p2_norm": "dominik solilo",
    "open_date": "2026-07-30T09:35:00.000Z",
-   "line": 77.5,
+   "line": 65.5,
    "over_odds": -110,
    "under_odds": -125
   },
