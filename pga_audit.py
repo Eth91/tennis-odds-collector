@@ -151,33 +151,66 @@ def parse(rate_kw):
     return out
 
 
-def bias(parsed, mx, lam=1.0):
+def _fair_map(parsed):
+    """(player, line) -> devigged fair P(over), from the two paired quotes.
+
+    The audit used to compare the model to mean(1/odds_over), i.e. the Over price WITH the vig
+    in it. On these lines the overround is 6.04%, so that reference sat +3.02 points above
+    fair and every "bias" number this section has ever printed was low by about that much.
+    """
+    q = {}
+    for pl, sd, ln, od, _rr in parsed:
+        q.setdefault((RU.norm(pl), ln), {})[sd] = od
+    out = {}
+    for k, v in q.items():
+        if "over" in v and "under" in v:
+            io_, iu = 1.0 / v["over"], 1.0 / v["under"]
+            if io_ + iu > 0:
+                out[k] = io_ / (io_ + iu)
+    return out
+
+
+def bias(parsed, mx, lam=1.0, fair=None):
+    """Model vs market on the Over side. Compares to FAIR when the paired quote exists."""
     ov = [x for x in parsed if x[1] == "over"]
+    if fair is not None:
+        ov = [x for x in ov if (RU.norm(x[0]), x[2]) in fair]
     if not ov:
         return None, None, 0
     m = st.mean(B.p_x_or_more({a: min(b * lam, .95) for a, b in rr.items()},
                               int(ln + .5), mx) for _p, _s, ln, _o, rr in ov)
-    k = st.mean(1 / x[3] for x in ov)
+    if fair is not None:
+        k = st.mean(fair[(RU.norm(x[0]), x[2])] for x in ov)
+    else:
+        k = st.mean(1 / x[3] for x in ov)
     return m, k, len(ov)
 
 
 p_naive = parse({})
-m1, k1, n1 = bias(p_naive, B.DEFAULT_MIX)
+FAIR = _fair_map(p_naive)
+m1, k1, n1 = bias(p_naive, B.DEFAULT_MIX, fair=FAIR)
 print("    v1 (par-72 mix, no context)     model %.3f vs market %.3f  bias %+.1f pts"
       % (m1, k1, 100 * (m1 - k1)))
 p_ctx = parse({"course_factor": cf, "wind_kmh": wind})
-m2, k2, n2 = bias(p_ctx, mix)
+m2, k2, n2 = bias(p_ctx, mix, fair=FAIR)
 print("    NOW (real mix + course + wind)   model %.3f vs market %.3f  bias %+.1f pts"
       % (m2, k2, 100 * (m2 - k2)))
 lo, hi = 0.5, 1.8
 for _ in range(30):
     L = (lo + hi) / 2
-    mm, _, _ = bias(p_ctx, mix, L)
+    mm, _, _ = bias(p_ctx, mix, L, fair=FAIR)
     if mm > k2:
         hi = L
     else:
         lo = L
 print("    market anchor now only corrects %.1f%% (was 12%% when blind)" % abs(100 * (L - 1)))
+print("    reference is the DEVIGGED fair price on %d two-sided lines; the raw Over price "
+      "sits %.2f pts above it, and comparing to raw understated every earlier bias figure "
+      "by that much" % (len(FAIR), 100 * (st.mean(1 / x[3] for x in p_ctx if x[1] == "over"
+                                                  and (RU.norm(x[0]), x[2]) in FAIR)
+                                          - st.mean(FAIR[(RU.norm(x[0]), x[2])]
+                                                    for x in p_ctx if x[1] == "over"
+                                                    and (RU.norm(x[0]), x[2]) in FAIR))))
 edges = []
 for pl, sd, ln, od, rr in p_ctx:
     rs = {a: min(b * L, .95) for a, b in rr.items()}

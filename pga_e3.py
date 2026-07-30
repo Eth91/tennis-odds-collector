@@ -254,10 +254,34 @@ def main():
                 parsed.append((pm.group(1).strip(), sm.group(1).lower(),
                                float(sm.group(2)), od, mkt, rr))
             overs = [x for x in parsed if x[1] == "over"]
+            # DEVIG BEFORE ANCHORING (2026-07-30). The anchor used to target
+            # mean(1/odds_over), i.e. the Over price WITH the vig in it. Measured overround on
+            # these lines is 6.04%, so that target sat +3.02 points above fair — which forced
+            # over-edges to average 0 (they should average -3.02) and under-edges to average
+            # -6.04. Unders could then never clear a +5% threshold: the 10-over / 1-under
+            # split the audit caught. Worse, every flagged over was over-valued by ~3 points.
+            # Pair each player's two quotes and anchor to the FAIR probability instead.
+            _q = {}
+            for _pl, _sd, _ln, _od, _mk, _rr in parsed:
+                _q.setdefault((RU.norm(_pl), _ln), {})[_sd] = _od
+            fair_over = {}
+            for _k, _v in _q.items():
+                if "over" in _v and "under" in _v:
+                    _io, _iu = 1.0 / _v["over"], 1.0 / _v["under"]
+                    if _io + _iu > 0:
+                        fair_over[_k] = _io / (_io + _iu)
+            _pairs = [x for x in overs if (RU.norm(x[0]), x[2]) in fair_over]
+            if _pairs:
+                _rawm = sum(1 / x[3] for x in _pairs) / len(_pairs)
+                _fairm = sum(fair_over[(RU.norm(x[0]), x[2])] for x in _pairs) / len(_pairs)
+                print("  birdies: devig on %d/%d two-sided lines — raw Over %.4f vs FAIR "
+                      "%.4f (vig %.2f pts)"
+                      % (len(_pairs), len(overs), _rawm, _fairm, 100 * (_rawm - _fairm)))
             LAM = 1.0
-            if len(overs) >= 8:
-                # bisect LAM so mean model P(over) == mean market implied P(over)
-                tgt = sum(1 / x[3] for x in overs) / len(overs)
+            if len(_pairs) >= 8:
+                # bisect LAM so mean model P(over) == mean FAIR P(over)
+                overs = _pairs
+                tgt = sum(fair_over[(RU.norm(x[0]), x[2])] for x in overs) / len(overs)
                 lo, hi = 0.5, 1.6
                 for _ in range(28):
                     LAM = (lo + hi) / 2
@@ -274,6 +298,7 @@ def main():
                 print(f"  birdies: course-level LAM={LAM:.3f} "
                       f"(market-anchored on {len(overs)} Over lines, mix {_mix})")
             seen_b = set()
+            _nb = {"over": 0, "under": 0}
             for player, side, line, od, mkt, rr in parsed:
                 rs = {k: min(v * LAM, 0.95) for k, v in rr.items()}
                 p_over = B.p_x_or_more(rs, int(line + 0.5), _mix)
@@ -282,10 +307,19 @@ def main():
                 key = (RU.norm(player), side, line)
                 if edge >= 0.05 and key not in seen_b:
                     seen_b.add(key)
+                    _nb[side] = _nb.get(side, 0) + 1
                     preview.append({"stream": "E3-birdies",
                                     "runner": f"{player} {side} {line:g}",
                                     "market": mkt[:60], "odds": od,
                                     "edge": round(edge, 3)})
+            # ONE-SIDEDNESS IS A LEVEL ALARM. With a devigged anchor both sides start
+            # from the same handicap, so a persistent all-one-way split means the LEVEL is
+            # wrong again — which is exactly how the v1 par-72 bug first showed itself.
+            print("  birdies: flags %d over / %d under%s"
+                  % (_nb.get("over", 0), _nb.get("under", 0),
+                     "  <-- ONE-SIDED, recheck the level" if
+                     (_nb.get("over", 0) + _nb.get("under", 0)) >= 6 and
+                     min(_nb.get("over", 0), _nb.get("under", 0)) == 0 else ""))
     except Exception as _be:
         print(f"  birdie pricing skipped: {str(_be)[:70]}")
 
