@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-30T04:07:00Z",
+ "captured_at": "2026-07-30T04:13:45Z",
  "matches": [
-  {
-   "event_id": 35882100,
-   "p1": "Josef Braun",
-   "p2": "Szymon Kolasa",
-   "p1_norm": "josef braun",
-   "p2_norm": "szymon kolasa",
-   "open_date": "2026-07-30T03:45:00.000Z",
-   "line": 86.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35882102,
-   "p1": "Oliwier Sokolowski",
-   "p2": "Pawel Kurek",
-   "p1_norm": "oliwier sokolowski",
-   "p2_norm": "pawel kurek",
-   "open_date": "2026-07-30T03:50:00.000Z",
-   "line": 98.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35882104,
    "p1": "Michal Wolny",
@@ -30,18 +8,18 @@
    "p1_norm": "michal wolny",
    "p2_norm": "jerzy michalik",
    "open_date": "2026-07-30T03:55:00.000Z",
-   "line": 95.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 102.5,
+   "over_odds": -165,
+   "under_odds": 120
   },
   {
-   "event_id": 35882113,
-   "p1": "Stapor Rafal",
-   "p2": "Dominik Solilo",
-   "p1_norm": "stapor rafal",
-   "p2_norm": "dominik solilo",
+   "event_id": 35882445,
+   "p1": "Oliwier Sokolowski",
+   "p2": "Oliver Vincenec",
+   "p1_norm": "oliwier sokolowski",
+   "p2_norm": "oliver vincenec",
    "open_date": "2026-07-30T04:00:00.000Z",
-   "line": 64.5,
+   "line": 86.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -53,8 +31,8 @@
    "p2_norm": "blazej warpas",
    "open_date": "2026-07-30T04:10:00.000Z",
    "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882188,
@@ -63,7 +41,7 @@
    "p1_norm": "rafal gajda",
    "p2_norm": "jakub nowak",
    "open_date": "2026-07-30T04:10:00.000Z",
-   "line": 80.5,
+   "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
   },
@@ -74,9 +52,9 @@
    "p1_norm": "kacper petas",
    "p2_norm": "grzegorz felkel",
    "open_date": "2026-07-30T04:10:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35882191,
@@ -85,9 +63,9 @@
    "p1_norm": "rafal niemiec",
    "p2_norm": "adrian burkacki",
    "open_date": "2026-07-30T04:10:00.000Z",
-   "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882408,
@@ -154,6 +132,17 @@
    "line": 78.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35882465,
+   "p1": "Zbigniew Nocun",
+   "p2": "Jerzy Michalik",
+   "p1_norm": "zbigniew nocun",
+   "p2_norm": "jerzy michalik",
+   "open_date": "2026-07-30T04:40:00.000Z",
+   "line": 73.5,
+   "over_odds": -120,
+   "under_odds": -110
   }
  ]
 }
