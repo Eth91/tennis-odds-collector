@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-30T22:19:43Z",
+ "captured_at": "2026-07-30T22:24:17Z",
  "matches": [
-  {
-   "event_id": 35885591,
-   "p1": "Jaroslaw Rolak",
-   "p2": "Adrian Eliasz",
-   "p1_norm": "jaroslaw rolak",
-   "p2_norm": "adrian eliasz",
-   "open_date": "2026-07-30T21:55:00.000Z",
-   "line": 96.5,
-   "over_odds": -140,
-   "under_odds": 100
-  },
-  {
-   "event_id": 35885627,
-   "p1": "Adam Staniczek",
-   "p2": "Zbigniew Nocun",
-   "p1_norm": "adam staniczek",
-   "p2_norm": "zbigniew nocun",
-   "open_date": "2026-07-30T22:00:00.000Z",
-   "line": 75.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
   {
    "event_id": 35885611,
    "p1": "Mateusz Trela",
@@ -30,9 +8,9 @@
    "p1_norm": "mateusz trela",
    "p2_norm": "arkadiusz mugowski",
    "open_date": "2026-07-30T22:15:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35885653,
@@ -41,9 +19,9 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "piotr gesiarz",
    "open_date": "2026-07-30T22:15:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 88.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35885615,
@@ -52,9 +30,9 @@
    "p1_norm": "jakub cyndera",
    "p2_norm": "dariusz molenda",
    "open_date": "2026-07-30T22:20:00.000Z",
-   "line": 68.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 72.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885624,
@@ -110,6 +88,17 @@
    "line": 76.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35885655,
+   "p1": "Kacper Adamus",
+   "p2": "Marek Tkocz",
+   "p1_norm": "kacper adamus",
+   "p2_norm": "marek tkocz",
+   "open_date": "2026-07-30T22:50:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
