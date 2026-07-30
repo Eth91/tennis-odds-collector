@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T06:09:36Z",
+ "captured_at": "2026-07-30T06:15:26Z",
  "matches": [
   {
    "event_id": 35882588,
@@ -8,7 +8,7 @@
    "p1_norm": "kamil klocek",
    "p2_norm": "kamil rudomina",
    "open_date": "2026-07-30T06:00:00.000Z",
-   "line": 85.5,
+   "line": 90.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -19,9 +19,9 @@
    "p1_norm": "milosz piecowski",
    "p2_norm": "wojciech gluszek",
    "open_date": "2026-07-30T06:00:00.000Z",
-   "line": 54.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 93.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882590,
@@ -30,7 +30,7 @@
    "p1_norm": "lukasz oracz",
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-30T06:05:00.000Z",
-   "line": 75.5,
+   "line": 60.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -41,9 +41,9 @@
    "p1_norm": "rafal gajda",
    "p2_norm": "oliwier sokolowski",
    "open_date": "2026-07-30T06:05:00.000Z",
-   "line": 88.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 96.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35882602,
@@ -52,9 +52,9 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "krzysztof juszczyk",
    "open_date": "2026-07-30T06:10:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 80.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882609,
@@ -64,8 +64,8 @@
    "p2_norm": "radoslaw malinowski",
    "open_date": "2026-07-30T06:20:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35882625,
@@ -75,8 +75,8 @@
    "p2_norm": "oliver vincenec",
    "open_date": "2026-07-30T06:20:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35882610,
@@ -96,9 +96,9 @@
    "p1_norm": "dominik solilo",
    "p2_norm": "michal minda",
    "open_date": "2026-07-30T06:25:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35882618,
@@ -108,8 +108,8 @@
    "p2_norm": "josef braun",
    "open_date": "2026-07-30T06:30:00.000Z",
    "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35882619,
@@ -121,6 +121,17 @@
    "line": 76.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35882630,
+   "p1": "Blazej Warpas",
+   "p2": "Wojciech Gluszek",
+   "p1_norm": "blazej warpas",
+   "p2_norm": "wojciech gluszek",
+   "open_date": "2026-07-30T06:40:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35882570,
