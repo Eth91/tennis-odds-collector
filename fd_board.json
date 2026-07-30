@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T22:24:17Z",
+ "captured_at": "2026-07-30T22:29:04Z",
  "matches": [
   {
    "event_id": 35885611,
@@ -8,9 +8,9 @@
    "p1_norm": "mateusz trela",
    "p2_norm": "arkadiusz mugowski",
    "open_date": "2026-07-30T22:15:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 84.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885653,
@@ -19,9 +19,9 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "piotr gesiarz",
    "open_date": "2026-07-30T22:15:00.000Z",
-   "line": 88.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 85.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885615,
@@ -30,9 +30,9 @@
    "p1_norm": "jakub cyndera",
    "p2_norm": "dariusz molenda",
    "open_date": "2026-07-30T22:20:00.000Z",
-   "line": 72.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 77.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35885624,
@@ -42,8 +42,8 @@
    "p2_norm": "marian lebek",
    "open_date": "2026-07-30T22:25:00.000Z",
    "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885631,
@@ -97,6 +97,28 @@
    "p2_norm": "marek tkocz",
    "open_date": "2026-07-30T22:50:00.000Z",
    "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35885665,
+   "p1": "Michal Guzik",
+   "p2": "Jerzy Michalik",
+   "p1_norm": "michal guzik",
+   "p2_norm": "jerzy michalik",
+   "open_date": "2026-07-30T22:55:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35885667,
+   "p1": "Dawid Kotwica",
+   "p2": "Arkadiusz Mugowski",
+   "p1_norm": "dawid kotwica",
+   "p2_norm": "arkadiusz mugowski",
+   "open_date": "2026-07-30T22:55:00.000Z",
+   "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
   }
