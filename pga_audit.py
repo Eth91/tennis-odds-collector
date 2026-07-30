@@ -89,6 +89,21 @@ wf = C.fit_wind(verbose=False)
 print("    wind coefficient       : %+.5f/km/h  r=%+.3f  n=%d obs / %d events  %s"
       % (wf["w"], wf.get("r") or 0, wf.get("n") or 0, wf.get("events") or 0,
          "ASSUMED" if wf.get("assumed") else "FITTED (" + str(wf.get("design")) + ")"))
+# SCALE CHECK: the live wind input must be on the same statistic as the fit. It was not —
+# fit on daily maxima, fed the mean of all hourly values — which inflated every birdie rate
+# by 3.88% in all weather. Assert it here so a future edit cannot silently reintroduce it.
+try:
+    _la_, _lo_ = F.coords()
+    _live = C.live_wind_stat(_la_, _lo_) if _la_ is not None else None
+    _fitm = wf.get("mean_wind")
+    if _live and _fitm:
+        _ratio = _live / _fitm
+        print("    scale check           : live %.1f km/h vs fitted-sample mean %.1f -> "
+              "%.2fx  %s" % (_live, _fitm, _ratio,
+                             "OK (same statistic)" if 0.5 <= _ratio <= 2.0
+                             else "MISMATCH — live input is not the fit's statistic"))
+except Exception as _e:
+    print("    scale check           : unavailable (%s)" % str(_e)[:50])
 _mw = wf.get("mean_wind")
 print("       centred on %s km/h %s"
       % (("%.1f" % _mw) if _mw else ("%.1f" % C.WIND_REF),

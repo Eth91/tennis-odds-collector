@@ -221,9 +221,12 @@ def main():
                 import pga_e1 as _E1, pga_field as _PF
                 _la, _lo = _PF.coords()
                 if _la is not None:
-                    _w = _E1.wind_hours(_la, _lo, days=3)
-                    if _w:
-                        _wind = sum(_w.values()) / len(_w)
+                    # MUST be the same statistic fit_wind was built on (mean of DAILY
+                    # MAXIMA). Feeding the mean of all hourly values, nights included, put
+                    # this ~7.5 km/h below the fitted scale and inflated every birdie rate by
+                    # 3.88% in all weather — most of the +4.0pt level bias the devigged audit
+                    # found. pga_context owns the definition so the two cannot drift again.
+                    _wind = C.live_wind_stat(_la, _lo, days=4)
                 print(f"  birdies: course factor {_cf:.3f} ({_cn} prior editions), "
                       f"wind {_wind if _wind is None else round(_wind, 1)} km/h")
             except Exception as _ce:

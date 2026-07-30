@@ -517,6 +517,29 @@ def fit_wind(verbose=True, refit=False):
     return out
 
 
+def live_wind_stat(lat, lon, days=4):
+    """The live wind number, on the SAME statistic fit_wind was built on.
+
+    fit_wind regresses on `daily=wind_speed_10m_max`, so the live input must also be a mean of
+    DAILY MAXIMA. Feeding it the mean of all hourly values (nights included) put the input
+    ~7.5 km/h below the fitted scale and inflated every birdie rate by 3.88% in all weather.
+    Both sides now come from here so they cannot drift apart again.
+    """
+    try:
+        import pga_e1 as _E1
+        w = _E1.wind_hours(lat, lon, days=days)
+    except Exception:                                              # noqa: BLE001
+        return None
+    if not w:
+        return None
+    by_day = {}
+    for k, v in w.items():
+        if v is not None:
+            by_day.setdefault(str(k)[:10], []).append(v)
+    peaks = [max(v) for v in by_day.values() if v]
+    return st.mean(peaks) if peaks else None
+
+
 def wind_factor(kmh):
     """Birdie multiplier for a given wind speed, floored/capped so a forecast spike can
     never dominate the price."""
