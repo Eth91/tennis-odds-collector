@@ -34,6 +34,9 @@ TN_EDGE = 0.04
 TN_MIN_ODDS = 1.5
 OUT_EV = 0.15
 OUT_RATIO = 1.3
+# Gated off 2026-07-30 by the real-price backtest above: 55% of the field
+# flagged, -85.6% ROI on 528 bets, and a 39.5% median overround.
+OUTRIGHT_ARMABLE = False
 
 
 def latest_event_rows():
@@ -212,7 +215,19 @@ def main():
             if ours is None:
                 continue
             if N == 1:
-                if ours >= OUT_RATIO * fair and ours * od - 1 >= OUT_EV:
+                # OUTRIGHT STREAM GATED OFF (2026-07-30) on real-price evidence. Backtested on 9
+                # majors / 955 priced+rated runners against actual FanDuel+DraftKings CLOSES:
+                # the live rule below flagged 528 of 955 runners (55% of the field!) at mean odds
+                # 1058, returning 1 winner and -85.6% ROI. The book's fair prices predicted 1.1
+                # winners from that set and were almost exactly right; we predicted 3.6. Our
+                # longshot probabilities run 1.4-2x the book's across the bottom four quintiles
+                # while realized is ~0 — the same over-prediction the top-20 decile curve showed,
+                # now confirmed with money prices. Measured overround here is a median 39.5%
+                # against ~4.5% on matchups, so this is the worst market for this model on both
+                # calibration AND cost. Preview still prints; it just cannot arm.
+                if not OUTRIGHT_ARMABLE:
+                    pass
+                elif ours >= OUT_RATIO * fair and ours * od - 1 >= OUT_EV:
                     preview.append({"stream": "E3-outright", "runner": run, "market": mt,
                                     "odds": od, "edge": round(ours - fair, 3)})
             elif ours - fair >= TN_EDGE and od >= TN_MIN_ODDS:
