@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T03:47:04Z",
+ "captured_at": "2026-07-30T03:53:31Z",
  "matches": [
-  {
-   "event_id": 35882080,
-   "p1": "Grzegorz Felkel",
-   "p2": "Artur Grela",
-   "p1_norm": "grzegorz felkel",
-   "p2_norm": "artur grela",
-   "open_date": "2026-07-30T03:25:00.000Z",
-   "line": 95.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35882099,
    "p1": "Michal Minda",
@@ -19,7 +8,7 @@
    "p1_norm": "michal minda",
    "p2_norm": "kamil klocek",
    "open_date": "2026-07-30T03:40:00.000Z",
-   "line": 76.5,
+   "line": 69.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -30,20 +19,9 @@
    "p1_norm": "josef braun",
    "p2_norm": "szymon kolasa",
    "open_date": "2026-07-30T03:45:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35882101,
-   "p1": "Mariusz Adamus",
-   "p2": "Wojciech Urban",
-   "p1_norm": "mariusz adamus",
-   "p2_norm": "wojciech urban",
-   "open_date": "2026-07-30T03:50:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35882102,
@@ -52,9 +30,9 @@
    "p1_norm": "oliwier sokolowski",
    "p2_norm": "pawel kurek",
    "open_date": "2026-07-30T03:50:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 79.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35882103,
@@ -63,9 +41,9 @@
    "p1_norm": "wojciech gluszek",
    "p2_norm": "igor dabrowski",
    "open_date": "2026-07-30T03:50:00.000Z",
-   "line": 77.5,
+   "line": 74.5,
    "over_odds": -120,
-   "under_odds": -110
+   "under_odds": -115
   },
   {
    "event_id": 35882104,
@@ -132,6 +110,17 @@
    "line": 77.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35882408,
+   "p1": "Witold Stechly",
+   "p2": "Miroslaw Warzecha",
+   "p1_norm": "witold stechly",
+   "p2_norm": "miroslaw warzecha",
+   "open_date": "2026-07-30T04:20:00.000Z",
+   "line": 64.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
