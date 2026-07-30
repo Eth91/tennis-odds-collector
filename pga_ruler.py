@@ -82,14 +82,26 @@ def _get(url):
         urllib.request.Request(url, headers=UA), timeout=40))
 
 
-def crawl(seasons=(2023, 2024, 2025, 2026)):
-    """Season scoreboards -> rounds(player, event, date, round, score). Idempotent."""
+def crawl(seasons=(2023, 2024, 2025, 2026), leagues=("pga", "eur")):
+    """Season scoreboards -> rounds(player, event, date, round, score). Idempotent.
+
+    leagues: ESPN golf league slugs. Defaults to PGA + DP World, chosen on MEASURED 2025 player
+    overlap with the PGA field — eur shares 248 players (30% of its field), champions-tour only 21
+    (7%), and lpga ZERO. The two-pass field-quality correction calibrates tours against each other
+    only through shared players, so a disjoint tour would get ratings on an uncalibrated scale that
+    look comparable and are not. eur is the one safe addition.
+    """
     con = sqlite3.connect(DB)
     con.execute("""CREATE TABLE IF NOT EXISTS rounds(
         event_id TEXT, event TEXT, date TEXT, player TEXT, rnd INTEGER, score REAL,
         PRIMARY KEY(event_id, player, rnd))""")
     for yr in seasons:
-        d = _get("https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard?dates=%d" % yr)
+      for _lg in leagues:
+        try:
+            d = _get("https://site.api.espn.com/apis/site/v2/sports/golf/%s/scoreboard?dates=%d"
+                     % (_lg, yr))
+        except Exception:                                          # noqa: BLE001
+            continue                                               # a tour missing a season is fine
         n = 0
         for ev in d.get("events") or []:
             eid, enm = str(ev.get("id")), ev.get("name") or ""

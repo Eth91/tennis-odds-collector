@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T06:39:38Z",
+ "captured_at": "2026-07-30T06:44:35Z",
  "matches": [
   {
    "event_id": 35882618,
@@ -8,9 +8,9 @@
    "p1_norm": "grzegorz felkel",
    "p2_norm": "josef braun",
    "open_date": "2026-07-30T06:30:00.000Z",
-   "line": 78.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 60.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35882619,
@@ -19,9 +19,9 @@
    "p1_norm": "wojciech urban",
    "p2_norm": "marian lebek",
    "open_date": "2026-07-30T06:30:00.000Z",
-   "line": 65.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 75.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882630,
@@ -30,9 +30,20 @@
    "p1_norm": "blazej warpas",
    "p2_norm": "wojciech gluszek",
    "open_date": "2026-07-30T06:40:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 80.5,
+   "over_odds": -115,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35882668,
+   "p1": "Jakub Nowak",
+   "p2": "Oliwier Sokolowski",
+   "p1_norm": "jakub nowak",
+   "p2_norm": "oliwier sokolowski",
+   "open_date": "2026-07-30T06:40:00.000Z",
+   "line": 80.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35882635,
@@ -99,6 +110,28 @@
    "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35882677,
+   "p1": "Jakub Kaczmarek",
+   "p2": "Wojciech Urban",
+   "p1_norm": "jakub kaczmarek",
+   "p2_norm": "wojciech urban",
+   "open_date": "2026-07-30T07:10:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35882678,
+   "p1": "Waldemar Glanowski",
+   "p2": "Piotr Przewlocki",
+   "p1_norm": "waldemar glanowski",
+   "p2_norm": "piotr przewlocki",
+   "open_date": "2026-07-30T07:10:00.000Z",
+   "line": 78.5,
+   "over_odds": -116,
+   "under_odds": -118
   },
   {
    "event_id": 35882570,
