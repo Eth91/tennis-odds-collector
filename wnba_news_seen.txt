@@ -135,6 +135,7 @@ rw|233|Chips in with season-high 12 points
 rw|238|No timetable for return
 rw|246|Records season-high 14 points
 rw|249|Stuck in bench role
+rw|252|Out again Thursday
 rw|252|Won't play Tuesday
 rw|254|Produces 18 points in win
 rw|254|Scores game-high 21 points
@@ -297,6 +298,7 @@ rw|782|Not listed on injury report
 rw|782|Out Wednesday
 rw|785|Expected to play Thursday
 rw|785|Productive in win over Tempo
+rw|785|Questionable for Thursday
 rw|785|Won't play Tuesday
 rw|786|Another productive showing Tuesday
 rw|786|Grabs 15 boards in win
