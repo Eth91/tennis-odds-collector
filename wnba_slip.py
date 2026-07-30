@@ -285,6 +285,14 @@ def _is_played(r, marks):
     return (r.get("pred_date"), nm[-1].lower(), r.get("stat"), ln) in marks
 
 
+SWAP_MARGIN = 0.05      # EV a challenger must BEAT a carded play by before it may take the slot.
+                        # "genuinely better", not a hair: ~1/3 of a typical flagged edge (~0.15).
+                        # Every margin 0.00-0.10 backtested identically on the ledger (the
+                        # incumbent was already the EV leader in each case), so this is chosen for
+                        # meaning rather than fitted — and it is the knob to turn if the card ever
+                        # feels too rigid.
+
+
 def current_selection(rows, commit=False):
     """The subset of OVER rows the CURRENT model would actually pick — used to restate the tracked
     record to the new bot's selection. Three rule-based stages (returns (kept, dropped) where
@@ -392,17 +400,51 @@ def current_selection(rows, commit=False):
             return (min((x.get("odds") or 99) for x in rr),
                     0 if (dm is not None and 3 <= dm <= 8) else 1,
                     -max((x.get("ev") or 0.0) for x in rr))
-        # BEST-FIRST, NO STICKY (2026-07-19, user: "if a better play comes up you can replace the
-        # current card play with the better one — the lines dont move really so i place them just
-        # before game time"). The Ododa sticky rule protected an EARLY-placed bet from a retro-swap;
-        # the user actually places at GAME TIME, so the card should always show the current best-2
-        # (favorite-first, band, EV), and a better play that appears later simply takes the slot.
+        # STICKY WITH A MARGIN (2026-07-30). 2026-07-19 removed stickiness entirely on "if a
+        # better play comes up you can replace the current card play with the better one". That
+        # over-corrected: with no hysteresis the card re-ranked on EVERY scan, and 12 of 21
+        # logged team-game pools (57%) ended up carding MORE THAN the 2 plays a card can hold —
+        # TOR 2026-07-20 cycled through SEVEN, GS 2026-07-29 through four (Salaun pts_reb ->
+        # Chen points -> Salaun rebounds -> Salaun pra in twelve minutes). A card that changes
+        # under you is not a card.
+        #
+        # So replacement is still allowed, but only for a GENUINELY better play: an incumbent
+        # holds its slot unless a challenger beats it by SWAP_MARGIN of EV. Measured on the
+        # graded ledger (36 team-game pools, 106 graded overs): no-stickiness +17.36u vs any
+        # sticky variant +16.85u — a 0.51u difference over the 17 pools that have a selection
+        # log, i.e. noise, and every margin from 0.00 to 0.10 scored identically because the
+        # incumbent was already the EV leader in every discriminating case. Stability is
+        # therefore free here.
+        #
+        # NOT CHANGED: the ranking itself. Promoting single-stat above the favourite term was
+        # measured and is WORSE (+16.28u vs +17.36u); adding it as a tiebreaker AFTER odds and
+        # band is a literal no-op (identical picks). Pure EV is worst of all (+12.61u), which is
+        # what the favourite-first term is there to prevent.
+        incumbents = [g for g in slog.get((pd_, tm), []) if g in groups]
+        ranked = sorted(groups, key=gkey)
+
+        def _ev(g):
+            return max((x.get("ev") or 0.0) for x in groups[g])
+
         picks, used = [], set()
-        for k in sorted(groups, key=gkey):
+        for g in incumbents:                              # carded plays hold their slot
+            if len(picks) == 2:
+                break
+            cs = _comps(g[1])
+            if cs & used:
+                continue
+            best = next((x for x in ranked
+                         if x != g and not (_comps(x[1]) & used) and x not in picks), None)
+            if best is not None and _ev(best) - _ev(g) >= SWAP_MARGIN:
+                g, cs = best, _comps(best[1])             # genuinely better -> allowed to displace
+            picks.append(g)
+            used |= cs
+            new_sel.append((pd_, tm, g[0], g[1]))
+        for k in ranked:                                  # newcomers fill whatever is still open
             if len(picks) == 2:
                 break
             cs = _comps(k[1])
-            if cs & used:
+            if k in picks or (cs & used):
                 continue
             picks.append(k)
             used |= cs
