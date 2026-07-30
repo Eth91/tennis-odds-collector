@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T18:14:39Z",
+ "captured_at": "2026-07-30T18:19:50Z",
  "matches": [
-  {
-   "event_id": 35884954,
-   "p1": "Kacper Adamus",
-   "p2": "Mariusz Baron",
-   "p1_norm": "kacper adamus",
-   "p2_norm": "mariusz baron",
-   "open_date": "2026-07-30T18:00:00.000Z",
-   "line": 97.5,
-   "over_odds": -130,
-   "under_odds": -105
-  },
   {
    "event_id": 35884956,
    "p1": "Krystian Kolodziej",
@@ -19,9 +8,9 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "patryk jendrzejewski",
    "open_date": "2026-07-30T18:05:00.000Z",
-   "line": 50.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35884963,
@@ -30,9 +19,9 @@
    "p1_norm": "arkadiusz mugowski",
    "p2_norm": "jaroslaw rolak",
    "open_date": "2026-07-30T18:10:00.000Z",
-   "line": 76.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 87.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35884964,
@@ -41,9 +30,9 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "jerzy michalik",
    "open_date": "2026-07-30T18:10:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35884976,
@@ -53,8 +42,8 @@
    "p2_norm": "dariusz molenda",
    "open_date": "2026-07-30T18:20:00.000Z",
    "line": 71.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35884985,
@@ -88,6 +77,28 @@
    "line": 74.5,
    "over_odds": -110,
    "under_odds": -120
+  },
+  {
+   "event_id": 35885012,
+   "p1": "Wojciech Pytlas",
+   "p2": "Mariusz Baron",
+   "p1_norm": "wojciech pytlas",
+   "p2_norm": "mariusz baron",
+   "open_date": "2026-07-30T18:45:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35885013,
+   "p1": "Kazimierz Rybak",
+   "p2": "Jakub Cyndera",
+   "p1_norm": "kazimierz rybak",
+   "p2_norm": "jakub cyndera",
+   "open_date": "2026-07-30T18:45:00.000Z",
+   "line": 74.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
