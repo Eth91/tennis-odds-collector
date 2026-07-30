@@ -1,27 +1,16 @@
 {
- "captured_at": "2026-07-30T20:38:10Z",
+ "captured_at": "2026-07-30T20:44:10Z",
  "matches": [
   {
-   "event_id": 35885455,
-   "p1": "Piotr Gesiarz",
-   "p2": "Jacek Zelezik",
-   "p1_norm": "piotr gesiarz",
-   "p2_norm": "jacek zelezik",
-   "open_date": "2026-07-30T20:25:00.000Z",
-   "line": 83.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
-  {
-   "event_id": 35885456,
-   "p1": "Marcin Kowalczyk",
-   "p2": "Arkadiusz Mugowski",
-   "p1_norm": "marcin kowalczyk",
-   "p2_norm": "arkadiusz mugowski",
-   "open_date": "2026-07-30T20:25:00.000Z",
-   "line": 85.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "event_id": 35885495,
+   "p1": "Mateusz Rutkowski",
+   "p2": "Patryk Jendrzejewski",
+   "p1_norm": "mateusz rutkowski",
+   "p2_norm": "patryk jendrzejewski",
+   "open_date": "2026-07-30T20:30:00.000Z",
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35885524,
@@ -30,9 +19,9 @@
    "p1_norm": "jakub cyndera",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-07-30T20:30:00.000Z",
-   "line": 82.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 92.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885502,
@@ -54,6 +43,17 @@
    "open_date": "2026-07-30T21:00:00.000Z",
    "line": 77.5,
    "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35885536,
+   "p1": "Jakub Pruszkowski",
+   "p2": "Marek Tkocz",
+   "p1_norm": "jakub pruszkowski",
+   "p2_norm": "marek tkocz",
+   "open_date": "2026-07-30T21:10:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
    "under_odds": -116
   }
  ]
