@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-07-30T06:19:58Z",
+ "captured_at": "2026-07-30T06:26:22Z",
  "matches": [
-  {
-   "event_id": 35882588,
-   "p1": "Kamil Klocek",
-   "p2": "Kamil Rudomina",
-   "p1_norm": "kamil klocek",
-   "p2_norm": "kamil rudomina",
-   "open_date": "2026-07-30T06:00:00.000Z",
-   "line": 91.5,
-   "over_odds": -145,
-   "under_odds": 105
-  },
-  {
-   "event_id": 35882601,
-   "p1": "Rafal Gajda",
-   "p2": "Oliwier Sokolowski",
-   "p1_norm": "rafal gajda",
-   "p2_norm": "oliwier sokolowski",
-   "open_date": "2026-07-30T06:05:00.000Z",
-   "line": 104.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35882602,
-   "p1": "Mariusz Adamus",
-   "p2": "Krzysztof Juszczyk",
-   "p1_norm": "mariusz adamus",
-   "p2_norm": "krzysztof juszczyk",
-   "open_date": "2026-07-30T06:10:00.000Z",
-   "line": 87.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
   {
    "event_id": 35882609,
    "p1": "Igor Dabrowski",
@@ -41,9 +8,9 @@
    "p1_norm": "igor dabrowski",
    "p2_norm": "radoslaw malinowski",
    "open_date": "2026-07-30T06:20:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 84.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882625,
@@ -52,31 +19,9 @@
    "p1_norm": "pawel kurek",
    "p2_norm": "oliver vincenec",
    "open_date": "2026-07-30T06:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
-  },
-  {
-   "event_id": 35882610,
-   "p1": "Jerzy Pelka",
-   "p2": "Waldemar Glanowski",
-   "p1_norm": "jerzy pelka",
-   "p2_norm": "waldemar glanowski",
-   "open_date": "2026-07-30T06:25:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
-  {
-   "event_id": 35882612,
-   "p1": "Dominik Solilo",
-   "p2": "Michal Minda",
-   "p1_norm": "dominik solilo",
-   "p2_norm": "michal minda",
-   "open_date": "2026-07-30T06:25:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 72.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35882618,
@@ -121,6 +66,28 @@
    "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35882638,
+   "p1": "Stapor Rafal",
+   "p2": "Kamil Klocek",
+   "p1_norm": "stapor rafal",
+   "p2_norm": "kamil klocek",
+   "open_date": "2026-07-30T06:50:00.000Z",
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -110
+  },
+  {
+   "event_id": 35882639,
+   "p1": "Rafal Niemiec",
+   "p2": "Krzysztof Juszczyk",
+   "p1_norm": "rafal niemiec",
+   "p2_norm": "krzysztof juszczyk",
+   "open_date": "2026-07-30T06:50:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -118
   },
   {
    "event_id": 35882570,
