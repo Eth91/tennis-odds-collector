@@ -551,11 +551,25 @@ def main():
     _sh = [v for v in _best.values() if v.get("shadow")]
     preview = (sorted(_v1, key=lambda x: -x["edge"])[:15]
                + sorted(_sh, key=lambda x: -x["edge"])[:15])
-    if armed and preview:
+    # PRE-ARM SHADOW LOGGING (2026-07-30). This block used to be `if armed and preview:`, so
+    # with G2 at n=0 NOTHING was ever written — the ledger had zero rows, the ALTER TABLE
+    # migration below was unreachable, and the evidence report was structurally incapable of
+    # ever leaving "INSUFFICIENT DATA". G2 needs 15 graded matchup closes and reaches only ~14
+    # by Sunday, so the record could not start this tournament either.
+    #
+    # This REVERSES a deliberate earlier choice ("never logged as paper flags"), and the reason
+    # for that choice was sound: an unproven ruler must not accumulate a paper record that LOOKS
+    # like evidence. That concern is now handled by a mechanism which did not exist when the
+    # rule was written — rows are tagged `shadow` and pga_validate excludes every shadow row
+    # from the v1.0 SPRT and scores them in their own section. So we get the prospective record
+    # without it masquerading as validation.
+    #
+    # Nothing about PRICING changes: same probabilities, same gates, same constants. Only what
+    # is written down changes.
+    if preview:
         con = sqlite3.connect(PAPER)
         con.execute(E1.DDL)
-        # migrate an existing ledger in place; pure instrumentation for the
-        # frozen-model validation - changes no probability, gate or constant
+        # migration hoisted out of the arming branch — it was unreachable in there
         for _c in ("p_bet", "p_fair", "snapshot_ts", "first_tee", "lam", "n_lines"):
             try:
                 con.execute("ALTER TABLE flags ADD COLUMN %s %s"
@@ -563,27 +577,34 @@ def main():
                                else "REAL"))
             except sqlite3.OperationalError:
                 pass
+        _n_shadow = 0
         for pv in preview:
-            key = f"{evn}|{pv['market']}|{pv['runner']}|{pv['stream']}"
+            _is_shadow = bool(pv.get("shadow")) or not armed
+            _stream = pv["stream"] + ("-shadow" if _is_shadow
+                                      and not pv["stream"].endswith("-shadow") else "")
+            key = f"{evn}|{pv['market']}|{pv['runner']}|{_stream}"
             cur = con.execute(
                 "INSERT OR IGNORE INTO flags(key,flagged_at,event,market,stream,"
                 "runner,opp,odds,d_wind,tee_r,tee_o,p_bet,p_fair,"
                 "snapshot_ts,first_tee,lam,n_lines) "
                 "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                (key, now, evn, pv["market"], pv["stream"], pv["runner"], "",
+                (key, now, evn, pv["market"], _stream, pv["runner"], "",
                  pv["odds"], pv["edge"], "", "",
                  pv.get("p_bet"), pv.get("p_fair"),
                  snap_ts, _first_tee,
-                 _bird_lam if pv["stream"] == "E3-birdies" else None,
-                 _bird_nlines if pv["stream"] == "E3-birdies" else None))
-            # shadow rows are persisted for the adoption test but are NOT v1.0 flags
-            if cur.rowcount and not pv.get("shadow"):
-                flags.append(pv)
+                 _bird_lam if pv["stream"].startswith("E3-birdies") else None,
+                 _bird_nlines if pv["stream"].startswith("E3-birdies") else None))
+            if cur.rowcount:
+                if _is_shadow:
+                    _n_shadow += 1
+                else:
+                    flags.append(pv)
         con.commit()
         con.close()
-        print(f"  E3 flags logged: {len(flags)}")
+        print(f"  E3 logged: {len(flags)} armed + {_n_shadow} shadow "
+              f"(G2 {'PASS' if armed else 'not passed — everything logs as shadow'})")
     else:
-        print(f"  E3 preview rows: {len(preview)} (not logged — gate not passed)")
+        print("  E3: no rows to log")
 
     # board: fold into pga_board.json via E1's writer, with the preview attached
     E1._write_board(evn)
