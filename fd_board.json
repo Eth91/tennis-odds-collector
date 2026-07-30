@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-07-30T21:03:49Z",
+ "captured_at": "2026-07-30T21:10:50Z",
  "matches": [
-  {
-   "event_id": 35885530,
-   "p1": "Michal Guzik",
-   "p2": "Kacper Kwiatkowski",
-   "p1_norm": "michal guzik",
-   "p2_norm": "kacper kwiatkowski",
-   "open_date": "2026-07-30T20:40:00.000Z",
-   "line": 85.5,
-   "over_odds": -145,
-   "under_odds": 105
-  },
-  {
-   "event_id": 35885502,
-   "p1": "Kacper Adamus",
-   "p2": "Pawel Slosarczyk",
-   "p1_norm": "kacper adamus",
-   "p2_norm": "pawel slosarczyk",
-   "open_date": "2026-07-30T20:45:00.000Z",
-   "line": 102.5,
-   "over_odds": 110,
-   "under_odds": -155
-  },
-  {
-   "event_id": 35885546,
-   "p1": "Kazimierz Rybak",
-   "p2": "Jakub Skorupa",
-   "p1_norm": "kazimierz rybak",
-   "p2_norm": "jakub skorupa",
-   "open_date": "2026-07-30T20:50:00.000Z",
-   "line": 82.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
   {
    "event_id": 35885525,
    "p1": "Jakub Chmielowski",
@@ -41,9 +8,31 @@
    "p1_norm": "jakub chmielowski",
    "p2_norm": "mateusz rutkowski",
    "open_date": "2026-07-30T21:00:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35885559,
+   "p1": "Marian Brunner",
+   "p2": "Jerzy Michalik",
+   "p1_norm": "marian brunner",
+   "p2_norm": "jerzy michalik",
+   "open_date": "2026-07-30T21:00:00.000Z",
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35885560,
+   "p1": "Mateusz Trela",
+   "p2": "Jaroslaw Rolak",
+   "p1_norm": "mateusz trela",
+   "p2_norm": "jaroslaw rolak",
+   "open_date": "2026-07-30T21:00:00.000Z",
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35885536,
@@ -52,9 +41,31 @@
    "p1_norm": "jakub pruszkowski",
    "p2_norm": "marek tkocz",
    "open_date": "2026-07-30T21:10:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
+   "line": 76.5,
+   "over_odds": -110,
+   "under_odds": -125
+  },
+  {
+   "event_id": 35885577,
+   "p1": "Dawid Kotwica",
+   "p2": "Mateusz Trela",
+   "p1_norm": "dawid kotwica",
+   "p2_norm": "mateusz trela",
+   "open_date": "2026-07-30T21:20:00.000Z",
+   "line": 78.5,
+   "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35885570,
+   "p1": "Marian Lebek",
+   "p2": "Pawel Slosarczyk",
+   "p1_norm": "marian lebek",
+   "p2_norm": "pawel slosarczyk",
+   "open_date": "2026-07-30T21:35:00.000Z",
+   "line": 73.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
