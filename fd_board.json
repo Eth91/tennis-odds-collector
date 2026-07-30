@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-30T12:05:37Z",
+ "captured_at": "2026-07-30T12:12:57Z",
  "matches": [
-  {
-   "event_id": 35883438,
-   "p1": "Jakub Zochniak",
-   "p2": "Krzysztof Wloczko",
-   "p1_norm": "jakub zochniak",
-   "p2_norm": "krzysztof wloczko",
-   "open_date": "2026-07-30T11:45:00.000Z",
-   "line": 94.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35883450,
-   "p1": "Wojciech Gluszek",
-   "p2": "Blazej Warpas",
-   "p1_norm": "wojciech gluszek",
-   "p2_norm": "blazej warpas",
-   "open_date": "2026-07-30T11:50:00.000Z",
-   "line": 76.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35883456,
    "p1": "Lukasz Oracz",
@@ -30,9 +8,9 @@
    "p1_norm": "lukasz oracz",
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-30T11:55:00.000Z",
-   "line": 86.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 77.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35883463,
@@ -41,9 +19,9 @@
    "p1_norm": "marcin jadczyk",
    "p2_norm": "karol strowski",
    "open_date": "2026-07-30T12:05:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 69.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35883471,
@@ -52,9 +30,9 @@
    "p1_norm": "kacper petas",
    "p2_norm": "josef braun",
    "open_date": "2026-07-30T12:10:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35883474,
@@ -99,6 +77,17 @@
    "line": 76.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35883497,
+   "p1": "Grzegorz Poliniewicz",
+   "p2": "Krzysztof Wloczko",
+   "p1_norm": "grzegorz poliniewicz",
+   "p2_norm": "krzysztof wloczko",
+   "open_date": "2026-07-30T12:35:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
