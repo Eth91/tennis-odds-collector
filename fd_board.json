@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T01:28:29Z",
+ "captured_at": "2026-07-30T01:32:30Z",
  "matches": [
   {
    "event_id": 35881947,
@@ -8,9 +8,9 @@
    "p1_norm": "andriej fomin",
    "p2_norm": "kazimierz rybak",
    "open_date": "2026-07-30T01:25:00.000Z",
-   "line": 74.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 70.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35881952,
@@ -19,9 +19,9 @@
    "p1_norm": "zbigniew nocun",
    "p2_norm": "michal wolny",
    "open_date": "2026-07-30T01:30:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 73.5,
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35881964,
