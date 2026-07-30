@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T19:42:07Z",
+ "captured_at": "2026-07-30T19:47:34Z",
  "matches": [
   {
    "event_id": 35885440,
@@ -8,9 +8,9 @@
    "p1_norm": "pawel slosarczyk",
    "p2_norm": "krzysztof juszczyk",
    "open_date": "2026-07-30T19:35:00.000Z",
-   "line": 48.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 58.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35885454,
@@ -19,9 +19,9 @@
    "p1_norm": "karol strowski",
    "p2_norm": "krystian kolodziej",
    "open_date": "2026-07-30T19:40:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 72.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885466,
@@ -66,17 +66,6 @@
    "line": 75.5,
    "over_odds": -112,
    "under_odds": -118
-  },
-  {
-   "event_id": 35885455,
-   "p1": "Piotr Gesiarz",
-   "p2": "Jacek Zelezik",
-   "p1_norm": "piotr gesiarz",
-   "p2_norm": "jacek zelezik",
-   "open_date": "2026-07-30T20:25:00.000Z",
-   "line": 76.5,
-   "over_odds": null,
-   "under_odds": null
   }
  ]
 }
