@@ -496,7 +496,14 @@ def main():
                 p_over = B.p_x_or_more(rs, int(line + 0.5), _mix)
                 ours = p_over if side == "over" else 1 - p_over
                 edge = ours - 1 / od
-                key = (RU.norm(player), side, line)
+                # ROUND MUST BE IN THE KEY (2026-07-30). It was (player, side, line), so the
+                # moment FanDuel posts R2 alongside R1 — which is exactly when it posts the
+                # next round's book — an identical player/side/line in a DIFFERENT round was
+                # silently dropped as a duplicate. The ledger key carries the market and so
+                # would have been fine; the bet was lost earlier than that, here.
+                _rnd_m = _re.search(r"Round\s+(\d)", mkt or "")
+                _rnd = _rnd_m.group(1) if _rnd_m else "?"
+                key = (RU.norm(player), side, line, _rnd)
                 if (edge >= 0.05 and ours <= B_RATIO_MAX * (1.0 / od)
                         and key not in seen_b):
                     seen_b.add(key)
@@ -518,6 +525,24 @@ def main():
                      min(_nb.get("over", 0), _nb.get("under", 0)) == 0 else ""))
     except Exception as _be:
         print(f"  birdie pricing skipped: {str(_be)[:70]}")
+
+    # ---- round-score O/U: SHADOW STREAM ----
+    # The ruler's most native market: sigma measured right to 0.4% on 15,426 leak-free
+    # player-rounds. The LEVEL is 0.148 sigma optimistic, so pga_rscore solves a single
+    # additive DELTA against the market's own mean before betting any deviation — we never
+    # claim to know what the field will shoot, only who beats it.
+    try:
+        import pga_rscore as _RS
+        _rs = _RS.price(rows, R_raw, RU.norm, _blend, RU.SPREAD)
+        if _rs:
+            preview.extend(_rs)
+            print(f"  round-score [SHADOW, armable={_RS.ARMABLE}]: {len(_rs)} flags "
+                  f"(delta {_rs[0].get('_delta')} strokes)")
+        else:
+            print("  round-score [SHADOW]: 0 flags (needs >= "
+                  f"{_RS.RS_MIN_LINES} two-sided lines to anchor the level)")
+    except Exception as _re2:
+        print(f"  round-score pricing skipped: {str(_re2)[:70]}")
 
     # ---- make-the-cut: SHADOW STREAM (candidate hypothesis, never armed) ----
     # A new stream is a new hypothesis under the v1.0 freeze. It prices and LOGS so a

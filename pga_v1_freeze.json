@@ -2,10 +2,10 @@
  "version": "v1.0",
  "frozen": "2026-07-30",
  "sha256_16": "27bf0a242491c19d",
- "source_sha256_16": "a1150b6ed1194943",
+ "source_sha256_16": "a8780c8de09971fd",
  "source_files": {
   "pga_ruler.py": "ce9013952e943a39",
-  "pga_e3.py": "ddee750643e91c68",
+  "pga_e3.py": "63099ac403076f09",
   "pga_birdies.py": "e7530e852c0400ed",
   "pga_context.py": "97f98a861a6fe4d0"
  },
