@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T04:56:55Z",
+ "captured_at": "2026-07-30T05:02:10Z",
  "matches": [
   {
    "event_id": 35882452,
@@ -8,20 +8,9 @@
    "p1_norm": "pawel kurek",
    "p2_norm": "michal durda",
    "open_date": "2026-07-30T04:30:00.000Z",
-   "line": 86.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35882465,
-   "p1": "Zbigniew Nocun",
-   "p2": "Jerzy Michalik",
-   "p1_norm": "zbigniew nocun",
-   "p2_norm": "jerzy michalik",
-   "open_date": "2026-07-30T04:40:00.000Z",
-   "line": 71.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 95.5,
+   "over_odds": -165,
+   "under_odds": 120
   },
   {
    "event_id": 35882469,
@@ -30,20 +19,9 @@
    "p1_norm": "wojciech gluszek",
    "p2_norm": "radoslaw malinowski",
    "open_date": "2026-07-30T04:50:00.000Z",
-   "line": 83.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35882470,
-   "p1": "Michal Minda",
-   "p2": "Kamil Rudomina",
-   "p1_norm": "michal minda",
-   "p2_norm": "kamil rudomina",
-   "open_date": "2026-07-30T04:50:00.000Z",
-   "line": 88.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 71.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35882471,
@@ -52,9 +30,9 @@
    "p1_norm": "jakub kaczmarek",
    "p2_norm": "mariusz adamus",
    "open_date": "2026-07-30T04:50:00.000Z",
-   "line": 78.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 82.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882473,
@@ -64,8 +42,8 @@
    "p2_norm": "artur grela",
    "open_date": "2026-07-30T04:55:00.000Z",
    "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35882476,
@@ -75,8 +53,8 @@
    "p2_norm": "michal wolny",
    "open_date": "2026-07-30T05:00:00.000Z",
    "line": 74.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35882494,

@@ -199,3 +199,21 @@ e3: pricing PGA Rocket Classic 2026  (G2 pending n=0 — preview only)
 pga grade: +0 newly graded — E1 record 0-0  +0.00u
 E1 wave meter — Rocket Classic [Scheduled]
   no tee times posted yet — meter waits (they release Tue/Wed)
+  crawl 2026: +11950 round rows
+  rounds table: 65359 rows, 1373 players
+G2: 0 gradeable closes [none] from 20 collected matchup markets
+     dropped  20  no same-edition result yet
+G2: n=0 < 15 -> gate INCONCLUSIVE. This is a FORWARD test and cannot be backtested: it needs OUR OWN collected closes, and the collector only has history from the day it started.
+e3: pricing PGA Rocket Classic 2026  (G2 pending n=0 — preview only)
+  ruler: course-fit players 107, wave split 147, wave shift +0.15 strokes [exposure gap +1.4 km/h -> +0.15 str]
+  skip TOP_10_FINISH_(INCL._TIES): ties-inclusive product, simulator has no ties (pool implies 14.3 vs nominal 10)
+  skip TOP_20_FINISH_(INCL._TIES): ties-inclusive product, simulator has no ties (pool implies 27.3 vs nominal 20)
+  skip TOP_5_FINISH_(INCL._TIES): ties-inclusive product, simulator has no ties (pool implies 7.7 vs nominal 5)
+  birdies: course factor 1.038 (3 prior editions), wind 15.9 km/h
+  birdies: course R2026524 par mix {3: 4, 4: 12, 5: 2}
+  birdies: devig on 24/24 two-sided lines — raw Over 0.5534 vs FAIR 0.5221 (vig 3.13 pts)
+  birdies: course-level LAM=0.975 (market-anchored on 24 Over lines, mix {3: 4, 4: 12, 5: 2})
+  birdies: NOT ARMABLE — birdie reliability slope 0.61 < 0.85 — tail probabilities are too extreme (18-hole independence assumption); needs a per-round random effect before this stream can be bet
+  birdies: flags 3 over / 2 under
+  E3 preview rows: 15 (not logged — gate not passed)
+pga grade: +0 newly graded — E1 record 0-0  +0.00u
