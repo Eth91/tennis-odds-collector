@@ -236,7 +236,8 @@ def rates(course_factor=1.0, wind_kmh=None, half_life_d=120.0):
             pass
     out = {}
     for pl, agg in per.items():
-        out[pl] = {par: min(((b + K_H * frate[par]) / (h + K_H)) * ctx, 0.95)
+        out[pl] = {par: min(((b + K_H_PAR.get(par, K_H) * frate[par])
+                             / (h + K_H_PAR.get(par, K_H))) * ctx, 0.95)
                    for par, (h, b) in agg.items()}
     return out, {par: min(v * ctx, 0.95) for par, v in frate.items()}
 
@@ -250,7 +251,14 @@ def rates(course_factor=1.0, wind_kmh=None, half_life_d=120.0):
 # Exact hole pars are used whenever the event is in our harvest; the rule is the
 # fallback for an UPCOMING course (which is the case that matters for betting).
 PAR_MIX_RULE = {70: {3: 4, 4: 12, 5: 2}, 71: {3: 4, 4: 11, 5: 3},
-                72: {3: 4, 4: 10, 5: 4}, 73: {3: 4, 4: 9, 5: 5}}
+                72: {3: 4, 4: 10, 5: 4}, 73: {3: 3, 4: 11, 5: 4}}
+# RE-VALIDATED 2026-07-29 on 114 harvested events (the rule was set on 8 and 5):
+#   par 70 -> (4,12,2) in 21/27 events (78%)
+#   par 71 -> (4,11,3) in 35/41 (85%)
+#   par 72 -> (4,10,4) in 42/44 (95%)
+#   par 73 -> (3,11,4) in 2/2  <- CORRECTED from the assumed (4,9,5). n=2 is thin, but an
+#             observed mix beats an invented one, and this is only the fallback for a course
+#             with no hole data at all — rare now that 114 events are harvested.
 
 
 def par_mix(par_total):
