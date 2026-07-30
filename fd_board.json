@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T07:11:25Z",
+ "captured_at": "2026-07-30T07:17:18Z",
  "matches": [
   {
    "event_id": 35882644,
@@ -8,7 +8,7 @@
    "p1_norm": "rafal gajda",
    "p2_norm": "pawel kurek",
    "open_date": "2026-07-30T06:55:00.000Z",
-   "line": 89.5,
+   "line": 91.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -19,9 +19,9 @@
    "p1_norm": "jakub kaczmarek",
    "p2_norm": "wojciech urban",
    "open_date": "2026-07-30T07:10:00.000Z",
-   "line": 79.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 81.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35882678,
@@ -30,9 +30,9 @@
    "p1_norm": "waldemar glanowski",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-07-30T07:15:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 80.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882680,
@@ -42,8 +42,8 @@
    "p2_norm": "adam linek",
    "open_date": "2026-07-30T07:15:00.000Z",
    "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882686,
@@ -99,6 +99,50 @@
    "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35882712,
+   "p1": "Blazej Warpas",
+   "p2": "Igor Dabrowski",
+   "p1_norm": "blazej warpas",
+   "p2_norm": "igor dabrowski",
+   "open_date": "2026-07-30T07:40:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35882713,
+   "p1": "Dominik Solilo",
+   "p2": "Kamil Klocek",
+   "p1_norm": "dominik solilo",
+   "p2_norm": "kamil klocek",
+   "open_date": "2026-07-30T07:40:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35882715,
+   "p1": "Jakub Nowak",
+   "p2": "Pawel Kurek",
+   "p1_norm": "jakub nowak",
+   "p2_norm": "pawel kurek",
+   "open_date": "2026-07-30T07:45:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35882716,
+   "p1": "Grzegorz Felkel",
+   "p2": "Szymon Kolasa",
+   "p1_norm": "grzegorz felkel",
+   "p2_norm": "szymon kolasa",
+   "open_date": "2026-07-30T07:45:00.000Z",
+   "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
