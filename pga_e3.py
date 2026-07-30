@@ -58,6 +58,16 @@ VIG_MAX = 1.75          # MEASURED across all six live top-N products: 1.209-1.3
                         # gift. Above 1.75 the pool is not one N-winner market — duplicated or merged
                         # pools land at 2.4x+. Replaces the old inv-vs-3*N_eff net, which could not
                         # mean anything while N_eff and inv were counted over different populations.
+EV_MIN = 0.03           # MEASURED 2026-07-30. A bet must clear +3% EV AT THE OFFERED PRICE, not
+                        # merely beat the devigged fair by an absolute probability margin — those
+                        # are different tests and only this one accounts for the vig. Since
+                        # od = N_eff/(fair*inv), EV = (p_bet/fair)/vig - 1, and the measured
+                        # overround on these products is 1.21-1.29, so TN_RATIO_MIN=1.15 alone
+                        # admitted guaranteed losers. Floor sized off Monte Carlo noise in the EV
+                        # number itself: 6 seeds give a per-bet sd of 0.0182 at reps=1, 0.0091 at
+                        # the shipped reps=4, so 0.03 is ~3.3sd. It filters SAMPLING noise only —
+                        # model error is larger and unquantified (BLEND_W's CI alone swings EV by
+                        # ~+/-8 points), so clearing this floor is necessary, never sufficient.
 TN_RATIO_MIN = 1.15     # MEASURED 2026-07-30. Bucketing 986 runners by (model/market) and grading
 TN_RATIO_MAX = 2.0      # on top-20 (162 positives): inside 2x the model is accurate (1.06-1.10x
                         # realised), beyond 2x it over-predicts by 2.08x (n=134) and 2.48x (n=192).
@@ -143,7 +153,8 @@ def main():
         _fair_side = fair if side == a else (1 - fair)
         _bet = _blend(_fair_side, _ours_side)
         if (_bet - _fair_side >= M_EDGE
-                and _ours_side / max(_fair_side, 1e-9) <= M_RATIO_MAX):
+                and _ours_side / max(_fair_side, 1e-9) <= M_RATIO_MAX
+                and _bet * odds - 1.0 >= EV_MIN):
             preview.append({"stream": "E3-match", "runner": side, "market": mkt[:60],
                             "odds": odds, "edge": round(_bet - _fair_side, 3),
                             "p_raw": round(_ours_side, 4), "p_bet": round(_bet, 4),
@@ -305,7 +316,11 @@ def main():
                                     "odds": od, "edge": round(ours - fair, 3)})
             elif (od >= TN_MIN_ODDS
                   and TN_RATIO_MIN <= ours / max(fair, 1e-9) <= TN_RATIO_MAX
-                  and _blend(fair, ours) - fair >= TN_EDGE):
+                  and _blend(fair, ours) - fair >= TN_EDGE
+                  # EV AT THE OFFERED PRICE (2026-07-30). The three tests above are all
+                  # relative to the DEVIGGED fair; none of them knows what vig we pay. On a
+                  # 21-29% overround that gap passed guaranteed losers.
+                  and _blend(fair, ours) * od - 1.0 >= EV_MIN):
                 # gate on the RAW ratio (that is what the 2.0 cap was measured against), but
                 # price off the BLEND — what we actually believe once the market is weighted in
                 _pb = _blend(fair, ours)
