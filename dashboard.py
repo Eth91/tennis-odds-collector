@@ -1397,6 +1397,17 @@ def _pga_panel():
             continue
         mkt, who, line = _pga_market_of(r)
         groups.setdefault(mkt, []).append((who, line, float(r["odds"])))
+    # DEDUPE. The same play is usually in BOTH lists — `open` is the paper ledger and `e3.rows`
+    # is the current preview — so merging them printed Eric Cole and Jackson Koivun twice.
+    # Key on what a bettor would call the same bet: market, selection, line. Keep the shortest
+    # price, which is the one actually available.
+    for mkt in groups:
+        best = {}
+        for who, line, od in groups[mkt]:
+            k = (who.strip().lower(), line.strip().lower())
+            if k not in best or od < best[k][2]:
+                best[k] = (who, line, od)
+        groups[mkt] = list(best.values())
 
     body = ""
     ORDER = ["MATCHUPS", "MAKE THE CUT", "TOP 5 FINISH", "TOP 10 FINISH", "TOP 20 FINISH",
