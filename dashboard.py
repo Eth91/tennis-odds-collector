@@ -1416,8 +1416,10 @@ def _pga_panel():
             det = f'<span class="pgaline">{html.escape(line)}</span>' if line else ""
             body += (f'<div class="swrow"><div class="swhd">'
                      f'<b>{html.escape(who)}</b>{det}'
-                     f'<span class="swusg" title="{od:.2f} decimal">'
-                     f'{html.escape(_am(od))} · FanDuel</span></div></div>')
+                     f'<span class="pgaodds" title="{od:.2f} decimal">'
+                     f'<span class="podds fd">{html.escape(_am(od))}</span>'
+                     f'<img class="bklogo" src="book-fd.png" alt="FD"></span>'
+                     f'</div></div>')
     if not groups:
         body = '<div class="swo">No plays on the board right now.</div>'
     return f'<div class="starwatch">{head}{body}</div>'
@@ -2790,6 +2792,7 @@ def build():
   .pgamkt {{ margin:10px 0 4px; font-size:11px; letter-spacing:.08em; font-weight:700;
              color:#8b94a3; text-transform:uppercase; }}
   .pgaline {{ margin-left:8px; color:#c8cfda; font-size:12.5px; }}
+  .pgaodds {{ margin-left:auto; white-space:nowrap; }}
   .swusg {{ margin-left:auto; color:#8b94a3; font-size:11.5px; font-variant-numeric:tabular-nums; white-space:nowrap; }}
   .swo {{ color:#7d8696; font-size:12px; margin-top:4px; }}
   .swo b {{ color:#c3c9d4; font-weight:700; }}
