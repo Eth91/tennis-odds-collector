@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-title" content="Pickz">
 <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="64x64" href="icon-64.png">
-<meta name="bv" content="512c7ec77f">
+<meta name="bv" content="1d83bd2616">
 <title>Today's Plays</title>
 <style>
   :root { color-scheme: dark; }
@@ -86,10 +86,19 @@
   .swn.hot { color:#6aa5ef; background:rgba(106,165,239,.16); }
   .swvs { color:#6b7484; font-size:11.5px; }
   .swday { color:#6b7484; font-size:10.5px; }
-  .pgamkt { margin:10px 0 4px; font-size:11px; letter-spacing:.08em; font-weight:700;
-             color:#8b94a3; text-transform:uppercase; }
-  .pgaline { margin-left:8px; color:#c8cfda; font-size:12.5px; }
-  .pgaodds { margin-left:auto; white-space:nowrap; }
+  .pgahead { display:flex; align-items:center; gap:8px; padding-bottom:2px; }
+  .pgatitle { color:#e8ecf2; font-size:15px; font-weight:800; letter-spacing:-.01em; }
+  .pgapaper { font-size:9px; font-weight:800; letter-spacing:.06em; color:#d0a45e;
+               border:1px solid #d0a45e55; border-radius:5px; padding:2px 5px; }
+  .pgarec { color:#7d8696; font-size:11.5px; font-variant-numeric:tabular-nums; }
+  .pgamkt { margin:17px 0 1px; font-size:10px; letter-spacing:.09em; font-weight:800;
+             color:#79828f; text-transform:uppercase; }
+  .pgamkt:first-of-type { margin-top:11px; }
+  .pgabet { padding:10px 0 9px; border-top:1px solid #1a1f28; }
+  .pgatop { display:flex; align-items:center; gap:8px; }
+  .pgasel { color:#e8ecf2; font-size:14.5px; font-weight:700; letter-spacing:-.01em; }
+  .pgasp { flex:1 1 auto; }
+  .pgasub { color:#7d8696; font-size:12px; margin-top:2px; }
   .swusg { margin-left:auto; color:#8b94a3; font-size:11.5px; font-variant-numeric:tabular-nums; white-space:nowrap; }
   .swo { color:#7d8696; font-size:12px; margin-top:4px; }
   .swo b { color:#c3c9d4; font-weight:700; }
@@ -543,7 +552,7 @@
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
-    <div class="live"><span class="dot"></span>4:57 PM MT
+    <div class="live"><span class="dot"></span>5:00 PM MT
       <button class="rfrsh" onclick="manualRefresh(this)" title="Pull new plays now" aria-label="Refresh now">↻</button>
       <span id="rfchk"></span></div>
   </header>
@@ -572,7 +581,7 @@
   </div>
   <div class="panel hidden" id="pga">
     <h2>PGA Tour · FanDuel</h2>
-    <div class="starwatch"><div class="sw-title"><img class="glogo" src="logos/pga.png" alt="" loading="lazy" onerror="this.style.display='none'"><img class="glogo" src="logos/fd.png" alt="" loading="lazy" onerror="this.style.display='none'">⛳ PGA <span>· Rocket Classic · PAPER — tracking only, not live bets · 0-0 · <b class="pos">+0.00u</b></span></div><div class="pgamkt">MATCHUPS</div><div class="swrow"><div class="swhd"><b>Si Woo Kim</b><span class="pgaline">72 holes vs Chris Gotterup</span><span class="pgaodds" title="2.25 decimal"><span class="podds fd">+125</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div></div><div class="swrow"><div class="swhd"><b>Wyndham Clark</b><span class="pgaline">72 holes vs Jackson Koivun</span><span class="pgaodds" title="2.88 decimal"><span class="podds fd">+188</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div></div><div class="pgamkt">TOP 20 FINISH</div><div class="swrow"><div class="swhd"><b>Christiaan Bezuidenhout</b><span class="pgaodds" title="5.70 decimal"><span class="podds fd">+470</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div></div><div class="pgamkt">ROUND 1 BIRDIES</div><div class="swrow"><div class="swhd"><b>Jake Knapp</b><span class="pgaline">over 2.5</span><span class="pgaodds" title="1.76 decimal"><span class="podds fd">-132</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div></div><div class="swrow"><div class="swhd"><b>Nicolai Højgaard</b><span class="pgaline">under 5.5</span><span class="pgaodds" title="1.78 decimal"><span class="podds fd">-128</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div></div><div class="swrow"><div class="swhd"><b>Jake Knapp</b><span class="pgaline">under 4.5</span><span class="pgaodds" title="2.02 decimal"><span class="podds fd">+102</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div></div><div class="swrow"><div class="swhd"><b>Jackson Suber</b><span class="pgaline">under 4.5</span><span class="pgaodds" title="2.26 decimal"><span class="podds fd">+126</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div></div><div class="pgamkt">ROUND 1 SCORE</div><div class="swrow"><div class="swhd"><b>Patrick Cantlay</b><span class="pgaline">over 64.5</span><span class="pgaodds" title="1.53 decimal"><span class="podds fd">-188</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div></div><div class="swrow"><div class="swhd"><b>Jacob Bridgeman</b><span class="pgaline">under 67.5</span><span class="pgaodds" title="2.00 decimal"><span class="podds fd">+100</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div></div><div class="swrow"><div class="swhd"><b>Jackson Suber</b><span class="pgaline">over 67.5</span><span class="pgaodds" title="2.38 decimal"><span class="podds fd">+138</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div></div><div class="swrow"><div class="swhd"><b>Nicolai Højgaard</b><span class="pgaline">over 66.5</span><span class="pgaodds" title="2.62 decimal"><span class="podds fd">+162</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div></div><div class="swrow"><div class="swhd"><b>Jake Knapp</b><span class="pgaline">under 68.5</span><span class="pgaodds" title="2.62 decimal"><span class="podds fd">+162</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div></div><div class="swrow"><div class="swhd"><b>J.J. Spaun</b><span class="pgaline">over 66.5</span><span class="pgaodds" title="2.62 decimal"><span class="podds fd">+162</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div></div><div class="swrow"><div class="swhd"><b>Cameron Young</b><span class="pgaline">under 67.5</span><span class="pgaodds" title="2.75 decimal"><span class="podds fd">+175</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div></div></div>
+    <div class="starwatch"><div class="pgahead"><span class="pgatitle">PGA Rocket Classic</span><span class="pgapaper">PAPER</span><span class="pgasp"></span></div><div class="pgamkt">TOP 20 FINISH</div><div class="pgabet"><div class="pgatop"><span class="pgasel">Christiaan Bezuidenhout</span><span class="pgasp"></span><span title="5.70 decimal"><span class="podds fd">+470</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div></div><div class="pgamkt">ROUND 1 BIRDIES</div><div class="pgabet"><div class="pgatop"><span class="pgasel">Jake Knapp</span><span class="pgasp"></span><span title="1.76 decimal"><span class="podds fd">-132</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div><div class="pgasub">over 2.5</div></div><div class="pgabet"><div class="pgatop"><span class="pgasel">Nicolai Højgaard</span><span class="pgasp"></span><span title="1.78 decimal"><span class="podds fd">-128</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div><div class="pgasub">under 5.5</div></div><div class="pgabet"><div class="pgatop"><span class="pgasel">Jake Knapp</span><span class="pgasp"></span><span title="2.02 decimal"><span class="podds fd">+102</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div><div class="pgasub">under 4.5</div></div><div class="pgabet"><div class="pgatop"><span class="pgasel">Jackson Suber</span><span class="pgasp"></span><span title="2.26 decimal"><span class="podds fd">+126</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div><div class="pgasub">under 4.5</div></div><div class="pgamkt">ROUND 1 SCORE</div><div class="pgabet"><div class="pgatop"><span class="pgasel">Patrick Cantlay</span><span class="pgasp"></span><span title="1.53 decimal"><span class="podds fd">-188</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div><div class="pgasub">over 64.5</div></div><div class="pgabet"><div class="pgatop"><span class="pgasel">Jacob Bridgeman</span><span class="pgasp"></span><span title="2.00 decimal"><span class="podds fd">+100</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div><div class="pgasub">under 67.5</div></div><div class="pgabet"><div class="pgatop"><span class="pgasel">Jackson Suber</span><span class="pgasp"></span><span title="2.38 decimal"><span class="podds fd">+138</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div><div class="pgasub">over 67.5</div></div><div class="pgabet"><div class="pgatop"><span class="pgasel">Nicolai Højgaard</span><span class="pgasp"></span><span title="2.62 decimal"><span class="podds fd">+162</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div><div class="pgasub">over 66.5</div></div><div class="pgabet"><div class="pgatop"><span class="pgasel">Jake Knapp</span><span class="pgasp"></span><span title="2.62 decimal"><span class="podds fd">+162</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div><div class="pgasub">under 68.5</div></div><div class="pgabet"><div class="pgatop"><span class="pgasel">J.J. Spaun</span><span class="pgasp"></span><span title="2.62 decimal"><span class="podds fd">+162</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div><div class="pgasub">over 66.5</div></div><div class="pgabet"><div class="pgatop"><span class="pgasel">Cameron Young</span><span class="pgasp"></span><span title="2.75 decimal"><span class="podds fd">+175</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div><div class="pgasub">under 67.5</div></div></div>
   </div>
   <div class="panel hidden" id="mlb">
     <h2>MLB pitcher props · best book</h2>
