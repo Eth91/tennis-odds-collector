@@ -1,0 +1,28 @@
+{
+ "updated": "2026-07-30T22:27:03Z",
+ "frozen": "2026-07-30",
+ "verdict": "INSUFFICIENT DATA",
+ "prospective": null,
+ "retrospective": {
+  "n_scored": 40,
+  "n_settled": 47,
+  "wins": 27,
+  "losses": 13,
+  "llr": 2.7086627871728215,
+  "logloss_model": 0.6424061205194058,
+  "logloss_market": 0.7101226901987266,
+  "brier_model": 0.22809705000002506,
+  "brier_market": 0.25837338507219193,
+  "slope": -0.2332692279381348,
+  "pnl": 20.016,
+  "roi": 0.4258723404255319,
+  "breakeven": 0.5075401408986736,
+  "roi_ci": [
+   0.14655752703944847,
+   0.7051871538116153
+  ],
+  "exp_model": 28.691998999999996,
+  "exp_market": 19.556325326955182,
+  "actual": 27.0
+ }
+}

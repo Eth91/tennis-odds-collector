@@ -1,0 +1,24 @@
+{
+ "version": "v1.0",
+ "frozen": "2026-07-30",
+ "sha256_16": "433b9e32404d015d",
+ "source_sha256_16": "ac6530fe526aa9e6",
+ "source_files": {
+  "wnba_alert.py": "e9f714e6568eb48a",
+  "wnba_slip.py": "443e81afa49f1059",
+  "wnba_tonight.py": "1918505b1705e8dc",
+  "wnba_wowy.py": "2dfa0bb4844e7ea3"
+ },
+ "constants": {
+  "wnba_slip": {
+   "COMPONENT_CAP_U": 2.5,
+   "LADDER_ANCHOR_U": 1.0,
+   "LADDER_CAP_U": 2.5,
+   "LADDER_RUNG_DEFAULT_U": 0.25,
+   "PARLAY_EPOCH": "2026-07-13",
+   "SWAP_MARGIN": 0.05,
+   "_SCHEMA": "CREATE TABLE IF NOT EXISTS parlays(\n  pred_date TEXT, key TEXT, legs TEXT, n INTEGER, dec REAL, ev REAL,\n  result TEXT, pnl REAL, played INTEGER DEFAULT 0, graded INTEGER DEFAULT 0, graded_at TEXT,\n  UNIQUE(pred_date, key));",
+   "_SEL_SCHEMA": "CREATE TABLE IF NOT EXISTS selections (\n    pred_date TEXT, team TEXT, player TEXT, stat TEXT, selected_at TEXT,\n    PRIMARY KEY (pred_date, team, player, stat))"
+  }
+ }
+}
