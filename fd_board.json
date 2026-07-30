@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-07-30T18:24:11Z",
+ "captured_at": "2026-07-30T18:29:13Z",
  "matches": [
-  {
-   "event_id": 35884956,
-   "p1": "Krystian Kolodziej",
-   "p2": "Patryk Jendrzejewski",
-   "p1_norm": "krystian kolodziej",
-   "p2_norm": "patryk jendrzejewski",
-   "open_date": "2026-07-30T18:05:00.000Z",
-   "line": 75.5,
-   "over_odds": -105,
-   "under_odds": -135
-  },
-  {
-   "event_id": 35884963,
-   "p1": "Arkadiusz Mugowski",
-   "p2": "Jaroslaw Rolak",
-   "p1_norm": "arkadiusz mugowski",
-   "p2_norm": "jaroslaw rolak",
-   "open_date": "2026-07-30T18:10:00.000Z",
-   "line": 89.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35884964,
-   "p1": "Jacek Zelezik",
-   "p2": "Jerzy Michalik",
-   "p1_norm": "jacek zelezik",
-   "p2_norm": "jerzy michalik",
-   "open_date": "2026-07-30T18:10:00.000Z",
-   "line": 84.5,
-   "over_odds": -160,
-   "under_odds": 115
-  },
   {
    "event_id": 35884976,
    "p1": "Jakub Skorupa",
@@ -41,7 +8,7 @@
    "p1_norm": "jakub skorupa",
    "p2_norm": "dariusz molenda",
    "open_date": "2026-07-30T18:20:00.000Z",
-   "line": 75.5,
+   "line": 57.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -52,9 +19,9 @@
    "p1_norm": "patryk mecik",
    "p2_norm": "pawel slosarczyk",
    "open_date": "2026-07-30T18:25:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35884999,
@@ -63,9 +30,9 @@
    "p1_norm": "marcin kowalczyk",
    "p2_norm": "dariusz szlubowski",
    "open_date": "2026-07-30T18:30:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -110
   },
   {
    "event_id": 35885001,
@@ -75,8 +42,8 @@
    "p2_norm": "michal guzik",
    "open_date": "2026-07-30T18:30:00.000Z",
    "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35885012,
@@ -97,8 +64,41 @@
    "p2_norm": "jakub cyndera",
    "open_date": "2026-07-30T18:45:00.000Z",
    "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35885034,
+   "p1": "Mateusz Rutkowski",
+   "p2": "Krystian Kolodziej",
+   "p1_norm": "mateusz rutkowski",
+   "p2_norm": "krystian kolodziej",
+   "open_date": "2026-07-30T18:50:00.000Z",
+   "line": 72.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35885039,
+   "p1": "Mateusz Trela",
+   "p2": "Arkadiusz Mugowski",
+   "p1_norm": "mateusz trela",
+   "p2_norm": "arkadiusz mugowski",
+   "open_date": "2026-07-30T18:55:00.000Z",
+   "line": 80.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35885040,
+   "p1": "Marian Brunner",
+   "p2": "Jacek Zelezik",
+   "p1_norm": "marian brunner",
+   "p2_norm": "jacek zelezik",
+   "open_date": "2026-07-30T18:55:00.000Z",
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -110
   }
  ]
 }
