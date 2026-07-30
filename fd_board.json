@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T12:12:57Z",
+ "captured_at": "2026-07-30T12:20:05Z",
  "matches": [
-  {
-   "event_id": 35883456,
-   "p1": "Lukasz Oracz",
-   "p2": "Oskar Jadach",
-   "p1_norm": "lukasz oracz",
-   "p2_norm": "oskar jadach",
-   "open_date": "2026-07-30T11:55:00.000Z",
-   "line": 77.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35883463,
    "p1": "Marcin Jadczyk",
@@ -19,9 +8,9 @@
    "p1_norm": "marcin jadczyk",
    "p2_norm": "karol strowski",
    "open_date": "2026-07-30T12:05:00.000Z",
-   "line": 69.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 71.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35883471,
@@ -30,7 +19,7 @@
    "p1_norm": "kacper petas",
    "p2_norm": "josef braun",
    "open_date": "2026-07-30T12:10:00.000Z",
-   "line": 77.5,
+   "line": 88.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -41,9 +30,9 @@
    "p1_norm": "rafal gajda",
    "p2_norm": "oliver vincenec",
    "open_date": "2026-07-30T12:15:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 65.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35883475,
@@ -52,9 +41,9 @@
    "p1_norm": "radoslaw malinowski",
    "p2_norm": "dominik solilo",
    "open_date": "2026-07-30T12:15:00.000Z",
-   "line": 75.5,
+   "line": 77.5,
    "over_odds": -120,
-   "under_odds": -110
+   "under_odds": -115
   },
   {
    "event_id": 35883481,
@@ -63,7 +52,7 @@
    "p1_norm": "jerzy pelka",
    "p2_norm": "piotr gumulinski",
    "open_date": "2026-07-30T12:20:00.000Z",
-   "line": 78.5,
+   "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
   },
@@ -88,6 +77,39 @@
    "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35883511,
+   "p1": "Milosz Piecowski",
+   "p2": "Blazej Warpas",
+   "p1_norm": "milosz piecowski",
+   "p2_norm": "blazej warpas",
+   "open_date": "2026-07-30T12:40:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35883512,
+   "p1": "Jakub Nowak",
+   "p2": "Oliwier Sokolowski",
+   "p1_norm": "jakub nowak",
+   "p2_norm": "oliwier sokolowski",
+   "open_date": "2026-07-30T12:40:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35883516,
+   "p1": "Waldemar Glanowski",
+   "p2": "Lukasz Oracz",
+   "p1_norm": "waldemar glanowski",
+   "p2_norm": "lukasz oracz",
+   "open_date": "2026-07-30T12:45:00.000Z",
+   "line": 75.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
