@@ -1,61 +1,6 @@
 {
- "captured_at": "2026-07-30T09:09:01Z",
+ "captured_at": "2026-07-30T09:14:51Z",
  "matches": [
-  {
-   "event_id": 35882803,
-   "p1": "Jakub Zochniak",
-   "p2": "Karol Wisniewski",
-   "p1_norm": "jakub zochniak",
-   "p2_norm": "karol wisniewski",
-   "open_date": "2026-07-30T09:00:00.000Z",
-   "line": 93.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35882804,
-   "p1": "Szymon Kolasa",
-   "p2": "Jan Zandecki",
-   "p1_norm": "szymon kolasa",
-   "p2_norm": "jan zandecki",
-   "open_date": "2026-07-30T09:00:00.000Z",
-   "line": 85.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35882805,
-   "p1": "Pawel Kurek",
-   "p2": "Michal Durda",
-   "p1_norm": "pawel kurek",
-   "p2_norm": "michal durda",
-   "open_date": "2026-07-30T09:00:00.000Z",
-   "line": 53.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35882808,
-   "p1": "Lukasz Oracz",
-   "p2": "Jerzy Pelka",
-   "p1_norm": "lukasz oracz",
-   "p2_norm": "jerzy pelka",
-   "open_date": "2026-07-30T09:05:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35882815,
-   "p1": "Rafal Niemiec",
-   "p2": "Jakub Kaczmarek",
-   "p1_norm": "rafal niemiec",
-   "p2_norm": "jakub kaczmarek",
-   "open_date": "2026-07-30T09:10:00.000Z",
-   "line": 73.5,
-   "over_odds": -116,
-   "under_odds": -116
-  },
   {
    "event_id": 35882806,
    "p1": "Wojciech Gluszek",
@@ -98,7 +43,7 @@
    "open_date": "2026-07-30T09:25:00.000Z",
    "line": 79.5,
    "over_odds": -118,
-   "under_odds": -116
+   "under_odds": -112
   },
   {
    "event_id": 35882846,
@@ -119,8 +64,8 @@
    "p2_norm": "adrian burkacki",
    "open_date": "2026-07-30T09:30:00.000Z",
    "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35882855,
@@ -129,9 +74,20 @@
    "p1_norm": "milosz piecowski",
    "p2_norm": "dominik solilo",
    "open_date": "2026-07-30T09:35:00.000Z",
-   "line": 73.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 72.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35882895,
+   "p1": "Krystian Kolodziej",
+   "p2": "Marcin Jadczyk",
+   "p1_norm": "krystian kolodziej",
+   "p2_norm": "marcin jadczyk",
+   "open_date": "2026-07-30T09:40:00.000Z",
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -110
   }
  ]
 }
