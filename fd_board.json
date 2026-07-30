@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T18:49:20Z",
+ "captured_at": "2026-07-30T18:53:45Z",
  "matches": [
   {
    "event_id": 35885012,
@@ -8,9 +8,9 @@
    "p1_norm": "wojciech pytlas",
    "p2_norm": "mariusz baron",
    "open_date": "2026-07-30T18:45:00.000Z",
-   "line": 69.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 52.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35885013,
@@ -19,9 +19,9 @@
    "p1_norm": "kazimierz rybak",
    "p2_norm": "jakub cyndera",
    "open_date": "2026-07-30T18:45:00.000Z",
-   "line": 69.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 71.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885034,
@@ -30,9 +30,9 @@
    "p1_norm": "mateusz rutkowski",
    "p2_norm": "krystian kolodziej",
    "open_date": "2026-07-30T18:50:00.000Z",
-   "line": 72.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 73.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35885039,
@@ -85,6 +85,28 @@
    "p1_norm": "patryk jendrzejewski",
    "p2_norm": "jakub chmielowski",
    "open_date": "2026-07-30T19:15:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35885084,
+   "p1": "Jerzy Michalik",
+   "p2": "Kacper Kwiatkowski",
+   "p1_norm": "jerzy michalik",
+   "p2_norm": "kacper kwiatkowski",
+   "open_date": "2026-07-30T19:20:00.000Z",
+   "line": 72.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35885085,
+   "p1": "Jaroslaw Rolak",
+   "p2": "Dawid Kotwica",
+   "p1_norm": "jaroslaw rolak",
+   "p2_norm": "dawid kotwica",
+   "open_date": "2026-07-30T19:20:00.000Z",
    "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
