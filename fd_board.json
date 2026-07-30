@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T19:26:59Z",
+ "captured_at": "2026-07-30T19:32:07Z",
  "matches": [
   {
    "event_id": 35885070,
@@ -8,20 +8,9 @@
    "p1_norm": "dariusz molenda",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-07-30T19:10:00.000Z",
-   "line": 92.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35885071,
-   "p1": "Kacper Adamus",
-   "p2": "Patryk Mecik",
-   "p1_norm": "kacper adamus",
-   "p2_norm": "patryk mecik",
-   "open_date": "2026-07-30T19:10:00.000Z",
-   "line": 97.5,
-   "over_odds": -155,
-   "under_odds": 110
+   "line": 93.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35885075,
@@ -30,9 +19,9 @@
    "p1_norm": "patryk jendrzejewski",
    "p2_norm": "jakub chmielowski",
    "open_date": "2026-07-30T19:15:00.000Z",
-   "line": 88.5,
-   "over_odds": -105,
-   "under_odds": -130
+   "line": 92.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35885440,
