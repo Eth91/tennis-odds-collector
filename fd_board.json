@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-30T11:38:22Z",
+ "captured_at": "2026-07-30T11:44:23Z",
  "matches": [
-  {
-   "event_id": 35883358,
-   "p1": "Milosz Piecowski",
-   "p2": "Kamil Klocek",
-   "p1_norm": "milosz piecowski",
-   "p2_norm": "kamil klocek",
-   "open_date": "2026-07-30T11:25:00.000Z",
-   "line": 65.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35883373,
-   "p1": "Waldemar Glanowski",
-   "p2": "Piotr Przewlocki",
-   "p1_norm": "waldemar glanowski",
-   "p2_norm": "piotr przewlocki",
-   "open_date": "2026-07-30T11:30:00.000Z",
-   "line": 83.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35883436,
    "p1": "Szymon Kolasa",
@@ -31,8 +9,8 @@
    "p2_norm": "krystian kolodziej",
    "open_date": "2026-07-30T11:40:00.000Z",
    "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35883438,
@@ -64,8 +42,8 @@
    "p2_norm": "oliwier sokolowski",
    "open_date": "2026-07-30T11:50:00.000Z",
    "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35883456,
@@ -88,6 +66,17 @@
    "line": 76.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35883471,
+   "p1": "Kacper Petas",
+   "p2": "Josef Braun",
+   "p1_norm": "kacper petas",
+   "p2_norm": "josef braun",
+   "open_date": "2026-07-30T12:10:00.000Z",
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -110
   }
  ]
 }
