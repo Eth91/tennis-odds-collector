@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T04:42:38Z",
+ "captured_at": "2026-07-30T04:47:46Z",
  "matches": [
   {
    "event_id": 35882452,
@@ -8,9 +8,9 @@
    "p1_norm": "pawel kurek",
    "p2_norm": "michal durda",
    "open_date": "2026-07-30T04:30:00.000Z",
-   "line": 73.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 80.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35882453,
@@ -19,9 +19,9 @@
    "p1_norm": "krzysztof juszczyk",
    "p2_norm": "marian lebek",
    "open_date": "2026-07-30T04:30:00.000Z",
-   "line": 86.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 90.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35882465,
@@ -30,7 +30,7 @@
    "p1_norm": "zbigniew nocun",
    "p2_norm": "jerzy michalik",
    "open_date": "2026-07-30T04:40:00.000Z",
-   "line": 78.5,
+   "line": 85.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -88,6 +88,17 @@
    "line": 74.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35882494,
+   "p1": "Krzysztof Juszczyk",
+   "p2": "Adrian Burkacki",
+   "p1_norm": "krzysztof juszczyk",
+   "p2_norm": "adrian burkacki",
+   "open_date": "2026-07-30T05:10:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
