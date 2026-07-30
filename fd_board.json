@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T00:15:20Z",
+ "captured_at": "2026-07-30T00:22:26Z",
  "matches": [
-  {
-   "event_id": 35881766,
-   "p1": "Wojciech Urban",
-   "p2": "Rafal Niemiec",
-   "p1_norm": "wojciech urban",
-   "p2_norm": "rafal niemiec",
-   "open_date": "2026-07-30T00:00:00.000Z",
-   "line": 90.5,
-   "over_odds": -140,
-   "under_odds": 100
-  },
   {
    "event_id": 35881781,
    "p1": "Patryk Jendrzejewski",
@@ -19,9 +8,9 @@
    "p1_norm": "patryk jendrzejewski",
    "p2_norm": "mateusz rutkowski",
    "open_date": "2026-07-30T00:10:00.000Z",
-   "line": 70.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 54.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35881782,
@@ -30,9 +19,9 @@
    "p1_norm": "kamil delikatny",
    "p2_norm": "andriej fomin",
    "open_date": "2026-07-30T00:10:00.000Z",
-   "line": 62.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 75.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35881801,
@@ -41,9 +30,9 @@
    "p1_norm": "zbigniew nocun",
    "p2_norm": "miroslaw warzecha",
    "open_date": "2026-07-30T00:20:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35881803,
@@ -86,6 +75,28 @@
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-30T00:35:00.000Z",
    "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35881834,
+   "p1": "Mariusz Koczyba",
+   "p2": "Rafal Niemiec",
+   "p1_norm": "mariusz koczyba",
+   "p2_norm": "rafal niemiec",
+   "open_date": "2026-07-30T00:45:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35881835,
+   "p1": "Henryk Tkaczyk",
+   "p2": "Witold Stechly",
+   "p1_norm": "henryk tkaczyk",
+   "p2_norm": "witold stechly",
+   "open_date": "2026-07-30T00:45:00.000Z",
+   "line": 66.5,
    "over_odds": -118,
    "under_odds": -112
   }
