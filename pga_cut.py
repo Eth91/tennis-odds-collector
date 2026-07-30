@@ -48,8 +48,11 @@ CUT_VIG_MIN = 1.01      # a book paying out more than it takes is a data error, 
 CUT_VIG_MAX = 1.30      # tighter than top-N's 1.75: this is a two-way market and should price near
                         # 1.06. Anything above 1.30 is not a clean make/miss book.
 CUT_MIN_RUNNERS = 8     # below this a one-sided pool cannot be normalised meaningfully.
-ARMABLE = False         # NEW STREAM = NEW HYPOTHESIS. Flip only after the paired-SPRT adoption
-                        # rule in pga_validate.py is satisfied on PROSPECTIVE settled bets.
+ARMABLE = True          # ARMED 2026-07-30 by explicit instruction, after the trade-off was stated:
+                        # armed cut bets enter the v1.0 record, so the paired-adoption test loses
+                        # its clean control group. The stream tag stays distinct (`E3-cut`) so the
+                        # two populations can still be separated ANALYTICALLY in every report —
+                        # that is the only part of the control that survives arming.
 
 
 def _norm(s):
@@ -97,10 +100,11 @@ def price(rows, sim, blend, field_norm=None):
         ev = pb * od - 1.0
         if (CUT_RATIO_MIN <= ratio <= CUT_RATIO_MAX
                 and pb - fair >= CUT_EDGE and ev >= CUT_EV_MIN):
-            out.append({"stream": "E3-cut-shadow", "runner": runner, "market": str(mkt)[:60],
+            out.append({"stream": "E3-cut" if ARMABLE else "E3-cut-shadow",
+                        "runner": runner, "market": str(mkt)[:60],
                         "odds": od, "p_raw": round(p, 4), "p_bet": round(pb, 4),
                         "p_fair": round(fair, 6), "edge": round(pb - fair, 3),
-                        "ev": round(ev, 4), "shadow": True})
+                        "ev": round(ev, 4), "shadow": not ARMABLE})
 
     if len(two_way) >= max(1, len(by_mkt) // 2):
         # YES/NO pairs. The player is in the market string, the side in the runner string.

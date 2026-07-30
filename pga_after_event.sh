@@ -10,6 +10,17 @@ set -uo pipefail
 # note: no `timeout` — it is GNU coreutils and absent on macOS, where this runs
 cd "$(dirname "$0")"
 
+# Python on this Mac ships without a usable CA bundle, so every https fetch (ESPN results, the
+# orchestrator) failed CERTIFICATE_VERIFY_FAILED and pga_field silently fell back to a STALE
+# CACHE. Grading against a stale cache would have produced confident, wrong results. Fixed via
+# the env var rather than by editing pga_ruler/pga_birdies/pga_context, which are frozen —
+# Python honours SSL_CERT_FILE for the default context, so this reaches every module.
+SSL_CERT_FILE="$(python3 -c 'import certifi; print(certifi.where())' 2>/dev/null)"
+[ -n "$SSL_CERT_FILE" ] && export SSL_CERT_FILE
+python3 -c "import urllib.request as u; u.urlopen('https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard',timeout=20)" 2>/dev/null \
+  && echo "network: live fetch OK" \
+  || { echo "*** network: live fetch FAILING — grading would read a stale cache. HALTING (H-4)."; exit 1; }
+
 echo "=== 1/3  drift check — the frozen constant set must be untouched ==="
 python3 - <<'PY'
 import hashlib, json, sys
