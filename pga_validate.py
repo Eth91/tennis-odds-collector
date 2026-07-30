@@ -35,6 +35,23 @@ cannot detect an edge that exists only in markets the gates never fire on, and i
 itself prove profitability after vig — that is what the ROI and yield columns are for, reported
 alongside but never used as the stopping rule.
 
+PRE-REGISTERED CAPTURE RULE (fixed 2026-07-30, before any settled bet). e3 prices on every cron
+pass, and these lines move violently — measured on Rocket Classic R1, Knapp over 2.5 went
+1.72 -> 2.42 (+40%) and Henley over 3.5 went 1.68 -> 2.52 (+50%) inside 2.5 hours. Without a rule,
+"the bet" would be whichever pass happened to fire and snapshot timing would dominate the record.
+
+    For each event, the bet set is every flag whose `snapshot_ts` equals S, where
+        S = max(snapshot_ts) over that event's flags with snapshot_ts < first R1 tee time.
+    An event with no known `first_tee` is EXCLUDED and reported as excluded — never scored on a
+    guessed capture, never silently dropped.
+
+Deterministic, no lookahead, and the last honest moment the bet could have been placed. Later
+snapshots stay in the ledger as raw material for volatility analysis; they do not enter the SPRT.
+
+PRE-REGISTERED SUBGROUP: anchored (`n_lines` >= 8) vs unanchored birdie bets. Reported separately
+from the first report onward. It is a COVARIATE, never a filter — dropping unanchored bets on
+suspicion would be a post-hoc selection made by the same judgement this test exists to audit.
+
 HALT CONDITIONS (any one, immediately, no discretion):
   H-1  SPRT crosses the lower boundary                     -> no edge
   H-2  reliability slope < 0.70 over the trailing 200 bets -> probabilities have drifted
@@ -72,19 +89,39 @@ def _rows():
     """Settled bets carrying both probabilities. Rows logged before the ledger was
     instrumented have no p_bet and are counted for ROI but cannot be scored."""
     if not PAPER.exists():
-        return [], 0
+        return [], 0, {}
     con = sqlite3.connect(PAPER)
     cols = {d[1] for d in con.execute("PRAGMA table_info(flags)")}
     if not {"p_bet", "p_fair"} <= cols:
         graded = con.execute("SELECT COUNT(*) FROM flags WHERE result IN ('W','L')").fetchone()[0]
         con.close()
-        return [], graded
-    out = list(con.execute(
-        "SELECT event, stream, market, runner, odds, p_bet, p_fair, result, pnl, flagged_at "
-        "FROM flags WHERE result IS NOT NULL AND result != '' ORDER BY flagged_at"))
+        return [], graded, {}
+    have_cap = {"snapshot_ts", "first_tee", "n_lines"} <= cols
+    sel = ("SELECT event, stream, market, runner, odds, p_bet, p_fair, result, pnl, flagged_at"
+           + (", snapshot_ts, first_tee, n_lines" if have_cap else ", NULL, NULL, NULL")
+           + " FROM flags WHERE result IS NOT NULL AND result != '' ORDER BY flagged_at")
+    raw = list(con.execute(sel))
     graded = con.execute("SELECT COUNT(*) FROM flags WHERE result IN ('W','L')").fetchone()[0]
     con.close()
-    return out, graded
+    if not have_cap:
+        return raw, graded, {}
+    # PRE-REGISTERED CAPTURE: one snapshot per event, the last one strictly before first tee.
+    by_ev = {}
+    for r in raw:
+        by_ev.setdefault(r[0], []).append(r)
+    keep, excluded = [], {}
+    for ev, rs in by_ev.items():
+        tee = next((r[11] for r in rs if r[11]), None)
+        if not tee:
+            excluded[ev] = "no first_tee recorded — capture undefined"
+            continue
+        pre = [r[10] for r in rs if r[10] and str(r[10]) < str(tee)]
+        if not pre:
+            excluded[ev] = "no snapshot before first tee"
+            continue
+        S = max(pre)
+        keep.extend(r for r in rs if r[10] == S)
+    return keep, graded, excluded
 
 
 def _clip(p):
@@ -165,7 +202,7 @@ def _verdict(m):
 
 
 def report():
-    rows, graded = _rows()
+    rows, graded, excluded = _rows()
     m = _metrics(rows)
     v, notes = _verdict(m)
     ts = dt.datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
@@ -208,6 +245,23 @@ def report():
               else "| reliability slope | n/a |",
               f"| mean odds | {m['avg_odds']:.2f} |",
               f"| **SPRT log-likelihood ratio** | **{m['llr']:+.4f}** |", ""]
+    if excluded:
+        L += ["## Events EXCLUDED by the capture rule", "",
+              "Reported, never silently dropped:", ""]
+        for ev, why in sorted(excluded.items()):
+            L.append(f"- `{ev}` — {why}")
+        L.append("")
+    if m is not None:
+        anc = [r for r in rows if r[12] is not None and r[12] >= 8]
+        una = [r for r in rows if r[12] is not None and r[12] < 8]
+        if anc or una:
+            L += ["## Pre-registered subgroup: birdie anchor", "",
+                  "| subgroup | n | P&L | note |", "|---|---|---|---|",
+                  f"| anchored (n_lines >= 8) | {len(anc)} | "
+                  f"{sum(float(r[8] or 0) for r in anc):+.2f}u | LAM solved against the market |",
+                  f"| unanchored (n_lines < 8) | {len(una)} | "
+                  f"{sum(float(r[8] or 0) for r in una):+.2f}u | LAM held at 1.000 |", "",
+                  "Covariate, not a filter — both are in the SPRT above.", ""]
     L += ["## Standing instruction", "",
           "No model change is proposed or adopted on this evidence. Every modification is a new "
           "hypothesis and must clear the adoption rule above on PROSPECTIVE data. Retrospective "
