@@ -65,6 +65,12 @@ SIG_SHRINK = 78.0       # MEASURED 2026-07-29 (was 20.0). The TRUE spread of pla
                         # sampling noise of 4.02 per observation. So 'some players are
                         # streakier' is mostly an illusion and own-sd deserves far less
                         # weight. k = 4.020 / 0.052.
+SPREAD = 1.30           # TUNED 2026-07-30 on 2025, HELD-OUT confirmed on 2026 (mean
+                        # |slope-1| .4464 -> .1602, a 64% cut). Widens rating DEVIATIONS from the
+                        # field before any rank/matchup calc. K_SHRINK is right for a point
+                        # estimate but a rank sim is non-linear, so shrunk inputs made the field
+                        # look homogeneous and compressed every tournament probability toward its
+                        # base rate. Sigma was ruled out first: it tests clean in every rating bin.
 MIN_ROUNDS = 20         # user 2026-07-29: '20 rounds or less is a good rule'. Below
                         # this a rating is HALVED toward field-average and sigma widens
                         # — it still prices (Koivun at 46 rounds is genuinely good and
@@ -207,8 +213,12 @@ def matchup_prob(R, a, b, rounds=1, course_fit=None):
         return None
     (ma, sa, _), (mb, sb, _) = ra, rb
     cf = course_fit or {}
-    ma = ma + cf.get(a, cf.get(norm(a), 0.0))
-    mb = mb + cf.get(b, cf.get(norm(b), 0.0))
+    # SPREAD must be applied here too, or matchup prices and the tournament sim would disagree
+    # about the same two players. The field mean of a shrunk rating set is ~0 by construction.
+    _all = [v[0] for v in R.values()]
+    _rm = (sum(_all) / len(_all)) if _all else 0.0
+    ma = _rm + SPREAD * (ma - _rm) + cf.get(a, cf.get(norm(a), 0.0))
+    mb = _rm + SPREAD * (mb - _rm) + cf.get(b, cf.get(norm(b), 0.0))
     mu = (mb - ma) * rounds
     var = rounds * (sa * sa + sb * sb) + RHO * (sa * sa + sb * sb) * (rounds - 1)
     return _phi(mu / math.sqrt(max(var, 1e-6)))
@@ -241,8 +251,11 @@ def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
     # COURSE FIT (blindness #3): per-player strokes/round adjustment at THIS venue,
     # already shrunk by pga_context (course history is the most over-claimed golf edge).
     cf = course_fit or {}
-    mus = np.array([(R.get(norm(p)) or R[p])[0] + cf.get(p, cf.get(norm(p), 0.0))
-                    for p in names])
+    _r = [(R.get(norm(p)) or R[p])[0] for p in names]
+    _rm = float(np.mean(_r)) if _r else 0.0
+    # SPREAD: widen deviations from the field mean (see the constant's note above)
+    mus = np.array([_rm + SPREAD * (v - _rm) + cf.get(p, cf.get(norm(p), 0.0))
+                    for p, v in zip(names, _r)])
     sig = np.array([(R.get(norm(p)) or R[p])[1] for p in names])
     k = len(names)
     if k < 30:

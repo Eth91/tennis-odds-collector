@@ -68,7 +68,10 @@ for eid, d0 in evs:
     # exactly 20 players; the realized side must be defined the same way. Ties are broken by
     # total then name, which is arbitrary but unbiased.
     order = sorted(full.items(), key=lambda kv: (kv[1], kv[0]))
-    pos = {p: i + 1 for i, (p, t) in enumerate(order)}
+    pos = {p: i + 1 for i, (p, t) in enumerate(order)}          # strict, ties broken arbitrarily
+    # ties-inclusive realized position: 1 + how many are STRICTLY better, so a tie shares the
+    # better rank — the definition the "(Incl. Ties)" products settle on
+    tpos = {p: 1 + sum(1 for _q, tq in full.items() if tq < t) for p, t in full.items()}
     for p in field:
         v = sim.get(p) or sim.get(RU.norm(p))
         if not v:
@@ -80,6 +83,12 @@ for eid, d0 in evs:
         buckets["top10"].append((v["top10"], 1.0 if pp <= 10 else 0.0))
         buckets["top5"].append((v["top5"], 1.0 if pp <= 5 else 0.0))
         buckets["outright"].append((v["win"], 1.0 if pp == 1 else 0.0))
+        tp = tpos.get(p, 10 ** 6)
+        if "top20_ties" in v:
+            buckets["top20_ties"].append((v["top20_ties"], 1.0 if tp <= 20 else 0.0))
+            buckets["top10_ties"].append((v["top10_ties"], 1.0 if tp <= 10 else 0.0))
+            buckets["top5_ties"].append((v["top5_ties"], 1.0 if tp <= 5 else 0.0))
+            buckets["win_ties"].append((v["win_ties"], 1.0 if tp == 1 else 0.0))
     # round-1 scores loaded ONCE per event. v1 opened a fresh connection per PAIR — 600 per
     # event, ~13k total — which is both slow and what exposed it to the DB swap.
     con = sqlite3.connect(RU.DB)
@@ -126,7 +135,8 @@ def slope(pairs, nb=8):
     return sl, st.mean(c[0] for c in srt), st.mean(c[1] for c in srt), len(pairs)
 
 
-ORDER = ["matchup_72h", "matchup_r1", "make_cut", "top20", "top10", "top5", "outright"]
+ORDER = ["matchup_72h", "matchup_r1", "make_cut", "top20", "top10", "top5", "outright",
+         "top20_ties", "top10_ties", "top5_ties", "win_ties"]
 print()
 print("  %-13s %7s %9s %9s %8s   %s" % ("market", "n", "pred mean", "real mean", "slope",
                                         "reads as"))
