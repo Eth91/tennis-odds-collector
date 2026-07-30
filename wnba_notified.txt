@@ -89,9 +89,11 @@ n1|2026-07-20|Arike Ogunbowale|points|15.5
 n1|2026-07-20|Arike Ogunbowale|points|16.5
 n1|2026-07-28|Bridget Carleton|pts_ast|14.5
 n1|2026-07-28|Megan DiLeo|points|12.5
+n1|2026-07-29|Janelle Salaun|pra|19.5
 n1|2026-07-29|Janelle Salaun|pts_reb|16.5
 n1|2026-07-29|Janelle Salaun|rebounds|4.5
 n1|2026-07-29|Kaitlyn Chen|points|8.5
+n1|2026-07-29|Kaitlyn Chen|points|9.5
 timing|2026-07-18|Aaliyah Edwards|points|9.5
 timing|2026-07-18|DeWanna Bonner|pra|20.5
 timing|2026-07-18|Jonquel Jones|pra|25.5
@@ -183,9 +185,11 @@ watch|2026-07-28|Marina Mabrey|pra|28.5
 watch|2026-07-28|Megan DiLeo|points|12.5
 watch|2026-07-28|Megan DiLeo|points|13.5
 watch|2026-07-28|Olivia Nelson-Ododa|rebounds|6.5
+watch|2026-07-29|Janelle Salaun|pra|19.5
 watch|2026-07-29|Janelle Salaun|pts_reb|16.5
 watch|2026-07-29|Janelle Salaun|rebounds|4.5
 watch|2026-07-29|Kaitlyn Chen|points|8.5
+watch|2026-07-29|Kaitlyn Chen|points|9.5
 watch|2026-07-30|Breanna Stewart|assists|3.5
 watch|2026-07-30|Jonquel Jones|assists|1.5
 watch|2026-07-30|Jonquel Jones|assists|2.5

@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T01:06:53Z",
+ "captured_at": "2026-07-30T01:11:27Z",
  "matches": [
-  {
-   "event_id": 35881835,
-   "p1": "Henryk Tkaczyk",
-   "p2": "Witold Stechly",
-   "p1_norm": "henryk tkaczyk",
-   "p2_norm": "witold stechly",
-   "open_date": "2026-07-30T00:45:00.000Z",
-   "line": 88.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35881916,
    "p1": "Adam Staniczek",
@@ -19,20 +8,9 @@
    "p1_norm": "adam staniczek",
    "p2_norm": "kamil delikatny",
    "open_date": "2026-07-30T01:00:00.000Z",
-   "line": 77.5,
+   "line": 81.5,
    "over_odds": -115,
    "under_odds": -120
-  },
-  {
-   "event_id": 35881936,
-   "p1": "Wojciech Urban",
-   "p2": "Jakub Pruszkowski",
-   "p1_norm": "wojciech urban",
-   "p2_norm": "jakub pruszkowski",
-   "open_date": "2026-07-30T01:10:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
   },
   {
    "event_id": 35881937,
@@ -41,9 +19,9 @@
    "p1_norm": "miroslaw warzecha",
    "p2_norm": "jerzy michalik",
    "open_date": "2026-07-30T01:10:00.000Z",
-   "line": 73.5,
+   "line": 71.5,
    "over_odds": -120,
-   "under_odds": -110
+   "under_odds": -115
   },
   {
    "event_id": 35881947,
@@ -64,8 +42,19 @@
    "p2_norm": "michal wolny",
    "open_date": "2026-07-30T01:30:00.000Z",
    "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35881964,
+   "p1": "Adrian Burkacki",
+   "p2": "Marian Lebek",
+   "p1_norm": "adrian burkacki",
+   "p2_norm": "marian lebek",
+   "open_date": "2026-07-30T01:35:00.000Z",
+   "line": 75.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
