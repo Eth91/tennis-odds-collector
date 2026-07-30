@@ -101,6 +101,25 @@ def _n1_warn(stat):
             if stat in N1_WEAK_STATS else "")
 
 
+# -- ROLE GATE (2026-07-30, measured on the ledger). A beneficiary who is NOT confirmed/likely
+# STARTING is not a bet:
+#     STARTING (confirmed+likely)    n=111  62-49  55.9%  +11.32u
+#     NOT STARTING (bench+projected) n= 23   6-17  26.1%  -11.26u
+# z = -2.52 vs the odds-implied break-even (52.3%; expected 12 wins, got 6) -- not noise. The
+# mechanism is minutes that never arrive: Chen 7/29 was tagged "bench", projected 21.5 min off
+# five prior 22-25 min games, and played 12 for 4 pts. The label was already computed and shown
+# on the board as "NOT STARTING"; nothing ever gated on it.
+#
+# ONE gate shared by ping and record. A blocked play stays in `preds` (board coverage, projection
+# tracker) but carries bettable=0: no ledger row, no parlay leg, no push.
+BET_ROLES = {"confirmed", "likely"}
+
+
+def role_ok(conf):
+    """True when the beneficiary is confirmed or likely STARTING."""
+    return str(conf) in BET_ROLES
+
+
 def collect():
     """Returns (alerts, preds): alerts are ntfy message tuples, preds are the full
     prediction rows logged to the ledger so every flagged spot gets graded and fed back
@@ -419,11 +438,14 @@ def collect():
                                          "conf": T.starter_label(n, team, starters, proj),
                                          "proj_min": round(proj, 1), "date": slate_date,
                                          "n1": True, **e})
-                        alerts.append((e["ev"], f"n1|{slate_date}|{n}|{e['stat']}|{e['line']:g}",
-                            f"⚡1G {out_label} OUT -> {_short(n)} {e['stat'][:3]} o{e['line']:g} "
-                            f"{T._am(e['dec'])} | proj {e['elev_avg']:g} +{e['ev']*100:.0f}%EV "
-                            f"· 1-game sample · STALE line — SPEED PILOT (graded, tier n1)"
-                            + _n1_warn(e["stat"])))
+                        if not role_ok(_c1):
+                            preds[-1]["bettable"] = 0    # board keeps it; no bet, no ping
+                        if role_ok(_c1):
+                            alerts.append((e["ev"], f"n1|{slate_date}|{n}|{e['stat']}|{e['line']:g}",
+                                f"⚡1G {out_label} OUT -> {_short(n)} {e['stat'][:3]} o{e['line']:g} "
+                                f"{T._am(e['dec'])} | proj {e['elev_avg']:g} +{e['ev']*100:.0f}%EV "
+                                f"· 1-game sample · STALE line — SPEED PILOT (graded, tier n1)"
+                                + _n1_warn(e["stat"])))
                 continue
             conf = T.starter_label(n, team, starters, proj)  # RotoWire-first confirmed/likely/bench
             # PROJECTION TRACKER: log this beneficiary's FULL projection (min + pts/reb/ast +
@@ -551,12 +573,13 @@ def collect():
                 except Exception:
                     rtag = ""
                 sd = "o" if e["side"] == "over" else "u"   # over/under prefix on the line
-                alerts.append((e["ev"], key,
-                    f"{out_label} OUT -> {_short(n)} {e['stat'][:3]} {sd}{e['line']:g} "
-                    f"{T._am(e['dec'])}{wo} | {rec} {e['hit']*100:.0f}% "
-                    f"| proj {e['elev_avg']:g} +{e['ev']*100:.0f}%EV{ctag}{tag}{env_tag}{rtag}"))
+                if role_ok(conf):
+                    alerts.append((e["ev"], key,
+                        f"{out_label} OUT -> {_short(n)} {e['stat'][:3]} {sd}{e['line']:g} "
+                        f"{T._am(e['dec'])}{wo} | {rec} {e['hit']*100:.0f}% "
+                        f"| proj {e['elev_avg']:g} +{e['ev']*100:.0f}%EV{ctag}{tag}{env_tag}{rtag}"))
                 preds.append({"pred_date": slate_date, "out_player": out_full, "player": n,
-                              "tier": "firm",
+                              "tier": "firm", "bettable": 1 if role_ok(conf) else 0,
                               "team": team, "opp": matchups_by[slate_date].get(team, ""),
                               "stat": e["stat"], "line": e["line"], "odds": e["dec"],
                               "odds_other": e.get("odds_other"),
@@ -948,14 +971,20 @@ def push_plays(fresh, preds, topic):
 
 def main():
     alerts, preds = collect()
-    logged = L.log_predictions(preds)                    # feed the learning loop
+    # ROLE GATE applied ONCE here, so the ledger, the parlays and the pushes cannot disagree
+    # about what counted as a bet. Blocked rows stay in `preds` for the board.
+    bet_preds = [p for p in preds if p.get("bettable", 1)]
+    _blocked = len(preds) - len(bet_preds)
+    if _blocked:
+        print(f"role gate: {_blocked} play(s) held — beneficiary not confirmed/likely starting")
+    logged = L.log_predictions(bet_preds)                # feed the learning loop
     # persist the day's recommended PARLAYS (from the flagged overs) so their ROI is tracked too.
     # Built per slate-date; replaces the still-pending set each scan (graded ones are locked).
     try:
         import wnba_slip as SLIP
         from collections import defaultdict as _dd
         byd = _dd(list)
-        for p in preds:
+        for p in bet_preds:
             if (p.get("side") or "over") == "over":
                 byd[p["pred_date"]].append(p)
         for d, overs in byd.items():
@@ -976,7 +1005,7 @@ def main():
     topic = os.environ.get("NTFY_TOPIC")
     push_ok = False
     if topic and fresh:
-        delivered = push_plays(fresh, preds, topic)
+        delivered = push_plays(fresh, bet_preds, topic)
         push_ok = bool(delivered)
         fresh = [(e2, k2, m2) for e2, k2, m2 in fresh if k2 in delivered]
     if push_ok:                                          # only remember spots we ACTUALLY delivered
