@@ -30,7 +30,13 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 DB = HERE / "pga_model.sqlite"
-CACHE = HERE / "pga_context_cache.json"
+# AUTHORITATIVE CACHE LIVES OUTSIDE THE REPO. It holds every fitted term (wind coefficient,
+# wave beta, scoring->birdie bridge, geocodes) and the loop does `git add -A -f` then
+# resets/replays tracked files — which already wiped the geocode cache once. A revert to an
+# older copy would silently reinstate OLD coefficients with no error raised anywhere, so the
+# in-repo file is now only a one-time SEED and a fallback for a fresh clone.
+CACHE = Path.home() / ".pga_context_cache.json"
+SEED_CACHE = HERE / "pga_context_cache.json"
 
 K_COURSE = 2.0       # pseudo-editions of shrinkage on the course factor
 K_FIT = 105.0        # MEASURED 2026-07-29 (was 8.0 — a 13x error). Personal course fit
@@ -48,8 +54,17 @@ WIND_REF = 15.0      # km/h reference: factors are relative to this
 
 
 def _cache():
+    """Read the external cache; on first run, seed it from the in-repo copy so the terms
+    measured before the move are not lost."""
     try:
         return json.loads(CACHE.read_text())
+    except Exception:                                              # noqa: BLE001
+        pass
+    try:
+        seeded = json.loads(SEED_CACHE.read_text())
+        if seeded:
+            CACHE.write_text(json.dumps(seeded))
+        return seeded
     except Exception:                                              # noqa: BLE001
         return {}
 
@@ -436,6 +451,7 @@ def fit_wind(verbose=True, refit=False):
         if holes and rnd and 1 <= rnd <= 4:
             by_ev.setdefault((tid, tname), []).append((rnd, birds / holes))
     xs, ys, used = [], [], 0
+    raw_w = []
     for (tid, tname), rr in by_ev.items():
         if len(rr) < 3:
             continue
@@ -466,6 +482,7 @@ def fit_wind(verbose=True, refit=False):
         if mr <= 0:
             continue
         for w, rate in pairs:
+            raw_w.append(w)                   # un-demeaned, to record the sample mean
             xs.append(w - mw)                 # within-event wind deviation
             ys.append(rate / mr - 1.0)        # within-event relative birdie deviation
         used += 1
@@ -485,7 +502,7 @@ def fit_wind(verbose=True, refit=False):
             print("     slope %+.5f per km/h   r=%+.3f" % (b, r))
         if b < 0:
             out = {"w": b, "n": len(xs), "events": used, "assumed": False, "r": r,
-                   "design": "within-event"}
+                   "design": "within-event", "mean_wind": st.mean(raw_w) if raw_w else None}
         else:
             if verbose:
                 print("  REJECTED: non-negative slope -> conservative default kept")
@@ -506,7 +523,13 @@ def wind_factor(kmh):
     f = fit_wind(verbose=False)
     if kmh is None:
         return 1.0
-    return max(0.80, min(1.15, 1.0 + f["w"] * (kmh - WIND_REF)))
+    # centre on the FITTED SAMPLE's own mean wind where we have it: the slope is estimated on
+    # within-event deviations, so the factor is only mean-zero if it is centred on the same
+    # mean. WIND_REF stays as the fallback for a cache with no recorded mean.
+    ref = f.get("mean_wind")
+    if not ref or ref <= 0:
+        ref = WIND_REF
+    return max(0.80, min(1.15, 1.0 + f["w"] * (kmh - ref)))
 
 
 if __name__ == "__main__":

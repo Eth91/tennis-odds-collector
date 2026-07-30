@@ -206,7 +206,25 @@ def matchup_prob(R, a, b, rounds=1, course_fit=None):
 
 
 def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
-             wave_shift=0.0, progress=None, partial=None):
+             wave_shift=0.0, progress=None, partial=None, reps=1):
+    """reps>1 averages independent runs to cut Monte Carlo noise at CONSTANT peak memory.
+    Measured across five seeds at 8000 sims, worst-case seed-to-seed sd was 0.70 points on
+    top-20 and 1.00 on make-cut — 14-20% of the 5-point edge threshold, so a flagged 5.0%
+    edge could be 4.3% or 5.7% from sampling alone. Four reps halve that; raising n_sims
+    instead would quadruple a (n_sims, k, 4) array, which this 956MB box cannot afford."""
+    if reps and reps > 1:
+        acc = {}
+        for i in range(int(reps)):
+            one = simulate(R, field, n_sims=n_sims, seed=seed + 1000 * i,
+                           course_fit=course_fit, wave=wave, wave_shift=wave_shift,
+                           progress=progress, partial=partial, reps=1)
+            if not one:
+                return {}
+            for pl, v in one.items():
+                a = acc.setdefault(pl, {})
+                for k_, val in v.items():
+                    a[k_] = a.get(k_, 0.0) + val / float(reps)
+        return acc
     """Win/top5/10/20/make-cut probs via MC: 4 rounds, player-week effect, top-70 cut."""
     import numpy as np
     rng = np.random.default_rng(seed)

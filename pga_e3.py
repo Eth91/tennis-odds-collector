@@ -145,8 +145,10 @@ def main():
               f"wave shift {wshift:+.2f} strokes [{wnote}]")
     except Exception as _xe:
         print(f"  ruler: context unavailable ({str(_xe)[:40]})")
+    # reps=4 halves Monte Carlo noise (worst case 0.70pt on top-20, ~14% of the 5pt edge
+    # threshold) without growing peak memory on this box
     sim = RU.simulate(R, field, course_fit=cfit, wave=wave,
-                      wave_shift=wshift) if field else {}
+                      wave_shift=wshift, reps=4) if field else {}
     # DEDUPE BEFORE DEVIG (2026-07-29) — this was manufacturing fake +20-27% edges.
     # The one-sided devig normalizes by sum(1/odds) over the market, so DUPLICATE runners
     # (the same top-20 market arrives as TOP_20_FINISH_IMG, TOP_20_FINISH_(INCL._TIES),
