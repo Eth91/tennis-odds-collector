@@ -89,6 +89,12 @@ wf = C.fit_wind(verbose=False)
 print("    wind coefficient       : %+.5f/km/h  r=%+.3f  n=%d obs / %d events  %s"
       % (wf["w"], wf.get("r") or 0, wf.get("n") or 0, wf.get("events") or 0,
          "ASSUMED" if wf.get("assumed") else "FITTED (" + str(wf.get("design")) + ")"))
+_mw = wf.get("mean_wind")
+print("       centred on %s km/h %s"
+      % (("%.1f" % _mw) if _mw else ("%.1f" % C.WIND_REF),
+         "(the fitted sample's own mean -> term is mean-zero)" if _mw
+         else "(WIND_REF fallback: the fit has no recorded mean, so the term carries a "
+              "standing bias at average conditions)"))
 ev = F.event().get("name") or ""
 cf, cn = C.course_factor(ev)
 print("    course factor (%s): %.3f from %d prior editions" % (ev[:22], cf, cn))
