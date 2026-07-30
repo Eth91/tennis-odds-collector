@@ -20,7 +20,16 @@ import sqlite3
 import statistics as st
 from collections import defaultdict
 
+import os
+import shutil
+
 import pga_ruler as RU
+
+# SNAPSHOT: pga_model.sqlite is tracked and the wnba loop resets/replays it, so a multi-minute
+# reader gets "no such table: rounds" or "readonly database" mid-run. Read from a private copy.
+_SNAP = os.path.expanduser("~/pga_model_mf.sqlite")
+shutil.copyfile(str(RU.DB), _SNAP)
+RU.DB = _SNAP
 
 random.seed(5)
 SIMS = 4000
@@ -71,6 +80,12 @@ for eid, d0 in evs:
         buckets["top10"].append((v["top10"], 1.0 if pp <= 10 else 0.0))
         buckets["top5"].append((v["top5"], 1.0 if pp <= 5 else 0.0))
         buckets["outright"].append((v["win"], 1.0 if pp == 1 else 0.0))
+    # round-1 scores loaded ONCE per event. v1 opened a fresh connection per PAIR — 600 per
+    # event, ~13k total — which is both slow and what exposed it to the DB swap.
+    con = sqlite3.connect(RU.DB)
+    r1 = {RU.norm(p): sc for p, sc in con.execute(
+        "SELECT player, score FROM rounds WHERE event_id=? AND rnd=1 AND score>0", (eid,))}
+    con.close()
     # matchup control: pairs of players who both completed 72 holes
     fl = [p for p in field if p in full]
     for _ in range(300):
@@ -87,14 +102,9 @@ for eid, d0 in evs:
         pr = RU.matchup_prob(Rn, a, b, rounds=1)
         if pr is None:
             continue
-        con = sqlite3.connect(RU.DB)
-        ra = con.execute("SELECT score FROM rounds WHERE event_id=? AND LOWER(player)=? AND "
-                         "rnd=1", (eid, a)).fetchone()
-        rb = con.execute("SELECT score FROM rounds WHERE event_id=? AND LOWER(player)=? AND "
-                         "rnd=1", (eid, b)).fetchone()
-        con.close()
-        if ra and rb and ra[0] and rb[0] and ra[0] != rb[0]:
-            buckets["matchup_r1"].append((pr, 1.0 if ra[0] < rb[0] else 0.0))
+        ra, rb = r1.get(a), r1.get(b)
+        if ra and rb and ra != rb:
+            buckets["matchup_r1"].append((pr, 1.0 if ra < rb else 0.0))
 
 print("events used: %d" % n_ev)
 
@@ -135,7 +145,28 @@ print("  slope 1.0 = probabilities mean what they say; below 0.85 = confident pr
 print("  not come true at their stated rate, which is exactly where flagged edges sit.")
 print()
 if res:
-    best = sorted(res.items(), key=lambda kv: -min(kv[1], 2 - kv[1]))
     print("  ranked by calibration (closest to 1.0 first):")
     for k, v in sorted(res.items(), key=lambda kv: abs(kv[1] - 1.0)):
         print("     %-13s slope %.3f" % (k, v))
+
+# A slope extrapolated into the tails can mislead, and the bets we would actually place live in
+# the tails — so print the observed curve instead of trusting the line.
+print()
+print("RELIABILITY CURVES (observed, not extrapolated)")
+for k in ("matchup_72h", "matchup_r1", "top20", "top10", "outright"):
+    pr = buckets.get(k) or []
+    if len(pr) < 300:
+        continue
+    srt = sorted(pr)
+    nb = 8
+    sz = len(srt) // nb
+    print("  %s" % k)
+    for i in range(nb):
+        ch = srt[i * sz:(i + 1) * sz] if i < nb - 1 else srt[i * sz:]
+        if not ch:
+            continue
+        px = st.mean(c[0] for c in ch)
+        py = st.mean(c[1] for c in ch)
+        gap = py - px
+        bar = "over-predicted" if gap < -0.01 else ("under-predicted" if gap > 0.01 else "ok")
+        print("     d%d  pred %.4f  real %.4f  %+.4f  %s" % (i + 1, px, py, gap, bar))
