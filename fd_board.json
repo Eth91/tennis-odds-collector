@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T05:06:34Z",
+ "captured_at": "2026-07-30T05:10:41Z",
  "matches": [
-  {
-   "event_id": 35882471,
-   "p1": "Jakub Kaczmarek",
-   "p2": "Mariusz Adamus",
-   "p1_norm": "jakub kaczmarek",
-   "p2_norm": "mariusz adamus",
-   "open_date": "2026-07-30T04:50:00.000Z",
-   "line": 98.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35882473,
    "p1": "Josef Braun",
@@ -19,7 +8,7 @@
    "p1_norm": "josef braun",
    "p2_norm": "artur grela",
    "open_date": "2026-07-30T04:55:00.000Z",
-   "line": 86.5,
+   "line": 82.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -30,9 +19,9 @@
    "p1_norm": "henryk tkaczyk",
    "p2_norm": "michal wolny",
    "open_date": "2026-07-30T05:00:00.000Z",
-   "line": 80.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 83.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35882494,
@@ -42,8 +31,8 @@
    "p2_norm": "adrian burkacki",
    "open_date": "2026-07-30T05:10:00.000Z",
    "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35882507,
@@ -64,8 +53,8 @@
    "p2_norm": "jan zandecki",
    "open_date": "2026-07-30T05:15:00.000Z",
    "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35882557,
@@ -77,6 +66,17 @@
    "line": 78.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35882558,
+   "p1": "Stapor Rafal",
+   "p2": "Michal Minda",
+   "p1_norm": "stapor rafal",
+   "p2_norm": "michal minda",
+   "open_date": "2026-07-30T05:35:00.000Z",
+   "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -116
   }
  ]
 }
