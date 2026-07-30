@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T17:59:35Z",
+ "captured_at": "2026-07-30T18:05:30Z",
  "matches": [
-  {
-   "event_id": 35884933,
-   "p1": "Marian Brunner",
-   "p2": "Michal Guzik",
-   "p1_norm": "marian brunner",
-   "p2_norm": "michal guzik",
-   "open_date": "2026-07-30T17:45:00.000Z",
-   "line": 81.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
   {
    "event_id": 35884950,
    "p1": "Jakub Cyndera",
@@ -19,9 +8,9 @@
    "p1_norm": "jakub cyndera",
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-30T17:55:00.000Z",
-   "line": 67.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 53.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35884954,
@@ -30,9 +19,9 @@
    "p1_norm": "kacper adamus",
    "p2_norm": "mariusz baron",
    "open_date": "2026-07-30T18:00:00.000Z",
-   "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 83.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35884956,
@@ -41,9 +30,9 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "patryk jendrzejewski",
    "open_date": "2026-07-30T18:05:00.000Z",
-   "line": 74.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35884963,
@@ -88,6 +77,28 @@
    "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35884999,
+   "p1": "Marcin Kowalczyk",
+   "p2": "Dariusz Szlubowski",
+   "p1_norm": "marcin kowalczyk",
+   "p2_norm": "dariusz szlubowski",
+   "open_date": "2026-07-30T18:30:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35885001,
+   "p1": "Piotr Gesiarz",
+   "p2": "Michal Guzik",
+   "p1_norm": "piotr gesiarz",
+   "p2_norm": "michal guzik",
+   "open_date": "2026-07-30T18:30:00.000Z",
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -120
   }
  ]
 }
