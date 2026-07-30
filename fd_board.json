@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T10:43:00Z",
+ "captured_at": "2026-07-30T10:49:05Z",
  "matches": [
   {
    "event_id": 35882950,
@@ -8,9 +8,9 @@
    "p1_norm": "marcin jadczyk",
    "p2_norm": "jan zandecki",
    "open_date": "2026-07-30T10:25:00.000Z",
-   "line": 110.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 112.5,
+   "over_odds": -195,
+   "under_odds": 135
   },
   {
    "event_id": 35882977,
@@ -19,9 +19,9 @@
    "p1_norm": "radoslaw malinowski",
    "p2_norm": "kamil klocek",
    "open_date": "2026-07-30T10:35:00.000Z",
-   "line": 73.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 74.5,
+   "over_odds": 115,
+   "under_odds": -160
   },
   {
    "event_id": 35882978,
@@ -30,7 +30,7 @@
    "p1_norm": "rafal gajda",
    "p2_norm": "michal durda",
    "open_date": "2026-07-30T10:35:00.000Z",
-   "line": 55.5,
+   "line": 82.5,
    "over_odds": -110,
    "under_odds": -125
   },
@@ -41,9 +41,9 @@
    "p1_norm": "jerzy pelka",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-07-30T10:40:00.000Z",
-   "line": 79.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 81.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35883000,
@@ -97,6 +97,17 @@
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-30T11:05:00.000Z",
    "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35883341,
+   "p1": "Artur Grela",
+   "p2": "Jan Zandecki",
+   "p1_norm": "artur grela",
+   "p2_norm": "jan zandecki",
+   "open_date": "2026-07-30T11:15:00.000Z",
+   "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
   }
