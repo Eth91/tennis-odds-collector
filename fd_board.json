@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T21:29:29Z",
+ "captured_at": "2026-07-30T21:33:46Z",
  "matches": [
   {
    "event_id": 35885578,
@@ -8,9 +8,9 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-30T21:15:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 56.5,
+   "over_odds": -105,
+   "under_odds": -135
   },
   {
    "event_id": 35885577,
@@ -19,9 +19,9 @@
    "p1_norm": "dawid kotwica",
    "p2_norm": "mateusz trela",
    "open_date": "2026-07-30T21:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 86.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35885590,
@@ -30,7 +30,7 @@
    "p1_norm": "jakub cyndera",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-30T21:25:00.000Z",
-   "line": 75.5,
+   "line": 83.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -64,6 +64,17 @@
    "p2_norm": "adrian eliasz",
    "open_date": "2026-07-30T21:55:00.000Z",
    "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35885594,
+   "p1": "Mariusz Baron",
+   "p2": "Kacper Adamus",
+   "p1_norm": "mariusz baron",
+   "p2_norm": "kacper adamus",
+   "open_date": "2026-07-30T22:00:00.000Z",
+   "line": 80.5,
    "over_odds": -112,
    "under_odds": -118
   }
