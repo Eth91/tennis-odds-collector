@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T02:43:46Z",
+ "captured_at": "2026-07-30T02:50:04Z",
  "matches": [
   {
    "event_id": 35882026,
@@ -8,9 +8,9 @@
    "p1_norm": "adam staniczek",
    "p2_norm": "andriej fomin",
    "open_date": "2026-07-30T02:35:00.000Z",
-   "line": 58.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 82.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35882041,
@@ -19,9 +19,9 @@
    "p1_norm": "wojciech urban",
    "p2_norm": "adrian burkacki",
    "open_date": "2026-07-30T02:45:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882042,
@@ -30,9 +30,9 @@
    "p1_norm": "miroslaw warzecha",
    "p2_norm": "michal wolny",
    "open_date": "2026-07-30T02:45:00.000Z",
-   "line": 72.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 73.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882052,
@@ -88,6 +88,17 @@
    "line": 68.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35882069,
+   "p1": "Rafal Niemiec",
+   "p2": "Marian Lebek",
+   "p1_norm": "rafal niemiec",
+   "p2_norm": "marian lebek",
+   "open_date": "2026-07-30T03:10:00.000Z",
+   "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
