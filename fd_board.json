@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T07:42:34Z",
+ "captured_at": "2026-07-30T07:46:34Z",
  "matches": [
   {
    "event_id": 35882702,
@@ -8,9 +8,9 @@
    "p1_norm": "jerzy pelka",
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-30T07:35:00.000Z",
-   "line": 81.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 68.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35882712,
@@ -19,9 +19,9 @@
    "p1_norm": "blazej warpas",
    "p2_norm": "igor dabrowski",
    "open_date": "2026-07-30T07:40:00.000Z",
-   "line": 80.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 87.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35882713,
@@ -30,9 +30,9 @@
    "p1_norm": "dominik solilo",
    "p2_norm": "kamil klocek",
    "open_date": "2026-07-30T07:40:00.000Z",
-   "line": 73.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 51.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35882715,
@@ -41,9 +41,9 @@
    "p1_norm": "jakub nowak",
    "p2_norm": "pawel kurek",
    "open_date": "2026-07-30T07:45:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35882716,
@@ -99,6 +99,39 @@
    "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35882746,
+   "p1": "Wojciech Gluszek",
+   "p2": "Bartlomiej Wisniewski",
+   "p1_norm": "wojciech gluszek",
+   "p2_norm": "bartlomiej wisniewski",
+   "open_date": "2026-07-30T08:10:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35882747,
+   "p1": "Oliwier Sokolowski",
+   "p2": "Michal Durda",
+   "p1_norm": "oliwier sokolowski",
+   "p2_norm": "michal durda",
+   "open_date": "2026-07-30T08:10:00.000Z",
+   "line": 72.5,
+   "over_odds": -120,
+   "under_odds": -110
+  },
+  {
+   "event_id": 35882748,
+   "p1": "Jakub Kaczmarek",
+   "p2": "Krzysztof Juszczyk",
+   "p1_norm": "jakub kaczmarek",
+   "p2_norm": "krzysztof juszczyk",
+   "open_date": "2026-07-30T08:10:00.000Z",
+   "line": 73.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
