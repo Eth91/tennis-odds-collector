@@ -124,6 +124,7 @@ rw|1093|Avoids injury report for Wednesday
 rw|1093|Fades injury report
 rw|1093|Not listed on injury report
 rw|1093|Sitting out Wednesday
+rw|1093|Won't suit up Wednesday
 rw|1095|Provides spark defensively
 rw|1098|Headed to bench
 rw|1100|Muted output in win
