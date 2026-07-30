@@ -84,6 +84,7 @@
 2026-07-28|Olivia Nelson-Ododa|rebounds|5.5
 2026-07-28|Olivia Nelson-Ododa|rebounds|6.5
 2026-07-28|Olivia Nelson-Ododa|rebounds|7.5
+2026-07-30|Laura Juskaite|points|9.5
 n1|2026-07-20|Arike Ogunbowale|points|14.5
 n1|2026-07-20|Arike Ogunbowale|points|15.5
 n1|2026-07-20|Arike Ogunbowale|points|16.5
@@ -194,3 +195,4 @@ watch|2026-07-30|Breanna Stewart|assists|3.5
 watch|2026-07-30|Jonquel Jones|assists|1.5
 watch|2026-07-30|Jonquel Jones|assists|2.5
 watch|2026-07-30|Kamilla Cardoso|pra|23.5
+watch|2026-07-30|Maria Conde|pts_ast|13.5
