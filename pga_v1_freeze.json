@@ -1,0 +1,82 @@
+{
+ "version": "v1.0",
+ "frozen": "2026-07-30",
+ "sha256_16": "27bf0a242491c19d",
+ "constants": {
+  "pga_ruler": {
+   "HALF_LIFE_D": 270.0,
+   "K_SHRINK": 11.0,
+   "MIN_ROUNDS": 20,
+   "RHO": 0.05,
+   "SHAPE_SLOPE": 1.3,
+   "SIG_SHRINK": 78.0,
+   "SPREAD": 1.3,
+   "UA": {
+    "User-Agent": "Mozilla/5.0"
+   }
+  },
+  "pga_e3": {
+   "BLEND_W": 0.4,
+   "B_RATIO_MAX": 1.6,
+   "EV_MIN": 0.03,
+   "M_EDGE": 0.06,
+   "M_RATIO_MAX": 1.6,
+   "OUTRIGHT_ARMABLE": false,
+   "OUT_EV": 0.15,
+   "OUT_RATIO": 1.3,
+   "TN_EDGE": 0.02,
+   "TN_MIN_ODDS": 1.5,
+   "TN_RATIO_MAX": 2.0,
+   "TN_RATIO_MIN": 1.15,
+   "VIG_MAX": 1.75,
+   "VIG_MIN": 1.01
+  },
+  "pga_birdies": {
+   "BIRDIE_RELIABILITY": 1.06,
+   "BIRDIE_RELIABILITY_MIN": 0.85,
+   "CPAR_K": 400.0,
+   "DDL": "CREATE TABLE IF NOT EXISTS birdie_rounds(\n    tid TEXT, tname TEXT, player TEXT, rnd INTEGER,\n    p3h INTEGER, p3b INTEGER, p4h INTEGER, p4b INTEGER, p5h INTEGER, p5b INTEGER,\n    PRIMARY KEY(tid, player, rnd))",
+   "DEFAULT_MIX": {
+    "3": 4,
+    "4": 10,
+    "5": 4
+   },
+   "DISPERSION": 0.552,
+   "KEY": "da2-gsrx5bibzbb4njvhl7t37wqyl4",
+   "K_H": 106.0,
+   "K_H_PAR": {
+    "3": 593.0,
+    "4": 106.0,
+    "5": 162.0
+   },
+   "PAR_MIX_RULE": {
+    "70": {
+     "3": 4,
+     "4": 12,
+     "5": 2
+    },
+    "71": {
+     "3": 4,
+     "4": 11,
+     "5": 3
+    },
+    "72": {
+     "3": 4,
+     "4": 10,
+     "5": 4
+    },
+    "73": {
+     "3": 3,
+     "4": 11,
+     "5": 4
+    }
+   },
+   "PHI_ROUND": 0.0233
+  },
+  "pga_context": {
+   "K_COURSE": 2.0,
+   "K_FIT": 105.0,
+   "WIND_REF": 15.0
+  }
+ }
+}
