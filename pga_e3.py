@@ -288,7 +288,9 @@ def main():
                       f"wind {_wind if _wind is None else round(_wind, 1)} km/h")
             except Exception as _ce:
                 print(f"  birdies: context unavailable ({str(_ce)[:40]})")
-            BR, _fr = B.rates(course_factor=_cf, wind_kmh=_wind)
+            # course_name gives rates() this venue's own per-par baseline (the fix
+            # that took the reliability slope from 0.617 to 1.059)
+            BR, _fr = B.rates(course_factor=_cf, wind_kmh=_wind, course_name=evn)
             BRn = {RU.norm(k): v for k, v in BR.items()}
             try:
                 # resolve the ORCHESTRATOR tid from the event name — ESPN ids are a

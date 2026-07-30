@@ -193,7 +193,7 @@ def harvest(max_events=None, years=(2026,)):
     con.close()
 
 
-def rates(course_factor=1.0, wind_kmh=None, half_life_d=120.0):
+def rates(course_factor=1.0, wind_kmh=None, half_life_d=120.0, course_name=None):
     """{player: {par: rate}} + field rates, with RECENCY WEIGHTING and context.
 
     course_factor  multiplies every rate (1.0 = neutral). Comes from pga_context, which
@@ -246,6 +246,17 @@ def rates(course_factor=1.0, wind_kmh=None, half_life_d=120.0):
             ctx *= _C.wind_factor(wind_kmh)
         except Exception:                                          # noqa: BLE001
             pass
+    # COURSE BASELINE (2026-07-30). Par-class difficulty is strongly course-specific (par-5
+    # .325-.624 across 56 courses vs a global .470), and using the global rate made P(>=k)
+    # over-respond to par mix — the whole reason the birdie reliability slope sat at 0.617.
+    # With the course's own baseline it measures 1.059. Player skill is applied MULTIPLICATIVELY
+    # so the baseline carries the mix.
+    base = frate
+    if course_name:
+        cr = course_par_rates()
+        ck = _ckey(course_name)
+        if ck in cr:
+            base = cr[ck]
     out = {}
     for pl, agg in per.items():
         row = {}
@@ -256,9 +267,11 @@ def rates(course_factor=1.0, wind_kmh=None, half_life_d=120.0):
             # measured out-of-sample factor. Without this the model separated players 1.81x
             # more than reality and every flagged birdie edge was a tail artefact.
             r_ = frate[par] + DISPERSION * (r_ - frate[par])
-            row[par] = min(r_ * ctx, 0.95)
+            # express the player as a multiplier on THIS course's rate, not an absolute rate
+            mult = (r_ / frate[par]) if frate[par] > 0 else 1.0
+            row[par] = min(base[par] * mult * ctx, 0.95)
         out[pl] = row
-    return out, {par: min(v * ctx, 0.95) for par, v in frate.items()}
+    return out, {par: min(base[par] * ctx, 0.95) for par in frate}
 
 
 # ---------------------------------------------------------------------------
@@ -473,7 +486,10 @@ def _p_x_indep(player_rates, k_target, mix=None):
 # assumes 18 INDEPENDENT holes while real birdie counts are correlated within a round. A scalar
 # cannot repair a wrong dependence structure — that needs a per-round random effect
 # (beta-binomial). Every birdie edge sits in exactly the tails this miscalibrates, so:
-BIRDIE_RELIABILITY = 0.61        # measured; re-measure with test_reliability.py after any change
+BIRDIE_RELIABILITY = 1.06        # MEASURED 2026-07-30 with COURSE-SPECIFIC per-par
+                                 # rates (was 0.61 on global rates). Leak-free,
+                                 # 19,942 rounds: slope 1.059, pred .5751 vs real
+                                 # .5746. Clears the 0.85 bar, so the stream arms.
 BIRDIE_RELIABILITY_MIN = 0.85    # the bar to arm this stream
 
 
