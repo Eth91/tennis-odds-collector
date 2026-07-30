@@ -52,7 +52,7 @@ else:
         for f, h in src.items():
             if _fz["source_files"].get(f) != h:
                 print("    changed: %s" % f)
-    print("  *** DRIFT: fingerprint %s != frozen %s ***" % (now, want))
+    print("  *** MODEL DRIFT ***")
     print("  The model has changed. Any evidence collected after this point belongs to a")
     print("  DIFFERENT model and cannot be pooled with the v1.0 record. Either revert, or")
     print("  start a new record — do not append.")
