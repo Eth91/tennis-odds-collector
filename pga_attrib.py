@@ -29,7 +29,10 @@ BOARD = HERE / "pga_board.json"
 
 rows = []
 try:
-    rows = (json.loads(BOARD.read_text()).get("e3") or [])
+    _e3 = json.loads(BOARD.read_text()).get("e3") or {}
+    # the board nests the preview under e3.rows; e3 itself is {armed, g2_n, rows}
+    rows = _e3.get("rows") if isinstance(_e3, dict) else (_e3 or [])
+    rows = [r for r in (rows or []) if isinstance(r, dict)]
 except Exception as e:                                              # noqa: BLE001
     print("no board: %s" % e)
 print("=" * 74)

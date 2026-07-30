@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T02:34:53Z",
+ "captured_at": "2026-07-30T02:43:46Z",
  "matches": [
-  {
-   "event_id": 35882018,
-   "p1": "Henryk Tkaczyk",
-   "p2": "Zbigniew Nocun",
-   "p1_norm": "henryk tkaczyk",
-   "p2_norm": "zbigniew nocun",
-   "open_date": "2026-07-30T02:20:00.000Z",
-   "line": 98.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
   {
    "event_id": 35882026,
    "p1": "Adam Staniczek",
@@ -19,9 +8,9 @@
    "p1_norm": "adam staniczek",
    "p2_norm": "andriej fomin",
    "open_date": "2026-07-30T02:35:00.000Z",
-   "line": 73.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 58.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882041,
@@ -86,8 +75,19 @@
    "p2_norm": "adam linek",
    "open_date": "2026-07-30T03:00:00.000Z",
    "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35882059,
+   "p1": "Witold Stechly",
+   "p2": "Zbigniew Nocun",
+   "p1_norm": "witold stechly",
+   "p2_norm": "zbigniew nocun",
+   "open_date": "2026-07-30T03:05:00.000Z",
+   "line": 68.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
