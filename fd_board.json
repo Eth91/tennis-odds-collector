@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-30T20:56:56Z",
+ "captured_at": "2026-07-30T21:03:49Z",
  "matches": [
-  {
-   "event_id": 35885495,
-   "p1": "Mateusz Rutkowski",
-   "p2": "Patryk Jendrzejewski",
-   "p1_norm": "mateusz rutkowski",
-   "p2_norm": "patryk jendrzejewski",
-   "open_date": "2026-07-30T20:30:00.000Z",
-   "line": 91.5,
-   "over_odds": -165,
-   "under_odds": 120
-  },
-  {
-   "event_id": 35885529,
-   "p1": "Dariusz Szlubowski",
-   "p2": "Dawid Kotwica",
-   "p1_norm": "dariusz szlubowski",
-   "p2_norm": "dawid kotwica",
-   "open_date": "2026-07-30T20:40:00.000Z",
-   "line": 86.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35885530,
    "p1": "Michal Guzik",
@@ -30,9 +8,9 @@
    "p1_norm": "michal guzik",
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-30T20:40:00.000Z",
-   "line": 62.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 85.5,
+   "over_odds": -145,
+   "under_odds": 105
   },
   {
    "event_id": 35885502,
@@ -41,9 +19,9 @@
    "p1_norm": "kacper adamus",
    "p2_norm": "pawel slosarczyk",
    "open_date": "2026-07-30T20:45:00.000Z",
-   "line": 87.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 102.5,
+   "over_odds": 110,
+   "under_odds": -155
   },
   {
    "event_id": 35885546,
@@ -52,9 +30,9 @@
    "p1_norm": "kazimierz rybak",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-30T20:50:00.000Z",
-   "line": 78.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 82.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35885525,
@@ -63,9 +41,9 @@
    "p1_norm": "jakub chmielowski",
    "p2_norm": "mateusz rutkowski",
    "open_date": "2026-07-30T21:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35885536,
