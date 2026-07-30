@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-30T18:58:15Z",
+ "captured_at": "2026-07-30T19:04:08Z",
  "matches": [
-  {
-   "event_id": 35885013,
-   "p1": "Kazimierz Rybak",
-   "p2": "Jakub Cyndera",
-   "p1_norm": "kazimierz rybak",
-   "p2_norm": "jakub cyndera",
-   "open_date": "2026-07-30T18:45:00.000Z",
-   "line": 69.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35885034,
    "p1": "Mateusz Rutkowski",
@@ -19,7 +8,7 @@
    "p1_norm": "mateusz rutkowski",
    "p2_norm": "krystian kolodziej",
    "open_date": "2026-07-30T18:50:00.000Z",
-   "line": 73.5,
+   "line": 85.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,7 +19,7 @@
    "p1_norm": "mateusz trela",
    "p2_norm": "arkadiusz mugowski",
    "open_date": "2026-07-30T18:55:00.000Z",
-   "line": 74.5,
+   "line": 84.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -41,9 +30,9 @@
    "p1_norm": "marian brunner",
    "p2_norm": "jacek zelezik",
    "open_date": "2026-07-30T18:55:00.000Z",
-   "line": 72.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 56.5,
+   "over_odds": 105,
+   "under_odds": -145
   },
   {
    "event_id": 35885070,
@@ -54,7 +43,7 @@
    "open_date": "2026-07-30T19:10:00.000Z",
    "line": 72.5,
    "over_odds": -118,
-   "under_odds": -112
+   "under_odds": -116
   },
   {
    "event_id": 35885071,
@@ -97,6 +86,17 @@
    "p2_norm": "dawid kotwica",
    "open_date": "2026-07-30T19:20:00.000Z",
    "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35885434,
+   "p1": "Jakub Skorupa",
+   "p2": "Adam Staniczek",
+   "p1_norm": "jakub skorupa",
+   "p2_norm": "adam staniczek",
+   "open_date": "2026-07-30T19:30:00.000Z",
+   "line": 75.5,
    "over_odds": -118,
    "under_odds": -112
   }
