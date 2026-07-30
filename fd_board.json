@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-30T10:26:30Z",
+ "captured_at": "2026-07-30T10:30:56Z",
  "matches": [
   {
    "event_id": 35882931,
@@ -8,9 +8,9 @@
    "p1_norm": "lukasz oracz",
    "p2_norm": "waldemar glanowski",
    "open_date": "2026-07-30T10:20:00.000Z",
-   "line": 78.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 83.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35882950,
@@ -19,9 +19,9 @@
    "p1_norm": "marcin jadczyk",
    "p2_norm": "jan zandecki",
    "open_date": "2026-07-30T10:25:00.000Z",
-   "line": 77.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35882970,
@@ -30,7 +30,7 @@
    "p1_norm": "kacper petas",
    "p2_norm": "karol wisniewski",
    "open_date": "2026-07-30T10:30:00.000Z",
-   "line": 71.5,
+   "line": 69.5,
    "over_odds": -112,
    "under_odds": -118
   },
@@ -77,6 +77,17 @@
    "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35883314,
+   "p1": "Krzysztof Wloczko",
+   "p2": "Josef Braun",
+   "p1_norm": "krzysztof wloczko",
+   "p2_norm": "josef braun",
+   "open_date": "2026-07-30T10:55:00.000Z",
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -110
   }
  ]
 }
