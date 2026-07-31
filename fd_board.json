@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T06:57:25Z",
+ "captured_at": "2026-07-31T07:03:23Z",
  "matches": [
   {
    "event_id": 35886481,
@@ -8,9 +8,9 @@
    "p1_norm": "milosz cesarz",
    "p2_norm": "krzysztof hetnar",
    "open_date": "2026-07-31T06:50:00.000Z",
-   "line": 69.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 48.5,
+   "over_odds": -150,
+   "under_odds": 110
   },
   {
    "event_id": 35886482,
@@ -19,8 +19,8 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "bartlomiej mleczko",
    "open_date": "2026-07-31T06:50:00.000Z",
-   "line": 86.5,
-   "over_odds": -120,
+   "line": 98.5,
+   "over_odds": -115,
    "under_odds": -115
   },
   {
@@ -30,9 +30,9 @@
    "p1_norm": "jan zandecki",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-31T06:55:00.000Z",
-   "line": 76.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 81.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35886487,
@@ -41,9 +41,9 @@
    "p1_norm": "radoslaw malinowski",
    "p2_norm": "igor dabrowski",
    "open_date": "2026-07-31T06:55:00.000Z",
-   "line": 76.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 86.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35886488,
@@ -52,9 +52,9 @@
    "p1_norm": "marcin lach",
    "p2_norm": "jakub nowak",
    "open_date": "2026-07-31T06:55:00.000Z",
-   "line": 71.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 70.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35886504,
