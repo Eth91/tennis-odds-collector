@@ -40,10 +40,16 @@ pass, and these lines move violently — measured on Rocket Classic R1, Knapp ov
 1.72 -> 2.42 (+40%) and Henley over 3.5 went 1.68 -> 2.52 (+50%) inside 2.5 hours. Without a rule,
 "the bet" would be whichever pass happened to fire and snapshot timing would dominate the record.
 
-    For each event, the bet set is every flag whose `snapshot_ts` equals S, where
-        S = max(snapshot_ts) over that event's flags with snapshot_ts < first R1 tee time.
-    An event with no known `first_tee` is EXCLUDED and reported as excluded — never scored on a
+    For each MARKET+RUNNER, the bet is the flag whose `snapshot_ts` is the last one strictly
+    before that PLAYER's tee time for the round the market names (a matchbet uses the earlier
+    of the two; a field-wide outright uses the R1 first tee, being live from the first ball).
+    A flag whose deadline cannot be resolved is EXCLUDED and reported — never scored on a
     guessed capture, never silently dropped.
+    REVISED 2026-07-31: the original used the round's first tee, which is not when a bet stops
+    being available — waves span ~7 hours — and `first_tee` only ever held R1's, so Round 2+
+    markets were tested against the wrong day and the rule admitted 0 of 37 flags. Changed only
+    because ZERO bets were scored under it, so no outcome could inform the choice; that
+    latitude ends with the first scored bet.
 
 Deterministic, no lookahead, and the last honest moment the bet could have been placed. Later
 snapshots stay in the ledger as raw material for volatility analysis; they do not enter the SPRT.
@@ -85,6 +91,84 @@ SLOPE_HALT, SLOPE_WINDOW = 0.70, 200
 FROZEN = "v1.0  frozen 2026-07-30"
 
 
+_TEES = None
+
+
+def _tee_index():
+    """{(tid_round, normalised player): tee datetime} from pga_tees.sqlite, plus each round's first
+    tee. Loaded once; a missing tee sheet degrades to {} and every row is then reported as
+    unresolvable rather than silently kept or dropped."""
+    global _TEES
+    if _TEES is not None:
+        return _TEES
+    import datetime as _dt
+    import re as _re
+    import sqlite3 as _sq
+    import unicodedata as _ud
+    idx, first = {}, {}
+    f = HERE / "pga_tees.sqlite"
+    if f.exists():
+        try:
+            c = _sq.connect(str(f))
+            for tn, rnd, pl, ms in c.execute(
+                    "SELECT tname, rnd, player, tee_ms FROM tee_sheet WHERE tee_ms IS NOT NULL"):
+                n = _ud.normalize("NFKD", str(pl or "")).encode("ascii", "ignore").decode()
+                n = _re.sub(r"[^a-z ]", "", n.lower()).strip()
+                t = _dt.datetime.utcfromtimestamp(ms / 1000)
+                idx[(str(tn), int(rnd or 0), n)] = t
+                k = (str(tn), int(rnd or 0))
+                if k not in first or t < first[k]:
+                    first[k] = t
+            c.close()
+        except Exception:                                            # noqa: BLE001
+            pass
+    _TEES = (idx, first)
+    return _TEES
+
+
+def _norm_name(x):
+    import re as _re
+    import unicodedata as _ud
+    n = _ud.normalize("NFKD", str(x or "")).encode("ascii", "ignore").decode()
+    return _re.sub(r"[^a-z ]", "", n.lower()).strip()
+
+
+def _player_deadline(event, market):
+    """The last moment this bet could honestly have been placed.
+
+    Golf waves span ~7 hours, so the round's first tee is not the deadline for a late-wave player —
+    their own tee is. Returns (deadline, reason) with deadline None when it cannot be resolved, so
+    the caller can EXCLUDE and report rather than guess."""
+    import re as _re
+    idx, first = _tee_index()
+    if not idx:
+        return None, "no tee sheet available"
+    m = str(market or "")
+    g = _re.search(r"Round (\d)", m)
+    rnd = int(g.group(1)) if g else 1
+    ev = str(event or "")
+    keys = [k for k in {kk[0] for kk in idx} if k and (k in ev or ev in k)]
+    tname = sorted(keys, key=len)[-1] if keys else None
+    if tname is None:
+        return None, "event not on the tee sheet"
+    if m.upper().startswith("TOP_") or "FINISH" in m.upper():
+        # a 72-hole outright is live from the first ball struck, so R1's first tee is the deadline
+        return first.get((tname, 1)), "field outright -> R1 first tee"
+    mm = _re.search(r"Matchbet\s+(.+?)\s+vs\.?\s+(.+?)$", m, _re.I)
+    if mm:
+        ts = [idx.get((tname, rnd, _norm_name(mm.group(i)))) for i in (1, 2)]
+        ts = [t for t in ts if t]
+        if not ts:
+            return None, "matchbet players not on the tee sheet"
+        return min(ts), "matchbet -> earlier of the two tees"
+    name = _re.sub(r"\s+(Total Birdies or Better|Round \d Score).*$", "", m, flags=_re.I)
+    name = _re.sub(r"\s+Round \d.*$", "", name).strip()
+    t = idx.get((tname, rnd, _norm_name(name)))
+    if t is None:
+        return None, "player %r not on the R%d tee sheet" % (name[:28], rnd)
+    return t, "player tee"
+
+
 def _rows():
     """Settled bets carrying both probabilities. Rows logged before the ledger was
     instrumented have no p_bet and are counted for ROI but cannot be scored."""
@@ -109,19 +193,44 @@ def _rows():
     by_ev = {}
     for r in raw:
         by_ev.setdefault(r[0], []).append(r)
+    # PER-PLAYER CAPTURE (revised 2026-07-31, while zero bets were scored — see the module
+    # docstring). The deadline for a bet is when THAT PLAYER tees, not when the round's first group
+    # does: waves span ~7 hours, and `first_tee` only ever held R1's, so every Round 2+ market was
+    # tested against the wrong day and the rule admitted 0 of 37 flags. One price per bet is still
+    # enforced — the last snapshot before that market's own deadline — because these lines move
+    # 40-50% within hours and otherwise whichever cron pass fired would decide the record.
     keep, excluded = [], {}
+    per = {}                                    # (market, runner) -> [rows], deadline
+    unresolved = {}
     for ev, rs in by_ev.items():
-        tee = next((r[11] for r in rs if r[11]), None)
-        if not tee:
-            excluded[ev] = "no first_tee recorded — capture undefined"
-            continue
-        pre = [r[10] for r in rs if r[10] and str(r[10]) < str(tee)]
+        for r in rs:
+            dl, why = _player_deadline(ev, r[2])
+            if dl is None:
+                unresolved.setdefault(ev, {}).setdefault(why, 0)
+                unresolved[ev][why] += 1
+                continue
+            per.setdefault((ev, r[2], r[3]), [dl, []])[1].append(r)
+    for (ev, _mk, _rn), (dl, rs) in per.items():
+        pre = [r for r in rs if r[10] and _dt_lt(str(r[10]), dl)]
         if not pre:
-            excluded[ev] = "no snapshot before first tee"
-            continue
-        S = max(pre)
-        keep.extend(r for r in rs if r[10] == S)
+            continue                            # player was already away at every snapshot
+        S = max(str(r[10]) for r in pre)
+        keep.extend(r for r in pre if str(r[10]) == S)
+    for ev, whys in unresolved.items():
+        excluded[ev] = "; ".join("%s (%d rows)" % (w, n) for w, n in sorted(whys.items()))
+    for ev in by_ev:
+        if ev not in excluded and not any(k[0] == ev for k in per):
+            excluded[ev] = "no resolvable tee deadline for any flag"
     return keep, graded, excluded
+
+
+def _dt_lt(snap_iso, deadline):
+    """snapshot < deadline, tolerant of the ledger's ISO-string form."""
+    import datetime as _dt
+    try:
+        return _dt.datetime.fromisoformat(str(snap_iso).replace("Z", "")) < deadline
+    except (TypeError, ValueError):
+        return False
 
 
 def _clip(p):

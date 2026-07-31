@@ -1,6 +1,6 @@
 # PGA v1.0  frozen 2026-07-30 — cumulative evidence
 
-_updated 2026-07-31T08:45:06Z · measurement only; the model is frozen and this file never tunes it_
+_updated 2026-07-31T08:57:22Z · measurement only; the model is frozen and this file never tunes it_
 
 ## Verdict
 
@@ -24,12 +24,6 @@ _updated 2026-07-31T08:45:06Z · measurement only; the model is frozen and this 
 No scored bets yet. Settled rows in the ledger: **7** (logged before instrumentation — ROI only, unscorable)
 
 Nothing can be concluded. The first scorable bets arrive when a tournament settles with `p_bet`/`p_fair` recorded.
-
-## Events EXCLUDED by the capture rule
-
-Reported, never silently dropped:
-
-- `PGA Rocket Classic 2026` — no snapshot before first tee
 
 ## Shadow streams (candidate hypotheses — NOT in the v1.0 test)
 
