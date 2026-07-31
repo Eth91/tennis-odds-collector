@@ -1,16 +1,16 @@
 {
- "captured_at": "2026-07-31T22:45:25Z",
+ "captured_at": "2026-07-31T22:51:08Z",
  "matches": [
   {
-   "event_id": 35889085,
-   "p1": "Patryk Jendrzejewski",
-   "p2": "Marcin Marchlewski",
-   "p1_norm": "patryk jendrzejewski",
-   "p2_norm": "marcin marchlewski",
-   "open_date": "2026-07-31T22:30:00.000Z",
-   "line": 59.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "event_id": 35889088,
+   "p1": "Sebastian Szostok",
+   "p2": "Wojciech Urban",
+   "p1_norm": "sebastian szostok",
+   "p2_norm": "wojciech urban",
+   "open_date": "2026-07-31T22:35:00.000Z",
+   "line": 85.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35889111,
@@ -19,20 +19,9 @@
    "p1_norm": "patryk jendrzejewski",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-31T22:50:00.000Z",
-   "line": 82.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
-  {
-   "event_id": 35889112,
-   "p1": "Cezary Pawlik",
-   "p2": "Jacek Oracz",
-   "p1_norm": "cezary pawlik",
-   "p2_norm": "jacek oracz",
-   "open_date": "2026-07-31T22:50:00.000Z",
-   "line": 82.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35889113,
@@ -75,6 +64,17 @@
    "p2_norm": "oskar jedrzejowski",
    "open_date": "2026-07-31T23:10:00.000Z",
    "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35889124,
+   "p1": "Jakub Chmielowski",
+   "p2": "Marcin Marchlewski",
+   "p1_norm": "jakub chmielowski",
+   "p2_norm": "marcin marchlewski",
+   "open_date": "2026-07-31T23:15:00.000Z",
+   "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
   }
