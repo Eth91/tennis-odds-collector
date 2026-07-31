@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T16:17:30Z",
+ "captured_at": "2026-07-31T16:21:35Z",
  "matches": [
   {
    "event_id": 35887957,
@@ -8,7 +8,18 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "jakub chmielowski",
    "open_date": "2026-07-31T16:05:00.000Z",
-   "line": 57.5,
+   "line": 54.5,
+   "over_odds": -110,
+   "under_odds": -125
+  },
+  {
+   "event_id": 35887980,
+   "p1": "Miroslaw Piecowski",
+   "p2": "Adrian Myszewski",
+   "p1_norm": "miroslaw piecowski",
+   "p2_norm": "adrian myszewski",
+   "open_date": "2026-07-31T16:15:00.000Z",
+   "line": 72.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -19,9 +30,9 @@
    "p1_norm": "sebastian szostok",
    "p2_norm": "mariusz koczyba",
    "open_date": "2026-07-31T16:15:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35887994,
@@ -30,9 +41,9 @@
    "p1_norm": "tomasz wrzalik",
    "p2_norm": "grzegorz wichowski",
    "open_date": "2026-07-31T16:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 70.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35888001,
