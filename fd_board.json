@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-31T07:18:18Z",
+ "captured_at": "2026-07-31T07:23:55Z",
  "matches": [
-  {
-   "event_id": 35886504,
-   "p1": "Tomasz Wrzalik",
-   "p2": "Jakub Kaczmarek",
-   "p1_norm": "tomasz wrzalik",
-   "p2_norm": "jakub kaczmarek",
-   "open_date": "2026-07-31T07:10:00.000Z",
-   "line": 84.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35886505,
-   "p1": "Marian Lebek",
-   "p2": "Mariusz Adamus",
-   "p1_norm": "marian lebek",
-   "p2_norm": "mariusz adamus",
-   "open_date": "2026-07-31T07:10:00.000Z",
-   "line": 58.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
   {
    "event_id": 35886510,
    "p1": "Dominik Solilo",
@@ -30,9 +8,9 @@
    "p1_norm": "dominik solilo",
    "p2_norm": "kamil rudomina",
    "open_date": "2026-07-31T07:15:00.000Z",
-   "line": 78.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 82.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35886688,
@@ -41,9 +19,9 @@
    "p1_norm": "robert kostepski",
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-07-31T07:20:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35886689,
@@ -52,9 +30,9 @@
    "p1_norm": "artur grela",
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-07-31T07:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35886690,
@@ -63,9 +41,9 @@
    "p1_norm": "adrian eliasz",
    "p2_norm": "kamil klocek",
    "open_date": "2026-07-31T07:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 70.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35886863,
@@ -132,6 +110,17 @@
    "line": 78.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35886897,
+   "p1": "Milosz Cesarz",
+   "p2": "Michal Paszkiewicz",
+   "p1_norm": "milosz cesarz",
+   "p2_norm": "michal paszkiewicz",
+   "open_date": "2026-07-31T07:50:00.000Z",
+   "line": 75.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
