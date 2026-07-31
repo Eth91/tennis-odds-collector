@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T03:29:35Z",
+ "captured_at": "2026-07-31T03:36:01Z",
  "matches": [
   {
    "event_id": 35885897,
@@ -8,7 +8,7 @@
    "p1_norm": "michal minda",
    "p2_norm": "dominik solilo",
    "open_date": "2026-07-31T03:20:00.000Z",
-   "line": 89.5,
+   "line": 76.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -19,9 +19,9 @@
    "p1_norm": "blazej warpas",
    "p2_norm": "adrian eliasz",
    "open_date": "2026-07-31T03:25:00.000Z",
-   "line": 70.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 72.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35885901,
@@ -30,31 +30,9 @@
    "p1_norm": "pawel kurek",
    "p2_norm": "robert kostepski",
    "open_date": "2026-07-31T03:25:00.000Z",
-   "line": 78.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35885902,
-   "p1": "Szymon Kolasa",
-   "p2": "Artur Grela",
-   "p1_norm": "szymon kolasa",
-   "p2_norm": "artur grela",
-   "open_date": "2026-07-31T03:25:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35885908,
-   "p1": "Marian Lebek",
-   "p2": "Marek Tkocz",
-   "p1_norm": "marian lebek",
-   "p2_norm": "marek tkocz",
-   "open_date": "2026-07-31T03:30:00.000Z",
-   "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 75.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35885909,
@@ -63,9 +41,9 @@
    "p1_norm": "aleksander barton",
    "p2_norm": "kazimierz rybak",
    "open_date": "2026-07-31T03:30:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 80.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885912,
@@ -130,6 +108,17 @@
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-07-31T03:55:00.000Z",
    "line": 72.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35885924,
+   "p1": "Jakub Zochniak",
+   "p2": "Michal Minda",
+   "p1_norm": "jakub zochniak",
+   "p2_norm": "michal minda",
+   "open_date": "2026-07-31T04:00:00.000Z",
+   "line": 80.5,
    "over_odds": -112,
    "under_odds": -118
   }
