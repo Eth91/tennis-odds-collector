@@ -1,6 +1,6 @@
 # PGA v1.0  frozen 2026-07-30 — cumulative evidence
 
-_updated 2026-07-31T09:40:22Z · measurement only; the model is frozen and this file never tunes it_
+_updated 2026-07-31T10:03:27Z · measurement only; the model is frozen and this file never tunes it_
 
 ## Verdict
 
@@ -31,7 +31,7 @@ No settled shadow bets yet. `E3-cut-shadow` logs but cannot arm until it beats t
 
 ## Registered open hypotheses
 
-- **H-P1 — should player rates use the CURRENT tournament's completed rounds?** They do not today: `pga_birdies.rates()` reads the harvested history, refreshed WEEKLY, so this week's R1 is absent and a player who shot 65 and one who shot 77 are priced identically — while the book has fully absorbed the difference. The only channel R1 reaches the model is the FIELD-level LAM anchor.
+- **H-P1 — REFUTED 2026-07-31, and briefly shipped before it was.** Adopted as v1.2 on a correlation of +0.152, reverted in v1.3 when a proper null showed it was the WEEK, not the player. The measurement de-conditioned at the ROUND level only; event factors span 0.81-1.24, so an easy week lifts every residual in it. Removing the EVENT level too: **r +0.152 -> +0.012** (0.019 birdies per 18), within-event null **+0.145 -> +0.006**. The original cross-event null (-0.005) was blind to this because it broke the week level along with player identity. DO NOT RE-PROPOSE without event-level de-conditioning and a WITHIN-event null. Original text follows for the record: should player rates use the CURRENT tournament's completed rounds? They do not today: `pga_birdies.rates()` reads the harvested history, refreshed WEEKLY, so this week's R1 is absent and a player who shot 65 and one who shot 77 are priced identically — while the book has fully absorbed the difference. The only channel R1 reaches the model is the FIELD-level LAM anchor.
 
   Tested 2026-07-31 on 42,557 harvested player-rounds across 114 events. Conditions removed first at the round level (field rate that round / field rate that event), because a course plays harder or easier round to round and that would otherwise masquerade as form — the factors do range 0.88x to 1.13x. Player baselines are LEAVE-ONE-EVENT-OUT so the current tournament never informs its own expectation.
 
