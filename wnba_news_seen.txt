@@ -107,6 +107,7 @@ rw|1060|Drops 18 points in loss
 rw|1060|Drops 19 points in blowout loss
 rw|1061|Left off injury report
 rw|1061|Not on injury report
+rw|1061|Ruled out Friday
 rw|1061|Ruled out for Wednesday
 rw|1064|Cut loose by Lynx
 rw|1064|Inks another seven-day deal
@@ -133,6 +134,7 @@ rw|1078|Out again Tuesday
 rw|1078|Ruled out for Friday
 rw|1084|Left off injury report
 rw|1084|Won't play Tuesday
+rw|1084|Won't suit up Friday
 rw|1087|Quiet rookie season continues
 rw|1088|Inactive versus Valkyries
 rw|1088|Joins Phoenix on developmental deal
@@ -146,6 +148,7 @@ rw|1095|Provides spark defensively
 rw|1098|Headed to bench
 rw|1100|Muted output in win
 rw|1103|Omitted from injury report
+rw|1103|Out Friday
 rw|1120|Scores six points off bench
 rw|1134|Off injury report
 rw|1134|Won't play Wednesday
@@ -406,6 +409,7 @@ rw|852|Questionable to return Tuesday
 rw|853|Another double-digit scoring effort
 rw|853|Paces Connecticut in loss
 rw|854|Available for Monday
+rw|854|Inactive against Mystics
 rw|854|Not listed on injury report
 rw|854|Won't suit up Wednesday
 rw|855|Starting against Indiana
