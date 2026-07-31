@@ -1,50 +1,6 @@
 {
- "captured_at": "2026-07-31T11:57:11Z",
+ "captured_at": "2026-07-31T12:22:37Z",
  "matches": [
-  {
-   "event_id": 35887421,
-   "p1": "Artur Daniel",
-   "p2": "Krystian Kolodziej",
-   "p1_norm": "artur daniel",
-   "p2_norm": "krystian kolodziej",
-   "open_date": "2026-07-31T11:45:00.000Z",
-   "line": 92.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35887426,
-   "p1": "Jakub Nowak",
-   "p2": "Mateusz Sikon",
-   "p1_norm": "jakub nowak",
-   "p2_norm": "mateusz sikon",
-   "open_date": "2026-07-31T11:50:00.000Z",
-   "line": 76.5,
-   "over_odds": -115,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35887427,
-   "p1": "Bartlomiej Mleczko",
-   "p2": "Michal Minda",
-   "p1_norm": "bartlomiej mleczko",
-   "p2_norm": "michal minda",
-   "open_date": "2026-07-31T11:50:00.000Z",
-   "line": 78.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35887437,
-   "p1": "Tomasz Wrzalik",
-   "p2": "Witold Buczynski",
-   "p1_norm": "tomasz wrzalik",
-   "p2_norm": "witold buczynski",
-   "open_date": "2026-07-31T11:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35887447,
    "p1": "Amirreza Abbasi",
@@ -52,9 +8,9 @@
    "p1_norm": "amirreza abbasi",
    "p2_norm": "karol strowski",
    "open_date": "2026-07-31T12:05:00.000Z",
-   "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 80.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35887450,
@@ -63,9 +19,9 @@
    "p1_norm": "dominik solilo",
    "p2_norm": "karol wisniewski",
    "open_date": "2026-07-31T12:10:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 60.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35887453,
@@ -74,9 +30,9 @@
    "p1_norm": "marcin lach",
    "p2_norm": "robert kostepski",
    "open_date": "2026-07-31T12:15:00.000Z",
-   "line": 75.5,
+   "line": 73.5,
    "over_odds": -110,
-   "under_odds": -118
+   "under_odds": -125
   },
   {
    "event_id": 35887454,
@@ -85,9 +41,9 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "mateusz misiak",
    "open_date": "2026-07-31T12:15:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 73.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35887467,
@@ -96,9 +52,53 @@
    "p1_norm": "oskar jadach",
    "p2_norm": "grzegorz wichowski",
    "open_date": "2026-07-31T12:20:00.000Z",
-   "line": 75.5,
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35887490,
+   "p1": "Jan Zandecki",
+   "p2": "Szymon Kolasa",
+   "p1_norm": "jan zandecki",
+   "p2_norm": "szymon kolasa",
+   "open_date": "2026-07-31T12:30:00.000Z",
+   "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35887502,
+   "p1": "Grzegorz Poliniewicz",
+   "p2": "Krystian Kolodziej",
+   "p1_norm": "grzegorz poliniewicz",
+   "p2_norm": "krystian kolodziej",
+   "open_date": "2026-07-31T12:35:00.000Z",
+   "line": 74.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35887509,
+   "p1": "Radoslaw Malinowski",
+   "p2": "Michal Minda",
+   "p1_norm": "radoslaw malinowski",
+   "p2_norm": "michal minda",
+   "open_date": "2026-07-31T12:40:00.000Z",
+   "line": 78.5,
+   "over_odds": -116,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35887510,
+   "p1": "Pawel Kurek",
+   "p2": "Mateusz Sikon",
+   "p1_norm": "pawel kurek",
+   "p2_norm": "mateusz sikon",
+   "open_date": "2026-07-31T12:40:00.000Z",
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -116
   }
  ]
 }
