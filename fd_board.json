@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T11:06:57Z",
+ "captured_at": "2026-07-31T11:12:32Z",
  "matches": [
   {
    "event_id": 35887347,
@@ -8,9 +8,9 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "karol wisniewski",
    "open_date": "2026-07-31T10:55:00.000Z",
-   "line": 78.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 86.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35887367,
@@ -19,9 +19,9 @@
    "p1_norm": "michal minda",
    "p2_norm": "mateusz misiak",
    "open_date": "2026-07-31T11:00:00.000Z",
-   "line": 73.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 77.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35887368,
@@ -30,7 +30,7 @@
    "p1_norm": "mateusz sikon",
    "p2_norm": "robert kostepski",
    "open_date": "2026-07-31T11:00:00.000Z",
-   "line": 76.5,
+   "line": 90.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -41,9 +41,9 @@
    "p1_norm": "grzegorz wichowski",
    "p2_norm": "witold buczynski",
    "open_date": "2026-07-31T11:05:00.000Z",
-   "line": 75.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 81.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35887380,
@@ -63,9 +63,9 @@
    "p1_norm": "grzegorz poliniewicz",
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-07-31T11:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35887402,
@@ -75,8 +75,8 @@
    "p2_norm": "igor dabrowski",
    "open_date": "2026-07-31T11:25:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35887403,
