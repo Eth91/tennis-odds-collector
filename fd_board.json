@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-31T05:41:09Z",
+ "captured_at": "2026-07-31T05:45:19Z",
  "matches": [
-  {
-   "event_id": 35886355,
-   "p1": "Grzegorz Wichowski",
-   "p2": "Jakub Kaczmarek",
-   "p1_norm": "grzegorz wichowski",
-   "p2_norm": "jakub kaczmarek",
-   "open_date": "2026-07-31T05:30:00.000Z",
-   "line": 60.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
   {
    "event_id": 35886356,
    "p1": "Milosz Cesarz",
@@ -19,9 +8,9 @@
    "p1_norm": "milosz cesarz",
    "p2_norm": "mariusz adamus",
    "open_date": "2026-07-31T05:30:00.000Z",
-   "line": 57.5,
-   "over_odds": -105,
-   "under_odds": -135
+   "line": 88.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35886376,
@@ -30,7 +19,7 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "stapor rafal",
    "open_date": "2026-07-31T05:35:00.000Z",
-   "line": 75.5,
+   "line": 68.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -41,9 +30,9 @@
    "p1_norm": "jan zandecki",
    "p2_norm": "martin olejnik",
    "open_date": "2026-07-31T05:40:00.000Z",
-   "line": 74.5,
+   "line": 77.5,
    "over_odds": -120,
-   "under_odds": -110
+   "under_odds": -115
   },
   {
    "event_id": 35886385,
@@ -52,9 +41,9 @@
    "p1_norm": "radoslaw malinowski",
    "p2_norm": "mateusz misiak",
    "open_date": "2026-07-31T05:40:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 73.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35886386,
@@ -63,9 +52,9 @@
    "p1_norm": "marcin lach",
    "p2_norm": "mateusz sikon",
    "open_date": "2026-07-31T05:40:00.000Z",
-   "line": 75.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 58.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35886410,
@@ -132,6 +121,17 @@
    "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35886442,
+   "p1": "Michal Paszkiewicz",
+   "p2": "Krzysztof Hetnar",
+   "p1_norm": "michal paszkiewicz",
+   "p2_norm": "krzysztof hetnar",
+   "open_date": "2026-07-31T06:10:00.000Z",
+   "line": 75.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
