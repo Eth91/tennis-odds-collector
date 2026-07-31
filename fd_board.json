@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T16:11:49Z",
+ "captured_at": "2026-07-31T16:17:30Z",
  "matches": [
   {
    "event_id": 35887957,
@@ -8,20 +8,9 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "jakub chmielowski",
    "open_date": "2026-07-31T16:05:00.000Z",
-   "line": 73.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
-  {
-   "event_id": 35887980,
-   "p1": "Miroslaw Piecowski",
-   "p2": "Adrian Myszewski",
-   "p1_norm": "miroslaw piecowski",
-   "p2_norm": "adrian myszewski",
-   "open_date": "2026-07-31T16:15:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 57.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35887981,
@@ -31,8 +20,8 @@
    "p2_norm": "mariusz koczyba",
    "open_date": "2026-07-31T16:15:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35887994,
@@ -86,6 +75,17 @@
    "p2_norm": "michal skorski",
    "open_date": "2026-07-31T16:35:00.000Z",
    "line": 81.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35888187,
+   "p1": "Oskar Jadach",
+   "p2": "Jakub Kaczmarek",
+   "p1_norm": "oskar jadach",
+   "p2_norm": "jakub kaczmarek",
+   "open_date": "2026-07-31T16:40:00.000Z",
+   "line": 74.5,
    "over_odds": -112,
    "under_odds": -118
   }
