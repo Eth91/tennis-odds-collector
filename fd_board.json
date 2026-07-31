@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T14:13:11Z",
+ "captured_at": "2026-07-31T14:17:13Z",
  "matches": [
   {
    "event_id": 35887706,
@@ -8,8 +8,8 @@
    "p1_norm": "tomasz wrzalik",
    "p2_norm": "jakub kaczmarek",
    "open_date": "2026-07-31T13:55:00.000Z",
-   "line": 106.5,
-   "over_odds": -135,
+   "line": 107.5,
+   "over_odds": -130,
    "under_odds": -105
   },
   {
@@ -19,9 +19,9 @@
    "p1_norm": "martin olejnik",
    "p2_norm": "artur grela",
    "open_date": "2026-07-31T14:10:00.000Z",
-   "line": 76.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 67.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35887719,
@@ -30,9 +30,9 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-07-31T14:15:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35887723,
@@ -74,9 +74,9 @@
    "p1_norm": "artur daniel",
    "p2_norm": "karol wisniewski",
    "open_date": "2026-07-31T14:35:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35887759,
@@ -86,8 +86,8 @@
    "p2_norm": "szymon kolasa",
    "open_date": "2026-07-31T14:35:00.000Z",
    "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35887767,
@@ -110,6 +110,17 @@
    "line": 72.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35887773,
+   "p1": "Grzegorz Wichowski",
+   "p2": "Witold Buczynski",
+   "p1_norm": "grzegorz wichowski",
+   "p2_norm": "witold buczynski",
+   "open_date": "2026-07-31T14:45:00.000Z",
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
