@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-31T21:51:59Z",
+ "captured_at": "2026-07-31T21:57:45Z",
  "matches": [
-  {
-   "event_id": 35889021,
-   "p1": "Michal Krutak",
-   "p2": "Oskar Jedrzejowski",
-   "p1_norm": "michal krutak",
-   "p2_norm": "oskar jedrzejowski",
-   "open_date": "2026-07-31T21:35:00.000Z",
-   "line": 75.5,
-   "over_odds": 100,
-   "under_odds": -140
-  },
   {
    "event_id": 35889033,
    "p1": "Krystian Kolodziej",
@@ -19,9 +8,9 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "patryk jendrzejewski",
    "open_date": "2026-07-31T21:45:00.000Z",
-   "line": 73.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 88.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35889034,
@@ -30,31 +19,9 @@
    "p1_norm": "kamil durak",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-07-31T21:45:00.000Z",
-   "line": 80.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35889044,
-   "p1": "Schaniel Krzysztof",
-   "p2": "Jakub Michalski",
-   "p1_norm": "schaniel krzysztof",
-   "p2_norm": "jakub michalski",
-   "open_date": "2026-07-31T21:55:00.000Z",
-   "line": 74.5,
-   "over_odds": -116,
-   "under_odds": -116
-  },
-  {
-   "event_id": 35889045,
-   "p1": "Adrian Myszewski",
-   "p2": "Adrian Fabis",
-   "p1_norm": "adrian myszewski",
-   "p2_norm": "adrian fabis",
-   "open_date": "2026-07-31T21:55:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 89.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35889046,
@@ -99,6 +66,28 @@
    "line": 80.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35889073,
+   "p1": "Mariusz Adamus",
+   "p2": "Damian Fira",
+   "p1_norm": "mariusz adamus",
+   "p2_norm": "damian fira",
+   "open_date": "2026-07-31T22:20:00.000Z",
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35889083,
+   "p1": "Michal Wolny",
+   "p2": "Michal Krutak",
+   "p1_norm": "michal wolny",
+   "p2_norm": "michal krutak",
+   "open_date": "2026-07-31T22:25:00.000Z",
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }

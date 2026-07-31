@@ -1,6 +1,6 @@
 # PGA v1.0  frozen 2026-07-30 — cumulative evidence
 
-_updated 2026-07-31T10:03:27Z · measurement only; the model is frozen and this file never tunes it_
+_updated 2026-07-31T21:57:50Z · measurement only; the model is frozen and this file never tunes it_
 
 ## Verdict
 
@@ -21,13 +21,17 @@ _updated 2026-07-31T10:03:27Z · measurement only; the model is frozen and this 
 
 ## Evidence
 
-No scored bets yet. Settled rows in the ledger: **7** — all 7 carry both probabilities and are scorable in principle, but every one was flagged AFTER that player had teed off, so the capture rule excludes them
+No scored bets yet. Settled rows in the ledger: **24** — all 24 carry both probabilities and are scorable in principle, but every one was flagged AFTER that player had teed off, so the capture rule excludes them
 
 Nothing can be concluded. The first scorable bets arrive when a tournament settles with `p_bet`/`p_fair` recorded.
 
 ## Shadow streams (candidate hypotheses — NOT in the v1.0 test)
 
-No settled shadow bets yet. `E3-cut-shadow` logs but cannot arm until it beats the frozen baseline on a paired SPRT over >= 100 prospective settled bets.
+| stream | n | P&L | logloss vs market | LLR |
+|---|---|---|---|---|
+| all shadow | 17 | +3.47u | 0.60866 vs 0.62978 | +0.3592 |
+
+Adoption needs LLR >= +2.773 on a PAIRED comparison over >= 100 settled bets. Currently 17.
 
 ## Registered open hypotheses
 
