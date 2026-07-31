@@ -1,6 +1,6 @@
-# WNBA v1.0 — cumulative evidence
+# WNBA v1.1 — cumulative evidence
 
-_updated 2026-07-31T06:04:10Z · frozen 2026-07-31 · constants `433b9e32404d015d` · source `5a8bff53184574fd`_
+_updated 2026-07-31T06:09:52Z · frozen 2026-07-31 · constants `433b9e32404d015d` · source `5a8bff53184574fd`_
 
 _measurement only; this file never tunes the model_
 
