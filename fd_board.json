@@ -1,50 +1,6 @@
 {
- "captured_at": "2026-07-31T06:23:08Z",
+ "captured_at": "2026-07-31T06:28:39Z",
  "matches": [
-  {
-   "event_id": 35886436,
-   "p1": "Marcin Jadczyk",
-   "p2": "Artur Grela",
-   "p1_norm": "marcin jadczyk",
-   "p2_norm": "artur grela",
-   "open_date": "2026-07-31T06:05:00.000Z",
-   "line": 88.5,
-   "over_odds": 115,
-   "under_odds": -160
-  },
-  {
-   "event_id": 35886437,
-   "p1": "Igor Dabrowski",
-   "p2": "Adrian Eliasz",
-   "p1_norm": "igor dabrowski",
-   "p2_norm": "adrian eliasz",
-   "open_date": "2026-07-31T06:05:00.000Z",
-   "line": 92.5,
-   "over_odds": -130,
-   "under_odds": -105
-  },
-  {
-   "event_id": 35886442,
-   "p1": "Michal Paszkiewicz",
-   "p2": "Krzysztof Hetnar",
-   "p1_norm": "michal paszkiewicz",
-   "p2_norm": "krzysztof hetnar",
-   "open_date": "2026-07-31T06:10:00.000Z",
-   "line": 84.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35886453,
-   "p1": "Michal Minda",
-   "p2": "Stapor Rafal",
-   "p1_norm": "michal minda",
-   "p2_norm": "stapor rafal",
-   "open_date": "2026-07-31T06:25:00.000Z",
-   "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
-  },
   {
    "event_id": 35886456,
    "p1": "Blazej Warpas",
@@ -99,6 +55,61 @@
    "line": 74.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35886481,
+   "p1": "Milosz Cesarz",
+   "p2": "Krzysztof Hetnar",
+   "p1_norm": "milosz cesarz",
+   "p2_norm": "krzysztof hetnar",
+   "open_date": "2026-07-31T06:50:00.000Z",
+   "line": 73.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35886482,
+   "p1": "Jakub Zochniak",
+   "p2": "Bartlomiej Mleczko",
+   "p1_norm": "jakub zochniak",
+   "p2_norm": "bartlomiej mleczko",
+   "open_date": "2026-07-31T06:50:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35886486,
+   "p1": "Jan Zandecki",
+   "p2": "Marcin Jadczyk",
+   "p1_norm": "jan zandecki",
+   "p2_norm": "marcin jadczyk",
+   "open_date": "2026-07-31T06:55:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35886487,
+   "p1": "Radoslaw Malinowski",
+   "p2": "Igor Dabrowski",
+   "p1_norm": "radoslaw malinowski",
+   "p2_norm": "igor dabrowski",
+   "open_date": "2026-07-31T06:55:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35886488,
+   "p1": "Marcin Lach",
+   "p2": "Jakub Nowak",
+   "p1_norm": "marcin lach",
+   "p2_norm": "jakub nowak",
+   "open_date": "2026-07-31T06:55:00.000Z",
+   "line": 73.5,
+   "over_odds": -120,
+   "under_odds": -110
   }
  ]
 }
