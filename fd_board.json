@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T20:25:01Z",
+ "captured_at": "2026-07-31T20:29:06Z",
  "matches": [
   {
    "event_id": 35888800,
@@ -8,9 +8,9 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "jacek oracz",
    "open_date": "2026-07-31T20:20:00.000Z",
-   "line": 83.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 85.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35888803,
@@ -19,7 +19,7 @@
    "p1_norm": "roman wiza",
    "p2_norm": "adam ruszkiewicz",
    "open_date": "2026-07-31T20:20:00.000Z",
-   "line": 79.5,
+   "line": 84.5,
    "over_odds": -120,
    "under_odds": -115
   },
