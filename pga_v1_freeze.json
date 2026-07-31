@@ -1,89 +1,13 @@
 {
- "version": "v1.0",
- "frozen": "2026-07-30",
+ "version": "v1.1",
+ "frozen": "2026-07-31",
  "sha256_16": "27bf0a242491c19d",
- "source_sha256_16": "a8780c8de09971fd",
+ "source_sha256_16": "da390a0ba6b0911b",
  "source_files": {
   "pga_ruler.py": "ce9013952e943a39",
-  "pga_e3.py": "63099ac403076f09",
+  "pga_e3.py": "2afa2da97ab5c1a8",
   "pga_birdies.py": "e7530e852c0400ed",
   "pga_context.py": "97f98a861a6fe4d0"
  },
- "constants": {
-  "pga_ruler": {
-   "HALF_LIFE_D": 270.0,
-   "K_SHRINK": 11.0,
-   "MIN_ROUNDS": 20,
-   "RHO": 0.05,
-   "SHAPE_SLOPE": 1.3,
-   "SIG_SHRINK": 78.0,
-   "SPREAD": 1.3,
-   "UA": {
-    "User-Agent": "Mozilla/5.0"
-   }
-  },
-  "pga_e3": {
-   "BLEND_W": 0.4,
-   "B_RATIO_MAX": 1.6,
-   "EV_MIN": 0.03,
-   "M_EDGE": 0.06,
-   "M_RATIO_MAX": 1.6,
-   "OUTRIGHT_ARMABLE": false,
-   "OUT_EV": 0.15,
-   "OUT_RATIO": 1.3,
-   "TN_EDGE": 0.02,
-   "TN_MIN_ODDS": 1.5,
-   "TN_RATIO_MAX": 2.0,
-   "TN_RATIO_MIN": 1.15,
-   "VIG_MAX": 1.75,
-   "VIG_MIN": 1.01
-  },
-  "pga_birdies": {
-   "BIRDIE_RELIABILITY": 1.06,
-   "BIRDIE_RELIABILITY_MIN": 0.85,
-   "CPAR_K": 400.0,
-   "DDL": "CREATE TABLE IF NOT EXISTS birdie_rounds(\n    tid TEXT, tname TEXT, player TEXT, rnd INTEGER,\n    p3h INTEGER, p3b INTEGER, p4h INTEGER, p4b INTEGER, p5h INTEGER, p5b INTEGER,\n    PRIMARY KEY(tid, player, rnd))",
-   "DEFAULT_MIX": {
-    "3": 4,
-    "4": 10,
-    "5": 4
-   },
-   "DISPERSION": 0.552,
-   "KEY": "da2-gsrx5bibzbb4njvhl7t37wqyl4",
-   "K_H": 106.0,
-   "K_H_PAR": {
-    "3": 593.0,
-    "4": 106.0,
-    "5": 162.0
-   },
-   "PAR_MIX_RULE": {
-    "70": {
-     "3": 4,
-     "4": 12,
-     "5": 2
-    },
-    "71": {
-     "3": 4,
-     "4": 11,
-     "5": 3
-    },
-    "72": {
-     "3": 4,
-     "4": 10,
-     "5": 4
-    },
-    "73": {
-     "3": 3,
-     "4": 11,
-     "5": 4
-    }
-   },
-   "PHI_ROUND": 0.0233
-  },
-  "pga_context": {
-   "K_COURSE": 2.0,
-   "K_FIT": 105.0,
-   "WIND_REF": 15.0
-  }
- }
+ "decision": "v1.1 (2026-07-31) \u2014 pga_e3 refuses to flag a market once THAT PLAYER has teed off, using the shared resolver in pga_tee_gate (imported by the validator too, so the model and the capture rule cannot answer 'is this still open?' differently). Golf waves span ~7 hours, so a round being under way is not the deadline; the player's own tee is. Before this, the */30 cron flagged Round 1 birdies 150-750 minutes after those players teed off (median +257). Those flags could never be scored (the pre-registered capture rule needs a pre-tee snapshot, and 26 of 37 flags this week were discarded by it), they appeared on the board as bets the validation would never count, and they were wagers into a better-informed price: on the 7 that settled, market p_fair was 0.620 for eventual winners vs 0.538 for losers, and the model disagreed hardest where it was wrong (Hojgaard 0.853 vs market 0.561, 224 min in, lost). Record 3-4, -2.10u. CONSEQUENCE: 72-hole matchbets and outrights are now flaggable only before the tournament's first ball, which matches the model's own thesis (tee-wave and wind edges are pre-round, and the ruler skips its shape recalibration in-play). AFFORDABLE BECAUSE THE MODEL HAD ZERO SCORED BETS: nothing accrued under the old behaviour, so no outcome informed this decision. v1.0's record was 0-0."
 }

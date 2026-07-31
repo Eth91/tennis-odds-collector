@@ -43,7 +43,7 @@ except Exception as e:
 # SOURCE hash matters as much as the constants: a drift check that only reads uppercase
 # module attributes passed while a whole dedupe block was missing from pga_e3.py.
 if now == want and now_src == want_src:
-    print("  OK  v1.0 constants %s + source %s intact" % (now, now_src))
+    print("  OK  %s constants %s + source %s intact" % (_fz.get("version", "?"), now, now_src))
 else:
     if now != want:
         print("  constants drifted: %s != %s" % (now, want))
