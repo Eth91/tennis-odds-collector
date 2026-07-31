@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T00:43:39Z",
+ "captured_at": "2026-07-31T00:51:05Z",
  "matches": [
   {
    "event_id": 35885736,
@@ -8,9 +8,9 @@
    "p1_norm": "piotr gesiarz",
    "p2_norm": "michal guzik",
    "open_date": "2026-07-31T00:35:00.000Z",
-   "line": 67.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 87.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35885745,
@@ -19,9 +19,9 @@
    "p1_norm": "aleksander barton",
    "p2_norm": "jakub cyndera",
    "open_date": "2026-07-31T00:45:00.000Z",
-   "line": 73.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885746,
@@ -31,8 +31,8 @@
    "p2_norm": "mariusz baron",
    "open_date": "2026-07-31T00:45:00.000Z",
    "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885764,
@@ -44,6 +44,28 @@
    "line": 76.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35885783,
+   "p1": "Kazimierz Rybak",
+   "p2": "Zbigniew Nocun",
+   "p1_norm": "kazimierz rybak",
+   "p2_norm": "zbigniew nocun",
+   "open_date": "2026-07-31T01:10:00.000Z",
+   "line": 68.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35885784,
+   "p1": "Jakub Pruszkowski",
+   "p2": "Kacper Adamus",
+   "p1_norm": "jakub pruszkowski",
+   "p2_norm": "kacper adamus",
+   "open_date": "2026-07-31T01:10:00.000Z",
+   "line": 80.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
