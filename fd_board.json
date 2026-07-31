@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T21:14:48Z",
+ "captured_at": "2026-07-31T21:24:24Z",
  "matches": [
   {
    "event_id": 35888922,
@@ -8,9 +8,9 @@
    "p1_norm": "michal wolny",
    "p2_norm": "jacek oracz",
    "open_date": "2026-07-31T21:10:00.000Z",
-   "line": 73.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 95.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35889007,
@@ -19,9 +19,9 @@
    "p1_norm": "mariusz koczyba",
    "p2_norm": "kamil kowalski",
    "open_date": "2026-07-31T21:20:00.000Z",
-   "line": 70.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 76.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35889008,
@@ -30,9 +30,9 @@
    "p1_norm": "marcin marchlewski",
    "p2_norm": "jakub chmielowski",
    "open_date": "2026-07-31T21:20:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35889018,
@@ -66,6 +66,28 @@
    "line": 79.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35889033,
+   "p1": "Krystian Kolodziej",
+   "p2": "Patryk Jendrzejewski",
+   "p1_norm": "krystian kolodziej",
+   "p2_norm": "patryk jendrzejewski",
+   "open_date": "2026-07-31T21:45:00.000Z",
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35889034,
+   "p1": "Kamil Durak",
+   "p2": "Sebastian Szostok",
+   "p1_norm": "kamil durak",
+   "p2_norm": "sebastian szostok",
+   "open_date": "2026-07-31T21:45:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
