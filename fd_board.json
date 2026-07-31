@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T22:55:45Z",
+ "captured_at": "2026-07-31T23:03:17Z",
  "matches": [
   {
    "event_id": 35889111,
@@ -8,9 +8,9 @@
    "p1_norm": "patryk jendrzejewski",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-07-31T22:50:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 90.5,
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35889113,
@@ -19,9 +19,9 @@
    "p1_norm": "michal skorski",
    "p2_norm": "miroslaw piecowski",
    "open_date": "2026-07-31T22:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 86.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35889118,
@@ -74,7 +74,7 @@
    "p1_norm": "adrian myszewski",
    "p2_norm": "mateusz trela",
    "open_date": "2026-07-31T23:20:00.000Z",
-   "line": 80.5,
+   "line": 84.5,
    "over_odds": -118,
    "under_odds": -112
   }

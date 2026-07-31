@@ -90,6 +90,7 @@
 2026-07-31|Bridget Carleton|points|14.5
 2026-07-31|Megan DiLeo|points|14.5
 2026-07-31|Megan DiLeo|points|15.5
+2026-08-01|Kamilla Cardoso|rebounds|8.5
 n1|2026-07-20|Arike Ogunbowale|points|14.5
 n1|2026-07-20|Arike Ogunbowale|points|15.5
 n1|2026-07-20|Arike Ogunbowale|points|16.5

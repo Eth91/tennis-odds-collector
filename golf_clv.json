@@ -1,4 +1,150 @@
 {
- "updated": "2026-07-30T23:00:06",
- "markets": {}
+ "updated": "2026-07-31T23:00:13",
+ "markets": {
+  "TOP_REGION_IMG": {
+   "n": 602,
+   "mean_open_over_close": 0.9752,
+   "median": 0.9342
+  },
+  "ROUND_LEADER_IMG": {
+   "n": 290,
+   "mean_open_over_close": 1.1477,
+   "median": 1.0
+  },
+  "WIN_ONLY_IMG": {
+   "n": 288,
+   "mean_open_over_close": 1.0985,
+   "median": 1.0
+  },
+  "TOP_10_FINISH_IMG": {
+   "n": 288,
+   "mean_open_over_close": 1.0483,
+   "median": 1.0
+  },
+  "TOP_5_FINISH_IMG": {
+   "n": 288,
+   "mean_open_over_close": 1.037,
+   "median": 1.0
+  },
+  "OUTRIGHT_WINNER_WITHOUT_X_IMG": {
+   "n": 284,
+   "mean_open_over_close": 1.0988,
+   "median": 1.0
+  },
+  "TOP_20_FINISH_IMG": {
+   "n": 187,
+   "mean_open_over_close": 1.111,
+   "median": 0.95
+  },
+  "3_BALLS_IMG": {
+   "n": 171,
+   "mean_open_over_close": 1.0061,
+   "median": 1.0
+  },
+  "OUTRIGHT_BETTING": {
+   "n": 163,
+   "mean_open_over_close": 1.0,
+   "median": 1.0
+  },
+  "TOP_10_FINISH_(INCL._TIES)": {
+   "n": 136,
+   "mean_open_over_close": 0.9504,
+   "median": 0.9474
+  },
+  "TOP_5_FINISH_(INCL._TIES)": {
+   "n": 135,
+   "mean_open_over_close": 0.9436,
+   "median": 0.98
+  },
+  "WHO_WILL_WIN_A_GROUP_OF_HOLES_IMG": {
+   "n": 114,
+   "mean_open_over_close": 1.0072,
+   "median": 1.0
+  },
+  "TOP_20_FINISH_(INCL._TIES)": {
+   "n": 106,
+   "mean_open_over_close": 0.9705,
+   "median": 0.95
+  },
+  "THREE_CHANCES_TO_WIN": {
+   "n": 84,
+   "mean_open_over_close": 1.0261,
+   "median": 1.0
+  },
+  "BIG_GUNS_V_THE_FIELD": {
+   "n": 70,
+   "mean_open_over_close": 1.0216,
+   "median": 1.0
+  },
+  "PLAYER_BIRDIES_OR_BETTER": {
+   "n": 64,
+   "mean_open_over_close": 1.0092,
+   "median": 1.0
+  },
+  "PLAYER_ROUND_SCORE": {
+   "n": 60,
+   "mean_open_over_close": 1.0035,
+   "median": 1.0
+  },
+  "TWO_CHANCES_TO_WIN": {
+   "n": 55,
+   "mean_open_over_close": 1.0293,
+   "median": 1.0
+  },
+  "PLAYER_HOLE_12_SCORE": {
+   "n": 54,
+   "mean_open_over_close": 1.041,
+   "median": 0.9964
+  },
+  "PLAYER_HOLE_11_SCORE": {
+   "n": 54,
+   "mean_open_over_close": 1.0644,
+   "median": 0.9879
+  },
+  "PLAYER_HOLE_10_SCORE": {
+   "n": 54,
+   "mean_open_over_close": 1.0244,
+   "median": 1.0
+  },
+  "TOP_GROUP_IMG": {
+   "n": 45,
+   "mean_open_over_close": 0.9742,
+   "median": 0.9091
+  },
+  "PLAYER_HOLE_1_SCORE": {
+   "n": 36,
+   "mean_open_over_close": 1.0778,
+   "median": 1.0258
+  },
+  "PLAYER_HOLE_2_SCORE": {
+   "n": 36,
+   "mean_open_over_close": 1.0762,
+   "median": 1.0
+  },
+  "PLAYER_HOLE_3_SCORE": {
+   "n": 36,
+   "mean_open_over_close": 0.9637,
+   "median": 0.9678
+  },
+  "TOURNAMENT_MATCHBETS_IMG": {
+   "n": 18,
+   "mean_open_over_close": 1.0164,
+   "median": 1.0
+  },
+  "ROUND_MATCHBETS_IMG": {
+   "n": 18,
+   "mean_open_over_close": 0.9866,
+   "median": 1.0
+  },
+  "WINNING_TEAM": {
+   "n": 3,
+   "mean_open_over_close": 1.0,
+   "median": 1.0
+  },
+  "WILL_THERE_BE_A_HOLE-IN-ONE_IMG": {
+   "n": 2,
+   "mean_open_over_close": 1.0,
+   "median": 1.0
+  }
+ }
 }
