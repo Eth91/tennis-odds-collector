@@ -1,6 +1,6 @@
 # PGA v1.0  frozen 2026-07-30 — cumulative evidence
 
-_updated 2026-07-31T08:57:22Z · measurement only; the model is frozen and this file never tunes it_
+_updated 2026-07-31T08:59:17Z · measurement only; the model is frozen and this file never tunes it_
 
 ## Verdict
 
@@ -21,7 +21,7 @@ _updated 2026-07-31T08:57:22Z · measurement only; the model is frozen and this 
 
 ## Evidence
 
-No scored bets yet. Settled rows in the ledger: **7** (logged before instrumentation — ROI only, unscorable)
+No scored bets yet. Settled rows in the ledger: **7** — all 7 carry both probabilities and are scorable in principle, but every one was flagged AFTER that player had teed off, so the capture rule excludes them
 
 Nothing can be concluded. The first scorable bets arrive when a tournament settles with `p_bet`/`p_fair` recorded.
 
