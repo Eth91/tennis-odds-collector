@@ -1061,7 +1061,7 @@ def _tt_ladder(lad, play_to, zone):
 TT_LIVE_JS = """
   const TT_BOARD_URL = 'https://raw.githubusercontent.com/fgf9p6ks2f-ux/tennis-odds-collector/main/fd_board.json';
   const TT_H2H_URL = 'https://raw.githubusercontent.com/fgf9p6ks2f-ux/tennis-odds-collector/main/tt_board.json';
-  let _ttBoard = null, _ttH2H = null, _ttUpcoming = null, _ttBets = null;
+  let _ttBoard = null, _ttH2H = null, _ttUpcoming = null, _ttBets = null, _ttSkipped = null;
   function _ttEsc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
   function _ttTime(iso){ try { return new Date(iso).toLocaleTimeString('en-US', {timeZone:'America/Denver', hour:'numeric', minute:'2-digit'}); } catch(e){ return ''; } }
   function _ttAm(o){ return (o != null && o > 0) ? '+' + o : '' + o; }
@@ -1127,6 +1127,15 @@ TT_LIVE_JS = """
                     hit: b.raw, real: true, book: _bn,
                     odds: (b.odds != null ? _ttAm(b.odds) : _ttDecAm((b.book||{}).od))});
     });
+    // REFUSED PLAYS SUPPRESS THEIR OWN PROJECTION. They are never rendered, but a pair that has a
+    // real FanDuel/BetMGM line and failed the gate must LEAVE the board rather than fall back to a
+    // projected row at an invented line — that reads as an available bet when the model said no.
+    (_ttSkipped || []).forEach(function(b){
+      if (!b || !b.p1 || !b.p2) return;
+      var s1 = _ttNorm(b.p1), s2 = _ttNorm(b.p2);
+      boardPairs[_ttKey(s1, s2)] = 1;
+      boardLast[_ttKey(_ttLast(s1), _ttLast(s2))] = 1;
+    });
     // projected likely-flags (pre-filtered to >=70% in tt_board) — DROP the moment FanDuel posts
     // this pair (exact key OR last-name fallback), so a "projected" tag never lingers past the real line
     (_ttUpcoming || []).forEach(function(e){
@@ -1168,7 +1177,7 @@ TT_LIVE_JS = """
     } catch(e){}
     try {
       var r2 = await fetch(TT_H2H_URL + '?_=' + Date.now(), { cache: 'no-store' });
-      if (r2.ok){ var d2 = await r2.json(); var mp = {}; (d2.elite_h2h || []).forEach(function(e){ mp[_ttKey(e.p1n, e.p2n)] = e; }); _ttH2H = mp; _ttUpcoming = Array.isArray(d2.elite_upcoming) ? d2.elite_upcoming : []; _ttBets = Array.isArray(d2.bets) ? d2.bets : []; }
+      if (r2.ok){ var d2 = await r2.json(); var mp = {}; (d2.elite_h2h || []).forEach(function(e){ mp[_ttKey(e.p1n, e.p2n)] = e; }); _ttH2H = mp; _ttUpcoming = Array.isArray(d2.elite_upcoming) ? d2.elite_upcoming : []; _ttBets = Array.isArray(d2.bets) ? d2.bets : []; _ttSkipped = Array.isArray(d2.skipped) ? d2.skipped : []; }
     } catch(e){}
     window._applyTTTotals();
     _ttStamp();
@@ -1197,6 +1206,7 @@ TT_LIVE_JS = """
     _ttH2H = mp;
     _ttUpcoming = Array.isArray(b.upcoming) ? b.upcoming : [];
     _ttBets = Array.isArray(b.bets) ? b.bets : [];
+    _ttSkipped = Array.isArray(b.skipped) ? b.skipped : [];
     try { window._applyTTTotals(); } catch(e){}
   })();
   window._fetchTTTotals();
@@ -1490,7 +1500,11 @@ def _tt_panel(data):
     boot = {"board": fb.get("matches") or [],
             "h2h": (data or {}).get("elite_h2h") or [],
             "upcoming": (data or {}).get("elite_upcoming") or [],
-            "bets": (data or {}).get("bets") or []}
+            "bets": (data or {}).get("bets") or [],
+            # REFUSED plays travel too — not to render, but so their PROJECTION is suppressed.
+            # A pair with a real line the model said no to must leave the board, and without this
+            # it silently reverts to a projected row at a made-up line, which reads as a live bet.
+            "skipped": (data or {}).get("skipped") or []}
     # `</script>` inside embedded JSON would close the tag early; escaping `<` is the standard guard
     boot_js = json.dumps(boot, default=str).replace("<", "\\u003c")
     return (warn + f'<script>window._TT_BOOT={boot_js};</script>'
