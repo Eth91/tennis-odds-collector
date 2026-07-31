@@ -159,6 +159,7 @@ rw|238|No timetable for return
 rw|246|Records season-high 14 points
 rw|249|Stuck in bench role
 rw|252|Out again Thursday
+rw|252|Won't play Saturday
 rw|252|Won't play Tuesday
 rw|254|Produces 18 points in win
 rw|254|Scores game-high 21 points
@@ -377,6 +378,7 @@ rw|789|Questionable for Tuesday
 rw|789|Upgraded to probable
 rw|789|Won't play Tuesday
 rw|792|Doubtful for Thursday
+rw|792|Questionable against Chicago
 rw|792|Ruled out for Tuesday
 rw|792|Won't play Wednesday
 rw|792|Won't suit up Thursday
