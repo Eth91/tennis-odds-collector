@@ -19,19 +19,19 @@ for db, tab, pc, nc in (("wnba_proj_log.sqlite", "projections", "pid", "player")
     try:
         c = sqlite3.connect(db)
         r = c.execute("SELECT pid FROM %s WHERE %s LIKE ? LIMIT 1" % (tab, nc),
-                      ("%Barker%",)).fetchone()
+                      ("%Ashlee Barker%",)).fetchone()
         if r:
             oid = r[0]
         c.close()
     except sqlite3.Error:
         pass
 if oid is None:                                   # fall back to the roster ESPN gives us
-    for p in (W.players() or []):
-        nm = p.get("name") or p.get("player") or p.get("fullName") or ""
-        if "Barker" in nm:
-            oid = p.get("id") or p.get("pid")
+    for nm, pid in (W.roster_ids() or {}).items():
+        if nm == OUT_NAME:
+            oid = pid
             print("  resolved via roster:", nm, oid)
             break
+oid = oid or 4703794          # Sarah Ashlee Barker, pinned
 print("  out_player pid:", oid)
 out_log = W.game_log(oid) if oid else []
 print("  out_player games:", len(out_log))
