@@ -257,6 +257,7 @@ rw|488|Double-double in win
 rw|488|Fares well in win
 rw|488|Probable for Friday
 rw|489|Logs 14 minutes in loss
+rw|495|Traded to Sun
 rw|498|Strong effort in loss
 rw|498|Strong line in loss
 rw|501|Sees 11 minutes in win
@@ -489,6 +490,7 @@ rw|998|Nears double-double in return
 rw|998|Removed from injury report
 rw|998|Scores career-high 21 points
 rw|998|Starting against Indiana
+rw|998|Traded to Tempo
 rw|aaliyahedwards|Edwards (knee) is out for Tuesday's game
 rw|aaliyahedwards|Edwards (knee) is out for Wednesday's ga
 rw|aaliyahedwards|Edwards (knee) won't return to Sunday's 
