@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T09:33:15Z",
+ "captured_at": "2026-07-31T09:37:29Z",
  "matches": [
   {
    "event_id": 35887111,
@@ -8,9 +8,9 @@
    "p1_norm": "grzegorz poliniewicz",
    "p2_norm": "karol wisniewski",
    "open_date": "2026-07-31T09:20:00.000Z",
-   "line": 89.5,
-   "over_odds": -105,
-   "under_odds": -130
+   "line": 91.5,
+   "over_odds": 120,
+   "under_odds": -165
   },
   {
    "event_id": 35887117,
@@ -19,7 +19,7 @@
    "p1_norm": "radoslaw malinowski",
    "p2_norm": "mateusz misiak",
    "open_date": "2026-07-31T09:25:00.000Z",
-   "line": 63.5,
+   "line": 75.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,7 +30,7 @@
    "p1_norm": "pawel kurek",
    "p2_norm": "robert kostepski",
    "open_date": "2026-07-31T09:25:00.000Z",
-   "line": 85.5,
+   "line": 76.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -41,9 +41,9 @@
    "p1_norm": "michal paszkiewicz",
    "p2_norm": "marek tkocz",
    "open_date": "2026-07-31T09:30:00.000Z",
-   "line": 73.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 52.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35887131,
@@ -52,9 +52,9 @@
    "p1_norm": "grzegorz wichowski",
    "p2_norm": "tomasz wrzalik",
    "open_date": "2026-07-31T09:30:00.000Z",
-   "line": 70.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 79.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35887157,
@@ -108,6 +108,28 @@
    "p2_norm": "jakub kaczmarek",
    "open_date": "2026-07-31T09:55:00.000Z",
    "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35887182,
+   "p1": "Martin Olejnik",
+   "p2": "Szymon Kolasa",
+   "p1_norm": "martin olejnik",
+   "p2_norm": "szymon kolasa",
+   "open_date": "2026-07-31T10:00:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35887212,
+   "p1": "Artur Daniel",
+   "p2": "Grzegorz Poliniewicz",
+   "p1_norm": "artur daniel",
+   "p2_norm": "grzegorz poliniewicz",
+   "open_date": "2026-07-31T10:05:00.000Z",
+   "line": 75.5,
    "over_odds": -112,
    "under_odds": -118
   }

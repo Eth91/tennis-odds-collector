@@ -193,7 +193,43 @@ def harvest(max_events=None, years=(2026,)):
     con.close()
 
 
-def rates(course_factor=1.0, wind_kmh=None, half_life_d=120.0, course_name=None):
+# ── H-P1: within-tournament form (2026-07-31) ───────────────────────────────────────────────
+# A player's residual in one round carries to the next at r=+0.152, measured on 42,557
+# player-rounds / 114 events after removing round-level conditions, with leave-one-event-out
+# baselines and a cross-event null of -0.005 (R1->R2 +0.150, R2->R3 +0.156, R3->R4 +0.156).
+# Residual sd is 1.79 birdies per 18, so this moves a projection ~0.27 birdies.
+FORM_R = 0.152          # weight on the current event's residual; 0.0 disables H-P1 entirely
+FORM_MIN_HOLES = 15     # need a real completed round before trusting a residual
+
+
+def live_rounds(tid, tname, cache={}):
+    """This event's COMPLETED rounds, fetched live — the weekly harvest does not have them.
+
+    Returns {player: (holes, birdies)} aggregated over every completed round so far. Cached per
+    tid+round-count so a */30 cron does not re-pull 148 scorecards every pass. Any failure returns
+    {} and H-P1 simply does not fire: a missing fetch must never change a price silently.
+    """
+    key = str(tid)
+    if key in cache:
+        return cache[key]
+    out = {}
+    try:
+        for pid, pname in players_of(tid):
+            try:
+                for row in scorecard_rows(tid, tname, pid, pname):
+                    _, _, pn, _rnd, p3h, p3b, p4h, p4b, p5h, p5b = row
+                    h, b = out.get(pn, (0, 0))
+                    out[pn] = (h + p3h + p4h + p5h, b + p3b + p4b + p5b)
+            except Exception:                                       # noqa: BLE001
+                continue
+    except Exception:                                               # noqa: BLE001
+        out = {}
+    cache[key] = out
+    return out
+
+
+def rates(course_factor=1.0, wind_kmh=None, half_life_d=120.0, course_name=None,
+          live_tid=None, live_tname=None):
     """{player: {par: rate}} + field rates, with RECENCY WEIGHTING and context.
 
     course_factor  multiplies every rate (1.0 = neutral). Comes from pga_context, which
@@ -222,6 +258,11 @@ def rates(course_factor=1.0, wind_kmh=None, half_life_d=120.0, course_name=None)
     for tid, pl, p3h, p3b, p4h, p4b, p5h, p5b in con.execute(
             "SELECT tid, player, SUM(p3h), SUM(p3b), SUM(p4h), SUM(p4b), SUM(p5h), SUM(p5b) "
             "FROM birdie_rounds GROUP BY tid, player"):
+        # H-P1: the current event must never inform its own baseline, or the residual is measured
+        # against a number that already contains it and shrinks toward zero (the same
+        # leave-one-event-out discipline the measurement used).
+        if live_tid and str(tid) == str(live_tid):
+            continue
         w = 1.0
         d = ed.get(tid)
         if d:
@@ -271,6 +312,45 @@ def rates(course_factor=1.0, wind_kmh=None, half_life_d=120.0, course_name=None)
             mult = (r_ / frate[par]) if frate[par] > 0 else 1.0
             row[par] = min(base[par] * mult * ctx, 0.95)
         out[pl] = row
+
+    # ── H-P1 FORM SHIFT (2026-07-31) ────────────────────────────────────────────────────────
+    # A player's residual in one round carries to the next at r=+0.152 (42,557 player-rounds /
+    # 114 events, round-level conditions removed, leave-one-event-out baselines, cross-event null
+    # -0.005). The baseline above already excludes live_tid, so `actual - expected` here is a
+    # clean residual rather than one measured against a number containing itself.
+    #
+    # The field's OWN rate this week carries the conditions (wind, pins, setup) — the same
+    # de-conditioning the measurement used — so expected() is the player's multiplier applied to
+    # what the field actually did, not to a historical average.
+    #
+    # Fully guarded: any failure leaves `out` untouched. A missing fetch must never move a price.
+    if live_tid and FORM_R:
+        try:
+            live = live_rounds(live_tid, live_tname or "")
+            usable = {p: (h, b) for p, (h, b) in live.items() if h >= FORM_MIN_HOLES}
+            th = sum(h for h, _ in usable.values())
+            tb = sum(b for _, b in usable.values())
+            if th >= FORM_MIN_HOLES * 10 and tb > 0:
+                field_now = tb / th                      # conditions, straight from the field
+                field_hist = sum(frate.values()) / len(frate) if frate else field_now
+                n_shift = 0
+                for pl, (h, b) in usable.items():
+                    row = out.get(pl)
+                    if not row:
+                        continue
+                    mult = ((sum(row.values()) / len(row)) / field_hist) if field_hist > 0 else 1.0
+                    expected = mult * field_now
+                    resid = (b / h) - expected
+                    shift = FORM_R * resid
+                    if abs(shift) < 1e-6:
+                        continue
+                    out[pl] = {par: max(min(v + shift, 0.95), 0.01) for par, v in row.items()}
+                    n_shift += 1
+                print(f"  H-P1 form: {n_shift} players shifted "
+                      f"(field {field_now:.4f}/hole over {th} holes, r={FORM_R})")
+        except Exception as _fe:                                    # noqa: BLE001
+            print(f"  H-P1 form: skipped ({str(_fe)[:60]})")
+
     return out, {par: min(base[par] * ctx, 0.95) for par in frate}
 
 

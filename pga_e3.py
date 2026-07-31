@@ -414,7 +414,17 @@ def main():
                 print(f"  birdies: context unavailable ({str(_ce)[:40]})")
             # course_name gives rates() this venue's own per-par baseline (the fix
             # that took the reliability slope from 0.617 to 1.059)
-            BR, _fr = B.rates(course_factor=_cf, wind_kmh=_wind, course_name=evn)
+            # H-P1 (2026-07-31): pass the live event so rates() can shift each player by the
+            # form they have shown THIS week. rates() drops live_tid from its own baseline, so the
+            # residual it measures is not computed against a number containing itself. Resolving
+            # the tid is best-effort — on failure live_tid stays None and H-P1 simply does not
+            # fire, leaving prices exactly as v1.1 produced them.
+            try:
+                _live_tid = B.tid_for_name(evn)
+            except Exception:                                       # noqa: BLE001
+                _live_tid = None
+            BR, _fr = B.rates(course_factor=_cf, wind_kmh=_wind, course_name=evn,
+                              live_tid=_live_tid, live_tname=evn)
             BRn = {RU.norm(k): v for k, v in BR.items()}
             try:
                 # resolve the ORCHESTRATOR tid from the event name — ESPN ids are a
