@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T16:44:26Z",
+ "captured_at": "2026-07-31T16:51:11Z",
  "matches": [
   {
    "event_id": 35888178,
@@ -8,9 +8,9 @@
    "p1_norm": "krzysztof juszczyk",
    "p2_norm": "wojciech urban",
    "open_date": "2026-07-31T16:35:00.000Z",
-   "line": 81.5,
+   "line": 96.5,
    "over_odds": -115,
-   "under_odds": -120
+   "under_odds": -115
   },
   {
    "event_id": 35888179,
@@ -19,9 +19,9 @@
    "p1_norm": "adrian fabis",
    "p2_norm": "michal skorski",
    "open_date": "2026-07-31T16:35:00.000Z",
-   "line": 96.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 106.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35888187,
@@ -30,9 +30,9 @@
    "p1_norm": "oskar jadach",
    "p2_norm": "jakub kaczmarek",
    "open_date": "2026-07-31T16:40:00.000Z",
-   "line": 69.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 74.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35888199,
@@ -41,9 +41,9 @@
    "p1_norm": "michal wolny",
    "p2_norm": "jacek oracz",
    "open_date": "2026-07-31T16:50:00.000Z",
-   "line": 70.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 67.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35888218,
