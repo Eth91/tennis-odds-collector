@@ -418,6 +418,7 @@ rw|915|Available for All-Star Game
 rw|915|Leads Dream to another win
 rw|916|Posts 15 points despite restriction
 rw|916|Scores 10 points in loss
+rw|916|Scores 26 points Thursday
 rw|916|Will play on minutes limit Thursday
 rw|917|Plays five minutes Tuesday
 rw|923|Listed out for Wednesday
