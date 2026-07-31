@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-31T10:56:19Z",
+ "captured_at": "2026-07-31T11:06:57Z",
  "matches": [
-  {
-   "event_id": 35887332,
-   "p1": "Oskar Jadach",
-   "p2": "Tomasz Wrzalik",
-   "p1_norm": "oskar jadach",
-   "p2_norm": "tomasz wrzalik",
-   "open_date": "2026-07-31T10:40:00.000Z",
-   "line": 80.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35887337,
-   "p1": "Amirreza Abbasi",
-   "p2": "Artur Grela",
-   "p1_norm": "amirreza abbasi",
-   "p2_norm": "artur grela",
-   "open_date": "2026-07-31T10:50:00.000Z",
-   "line": 75.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35887347,
    "p1": "Krystian Kolodziej",
@@ -30,9 +8,9 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "karol wisniewski",
    "open_date": "2026-07-31T10:55:00.000Z",
-   "line": 74.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 78.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35887367,
@@ -41,9 +19,9 @@
    "p1_norm": "michal minda",
    "p2_norm": "mateusz misiak",
    "open_date": "2026-07-31T11:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 73.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35887368,
@@ -52,9 +30,9 @@
    "p1_norm": "mateusz sikon",
    "p2_norm": "robert kostepski",
    "open_date": "2026-07-31T11:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35887370,
@@ -64,8 +42,8 @@
    "p2_norm": "witold buczynski",
    "open_date": "2026-07-31T11:05:00.000Z",
    "line": 75.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35887380,
@@ -88,6 +66,39 @@
    "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35887402,
+   "p1": "Radoslaw Malinowski",
+   "p2": "Igor Dabrowski",
+   "p1_norm": "radoslaw malinowski",
+   "p2_norm": "igor dabrowski",
+   "open_date": "2026-07-31T11:25:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35887403,
+   "p1": "Pawel Kurek",
+   "p2": "Wojciech Wojtaszczyk",
+   "p1_norm": "pawel kurek",
+   "p2_norm": "wojciech wojtaszczyk",
+   "open_date": "2026-07-31T11:25:00.000Z",
+   "line": 72.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35887407,
+   "p1": "Wojciech Tobiasz",
+   "p2": "Jakub Kaczmarek",
+   "p1_norm": "wojciech tobiasz",
+   "p2_norm": "jakub kaczmarek",
+   "open_date": "2026-07-31T11:30:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
