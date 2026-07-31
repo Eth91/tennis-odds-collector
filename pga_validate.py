@@ -91,82 +91,14 @@ SLOPE_HALT, SLOPE_WINDOW = 0.70, 200
 FROZEN = "v1.0  frozen 2026-07-30"
 
 
-_TEES = None
-
-
-def _tee_index():
-    """{(tid_round, normalised player): tee datetime} from pga_tees.sqlite, plus each round's first
-    tee. Loaded once; a missing tee sheet degrades to {} and every row is then reported as
-    unresolvable rather than silently kept or dropped."""
-    global _TEES
-    if _TEES is not None:
-        return _TEES
-    import datetime as _dt
-    import re as _re
-    import sqlite3 as _sq
-    import unicodedata as _ud
-    idx, first = {}, {}
-    f = HERE / "pga_tees.sqlite"
-    if f.exists():
-        try:
-            c = _sq.connect(str(f))
-            for tn, rnd, pl, ms in c.execute(
-                    "SELECT tname, rnd, player, tee_ms FROM tee_sheet WHERE tee_ms IS NOT NULL"):
-                n = _ud.normalize("NFKD", str(pl or "")).encode("ascii", "ignore").decode()
-                n = _re.sub(r"[^a-z ]", "", n.lower()).strip()
-                t = _dt.datetime.utcfromtimestamp(ms / 1000)
-                idx[(str(tn), int(rnd or 0), n)] = t
-                k = (str(tn), int(rnd or 0))
-                if k not in first or t < first[k]:
-                    first[k] = t
-            c.close()
-        except Exception:                                            # noqa: BLE001
-            pass
-    _TEES = (idx, first)
-    return _TEES
-
-
-def _norm_name(x):
-    import re as _re
-    import unicodedata as _ud
-    n = _ud.normalize("NFKD", str(x or "")).encode("ascii", "ignore").decode()
-    return _re.sub(r"[^a-z ]", "", n.lower()).strip()
+# The deadline resolver lives in pga_tee_gate so the MODEL and the VALIDATOR cannot answer
+# "is this market still open?" differently. They did, and that is the whole bug this fixes.
+import pga_tee_gate as _TG
 
 
 def _player_deadline(event, market):
-    """The last moment this bet could honestly have been placed.
-
-    Golf waves span ~7 hours, so the round's first tee is not the deadline for a late-wave player —
-    their own tee is. Returns (deadline, reason) with deadline None when it cannot be resolved, so
-    the caller can EXCLUDE and report rather than guess."""
-    import re as _re
-    idx, first = _tee_index()
-    if not idx:
-        return None, "no tee sheet available"
-    m = str(market or "")
-    g = _re.search(r"Round (\d)", m)
-    rnd = int(g.group(1)) if g else 1
-    ev = str(event or "")
-    keys = [k for k in {kk[0] for kk in idx} if k and (k in ev or ev in k)]
-    tname = sorted(keys, key=len)[-1] if keys else None
-    if tname is None:
-        return None, "event not on the tee sheet"
-    if m.upper().startswith("TOP_") or "FINISH" in m.upper():
-        # a 72-hole outright is live from the first ball struck, so R1's first tee is the deadline
-        return first.get((tname, 1)), "field outright -> R1 first tee"
-    mm = _re.search(r"Matchbet\s+(.+?)\s+vs\.?\s+(.+?)$", m, _re.I)
-    if mm:
-        ts = [idx.get((tname, rnd, _norm_name(mm.group(i)))) for i in (1, 2)]
-        ts = [t for t in ts if t]
-        if not ts:
-            return None, "matchbet players not on the tee sheet"
-        return min(ts), "matchbet -> earlier of the two tees"
-    name = _re.sub(r"\s+(Total Birdies or Better|Round \d Score).*$", "", m, flags=_re.I)
-    name = _re.sub(r"\s+Round \d.*$", "", name).strip()
-    t = idx.get((tname, rnd, _norm_name(name)))
-    if t is None:
-        return None, "player %r not on the R%d tee sheet" % (name[:28], rnd)
-    return t, "player tee"
+    """(deadline, reason) — delegated, so there is exactly one implementation."""
+    return _TG.deadline(event, market)
 
 
 def _rows():

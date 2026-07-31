@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T09:03:32Z",
+ "captured_at": "2026-07-31T09:10:23Z",
  "matches": [
   {
    "event_id": 35887035,
@@ -8,9 +8,9 @@
    "p1_norm": "artur daniel",
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-07-31T09:00:00.000Z",
-   "line": 80.5,
-   "over_odds": -115,
-   "under_odds": -115
+   "line": 85.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35887036,
@@ -19,9 +19,9 @@
    "p1_norm": "bartlomiej mleczko",
    "p2_norm": "igor dabrowski",
    "open_date": "2026-07-31T09:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 73.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35887037,
@@ -30,7 +30,7 @@
    "p1_norm": "jakub nowak",
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-07-31T09:00:00.000Z",
-   "line": 77.5,
+   "line": 89.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -41,9 +41,9 @@
    "p1_norm": "wojciech tobiasz",
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-31T09:05:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 84.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35887057,
@@ -52,9 +52,9 @@
    "p1_norm": "milosz cesarz",
    "p2_norm": "marian lebek",
    "open_date": "2026-07-31T09:10:00.000Z",
-   "line": 71.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 73.5,
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35887111,
@@ -75,8 +75,8 @@
    "p2_norm": "mateusz misiak",
    "open_date": "2026-07-31T09:25:00.000Z",
    "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35887118,
@@ -96,9 +96,9 @@
    "p1_norm": "michal paszkiewicz",
    "p2_norm": "marek tkocz",
    "open_date": "2026-07-31T09:30:00.000Z",
-   "line": 71.5,
-   "over_odds": -118,
-   "under_odds": -110
+   "line": 72.5,
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35887131,

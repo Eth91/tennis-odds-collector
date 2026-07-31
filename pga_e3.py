@@ -100,6 +100,9 @@ def _blend(fair, ours, w=None):
     return 1.0 / (1.0 + _m.exp(-((1.0 - w) * lf + w * lo)))
 
 
+import pga_tee_gate as _TEEGATE
+
+
 def latest_event_rows():
     con = sqlite3.connect(LINES)
     ev = con.execute("SELECT event, COUNT(*) c FROM golf_lines WHERE collected_at >= "
@@ -603,7 +606,19 @@ def main():
             except sqlite3.OperationalError:
                 pass
         _n_shadow = 0
+        _n_teed = 0
         for pv in preview:
+            # TEE GATE (2026-07-31). FanDuel keeps a round's markets up while that round is live,
+            # so the */30 scan was flagging R1 birdies up to 750 min AFTER those players teed off
+            # (median +257). Such a flag can never be scored — the pre-registered capture rule
+            # needs a pre-tee snapshot — and it is a bet into a price that has already absorbed the
+            # round: on the 7 that settled, market p_fair was 0.620 for eventual winners vs 0.538
+            # for losers, and the model disagreed hardest where it was wrong (3-4, -2.10u).
+            # Resolver is SHARED with the validator (pga_tee_gate) so the two cannot diverge.
+            # An UNRESOLVED deadline counts as closed: not knowing is not permission.
+            if not _TEEGATE.is_open(evn, pv["market"]):
+                _n_teed += 1
+                continue
             _is_shadow = bool(pv.get("shadow")) or not armed
             _stream = pv["stream"] + ("-shadow" if _is_shadow
                                       and not pv["stream"].endswith("-shadow") else "")
@@ -626,7 +641,8 @@ def main():
                     flags.append(pv)
         con.commit()
         con.close()
-        print(f"  E3 logged: {len(flags)} armed + {_n_shadow} shadow "
+        print(f"  E3 logged: {len(flags)} armed + {_n_shadow} shadow, "
+              f"{_n_teed} skipped (player already teed off) "
               f"(G2 {'PASS' if armed else 'not passed — everything logs as shadow'})")
     else:
         print("  E3: no rows to log")
