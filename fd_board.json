@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T23:14:46Z",
+ "captured_at": "2026-07-31T23:19:07Z",
  "matches": [
   {
    "event_id": 35889121,
@@ -8,9 +8,9 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "oskar jedrzejowski",
    "open_date": "2026-07-31T23:10:00.000Z",
-   "line": 75.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35889124,
@@ -19,9 +19,9 @@
    "p1_norm": "jakub chmielowski",
    "p2_norm": "marcin marchlewski",
    "open_date": "2026-07-31T23:15:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 68.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35889142,
@@ -76,6 +76,28 @@
    "open_date": "2026-07-31T23:35:00.000Z",
    "line": 77.5,
    "over_odds": -116,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35889170,
+   "p1": "Krzysztof Juszczyk",
+   "p2": "Kamil Durak",
+   "p1_norm": "krzysztof juszczyk",
+   "p2_norm": "kamil durak",
+   "open_date": "2026-07-31T23:45:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35889171,
+   "p1": "Michal Skorski",
+   "p2": "Adrian Fabis",
+   "p1_norm": "michal skorski",
+   "p2_norm": "adrian fabis",
+   "open_date": "2026-07-31T23:45:00.000Z",
+   "line": 82.5,
+   "over_odds": -112,
    "under_odds": -118
   }
  ]
