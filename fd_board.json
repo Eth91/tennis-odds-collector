@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T20:48:33Z",
+ "captured_at": "2026-07-31T20:53:35Z",
  "matches": [
   {
    "event_id": 35888808,
@@ -8,20 +8,9 @@
    "p1_norm": "patryk jendrzejewski",
    "p2_norm": "jakub chmielowski",
    "open_date": "2026-07-31T20:30:00.000Z",
-   "line": 90.5,
-   "over_odds": -130,
-   "under_odds": -105
-  },
-  {
-   "event_id": 35888810,
-   "p1": "Miroslaw Piecowski",
-   "p2": "Mateusz Trela",
-   "p1_norm": "miroslaw piecowski",
-   "p2_norm": "mateusz trela",
-   "open_date": "2026-07-31T20:30:00.000Z",
-   "line": 86.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 92.5,
+   "over_odds": 135,
+   "under_odds": -190
   },
   {
    "event_id": 35888823,
@@ -30,9 +19,20 @@
    "p1_norm": "cezary pawlik",
    "p2_norm": "oskar jedrzejowski",
    "open_date": "2026-07-31T20:45:00.000Z",
-   "line": 77.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 87.5,
+   "over_odds": -115,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35888824,
+   "p1": "Damian Fira",
+   "p2": "Schaniel Krzysztof",
+   "p1_norm": "damian fira",
+   "p2_norm": "schaniel krzysztof",
+   "open_date": "2026-07-31T20:45:00.000Z",
+   "line": 82.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35888830,
