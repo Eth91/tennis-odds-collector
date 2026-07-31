@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-31T10:36:13Z",
+ "captured_at": "2026-07-31T10:42:29Z",
  "matches": [
-  {
-   "event_id": 35887274,
-   "p1": "Bartlomiej Mleczko",
-   "p2": "Radoslaw Malinowski",
-   "p1_norm": "bartlomiej mleczko",
-   "p2_norm": "radoslaw malinowski",
-   "open_date": "2026-07-31T10:10:00.000Z",
-   "line": 99.5,
-   "over_odds": -105,
-   "under_odds": -135
-  },
-  {
-   "event_id": 35887302,
-   "p1": "Jan Zandecki",
-   "p2": "Karol Strowski",
-   "p1_norm": "jan zandecki",
-   "p2_norm": "karol strowski",
-   "open_date": "2026-07-31T10:25:00.000Z",
-   "line": 62.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35887319,
    "p1": "Dominik Solilo",
@@ -30,9 +8,9 @@
    "p1_norm": "dominik solilo",
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-07-31T10:30:00.000Z",
-   "line": 76.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 78.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35887323,
@@ -41,9 +19,9 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "igor dabrowski",
    "open_date": "2026-07-31T10:35:00.000Z",
-   "line": 73.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 70.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35887325,
@@ -52,9 +30,9 @@
    "p1_norm": "marcin lach",
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-07-31T10:35:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 45.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35887332,
@@ -63,9 +41,9 @@
    "p1_norm": "oskar jadach",
    "p2_norm": "tomasz wrzalik",
    "open_date": "2026-07-31T10:40:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35887337,
@@ -110,6 +88,17 @@
    "line": 77.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35887370,
+   "p1": "Grzegorz Wichowski",
+   "p2": "Witold Buczynski",
+   "p1_norm": "grzegorz wichowski",
+   "p2_norm": "witold buczynski",
+   "open_date": "2026-07-31T11:05:00.000Z",
+   "line": 75.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
