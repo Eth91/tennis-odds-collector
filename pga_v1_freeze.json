@@ -1,13 +1,13 @@
 {
- "version": "v1.1",
+ "version": "v1.2",
  "frozen": "2026-07-31",
- "sha256_16": "27bf0a242491c19d",
- "source_sha256_16": "da390a0ba6b0911b",
+ "sha256_16": "91ce7b76804a14a4",
+ "source_sha256_16": "b217618a5457fcb1",
  "source_files": {
   "pga_ruler.py": "ce9013952e943a39",
-  "pga_e3.py": "2afa2da97ab5c1a8",
-  "pga_birdies.py": "e7530e852c0400ed",
+  "pga_e3.py": "302fc33aa6a63a06",
+  "pga_birdies.py": "16998c1251a2f2ae",
   "pga_context.py": "97f98a861a6fe4d0"
  },
- "decision": "v1.1 (2026-07-31) \u2014 pga_e3 refuses to flag a market once THAT PLAYER has teed off, using the shared resolver in pga_tee_gate (imported by the validator too, so the model and the capture rule cannot answer 'is this still open?' differently). Golf waves span ~7 hours, so a round being under way is not the deadline; the player's own tee is. Before this, the */30 cron flagged Round 1 birdies 150-750 minutes after those players teed off (median +257). Those flags could never be scored (the pre-registered capture rule needs a pre-tee snapshot, and 26 of 37 flags this week were discarded by it), they appeared on the board as bets the validation would never count, and they were wagers into a better-informed price: on the 7 that settled, market p_fair was 0.620 for eventual winners vs 0.538 for losers, and the model disagreed hardest where it was wrong (Hojgaard 0.853 vs market 0.561, 224 min in, lost). Record 3-4, -2.10u. CONSEQUENCE: 72-hole matchbets and outrights are now flaggable only before the tournament's first ball, which matches the model's own thesis (tee-wave and wind edges are pre-round, and the ruler skips its shape recalibration in-play). AFFORDABLE BECAUSE THE MODEL HAD ZERO SCORED BETS: nothing accrued under the old behaviour, so no outcome informed this decision. v1.0's record was 0-0."
+ "decision": "v1.2 (2026-07-31) \u2014 H-P1 ADOPTED: pga_birdies.rates() shifts each player by the form they have shown THIS tournament. Previously R2+ was priced with zero knowledge of the current event (the harvest runs weekly), so a player who shot 65 and one who shot 77 were priced identically while the book had fully absorbed the difference. rates() now takes live_tid, EXCLUDES that event from its own historical baseline, fetches the completed rounds live, and adds FORM_R * (actual - expected) to every par rate, where expected uses the FIELD's actual rate this week so conditions (wind, pins, setup) are carried by the field rather than mistaken for form. MEASURED: r=+0.152 on 42,557 player-rounds / 114 events after removing round-level conditions, with leave-one-event-out baselines \u2014 R1->R2 +0.150 (n=12,593), R2->R3 +0.156 (n=7,757), R3->R4 +0.156 (n=7,406) \u2014 against a cross-event null of -0.005. Worth ~0.27 birdies per 18 (residual sd 1.79). VERIFIED on the live event: 139-140 players shifted; hot players mean +0.0094/hole, cold -0.0127/hole (Malnati 9 birdies -> +0.041, Dunlap 1 birdie -> -0.027), so the sign is right. Flag mix moved 3over/6under -> 6over/4under. *** ADOPTED AGAINST THE STANDING RULE, at the user's direction. H-P1 was registered as requiring a paired SPRT over >=100 PROSPECTIVE bets and has not had one. Mitigating: it is not a threshold fitted to our betting record but an information source measured on 27,756 independent round-pairs with a clean null, and the model had ZERO scored bets so no outcome could have informed it. It remains a departure from the adoption rule and is recorded as one. v1.1's record was 0-0; the 11 R2 flags logged under v1.1 belong to v1.1 and must not be pooled with what v1.2 produces. ***"
 }
