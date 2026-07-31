@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-31T09:10:23Z",
+ "captured_at": "2026-07-31T09:14:25Z",
  "matches": [
-  {
-   "event_id": 35887035,
-   "p1": "Artur Daniel",
-   "p2": "Krzysztof Wloczko",
-   "p1_norm": "artur daniel",
-   "p2_norm": "krzysztof wloczko",
-   "open_date": "2026-07-31T09:00:00.000Z",
-   "line": 85.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
   {
    "event_id": 35887036,
    "p1": "Bartlomiej Mleczko",
@@ -19,18 +8,7 @@
    "p1_norm": "bartlomiej mleczko",
    "p2_norm": "igor dabrowski",
    "open_date": "2026-07-31T09:00:00.000Z",
-   "line": 73.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35887037,
-   "p1": "Jakub Nowak",
-   "p2": "Wojciech Wojtaszczyk",
-   "p1_norm": "jakub nowak",
-   "p2_norm": "wojciech wojtaszczyk",
-   "open_date": "2026-07-31T09:00:00.000Z",
-   "line": 89.5,
+   "line": 86.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -41,9 +19,9 @@
    "p1_norm": "wojciech tobiasz",
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-31T09:05:00.000Z",
-   "line": 84.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35887057,
@@ -52,9 +30,9 @@
    "p1_norm": "milosz cesarz",
    "p2_norm": "marian lebek",
    "open_date": "2026-07-31T09:10:00.000Z",
-   "line": 73.5,
+   "line": 78.5,
    "over_odds": -110,
-   "under_odds": -120
+   "under_odds": -125
   },
   {
    "event_id": 35887111,
