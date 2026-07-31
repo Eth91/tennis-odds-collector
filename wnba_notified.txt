@@ -206,4 +206,9 @@ watch|2026-07-31|Megan DiLeo|points|14.5
 watch|2026-08-01|Gabriela Jaquez|points|7.5
 watch|2026-08-01|Kamilla Cardoso|assists|2.5
 watch|2026-08-01|Kamilla Cardoso|points|19.5
+watch|2026-08-01|Natasha Cloud|assists|4.5
+watch|2026-08-01|Natasha Cloud|points|9.5
+watch|2026-08-01|Natasha Cloud|pra|17.5
 watch|2026-08-01|Natasha Cloud|pts_ast|14.5
+watch|2026-08-01|Natasha Cloud|pts_reb|12.5
+watch|2026-08-01|Natasha Cloud|reb_ast|7.5

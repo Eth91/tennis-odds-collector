@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T21:57:45Z",
+ "captured_at": "2026-07-31T22:02:03Z",
  "matches": [
   {
    "event_id": 35889033,
@@ -8,20 +8,20 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "patryk jendrzejewski",
    "open_date": "2026-07-31T21:45:00.000Z",
-   "line": 88.5,
+   "line": 92.5,
    "over_odds": -120,
    "under_odds": -115
   },
   {
-   "event_id": 35889034,
-   "p1": "Kamil Durak",
-   "p2": "Sebastian Szostok",
-   "p1_norm": "kamil durak",
-   "p2_norm": "sebastian szostok",
-   "open_date": "2026-07-31T21:45:00.000Z",
-   "line": 89.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "event_id": 35889045,
+   "p1": "Adrian Myszewski",
+   "p2": "Adrian Fabis",
+   "p1_norm": "adrian myszewski",
+   "p2_norm": "adrian fabis",
+   "open_date": "2026-07-31T21:55:00.000Z",
+   "line": 72.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35889046,
@@ -30,9 +30,9 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "cezary pawlik",
    "open_date": "2026-07-31T22:00:00.000Z",
-   "line": 81.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35889048,
