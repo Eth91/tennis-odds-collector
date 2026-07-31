@@ -435,6 +435,7 @@ rw|927|Leads team with seven assists
 rw|927|Notches 11 points in loss
 rw|930|Plays well off bench
 rw|935|Commits nine turnovers in loss
+rw|935|Decent production in loss
 rw|935|Makes most of playing time
 rw|953|Scoreless in win
 rw|969|Manages 11 points in loss
