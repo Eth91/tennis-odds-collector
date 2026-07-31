@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T15:29:03Z",
+ "captured_at": "2026-07-31T15:33:31Z",
  "matches": [
   {
    "event_id": 35887879,
@@ -8,7 +8,7 @@
    "p1_norm": "amirreza abbasi",
    "p2_norm": "szymon kolasa",
    "open_date": "2026-07-31T15:25:00.000Z",
-   "line": 75.5,
+   "line": 71.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -19,7 +19,7 @@
    "p1_norm": "adrian myszewski",
    "p2_norm": "mateusz trela",
    "open_date": "2026-07-31T15:25:00.000Z",
-   "line": 76.5,
+   "line": 82.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,9 +30,9 @@
    "p1_norm": "mariusz koczyba",
    "p2_norm": "kamil kowalski",
    "open_date": "2026-07-31T15:25:00.000Z",
-   "line": 70.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 47.5,
+   "over_odds": -170,
+   "under_odds": 120
   },
   {
    "event_id": 35887889,
@@ -41,9 +41,9 @@
    "p1_norm": "wojciech tobiasz",
    "p2_norm": "grzegorz wichowski",
    "open_date": "2026-07-31T15:30:00.000Z",
-   "line": 69.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 67.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35887908,
@@ -97,6 +97,17 @@
    "p2_norm": "jakub kaczmarek",
    "open_date": "2026-07-31T15:55:00.000Z",
    "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35887951,
+   "p1": "Jacek Zelezik",
+   "p2": "Michal Wolny",
+   "p1_norm": "jacek zelezik",
+   "p2_norm": "michal wolny",
+   "open_date": "2026-07-31T16:00:00.000Z",
+   "line": 75.5,
    "over_odds": -118,
    "under_odds": -112
   }
