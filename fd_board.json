@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T20:04:24Z",
+ "captured_at": "2026-07-31T20:09:05Z",
  "matches": [
   {
    "event_id": 35888777,
@@ -8,20 +8,9 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "jakub michalski",
    "open_date": "2026-07-31T19:55:00.000Z",
-   "line": 88.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35888780,
-   "p1": "Michal Krutak",
-   "p2": "Michal Wolny",
-   "p1_norm": "michal krutak",
-   "p2_norm": "michal wolny",
-   "open_date": "2026-07-31T20:00:00.000Z",
-   "line": 77.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 94.5,
+   "over_odds": -105,
+   "under_odds": -135
   },
   {
    "event_id": 35888783,
@@ -30,9 +19,9 @@
    "p1_norm": "kamil durak",
    "p2_norm": "wojciech urban",
    "open_date": "2026-07-31T20:05:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35888784,
@@ -42,8 +31,8 @@
    "p2_norm": "artur daniel",
    "open_date": "2026-07-31T20:05:00.000Z",
    "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35888786,
@@ -52,9 +41,9 @@
    "p1_norm": "kamil rudomina",
    "p2_norm": "michal skorski",
    "open_date": "2026-07-31T20:05:00.000Z",
-   "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -116
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35888800,
@@ -63,9 +52,9 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "jacek oracz",
    "open_date": "2026-07-31T20:20:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35888803,
