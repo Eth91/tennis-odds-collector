@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T14:58:35Z",
+ "captured_at": "2026-07-31T15:06:28Z",
  "matches": [
   {
    "event_id": 35887773,
@@ -8,9 +8,9 @@
    "p1_norm": "grzegorz wichowski",
    "p2_norm": "witold buczynski",
    "open_date": "2026-07-31T14:45:00.000Z",
-   "line": 85.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 77.5,
+   "over_odds": -145,
+   "under_odds": 105
   },
   {
    "event_id": 35887804,
@@ -19,9 +19,9 @@
    "p1_norm": "jan zandecki",
    "p2_norm": "artur grela",
    "open_date": "2026-07-31T15:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 75.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35887805,
@@ -31,8 +31,8 @@
    "p2_norm": "wojciech urban",
    "open_date": "2026-07-31T15:00:00.000Z",
    "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35887806,
@@ -42,19 +42,8 @@
    "p2_norm": "michal skorski",
    "open_date": "2026-07-31T15:00:00.000Z",
    "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
-  },
-  {
-   "event_id": 35887814,
-   "p1": "Tomasz Wrzalik",
-   "p2": "Oskar Jadach",
-   "p1_norm": "tomasz wrzalik",
-   "p2_norm": "oskar jadach",
-   "open_date": "2026-07-31T15:05:00.000Z",
-   "line": 76.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35887828,
@@ -85,9 +74,9 @@
    "p1_norm": "adrian myszewski",
    "p2_norm": "mateusz trela",
    "open_date": "2026-07-31T15:25:00.000Z",
-   "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 84.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35887881,
@@ -99,6 +88,17 @@
    "line": 73.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35887889,
+   "p1": "Wojciech Tobiasz",
+   "p2": "Grzegorz Wichowski",
+   "p1_norm": "wojciech tobiasz",
+   "p2_norm": "grzegorz wichowski",
+   "open_date": "2026-07-31T15:30:00.000Z",
+   "line": 68.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
