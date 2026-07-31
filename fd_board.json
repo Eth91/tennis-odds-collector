@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-31T08:12:32Z",
+ "captured_at": "2026-07-31T08:18:09Z",
  "matches": [
-  {
-   "event_id": 35886897,
-   "p1": "Milosz Cesarz",
-   "p2": "Michal Paszkiewicz",
-   "p1_norm": "milosz cesarz",
-   "p2_norm": "michal paszkiewicz",
-   "open_date": "2026-07-31T07:50:00.000Z",
-   "line": 88.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35886917,
    "p1": "Martin Olejnik",
@@ -19,8 +8,8 @@
    "p1_norm": "martin olejnik",
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-07-31T08:05:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
+   "line": 75.5,
+   "over_odds": -115,
    "under_odds": -115
   },
   {
@@ -30,9 +19,9 @@
    "p1_norm": "stapor rafal",
    "p2_norm": "kamil rudomina",
    "open_date": "2026-07-31T08:05:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 91.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35886931,
@@ -41,9 +30,9 @@
    "p1_norm": "mateusz sikon",
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-07-31T08:10:00.000Z",
-   "line": 70.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 53.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35886932,
@@ -52,9 +41,9 @@
    "p1_norm": "mateusz misiak",
    "p2_norm": "kamil klocek",
    "open_date": "2026-07-31T08:10:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35886934,
@@ -63,9 +52,9 @@
    "p1_norm": "marian lebek",
    "p2_norm": "krzysztof hetnar",
    "open_date": "2026-07-31T08:10:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 72.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35886949,
