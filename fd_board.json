@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-31T19:57:44Z",
+ "captured_at": "2026-07-31T20:04:24Z",
  "matches": [
-  {
-   "event_id": 35888759,
-   "p1": "Mariusz Koczyba",
-   "p2": "Krzysztof Juszczyk",
-   "p1_norm": "mariusz koczyba",
-   "p2_norm": "krzysztof juszczyk",
-   "open_date": "2026-07-31T19:40:00.000Z",
-   "line": 92.5,
-   "over_odds": -140,
-   "under_odds": 100
-  },
   {
    "event_id": 35888777,
    "p1": "Mariusz Adamus",
@@ -19,9 +8,9 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "jakub michalski",
    "open_date": "2026-07-31T19:55:00.000Z",
-   "line": 75.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 88.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35888780,
@@ -30,9 +19,9 @@
    "p1_norm": "michal krutak",
    "p2_norm": "michal wolny",
    "open_date": "2026-07-31T20:00:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 77.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35888783,
@@ -41,9 +30,9 @@
    "p1_norm": "kamil durak",
    "p2_norm": "wojciech urban",
    "open_date": "2026-07-31T20:05:00.000Z",
-   "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35888784,
@@ -86,6 +75,39 @@
    "p2_norm": "adam ruszkiewicz",
    "open_date": "2026-07-31T20:20:00.000Z",
    "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35888808,
+   "p1": "Patryk Jendrzejewski",
+   "p2": "Jakub Chmielowski",
+   "p1_norm": "patryk jendrzejewski",
+   "p2_norm": "jakub chmielowski",
+   "open_date": "2026-07-31T20:30:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35888809,
+   "p1": "Sebastian Szostok",
+   "p2": "Kamil Kowalski",
+   "p1_norm": "sebastian szostok",
+   "p2_norm": "kamil kowalski",
+   "open_date": "2026-07-31T20:30:00.000Z",
+   "line": 71.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35888810,
+   "p1": "Miroslaw Piecowski",
+   "p2": "Mateusz Trela",
+   "p1_norm": "miroslaw piecowski",
+   "p2_norm": "mateusz trela",
+   "open_date": "2026-07-31T20:30:00.000Z",
+   "line": 80.5,
    "over_odds": -112,
    "under_odds": -118
   }
