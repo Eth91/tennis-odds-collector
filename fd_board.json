@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T22:02:03Z",
+ "captured_at": "2026-07-31T22:09:08Z",
  "matches": [
   {
    "event_id": 35889033,
@@ -8,9 +8,9 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "patryk jendrzejewski",
    "open_date": "2026-07-31T21:45:00.000Z",
-   "line": 92.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 99.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35889045,
@@ -19,20 +19,9 @@
    "p1_norm": "adrian myszewski",
    "p2_norm": "adrian fabis",
    "open_date": "2026-07-31T21:55:00.000Z",
-   "line": 72.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35889046,
-   "p1": "Jacek Zelezik",
-   "p2": "Cezary Pawlik",
-   "p1_norm": "jacek zelezik",
-   "p2_norm": "cezary pawlik",
-   "open_date": "2026-07-31T22:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 79.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35889048,
@@ -41,9 +30,9 @@
    "p1_norm": "jakub glanowski",
    "p2_norm": "jakub chmielowski",
    "open_date": "2026-07-31T22:05:00.000Z",
-   "line": 77.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 75.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35889054,
@@ -86,6 +75,39 @@
    "p2_norm": "michal krutak",
    "open_date": "2026-07-31T22:25:00.000Z",
    "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35889085,
+   "p1": "Patryk Jendrzejewski",
+   "p2": "Marcin Marchlewski",
+   "p1_norm": "patryk jendrzejewski",
+   "p2_norm": "marcin marchlewski",
+   "open_date": "2026-07-31T22:30:00.000Z",
+   "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35889088,
+   "p1": "Sebastian Szostok",
+   "p2": "Wojciech Urban",
+   "p1_norm": "sebastian szostok",
+   "p2_norm": "wojciech urban",
+   "open_date": "2026-07-31T22:35:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35889089,
+   "p1": "Adrian Fabis",
+   "p2": "Mateusz Trela",
+   "p1_norm": "adrian fabis",
+   "p2_norm": "mateusz trela",
+   "open_date": "2026-07-31T22:35:00.000Z",
+   "line": 81.5,
    "over_odds": -118,
    "under_odds": -112
   }

@@ -1,22 +1,22 @@
 {
  "played": 8,
- "passed": 148,
+ "passed": 149,
  "separations": {
-  "odds": 1.393,
-  "n_elev": -1.162,
+  "odds": 1.398,
+  "n_elev": -1.168,
   "proj_min": -0.955,
-  "d_stat": 0.877,
-  "driver": 0.862,
-  "d_fga": 0.736,
-  "ev": 0.649,
-  "season_avg": -0.567,
-  "d_min": 0.563,
-  "line": -0.322,
-  "elev_avg": -0.246,
-  "vac": -0.206,
-  "pace": 0.122,
-  "opp_def": 0.086,
-  "total": 0.084,
-  "proj_hit": -0.069
+  "d_stat": 0.871,
+  "driver": 0.86,
+  "d_fga": 0.734,
+  "ev": 0.656,
+  "season_avg": -0.572,
+  "d_min": 0.565,
+  "line": -0.327,
+  "elev_avg": -0.25,
+  "vac": -0.202,
+  "pace": 0.109,
+  "opp_def": 0.08,
+  "proj_hit": -0.065,
+  "total": 0.061
  }
 }
