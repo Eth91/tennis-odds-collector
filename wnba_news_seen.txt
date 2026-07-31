@@ -86,6 +86,7 @@ rw|1050|Provides scoring punch
 rw|1050|Scores team-high 26 points
 rw|1051|Left off injury report
 rw|1051|Unavailable versus Sun
+rw|1053|Avoids injury report
 rw|1053|Avoids injury report for Tuesday
 rw|1053|Inactive Thursday
 rw|1053|Won't play Wednesday

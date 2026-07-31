@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T22:24:31Z",
+ "captured_at": "2026-07-31T22:29:35Z",
  "matches": [
   {
    "event_id": 35889048,
@@ -8,31 +8,9 @@
    "p1_norm": "jakub glanowski",
    "p2_norm": "jakub chmielowski",
    "open_date": "2026-07-31T22:05:00.000Z",
-   "line": 70.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35889054,
-   "p1": "Krzysztof Juszczyk",
-   "p2": "Mariusz Koczyba",
-   "p1_norm": "krzysztof juszczyk",
-   "p2_norm": "mariusz koczyba",
-   "open_date": "2026-07-31T22:10:00.000Z",
-   "line": 78.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35889083,
-   "p1": "Michal Wolny",
-   "p2": "Michal Krutak",
-   "p1_norm": "michal wolny",
-   "p2_norm": "michal krutak",
-   "open_date": "2026-07-31T22:25:00.000Z",
-   "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 73.5,
+   "over_odds": -105,
+   "under_odds": -135
   },
   {
    "event_id": 35889085,
@@ -88,6 +66,28 @@
    "line": 82.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35889113,
+   "p1": "Michal Skorski",
+   "p2": "Miroslaw Piecowski",
+   "p1_norm": "michal skorski",
+   "p2_norm": "miroslaw piecowski",
+   "open_date": "2026-07-31T22:55:00.000Z",
+   "line": 81.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35889114,
+   "p1": "Kamil Durak",
+   "p2": "Kamil Kowalski",
+   "p1_norm": "kamil durak",
+   "p2_norm": "kamil kowalski",
+   "open_date": "2026-07-31T22:55:00.000Z",
+   "line": 73.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
