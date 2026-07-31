@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T21:24:24Z",
+ "captured_at": "2026-07-31T21:29:37Z",
  "matches": [
   {
    "event_id": 35888922,
@@ -8,18 +8,7 @@
    "p1_norm": "michal wolny",
    "p2_norm": "jacek oracz",
    "open_date": "2026-07-31T21:10:00.000Z",
-   "line": 95.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35889007,
-   "p1": "Mariusz Koczyba",
-   "p2": "Kamil Kowalski",
-   "p1_norm": "mariusz koczyba",
-   "p2_norm": "kamil kowalski",
-   "open_date": "2026-07-31T21:20:00.000Z",
-   "line": 76.5,
+   "line": 105.5,
    "over_odds": null,
    "under_odds": null
   },
@@ -30,9 +19,9 @@
    "p1_norm": "marcin marchlewski",
    "p2_norm": "jakub chmielowski",
    "open_date": "2026-07-31T21:20:00.000Z",
-   "line": 77.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 66.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35889018,
@@ -88,6 +77,28 @@
    "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35889044,
+   "p1": "Schaniel Krzysztof",
+   "p2": "Jakub Michalski",
+   "p1_norm": "schaniel krzysztof",
+   "p2_norm": "jakub michalski",
+   "open_date": "2026-07-31T21:55:00.000Z",
+   "line": 74.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35889045,
+   "p1": "Adrian Myszewski",
+   "p2": "Adrian Fabis",
+   "p1_norm": "adrian myszewski",
+   "p2_norm": "adrian fabis",
+   "open_date": "2026-07-31T21:55:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
