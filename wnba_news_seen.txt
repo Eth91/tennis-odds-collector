@@ -84,6 +84,7 @@ rw|1050|Scores team-high 26 points
 rw|1051|Left off injury report
 rw|1051|Unavailable versus Sun
 rw|1053|Avoids injury report for Tuesday
+rw|1053|Inactive Thursday
 rw|1053|Won't play Wednesday
 rw|1054|Chips in seven points in upset win
 rw|1055|Explodes for 32 points
