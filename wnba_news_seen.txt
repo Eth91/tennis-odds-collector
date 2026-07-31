@@ -341,6 +341,7 @@ rw|782|Out Wednesday
 rw|782|Unavailable versus Las Vegas
 rw|784|Records three steals
 rw|785|Expected to play Thursday
+rw|785|Good to go Thursday
 rw|785|Productive in win over Tempo
 rw|785|Questionable for Thursday
 rw|785|Upgraded to probable
