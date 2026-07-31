@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T04:07:53Z",
+ "captured_at": "2026-07-31T04:12:46Z",
  "matches": [
   {
    "event_id": 35885913,
@@ -9,8 +9,8 @@
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-31T03:45:00.000Z",
    "line": 78.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35885921,
@@ -19,9 +19,9 @@
    "p1_norm": "adam staniczek",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-07-31T03:55:00.000Z",
-   "line": 60.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 58.5,
+   "over_odds": -140,
+   "under_odds": 100
   },
   {
    "event_id": 35885928,
@@ -30,9 +30,9 @@
    "p1_norm": "radoslaw malinowski",
    "p2_norm": "blazej warpas",
    "open_date": "2026-07-31T04:10:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885929,
@@ -42,8 +42,8 @@
    "p2_norm": "szymon kolasa",
    "open_date": "2026-07-31T04:10:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -110
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35885930,
@@ -75,8 +75,8 @@
    "p2_norm": "kamil rudomina",
    "open_date": "2026-07-31T04:25:00.000Z",
    "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35885943,
