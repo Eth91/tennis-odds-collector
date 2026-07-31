@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T19:08:02Z",
+ "captured_at": "2026-07-31T19:14:50Z",
  "matches": [
   {
    "event_id": 35888526,
@@ -8,9 +8,9 @@
    "p1_norm": "sebastian szostok",
    "p2_norm": "krzysztof juszczyk",
    "open_date": "2026-07-31T18:55:00.000Z",
-   "line": 91.5,
-   "over_odds": -105,
-   "under_odds": -130
+   "line": 87.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35888535,
@@ -19,9 +19,9 @@
    "p1_norm": "damian fira",
    "p2_norm": "jakub michalski",
    "open_date": "2026-07-31T19:10:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 79.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35888536,
@@ -30,9 +30,9 @@
    "p1_norm": "cezary pawlik",
    "p2_norm": "michal wolny",
    "open_date": "2026-07-31T19:10:00.000Z",
-   "line": 73.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 68.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35888538,
@@ -75,8 +75,8 @@
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-07-31T19:30:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35888749,
@@ -86,8 +86,41 @@
    "p2_norm": "jacek oracz",
    "open_date": "2026-07-31T19:35:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35888756,
+   "p1": "Karol Strowski",
+   "p2": "Marcin Marchlewski",
+   "p1_norm": "karol strowski",
+   "p2_norm": "marcin marchlewski",
+   "open_date": "2026-07-31T19:40:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35888757,
+   "p1": "Adrian Myszewski",
+   "p2": "Adrian Fabis",
+   "p1_norm": "adrian myszewski",
+   "p2_norm": "adrian fabis",
+   "open_date": "2026-07-31T19:40:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35888759,
+   "p1": "Mariusz Koczyba",
+   "p2": "Krzysztof Juszczyk",
+   "p1_norm": "mariusz koczyba",
+   "p2_norm": "krzysztof juszczyk",
+   "open_date": "2026-07-31T19:40:00.000Z",
+   "line": 76.5,
+   "over_odds": -110,
+   "under_odds": -120
   }
  ]
 }
