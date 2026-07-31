@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T04:03:26Z",
+ "captured_at": "2026-07-31T04:07:53Z",
  "matches": [
   {
    "event_id": 35885913,
@@ -8,7 +8,7 @@
    "p1_norm": "martin olejnik",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-31T03:45:00.000Z",
-   "line": 61.5,
+   "line": 78.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -19,9 +19,9 @@
    "p1_norm": "adam staniczek",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-07-31T03:55:00.000Z",
-   "line": 73.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 60.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35885928,
