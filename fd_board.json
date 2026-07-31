@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-31T21:29:37Z",
+ "captured_at": "2026-07-31T21:35:47Z",
  "matches": [
-  {
-   "event_id": 35888922,
-   "p1": "Michal Wolny",
-   "p2": "Jacek Oracz",
-   "p1_norm": "michal wolny",
-   "p2_norm": "jacek oracz",
-   "open_date": "2026-07-31T21:10:00.000Z",
-   "line": 105.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35889008,
    "p1": "Marcin Marchlewski",
@@ -19,9 +8,9 @@
    "p1_norm": "marcin marchlewski",
    "p2_norm": "jakub chmielowski",
    "open_date": "2026-07-31T21:20:00.000Z",
-   "line": 66.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 89.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35889018,
@@ -30,9 +19,9 @@
    "p1_norm": "adrian myszewski",
    "p2_norm": "miroslaw piecowski",
    "open_date": "2026-07-31T21:30:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35889019,
@@ -41,9 +30,9 @@
    "p1_norm": "roman wiza",
    "p2_norm": "damian fira",
    "open_date": "2026-07-31T21:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 72.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35889021,
@@ -52,9 +41,9 @@
    "p1_norm": "michal krutak",
    "p2_norm": "oskar jedrzejowski",
    "open_date": "2026-07-31T21:35:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35889033,
@@ -99,6 +88,17 @@
    "line": 80.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35889046,
+   "p1": "Jacek Zelezik",
+   "p2": "Cezary Pawlik",
+   "p1_norm": "jacek zelezik",
+   "p2_norm": "cezary pawlik",
+   "open_date": "2026-07-31T22:00:00.000Z",
+   "line": 81.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
