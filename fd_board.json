@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-07-31T18:20:16Z",
+ "captured_at": "2026-07-31T18:28:20Z",
  "matches": [
-  {
-   "event_id": 35888442,
-   "p1": "Marcin Marchlewski",
-   "p2": "Patryk Jendrzejewski",
-   "p1_norm": "marcin marchlewski",
-   "p2_norm": "patryk jendrzejewski",
-   "open_date": "2026-07-31T18:05:00.000Z",
-   "line": 99.5,
-   "over_odds": -195,
-   "under_odds": 135
-  },
-  {
-   "event_id": 35888453,
-   "p1": "Krzysztof Juszczyk",
-   "p2": "Kamil Kowalski",
-   "p1_norm": "krzysztof juszczyk",
-   "p2_norm": "kamil kowalski",
-   "open_date": "2026-07-31T18:10:00.000Z",
-   "line": 57.5,
-   "over_odds": -130,
-   "under_odds": -105
-  },
-  {
-   "event_id": 35888454,
-   "p1": "Adrian Fabis",
-   "p2": "Mateusz Trela",
-   "p1_norm": "adrian fabis",
-   "p2_norm": "mateusz trela",
-   "open_date": "2026-07-31T18:10:00.000Z",
-   "line": 87.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35888477,
    "p1": "Adam Ruszkiewicz",
@@ -41,9 +8,9 @@
    "p1_norm": "adam ruszkiewicz",
    "p2_norm": "damian fira",
    "open_date": "2026-07-31T18:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35888488,
@@ -52,9 +19,9 @@
    "p1_norm": "michal wolny",
    "p2_norm": "oskar jedrzejowski",
    "open_date": "2026-07-31T18:25:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 72.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35888495,
@@ -87,7 +54,7 @@
    "open_date": "2026-07-31T18:30:00.000Z",
    "line": 75.5,
    "over_odds": -116,
-   "under_odds": -116
+   "under_odds": -118
   },
   {
    "event_id": 35888510,
@@ -110,6 +77,39 @@
    "line": 77.5,
    "over_odds": -120,
    "under_odds": -110
+  },
+  {
+   "event_id": 35888516,
+   "p1": "Krystian Kolodziej",
+   "p2": "Marcin Marchlewski",
+   "p1_norm": "krystian kolodziej",
+   "p2_norm": "marcin marchlewski",
+   "open_date": "2026-07-31T18:50:00.000Z",
+   "line": 64.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35888526,
+   "p1": "Sebastian Szostok",
+   "p2": "Krzysztof Juszczyk",
+   "p1_norm": "sebastian szostok",
+   "p2_norm": "krzysztof juszczyk",
+   "open_date": "2026-07-31T18:55:00.000Z",
+   "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35888527,
+   "p1": "Miroslaw Piecowski",
+   "p2": "Adrian Fabis",
+   "p1_norm": "miroslaw piecowski",
+   "p2_norm": "adrian fabis",
+   "open_date": "2026-07-31T18:55:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
