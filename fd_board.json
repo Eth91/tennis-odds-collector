@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-31T14:17:13Z",
+ "captured_at": "2026-07-31T14:23:52Z",
  "matches": [
-  {
-   "event_id": 35887706,
-   "p1": "Tomasz Wrzalik",
-   "p2": "Jakub Kaczmarek",
-   "p1_norm": "tomasz wrzalik",
-   "p2_norm": "jakub kaczmarek",
-   "open_date": "2026-07-31T13:55:00.000Z",
-   "line": 107.5,
-   "over_odds": -130,
-   "under_odds": -105
-  },
-  {
-   "event_id": 35887716,
-   "p1": "Martin Olejnik",
-   "p2": "Artur Grela",
-   "p1_norm": "martin olejnik",
-   "p2_norm": "artur grela",
-   "open_date": "2026-07-31T14:10:00.000Z",
-   "line": 67.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35887719,
    "p1": "Krystian Kolodziej",
@@ -30,7 +8,7 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-07-31T14:15:00.000Z",
-   "line": 76.5,
+   "line": 63.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -41,9 +19,9 @@
    "p1_norm": "wojciech tobiasz",
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-31T14:20:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35887724,
@@ -52,9 +30,9 @@
    "p1_norm": "michal minda",
    "p2_norm": "igor dabrowski",
    "open_date": "2026-07-31T14:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35887725,
@@ -64,8 +42,8 @@
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-07-31T14:20:00.000Z",
    "line": 69.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35887758,
