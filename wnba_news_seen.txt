@@ -100,6 +100,7 @@ rw|1057|Will play on minutes restriction
 rw|1058|Agrees to new seven-day deal
 rw|1058|Let go by Mercury
 rw|1060|Drops 18 points in loss
+rw|1060|Drops 19 points in blowout loss
 rw|1061|Left off injury report
 rw|1061|Not on injury report
 rw|1061|Ruled out for Wednesday
