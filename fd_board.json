@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-31T23:30:37Z",
+ "captured_at": "2026-07-31T23:38:29Z",
  "matches": [
-  {
-   "event_id": 35889142,
-   "p1": "Mariusz Koczyba",
-   "p2": "Wojciech Urban",
-   "p1_norm": "mariusz koczyba",
-   "p2_norm": "wojciech urban",
-   "open_date": "2026-07-31T23:20:00.000Z",
-   "line": 72.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35889155,
-   "p1": "Damian Fira",
-   "p2": "Jakub Michalski",
-   "p1_norm": "damian fira",
-   "p2_norm": "jakub michalski",
-   "open_date": "2026-07-31T23:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
   {
    "event_id": 35889160,
    "p1": "Jakub Kuzmicz",
@@ -30,20 +8,9 @@
    "p1_norm": "jakub kuzmicz",
    "p2_norm": "jakub chmielowski",
    "open_date": "2026-07-31T23:35:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35889161,
-   "p1": "Michal Krutak",
-   "p2": "Jacek Oracz",
-   "p1_norm": "michal krutak",
-   "p2_norm": "jacek oracz",
-   "open_date": "2026-07-31T23:35:00.000Z",
-   "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -118
+   "line": 72.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35889170,
@@ -75,8 +42,8 @@
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-07-31T23:55:00.000Z",
    "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35889182,
@@ -86,8 +53,19 @@
    "p2_norm": "marcin marchlewski",
    "open_date": "2026-07-31T23:55:00.000Z",
    "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35889185,
+   "p1": "Michal Wolny",
+   "p2": "Jacek Zelezik",
+   "p1_norm": "michal wolny",
+   "p2_norm": "jacek zelezik",
+   "open_date": "2026-08-01T00:00:00.000Z",
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
