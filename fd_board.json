@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-31T10:42:29Z",
+ "captured_at": "2026-07-31T10:47:07Z",
  "matches": [
-  {
-   "event_id": 35887319,
-   "p1": "Dominik Solilo",
-   "p2": "Krzysztof Wloczko",
-   "p1_norm": "dominik solilo",
-   "p2_norm": "krzysztof wloczko",
-   "open_date": "2026-07-31T10:30:00.000Z",
-   "line": 78.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35887323,
    "p1": "Jakub Zochniak",
@@ -19,20 +8,9 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "igor dabrowski",
    "open_date": "2026-07-31T10:35:00.000Z",
-   "line": 70.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35887325,
-   "p1": "Marcin Lach",
-   "p2": "Wojciech Wojtaszczyk",
-   "p1_norm": "marcin lach",
-   "p2_norm": "wojciech wojtaszczyk",
-   "open_date": "2026-07-31T10:35:00.000Z",
-   "line": 45.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 69.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35887332,
@@ -41,9 +19,9 @@
    "p1_norm": "oskar jadach",
    "p2_norm": "tomasz wrzalik",
    "open_date": "2026-07-31T10:40:00.000Z",
-   "line": 75.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 80.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35887337,
@@ -99,6 +77,17 @@
    "line": 75.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35887380,
+   "p1": "Martin Olejnik",
+   "p2": "Jan Zandecki",
+   "p1_norm": "martin olejnik",
+   "p2_norm": "jan zandecki",
+   "open_date": "2026-07-31T11:15:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
