@@ -1,6 +1,6 @@
-# WNBA v1.1 — cumulative evidence
+# WNBA v1.2 — cumulative evidence
 
-_updated 2026-07-31T07:46:04Z · frozen 2026-07-31 · constants `433b9e32404d015d` · source `5a8bff53184574fd`_
+_updated 2026-07-31T09:45:33Z · frozen 2026-07-31 · constants `433b9e32404d015d` · source `323d26d55c6d35fc`_
 
 _measurement only; this file never tunes the model_
 
@@ -31,20 +31,20 @@ Produced by a model that was changing underneath it (132 commits / 151 bets). Re
 
 | metric | model | market |
 |---|---|---|
-| log loss | **0.64859** | 0.70990 |
-| Brier | **0.23090** | 0.25827 |
-| expected wins | 30.0 | 20.6 |
+| log loss | **0.65631** | 0.70951 |
+| Brier | **0.23461** | 0.25807 |
+| expected wins | 30.6 | 21.1 |
 | actual wins | 28 | |
 
 | | |
 |---|---|
-| settled / scored | 49 / 42 |
-| record | 28-14 |
-| P&L (1u flat) | +19.87u |
-| ROI vs breakeven | +40.54% vs 50.9% |
-| ROI 95% CI | +13.10% .. +67.98% |
-| reliability slope | -0.561 |
-| **SPRT log-likelihood ratio** | **+2.5751** |
+| settled / scored | 50 / 43 |
+| record | 28-15 |
+| P&L (1u flat) | +18.87u |
+| ROI vs breakeven | +37.73% vs 51.0% |
+| ROI 95% CI | +10.29% .. +65.17% |
+| reliability slope | -0.382 |
+| **SPRT log-likelihood ratio** | **+2.2874** |
 
 ## Standing instruction
 
