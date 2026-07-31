@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-31T18:45:43Z",
+ "captured_at": "2026-07-31T18:50:59Z",
  "matches": [
-  {
-   "event_id": 35888495,
-   "p1": "Adrian Myszewski",
-   "p2": "Kamil Rudomina",
-   "p1_norm": "adrian myszewski",
-   "p2_norm": "kamil rudomina",
-   "open_date": "2026-07-31T18:30:00.000Z",
-   "line": 95.5,
-   "over_odds": 120,
-   "under_odds": -165
-  },
-  {
-   "event_id": 35888497,
-   "p1": "Karol Strowski",
-   "p2": "Jakub Chmielowski",
-   "p1_norm": "karol strowski",
-   "p2_norm": "jakub chmielowski",
-   "open_date": "2026-07-31T18:30:00.000Z",
-   "line": 86.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35888510,
    "p1": "Roman Wiza",
@@ -30,9 +8,9 @@
    "p1_norm": "roman wiza",
    "p2_norm": "mariusz adamus",
    "open_date": "2026-07-31T18:45:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 79.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35888511,
@@ -41,20 +19,9 @@
    "p1_norm": "michal krutak",
    "p2_norm": "jacek zelezik",
    "open_date": "2026-07-31T18:45:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35888516,
-   "p1": "Krystian Kolodziej",
-   "p2": "Marcin Marchlewski",
-   "p1_norm": "krystian kolodziej",
-   "p2_norm": "marcin marchlewski",
-   "open_date": "2026-07-31T18:50:00.000Z",
-   "line": 64.5,
-   "over_odds": -108,
-   "under_odds": -126
+   "line": 72.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35888526,
@@ -97,6 +64,17 @@
    "p2_norm": "michal wolny",
    "open_date": "2026-07-31T19:10:00.000Z",
    "line": 73.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35888538,
+   "p1": "Artur Daniel",
+   "p2": "Patryk Jendrzejewski",
+   "p1_norm": "artur daniel",
+   "p2_norm": "patryk jendrzejewski",
+   "open_date": "2026-07-31T19:15:00.000Z",
+   "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
   }
