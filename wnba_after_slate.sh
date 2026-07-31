@@ -38,7 +38,7 @@ if now_src != fz["source_sha256_16"]:
             print("    changed: %s" % f)
     ok = False
 if ok:
-    print("  OK  v1.0 constants %s + source %s intact" % (now_c, now_src))
+    print("  OK  %s constants %s + source %s intact" % (fz.get("version", "?"), now_c, now_src))
 else:
     print("  *** MODEL DRIFT ***")
     print("  Evidence collected after this point belongs to a DIFFERENT model and cannot be")

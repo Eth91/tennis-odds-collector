@@ -699,7 +699,21 @@ def collect():
         # then favorite (odds) then EV — matching the validated gate-then-favorite hierarchy.
         dm = p.get("d_min")
         oob = 1 if (dm is not None and (dm < 0 or dm > 8)) else 0
-        cand = (oob, float(p.get("odds") or 99), -(p.get("ev") or 0))
+        # A-BAND BEFORE ODDS (2026-07-31, the Carleton/DiLeo case). `oob` is the SHADOW band, so
+        # when both legs sit inside 0-8 it is identical for both and the tie falls to odds — a
+        # coin-flip price gap then decides. POR 7/31: Carleton d_min +0.3 at 1.9804 beat DiLeo
+        # d_min +4.2 at 2.04, 1.5 pts of implied probability. And since the cap keeps exactly ONE
+        # player per family, the survivor is automatically the cascade favourite, so this was not
+        # a choice between two B plays: DiLeo surviving is TIER A (in band + favourite + single),
+        # Carleton surviving is TIER B. Counted ledger: A 14-3 / 82.4% / +0.73u per bet vs
+        # B 17-11 / 60.7% / +0.20u. Ranking the A-band ahead of odds is what the 2026-07-19
+        # comment above already intended; it was implemented with the shadow band, so it only
+        # fired when a leg fell outside 0-8 (Leger-Walker 8.3 vs Nelson-Ododa 7.6) and never for
+        # a 0.3-vs-4.2 split. Reconstructed over all 32 logged contests this changes ZERO past
+        # bets — no contest in the record has the split-band shape — so it cannot break a winning
+        # pattern; tonight is the first occurrence.
+        _notA = 0 if (dm is not None and 3 <= dm <= 8) else 1
+        cand = (oob, _notA, float(p.get("odds") or 99), -(p.get("ev") or 0))
         if k not in top or cand < top[k][0]:
             top[k] = (cand, p["player"])
     drop = {(p["player"], p["stat"]) for p in preds                     # (player, stat) legs to cut

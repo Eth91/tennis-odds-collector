@@ -2184,6 +2184,85 @@ def _slip_html(rows=None):
         return ""
 
 
+def _considered_html(rows):
+    """Plays the model flagged and then REJECTED for this slate — shown as context, never as bets.
+
+    A rejected play used to leave no trace on any surface a human reads: the correlation cap deletes
+    the losing leg before the ledger write, so DiLeo (2026-07-31) beat Carleton on every signal and
+    then simply was not there. Surfacing them makes selection mistakes visible the same night
+    instead of two weeks later.
+
+    Fully guarded: any failure returns "" so this can never blank the board."""
+    try:
+        import csv as _csv
+        from collections import OrderedDict
+        dates = {r.get("pred_date") for r in rows if r.get("pred_date")}
+        if not dates:
+            return ""
+        seen = OrderedDict()
+
+        # 1. losers of a correlation-cap pool
+        capf = HERE / "wnba_capped_legs.csv"
+        if capf.exists():
+            with open(capf) as fh:
+                for c in _csv.reader(fh):
+                    if len(c) < 9 or c[0] not in dates:
+                        continue
+                    try:
+                        line = float(c[5])
+                    except ValueError:
+                        continue
+                    dm = None
+                    try:
+                        dm = float(c[8])
+                    except (ValueError, IndexError):
+                        pass
+                    seen[(c[0], c[3], c[4], line)] = {
+                        "date": c[0], "team": c[1], "player": c[3], "stat": c[4],
+                        "line": line, "odds": c[6], "d_min": dm,
+                        "why": "lost the %s pool to %s" % (c[4], _short(c[2]))}
+
+        # 2. plays that lost a TOP-2 slot
+        try:
+            import wnba_slip as _S
+            _ov = [r for r in rows if (r.get("side") or "over") == "over"]
+            _, _dropped = _S.current_selection(_ov)
+            for r, why in _dropped or []:
+                k = (r.get("pred_date"), r.get("player"), r.get("stat"), r.get("line"))
+                if k in seen:
+                    continue
+                seen[k] = {"date": r.get("pred_date"), "team": r.get("team"),
+                           "player": r.get("player"), "stat": r.get("stat"),
+                           "line": r.get("line"), "odds": r.get("odds"),
+                           "d_min": r.get("d_min"), "why": why}
+        except Exception:                                            # noqa: BLE001
+            pass
+
+        if not seen:
+            return ""
+        out = ""
+        for v in list(seen.values())[:12]:
+            dm = v.get("d_min")
+            band = ("in the 3-8 band" if (dm is not None and 3 <= dm <= 8)
+                    else ("min %+g" % dm if dm is not None else ""))
+            ln = v.get("line")
+            out += ('<div class="ttbet"><span class="pind o">O</span>'
+                    '<span class="ttbln">%s</span>'
+                    '<div class="ttbmid"><div class="ttbnm"><b>%s</b> %s</div>'
+                    '<div class="ttbsb">%s%s</div></div></div>'
+                    % (("%g" % ln) if ln is not None else "-",
+                       html.escape(str(v.get("player") or "?")),
+                       html.escape(STAT.get(v.get("stat"), str(v.get("stat") or ""))),
+                       html.escape(str(v.get("why") or "")),
+                       (" · " + band) if band else ""))
+        return ('<div class="card"><h3 class="ttlg">Also considered · NOT BET</h3>' + out +
+                '<div class="ttfoot">Flagged by the model, then rejected — either it lost a '
+                'same-team same-family pool to another player, or it lost a top-2 slot. Shown so a '
+                'selection call is visible the night it happens. No stake, no alert.</div></div>')
+    except Exception:                                                # noqa: BLE001
+        return ""
+
+
 def _ladders_html(rows):
     """🪜 Laddered plays pulled into their own section so they're easy to find: each player-stat with
     2+ rungs, showing every rung's line/odds and the user's ladder stake (1u base + declining rungs)."""
@@ -2406,6 +2485,7 @@ def build():
         cards = (f'<div class="mlbwarn">⚠️ WNBA feed issue: {html.escape(_wh["reason"])} — the board '
                  f'may be missing plays (you were alerted). This is NOT a quiet slate.</div>' + cards)
     ladders_html = _ladders_html(rows)
+    considered_html = _considered_html(rows)   # flagged-then-rejected, context only
     slip_html = _slip_html(rows)
     wl_html = _watchlist_html({(r.get("pred_date"), r.get("player"), r.get("stat")) for r in rows}, tips)
     starwatch_html = _starwatch_html()
@@ -3321,6 +3401,7 @@ def build():
     {slip_html}
     {wl_html}
     {injury_html}
+    {considered_html}
     {tier_legend}
     {extras_html}
   </div>

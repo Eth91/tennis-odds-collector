@@ -77,7 +77,7 @@ UPPER = math.log((1 - BETA) / ALPHA)          # +2.773
 LOWER = math.log(BETA / (1 - ALPHA))          # -1.558
 MIN_N_ADOPT = 60
 SLOPE_HALT, SLOPE_WINDOW = 0.70, 100
-FROZEN_ON = "2026-07-30"
+FROZEN_ON = "2026-07-31"   # v1.1 — see wnba_v1_freeze.json decision
 BET_ROLES = {"confirmed", "likely"}
 
 
@@ -216,12 +216,16 @@ def report():
         fid = f"constants `{fz['sha256_16']}` · source `{fz['source_sha256_16']}`"
     except Exception:                                          # noqa: BLE001
         fid = "_fingerprint unreadable_"
-    L = [f"# WNBA v1.0 — cumulative evidence", "",
+    try:
+        _ver = json.loads(FREEZE.read_text()).get("version", "v?")
+    except Exception:                                          # noqa: BLE001
+        _ver = "v?"
+    L = [f"# WNBA {_ver} — cumulative evidence", "",
          f"_updated {ts} · frozen {FROZEN_ON} · {fid}_", "",
          "_measurement only; this file never tunes the model_", "",
          "## Verdict", "", f"**{v}**", ""]
     L += [f"- {n}" for n in notes]
-    L += ["", "## Pre-registered test (fixed 2026-07-30, before any prospective bet)", "",
+    L += ["", f"## Pre-registered test (fixed {FROZEN_ON}, before any prospective bet)", "",
           "| | |", "|---|---|",
           "| universe | graded overs → `current_selection` → confidence ∈ {confirmed, likely} |",
           "| H0 | outcomes at the DEVIGGED market rate (odds vs odds_other) |",
