@@ -294,6 +294,7 @@ rw|587|Hands out 10 dimes in loss
 rw|587|Leading scorer in loss
 rw|587|Records pair of steals Wednesday
 rw|599|Struggles in loss
+rw|603|Adds 16 points in loss
 rw|603|Drops 25 points in defeat
 rw|603|Rough shooting night in loss
 rw|603|Strikes for 23 points in ASG loss
