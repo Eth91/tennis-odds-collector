@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T08:34:32Z",
+ "captured_at": "2026-07-31T08:39:31Z",
  "matches": [
   {
    "event_id": 35886993,
@@ -8,9 +8,9 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "marek tkocz",
    "open_date": "2026-07-31T08:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 84.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35886994,
@@ -19,7 +19,7 @@
    "p1_norm": "jan zandecki",
    "p2_norm": "artur grela",
    "open_date": "2026-07-31T08:30:00.000Z",
-   "line": 77.5,
+   "line": 84.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,7 +30,7 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "dominik solilo",
    "open_date": "2026-07-31T08:30:00.000Z",
-   "line": 78.5,
+   "line": 87.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -41,9 +41,9 @@
    "p1_norm": "marcin lach",
    "p2_norm": "robert kostepski",
    "open_date": "2026-07-31T08:35:00.000Z",
-   "line": 75.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 78.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35887000,
@@ -52,9 +52,9 @@
    "p1_norm": "radoslaw malinowski",
    "p2_norm": "adrian eliasz",
    "open_date": "2026-07-31T08:35:00.000Z",
-   "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 79.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35887003,
@@ -108,6 +108,17 @@
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-07-31T09:00:00.000Z",
    "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35887054,
+   "p1": "Wojciech Tobiasz",
+   "p2": "Oskar Jadach",
+   "p1_norm": "wojciech tobiasz",
+   "p2_norm": "oskar jadach",
+   "open_date": "2026-07-31T09:05:00.000Z",
+   "line": 75.5,
    "over_odds": -118,
    "under_odds": -112
   }
