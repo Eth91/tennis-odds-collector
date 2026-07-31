@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T01:51:09Z",
+ "captured_at": "2026-07-31T02:00:23Z",
  "matches": [
   {
    "event_id": 35885808,
@@ -8,7 +8,7 @@
    "p1_norm": "piotr gesiarz",
    "p2_norm": "marian brunner",
    "open_date": "2026-07-31T01:45:00.000Z",
-   "line": 75.5,
+   "line": 87.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -30,9 +30,9 @@
    "p1_norm": "marian lebek",
    "p2_norm": "kacper adamus",
    "open_date": "2026-07-31T02:00:00.000Z",
-   "line": 74.5,
+   "line": 77.5,
    "over_odds": -118,
-   "under_odds": -112
+   "under_odds": -116
   },
   {
    "event_id": 35885824,
@@ -44,6 +44,28 @@
    "line": 71.5,
    "over_odds": -110,
    "under_odds": -118
+  },
+  {
+   "event_id": 35885828,
+   "p1": "Mariusz Baron",
+   "p2": "Marek Tkocz",
+   "p1_norm": "mariusz baron",
+   "p2_norm": "marek tkocz",
+   "open_date": "2026-07-31T02:20:00.000Z",
+   "line": 74.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35885829,
+   "p1": "Aleksander Barton",
+   "p2": "Jakub Skorupa",
+   "p1_norm": "aleksander barton",
+   "p2_norm": "jakub skorupa",
+   "open_date": "2026-07-31T02:20:00.000Z",
+   "line": 70.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
