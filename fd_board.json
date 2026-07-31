@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T06:28:39Z",
+ "captured_at": "2026-07-31T06:35:28Z",
  "matches": [
   {
    "event_id": 35886456,
@@ -8,9 +8,9 @@
    "p1_norm": "blazej warpas",
    "p2_norm": "mateusz misiak",
    "open_date": "2026-07-31T06:30:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 67.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35886457,
@@ -19,9 +19,9 @@
    "p1_norm": "pawel kurek",
    "p2_norm": "mateusz sikon",
    "open_date": "2026-07-31T06:30:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35886458,
@@ -30,20 +30,9 @@
    "p1_norm": "szymon kolasa",
    "p2_norm": "martin olejnik",
    "open_date": "2026-07-31T06:30:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
-  {
-   "event_id": 35886459,
-   "p1": "Mariusz Adamus",
-   "p2": "Jakub Pruszkowski",
-   "p1_norm": "mariusz adamus",
-   "p2_norm": "jakub pruszkowski",
-   "open_date": "2026-07-31T06:30:00.000Z",
-   "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 74.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35886472,
