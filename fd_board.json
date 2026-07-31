@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T00:19:45Z",
+ "captured_at": "2026-07-31T00:26:57Z",
  "matches": [
   {
    "event_id": 35885708,
@@ -8,31 +8,9 @@
    "p1_norm": "jaroslaw rolak",
    "p2_norm": "dawid kotwica",
    "open_date": "2026-07-31T00:10:00.000Z",
-   "line": 74.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35885709,
-   "p1": "Patryk Jendrzejewski",
-   "p2": "Jakub Chmielowski",
-   "p1_norm": "patryk jendrzejewski",
-   "p2_norm": "jakub chmielowski",
-   "open_date": "2026-07-31T00:10:00.000Z",
-   "line": 62.5,
-   "over_odds": -105,
-   "under_odds": -135
-  },
-  {
-   "event_id": 35885710,
-   "p1": "Marian Brunner",
-   "p2": "Jerzy Michalik",
-   "p1_norm": "marian brunner",
-   "p2_norm": "jerzy michalik",
-   "open_date": "2026-07-31T00:10:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 90.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885724,
@@ -41,20 +19,9 @@
    "p1_norm": "jakub skorupa",
    "p2_norm": "kazimierz rybak",
    "open_date": "2026-07-31T00:20:00.000Z",
-   "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35885725,
-   "p1": "Kacper Adamus",
-   "p2": "Pawel Slosarczyk",
-   "p1_norm": "kacper adamus",
-   "p2_norm": "pawel slosarczyk",
-   "open_date": "2026-07-31T00:25:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35885736,
