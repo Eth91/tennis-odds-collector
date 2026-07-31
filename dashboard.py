@@ -1154,7 +1154,7 @@ TT_LIVE_JS = """
     }
     el.innerHTML = '<div class="card"><h3 class="ttlg">\\uD83C\\uDFD3 TT Elite ' + mid + ' Flags'
       + '<span class="ttcnt">' + entries.length + '</span></h3>' + rows
-      + '<div class="ttfoot">hit rate = share of H2H meetings that went this side at this line ' + mid + ' only pairs \\u226570% shown ' + mid + ' confirmed = FanDuel has posted the line (tracked) ' + mid + ' projected = before FanDuel posts (never tracked)</div></div>';
+      + '<div class="ttfoot">hit rate = share of H2H meetings that went this side at this line ' + mid + ' only pairs \\u226570% shown ' + mid + ' confirmed = a REAL posted line (FanDuel or BetMGM) ' + mid + ' projected = before FanDuel posts (never tracked)</div></div>';
   };
   window._fetchTTTotals = async function(){
     try {
@@ -1336,7 +1336,7 @@ def _tt_totals_card(tt_json, now=None):
     return (f'<div class="card"><h3 class="ttlg">🏓 TT Elite · Flags'
             f'<span class="ttcnt">{len(entries)}</span></h3>{rows}'
             f'<div class="ttfoot">hit rate = share of the pair’s H2H meetings that went this side '
-            f'at this line · only pairs ≥70% shown · confirmed = FanDuel has posted the line (tracked) · '
+            f'at this line · only pairs ≥70% shown · confirmed = a REAL posted line (FanDuel or BetMGM) · '
             f'projected = our line before FanDuel posts (never tracked)</div></div>')
 
 
