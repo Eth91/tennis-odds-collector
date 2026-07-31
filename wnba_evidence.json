@@ -1,49 +1,28 @@
 {
- "updated": "2026-07-31T05:28:46Z",
- "frozen": "2026-07-30",
- "verdict": "CONTINUE COLLECTING",
- "prospective": {
-  "n_scored": 2,
-  "n_settled": 2,
-  "wins": 1,
-  "losses": 1,
-  "llr": -0.1335465185724496,
-  "logloss_model": 0.7721693055315801,
-  "logloss_market": 0.7053960462453552,
-  "brier_model": 0.286885,
-  "brier_market": 0.2561120884333792,
-  "slope": -38.461538461538424,
-  "pnl": -0.1499999999999999,
-  "roi": -0.07499999999999996,
-  "breakeven": 0.5528838809417602,
-  "roi_ci": [
-   -1.3569845942912107,
-   1.2069845942912107
-  ],
-  "exp_model": 1.308,
-  "exp_market": 1.045184725022855,
-  "actual": 1.0
- },
+ "updated": "2026-07-31T06:04:10Z",
+ "frozen": "2026-07-31",
+ "verdict": "INSUFFICIENT DATA",
+ "prospective": null,
  "retrospective": {
-  "n_scored": 40,
-  "n_settled": 47,
-  "wins": 27,
-  "losses": 13,
-  "llr": 2.7086627871728215,
-  "logloss_model": 0.6424061205194058,
-  "logloss_market": 0.7101226901987266,
-  "brier_model": 0.22809705000002506,
-  "brier_market": 0.25837338507219193,
-  "slope": -0.2332692279381348,
-  "pnl": 20.016,
-  "roi": 0.4258723404255319,
-  "breakeven": 0.5075401408986736,
+  "n_scored": 42,
+  "n_settled": 49,
+  "wins": 28,
+  "losses": 14,
+  "llr": 2.575116268600372,
+  "logloss_model": 0.6485853198056999,
+  "logloss_market": 0.7098976119152327,
+  "brier_model": 0.23089647619050005,
+  "brier_market": 0.2582657042798675,
+  "slope": -0.560656004687125,
+  "pnl": 19.866,
+  "roi": 0.4054285714285714,
+  "breakeven": 0.5093909057983914,
   "roi_ci": [
-   0.14655752703944847,
-   0.7051871538116153
+   0.13104553609292974,
+   0.679811606764213
   ],
-  "exp_model": 28.691998999999996,
-  "exp_market": 19.556325326955182,
-  "actual": 27.0
+  "exp_model": 29.999998999999995,
+  "exp_market": 20.60151005197804,
+  "actual": 28.0
  }
 }

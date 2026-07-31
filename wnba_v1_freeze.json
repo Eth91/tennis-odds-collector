@@ -1,14 +1,15 @@
 {
- "version": "v1.0",
- "frozen": "2026-07-30",
+ "version": "v1.1",
+ "frozen": "2026-07-31",
  "sha256_16": "433b9e32404d015d",
- "source_sha256_16": "ac6530fe526aa9e6",
+ "source_sha256_16": "5a8bff53184574fd",
  "source_files": {
-  "wnba_alert.py": "e9f714e6568eb48a",
+  "wnba_alert.py": "d45852a3cadeae17",
   "wnba_slip.py": "443e81afa49f1059",
   "wnba_tonight.py": "1918505b1705e8dc",
   "wnba_wowy.py": "2dfa0bb4844e7ea3"
  },
+ "decision": "v1.1 (2026-07-31) \u2014 correlation cap ranks on the A-BAND (3-8) before odds, not only the shadow band (<0 or >8). The cap keeps ONE player per team-game prop-family, so the survivor is automatically the cascade favourite; with both legs inside 0-8 the old band term was identical for both and a coin-flip price gap decided. POR 2026-07-31: Carleton d_min +0.3 at 1.9804 beat DiLeo d_min +4.2 at 2.04 \u2014 1.5 pts of implied probability \u2014 which meant the cap was choosing a TIER B over a TIER A (counted ledger: A 14-3 / 82.4% / +0.73u per bet vs B 17-11 / 60.7% / +0.20u). This is what the cap's own 2026-07-19 comment already intended; it was implemented with the shadow band so it only fired when a leg fell outside 0-8. Reconstructed over all 32 logged cap contests it changes ZERO past bets \u2014 no contest in the record has the split-band shape \u2014 so it is a correction of an internal contradiction, not a tune fitted to results. v1.0's prospective window (2026-07-30) held 2 graded bets; they belong to v1.0 and are not pooled forward.",
  "constants": {
   "wnba_slip": {
    "COMPONENT_CAP_U": 2.5,

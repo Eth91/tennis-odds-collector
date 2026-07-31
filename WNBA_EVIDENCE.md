@@ -1,16 +1,16 @@
 # WNBA v1.0 — cumulative evidence
 
-_updated 2026-07-31T05:28:46Z · frozen 2026-07-30 · constants `433b9e32404d015d` · source `ac6530fe526aa9e6`_
+_updated 2026-07-31T06:04:10Z · frozen 2026-07-31 · constants `433b9e32404d015d` · source `5a8bff53184574fd`_
 
 _measurement only; this file never tunes the model_
 
 ## Verdict
 
-**CONTINUE COLLECTING**
+**INSUFFICIENT DATA**
 
-- LLR -0.134 inside (-1.558, +2.773) — undecided
+- no prospective settled bets yet
 
-## Pre-registered test (fixed 2026-07-30, before any prospective bet)
+## Pre-registered test (fixed 2026-07-31, before any prospective bet)
 
 | | |
 |---|---|
@@ -23,24 +23,7 @@ _measurement only; this file never tunes the model_
 
 ## Prospective record (this is the test)
 
-Bets carded on or after the freeze date.
-
-| metric | model | market |
-|---|---|---|
-| log loss | **0.77217** | 0.70540 |
-| Brier | **0.28689** | 0.25611 |
-| expected wins | 1.3 | 1.0 |
-| actual wins | 1 | |
-
-| | |
-|---|---|
-| settled / scored | 2 / 2 |
-| record | 1-1 |
-| P&L (1u flat) | -0.15u |
-| ROI vs breakeven | -7.50% vs 55.3% |
-| ROI 95% CI | -135.70% .. +120.70% |
-| reliability slope | -38.462 |
-| **SPRT log-likelihood ratio** | **-0.1335** |
+_none yet_
 
 ## Retrospective, for context only — NOT part of the test
 
@@ -48,20 +31,20 @@ Produced by a model that was changing underneath it (132 commits / 151 bets). Re
 
 | metric | model | market |
 |---|---|---|
-| log loss | **0.64241** | 0.71012 |
-| Brier | **0.22810** | 0.25837 |
-| expected wins | 28.7 | 19.6 |
-| actual wins | 27 | |
+| log loss | **0.64859** | 0.70990 |
+| Brier | **0.23090** | 0.25827 |
+| expected wins | 30.0 | 20.6 |
+| actual wins | 28 | |
 
 | | |
 |---|---|
-| settled / scored | 47 / 40 |
-| record | 27-13 |
-| P&L (1u flat) | +20.02u |
-| ROI vs breakeven | +42.59% vs 50.8% |
-| ROI 95% CI | +14.66% .. +70.52% |
-| reliability slope | -0.233 |
-| **SPRT log-likelihood ratio** | **+2.7087** |
+| settled / scored | 49 / 42 |
+| record | 28-14 |
+| P&L (1u flat) | +19.87u |
+| ROI vs breakeven | +40.54% vs 50.9% |
+| ROI 95% CI | +13.10% .. +67.98% |
+| reliability slope | -0.561 |
+| **SPRT log-likelihood ratio** | **+2.5751** |
 
 ## Standing instruction
 
