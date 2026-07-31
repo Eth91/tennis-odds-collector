@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-31T07:28:54Z",
+ "captured_at": "2026-07-31T07:33:01Z",
  "matches": [
-  {
-   "event_id": 35886510,
-   "p1": "Dominik Solilo",
-   "p2": "Kamil Rudomina",
-   "p1_norm": "dominik solilo",
-   "p2_norm": "kamil rudomina",
-   "open_date": "2026-07-31T07:15:00.000Z",
-   "line": 79.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35886688,
    "p1": "Robert Kostepski",
@@ -19,9 +8,9 @@
    "p1_norm": "robert kostepski",
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-07-31T07:20:00.000Z",
-   "line": 74.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 68.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35886689,
@@ -30,20 +19,9 @@
    "p1_norm": "artur grela",
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-07-31T07:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35886690,
-   "p1": "Adrian Eliasz",
-   "p2": "Kamil Klocek",
-   "p1_norm": "adrian eliasz",
-   "p2_norm": "kamil klocek",
-   "open_date": "2026-07-31T07:20:00.000Z",
-   "line": 51.5,
-   "over_odds": 110,
-   "under_odds": -155
+   "line": 82.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35886863,
@@ -52,9 +30,9 @@
    "p1_norm": "oskar jadach",
    "p2_norm": "witold buczynski",
    "open_date": "2026-07-31T07:30:00.000Z",
-   "line": 73.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 65.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35886864,
@@ -63,9 +41,9 @@
    "p1_norm": "marek tkocz",
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-07-31T07:30:00.000Z",
-   "line": 75.5,
+   "line": 72.5,
    "over_odds": -120,
-   "under_odds": -110
+   "under_odds": -115
   },
   {
    "event_id": 35886885,
