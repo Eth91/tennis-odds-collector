@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T18:50:59Z",
+ "captured_at": "2026-07-31T18:56:18Z",
  "matches": [
   {
    "event_id": 35888510,
@@ -8,9 +8,9 @@
    "p1_norm": "roman wiza",
    "p2_norm": "mariusz adamus",
    "open_date": "2026-07-31T18:45:00.000Z",
-   "line": 79.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 86.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35888511,
@@ -19,20 +19,9 @@
    "p1_norm": "michal krutak",
    "p2_norm": "jacek zelezik",
    "open_date": "2026-07-31T18:45:00.000Z",
-   "line": 72.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35888526,
-   "p1": "Sebastian Szostok",
-   "p2": "Krzysztof Juszczyk",
-   "p1_norm": "sebastian szostok",
-   "p2_norm": "krzysztof juszczyk",
-   "open_date": "2026-07-31T18:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35888527,
@@ -41,9 +30,9 @@
    "p1_norm": "miroslaw piecowski",
    "p2_norm": "adrian fabis",
    "open_date": "2026-07-31T18:55:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -110
   },
   {
    "event_id": 35888535,
@@ -75,6 +64,28 @@
    "p2_norm": "patryk jendrzejewski",
    "open_date": "2026-07-31T19:15:00.000Z",
    "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35888608,
+   "p1": "Kamil Kowalski",
+   "p2": "Wojciech Urban",
+   "p1_norm": "kamil kowalski",
+   "p2_norm": "wojciech urban",
+   "open_date": "2026-07-31T19:20:00.000Z",
+   "line": 74.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35888609,
+   "p1": "Mateusz Trela",
+   "p2": "Michal Skorski",
+   "p1_norm": "mateusz trela",
+   "p2_norm": "michal skorski",
+   "open_date": "2026-07-31T19:20:00.000Z",
+   "line": 81.5,
    "over_odds": -118,
    "under_odds": -112
   }
