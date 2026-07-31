@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-title" content="Pickz">
 <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="64x64" href="icon-64.png">
-<meta name="bv" content="0bf3dce47d">
+<meta name="bv" content="f2222dc3f5">
 <title>Today's Plays</title>
 <style>
   :root { color-scheme: dark; }
@@ -242,7 +242,11 @@
   .ttbln { font-size:16px; font-weight:800; color:var(--t1); font-variant-numeric:tabular-nums; min-width:52px; letter-spacing:-.01em; }
   .ttbln .tld { color:#5b6b82; font-weight:600; margin-right:1px; }
   .ttbmid { flex:1; min-width:0; }
-  .ttbnm { font-size:14px; color:#cdd5e0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  /* FULL NAMES (2026-07-31, user): ellipsis truncation made Polish pairs unreadable on a
+     phone, and a name you cannot read is a bet you cannot place. Wrap instead. */
+  .ttbnm { font-size:14px; color:#cdd5e0; white-space:normal; overflow-wrap:anywhere; line-height:1.32; }
+  .ttbsb .bmgm { color:#c9a227; }     /* BetMGM gold, so the book is never misread */
+  .podds.bmgm { color:#c9a227; }
   .ttbnm b { color:var(--t1); font-weight:700; }
   .ttbsb { color:#93a0b4; font-size:12px; margin-top:2px; }
   .shop { color:#6f7d92; font-size:11px; }
@@ -552,7 +556,7 @@
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
-    <div class="live"><span class="dot"></span>3:46 PM MT
+    <div class="live"><span class="dot"></span>3:49 PM MT
       <button class="rfrsh" onclick="manualRefresh(this)" title="Pull new plays now" aria-label="Refresh now">↻</button>
       <span id="rfchk"></span></div>
   </header>
@@ -720,6 +724,17 @@
   // mirrors fd_tt.norm EXACTLY: NFKD, drop combining marks, lowercase, collapse whitespace.
   // toLowerCase().trim() agrees only while names are ASCII; TT is full of Polish names, and one
   // diacritic would break the dedup key and render a FanDuel-priced bet twice.
+  // bmbets stores DECIMAL odds; the existing _ttAm formats an AMERICAN number, so a decimal
+  // pushed through it would render "1.87" as a price. Convert explicitly.
+  function _ttDecAm(v){
+    var n = Number(v); if (!isFinite(n) || n <= 1) return null;
+    n = (n >= 2) ? Math.round((n-1)*100) : -Math.round(100/(n-1));
+    return (n > 0 ? '+' + n : String(n));
+  }
+  var _TTMGM = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'"
+    + "%3E%3Crect width='24' height='24' rx='6' fill='%23c9a227'/%3E%3Ctext x='12' y='16'"
+    + " font-size='8.5' font-weight='700' text-anchor='middle' fill='%23151b24'"
+    + " font-family='Arial,sans-serif'%3EMGM%3C/text%3E%3C/svg%3E";
   function _ttNorm(x){
     return String(x||'').normalize('NFKD').replace(/[̀-ͯ]/g,'')
       .toLowerCase().split(/\s+/).filter(Boolean).join(' ');
@@ -738,8 +753,10 @@
       var tots = entry.totals || [], n = tots.length, ov = 0, j;
       for (j=0;j<n;j++){ if (tots[j] > +m.line) ov++; }
       var hit = n ? Math.round((entry.pick.side==='over'?ov:n-ov)/n*100) : null;
+      var _od = (entry.pick.side === 'over') ? m.over_odds : m.under_odds;
       entries.push({start: new Date(m.open_date).getTime(), p1: m.p1, p2: m.p2, line: +m.line,
-                    side: entry.pick.side, hit: hit, real: true});
+                    side: entry.pick.side, hit: hit, real: true, book: 'FanDuel',
+                    odds: (_od == null ? null : _ttAm(_od))});
     });
     // BETS PRICED AWAY FROM FANDUEL. The loop above only sees fd_board pairs, and elite_h2h is
     // itself built from fd_board, so a bet taken at a fresh BetMGM line renders nowhere — it sat in
@@ -756,7 +773,8 @@
       boardPairs[k] = 1;
       entries.push({start: st, p1: b.p1, p2: b.p2, line: +b.play_to,
                     side: (String(b.side||'').charAt(0) === 'O') ? 'over' : 'under',
-                    hit: b.raw, real: true, book: 'BetMGM'});
+                    hit: b.raw, real: true, book: 'BetMGM',
+                    odds: _ttDecAm((b.book||{}).od)});
     });
     // projected likely-flags (pre-filtered to >=70% in tt_board) — DROP the moment FanDuel posts
     // this pair (exact key OR last-name fallback), so a "projected" tag never lingers past the real line
@@ -777,7 +795,12 @@
       var x = entries[i], tip = _ttTime(new Date(x.start).toISOString()), o = x.side==='over'?'O':'U';
       var chip = (x.hit != null) ? ('<div class="ttconf"><span class="tchip ' + (x.hit>=78?'tA':'tB') + '">' + x.hit + '%</span><span class="ttconflab">hit rate</span></div>') : '';
       var lncell = x.real ? (''+x.line) : ('<span class="tld">~</span>' + x.line);
-      var src = x.real ? '<span class="fd">' + (x.book || 'FanDuel') + ' ' + mid + ' confirmed</span>' : '<span class="pj">projected</span>';
+      var _bk = x.book || 'FanDuel', _mgm = (_bk === 'BetMGM'), _cls = _mgm ? 'bmgm' : 'fd';
+      var _price = x.odds ? ('<span class="podds ' + _cls + '">' + x.odds + '</span>'
+            + '<img class="bklogo" src="' + (_mgm ? _TTMGM : 'book-fd.png') + '" alt="'
+            + (_mgm ? 'MGM' : 'FD') + '">') : '';
+      var src = x.real ? ('<span class="' + _cls + '">' + _bk + ' ' + mid + ' confirmed</span>' + _price)
+                       : '<span class="pj">projected</span>';
       rows += '<div class="ttbet"><span class="pind ' + o.toLowerCase() + '">' + o + '</span>'
             + '<span class="ttbln">' + lncell + '</span>'
             + '<div class="ttbmid"><div class="ttbnm"><b>' + _ttEsc(x.p1) + '</b> v ' + _ttEsc(x.p2) + '</div>'

@@ -1070,6 +1070,17 @@ TT_LIVE_JS = """
   // mirrors fd_tt.norm EXACTLY: NFKD, drop combining marks, lowercase, collapse whitespace.
   // toLowerCase().trim() agrees only while names are ASCII; TT is full of Polish names, and one
   // diacritic would break the dedup key and render a FanDuel-priced bet twice.
+  // bmbets stores DECIMAL odds; the existing _ttAm formats an AMERICAN number, so a decimal
+  // pushed through it would render "1.87" as a price. Convert explicitly.
+  function _ttDecAm(v){
+    var n = Number(v); if (!isFinite(n) || n <= 1) return null;
+    n = (n >= 2) ? Math.round((n-1)*100) : -Math.round(100/(n-1));
+    return (n > 0 ? '+' + n : String(n));
+  }
+  var _TTMGM = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'"
+    + "%3E%3Crect width='24' height='24' rx='6' fill='%23c9a227'/%3E%3Ctext x='12' y='16'"
+    + " font-size='8.5' font-weight='700' text-anchor='middle' fill='%23151b24'"
+    + " font-family='Arial,sans-serif'%3EMGM%3C/text%3E%3C/svg%3E";
   function _ttNorm(x){
     return String(x||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'')
       .toLowerCase().split(/\s+/).filter(Boolean).join(' ');
@@ -1088,8 +1099,10 @@ TT_LIVE_JS = """
       var tots = entry.totals || [], n = tots.length, ov = 0, j;
       for (j=0;j<n;j++){ if (tots[j] > +m.line) ov++; }
       var hit = n ? Math.round((entry.pick.side==='over'?ov:n-ov)/n*100) : null;
+      var _od = (entry.pick.side === 'over') ? m.over_odds : m.under_odds;
       entries.push({start: new Date(m.open_date).getTime(), p1: m.p1, p2: m.p2, line: +m.line,
-                    side: entry.pick.side, hit: hit, real: true});
+                    side: entry.pick.side, hit: hit, real: true, book: 'FanDuel',
+                    odds: (_od == null ? null : _ttAm(_od))});
     });
     // BETS PRICED AWAY FROM FANDUEL. The loop above only sees fd_board pairs, and elite_h2h is
     // itself built from fd_board, so a bet taken at a fresh BetMGM line renders nowhere — it sat in
@@ -1106,7 +1119,8 @@ TT_LIVE_JS = """
       boardPairs[k] = 1;
       entries.push({start: st, p1: b.p1, p2: b.p2, line: +b.play_to,
                     side: (String(b.side||'').charAt(0) === 'O') ? 'over' : 'under',
-                    hit: b.raw, real: true, book: 'BetMGM'});
+                    hit: b.raw, real: true, book: 'BetMGM',
+                    odds: _ttDecAm((b.book||{}).od)});
     });
     // projected likely-flags (pre-filtered to >=70% in tt_board) — DROP the moment FanDuel posts
     // this pair (exact key OR last-name fallback), so a "projected" tag never lingers past the real line
@@ -1127,7 +1141,12 @@ TT_LIVE_JS = """
       var x = entries[i], tip = _ttTime(new Date(x.start).toISOString()), o = x.side==='over'?'O':'U';
       var chip = (x.hit != null) ? ('<div class="ttconf"><span class="tchip ' + (x.hit>=78?'tA':'tB') + '">' + x.hit + '%</span><span class="ttconflab">hit rate</span></div>') : '';
       var lncell = x.real ? (''+x.line) : ('<span class="tld">~</span>' + x.line);
-      var src = x.real ? '<span class="fd">' + (x.book || 'FanDuel') + ' ' + mid + ' confirmed</span>' : '<span class="pj">projected</span>';
+      var _bk = x.book || 'FanDuel', _mgm = (_bk === 'BetMGM'), _cls = _mgm ? 'bmgm' : 'fd';
+      var _price = x.odds ? ('<span class="podds ' + _cls + '">' + x.odds + '</span>'
+            + '<img class="bklogo" src="' + (_mgm ? _TTMGM : 'book-fd.png') + '" alt="'
+            + (_mgm ? 'MGM' : 'FD') + '">') : '';
+      var src = x.real ? ('<span class="' + _cls + '">' + _bk + ' ' + mid + ' confirmed</span>' + _price)
+                       : '<span class="pj">projected</span>';
       rows += '<div class="ttbet"><span class="pind ' + o.toLowerCase() + '">' + o + '</span>'
             + '<span class="ttbln">' + lncell + '</span>'
             + '<div class="ttbmid"><div class="ttbnm"><b>' + _ttEsc(x.p1) + '</b> v ' + _ttEsc(x.p2) + '</div>'
@@ -1167,6 +1186,29 @@ TT_LIVE_JS = """
 """
 
 
+# BetMGM badge as an inline SVG data URI. docs/ ships book-fd.png and book-dk.png only; a new binary
+# would need committing, serving and cache-busting. #c9a227 is BetMGM's gold, dark glyph for contrast.
+TTMGM_LOGO = ("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'"
+              "%3E%3Crect width='24' height='24' rx='6' fill='%23c9a227'/%3E%3Ctext x='12' y='16'"
+              " font-size='8.5' font-weight='700' text-anchor='middle' fill='%23151b24'"
+              " font-family='Arial,sans-serif'%3EMGM%3C/text%3E%3C/svg%3E")
+
+
+def _tt_am(v, decimal=False):
+    """Format a price as American. `decimal=True` converts first — fd_board is already American,
+    bmbets stores decimal, and rendering one as the other prints a plausible wrong number."""
+    try:
+        v = float(v)
+    except (TypeError, ValueError):
+        return None
+    if decimal:
+        if v <= 1:
+            return None
+        v = round((v - 1) * 100) if v >= 2 else -round(100 / (v - 1))
+    v = int(round(v))
+    return ("+%d" % v) if v > 0 else str(v)
+
+
 def _tt_totals_card(tt_json, now=None):
     """TT Elite FLAGGED BETS — only games where the pair hits a side >=70% AT the FanDuel line.
     Each row: matchup, MT tip time, the FanDuel line to bet, the OVER/UNDER side, and the pair's
@@ -1190,6 +1232,13 @@ def _tt_totals_card(tt_json, now=None):
     board_last = set()          # {frozenset(lastname1, lastname2)} — tolerant fallback so a projection
     #                             flips to the real line even if 24live/FanDuel spell first names differently
     _last = lambda s: (s or "").split()[-1] if (s or "").split() else ""
+    # mirrors fd_tt.norm so the bets dedupe key matches the board keys; plain .lower()
+    # agrees only while every name is ASCII, and TT is full of Polish names.
+    def _norm_tt(x):
+        import unicodedata as _u
+        n = _u.normalize("NFKD", str(x or ""))
+        n = "".join(c for c in n if not _u.combining(c))
+        return " ".join(n.lower().split())
     for m in board.get("matches", []):
         od, line = m.get("open_date"), m.get("line")
         if not od or line is None:
@@ -1210,8 +1259,32 @@ def _tt_totals_card(tt_json, now=None):
         n = len(tots)
         over = sum(1 for t in tots if t > line)
         hit = round((over if pick["side"] == "over" else n - over) / n * 100) if n else None
+        _od = m.get("over_odds") if pick["side"] == "over" else m.get("under_odds")
         entries.append({"start": start, "p1": m.get("p1", "?"), "p2": m.get("p2", "?"),
-                        "line": line, "side": pick["side"], "hit": hit, "real": True})
+                        "line": line, "side": pick["side"], "hit": hit, "real": True,
+                        "odds": _tt_am(_od), "book": "FanDuel"})
+    # BETS PRICED AWAY FROM FANDUEL. The loop above walks fd_board, and elite_h2h is itself built
+    # from fd_board, so a bet struck at a fresh BetMGM line renders nowhere — it sits in `bets`,
+    # counted in the record, invisible. An EXTRA play gets noticed; a MISSING one does not.
+    # `bets` is post-gate (tt_board routes refused plays to `skipped`), so this cannot loosen it.
+    for b in (tt_json or {}).get("bets", []):
+        _k = frozenset((_norm_tt(b.get("p1")), _norm_tt(b.get("p2"))))
+        if _k in board_pairs or not b.get("play_to"):
+            continue
+        try:
+            start = dt.datetime.fromtimestamp(int(b["ts"]), dt.timezone.utc)
+        except (KeyError, TypeError, ValueError, OSError):
+            continue
+        if start <= now:
+            continue
+        board_pairs.add(_k)
+        _bk = b.get("book") or {}
+        entries.append({"start": start, "p1": b.get("p1", "?"), "p2": b.get("p2", "?"),
+                        "line": b["play_to"],
+                        "side": "over" if str(b.get("side", "")).startswith("O") else "under",
+                        "hit": b.get("raw"), "real": True,
+                        "odds": _tt_am(_bk.get("od"), decimal=True), "book": "BetMGM"})
+
     for e in (tt_json or {}).get("elite_upcoming", []):
         if not e.get("side"):
             continue
@@ -1243,7 +1316,16 @@ def _tt_totals_card(tt_json, now=None):
                 f'<span class="ttconflab">hit rate</span></div>'
                 if conf is not None else "")
         if x["real"]:
-            lncell, src = f'{x["line"]:g}', '<span class="fd">FanDuel · confirmed</span>'
+            _bk = x.get("book") or "FanDuel"
+            _mgm = _bk == "BetMGM"
+            _cls = "bmgm" if _mgm else "fd"
+            _o = x.get("odds")
+            _price = ("" if not _o else
+                      f'<span class="podds {_cls}">{_o}</span>'
+                      f'<img class="bklogo" src="{TTMGM_LOGO if _mgm else "book-fd.png"}" '
+                      f'alt="{"MGM" if _mgm else "FD"}">')
+            lncell = f'{x["line"]:g}'
+            src = f'<span class="{_cls}">{_bk} · confirmed</span>{_price}'
         else:
             lncell, src = f'<span class="tld">~</span>{x["line"]:g}', '<span class="pj">projected</span>'
         rows += (f'<div class="ttbet"><span class="pind {o.lower()}">{o}</span>'
@@ -3129,7 +3211,11 @@ def build():
   .ttbln {{ font-size:16px; font-weight:800; color:var(--t1); font-variant-numeric:tabular-nums; min-width:52px; letter-spacing:-.01em; }}
   .ttbln .tld {{ color:#5b6b82; font-weight:600; margin-right:1px; }}
   .ttbmid {{ flex:1; min-width:0; }}
-  .ttbnm {{ font-size:14px; color:#cdd5e0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }}
+  /* FULL NAMES (2026-07-31, user): ellipsis truncation made Polish pairs unreadable on a
+     phone, and a name you cannot read is a bet you cannot place. Wrap instead. */
+  .ttbnm {{ font-size:14px; color:#cdd5e0; white-space:normal; overflow-wrap:anywhere; line-height:1.32; }}
+  .ttbsb .bmgm {{ color:#c9a227; }}     /* BetMGM gold, so the book is never misread */
+  .podds.bmgm {{ color:#c9a227; }}
   .ttbnm b {{ color:var(--t1); font-weight:700; }}
   .ttbsb {{ color:#93a0b4; font-size:12px; margin-top:2px; }}
   .shop {{ color:#6f7d92; font-size:11px; }}
