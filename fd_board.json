@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T01:16:13Z",
+ "captured_at": "2026-07-31T01:24:58Z",
  "matches": [
   {
    "event_id": 35885783,
@@ -8,9 +8,9 @@
    "p1_norm": "kazimierz rybak",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-07-31T01:10:00.000Z",
-   "line": 70.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 87.5,
+   "over_odds": 110,
+   "under_odds": -150
   },
   {
    "event_id": 35885795,
@@ -41,9 +41,20 @@
    "p1_norm": "pawel slosarczyk",
    "p2_norm": "marek tkocz",
    "open_date": "2026-07-31T01:35:00.000Z",
-   "line": 65.5,
+   "line": 60.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35885808,
+   "p1": "Piotr Gesiarz",
+   "p2": "Marian Brunner",
+   "p1_norm": "piotr gesiarz",
+   "p2_norm": "marian brunner",
+   "open_date": "2026-07-31T01:45:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
