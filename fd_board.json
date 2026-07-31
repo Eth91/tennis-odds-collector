@@ -1,38 +1,16 @@
 {
- "captured_at": "2026-07-31T04:48:14Z",
+ "captured_at": "2026-07-31T04:54:45Z",
  "matches": [
   {
-   "event_id": 35885938,
-   "p1": "Jakub Cyndera",
-   "p2": "Kazimierz Rybak",
-   "p1_norm": "jakub cyndera",
-   "p2_norm": "kazimierz rybak",
-   "open_date": "2026-07-31T04:20:00.000Z",
+   "event_id": 35885966,
+   "p1": "Jakub Skorupa",
+   "p2": "Zbigniew Nocun",
+   "p1_norm": "jakub skorupa",
+   "p2_norm": "zbigniew nocun",
+   "open_date": "2026-07-31T04:40:00.000Z",
    "line": 77.5,
-   "over_odds": -140,
-   "under_odds": 100
-  },
-  {
-   "event_id": 35885943,
-   "p1": "Krzysztof Hetnar",
-   "p2": "Jakub Pruszkowski",
-   "p1_norm": "krzysztof hetnar",
-   "p2_norm": "jakub pruszkowski",
-   "open_date": "2026-07-31T04:30:00.000Z",
-   "line": 109.5,
-   "over_odds": 105,
-   "under_odds": -145
-  },
-  {
-   "event_id": 35885946,
-   "p1": "Marcin Jadczyk",
-   "p2": "Krzysztof Wloczko",
-   "p1_norm": "marcin jadczyk",
-   "p2_norm": "krzysztof wloczko",
-   "open_date": "2026-07-31T04:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -130,
-   "under_odds": -105
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35885970,
@@ -41,9 +19,9 @@
    "p1_norm": "stapor rafal",
    "p2_norm": "dominik solilo",
    "open_date": "2026-07-31T04:50:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885971,
@@ -52,9 +30,9 @@
    "p1_norm": "marian lebek",
    "p2_norm": "michal paszkiewicz",
    "open_date": "2026-07-31T04:50:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885972,
@@ -85,9 +63,9 @@
    "p1_norm": "mateusz misiak",
    "p2_norm": "adrian eliasz",
    "open_date": "2026-07-31T04:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35886165,
