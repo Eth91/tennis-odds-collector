@@ -277,6 +277,7 @@ rw|580|Racks up 20 points in Sunday's win
 rw|580|Scores team-high 29 points
 rw|581|On fire from perimeter
 rw|581|Tallies 18 points in loss
+rw|583|Not starting Thursday
 rw|583|Starting versus Portland
 rw|584|Notches eight points in win
 rw|584|Scores in double figures off bench
