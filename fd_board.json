@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T01:47:03Z",
+ "captured_at": "2026-07-31T01:51:09Z",
  "matches": [
   {
    "event_id": 35885808,
@@ -8,9 +8,9 @@
    "p1_norm": "piotr gesiarz",
    "p2_norm": "marian brunner",
    "open_date": "2026-07-31T01:45:00.000Z",
-   "line": 77.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 75.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35885812,
