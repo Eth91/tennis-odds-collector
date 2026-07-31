@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T19:23:13Z",
+ "captured_at": "2026-07-31T19:30:45Z",
  "matches": [
   {
    "event_id": 35888535,
@@ -8,9 +8,9 @@
    "p1_norm": "damian fira",
    "p2_norm": "jakub michalski",
    "open_date": "2026-07-31T19:10:00.000Z",
-   "line": 98.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 105.5,
+   "over_odds": -105,
+   "under_odds": -135
   },
   {
    "event_id": 35888538,
@@ -19,9 +19,9 @@
    "p1_norm": "artur daniel",
    "p2_norm": "patryk jendrzejewski",
    "open_date": "2026-07-31T19:15:00.000Z",
-   "line": 81.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 92.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35888608,
@@ -30,9 +30,9 @@
    "p1_norm": "kamil kowalski",
    "p2_norm": "wojciech urban",
    "open_date": "2026-07-31T19:20:00.000Z",
-   "line": 57.5,
-   "over_odds": -115,
-   "under_odds": -115
+   "line": 52.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35888609,
@@ -41,7 +41,7 @@
    "p1_norm": "mateusz trela",
    "p2_norm": "michal skorski",
    "open_date": "2026-07-31T19:20:00.000Z",
-   "line": 72.5,
+   "line": 89.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -52,9 +52,9 @@
    "p1_norm": "adam ruszkiewicz",
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-07-31T19:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35888749,
@@ -99,6 +99,17 @@
    "line": 76.5,
    "over_odds": -110,
    "under_odds": -120
+  },
+  {
+   "event_id": 35888777,
+   "p1": "Mariusz Adamus",
+   "p2": "Jakub Michalski",
+   "p1_norm": "mariusz adamus",
+   "p2_norm": "jakub michalski",
+   "open_date": "2026-07-31T19:55:00.000Z",
+   "line": 75.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
