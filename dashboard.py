@@ -246,6 +246,30 @@ def _fav_keys(rows):
     return _S.fav_keys(rows)
 
 
+BET_ROLES = {"confirmed", "likely"}   # wnba_alert.BET_ROLES — the roles the bot will actually bet
+
+
+def _bet_only(rows):
+    """Keep only rows the bot would actually BET: role confirmed/likely, plus anything played.
+
+    The role gate is live in wnba_alert (it decides what is staked and what pings), but the
+    displayed record never applied it, so the board scored plays the model refuses — a projected
+    lineup or an outright bench role means the "expanded role" premise is unverified.
+
+    PLAYED BETS ARE ALWAYS KEPT. current_selection bypasses its own gates for rows marked in
+    wnba_played.txt because real money must appear in the record whatever the model thought; that
+    bypass happens INSIDE current_selection, so filtering after it would delete precisely those
+    bets. Re-checking the marks here preserves it."""
+    try:
+        import wnba_slip as _WS
+        marks = _WS._played_marks()
+        played = (lambda r: _WS._is_played(r, marks)) if marks else (lambda r: False)
+    except Exception:                                                # noqa: BLE001
+        played = lambda r: bool(r.get("played"))                     # noqa: E731
+    return [r for r in rows
+            if str(r.get("confidence")) in BET_ROLES or r.get("played") or played(r)]
+
+
 def _tier_records():
     """Live per-tier record over the graded go-forward universe — the legend's calibration."""
     try:
@@ -257,6 +281,7 @@ def _tier_records():
             "AND (side IS NULL OR side='over')")]
         con.close()
         sel, _ = S.current_selection(g)
+        sel = _bet_only(sel)          # the tier legend is a RECORD -> only bettable roles
         favs = _fav_keys(g)                              # market pecking order over ALL flagged
         rec = {"A": [0, 0, 0.0], "B": [0, 0, 0.0], "C": [0, 0, 0.0]}
         for r in sel:
@@ -282,7 +307,11 @@ def _load(mt_date):
         "SELECT * FROM predictions WHERE pred_date>=? AND result IS NULL "
         "ORDER BY pred_date ASC, ev DESC",
         (mt_date,))]
-    g = [dict(r) for r in con.execute("SELECT result,odds,side,pred_date,player,team,stat,line,n_elev,d_min,ev,elev_avg "
+    g = [dict(r) for r in con.execute("SELECT result,odds,side,pred_date,player,team,stat,line,n_elev,d_min,ev,elev_avg, "
+                                      # confidence/tier/played are READ below and were absent:
+                                      # tier=None made the n1 exclusion a no-op (always True),
+                                      # and confidence=None made the role gate drop everything.
+                                      "confidence,tier,played "
                                       "FROM predictions WHERE graded=1 AND pred_date>='2026-07-09'")]
     # IN-PROGRESS MARK (2026-07-29): once a bet's game tips it is a POSITION, not a shoppable
     # rung. Everything below keys off this: it survives the live-line filter and renders at the
@@ -351,6 +380,10 @@ def _load(mt_date):
     try:
         import wnba_slip as _SL
         dec, _dropped = _SL.current_selection(overs)
+        # HEADLINE RECORD: count only what the bot would bet. The role gate is already live
+        # in wnba_alert; without this the board scored 7 refused plays (4 projected, 2 bench,
+        # 1 unlabelled). Played bets are preserved by _bet_only.
+        dec = _bet_only(dec)
     except Exception:
         dec = overs
     w = sum(1 for r in dec if r["result"] == (r["side"] or "over"))   # win = result matches side
@@ -830,6 +863,7 @@ def _wnba_recent(days=2):
             continue
         try:
             dec, _ = SL.current_selection(overs)
+            dec = _bet_only(dec)      # per-day record -> same universe as the headline
             sm = SL.ladder_stake_map(dec)
         except Exception:
             dec, sm = overs, {}
