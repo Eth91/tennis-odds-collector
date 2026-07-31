@@ -358,6 +358,7 @@ rw|786|Paces Mystics with 25 points
 rw|789|Available off bench Thursday
 rw|789|Goes through practice
 rw|789|Iffy for Thursday
+rw|789|Logs 10 points in return
 rw|789|Questionable for Tuesday
 rw|789|Upgraded to probable
 rw|789|Won't play Tuesday
