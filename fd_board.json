@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T00:59:00Z",
+ "captured_at": "2026-07-31T01:03:00Z",
  "matches": [
   {
    "event_id": 35885745,
@@ -8,7 +8,7 @@
    "p1_norm": "aleksander barton",
    "p2_norm": "jakub cyndera",
    "open_date": "2026-07-31T00:45:00.000Z",
-   "line": 82.5,
+   "line": 93.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -19,7 +19,7 @@
    "p1_norm": "marian lebek",
    "p2_norm": "mariusz baron",
    "open_date": "2026-07-31T00:45:00.000Z",
-   "line": 86.5,
+   "line": 92.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -30,9 +30,9 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "marian brunner",
    "open_date": "2026-07-31T01:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 68.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35885783,
