@@ -164,6 +164,7 @@ rw|272|Scores season-high 25 points
 rw|276|Another quality showing Wednesday
 rw|276|Double-doubles in win
 rw|276|Named All-Star Game MVP
+rw|278|Dishes five dimes in victory
 rw|278|Reaches 20-point plateau
 rw|278|Scoreless in road win
 rw|280|Plays well off bench
