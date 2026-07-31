@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-31T15:24:49Z",
+ "captured_at": "2026-07-31T15:29:03Z",
  "matches": [
-  {
-   "event_id": 35887828,
-   "p1": "Cezary Pawlik",
-   "p2": "Jacek Oracz",
-   "p1_norm": "cezary pawlik",
-   "p2_norm": "jacek oracz",
-   "open_date": "2026-07-31T15:10:00.000Z",
-   "line": 73.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
   {
    "event_id": 35887879,
    "p1": "Amirreza Abbasi",
@@ -19,9 +8,9 @@
    "p1_norm": "amirreza abbasi",
    "p2_norm": "szymon kolasa",
    "open_date": "2026-07-31T15:25:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35887880,
@@ -30,9 +19,9 @@
    "p1_norm": "adrian myszewski",
    "p2_norm": "mateusz trela",
    "open_date": "2026-07-31T15:25:00.000Z",
-   "line": 84.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35887881,
@@ -41,9 +30,9 @@
    "p1_norm": "mariusz koczyba",
    "p2_norm": "kamil kowalski",
    "open_date": "2026-07-31T15:25:00.000Z",
-   "line": 73.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 70.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35887889,
@@ -53,8 +42,8 @@
    "p2_norm": "grzegorz wichowski",
    "open_date": "2026-07-31T15:30:00.000Z",
    "line": 69.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35887908,
@@ -63,9 +52,9 @@
    "p1_norm": "michal krutak",
    "p2_norm": "oskar jedrzejowski",
    "open_date": "2026-07-31T15:35:00.000Z",
-   "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35887916,
@@ -97,6 +86,17 @@
    "p2_norm": "adrian fabis",
    "open_date": "2026-07-31T15:50:00.000Z",
    "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35887939,
+   "p1": "Witold Buczynski",
+   "p2": "Jakub Kaczmarek",
+   "p1_norm": "witold buczynski",
+   "p2_norm": "jakub kaczmarek",
+   "open_date": "2026-07-31T15:55:00.000Z",
+   "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
   }
