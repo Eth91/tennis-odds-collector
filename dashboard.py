@@ -1117,10 +1117,15 @@ TT_LIVE_JS = """
       if (boardPairs[k] || boardLast[_ttKey(_ttLast(n1), _ttLast(n2))]) return;
       var st = b.ts * 1000; if (st <= now) return;
       boardPairs[k] = 1;
-      entries.push({start: st, p1: b.p1, p2: b.p2, line: +b.play_to,
+      // the REAL wager: line/odds/book_name are what the bet is struck at. b.side and b.play_to
+      // are the card's ladder ZONE, which is why an 81.5 line used to render as "O<=82.5".
+      // b.odds is already AMERICAN (converted at the fd_tt boundary), so no second conversion.
+      var _bn = (b.book_name === 'betmgm') ? 'BetMGM' : 'FanDuel';
+      entries.push({start: st, p1: b.p1, p2: b.p2,
+                    line: (b.line != null ? +b.line : +b.play_to),
                     side: (String(b.side||'').charAt(0) === 'O') ? 'over' : 'under',
-                    hit: b.raw, real: true, book: 'BetMGM',
-                    odds: _ttDecAm((b.book||{}).od)});
+                    hit: b.raw, real: true, book: _bn,
+                    odds: (b.odds != null ? _ttAm(b.odds) : _ttDecAm((b.book||{}).od))});
     });
     // projected likely-flags (pre-filtered to >=70% in tt_board) — DROP the moment FanDuel posts
     // this pair (exact key OR last-name fallback), so a "projected" tag never lingers past the real line
