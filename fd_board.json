@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-31T09:14:25Z",
+ "captured_at": "2026-07-31T09:20:26Z",
  "matches": [
-  {
-   "event_id": 35887036,
-   "p1": "Bartlomiej Mleczko",
-   "p2": "Igor Dabrowski",
-   "p1_norm": "bartlomiej mleczko",
-   "p2_norm": "igor dabrowski",
-   "open_date": "2026-07-31T09:00:00.000Z",
-   "line": 86.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35887054,
    "p1": "Wojciech Tobiasz",
@@ -19,7 +8,7 @@
    "p1_norm": "wojciech tobiasz",
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-31T09:05:00.000Z",
-   "line": 77.5,
+   "line": 83.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -30,9 +19,9 @@
    "p1_norm": "milosz cesarz",
    "p2_norm": "marian lebek",
    "open_date": "2026-07-31T09:10:00.000Z",
-   "line": 78.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 65.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35887111,
@@ -41,9 +30,9 @@
    "p1_norm": "grzegorz poliniewicz",
    "p2_norm": "karol wisniewski",
    "open_date": "2026-07-31T09:20:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35887117,
@@ -86,6 +75,17 @@
    "p2_norm": "tomasz wrzalik",
    "open_date": "2026-07-31T09:30:00.000Z",
    "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35887157,
+   "p1": "Krystian Kolodziej",
+   "p2": "Dominik Solilo",
+   "p1_norm": "krystian kolodziej",
+   "p2_norm": "dominik solilo",
+   "open_date": "2026-07-31T09:45:00.000Z",
+   "line": 72.5,
    "over_odds": -112,
    "under_odds": -118
   }
