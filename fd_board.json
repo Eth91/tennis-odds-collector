@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T23:48:56Z",
+ "captured_at": "2026-07-31T23:54:25Z",
  "matches": [
   {
    "event_id": 35889160,
@@ -8,7 +8,7 @@
    "p1_norm": "jakub kuzmicz",
    "p2_norm": "jakub chmielowski",
    "open_date": "2026-07-31T23:35:00.000Z",
-   "line": 77.5,
+   "line": 93.5,
    "over_odds": -110,
    "under_odds": -125
   },
@@ -64,6 +64,28 @@
    "p2_norm": "kamil kowalski",
    "open_date": "2026-08-01T00:10:00.000Z",
    "line": 61.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35889234,
+   "p1": "Patryk Jendrzejewski",
+   "p2": "Jakub Chmielowski",
+   "p1_norm": "patryk jendrzejewski",
+   "p2_norm": "jakub chmielowski",
+   "open_date": "2026-08-01T00:20:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35889235,
+   "p1": "Adam Ruszkiewicz",
+   "p2": "Roman Wiza",
+   "p1_norm": "adam ruszkiewicz",
+   "p2_norm": "roman wiza",
+   "open_date": "2026-08-01T00:20:00.000Z",
+   "line": 76.5,
    "over_odds": -112,
    "under_odds": -118
   }
