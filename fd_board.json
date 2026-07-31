@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-31T03:11:49Z",
+ "captured_at": "2026-07-31T03:17:49Z",
  "matches": [
-  {
-   "event_id": 35885856,
-   "p1": "Radoslaw Malinowski",
-   "p2": "Kamil Klocek",
-   "p1_norm": "radoslaw malinowski",
-   "p2_norm": "kamil klocek",
-   "open_date": "2026-07-31T03:00:00.000Z",
-   "line": 68.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35885857,
    "p1": "Jakub Zochniak",
@@ -19,9 +8,9 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "kamil rudomina",
    "open_date": "2026-07-31T03:00:00.000Z",
-   "line": 90.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 92.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35885858,
@@ -30,20 +19,9 @@
    "p1_norm": "jan zandecki",
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-07-31T03:00:00.000Z",
-   "line": 84.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35885859,
-   "p1": "Marcin Lach",
-   "p2": "Wojciech Wojtaszczyk",
-   "p1_norm": "marcin lach",
-   "p2_norm": "wojciech wojtaszczyk",
-   "open_date": "2026-07-31T03:00:00.000Z",
-   "line": 80.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 75.5,
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35885860,
@@ -52,7 +30,7 @@
    "p1_norm": "jakub cyndera",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-07-31T03:05:00.000Z",
-   "line": 78.5,
+   "line": 90.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -63,9 +41,9 @@
    "p1_norm": "milosz cesarz",
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-07-31T03:10:00.000Z",
-   "line": 67.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 50.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35885897,
@@ -130,6 +108,28 @@
    "p2_norm": "kazimierz rybak",
    "open_date": "2026-07-31T03:30:00.000Z",
    "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35885912,
+   "p1": "Stapor Rafal",
+   "p2": "Bartlomiej Mleczko",
+   "p1_norm": "stapor rafal",
+   "p2_norm": "bartlomiej mleczko",
+   "open_date": "2026-07-31T03:40:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35885913,
+   "p1": "Martin Olejnik",
+   "p2": "Marcin Jadczyk",
+   "p1_norm": "martin olejnik",
+   "p2_norm": "marcin jadczyk",
+   "open_date": "2026-07-31T03:45:00.000Z",
+   "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
   }
