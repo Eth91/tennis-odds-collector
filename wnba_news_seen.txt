@@ -412,6 +412,7 @@ rw|854|Available for Monday
 rw|854|Inactive against Mystics
 rw|854|Not listed on injury report
 rw|854|Won't suit up Wednesday
+rw|855|Not starting Friday
 rw|855|Starting against Indiana
 rw|855|Stuck in reserve role
 rw|856|Plays well off bench

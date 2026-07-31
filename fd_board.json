@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-07-31T23:03:17Z",
+ "captured_at": "2026-07-31T23:08:51Z",
  "matches": [
-  {
-   "event_id": 35889111,
-   "p1": "Patryk Jendrzejewski",
-   "p2": "Jakub Kuzmicz",
-   "p1_norm": "patryk jendrzejewski",
-   "p2_norm": "jakub kuzmicz",
-   "open_date": "2026-07-31T22:50:00.000Z",
-   "line": 90.5,
-   "over_odds": -130,
-   "under_odds": -105
-  },
-  {
-   "event_id": 35889113,
-   "p1": "Michal Skorski",
-   "p2": "Miroslaw Piecowski",
-   "p1_norm": "michal skorski",
-   "p2_norm": "miroslaw piecowski",
-   "open_date": "2026-07-31T22:55:00.000Z",
-   "line": 86.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35889118,
-   "p1": "Roman Wiza",
-   "p2": "Schaniel Krzysztof",
-   "p1_norm": "roman wiza",
-   "p2_norm": "schaniel krzysztof",
-   "open_date": "2026-07-31T23:05:00.000Z",
-   "line": 72.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
   {
    "event_id": 35889121,
    "p1": "Jacek Zelezik",
@@ -77,6 +44,39 @@
    "line": 84.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35889155,
+   "p1": "Damian Fira",
+   "p2": "Jakub Michalski",
+   "p1_norm": "damian fira",
+   "p2_norm": "jakub michalski",
+   "open_date": "2026-07-31T23:30:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35889160,
+   "p1": "Jakub Kuzmicz",
+   "p2": "Jakub Chmielowski",
+   "p1_norm": "jakub kuzmicz",
+   "p2_norm": "jakub chmielowski",
+   "open_date": "2026-07-31T23:35:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35889161,
+   "p1": "Michal Krutak",
+   "p2": "Jacek Oracz",
+   "p1_norm": "michal krutak",
+   "p2_norm": "jacek oracz",
+   "open_date": "2026-07-31T23:35:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
