@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-31T15:06:28Z",
+ "captured_at": "2026-07-31T15:12:42Z",
  "matches": [
-  {
-   "event_id": 35887773,
-   "p1": "Grzegorz Wichowski",
-   "p2": "Witold Buczynski",
-   "p1_norm": "grzegorz wichowski",
-   "p2_norm": "witold buczynski",
-   "open_date": "2026-07-31T14:45:00.000Z",
-   "line": 77.5,
-   "over_odds": -145,
-   "under_odds": 105
-  },
   {
    "event_id": 35887804,
    "p1": "Jan Zandecki",
@@ -20,8 +9,8 @@
    "p2_norm": "artur grela",
    "open_date": "2026-07-31T15:00:00.000Z",
    "line": 75.5,
-   "over_odds": -115,
-   "under_odds": -115
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35887805,
@@ -30,7 +19,7 @@
    "p1_norm": "sebastian szostok",
    "p2_norm": "wojciech urban",
    "open_date": "2026-07-31T15:00:00.000Z",
-   "line": 78.5,
+   "line": 85.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -41,7 +30,18 @@
    "p1_norm": "miroslaw piecowski",
    "p2_norm": "michal skorski",
    "open_date": "2026-07-31T15:00:00.000Z",
-   "line": 80.5,
+   "line": 90.5,
+   "over_odds": -110,
+   "under_odds": -125
+  },
+  {
+   "event_id": 35887814,
+   "p1": "Tomasz Wrzalik",
+   "p2": "Oskar Jadach",
+   "p1_norm": "tomasz wrzalik",
+   "p2_norm": "oskar jadach",
+   "open_date": "2026-07-31T15:05:00.000Z",
+   "line": 74.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -52,9 +52,9 @@
    "p1_norm": "cezary pawlik",
    "p2_norm": "jacek oracz",
    "open_date": "2026-07-31T15:10:00.000Z",
-   "line": 81.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 73.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35887879,
@@ -64,8 +64,8 @@
    "p2_norm": "szymon kolasa",
    "open_date": "2026-07-31T15:25:00.000Z",
    "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35887880,
@@ -96,7 +96,18 @@
    "p1_norm": "wojciech tobiasz",
    "p2_norm": "grzegorz wichowski",
    "open_date": "2026-07-31T15:30:00.000Z",
-   "line": 68.5,
+   "line": 69.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35887908,
+   "p1": "Michal Krutak",
+   "p2": "Oskar Jedrzejowski",
+   "p1_norm": "michal krutak",
+   "p2_norm": "oskar jedrzejowski",
+   "open_date": "2026-07-31T15:35:00.000Z",
+   "line": 79.5,
    "over_odds": -116,
    "under_odds": -116
   }
