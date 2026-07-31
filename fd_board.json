@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T06:35:28Z",
+ "captured_at": "2026-07-31T06:40:37Z",
  "matches": [
   {
    "event_id": 35886456,
@@ -8,7 +8,7 @@
    "p1_norm": "blazej warpas",
    "p2_norm": "mateusz misiak",
    "open_date": "2026-07-31T06:30:00.000Z",
-   "line": 67.5,
+   "line": 60.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -19,9 +19,9 @@
    "p1_norm": "pawel kurek",
    "p2_norm": "mateusz sikon",
    "open_date": "2026-07-31T06:30:00.000Z",
-   "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 56.5,
+   "over_odds": 100,
+   "under_odds": -140
   },
   {
    "event_id": 35886458,
@@ -30,8 +30,8 @@
    "p1_norm": "szymon kolasa",
    "p2_norm": "martin olejnik",
    "open_date": "2026-07-31T06:30:00.000Z",
-   "line": 74.5,
-   "over_odds": -115,
+   "line": 83.5,
+   "over_odds": -120,
    "under_odds": -115
   },
   {
@@ -42,8 +42,8 @@
    "p2_norm": "wojciech tobiasz",
    "open_date": "2026-07-31T06:45:00.000Z",
    "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -120,
+   "under_odds": -110
   },
   {
    "event_id": 35886481,
@@ -52,7 +52,7 @@
    "p1_norm": "milosz cesarz",
    "p2_norm": "krzysztof hetnar",
    "open_date": "2026-07-31T06:50:00.000Z",
-   "line": 73.5,
+   "line": 72.5,
    "over_odds": -118,
    "under_odds": -112
   },
@@ -85,9 +85,9 @@
    "p1_norm": "radoslaw malinowski",
    "p2_norm": "igor dabrowski",
    "open_date": "2026-07-31T06:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35886488,
@@ -97,8 +97,8 @@
    "p2_norm": "jakub nowak",
    "open_date": "2026-07-31T06:55:00.000Z",
    "line": 73.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
