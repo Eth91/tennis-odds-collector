@@ -56,6 +56,7 @@ rw|1015|Won't play Tuesday
 rw|1015|Won't play Wednesday
 rw|1016|Available to play
 rw|1016|Downgraded to out
+rw|1016|Not on injury report for Saturday
 rw|1016|Out Wednesday
 rw|1018|Inactive versus Toronto
 rw|1018|Omitted from injury report
