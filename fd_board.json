@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T07:38:43Z",
+ "captured_at": "2026-07-31T07:43:47Z",
  "matches": [
   {
    "event_id": 35886689,
@@ -8,31 +8,9 @@
    "p1_norm": "artur grela",
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-07-31T07:20:00.000Z",
-   "line": 70.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
-  {
-   "event_id": 35886863,
-   "p1": "Oskar Jadach",
-   "p2": "Witold Buczynski",
-   "p1_norm": "oskar jadach",
-   "p2_norm": "witold buczynski",
-   "open_date": "2026-07-31T07:30:00.000Z",
-   "line": 51.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
-  {
-   "event_id": 35886864,
-   "p1": "Marek Tkocz",
-   "p2": "Jakub Pruszkowski",
-   "p1_norm": "marek tkocz",
-   "p2_norm": "jakub pruszkowski",
-   "open_date": "2026-07-31T07:30:00.000Z",
-   "line": 52.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 95.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35886885,
@@ -41,9 +19,9 @@
    "p1_norm": "blazej warpas",
    "p2_norm": "igor dabrowski",
    "open_date": "2026-07-31T07:40:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35886886,
@@ -52,9 +30,9 @@
    "p1_norm": "michal minda",
    "p2_norm": "bartlomiej mleczko",
    "open_date": "2026-07-31T07:40:00.000Z",
-   "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35886890,
@@ -121,6 +99,39 @@
    "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35886931,
+   "p1": "Mateusz Sikon",
+   "p2": "Wojciech Wojtaszczyk",
+   "p1_norm": "mateusz sikon",
+   "p2_norm": "wojciech wojtaszczyk",
+   "open_date": "2026-07-31T08:10:00.000Z",
+   "line": 73.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35886932,
+   "p1": "Mateusz Misiak",
+   "p2": "Kamil Klocek",
+   "p1_norm": "mateusz misiak",
+   "p2_norm": "kamil klocek",
+   "open_date": "2026-07-31T08:10:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35886934,
+   "p1": "Marian Lebek",
+   "p2": "Krzysztof Hetnar",
+   "p1_norm": "marian lebek",
+   "p2_norm": "krzysztof hetnar",
+   "open_date": "2026-07-31T08:10:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
