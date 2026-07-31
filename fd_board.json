@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T07:23:55Z",
+ "captured_at": "2026-07-31T07:28:54Z",
  "matches": [
   {
    "event_id": 35886510,
@@ -8,9 +8,9 @@
    "p1_norm": "dominik solilo",
    "p2_norm": "kamil rudomina",
    "open_date": "2026-07-31T07:15:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -115
+   "line": 79.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35886688,
@@ -19,7 +19,7 @@
    "p1_norm": "robert kostepski",
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-07-31T07:20:00.000Z",
-   "line": 76.5,
+   "line": 74.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -41,9 +41,9 @@
    "p1_norm": "adrian eliasz",
    "p2_norm": "kamil klocek",
    "open_date": "2026-07-31T07:20:00.000Z",
-   "line": 70.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 51.5,
+   "over_odds": 110,
+   "under_odds": -155
   },
   {
    "event_id": 35886863,
@@ -121,6 +121,17 @@
    "line": 75.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35886902,
+   "p1": "Wojciech Tobiasz",
+   "p2": "Jakub Kaczmarek",
+   "p1_norm": "wojciech tobiasz",
+   "p2_norm": "jakub kaczmarek",
+   "open_date": "2026-07-31T07:55:00.000Z",
+   "line": 78.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
