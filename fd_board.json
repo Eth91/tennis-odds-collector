@@ -1,61 +1,6 @@
 {
- "captured_at": "2026-07-31T16:06:15Z",
+ "captured_at": "2026-07-31T16:11:49Z",
  "matches": [
-  {
-   "event_id": 35887916,
-   "p1": "Martin Olejnik",
-   "p2": "Karol Strowski",
-   "p1_norm": "martin olejnik",
-   "p2_norm": "karol strowski",
-   "open_date": "2026-07-31T15:45:00.000Z",
-   "line": 88.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35887931,
-   "p1": "Kamil Durak",
-   "p2": "Krzysztof Juszczyk",
-   "p1_norm": "kamil durak",
-   "p2_norm": "krzysztof juszczyk",
-   "open_date": "2026-07-31T15:50:00.000Z",
-   "line": 78.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35887932,
-   "p1": "Kamil Rudomina",
-   "p2": "Adrian Fabis",
-   "p1_norm": "kamil rudomina",
-   "p2_norm": "adrian fabis",
-   "open_date": "2026-07-31T15:50:00.000Z",
-   "line": 94.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35887939,
-   "p1": "Witold Buczynski",
-   "p2": "Jakub Kaczmarek",
-   "p1_norm": "witold buczynski",
-   "p2_norm": "jakub kaczmarek",
-   "open_date": "2026-07-31T15:55:00.000Z",
-   "line": 81.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35887951,
-   "p1": "Jacek Zelezik",
-   "p2": "Michal Wolny",
-   "p1_norm": "jacek zelezik",
-   "p2_norm": "michal wolny",
-   "open_date": "2026-07-31T16:00:00.000Z",
-   "line": 64.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35887957,
    "p1": "Krystian Kolodziej",
@@ -119,6 +64,28 @@
    "p2_norm": "patryk jendrzejewski",
    "open_date": "2026-07-31T16:30:00.000Z",
    "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35888178,
+   "p1": "Krzysztof Juszczyk",
+   "p2": "Wojciech Urban",
+   "p1_norm": "krzysztof juszczyk",
+   "p2_norm": "wojciech urban",
+   "open_date": "2026-07-31T16:35:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35888179,
+   "p1": "Adrian Fabis",
+   "p2": "Michal Skorski",
+   "p1_norm": "adrian fabis",
+   "p2_norm": "michal skorski",
+   "open_date": "2026-07-31T16:35:00.000Z",
+   "line": 81.5,
    "over_odds": -112,
    "under_odds": -118
   }
