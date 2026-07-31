@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-31T19:14:50Z",
+ "captured_at": "2026-07-31T19:23:13Z",
  "matches": [
-  {
-   "event_id": 35888526,
-   "p1": "Sebastian Szostok",
-   "p2": "Krzysztof Juszczyk",
-   "p1_norm": "sebastian szostok",
-   "p2_norm": "krzysztof juszczyk",
-   "open_date": "2026-07-31T18:55:00.000Z",
-   "line": 87.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35888535,
    "p1": "Damian Fira",
@@ -19,18 +8,7 @@
    "p1_norm": "damian fira",
    "p2_norm": "jakub michalski",
    "open_date": "2026-07-31T19:10:00.000Z",
-   "line": 79.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35888536,
-   "p1": "Cezary Pawlik",
-   "p2": "Michal Wolny",
-   "p1_norm": "cezary pawlik",
-   "p2_norm": "michal wolny",
-   "open_date": "2026-07-31T19:10:00.000Z",
-   "line": 68.5,
+   "line": 98.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -41,9 +19,9 @@
    "p1_norm": "artur daniel",
    "p2_norm": "patryk jendrzejewski",
    "open_date": "2026-07-31T19:15:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35888608,
@@ -52,9 +30,9 @@
    "p1_norm": "kamil kowalski",
    "p2_norm": "wojciech urban",
    "open_date": "2026-07-31T19:20:00.000Z",
-   "line": 74.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 57.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35888609,
@@ -63,9 +41,9 @@
    "p1_norm": "mateusz trela",
    "p2_norm": "michal skorski",
    "open_date": "2026-07-31T19:20:00.000Z",
-   "line": 81.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 72.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35888627,
@@ -86,8 +64,8 @@
    "p2_norm": "jacek oracz",
    "open_date": "2026-07-31T19:35:00.000Z",
    "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35888756,
