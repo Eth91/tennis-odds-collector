@@ -1,6 +1,6 @@
 # PGA v1.0  frozen 2026-07-30 — cumulative evidence
 
-_updated 2026-07-31T08:59:17Z · measurement only; the model is frozen and this file never tunes it_
+_updated 2026-07-31T09:15:54Z · measurement only; the model is frozen and this file never tunes it_
 
 ## Verdict
 
