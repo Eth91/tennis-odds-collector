@@ -1,14 +1,14 @@
 # WNBA v1.0 — cumulative evidence
 
-_updated 2026-07-30T22:27:03Z · frozen 2026-07-30 · constants `433b9e32404d015d` · source `ac6530fe526aa9e6`_
+_updated 2026-07-31T05:28:46Z · frozen 2026-07-30 · constants `433b9e32404d015d` · source `ac6530fe526aa9e6`_
 
 _measurement only; this file never tunes the model_
 
 ## Verdict
 
-**INSUFFICIENT DATA**
+**CONTINUE COLLECTING**
 
-- no prospective settled bets yet
+- LLR -0.134 inside (-1.558, +2.773) — undecided
 
 ## Pre-registered test (fixed 2026-07-30, before any prospective bet)
 
@@ -23,7 +23,24 @@ _measurement only; this file never tunes the model_
 
 ## Prospective record (this is the test)
 
-_none yet_
+Bets carded on or after the freeze date.
+
+| metric | model | market |
+|---|---|---|
+| log loss | **0.77217** | 0.70540 |
+| Brier | **0.28689** | 0.25611 |
+| expected wins | 1.3 | 1.0 |
+| actual wins | 1 | |
+
+| | |
+|---|---|
+| settled / scored | 2 / 2 |
+| record | 1-1 |
+| P&L (1u flat) | -0.15u |
+| ROI vs breakeven | -7.50% vs 55.3% |
+| ROI 95% CI | -135.70% .. +120.70% |
+| reliability slope | -38.462 |
+| **SPRT log-likelihood ratio** | **-0.1335** |
 
 ## Retrospective, for context only — NOT part of the test
 

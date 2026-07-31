@@ -1,8 +1,29 @@
 {
- "updated": "2026-07-30T22:27:03Z",
+ "updated": "2026-07-31T05:28:46Z",
  "frozen": "2026-07-30",
- "verdict": "INSUFFICIENT DATA",
- "prospective": null,
+ "verdict": "CONTINUE COLLECTING",
+ "prospective": {
+  "n_scored": 2,
+  "n_settled": 2,
+  "wins": 1,
+  "losses": 1,
+  "llr": -0.1335465185724496,
+  "logloss_model": 0.7721693055315801,
+  "logloss_market": 0.7053960462453552,
+  "brier_model": 0.286885,
+  "brier_market": 0.2561120884333792,
+  "slope": -38.461538461538424,
+  "pnl": -0.1499999999999999,
+  "roi": -0.07499999999999996,
+  "breakeven": 0.5528838809417602,
+  "roi_ci": [
+   -1.3569845942912107,
+   1.2069845942912107
+  ],
+  "exp_model": 1.308,
+  "exp_market": 1.045184725022855,
+  "actual": 1.0
+ },
  "retrospective": {
   "n_scored": 40,
   "n_settled": 47,
