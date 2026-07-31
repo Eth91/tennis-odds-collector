@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-31T05:26:33Z",
+ "captured_at": "2026-07-31T05:36:52Z",
  "matches": [
-  {
-   "event_id": 35886165,
-   "p1": "Aleksander Barton",
-   "p2": "Adam Staniczek",
-   "p1_norm": "aleksander barton",
-   "p2_norm": "adam staniczek",
-   "open_date": "2026-07-31T05:05:00.000Z",
-   "line": 82.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35886264,
-   "p1": "Krzysztof Hetnar",
-   "p2": "Marek Tkocz",
-   "p1_norm": "krzysztof hetnar",
-   "p2_norm": "marek tkocz",
-   "open_date": "2026-07-31T05:10:00.000Z",
-   "line": 78.5,
-   "over_odds": -145,
-   "under_odds": 105
-  },
   {
    "event_id": 35886312,
    "p1": "Blazej Warpas",
@@ -30,20 +8,9 @@
    "p1_norm": "blazej warpas",
    "p2_norm": "kamil klocek",
    "open_date": "2026-07-31T05:15:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35886315,
-   "p1": "Szymon Kolasa",
-   "p2": "Krzysztof Wloczko",
-   "p1_norm": "szymon kolasa",
-   "p2_norm": "krzysztof wloczko",
-   "open_date": "2026-07-31T05:15:00.000Z",
-   "line": 55.5,
-   "over_odds": 100,
-   "under_odds": -140
+   "line": 94.5,
+   "over_odds": -185,
+   "under_odds": 130
   },
   {
    "event_id": 35886355,
@@ -52,9 +19,9 @@
    "p1_norm": "grzegorz wichowski",
    "p2_norm": "jakub kaczmarek",
    "open_date": "2026-07-31T05:30:00.000Z",
-   "line": 73.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 53.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35886356,
@@ -63,20 +30,9 @@
    "p1_norm": "milosz cesarz",
    "p2_norm": "mariusz adamus",
    "open_date": "2026-07-31T05:30:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
-  {
-   "event_id": 35886376,
-   "p1": "Jakub Zochniak",
-   "p2": "Stapor Rafal",
-   "p1_norm": "jakub zochniak",
-   "p2_norm": "stapor rafal",
-   "open_date": "2026-07-31T05:35:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35886384,
@@ -118,6 +74,28 @@
    "p1_norm": "marian lebek",
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-07-31T05:50:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35886416,
+   "p1": "Wojciech Tobiasz",
+   "p2": "Witold Buczynski",
+   "p1_norm": "wojciech tobiasz",
+   "p2_norm": "witold buczynski",
+   "open_date": "2026-07-31T05:55:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35886432,
+   "p1": "Bartlomiej Mleczko",
+   "p2": "Dominik Solilo",
+   "p1_norm": "bartlomiej mleczko",
+   "p2_norm": "dominik solilo",
+   "open_date": "2026-07-31T06:00:00.000Z",
    "line": 78.5,
    "over_odds": -112,
    "under_odds": -118
