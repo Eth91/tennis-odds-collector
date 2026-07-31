@@ -2071,6 +2071,24 @@ def _injury_html():
     except (ValueError, OSError):
         return ""
     rows_d = d.get("rows") or []
+
+    # ONLY TEAMS PLAYING TODAY (2026-07-31, user). A status on a team that is not on the slate
+    # cannot change a bet tonight, and it buries the names that can. FAIL OPEN: if the tip lookup
+    # errors or comes back empty we render EVERYTHING, because a network hiccup must never make the
+    # injury report look clean when it is not.
+    _hidden = 0
+    _today_teams = set()
+    try:
+        _et = dt.datetime.now(dt.timezone.utc).astimezone(dt.timezone(dt.timedelta(hours=-4)))
+        _slate = _et.date().isoformat()
+        _today_teams = {t for (dte, t) in (_tip_times() or {}) if dte == _slate}
+    except Exception:                                                # noqa: BLE001
+        _today_teams = set()
+    if _today_teams:
+        _keep = [r for r in rows_d if (r.get("team") or "").upper() in _today_teams]
+        _hidden = len(rows_d) - len(_keep)
+        rows_d = _keep
+
     age_min = None
     try:
         _t = dt.datetime.fromisoformat((d.get("ts") or "").replace("Z", "+00:00"))
@@ -2105,8 +2123,10 @@ def _injury_html():
                  + '</div></div>')
     if not body:
         body = '<div class="swo">No impact players carry an injury status right now.</div>'
+    _scope = ("· teams playing today" if _today_teams else "· ALL teams (slate lookup failed)")
+    _hid = (" · %d hidden (not playing)" % _hidden) if _hidden else ""
     return ('<div class="starwatch"><div class="sw-title">🏥 Injury report '
-            '<span>· n = team games without her</span></div>'
+            f'<span>{_scope}{_hid} · n = team games without her</span></div>'
             + stale + body + '</div>')
 
 
