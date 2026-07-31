@@ -241,6 +241,7 @@ rw|479|Productive from charity stripe
 rw|481|Dominant in win Monday
 rw|481|Leads all scorers Tuesday
 rw|481|Posts 38 points in road loss
+rw|481|Strikes for 33 points in victory
 rw|483|Out for personal reasons
 rw|483|Paces Sky with 20 points
 rw|483|Stuffs stat sheet in defeat
