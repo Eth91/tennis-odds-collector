@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-31T20:18:29Z",
+ "captured_at": "2026-07-31T20:25:01Z",
  "matches": [
-  {
-   "event_id": 35888784,
-   "p1": "Krystian Kolodziej",
-   "p2": "Artur Daniel",
-   "p1_norm": "krystian kolodziej",
-   "p2_norm": "artur daniel",
-   "open_date": "2026-07-31T20:05:00.000Z",
-   "line": 86.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35888786,
-   "p1": "Kamil Rudomina",
-   "p2": "Michal Skorski",
-   "p1_norm": "kamil rudomina",
-   "p2_norm": "michal skorski",
-   "open_date": "2026-07-31T20:05:00.000Z",
-   "line": 99.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35888800,
    "p1": "Jacek Zelezik",
@@ -30,9 +8,9 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "jacek oracz",
    "open_date": "2026-07-31T20:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 83.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35888803,
@@ -41,9 +19,9 @@
    "p1_norm": "roman wiza",
    "p2_norm": "adam ruszkiewicz",
    "open_date": "2026-07-31T20:20:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 79.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35888808,
