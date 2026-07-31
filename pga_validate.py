@@ -310,6 +310,27 @@ def _verdict(m):
     return v, notes
 
 
+def _why_unscored(graded):
+    """Say WHY settled rows are not scored, distinguishing the two very different causes: missing
+    probabilities (an instrumentation gap) versus the capture rule refusing them (a timing fact
+    about when we priced). Blaming the wrong one sends the reader to fix the wrong thing."""
+    import sqlite3
+    try:
+        c = sqlite3.connect(str(PAPER))
+        both = c.execute("SELECT COUNT(*) FROM flags WHERE result IN ('W','L') "
+                         "AND p_bet IS NOT NULL AND p_fair IS NOT NULL").fetchone()[0]
+        c.close()
+    except Exception:                                              # noqa: BLE001
+        return " (unscorable)"
+    if both == 0:
+        return " (logged before instrumentation — ROI only, unscorable)"
+    if both < graded:
+        return (" (%d carry both probabilities; the rest predate instrumentation. None captured "
+                "before their player teed off)" % both)
+    return (" — all %d carry both probabilities and are scorable in principle, but every one was "
+            "flagged AFTER that player had teed off, so the capture rule excludes them" % both)
+
+
 def report():
     rows, graded, excluded = _rows()
     # SHADOW STREAMS are candidate hypotheses and NEVER enter the v1.0 SPRT. They are
@@ -337,7 +358,7 @@ def report():
     if m is None:
         L += ["## Evidence", "",
               f"No scored bets yet. Settled rows in the ledger: **{graded}**"
-              + ("" if graded == 0 else " (logged before instrumentation — ROI only, unscorable)"),
+              + ("" if graded == 0 else _why_unscored(graded)),
               "", "Nothing can be concluded. The first scorable bets arrive when a tournament "
               "settles with `p_bet`/`p_fair` recorded.", ""]
     else:
