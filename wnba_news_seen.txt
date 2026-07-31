@@ -302,6 +302,7 @@ rw|615|Listed out for Monday
 rw|615|Questionable for Tuesday
 rw|615|Questionable versus Aces
 rw|615|Will play Thursday
+rw|615|Won't face minutes limit
 rw|615|Won't play Tuesday
 rw|615|Won't play Wednesday
 rw|640|Hands out four dimes in loss
