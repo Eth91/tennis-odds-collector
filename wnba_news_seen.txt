@@ -472,6 +472,7 @@ rw|991|Posts double-double Monday
 rw|991|Records another double-double
 rw|992|Playing minimal role
 rw|998|Could return Sunday
+rw|998|Matches career high in scoring
 rw|998|Nears double-double in return
 rw|998|Removed from injury report
 rw|998|Scores career-high 21 points
