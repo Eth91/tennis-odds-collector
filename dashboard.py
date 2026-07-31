@@ -1181,6 +1181,19 @@ TT_LIVE_JS = """
     try { if (typeof bgRefresh === 'function') await bgRefresh(); } catch(e){}  // latest baked WNBA/tracker panels
     if (btn){ setTimeout(function(){ btn.classList.remove('spin'); btn.disabled = false; }, 450); }
   };
+  // SEED FROM THE SERVER-EMBEDDED BOOTSTRAP, then poll. This is what replaced the Python bake:
+  // the markup is built here and only here, but the DATA arrives with the page, so first paint is
+  // instant and survives a failed fetch — which is the only thing the second renderer was buying.
+  (function(){
+    var b = window._TT_BOOT;
+    if (!b) return;
+    _ttBoard = Array.isArray(b.board) ? b.board : [];
+    var mp = {}; (b.h2h || []).forEach(function(e){ mp[_ttKey(e.p1n, e.p2n)] = e; });
+    _ttH2H = mp;
+    _ttUpcoming = Array.isArray(b.upcoming) ? b.upcoming : [];
+    _ttBets = Array.isArray(b.bets) ? b.bets : [];
+    try { window._applyTTTotals(); } catch(e){}
+  })();
   window._fetchTTTotals();
   setInterval(window._fetchTTTotals, 60000);
 """
@@ -1208,136 +1221,6 @@ def _tt_am(v, decimal=False):
     v = int(round(v))
     return ("+%d" % v) if v > 0 else str(v)
 
-
-def _tt_totals_card(tt_json, now=None):
-    """TT Elite FLAGGED BETS — only games where the pair hits a side >=70% AT the FanDuel line.
-    Each row: matchup, MT tip time, the FanDuel line to bet, the OVER/UNDER side, and the pair's
-    H2H record + hit rate AT that line. Names/time/line from fd_board.json (live, VM); pick + H2H
-    totals from tt_board.json elite_h2h (Actions). No board / nothing clears 70% -> a short note."""
-    f = HERE / "fd_board.json"
-    board = {}
-    if f.exists():
-        try:
-            board = json.loads(f.read_text())
-        except (ValueError, OSError):
-            board = {}
-    h2h = {frozenset((e.get("p1n"), e.get("p2n"))): e
-           for e in (tt_json or {}).get("elite_h2h", [])}
-    now = now or dt.datetime.now(dt.timezone.utc)
-    # LIKELY FLAGS ONLY, WNBA-card styled (2026-07-20, user): a real FanDuel-priced +EV side, PLUS
-    # upcoming games that already clear the flag bar at our PROJECTED line (tt_board pre-filters
-    # elite_upcoming to pairs hitting a side >=70%, min 12 H2H). No-edge / toss-up games are dropped.
-    entries = []
-    board_pairs = set()
-    board_last = set()          # {frozenset(lastname1, lastname2)} — tolerant fallback so a projection
-    #                             flips to the real line even if 24live/FanDuel spell first names differently
-    _last = lambda s: (s or "").split()[-1] if (s or "").split() else ""
-    # mirrors fd_tt.norm so the bets dedupe key matches the board keys; plain .lower()
-    # agrees only while every name is ASCII, and TT is full of Polish names.
-    def _norm_tt(x):
-        import unicodedata as _u
-        n = _u.normalize("NFKD", str(x or ""))
-        n = "".join(c for c in n if not _u.combining(c))
-        return " ".join(n.lower().split())
-    for m in board.get("matches", []):
-        od, line = m.get("open_date"), m.get("line")
-        if not od or line is None:
-            continue
-        try:
-            start = dt.datetime.fromisoformat(od.replace("Z", "+00:00"))
-        except ValueError:
-            continue
-        if start <= now:
-            continue
-        key = frozenset((m.get("p1_norm"), m.get("p2_norm")))
-        board_pairs.add(key)
-        board_last.add(frozenset((_last(m.get("p1_norm")), _last(m.get("p2_norm")))))
-        pick = (h2h.get(key) or {}).get("pick")
-        if not pick:                            # only flagged bets on the real board
-            continue
-        tots = (h2h.get(key) or {}).get("totals") or []
-        n = len(tots)
-        over = sum(1 for t in tots if t > line)
-        hit = round((over if pick["side"] == "over" else n - over) / n * 100) if n else None
-        _od = m.get("over_odds") if pick["side"] == "over" else m.get("under_odds")
-        entries.append({"start": start, "p1": m.get("p1", "?"), "p2": m.get("p2", "?"),
-                        "line": line, "side": pick["side"], "hit": hit, "real": True,
-                        "odds": _tt_am(_od), "book": "FanDuel"})
-    # BETS PRICED AWAY FROM FANDUEL. The loop above walks fd_board, and elite_h2h is itself built
-    # from fd_board, so a bet struck at a fresh BetMGM line renders nowhere — it sits in `bets`,
-    # counted in the record, invisible. An EXTRA play gets noticed; a MISSING one does not.
-    # `bets` is post-gate (tt_board routes refused plays to `skipped`), so this cannot loosen it.
-    for b in (tt_json or {}).get("bets", []):
-        _k = frozenset((_norm_tt(b.get("p1")), _norm_tt(b.get("p2"))))
-        if _k in board_pairs or not b.get("play_to"):
-            continue
-        try:
-            start = dt.datetime.fromtimestamp(int(b["ts"]), dt.timezone.utc)
-        except (KeyError, TypeError, ValueError, OSError):
-            continue
-        if start <= now:
-            continue
-        board_pairs.add(_k)
-        _bk = b.get("book") or {}
-        entries.append({"start": start, "p1": b.get("p1", "?"), "p2": b.get("p2", "?"),
-                        "line": b["play_to"],
-                        "side": "over" if str(b.get("side", "")).startswith("O") else "under",
-                        "hit": b.get("raw"), "real": True,
-                        "odds": _tt_am(_bk.get("od"), decimal=True), "book": "BetMGM"})
-
-    for e in (tt_json or {}).get("elite_upcoming", []):
-        if not e.get("side"):
-            continue
-        # DROP the projection the moment FanDuel posts this pair (exact key OR last-name fallback) —
-        # a "projected" tag must never linger once the real line exists (user, 2026-07-21).
-        if (frozenset((e.get("p1n"), e.get("p2n"))) in board_pairs
-                or frozenset((_last(e.get("p1n")), _last(e.get("p2n")))) in board_last):
-            continue
-        try:
-            start = dt.datetime.fromtimestamp(int(e["ts"]), dt.timezone.utc)
-        except (KeyError, TypeError, ValueError, OSError):
-            continue
-        if start <= now:
-            continue
-        entries.append({"start": start, "p1": e.get("p1", "?"), "p2": e.get("p2", "?"),
-                        "line": e.get("proj"), "side": e["side"], "hit": e.get("hit"), "real": False})
-    if not entries:
-        return ('<div class="card"><h3 class="ttlg">🏓 TT Elite · Flags</h3>'
-                '<div class="ttempty">No TT Elite flags right now — no pair clears the 70% bar at its '
-                'line (real or projected). Check back closer to the games.</div></div>')
-    entries.sort(key=lambda x: (not x["real"], x["start"]))     # real bets first, then projected by tip
-    entries = entries[:16]
-    rows = ""
-    for x in entries:
-        tip = x["start"].astimezone(MT).strftime("%-I:%M %p")
-        o = "O" if x["side"] == "over" else "U"
-        conf = x.get("hit")
-        chip = (f'<div class="ttconf"><span class="tchip {"tA" if conf >= 78 else "tB"}">{conf}%</span>'
-                f'<span class="ttconflab">hit rate</span></div>'
-                if conf is not None else "")
-        if x["real"]:
-            _bk = x.get("book") or "FanDuel"
-            _mgm = _bk == "BetMGM"
-            _cls = "bmgm" if _mgm else "fd"
-            _o = x.get("odds")
-            _price = ("" if not _o else
-                      f'<span class="podds {_cls}">{_o}</span>'
-                      f'<img class="bklogo" src="{TTMGM_LOGO if _mgm else "book-fd.png"}" '
-                      f'alt="{"MGM" if _mgm else "FD"}">')
-            lncell = f'{x["line"]:g}'
-            src = f'<span class="{_cls}">{_bk} · confirmed</span>{_price}'
-        else:
-            lncell, src = f'<span class="tld">~</span>{x["line"]:g}', '<span class="pj">projected</span>'
-        rows += (f'<div class="ttbet"><span class="pind {o.lower()}">{o}</span>'
-                 f'<span class="ttbln">{lncell}</span>'
-                 f'<div class="ttbmid"><div class="ttbnm"><b>{html.escape(x["p1"])}</b> v '
-                 f'{html.escape(x["p2"])}</div><div class="ttbsb">{tip} MT · {x["side"]} · {src}</div></div>'
-                 f'{chip}</div>')
-    return (f'<div class="card"><h3 class="ttlg">🏓 TT Elite · Flags'
-            f'<span class="ttcnt">{len(entries)}</span></h3>{rows}'
-            f'<div class="ttfoot">hit rate = share of the pair’s H2H meetings that went this side '
-            f'at this line · only pairs ≥70% shown · confirmed = a REAL posted line (FanDuel or BetMGM) · '
-            f'projected = our line before FanDuel posts (never tracked)</div></div>')
 
 
 _WNBA_INJ = HERE / "wnba_injury_report_cache.json"
@@ -1588,7 +1471,25 @@ def _tt_panel(data):
     h = _tt_health(data)
     warn = ("" if h["ok"] else f'<div class="mlbwarn">⚠️ TT feed issue: {html.escape(h["reason"])} — '
             f'flags may be missing (you were alerted). This is NOT a quiet slate.</div>')
-    return warn + '<div id="tt-totals">' + _tt_totals_card(data) + '</div>'
+    # ONE RENDERER (2026-07-31). The card used to be built here in Python AND again in JS, and the
+    # two copies drifted five separate times in a day. Python now ships only the DATA; the JS in
+    # TT_LIVE_JS builds the markup, seeds itself from this bootstrap for an instant first paint, and
+    # then polls the live JSON every 60s through the same function.
+    fb = {}
+    try:
+        _f = HERE / "fd_board.json"
+        if _f.exists():
+            fb = json.loads(_f.read_text())
+    except (ValueError, OSError):
+        fb = {}
+    boot = {"board": fb.get("matches") or [],
+            "h2h": (data or {}).get("elite_h2h") or [],
+            "upcoming": (data or {}).get("elite_upcoming") or [],
+            "bets": (data or {}).get("bets") or []}
+    # `</script>` inside embedded JSON would close the tag early; escaping `<` is the standard guard
+    boot_js = json.dumps(boot, default=str).replace("<", "\\u003c")
+    return (warn + f'<script>window._TT_BOOT={boot_js};</script>'
+            '<div id="tt-totals"></div>')
 
 
 # ---------------------------------------------------------------- MLB pitcher-prop plays + tracker
