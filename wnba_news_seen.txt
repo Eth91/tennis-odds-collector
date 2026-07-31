@@ -186,6 +186,7 @@ rw|326|Misses practice with illness
 rw|326|Omitted from injury report
 rw|330|Not starting Wednesday
 rw|330|Starting Monday
+rw|331|Drills four treys
 rw|331|Nets 19 points in Washington
 rw|331|Strong line in win
 rw|331|Strong outing in win

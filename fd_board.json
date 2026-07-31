@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T04:54:45Z",
+ "captured_at": "2026-07-31T05:02:03Z",
  "matches": [
   {
    "event_id": 35885966,
@@ -8,7 +8,7 @@
    "p1_norm": "jakub skorupa",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-07-31T04:40:00.000Z",
-   "line": 77.5,
+   "line": 88.5,
    "over_odds": -115,
    "under_odds": -115
   },
@@ -19,9 +19,9 @@
    "p1_norm": "stapor rafal",
    "p2_norm": "dominik solilo",
    "open_date": "2026-07-31T04:50:00.000Z",
-   "line": 76.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 52.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35885971,
@@ -30,9 +30,9 @@
    "p1_norm": "marian lebek",
    "p2_norm": "michal paszkiewicz",
    "open_date": "2026-07-31T04:50:00.000Z",
-   "line": 77.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 46.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35885972,
@@ -41,9 +41,9 @@
    "p1_norm": "mateusz sikon",
    "p2_norm": "robert kostepski",
    "open_date": "2026-07-31T04:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35885973,
@@ -52,9 +52,9 @@
    "p1_norm": "martin olejnik",
    "p2_norm": "artur grela",
    "open_date": "2026-07-31T04:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 73.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35885974,
@@ -63,9 +63,9 @@
    "p1_norm": "mateusz misiak",
    "p2_norm": "adrian eliasz",
    "open_date": "2026-07-31T04:55:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35886165,
