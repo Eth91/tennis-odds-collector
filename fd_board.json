@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T01:24:58Z",
+ "captured_at": "2026-07-31T01:29:00Z",
  "matches": [
   {
    "event_id": 35885783,
@@ -8,9 +8,9 @@
    "p1_norm": "kazimierz rybak",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-07-31T01:10:00.000Z",
-   "line": 87.5,
-   "over_odds": 110,
-   "under_odds": -150
+   "line": 90.5,
+   "over_odds": 155,
+   "under_odds": -230
   },
   {
    "event_id": 35885795,
@@ -20,8 +20,8 @@
    "p2_norm": "kacper kwiatkowski",
    "open_date": "2026-07-31T01:25:00.000Z",
    "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885802,
@@ -55,6 +55,17 @@
    "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35885812,
+   "p1": "Jakub Cyndera",
+   "p2": "Zbigniew Nocun",
+   "p1_norm": "jakub cyndera",
+   "p2_norm": "zbigniew nocun",
+   "open_date": "2026-07-31T01:55:00.000Z",
+   "line": 75.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
