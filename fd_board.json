@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-31T21:10:34Z",
+ "captured_at": "2026-07-31T21:14:48Z",
  "matches": [
-  {
-   "event_id": 35888823,
-   "p1": "Cezary Pawlik",
-   "p2": "Oskar Jedrzejowski",
-   "p1_norm": "cezary pawlik",
-   "p2_norm": "oskar jedrzejowski",
-   "open_date": "2026-07-31T20:45:00.000Z",
-   "line": 106.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
-  {
-   "event_id": 35888832,
-   "p1": "Krzysztof Juszczyk",
-   "p2": "Wojciech Urban",
-   "p1_norm": "krzysztof juszczyk",
-   "p2_norm": "wojciech urban",
-   "open_date": "2026-07-31T21:00:00.000Z",
-   "line": 73.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35888922,
    "p1": "Michal Wolny",
@@ -31,8 +9,8 @@
    "p2_norm": "jacek oracz",
    "open_date": "2026-07-31T21:10:00.000Z",
    "line": 73.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35889007,
@@ -42,8 +20,8 @@
    "p2_norm": "kamil kowalski",
    "open_date": "2026-07-31T21:20:00.000Z",
    "line": 70.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35889008,

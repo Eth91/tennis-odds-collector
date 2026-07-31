@@ -391,6 +391,7 @@ rw|807|Settling into starting lineup
 rw|809|Scoreless in 17 minutes
 rw|836|Available Thursday
 rw|836|Inactive versus Liberty
+rw|836|Signs offer sheet with Minnesota
 rw|852|Doesn't return Tuesday
 rw|852|Drops 22 points in blowout win
 rw|852|Exits to locker room Tuesday
