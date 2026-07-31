@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T05:02:03Z",
+ "captured_at": "2026-07-31T05:06:26Z",
  "matches": [
   {
    "event_id": 35885966,
@@ -8,31 +8,9 @@
    "p1_norm": "jakub skorupa",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-07-31T04:40:00.000Z",
-   "line": 88.5,
-   "over_odds": -115,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35885970,
-   "p1": "Stapor Rafal",
-   "p2": "Dominik Solilo",
-   "p1_norm": "stapor rafal",
-   "p2_norm": "dominik solilo",
-   "open_date": "2026-07-31T04:50:00.000Z",
-   "line": 52.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35885971,
-   "p1": "Marian Lebek",
-   "p2": "Michal Paszkiewicz",
-   "p1_norm": "marian lebek",
-   "p2_norm": "michal paszkiewicz",
-   "open_date": "2026-07-31T04:50:00.000Z",
-   "line": 46.5,
-   "over_odds": -105,
-   "under_odds": -130
+   "line": 93.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35885972,
@@ -41,8 +19,8 @@
    "p1_norm": "mateusz sikon",
    "p2_norm": "robert kostepski",
    "open_date": "2026-07-31T04:55:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
+   "line": 85.5,
+   "over_odds": -115,
    "under_odds": -115
   },
   {
@@ -53,8 +31,8 @@
    "p2_norm": "artur grela",
    "open_date": "2026-07-31T04:55:00.000Z",
    "line": 73.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35885974,
@@ -63,7 +41,7 @@
    "p1_norm": "mateusz misiak",
    "p2_norm": "adrian eliasz",
    "open_date": "2026-07-31T04:55:00.000Z",
-   "line": 75.5,
+   "line": 80.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -132,6 +110,28 @@
    "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35886355,
+   "p1": "Grzegorz Wichowski",
+   "p2": "Jakub Kaczmarek",
+   "p1_norm": "grzegorz wichowski",
+   "p2_norm": "jakub kaczmarek",
+   "open_date": "2026-07-31T05:30:00.000Z",
+   "line": 73.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35886356,
+   "p1": "Milosz Cesarz",
+   "p2": "Mariusz Adamus",
+   "p1_norm": "milosz cesarz",
+   "p2_norm": "mariusz adamus",
+   "open_date": "2026-07-31T05:30:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
