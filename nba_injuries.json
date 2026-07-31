@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-07-31T15:27:06+00:00",
+ "fetched_at": "2026-07-31T15:57:30+00:00",
  "injuries": {
   "Mouhamed Gueye": {
    "team": "",
@@ -667,6 +667,12 @@
    "detail": "Achilles",
    "date": "2026-06-16"
   },
+  "Keegan Murray": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Ankle",
+   "date": "2026-07-31"
+  },
   "Nique Clifford": {
    "team": "",
    "status": "Day-To-Day",
@@ -714,12 +720,6 @@
    "status": "Day-To-Day",
    "detail": "Knee",
    "date": "2026-06-25"
-  },
-  "Keegan Murray": {
-   "team": "",
-   "status": "Day-To-Day",
-   "detail": "Ankle",
-   "date": "2026-06-16"
   },
   "David Jones Garcia": {
    "team": "",
