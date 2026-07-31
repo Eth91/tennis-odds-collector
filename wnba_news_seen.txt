@@ -230,6 +230,7 @@ rw|440|Drops 26 points in Saturday's loss
 rw|440|Ends with 20 points Wednesday
 rw|440|Flirts with triple-double in OT win
 rw|440|Full stat line in victory
+rw|440|Moves to 10th in all-time scoring
 rw|453|Scores nine points in loss
 rw|453|Tallies 11 points in victory
 rw|462|Cools off Wednesday
