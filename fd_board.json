@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T13:58:47Z",
+ "captured_at": "2026-07-31T14:07:41Z",
  "matches": [
   {
    "event_id": 35887678,
@@ -8,31 +8,9 @@
    "p1_norm": "jan zandecki",
    "p2_norm": "amirreza abbasi",
    "open_date": "2026-07-31T13:45:00.000Z",
-   "line": 78.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35887690,
-   "p1": "Grzegorz Poliniewicz",
-   "p2": "Dominik Solilo",
-   "p1_norm": "grzegorz poliniewicz",
-   "p2_norm": "dominik solilo",
-   "open_date": "2026-07-31T13:50:00.000Z",
-   "line": 70.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35887705,
-   "p1": "Pawel Kurek",
-   "p2": "Marcin Lach",
-   "p1_norm": "pawel kurek",
-   "p2_norm": "marcin lach",
-   "open_date": "2026-07-31T13:55:00.000Z",
-   "line": 75.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 94.5,
+   "over_odds": 120,
+   "under_odds": -165
   },
   {
    "event_id": 35887706,
@@ -41,20 +19,9 @@
    "p1_norm": "tomasz wrzalik",
    "p2_norm": "jakub kaczmarek",
    "open_date": "2026-07-31T13:55:00.000Z",
-   "line": 69.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35887707,
-   "p1": "Radoslaw Malinowski",
-   "p2": "Jakub Zochniak",
-   "p1_norm": "radoslaw malinowski",
-   "p2_norm": "jakub zochniak",
-   "open_date": "2026-07-31T13:55:00.000Z",
-   "line": 70.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 98.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35887716,
