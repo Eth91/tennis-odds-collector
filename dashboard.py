@@ -1061,12 +1061,19 @@ def _tt_ladder(lad, play_to, zone):
 TT_LIVE_JS = """
   const TT_BOARD_URL = 'https://raw.githubusercontent.com/fgf9p6ks2f-ux/tennis-odds-collector/main/fd_board.json';
   const TT_H2H_URL = 'https://raw.githubusercontent.com/fgf9p6ks2f-ux/tennis-odds-collector/main/tt_board.json';
-  let _ttBoard = null, _ttH2H = null, _ttUpcoming = null;
+  let _ttBoard = null, _ttH2H = null, _ttUpcoming = null, _ttBets = null;
   function _ttEsc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
   function _ttTime(iso){ try { return new Date(iso).toLocaleTimeString('en-US', {timeZone:'America/Denver', hour:'numeric', minute:'2-digit'}); } catch(e){ return ''; } }
   function _ttAm(o){ return (o != null && o > 0) ? '+' + o : '' + o; }
   function _ttKey(a, b){ return [a, b].sort().join('|'); }
   function _ttLast(s){ var a = String(s == null ? '' : s).split(/\\s+/).filter(Boolean); return a.length ? a[a.length-1] : ''; }
+  // mirrors fd_tt.norm EXACTLY: NFKD, drop combining marks, lowercase, collapse whitespace.
+  // toLowerCase().trim() agrees only while names are ASCII; TT is full of Polish names, and one
+  // diacritic would break the dedup key and render a FanDuel-priced bet twice.
+  function _ttNorm(x){
+    return String(x||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'')
+      .toLowerCase().split(/\s+/).filter(Boolean).join(' ');
+  }
   window._applyTTTotals = function(){
     var el = document.getElementById('tt-totals');
     if (!el) return;
@@ -1083,6 +1090,23 @@ TT_LIVE_JS = """
       var hit = n ? Math.round((entry.pick.side==='over'?ov:n-ov)/n*100) : null;
       entries.push({start: new Date(m.open_date).getTime(), p1: m.p1, p2: m.p2, line: +m.line,
                     side: entry.pick.side, hit: hit, real: true});
+    });
+    // BETS PRICED AWAY FROM FANDUEL. The loop above only sees fd_board pairs, and elite_h2h is
+    // itself built from fd_board, so a bet taken at a fresh BetMGM line renders nowhere — it sat in
+    // `bets`, counted in the record, invisible. An EXTRA play gets noticed; a MISSING one does not.
+    // `bets` is post-gate (tt_board routes refused plays to `skipped`), so this cannot loosen anything.
+    (_ttBets || []).forEach(function(b){
+      if (!b || !b.play_to || !b.ts) return;
+      var n1 = _ttNorm(b.p1), n2 = _ttNorm(b.p2);
+      var k = _ttKey(n1, n2);
+      // two guards: the exact normalised key, and the last-name fallback the projections loop
+      // already uses, so a first-name spelling difference between sources cannot duplicate a play
+      if (boardPairs[k] || boardLast[_ttKey(_ttLast(n1), _ttLast(n2))]) return;
+      var st = b.ts * 1000; if (st <= now) return;
+      boardPairs[k] = 1;
+      entries.push({start: st, p1: b.p1, p2: b.p2, line: +b.play_to,
+                    side: (String(b.side||'').charAt(0) === 'O') ? 'over' : 'under',
+                    hit: b.raw, real: true, book: 'BetMGM'});
     });
     // projected likely-flags (pre-filtered to >=70% in tt_board) — DROP the moment FanDuel posts
     // this pair (exact key OR last-name fallback), so a "projected" tag never lingers past the real line
@@ -1103,7 +1127,7 @@ TT_LIVE_JS = """
       var x = entries[i], tip = _ttTime(new Date(x.start).toISOString()), o = x.side==='over'?'O':'U';
       var chip = (x.hit != null) ? ('<div class="ttconf"><span class="tchip ' + (x.hit>=78?'tA':'tB') + '">' + x.hit + '%</span><span class="ttconflab">hit rate</span></div>') : '';
       var lncell = x.real ? (''+x.line) : ('<span class="tld">~</span>' + x.line);
-      var src = x.real ? '<span class="fd">FanDuel ' + mid + ' confirmed</span>' : '<span class="pj">projected</span>';
+      var src = x.real ? '<span class="fd">' + (x.book || 'FanDuel') + ' ' + mid + ' confirmed</span>' : '<span class="pj">projected</span>';
       rows += '<div class="ttbet"><span class="pind ' + o.toLowerCase() + '">' + o + '</span>'
             + '<span class="ttbln">' + lncell + '</span>'
             + '<div class="ttbmid"><div class="ttbnm"><b>' + _ttEsc(x.p1) + '</b> v ' + _ttEsc(x.p2) + '</div>'
@@ -1120,7 +1144,7 @@ TT_LIVE_JS = """
     } catch(e){}
     try {
       var r2 = await fetch(TT_H2H_URL + '?_=' + Date.now(), { cache: 'no-store' });
-      if (r2.ok){ var d2 = await r2.json(); var mp = {}; (d2.elite_h2h || []).forEach(function(e){ mp[_ttKey(e.p1n, e.p2n)] = e; }); _ttH2H = mp; _ttUpcoming = Array.isArray(d2.elite_upcoming) ? d2.elite_upcoming : []; }
+      if (r2.ok){ var d2 = await r2.json(); var mp = {}; (d2.elite_h2h || []).forEach(function(e){ mp[_ttKey(e.p1n, e.p2n)] = e; }); _ttH2H = mp; _ttUpcoming = Array.isArray(d2.elite_upcoming) ? d2.elite_upcoming : []; _ttBets = Array.isArray(d2.bets) ? d2.bets : []; }
     } catch(e){}
     window._applyTTTotals();
     _ttStamp();
