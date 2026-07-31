@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-31T04:12:46Z",
+ "captured_at": "2026-07-31T04:18:19Z",
  "matches": [
-  {
-   "event_id": 35885913,
-   "p1": "Martin Olejnik",
-   "p2": "Marcin Jadczyk",
-   "p1_norm": "martin olejnik",
-   "p2_norm": "marcin jadczyk",
-   "open_date": "2026-07-31T03:45:00.000Z",
-   "line": 78.5,
-   "over_odds": -130,
-   "under_odds": -105
-  },
   {
    "event_id": 35885921,
    "p1": "Adam Staniczek",
@@ -19,9 +8,9 @@
    "p1_norm": "adam staniczek",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-07-31T03:55:00.000Z",
-   "line": 58.5,
-   "over_odds": -140,
-   "under_odds": 100
+   "line": 82.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35885928,
@@ -31,8 +20,8 @@
    "p2_norm": "blazej warpas",
    "open_date": "2026-07-31T04:10:00.000Z",
    "line": 76.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35885929,
@@ -41,9 +30,9 @@
    "p1_norm": "jan zandecki",
    "p2_norm": "szymon kolasa",
    "open_date": "2026-07-31T04:10:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 69.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35885930,
@@ -52,9 +41,9 @@
    "p1_norm": "marcin lach",
    "p2_norm": "pawel kurek",
    "open_date": "2026-07-31T04:10:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35885938,
@@ -121,6 +110,17 @@
    "line": 76.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35885966,
+   "p1": "Jakub Skorupa",
+   "p2": "Zbigniew Nocun",
+   "p1_norm": "jakub skorupa",
+   "p2_norm": "zbigniew nocun",
+   "open_date": "2026-07-31T04:40:00.000Z",
+   "line": 75.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
