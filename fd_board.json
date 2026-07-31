@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-31T08:24:15Z",
+ "captured_at": "2026-07-31T08:30:06Z",
  "matches": [
-  {
-   "event_id": 35886918,
-   "p1": "Stapor Rafal",
-   "p2": "Kamil Rudomina",
-   "p1_norm": "stapor rafal",
-   "p2_norm": "kamil rudomina",
-   "open_date": "2026-07-31T08:05:00.000Z",
-   "line": 97.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35886932,
    "p1": "Mateusz Misiak",
@@ -19,19 +8,8 @@
    "p1_norm": "mateusz misiak",
    "p2_norm": "kamil klocek",
    "open_date": "2026-07-31T08:10:00.000Z",
-   "line": 81.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35886934,
-   "p1": "Marian Lebek",
-   "p2": "Krzysztof Hetnar",
-   "p1_norm": "marian lebek",
-   "p2_norm": "krzysztof hetnar",
-   "open_date": "2026-07-31T08:10:00.000Z",
-   "line": 56.5,
-   "over_odds": 100,
+   "line": 90.5,
+   "over_odds": -105,
    "under_odds": -135
   },
   {
@@ -41,9 +19,9 @@
    "p1_norm": "grzegorz wichowski",
    "p2_norm": "oskar jadach",
    "open_date": "2026-07-31T08:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 56.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35886993,
@@ -64,8 +42,8 @@
    "p2_norm": "artur grela",
    "open_date": "2026-07-31T08:30:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35886995,
@@ -75,8 +53,8 @@
    "p2_norm": "dominik solilo",
    "open_date": "2026-07-31T08:30:00.000Z",
    "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35886999,
