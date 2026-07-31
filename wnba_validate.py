@@ -77,7 +77,7 @@ UPPER = math.log((1 - BETA) / ALPHA)          # +2.773
 LOWER = math.log(BETA / (1 - ALPHA))          # -1.558
 MIN_N_ADOPT = 60
 SLOPE_HALT, SLOPE_WINDOW = 0.70, 100
-FROZEN_ON = "2026-07-31"   # v1.1 — see wnba_v1_freeze.json decision
+FROZEN_ON = "2026-07-31"   # v1.2 — see wnba_v1_freeze.json decision
 BET_ROLES = {"confirmed", "likely"}
 
 

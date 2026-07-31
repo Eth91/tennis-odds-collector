@@ -2238,6 +2238,20 @@ def _considered_html(rows):
         except Exception:                                            # noqa: BLE001
             pass
 
+        # A play we are CURRENTLY betting must never render as "not bet". wnba_capped_legs.csv is
+        # append-only, so a decision reversed later in the day (the correlation-cap fix flipping
+        # Carleton/DiLeo) leaves a stale row that would otherwise contradict the card.
+        _sel_now = set()
+        try:
+            import wnba_slip as _S2
+            _k, _ = _S2.current_selection([r for r in rows
+                                           if (r.get("side") or "over") == "over"])
+            _sel_now = {(r.get("player"), r.get("stat")) for r in _k}
+        except Exception:                                            # noqa: BLE001
+            pass
+        for _k2 in [k for k in seen if (seen[k].get("player"), seen[k].get("stat")) in _sel_now]:
+            seen.pop(_k2, None)
+
         if not seen:
             return ""
         out = ""

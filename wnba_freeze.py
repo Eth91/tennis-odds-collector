@@ -17,21 +17,23 @@ import sys
 
 FILES = ["wnba_alert.py", "wnba_slip.py", "wnba_tonight.py", "wnba_wowy.py"]
 MODULES = ("wnba_slip",)
-VERSION = "v1.1"
+VERSION = "v1.2"
 FROZEN_ON = "2026-07-31"
 DECISION = (
-    "v1.1 (2026-07-31) — correlation cap ranks on the A-BAND (3-8) before odds, not only the "
-    "shadow band (<0 or >8). The cap keeps ONE player per team-game prop-family, so the survivor "
-    "is automatically the cascade favourite; with both legs inside 0-8 the old band term was "
-    "identical for both and a coin-flip price gap decided. POR 2026-07-31: Carleton d_min +0.3 at "
-    "1.9804 beat DiLeo d_min +4.2 at 2.04 — 1.5 pts of implied probability — which meant the cap "
-    "was choosing a TIER B over a TIER A (counted ledger: A 14-3 / 82.4% / +0.73u per bet vs "
-    "B 17-11 / 60.7% / +0.20u). This is what the cap's own 2026-07-19 comment already intended; it "
-    "was implemented with the shadow band so it only fired when a leg fell outside 0-8. "
-    "Reconstructed over all 32 logged cap contests it changes ZERO past bets — no contest in the "
-    "record has the split-band shape — so it is a correction of an internal contradiction, not a "
-    "tune fitted to results. v1.0's prospective window (2026-07-30) held 2 graded bets; they "
-    "belong to v1.0 and are not pooled forward.")
+    "v1.2 (2026-07-31) — the sticky-incumbent swap test is now BAND-AWARE. It compared raw EV while "
+    "the ranking uses (odds, band, EV), so an incumbent could hold a slot while ranking WORSE on "
+    "the canonical key, and hold it on the one metric this ledger shows is ANTI-predictive. Live "
+    "case: DiLeo (band 0, odds 1.9091, EV 0.213) could not displace Carleton (band 1, odds 1.9804, "
+    "EV 0.462), so the card kept a TIER B play over a TIER A one — and Carleton only held the slot "
+    "because she was carded at 04:08, before the v1.1 correlation-cap fix. Stickiness was "
+    "protecting the output of the bug v1.1 corrected. "
+    "A challenger now displaces when it is better ON THE BAND (structural, and band membership "
+    "barely moves during a slate, so it cannot churn); within the same band the original "
+    "SWAP_MARGIN EV rule is unchanged, preserving the anti-churn property that stickiness exists "
+    "for (57% of pools once carded more than the two plays a card holds). "
+    "Tier records behind the ordering: A 14-3 / 82.4% / +0.73u per bet vs B 17-11 / 60.7% / "
+    "+0.20u. RESTATEMENT COST: the counted record moves 33-15 / +19.05u to 33-16 / +18.05u — one "
+    "additional graded loss enters as a different incumbent yields. Reported, not hidden.")
 
 
 def main():
