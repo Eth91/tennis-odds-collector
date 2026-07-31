@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-31T03:17:49Z",
+ "captured_at": "2026-07-31T03:23:42Z",
  "matches": [
-  {
-   "event_id": 35885857,
-   "p1": "Jakub Zochniak",
-   "p2": "Kamil Rudomina",
-   "p1_norm": "jakub zochniak",
-   "p2_norm": "kamil rudomina",
-   "open_date": "2026-07-31T03:00:00.000Z",
-   "line": 92.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35885858,
    "p1": "Jan Zandecki",
@@ -19,31 +8,9 @@
    "p1_norm": "jan zandecki",
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-07-31T03:00:00.000Z",
-   "line": 75.5,
-   "over_odds": -130,
-   "under_odds": -105
-  },
-  {
-   "event_id": 35885860,
-   "p1": "Jakub Cyndera",
-   "p2": "Jakub Skorupa",
-   "p1_norm": "jakub cyndera",
-   "p2_norm": "jakub skorupa",
-   "open_date": "2026-07-31T03:05:00.000Z",
-   "line": 90.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35885862,
-   "p1": "Milosz Cesarz",
-   "p2": "Jakub Pruszkowski",
-   "p1_norm": "milosz cesarz",
-   "p2_norm": "jakub pruszkowski",
-   "open_date": "2026-07-31T03:10:00.000Z",
-   "line": 50.5,
-   "over_odds": -105,
-   "under_odds": -130
+   "line": 91.5,
+   "over_odds": -140,
+   "under_odds": 100
   },
   {
    "event_id": 35885897,
@@ -52,9 +19,9 @@
    "p1_norm": "michal minda",
    "p2_norm": "dominik solilo",
    "open_date": "2026-07-31T03:20:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35885900,
@@ -130,6 +97,39 @@
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-07-31T03:45:00.000Z",
    "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35885915,
+   "p1": "Mateusz Sikon",
+   "p2": "Jakub Nowak",
+   "p1_norm": "mateusz sikon",
+   "p2_norm": "jakub nowak",
+   "open_date": "2026-07-31T03:50:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35885916,
+   "p1": "Michal Paszkiewicz",
+   "p2": "Mariusz Adamus",
+   "p1_norm": "michal paszkiewicz",
+   "p2_norm": "mariusz adamus",
+   "open_date": "2026-07-31T03:50:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35885917,
+   "p1": "Mateusz Misiak",
+   "p2": "Igor Dabrowski",
+   "p1_norm": "mateusz misiak",
+   "p2_norm": "igor dabrowski",
+   "open_date": "2026-07-31T03:50:00.000Z",
+   "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
   }
