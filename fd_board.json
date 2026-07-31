@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T02:47:54Z",
+ "captured_at": "2026-07-31T02:54:12Z",
  "matches": [
   {
    "event_id": 35885848,
@@ -8,7 +8,7 @@
    "p1_norm": "kazimierz rybak",
    "p2_norm": "adam staniczek",
    "open_date": "2026-07-31T02:45:00.000Z",
-   "line": 76.5,
+   "line": 78.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -20,8 +20,8 @@
    "p2_norm": "pawel slosarczyk",
    "open_date": "2026-07-31T02:45:00.000Z",
    "line": 77.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35885856,
@@ -88,6 +88,17 @@
    "line": 72.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35885897,
+   "p1": "Michal Minda",
+   "p2": "Dominik Solilo",
+   "p1_norm": "michal minda",
+   "p2_norm": "dominik solilo",
+   "open_date": "2026-07-31T03:20:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
