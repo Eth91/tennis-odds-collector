@@ -147,6 +147,7 @@ rw|1103|Omitted from injury report
 rw|1120|Scores six points off bench
 rw|1134|Off injury report
 rw|1134|Won't play Wednesday
+rw|1135|Waived by Tempo
 rw|1137|Ruled out Thursday
 rw|228|Listed out for Wednesday
 rw|228|Out for Tuesday

@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-31T17:10:47Z",
+ "captured_at": "2026-07-31T17:17:12Z",
  "matches": [
-  {
-   "event_id": 35888218,
-   "p1": "Kamil Durak",
-   "p2": "Kamil Kowalski",
-   "p1_norm": "kamil durak",
-   "p2_norm": "kamil kowalski",
-   "open_date": "2026-07-31T16:55:00.000Z",
-   "line": 80.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35888220,
-   "p1": "Marcin Marchlewski",
-   "p2": "Artur Daniel",
-   "p1_norm": "marcin marchlewski",
-   "p2_norm": "artur daniel",
-   "open_date": "2026-07-31T16:55:00.000Z",
-   "line": 91.5,
-   "over_odds": 140,
-   "under_odds": -200
-  },
   {
    "event_id": 35888255,
    "p1": "Wojciech Tobiasz",
@@ -30,7 +8,18 @@
    "p1_norm": "wojciech tobiasz",
    "p2_norm": "witold buczynski",
    "open_date": "2026-07-31T17:05:00.000Z",
-   "line": 83.5,
+   "line": 75.5,
+   "over_odds": -110,
+   "under_odds": -125
+  },
+  {
+   "event_id": 35888261,
+   "p1": "Jacek Zelezik",
+   "p2": "Oskar Jedrzejowski",
+   "p1_norm": "jacek zelezik",
+   "p2_norm": "oskar jedrzejowski",
+   "open_date": "2026-07-31T17:10:00.000Z",
+   "line": 73.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -64,8 +53,8 @@
    "p2_norm": "michal skorski",
    "open_date": "2026-07-31T17:20:00.000Z",
    "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35888291,
@@ -88,6 +77,39 @@
    "line": 78.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35888306,
+   "p1": "Artur Daniel",
+   "p2": "Jakub Chmielowski",
+   "p1_norm": "artur daniel",
+   "p2_norm": "jakub chmielowski",
+   "open_date": "2026-07-31T17:40:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35888310,
+   "p1": "Miroslaw Piecowski",
+   "p2": "Kamil Rudomina",
+   "p1_norm": "miroslaw piecowski",
+   "p2_norm": "kamil rudomina",
+   "open_date": "2026-07-31T17:45:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35888311,
+   "p1": "Sebastian Szostok",
+   "p2": "Kamil Durak",
+   "p1_norm": "sebastian szostok",
+   "p2_norm": "kamil durak",
+   "open_date": "2026-07-31T17:45:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
