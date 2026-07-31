@@ -426,6 +426,17 @@ def current_selection(rows, commit=False):
         def _ev(g):
             return max((x.get("ev") or 0.0) for x in groups[g])
 
+        def _band_of(g):
+            """0 when the group sits in the validated 3-8 d_min band, else 1.
+
+            The swap test below used EV alone while gkey ranks on (odds, band, EV), so an incumbent
+            could hold a slot while ranking WORSE on the canonical key — and hold it on EV, which
+            this ledger shows is anti-predictive (tier A 82.4% vs tier B 60.7%). 2026-07-31: DiLeo
+            (band 0, odds 1.9091) could not displace Carleton (band 1, odds 1.9804) because
+            Carleton's EV was higher, so the card kept the tier-B play over the tier-A one."""
+            dm = groups[g][0].get("d_min")
+            return 0 if (dm is not None and 3 <= dm <= 8) else 1
+
         picks, used = [], set()
         for g in incumbents:                              # carded plays hold their slot
             if len(picks) == 2:
@@ -435,7 +446,13 @@ def current_selection(rows, commit=False):
                 continue
             best = next((x for x in ranked
                          if x != g and not (_comps(x[1]) & used) and x not in picks), None)
-            if best is not None and _ev(best) - _ev(g) >= SWAP_MARGIN:
+            # A challenger displaces the incumbent when it is BETTER ON THE BAND (structural, and
+            # band membership barely moves during a slate, so this cannot churn), or when the two
+            # share a band and it beats EV by the margin (the original anti-churn rule, unchanged).
+            # Using EV alone let a tier-B incumbent block a tier-A challenger indefinitely.
+            if best is not None and (
+                    _band_of(best) < _band_of(g)
+                    or (_band_of(best) == _band_of(g) and _ev(best) - _ev(g) >= SWAP_MARGIN)):
                 g, cs = best, _comps(best[1])             # genuinely better -> allowed to displace
             picks.append(g)
             used |= cs
