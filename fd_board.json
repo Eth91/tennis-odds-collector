@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-31T23:19:07Z",
+ "captured_at": "2026-07-31T23:24:55Z",
  "matches": [
-  {
-   "event_id": 35889121,
-   "p1": "Jacek Zelezik",
-   "p2": "Oskar Jedrzejowski",
-   "p1_norm": "jacek zelezik",
-   "p2_norm": "oskar jedrzejowski",
-   "open_date": "2026-07-31T23:10:00.000Z",
-   "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35889124,
    "p1": "Jakub Chmielowski",
@@ -19,7 +8,7 @@
    "p1_norm": "jakub chmielowski",
    "p2_norm": "marcin marchlewski",
    "open_date": "2026-07-31T23:15:00.000Z",
-   "line": 68.5,
+   "line": 85.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -30,20 +19,9 @@
    "p1_norm": "mariusz koczyba",
    "p2_norm": "wojciech urban",
    "open_date": "2026-07-31T23:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35889143,
-   "p1": "Adrian Myszewski",
-   "p2": "Mateusz Trela",
-   "p1_norm": "adrian myszewski",
-   "p2_norm": "mateusz trela",
-   "open_date": "2026-07-31T23:20:00.000Z",
-   "line": 84.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 79.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35889155,
