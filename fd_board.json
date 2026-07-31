@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T02:27:00Z",
+ "captured_at": "2026-07-31T02:34:28Z",
  "matches": [
   {
    "event_id": 35885828,
@@ -8,18 +8,7 @@
    "p1_norm": "mariusz baron",
    "p2_norm": "marek tkocz",
    "open_date": "2026-07-31T02:20:00.000Z",
-   "line": 71.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35885829,
-   "p1": "Aleksander Barton",
-   "p2": "Jakub Skorupa",
-   "p1_norm": "aleksander barton",
-   "p2_norm": "jakub skorupa",
-   "open_date": "2026-07-31T02:20:00.000Z",
-   "line": 77.5,
+   "line": 89.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -55,6 +44,50 @@
    "line": 73.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35885856,
+   "p1": "Radoslaw Malinowski",
+   "p2": "Kamil Klocek",
+   "p1_norm": "radoslaw malinowski",
+   "p2_norm": "kamil klocek",
+   "open_date": "2026-07-31T03:00:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35885857,
+   "p1": "Jakub Zochniak",
+   "p2": "Kamil Rudomina",
+   "p1_norm": "jakub zochniak",
+   "p2_norm": "kamil rudomina",
+   "open_date": "2026-07-31T03:00:00.000Z",
+   "line": 79.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35885858,
+   "p1": "Jan Zandecki",
+   "p2": "Krzysztof Wloczko",
+   "p1_norm": "jan zandecki",
+   "p2_norm": "krzysztof wloczko",
+   "open_date": "2026-07-31T03:00:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35885859,
+   "p1": "Marcin Lach",
+   "p2": "Wojciech Wojtaszczyk",
+   "p1_norm": "marcin lach",
+   "p2_norm": "wojciech wojtaszczyk",
+   "open_date": "2026-07-31T03:00:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }

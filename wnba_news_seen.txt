@@ -393,6 +393,7 @@ rw|856|Plays well off bench
 rw|859|Scores in double figures off bench
 rw|860|Added to injury report
 rw|860|Back with 12 points off bench
+rw|860|Catches fire from deep
 rw|860|Logs 15 minutes in win
 rw|860|Now available Thursday
 rw|860|Upgraded to probable
