@@ -373,6 +373,7 @@ rw|797|Scores team-high 20 points
 rw|798|Stumbles in loss
 rw|799|Quiet outing in win
 rw|807|Posts double-double in road loss
+rw|807|Posts strong double-double
 rw|807|Productive in loss to Mystics
 rw|807|Settling into starting lineup
 rw|809|Scoreless in 17 minutes
