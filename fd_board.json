@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-07-31T09:37:29Z",
+ "captured_at": "2026-07-31T09:41:32Z",
  "matches": [
-  {
-   "event_id": 35887111,
-   "p1": "Grzegorz Poliniewicz",
-   "p2": "Karol Wisniewski",
-   "p1_norm": "grzegorz poliniewicz",
-   "p2_norm": "karol wisniewski",
-   "open_date": "2026-07-31T09:20:00.000Z",
-   "line": 91.5,
-   "over_odds": 120,
-   "under_odds": -165
-  },
   {
    "event_id": 35887117,
    "p1": "Radoslaw Malinowski",
@@ -19,9 +8,9 @@
    "p1_norm": "radoslaw malinowski",
    "p2_norm": "mateusz misiak",
    "open_date": "2026-07-31T09:25:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 87.5,
+   "over_odds": -140,
+   "under_odds": 100
   },
   {
    "event_id": 35887118,
@@ -30,20 +19,9 @@
    "p1_norm": "pawel kurek",
    "p2_norm": "robert kostepski",
    "open_date": "2026-07-31T09:25:00.000Z",
-   "line": 76.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35887130,
-   "p1": "Michal Paszkiewicz",
-   "p2": "Marek Tkocz",
-   "p1_norm": "michal paszkiewicz",
-   "p2_norm": "marek tkocz",
-   "open_date": "2026-07-31T09:30:00.000Z",
-   "line": 52.5,
-   "over_odds": -135,
-   "under_odds": -105
+   "line": 88.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35887131,
@@ -52,8 +30,8 @@
    "p1_norm": "grzegorz wichowski",
    "p2_norm": "tomasz wrzalik",
    "open_date": "2026-07-31T09:30:00.000Z",
-   "line": 79.5,
-   "over_odds": -115,
+   "line": 78.5,
+   "over_odds": -110,
    "under_odds": -120
   },
   {
