@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-31T07:13:47Z",
+ "captured_at": "2026-07-31T07:18:18Z",
  "matches": [
-  {
-   "event_id": 35886486,
-   "p1": "Jan Zandecki",
-   "p2": "Marcin Jadczyk",
-   "p1_norm": "jan zandecki",
-   "p2_norm": "marcin jadczyk",
-   "open_date": "2026-07-31T06:55:00.000Z",
-   "line": 87.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35886487,
-   "p1": "Radoslaw Malinowski",
-   "p2": "Igor Dabrowski",
-   "p1_norm": "radoslaw malinowski",
-   "p2_norm": "igor dabrowski",
-   "open_date": "2026-07-31T06:55:00.000Z",
-   "line": 102.5,
-   "over_odds": -130,
-   "under_odds": -105
-  },
   {
    "event_id": 35886504,
    "p1": "Tomasz Wrzalik",
@@ -30,9 +8,9 @@
    "p1_norm": "tomasz wrzalik",
    "p2_norm": "jakub kaczmarek",
    "open_date": "2026-07-31T07:10:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 84.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35886505,
@@ -41,9 +19,9 @@
    "p1_norm": "marian lebek",
    "p2_norm": "mariusz adamus",
    "open_date": "2026-07-31T07:10:00.000Z",
-   "line": 74.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 58.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35886510,
@@ -52,9 +30,9 @@
    "p1_norm": "dominik solilo",
    "p2_norm": "kamil rudomina",
    "open_date": "2026-07-31T07:15:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35886688,
@@ -132,6 +110,28 @@
    "line": 80.5,
    "over_odds": -116,
    "under_odds": -118
+  },
+  {
+   "event_id": 35886890,
+   "p1": "Szymon Kolasa",
+   "p2": "Marcin Jadczyk",
+   "p1_norm": "szymon kolasa",
+   "p2_norm": "marcin jadczyk",
+   "open_date": "2026-07-31T07:45:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35886891,
+   "p1": "Pawel Kurek",
+   "p2": "Jakub Nowak",
+   "p1_norm": "pawel kurek",
+   "p2_norm": "jakub nowak",
+   "open_date": "2026-07-31T07:45:00.000Z",
+   "line": 78.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
