@@ -198,7 +198,18 @@ def harvest(max_events=None, years=(2026,)):
 # player-rounds / 114 events after removing round-level conditions, with leave-one-event-out
 # baselines and a cross-event null of -0.005 (R1->R2 +0.150, R2->R3 +0.156, R3->R4 +0.156).
 # Residual sd is 1.79 birdies per 18, so this moves a projection ~0.27 birdies.
-FORM_R = 0.152          # weight on the current event's residual; 0.0 disables H-P1 entirely
+# ⚠️ REFUTED 2026-07-31, hours after it shipped. Set to 0.0 — H-P1 is DISABLED.
+# The +0.152 that justified it was de-conditioned at the ROUND level only. Event factors range
+# 0.81-1.24, so a week playing easy against a player's history lifts ALL their residuals that week
+# and R1 "predicts" R2 for reasons unrelated to form. Removing the EVENT level too:
+#     round-only de-conditioning : r=+0.152, within-event null +0.145   <- the null gives it away
+#     round + event (correct)    : r=+0.012, within-event null +0.006   <- 0.019 birdies per 18
+# The original cross-event null (-0.005) could not catch it: pairing across DIFFERENT events breaks
+# the shared week level as well as player identity, so it tested a weaker claim than it looked like.
+# The correct null shuffles WITHIN an event — identity dies, the week survives.
+# Machinery kept rather than deleted: this idea is intuitive and WILL be proposed again, and the
+# refutation belongs where the next person looks. Re-enabling must be a deliberate act.
+FORM_R = 0.0            # was 0.152; see above. 0.0 disables the H-P1 shift entirely
 FORM_MIN_HOLES = 15     # need a real completed round before trusting a residual
 
 

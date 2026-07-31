@@ -80,10 +80,18 @@ def _rounds():
 def residuals(rows):
     """{(tid, player, rnd): residual} — de-conditioned, leave-one-event-out baseline."""
     rate = {(t, p, int(r)): b / h for t, _tn, p, r, h, b, *_ in rows}
-    by_ev_rnd, by_ev = defaultdict(list), defaultdict(list)
+    by_ev_rnd, by_ev, allv = defaultdict(list), defaultdict(list), []
     for (t, p, r), v in rate.items():
         by_ev_rnd[(t, r)].append(v)
         by_ev[t].append(v)
+        allv.append(v)
+    # TWO levels of conditions, not one. Removing only the ROUND level is what manufactured H-P1:
+    # event factors span 0.81-1.24, so a week playing easy against a player's history lifts ALL
+    # their residuals that week, and any within-event feature then "predicts" for reasons that have
+    # nothing to do with the player. Round factor alone cannot see this, because it normalises each
+    # round to the EVENT mean and so is blind to where that mean sits.
+    grand = st.mean(allv) if allv else 1.0
+    efac = {t: (st.mean(v) / grand if grand else 1.0) for t, v in by_ev.items()}
     rfac = {}
     for (t, r), v in by_ev_rnd.items():
         base = st.mean(by_ev[t]) or 1e-9
@@ -104,7 +112,7 @@ def residuals(rows):
         f = rfac.get((t, r))
         if not f:
             continue
-        out[(t, p, r)] = v - (s / n) * f
+        out[(t, p, r)] = v - (s / n) * f * efac.get(t, 1.0)
     return out, rate, rfac
 
 
@@ -352,9 +360,6 @@ def evaluate(name, fn, resid, rows):
     # NULL: shuffle the feature WITHIN (event, round) so conditions are preserved exactly and only
     # the player-to-feature link is broken. A non-flat null means the de-conditioning leaked.
     rng = random.Random(17)
-    grp = defaultdict(list)
-    for i, (tid, pl, rnd) in enumerate([k for k in resid if True][:0]):
-        pass
     byg = defaultdict(list)
     for i, ((v, res), tid) in enumerate(zip(pairs, keys)):
         byg[tid].append(i)

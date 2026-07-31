@@ -342,7 +342,15 @@ def report():
               f"Adoption needs LLR >= +{UPPER:.3f} on a PAIRED comparison over >= "
               f"{MIN_N_ADOPT} settled bets. Currently {ms['n_scored']}.", ""]
     L += ["## Registered open hypotheses", "",
-          "- **H-P1 — should player rates use the CURRENT tournament's completed rounds?** They do "
+          "- **H-P1 — REFUTED 2026-07-31, and briefly shipped before it was.** Adopted as v1.2 on a "
+          "correlation of +0.152, reverted in v1.3 when a proper null showed it was the WEEK, not "
+          "the player. The measurement de-conditioned at the ROUND level only; event factors span "
+          "0.81-1.24, so an easy week lifts every residual in it. Removing the EVENT level too: "
+          "**r +0.152 -> +0.012** (0.019 birdies per 18), within-event null **+0.145 -> +0.006**. "
+          "The original cross-event null (-0.005) was blind to this because it broke the week "
+          "level along with player identity. DO NOT RE-PROPOSE without event-level "
+          "de-conditioning and a WITHIN-event null. Original text follows for the record: "
+          "should player rates use the CURRENT tournament's completed rounds? They do "
           "not today: `pga_birdies.rates()` reads the harvested history, refreshed WEEKLY, so this "
           "week's R1 is absent and a player who shot 65 and one who shot 77 are priced "
           "identically — while the book has fully absorbed the difference. The only channel R1 "

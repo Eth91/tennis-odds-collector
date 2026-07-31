@@ -15,31 +15,23 @@ import json
 import sys
 
 FILES = ("pga_ruler.py", "pga_e3.py", "pga_birdies.py", "pga_context.py")
-VERSION = "v1.2"
+VERSION = "v1.3"
 FROZEN_ON = "2026-07-31"
 DECISION = (
-    "v1.2 (2026-07-31) — H-P1 ADOPTED: pga_birdies.rates() shifts each player by the form they "
-    "have shown THIS tournament. Previously R2+ was priced with zero knowledge of the current "
-    "event (the harvest runs weekly), so a player who shot 65 and one who shot 77 were priced "
-    "identically while the book had fully absorbed the difference. rates() now takes live_tid, "
-    "EXCLUDES that event from its own historical baseline, fetches the completed rounds live, and "
-    "adds FORM_R * (actual - expected) to every par rate, where expected uses the FIELD's actual "
-    "rate this week so conditions (wind, pins, setup) are carried by the field rather than "
-    "mistaken for form. "
-    "MEASURED: r=+0.152 on 42,557 player-rounds / 114 events after removing round-level "
-    "conditions, with leave-one-event-out baselines — R1->R2 +0.150 (n=12,593), R2->R3 +0.156 "
-    "(n=7,757), R3->R4 +0.156 (n=7,406) — against a cross-event null of -0.005. Worth ~0.27 "
-    "birdies per 18 (residual sd 1.79). "
-    "VERIFIED on the live event: 139-140 players shifted; hot players mean +0.0094/hole, cold "
-    "-0.0127/hole (Malnati 9 birdies -> +0.041, Dunlap 1 birdie -> -0.027), so the sign is right. "
-    "Flag mix moved 3over/6under -> 6over/4under. "
-    "*** ADOPTED AGAINST THE STANDING RULE, at the user's direction. H-P1 was registered as "
-    "requiring a paired SPRT over >=100 PROSPECTIVE bets and has not had one. Mitigating: it is "
-    "not a threshold fitted to our betting record but an information source measured on 27,756 "
-    "independent round-pairs with a clean null, and the model had ZERO scored bets so no outcome "
-    "could have informed it. It remains a departure from the adoption rule and is recorded as one. "
-    "v1.1's record was 0-0; the 11 R2 flags logged under v1.1 belong to v1.1 and must not be "
-    "pooled with what v1.2 produces. ***")
+    "v1.3 (2026-07-31) — H-P1 REVERTED, hours after v1.2 adopted it. FORM_R 0.152 -> 0.0. "
+    "The +0.152 that justified it was de-conditioned at the ROUND level only. Event factors span "
+    "0.81-1.24, so a week that plays easy against a player's history lifts EVERY one of their "
+    "residuals that week, and R1 'predicts' R2 for reasons unrelated to form. Removing the EVENT "
+    "level too: r=+0.152 -> +0.012 (0.019 birdies per 18), within-event null +0.145 -> +0.006. "
+    "The original cross-event null (-0.005) could not catch it, because pairing residuals across "
+    "DIFFERENT events destroys the shared week level as well as player identity and therefore "
+    "tests a weaker claim than it appears to. The correct null shuffles WITHIN an event: player "
+    "identity dies, the week survives. That null was what exposed it. "
+    "The machinery is left in place at FORM_R=0.0 rather than deleted, because the idea is "
+    "intuitive enough to be proposed again and the refutation belongs where the next person will "
+    "look. Behaviour is identical to v1.1: flags back to 3 over / 6 under. "
+    "LESSON RECORDED: de-condition at EVERY level that varies. Round-level alone was not enough, "
+    "and a null that also breaks the confound cannot detect the confound.")
 
 
 def main():
