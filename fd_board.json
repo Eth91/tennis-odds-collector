@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-01T00:05:30Z",
+ "captured_at": "2026-08-01T00:12:32Z",
  "matches": [
-  {
-   "event_id": 35889182,
-   "p1": "Jakub Glanowski",
-   "p2": "Marcin Marchlewski",
-   "p1_norm": "jakub glanowski",
-   "p2_norm": "marcin marchlewski",
-   "open_date": "2026-07-31T23:55:00.000Z",
-   "line": 73.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35889185,
    "p1": "Michal Wolny",
@@ -19,31 +8,9 @@
    "p1_norm": "michal wolny",
    "p2_norm": "jacek zelezik",
    "open_date": "2026-08-01T00:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35889229,
-   "p1": "Adrian Myszewski",
-   "p2": "Michal Skorski",
-   "p1_norm": "adrian myszewski",
-   "p2_norm": "michal skorski",
-   "open_date": "2026-08-01T00:10:00.000Z",
-   "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35889230,
-   "p1": "Sebastian Szostok",
-   "p2": "Kamil Kowalski",
-   "p1_norm": "sebastian szostok",
-   "p2_norm": "kamil kowalski",
-   "open_date": "2026-08-01T00:10:00.000Z",
-   "line": 61.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 70.5,
+   "over_odds": -140,
+   "under_odds": 100
   },
   {
    "event_id": 35889234,
@@ -77,6 +44,28 @@
    "line": 83.5,
    "over_odds": -116,
    "under_odds": -118
+  },
+  {
+   "event_id": 35889298,
+   "p1": "Adrian Fabis",
+   "p2": "Miroslaw Piecowski",
+   "p1_norm": "adrian fabis",
+   "p2_norm": "miroslaw piecowski",
+   "open_date": "2026-08-01T00:35:00.000Z",
+   "line": 80.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35889299,
+   "p1": "Mariusz Koczyba",
+   "p2": "Kamil Durak",
+   "p1_norm": "mariusz koczyba",
+   "p2_norm": "kamil durak",
+   "open_date": "2026-08-01T00:35:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
