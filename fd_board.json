@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-01T01:14:43Z",
+ "captured_at": "2026-08-01T01:22:26Z",
  "matches": [
   {
    "event_id": 35889351,
@@ -8,9 +8,9 @@
    "p1_norm": "roman wiza",
    "p2_norm": "jakub michalski",
    "open_date": "2026-08-01T01:10:00.000Z",
-   "line": 84.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 85.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35889353,
@@ -19,9 +19,9 @@
    "p1_norm": "patryk jendrzejewski",
    "p2_norm": "jakub glanowski",
    "open_date": "2026-08-01T01:10:00.000Z",
-   "line": 74.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 75.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35889362,
@@ -52,9 +52,9 @@
    "p1_norm": "jakub kuzmicz",
    "p2_norm": "marcin marchlewski",
    "open_date": "2026-08-01T01:30:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35889368,
@@ -64,6 +64,17 @@
    "p2_norm": "jacek oracz",
    "open_date": "2026-08-01T01:35:00.000Z",
    "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35889379,
+   "p1": "Mariusz Koczyba",
+   "p2": "Sebastian Szostok",
+   "p1_norm": "mariusz koczyba",
+   "p2_norm": "sebastian szostok",
+   "open_date": "2026-08-01T01:45:00.000Z",
+   "line": 77.5,
    "over_odds": -112,
    "under_odds": -118
   }
