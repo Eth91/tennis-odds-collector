@@ -685,7 +685,7 @@ def _prop_row(r, rungs=None, player=None):
     # ---- header: status, book, lock ----
     slbl, scls = _cu_status(r)
     if r.get("_tipped"):
-        slbl, scls = "In progress", "pp"
+        slbl, scls = "In progress", "live"   # distinct from bench: the chip filters on this
     bp = None if r.get("_tipped") else _book_prices(r)
     if bp:
         best_bk, best_dec = bp[0]
@@ -3506,6 +3506,7 @@ def build():
   #wnba .cu-st.mid {{ color:var(--cu-blue); background:rgba(10,132,255,.18); }}
   #wnba .cu-st.pp {{ color:var(--cu-org); background:rgba(255,159,10,.18); }}
   #wnba .cu-st.no {{ color:var(--cu-lbl2); background:var(--cu-fill); }}
+  #wnba .cu-st.live {{ color:var(--cu-org); background:rgba(255,159,10,.18); }}
   #wnba .cu-hd .bklogo {{ width:24px; height:24px; border-radius:6px; background:var(--cu-fill);
                           padding:3px; margin:0; vertical-align:0; }}
   #wnba .cu-time {{ margin-left:auto; font-size:14px; color:var(--cu-lbl2);
@@ -3676,7 +3677,8 @@ def build():
       {{ k: 'all', l: 'All',         m: function () {{ return true; }} }},
       {{ k: 'ok',  l: 'Starting',    m: function (c) {{ return c.dataset.status === 'ok'; }} }},
       {{ k: 'mid', l: 'Likely',      m: function (c) {{ return c.dataset.status === 'mid'; }} }},
-      {{ k: 'pp',  l: 'In progress', m: function (c) {{ return c.dataset.status === 'pp'; }} }},
+      {{ k: 'pp',   l: 'Bench',       m: function (c) {{ return c.dataset.status === 'pp'; }} }},
+      {{ k: 'live', l: 'In progress', m: function (c) {{ return c.dataset.status === 'live'; }} }},
       {{ k: 'lad', l: 'Ladders',     m: function (c) {{ return c.dataset.lad === '1'; }} }},
       {{ k: 'fd',  l: 'FanDuel',     m: function (c) {{ return c.dataset.book === 'fd'; }} }},
       {{ k: 'dk',  l: 'DraftKings',  m: function (c) {{ return c.dataset.book === 'dk'; }} }}
