@@ -109,6 +109,25 @@ def grade_one(stream, market, runner, odds, ctx):
         won = (n > line) if side == "over" else (n < line)
         return ("W", odds - 1.0) if won else ("L", -1.0)
 
+    if stream.startswith("E3-rscore"):
+        # ROUND-SCOPED: settles as soon as that round's score exists, exactly like birdies.
+        # There was no branch here at all, so every round-score flag fell through to None and
+        # never settled — 11 of them on the Rocket Classic alone.
+        m = re.search(r"^(.*?)\s+(over|under)\s+([\d.]+)$", runner.strip(), re.I)
+        rm = re.search(r"Round\s+(\d)", market or "")
+        if not m or not rm:
+            return None
+        who, side, line = _norm(m.group(1)), m.group(2).lower(), float(m.group(3))
+        k = int(rm.group(1))
+        rs = scores.get(who)
+        if rs is None or len(rs) < k:
+            return None                                # that round not in the book yet
+        sc = rs[k - 1]
+        if sc == line:
+            return ("P", 0.0)                          # lines are half-strokes, but never assume
+        won = (sc > line) if side == "over" else (sc < line)
+        return ("W", odds - 1.0) if won else ("L", -1.0)
+
     if stream.startswith("E3-match"):
         # Strip the market boilerplate BEFORE splitting. Using `.split(")")[-1]` only worked
         # when the market carried a parenthesised round ("18 Hole Matchbet (Round 1) A vs B");
