@@ -1,27 +1,16 @@
 {
- "captured_at": "2026-08-01T08:36:28Z",
+ "captured_at": "2026-08-01T08:45:46Z",
  "matches": [
   {
-   "event_id": 35890287,
-   "p1": "Piotr Gumulinski",
-   "p2": "Marcin Lach",
-   "p1_norm": "piotr gumulinski",
-   "p2_norm": "marcin lach",
-   "open_date": "2026-08-01T08:20:00.000Z",
-   "line": 94.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35890318,
-   "p1": "Bartlomiej Mleczko",
-   "p2": "Jakub Wozniak",
-   "p1_norm": "bartlomiej mleczko",
-   "p2_norm": "jakub wozniak",
+   "event_id": 35890320,
+   "p1": "Konrad Kulpa",
+   "p2": "Artur Daniel",
+   "p1_norm": "konrad kulpa",
+   "p2_norm": "artur daniel",
    "open_date": "2026-08-01T08:30:00.000Z",
-   "line": 78.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 58.5,
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35890326,
@@ -30,9 +19,9 @@
    "p1_norm": "pawel slosarczyk",
    "p2_norm": "pawel kurek",
    "open_date": "2026-08-01T08:35:00.000Z",
-   "line": 75.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 89.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35890327,
@@ -41,9 +30,9 @@
    "p1_norm": "jacek przewlocki",
    "p2_norm": "jaroslaw rolak",
    "open_date": "2026-08-01T08:35:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 85.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35890339,
@@ -52,7 +41,7 @@
    "p1_norm": "dawid jendrysik",
    "p2_norm": "mateusz sikon",
    "open_date": "2026-08-01T08:45:00.000Z",
-   "line": 78.5,
+   "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
   },
@@ -63,9 +52,9 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "rafal ogon",
    "open_date": "2026-08-01T08:45:00.000Z",
-   "line": 75.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 74.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35890361,
@@ -108,8 +97,19 @@
    "p2_norm": "tadeusz piotrowski",
    "open_date": "2026-08-01T09:00:00.000Z",
    "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -120,
+   "under_odds": -110
+  },
+  {
+   "event_id": 35890366,
+   "p1": "Daniel Morawiec",
+   "p2": "Marcin Lach",
+   "p1_norm": "daniel morawiec",
+   "p2_norm": "marcin lach",
+   "open_date": "2026-08-01T09:05:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
