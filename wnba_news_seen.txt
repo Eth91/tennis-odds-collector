@@ -262,6 +262,7 @@ rw|484|Iffy for Wednesday
 rw|484|Ruled out Wednesday
 rw|485|Held in check
 rw|485|Hits game-winning shot at buzzer
+rw|488|Available Friday
 rw|488|Double-double in win
 rw|488|Fares well in win
 rw|488|Probable for Friday
@@ -408,6 +409,7 @@ rw|852|Exits to locker room Tuesday
 rw|852|Logs 15 points vs. New York
 rw|852|Probable versus Fire
 rw|852|Questionable to return Tuesday
+rw|852|Upgraded to available
 rw|853|Another double-digit scoring effort
 rw|853|Paces Connecticut in loss
 rw|854|Available for Monday
@@ -428,6 +430,7 @@ rw|860|Upgraded to probable
 rw|863|Explodes for 18 points off bench
 rw|863|Reaches double figures off bench
 rw|911|Available against Connecticut
+rw|911|Cleared to play Friday
 rw|911|Dishes seven dimes Saturday
 rw|911|Double-double in blowout win
 rw|911|Expected to play Friday
