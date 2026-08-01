@@ -1188,7 +1188,7 @@ TT_LIVE_JS = """
       var lncell = x.real ? (''+x.line) : ('<span class="tld">~</span>' + x.line);
       var _bk = x.book || 'FanDuel', _mgm = (_bk === 'BetMGM'), _cls = _mgm ? 'bmgm' : 'fd';
       var _bklogo = '<img class="bklogo" src="' + (_mgm ? _TTMGM : 'book-fd.png')
-            + '" onerror="if(this.src.indexOf(\'book-mgm\')>-1)this.src=_TTMGM_FALLBACK" alt="'
+            + '" onerror="this.onerror=null;this.src=_TTMGM_FALLBACK" alt="'
             + (_mgm ? 'MGM' : 'FD') + '">';
       var _oddstxt = x.odds ? ('<span class="cu-od' + (_mgm ? ' bmgm' : '') + '">' + x.odds + '</span>') : '';
       var _price = '';
