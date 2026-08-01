@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-01T01:22:26Z",
+ "captured_at": "2026-08-01T01:26:30Z",
  "matches": [
   {
    "event_id": 35889351,
@@ -8,20 +8,9 @@
    "p1_norm": "roman wiza",
    "p2_norm": "jakub michalski",
    "open_date": "2026-08-01T01:10:00.000Z",
-   "line": 85.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35889353,
-   "p1": "Patryk Jendrzejewski",
-   "p2": "Jakub Glanowski",
-   "p1_norm": "patryk jendrzejewski",
-   "p2_norm": "jakub glanowski",
-   "open_date": "2026-08-01T01:10:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 102.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35889362,
@@ -30,9 +19,9 @@
    "p1_norm": "kamil kowalski",
    "p2_norm": "wojciech urban",
    "open_date": "2026-08-01T01:25:00.000Z",
-   "line": 65.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 67.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35889365,
