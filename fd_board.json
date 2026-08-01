@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-01T05:18:32Z",
+ "captured_at": "2026-08-01T05:24:05Z",
  "matches": [
   {
    "event_id": 35889603,
@@ -8,9 +8,9 @@
    "p1_norm": "damian fira",
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-08-01T05:05:00.000Z",
-   "line": 94.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 98.5,
+   "over_odds": -105,
+   "under_odds": -135
   },
   {
    "event_id": 35889611,
@@ -19,20 +19,20 @@
    "p1_norm": "mariusz baron",
    "p2_norm": "mateusz sikon",
    "open_date": "2026-08-01T05:10:00.000Z",
-   "line": 92.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 95.5,
+   "over_odds": 105,
+   "under_odds": -145
   },
   {
-   "event_id": 35889612,
-   "p1": "Jacek Wieczerzak",
-   "p2": "Witold Buczynski",
-   "p1_norm": "jacek wieczerzak",
-   "p2_norm": "witold buczynski",
+   "event_id": 35889614,
+   "p1": "Dominik Solilo",
+   "p2": "Mateusz Woskowicz",
+   "p1_norm": "dominik solilo",
+   "p2_norm": "mateusz woskowicz",
    "open_date": "2026-08-01T05:15:00.000Z",
-   "line": 77.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 69.5,
+   "over_odds": -105,
+   "under_odds": -135
   },
   {
    "event_id": 35889615,
@@ -41,9 +41,9 @@
    "p1_norm": "dariusz wrobel",
    "p2_norm": "bartlomiej wisniewski",
    "open_date": "2026-08-01T05:15:00.000Z",
-   "line": 72.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 86.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35889904,
