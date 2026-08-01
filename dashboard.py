@@ -707,7 +707,11 @@ def _prop_row(r, rungs=None, player=None):
            if team or opp else "")
 
     # ---- sub-line: market, tier, and the injury driver that created the spot ----
-    sub = [stat.title() if stat else ""]
+    # Full word, as in the render — STAT holds the short form ("PTS") for the compact rows.
+    _FULL = {"points": "Points", "rebounds": "Rebounds", "assists": "Assists",
+             "threes": "Threes", "pra": "Pts+Reb+Ast", "pr": "Pts+Reb", "pa": "Pts+Ast",
+             "ra": "Reb+Ast", "steals": "Steals", "blocks": "Blocks", "turnovers": "Turnovers"}
+    sub = [_FULL.get(r["stat"], stat.title() if stat else "")]
     tval = r.get("_tier")
     if tval:
         sub.append(f"Tier {tval}")
@@ -725,7 +729,7 @@ def _prop_row(r, rungs=None, player=None):
         line_disp, rng = f"{lns[0]:g}–{lns[-1]:g}", " rng"
     else:
         line_disp, rng = f"{r['line']:g}", ""
-    unit = f'<span class="cu-unit">{stat.lower()}</span>' if stat else ""
+    unit = f'<span class="cu-unit">{stat.lower()}</span>' if stat else ""   # short form under the number
 
     # ---- confidence bar (real meter, promoted from the drawer) ----
     cf = _cu_conf(r)
@@ -834,7 +838,7 @@ def _game_group(players, tips, today=None, idx=0):
     outline = (f'<div class="cu-out"><i class="sdot warn"></i>{html.escape(outs)} out</div>'
                if outs else "")
     return (f'<div class="game" data-edge="{gedge:.4f}" data-tip="{gtip:.0f}" style="--i:{idx}">'
-            f'<div class="cu-sh">{_llogo("wnba")}<b>WNBA</b>'
+            f'<div class="cu-sh">{_llogo("wnba")}<b>WNBA</b><span class="cu-dot">·</span>'
             f'<span class="cu-shm">{glogo(team)}{team} @ {glogo(opp)}{opp or "—"}</span>'
             f'<span class="cu-shr">{tiptime}</span></div>'
             f'{outline}<div class="cu-grp">{cards}</div></div>')
@@ -3471,6 +3475,7 @@ def build():
                   font-size:13px; letter-spacing:.02em; text-transform:uppercase;
                   color:var(--cu-lbl2); }}
   #wnba .cu-sh b {{ font-weight:600; letter-spacing:0; text-transform:none; font-size:13px; }}
+  #wnba .cu-dot {{ color:var(--cu-lbl3); }}
   #wnba .cu-shm {{ display:inline-flex; align-items:center; gap:5px; text-transform:none;
                    letter-spacing:0; font-size:13px; }}
   #wnba .cu-shr {{ margin-left:auto; text-transform:none; letter-spacing:0; font-size:13px;

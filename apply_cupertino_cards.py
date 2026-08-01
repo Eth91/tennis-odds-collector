@@ -52,7 +52,8 @@ end = s.index("def _load_tt():")
 old = s[start:end]
 
 # keep the helpers the new renderer still needs, verbatim, by re-deriving them from the old body
-NEW = '''def _cu_status(r):
+NEW = '''# CUPERTINO-CARDS: card markup rebuilt to the approved render anatomy.
+def _cu_status(r):
     """Lineup status as an iOS pill. Real values only — the logger writes exactly these four."""
     return {"confirmed": ("Starting", "ok"), "likely": ("Likely", "mid"),
             "bench": ("Bench", "pp"), "projected": ("TBD", "no")}.get(
