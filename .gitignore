@@ -57,5 +57,15 @@ wnba_clv.sqlite
 # Local analysis DBs -- rebuildable from nflverse / the NHL API, never committed.
 nfl_stats.sqlite
 nhl_stats.sqlite
+
+# Raw FanDuel golf snapshot archive (golf_collect.py). Reached 89.6 MiB -- past GitHub's 50 MB
+# warning, closing on the 100 MB hard block -- and was dropped from tracking 2026-08-01T07:32Z.
+# IGNORING IT IS THE SAFETY RAIL, not just tidiness. It was untracked-but-not-ignored, and an
+# empty one existed on the Mac: a single `git add -A` would have committed a 0-byte file that the
+# VM's `git reset --hard FETCH_HEAD` then applied over the real 89.6 MiB archive. The derived
+# golf_moves.sqlite (paired open->close, ~2% the size) stays tracked and is what analysis reads.
+golf_lines.sqlite
+golf_lines.sqlite-wal
+golf_lines.sqlite-shm
 .git-clobbered/
 pga_tees.sqlite
