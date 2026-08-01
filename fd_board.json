@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-08-01T05:51:25Z",
+ "captured_at": "2026-08-01T05:56:32Z",
  "matches": [
-  {
-   "event_id": 35889975,
-   "p1": "Jakub Kaczmarek",
-   "p2": "Wojciech Pytlas",
-   "p1_norm": "jakub kaczmarek",
-   "p2_norm": "wojciech pytlas",
-   "open_date": "2026-08-01T05:35:00.000Z",
-   "line": 89.5,
-   "over_odds": 110,
-   "under_odds": -155
-  },
-  {
-   "event_id": 35889976,
-   "p1": "Bartlomiej Mleczko",
-   "p2": "Tadeusz Piotrowski",
-   "p1_norm": "bartlomiej mleczko",
-   "p2_norm": "tadeusz piotrowski",
-   "open_date": "2026-08-01T05:35:00.000Z",
-   "line": 82.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
-  {
-   "event_id": 35890004,
-   "p1": "Jacek Przewlocki",
-   "p2": "Dawid Poloszczanski",
-   "p1_norm": "jacek przewlocki",
-   "p2_norm": "dawid poloszczanski",
-   "open_date": "2026-08-01T05:40:00.000Z",
-   "line": 67.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35890005,
    "p1": "Konrad Kulpa",
@@ -41,20 +8,9 @@
    "p1_norm": "konrad kulpa",
    "p2_norm": "petr david",
    "open_date": "2026-08-01T05:40:00.000Z",
-   "line": 53.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
-  {
-   "event_id": 35890006,
-   "p1": "Pawel Slosarczyk",
-   "p2": "Rafal Glica",
-   "p1_norm": "pawel slosarczyk",
-   "p2_norm": "rafal glica",
-   "open_date": "2026-08-01T05:40:00.000Z",
-   "line": 80.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 64.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35890022,
@@ -63,9 +19,9 @@
    "p1_norm": "daniel morawiec",
    "p2_norm": "rafal ogon",
    "open_date": "2026-08-01T05:55:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 74.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35890031,
@@ -119,6 +75,17 @@
    "p2_norm": "jaroslaw rolak",
    "open_date": "2026-08-01T06:05:00.000Z",
    "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35890050,
+   "p1": "Marcin Lach",
+   "p2": "Rafal Wojcik",
+   "p1_norm": "marcin lach",
+   "p2_norm": "rafal wojcik",
+   "open_date": "2026-08-01T06:20:00.000Z",
+   "line": 75.5,
    "over_odds": -116,
    "under_odds": -116
   }
