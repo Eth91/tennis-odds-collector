@@ -376,6 +376,7 @@ rw|785|Questionable for Thursday
 rw|785|Upgraded to probable
 rw|785|Won't play Tuesday
 rw|786|Another productive showing Tuesday
+rw|786|Double-doubles in win
 rw|786|Grabs 15 boards in win
 rw|786|Paces Mystics with 25 points
 rw|789|Available off bench Thursday
