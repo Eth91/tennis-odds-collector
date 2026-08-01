@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-07-31T23:59:58Z",
+ "captured_at": "2026-08-01T00:05:30Z",
  "matches": [
   {
    "event_id": 35889182,
@@ -8,9 +8,9 @@
    "p1_norm": "jakub glanowski",
    "p2_norm": "marcin marchlewski",
    "open_date": "2026-07-31T23:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 73.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35889185,
@@ -19,9 +19,9 @@
    "p1_norm": "michal wolny",
    "p2_norm": "jacek zelezik",
    "open_date": "2026-08-01T00:00:00.000Z",
-   "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35889229,
