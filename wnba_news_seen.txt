@@ -184,6 +184,7 @@ rw|280|Plays well off bench
 rw|287|Return not imminent
 rw|291|Goes for 15 points in loss
 rw|291|Hauls in eight boards in loss
+rw|297|Another productive showing
 rw|297|Generates 29 points against Chicago
 rw|297|Rolls up 29 points against Sky
 rw|297|Scores 25 points in win
