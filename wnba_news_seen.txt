@@ -444,6 +444,7 @@ rw|911|Expected to play Tuesday
 rw|911|Good to go Tuesday
 rw|911|Probable for Wednesday
 rw|911|Scores 32 points in win
+rw|911|Triple-double in Friday's win
 rw|912|Logs 21 minutes Sunday
 rw|912|Minutes restriction lifted
 rw|912|Records five points in loss
