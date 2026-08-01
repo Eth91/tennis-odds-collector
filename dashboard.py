@@ -724,25 +724,18 @@ def _prop_row(r, rungs=None, player=None):
     def _tm(ab):
         return (f'<img class="cu-tm" src="{LOGO.format(ab.lower())}" alt="{ab}" loading="lazy" '
                 f'onerror="this.style.display=\'none\'">' if ab else "")
-    tms = (f'<span class="cu-tms">{_tm(team)}<i>@</i>{_tm(opp)}</span>'
-           if team or opp else "")
+    # The player's OWN badge only. The TEAM @ TEAM pair lives on the section header above and
+    # repeating it here said nothing the reader had not just read.
+    tms = f'<span class="cu-tms">{_tm(team)}</span>' if team else ""
 
     # ---- sub-line: market, tier, and the injury driver that created the spot ----
     # Full word, as in the render — STAT holds the short form ("PTS") for the compact rows.
     _FULL = {"points": "Points", "rebounds": "Rebounds", "assists": "Assists",
              "threes": "Threes", "pra": "Pts+Reb+Ast", "pr": "Pts+Reb", "pa": "Pts+Ast",
              "ra": "Reb+Ast", "steals": "Steals", "blocks": "Blocks", "turnovers": "Turnovers"}
-    sub = [_FULL.get(r["stat"], stat.title() if stat else "")]
+    # Context line removed. Tier survives as a header chip — see module docstring.
     tval = r.get("_tier")
-    if tval:
-        sub.append(f"Tier {tval}")
-    outs = ", ".join(_short(x.strip()) for x in (r.get("out_player") or "").split(",") if x.strip())
-    if outs:
-        sub.append(f"{html.escape(outs)} out")
-    dm = r.get("d_min")
-    if not outs and dm is not None and dm > 2:
-        sub.append(f"{dm:+.0f} min")
-    subline = " · ".join(x for x in sub if x)
+    tchip = f'<span class="cu-tier">Tier {tval}</span>' if tval else ""
 
     # ---- the bet ----
     if rungs and len(rungs) > 1:
@@ -805,10 +798,9 @@ def _prop_row(r, rungs=None, player=None):
       <div class="cu-c" data-status="{scls}" data-book="{best_bk}" data-lad="{1 if rungs and len(rungs) > 1 else 0}">
         <div class="cu-sum" data-side="{side}" data-k="{dk}"
              onclick="this.parentNode.querySelector('.bars').classList.toggle('open')">
-          <div class="cu-hd"><span class="cu-st {scls}">{slbl}</span>{btag}
+          <div class="cu-hd"><span class="cu-st {scls}">{slbl}</span>{tchip}{btag}
             <span class="cu-time">{tipt}</span></div>
-          <div class="cu-ttl">{nm}{tms}</div>
-          <div class="cu-sub">{subline}</div>
+          <div class="cu-ttl">{tms}{nm}</div>
           <div class="cu-bet"><span class="cu-dir {o}">{oword}</span>
             <span class="cu-line{rng}">{line_disp}</span>{unit}
             <span class="cu-price">{contra}<span class="cu-od">{_am(best_dec)}</span>
@@ -4248,6 +4240,19 @@ def build():
   #wnba .bars {{ padding:0; }}
   #wnba .bars.open {{ padding:4px 12px 12px; }}
   #wnba .bars.open .dw {{ background:var(--cu-grp2); border-radius:10px; padding:14px; }}
+
+  /* ══════════════════ CUPERTINO-CARD2 ══════════════════
+     Context line gone; the name takes the space it vacated. 24pt against the 36pt bet keeps the
+     bet unmistakably the object of the card while giving the player real presence. */
+  #wnba .cu-ttl {{ font-size:24px; font-weight:660; letter-spacing:-.028em; gap:10px;
+                   margin-bottom:16px; align-items:center; }}
+  #wnba .cu-tms {{ display:inline-flex; align-items:center; }}
+  #wnba .cu-tm {{ width:26px; height:26px; }}
+  #wnba .cu-tier {{ font-size:12px; font-weight:600; padding:2px 8px; border-radius:11px;
+                    background:var(--cu-fill); color:var(--cu-lbl2); }}
+  @media (max-width:520px) {{
+    #wnba .cu-ttl {{ font-size:23px; }}
+  }}
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
