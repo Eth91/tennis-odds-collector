@@ -275,6 +275,7 @@ rw|498|Strong line in loss
 rw|501|Sees 11 minutes in win
 rw|539|Another 30-point performance
 rw|539|Drops 28 points in ASG loss
+rw|539|Erupts in second half vs. Portland
 rw|539|Nets 28 points in win
 rw|539|Posts 23 points in rout
 rw|571|Drops 24 in nation's capital
@@ -445,6 +446,7 @@ rw|911|Good to go Tuesday
 rw|911|Probable for Wednesday
 rw|911|Scores 32 points in win
 rw|911|Triple-double in Friday's win
+rw|911|Triple-doubles in Friday's win
 rw|912|Logs 21 minutes Sunday
 rw|912|Minutes restriction lifted
 rw|912|Records five points in loss
