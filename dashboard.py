@@ -4082,7 +4082,11 @@ def build():
      its own bottom border, .dsec added a rule, .regime added another, and .chart a third — so gaps
      doubled wherever two met and collapsed where a block was empty. One rule now: every section is
      a .dsec, separated by exactly one 16px gap and one hairline, and empty sections emit nothing. */
-  #wnba .bwrap {{ padding:16px; }}
+  /* PADDING ONLY WHEN OPEN. A 0fr grid row clips CONTENT but cannot collapse the child's own
+     padding, so an unconditional .bwrap padding re-creates the dead space under every closed card
+     — the same bug fixed once already in CUPERTINO-POLISH and reintroduced here. */
+  #wnba .bwrap {{ padding:0; }}
+  #wnba .bars.open .bwrap {{ padding:16px; }}
   #wnba .bwrap > * {{ margin:0; }}
   #wnba .bwrap > * + * {{ margin-top:16px; padding-top:16px; border-top:.5px solid var(--cu-sep); }}
   #wnba .bwrap .meters {{ margin:0 !important; padding:0 !important; border:0 !important; }}
