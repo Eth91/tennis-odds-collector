@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-07-31T23:54:25Z",
+ "captured_at": "2026-07-31T23:59:58Z",
  "matches": [
-  {
-   "event_id": 35889160,
-   "p1": "Jakub Kuzmicz",
-   "p2": "Jakub Chmielowski",
-   "p1_norm": "jakub kuzmicz",
-   "p2_norm": "jakub chmielowski",
-   "open_date": "2026-07-31T23:35:00.000Z",
-   "line": 93.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35889181,
-   "p1": "Mariusz Adamus",
-   "p2": "Schaniel Krzysztof",
-   "p1_norm": "mariusz adamus",
-   "p2_norm": "schaniel krzysztof",
-   "open_date": "2026-07-31T23:55:00.000Z",
-   "line": 82.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
   {
    "event_id": 35889182,
    "p1": "Jakub Glanowski",
@@ -30,9 +8,9 @@
    "p1_norm": "jakub glanowski",
    "p2_norm": "marcin marchlewski",
    "open_date": "2026-07-31T23:55:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35889185,
@@ -87,6 +65,17 @@
    "open_date": "2026-08-01T00:20:00.000Z",
    "line": 76.5,
    "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35889261,
+   "p1": "Cezary Pawlik",
+   "p2": "Oskar Jedrzejowski",
+   "p1_norm": "cezary pawlik",
+   "p2_norm": "oskar jedrzejowski",
+   "open_date": "2026-08-01T00:25:00.000Z",
+   "line": 83.5,
+   "over_odds": -116,
    "under_odds": -118
   }
  ]
