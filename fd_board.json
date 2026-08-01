@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-01T04:10:42Z",
+ "captured_at": "2026-08-01T04:17:11Z",
  "matches": [
-  {
-   "event_id": 35889528,
-   "p1": "Bartlomiej Mleczko",
-   "p2": "Dominik Solilo",
-   "p1_norm": "bartlomiej mleczko",
-   "p2_norm": "dominik solilo",
-   "open_date": "2026-08-01T04:00:00.000Z",
-   "line": 56.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35889532,
    "p1": "Pawel Slosarczyk",
@@ -19,9 +8,9 @@
    "p1_norm": "pawel slosarczyk",
    "p2_norm": "jacek wieczerzak",
    "open_date": "2026-08-01T04:10:00.000Z",
-   "line": 73.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 82.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35889533,
@@ -30,20 +19,9 @@
    "p1_norm": "konrad kulpa",
    "p2_norm": "jakub kosowski",
    "open_date": "2026-08-01T04:10:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -116
-  },
-  {
-   "event_id": 35889534,
-   "p1": "Jacek Przewlocki",
-   "p2": "Dariusz Wrobel",
-   "p1_norm": "jacek przewlocki",
-   "p2_norm": "dariusz wrobel",
-   "open_date": "2026-08-01T04:10:00.000Z",
-   "line": 78.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 81.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35889542,
@@ -52,9 +30,9 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "roman wiza",
    "open_date": "2026-08-01T04:20:00.000Z",
-   "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35889544,
@@ -110,6 +88,17 @@
    "line": 78.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35889557,
+   "p1": "Adam Ruszkiewicz",
+   "p2": "Jakub Michalski",
+   "p1_norm": "adam ruszkiewicz",
+   "p2_norm": "jakub michalski",
+   "open_date": "2026-08-01T04:40:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
