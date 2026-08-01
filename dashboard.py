@@ -4086,7 +4086,10 @@ def build():
   #wnba .bwrap > * {{ margin:0; }}
   #wnba .bwrap > * + * {{ margin-top:16px; padding-top:16px; border-top:.5px solid var(--cu-sep); }}
   #wnba .bwrap .meters {{ margin:0 !important; padding:0 !important; border:0 !important; }}
-  #wnba .dsec {{ padding-top:0; margin-top:0; border-top:0; }}   /* the parent rule owns spacing */
+  /* NO .dsec reset here. It would score (1,1,0) — identical to `.bwrap > * + *` — and being
+     later it would cancel the very spacing that rule provides, which is exactly what jammed the
+     section labels against the block above them. The parent rule already beats the earlier
+     CUPERTINO-REBUILD .dsec rule on source order at equal specificity. */
   #wnba .dlab {{ font-size:12px; font-weight:600; letter-spacing:.02em; text-transform:uppercase;
                  color:var(--cu-lbl2); margin:0 0 10px; }}
   #wnba .dsec > .why, #wnba .dsec .rgh {{ margin:0; font-size:15px; line-height:1.45;
