@@ -1,12 +1,12 @@
 # WNBA injury-timing CLV — does the line move our way, open to close?
 
-_2026-07-31 22:04 UTC · 444 closed shadows (opening line vs closing line)_
+_2026-08-01 02:04 UTC · 453 closed shadows (opening line vs closing line)_
 
 ## Does the line move toward our read from open to close?
 ```
-closed shadows:            444
+closed shadows:            453
 avg line move toward us:   +0.14 pts   (>0 = the close moved our way)
-positive-CLV rate:         18%
+positive-CLV rate:         19%
 corr(our edge, line move): +0.41   (does proj-minus-open predict open-to-close?)
 realized hit (our side):   55% (436)
 ```
