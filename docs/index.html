@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-title" content="Pickz">
 <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="64x64" href="icon-64.png">
-<meta name="bv" content="677d08e749">
+<meta name="bv" content="996338ca8c">
 <title>Today's Plays</title>
 <style>
   :root { color-scheme: dark; }
@@ -1133,10 +1133,33 @@
   #wnba .swrow .glogo { width:24px; height:24px; }
   .bklogo { width:22px !important; height:22px !important; }
   #wnba .cu-hd .bklogo { width:24px !important; height:24px !important; }
+
+  /* ══════════════════ CUPERTINO-DRAWER ══════════════════
+     The drawer's spacing was coming from four different sources stacked on each other: .meters had
+     its own bottom border, .dsec added a rule, .regime added another, and .chart a third — so gaps
+     doubled wherever two met and collapsed where a block was empty. One rule now: every section is
+     a .dsec, separated by exactly one 16px gap and one hairline, and empty sections emit nothing. */
+  #wnba .bwrap { padding:16px; }
+  #wnba .bwrap > * { margin:0; }
+  #wnba .bwrap > * + * { margin-top:16px; padding-top:16px; border-top:.5px solid var(--cu-sep); }
+  #wnba .bwrap .meters { margin:0 !important; padding:0 !important; border:0 !important; }
+  #wnba .dsec { padding-top:0; margin-top:0; border-top:0; }   /* the parent rule owns spacing */
+  #wnba .dlab { font-size:12px; font-weight:600; letter-spacing:.02em; text-transform:uppercase;
+                 color:var(--cu-lbl2); margin:0 0 10px; }
+  #wnba .dsec > .why, #wnba .dsec .rgh { margin:0; font-size:15px; line-height:1.45;
+                                          color:var(--cu-lbl2); }
+  #wnba .dsec .regime { background:none !important; border:0 !important; padding:0 !important;
+                         margin:0 !important; }
+  #wnba .rgsub { margin-top:8px; font-size:13px; color:var(--cu-lbl3); }
+  #wnba .cmps { margin-top:12px; gap:6px; }
+  #wnba .chart { margin:0 !important; padding-top:0 !important; border-top:0 !important; }
+  #wnba .bnote { margin-top:10px !important; }
+  #wnba .meter { gap:12px; margin:0 0 10px; }
+  #wnba .meter:last-child { margin-bottom:0; }
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
-    <div class="live"><span class="dot"></span>10:33 PM MT
+    <div class="live"><span class="dot"></span>10:35 PM MT
       <button class="rfrsh" onclick="manualRefresh(this)" title="Pull new plays now" aria-label="Refresh now">↻</button>
       <span id="rfchk"></span></div>
   </header>
@@ -1165,7 +1188,7 @@
             <span class="cu-price"><span class="cu-od">-119</span>
               <span class="cu-chev">›</span></span></div>
           <div class="cu-cf"><span class="cu-bar"><i class="g" style="width:100%"></i></span><span class="cu-pc">100%</span><span class="cu-n">2/2 when out</span></div>
-        </div><div class="bars"><div class="bwrap"><div class="meters"><div class="meter good" title="her games with tonight’s ruled-out players actually out"><span class="mlab">when they sit</span><span class="mbar"><i style="width:100%"></i></span><span class="mval">2/2 over</span></div><div class="meter good" title="all recent games, any lineup"><span class="mlab">last 10 games</span><span class="mbar"><i style="width:60%"></i></span><span class="mval">6/10 over</span></div></div><div class="dsec"><div class="dlab">Why this flagged</div><div class="why">Projects <b>12 PTS</b> vs the 9.5 line — S. Diggins + A. Stevens out (+4 min, +1 usage). Book anchored near the season avg (9.9) — it hasn't repriced the role.</div></div><div class="regime"><div class="rgh">Games with <b>S.Diggins, A.Stevens</b> actually out — avg <b>11</b> PTS <span class="sup">over friendly</span> · <span class="warn">tonight differs from her recent games</span></div><div class="rgsub">lineup match ranked by: K.Cardoso, G.Jaquez, J.Sheldon playing</div><div class="cmps"><span class="cmp pr">07-31 CON <b>11</b> · 31'</span><span class="cmp pr">05-17 MIN <b>11</b> · 32'</span></div></div><div class="chart"><div class="pline" style="bottom:53.3%"><span>9.5</span></div><div class="col"><div class="m" style="height:76%"></div><div class="b o" style="height:61.7%"><span class="bv">11</span></div></div><div class="col"><div class="m" style="height:74%"></div><div class="b o" style="height:61.7%"><span class="bv">11</span></div></div></div><div class="opps"><span>MIN</span><span>CON</span></div><div class="bnote">2/2 over 9.5</div></div></div>
+        </div><div class="bars"><div class="bwrap"><div class="meters"><div class="meter good" title="her games with tonight’s ruled-out players actually out"><span class="mlab">when they sit</span><span class="mbar"><i style="width:100%"></i></span><span class="mval">2/2 over</span></div><div class="meter good" title="all recent games, any lineup"><span class="mlab">last 10 games</span><span class="mbar"><i style="width:60%"></i></span><span class="mval">6/10 over</span></div></div><div class="dsec"><div class="dlab">Why this flagged</div><div class="why">Projects <b>12 PTS</b> vs the 9.5 line — S. Diggins + A. Stevens out (+4 min, +1 usage). Book anchored near the season avg (9.9) — it hasn't repriced the role.</div></div><div class="dsec"><div class="dlab">Same-lineup history</div><div class="regime"><div class="rgh">Games with <b>S.Diggins, A.Stevens</b> actually out — avg <b>11</b> PTS <span class="sup">over friendly</span> · <span class="warn">tonight differs from her recent games</span></div><div class="rgsub">lineup match ranked by: K.Cardoso, G.Jaquez, J.Sheldon playing</div><div class="cmps"><span class="cmp pr">07-31 CON <b>11</b> · 31'</span><span class="cmp pr">05-17 MIN <b>11</b> · 32'</span></div></div></div><div class="chart"><div class="pline" style="bottom:53.3%"><span>9.5</span></div><div class="col"><div class="m" style="height:76%"></div><div class="b o" style="height:61.7%"><span class="bv">11</span></div></div><div class="col"><div class="m" style="height:74%"></div><div class="b o" style="height:61.7%"><span class="bv">11</span></div></div></div><div class="opps"><span>MIN</span><span>CON</span></div><div class="bnote">2/2 over 9.5</div></div></div>
       </div></div></div></div>
     
     
@@ -1376,7 +1399,7 @@
   }
   // Real BetMGM mark when docs/book-mgm.png exists; the monogram below is only the
   // fallback for when it does not (no BetMGM SVG is publicly obtainable).
-  var _TTMGM = "book-mgm.png";
+  var _TTMGM = "book-mgm.svg";
   var _TTMGM_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'"
     + " viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23c9a227'/%3E"
     + "%3Ctext x='12' y='16' font-size='8.5' font-weight='700' text-anchor='middle'"
