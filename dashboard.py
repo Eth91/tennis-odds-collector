@@ -78,6 +78,21 @@ MLB_NAME = {"Arizona Diamondbacks": (109, "AZ"), "Athletics": (133, "ATH"),
             "Toronto Blue Jays": (141, "TOR"), "Washington Nationals": (120, "WSH")}
 
 
+LEAGUE_LOGO = {"wnba": "logos/wnba.png", "mlb": "logos/mlb.png", "pga": "logos/pga.png"}
+
+
+def _llogo(league, cls="llogo"):
+    """League mark for a section header. Falls back to a monogram box when no licensed asset
+    exists (TT Elite), so the slot geometry is identical either way and a 404 never leaves a gap."""
+    src = LEAGUE_LOGO.get((league or "").lower())
+    ab = (league or "").upper()[:3]
+    if not src:
+        return f'<span class="{cls} mono">{ab}</span>'
+    return (f'<span class="{cls}"><img src="{src}" alt="{ab}" loading="lazy" '
+            f'onerror="this.parentNode.className=\'{cls} mono\';this.parentNode.textContent=\'{ab}\'">'
+            f'</span>')
+
+
 def _mlogo(ab, cls="glogo"):
     tid = MLB_AB.get((ab or "").upper().split()[0] if ab else "")
     return (f'<img class="{cls}" src="logos/mlb_{tid}.svg" alt="" loading="lazy" '
@@ -641,6 +656,7 @@ def _prop_row(r, rungs=None):
                 f'below">{tval}</span>' if tval else "")
     side = (r.get("side") if hasattr(r, "get") else r["side"]) or "over"
     o = "O" if side == "over" else "U"
+    oword = "OVER" if side == "over" else "UNDER"
     ev = r.get("ev")
     edge_v = f"{ev*100:+.0f}%" if ev is not None else ""
     ecls = "hi" if (ev or 0) >= 0.15 else ("mid" if (ev or 0) >= 0.07 else "lo")
@@ -746,7 +762,7 @@ def _prop_row(r, rungs=None):
     return f"""
       <div class="prop" data-side="{side}" data-k="{dk}" onclick="this.nextElementSibling.classList.toggle('open')">
         <div class="prow">
-          <span class="pind {o.lower()}">{o}</span>
+          <span class="pind {o.lower()}">{oword}</span>
           <span class="plno{rngcls}">{line_disp}</span><span class="pstat">{stat}</span>{tierchip}{rwatch}
           <span class="psp"></span>
           {odds_html}
@@ -823,7 +839,7 @@ def _game_group(players, tips, today=None, idx=0):
         return (f'<img class="glogo" src="{LOGO.format(ab.lower())}" alt="" loading="lazy" '
                 f'onerror="this.style.display=\'none\'">' if ab else "")
     return (f'<div class="game" data-edge="{gedge:.4f}" data-tip="{gtip:.0f}" style="--i:{idx}">'
-            f'<div class="ghd"><span class="gmatch">{glogo(team)}{team}'
+            f'<div class="ghd">{_llogo("wnba")}<span class="gmatch">{glogo(team)}{team}'
             f'<span class="gvs">vs</span>{glogo(opp)}{opp or "—"}</span>'
             f'<span class="gtime">{when}</span></div>'
             + (f'<div class="gout"><i class="sdot warn"></i>{html.escape(outs)} out</div>' if outs else "")
@@ -3441,6 +3457,99 @@ def build():
   .ttrkrow span:last-child.up {{ color:var(--up); }}
   @media (prefers-reduced-motion:reduce) {{
     *, *::before, *::after {{ animation:none !important; transition:none !important; }}
+  }}
+
+  /* ══════════════════ CUPERTINO-DARK v2 ══════════════════
+     Apple's dark system palette, SCOPED TO #wnba. The other panels (#tt, #pga, #mlb) keep their
+     own semantics untouched — TT/MLB unders stay red, FanDuel stays blue, DraftKings green,
+     BetMGM gold. Those colours are functional on those boards and are not ours to flatten.
+     The #wnba prefix scores (1,1,0), which beats the existing (0,2,0) class rules inside the
+     panel and loses everywhere else, so no !important is needed anywhere below. */
+  :root {{
+    --cu-bg:#000;                      /* systemGroupedBackground (dark) — true black, not grey */
+    --cu-grp:#1c1c1e;                  /* secondarySystemGroupedBackground — cards live here */
+    --cu-grp2:#2c2c2e;                 /* tertiary — the drawer RISES to this, it does not recede */
+    --cu-lbl:#fff;
+    --cu-lbl2:rgba(235,235,245,.6);
+    --cu-lbl3:rgba(235,235,245,.3);    /* the em-dash colour */
+    --cu-fill:rgba(120,120,128,.24);   /* bar tracks — higher alpha than light mode needs */
+    --cu-sep:rgba(84,84,88,.65);
+    --cu-hover:rgba(255,255,255,.04);  /* inverts from black-3% in light */
+    --cu-blue:#0a84ff; --cu-grn:#30d158; --cu-org:#ff9f0a; --cu-red:#ff453a;
+  }}
+  body {{ background:var(--cu-bg); color:var(--cu-lbl); }}
+
+  /* group = rounded container, hairline inset separators, no border */
+  #wnba .pblk {{ background:var(--cu-grp); border:0; border-radius:12px; padding:0;
+                 margin-bottom:16px; overflow:hidden; }}
+  #wnba .phd {{ padding:12px 16px 10px; gap:10px; }}
+  #wnba .pname {{ font-size:19px; font-weight:640; letter-spacing:-.022em; color:var(--cu-lbl); }}
+  #wnba .plogo {{ width:26px; height:26px; background:var(--cu-fill); padding:2px; }}
+  #wnba .prop {{ padding:12px 16px 14px; border-top:.5px solid var(--cu-sep); margin-top:0;
+                 transition:background .13s; }}
+  #wnba .pblk .prop:first-of-type {{ border-top:.5px solid var(--cu-sep); margin-top:0; }}
+  #wnba .prop:hover {{ background:var(--cu-hover); }}
+  #wnba .prop:has(+ .bars.open) {{ background:rgba(255,255,255,.025); }}
+
+  /* THE BET — direction is a subordinate word, the number is the object. 36px vs 19px name. */
+  #wnba .pind {{ width:auto; height:auto; border-radius:0; background:none;
+                 font-size:13px; font-weight:700; letter-spacing:.06em;
+                 color:var(--cu-lbl2); display:inline; place-items:unset; }}
+  #wnba .plno {{ font-size:36px; font-weight:680; letter-spacing:-.04em; color:var(--cu-lbl); }}
+  #wnba .plno.rng {{ font-size:24px; }}
+  #wnba .pstat {{ font-size:14px; font-weight:600; color:var(--cu-lbl2); letter-spacing:0; }}
+  #wnba .prow {{ gap:8px; align-items:baseline; }}
+
+  /* price + book. Over/under carries NO colour HERE — direction is a label, not a state; green and
+     red stay reserved for outcome and injury on this board. TT/MLB keep their own scheme. */
+  #wnba .podds {{ font-size:20px; font-weight:640; letter-spacing:-.02em; color:var(--cu-lbl); }}
+  #wnba .bklogo {{ width:26px; height:26px; border-radius:7px; background:var(--cu-fill);
+                   padding:3px; vertical-align:-7px; margin-left:7px; }}
+  #wnba .pedge {{ font-size:15px; font-weight:640; color:var(--cu-lbl2); }}
+  #wnba .pedge.hi {{ color:var(--cu-grn); }}
+  #wnba .pedge.mid {{ color:var(--cu-lbl2); }}
+  #wnba .pedge.lo {{ color:var(--cu-lbl3); }}
+  #wnba .pchev {{ color:var(--cu-lbl3); font-size:16px; }}
+  #wnba .pctx {{ color:var(--cu-lbl2); font-size:14px; }}
+
+  /* confidence meters — system fills, semantic only at the ends */
+  #wnba .meter .mbar {{ background:var(--cu-fill); border-radius:4px; height:7px; }}
+  #wnba .meter .mbar i {{ background:var(--cu-blue); border-radius:4px; }}
+  #wnba .meter.good .mbar i {{ background:var(--cu-grn); }}
+  #wnba .meter.bad .mbar i {{ background:var(--cu-red); }}
+  #wnba .meter .mlab {{ color:var(--cu-lbl2); }}
+  #wnba .meter .mval {{ color:var(--cu-lbl); font-variant-numeric:tabular-nums; }}
+
+  /* the drawer ELEVATES — the single detail that makes it read as iOS dark rather than a recolour */
+  #wnba .bars.open {{ background:var(--cu-grp2); border-radius:10px;
+                      margin:0 12px 12px; padding:12px 14px; }}
+  #wnba .bwrap .meters {{ border-bottom:.5px solid var(--cu-sep); }}
+
+  /* section header: league mark then the two team marks */
+  #wnba .ghd {{ gap:9px; padding:0 4px 10px; }}
+  #wnba .llogo {{ width:26px; height:26px; border-radius:7px; flex:none; display:inline-flex;
+                  align-items:center; justify-content:center; overflow:hidden;
+                  background:var(--cu-fill); }}
+  #wnba .llogo img {{ width:100%; height:100%; object-fit:contain; padding:3px; }}
+  #wnba .llogo.mono {{ font-size:9px; font-weight:700; letter-spacing:-.03em; color:var(--cu-lbl2); }}
+  #wnba .gmatch {{ font-size:13px; font-weight:600; letter-spacing:0; text-transform:uppercase;
+                   color:var(--cu-lbl2); }}
+  #wnba .glogo {{ width:22px; height:22px; background:var(--cu-fill); padding:2px; }}
+  #wnba .gtime {{ color:var(--cu-lbl2); font-size:14px; font-variant-numeric:tabular-nums; }}
+  #wnba .gout {{ color:var(--cu-lbl2); font-size:14px; }}
+
+  /* status chips — semantic at 18% alpha; a tint needs more weight on black than on white */
+  #wnba .pflag {{ color:var(--cu-lbl2); font-size:13px; }}
+  #wnba .tchip {{ border-radius:11px; font-size:12px; font-weight:600; padding:2px 8px; }}
+  #wnba .pmin {{ color:var(--cu-lbl2); font-size:14px; font-variant-numeric:tabular-nums; }}
+
+  /* an unavailable value is a designed state, not a gap */
+  #wnba .na {{ color:var(--cu-lbl3); }}
+  #wnba .pedge:empty::before {{ content:"—"; color:var(--cu-lbl3); }}
+
+  @media (max-width:520px) {{
+    #wnba .plno {{ font-size:30px; }}
+    #wnba .podds {{ font-size:18px; }}
   }}
 </style></head><body><div class="wrap">
   <header>
