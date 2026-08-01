@@ -3594,7 +3594,6 @@ def build():
 
   /* ---- the drawer ELEVATES (tertiary above secondary) ---- */
   #wnba .bars {{ padding:0 12px 12px; }}
-  #wnba .bars.open {{ background:transparent; }}
   #wnba .bwrap {{ background:var(--cu-grp2); border-radius:10px; padding:12px 14px; }}
   #wnba .bwrap .meters {{ margin:0 0 12px; padding-bottom:12px;
                           border-bottom:.5px solid var(--cu-sep); }}
@@ -3658,7 +3657,6 @@ def build():
   /* closed drawer must be ZERO tall: padding is intrinsic and survives a 0fr row, so it only
      exists once open. This was 50px of dead space under every card. */
   #wnba .bars {{ padding:0; }}
-  #wnba .bars.open {{ padding:0 12px 12px; background:transparent; }}
   #wnba .bwrap {{ background:none; padding:0; border-radius:0; }}
   #wnba .bars.open .bwrap {{ background:var(--cu-grp2); border-radius:10px; padding:12px 14px; }}
 
@@ -4118,7 +4116,6 @@ def build():
      intrinsic and a 0fr grid row cannot collapse it, which is what left dead space under every
      closed card twice before. */
   #wnba .bars {{ padding:0; }}
-  #wnba .bars.open {{ padding:0 12px 12px; }}
   #wnba .dw {{ padding:0; }}
   #wnba .bars.open .dw {{ background:var(--cu-grp2); border-radius:10px; padding:16px; }}
 
@@ -4172,6 +4169,48 @@ def build():
   #wnba .dw-opps {{ display:flex; gap:5px; margin-top:6px; }}
   #wnba .dw-opps span {{ flex:1; text-align:center; font-size:11px; color:var(--cu-lbl3); }}
   #wnba .dw-note {{ font-size:13px; color:var(--cu-lbl3); margin-top:10px; }}
+
+  /* ══════════════════ CUPERTINO-SPACE4 ══════════════════
+     One 4pt scale for the WNBA card and drawer. Every value below is 4/8/12/16/20 — no exceptions,
+     because the consistency is the design. Previous values were 13/14/9/7/8/11/12, which is a
+     sequence of guesses rather than a system, and that is what made it not read as Apple.
+
+     Also consolidates the .bars.open padding, which had accumulated into three separate rules
+     across earlier passes, so the card-to-drawer gap depended on which one happened to win. */
+
+  /* section header -> group */
+  #wnba .cu-sh {{ padding:8px 4px; gap:8px; }}
+  #wnba .cu-out {{ padding:0 4px 8px; gap:8px; }}
+  #wnba .game {{ margin-bottom:20px; }}          /* card -> card */
+  #wnba .cu-grp {{ margin-bottom:0; }}
+
+  /* inside the card */
+  #wnba .cu-sum {{ padding:16px; }}
+  #wnba .cu-hd {{ margin-bottom:12px; gap:8px; }}
+  #wnba .cu-ttl {{ margin-bottom:2px; gap:8px; }}   /* title+sub are one pair, deliberately tight */
+  #wnba .cu-sub {{ margin-bottom:16px; }}
+  #wnba .cu-bet {{ margin-bottom:16px; gap:8px; }}
+  #wnba .cu-cf {{ gap:12px; }}
+
+  /* card -> drawer: 16 from the summary plus 4 here = 20, one step ABOVE the 16 used inside the
+     panel, so the drawer reads as nested rather than welded to the card */
+  #wnba .bars {{ padding:0; }}
+  #wnba .bars.open {{ padding:4px 12px 12px; }}
+  #wnba .bars.open .dw {{ padding:16px; }}
+
+  /* inside the drawer */
+  #wnba .dw-s + .dw-s {{ margin-top:16px; padding-top:16px; }}
+  #wnba .dw-l {{ margin-bottom:8px; }}
+  #wnba .dw .meter {{ margin-bottom:12px; gap:12px; }}
+  #wnba .dw .meter:last-child {{ margin-bottom:0; }}
+  #wnba .dw .rgsub {{ margin-top:8px; }}
+  #wnba .dw .cmps {{ margin-top:12px; gap:8px; }}
+  #wnba .dw-opps {{ margin-top:8px; }}
+  #wnba .dw-note {{ margin-top:12px; }}
+
+  @media (max-width:520px) {{
+    #wnba .cu-sum {{ padding:16px; }}
+  }}
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
