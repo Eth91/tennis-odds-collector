@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-01T02:48:58Z",
+ "captured_at": "2026-08-01T02:56:52Z",
  "matches": [
   {
    "event_id": 35889438,
@@ -8,9 +8,9 @@
    "p1_norm": "michal wolny",
    "p2_norm": "oskar jedrzejowski",
    "open_date": "2026-08-01T02:45:00.000Z",
-   "line": 80.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 73.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35889465,
