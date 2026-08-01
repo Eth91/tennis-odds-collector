@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-01T07:01:12Z",
+ "captured_at": "2026-08-01T07:06:59Z",
  "matches": [
-  {
-   "event_id": 35890075,
-   "p1": "Jakub Kaczmarek",
-   "p2": "Mariusz Baron",
-   "p1_norm": "jakub kaczmarek",
-   "p2_norm": "mariusz baron",
-   "open_date": "2026-08-01T06:45:00.000Z",
-   "line": 92.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35890092,
    "p1": "Bartlomiej Mleczko",
@@ -19,9 +8,9 @@
    "p1_norm": "bartlomiej mleczko",
    "p2_norm": "piotr maruszak",
    "open_date": "2026-08-01T06:50:00.000Z",
-   "line": 92.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 94.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35890097,
@@ -30,9 +19,9 @@
    "p1_norm": "konrad kulpa",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-08-01T06:55:00.000Z",
-   "line": 78.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 84.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35890098,
@@ -41,9 +30,9 @@
    "p1_norm": "pawel slosarczyk",
    "p2_norm": "oliwier sokolowski",
    "open_date": "2026-08-01T06:55:00.000Z",
-   "line": 80.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 89.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35890099,
@@ -52,9 +41,9 @@
    "p1_norm": "jacek przewlocki",
    "p2_norm": "maciej sinicki",
    "open_date": "2026-08-01T06:55:00.000Z",
-   "line": 72.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 54.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35890106,
@@ -121,6 +110,17 @@
    "line": 76.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35890178,
+   "p1": "Marcin Lach",
+   "p2": "Rafal Ogon",
+   "p1_norm": "marcin lach",
+   "p2_norm": "rafal ogon",
+   "open_date": "2026-08-01T07:30:00.000Z",
+   "line": 69.5,
+   "over_odds": -120,
+   "under_odds": -110
   }
  ]
 }
