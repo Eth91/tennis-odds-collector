@@ -397,6 +397,7 @@ rw|797|Returns after brief exit
 rw|797|Scores team-high 20 points
 rw|798|Stumbles in loss
 rw|799|Quiet outing in win
+rw|799|Scores 18 points Friday
 rw|807|Posts double-double in road loss
 rw|807|Posts strong double-double
 rw|807|Productive in loss to Mystics
