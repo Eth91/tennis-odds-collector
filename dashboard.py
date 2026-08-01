@@ -3926,6 +3926,62 @@ def build():
   #tt .ttcnt {{ background:var(--cu-fill); color:var(--cu-lbl2); border-radius:11px;
                 padding:1px 8px; font-size:12px; font-weight:600; margin-left:auto; }}
   #tt .tld {{ color:var(--cu-lbl3); }}
+
+  /* ══════════════════ CUPERTINO-POLISH2 ══════════════════
+     The WNBA drawer OPENS fine — its CONTENTS were never styled. Everything below .meters was
+     still the old design, including a .regime block with its own DARKER background, which pushed
+     elevation the wrong way (dark mode raises, it does not recede). Plus TT/PGA spacing. */
+
+  /* ---- WNBA drawer: one elevated panel, flat sections inside it ---- */
+  #wnba .bwrap {{ padding:14px 16px; }}
+  #wnba .bwrap .meters {{ margin:0 0 14px; padding-bottom:14px; }}
+  #wnba .meter {{ gap:12px; margin-bottom:10px; }}
+  #wnba .meter:last-child {{ margin-bottom:0; }}
+  #wnba .meter .mlab {{ font-size:14px; width:110px; flex:none; }}
+  #wnba .meter .mval {{ font-size:14px; font-weight:590; margin-left:auto; }}
+  #wnba .why {{ font-size:15px; line-height:1.45; color:var(--cu-lbl2); margin:0 0 14px; }}
+  /* the regime block sat in its own dark box — flatten it onto the drawer surface */
+  #wnba .regime {{ background:none !important; border:0 !important; border-radius:0 !important;
+                   padding:14px 0 0 !important; margin:0 !important;
+                   border-top:.5px solid var(--cu-sep) !important; }}
+  #wnba .rgh {{ font-size:15px; line-height:1.45; color:var(--cu-lbl2); }}
+  #wnba .rgsub {{ font-size:13px; color:var(--cu-lbl3); margin-top:6px; }}
+  #wnba .sup {{ color:var(--cu-grn); }}
+  #wnba .warn {{ color:var(--cu-org); }}
+  #wnba .cmps {{ display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }}
+  #wnba .cmp {{ background:var(--cu-fill); border:0; border-radius:11px; padding:4px 10px;
+                font-size:13px; color:var(--cu-lbl2); font-variant-numeric:tabular-nums; }}
+  #wnba .cmp b {{ color:var(--cu-lbl); font-weight:600; }}
+  #wnba .chart {{ margin:16px 0 0; padding-top:14px; border-top:.5px solid var(--cu-sep); }}
+  #wnba .opps {{ font-size:12px; color:var(--cu-lbl3); }}
+  #wnba .bnote {{ font-size:13px; color:var(--cu-lbl3); border-top:0 !important;
+                  padding-top:0 !important; margin-top:10px !important; }}
+  #wnba .bv {{ font-size:12px; font-weight:600; }}
+  #wnba .pline span {{ font-size:12px; color:var(--cu-lbl3); }}
+
+  /* ---- TT spacing: the row was cramped and the meta line wrapped three ways ---- */
+  #tt .card {{ padding:14px 16px 16px; }}
+  #tt .ttbet {{ gap:12px; padding:14px 0; align-items:flex-start; }}
+  #tt .pind {{ margin-top:2px; }}
+  #tt .ttbln {{ min-width:58px; margin-top:-2px; }}
+  #tt .ttbnm {{ margin-bottom:4px; }}
+  #tt .ttbsb {{ line-height:1.5; }}
+  #tt .ttconf {{ margin-top:1px; }}
+  #tt .ttlg {{ margin-bottom:14px; }}
+
+  /* ---- PGA spacing ---- */
+  #pga .starwatch {{ padding:14px 16px 16px; }}
+  #pga .pgahead {{ margin-bottom:4px; padding-bottom:12px;
+                   border-bottom:.5px solid var(--cu-sep); }}
+  #pga .pgamkt {{ margin:16px 0 2px; }}
+  #pga .pgabet {{ padding:13px 0; }}
+  #pga .pgabet:first-of-type {{ padding-top:8px; }}
+
+  /* ---- Tracker spacing ---- */
+  #tracker .tcard {{ padding:14px 16px 16px; }}
+  #tracker .thead {{ margin-bottom:14px; }}
+  #tracker .trow {{ margin-bottom:14px; }}
+  #tracker .tsub {{ padding-top:12px; border-top:.5px solid var(--cu-sep); margin-top:0; }}
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
