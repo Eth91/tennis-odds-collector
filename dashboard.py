@@ -781,7 +781,7 @@ def _prop_row(r, rungs=None, player=None):
                               "all recent games, any lineup"))
     dk = html.escape(f"{r.get('pred_date') or ''}|{r['player']}|{r['stat']}|{r['line']:g}")
     return f"""
-      <div class="cu-c">
+      <div class="cu-c" data-status="{scls}" data-book="{best_bk}" data-lad="{1 if rungs and len(rungs) > 1 else 0}">
         <div class="cu-sum" data-side="{side}" data-k="{dk}"
              onclick="this.parentNode.querySelector('.bars').classList.toggle('open')">
           <div class="cu-hd"><span class="cu-st {scls}">{slbl}</span>{btag}
@@ -3573,6 +3573,44 @@ def build():
     #wnba .cu-ttl {{ font-size:18px; }}
     #wnba .cu-sub {{ font-size:14px; }}
   }}
+
+  /* ══════════════════ CUPERTINO-CHROME ══════════════════
+     Page chrome to match the iPhone render: iOS large title, segmented tabs, filter chips. */
+  .wrap {{ padding:14px 20px 48px; }}
+  header {{ padding:0 0 2px; }}
+  h1 {{ font-size:34px; font-weight:700; letter-spacing:-.037em; line-height:1.1;
+        color:var(--cu-lbl); }}
+  .live {{ font-size:14px; color:var(--cu-lbl2); gap:7px; margin-top:3px;
+           font-variant-numeric:tabular-nums; }}
+  .live .dot {{ width:7px; height:7px; border-radius:50%; background:var(--cu-grn); flex:none; }}
+  .rfrsh {{ width:28px; height:28px; border-radius:14px; background:var(--cu-fill);
+            border:0; color:var(--cu-lbl2); font-size:14px; margin-left:auto; }}
+  .rfrsh:active {{ background:rgba(120,120,128,.4); }}
+
+  /* segmented control — .tabthumb becomes the selected segment, so showTab() is untouched */
+  .tabs {{ background:var(--cu-fill); border:0; border-radius:9px; padding:2px; gap:2px;
+           margin:13px 0 0; }}
+  .tab {{ border-radius:7px; padding:6px 0; font-size:13px; font-weight:590;
+          color:var(--cu-lbl2) !important; gap:5px; }}
+  .tab.active {{ color:var(--cu-lbl) !important; }}
+  .tabthumb {{ top:2px; bottom:2px; left:2px; border-radius:7px; background:#636366 !important;
+               box-shadow:0 3px 8px rgba(0,0,0,.3); }}
+  .tabic {{ width:14px; height:14px; opacity:1; }}
+
+  /* filter chips — rendered only for filters that actually match something */
+  .cu-chips {{ display:flex; gap:7px; padding:12px 0 4px; overflow-x:auto;
+               -webkit-overflow-scrolling:touch; scrollbar-width:none; }}
+  .cu-chips::-webkit-scrollbar {{ display:none; }}
+  .cu-chips[hidden] {{ display:none; }}
+  .cu-ch {{ background:var(--cu-grp); border:0; border-radius:15px; font:inherit; font-size:13px;
+            font-weight:500; color:var(--cu-lbl); padding:6px 12px; white-space:nowrap;
+            cursor:pointer; display:inline-flex; gap:5px; align-items:center;
+            transition:background .14s,color .14s; }}
+  .cu-ch:hover {{ background:var(--cu-grp2); }}
+  .cu-ch[aria-current="true"] {{ background:var(--cu-blue); color:#fff; }}
+  .cu-ch .ct {{ font-size:12px; color:var(--cu-lbl2); font-variant-numeric:tabular-nums; }}
+  .cu-ch[aria-current="true"] .ct {{ color:rgba(255,255,255,.7); }}
+  .cu-ch:focus-visible {{ outline:2px solid var(--cu-blue); outline-offset:2px; }}
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
@@ -3590,6 +3628,7 @@ def build():
   </div>
   <div class="panel" id="wnba">
     {recstrip_html}
+    <div id="wnbafilters" class="cu-chips" hidden></div>
     <div id="games">{cards}</div>
     {starwatch_html}
     {ladders_html}
@@ -3623,6 +3662,62 @@ def build():
     const a = document.querySelector('.tab.active'), th = document.getElementById('tabthumb');
     if (a && th) {{ th.style.left = a.offsetLeft + 'px'; th.style.width = a.offsetWidth + 'px'; }}
   }}
+
+  // ---- CUPERTINO-CHROME: real filter chips -------------------------------------------------
+  // Counts are measured from the rendered cards, never precomputed, so a chip cannot claim a
+  // number it did not find. A filter matching zero cards is not rendered at all rather than
+  // shown as a dead affordance.
+  (function () {{
+    var host = document.getElementById('wnbafilters');
+    if (!host) return;
+    var cards = [].slice.call(document.querySelectorAll('#wnba .cu-c[data-status]'));
+    if (cards.length < 2) return;                       // one card needs no filter row
+    var defs = [
+      {{ k: 'all', l: 'All',         m: function () {{ return true; }} }},
+      {{ k: 'ok',  l: 'Starting',    m: function (c) {{ return c.dataset.status === 'ok'; }} }},
+      {{ k: 'mid', l: 'Likely',      m: function (c) {{ return c.dataset.status === 'mid'; }} }},
+      {{ k: 'pp',  l: 'In progress', m: function (c) {{ return c.dataset.status === 'pp'; }} }},
+      {{ k: 'lad', l: 'Ladders',     m: function (c) {{ return c.dataset.lad === '1'; }} }},
+      {{ k: 'fd',  l: 'FanDuel',     m: function (c) {{ return c.dataset.book === 'fd'; }} }},
+      {{ k: 'dk',  l: 'DraftKings',  m: function (c) {{ return c.dataset.book === 'dk'; }} }}
+    ];
+    var cur = 'all';
+    function apply() {{
+      var d = defs.filter(function (x) {{ return x.k === cur; }})[0] || defs[0];
+      cards.forEach(function (c) {{ c.style.display = d.m(c) ? '' : 'none'; }});
+      // a section whose cards are all hidden collapses, header and all
+      [].forEach.call(document.querySelectorAll('#wnba .game'), function (g) {{
+        var any = [].some.call(g.querySelectorAll('.cu-c'), function (c) {{
+          return c.style.display !== 'none';
+        }});
+        g.style.display = any ? '' : 'none';
+      }});
+    }}
+    function draw() {{
+      host.innerHTML = '';
+      var shown = 0;
+      defs.forEach(function (d) {{
+        var n = cards.filter(d.m).length;
+        if (!n) return;                                 // never render an empty filter
+        shown++;
+        var b = document.createElement('button');
+        b.className = 'cu-ch';
+        b.type = 'button';
+        if (d.k === cur) b.setAttribute('aria-current', 'true');
+        b.appendChild(document.createTextNode(d.l + ' '));
+        var ct = document.createElement('span');
+        ct.className = 'ct';
+        ct.textContent = n;
+        b.appendChild(ct);
+        b.addEventListener('click', function () {{ cur = d.k; apply(); draw(); }});
+        host.appendChild(b);
+      }});
+      host.hidden = shown < 2;                          // one chip is not a filter
+    }}
+    draw();
+    apply();
+  }})();
+
   function showTab(t) {{
     document.querySelectorAll('.panel').forEach(p => p.classList.toggle('hidden', p.id !== t));
     document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
