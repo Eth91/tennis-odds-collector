@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-01T09:52:48Z",
+ "captured_at": "2026-08-01T10:11:17Z",
  "matches": [
-  {
-   "event_id": 35890434,
-   "p1": "Amirreza Abbasi",
-   "p2": "Artur Daniel",
-   "p1_norm": "amirreza abbasi",
-   "p2_norm": "artur daniel",
-   "open_date": "2026-08-01T09:40:00.000Z",
-   "line": 77.5,
-   "over_odds": -110,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35890438,
-   "p1": "Mateusz Woskowicz",
-   "p2": "Bartlomiej Mleczko",
-   "p1_norm": "mateusz woskowicz",
-   "p2_norm": "bartlomiej mleczko",
-   "open_date": "2026-08-01T09:45:00.000Z",
-   "line": 84.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35890658,
    "p1": "Bartlomiej Wisniewski",
@@ -30,20 +8,9 @@
    "p1_norm": "bartlomiej wisniewski",
    "p2_norm": "jacek przewlocki",
    "open_date": "2026-08-01T09:50:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35890659,
-   "p1": "Rafal Glica",
-   "p2": "Pawel Slosarczyk",
-   "p1_norm": "rafal glica",
-   "p2_norm": "pawel slosarczyk",
-   "open_date": "2026-08-01T09:50:00.000Z",
-   "line": 76.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 101.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35890781,
@@ -52,9 +19,9 @@
    "p1_norm": "rafal ogon",
    "p2_norm": "jakub jesiek",
    "open_date": "2026-08-01T09:55:00.000Z",
-   "line": 73.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 88.5,
+   "over_odds": -160,
+   "under_odds": 115
   },
   {
    "event_id": 35890798,
@@ -63,9 +30,9 @@
    "p1_norm": "petr david",
    "p2_norm": "konrad kulpa",
    "open_date": "2026-08-01T10:00:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 75.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35890801,
@@ -74,9 +41,9 @@
    "p1_norm": "maciej sinicki",
    "p2_norm": "jakub wozniak",
    "open_date": "2026-08-01T10:05:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 77.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35890807,
@@ -85,7 +52,7 @@
    "p1_norm": "dawid poloszczanski",
    "p2_norm": "jaroslaw rolak",
    "open_date": "2026-08-01T10:10:00.000Z",
-   "line": 80.5,
+   "line": 77.5,
    "over_odds": -112,
    "under_odds": -118
   },
@@ -97,6 +64,61 @@
    "p2_norm": "jacek wieczerzak",
    "open_date": "2026-08-01T10:10:00.000Z",
    "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -110
+  },
+  {
+   "event_id": 35890821,
+   "p1": "Daniel Morawiec",
+   "p2": "Rafal Wojcik",
+   "p1_norm": "daniel morawiec",
+   "p2_norm": "rafal wojcik",
+   "open_date": "2026-08-01T10:20:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35890826,
+   "p1": "Artur Daniel",
+   "p2": "Artur Grela",
+   "p1_norm": "artur daniel",
+   "p2_norm": "artur grela",
+   "open_date": "2026-08-01T10:25:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35890832,
+   "p1": "Bartlomiej Mleczko",
+   "p2": "Tadeusz Piotrowski",
+   "p1_norm": "bartlomiej mleczko",
+   "p2_norm": "tadeusz piotrowski",
+   "open_date": "2026-08-01T10:30:00.000Z",
+   "line": 74.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35890837,
+   "p1": "Pawel Slosarczyk",
+   "p2": "Witold Buczynski",
+   "p1_norm": "pawel slosarczyk",
+   "p2_norm": "witold buczynski",
+   "open_date": "2026-08-01T10:35:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35890838,
+   "p1": "Jacek Przewlocki",
+   "p2": "Bartosz Kwodawski",
+   "p1_norm": "jacek przewlocki",
+   "p2_norm": "bartosz kwodawski",
+   "open_date": "2026-08-01T10:35:00.000Z",
+   "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
   }
