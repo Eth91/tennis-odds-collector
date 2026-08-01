@@ -3599,7 +3599,6 @@ def build():
   #wnba .cu-rungs .rung b {{ color:var(--cu-lbl); font-weight:600; }}
 
   /* ---- the drawer ELEVATES (tertiary above secondary) ---- */
-  #wnba .bars {{ padding:0 12px 12px; }}
   #wnba .bwrap {{ background:var(--cu-grp2); border-radius:10px; padding:12px 14px; }}
   #wnba .bwrap .meters {{ margin:0 0 12px; padding-bottom:12px;
                           border-bottom:.5px solid var(--cu-sep); }}
@@ -3662,7 +3661,6 @@ def build():
   /* ══════════════════ CUPERTINO-POLISH ══════════════════ */
   /* closed drawer must be ZERO tall: padding is intrinsic and survives a 0fr row, so it only
      exists once open. This was 50px of dead space under every card. */
-  #wnba .bars {{ padding:0; }}
   #wnba .bwrap {{ background:none; padding:0; border-radius:0; }}
   #wnba .bars.open .bwrap {{ background:var(--cu-grp2); border-radius:10px; padding:12px 14px; }}
 
@@ -4121,9 +4119,6 @@ def build():
      the only place its spacing is defined. Collapsed state carries NO padding — padding is
      intrinsic and a 0fr grid row cannot collapse it, which is what left dead space under every
      closed card twice before. */
-  #wnba .bars {{ padding:0; }}
-  #wnba .dw {{ padding:0; }}
-  #wnba .bars.open .dw {{ background:var(--cu-grp2); border-radius:10px; padding:16px; }}
 
   #wnba .dw-s + .dw-s {{ margin-top:16px; padding-top:16px; border-top:.5px solid var(--cu-sep); }}
   #wnba .dw-l {{ font-size:12px; font-weight:600; letter-spacing:.02em; text-transform:uppercase;
@@ -4200,9 +4195,6 @@ def build():
 
   /* card -> drawer: 16 from the summary plus 4 here = 20, one step ABOVE the 16 used inside the
      panel, so the drawer reads as nested rather than welded to the card */
-  #wnba .bars {{ padding:0; }}
-  #wnba .bars.open {{ padding:4px 12px 12px; }}
-  #wnba .bars.open .dw {{ padding:16px; }}
 
   /* inside the drawer */
   #wnba .dw-s + .dw-s {{ margin-top:16px; padding-top:16px; }}
@@ -4223,7 +4215,6 @@ def build():
      two of its four labels sat above content that already describes itself, and 16pt gaps are more
      air than this density needs. 12pt rhythm, 14pt panel padding, and drawer type a step smaller
      than the card face — detail should read as subordinate to the headline, not compete with it. */
-  #wnba .bars.open .dw {{ padding:14px; }}
   #wnba .dw-s + .dw-s {{ margin-top:12px; padding-top:12px; }}
   #wnba .dw-l {{ font-size:11px; margin-bottom:6px; }}
   #wnba .dw-p {{ font-size:14px; line-height:1.4; }}
@@ -4241,6 +4232,22 @@ def build():
   #wnba .dw-opps span {{ font-size:10px; }}
   #wnba .dw-note {{ font-size:12px; margin-top:8px; }}
   #wnba .dw-line span {{ font-size:10px; top:-14px; }}
+
+  /* ══════════════════ CUPERTINO-COLLAPSE ══════════════════
+     THE COLLAPSE CONTRACT. `.bars` is a grid that animates between 0fr and 1fr. A 0fr row only
+     clips its child if that child carries BOTH `overflow:hidden` and `min-height:0` — otherwise the
+     child keeps its intrinsic height and the row grows to fit it, which is why closing the drawer
+     was hiding the content but leaving the space.
+
+     The old .bwrap had this pair. Renaming it to .dw during the rebuild carried the padding, the
+     background and the radius across but not this, because the rule lived far away and unscoped.
+
+     This block is also the ONLY place .bars/.dw padding is declared — four rules had accumulated,
+     one per pass, each added rather than edited. */
+  #wnba .dw {{ overflow:hidden; min-height:0; padding:0; }}
+  #wnba .bars {{ padding:0; }}
+  #wnba .bars.open {{ padding:4px 12px 12px; }}
+  #wnba .bars.open .dw {{ background:var(--cu-grp2); border-radius:10px; padding:14px; }}
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
