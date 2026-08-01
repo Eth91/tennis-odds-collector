@@ -468,11 +468,11 @@ def _reasoning(r):
         b = [f"Projects <b>{proj:g} {stat}</b> vs the {line:g} line" + (f" — {role}." if role else ".")]
     rec = _raw_record(r)
     if rec and rec[2] == "under" and rec[3] >= 2:
-        b.append(f"⚠ she's gone OVER in {rec[3]} of her last 3 — treat this under with caution.")
+        b.append(f"She's gone OVER in {rec[3]} of her last 3 — treat this under with caution.")
     if r.get("stale") and savg is not None:
         b.append(f"Book anchored near the season avg ({savg:g}) — it hasn't repriced the role.")
     if r.get("confidence") == "bench":
-        b.append("⚠ not in the projected starting five — minutes uncertain.")
+        b.append("Not in the projected starting five — minutes uncertain.")
     return " ".join(b)
 
 
@@ -506,7 +506,7 @@ def _regime_html(r):
     incfg = f' · <b>{html.escape(inn)}</b> in' if inn else ""
     np = rg.get("n_primary", rg.get("n_comps", 0))
     supports = (avg < line) if side == "under" else (avg > line)
-    verdict = ("✓ " + side + " friendly") if supports else ("⚠ against the " + side)
+    verdict = (side + " friendly") if supports else ("against the " + side)
     vcls = "sup" if supports else "warn"
     # mark the chips that match tonight's lineup BEST (the ones the avg is over) so it's obvious
     # which games are true same-lineup comps vs looser ones (a blowout where a starter also sat).
@@ -994,7 +994,7 @@ def _tracker_panel(wnba_rec, tt_json):
             if (flt.get("w", 0) + flt.get("l", 0)) > 0:
                 note += (f" · shadow 80-90u {flt['w']}-{flt['l']} "
                          f"({flt['u']:+.1f}u, filtered out — validating)")
-            tt_card += card("🏓", "TT Elite", elite["w"], elite["l"], elite["u"], note,
+            tt_card += card("", "TT Elite", elite["w"], elite["l"], elite["u"], note,
                             recent=(tt or {}).get("recent"))
         rest = [x for x in leagues if x["league"] != "TT Elite Series"]
         if rest:                                           # shadow leagues — compact per-league table
@@ -1006,16 +1006,16 @@ def _tracker_panel(wnba_rec, tt_json):
                 trows += (f'<div class="ttrkrow"><span>{html.escape(SHORT.get(x["league"], x["league"]))}</span>'
                           f'<span>{x["w"]}-{x["l"]}</span><span>{hit}</span>'
                           f'<span class="{ucls}">{x["u"]:+.1f}u</span></div>')
-            tt_card += (f'<div class="tcard"><div class="thead">🏓 Other TT leagues '
+            tt_card += (f'<div class="tcard"><div class="thead">Other TT leagues '
                         f'<span class="tsh">shadow · not bet</span></div>'
                         f'<div class="ttrk"><div class="ttrkrow ttrkhd"><span>league</span><span>W-L</span>'
                         f'<span>hit</span><span>units</span></div>{trows}</div>'
                         f'<div class="tsub">validation only · flat 1u @ -120 · hidden from the bet board</div></div>')
     elif tt:                                               # backward-compat: old combined tracker
-        tt_card += card("🏓", "Table tennis", tt.get("w", 0), tt.get("l", 0), tt.get("u", 0.0),
+        tt_card += card("", "Table tennis", tt.get("w", 0), tt.get("l", 0), tt.get("u", 0.0),
                         "flat 1u · settles live · since 7/9")
     else:
-        tt_card += ('<div class="tcard"><div class="thead">🏓 Table tennis</div>'
+        tt_card += ('<div class="tcard"><div class="thead">Table tennis</div>'
                     '<div class="tsub">connecting… (needs the tt-elite bridge)</div></div>')
 
     # 4) WNBA parlays
@@ -1032,7 +1032,7 @@ def _tracker_panel(wnba_rec, tt_json):
             extra += [f"{pr['void']} void"] if pr["void"] else []
             extra += [f"{pr['suggested']} suggested"] if pr["suggested"] else []
             sub += (" · " + " · ".join(extra)) if extra else ""
-            parlay_card = (f'<div class="tcard"><div class="thead">🎰 WNBA Parlays</div><div class="trow">'
+            parlay_card = (f'<div class="tcard"><div class="thead">WNBA Parlays</div><div class="trow">'
                            f'<div class="tbox"><div class="tk">Record</div><div class="tv">{pr["w"]}-{pr["l"]}</div></div>'
                            f'<div class="tbox"><div class="tk">Hit rate</div><div class="tv">{hit}</div></div>'
                            f'<div class="tbox"><div class="tk">Units</div><div class="tv {ucls}">{pr["units"]:+.2f}u</div></div>'
@@ -1098,10 +1098,13 @@ TT_LIVE_JS = """
     n = (n >= 2) ? Math.round((n-1)*100) : -Math.round(100/(n-1));
     return (n > 0 ? '+' + n : String(n));
   }
-  var _TTMGM = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'"
-    + "%3E%3Crect width='24' height='24' rx='6' fill='%23c9a227'/%3E%3Ctext x='12' y='16'"
-    + " font-size='8.5' font-weight='700' text-anchor='middle' fill='%23151b24'"
-    + " font-family='Arial,sans-serif'%3EMGM%3C/text%3E%3C/svg%3E";
+  // Real BetMGM mark when docs/book-mgm.png exists; the monogram below is only the
+  // fallback for when it does not (no BetMGM SVG is publicly obtainable).
+  var _TTMGM = "book-mgm.png";
+  var _TTMGM_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'"
+    + " viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23c9a227'/%3E"
+    + "%3Ctext x='12' y='16' font-size='8.5' font-weight='700' text-anchor='middle'"
+    + " fill='%23151b24' font-family='Arial,sans-serif'%3EMGM%3C/text%3E%3C/svg%3E";
   function _ttNorm(x){
     return String(x||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'')
       .toLowerCase().split(/\s+/).filter(Boolean).join(' ');
@@ -1204,7 +1207,7 @@ TT_LIVE_JS = """
             + '<div class="cu-cf">' + _hit + '</div>'
             + '</div></div>';
     }
-    el.innerHTML = '<div class="card"><h3 class="ttlg">\\uD83C\\uDFD3 TT Elite ' + mid + ' Flags'
+    el.innerHTML = '<div class="card"><h3 class="ttlg">TT Elite ' + mid + ' Flags'
       + '<span class="ttcnt">' + entries.length + '</span></h3>' + rows
       + '<div class="ttfoot">projected = no posted line yet, never tracked</div></div>';
   };
@@ -1347,7 +1350,7 @@ def _feed_health_ping(tt_json):
         key = f"{today}|{board}"
         if key in seen:
             continue
-        text = f"⚠️ {board} feed issue: {v['reason']} — board may be missing plays, check the pipeline"
+        text = f"{board} feed issue: {v['reason']} — board may be missing plays, check the pipeline"
         try:
             requests.post(f"https://ntfy.sh/{topic}", data=text.encode("utf-8"),
                           params={"title": "Pickz", "priority": "high"}, timeout=15).raise_for_status()
@@ -2196,7 +2199,7 @@ def _injury_html():
         body = '<div class="swo">No impact players carry an injury status right now.</div>'
     _scope = ("· today" if _today_teams else "· all teams (slate lookup failed)")
     _hid = (" · %d hidden (not playing)" % _hidden) if _hidden else ""
-    return ('<div class="starwatch"><div class="sw-title">🏥 Injury report '
+    return ('<div class="starwatch"><div class="sw-title">Injury report '
             f'<span>{_scope}{_hid} · n = team games without her</span></div>'
             + stale + body + '</div>')
 
@@ -4044,6 +4047,28 @@ def build():
   #tt .cu-n {{ font-size:14px; color:var(--cu-lbl2); }}
   #tt .cu-n.na {{ color:var(--cu-lbl3); }}
   #tt .tld {{ color:var(--cu-lbl3); font-size:22px; }}
+
+  /* ══════════════════ CUPERTINO-CLEAN ══════════════════
+     No boxes behind marks. A league or team logo is already a designed shape with its own
+     silhouette; wrapping it in a tinted rounded square adds a container the brand never had.
+     Only the MONOGRAM fallback keeps a box — a bare two-letter string needs one to read as a mark
+     rather than as stray text. */
+  .mk, .glogo, .plogo, .bklogo, .llogo, .tlogo,
+  #wnba .cu-tm, #wnba .cu-gl, #wnba .glogo, #wnba .plogo, #wnba .bklogo,
+  #wnba .llogo, #wnba .swrow .glogo, #tt .bklogo, #pga .bklogo, #tracker .bklogo {{
+      background:none !important; border:0 !important; padding:0 !important;
+      border-radius:0 !important; }}
+  #wnba .llogo, #wnba .cu-gl {{ overflow:visible; }}
+  #wnba .llogo img {{ padding:0 !important; }}
+  /* monogram fallback keeps its container */
+  .llogo.mono, #wnba .llogo.mono {{ background:var(--cu-fill) !important; border-radius:6px !important;
+      display:inline-flex; align-items:center; justify-content:center; }}
+  /* marks are round-ish artwork; give them consistent optical sizes now the boxes are gone */
+  #wnba .cu-tm {{ width:20px; height:20px; }}
+  #wnba .cu-gl, #wnba .glogo {{ width:20px; height:20px; }}
+  #wnba .swrow .glogo {{ width:24px; height:24px; }}
+  .bklogo {{ width:22px !important; height:22px !important; }}
+  #wnba .cu-hd .bklogo {{ width:24px !important; height:24px !important; }}
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>

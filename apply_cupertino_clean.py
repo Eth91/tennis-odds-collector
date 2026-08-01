@@ -50,10 +50,15 @@ new_mgm = ('  // Real BetMGM mark when docs/book-mgm.png exists; the monogram be
            '    + "%3Ctext x=\'12\' y=\'16\' font-size=\'8.5\' font-weight=\'700\' text-anchor=\'middle\'"\n'
            '    + " fill=\'%23151b24\' font-family=\'Arial,sans-serif\'%3EMGM%3C/text%3E%3C/svg%3E";')
 s = s.replace(old_mgm, new_mgm, 1); n+=1; print("   - BetMGM -> real asset with monogram fallback")
-sub("""'<img class="bklogo" src="' + (_mgm ? _TTMGM : 'book-fd.png') + '" alt="'""",
-    """'<img class="bklogo" src="' + (_mgm ? _TTMGM : 'book-fd.png')
+# The rebuild patch may already carry this onerror (order between the two is not guaranteed,
+# since the loop can revert one of them mid-flight). Only add it if absent.
+if "_TTMGM_FALLBACK" not in s:
+    sub("""'<img class="bklogo" src="' + (_mgm ? _TTMGM : 'book-fd.png') + '" alt="'""",
+        """'<img class="bklogo" src="' + (_mgm ? _TTMGM : 'book-fd.png')
             + '" onerror="if(this.src.indexOf(\\'book-mgm\\')>-1)this.src=_TTMGM_FALLBACK" alt="'""",
-    "BetMGM onerror fallback")
+        "BetMGM onerror fallback")
+else:
+    print("   = onerror already present (from rebuild)")
 
 CSS = r"""
   /* ══════════════════ CUPERTINO-CLEAN ══════════════════
