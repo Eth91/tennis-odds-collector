@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-01T00:56:30Z",
+ "captured_at": "2026-08-01T01:01:41Z",
  "matches": [
   {
    "event_id": 35889325,
@@ -8,9 +8,9 @@
    "p1_norm": "jakub glanowski",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-08-01T00:45:00.000Z",
-   "line": 90.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 95.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35889345,
@@ -19,9 +19,9 @@
    "p1_norm": "krzysztof juszczyk",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-08-01T01:00:00.000Z",
-   "line": 75.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35889351,
@@ -53,6 +53,17 @@
    "p2_norm": "jakub glanowski",
    "open_date": "2026-08-01T01:10:00.000Z",
    "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35889362,
+   "p1": "Kamil Kowalski",
+   "p2": "Wojciech Urban",
+   "p1_norm": "kamil kowalski",
+   "p2_norm": "wojciech urban",
+   "open_date": "2026-08-01T01:25:00.000Z",
+   "line": 65.5,
    "over_odds": -116,
    "under_odds": -116
   }
