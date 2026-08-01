@@ -4017,8 +4017,12 @@ def build():
 
   /* ══════════════════ CUPERTINO-REBUILD ══════════════════ */
   /* WNBA drawer: labelled sections, hairline-ruled, one rhythm */
-  #wnba .dsec {{ padding-top:14px; margin-top:14px; border-top:.5px solid var(--cu-sep); }}
-  #wnba .bwrap > .meters + .dsec {{ margin-top:0; border-top:0; padding-top:0; }}
+  /* Drawer spacing is owned ENTIRELY by `#wnba .bwrap > * + *` further down. The two rules
+     that used to live here fought it: `.bwrap > .meters + .dsec` scores (1,3,0) and beat
+     the (1,1,0) parent rule outright, zeroing the gap and the hairline between the meters
+     and the first labelled section — which is what jammed 'WHY THIS FLAGGED' against the
+     block above it. They existed to avoid doubling up when .meters still had its own
+     border-bottom; it no longer does, so they are pure interference. */
   #wnba .dlab {{ font-size:12px; font-weight:600; letter-spacing:.02em; text-transform:uppercase;
                  color:var(--cu-lbl2); margin-bottom:8px; }}
   #wnba .dsec .why {{ margin:0; }}
