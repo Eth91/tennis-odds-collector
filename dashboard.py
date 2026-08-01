@@ -547,10 +547,16 @@ def _bars(r, meters=""):
     def sec(label, inner):
         """A section, or nothing at all. An absent block must not leave an orphan label or a
         trailing rule behind it — that was half of what made the old spacing look arbitrary."""
-        return f'<div class="dw-s"><div class="dw-l">{label}</div>{inner}</div>' if inner else ""
+        if not inner:
+            return ""
+        lab = f'<div class="dw-l">{label}</div>' if label else ""
+        return f'<div class="dw-s">{lab}{inner}</div>'
 
-    parts = [sec("Confidence", meters),
-             sec("Why this flagged", f'<div class="dw-p">{_reasoning(r)}</div>'),
+    # No label on the meters or the reasoning: both are self-describing ("when they sit 2/2 over"
+    # needs no CONFIDENCE header above it) and a label costs a full row. Labels are kept only where
+    # the block would otherwise be ambiguous.
+    parts = [sec("", meters),
+             sec("", f'<div class="dw-p">{_reasoning(r)}</div>'),
              sec("Same-lineup history", _regime_html(r))]
 
     s_ = _samples(r)
@@ -4211,6 +4217,30 @@ def build():
   @media (max-width:520px) {{
     #wnba .cu-sum {{ padding:16px; }}
   }}
+
+  /* ══════════════════ CUPERTINO-DW2 ══════════════════
+     Compacted after looking at it on device. The rebuild was structurally right but far too tall:
+     two of its four labels sat above content that already describes itself, and 16pt gaps are more
+     air than this density needs. 12pt rhythm, 14pt panel padding, and drawer type a step smaller
+     than the card face — detail should read as subordinate to the headline, not compete with it. */
+  #wnba .bars.open .dw {{ padding:14px; }}
+  #wnba .dw-s + .dw-s {{ margin-top:12px; padding-top:12px; }}
+  #wnba .dw-l {{ font-size:11px; margin-bottom:6px; }}
+  #wnba .dw-p {{ font-size:14px; line-height:1.4; }}
+  #wnba .dw .meter {{ margin-bottom:8px; gap:10px; }}
+  #wnba .dw .mlab {{ font-size:13px; width:100px; }}
+  #wnba .dw .mbar {{ height:6px; }}
+  #wnba .dw .mval {{ font-size:13px; }}
+  #wnba .dw .rgh {{ font-size:14px; line-height:1.4; }}
+  #wnba .dw .rgsub {{ font-size:12px; margin-top:6px; }}
+  #wnba .dw .cmps {{ margin-top:8px; gap:6px; }}
+  #wnba .dw .cmp {{ font-size:12px; padding:3px 8px; }}
+  #wnba .dw-chart {{ height:76px; gap:4px; }}
+  #wnba .dw-bar span {{ font-size:10px; }}
+  #wnba .dw-opps {{ margin-top:6px; }}
+  #wnba .dw-opps span {{ font-size:10px; }}
+  #wnba .dw-note {{ font-size:12px; margin-top:8px; }}
+  #wnba .dw-line span {{ font-size:10px; top:-14px; }}
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
