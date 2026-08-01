@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-01T00:12:32Z",
+ "captured_at": "2026-08-01T00:16:33Z",
  "matches": [
-  {
-   "event_id": 35889185,
-   "p1": "Michal Wolny",
-   "p2": "Jacek Zelezik",
-   "p1_norm": "michal wolny",
-   "p2_norm": "jacek zelezik",
-   "open_date": "2026-08-01T00:00:00.000Z",
-   "line": 70.5,
-   "over_odds": -140,
-   "under_odds": 100
-  },
   {
    "event_id": 35889234,
    "p1": "Patryk Jendrzejewski",
