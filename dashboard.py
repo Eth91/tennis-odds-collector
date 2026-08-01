@@ -522,6 +522,13 @@ def _regime_html(r):
             + f'<div class="cmps">{chips}</div></div>')
 
 
+def _meter_html(label, pct, valtext, title=""):
+    cls = " good" if pct >= 60 else (" bad" if pct <= 40 else "")
+    return (f'<div class="meter{cls}" title="{html.escape(title)}"><span class="mlab">{label}</span>'
+            f'<span class="mbar"><i style="width:{min(pct, 100):.0f}%"></i></span>'
+            f'<span class="mval">{valtext}</span></div>')
+
+
 def _bars(r, meters=""):
     """Dropdown: hit-rate meters (moved off the front card 2026-07-19) + generated reasoning + a
     PropsCash-style game log. Each game's ACTUAL stat is a bar (green if it cashed our side, red if
@@ -639,211 +646,198 @@ def _book_prices(r):
     return sorted([(b, o) for b, (ca, o) in latest.items()], key=lambda x: -x[1])
 
 
-def _prop_row(r, rungs=None):
-    """props.cash-style prop: side pill + line + stat, best-book odds + model edge on the right, the
-    hit-rate HEATMAP (ROLE injury-context · L5 · L10 · season · H2H, green/red), and a compact
-    context line (usage driver + matchup D + the runner-up book price). Taps to expand the bars."""
-    stat = STAT.get(r["stat"], r["stat"].upper())
-    # REB VERDICT EXECUTED (2026-07-18, pre-committed at ~33 graded): the current-rules reb
-    # subset finished NET-POSITIVE (+0.36u, 7-6; in-band reb 10-5 +4.8u) — the historical bleed
-    # was entirely OUT-OF-BAND flags (1-8, -6.8u), which is a band problem, not a rebounds
-    # problem. Watch tag removed per the rule; next validation target = out-of-band firm flags
-    # (incl. the cold-margin exemption: Makani -4.1 scoreless, Ododa 10.7) via the real-line
-    # replay before any gate ships.
-    rwatch = ""
-    tval = r.get("_tier")
-    tierchip = (f'<span class="tchip t{tval}" title="confidence tier — live record in the legend '
-                f'below">{tval}</span>' if tval else "")
-    side = (r.get("side") if hasattr(r, "get") else r["side"]) or "over"
-    o = "O" if side == "over" else "U"
-    oword = "OVER" if side == "over" else "UNDER"
-    ev = r.get("ev")
-    edge_v = f"{ev*100:+.0f}%" if ev is not None else ""
-    ecls = "hi" if (ev or 0) >= 0.15 else ("mid" if (ev or 0) >= 0.07 else "lo")
-    # PLAIN-LANGUAGE METERS (2026-07-17 user: the ROLE/L5/L10/SZN/H2H boxes "make no sense at
-    # first glance") — two labeled bars anyone can read: how often she clears THIS line when the
-    # star sits, and over her last 10. Full splits still live in the drawer chart.
-    def _meter(label, pct, valtext, title=""):
-        cls = " good" if pct >= 60 else (" bad" if pct <= 40 else "")
-        return (f'<div class="meter{cls}" title="{html.escape(title)}"><span class="mlab">{label}</span>'
-                f'<span class="mbar"><i style="width:{min(pct, 100):.0f}%"></i></span>'
-                f'<span class="mval">{valtext}</span></div>')
-    sp = _splits(r) or {}
-    ms = []
+def _cu_status(r):
+    """Lineup status as an iOS pill. Real values only — the logger writes exactly these four."""
+    return {"confirmed": ("Starting", "ok"), "likely": ("Likely", "mid"),
+            "bench": ("Bench", "pp"), "projected": ("TBD", "no")}.get(
+                r.get("confidence") or "projected", ("TBD", "no"))
+
+
+def _cu_conf(r):
+    """The card-face confidence bar. This is the model's OWN primary meter promoted out of the
+    drawer, never a new number: volume rows show proj_hit, role rows show the when-they-sit record.
+    Returns (pct, label, good) or None when the model has neither — the card then shows an em-dash
+    rather than inventing a figure."""
     if r.get("basis") == "volume" and r.get("proj_hit"):
-        ms.append(_meter("volume model", r["proj_hit"] * 100, f'{r["proj_hit"]*100:.0f}%',
-                         "model probability off shot volume (volume is sticky, shooting is variance)"))
-    else:
-        rec = _raw_record(r)
-        if rec and rec[1]:
-            ms.append(_meter("when they sit", rec[0] / rec[1] * 100, f"{rec[0]}/{rec[1]} over",
-                             "her games with tonight's ruled-out players actually out — over this line"))
+        p = r["proj_hit"] * 100
+        return p, f'{p:.0f}%', p >= 60
+    rec = _raw_record(r)
+    if rec and rec[1]:
+        p = rec[0] / rec[1] * 100
+        return p, f'{rec[0]}/{rec[1]} when out', p >= 60
+    sp = _splits(r) or {}
     l10 = sp.get("l10")
     if l10 and l10[1]:
-        ms.append(_meter("last 10 games", l10[0] / l10[1] * 100, f"{l10[0]}/{l10[1]} over",
-                         "all recent games, any lineup — over this line"))
-    grid = "".join(ms)
-    # context line — our injury driver + the DvP matchup note (qualitative signals, not hit rates)
-    ctx, drv, dm = [], r.get("driver"), r.get("d_min")
-    dlbl = {"points": "usg", "rebounds": "reb", "assists": "ast"}.get(r["stat"], "usg")
-    if drv is not None and drv >= 1:
-        ctx.append(f'<span class="cdrv">▲{drv:+.0f} {dlbl}</span>')
-    elif dm is not None and dm > 2:
-        ctx.append(f'<span class="cdrv">▲{dm:+.0f} min</span>')
-    try:
-        import wnba_dvp as DVP
-        note = DVP.matchup_note((r.get("opp") or "").upper(), r.get("pos") or "", r["stat"])
-        if note:
-            ctx.append(f'<span class="cdvp {note}">{note} D</span>')
-    except Exception:
-        pass
-    if r.get("elev_avg") is not None:
-        ctx.append(f'proj {r["elev_avg"]:g}')
-    # BEST PRICE across books — show WHICH book has the best number, runner-up in the context line
-    # IN PROGRESS: freeze the price at what we flagged. _book_prices would quote the in-play
-    # market (Mabrey read -440 on the board against +116 in the ledger).
+        p = l10[0] / l10[1] * 100
+        return p, f'{l10[0]}/{l10[1]} last 10', p >= 60
+    return None
+
+
+def _prop_row(r, rungs=None, player=None):
+    """ONE Cupertino card: status pill + book + lock time, player + team marks, context sub-line,
+    the bet at display size, and the confidence bar on the face. Tapping toggles the drawer, which
+    is unchanged."""
+    stat = STAT.get(r["stat"], r["stat"].upper())
+    side = (r.get("side") if hasattr(r, "get") else r["side"]) or "over"
+    oword = "OVER" if side == "over" else "UNDER"
+    o = "o" if side == "over" else "u"
+
+    # ---- header: status, book, lock ----
+    slbl, scls = _cu_status(r)
     if r.get("_tipped"):
-        ctx.append('<span class="cdrv">● IN PROGRESS · price at flag</span>')
+        slbl, scls = "In progress", "pp"
     bp = None if r.get("_tipped") else _book_prices(r)
     if bp:
         best_bk, best_dec = bp[0]
-        # BOOK-COLORED ODDS + LOGO (2026-07-19): FanDuel blue, DraftKings green, with the book's
-        # logo alongside so the source is unmistakable.
-        bcls = best_bk if best_bk in ("fd", "dk") else "oth"
         btag = (f'<img class="bklogo" src="book-{best_bk}.png" alt="{best_bk.upper()}">'
                 if best_bk in ("fd", "dk") else f'<span class="pbk oth">{best_bk.upper()}</span>')
-        odds_html = f'<span class="podds {bcls}">{_am(best_dec)}</span>{btag}'
-        if len(bp) > 1:
-            ctx.append(f'{bp[1][0].upper()} {_am(bp[1][1])}')
     else:
-        best_dec = float(r["odds"])
-        odds_html = f'<span class="podds fd">{_am(best_dec)}</span><img class="bklogo" src="book-fd.png" alt="FD">'
-    ctxline = f'<div class="pctx">{" · ".join(ctx)}</div>' if ctx else ""
-    dk = html.escape(f"{r.get('pred_date') or ''}|{r['player']}|{r['stat']}|{r['line']:g}")
-    # CONTRA tag: when most recent-form windows and/or the same-lineup comps lean AGAINST the
-    # bet, say so ON the card face (2026-07-17 audit: green EV over red chips read as a bug —
-    # the drawer's honest warning was invisible until tapped).
+        best_dec, best_bk = float(r["odds"]), "fd"
+        btag = '<img class="bklogo" src="book-fd.png" alt="FD">'
+    tipt = r.get("_tiptime") or ""
+
+    # ---- title: player + both team marks ----
+    nm = html.escape(_short(player or r.get("player") or ""))
+    team, opp = (r.get("team") or "").upper(), (r.get("opp") or "").upper()
+
+    def _tm(ab):
+        return (f'<img class="cu-tm" src="{LOGO.format(ab.lower())}" alt="{ab}" loading="lazy" '
+                f'onerror="this.style.display=\'none\'">' if ab else "")
+    tms = (f'<span class="cu-tms">{_tm(team)}<i>@</i>{_tm(opp)}</span>'
+           if team or opp else "")
+
+    # ---- sub-line: market, tier, and the injury driver that created the spot ----
+    sub = [stat.title() if stat else ""]
+    tval = r.get("_tier")
+    if tval:
+        sub.append(f"Tier {tval}")
+    outs = ", ".join(_short(x.strip()) for x in (r.get("out_player") or "").split(",") if x.strip())
+    if outs:
+        sub.append(f"{html.escape(outs)} out")
+    dm = r.get("d_min")
+    if not outs and dm is not None and dm > 2:
+        sub.append(f"{dm:+.0f} min")
+    subline = " · ".join(x for x in sub if x)
+
+    # ---- the bet ----
+    if rungs and len(rungs) > 1:
+        lns = sorted(x["line"] for x in rungs)
+        line_disp, rng = f"{lns[0]:g}–{lns[-1]:g}", " rng"
+    else:
+        line_disp, rng = f"{r['line']:g}", ""
+    unit = f'<span class="cu-unit">{stat.lower()}</span>' if stat else ""
+
+    # ---- confidence bar (real meter, promoted from the drawer) ----
+    cf = _cu_conf(r)
+    if cf:
+        pct, clbl, good = cf
+        bar = (f'<span class="cu-bar"><i class="{"g" if good else ""}" '
+               f'style="width:{min(pct,100):.0f}%"></i></span>'
+               f'<span class="cu-pc">{pct:.0f}%</span><span class="cu-n">{clbl}</span>')
+    else:
+        bar = ('<span class="cu-bar"></span><span class="cu-pc na">—</span>'
+               '<span class="cu-n na">no sample</span>')
+
+    # ---- warnings that must stay on the face ----
     pcts = []
     rr_ = None if r.get("basis") == "volume" else _raw_record(r)
     if rr_ and rr_[1]:
         pcts.append(rr_[0] / rr_[1] * 100)
+    sp = _splits(r) or {}
     for kk_ in ("l5", "l10", "szn", "h2h"):
         hh_ = sp.get(kk_)
         if hh_ and hh_[1]:
             pcts.append(hh_[0] / hh_[1] * 100)
-    rg_against = False
-    try:
-        rg_ = json.loads(r["regime"]) if r.get("regime") else {}
-        if rg_.get("comps") and rg_.get("comp_avg") is not None:
-            rg_against = ((rg_["comp_avg"] <= float(r["line"])) if side == "over"
-                          else (rg_["comp_avg"] >= float(r["line"])))
-    except (ValueError, TypeError):
-        pass
     ncold = sum(1 for p_ in pcts if p_ <= 35)
-    contra = ('<span class="contra" title="most form windows / same-lineup comps lean against '
-              'this bet — open the drawer">⚠</span>'
-              if (pcts and ncold >= max(2, len(pcts) / 2)) or (rg_against and ncold >= 1) else "")
-    # GROUP same-stat/same-side rungs (an under whose anchor line moved across scans, or an overs
-    # ladder): ONE card showing the line RANGE + a strip of every rung's line@odds — declutters
-    # without dropping any flag (each rung stays its own ledger row / placed bet).
-    rngcls = ""
+    contra = ('<span class="cu-warn" title="most form windows lean against this bet — open the '
+              'drawer">⚠</span>' if pcts and ncold >= max(2, len(pcts) / 2) else "")
+
+    rungs_html = ""
     if rungs and len(rungs) > 1:
-        lns = sorted(x["line"] for x in rungs)
-        line_disp = f"{lns[0]:g}–{lns[-1]:g}"
-        rngcls = " rng"                                    # smaller font so the range never wraps
         chips = []
         for rr in sorted(rungs, key=lambda x: x["line"]):
             bpr = _book_prices(rr)
             chips.append(f'<span class="rung"><b>{rr["line"]:g}</b> '
                          f'<span class="ro">{_am(bpr[0][1] if bpr else float(rr["odds"]))}</span></span>')
-        rungs_html = f'<div class="prungs"><span class="rlbl">rungs</span>{"".join(chips)}</div>'
+        rungs_html = f'<div class="cu-rungs">{"".join(chips)}</div>'
+
+    # the drawer keeps its original meters
+    ms = []
+    if r.get("basis") == "volume" and r.get("proj_hit"):
+        ms.append(_meter_html("volume model", r["proj_hit"] * 100, f'{r["proj_hit"]*100:.0f}%',
+                              "model probability off shot volume"))
     else:
-        line_disp, rungs_html = f"{r['line']:g}", ""
+        rec = _raw_record(r)
+        if rec and rec[1]:
+            ms.append(_meter_html("when they sit", rec[0] / rec[1] * 100, f"{rec[0]}/{rec[1]} over",
+                                  "her games with tonight\u2019s ruled-out players actually out"))
+    l10 = sp.get("l10")
+    if l10 and l10[1]:
+        ms.append(_meter_html("last 10 games", l10[0] / l10[1] * 100, f"{l10[0]}/{l10[1]} over",
+                              "all recent games, any lineup"))
+    dk = html.escape(f"{r.get('pred_date') or ''}|{r['player']}|{r['stat']}|{r['line']:g}")
     return f"""
-      <div class="prop" data-side="{side}" data-k="{dk}" onclick="this.nextElementSibling.classList.toggle('open')">
-        <div class="prow">
-          <span class="pind {o.lower()}">{oword}</span>
-          <span class="plno{rngcls}">{line_disp}</span><span class="pstat">{stat}</span>{tierchip}{rwatch}
-          <span class="psp"></span>
-          {odds_html}
-          <span class="pedge {ecls}">{edge_v}</span>{contra}<span class="pchev">›</span></div>
-        {ctxline}{rungs_html}
-      </div>{_bars(r, grid)}"""
+      <div class="cu-c">
+        <div class="cu-sum" data-side="{side}" data-k="{dk}"
+             onclick="this.parentNode.querySelector('.bars').classList.toggle('open')">
+          <div class="cu-hd"><span class="cu-st {scls}">{slbl}</span>{btag}
+            <span class="cu-time">{tipt}</span></div>
+          <div class="cu-ttl">{nm}{tms}</div>
+          <div class="cu-sub">{subline}</div>
+          <div class="cu-bet"><span class="cu-dir {o}">{oword}</span>
+            <span class="cu-line{rng}">{line_disp}</span>{unit}
+            <span class="cu-price">{contra}<span class="cu-od">{_am(best_dec)}</span>
+              <span class="cu-chev">\u203a</span></span></div>
+          <div class="cu-cf">{bar}</div>{rungs_html}
+        </div>{_bars(r, "".join(ms))}
+      </div>"""
 
 
 def _player_block(player, rows):
-    """One beneficiary inside a game: team logo + name, lineup status as a quiet dot-chip, projected
-    minutes right-aligned. The team-level injury context (who's out) lives on the GAME header, not
-    here. Color discipline: the status is a small colored DOT + gray text, not colored text — the
-    saturated green on this surface belongs to the edge number alone."""
-    r0 = rows[0]
-    team = (r0.get("team") or "").upper()
-    logo = (f'<img class="plogo" src="{LOGO.format(team.lower())}" alt="" loading="lazy" '
-            f'onerror="this.style.display=\'none\'">' if team else "")
-    cb = {"confirmed": ("starting", "ok"), "bench": ("bench", "warn"),
-          "likely": ("likely", "mid"), "projected": ("TBD", "mid")}.get(
-              r0.get("confidence") or "projected", ("", ""))
-    flag = f'<span class="pflag"><i class="sdot {cb[1]}"></i>{cb[0]}</span>' if cb[0] else ""
-    pm, dm = r0.get("proj_min"), r0.get("d_min")
-    mins = ""
-    if pm:
-        trend = ("" if dm is None else
-                 (f' <span class="tup">▲+{dm:.0f}</span>' if dm >= 0
-                  else f' <span class="tdn">▼{dm:.0f}</span>'))
-        mins = f'<span class="pmin">~{pm:.0f}\'{trend}</span>'
-    sp = r0.get("spread")
-    dogchip = (f'<span class="dog">+{sp:.0f} dog</span>' if sp is not None and sp >= 8 else "")
-    # ('2★ out' badge removed 2026-07-17 — the multi-out cell carried no real-line signal
-    # (our bets: 2+ out 56% vs 1 out 60%); the game header's outs line already shows who's out.)
-    # group same-stat/same-side rungs into ONE card (the anchor line can move across scans and the
-    # keep-every-flag rule preserves each rung — so show them as one play with its line range, no flag
-    # dropped). Order groups by best rung EV; a single-rung group renders exactly as before.
+    """Each play is now its own card carrying the player identity, so this just orders them."""
     groups = {}
     for r in rows:
         groups.setdefault((r["stat"], (r.get("side") or "over")), []).append(r)
+
     def _render(g):
         side = g[0].get("side") or "over"
         if side == "under" and len(g) > 1:
-            # NO UNDER LADDERS (user): a moved anchor left multiple under rungs; show ONLY the single
-            # best (highest = most room) under line, not a ladder. Display-only — the ledger keeps
-            # every flag (permanent-flag rule intact); we just don't surface the redundant rungs.
-            return _prop_row(max(g, key=lambda x: x["line"]))
-        g = sorted(g, key=lambda x: -(x.get("ev") or 0))            # overs: keep the intentional ladder
-        return _prop_row(g[0], rungs=g if len(g) > 1 else None)
+            return _prop_row(max(g, key=lambda x: x["line"]), player=player)
+        g = sorted(g, key=lambda x: -(x.get("ev") or 0))
+        return _prop_row(g[0], rungs=g if len(g) > 1 else None, player=player)
     ordered = sorted(groups.values(), key=lambda g: -max((x.get("ev") or 0) for x in g))
-    props = "".join(_render(g) for g in ordered)
-    return (f'<div class="pblk">'
-            f'<div class="phd">{logo}<span class="pname">{html.escape(_short(player))}</span>'
-            f'{flag}{dogchip}<span class="psp2"></span>{mins}</div>{props}</div>')
+    return "".join(_render(g) for g in ordered)
 
 
 def _game_group(players, tips, today=None, idx=0):
-    """A GAME: a header (matchup + tip time / slate day) and the shared injury context (who's
-    out), then the beneficiary blocks. `players` = [(player, rows)] already ordered by edge. A
-    play whose slate date isn't today is labelled with its weekday+date."""
+    """A GAME as an iOS grouped-list section: header (league mark + matchup + tip), then the
+    rounded group of play cards."""
     r0 = players[0][1][0]
     team = (r0.get("team") or "").upper()
     opp = (r0.get("opp") or "").upper()
     pd0 = r0.get("pred_date") or (today or "")
     tip = tips.get((pd0, team)) or tips.get((pd0, opp))
     tiptime = tip.astimezone(MT).strftime("%-I:%M %p") if tip else ""
-    when = tiptime                                         # the day is shown once, in the .dayhdr divider
+    for _, prs in players:
+        for r in prs:
+            r["_tiptime"] = tiptime
     outset = {_short(nm.strip()) for _, prs in players for r in prs
               for nm in (r.get("out_player") or "").split(",") if nm.strip()}
     outs = " + ".join(sorted(outset))
-    blocks = "".join(_player_block(p, prs) for p, prs in players)
+    cards = "".join(_player_block(p, prs) for p, prs in players)
     gedge = max((x.get("ev") or 0) for _, prs in players for x in prs)
     gtip = tip.timestamp() if tip else 9e15
 
     def glogo(ab):
-        return (f'<img class="glogo" src="{LOGO.format(ab.lower())}" alt="" loading="lazy" '
+        return (f'<img class="cu-gl" src="{LOGO.format(ab.lower())}" alt="" loading="lazy" '
                 f'onerror="this.style.display=\'none\'">' if ab else "")
+    outline = (f'<div class="cu-out"><i class="sdot warn"></i>{html.escape(outs)} out</div>'
+               if outs else "")
     return (f'<div class="game" data-edge="{gedge:.4f}" data-tip="{gtip:.0f}" style="--i:{idx}">'
-            f'<div class="ghd">{_llogo("wnba")}<span class="gmatch">{glogo(team)}{team}'
-            f'<span class="gvs">vs</span>{glogo(opp)}{opp or "—"}</span>'
-            f'<span class="gtime">{when}</span></div>'
-            + (f'<div class="gout"><i class="sdot warn"></i>{html.escape(outs)} out</div>' if outs else "")
-            + blocks + "</div>")
+            f'<div class="cu-sh">{_llogo("wnba")}<b>WNBA</b>'
+            f'<span class="cu-shm">{glogo(team)}{team} @ {glogo(opp)}{opp or "—"}</span>'
+            f'<span class="cu-shr">{tiptime}</span></div>'
+            f'{outline}<div class="cu-grp">{cards}</div></div>')
 
 
 def _load_tt():
@@ -3459,100 +3453,120 @@ def build():
     *, *::before, *::after {{ animation:none !important; transition:none !important; }}
   }}
 
-  /* ══════════════════ CUPERTINO-DARK v2 ══════════════════
-     Apple's dark system palette, SCOPED TO #wnba. The other panels (#tt, #pga, #mlb) keep their
-     own semantics untouched — TT/MLB unders stay red, FanDuel stays blue, DraftKings green,
-     BetMGM gold. Those colours are functional on those boards and are not ours to flatten.
-     The #wnba prefix scores (1,1,0), which beats the existing (0,2,0) class rules inside the
-     panel and loses everywhere else, so no !important is needed anywhere below. */
+  /* ══════════════════ CUPERTINO-CSS2 ══════════════════
+     Apple dark, matching the approved render 1:1. Scoped to #wnba; #tt/#pga/#mlb are untouched.
+     Dark mode is not an inversion — elevation REVERSES (the drawer rises to #2C2C2E inside a
+     #1C1C1E group), semantics use Apple's brighter dark variants, and the hover wash is white. */
   :root {{
-    --cu-bg:#000;                      /* systemGroupedBackground (dark) — true black, not grey */
-    --cu-grp:#1c1c1e;                  /* secondarySystemGroupedBackground — cards live here */
-    --cu-grp2:#2c2c2e;                 /* tertiary — the drawer RISES to this, it does not recede */
-    --cu-lbl:#fff;
-    --cu-lbl2:rgba(235,235,245,.6);
-    --cu-lbl3:rgba(235,235,245,.3);    /* the em-dash colour */
-    --cu-fill:rgba(120,120,128,.24);   /* bar tracks — higher alpha than light mode needs */
-    --cu-sep:rgba(84,84,88,.65);
-    --cu-hover:rgba(255,255,255,.04);  /* inverts from black-3% in light */
+    --cu-bg:#000; --cu-grp:#1c1c1e; --cu-grp2:#2c2c2e;
+    --cu-lbl:#fff; --cu-lbl2:rgba(235,235,245,.6); --cu-lbl3:rgba(235,235,245,.3);
+    --cu-fill:rgba(120,120,128,.24); --cu-sep:rgba(84,84,88,.65);
     --cu-blue:#0a84ff; --cu-grn:#30d158; --cu-org:#ff9f0a; --cu-red:#ff453a;
   }}
-  body {{ background:var(--cu-bg); color:var(--cu-lbl); }}
+  body {{ background:var(--cu-bg); color:var(--cu-lbl);
+          font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif; }}
 
-  /* group = rounded container, hairline inset separators, no border */
-  #wnba .pblk {{ background:var(--cu-grp); border:0; border-radius:12px; padding:0;
-                 margin-bottom:16px; overflow:hidden; }}
-  #wnba .phd {{ padding:12px 16px 10px; gap:10px; }}
-  #wnba .pname {{ font-size:19px; font-weight:640; letter-spacing:-.022em; color:var(--cu-lbl); }}
-  #wnba .plogo {{ width:26px; height:26px; background:var(--cu-fill); padding:2px; }}
-  #wnba .prop {{ padding:12px 16px 14px; border-top:.5px solid var(--cu-sep); margin-top:0;
-                 transition:background .13s; }}
-  #wnba .pblk .prop:first-of-type {{ border-top:.5px solid var(--cu-sep); margin-top:0; }}
-  #wnba .prop:hover {{ background:var(--cu-hover); }}
-  #wnba .prop:has(+ .bars.open) {{ background:rgba(255,255,255,.025); }}
-
-  /* THE BET — direction is a subordinate word, the number is the object. 36px vs 19px name. */
-  /* .prop-scoped ONLY. The "Also considered · NOT BET" panel also lives in #wnba but renders
-     compact .ttbet rows whose .pind is a chip, not a card label — restyling it there stripped the
-     chip and left a floating "O". Cupertino applies to the CARDS; that list keeps its own idiom. */
-  #wnba .prop .pind {{ width:auto; height:auto; border-radius:0; background:none;
-                       font-size:13px; font-weight:700; letter-spacing:.06em;
-                       color:var(--cu-lbl2); display:inline; place-items:unset; }}
-  #wnba .plno {{ font-size:36px; font-weight:680; letter-spacing:-.04em; color:var(--cu-lbl); }}
-  #wnba .plno.rng {{ font-size:24px; }}
-  #wnba .pstat {{ font-size:14px; font-weight:600; color:var(--cu-lbl2); letter-spacing:0; }}
-  #wnba .prow {{ gap:8px; align-items:baseline; }}
-
-  /* price + book. Over/under carries NO colour HERE — direction is a label, not a state; green and
-     red stay reserved for outcome and injury on this board. TT/MLB keep their own scheme. */
-  #wnba .podds {{ font-size:20px; font-weight:640; letter-spacing:-.02em; color:var(--cu-lbl); }}
-  #wnba .bklogo {{ width:26px; height:26px; border-radius:7px; background:var(--cu-fill);
-                   padding:3px; vertical-align:-7px; margin-left:7px; }}
-  #wnba .pedge {{ font-size:15px; font-weight:640; color:var(--cu-lbl2); }}
-  #wnba .pedge.hi {{ color:var(--cu-grn); }}
-  #wnba .pedge.mid {{ color:var(--cu-lbl2); }}
-  #wnba .pedge.lo {{ color:var(--cu-lbl3); }}
-  #wnba .pchev {{ color:var(--cu-lbl3); font-size:16px; }}
-  #wnba .pctx {{ color:var(--cu-lbl2); font-size:14px; }}
-
-  /* confidence meters — system fills, semantic only at the ends */
-  #wnba .meter .mbar {{ background:var(--cu-fill); border-radius:4px; height:7px; }}
-  #wnba .meter .mbar i {{ background:var(--cu-blue); border-radius:4px; }}
-  #wnba .meter.good .mbar i {{ background:var(--cu-grn); }}
-  #wnba .meter.bad .mbar i {{ background:var(--cu-red); }}
-  #wnba .meter .mlab {{ color:var(--cu-lbl2); }}
-  #wnba .meter .mval {{ color:var(--cu-lbl); font-variant-numeric:tabular-nums; }}
-
-  /* the drawer ELEVATES — the single detail that makes it read as iOS dark rather than a recolour */
-  #wnba .bars.open {{ background:var(--cu-grp2); border-radius:10px;
-                      margin:0 12px 12px; padding:12px 14px; }}
-  #wnba .bwrap .meters {{ border-bottom:.5px solid var(--cu-sep); }}
-
-  /* section header: league mark then the two team marks */
-  #wnba .ghd {{ gap:9px; padding:0 4px 10px; }}
-  #wnba .llogo {{ width:26px; height:26px; border-radius:7px; flex:none; display:inline-flex;
+  /* ---- grouped-list section header ---- */
+  #wnba .cu-sh {{ display:flex; align-items:center; gap:8px; padding:8px 4px 7px;
+                  font-size:13px; letter-spacing:.02em; text-transform:uppercase;
+                  color:var(--cu-lbl2); }}
+  #wnba .cu-sh b {{ font-weight:600; letter-spacing:0; text-transform:none; font-size:13px; }}
+  #wnba .cu-shm {{ display:inline-flex; align-items:center; gap:5px; text-transform:none;
+                   letter-spacing:0; font-size:13px; }}
+  #wnba .cu-shr {{ margin-left:auto; text-transform:none; letter-spacing:0; font-size:13px;
+                   font-variant-numeric:tabular-nums; }}
+  #wnba .cu-gl {{ width:20px; height:20px; object-fit:contain; border-radius:5px;
+                  background:var(--cu-fill); padding:2px; }}
+  #wnba .llogo {{ width:24px; height:24px; border-radius:6px; flex:none; display:inline-flex;
                   align-items:center; justify-content:center; overflow:hidden;
                   background:var(--cu-fill); }}
   #wnba .llogo img {{ width:100%; height:100%; object-fit:contain; padding:3px; }}
-  #wnba .llogo.mono {{ font-size:9px; font-weight:700; letter-spacing:-.03em; color:var(--cu-lbl2); }}
-  #wnba .gmatch {{ font-size:13px; font-weight:600; letter-spacing:0; text-transform:uppercase;
-                   color:var(--cu-lbl2); }}
-  #wnba .glogo {{ width:22px; height:22px; background:var(--cu-fill); padding:2px; }}
-  #wnba .gtime {{ color:var(--cu-lbl2); font-size:14px; font-variant-numeric:tabular-nums; }}
-  #wnba .gout {{ color:var(--cu-lbl2); font-size:14px; }}
+  #wnba .llogo.mono {{ font-size:8px; font-weight:700; color:var(--cu-lbl2); }}
+  #wnba .cu-out {{ display:flex; align-items:center; gap:7px; padding:0 4px 8px;
+                   font-size:13px; color:var(--cu-lbl2); }}
 
-  /* status chips — semantic at 18% alpha; a tint needs more weight on black than on white */
-  #wnba .pflag {{ color:var(--cu-lbl2); font-size:13px; }}
-  #wnba .tchip {{ border-radius:11px; font-size:12px; font-weight:600; padding:2px 8px; }}
-  #wnba .pmin {{ color:var(--cu-lbl2); font-size:14px; font-variant-numeric:tabular-nums; }}
+  /* ---- the rounded group + card ---- */
+  #wnba .cu-grp {{ background:var(--cu-grp); border-radius:12px; overflow:hidden;
+                   margin-bottom:20px; }}
+  #wnba .cu-c {{ border-bottom:.5px solid var(--cu-sep); }}
+  #wnba .cu-c:last-child {{ border-bottom:0; }}
+  #wnba .cu-sum {{ padding:13px 16px 14px; cursor:pointer; transition:background .13s; }}
+  #wnba .cu-sum:hover {{ background:rgba(255,255,255,.04); }}
+  #wnba .cu-sum:active {{ background:rgba(255,255,255,.07); }}
 
-  /* an unavailable value is a designed state, not a gap */
-  #wnba .na {{ color:var(--cu-lbl3); }}
-  #wnba .pedge:empty::before {{ content:"—"; color:var(--cu-lbl3); }}
+  /* header row: status pill, book mark, lock time */
+  #wnba .cu-hd {{ display:flex; align-items:center; gap:8px; margin-bottom:9px; }}
+  #wnba .cu-st {{ font-size:12px; font-weight:600; padding:2px 8px; border-radius:11px; }}
+  #wnba .cu-st.ok {{ color:var(--cu-grn); background:rgba(48,209,88,.18); }}
+  #wnba .cu-st.mid {{ color:var(--cu-blue); background:rgba(10,132,255,.18); }}
+  #wnba .cu-st.pp {{ color:var(--cu-org); background:rgba(255,159,10,.18); }}
+  #wnba .cu-st.no {{ color:var(--cu-lbl2); background:var(--cu-fill); }}
+  #wnba .cu-hd .bklogo {{ width:24px; height:24px; border-radius:6px; background:var(--cu-fill);
+                          padding:3px; margin:0; vertical-align:0; }}
+  #wnba .cu-time {{ margin-left:auto; font-size:14px; color:var(--cu-lbl2);
+                    font-variant-numeric:tabular-nums; }}
+
+  /* title + team marks */
+  #wnba .cu-ttl {{ font-size:19px; font-weight:640; letter-spacing:-.022em; color:var(--cu-lbl);
+                   display:flex; align-items:center; gap:8px; margin-bottom:2px; }}
+  #wnba .cu-tms {{ display:inline-flex; align-items:center; gap:4px; }}
+  #wnba .cu-tms i {{ font-style:normal; font-size:13px; color:var(--cu-lbl3); font-weight:400; }}
+  #wnba .cu-tm {{ width:22px; height:22px; object-fit:contain; border-radius:50%;
+                  background:var(--cu-fill); padding:2px; }}
+  #wnba .cu-sub {{ font-size:15px; color:var(--cu-lbl2); margin-bottom:14px; }}
+
+  /* THE BET — 36px number, direction subordinate, price right-aligned */
+  #wnba .cu-bet {{ display:flex; align-items:baseline; gap:8px; margin-bottom:14px; }}
+  #wnba .cu-dir {{ font-size:13px; font-weight:700; letter-spacing:.06em; color:var(--cu-lbl2); }}
+  #wnba .cu-line {{ font-size:36px; font-weight:680; letter-spacing:-.04em; line-height:1;
+                    font-variant-numeric:tabular-nums; }}
+  #wnba .cu-line.rng {{ font-size:26px; }}
+  #wnba .cu-unit {{ font-size:14px; font-weight:600; color:var(--cu-lbl2); }}
+  #wnba .cu-price {{ margin-left:auto; display:flex; align-items:center; gap:9px; }}
+  #wnba .cu-od {{ font-size:20px; font-weight:640; letter-spacing:-.02em;
+                  font-variant-numeric:tabular-nums; }}
+  #wnba .cu-chev {{ color:var(--cu-lbl3); font-size:15px; transition:transform .18s; }}
+  #wnba .cu-c:has(.bars.open) .cu-chev {{ transform:rotate(90deg); }}
+  #wnba .cu-warn {{ color:var(--cu-org); font-size:14px; }}
+
+  /* confidence on the FACE */
+  #wnba .cu-cf {{ display:flex; align-items:center; gap:11px; }}
+  #wnba .cu-bar {{ flex:1; height:7px; background:var(--cu-fill); border-radius:4px;
+                   overflow:hidden; }}
+  #wnba .cu-bar i {{ display:block; height:100%; background:var(--cu-blue); border-radius:4px; }}
+  #wnba .cu-bar i.g {{ background:var(--cu-grn); }}
+  #wnba .cu-pc {{ font-size:16px; font-weight:640; letter-spacing:-.02em;
+                  font-variant-numeric:tabular-nums; }}
+  #wnba .cu-pc.na {{ color:var(--cu-lbl3); }}
+  #wnba .cu-n {{ font-size:14px; color:var(--cu-lbl2); font-variant-numeric:tabular-nums; }}
+  #wnba .cu-n.na {{ color:var(--cu-lbl3); }}
+  #wnba .cu-rungs {{ display:flex; gap:6px; flex-wrap:wrap; margin-top:11px; }}
+  #wnba .cu-rungs .rung {{ font-size:12px; color:var(--cu-lbl2); background:var(--cu-fill);
+                           border-radius:7px; padding:3px 8px; font-variant-numeric:tabular-nums; }}
+  #wnba .cu-rungs .rung b {{ color:var(--cu-lbl); font-weight:600; }}
+
+  /* ---- the drawer ELEVATES (tertiary above secondary) ---- */
+  #wnba .bars {{ padding:0 12px 12px; }}
+  #wnba .bars.open {{ background:transparent; }}
+  #wnba .bwrap {{ background:var(--cu-grp2); border-radius:10px; padding:12px 14px; }}
+  #wnba .bwrap .meters {{ margin:0 0 12px; padding-bottom:12px;
+                          border-bottom:.5px solid var(--cu-sep); }}
+  #wnba .meter {{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }}
+  #wnba .meter .mlab {{ font-size:13px; color:var(--cu-lbl2); }}
+  #wnba .meter .mbar {{ flex:1; height:7px; background:var(--cu-fill); border-radius:4px;
+                        overflow:hidden; }}
+  #wnba .meter .mbar i {{ display:block; height:100%; background:var(--cu-blue); border-radius:4px; }}
+  #wnba .meter.good .mbar i {{ background:var(--cu-grn); }}
+  #wnba .meter.bad .mbar i {{ background:var(--cu-red); }}
+  #wnba .meter .mval {{ font-size:13px; color:var(--cu-lbl);
+                        font-variant-numeric:tabular-nums; }}
+  #wnba .why, #wnba .regime {{ font-size:14px; line-height:1.42; color:var(--cu-lbl2); }}
+  #wnba .why b, #wnba .regime b {{ color:var(--cu-lbl); font-weight:600; }}
 
   @media (max-width:520px) {{
-    #wnba .plno {{ font-size:30px; }}
-    #wnba .podds {{ font-size:18px; }}
+    #wnba .cu-line {{ font-size:34px; }}
+    #wnba .cu-ttl {{ font-size:18px; }}
+    #wnba .cu-sub {{ font-size:14px; }}
   }}
 </style></head><body><div class="wrap">
   <header>
