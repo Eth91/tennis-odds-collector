@@ -4276,6 +4276,19 @@ def build():
                        border:1px solid rgba(10,132,255,.42); }}
   #wnba .cu-tier.tB {{ color:var(--cu-lbl2); background:var(--cu-fill); border:1px solid transparent; }}
   #wnba .cu-tier.tC {{ color:var(--cu-lbl3); background:var(--cu-fill); border:1px solid transparent; }}
+
+  /* ══════════════════ CUPERTINO-TRACK16 ══════════════════
+     Tracker stat tiles wrapped on iPhone 16. Measured at 393pt: the tile content box is 74px and
+     "33-17" at 26px needs ~80px, so the browser broke it at the HYPHEN — records wrapped while
+     percentages and units did not. iPhone 17 is 402pt, which is why it never showed up in testing.
+
+     26 -> 22px, tile padding 12 -> 8px side (content 74 -> 86px), and white-space:nowrap as a
+     guard so a future three-digit record (100-17) degrades by overflowing visibly rather than
+     silently wrapping to two lines. Verified at 393pt: nothing wraps, nothing overflows. */
+  #tracker .tbox {{ padding:10px 8px; }}
+  #tracker .tv {{ font-size:22px; white-space:nowrap; }}
+  #tracker .tk {{ font-size:11px; white-space:nowrap; }}
+  #tracker .tsub {{ font-size:12px; }}
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
