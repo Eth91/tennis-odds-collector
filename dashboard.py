@@ -735,7 +735,8 @@ def _prop_row(r, rungs=None, player=None):
              "ra": "Reb+Ast", "steals": "Steals", "blocks": "Blocks", "turnovers": "Turnovers"}
     # Context line removed. Tier survives as a header chip — see module docstring.
     tval = r.get("_tier")
-    tchip = (f'<span class="cu-tier t{tval}">Tier {tval}</span>') if tval else ""
+    # Just the letter, in the same circular badge the confidence-tier legend uses.
+    tchip = (f'<span class="cu-tier t{tval}" title="confidence tier">{tval}</span>') if tval else ""
 
     # ---- the bet ----
     if rungs and len(rungs) > 1:
@@ -4263,6 +4264,18 @@ def build():
   #wnba .cu-tier.tA {{ color:var(--cu-blue); background:rgba(10,132,255,.18); }}
   #wnba .cu-tier.tB {{ color:var(--cu-lbl2); background:var(--cu-fill); }}
   #wnba .cu-tier.tC {{ color:var(--cu-lbl3); background:var(--cu-fill); }}
+
+  /* ══════════════════ CUPERTINO-TIER3 ══════════════════
+     The letter alone, in the circular badge the confidence-tier legend already uses — same object
+     in both places rather than a word here and a badge there. The word "Tier" was carrying no
+     information the badge does not. */
+  #wnba .cu-tier {{ width:26px; height:26px; border-radius:13px; padding:0; flex:none;
+                    display:inline-flex; align-items:center; justify-content:center;
+                    font-size:13px; font-weight:700; letter-spacing:0; margin-left:auto; }}
+  #wnba .cu-tier.tA {{ color:var(--cu-blue); background:rgba(10,132,255,.18);
+                       border:1px solid rgba(10,132,255,.42); }}
+  #wnba .cu-tier.tB {{ color:var(--cu-lbl2); background:var(--cu-fill); border:1px solid transparent; }}
+  #wnba .cu-tier.tC {{ color:var(--cu-lbl3); background:var(--cu-fill); border:1px solid transparent; }}
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
