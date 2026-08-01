@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-08-01T08:45:46Z",
+ "captured_at": "2026-08-01T08:56:50Z",
  "matches": [
-  {
-   "event_id": 35890320,
-   "p1": "Konrad Kulpa",
-   "p2": "Artur Daniel",
-   "p1_norm": "konrad kulpa",
-   "p2_norm": "artur daniel",
-   "open_date": "2026-08-01T08:30:00.000Z",
-   "line": 58.5,
-   "over_odds": -130,
-   "under_odds": -105
-  },
-  {
-   "event_id": 35890326,
-   "p1": "Pawel Slosarczyk",
-   "p2": "Pawel Kurek",
-   "p1_norm": "pawel slosarczyk",
-   "p2_norm": "pawel kurek",
-   "open_date": "2026-08-01T08:35:00.000Z",
-   "line": 89.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35890327,
-   "p1": "Jacek Przewlocki",
-   "p2": "Jaroslaw Rolak",
-   "p1_norm": "jacek przewlocki",
-   "p2_norm": "jaroslaw rolak",
-   "open_date": "2026-08-01T08:35:00.000Z",
-   "line": 85.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35890339,
    "p1": "Dawid Jendrysik",
@@ -41,9 +8,9 @@
    "p1_norm": "dawid jendrysik",
    "p2_norm": "mateusz sikon",
    "open_date": "2026-08-01T08:45:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 63.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35890340,
@@ -53,8 +20,8 @@
    "p2_norm": "rafal ogon",
    "open_date": "2026-08-01T08:45:00.000Z",
    "line": 74.5,
-   "over_odds": null,
-   "under_odds": null
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35890361,
@@ -96,9 +63,9 @@
    "p1_norm": "maciej sinicki",
    "p2_norm": "tadeusz piotrowski",
    "open_date": "2026-08-01T09:00:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35890366,
@@ -110,6 +77,28 @@
    "line": 77.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35890414,
+   "p1": "Jakub Wozniak",
+   "p2": "Piotr Maruszak",
+   "p1_norm": "jakub wozniak",
+   "p2_norm": "piotr maruszak",
+   "open_date": "2026-08-01T09:20:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35890415,
+   "p1": "Konrad Kulpa",
+   "p2": "Jakub Kosowski",
+   "p1_norm": "konrad kulpa",
+   "p2_norm": "jakub kosowski",
+   "open_date": "2026-08-01T09:20:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
