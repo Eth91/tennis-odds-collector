@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-01T01:36:28Z",
+ "captured_at": "2026-08-01T01:41:23Z",
  "matches": [
   {
    "event_id": 35889362,
@@ -8,9 +8,9 @@
    "p1_norm": "kamil kowalski",
    "p2_norm": "wojciech urban",
    "open_date": "2026-08-01T01:25:00.000Z",
-   "line": 73.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 89.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35889366,
@@ -19,9 +19,9 @@
    "p1_norm": "jakub kuzmicz",
    "p2_norm": "marcin marchlewski",
    "open_date": "2026-08-01T01:30:00.000Z",
-   "line": 59.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 53.5,
+   "over_odds": 105,
+   "under_odds": -140
   },
   {
    "event_id": 35889368,
@@ -30,9 +30,9 @@
    "p1_norm": "oskar jedrzejowski",
    "p2_norm": "jacek oracz",
    "open_date": "2026-08-01T01:35:00.000Z",
-   "line": 76.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 74.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35889379,
