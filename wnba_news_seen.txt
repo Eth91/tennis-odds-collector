@@ -361,6 +361,7 @@ rw|751|Upgraded to available
 rw|755|Cools off Wednesday
 rw|755|Double-doubles off bench
 rw|757|Logs 28 minutes in win
+rw|782|Dodges injury report for Saturday
 rw|782|Not listed on injury report
 rw|782|Out Wednesday
 rw|782|Unavailable versus Las Vegas
