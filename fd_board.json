@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-01T08:56:50Z",
+ "captured_at": "2026-08-01T09:08:24Z",
  "matches": [
-  {
-   "event_id": 35890339,
-   "p1": "Dawid Jendrysik",
-   "p2": "Mateusz Sikon",
-   "p1_norm": "dawid jendrysik",
-   "p2_norm": "mateusz sikon",
-   "open_date": "2026-08-01T08:45:00.000Z",
-   "line": 63.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35890340,
-   "p1": "Rafal Wojcik",
-   "p2": "Rafal Ogon",
-   "p1_norm": "rafal wojcik",
-   "p2_norm": "rafal ogon",
-   "open_date": "2026-08-01T08:45:00.000Z",
-   "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35890361,
    "p1": "Dawid Poloszczanski",
@@ -30,9 +8,9 @@
    "p1_norm": "dawid poloszczanski",
    "p2_norm": "bartosz kwodawski",
    "open_date": "2026-08-01T09:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 73.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35890362,
@@ -42,19 +20,8 @@
    "p2_norm": "artur grela",
    "open_date": "2026-08-01T09:00:00.000Z",
    "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
-  },
-  {
-   "event_id": 35890363,
-   "p1": "Oliwier Sokolowski",
-   "p2": "Witold Buczynski",
-   "p1_norm": "oliwier sokolowski",
-   "p2_norm": "witold buczynski",
-   "open_date": "2026-08-01T09:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35890364,
@@ -63,9 +30,9 @@
    "p1_norm": "maciej sinicki",
    "p2_norm": "tadeusz piotrowski",
    "open_date": "2026-08-01T09:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 80.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35890366,
@@ -75,8 +42,8 @@
    "p2_norm": "marcin lach",
    "open_date": "2026-08-01T09:05:00.000Z",
    "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35890414,
@@ -97,6 +64,39 @@
    "p2_norm": "jakub kosowski",
    "open_date": "2026-08-01T09:20:00.000Z",
    "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35890418,
+   "p1": "Jacek Wieczerzak",
+   "p2": "Pawel Kurek",
+   "p1_norm": "jacek wieczerzak",
+   "p2_norm": "pawel kurek",
+   "open_date": "2026-08-01T09:25:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35890419,
+   "p1": "Jaroslaw Rolak",
+   "p2": "Krzysztof Guminski",
+   "p1_norm": "jaroslaw rolak",
+   "p2_norm": "krzysztof guminski",
+   "open_date": "2026-08-01T09:25:00.000Z",
+   "line": 78.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35890425,
+   "p1": "Piotr Gumulinski",
+   "p2": "Rafal Wojcik",
+   "p1_norm": "piotr gumulinski",
+   "p2_norm": "rafal wojcik",
+   "open_date": "2026-08-01T09:30:00.000Z",
+   "line": 79.5,
    "over_odds": -118,
    "under_odds": -112
   }
