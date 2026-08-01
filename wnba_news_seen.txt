@@ -416,6 +416,7 @@ rw|852|Exits to locker room Tuesday
 rw|852|Logs 15 points vs. New York
 rw|852|Probable versus Fire
 rw|852|Questionable to return Tuesday
+rw|852|Records seven stocks Friday
 rw|852|Upgraded to available
 rw|853|Another double-digit scoring effort
 rw|853|Paces Connecticut in loss
