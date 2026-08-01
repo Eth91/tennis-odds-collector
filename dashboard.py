@@ -735,7 +735,7 @@ def _prop_row(r, rungs=None, player=None):
              "ra": "Reb+Ast", "steals": "Steals", "blocks": "Blocks", "turnovers": "Turnovers"}
     # Context line removed. Tier survives as a header chip — see module docstring.
     tval = r.get("_tier")
-    tchip = f'<span class="cu-tier">Tier {tval}</span>' if tval else ""
+    tchip = (f'<span class="cu-tier t{tval}">Tier {tval}</span>') if tval else ""
 
     # ---- the bet ----
     if rungs and len(rungs) > 1:
@@ -798,9 +798,9 @@ def _prop_row(r, rungs=None, player=None):
       <div class="cu-c" data-status="{scls}" data-book="{best_bk}" data-lad="{1 if rungs and len(rungs) > 1 else 0}">
         <div class="cu-sum" data-side="{side}" data-k="{dk}"
              onclick="this.parentNode.querySelector('.bars').classList.toggle('open')">
-          <div class="cu-hd"><span class="cu-st {scls}">{slbl}</span>{tchip}{btag}
+          <div class="cu-hd"><span class="cu-st {scls}">{slbl}</span>{btag}
             <span class="cu-time">{tipt}</span></div>
-          <div class="cu-ttl">{tms}{nm}</div>
+          <div class="cu-ttl">{tms}{nm}{tchip}</div>
           <div class="cu-bet"><span class="cu-dir {o}">{oword}</span>
             <span class="cu-line{rng}">{line_disp}</span>{unit}
             <span class="cu-price">{contra}<span class="cu-od">{_am(best_dec)}</span>
@@ -4253,6 +4253,16 @@ def build():
   @media (max-width:520px) {{
     #wnba .cu-ttl {{ font-size:23px; }}
   }}
+
+  /* ══════════════════ CUPERTINO-TIER2 ══════════════════
+     Tier moves off the header and onto the title row, pushed right — so it sits on the same right
+     edge as the lock time above it and the price below, vertically between the two. Tier A takes
+     the blue it already has in the confidence-tier legend, so the two places agree; B and C stay
+     neutral because only A is the band the model treats as its own. */
+  #wnba .cu-tier {{ margin-left:auto; flex:none; }}
+  #wnba .cu-tier.tA {{ color:var(--cu-blue); background:rgba(10,132,255,.18); }}
+  #wnba .cu-tier.tB {{ color:var(--cu-lbl2); background:var(--cu-fill); }}
+  #wnba .cu-tier.tC {{ color:var(--cu-lbl3); background:var(--cu-fill); }}
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
