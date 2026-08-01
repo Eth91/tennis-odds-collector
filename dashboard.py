@@ -2154,7 +2154,11 @@ def _injury_html():
     body = ""
     for r in rows_d:
         stt = r.get("status") or ""
-        scls = "out" if stt.lower().startswith(("out", "doubt")) else "q"
+        # Same all-clear rule as star watch. This is the INJURY REPORT emitter (_injury_html);
+        # the first pass patched _starwatch_html by mistake, so the badges stayed orange on device.
+        _sl = stt.lower()
+        scls = ("out" if _sl.startswith(("out", "doubt"))
+                else ("avail" if _sl.startswith(("avail", "prob", "active")) else "q"))
         nw = r.get("n_without")
         if nw is None:
             nb = ""
