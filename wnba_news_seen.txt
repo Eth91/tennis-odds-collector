@@ -474,6 +474,7 @@ rw|972|Another quiet effort
 rw|972|Not listed on injury report
 rw|973|Bottoms out Wednesday
 rw|977|Fares well against Sparks
+rw|979|Drops 23 points in loss
 rw|979|Good to go Wednesday
 rw|979|Nets 21 points Wednesday
 rw|979|Not on injury report
