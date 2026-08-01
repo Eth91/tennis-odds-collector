@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-01T00:23:46Z",
+ "captured_at": "2026-08-01T00:32:47Z",
  "matches": [
-  {
-   "event_id": 35889234,
-   "p1": "Patryk Jendrzejewski",
-   "p2": "Jakub Chmielowski",
-   "p1_norm": "patryk jendrzejewski",
-   "p2_norm": "jakub chmielowski",
-   "open_date": "2026-08-01T00:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
   {
    "event_id": 35889235,
    "p1": "Adam Ruszkiewicz",
@@ -19,20 +8,9 @@
    "p1_norm": "adam ruszkiewicz",
    "p2_norm": "roman wiza",
    "open_date": "2026-08-01T00:20:00.000Z",
-   "line": 73.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35889261,
-   "p1": "Cezary Pawlik",
-   "p2": "Oskar Jedrzejowski",
-   "p1_norm": "cezary pawlik",
-   "p2_norm": "oskar jedrzejowski",
-   "open_date": "2026-08-01T00:25:00.000Z",
-   "line": 83.5,
-   "over_odds": -116,
-   "under_odds": -118
+   "line": 87.5,
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35889298,
