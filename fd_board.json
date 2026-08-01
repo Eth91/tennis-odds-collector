@@ -1,6 +1,17 @@
 {
- "captured_at": "2026-08-01T08:17:31Z",
+ "captured_at": "2026-08-01T08:27:22Z",
  "matches": [
+  {
+   "event_id": 35890253,
+   "p1": "Petr David",
+   "p2": "Artur Grela",
+   "p1_norm": "petr david",
+   "p2_norm": "artur grela",
+   "open_date": "2026-08-01T08:05:00.000Z",
+   "line": 89.5,
+   "over_odds": -115,
+   "under_odds": -120
+  },
   {
    "event_id": 35890269,
    "p1": "Dawid Poloszczanski",
@@ -8,9 +19,9 @@
    "p1_norm": "dawid poloszczanski",
    "p2_norm": "bartlomiej wisniewski",
    "open_date": "2026-08-01T08:10:00.000Z",
-   "line": 82.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 94.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35890287,
@@ -20,8 +31,8 @@
    "p2_norm": "marcin lach",
    "open_date": "2026-08-01T08:20:00.000Z",
    "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35890288,
@@ -30,9 +41,9 @@
    "p1_norm": "mariusz baron",
    "p2_norm": "wojciech pytlas",
    "open_date": "2026-08-01T08:20:00.000Z",
-   "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 58.5,
+   "over_odds": 100,
+   "under_odds": -140
   },
   {
    "event_id": 35890318,
@@ -41,9 +52,9 @@
    "p1_norm": "bartlomiej mleczko",
    "p2_norm": "jakub wozniak",
    "open_date": "2026-08-01T08:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -116
   },
   {
    "event_id": 35890320,
