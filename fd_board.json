@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-01T07:19:49Z",
+ "captured_at": "2026-08-01T07:24:05Z",
  "matches": [
   {
    "event_id": 35890106,
@@ -8,9 +8,9 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "jakub jesiek",
    "open_date": "2026-08-01T07:10:00.000Z",
-   "line": 89.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 77.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35890107,
@@ -19,9 +19,9 @@
    "p1_norm": "dawid jendrysik",
    "p2_norm": "kacper adamus",
    "open_date": "2026-08-01T07:10:00.000Z",
-   "line": 80.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 92.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35890119,
@@ -30,9 +30,9 @@
    "p1_norm": "jakub wozniak",
    "p2_norm": "mateusz woskowicz",
    "open_date": "2026-08-01T07:15:00.000Z",
-   "line": 76.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 72.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35890169,
@@ -41,9 +41,9 @@
    "p1_norm": "jaroslaw rolak",
    "p2_norm": "bartlomiej wisniewski",
    "open_date": "2026-08-01T07:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 72.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35890170,
@@ -52,9 +52,9 @@
    "p1_norm": "artur daniel",
    "p2_norm": "artur grela",
    "open_date": "2026-08-01T07:20:00.000Z",
-   "line": 75.5,
+   "line": 80.5,
    "over_odds": -110,
-   "under_odds": -120
+   "under_odds": -125
   },
   {
    "event_id": 35890171,
@@ -63,9 +63,9 @@
    "p1_norm": "pawel kurek",
    "p2_norm": "witold buczynski",
    "open_date": "2026-08-01T07:20:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 71.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35890178,
