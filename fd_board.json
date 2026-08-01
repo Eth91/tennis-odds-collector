@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-01T03:53:18Z",
+ "captured_at": "2026-08-01T04:03:12Z",
  "matches": [
-  {
-   "event_id": 35889495,
-   "p1": "Tadeusz Piotrowski",
-   "p2": "Piotr Maruszak",
-   "p1_norm": "tadeusz piotrowski",
-   "p2_norm": "piotr maruszak",
-   "open_date": "2026-08-01T03:40:00.000Z",
-   "line": 80.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35889499,
    "p1": "Petr David",
@@ -19,9 +8,9 @@
    "p1_norm": "petr david",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-08-01T03:45:00.000Z",
-   "line": 82.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 94.5,
+   "over_odds": 115,
+   "under_odds": -165
   },
   {
    "event_id": 35889515,
@@ -30,31 +19,9 @@
    "p1_norm": "dawid poloszczanski",
    "p2_norm": "maciej sinicki",
    "open_date": "2026-08-01T03:50:00.000Z",
-   "line": 77.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35889516,
-   "p1": "Schaniel Krzysztof",
-   "p2": "Jakub Michalski",
-   "p1_norm": "schaniel krzysztof",
-   "p2_norm": "jakub michalski",
-   "open_date": "2026-08-01T03:55:00.000Z",
-   "line": 74.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
-  {
-   "event_id": 35889527,
-   "p1": "Mariusz Baron",
-   "p2": "Kacper Adamus",
-   "p1_norm": "mariusz baron",
-   "p2_norm": "kacper adamus",
-   "open_date": "2026-08-01T04:00:00.000Z",
-   "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 90.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35889528,
@@ -63,9 +30,9 @@
    "p1_norm": "bartlomiej mleczko",
    "p2_norm": "dominik solilo",
    "open_date": "2026-08-01T04:00:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -118
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35889532,
@@ -97,6 +64,39 @@
    "p2_norm": "dariusz wrobel",
    "open_date": "2026-08-01T04:10:00.000Z",
    "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35889542,
+   "p1": "Mariusz Adamus",
+   "p2": "Roman Wiza",
+   "p1_norm": "mariusz adamus",
+   "p2_norm": "roman wiza",
+   "open_date": "2026-08-01T04:20:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35889544,
+   "p1": "Piotr Maruszak",
+   "p2": "Mateusz Woskowicz",
+   "p1_norm": "piotr maruszak",
+   "p2_norm": "mateusz woskowicz",
+   "open_date": "2026-08-01T04:25:00.000Z",
+   "line": 79.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35889545,
+   "p1": "Dawid Jendrysik",
+   "p2": "Jakub Kaczmarek",
+   "p1_norm": "dawid jendrysik",
+   "p2_norm": "jakub kaczmarek",
+   "open_date": "2026-08-01T04:25:00.000Z",
+   "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
   }
