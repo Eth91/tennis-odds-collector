@@ -71,9 +71,12 @@ NEW = r"""  /* ══════════════════ CUPERTINO-
   #wnba .prop:has(+ .bars.open) {{ background:rgba(255,255,255,.025); }}
 
   /* THE BET — direction is a subordinate word, the number is the object. 36px vs 19px name. */
-  #wnba .pind {{ width:auto; height:auto; border-radius:0; background:none;
-                 font-size:13px; font-weight:700; letter-spacing:.06em;
-                 color:var(--cu-lbl2); display:inline; place-items:unset; }}
+  /* .prop-scoped ONLY. The "Also considered · NOT BET" panel also lives in #wnba but renders
+     compact .ttbet rows whose .pind is a chip, not a card label — restyling it there stripped the
+     chip and left a floating "O". Cupertino applies to the CARDS; that list keeps its own idiom. */
+  #wnba .prop .pind {{ width:auto; height:auto; border-radius:0; background:none;
+                       font-size:13px; font-weight:700; letter-spacing:.06em;
+                       color:var(--cu-lbl2); display:inline; place-items:unset; }}
   #wnba .plno {{ font-size:36px; font-weight:680; letter-spacing:-.04em; color:var(--cu-lbl); }}
   #wnba .plno.rng {{ font-size:24px; }}
   #wnba .pstat {{ font-size:14px; font-weight:600; color:var(--cu-lbl2); letter-spacing:0; }}
