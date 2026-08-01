@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-01T01:01:41Z",
+ "captured_at": "2026-08-01T01:06:35Z",
  "matches": [
-  {
-   "event_id": 35889325,
-   "p1": "Jakub Glanowski",
-   "p2": "Jakub Kuzmicz",
-   "p1_norm": "jakub glanowski",
-   "p2_norm": "jakub kuzmicz",
-   "open_date": "2026-08-01T00:45:00.000Z",
-   "line": 95.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35889345,
    "p1": "Krzysztof Juszczyk",
@@ -19,8 +8,8 @@
    "p1_norm": "krzysztof juszczyk",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-08-01T01:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
+   "line": 52.5,
+   "over_odds": -125,
    "under_odds": -115
   },
   {
@@ -66,6 +55,28 @@
    "line": 65.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35889365,
+   "p1": "Adam Ruszkiewicz",
+   "p2": "Schaniel Krzysztof",
+   "p1_norm": "adam ruszkiewicz",
+   "p2_norm": "schaniel krzysztof",
+   "open_date": "2026-08-01T01:30:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35889366,
+   "p1": "Jakub Kuzmicz",
+   "p2": "Marcin Marchlewski",
+   "p1_norm": "jakub kuzmicz",
+   "p2_norm": "marcin marchlewski",
+   "open_date": "2026-08-01T01:30:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
