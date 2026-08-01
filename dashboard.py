@@ -660,7 +660,9 @@ def _cu_conf(r):
     rather than inventing a figure."""
     if r.get("basis") == "volume" and r.get("proj_hit"):
         p = r["proj_hit"] * 100
-        return p, f'{p:.0f}%', p >= 60
+        # NOT the percentage again — .cu-pc already prints it. Label with what the model produced.
+        ea = r.get("elev_avg")
+        return p, (f"proj {ea:g}" if ea is not None else "volume model"), p >= 60
     rec = _raw_record(r)
     if rec and rec[1]:
         p = rec[0] / rec[1] * 100
@@ -3612,6 +3614,44 @@ def build():
   .cu-ch .ct {{ font-size:12px; color:var(--cu-lbl2); font-variant-numeric:tabular-nums; }}
   .cu-ch[aria-current="true"] .ct {{ color:rgba(255,255,255,.7); }}
   .cu-ch:focus-visible {{ outline:2px solid var(--cu-blue); outline-offset:2px; }}
+
+  /* ══════════════════ CUPERTINO-POLISH ══════════════════ */
+  /* closed drawer must be ZERO tall: padding is intrinsic and survives a 0fr row, so it only
+     exists once open. This was 50px of dead space under every card. */
+  #wnba .bars {{ padding:0; }}
+  #wnba .bars.open {{ padding:0 12px 12px; background:transparent; }}
+  #wnba .bwrap {{ background:none; padding:0; border-radius:0; }}
+  #wnba .bars.open .bwrap {{ background:var(--cu-grp2); border-radius:10px; padding:12px 14px; }}
+
+  /* the bet holds 36px on phones — no step-down */
+  @media (max-width:520px) {{
+    #wnba .cu-line {{ font-size:36px; }}
+    #wnba .cu-ttl {{ font-size:19px; }}
+    #wnba .cu-sub {{ font-size:15px; }}
+  }}
+
+  /* record strip -> an iOS grouped row */
+  .recstrip {{ background:var(--cu-grp); border:0; border-radius:12px; padding:12px 16px;
+               margin:14px 0 0; gap:8px; font-size:15px; color:var(--cu-lbl2); }}
+  .recstrip b {{ color:var(--cu-lbl); font-weight:640; }}
+  .recstrip b.up {{ color:var(--cu-grn); }}
+  .recstrip b.down {{ color:var(--cu-red); }}
+  .recstrip span {{ color:var(--cu-lbl3); font-size:13px; }}
+
+  /* the in-progress banner */
+  #wnba .dayhdr {{ font-size:13px; letter-spacing:.02em; text-transform:uppercase;
+                   color:var(--cu-lbl2); padding:16px 4px 6px; }}
+  #wnba .dayhdr.live {{ color:var(--cu-org); }}
+
+  /* Watchlist / Injury / Also-considered -> grouped cards */
+  #wnba .card {{ background:var(--cu-grp); border:0; border-radius:12px; padding:14px 16px;
+                 margin:0 0 20px; }}
+  #wnba .ttlg {{ font-size:13px; font-weight:600; letter-spacing:.02em; text-transform:uppercase;
+                 color:var(--cu-lbl2); margin:0 0 10px; }}
+
+  /* the active tab had a leftover border from the old pill bar */
+  .tab {{ border:0 !important; box-shadow:none !important; }}
+  .tab.active {{ background:none !important; }}
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
