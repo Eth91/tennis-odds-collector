@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-01T06:33:01Z",
+ "captured_at": "2026-08-01T06:39:46Z",
  "matches": [
-  {
-   "event_id": 35890050,
-   "p1": "Marcin Lach",
-   "p2": "Rafal Wojcik",
-   "p1_norm": "marcin lach",
-   "p2_norm": "rafal wojcik",
-   "open_date": "2026-08-01T06:20:00.000Z",
-   "line": 79.5,
-   "over_odds": 105,
-   "under_odds": -145
-  },
   {
    "event_id": 35890054,
    "p1": "Dominik Solilo",
@@ -19,9 +8,9 @@
    "p1_norm": "dominik solilo",
    "p2_norm": "tadeusz piotrowski",
    "open_date": "2026-08-01T06:25:00.000Z",
-   "line": 60.5,
-   "over_odds": -135,
-   "under_odds": -105
+   "line": 74.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35890055,
@@ -30,9 +19,9 @@
    "p1_norm": "kacper adamus",
    "p2_norm": "mateusz sikon",
    "open_date": "2026-08-01T06:25:00.000Z",
-   "line": 89.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 85.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35890056,
@@ -41,9 +30,9 @@
    "p1_norm": "jacek wieczerzak",
    "p2_norm": "rafal glica",
    "open_date": "2026-08-01T06:30:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 71.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35890057,
@@ -52,9 +41,9 @@
    "p1_norm": "jakub kosowski",
    "p2_norm": "petr david",
    "open_date": "2026-08-01T06:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35890058,
@@ -63,9 +52,9 @@
    "p1_norm": "dariusz wrobel",
    "p2_norm": "dawid poloszczanski",
    "open_date": "2026-08-01T06:30:00.000Z",
-   "line": 73.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 82.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35890075,
@@ -107,9 +96,9 @@
    "p1_norm": "konrad kulpa",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-08-01T06:55:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35890098,
