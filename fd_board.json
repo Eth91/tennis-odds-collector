@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-01T07:50:12Z",
+ "captured_at": "2026-08-01T07:56:36Z",
  "matches": [
-  {
-   "event_id": 35890188,
-   "p1": "Mateusz Sikon",
-   "p2": "Wojciech Pytlas",
-   "p1_norm": "mateusz sikon",
-   "p2_norm": "wojciech pytlas",
-   "open_date": "2026-08-01T07:35:00.000Z",
-   "line": 79.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35890193,
-   "p1": "Dominik Solilo",
-   "p2": "Piotr Maruszak",
-   "p1_norm": "dominik solilo",
-   "p2_norm": "piotr maruszak",
-   "open_date": "2026-08-01T07:40:00.000Z",
-   "line": 77.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
   {
    "event_id": 35890194,
    "p1": "Dariusz Wrobel",
@@ -30,9 +8,20 @@
    "p1_norm": "dariusz wrobel",
    "p2_norm": "maciej sinicki",
    "open_date": "2026-08-01T07:40:00.000Z",
-   "line": 78.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 92.5,
+   "over_odds": -115,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35890199,
+   "p1": "Jacek Wieczerzak",
+   "p2": "Oliwier Sokolowski",
+   "p1_norm": "jacek wieczerzak",
+   "p2_norm": "oliwier sokolowski",
+   "open_date": "2026-08-01T07:45:00.000Z",
+   "line": 88.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35890200,
@@ -41,9 +30,9 @@
    "p1_norm": "jakub kosowski",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-08-01T07:45:00.000Z",
-   "line": 76.5,
+   "line": 88.5,
    "over_odds": -115,
-   "under_odds": -120
+   "under_odds": -115
   },
   {
    "event_id": 35890217,
@@ -52,9 +41,9 @@
    "p1_norm": "daniel morawiec",
    "p2_norm": "jakub jesiek",
    "open_date": "2026-08-01T07:55:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35890248,
@@ -108,6 +97,28 @@
    "p2_norm": "witold buczynski",
    "open_date": "2026-08-01T08:10:00.000Z",
    "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35890287,
+   "p1": "Piotr Gumulinski",
+   "p2": "Marcin Lach",
+   "p1_norm": "piotr gumulinski",
+   "p2_norm": "marcin lach",
+   "open_date": "2026-08-01T08:20:00.000Z",
+   "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35890288,
+   "p1": "Mariusz Baron",
+   "p2": "Wojciech Pytlas",
+   "p1_norm": "mariusz baron",
+   "p2_norm": "wojciech pytlas",
+   "open_date": "2026-08-01T08:20:00.000Z",
+   "line": 74.5,
    "over_odds": -118,
    "under_odds": -112
   }
