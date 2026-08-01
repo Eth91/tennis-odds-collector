@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-01T00:40:56Z",
+ "captured_at": "2026-08-01T00:48:10Z",
  "matches": [
-  {
-   "event_id": 35889322,
-   "p1": "Michal Krutak",
-   "p2": "Jacek Zelezik",
-   "p1_norm": "michal krutak",
-   "p2_norm": "jacek zelezik",
-   "open_date": "2026-08-01T00:45:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
   {
    "event_id": 35889325,
    "p1": "Jakub Glanowski",
@@ -19,20 +8,9 @@
    "p1_norm": "jakub glanowski",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-08-01T00:45:00.000Z",
-   "line": 73.5,
-   "over_odds": -116,
-   "under_odds": -116
-  },
-  {
-   "event_id": 35889326,
-   "p1": "Damian Fira",
-   "p2": "Mariusz Adamus",
-   "p1_norm": "damian fira",
-   "p2_norm": "mariusz adamus",
-   "open_date": "2026-08-01T00:45:00.000Z",
-   "line": 75.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 68.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35889345,
@@ -42,6 +20,39 @@
    "p2_norm": "sebastian szostok",
    "open_date": "2026-08-01T01:00:00.000Z",
    "line": 75.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35889351,
+   "p1": "Roman Wiza",
+   "p2": "Jakub Michalski",
+   "p1_norm": "roman wiza",
+   "p2_norm": "jakub michalski",
+   "open_date": "2026-08-01T01:10:00.000Z",
+   "line": 72.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35889352,
+   "p1": "Michal Wolny",
+   "p2": "Cezary Pawlik",
+   "p1_norm": "michal wolny",
+   "p2_norm": "cezary pawlik",
+   "open_date": "2026-08-01T01:10:00.000Z",
+   "line": 73.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35889353,
+   "p1": "Patryk Jendrzejewski",
+   "p2": "Jakub Glanowski",
+   "p1_norm": "patryk jendrzejewski",
+   "p2_norm": "jakub glanowski",
+   "open_date": "2026-08-01T01:10:00.000Z",
+   "line": 76.5,
    "over_odds": -116,
    "under_odds": -116
   }
