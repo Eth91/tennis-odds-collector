@@ -537,49 +537,50 @@ def _wrapsec(label, inner):
 
 
 def _bars(r, meters=""):
-    """Dropdown: hit-rate meters (moved off the front card 2026-07-19) + generated reasoning + a
-    PropsCash-style game log. Each game's ACTUAL stat is a bar (green if it cashed our side, red if
-    not) with the line drawn across, and a gray MINUTES bar behind it (own 0-40 scale). Opp below."""
-    mhtml = f'<div class="meters">{meters}</div>' if meters else ""
-    # CUPERTINO-REBUILD: grouped-list grammar inside the drawer — a labelled section per idea,
-    # hairline-ruled, instead of a stack of bare divs.
-    why = (f'{mhtml}'
-           f'<div class="dsec"><div class="dlab">Why this flagged</div>'
-           f'<div class="why">{_reasoning(r)}</div></div>'
-           f'{_wrapsec("Same-lineup history", _regime_html(r))}')
-    s = _samples(r)
-    if not s:
-        return f'<div class="bars"><div class="bwrap">{why}<div class="nodata">no game data</div></div></div>'
-    s = list(reversed(s))                              # newest-first -> show oldest-left
-    line = float(r["line"])
-    side = (r.get("side") if hasattr(r, "get") else r["side"]) or "over"
-    vals = [x[0] for x in s]
-    # TWO scales so the gray MINUTES bar is always clearly TALLER than the colored stat bar
-    # (props.cash style): minutes fill toward the top on their own 0-42 range (a 30-min night ≈
-    # 71%), stats are compressed into the lower ~62% so the minute number atop every bar stays
-    # readable and never collides with the stat value.
-    mx = max(max(vals), line) * 1.62 or 1
-    onside = (lambda v: v > line) if side == "over" else (lambda v: v < line)
-    hits = sum(1 for v in vals if onside(v))
-    # the bars are the player's games matching tonight's injury context (out-set absent), so name it
-    outs = ", ".join(_short(nm.strip()) for nm in (r.get("out_player") or "").split(",") if nm.strip())
-    note = ("volume-confirmed role · bars = actual pts (shooting varies, volume doesn't)"
-            if r["basis"] == "volume" else (f"games without {outs}" if outs else "elevated-role games")
-            if r["basis"] == "elevated" else f"projected to ~{r['proj_min']:.0f} min")
-    cols = ""
-    for x in s:
-        v = x[0]
-        mn = x[2] if len(x) > 2 else 0                  # minutes that game (overlay, own 0-40 scale)
-        cols += (f'<div class="col">'
-                 f'<div class="m" style="height:{min(mn/42*100, 97):.0f}%"></div>'
-                 f'<div class="b {"o" if onside(v) else "u"}" style="height:{v/mx*100:.1f}%">'
-                 f'<span class="bv">{v:g}</span></div></div>')
-    opps = "".join(f'<span>{html.escape(str(o) or "")}</span>' for _, o, *_ in s)
-    return (f'<div class="bars"><div class="bwrap">{why}<div class="chart">'
-            f'<div class="pline" style="bottom:{line/mx*100:.1f}%"><span>{line:g}</span></div>'
-            f'{cols}</div><div class="opps">{opps}</div>'
-            f'<div class="bnote">{hits}/{len(s)} {side} {line:g}</div></div></div>')
+    """The expanded card detail. CUPERTINO-DW: a flat vertical stack of labelled sections —
+    confidence, reasoning, same-lineup history, recent games — separated by one hairline each.
 
+    Emits dw-* class names deliberately. The previous drawer accumulated rules across several
+    passes that fought each other on specificity; a fresh namespace means none of them can match
+    this markup, so its spacing is defined in exactly one place.
+    """
+    def sec(label, inner):
+        """A section, or nothing at all. An absent block must not leave an orphan label or a
+        trailing rule behind it — that was half of what made the old spacing look arbitrary."""
+        return f'<div class="dw-s"><div class="dw-l">{label}</div>{inner}</div>' if inner else ""
+
+    parts = [sec("Confidence", meters),
+             sec("Why this flagged", f'<div class="dw-p">{_reasoning(r)}</div>'),
+             sec("Same-lineup history", _regime_html(r))]
+
+    s_ = _samples(r)
+    if s_:
+        s_ = list(reversed(s_))                        # newest-first -> oldest on the left
+        line = float(r["line"])
+        side = (r.get("side") if hasattr(r, "get") else r["side"]) or "over"
+        vals = [x[0] for x in s_]
+        # two scales, so the gray minutes bar always reads taller than the coloured stat bar
+        mx = max(max(vals), line) * 1.62 or 1
+        onside = (lambda v: v > line) if side == "over" else (lambda v: v < line)
+        hits = sum(1 for v in vals if onside(v))
+        cols = ""
+        for x in s_:
+            v = x[0]
+            mn = x[2] if len(x) > 2 else 0
+            cols += (f'<div class="dw-col">'
+                     f'<div class="dw-min" style="height:{min(mn / 42 * 100, 97):.0f}%"></div>'
+                     f'<div class="dw-bar {"on" if onside(v) else "off"}" '
+                     f'style="height:{v / mx * 100:.1f}%"><span>{v:g}</span></div></div>')
+        opps = "".join(f'<span>{html.escape(str(o) or "")}</span>' for _, o, *_ in s_)
+        chart = (f'<div class="dw-chart">'
+                 f'<div class="dw-line" style="bottom:{line / mx * 100:.1f}%"><span>{line:g}</span></div>'
+                 f'{cols}</div><div class="dw-opps">{opps}</div>'
+                 f'<div class="dw-note">{hits}/{len(s_)} {side} {line:g}</div>')
+        parts.append(sec("Recent games", chart))
+    else:
+        parts.append(sec("Recent games", '<div class="dw-p">No game data.</div>'))
+
+    return f'<div class="bars"><div class="dw">{"".join(p for p in parts if p)}</div></div>'
 
 def _splits(r):
     """The player's OVER/UNDER hit rate AT THIS LINE over recent windows — L5 / L10 / season / vs
@@ -4110,6 +4111,67 @@ def build():
   #wnba .bnote {{ margin-top:10px !important; }}
   #wnba .meter {{ gap:12px; margin:0 0 10px; }}
   #wnba .meter:last-child {{ margin-bottom:0; }}
+
+  /* ══════════════════ CUPERTINO-DW ══════════════════
+     The drawer, rebuilt under its own namespace. Nothing above this block matches dw-*, so this is
+     the only place its spacing is defined. Collapsed state carries NO padding — padding is
+     intrinsic and a 0fr grid row cannot collapse it, which is what left dead space under every
+     closed card twice before. */
+  #wnba .bars {{ padding:0; }}
+  #wnba .bars.open {{ padding:0 12px 12px; }}
+  #wnba .dw {{ padding:0; }}
+  #wnba .bars.open .dw {{ background:var(--cu-grp2); border-radius:10px; padding:16px; }}
+
+  #wnba .dw-s + .dw-s {{ margin-top:16px; padding-top:16px; border-top:.5px solid var(--cu-sep); }}
+  #wnba .dw-l {{ font-size:12px; font-weight:600; letter-spacing:.02em; text-transform:uppercase;
+                 color:var(--cu-lbl2); margin:0 0 10px; }}
+  #wnba .dw-p {{ font-size:15px; line-height:1.45; color:var(--cu-lbl2); margin:0; }}
+  #wnba .dw-p b {{ color:var(--cu-lbl); font-weight:600; }}
+
+  /* meters, inherited from the card's language */
+  #wnba .dw .meter {{ display:flex; align-items:center; gap:12px; margin:0 0 10px; }}
+  #wnba .dw .meter:last-child {{ margin-bottom:0; }}
+  #wnba .dw .mlab {{ font-size:14px; color:var(--cu-lbl2); width:112px; flex:none; }}
+  #wnba .dw .mbar {{ flex:1; height:7px; background:var(--cu-fill); border-radius:4px; overflow:hidden; }}
+  #wnba .dw .mbar i {{ display:block; height:100%; background:var(--cu-blue); border-radius:4px; }}
+  #wnba .dw .meter.good .mbar i {{ background:var(--cu-grn); }}
+  #wnba .dw .meter.bad .mbar i {{ background:var(--cu-red); }}
+  #wnba .dw .mval {{ font-size:14px; font-weight:590; color:var(--cu-lbl); margin-left:auto;
+                     font-variant-numeric:tabular-nums; }}
+
+  /* regime block, flattened onto the drawer surface */
+  #wnba .dw .regime {{ background:none !important; border:0 !important; padding:0 !important;
+                       margin:0 !important; }}
+  #wnba .dw .rgh {{ font-size:15px; line-height:1.45; color:var(--cu-lbl2); }}
+  #wnba .dw .rgh b {{ color:var(--cu-lbl); font-weight:600; }}
+  #wnba .dw .rgsub {{ font-size:13px; color:var(--cu-lbl3); margin-top:8px; }}
+  #wnba .dw .cmps {{ display:flex; gap:6px; flex-wrap:wrap; margin-top:12px; }}
+  #wnba .dw .cmp {{ background:var(--cu-fill); border:0; border-radius:11px; padding:4px 10px;
+                    font-size:13px; color:var(--cu-lbl2); font-variant-numeric:tabular-nums; }}
+  #wnba .dw .cmp b {{ color:var(--cu-lbl); font-weight:600; }}
+  #wnba .dw .sup {{ color:var(--cu-grn); }}
+  #wnba .dw .warn {{ color:var(--cu-org); }}
+
+  /* game log */
+  #wnba .dw-chart {{ position:relative; display:flex; align-items:flex-end; gap:5px; height:96px;
+                     margin:0; }}
+  #wnba .dw-col {{ position:relative; flex:1; height:100%; display:flex; align-items:flex-end;
+                   justify-content:center; }}
+  #wnba .dw-min {{ position:absolute; bottom:0; left:0; right:0; background:var(--cu-fill);
+                   border-radius:3px 3px 0 0; }}
+  #wnba .dw-bar {{ position:relative; width:100%; border-radius:3px 3px 0 0; min-height:15px;
+                   display:flex; align-items:flex-start; justify-content:center; }}
+  #wnba .dw-bar.on {{ background:var(--cu-grn); }}
+  #wnba .dw-bar.off {{ background:rgba(255,69,58,.55); }}
+  #wnba .dw-bar span {{ font-size:11px; font-weight:600; color:#000; margin-top:2px;
+                        font-variant-numeric:tabular-nums; }}
+  #wnba .dw-line {{ position:absolute; left:0; right:0; height:1px; background:var(--cu-lbl3);
+                    z-index:2; }}
+  #wnba .dw-line span {{ position:absolute; right:0; top:-16px; font-size:11px;
+                         color:var(--cu-lbl3); font-variant-numeric:tabular-nums; }}
+  #wnba .dw-opps {{ display:flex; gap:5px; margin-top:6px; }}
+  #wnba .dw-opps span {{ flex:1; text-align:center; font-size:11px; color:var(--cu-lbl3); }}
+  #wnba .dw-note {{ font-size:13px; color:var(--cu-lbl3); margin-top:10px; }}
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
