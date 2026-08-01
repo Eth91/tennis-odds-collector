@@ -488,6 +488,7 @@ rw|979|Off night in loss to Atlanta
 rw|979|Questionable for Wednesday
 rw|979|Sitting out Monday
 rw|980|Double-double in return
+rw|980|Double-doubles in return
 rw|980|Flirts with double-double
 rw|980|Good to go Friday
 rw|980|Huge two-way showing in loss
