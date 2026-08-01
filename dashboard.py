@@ -3750,6 +3750,19 @@ def build():
   #wnba .regime {{ margin-top:10px; padding-top:10px; border-top:.5px solid var(--cu-sep); }}
   #wnba .why {{ margin-top:10px; }}
   #wnba .opps, #wnba .pline {{ color:var(--cu-lbl3); font-size:12px; }}
+
+  /* ══════════════════ CUPERTINO-SIMFIX ══════════════════
+     Two things only visible on a real device screenshot, not in computed styles:
+     1. .tabthumb kept `border:1px solid rgba(77,163,255,.35)` + an inset highlight from the old
+        pill bar — a blue ring around the grey iOS thumb. Overriding background alone missed it.
+     2. The in-progress banner was uppercased by my own rule, so it SHOUTED and wrapped to two
+        lines. iOS uses sentence case at this size; only the tiny section eyebrows are caps. */
+  .tabthumb {{ border:0 !important; box-shadow:0 3px 8px rgba(0,0,0,.3) !important;
+               background:#636366 !important; }}
+  #wnba .dayhdr {{ text-transform:none; font-size:15px; letter-spacing:0;
+                   color:var(--cu-lbl2); padding:16px 4px 6px; line-height:1.35; }}
+  #wnba .dayhdr.live {{ color:var(--cu-lbl2); }}
+  #wnba .dayhdr.live b {{ color:var(--cu-org); font-weight:600; }}
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
