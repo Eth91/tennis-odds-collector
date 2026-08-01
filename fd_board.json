@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-08-01T03:20:29Z",
+ "captured_at": "2026-08-01T03:29:01Z",
  "matches": [
-  {
-   "event_id": 35889465,
-   "p1": "Konrad Kulpa",
-   "p2": "Artur Grela",
-   "p1_norm": "konrad kulpa",
-   "p2_norm": "artur grela",
-   "open_date": "2026-08-01T03:00:00.000Z",
-   "line": 86.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
-  {
-   "event_id": 35889473,
-   "p1": "Dawid Jendrysik",
-   "p2": "Wojciech Pytlas",
-   "p1_norm": "dawid jendrysik",
-   "p2_norm": "wojciech pytlas",
-   "open_date": "2026-08-01T03:10:00.000Z",
-   "line": 64.5,
-   "over_odds": -105,
-   "under_odds": -135
-  },
-  {
-   "event_id": 35889484,
-   "p1": "Dariusz Wrobel",
-   "p2": "Jaroslaw Rolak",
-   "p1_norm": "dariusz wrobel",
-   "p2_norm": "jaroslaw rolak",
-   "open_date": "2026-08-01T03:25:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -116
-  },
   {
    "event_id": 35889485,
    "p1": "Jakub Kosowski",
@@ -41,9 +8,9 @@
    "p1_norm": "jakub kosowski",
    "p2_norm": "artur daniel",
    "open_date": "2026-08-01T03:25:00.000Z",
-   "line": 75.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35889486,
@@ -52,9 +19,9 @@
    "p1_norm": "jacek wieczerzak",
    "p2_norm": "pawel kurek",
    "open_date": "2026-08-01T03:25:00.000Z",
-   "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 72.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35889490,
@@ -96,9 +63,42 @@
    "p1_norm": "petr david",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-08-01T03:45:00.000Z",
-   "line": 78.5,
+   "line": 82.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35889514,
+   "p1": "Rafal Glica",
+   "p2": "Oliwier Sokolowski",
+   "p1_norm": "rafal glica",
+   "p2_norm": "oliwier sokolowski",
+   "open_date": "2026-08-01T03:50:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35889515,
+   "p1": "Dawid Poloszczanski",
+   "p2": "Maciej Sinicki",
+   "p1_norm": "dawid poloszczanski",
+   "p2_norm": "maciej sinicki",
+   "open_date": "2026-08-01T03:50:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35889516,
+   "p1": "Schaniel Krzysztof",
+   "p2": "Jakub Michalski",
+   "p1_norm": "schaniel krzysztof",
+   "p2_norm": "jakub michalski",
+   "open_date": "2026-08-01T03:55:00.000Z",
+   "line": 74.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
