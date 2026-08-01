@@ -1175,7 +1175,7 @@ TT_LIVE_JS = """
       var _price = x.odds ? ('<span class="podds ' + _cls + '">' + x.odds + '</span>'
             + '<img class="bklogo" src="' + (_mgm ? _TTMGM : 'book-fd.png') + '" alt="'
             + (_mgm ? 'MGM' : 'FD') + '">') : '';
-      var src = x.real ? ('<span class="' + _cls + '">' + _bk + ' ' + mid + ' confirmed</span>' + _price)
+      var src = x.real ? ('<span class="' + _cls + '">' + _bk + ' ' + mid + ' confirmed</span> ' + _price)
                        : '<span class="pj">projected</span>';
       rows += '<div class="ttbet"><span class="pind ' + o.toLowerCase() + '">' + o + '</span>'
             + '<span class="ttbln">' + lncell + '</span>'
@@ -3893,6 +3893,39 @@ def build():
   #pga .pgarec b {{ color:var(--cu-grn); font-weight:600; }}
   #pga .pgapaper {{ flex:none; }}
   #pga .pgamkt {{ margin:18px 0 4px; }}
+
+  /* ══════════════════ CUPERTINO-TTFIX ══════════════════
+     TT structure is: .ttbet > .pind, .ttbln, .ttbmid(.ttbnm + .ttbsb), .ttconf(.tchip + .ttconflab)
+
+     Two real bugs found on device:
+     1. The hit-rate pill is .ttconf > .tchip.tA — the original blue-GLOW rule, which I had only
+        overridden inside #wnba. It encodes a number that is already printed, so the glow is
+        decoration; neutral it goes.
+     2. `.ttbet:last-of-type` never matched. :last-of-type keys off the TAG, and .ttfoot is also a
+        div sitting after the rows — so the final row kept its border-bottom and stacked with the
+        footnote's border-top, giving the double hairline. Fixed by dropping the footnote's own
+        top border and letting the last row's separator do that job. */
+  .ttfoot {{ border-top:0 !important; padding-top:0 !important; margin-top:14px !important; }}
+  #tt .ttconf {{ display:flex; flex-direction:column; align-items:flex-end; gap:2px; flex:none; }}
+  #tt .ttconf .tchip {{ background:var(--cu-fill) !important; color:var(--cu-lbl) !important;
+                        border:0 !important; box-shadow:none !important; border-radius:11px;
+                        font-size:15px; font-weight:640; padding:3px 10px; width:auto; height:auto;
+                        font-variant-numeric:tabular-nums; }}
+  #tt .ttconflab {{ font-size:12px; color:var(--cu-lbl2); text-transform:none;
+                    letter-spacing:0; font-weight:400; }}
+  #tt .ttbmid {{ flex:1; min-width:0; }}
+  #tt .ttbnm {{ font-size:15px; font-weight:600; color:var(--cu-lbl); line-height:1.3; }}
+  #tt .ttbnm b {{ font-weight:600; }}
+  #tt .ttbsb {{ font-size:13px; color:var(--cu-lbl2); margin-top:3px; line-height:1.45; }}
+  #tt .ttbsb .fd, #tt .ttbsb .bmgm {{ color:var(--cu-lbl2) !important; }}
+  #tt .ttbsb .podds.bmgm {{ color:#d4af37 !important; }}   /* BetMGM identity kept on the PRICE */
+  #tt .ttbsb .podds.fd {{ color:var(--cu-lbl) !important; }}
+  #tt .ttbsb .bklogo {{ width:20px; height:20px; border-radius:5px; padding:2px;
+                        vertical-align:-5px; margin-left:5px; }}
+  #tt .pj {{ color:var(--cu-lbl3); }}
+  #tt .ttcnt {{ background:var(--cu-fill); color:var(--cu-lbl2); border-radius:11px;
+                padding:1px 8px; font-size:12px; font-weight:600; margin-left:auto; }}
+  #tt .tld {{ color:var(--cu-lbl3); }}
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
