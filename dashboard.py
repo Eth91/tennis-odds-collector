@@ -566,7 +566,7 @@ def _bars(r, meters=""):
     return (f'<div class="bars"><div class="bwrap">{why}<div class="chart">'
             f'<div class="pline" style="bottom:{line/mx*100:.1f}%"><span>{line:g}</span></div>'
             f'{cols}</div><div class="opps">{opps}</div>'
-            f'<div class="bnote">{hits}/{len(s)} {side} {line:g} · gray bar = minutes · {note}</div></div></div>')
+            f'<div class="bnote">{hits}/{len(s)} {side} {line:g}</div></div></div>')
 
 
 def _splits(r):
@@ -945,7 +945,7 @@ def _tracker_panel(wnba_rec, tt_json):
 
     # 1) WNBA injury props
     w, l, u = wnba_rec
-    wnba_card = card('<img class="tlogo" src="logos/wnba.png" alt="">', "WNBA", w, l, u, "current-model picks (overs · thin-sample & over-stack filtered) · 1u base + declining rungs · since 7/9", recent=_wnba_recent())
+    wnba_card = card('<img class="tlogo" src="logos/wnba.png" alt="">', "WNBA", w, l, u, "1u base + declining rungs · since 7/9", recent=_wnba_recent())
 
     # 2) MLB = the two live COMPASS models (u15.5 route-A model RETIRED by user 2026-07-26 —
     # k_paper flagging benched; its 12-3 era lives in git history)
@@ -1184,7 +1184,7 @@ TT_LIVE_JS = """
     }
     el.innerHTML = '<div class="card"><h3 class="ttlg">\\uD83C\\uDFD3 TT Elite ' + mid + ' Flags'
       + '<span class="ttcnt">' + entries.length + '</span></h3>' + rows
-      + '<div class="ttfoot">hit rate = share of H2H meetings that went this side at this line ' + mid + ' only pairs \\u226570% shown ' + mid + ' confirmed = a REAL posted line (FanDuel or BetMGM) ' + mid + ' projected = before FanDuel posts (never tracked)</div></div>';
+      + '<div class="ttfoot">projected = no posted line yet, never tracked</div></div>';
   };
   window._fetchTTTotals = async function(){
     try {
@@ -2172,7 +2172,7 @@ def _injury_html():
                  + '</div></div>')
     if not body:
         body = '<div class="swo">No impact players carry an injury status right now.</div>'
-    _scope = ("· teams playing today" if _today_teams else "· ALL teams (slate lookup failed)")
+    _scope = ("· today" if _today_teams else "· all teams (slate lookup failed)")
     _hid = (" · %d hidden (not playing)" % _hidden) if _hidden else ""
     return ('<div class="starwatch"><div class="sw-title">🏥 Injury report '
             f'<span>{_scope}{_hid} · n = team games without her</span></div>'
@@ -2499,7 +2499,7 @@ def build():
                   f'<span class="tchip t{_xt}">{_xt}</span>{pv}</span>')
     extras_html = ('<div class="xtras"><div class="xt" title="pinged &amp; ledger-logged — dropped by '
                    'the 2-per-team / rung-gap rules; not in the tracked record">Also flagged '
-                   '<span>· benched by the selection rules · not picks</span></div>'
+                   '<span>· not picks</span></div>'
                    + chips + '</div>') if chips else ""
     # honest header numbers: count the SELECTED play-groups on the cards (not every ledger rung),
     # plus a record strip so the board carries its own track record (audit item: record was a tab away)
@@ -3898,7 +3898,7 @@ def build():
     <h2>Live record</h2>
     {tracker_html}
   </div>
-  <div class="foot">auto-generated · self-refreshing · WNBA 1u ladders · TT/GG ¼-Kelly paper</div>
+  <div class="foot">auto-generated · self-refreshing</div>
 </div>
 <script>
   function _thumb() {{
