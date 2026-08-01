@@ -3788,7 +3788,7 @@ def build():
                  color:var(--cu-lbl2); margin:18px 4px 10px; }}
 
   /* every card surface */
-  .card, .tcard, .pgatop, .starwatch, .watchlist, .tierleg, .xtras {{
+  .card, .tcard, .starwatch, .watchlist, .tierleg, .xtras {{
       background:var(--cu-grp); border:0 !important; border-radius:12px; padding:14px 16px;
       margin:0 0 20px; box-shadow:none !important; }}
   .thead, .pgahead, .ttlg, .wl-title, .sw-title {{ font-size:13px; font-weight:600;
@@ -3859,11 +3859,40 @@ def build():
   .foot {{ font-size:13px; color:var(--cu-lbl3); text-align:center; padding:8px 0 28px; }}
   .ttfoot, .bnote {{ font-size:13px; color:var(--cu-lbl3); line-height:1.4;
                      margin-top:12px; padding-top:12px; border-top:.5px solid var(--cu-sep); }}
-  .tcard, .card, .pgatop, .starwatch, .watchlist, .tierleg, .xtras {{ margin-bottom:20px; }}
+  .tcard, .card, .starwatch, .watchlist, .tierleg, .xtras {{ margin-bottom:20px; }}
   .panel {{ padding-bottom:8px; }}
   .thead, .ttlg, .pgahead {{ line-height:1.3; }}
   #wnba .game {{ margin-bottom:20px; }}
   #wnba .cu-grp {{ margin-bottom:0; }}
+
+  /* ══════════════════ CUPERTINO-PGAFIX ══════════════════
+     I styled these blind from class names and got the structure backwards. Real markup is:
+         .pgabet  vertical wrapper
+           .pgatop   name · .pgasp spacer · odds + book logo   (the horizontal row)
+           .pgasub   context line
+     So .pgabet must be a BLOCK (I had made it a flex row, which put the sub-line beside the row),
+     and .pgatop is not a card surface (it was in the card group, giving every row card padding
+     and a 20pt margin — hence the huge gaps). */
+  #pga .pgabet {{ display:block !important; padding:12px 0; margin:0;
+                  border-bottom:.5px solid var(--cu-sep); background:none !important;
+                  border-radius:0 !important; }}
+  #pga .pgabet:last-child {{ border-bottom:0; }}
+  #pga .pgatop {{ display:flex; align-items:center; gap:8px; background:none !important;
+                  padding:0 !important; margin:0 !important; border-radius:0 !important; }}
+  #pga .pgasp {{ flex:1 1 auto; }}
+  #pga .pgasel {{ font-size:16px; font-weight:600; color:var(--cu-lbl); letter-spacing:-.015em;
+                  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }}
+  #pga .pgasub {{ font-size:13px; color:var(--cu-lbl2); margin-top:3px; }}
+  #pga .podds, #pga .podds.fd {{ color:var(--cu-lbl) !important; font-size:17px; font-weight:640;
+                                 white-space:nowrap; }}
+  /* header: title must not wrap next to the pill and record */
+  #pga .pgahead {{ display:flex; align-items:center; gap:8px; flex-wrap:nowrap; }}
+  #pga .pgatitle {{ font-size:17px; font-weight:640; white-space:nowrap; overflow:hidden;
+                    text-overflow:ellipsis; flex:0 1 auto; }}
+  #pga .pgarec {{ font-size:13px; white-space:nowrap; flex:none; text-transform:none; }}
+  #pga .pgarec b {{ color:var(--cu-grn); font-weight:600; }}
+  #pga .pgapaper {{ flex:none; }}
+  #pga .pgamkt {{ margin:18px 0 4px; }}
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
