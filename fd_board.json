@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-01T03:05:40Z",
+ "captured_at": "2026-08-01T03:13:20Z",
  "matches": [
   {
    "event_id": 35889465,
@@ -8,9 +8,9 @@
    "p1_norm": "konrad kulpa",
    "p2_norm": "artur grela",
    "open_date": "2026-08-01T03:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 82.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35889468,
@@ -19,20 +19,9 @@
    "p1_norm": "pawel slosarczyk",
    "p2_norm": "witold buczynski",
    "open_date": "2026-08-01T03:00:00.000Z",
-   "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35889470,
-   "p1": "Mariusz Adamus",
-   "p2": "Adam Ruszkiewicz",
-   "p1_norm": "mariusz adamus",
-   "p2_norm": "adam ruszkiewicz",
-   "open_date": "2026-08-01T03:05:00.000Z",
-   "line": 82.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 66.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35889473,
@@ -41,9 +30,9 @@
    "p1_norm": "dawid jendrysik",
    "p2_norm": "wojciech pytlas",
    "open_date": "2026-08-01T03:10:00.000Z",
-   "line": 72.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 74.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35889484,
@@ -86,8 +75,30 @@
    "p2_norm": "roman wiza",
    "open_date": "2026-08-01T03:30:00.000Z",
    "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35889493,
+   "p1": "Jakub Kaczmarek",
+   "p2": "Mateusz Sikon",
+   "p1_norm": "jakub kaczmarek",
+   "p2_norm": "mateusz sikon",
+   "open_date": "2026-08-01T03:35:00.000Z",
+   "line": 79.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35889495,
+   "p1": "Tadeusz Piotrowski",
+   "p2": "Piotr Maruszak",
+   "p1_norm": "tadeusz piotrowski",
+   "p2_norm": "piotr maruszak",
+   "open_date": "2026-08-01T03:40:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }

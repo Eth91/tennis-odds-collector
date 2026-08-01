@@ -314,6 +314,7 @@ rw|586|Pulls down 16 boards in loss
 rw|586|Records another double-double
 rw|587|Hands out 10 dimes in loss
 rw|587|Leading scorer in loss
+rw|587|Leads all scorers in loss
 rw|587|Records pair of steals Wednesday
 rw|599|Struggles in loss
 rw|603|Adds 16 points in loss
