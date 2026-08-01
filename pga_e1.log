@@ -820,3 +820,22 @@ e3: pricing PGA Rocket Classic 2026  (G2 pending n=13 — preview only)
   make-cut [SHADOW, armable=True]: 0 flags
   E3: no rows to log
 pga grade: +0 newly graded — E1 record 14-10  +1.38u
+E1 wave meter — Rocket Classic [In Progress]
+  no tee times posted yet — meter waits (they release Tue/Wed)
+  crawl 2026: +12242 round rows
+  crawl 2026: +7221 round rows
+  rounds table: 117806 rows, 2459 players
+G2: 13 gradeable closes [R1=4 R2=9] from 33 collected matchup markets
+     dropped  11  round not both posted / tie
+     dropped   9  72h not both complete / tie
+G2: n=13 < 15 -> gate INCONCLUSIVE. This is a FORWARD test and cannot be backtested: it needs OUR OWN collected closes, and the collector only has history from the day it started.
+e3: pricing PGA Rocket Classic 2026  (G2 pending n=13 — preview only)
+  capture: snapshot 2026-07-31T23:30:01 | first R1 tee 2026-07-30T11:00:00
+  ruler: course-fit players 147, wave split 148, wave shift +0.11 strokes [exposure gap +1.0 km/h -> +0.11 str]
+  TOP_10_FINISH_IMG: 72 priced, N_eff 6.72 (nominal 10), implied vig 1.705
+  TOP_20_FINISH_IMG: 69 priced, N_eff 12.81 (nominal 20), implied vig 1.723
+  TOP_5_FINISH_IMG: 72 priced, N_eff 3.49 (nominal 5), implied vig 1.713
+  round-score [SHADOW]: 0 flags (needs >= 6 two-sided lines to anchor the level)
+  make-cut [SHADOW, armable=True]: 0 flags
+  E3: no rows to log
+pga grade: +0 newly graded — E1 record 14-10  +1.38u
