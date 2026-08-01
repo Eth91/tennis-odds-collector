@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-01T03:33:10Z",
+ "captured_at": "2026-08-01T03:37:43Z",
  "matches": [
   {
    "event_id": 35889485,
@@ -8,9 +8,9 @@
    "p1_norm": "jakub kosowski",
    "p2_norm": "artur daniel",
    "open_date": "2026-08-01T03:25:00.000Z",
-   "line": 63.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 71.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35889486,
@@ -19,7 +19,7 @@
    "p1_norm": "jacek wieczerzak",
    "p2_norm": "pawel kurek",
    "open_date": "2026-08-01T03:25:00.000Z",
-   "line": 82.5,
+   "line": 98.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,9 +30,9 @@
    "p1_norm": "damian fira",
    "p2_norm": "roman wiza",
    "open_date": "2026-08-01T03:30:00.000Z",
-   "line": 73.5,
+   "line": 80.5,
    "over_odds": -115,
-   "under_odds": -120
+   "under_odds": -115
   },
   {
    "event_id": 35889493,
@@ -41,9 +41,9 @@
    "p1_norm": "jakub kaczmarek",
    "p2_norm": "mateusz sikon",
    "open_date": "2026-08-01T03:35:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35889495,
@@ -98,6 +98,28 @@
    "open_date": "2026-08-01T03:55:00.000Z",
    "line": 74.5,
    "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35889527,
+   "p1": "Mariusz Baron",
+   "p2": "Kacper Adamus",
+   "p1_norm": "mariusz baron",
+   "p2_norm": "kacper adamus",
+   "open_date": "2026-08-01T04:00:00.000Z",
+   "line": 80.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35889528,
+   "p1": "Bartlomiej Mleczko",
+   "p2": "Dominik Solilo",
+   "p1_norm": "bartlomiej mleczko",
+   "p2_norm": "dominik solilo",
+   "open_date": "2026-08-01T04:00:00.000Z",
+   "line": 78.5,
+   "over_odds": -116,
    "under_odds": -118
   }
  ]
