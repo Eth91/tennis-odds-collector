@@ -2077,7 +2077,10 @@ def _starwatch_html():
     rows = ""
     for s in sorted(stars, key=lambda x: (x.get("date") or today, x.get("player") or "")):
         stt = s.get("status") or ""
-        scls = "out" if stt in ("Out", "Doubtful") else "q"
+        # Available is the ALL-CLEAR, not a warning. Sharing "q" with Questionable painted four
+        # orange badges on the injury card and buried the one "Out" that actually matters.
+        scls = ("out" if stt in ("Out", "Doubtful")
+                else ("avail" if stt == "Available" else "q"))
         opts = ", ".join(_short(o) for o in (s.get("options") or [])) or "—"
         dtag = ""
         if s.get("date") and s["date"] != today:
@@ -3763,6 +3766,15 @@ def build():
                    color:var(--cu-lbl2); padding:16px 4px 6px; line-height:1.35; }}
   #wnba .dayhdr.live {{ color:var(--cu-lbl2); }}
   #wnba .dayhdr.live b {{ color:var(--cu-org); font-weight:600; }}
+
+  /* ══════════════════ CUPERTINO-SIM2 ══════════════════
+     Found on the device: the injury card showed four orange "Available" badges, so the single
+     red "Out" — the only one that changes a bet — did not stand out. Available is now neutral. */
+  #wnba .swstat.avail {{ color:var(--cu-lbl2); background:var(--cu-fill); }}
+  /* the leading O/U in Also-considered was orphaned from its number */
+  #wnba .ttbet {{ gap:6px; }}
+  #wnba .ttbet .pind {{ margin-right:-2px; }}
+  #wnba .ttbmid {{ margin-left:6px; }}
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
