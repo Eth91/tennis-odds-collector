@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-01T02:23:22Z",
+ "captured_at": "2026-08-01T02:33:04Z",
  "matches": [
   {
    "event_id": 35889415,
@@ -8,9 +8,9 @@
    "p1_norm": "damian fira",
    "p2_norm": "adam ruszkiewicz",
    "open_date": "2026-08-01T02:20:00.000Z",
-   "line": 74.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35889416,
@@ -19,9 +19,9 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "jacek oracz",
    "open_date": "2026-08-01T02:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 98.5,
+   "over_odds": 105,
+   "under_odds": -145
   },
   {
    "event_id": 35889428,
