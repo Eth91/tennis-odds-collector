@@ -529,6 +529,13 @@ def _meter_html(label, pct, valtext, title=""):
             f'<span class="mval">{valtext}</span></div>')
 
 
+def _wrapsec(label, inner):
+    """A labelled drawer section. Returns nothing when the block is empty, so an absent section
+    leaves no header and no rule behind it — the drawer's spacing then comes only from sections
+    that actually have content."""
+    return (f'<div class="dsec"><div class="dlab">{label}</div>{inner}</div>') if inner else ""
+
+
 def _bars(r, meters=""):
     """Dropdown: hit-rate meters (moved off the front card 2026-07-19) + generated reasoning + a
     PropsCash-style game log. Each game's ACTUAL stat is a bar (green if it cashed our side, red if
@@ -539,7 +546,7 @@ def _bars(r, meters=""):
     why = (f'{mhtml}'
            f'<div class="dsec"><div class="dlab">Why this flagged</div>'
            f'<div class="why">{_reasoning(r)}</div></div>'
-           f'{_regime_html(r)}')
+           f'{_wrapsec("Same-lineup history", _regime_html(r))}')
     s = _samples(r)
     if not s:
         return f'<div class="bars"><div class="bwrap">{why}<div class="nodata">no game data</div></div></div>'
@@ -1100,7 +1107,7 @@ TT_LIVE_JS = """
   }
   // Real BetMGM mark when docs/book-mgm.png exists; the monogram below is only the
   // fallback for when it does not (no BetMGM SVG is publicly obtainable).
-  var _TTMGM = "book-mgm.png";
+  var _TTMGM = "book-mgm.svg";
   var _TTMGM_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'"
     + " viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23c9a227'/%3E"
     + "%3Ctext x='12' y='16' font-size='8.5' font-weight='700' text-anchor='middle'"
@@ -4069,6 +4076,29 @@ def build():
   #wnba .swrow .glogo {{ width:24px; height:24px; }}
   .bklogo {{ width:22px !important; height:22px !important; }}
   #wnba .cu-hd .bklogo {{ width:24px !important; height:24px !important; }}
+
+  /* ══════════════════ CUPERTINO-DRAWER ══════════════════
+     The drawer's spacing was coming from four different sources stacked on each other: .meters had
+     its own bottom border, .dsec added a rule, .regime added another, and .chart a third — so gaps
+     doubled wherever two met and collapsed where a block was empty. One rule now: every section is
+     a .dsec, separated by exactly one 16px gap and one hairline, and empty sections emit nothing. */
+  #wnba .bwrap {{ padding:16px; }}
+  #wnba .bwrap > * {{ margin:0; }}
+  #wnba .bwrap > * + * {{ margin-top:16px; padding-top:16px; border-top:.5px solid var(--cu-sep); }}
+  #wnba .bwrap .meters {{ margin:0 !important; padding:0 !important; border:0 !important; }}
+  #wnba .dsec {{ padding-top:0; margin-top:0; border-top:0; }}   /* the parent rule owns spacing */
+  #wnba .dlab {{ font-size:12px; font-weight:600; letter-spacing:.02em; text-transform:uppercase;
+                 color:var(--cu-lbl2); margin:0 0 10px; }}
+  #wnba .dsec > .why, #wnba .dsec .rgh {{ margin:0; font-size:15px; line-height:1.45;
+                                          color:var(--cu-lbl2); }}
+  #wnba .dsec .regime {{ background:none !important; border:0 !important; padding:0 !important;
+                         margin:0 !important; }}
+  #wnba .rgsub {{ margin-top:8px; font-size:13px; color:var(--cu-lbl3); }}
+  #wnba .cmps {{ margin-top:12px; gap:6px; }}
+  #wnba .chart {{ margin:0 !important; padding-top:0 !important; border-top:0 !important; }}
+  #wnba .bnote {{ margin-top:10px !important; }}
+  #wnba .meter {{ gap:12px; margin:0 0 10px; }}
+  #wnba .meter:last-child {{ margin-bottom:0; }}
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
