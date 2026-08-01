@@ -2339,9 +2339,8 @@ def _considered_html(rows):
                        html.escape(str(v.get("why") or "")),
                        (" · " + band) if band else ""))
         return ('<div class="card"><h3 class="ttlg">Also considered · NOT BET</h3>' + out +
-                '<div class="ttfoot">Flagged by the model, then rejected — either it lost a '
-                'same-team same-family pool to another player, or it lost a top-2 slot. Shown so a '
-                'selection call is visible the night it happens. No stake, no alert.</div></div>')
+                '<div class="ttfoot">Rejected by the selection rules. No stake, no alert.'
+                '</div></div>')
     except Exception:                                                # noqa: BLE001
         return ""
 
@@ -3854,6 +3853,17 @@ def build():
   #tt .podds.bmgm {{ color:#d4af37 !important; }}      /* BetMGM identity — kept */
   #tt .bklogo {{ width:24px; height:24px; border-radius:6px; background:var(--cu-fill);
                  padding:3px; vertical-align:-6px; margin-left:6px; }}
+
+  /* ══════════════════ CUPERTINO-SPACING ══════════════════
+     Rhythm: 20pt between groups, 12pt inside them, footnotes quiet above a hairline. */
+  .foot {{ font-size:13px; color:var(--cu-lbl3); text-align:center; padding:8px 0 28px; }}
+  .ttfoot, .bnote {{ font-size:13px; color:var(--cu-lbl3); line-height:1.4;
+                     margin-top:12px; padding-top:12px; border-top:.5px solid var(--cu-sep); }}
+  .tcard, .card, .pgatop, .starwatch, .watchlist, .tierleg, .xtras {{ margin-bottom:20px; }}
+  .panel {{ padding-bottom:8px; }}
+  .thead, .ttlg, .pgahead {{ line-height:1.3; }}
+  #wnba .game {{ margin-bottom:20px; }}
+  #wnba .cu-grp {{ margin-bottom:0; }}
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
