@@ -159,7 +159,10 @@ def main():
                 _first_tee = min(_tt0.values())
         except Exception:                                           # noqa: BLE001
             _first_tee = None
-    print(f"  capture: snapshot {snap_ts} | first R1 tee {_first_tee or 'UNKNOWN'}")
+    # R1's tee is printed for orientation only. It is NOT the capture boundary for anything but
+    # a field-wide outright — each flag below stamps its own deadline from the shared tee gate.
+    print(f"  capture: snapshot {snap_ts} | R1 first tee {_first_tee or 'UNKNOWN'} "
+          f"(per-flag deadlines from pga_tee_gate)")
 
     preview, flags = [], []
     cfit = {}                     # filled by the field block below; matchups tolerate empty
@@ -629,6 +632,13 @@ def main():
             if not _TEEGATE.is_open(evn, pv["market"]):
                 _n_teed += 1
                 continue
+            # THIS market's own deadline — a player tee for a single-player market, the earlier of
+            # the two for a matchbet, the R1 first tee for a field outright. Previously every flag
+            # was stamped with the event's R1 tee, so a Round 3 bet recorded a Wednesday deadline.
+            # is_open() already returned True, so a deadline exists; the guard is for the case
+            # where the tee sheet is reloaded between the two calls.
+            _dl, _ = _TEEGATE.deadline(evn, pv["market"])
+            _tee_stamp = (_dl.replace(microsecond=0).isoformat() if _dl else None)
             _is_shadow = bool(pv.get("shadow")) or not armed
             _stream = pv["stream"] + ("-shadow" if _is_shadow
                                       and not pv["stream"].endswith("-shadow") else "")
@@ -641,7 +651,7 @@ def main():
                 (key, now, evn, pv["market"], _stream, pv["runner"], "",
                  pv["odds"], pv["edge"], "", "",
                  pv.get("p_bet"), pv.get("p_fair"),
-                 snap_ts, _first_tee,
+                 snap_ts, _tee_stamp,
                  _bird_lam if pv["stream"].startswith("E3-birdies") else None,
                  _bird_nlines if pv["stream"].startswith("E3-birdies") else None))
             if cur.rowcount:
