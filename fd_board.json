@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-02T14:19:19Z",
+ "captured_at": "2026-08-02T14:25:06Z",
  "matches": [
   {
    "event_id": 35895993,
@@ -8,9 +8,9 @@
    "p1_norm": "konrad kulpa",
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-08-02T14:10:00.000Z",
-   "line": 69.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 82.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35895996,
@@ -19,42 +19,9 @@
    "p1_norm": "piotr staniszewski",
    "p2_norm": "arkadiusz mugowski",
    "open_date": "2026-08-02T14:15:00.000Z",
-   "line": 81.5,
+   "line": 89.5,
    "over_odds": -110,
    "under_odds": -125
-  },
-  {
-   "event_id": 35896009,
-   "p1": "Jakub Michalczyk",
-   "p2": "Mikolaj Lukaszewski",
-   "p1_norm": "jakub michalczyk",
-   "p2_norm": "mikolaj lukaszewski",
-   "open_date": "2026-08-02T14:20:00.000Z",
-   "line": 81.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
-  {
-   "event_id": 35896010,
-   "p1": "Pawel Adamus",
-   "p2": "Jakub Nowak",
-   "p1_norm": "pawel adamus",
-   "p2_norm": "jakub nowak",
-   "open_date": "2026-08-02T14:20:00.000Z",
-   "line": 81.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35896011,
-   "p1": "Schaniel Krzysztof",
-   "p2": "Marcin Lach",
-   "p1_norm": "schaniel krzysztof",
-   "p2_norm": "marcin lach",
-   "open_date": "2026-08-02T14:20:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
   },
   {
    "event_id": 35896037,
@@ -75,8 +42,8 @@
    "p2_norm": "krystian kolodziej",
    "open_date": "2026-08-02T14:35:00.000Z",
    "line": 74.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35896041,
