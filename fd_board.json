@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-02T20:34:51Z",
+ "captured_at": "2026-08-02T20:41:39Z",
  "matches": [
-  {
-   "event_id": 35897084,
-   "p1": "Grzegorz Mucha",
-   "p2": "Kazimierz Rybak",
-   "p1_norm": "grzegorz mucha",
-   "p2_norm": "kazimierz rybak",
-   "open_date": "2026-08-02T20:30:00.000Z",
-   "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35897085,
    "p1": "Jacek Mitas",
@@ -19,7 +8,7 @@
    "p1_norm": "jacek mitas",
    "p2_norm": "filip mlynarski",
    "open_date": "2026-08-02T20:30:00.000Z",
-   "line": 84.5,
+   "line": 88.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -30,7 +19,7 @@
    "p1_norm": "marcin marchlewski",
    "p2_norm": "tomasz filbrandt",
    "open_date": "2026-08-02T20:30:00.000Z",
-   "line": 76.5,
+   "line": 88.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -41,9 +30,9 @@
    "p1_norm": "sebastian juzek",
    "p2_norm": "mateusz sikon",
    "open_date": "2026-08-02T20:45:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35897092,
@@ -64,8 +53,8 @@
    "p2_norm": "michal guzik",
    "open_date": "2026-08-02T21:00:00.000Z",
    "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35897105,
@@ -77,6 +66,17 @@
    "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35897114,
+   "p1": "Mariusz Baron",
+   "p2": "Grzegorz Marud",
+   "p1_norm": "mariusz baron",
+   "p2_norm": "grzegorz marud",
+   "open_date": "2026-08-02T21:05:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
