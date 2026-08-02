@@ -108,16 +108,24 @@ def grade():
     # from the same fetches the grading loop already makes, so it costs nothing extra, and it is
     # the honest proof that the data source is current rather than silently truncated.
     _feed_max = None
-    for rid, date, pid, opp in rows:
-        if pid not in cache:
+    # PASS 1 — fetch every log, and only then establish the feed high-water mark. Accumulating
+    # it inside the resolution loop was wrong in a way that silently did nothing: rows come back in
+    # rowid order, so the OLD rows (the ones needing resolution) were tested against a _feed_max
+    # built only from the equally-old logs seen so far, while the current-slate logs that prove the
+    # feed advanced were not read until later. The mark has to be complete before it is used.
+    for _rid, _date, _pid, _opp in rows:
+        if _pid not in cache:
             try:
-                cache[pid] = W.game_log(pid)
+                cache[_pid] = W.game_log(_pid)
             except RuntimeError:
-                cache[pid] = []
-        for _g in cache[pid]:
+                cache[_pid] = []
+        for _g in cache[_pid]:
             _gd = str(_g.get("date"))[:10]
             if _gd and (_feed_max is None or _gd > _feed_max):
                 _feed_max = _gd
+
+    # PASS 2 — resolve.
+    for rid, date, pid, opp in rows:
         cand = sorted((g for g in cache[pid]
                        if g.get("result") and g["date"][:10] >= date
                        and (not opp or (g.get("matchup") or "").upper() == opp.upper())),

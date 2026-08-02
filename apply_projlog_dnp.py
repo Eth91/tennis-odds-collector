@@ -40,91 +40,19 @@ if "DNP_MIN_AGE_DAYS" in s:
     print("  = already applied")
     raise SystemExit(0)
 
-CONST = '''DNP_MIN_AGE_DAYS = 2     # a slate younger than this may still be in progress; never resolve it
+# Whole-function replacement rather than a set of narrow anchors. grade() is restructured into two
+# passes here, so patching it line-by-line left the apply script and the live file able to drift —
+# and a patch script that no longer reproduces the file it documents is worse than none, because
+# the VM loop hard-resets and these scripts are what rebuild the change.
+CONST = "DNP_MIN_AGE_DAYS = 2     # a slate younger than this may still be in progress; never resolve it\n\n"
+anchor = "\ndef _con():"
+assert anchor in s, "const anchor"
+s = s.replace(anchor, "\n" + CONST + anchor, 1)
 
-'''
-anchor0 = "\ndef _con():"
-assert anchor0 in s, "const anchor"
-s = s.replace(anchor0, "\n" + CONST + "\ndef _con():", 1)
-
-OLD = '''        if not cand:
-            continue'''
-NEW = '''        if not cand:
-            # DID NOT PLAY, or the game has not happened yet — the SAME observation. Resolving the
-            # second would destroy live rows, so this only fires with both guards satisfied:
-            # the slate is old enough to be over, AND this player's own feed is demonstrably
-            # current past it (she has a later game). Without the second guard a stale or broken
-            # game-log feed would be silently recorded as "she was a scratch".
-            if _dnp_resolvable(date, cache[pid], _feed_max):
-                con.execute("UPDATE projections SET graded=2 WHERE rowid=?", (rid,))
-                dnp += 1
-            continue'''
-assert OLD in s, "cand anchor"
-s = s.replace(OLD, NEW, 1)
-
-# The feed high-water mark is accumulated from the SAME game-log fetches the grading loop already
-# makes, so proving the source is current costs no extra requests.
-OLD_FM = """        cand = sorted((g for g in cache[pid]"""
-NEW_FM = """        for _g in cache[pid]:
-            _gd = str(_g.get("date"))[:10]
-            if _gd and (_feed_max is None or _gd > _feed_max):
-                _feed_max = _gd
-        cand = sorted((g for g in cache[pid]"""
-assert OLD_FM in s, "feed-max anchor"
-s = s.replace(OLD_FM, NEW_FM, 1)
-
-OLD2 = '''    cache, graded = {}, 0'''
-NEW2 = '''    cache, graded, dnp = {}, 0, 0
-    # Feed high-water mark: the newest game date anywhere in the logs this run touches. Computed
-    # from the same fetches the grading loop already makes, so it costs nothing extra, and it is
-    # the honest proof that the data source is current rather than silently truncated.
-    _feed_max = None'''
-assert OLD2 in s, "counter anchor"
-s = s.replace(OLD2, NEW2, 1)
-
-OLD3 = '''    con.commit()
-    con.close()
-    return graded'''
-NEW3 = '''    con.commit()
-    con.close()
-    if dnp:
-        print("proj grade: %d row(s) resolved as DID-NOT-PLAY (graded=2, actual_min left NULL)" % dnp)
-    return graded'''
-assert OLD3 in s, "return anchor"
-s = s.replace(OLD3, NEW3, 1)
-
-HELPER = '''
-
-def _dnp_resolvable(date, log, feed_max=None):
-    """May a projection with no box score be settled as DID-NOT-PLAY? Both guards must hold.
-
-    Returns False whenever we cannot TELL, which leaves the row pending and visible rather than
-    silently recording a scratch that may just be a broken feed.
-
-    CURRENCY IS PROVEN AT THE FEED, NOT THE PLAYER. The first version of this asked whether the
-    PLAYER had a later game — and that fails on exactly the dominant case: a player on a long
-    absence has no later game BECAUSE she never came back, which is the very thing we are trying to
-    record. Haley Jones was projected 2026-07-20 with her last game on 05-20; her own log can never
-    clear that bar. `feed_max` is the newest game date seen anywhere in this run, so it answers the
-    question actually being asked — did our data source advance past this slate? If it did, an
-    absent player was absent. If it did not, we know nothing and refuse.
-    """
-    import datetime as _dt
-    try:
-        d = _dt.date.fromisoformat(str(date)[:10])
-    except (TypeError, ValueError):
-        return False
-    if (_dt.date.today() - d).days < DNP_MIN_AGE_DAYS:
-        return False                       # slate may still be in progress
-    ds = str(date)[:10]
-    if feed_max and str(feed_max)[:10] > ds:
-        return True                        # the SOURCE moved past this slate: absence is real
-    return any(str(g.get("date"))[:10] > ds for g in (log or []))
-
-'''
-anchor2 = "\ndef grade():"
-assert anchor2 in s, "grade anchor"
-s = s.replace(anchor2, HELPER + "\ndef grade():", 1)
+OLD = '\ndef grade():\n    con = _con()\n    rows = con.execute("SELECT rowid, date, pid, opp FROM projections WHERE graded=0").fetchall()\n    if not rows:\n        con.close()\n        return 0\n    ids = {v["id"]: n for n, v in W.players().items()}     # ensure name cache warm (pid is the key)\n    cache, graded = {}, 0\n    for rid, date, pid, opp in rows:\n        if pid not in cache:\n            try:\n                cache[pid] = W.game_log(pid)\n            except RuntimeError:\n                cache[pid] = []\n        cand = sorted((g for g in cache[pid]\n                       if g.get("result") and g["date"][:10] >= date\n                       and (not opp or (g.get("matchup") or "").upper() == opp.upper())),\n                      key=lambda g: g["date"])\n        if not cand:\n            continue\n        g = cand[0]\n        con.execute("UPDATE projections SET actual_min=?, actual_pts=?, actual_reb=?, "\n                    "actual_ast=?, graded=1 WHERE rowid=?",\n                    (g["min"], g["pts"], g["reb"], g["ast"], rid))\n        graded += 1\n    con.commit()\n    con.close()\n    return graded\n\n'
+NEW = '\ndef _dnp_resolvable(date, log, feed_max=None):\n    """May a projection with no box score be settled as DID-NOT-PLAY? Both guards must hold.\n\n    Returns False whenever we cannot TELL, which leaves the row pending and visible rather than\n    silently recording a scratch that may just be a broken feed.\n\n    CURRENCY IS PROVEN AT THE FEED, NOT THE PLAYER. The first version of this asked whether the\n    PLAYER had a later game — and that fails on exactly the dominant case: a player on a long\n    absence has no later game BECAUSE she never came back, which is the very thing we are trying to\n    record. Haley Jones was projected 2026-07-20 with her last game on 05-20; her own log can never\n    clear that bar. `feed_max` is the newest game date seen anywhere in this run, so it answers the\n    question actually being asked — did our data source advance past this slate? If it did, an\n    absent player was absent. If it did not, we know nothing and refuse.\n    """\n    import datetime as _dt\n    try:\n        d = _dt.date.fromisoformat(str(date)[:10])\n    except (TypeError, ValueError):\n        return False\n    if (_dt.date.today() - d).days < DNP_MIN_AGE_DAYS:\n        return False                       # slate may still be in progress\n    ds = str(date)[:10]\n    if feed_max and str(feed_max)[:10] > ds:\n        return True                        # the SOURCE moved past this slate: absence is real\n    return any(str(g.get("date"))[:10] > ds for g in (log or []))\n\n\ndef grade():\n    con = _con()\n    rows = con.execute("SELECT rowid, date, pid, opp FROM projections WHERE graded=0").fetchall()\n    if not rows:\n        con.close()\n        return 0\n    ids = {v["id"]: n for n, v in W.players().items()}     # ensure name cache warm (pid is the key)\n    cache, graded, dnp = {}, 0, 0\n    # Feed high-water mark: the newest game date anywhere in the logs this run touches. Computed\n    # from the same fetches the grading loop already makes, so it costs nothing extra, and it is\n    # the honest proof that the data source is current rather than silently truncated.\n    _feed_max = None\n    # PASS 1 — fetch every log, and only then establish the feed high-water mark. Accumulating\n    # it inside the resolution loop was wrong in a way that silently did nothing: rows come back in\n    # rowid order, so the OLD rows (the ones needing resolution) were tested against a _feed_max\n    # built only from the equally-old logs seen so far, while the current-slate logs that prove the\n    # feed advanced were not read until later. The mark has to be complete before it is used.\n    for _rid, _date, _pid, _opp in rows:\n        if _pid not in cache:\n            try:\n                cache[_pid] = W.game_log(_pid)\n            except RuntimeError:\n                cache[_pid] = []\n        for _g in cache[_pid]:\n            _gd = str(_g.get("date"))[:10]\n            if _gd and (_feed_max is None or _gd > _feed_max):\n                _feed_max = _gd\n\n    # PASS 2 — resolve.\n    for rid, date, pid, opp in rows:\n        cand = sorted((g for g in cache[pid]\n                       if g.get("result") and g["date"][:10] >= date\n                       and (not opp or (g.get("matchup") or "").upper() == opp.upper())),\n                      key=lambda g: g["date"])\n        if not cand:\n            # DID NOT PLAY, or the game has not happened yet — the SAME observation. Resolving the\n            # second would destroy live rows, so this only fires with both guards satisfied:\n            # the slate is old enough to be over, AND this player\'s own feed is demonstrably\n            # current past it (she has a later game). Without the second guard a stale or broken\n            # game-log feed would be silently recorded as "she was a scratch".\n            if _dnp_resolvable(date, cache[pid], _feed_max):\n                con.execute("UPDATE projections SET graded=2 WHERE rowid=?", (rid,))\n                dnp += 1\n            continue\n        g = cand[0]\n        con.execute("UPDATE projections SET actual_min=?, actual_pts=?, actual_reb=?, "\n                    "actual_ast=?, graded=1 WHERE rowid=?",\n                    (g["min"], g["pts"], g["reb"], g["ast"], rid))\n        graded += 1\n    con.commit()\n    con.close()\n    if dnp:\n        print("proj grade: %d row(s) resolved as DID-NOT-PLAY (graded=2, actual_min left NULL)" % dnp)\n    return graded\n\n'
+assert OLD in s, "grade() block anchor"
+s = s.replace(OLD, NEW + chr(10), 1)   # keep the blank line before _bias()
 
 ast.parse(s)
 shutil.copyfile(P, "/tmp/wnba_proj_log.predpn.py")
