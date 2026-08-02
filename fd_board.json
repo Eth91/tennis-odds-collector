@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-02T18:12:35Z",
+ "captured_at": "2026-08-02T18:22:35Z",
  "matches": [
-  {
-   "event_id": 35896776,
-   "p1": "Sebastian Juzek",
-   "p2": "Adam Ruszkiewicz",
-   "p1_norm": "sebastian juzek",
-   "p2_norm": "adam ruszkiewicz",
-   "open_date": "2026-08-02T18:00:00.000Z",
-   "line": 67.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35896781,
-   "p1": "Dawid Kosmal",
-   "p2": "Filip Mlynarski",
-   "p1_norm": "dawid kosmal",
-   "p2_norm": "filip mlynarski",
-   "open_date": "2026-08-02T18:05:00.000Z",
-   "line": 53.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
   {
    "event_id": 35896794,
    "p1": "Szymon Brud",
@@ -30,20 +8,9 @@
    "p1_norm": "szymon brud",
    "p2_norm": "tomasz filbrandt",
    "open_date": "2026-08-02T18:10:00.000Z",
-   "line": 77.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
-  {
-   "event_id": 35896795,
-   "p1": "Mateusz Baran",
-   "p2": "Kazimierz Rybak",
-   "p1_norm": "mateusz baran",
-   "p2_norm": "kazimierz rybak",
-   "open_date": "2026-08-02T18:10:00.000Z",
-   "line": 65.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 63.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35896823,
@@ -52,9 +19,9 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "lukasz oracz",
    "open_date": "2026-08-02T18:20:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35896827,
@@ -99,6 +66,28 @@
    "line": 73.5,
    "over_odds": -110,
    "under_odds": -120
+  },
+  {
+   "event_id": 35896855,
+   "p1": "Pawel Kurek",
+   "p2": "Mariusz Baron",
+   "p1_norm": "pawel kurek",
+   "p2_norm": "mariusz baron",
+   "open_date": "2026-08-02T18:45:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35896856,
+   "p1": "Jaroslaw Badura",
+   "p2": "Adam Ruszkiewicz",
+   "p1_norm": "jaroslaw badura",
+   "p2_norm": "adam ruszkiewicz",
+   "open_date": "2026-08-02T18:45:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
