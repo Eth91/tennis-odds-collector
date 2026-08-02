@@ -1,6 +1,17 @@
 {
- "captured_at": "2026-08-02T15:03:32Z",
+ "captured_at": "2026-08-02T15:09:02Z",
  "matches": [
+  {
+   "event_id": 35896079,
+   "p1": "Jacek Mitas",
+   "p2": "Mateusz Rutkowski",
+   "p1_norm": "jacek mitas",
+   "p2_norm": "mateusz rutkowski",
+   "open_date": "2026-08-02T15:00:00.000Z",
+   "line": 53.5,
+   "over_odds": -120,
+   "under_odds": -115
+  },
   {
    "event_id": 35896081,
    "p1": "Grzegorz Mucha",
@@ -8,20 +19,9 @@
    "p1_norm": "grzegorz mucha",
    "p2_norm": "michal guzik",
    "open_date": "2026-08-02T15:00:00.000Z",
-   "line": 67.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35896088,
-   "p1": "Rafal Wojcik",
-   "p2": "Jakub Nowak",
-   "p1_norm": "rafal wojcik",
-   "p2_norm": "jakub nowak",
-   "open_date": "2026-08-02T15:05:00.000Z",
-   "line": 84.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 50.5,
+   "over_odds": 110,
+   "under_odds": -155
   },
   {
    "event_id": 35896101,
@@ -66,6 +66,17 @@
    "line": 71.5,
    "over_odds": -120,
    "under_odds": -110
+  },
+  {
+   "event_id": 35896189,
+   "p1": "Pawel Adamus",
+   "p2": "Oskar Sokolowski",
+   "p1_norm": "pawel adamus",
+   "p2_norm": "oskar sokolowski",
+   "open_date": "2026-08-02T15:30:00.000Z",
+   "line": 80.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
