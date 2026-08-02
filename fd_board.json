@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-02T15:25:46Z",
+ "captured_at": "2026-08-02T15:31:36Z",
  "matches": [
-  {
-   "event_id": 35896101,
-   "p1": "Sebastian Juzek",
-   "p2": "Jakub Jesiek",
-   "p1_norm": "sebastian juzek",
-   "p2_norm": "jakub jesiek",
-   "open_date": "2026-08-02T15:10:00.000Z",
-   "line": 91.5,
-   "over_odds": -130,
-   "under_odds": -105
-  },
   {
    "event_id": 35896169,
    "p1": "Jakub Glanowski",
@@ -19,9 +8,9 @@
    "p1_norm": "jakub glanowski",
    "p2_norm": "tomasz filbrandt",
    "open_date": "2026-08-02T15:25:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 50.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35896170,
@@ -30,9 +19,9 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "filip mlynarski",
    "open_date": "2026-08-02T15:25:00.000Z",
-   "line": 74.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 60.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35896171,
@@ -41,9 +30,9 @@
    "p1_norm": "michal machelski",
    "p2_norm": "kazimierz rybak",
    "open_date": "2026-08-02T15:25:00.000Z",
-   "line": 70.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 55.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35896228,
@@ -77,6 +66,17 @@
    "line": 78.5,
    "over_odds": -118,
    "under_odds": -116
+  },
+  {
+   "event_id": 35896249,
+   "p1": "Piotr Przewlocki",
+   "p2": "Krzysztof Juszczyk",
+   "p1_norm": "piotr przewlocki",
+   "p2_norm": "krzysztof juszczyk",
+   "open_date": "2026-08-02T15:55:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
