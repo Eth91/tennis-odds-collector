@@ -52,6 +52,11 @@ LEAGUES = {"mlb": "84240", "wnba": "94682",
            "nba": "42648"}   # NBA port P1: idles until Oct; STAT_MAP already covers bball
 
 
+# DK milestone rung label: "15+", "8+". Anchored so a player name or an "Over 14.5" can
+# never match, which is what keeps the 1206 handicap market out of the points ladder.
+_MILESTONE = re.compile(r"\d+(?:\.\d+)?\+")
+
+
 def _stat_key(subcat_name):
     return STAT_MAP.get(re.sub(r"\s*o/u\s*$", "", subcat_name.strip().lower()))
 
@@ -108,14 +113,31 @@ def collect_league(sport, lg):
             continue
         emkt = {m["id"]: m.get("eventId") for m in j.get("markets", [])}
         for sel in j.get("selections", []):
-            label = (sel.get("label") or "").strip().lower()
+            raw = (sel.get("label") or "").strip()
+            label = raw.lower()
+            pts, dec, player = sel.get("points"), _dec(sel), _player(sel)
             side = "over" if label.startswith("over") else \
                    "under" if label.startswith("under") else None
-            pts, dec, player = sel.get("points"), _dec(sel), _player(sel)
+            # MILESTONE RUNGS. DK posts its alt ladder as one-sided "15+" selections with NO
+            # `points` value, so the over/under label test dropped all of them — 459 WNBA points
+            # selections per cycle, which is why the board only ever had DK's main line.
+            #
+            # The discriminator is deliberately narrow. Category 1206 is a player-vs-player
+            # HANDICAP market whose `points` holds a spread (-6.5), not a total; accepting it as a
+            # points line would poison the model far worse than missing the milestones. Requiring
+            # BOTH a bare "<number>+" label AND points=None excludes it structurally.
+            if side is None and pts is None and _MILESTONE.fullmatch(raw):
+                side = "over"
+                pts = float(raw[:-1]) - 0.5     # "15+" == 15 or more == over 14.5
             if side is None or pts is None or dec is None or not player:
                 continue
-            k = (sel.get("marketId"), side)
-            if k in seen:              # same player market surfaced in 'X' and 'X O/U'
+            # Dedupe on the RUNG, not the market. A milestone ladder is many overs inside ONE
+            # marketId (Carleton: 6+/8+/10+/12+/14+/15+/18+/20+/25+ all under market 356486642),
+            # so keying on (marketId, side) collapsed the whole ladder to its first rung — which is
+            # why the fix above still only yielded her 6+. Including the line keeps the original
+            # intent (the same rung surfacing in both 'X' and 'X O/U' still dedupes).
+            k = (sel.get("marketId"), side, round(float(pts), 1))
+            if k in seen:
                 continue
             eid = emkt.get(sel.get("marketId"))
             if eid not in events:      # market's game is live/started (pre-game filter above) — skip
