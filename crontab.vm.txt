@@ -1,0 +1,47 @@
+# CRONTABS FOR BOTH ORACLE BOXES — documentation, not a deployed file.
+#
+# WHY THIS IS IN THE REPO. The crontabs are VM-LOCAL state. They are not in git, they are not in
+# any systemd unit, and nothing recreates them. A box rebuild, a `crontab -r`, or a fresh Oracle
+# instance loses every line below with no error and no gap in any log — the loops keep running and
+# only the *scheduled* work silently stops. That is the same shape as every other failure found on
+# 2026-08-02: the thing that stopped was the thing nothing was watching.
+#
+# It nearly happened during the 32 GB re-clone: the crontab was cleared to keep cron from racing
+# the swap and only restored from a hand-made backup in /tmp. Restore with:
+#     grep -v '^#' crontab.vm.txt | crontab -        # on the MAIN VM only
+# worker-2's entries are listed as comments at the bottom and must be installed there, not here.
+#
+# Paths are absolute on purpose: cron's PATH is not a login shell's.
+
+# ── MAIN VM (wnba-loop-vm, 155.248.217.149) ────────────────────────────────────────────────────
+# daily self-check a few hours before tip; silent when healthy, ntfy-URGENT on a silent failure
+0 19 * * * cd /home/ubuntu/tennis-odds-collector && /usr/bin/python3 wnba_selfcheck.py >> /tmp/wnba_selfcheck.log 2>&1
+
+# the golf archive pass + the PGA meters. Note pga_e3 and pga_grade run with `;` not `&&`, so a
+# failed golf_collect cannot suppress pricing or grading.
+*/30 * * * * cd /home/ubuntu/tennis-odds-collector && /usr/bin/python3 golf_collect.py >> golf_collect.log 2>&1 && /usr/bin/python3 pga_e1.py >> pga_e1.log 2>&1; /usr/bin/python3 pga_e3.py >> pga_e1.log 2>&1; /usr/bin/python3 pga_grade.py >> pga_e1.log 2>&1
+
+# DENSE GOLF PASS (added 2026-08-02). The price that decides whether a golf market was soft is the
+# LAST one before that player tees, and at 30-minute spacing that price is up to 30 minutes stale —
+# mostly sampling error. --only-if-tee-within exits before any HTTP unless a tee lands in the next
+# 75 minutes, so this costs nothing for the ~22 hours a day with no imminent wave.
+*/5 * * * * cd /home/ubuntu/tennis-odds-collector && /usr/bin/python3 golf_collect.py --only-if-tee-within 75 >> golf_collect.log 2>&1
+
+0 23 * * * cd /home/ubuntu/tennis-odds-collector && /usr/bin/python3 golf_clv.py >> golf_clv.log 2>&1
+10 9 * * * cd /home/ubuntu/tennis-odds-collector && /usr/bin/python3 fd_maintain.py >> fd_maintain.log 2>&1
+10 23 * * 1 cd /home/ubuntu/tennis-odds-collector && /usr/bin/python3 pga_birdies.py --harvest >> birdie_harvest.log 2>&1
+
+# CROSS-MACHINE: this box watches WORKER-2's published TT board. A watchdog hosted on the box it
+# watches cannot report that box being down, which is the whole reason it lives here.
+*/10 * * * * /bin/bash /home/ubuntu/tt_board_watchdog.sh >> /home/ubuntu/tt_watchdog.log 2>&1
+
+# ── WORKER-2 (wnba-worker-2, 140.238.143.104) — install THERE, not here ────────────────────────
+# */3 * * * * /bin/bash /home/ubuntu/tt_publish_board.sh >> /home/ubuntu/tt_publish.log 2>&1
+# */3 * * * * cd /home/ubuntu/tt-elite && /usr/bin/python3 bmgm_tt.py >> /home/ubuntu/bmgm_tt.log 2>&1
+#
+# CROSS-MACHINE, the mirror of tt_board_watchdog above: worker-2 watches the MAIN VM's published
+# output. Added 2026-08-02 after the main VM published nothing for 19 hours with every monitor
+# green. The Actions vm-watchdog.yml that was supposed to catch it asks for */10 and actually fires
+# every 3.5-8.5 hours (measured), so the authoritative monitor had to move to a box that is really
+# always on.
+# */10 * * * * /bin/bash /home/ubuntu/vm_publish_watchdog.sh
