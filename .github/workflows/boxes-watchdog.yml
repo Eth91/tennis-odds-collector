@@ -1,0 +1,115 @@
+name: boxes-watchdog
+# THE ONLY MONITOR THAT SURVIVES BOTH ORACLE BOXES DYING AT ONCE.
+#
+# The two on-box watchdogs are deliberately cross-machine — the main VM watches worker-2's TT board,
+# worker-2 watches the main VM's publish — because a watchdog hosted on the box it watches cannot
+# report that box being down. That covers either box failing. It does NOT cover both failing
+# together, and until now nothing did: the honest limit written into the design was "if both boxes
+# die at once there is no notification."
+#
+# It also fixes the cadence problem that made the existing vm-watchdog useless. That workflow asks
+# for */10 and GitHub actually ran it at 3h33m, 4h17m, 3h31m and 8h29m intervals (measured over two
+# days). On 2026-08-02 the main VM published nothing for 19 hours and the alert never came, partly
+# for that reason. collect-odds solved the same problem with a SELF-REDISPATCH chain and genuinely
+# runs every ~9-20 min, so this copies that pattern rather than trusting `schedule:` again.
+#
+# IT JUDGES PUBLISHED ARTEFACTS, NOT HEARTBEATS. The old watchdog read the `heartbeat` branch, which
+# beat() force-pushes as a synthesised parentless commit — it never touches the index, HEAD or main,
+# so it stayed perfectly green through a wedged repo, a detached HEAD and 19 hours of rejected
+# pushes. Commit age on main is outcome-based and therefore agnostic to cause: a wedged rebase, a
+# full disk, a rejected push, a dead box and a revoked token all look identical, and all of them
+# equally mean the board is not updating.
+on:
+  schedule:
+    - cron: "*/30 * * * *"     # seed only; the self-redispatch below is what actually keeps cadence
+  workflow_dispatch: {}
+concurrency:
+  group: boxes-watchdog
+  cancel-in-progress: true
+permissions:
+  contents: read
+  actions: write               # github.token self-redispatch; never gate this on a PAT
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check both boxes' published output
+        env:
+          REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          python3 - <<'PY'
+          import os, json, datetime, urllib.request
+          repo = os.environ["REPO"]; topic = os.environ.get("NTFY_TOPIC", "")
+          tok = os.environ.get("GH_TOKEN", "")
+          now = datetime.datetime.now(datetime.timezone.utc)
+
+          # (commit-message marker, human name, stale threshold in minutes)
+          # Thresholds are generous multiples of the real cadence: the main VM pushes ~every 60s and
+          # worker-2 publishes every 3 min, so these fire only on a genuine stall, not on jitter.
+          WATCH = [("vm loop data", "Main VM (WNBA + PGA)", 60),
+                   ("tt board",     "worker-2 (TT)",        45)]
+
+          def ntfy(title, body, prio="urgent"):
+              if not topic:
+                  print("!! no NTFY_TOPIC secret — cannot alert"); return
+              req = urllib.request.Request("https://ntfy.sh/" + topic, data=body.encode(),
+                    headers={"Title": title, "Priority": prio, "Tags": "rotating_light"})
+              urllib.request.urlopen(req, timeout=15).read()
+
+          h = {"User-Agent": "boxes-watchdog", "Accept": "application/vnd.github+json"}
+          if tok: h["Authorization"] = "Bearer " + tok
+          try:
+              req = urllib.request.Request(
+                  "https://api.github.com/repos/%s/commits?per_page=100" % repo, headers=h)
+              commits = json.load(urllib.request.urlopen(req, timeout=25))
+          except Exception as e:
+              # UNREACHABLE IS NOT A PASS. Say so rather than exiting quietly green.
+              print("commit list unreadable:", e)
+              ntfy("Watchdog blind", "boxes-watchdog cannot read the commit list (%s)" % e, "default")
+              raise SystemExit(0)
+
+          bad = []
+          for marker, name, thresh in WATCH:
+              age = None
+              for c in commits:
+                  if marker in (c.get("commit", {}).get("message") or ""):
+                      t = datetime.datetime.fromisoformat(
+                          c["commit"]["committer"]["date"].replace("Z", "+00:00"))
+                      age = int((now - t).total_seconds() // 60)
+                      break
+              if age is None:
+                  # absent from the 100 newest commits = long dead, not "fine"
+                  bad.append("%s: no publish in the last 100 commits" % name)
+                  print("%-24s ABSENT" % name)
+              elif age > thresh:
+                  bad.append("%s: %d min stale (limit %d)" % (name, age, thresh))
+                  print("%-24s STALE %d min" % (name, age))
+              else:
+                  print("%-24s ok (%d min)" % (name, age))
+
+          if bad:
+              ntfy("Betting boxes not publishing", "\n".join(bad) +
+                   "\n\nBoth on-box watchdogs may also be down. Check wnba-loop on the main VM and "
+                   "tt-loop on worker-2.")
+              print("ALERTED")
+          PY
+
+      - name: self-redispatch — immortal ~10-min chain past the throttled */30 cron
+        # Same reasoning as collect-odds: `schedule:` alone is measured at 3.5-8.5h here, which is
+        # useless for a watchdog. success()||failure() (not always()) so a superseded run does not
+        # redispatch — the run that superseded it carries the chain.
+        if: success() || failure()
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          sleep 480
+          code=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/boxes-watchdog.yml/dispatches" \
+            -d '{"ref":"${{ github.ref_name }}"}')
+          if [ "$code" = "204" ]; then echo "✓ redispatched boxes-watchdog (~10-min chain)";
+          else echo "redispatch HTTP $code — the */30 cron is the fallback"; fi
