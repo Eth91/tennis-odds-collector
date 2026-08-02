@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-02T22:56:13Z",
+ "captured_at": "2026-08-02T23:03:49Z",
  "matches": [
   {
    "event_id": 35897249,
@@ -8,20 +8,9 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-08-02T22:40:00.000Z",
-   "line": 92.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35897256,
-   "p1": "Sebastian Juzek",
-   "p2": "Jakub Jesiek",
-   "p1_norm": "sebastian juzek",
-   "p2_norm": "jakub jesiek",
-   "open_date": "2026-08-02T22:50:00.000Z",
-   "line": 73.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 109.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35897257,
@@ -30,7 +19,7 @@
    "p1_norm": "mateusz rutkowski",
    "p2_norm": "dawid kosmal",
    "open_date": "2026-08-02T22:50:00.000Z",
-   "line": 77.5,
+   "line": 76.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -41,9 +30,9 @@
    "p1_norm": "zbigniew nocun",
    "p2_norm": "kazimierz rybak",
    "open_date": "2026-08-02T22:55:00.000Z",
-   "line": 74.5,
+   "line": 70.5,
    "over_odds": -110,
-   "under_odds": -120
+   "under_odds": -125
   },
   {
    "event_id": 35897259,
@@ -52,9 +41,9 @@
    "p1_norm": "kacper szurlej",
    "p2_norm": "szymon brud",
    "open_date": "2026-08-02T22:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 88.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35897260,
