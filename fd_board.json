@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-02T14:49:19Z",
+ "captured_at": "2026-08-02T14:54:22Z",
  "matches": [
   {
    "event_id": 35896037,
@@ -8,9 +8,9 @@
    "p1_norm": "mateusz zagajewski",
    "p2_norm": "tadeusz piotrowski",
    "open_date": "2026-08-02T14:35:00.000Z",
-   "line": 91.5,
-   "over_odds": -135,
-   "under_odds": -105
+   "line": 98.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35896038,
@@ -19,9 +19,9 @@
    "p1_norm": "tibor spanik",
    "p2_norm": "krystian kolodziej",
    "open_date": "2026-08-02T14:35:00.000Z",
-   "line": 89.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35896042,
@@ -30,9 +30,9 @@
    "p1_norm": "sebastian szostok",
    "p2_norm": "marian lebek",
    "open_date": "2026-08-02T14:40:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 84.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35896079,
