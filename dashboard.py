@@ -2128,8 +2128,9 @@ def _starwatch_html():
                  f'<span class="swusg">{s.get("mpg")}\' · {s.get("ppg")}p'
                  + (f" · {s.get('ast')}a" if s.get("ast") else "") + '</span></div>'
                  f'<div class="swo">likely to inherit the role: <b>{html.escape(opts)}</b></div></div>')
-    return ('<div class="starwatch"><div class="sw-title">Star Watch '
-            '<span>· big names out that the model can\'t project — your call</span></div>'
+    # Subtitle dropped: it wrapped to two lines at 402pt and restated the section name. The
+    # INJURY REPORT keeps its subtitle because that one defines `n=`, which the badge does not.
+    return ('<div class="starwatch"><div class="sw-title">Star Watch</div>'
             + rows + '</div>')
 
 
@@ -2592,8 +2593,10 @@ def build():
         for _key, pl in _live:
             _parts.append(_game_group(pl, tips, today, _i))
             _i += 1
-    cards = "\n".join(p for p in _parts if p) if order else \
-        '<div class="empty">No plays flagged yet.<br><span>The watcher checks every ~60s and fills this in the moment a key player is ruled out.</span></div>'
+    cards = "\n".join(p for p in _parts if p) if order else (
+        '<div class="empty"><div class="empty-t">No plays flagged yet</div>'
+        '<div class="empty-s">The watcher checks every ~60s and fills this in '
+        'the moment a key player is ruled out.</div></div>')
     _wh = _wnba_health()                                   # LOUD: broken scan feed != a quiet slate
     if not _wh["ok"]:
         cards = (f'<div class="mlbwarn">⚠️ WNBA feed issue: {html.escape(_wh["reason"])} — the board '
@@ -3762,10 +3765,8 @@ def build():
   /* ---- INJURY REPORT ---- */
   #wnba .starwatch {{ background:var(--cu-grp); border:0; border-radius:12px; padding:14px 16px;
         margin:0 0 20px; }}
-  #wnba .swrow {{ display:flex; align-items:center; gap:10px; padding:11px 0;
-        border-bottom:.5px solid var(--cu-sep); }}
-  #wnba .swrow:last-child {{ border-bottom:0; }}
-  #wnba .swhd {{ font-size:15px; font-weight:600; color:var(--cu-lbl); letter-spacing:-.01em; }}
+  /* .swrow / .swhd moved to CUPERTINO-SECTIONS below — the flex here broke Star Watch, whose
+     rows have TWO children (.swhd + .swo) rather than the injury report's one. */
   #wnba .swstat {{ font-size:12px; font-weight:600; padding:2px 8px; border-radius:11px;
         background:var(--cu-fill); color:var(--cu-lbl2); }}
   #wnba .swstat.out {{ color:var(--cu-red); background:rgba(255,69,58,.18); }}
@@ -4289,6 +4290,69 @@ def build():
   #tracker .tv {{ font-size:22px; white-space:nowrap; }}
   #tracker .tk {{ font-size:11px; white-space:nowrap; }}
   #tracker .tsub {{ font-size:12px; }}
+
+  /* ══════════════════ CUPERTINO-SECTIONS ══════════════════
+     Star Watch, Parlays and the empty state — the three the earlier passes missed. All #wnba-scoped
+     so the other panels keep their own semantics. */
+
+  /* ---- STAR WATCH ----
+     THE LAYOUT BUG: `#wnba .swrow` is display:flex, set when the INJURY REPORT was converted. An
+     injury row has one child (.swhd, itself flex) so flex is harmless there. A star-watch row has
+     TWO (.swhd + .swo), so flex put the inheritor line BESIDE the header — a ~60px column jammed
+     against the right edge, one word per line, clipping off screen. block fixes it and is
+     identical for a single-child row, so the injury report is unaffected. */
+  #wnba .swrow {{ display:block; padding:12px 0; border-bottom:.5px solid var(--cu-sep); }}
+  #wnba .swrow:first-of-type {{ padding-top:4px; }}
+  #wnba .swrow:last-child {{ border-bottom:0; padding-bottom:0; }}
+  #wnba .swhd {{ display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+                 font-size:16px; font-weight:600; letter-spacing:-.01em; color:var(--cu-lbl); }}
+  #wnba .swhd b {{ font-weight:600; }}
+  /* usage numbers are a trailing detail, not a competing column — they push right and never wrap */
+  #wnba .swusg {{ margin-left:auto; color:var(--cu-lbl2); font-size:14px;
+                  font-variant-numeric:tabular-nums; white-space:nowrap; }}
+  #wnba .swvs {{ color:var(--cu-lbl2); font-size:14px; }}
+  #wnba .swday {{ color:var(--cu-lbl3); font-size:13px; }}
+  #wnba .swo {{ margin-top:6px; color:var(--cu-lbl2); font-size:14px; line-height:1.4; }}
+  #wnba .swo b {{ color:var(--cu-lbl); font-weight:600; }}
+  #wnba .sw-title {{ margin-bottom:2px; }}
+
+  /* ---- PARLAYS ---- built on the play card's primitives so the two read as one system */
+  #wnba .slips {{ display:flex; flex-direction:column; gap:12px; }}
+  #wnba .slip {{ background:var(--cu-grp); border:0; border-radius:12px; overflow:hidden; }}
+  #wnba .slip.splayed {{ box-shadow:inset 0 0 0 1.5px rgba(48,209,88,.45); }}
+  #wnba .shd {{ display:flex; align-items:center; gap:8px; padding:12px 16px 10px;
+                background:none; border-bottom:.5px solid var(--cu-sep); }}
+  /* sentence case: only the tiny section eyebrows shout on this board */
+  #wnba .sn {{ color:var(--cu-lbl); font-weight:600; font-size:15px;
+               text-transform:none; letter-spacing:-.01em; }}
+  #wnba .sodds {{ color:var(--cu-grn); font-weight:640; font-size:19px; letter-spacing:-.02em;
+                  font-variant-numeric:tabular-nums; }}
+  #wnba .slegs {{ padding:4px 16px; }}
+  #wnba .sleg {{ padding:11px 0 11px 26px; gap:10px; }}
+  #wnba .sleg + .sleg {{ border-top:.5px solid var(--cu-sep); }}
+  #wnba .slp {{ color:var(--cu-lbl); font-weight:600; font-size:16px; letter-spacing:-.01em; }}
+  #wnba .slm {{ color:var(--cu-lbl2); font-size:14px; margin-top:2px; }}
+  #wnba .slo {{ color:var(--cu-lbl); font-weight:600; font-size:16px;
+                font-variant-numeric:tabular-nums; }}
+  #wnba .sleg .glogo, #wnba .sleg img {{ width:28px; height:28px; border-radius:50%;
+                                          background:var(--cu-fill); }}
+  #wnba .sfoot {{ padding:12px 16px; border-top:.5px solid var(--cu-sep);
+                  color:var(--cu-lbl2); font-size:14px; }}
+  #wnba .sfoot b {{ color:var(--cu-lbl); font-weight:600; }}
+  #wnba .stag {{ font-size:12px; font-weight:600; padding:2px 8px; border-radius:11px;
+                 background:var(--cu-fill); color:var(--cu-lbl2); letter-spacing:0; }}
+  #wnba .sv {{ color:var(--cu-grn); font-size:13px; font-weight:600; }}
+  #wnba .pmark {{ color:var(--cu-lbl3); font-size:19px; padding:0 2px; }}
+  #wnba .pmark.on {{ color:var(--cu-grn); }}
+  #wnba .sid {{ color:var(--cu-lbl3); font-size:12px; }}
+
+  /* ---- EMPTY STATE ---- the most-seen screen on a quiet slate */
+  #wnba .empty {{ background:var(--cu-grp); border:0; border-radius:12px;
+                  padding:32px 20px; text-align:center; margin:4px 0 20px; }}
+  #wnba .empty-t {{ color:var(--cu-lbl); font-size:17px; font-weight:600;
+                    letter-spacing:-.02em; }}
+  #wnba .empty-s {{ color:var(--cu-lbl2); font-size:14px; line-height:1.45;
+                    margin:6px auto 0; max-width:30ch; }}
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
