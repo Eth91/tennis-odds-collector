@@ -18,9 +18,12 @@ line at a slightly worse price. That is not a coincidence the floor happens to c
 pattern the floor was measured on.
 """
 import sqlite3
+from pathlib import Path
 
 FLOOR = 0.50
-DB = "/Users/ethandown/tennis-odds-collector/pga_paper.sqlite"
+# Resolved from the script, not the cwd — this runs on the VM against the LIVE ledger, and an
+# absolute developer path would either miss or, worse, create an empty database next to it.
+DB = str(Path(__file__).resolve().parent / "pga_paper.sqlite")
 
 con = sqlite3.connect(DB)
 con.row_factory = sqlite3.Row
