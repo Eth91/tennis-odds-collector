@@ -68,6 +68,7 @@ rw|1015|Won't play Tuesday
 rw|1015|Won't play Wednesday
 rw|1016|Available to play
 rw|1016|Downgraded to out
+rw|1016|Fades injury report
 rw|1016|Not on injury report for Saturday
 rw|1016|Out Wednesday
 rw|1018|Inactive versus Toronto
@@ -207,6 +208,7 @@ rw|278|Reaches 20-point plateau
 rw|278|Scoreless in road win
 rw|278|Strikes for 27 points in win
 rw|280|Plays well off bench
+rw|287|Remains out for Monday
 rw|287|Return not imminent
 rw|291|Goes for 15 points in loss
 rw|291|Hauls in eight boards in loss
@@ -290,6 +292,7 @@ rw|481|Dominant in win Monday
 rw|481|Leads all scorers Tuesday
 rw|481|Posts 38 points in road loss
 rw|481|Strikes for 33 points in victory
+rw|483|Out again Monday
 rw|483|Out for personal reasons
 rw|483|Paces Sky with 20 points
 rw|483|Ruled out for Saturday
