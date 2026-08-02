@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-02T14:02:46Z",
+ "captured_at": "2026-08-02T14:08:10Z",
  "matches": [
-  {
-   "event_id": 35895954,
-   "p1": "Petr David",
-   "p2": "Jakub Kosowski",
-   "p1_norm": "petr david",
-   "p2_norm": "jakub kosowski",
-   "open_date": "2026-08-02T13:45:00.000Z",
-   "line": 89.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35895993,
    "p1": "Konrad Kulpa",
@@ -64,6 +53,28 @@
    "p2_norm": "marcin lach",
    "open_date": "2026-08-02T14:20:00.000Z",
    "line": 75.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35896037,
+   "p1": "Mateusz Zagajewski",
+   "p2": "Tadeusz Piotrowski",
+   "p1_norm": "mateusz zagajewski",
+   "p2_norm": "tadeusz piotrowski",
+   "open_date": "2026-08-02T14:35:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35896038,
+   "p1": "Tibor Spanik",
+   "p2": "Krystian Kolodziej",
+   "p1_norm": "tibor spanik",
+   "p2_norm": "krystian kolodziej",
+   "open_date": "2026-08-02T14:35:00.000Z",
+   "line": 74.5,
    "over_odds": -116,
    "under_odds": -116
   }
