@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-02T09:05:43Z",
+ "captured_at": "2026-08-02T09:12:52Z",
  "matches": [
-  {
-   "event_id": 35894949,
-   "p1": "Pawel Adamus",
-   "p2": "Piotr Przewlocki",
-   "p1_norm": "pawel adamus",
-   "p2_norm": "piotr przewlocki",
-   "open_date": "2026-08-02T08:45:00.000Z",
-   "line": 107.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
   {
    "event_id": 35894960,
    "p1": "Mariusz Zwolinski",
@@ -19,9 +8,9 @@
    "p1_norm": "mariusz zwolinski",
    "p2_norm": "mikolaj lukaszewski",
    "open_date": "2026-08-02T09:00:00.000Z",
-   "line": 78.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 79.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35894961,
@@ -30,31 +19,9 @@
    "p1_norm": "sebastian szostok",
    "p2_norm": "marcin lach",
    "open_date": "2026-08-02T09:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35894962,
-   "p1": "Tibor Spanik",
-   "p2": "Krzysztof Wloczko",
-   "p1_norm": "tibor spanik",
-   "p2_norm": "krzysztof wloczko",
-   "open_date": "2026-08-02T09:00:00.000Z",
-   "line": 80.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35894963,
-   "p1": "Mateusz Zagajewski",
-   "p2": "Arkadiusz Mugowski",
-   "p1_norm": "mateusz zagajewski",
-   "p2_norm": "arkadiusz mugowski",
-   "open_date": "2026-08-02T09:00:00.000Z",
-   "line": 54.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 72.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35894972,
@@ -63,9 +30,9 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "jakub nowak",
    "open_date": "2026-08-02T09:05:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35894984,
@@ -74,7 +41,7 @@
    "p1_norm": "piotr maruszak",
    "p2_norm": "tadeusz piotrowski",
    "open_date": "2026-08-02T09:20:00.000Z",
-   "line": 75.5,
+   "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
   },
