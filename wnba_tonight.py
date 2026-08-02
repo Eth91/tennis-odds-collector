@@ -188,25 +188,64 @@ RUNG_INVERSION_TOL = 0.05     # rungs are collected at slightly different instan
                               # freshness window, so 1-2% inversions are timing noise, not breakage
 
 
+def _longest_monotone(pairs):
+    """Largest subset of (line, over) keeping over-price non-decreasing as the line rises.
+
+    A greedy walk lets ONE bad rung veto every correct rung after it — which is exactly how the real
+    main line was being destroyed. Taking the longest valid chain instead means a lone corrupt rung
+    is outvoted by the rungs that agree with each other, so the failure mode is bounded.
+    """
+    if not pairs:
+        return []
+    n = len(pairs)
+    best = [1] * n
+    prev = [-1] * n
+    for i in range(n):
+        for j in range(i):
+            if pairs[j][1] <= pairs[i][1] * (1.0 + RUNG_INVERSION_TOL) and best[j] + 1 > best[i]:
+                best[i], prev[i] = best[j] + 1, j
+    i = max(range(n), key=lambda k: best[k])
+    chain = []
+    while i >= 0:
+        chain.append(pairs[i][0])
+        i = prev[i]
+    return chain[::-1]
+
+
 def _drop_inverted(byline):
     """{line: [over, under]} -> the same with arithmetically impossible rungs removed.
 
-    Walks from the HIGHEST line down keeping the cheapest over-price seen above; any rung quoting
-    more than something already harder to hit is discarded. Book-agnostic on purpose: it survives
-    whatever the upstream mislabel turns out to be, instead of hard-coding which market leaked.
+    A higher line cannot be cheaper than a lower one. The hard part is not the invariant, it is
+    knowing WHICH rung breaks it, because these ladders arrive with a second market mislabelled into
+    them and the junk sits at BOTH ends (a 2.5-point line quoted at 3.5, and a 29.5 quoted shorter
+    than the 18.5). Any greedy walk from an end anchors on that junk and deletes the real rungs:
+    the previous top-down version destroyed the genuine two-sided 18.5 for Ogwumike and Miles.
+
+    THE TWO-SIDED RUNG IS THE ANCHOR. Books post both sides only on the real market; alt and
+    milestone rungs are one-sided. That identifies which market we are in without trusting any
+    price. Everything is then judged against it, and the survivors reduced to their longest monotone
+    chain so one bad rung cannot veto the rest. No two-sided rung -> longest chain alone.
     """
     if len(byline) < 2:
         return byline
-    out, cheapest = {}, None
-    for ln in sorted(byline, reverse=True):
-        ov = byline[ln][0]
-        if not ov:                                   # under-only rung: nothing to test
-            out[ln] = byline[ln]
-            continue
-        if cheapest is not None and ov > cheapest * (1.0 + RUNG_INVERSION_TOL):
-            continue                                 # easier line, longer price -> not this market
-        out[ln] = byline[ln]
-        cheapest = ov if cheapest is None else min(cheapest, ov)
+    priced = sorted((ln, byline[ln][0]) for ln in byline if byline[ln][0])
+    unpriced = {ln: byline[ln] for ln in byline if not byline[ln][0]}   # under-only: nothing to test
+    if not priced:
+        return byline
+
+    twosided = [ln for ln in sorted(byline) if byline[ln][0] and byline[ln][1]]
+    if twosided:
+        # If a book posts several two-sided rungs, the real main line is the one nearest even money.
+        anchor = min(twosided, key=lambda ln: abs(byline[ln][0] - 2.0))
+        aov = byline[anchor][0]
+        priced = [(ln, ov) for ln, ov in priced
+                  if ln == anchor
+                  or (ov <= aov * (1.0 + RUNG_INVERSION_TOL) if ln < anchor
+                      else ov >= aov / (1.0 + RUNG_INVERSION_TOL))]
+
+    keep = set(_longest_monotone(priced))
+    out = {ln: byline[ln] for ln in byline if ln in keep}
+    out.update(unpriced)
     return out
 
 
