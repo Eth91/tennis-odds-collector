@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-02T09:48:38Z",
+ "captured_at": "2026-08-02T09:53:59Z",
  "matches": [
   {
    "event_id": 35895007,
@@ -8,9 +8,9 @@
    "p1_norm": "konrad kulpa",
    "p2_norm": "jakub kosowski",
    "open_date": "2026-08-02T09:40:00.000Z",
-   "line": 82.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 87.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35895019,
@@ -19,9 +19,9 @@
    "p1_norm": "piotr staniszewski",
    "p2_norm": "mateusz woskowicz",
    "open_date": "2026-08-02T09:45:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 85.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35895022,
@@ -30,9 +30,9 @@
    "p1_norm": "jakub michalczyk",
    "p2_norm": "artur szoltysek",
    "open_date": "2026-08-02T09:50:00.000Z",
-   "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 77.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35895023,
@@ -42,8 +42,8 @@
    "p2_norm": "jacek wieczerzak",
    "open_date": "2026-08-02T09:50:00.000Z",
    "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35895029,
@@ -99,6 +99,17 @@
    "line": 79.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35895087,
+   "p1": "Rafal Wojcik",
+   "p2": "Pawel Adamus",
+   "p1_norm": "rafal wojcik",
+   "p2_norm": "pawel adamus",
+   "open_date": "2026-08-02T10:20:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
