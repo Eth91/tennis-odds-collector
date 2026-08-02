@@ -925,3 +925,30 @@ e3: pricing PGA Rocket Classic 2026  (G2 pending n=0 — preview only)
   make-cut [SHADOW, armable=True]: 0 flags
   E3 logged: 0 armed + 0 shadow, 1 skipped (player already teed off) (G2 not passed — everything logs as shadow)
 pga grade: +0 newly graded — E1 record 14-10  +1.38u
+E1 wave meter — Rocket Classic [In Progress]
+  no tee times posted yet — meter waits (they release Tue/Wed)
+  crawl 2026: +12315 round rows
+  crawl 2026: +7221 round rows
+  rounds table: 117879 rows, 2459 players
+G2: 0 gradeable closes [none] from 14 collected matchup markets
+     dropped   9  round not both posted / tie
+     dropped   5  no two-sided pre-round close
+G2: n=0 < 15 -> gate INCONCLUSIVE. This is a FORWARD test and cannot be backtested: it needs OUR OWN collected closes, and the collector only has history from the day it started.
+e3: pricing PGA Rocket Classic 2026  (G2 pending n=0 — preview only)
+  capture: snapshot 2026-08-02T09:00:01 | R1 first tee 2026-07-30T11:00:00 (per-flag deadlines from pga_tee_gate)
+  ruler: course-fit players 147, wave split 148, wave shift +0.11 strokes [exposure gap +1.0 km/h -> +0.11 str]
+  TOP_10_FINISH_IMG: 72 priced, N_eff 6.77 (nominal 10), implied vig 1.671
+  skip TOP_10_FINISH_(INCL._TIES): implied vig 1.816 outside [1.01, 1.75] (70 priced, N_eff 7.62)
+  skip TOP_20_FINISH_IMG: implied vig 1.936 outside [1.01, 1.75] (53 priced, N_eff 11.01)
+  skip TOP_20_FINISH_(INCL._TIES): implied vig 2.029 outside [1.01, 1.75] (56 priced, N_eff 12.71)
+  TOP_5_FINISH_IMG: 72 priced, N_eff 3.52 (nominal 5), implied vig 1.680
+  skip TOP_5_FINISH_(INCL._TIES): implied vig 1.811 outside [1.01, 1.75] (70 priced, N_eff 4.01)
+  birdies: course factor 1.047 (4 prior editions), wind 17.6 km/h
+  birdies: course R2026524 par mix {3: 4, 4: 12, 5: 2}
+  birdies: devig on 20/20 two-sided lines — raw Over 0.5116 vs FAIR 0.4827 (vig 2.89 pts)
+  birdies: course-level LAM=1.169 (market-anchored on 20 Over lines, mix {3: 4, 4: 12, 5: 2})
+  birdies: flags 1 over / 3 under
+  round-score [SHADOW, armable=False]: 1 flags (delta 69.373 strokes)
+  make-cut [SHADOW, armable=True]: 0 flags
+  E3 logged: 0 armed + 0 shadow, 1 skipped (player already teed off) (G2 not passed — everything logs as shadow)
+pga grade: +0 newly graded — E1 record 14-10  +1.38u
