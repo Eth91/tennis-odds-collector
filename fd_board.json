@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-02T14:25:06Z",
+ "captured_at": "2026-08-02T14:31:36Z",
  "matches": [
-  {
-   "event_id": 35895993,
-   "p1": "Konrad Kulpa",
-   "p2": "Krzysztof Wloczko",
-   "p1_norm": "konrad kulpa",
-   "p2_norm": "krzysztof wloczko",
-   "open_date": "2026-08-02T14:10:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35895996,
-   "p1": "Piotr Staniszewski",
-   "p2": "Arkadiusz Mugowski",
-   "p1_norm": "piotr staniszewski",
-   "p2_norm": "arkadiusz mugowski",
-   "open_date": "2026-08-02T14:15:00.000Z",
-   "line": 89.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35896037,
    "p1": "Mateusz Zagajewski",
