@@ -1,0 +1,96 @@
+name: collect-odds
+# THIN SHIM (2026-07-29): everything that CAN run on the Oracle VM now does.
+# What is left is only what Oracle physically cannot reach: DraftKings, which
+# Akamai 403s from Oracle IPs but serves normally to Azure runners. The delta
+# export is how those lines reach the VM (lines_ingest.py).
+# Commits the growing odds.sqlite back to the repo each run.
+#
+# Caveats: scheduled runs are best-effort (GitHub may delay them a few minutes);
+# schedules auto-disable after 60 days of no repo activity (data commits keep it alive).
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: collect-odds
+  cancel-in-progress: true      # a fresh (cron OR self-redispatched) run supersedes the old — no pileup
+
+permissions:
+  contents: write
+  actions: write                # github.token self-redispatch -> immortal chain past the throttled */30 cron
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45         # ~3min work + ~26min sleep + redispatch; a hung run can't block forever
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests curl_cffi
+      - name: collect draftkings props (2nd soft book, best-price line shopping)
+        env:
+          FD_DB: ${{ github.workspace }}/fanduel_props.sqlite
+        run: python dk_collect.py --wnba || echo "draftkings collect skipped"
+      # BENCHED 2026-07-09 (focus = TT + WNBA): esports/MLB/NFL still COLLECT (data + grading
+      # of existing bets preserved) but no NTFY_TOPIC -> no phone pushes. Un-bench = restore
+      # NTFY_TOPIC here and drop --no-flags / ACTIVE_SPORTS.
+      # NBA port P1 (2026-07-16): injury feed plumbing — offseason output is stale
+      # season-enders (harmless); proves the feed long before opening night.
+      # NBA flag-time engine (paper): injuries x WOWY priors x live FD/DK lines -> ledger.
+      # Offseason = clean no-op (no games / no posted props); armed for October.
+      - name: export line delta
+        # 2026-07-25: Actions NO LONGER commits the 100MB fanduel_props.sqlite (three-writer blob
+        # war -> 18h line freeze; even a 10-try push loop lost every race). Instead: export THIS
+        # run's collected rows as a small JSON the VM ingests (lines_ingest.py). Single blob
+        # committer = the VM.
+        run: |
+          python3 - <<'PYEOF'
+          import json, sqlite3, datetime as dt
+          con = sqlite3.connect("fanduel_props.sqlite")
+          cut = (dt.datetime.utcnow() - dt.timedelta(minutes=45)).isoformat()
+          rows = con.execute("SELECT collected_at, sport, event, player, stat, line, side, odds, "
+                             "book FROM fd_lines WHERE collected_at > ?", (cut,)).fetchall()
+          json.dump({"exported_at": dt.datetime.utcnow().isoformat(), "rows": rows},
+                    open("lines_delta.json", "w"))
+          print(f"delta rows {len(rows)}")
+          PYEOF
+      - name: commit dbs
+        run: |
+          git config user.name "odds-bot"
+          git config user.email "odds-bot@users.noreply.github.com"
+          for f in lines_delta.json; do
+            git add -f "$f" 2>/dev/null || true
+          done
+          git commit -m "odds snapshot [skip ci]" -q || { echo "no change"; exit 0; }
+          # ROBUST push, 2026-07-25 rewrite: the VM loop pushes every ~2min, so two attempts ALWAYS
+          # lost the race ("push skipped" on every run for 18h -> repo-wide MLB line freeze), and the
+          # old reset --hard fallback DESTROYED the snapshot commit it was meant to push. Now: keep
+          # the commit at all costs, rebase (-X theirs keeps our fresh blobs on conflict) + push in a
+          # bounded retry loop. NEVER reset --hard here.
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            git pull --rebase --autostash -X theirs -q 2>/dev/null || { git rebase --abort 2>/dev/null || true; }
+            git push -q 2>/dev/null && { echo "snapshot pushed (try $i)"; exit 0; }
+            sleep $((RANDOM % 8 + 3))
+          done
+          echo "::warning::snapshot push failed after 10 tries (next run retries)"
+      - name: self-redispatch — immortal ~10-min chain past the throttled */30 cron
+        # collect-odds had NO self-redispatch, so it lived and died by the */30 cron — which GitHub
+        # was throttling to every ~4-5h (MLB collection silently stalled for hours). Sleep ~26 min so
+        # each cycle lands ~30 min, then dispatch ourselves -> an immortal chain independent of the
+        # cron (now just a seed). success()||failure() (not always()) so a superseded/cancelled run
+        # doesn't redispatch — the run that superseded it carries the chain (cancel-in-progress:true).
+        if: success() || failure()
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          sleep 480
+          code=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/collect-odds.yml/dispatches" \
+            -d '{"ref":"${{ github.ref_name }}"}')
+          if [ "$code" = "204" ]; then echo "✓ redispatched collect-odds (immortal ~30-min chain)";
+          else echo "redispatch HTTP $code — the */30 cron is the fallback"; fi

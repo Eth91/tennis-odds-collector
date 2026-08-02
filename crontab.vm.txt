@@ -1,0 +1,7 @@
+0 19 * * * cd /home/ubuntu/tennis-odds-collector && /usr/bin/python3 wnba_selfcheck.py >> /tmp/wnba_selfcheck.log 2>&1
+*/30 * * * * cd /home/ubuntu/tennis-odds-collector && /usr/bin/python3 golf_collect.py >> golf_collect.log 2>&1 && /usr/bin/python3 pga_e1.py >> pga_e1.log 2>&1; /usr/bin/python3 pga_e3.py >> pga_e1.log 2>&1; /usr/bin/python3 pga_grade.py >> pga_e1.log 2>&1
+0 23 * * * cd /home/ubuntu/tennis-odds-collector && /usr/bin/python3 golf_clv.py >> golf_clv.log 2>&1
+10 9 * * * cd /home/ubuntu/tennis-odds-collector && /usr/bin/python3 fd_maintain.py >> fd_maintain.log 2>&1
+10 23 * * 1 cd /home/ubuntu/tennis-odds-collector && /usr/bin/python3 pga_birdies.py --harvest >> birdie_harvest.log 2>&1
+*/10 * * * * /bin/bash /home/ubuntu/tt_board_watchdog.sh >> /home/ubuntu/tt_watchdog.log 2>&1
+*/5 * * * * cd /home/ubuntu/tennis-odds-collector && /usr/bin/python3 golf_collect.py --only-if-tee-within 75 >> golf_collect.log 2>&1

@@ -1,0 +1,893 @@
+{
+ "fetched_at": "2026-08-02T06:32:39+00:00",
+ "injuries": {
+  "Mouhamed Gueye": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Foot",
+   "date": "2026-07-19"
+  },
+  "Keshon Gilbert": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Hip",
+   "date": "2026-07-18"
+  },
+  "RayJ Dennis": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Achilles",
+   "date": "2026-07-18"
+  },
+  "Asa Newell": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-18"
+  },
+  "Zuby Ejiofor": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-18"
+  },
+  "Kingston Flemings": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-18"
+  },
+  "Jock Landale": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Ankle",
+   "date": "2026-06-30"
+  },
+  "Jayson Tatum": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Knee",
+   "date": "2026-07-27"
+  },
+  "Chris Cenac Jr.": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-18"
+  },
+  "Hugo Gonzalez": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-18"
+  },
+  "Michael Porter Jr.": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Hamstring",
+   "date": "2026-07-27"
+  },
+  "Tyler Bilodeau": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-19"
+  },
+  "Chaney Johnson": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-19"
+  },
+  "Ben Saraf": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-19"
+  },
+  "Drake Powell": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-19"
+  },
+  "Egor Demin": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-19"
+  },
+  "Danny Wolf": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-19"
+  },
+  "Mikel Brown Jr.": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-19"
+  },
+  "Nolan Traore": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Knee",
+   "date": "2026-06-30"
+  },
+  "Noah Clowney": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Ankle",
+   "date": "2026-06-24"
+  },
+  "Terance Mann": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Knee",
+   "date": "2026-06-16"
+  },
+  "Brandon Miller": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Shoulder",
+   "date": "2026-06-25"
+  },
+  "PJ Hall": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Ankle",
+   "date": "2026-06-16"
+  },
+  "Noa Essengue": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Thumb",
+   "date": "2026-07-17"
+  },
+  "Dailyn Swain": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Wrist",
+   "date": "2026-07-17"
+  },
+  "Zach Collins": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Toe",
+   "date": "2026-07-01"
+  },
+  "Jalen Smith": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Calf",
+   "date": "2026-06-24"
+  },
+  "Josh Giddey": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Ankle",
+   "date": "2026-06-24"
+  },
+  "Nic Claxton": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Finger",
+   "date": "2026-06-23"
+  },
+  "Isaac Okoro": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Quadriceps",
+   "date": "2026-06-16"
+  },
+  "Rob Dillingham": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Wrist",
+   "date": "2026-06-16"
+  },
+  "Tristan Enaruna": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Illness",
+   "date": "2026-07-18"
+  },
+  "Nae'Qwan Tomlin": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-18"
+  },
+  "Kyrie Irving": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Knee",
+   "date": "2026-07-27"
+  },
+  "Morez Johnson Jr.": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Illness",
+   "date": "2026-07-18"
+  },
+  "Santi Aldama": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Knee",
+   "date": "2026-07-01"
+  },
+  "Dereck Lively II": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Foot",
+   "date": "2026-06-26"
+  },
+  "Naji Marshall": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Hip",
+   "date": "2026-06-26"
+  },
+  "Cooper Flagg": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Ankle",
+   "date": "2026-06-26"
+  },
+  "P.J. Washington": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Elbow",
+   "date": "2026-06-26"
+  },
+  "Caleb Martin": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Heel",
+   "date": "2026-06-16"
+  },
+  "Peyton Watson": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Hamstring",
+   "date": "2026-07-28"
+  },
+  "Trevon Brazile": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Undisclosed",
+   "date": "2026-07-19"
+  },
+  "Aaron Gordon": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Calf",
+   "date": "2026-06-16"
+  },
+  "Jimmy Butler III": {
+   "team": "",
+   "status": "Out",
+   "detail": "Knee",
+   "date": "2026-06-26"
+  },
+  "Moses Moody": {
+   "team": "",
+   "status": "Out",
+   "detail": "Knee",
+   "date": "2026-03-24"
+  },
+  "Fred VanVleet": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Knee",
+   "date": "2026-06-29"
+  },
+  "Kevin Durant": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Ankle",
+   "date": "2026-06-16"
+  },
+  "Steven Adams": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Ankle",
+   "date": "2026-06-16"
+  },
+  "Tyrese Haliburton": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Achilles",
+   "date": "2026-06-27"
+  },
+  "Jarace Walker": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Foot",
+   "date": "2026-06-16"
+  },
+  "Pascal Siakam": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Ankle",
+   "date": "2026-06-16"
+  },
+  "Ben Sheppard": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Hip",
+   "date": "2026-06-16"
+  },
+  "Aaron Nesmith": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Neck",
+   "date": "2026-06-16"
+  },
+  "T.J. McConnell": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Hamstring",
+   "date": "2026-06-16"
+  },
+  "Johnny Furphy": {
+   "team": "",
+   "status": "Out",
+   "detail": "Knee",
+   "date": "2026-02-09"
+  },
+  "Kobe Sanders": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-18"
+  },
+  "Cam Christie": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Ankle",
+   "date": "2026-07-18"
+  },
+  "Yanic Konan Niederhauser": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Foot",
+   "date": "2026-06-16"
+  },
+  "Ziaire Williams": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Foot",
+   "date": "2026-07-13"
+  },
+  "Luka Doncic": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Hamstring",
+   "date": "2026-07-01"
+  },
+  "Cam Spencer": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Back",
+   "date": "2026-07-27"
+  },
+  "Scotty Pippen Jr.": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Toe",
+   "date": "2026-07-27"
+  },
+  "Ty Jerome": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Ankle",
+   "date": "2026-07-27"
+  },
+  "Walter Clayton Jr.": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Knee",
+   "date": "2026-07-20"
+  },
+  "Karim Lopez": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Undisclosed",
+   "date": "2026-07-20"
+  },
+  "GG Jackson": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Knee",
+   "date": "2026-06-29"
+  },
+  "Richie Saunders": {
+   "team": "",
+   "status": "Out",
+   "detail": "Knee",
+   "date": "2026-06-25"
+  },
+  "Jaylen Wells": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Toe",
+   "date": "2026-06-24"
+  },
+  "Zach Edey": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Ankle",
+   "date": "2026-06-24"
+  },
+  "Bam Adebayo": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Back",
+   "date": "2026-07-28"
+  },
+  "Trevor Keels": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Knee",
+   "date": "2026-07-18"
+  },
+  "Ryan Conwell": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Hip",
+   "date": "2026-07-15"
+  },
+  "Myron Gardner": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Ankle",
+   "date": "2026-07-08"
+  },
+  "Dru Smith": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Foot",
+   "date": "2026-06-29"
+  },
+  "Giannis Antetokounmpo": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Knee",
+   "date": "2026-06-23"
+  },
+  "Gary Trent Jr.": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Oblique",
+   "date": "2026-07-11"
+  },
+  "Kyle Kuzma": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Achilles",
+   "date": "2026-06-26"
+  },
+  "Myles Turner": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Ankle",
+   "date": "2026-06-26"
+  },
+  "Ryan Rollins": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Thumb",
+   "date": "2026-06-26"
+  },
+  "Kevin Porter Jr.": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Knee",
+   "date": "2026-06-26"
+  },
+  "Joan Beringer": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Back",
+   "date": "2026-07-18"
+  },
+  "Donte DiVincenzo": {
+   "team": "",
+   "status": "Out",
+   "detail": "Achilles",
+   "date": "2026-04-26"
+  },
+  "Micah Peavy": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-19"
+  },
+  "Karlo Matkovic": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Back",
+   "date": "2026-06-25"
+  },
+  "Zion Williamson": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Knee",
+   "date": "2026-06-16"
+  },
+  "Dejounte Murray": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Hand",
+   "date": "2026-06-16"
+  },
+  "Trey Murphy III": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Ankle",
+   "date": "2026-06-16"
+  },
+  "Yves Missi": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Hand",
+   "date": "2026-06-16"
+  },
+  "Bryce McGowens": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Toe",
+   "date": "2026-06-16"
+  },
+  "Mohamed Diawara": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Finger",
+   "date": "2026-07-18"
+  },
+  "Jalen Brunson": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Wrist",
+   "date": "2026-07-07"
+  },
+  "Ajay Mitchell": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Calf",
+   "date": "2026-07-30"
+  },
+  "Otega Oweh": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Lower Leg",
+   "date": "2026-07-19"
+  },
+  "Aday Mara": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-16"
+  },
+  "Thomas Sorber": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Knee",
+   "date": "2026-07-01"
+  },
+  "Jalen Williams": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Hamstring",
+   "date": "2026-06-16"
+  },
+  "Nikola Topic": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Back",
+   "date": "2026-06-16"
+  },
+  "Noah Penda": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-18"
+  },
+  "Jase Richardson": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-18"
+  },
+  "Izaiyah Nelson": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Ankle",
+   "date": "2026-07-13"
+  },
+  "Jonathan Isaac": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Knee",
+   "date": "2026-07-01"
+  },
+  "Franz Wagner": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Calf",
+   "date": "2026-06-16"
+  },
+  "Kentavious Caldwell-Pope": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Finger",
+   "date": "2026-07-25"
+  },
+  "CJ Huntley": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Hamstring",
+   "date": "2026-07-19"
+  },
+  "Rasheer Fleming": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Not Injury Related",
+   "date": "2026-07-16"
+  },
+  "Khaman Maluach": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-16"
+  },
+  "Mark Williams": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Foot",
+   "date": "2026-06-26"
+  },
+  "Jordan Goodwin": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Calf",
+   "date": "2026-06-21"
+  },
+  "Ja Morant": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Elbow",
+   "date": "2026-06-29"
+  },
+  "Damian Lillard": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Achilles",
+   "date": "2026-06-16"
+  },
+  "Keegan Murray": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Ankle",
+   "date": "2026-07-31"
+  },
+  "Nique Clifford": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-17"
+  },
+  "Maxime Raynaud": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-17"
+  },
+  "Dylan Cardwell": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Thumb",
+   "date": "2026-07-17"
+  },
+  "Darius Acuff Jr.": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-17"
+  },
+  "Zach LaVine": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Hand",
+   "date": "2026-06-29"
+  },
+  "Malik Monk": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Personal",
+   "date": "2026-06-25"
+  },
+  "De'Andre Hunter": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Eye",
+   "date": "2026-06-25"
+  },
+  "Domantas Sabonis": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Knee",
+   "date": "2026-06-25"
+  },
+  "David Jones Garcia": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Ankle",
+   "date": "2026-07-22"
+  },
+  "Jayden Quaintance": {
+   "team": "",
+   "status": "Out",
+   "detail": "Knee",
+   "date": "2026-07-19"
+  },
+  "Tarris Reed Jr.": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-19"
+  },
+  "Nate Bittle": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Knee",
+   "date": "2026-07-19"
+  },
+  "Alijah Martin": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Knee",
+   "date": "2026-07-19"
+  },
+  "Allen Graves": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-19"
+  },
+  "Chucky Hepburn": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Knee",
+   "date": "2026-07-19"
+  },
+  "Collin Murray-Boyles": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Finger",
+   "date": "2026-07-19"
+  },
+  "Brandon Ingram": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Heel",
+   "date": "2026-06-30"
+  },
+  "Immanuel Quickley": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Hamstring",
+   "date": "2026-06-16"
+  },
+  "Trey Alexander": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Ribs",
+   "date": "2026-07-17"
+  },
+  "Ace Bailey": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Back",
+   "date": "2026-07-17"
+  },
+  "Darryn Peterson": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-17"
+  },
+  "Cody Williams": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Illness",
+   "date": "2026-07-17"
+  },
+  "Jusuf Nurkic": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Nose",
+   "date": "2026-07-01"
+  },
+  "Jaren Jackson Jr.": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Knee",
+   "date": "2026-06-24"
+  },
+  "Isaiah Collier": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Hamstring",
+   "date": "2026-06-24"
+  },
+  "Keyonte George": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Hamstring",
+   "date": "2026-06-24"
+  },
+  "Kyle Filipowski": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Back",
+   "date": "2026-06-16"
+  },
+  "Jamir Watkins": {
+   "team": "",
+   "status": "Out",
+   "detail": "Knee",
+   "date": "2026-07-30"
+  },
+  "Will Riley": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-14"
+  },
+  "Tre Johnson": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-14"
+  },
+  "AJ Dybantsa": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Rest",
+   "date": "2026-07-14"
+  },
+  "Alex Sarr": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Foot",
+   "date": "2026-06-24"
+  },
+  "Anthony Davis": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Finger",
+   "date": "2026-06-24"
+  },
+  "Trae Young": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Quadriceps",
+   "date": "2026-06-22"
+  },
+  "Cam Whitmore": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Shoulder",
+   "date": "2026-06-16"
+  },
+  "Tristan Vukcevic": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Knee",
+   "date": "2026-06-16"
+  }
+ }
+}

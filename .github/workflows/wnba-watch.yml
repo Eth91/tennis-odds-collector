@@ -1,0 +1,104 @@
+name: wnba-watch
+# ~60s injury polling on GitHub alone. RELIABILITY MODEL: GitHub heavily throttles/drops
+# high-frequency scheduled ticks, so we DON'T rely on frequent starts. Cron only needs to
+# START the job; the job then LOOPS internally every 60s for up to ~5.5 HOURS. So a single
+# successful start covers a whole window even if GitHub drops most ticks. Hourly start
+# attempts + cancel-in-progress = the freshest start wins, and the running loop self-heals
+# any gap up to 5.5h. Public repo => free minutes.
+#
+# Notifications are robust to git hiccups: wnba_watch.py fires the ntfy push BEFORE any
+# commit, so a rebase/conflict never costs an alert. Commits use -X theirs so the binary
+# ledger never hard-fails the run (the ledger self-heals — dedup makes re-logging idempotent).
+# CRONS CUT 2026-07-29: every step below now runs on the Oracle VM (vm_loop.sh).
+# Kept dispatch-only as a manual fallback if the VM is down. Do NOT re-add a
+# schedule without first removing the step from vm_loop.sh -- two writers on the
+# same SQLite files and the same git remote is what caused the fd_lines blob war.
+on:
+  workflow_dispatch: {}
+
+concurrency:
+  group: wnba-watch
+  cancel-in-progress: true    # the newest start supersedes; dropped starts covered by the long loop
+
+permissions:
+  contents: write
+  actions: write            # self-redispatch via github.token needs this (verified it works)
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350       # loop runs ~5.3h then a guaranteed always() step redispatches the next run
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests curl_cffi numpy
+      - name: poll every 60s; urgent push on a new out
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          git config user.name "odds-bot"
+          git config user.email "odds-bot@users.noreply.github.com"
+          for i in $(seq 1 315); do
+            if [ $((i % 1)) -eq 0 ]; then                        # EVERY ~60s: REFRESH FanDuel + DK WNBA
+              # (was every 2 min — tightened so a freshly-posted opening line is caught within a minute,
+              # which is the whole CLV edge: the poll below runs right after, on the fresh lines)
+              # lines into a SMALL, WNBA-only wnba_lines.sqlite (~8k rows / <1MB) that IS committed
+              # below — so the persistent snapshot the dashboard best-price + CLV read stays fresh even
+              # when GitHub throttles collect-odds' cron (its 30MB full DB is left to collect-odds).
+              FD_DB="$(pwd)/wnba_lines.sqlite" python fd_collect.py --wnba >/dev/null 2>&1 || echo "fd lines skipped"
+              FD_DB="$(pwd)/wnba_lines.sqlite" python dk_collect.py --wnba >/dev/null 2>&1 || echo "dk lines skipped"
+              # prune to 2 days, then stamp the latest line-time into a tiny COMMITTED marker: when
+              # fresh lines land it changes -> trips the porcelain gate below -> the dashboard regen
+              # picks up the new best-price (via the resolver) without committing the 1.6MB sqlite.
+              # No new lines (e.g. overnight) -> MAX unchanged -> marker unchanged -> no spurious commit.
+              python -c "import sqlite3; c=sqlite3.connect('wnba_lines.sqlite'); c.execute(\"DELETE FROM fd_lines WHERE collected_at < datetime('now','-2 days')\"); c.commit(); ts=c.execute(\"SELECT COALESCE(MAX(collected_at),'') FROM fd_lines WHERE sport='wnba'\").fetchone()[0]; c.close(); open('wnba_lines_ts.txt','w').write(ts)" 2>/dev/null || true
+            fi
+            python wnba_watch.py || echo "poll $i skipped"       # ntfy push happens in here, pre-commit
+            if [ $((i % 10)) -eq 1 ]; then                       # ~every 10 min: settle finished games LIVE
+              python wnba_ledger.py --grade || echo "grade FAILED"          # NOT /dev/null: a grade crash
+              python wnba_clv.py --close || echo "clv close FAILED"         # must be VISIBLE in the CI log
+              # resolve past questionable observations + recalibrate SIT_PROB from the empirical sit-rate
+              python wnba_question_log.py --resolve --recalibrate >/dev/null 2>&1 || echo "sit recal skipped"
+              # heartbeat watchdog: ntfy alarm if grading is stuck or the line feed died (the silent-
+              # failure class that hid the grading freeze). Deduped to 1 alert/issue/day.
+              python wnba_watch.py --watchdog || echo "watchdog skipped"
+            fi
+            if [ -n "$(git status --porcelain)" ]; then
+              # commit DATA first (never the generated dashboard) -> clean rebase, no docs
+              # conflict; then regenerate + commit the dashboard fresh on top (conflict-proof).
+              for f in wnba_lines_ts.txt wnba_priced_state.json wnba_status_state.json wnba_confirm_state.json wnba_players_cache.json wnba_context_cache.json wnba_notified.txt wnba_ledger.sqlite wnba_played.txt wnba_parlays_played.txt wnba_dvp_cache.json wnba_proj_log.sqlite wnba_clv.sqlite wnba_news_seen.txt wnba_question_log.sqlite wnba_sit_prob.json wnba_watchdog_state.json wnba_proj_cache.json wnba_watchlist.json wnba_openers.json; do
+                git add -f "$f" 2>/dev/null || true
+              done
+              if git commit -m "wnba watch data [skip ci]" -q >/dev/null 2>&1; then
+                # reconcile onto origin; on an unresolvable rebase, ABORT (keep local commits) and defer
+                # to next cycle — NEVER reset --hard, which would discard this cycle's freshly-graded
+                # ledger / captured shadows / SEEN and re-fire already-sent alerts.
+                git pull --rebase --autostash -X theirs -q 2>/dev/null || git rebase --abort 2>/dev/null || true
+              fi
+              python dashboard.py >/dev/null 2>&1 || echo "dashboard skipped"
+              git add -f docs/index.html 2>/dev/null || true
+              git commit -m "wnba watch dash [skip ci]" -q >/dev/null 2>&1 || true
+              git push -q 2>/dev/null || { git pull --rebase --autostash -X theirs -q 2>/dev/null && git push -q 2>/dev/null; } || { git rebase --abort 2>/dev/null || true; echo "push deferred to next cycle (local commits preserved)"; }
+            fi
+            sleep 60
+          done
+      - name: self-redispatch — keep the loop IMMORTAL regardless of dropped cron starts
+        if: always()               # runs even if the poll step errored, so the chain never breaks
+        env:
+          TOKEN: ${{ secrets.DISPATCH_PAT || github.token }}
+        run: |
+          # VERIFIED 2026-07-13: the built-in GITHUB_TOKEN *can* self-dispatch (workflow_dispatch,
+          # with permissions: actions: write) — a test run self-spawned its next generation. So the
+          # chain is IMMORTAL with no secret. This is exactly what was silently missing: only
+          # NTFY_TOPIC was ever set, so the old PAT-gated redispatch always no-op'd -> the loop was
+          # cron-only, GitHub throttled the overnight ticks, and opening lines were missed for days.
+          # cancel-in-progress makes the handoff seamless; the cron stays as a seed fallback.
+          code=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/wnba-watch.yml/dispatches" \
+            -d '{"ref":"main"}')
+          if [ "$code" = "204" ]; then echo "✓ redispatched next watch loop (immortal chain)"; \
+          else echo "redispatch HTTP $code — cron is the fallback"; fi

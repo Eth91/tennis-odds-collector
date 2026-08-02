@@ -1,0 +1,63 @@
+name: wnba-night
+# Covers the ~1-11am ET gap that the main wnba-watch loop leaves. Overnight, WNBA injury news is
+# rare but FanDuel POSTS the next day's board + OPENING LINES here — the softest numbers of the
+# whole cycle. So this keeps watching through the gap: polls injuries every ~3 min (fires the ntfy
+# push + logs a CLV shadow on any new out, using fresh in-job lines) and refreshes FanDuel WNBA
+# lines every ~12 min. Lighter than the day loop (no live games -> no grading/dashboard regen);
+# collect-odds still owns the persistent 24MB snapshot, so this only commits the small state files.
+# CRONS CUT 2026-07-29: every step below now runs on the Oracle VM (vm_loop.sh).
+# Kept dispatch-only as a manual fallback if the VM is down. Do NOT re-add a
+# schedule without first removing the step from vm_loop.sh -- two writers on the
+# same SQLite files and the same git remote is what caused the fd_lines blob war.
+on:
+  workflow_dispatch: {}
+
+concurrency:
+  group: wnba-night
+  cancel-in-progress: true     # newest start supersedes; dropped starts covered by the long loop
+
+permissions:
+  contents: write
+
+jobs:
+  night:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350        # room for the ~5h loop (300 x ~66s); the next hourly start chains it
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests curl_cffi numpy
+      - name: overnight watch — injuries + opening lines
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          git config user.name "odds-bot"
+          git config user.email "odds-bot@users.noreply.github.com"
+          for i in $(seq 1 300); do                    # 300 x 60s = ~5h, one start covers the gap
+            # EVERY ~60s: probe BOTH books (FanDuel + DraftKings) 24/7 into the small resilient
+            # wnba_lines.sqlite (gitignored scratch the resolver reads) so a next-day OPENING line is
+            # caught within a minute — the softest numbers of the cycle, and the whole point of the
+            # overnight window. Same cadence + both books as the day loop; prune 2d + stamp the marker.
+            FD_DB="$(pwd)/wnba_lines.sqlite" python fd_collect.py --wnba >/dev/null 2>&1 || echo "fd lines skipped"
+            FD_DB="$(pwd)/wnba_lines.sqlite" python dk_collect.py --wnba >/dev/null 2>&1 || echo "dk lines skipped"
+            python -c "import sqlite3; c=sqlite3.connect('wnba_lines.sqlite'); c.execute(\"DELETE FROM fd_lines WHERE collected_at < datetime('now','-2 days')\"); c.commit(); ts=c.execute(\"SELECT COALESCE(MAX(collected_at),'') FROM fd_lines WHERE sport='wnba'\").fetchone()[0]; c.close(); open('wnba_lines_ts.txt','w').write(ts)" 2>/dev/null || true
+            python wnba_watch.py || echo "poll $i skipped"    # injuries -> ntfy push + opening-line spots + CLV shadow
+            if [ $((i % 10)) -eq 1 ]; then                     # settle any late West-coast finals + watchdog
+              python wnba_ledger.py --grade || echo "grade FAILED"
+              python wnba_clv.py --close || echo "clv close FAILED"
+              python wnba_watch.py --watchdog || echo "watchdog skipped"
+            fi
+            if [ -n "$(git status --porcelain)" ]; then
+              for f in wnba_lines_ts.txt wnba_priced_state.json wnba_status_state.json wnba_confirm_state.json wnba_players_cache.json wnba_context_cache.json wnba_notified.txt wnba_ledger.sqlite wnba_played.txt wnba_parlays_played.txt wnba_clv.sqlite wnba_proj_log.sqlite wnba_news_seen.txt wnba_question_log.sqlite wnba_sit_prob.json wnba_watchdog_state.json wnba_proj_cache.json; do
+                git add -f "$f" 2>/dev/null || true
+              done
+              if git commit -m "wnba night watch [skip ci]" -q >/dev/null 2>&1; then
+                # reconcile onto origin; NEVER reset --hard (would discard fresh shadows/SEEN and re-fire alerts)
+                git pull --rebase --autostash -X theirs -q 2>/dev/null || git rebase --abort 2>/dev/null || true
+              fi
+              git push -q 2>/dev/null || { git pull --rebase --autostash -X theirs -q 2>/dev/null && git push -q 2>/dev/null; } || { git rebase --abort 2>/dev/null || true; echo "push deferred to next cycle"; }
+            fi
+            sleep 60
+          done

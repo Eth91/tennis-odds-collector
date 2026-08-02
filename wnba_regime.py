@@ -1,0 +1,123 @@
+"""Injury-regime DIVERGENCE flag — display-only, NOT a projection change.
+
+The regime-conditional PROJECTION backtested as a wash: recency already captures a stable role,
+and the exact injury combination is too rare (only ~15% of injury spots have >=3 exact comps) to
+model reliably. But the ONE thing this computes dependably is: does tonight's absence set match
+the player's RECENT games? When it doesn't — a driver just returned, or a fresh injury — recency
+is drawing from the wrong regime, and that's exactly where a human "find the closest comp" read
+beats the model (you can eyeball whether the comp sample is clean; the model can't).
+
+So this surfaces, for CONSISTENT-minutes players only (fringe players' comps are too noisy to
+trust): (1) whether tonight diverges from recent games, and (2) the closest historical comps —
+the games where the same high-impact teammates were out — with the player's line in them. The
+match is weighted by each absent teammate's role size, so it keys on the Rice/Sykes-level
+absences, not a bench end who sat.
+"""
+import datetime as dt
+import statistics as st
+
+KEY = {"points": "pts", "rebounds": "reb", "assists": "ast"}
+
+
+def _played(log):
+    return {g["date"][:10] for g in log if (g.get("min") or 0) > 0}
+
+
+def _active_around(dates, d, win=24):
+    """Teammate is a real rotation-mate AROUND date d (played within +/-win days) — so their absence
+    in game d is a genuine INJURY/DNP, not 'not on the team yet'. Symmetric, so a star injured at the
+    season OPENER (no prior games, but games soon after) still counts as a real absence — the old
+    before-only window silently dropped every early-season both-out comp."""
+    d0 = dt.date.fromisoformat(d)
+    lo, hi = (d0 - dt.timedelta(days=win)).isoformat(), (d0 + dt.timedelta(days=win)).isoformat()
+    return any(lo <= x <= hi and x != d for x in dates)
+
+
+def _absent_ok(dates, d, win=24):
+    """Is the out player's absence in game d GENUINE? Two valid shapes: (a) they played within
+    ±win days (a mid-season scratch — _active_around); (b) d is AFTER their latest appearance =
+    the CURRENT absence streak. (b) is the 2026-07-18 fix (user: "the sky played a game
+    yesterday without jackson and diggins so its not the first game without them"): a long-term
+    out (R.Jackson, last game 5/17) failed the ±24d window for every recent game, so beneficiaries
+    of season-enders showed no_comps/n_out_games=0 forever AND wnba_redist lost its gate sample —
+    the games most like tonight (the live absence streak) were the ones being rejected."""
+    if not dates:
+        return False
+    if d > max(dates):
+        return True
+    return _active_around(dates, d, win)
+
+
+def _role(log):
+    m = [g["min"] for g in log if (g.get("min") or 0) > 0]
+    return st.mean(m) if m else 0.0
+
+
+def regime_note(blog, out_logs, out_names, stat, in_logs=None, in_names=None):
+    """Closest COMPS conditioned on the FULL impact lineup — the ruled-out players ABSENT *and* the
+    key in-players PRESENT. Basketball usage is defined by 2-3+ impact players, not one: Johannes
+    with Sabally+Fiebich out AVERAGES 13.7, but that's 15.8 with Ionescu ALSO out vs 9.5 with
+    Ionescu IN — so a comp that ignores who's on the floor is misleading. We weight every impact
+    teammate by role size and score each historical game by how much of tonight's exact in/out
+    configuration it reproduces; comp_avg is over the games that match tonight BEST.
+
+    blog: beneficiary log. out_logs/out_names: tonight's ruled-out teammates. in_logs/in_names:
+    the team's OTHER impact players expected to PLAY tonight (Ionescu, Stewart...). stat: the market.
+    Returns a dashboard dict, or None when it doesn't apply."""
+    key = KEY.get(stat, stat)
+    games = sorted((g for g in blog if (g.get("min") or 0) > 0), key=lambda g: g["date"])
+    if len(games) < 6 or not out_logs or max(g["min"] for g in games) < 18:
+        return None
+    in_logs, in_names = in_logs or [], in_names or []
+    out_played = [_played(ol) for ol in out_logs]
+    in_played = [_played(il) for il in in_logs]
+    wt_out = [_role(ol) for ol in out_logs]
+    wt_in = [_role(il) for il in in_logs]
+    if max(wt_out, default=0) <= 0:
+        return None
+    # key config members = role >= half the biggest OUT's minutes (screens out bench-end noise on
+    # both sides). sig_out defines the absences; sig_in the presences that suppress a usage spike.
+    thr = 0.5 * max(wt_out)
+    sig_out = [i for i in range(len(out_logs)) if wt_out[i] >= thr]
+    sig_in = [j for j in range(len(in_logs)) if wt_in[j] >= thr]
+    if not sig_out:
+        return None
+    sig_names = [out_names[i] for i in sig_out if i < len(out_names)]
+    inn = [in_names[j] for j in sig_in if j < len(in_names)]
+    tw = (sum(wt_out[i] for i in sig_out) + sum(wt_in[j] for j in sig_in)) or 1.0
+
+    # ── HONESTY FIX 2026-07-17 (user caught it on McBride): the old match() BLENDED outs-absent
+    # and ins-present, so heavy in-lineup weight let games where the "out" player actually PLAYED
+    # score as comps while the header claimed them out. A comp now REQUIRES every significant out
+    # genuinely absent (absent + active around that date); the in-lineup only RANKS those games. ──
+    def outs_absent(d):
+        return all(d not in out_played[i] and _absent_ok(out_played[i], d) for i in sig_out)
+
+    tw_in = sum(wt_in[j] for j in sig_in) or 1.0
+
+    def in_score(d):
+        return sum(wt_in[j] for j in sig_in if d in in_played[j]) / tw_in
+
+    cand = [g for g in games if outs_absent(g["date"][:10])]
+    if len(cand) < 2:
+        # FIRST (or nearly first) game without this out-set — no true comps exist. Say exactly
+        # that: for the injury method this IS the signal (the news edge), not a data gap to paper
+        # over with lookalike games.
+        return {"v2": True, "no_comps": True, "sig_names": sig_names,
+                "n_out_games": len(cand)}
+    rows = [(g, in_score(g["date"][:10])) for g in cand]
+    close = sorted(rows, key=lambda r: r[1], reverse=True)[:6]
+    if st.median([r[0]["min"] for r in close]) < 15:
+        return None
+    best = close[0][1]
+    primary = [r for r in close if r[1] >= best - 0.08] or close[:2]
+    disp = sorted(close, key=lambda r: r[0]["date"], reverse=True)
+    comps = [{"date": r[0]["date"][:10], "opp": (r[0].get("matchup") or ""),
+              "min": round(r[0]["min"]), "val": round(r[0].get(key, 0)), "match": round(r[1], 2)}
+             for r in disp]
+    all_dates = [g["date"][:10] for g in games]
+    recent_match = st.mean(1.0 if outs_absent(x) else 0.0 for x in all_dates[-3:])
+    return {"v2": True, "divergent": recent_match < 0.5,      # recent games had them PLAYING
+            "recent_match": round(recent_match, 2), "sig_names": sig_names, "in_names": inn,
+            "comps": comps, "comp_avg": round(st.mean(r[0].get(key, 0) for r in primary), 1),
+            "n_comps": len(comps), "n_primary": len(primary)}

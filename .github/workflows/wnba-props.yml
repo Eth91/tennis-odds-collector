@@ -1,0 +1,97 @@
+name: wnba-props
+# Injury-driven WNBA prop alerts. Runs a few times through the US afternoon/evening;
+# the late runs catch confirmed lineups (~30 min pre-tip) — the speed window the edge
+# lives in. Also refreshes the DvP cache (position defense) from GitHub's IP, which
+# isn't rate-limited the way a local dev machine gets after heavy use.
+# CRONS CUT 2026-07-29: every step below now runs on the Oracle VM (vm_loop.sh).
+# Kept dispatch-only as a manual fallback if the VM is down. Do NOT re-add a
+# schedule without first removing the step from vm_loop.sh -- two writers on the
+# same SQLite files and the same git remote is what caused the fd_lines blob war.
+on:
+  workflow_dispatch: {}
+
+concurrency:
+  group: wnba-props
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: write                 # github.token self-redispatch — immortal past dropped crons
+
+jobs:
+  props:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests curl_cffi numpy
+      - name: grade yesterday's logged spots off box scores (the learning loop)
+        run: python wnba_ledger.py --grade || echo "grade skipped"
+      - name: grade + analyze the projection tracker (minutes/pts/reb/ast accuracy)
+        run: python wnba_proj_log.py --grade || echo "proj tracker skipped"
+      - name: CLV shadow — capture closing lines, grade, report (the timing-edge proof)
+        run: |
+          python wnba_clv.py --close || echo "clv close skipped"
+          python wnba_clv.py --grade || echo "clv grade skipped"
+          python wnba_clv.py --report || echo "clv report skipped"
+      - name: retrain empirical lineup model (learns each team's replacement-by-position from clean swaps)
+        run: python wnba_lineup_model.py || echo "lineup model skipped"
+      - name: retrain projection calibration on graded results
+        run: python wnba_ledger.py --train || echo "train skipped"
+      - name: fit usage-redistribution model (ESPN data, datacenter-OK)
+        run: python wnba_redist.py --fit --teams ATL,CHI,CON,DAL,GS,IND,LA,LV,MIN,NY,PHX,POR,SEA,TOR,WSH || echo "redist fit skipped"
+      - name: injury-driven prop alerts (logs every spot to the ledger)
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python wnba_alert.py || echo "wnba alert skipped"
+      - name: refresh phone dashboard (docs/index.html -> GitHub Pages)
+        run: python dashboard.py || echo "dashboard skipped"
+      - name: context report — prop hit% by game total / underdog size / blowout (monitor)
+        run: python wnba_context_report.py || echo "context report skipped"
+      - name: commit
+        run: |
+          git config user.name "odds-bot"
+          git config user.email "odds-bot@users.noreply.github.com"
+          # 1) commit DATA only (NOT the generated dashboard) so the rebase has no volatile
+          #    text file to conflict on. add each independently (a missing path would make
+          #    `git add a b c` stage nothing).
+          for f in wnba_notified.txt wnba_context_cache.json wnba_redist.json wnba_ledger.sqlite wnba_proj_cal.json wnba_players_cache.json wnba_injury_state.json wnba_played.txt wnba_parlays_played.txt wnba_dvp_cache.json wnba_proj_log.sqlite wnba_proj_accuracy.md wnba_clv.sqlite wnba_clv.md wnba_starter_cache.json wnba_lineup_model.json wnba_proj_cache.json wnba_watchlist.json wnba_status_state.json wnba_question_log.sqlite wnba_sit_prob.json wnba_context.md; do
+            git add -f "$f" 2>/dev/null || true
+          done
+          git commit -m "wnba props data [skip ci]" -q 2>/dev/null || echo "no data change"
+          # -X theirs so the binary ledger never hard-fails; a hard reset is the last resort so
+          # we always end ON A BRANCH (this run's ledger re-logs next run — UPSERT is idempotent)
+          git pull --rebase --autostash -X theirs -q 2>/dev/null \
+            || { git rebase --abort 2>/dev/null || true; git reset --hard origin/main -q; }
+          # 2) regenerate the dashboard from the MERGED data + commit it fresh — always newer
+          #    than remote's, so it can NEVER produce the docs/index.html rebase conflict that
+          #    was failing runs (exit 128 / detached HEAD).
+          python dashboard.py 2>/dev/null || echo "dashboard skipped"
+          git add -f docs/index.html 2>/dev/null || true
+          git commit -m "wnba dashboard [skip ci]" -q 2>/dev/null || echo "no dash change"
+          git push -q 2>/dev/null \
+            || { git pull --rebase --autostash -X theirs -q 2>/dev/null || git reset --hard origin/main -q; git push -q 2>/dev/null || true; }
+      - name: self-redispatch — keep the logger immortal past dropped crons
+        if: always()
+        env:
+          TOKEN: ${{ secrets.DISPATCH_PAT || github.token }}
+        run: |
+          # wnba-props is the play-LOGGER (wnba_alert.py -> predictions ledger). It was cron-only;
+          # GitHub dropped its cron for ~11h on 2026-07-13, so no plays logged + the board went empty.
+          # Sleep to a sane cadence, then github.token re-dispatches (actions: write) -> immortal
+          # chain; the crons remain as a fallback seed.
+          sleep 1500   # ~25 min. This loop is the BACKSTOP + retrain, NOT the alert path: the 60s
+                       # wnba-watch loop already runs A.collect() event-driven the instant a new out or
+                       # opening line appears (wnba_watch.py ~line 491), so injury->beneficiary-alert is
+                       # already ~60s. Running the heavy ESPN retrains more often here buys no alert
+                       # speed and only risks throttling the shared feed — so keep it slow.
+          code=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/wnba-props.yml/dispatches" \
+            -d '{"ref":"${{ github.ref_name }}"}')
+          if [ "$code" = "204" ]; then echo "✓ redispatched next wnba-props (immortal chain)";
+          else echo "redispatch HTTP $code — the crons are the fallback"; fi

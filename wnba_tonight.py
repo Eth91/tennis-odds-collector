@@ -1,0 +1,1414 @@
+"""WNBA tonight board — the TRIGGER. Turns 'who's out' into 'here are the spots'.
+
+Ties tonight's ESPN injury report + schedule to the WOWY engine: for every key player
+ruled OUT on a team playing tonight, surface who inherits the minutes/usage and their
+production in past games at that role — so the spot finds YOU instead of you memorizing
+lineups. This is step 1 of 3 (trigger -> prop-line integration -> DvP).
+
+    python wnba_tonight.py             # tonight's absences + beneficiaries
+    python wnba_tonight.py --min-out 22  # only key players (>=22 mpg) being out
+"""
+from __future__ import annotations
+
+import argparse
+import datetime as dt
+import json
+import math
+import os
+import sqlite3
+import statistics as st
+from collections import defaultdict
+from pathlib import Path
+
+import requests
+
+try:
+    from zoneinfo import ZoneInfo
+    ET = ZoneInfo("America/New_York")
+except Exception:
+    ET = dt.timezone(dt.timedelta(hours=-4))
+
+import rotowire as RW
+import wnba_context as CTX
+import wnba_dvp as DVP
+import wnba_props_db as PDB
+import wnba_wowy as W
+
+_RW_CACHE = {}
+
+
+def rw_lineups():
+    """RotoWire WNBA board (confirmed/projected lineups + ruled-out), fetched once per
+    process and reused. Degrades to an empty board if RotoWire is unreachable, so the whole
+    pipeline never hard-depends on it. Logs its status once so CI shows if it connected."""
+    if "b" not in _RW_CACHE:
+        try:
+            _RW_CACHE["b"] = RW.board()
+            print(f"RotoWire OK: {len(_RW_CACHE['b'])} lineups, "
+                  f"{sum(len(t['out']) for t in _RW_CACHE['b'])} ruled out", flush=True)
+        except Exception as e:
+            _RW_CACHE["b"] = []
+            print(f"RotoWire UNREACHABLE ({str(e)[:60]}) — ESPN fallback", flush=True)
+    return _RW_CACHE["b"]
+
+PROPS_DB = Path(os.environ.get("FD_DB",
+                Path(__file__).resolve().parent / "fanduel_props.sqlite"))
+# fd_lines stat keys we can project from a game log
+PROP_STATS = {"points": "pts", "rebounds": "reb", "assists": "ast",
+              "pra": "pra", "pts_reb": "pts_reb", "pts_ast": "pts_ast", "reb_ast": "reb_ast"}
+
+# which base stats each market contains — two markets are CORRELATED (never both bet on one player)
+# if their component sets overlap: points & pra share {p}; rebounds & reb_ast share {r}; etc. A sharp
+# doesn't stack pts + PRA + PA on one player — one bad game sinks them all.
+_STAT_COMPONENTS = {"points": frozenset("p"), "rebounds": frozenset("r"), "assists": frozenset("a"),
+                    "pra": frozenset("pra"), "pts_reb": frozenset("pr"),
+                    "pts_ast": frozenset("pa"), "reb_ast": frozenset("ra")}
+HIGH_EV = 0.20      # a player gets a 2ND (uncorrelated) original-line play only if BOTH anchors clear this
+LADDER_MAX = 3      # at most this many OVER ladder rungs above the original line (FD ladders overs only)
+LADDER_GAP = 2.0    # min spacing between kept ladder rungs, so it's a spread ladder not 5 stacked rungs
+ROLE_GUARD_MINN = 3 # min without-the-out-player games before the role-expansion under-guard trusts w['without']
+POINTS_PREF_MARGIN = 0.08   # prefer a POINTS anchor over a points-containing combo (pra/pts_reb/pts_ast)
+                            # when points' EV is within this of the combo's — points is the ladderable
+                            # volume edge; a combo is largely its components repackaged and can't ladder
+
+
+def _main_line(ladder, allow_alt=False):
+    """The ORIGINAL line: the rung whose over price sits closest to even (~2.0 dec) — i.e. FanDuel's
+    posted o/u number, the anchor the user bets. Returns the line (float) or None if the ladder is too
+    skewed to have a real main line (only deep alt rungs). Mirrors wnba_clv.book_line."""
+    cand = [(round(float(ln), 1), o) for ln, (o, u) in ladder.items() if o and 1.3 <= o <= 3.5]
+    if not cand:
+        return None
+    line, o = min(cand, key=lambda x: abs(x[1] - 2.0))
+    if 1.6 <= o <= 2.6:
+        return line
+    # ALT/MILESTONE LADDER (2026-07-28): FanDuel posts bench + role players as one-sided
+    # "5+ / 10+ / 15+" rungs, which never land in the even-money band, so this returned None
+    # and _select_player_bets dropped the player entirely. With allow_alt we anchor on the
+    # nearest-to-even rung anyway; the caller raises the EV bar to pay for the fatter hold.
+    return line if allow_alt else None
+
+
+PLAY_PROB_GATE = 0.85   # only DNP-discount OVERS whose role-realization is below this (the fringe tail);
+                        # confirmed/locked-in roles sit near 1.0 and are left untouched
+
+
+def _play_prob(log, out_logs, proj_min):
+    """P(the beneficiary reaches ~the projected role | they play) — the availability/DNP discount for
+    OVERS. A fringe player projected on injury-elevated minutes often plays a SMALLER role than we
+    project; the book's plus-money over already prices that, but our `hit` is conditional on the
+    elevated role, so an over like Gardner o4.5 @ +305 reads as huge fake EV. Estimate = the fraction of
+    the player's WITHOUT-the-out-star games (the injury creates the role, so condition on it) that they
+    actually PLAYED (min >= 8 — a true DNP just VOIDS the prop, so it's excluded, not counted a loss) in
+    which they reached the projected role (min >= 0.7*proj_min). Shrunk toward a prior so a 1-2 game
+    sample can't swing to 0/1: ~1 for a locked-in starter, lower for a sporadic bench player."""
+    if not proj_min or proj_min <= 0:
+        return 1.0
+    out_dates = set().union(*[set(om) for om in out_logs]) if out_logs else set()
+    ctx = [g for g in log if g["date"][:10] not in out_dates] or log[-10:]   # without-games, else recent
+    played = [g for g in ctx if g.get("min", 0) >= 8]                        # DNP voids -> not a loss
+    if not played:
+        return 1.0                                                          # no signal -> no discount
+    # average fraction of the PROJECTED minutes the player actually logs when active (capped at 1 so
+    # over-performing a game doesn't offset a benching). Smooth, no floor cliff — a reliable starter
+    # sits ~1.0, a fringe player who plays half the projected role sits ~0.5. Shrunk toward a prior.
+    ratios = [min(g.get("min", 0) / proj_min, 1.0) for g in played]
+    K, prior = 4.0, 0.85
+    return (sum(ratios) + prior * K) / (len(ratios) + K)
+
+
+def _am(dec):
+    return f"+{round((dec-1)*100)}" if dec >= 2 else f"{round(-100/(dec-1))}"
+
+
+def kelly_units(ph, n, dec, frac=0.25, unit_pct=0.04):
+    """Recommended stake in UNITS via fractional (quarter) Kelly — sizes by edge AND odds,
+    the math behind 'more on solid near-even bets, less on longshots'. p = the credibility-
+    shrunk win prob (thin samples pulled toward the book); Kelly fraction f = (p·dec−1)/
+    (dec−1); stake = frac·f of bankroll; 1u = unit_pct of bankroll. Quarter-Kelly + 1u=4%
+    bankroll calibrates a solid ~-140/+100 edge to ~1u. Rounded to 0.5u, capped [0.5, 3]."""
+    if ph is None or not n or dec <= 1:
+        return 1.0
+    p = (ph * n + (1.0 / dec) * 6) / (n + 6)          # shrink toward the book's implied prob
+    f = (p * dec - 1) / (dec - 1)                     # full-Kelly fraction of bankroll
+    if f <= 0:
+        return 0.5
+    return max(0.5, min(3.0, round((frac * f / unit_pct) * 2) / 2))
+
+
+def playing_now(player):
+    """True if a supposedly-out player actually has FRESH props posted — books pull a
+    player's props the moment they're ruled out, so a full slate in the latest collection
+    cycle means they're PLAYING. Guards against a stale injury feed (e.g. a returning
+    player still tagged 'Out', like A'ja Wilson 7/9)."""
+    db = PDB.props_db()                                # freshest of collect-odds' DB / the watch loop's
+    if not Path(db).exists():
+        return False
+    con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+    latest = con.execute("SELECT MAX(collected_at) FROM fd_lines WHERE sport='wnba'").fetchone()[0]
+    if not latest:
+        con.close()
+        return False
+    n = con.execute("SELECT COUNT(*) FROM fd_lines WHERE sport='wnba' AND player=? "
+                    "AND collected_at >= datetime(?, '-45 minutes')", (player, latest)).fetchone()[0]
+    con.close()
+    return n > 0
+
+
+def confirmed_playing(player, team):
+    """True ONLY if RotoWire's CONFIRMED starting five (not merely 'projected') lists this player — a
+    POSITIVE 'they are playing tonight' signal, the one thing that can safely override a stale ESPN
+    out-tag (a genuinely-returned player). Unlike 'their props are still posted', a book's LAG in
+    pulling a freshly-ruled-out player's props CANNOT fake this — that lag is exactly what reported
+    Satou Sabally (ruled OUT) as active. Defaults False (TRUST THE INJURY REPORT) whenever RotoWire
+    hasn't confirmed the lineup yet or is unreachable, so an OUT tag is never overridden on a guess."""
+    if not team:
+        return False
+    try:
+        return RW.starter_status(rw_lineups(), team, player) == "confirmed"
+    except Exception:
+        return False
+
+
+FRESH_MIN = 10   # a book's CURRENT ladder = rungs re-posted within this many minutes of its newest
+                 # (2026-07-22: was 90 — an Actions-era relic; the VM collects every 25-75s, so 90min let a
+                 # moved-off rung linger as a phantom live line, e.g. Nelson-Ododa o18.5 shown 88min after FD
+                 # went to o20.5. 10min = ~8-24 collection cycles of slack, drops anything genuinely gone.)
+                 # stamp. A prior slate's rows (~24h back) fall outside it, so a stale alt price can
+                 # never merge into tonight's ladder (the bug that logged o14.5 @ +280 vs a real 17.5).
+
+
+def posted_props(player):
+    """CURRENT WNBA ladder for a player: {stat_key: {line: (best_over_dec, best_under_dec)}} across
+    books. Both sides (the model bets whichever side the projection favors; 0.0 if a book posted only
+    one). CRITICAL: uses only the latest snapshot — for each rung we take the NEWEST price (never the
+    max across time) and drop rungs not re-posted this cycle — otherwise a mispriced alt from a prior
+    slate (yesterday's o14.5 @ +280) survives as a phantom live line and fabricates huge fake edges."""
+    db = PDB.props_db()                                # freshest of collect-odds' DB / the watch loop's
+    if not Path(db).exists():
+        return {}
+    con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+    rows = con.execute(
+        "SELECT stat, line, side, odds, COALESCE(book,'fd'), collected_at FROM fd_lines "
+        "WHERE sport='wnba' AND player=? AND collected_at > datetime('now','-1 day') "
+        # live=1 rows are IN-PLAY prices (collected since 2026-07-28). A pre-game projection
+        # knows nothing about the score, foul trouble, or minutes already played, so these
+        # are captured for CLV/post-mortems and never priced into a bet.
+        "AND COALESCE(live,0)=0",
+        (player,)).fetchall()
+    con.close()
+    if not rows:
+        return {}
+    latest = max(r[5] for r in rows)                   # this player's newest collection stamp
+    try:
+        cutoff = (dt.datetime.fromisoformat(latest) - dt.timedelta(minutes=FRESH_MIN)).isoformat()
+    except ValueError:
+        cutoff = ""
+    newest = {}                                        # (stat, line, side, book) -> (collected_at, odds)
+    for stat, line, side, odds, bk, ca in rows:
+        if stat not in PROP_STATS or line is None or side not in ("over", "under") or ca < cutoff:
+            continue
+        k = (stat, round(float(line), 1), side, bk)
+        if k not in newest or ca > newest[k][0]:       # keep the LATEST price for this rung — not the max
+            newest[k] = (ca, float(odds))
+    best = defaultdict(lambda: defaultdict(lambda: [0.0, 0.0]))   # stat -> line -> [over, under]
+    for (stat, line, side, bk), (ca, odds) in newest.items():
+        i = 0 if side == "over" else 1
+        best[stat][line][i] = max(best[stat][line][i], odds)      # best price across BOOKS, same cycle
+    return {s: {k: tuple(v) for k, v in d.items()} for s, d in best.items()}
+
+
+# Role floor scaled for WNBA's shorter 40-min game (NBA is 48): a bench player promoted
+# to the starting lineup projects to ~22+ min, so judge production in their 22+ min games.
+ROLE_FLOOR = 22.0
+
+# Asymmetric EV bars from the backtest (14d+21d, leak-free) + the 07-09 real-line re-grade:
+# UNDERS on reduced/regressing roles beat a blind baseline by +6 to +9 pts (reb/ast esp.);
+# OVERS have ~no edge (elevated roles regress). So take the side minutes-honest favors, but
+# demand much more edge to bet an over than an under.
+OVER_EV_MIN = 0.10
+ALT_LADDER_LIVE = True   # bet FanDuel's one-sided milestone ladders (user call 2026-07-28)
+LADDER_EV_MIN = 0.20     # 2x the two-way floor: one-sided => no devig, no hold estimate
+UNDER_EV_MIN = 0.04
+THIN_SAMPLE_N = 7      # fewer elevated games than this = an unreliable projection...
+BIG_JUMP_MIN = 10.0    # ...and combined with a huge projected minutes jump = over-extrapolation, skip
+COLD_START_MARGIN = 5.0  # ...UNLESS the elevated-sample median beats the line by this much — the
+                         # COLD-START tier (2026-07-16, user: "can't we predict the beneficiary
+                         # without history?"). NBA walk-forward (2,924 zero/low-WOWY flags,
+                         # absence game 1-2): margin 5-8 -> 63.7%, 8+ -> 67.8% (+17-24% ROI).
+                         # A 5-pt absolute margin is STRICTER in WNBA's lower-scoring context.
+
+
+def flip_p_over(wvals, line):
+    """P(over) for the role_flip, estimated from the WITHOUT-star game values `wvals`.
+    Uses Normal(mu, sigma) — magnitude-aware — instead of a raw line-cross hit-rate. On the
+    3-9 games a WOWY split gives, a hit-rate is coarse and discards HOW FAR production sits
+    from the line: a 2.9-assist mean into a 2.5 line is a real over-lean a 25%-hit-rate buries,
+    while a 60%-on-5 hit-rate overstates a mean sitting right on the line. sigma is floored
+    (CV 0.35 / abs 1.0) so a tiny-sample variance can't manufacture false confidence. Leak-free
+    backtest: the hit-rate ranked flips BACKWARDS (winner-minus-loser P(over) -0.06); this ranks
+    them the right way (+0.01) — a better estimator, NOT a lower bar. Shared with flip_backtest.py
+    so the backtest can't drift from production. n=6 can't validate the ordering; this is founded
+    on first principles + fixes the sign, and is tracked forward."""
+    mu = st.mean(wvals)
+    sg = max(st.pstdev(wvals) if len(wvals) > 1 else 0.0, 0.35 * mu, 1.0)
+    return 1 - 0.5 * (1 + math.erf(((line - mu) / sg) / math.sqrt(2)))
+VOL_EV_MIN = 0.07     # volume-confirmed points OVERS EV bar
+PRIMARY_FGA = 13.0    # baseline FGA at/above this = a primary option (Mabrey) — no room to grow, SKIP
+# ROOM-TO-GROW volume model. The broad real-line backtest lost (-38%) because it flagged PRIMARY
+# options (Mabrey: proj 24 -> scored 11, 0-4) whose shot count doesn't actually rise off an injury.
+# Filtering to LOW-baseline-usage players (bench->starter + secondary starters like Hamby, who
+# absorb the vacated shots) flips it: role players hit 54% on real lines (injury_volume_backtest,
+# split by tier). So the volume over is live ONLY for room-to-grow players; the CLV shadow + ledger
+# grade it forward, and the edge compounds with the injury-TIMING (bet before the line moves).
+VOL_LIVE = True
+
+
+# The user's per-stat decision model: which WOWY signals DECIDE each market.
+#   points   -> FGA (shot volume/usage) + minutes   (scoring is opportunity-driven)
+#   rebounds -> rebounds + minutes                   (own rate + playing time)
+#   assists  -> assists + minutes                    (own rate + playing time)
+# FGA is a POINTS driver only; it's noise for reb/ast.
+STAT_DRIVER = {"points": "fga", "rebounds": "reb", "assists": "ast",
+               "pra": "fga", "pts_reb": "fga", "pts_ast": "fga", "reb_ast": "reb"}
+
+
+_PG = {"G": "G", "PG": "G", "SG": "G", "GF": "G", "F": "F", "SF": "F", "PF": "F",
+       "FC": "C", "C": "C", "CF": "C"}
+_STAT_CTX = {"points": ("G", "F", "C"), "rebounds": ("C", "F"), "assists": ("G",)}
+
+
+def project_all(log, proj_min):
+    """Full minutes-honest projection (min + pts/reb/ast) for the projection TRACKER — mirrors
+    prop_edges' elevated/breakout basis but for all three stats, regardless of flagging, so the
+    background learner can grade every projection the model makes (not just the flagged bets)."""
+    floor = max(proj_min - 4, ROLE_FLOOR)
+    elevated = [g for g in log if g["min"] >= floor]
+    if len(elevated) >= 4:
+        sample, basis, cap = elevated, "elevated", 1.35
+    else:
+        sample = [g for g in log if g["min"] >= 12]
+        basis, cap = "projected", 2.2
+    if len(sample) < 3:
+        return None
+
+    def pj(key):
+        return round(st.mean(g[key] * min(proj_min / max(g["min"], 1.0), cap) for g in sample), 2)
+
+    return {"proj_min": round(proj_min, 1), "proj_pts": pj("pts"), "proj_reb": pj("reb"),
+            "proj_ast": pj("ast"), "basis": basis, "n_games": len(sample)}
+
+
+def _norm_sf(z):
+    """P(X > z) for standard normal — no scipy."""
+    return 0.5 * math.erfc(z / math.sqrt(2))
+
+
+def volume_points(log, proj_min, n_recent=4):
+    """VOLUME-BASED points projection (the user's laddering edge). Shooting % is variance, but
+    FGA/FTA volume is sticky (role/minutes-driven) — so project points off the ELEVATED volume at
+    the player's SEASON efficiency (points per true-shot = pts / (FGA + 0.44·FTA)), not off recent
+    points that carry single-game shooting noise the book fades. `confirmed` = the recent shot
+    volume is genuinely elevated vs the pre-surge baseline (the real-role-vs-hot-night tell).
+    Backtested (volume_points_backtest.py): more accurate than a recent-points projection in
+    role-jump spots, and the over stays profitable where a recent-points over regresses."""
+    games = sorted((g for g in log if (g.get("min") or 0) > 0), key=lambda g: g["date"])
+    if len(games) < 5:
+        return None
+    ts_tot = sum(g["fga"] + 0.44 * g["fta"] for g in games)
+    if ts_tot <= 0:
+        return None
+    pps = sum(g["pts"] for g in games) / ts_tot                 # season points per true-shot
+    recent = games[-n_recent:]
+    fga_p = st.mean(g["fga"] / max(g["min"], 1) for g in recent) * proj_min
+    fta_p = st.mean(g["fta"] / max(g["min"], 1) for g in recent) * proj_min
+    vol_pts = (fga_p + 0.44 * fta_p) * pps
+    base = games[:-3] or games                                  # pre-surge baseline volume
+    base_fga = st.mean(g["fga"] for g in base)
+    recent_fga = st.mean(g["fga"] for g in games[-3:])
+    sig = st.pstdev([g["pts"] for g in games[-8:]]) if len(games) >= 5 else 5.0
+    # confirmed = volume genuinely rose AND the player has ROOM TO GROW (not already a primary
+    # option who gets his shots regardless — those "jumps" are noise, backtested 0-4).
+    return {"vol_pts": vol_pts,
+            "confirmed": base_fga > 0 and recent_fga >= 1.35 * base_fga and base_fga < PRIMARY_FGA,
+            "sigma": max(sig, 4.0), "pps": round(pps, 3), "base_fga": round(base_fga, 1),
+            "recent_fga": round(recent_fga, 1), "fga_proj": round(fga_p, 1)}
+
+
+def prop_edges(player, log, proj_min, w=None, vacated=None, ctx=None, out_logs=None,
+               opp=None, pos=None):
+    """+EV over-props, framed as the user's actual edge: the gap between ELEVATED-ROLE
+    production and a line the book anchored to the SEASON AVERAGE. For each posted line:
+    hit rate in the player's elevated games (min >= max(proj-4, 22)), credibility-shrunk
+    to the book's implied prob (thin samples + the book set the line), flagged when +EV.
+
+    Per-stat judgment signals (`w` = beneficiary's WOWY split vs the OUT player):
+      points   decided on d_fga + d_min;  rebounds on d_reb + d_min;  assists on d_ast + d_min.
+    Points also carry d_fta/d_3pa (line/three scoring channels). `vacated` = the out
+    player's own avg in that stat = SIZE of the redistributed pool. `ctx` = matchup
+    context (Vegas total, pace, opp points allowed) — the game environment, which lifts
+    all counting stats. All attached as features; the learned model weights them. Won't
+    post an over on a stat that DROPS without the player. Returns list of dicts."""
+    floor = max(proj_min - 4, ROLE_FLOOR)
+    elevated = [g for g in log if g["min"] >= floor]
+    if len(elevated) >= 4:
+        # shrink_k 6->11: the graded ledger showed the empirical hit is IN-SAMPLE OPTIMISTIC — the
+        # shrunk P(win) read 64% vs a realized 51% (favorable-role games regress). A calibration
+        # backtest over the k-sweep narrowed the gap to ~6pts and lifted ROI at ~11-15; bumped
+        # conservatively (not to the fitted peak) to avoid overfitting a 45-bet sample.
+        sample, basis, shrink_k = elevated, "elevated", 11
+        def val(g, key):
+            # minutes-HONEST: scale each elevated game's production to TONIGHT's projected
+            # minutes. Otherwise the model cherry-picks a player's 26-min games (Billings'
+            # 7.4 reb) to project a ~19-min role. Capped at 1.35x so a genuine bump isn't
+            # clipped; counting stats only (rate stats like FGA-per already normalize).
+            r = min(proj_min / max(g["min"], 1.0), 1.35) if key in ("pts", "reb", "ast", "fga", "fta", "fg3a", "pra", "pts_reb", "pts_ast", "reb_ast") else 1.0
+            return g[key] * r
+    else:
+        # BREAKOUT fallback: thin elevated history but a real projected role. Project each
+        # game to the projected minutes via per-minute rate (the user's method for a bench
+        # player who just got the role — "she scores 16 and gets a big minutes boost").
+        # Noisier, so tag it + shrink harder.
+        base = [g for g in log if g["min"] >= 12]
+        if len(base) < 3 or proj_min < ROLE_FLOOR:
+            return []
+        sample, basis, shrink_k = base, "projected", 14   # 9->14: thin breakout sample regresses even
+        def val(g, key):
+            return g[key] * min(proj_min / g["min"], 2.2)
+    fga = st.mean([val(g, "fga") for g in sample])
+    ctx = ctx or {}
+
+    def wdelta(k):                                  # without-minus-with, or None if no split
+        if not w or w.get("n_with", 0) < 1 or w.get("n_without", 0) < 1:
+            return None
+        return round(w["without"][k]["mean"] - w["with"][k]["mean"], 1)
+    d_min, d_fga, d_fta, d_3pa = wdelta("min"), wdelta("fga"), wdelta("fta"), wdelta("fg3a")
+    play_prob = _play_prob(log, out_logs, proj_min)   # role-realization; discounts fringe-role OVERS
+    # VOLUME layer (points only): if the role's shot volume is genuinely elevated, project points
+    # off that sticky volume and ladder the OVERS — the validated laddering edge.
+    vp = volume_points(log, proj_min)
+    vol_ok = bool(vp and vp["confirmed"])
+
+    out = []
+    for stat, best in posted_props(player).items():
+        key = PROP_STATS[stat]
+        orig_line = _main_line(best)          # the ORIGINAL (posted o/u) line = the anchor for this stat
+        alt_ladder = False
+        if orig_line is None and ALT_LADDER_LIVE:
+            orig_line = _main_line(best, allow_alt=True)   # one-sided milestone ladder
+            alt_ladder = orig_line is not None
+        season_avg = st.mean([g[key] for g in log]) if log else 0
+        vals = [val(g, key) for g in sample]
+        # plain minutes-honest mean. Context-weighting is dropped: the backtest showed it
+        # diluted the under edge (MH-alone unders +8.4 vs +6.5 with context) for no MAE gain.
+        elev_avg = st.mean(vals)
+        # DvP tiebreaker: nudge toward the opponent's position- and pace-adjusted tendency to
+        # allow this stat (small — dvp_backtest showed it's marginal, so it breaks ties/orders
+        # overs by matchup but never overrides the validated under model). Logged as a feature.
+        dvp_c = DVP.dvp(opp, pos, key) if (opp and pos) else 0.0
+        elev_avg += dvp_c * proj_min
+        use_vol = vol_ok and stat == "points" and VOL_LIVE     # VOL_LIVE=False: shadow only, no bets
+        if use_vol:
+            elev_avg = round(vp["vol_pts"], 1)      # sticky-volume projection drives the points ladder
+        n = len(vals)
+        # per-game samples for the bar chart. Show the games that match TONIGHT's injury context —
+        # the player's games where the SAME out-set was ABSENT (the user: "only the bars without
+        # Mack and Nogic"). out_logs = each out player's {date: minutes}, so a game is same-context
+        # when none of them appear on that date. Fall back to elevated-role games only if too few
+        # same-context games exist yet, so a brand-new out-set still renders a chart.
+        chart_pool = sample
+        if out_logs:
+            same_ctx = [g for g in log if all(g["date"][:10] not in om for om in out_logs)]
+            if len(same_ctx) >= 2:
+                chart_pool = same_ctx
+        recent = sorted(chart_pool, key=lambda g: g["date"], reverse=True)[:10]
+        # store the ACTUAL game stat (whole number) + minutes for the chart — not the minutes-
+        # scaled projection value (which produced confusing decimals). The bars show what the
+        # player really did each game vs the line; the minutes overlay shows the role context.
+        samples = [[round(g[key]), g["matchup"], round(g["min"])] for g in recent]
+        d_stat = wdelta(key)
+        driver = wdelta(STAT_DRIVER[stat])          # the deciding signal for THIS market
+        vac = round(vacated[stat], 1) if vacated and stat in vacated else None
+        for line, (over_dec, under_dec) in sorted(best.items()):
+            # Compute the side the projection favors vs THIS line (over if projection >= line). We now
+            # bet OVERS ONLY — the injury-beneficiary's over, laddered (the user's proven method, and
+            # the ledger split: overs +9.4% ROI vs unders -11.5%). `side` is still computed so the flip
+            # can rescue an over the projection under-shot and so the volume layer knows to ladder overs.
+            side = "over" if elev_avg >= line else "under"
+            if use_vol and side == "under":           # the volume layer ladders OVERS only
+                continue
+            # FLIP (role-expansion over-rescue): when the projection lands UNDER a line but the player's
+            # production WITHOUT the out star sits AT/above it (needs a real n_without), the proj under-
+            # shot the expanded role — so bet the OVER, scored on the without-star games (magnitude-aware
+            # via flip_p_over), if +EV. In an overs-only world this is the one path that catches an over
+            # the naive side-pick misses; a ~50% coin-flip over stays a no-bet.
+            if side == "under" and w and w.get("n_without", 0) >= ROLE_GUARD_MINN:
+                wblk = w.get("without", {}).get(key) or {}
+                wo, wvals = wblk.get("mean"), wblk.get("vals")
+                if wo is not None and wo >= line:
+                    if wvals and len(wvals) >= ROLE_GUARD_MINN and 1.6 <= over_dec <= 5.0:
+                        nw = len(wvals)
+                        p_over = flip_p_over(wvals, line)     # magnitude-aware P(over), not a hit-rate
+                        po = (p_over * nw + (1.0 / over_dec) * shrink_k) / (nw + shrink_k)
+                        eo = po * over_dec - 1
+                        if eo >= OVER_EV_MIN:
+                            out.append({"ev": eo, "stat": stat, "line": line, "dec": over_dec, "hit": p_over,
+                                        "odds_other": under_dec,
+                                        "side": "over", "orig_line": orig_line, "pi_role": round(play_prob, 2),
+                                        "n": nw, "fga": fga, "season_avg": round(season_avg, 1),
+                                        "elev_avg": round(wo, 1), "stale": False,
+                                        "d_stat": d_stat, "d_fga": d_fga, "d_min": d_min,
+                                        "driver": driver, "vac": vac,
+                                        "total": ctx.get("total"), "pace": ctx.get("pace"),
+                                        "opp_def": ctx.get("opp_pts_allowed"), "spread": ctx.get("dog"),
+                                        "d_fta": d_fta if stat == "points" else None,
+                                        "d_3pa": d_3pa if stat == "points" else None,
+                                        "basis": "role_flip", "samples": samples, "vol": None})
+                    continue                                            # never emit the contradicted under
+            # OVERS-ONLY (2026-07-13, user's real method): never auto-bet an under. The flip above
+            # already appended any rescued OVER; every remaining under is skipped. Beneficiary overs
+            # carry the edge (+$321 in the ledger); auto-unders bled (-$333). Error-line unders are a
+            # manual/info call — the model can't generate them (its big-gap unders LOST: it under-
+            # projects low-minutes players who then get the injury bump and sail over).
+            if side == "under":
+                continue
+            dec = over_dec
+            hi_odds = 7.0 if use_vol else 5.0          # volume overs LADDER UP to +600 alt lines
+            lo_odds = 1.6 if use_vol else 1.25         # ...but NEVER a deep favorite under the line
+            if not dec or not (lo_odds <= dec <= hi_odds):   # no price, deep fav, or lottery longshot
+                continue
+            # skip trivial deep favorites — the line sits so far on one side of the projection
+            # it's a near-lock with no edge (a 15-pt scorer's o3.5, or a u30.5), just clutter.
+            if elev_avg > 0 and ((side == "over" and line < 0.4 * elev_avg)
+                                 or (side == "under" and line > 2.5 * elev_avg)):
+                continue
+            # direction guard: don't bet an OVER on a stat that FALLS without the out player
+            # (tolerate small negatives — early-season WOWY samples are thin/noisy).
+            if side == "over" and d_stat is not None and d_stat < -1.0 and not use_vol:
+                continue
+            # GUARD-REBOUND TRAP (2026-07-20, user + 53-projection backtest): in the WNBA a guard's
+            # rebounds at a <=3.5 line are noise — they're rarely in prime rebounding spots, so the
+            # board depends on where the ball bounces, not on the vacated role. Graded guard rebound
+            # projections cleared o3.5 just 33% (o2.5 46%) even when the model projected an over, and a
+            # guard projects 5+ reb ~1/53. Skip a guard's rebound OVER at <=3.5 unless it genuinely
+            # projects 5+ (the user's "insane evidence" bar). Assists are UNAFFECTED (those aren't luck).
+            # WNBA-SPECIFIC — do NOT port to the NBA, where guard-forwards (Luka/Dončić) average 7-8 reb.
+            _pg = (pos or "").strip().upper()
+            if (side == "over" and stat == "rebounds" and elev_avg < 5 and line <= 3.5
+                    and (_pg.startswith("G") or _pg in ("PG", "SG", "GF"))):
+                continue
+            # CONVICTION gate: an injury-driven OVER only pays when the role actually EXPANDS — more
+            # minutes or more shot volume. A flat/negative WOWY driver = a coin-flip star-over that
+            # regresses to the mean (Stewart o18.5 w/ Fiebich out: usage +0.1, minutes -3.5 -> lost).
+            # Leak-free backtest: flat-role overs hit 38-42% (~-20% ROI) vs role-jump overs 53-59%
+            # (+1..+14%). Require minutes +2 OR usage(FGA) +1 to flag the over. Volume plays are
+            # already usage-confirmed, so they're exempt.
+            # CONVICTION gate for overs: only flag an over whose role is CONFIRMED to expand (minutes
+            # +2 OR usage(FGA) +1). Missing WOWY (d_min/d_fga None — a new signing with no games
+            # alongside the out player) counts as UNCONFIRMED, so the over is skipped, not flagged on
+            # faith: an unconfirmed elevated-role over is exactly the bet the pivot says regresses.
+            if side == "over" and not use_vol and not (
+                    d_min is not None and d_fga is not None and (d_min > 2 or d_fga > 1)):
+                continue
+            # THIN-SAMPLE OVER-EXTRAPOLATION GUARD (2026-07-14): skip an over built on a THIN elevated
+            # sample AND an EXTREME projected minutes jump — a deep-bench player extrapolated into a huge
+            # role off a handful of games. The model's clearest failure mode in the loss investigation:
+            # Valeriane Ayayi went 0-5, every bet n_elev<7 with d_min ~+16-18, delivering ~half the
+            # projection. Validated on the 34 graded overs (stable across n<6-8 / d_min>8-12): cuts a
+            # 1-5 set (-4.4u) -> record 18-10, ROI +9.4% -> +27.3%. Conservative (only the extreme
+            # corner); volume plays are usage-confirmed so they're exempt. Small sample (~1 player) —
+            # watch forward. (See flip_backtest.py-style validation in the ledger analysis.)
+            # D_MIN BAND PILOT (2026-07-16, revised same day — user: "isn't >8 just Ayayi?
+            # we need a bigger sample"): correct — the live <0/>8 "collapse" is 1-2 PLAYERS
+            # (>8 = Ayayi x5 + 3 others; <0 = 3 Stewart bets), and the NBA big-sample found
+            # MEASURED 8+ jumps are the BEST band (65.3%). Too suspect to bet, not enough
+            # multi-player evidence to hard-kill: outside-band overs become SHADOW PILOTS
+            # (⚡BAND alert + CLV shadow, never the firm record) until the sample is big and
+            # diverse enough to promote or bury. Volume/cold-start-margin plays stay exempt.
+            # OUT-OF-BAND GATE (2026-07-18, real-line backtest): firm flags at d_min <0 or >8
+            # went 3-13 (-10.96u) at real odds — every Ayayi phantom, Stewart's negative-band
+            # night, Makani's -4.1 scoreless o10.5, Ododa 8.1/10.7. The 0-3 zone stays FIRM
+            # (7-7 all / 4-2 selection at real lines — the EV+role filters carry it) and the
+            # cold-margin exemption is REMOVED (its two live exemptions, Makani + Ododa, both
+            # lost; it was NBA-proxy-validated only). Cutoff 8 not BIG_JUMP_MIN=10: Allemand
+            # 8.2/8.3 and Ododa 8.1 all lost — the band's own edge (3-8) defines the gate.
+            band_pilot = bool(side == "over" and not use_vol and d_min is not None
+                              and (d_min < 0 or d_min > 8))
+            if (side == "over" and not use_vol and n < THIN_SAMPLE_N and d_min is not None
+                    and d_min > BIG_JUMP_MIN
+                    and st.median(vals) - line < COLD_START_MARGIN):
+                continue          # thin + huge jump + only a small proj cushion -> Ayayi corner, skip.
+                                  # Margin >= COLD_START_MARGIN passes as the NBA-validated cold-start
+                                  # tier (first-absence beneficiaries with no elevated history — the
+                                  # 7/16 Gustafson/POR case the hard skip was silently eating).
+            if use_vol:
+                # P(points > line) from the VOLUME projection (normal around vol_pts) — strips the
+                # single-game shooting variance the empirical elevated-game hit rate carries.
+                hit = _norm_sf((line - vp["vol_pts"]) / vp["sigma"])
+            else:
+                hit = (sum(1 for v in vals if v > line) if side == "over"
+                       else sum(1 for v in vals if v < line)) / n
+            # AVAILABILITY/DNP discount (OVERS only): `hit` is conditional on the elevated role; if the
+            # player realizes that role only part of the time (fringe/bench), the over's unconditional
+            # win prob is lower — the book's plus-money price already reflects it. Confirmed roles
+            # (play_prob >= gate) are untouched; a reduced role makes the OVER miss (unders are helped,
+            # so we leave them). This is what kills the Gardner o4.5 @ +305 fake edge.
+            if side == "over" and play_prob < PLAY_PROB_GATE:
+                hit *= play_prob
+            if hit >= 0.92 and dec >= 2.0:        # ~certain at plus money = mis-scrape, skip
+                continue
+            p_adj = (hit * n + (1 / dec) * shrink_k) / (n + shrink_k)
+            ev = p_adj * dec - 1
+            # stale line: the book anchored near the SEASON avg while the projected role sits
+            # on the OTHER side of it — over above the season/proj midpoint, under below.
+            mid = (season_avg + elev_avg) / 2
+            stale = abs(elev_avg - season_avg) >= 1.0 and (
+                (side == "over" and line <= mid) or (side == "under" and line >= mid))
+            ev_bar = VOL_EV_MIN if use_vol else (OVER_EV_MIN if side == "over" else UNDER_EV_MIN)
+            if alt_ladder:
+                if side != "over":
+                    continue              # one-sided market: there is no under to bet
+                ev_bar = max(ev_bar, LADDER_EV_MIN)
+            if ev >= ev_bar:
+                spot = {"ev": ev, "stat": stat, "line": line, "dec": dec, "hit": hit,
+                        "band_pilot": band_pilot, "alt_ladder": alt_ladder,
+                        "odds_other": (under_dec if side == "over" else over_dec),
+                        "side": side, "orig_line": orig_line, "pi_role": round(play_prob, 2),
+                        "n": n, "fga": fga, "season_avg": round(season_avg, 1),
+                        "elev_avg": round(elev_avg, 1), "stale": stale,
+                        "d_stat": d_stat, "d_fga": d_fga, "d_min": d_min,
+                        "driver": driver, "vac": vac,
+                        # matchup environment (same across the team's props)
+                        "total": ctx.get("total"), "pace": ctx.get("pace"),
+                        "opp_def": ctx.get("opp_pts_allowed"),
+                        # spread FOR the beneficiary's team: +mag = underdog (blowout risk)
+                        "spread": ctx.get("dog"),
+                        # points-only scoring channels
+                        "d_fta": d_fta if stat == "points" else None,
+                        "d_3pa": d_3pa if stat == "points" else None,
+                        # basis: 'volume' marks a volume-confirmed points-over ladder rung
+                        "basis": "volume" if use_vol else basis, "samples": samples,
+                        "vol": ({"vp": round(vp["vol_pts"], 1), "bf": vp["base_fga"],
+                                 "rf": vp["recent_fga"], "pps": vp["pps"]} if use_vol else None)}
+                out.append(spot)
+    firm = [s for s in out if not s.get("band_pilot")]
+    pilots = [s for s in out if s.get("band_pilot")]
+    return _select_player_bets(firm) + pilots
+
+
+def _select_player_bets(out):
+    """The sharp-exposure rule (user's spec): for ONE player, bet at most 2 UNCORRELATED original-line
+    plays (a 2nd only when both anchors are high-EV), and on an OVER stat add up to LADDER_MAX rungs
+    ABOVE the original line — never a pile of correlated legs (pts + PRA + PA) or deep favorites below
+    the line. `out` = every +EV rung for this player.
+      1. per stat: the ANCHOR = the +EV bet at the original line; OVER anchors also carry a spread
+         ladder of the +EV rungs above the line; UNDER anchors stand alone (FanDuel barely posts alt
+         unders). A stat with no +EV bet at its original line is dropped (we anchor on the posted o/u).
+      2. rank stats by anchor EV; take the best, then a 2nd only if its components are DISJOINT from
+         the 1st AND both anchors clear HIGH_EV."""
+    by_stat = defaultdict(list)
+    for e in out:
+        if e.get("orig_line") is not None:
+            by_stat[e["stat"]].append(e)
+    plays = {}                                             # stat -> [anchor, ladder rungs...]
+    for stat, spots in by_stat.items():
+        orig = spots[0]["orig_line"]
+        anchor = next((s for s in spots if abs(s["line"] - orig) < 1e-6), None)
+        if not anchor:                                     # no +EV play at the posted o/u -> skip stat
+            continue
+        if anchor["side"] == "over":                       # ladder UP: spread rungs above the line
+            legs, last = [anchor], orig
+            for s in sorted((x for x in spots if x["line"] > orig + 1e-6), key=lambda x: x["line"]):
+                if len(legs) > LADDER_MAX:
+                    break
+                if s["line"] - last >= LADDER_GAP:
+                    legs.append(s)
+                    last = s["line"]
+            plays[stat] = legs
+        else:
+            plays[stat] = [anchor]                          # under: single original-line play, no ladder
+    # PREFER POINTS over points-containing combos (user pref): if a +EV points anchor is within
+    # POINTS_PREF_MARGIN of the best points-combo, keep points (it ladders — the volume edge) and drop
+    # pra/pts_reb/pts_ast so they don't out-rank it. If the combo is clearly better, leave it be (the
+    # correlation rule below then drops points anyway). Only the POINTS family — reb/ast stay pure-EV.
+    pts_family = [s for s in plays if "p" in _STAT_COMPONENTS[s]]   # points, pra, pts_reb, pts_ast
+    if "points" in plays and len(pts_family) > 1:
+        best_combo = max(plays[s][0]["ev"] for s in pts_family if s != "points")
+        if plays["points"][0]["ev"] >= best_combo - POINTS_PREF_MARGIN:
+            for s in pts_family:
+                if s != "points":
+                    del plays[s]
+    ranked = sorted(plays, key=lambda s: -plays[s][0]["ev"])   # by anchor EV
+    chosen, used = [], frozenset()
+    for stat in ranked:
+        comp = _STAT_COMPONENTS[stat]
+        if not chosen:
+            chosen.append(stat)
+            used = comp
+        elif len(chosen) < 2 and not (comp & used) \
+                and plays[chosen[0]][0]["ev"] >= HIGH_EV and plays[stat][0]["ev"] >= HIGH_EV:
+            chosen.append(stat)
+            used = used | comp
+    kept = [leg for stat in chosen for leg in plays[stat]]
+    kept.sort(key=lambda d: -d["ev"])
+    return kept
+
+
+def double_double_rate(log, proj_min, w=None):
+    """DD hit rate in the player's elevated-role games — the lagging high-odds market on
+    backup bigs (Embiid out → Drummond DD at 2.5-4x). Threads the same judgment signals:
+    the reb/pts/min RISE without the out player (`w`), the two stats a big's DD is built
+    from. Returns {rate, n, d_reb, d_pts, d_min} or None if thin / role clearly shrinks."""
+    floor = max(proj_min - 4, ROLE_FLOOR - 5)
+    elevated = [g for g in log if g["min"] >= floor]
+    if len(elevated) < 4:
+        return None
+
+    def wd(k):
+        if not w or w.get("n_with", 0) < 1 or w.get("n_without", 0) < 1:
+            return None
+        return round(w["without"][k]["mean"] - w["with"][k]["mean"], 1)
+    d_reb, d_pts, d_min = wd("reb"), wd("pts"), wd("min")
+    # the DD comes from the role EXPANDING — skip if both scoring and boards fall off
+    if d_reb is not None and d_pts is not None and d_reb < -1.0 and d_pts < -1.0:
+        return None
+    return {"rate": sum(1 for g in elevated if g["dd"]) / len(elevated), "n": len(elevated),
+            "d_reb": d_reb, "d_pts": d_pts, "d_min": d_min}
+
+ESPN = "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba"
+EH = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
+
+# Pooled session (2026-07-29 latency work): a fresh requests.get() per call rebuilt the SSL
+# context and re-read the CA bundle every time — profiled at 166ms of load_verify_locations
+# PER CALL, ~4.3s across one scan. One Session keeps the connection alive to ESPN and builds
+# that context once. Pool sized for the per-player fan-out.
+_SESSION = requests.Session()
+_SESSION.mount("https://", requests.adapters.HTTPAdapter(
+    pool_connections=4, pool_maxsize=8, max_retries=0))
+
+# players() and the scoreboard are both ESPN now — abbrevs already match, no remap.
+TEAM_FIX = {}
+
+
+def _espn(path):
+    r = _SESSION.get(f"{ESPN}/{path}", headers=EH, timeout=20)
+    return r.json() if r.status_code == 200 else {}
+
+
+def tonight_matchups(date=None):
+    """{team abbrev: opponent abbrev} for the given ET slate date (default TODAY) — non-final
+    games. Query the explicit ET date, NOT ESPN's default /scoreboard — the default stays
+    stuck on yesterday's finished slate until late morning ET. date='YYYYMMDD' (e.g. tomorrow
+    for the next-day contingent watchlist)."""
+    et_date = date or dt.datetime.now(dt.timezone.utc).astimezone(ET).strftime("%Y%m%d")
+    out = {}
+    for e in _espn(f"scoreboard?dates={et_date}").get("events", []):
+        if e.get("status", {}).get("type", {}).get("state") == "post":
+            continue
+        comp = e.get("competitions", [{}])[0].get("competitors", [])
+        abs_ = [TEAM_FIX.get(c.get("team", {}).get("abbreviation", ""),
+                             c.get("team", {}).get("abbreviation", "")) for c in comp]
+        if len(abs_) == 2:
+            out[abs_[0]] = abs_[1]
+            out[abs_[1]] = abs_[0]
+    return out
+
+
+def tonight_teams():
+    return set(tonight_matchups())
+
+
+def game_ids(date=None):
+    """{team abbrev: ESPN game id} for the given ET slate date (default today)."""
+    et_date = date or dt.datetime.now(dt.timezone.utc).astimezone(ET).strftime("%Y%m%d")
+    out = {}
+    for e in _espn(f"scoreboard?dates={et_date}").get("events", []):
+        gid = e.get("id")
+        for c in e.get("competitions", [{}])[0].get("competitors", []):
+            ab = c.get("team", {}).get("abbreviation")
+            if ab and gid:
+                out[ab] = gid
+    return out
+
+
+def game_starters(game_id):
+    """{player_name: is_starter(bool)} once the lineup is SET (~30 min pre-tip / at tip),
+    else None (lineup not posted yet). ESPN flags each box-score player as a starter."""
+    if not game_id:
+        return None
+    out = {}
+    for tm in _espn(f"summary?event={game_id}").get("boxscore", {}).get("players", []):
+        for stt in tm.get("statistics", []):
+            for a in stt.get("athletes", []):
+                nm = a.get("athlete", {}).get("displayName")
+                if nm and a.get("starter") is not None:
+                    out[nm] = bool(a.get("starter"))
+    return out or None                        # empty -> lineup not out yet
+
+
+def starter_label(name, team, starters, proj_min):
+    """Confidence in the elevated-MINUTES assumption (the user's key check — does the coach
+    actually start the beneficiary). RotoWire is PRIMARY (confirmed/projected lineups posted
+    hours ahead, locked ~30-60 min pre-tip); ESPN's box-score flag is the fallback:
+       confirmed  — RotoWire (or ESPN) has them in a CONFIRMED starting five
+       likely     — RotoWire has them in a PROJECTED five, or lineup TBD w/ starter-sized proj
+       bench      — a lineup is posted for their team and they're NOT in it (proj too high)
+       projected  — lineup TBD, a rotation bump (minutes less certain)"""
+    # @UnderdogWNBA CONFIRMED FIVE first (2026-07-29, user: Underdog is source #1). They post
+    # the locked five ~30-60 min pre-tip, ahead of RotoWire, and it is unambiguous: in it =
+    # confirmed, a five exists without you = bench. No five -> RotoWire, unchanged.
+    try:
+        import wnba_lineups as _LU
+        _five = (_LU.lineups(tz=ET) or {}).get((team or "").upper())
+        if _five:
+            return "confirmed" if name in _five else "bench"
+    except Exception:
+        pass
+    board = rw_lineups()
+    st = RW.starter_status(board, team, name) if (board and team) else None
+    if st == "confirmed":
+        return "confirmed"
+    if st == "projected":
+        return "likely"                       # in a projected lineup = likely to start
+    if board and team and any(t["team"] == team.upper() for t in board):
+        return "bench"                        # RotoWire posted this team's five, they're not in it
+    if starters is not None:                  # ESPN fallback: box-score lineup is set
+        return "confirmed" if starters.get(name) else "bench"
+    return "likely" if proj_min >= 26 else "projected"
+
+
+CONFIRMED_OUT_TODAY = set()          # populated by injuries() each call
+RET_OUT_BY = {}
+OFFICIAL_BY_DATE = {}
+CONFIRMED_OUT_BY_DATE = {}           # {game_date: set(names)} — official report + overrides
+# RotoWire fallback: how stale the official PDF must be before RW may override an official
+# Probable/Available. RW UPGRADES of Questionable/absent players are never gated on this.
+RW_FALLBACK_STALE_HRS = 3.0   # report-age reporting only; RotoWire is rank 3 by gap-fill now
+RW_FALLBACK_OUTS = set()             # names RW ruled out that the official report had not
+NEWS_OUTS = set()                    # names @UnderdogWNBA ruled out (beat-reporter speed)
+NEWS_LOG = 'underdog_log.jsonl'      # written by underdog_watch.service, one JSON per ruling
+
+
+def confirmed_for(date_iso):
+    """Names confirmed out for that date: an OFFICIAL same-game Out ruling / user override
+    (today also unions the fast sources: RW flip-guarded, fresh rulings) PLUS every long-term
+    out whose ESPN returnDate is beyond the slate date (season-enders, multi-week injuries)."""
+    return (CONFIRMED_OUT_BY_DATE.get(date_iso, set())
+            | {n for n, r in RET_OUT_BY.items() if r > date_iso})
+
+
+def injuries():
+    """{player_name: status} — the OFFICIAL WNBA INJURY REPORT, and nothing else.
+
+    2026-07-28, user, emphatic: "the wnba injury report is the official report i dont care
+    about espn or rotowire. the minute a new report comes out that says the player wont play
+    then they are out. drop rotowire and espn scans."
+
+    ESPN + RotoWire injury scans REMOVED. They earned it: on an audited night ESPN disagreed
+    with the league on 4 of 22 rows, ALWAYS over-reporting Out (Hall listed Out but officially
+    Probable; Johannes / Rice / N.Sabally Out vs officially Questionable). The official
+    override was already silently correcting every one of them, so the aggregators were
+    contributing noise plus a stale-confirmation problem rather than speed.
+
+    This SIMPLIFIES the hardest part: the league PDF is GAME-DATED and refreshes on the
+    :00/:15/:30/:45 marks, so an official Out IS confirmed for that game by construction. The
+    old machinery (RW page-flip guard, ESPN returnDate inference, first-seen-today stamping)
+    existed only because a rolling feed cannot distinguish "out tonight" from "was out last
+    game". That ambiguity no longer exists — every official Out for today is confirmed now.
+
+    Precedence: official report, then the user's manual overrides last.
+    RotoWire is still used ELSEWHERE for CONFIRMED STARTING LINEUPS only (user 2026-07-18:
+    "don't rely on RotoWire for anything but CONFIRMED starters") — a lineup signal, not an
+    injury status, and untouched by this change."""
+    out = {}
+    _ovr_out = set()
+    today_iso = dt.datetime.now(ET).date().isoformat()
+    # ── THE ONLY INJURY SOURCE: the official league report ──
+    _official, today_off = {}, {}
+    RW_FALLBACK_OUTS.clear()
+    NEWS_OUTS.clear()
+    try:
+        import wnba_injury_report as IR
+        _official = IR.confirmed_by_date()               # {date: {player: status}}
+        today_off = _official.get(today_iso) or {}
+        for nm, stt in today_off.items():
+            if stt in ("Out", "Doubtful", "Questionable"):
+                out[nm] = stt
+            # Probable / Available => plays; never enters the injury view at all
+    except Exception:
+        pass
+    # ── ROTOWIRE FALLBACK — STALE-REPORT ONLY (2026-07-28, user) ──────────────────
+    # "the wnba injury report hasnt updated since 12:00 ET. use rotowire as a fallback if its
+    #  not up to date. Sabally and Harrison are out, wnba underdog tweeted it."
+    # The league PDF stays the authority — but it CAN GO STALE. On 7/28 the newest published
+    # report was the 12:00 PM ET one while beat reporters had already ruled two officially-
+    # Questionable players out for an 8pm tip. Waiting for the next PDF mark forfeits exactly
+    # the window the edge lives in (⚡ speed doctrine: race the reprice, never follow it).
+    #
+    # RW is ADD-ONLY here and can never clear an official Out:
+    #   official Out                   -> unchanged (RW cannot un-rule-out)
+    #   official Questionable/Doubtful -> RW Out UPGRADES to Out, always. "Questionable" is
+    #                                     not a ruling; a beat-confirmed ruling-out is
+    #                                     strictly later information.
+    #   absent from the report         -> RW Out adds it (the 7/16 Gustafson case: the league
+    #                                     row simply was not there yet)
+    #   official Probable/Available    -> RW Out wins ONLY once the report is STALE. A FRESH
+    #                                     official clearance outranks RW — that clearance is
+    #                                     what caught ESPN phantom Outs like Hall on 7/28.
+    # ESPN stays dropped entirely; it was the source that over-reported Out.
+    _rep_age_h, _rep_dt = None, None
+    try:
+        _now_et = dt.datetime.now(ET)
+        _stamp = (IR.report() or {}).get("stamp") or ""
+        _rep_dt = (dt.datetime.strptime(_stamp, "%Y-%m-%d_%I_%M%p")
+                   .replace(tzinfo=_now_et.tzinfo))
+        _rep_age_h = (_now_et - _rep_dt).total_seconds() / 3600.0
+    except Exception:
+        pass
+    _stale = _rep_age_h is None or _rep_age_h > RW_FALLBACK_STALE_HRS
+    try:
+        _pl = json.loads((Path(__file__).resolve().parent
+                          / "wnba_players_cache.json").read_text()).get("players", {})
+        for _t in rw_lineups() or []:
+            _team = _t.get("team")
+            for _abbr in _t.get("out") or []:
+                _key = RW.norm(_abbr)
+                _full = [n for n, v in _pl.items()
+                         if v.get("team") == _team and RW.norm(n) == _key]
+                if len(_full) != 1:          # team-scoped; ambiguous collision -> skip
+                    continue
+                _nm = _full[0]
+                # RANK 3: RotoWire fills only what the league report is SILENT about.
+                # Any official status for this player -- Out, Questionable, Probable --
+                # outranks RotoWire outright.
+                if today_off.get(_nm) is not None:
+                    continue
+                out[_nm] = "Out"
+                RW_FALLBACK_OUTS.add(_nm)
+        if RW_FALLBACK_OUTS:
+            print("RW FALLBACK OUT (report age %s): %s"
+                  % ("?" if _rep_age_h is None else ("%.1fh" % _rep_age_h),
+                     ", ".join(sorted(RW_FALLBACK_OUTS))), flush=True)
+    except Exception:
+        pass
+    # ── @UnderdogWNBA BREAKING RULINGS (2026-07-28, user) ────────────────────────────
+    # "we need to just watch underdog wnba on twitter, they have the quickest up to date
+    #  starting lineups and injury information."
+    # underdog_watch.service has been polling @UnderdogWNBA every ~60s and logging every
+    # ruling to underdog_log.jsonl -- but it only ever touched /tmp/.force_fullscan to kick
+    # a rescan. Nothing CONSUMED it, so the rescan re-read the same stale official PDF and
+    # learned nothing. On 7/28 it caught "Aaliyah Edwards (knee) ruled out Tuesday" at 22:53
+    # UTC while the league report sat frozen at its 12:00 PM mark and RotoWire had nothing.
+    # That is the whole edge: a beat-confirmed ruling is the FASTEST signal we get.
+    #
+    # Precedence — a ruling is later information than a status, never the reverse:
+    #   official Out                  -> unchanged
+    #   news "out"                    -> Out, UNLESS the official report cleared them TODAY
+    #                                    (Probable/Available = an independent veto)
+    #   news "in" (available to play) -> clears them, UNLESS the official report says Out
+    # News outs are game-dated ("ruled out Tuesday") => CONFIRMED by construction, same as
+    # an official Out, so they produce FIRM flags rather than contingent ones.
+    try:
+        _ud = Path(__file__).resolve().parent / NEWS_LOG
+        _off_avail = {n for n, st_ in today_off.items()
+                      if st_ in ("Probable", "Available", "Playing")}
+        _off_out = {n for n, st_ in today_off.items() if st_ == "Out"}
+        _roster = json.loads((Path(__file__).resolve().parent
+                              / "wnba_players_cache.json").read_text()).get("players", {})
+        _by_norm = {}
+        for _n in _roster:
+            _by_norm.setdefault(RW.norm(_n), []).append(_n)
+        _news = []
+        for _ln in _ud.read_text().splitlines():
+            if not _ln.strip():
+                continue
+            try:
+                _e = json.loads(_ln)
+            except ValueError:
+                continue
+            # tweet time is UTC; the slate date is ET
+            try:
+                _when = dt.datetime.fromisoformat(_e["t"]).astimezone(ET).date().isoformat()
+            except Exception:
+                continue
+            if _when != today_iso or _e.get("st") not in ("out", "in"):
+                continue
+            try:
+                _e["_dt"] = dt.datetime.fromisoformat(_e["t"]).astimezone(ET)
+            except Exception:
+                _e["_dt"] = None
+            _news.append(_e)
+        for _e in _news:                       # oldest -> newest, so the latest ruling wins
+            _txt = (_e.get("text") or "").strip()
+            # the tweet opens with the player's name ("Aaliyah Edwards (knee) ruled out..."),
+            # so match the LONGEST roster name that prefixes it — no brittle regex, and it
+            # handles both the parenthetical and bare forms.
+            _low = _txt.lower()
+            _nm = None
+            for _full in _roster:              # longest literal prefix wins (handles
+                if _low.startswith(_full.lower()):   # 'Alyssa Thomas' vs 'Alyssa Thom')
+                    if _nm is None or len(_full) > len(_nm):
+                        _nm = _full
+            if not _nm:
+                print("underdog: unmatched name in %r" % _txt[:60], flush=True)
+                continue
+            if _e["st"] == "out":
+                # RANK 1: a news ruling wins outright. No veto -- the old time-aware one let a
+                # noon "Probable" outrank a 6:53pm "ruled out" (the Edwards miss). If the league
+                # published AFTER the tweet and disagrees, say so but still trust the news.
+                if (_nm in _off_avail and _rep_dt is not None
+                        and _e.get("_dt") is not None and _rep_dt > _e["_dt"]):
+                    print("CONFLICT: report (%s) later than news, says %s is %s -- "
+                          "taking the news OUT anyway (rank 1)"
+                          % (_stamp, _nm, today_off.get(_nm)), flush=True)
+                out[_nm] = "Out"
+                NEWS_OUTS.add(_nm)
+            else:                              # "available to play"
+                # RANK 1 both ways: a news clearance also outranks the report. An official Out
+                # that a beat reporter later contradicts is a stale row, not a live ruling.
+                if _nm in _off_out:
+                    print("CONFLICT: report says %s Out, news says available -- "
+                          "taking the news (rank 1)" % _nm, flush=True)
+                out.pop(_nm, None)
+                NEWS_OUTS.discard(_nm)
+        if NEWS_OUTS:
+            print("NEWS OUT @UnderdogWNBA: %s" % ", ".join(sorted(NEWS_OUTS)), flush=True)
+    except Exception as _ex:
+        print("underdog feed skipped: %s" % str(_ex)[:70], flush=True)
+    # (FAST-NEWS OVERRIDES removed 2026-07-28 — they were RotoWire/Underdog sourced. The
+    # official report refreshes every 15 minutes and is the authority per the user.)
+    # MANUAL STATUS OVERRIDES — applied LAST (2026-07-18 fix: the RW merge ran after this
+    # block and re-marked Boston Out, silently demoting the user's override; highest
+    # precedence means highest, so overrides now run after every feed source): wnba_status_overrides.json — {"Player": {"status":
+    # "Probable", "expires": "YYYY-MM-DD"}}. For when the USER knows before the feeds (7/16:
+    # Rivers upgraded to probable for 7/17 while ESPN league+game feeds AND FD's slate all still
+    # said Out). Highest precedence; Probable/Available REMOVES the player from the injury view
+    # entirely (they play); entries auto-expire. Committed so VM + Actions both honor it.
+    try:
+        ov = json.loads((Path(__file__).resolve().parent
+                         / "wnba_status_overrides.json").read_text())
+        today_iso = dt.datetime.now(ET).date().isoformat()
+        for nm, o in (ov or {}).items():
+            if (o.get("expires") or "9999") < today_iso:
+                continue
+            st = o.get("status", "")
+            if st in ("Probable", "Available", "Playing"):
+                out.pop(nm, None)
+            elif st:
+                out[nm] = st
+                if st in ("Out", "Doubtful"):
+                    _ovr_out.add(nm)         # user-declared -> confirmed
+    except (OSError, ValueError):
+        pass
+    # ── CONFIRMED-FOR-TODAY (2026-07-18, user: "only flag bets whose out players are CONFIRMED
+    # out"): a rolling-feed 'Out' can be LAST game's status well into game day (McBride/Juhasz-
+    # Miles; Boston may play tonight). Confirmed = RW's game-day out-list (game-specific) OR a
+    # manual override OR a ruling whose Out status FIRST APPEARED today (fresh news — preserves
+    # the speed doctrine for breaking rulings). Carryover Outs stay UNCONFIRMED until RW posts
+    # or the status re-breaks; wnba_alert routes their edges to the ⏳ contingent tier.
+    global OFFICIAL_BY_DATE
+    OFFICIAL_BY_DATE = _official or {}
+    # ── LONG-TERM OUTS (2026-07-18, user: "the bot lacks the ability to rule out players who
+    # are out for the season or long term"): ESPN returnDate covers the whole class — season-
+    # enders carry a next-May sentinel (R.Jackson/Nogic 2027-05-01), timetabled outs the actual
+    # window (Plum 07-28, Diggins 07-22). returnDate STRICTLY AFTER a slate date = officially
+    # expected out through that date -> confirmed for it (return == slate date means "next
+    # chance to play IS that game" — Morrow/Mack — and correctly stays unconfirmed). Filtered
+    # by post-override status so a user override or an official-report downgrade always wins.
+    global RET_OUT_BY
+    RET_OUT_BY = {}          # was ESPN returnDate; ESPN is no longer consumed
+    global CONFIRMED_OUT_TODAY
+    # Official Outs are GAME-DATED => confirmed for that game by construction. No first-seen
+    # stamping, no page-flip guard, no returnDate inference: all of that dated a rolling
+    # feed's status, and we no longer consume one.
+    try:
+        _off_today = {n for n, st_ in (_official.get(today_iso) or {}).items() if st_ == "Out"}
+        CONFIRMED_OUT_TODAY = (((_off_today | _ovr_out | RW_FALLBACK_OUTS | NEWS_OUTS)
+                                & {n for n, s_ in out.items() if s_ in ("Out", "Doubtful")})
+                               | _ovr_out | RW_FALLBACK_OUTS | NEWS_OUTS)
+        global CONFIRMED_OUT_BY_DATE
+        CONFIRMED_OUT_BY_DATE = {dte: ({n for n, st_ in mp.items() if st_ == "Out"} | _ovr_out)
+                                 for dte, mp in _official.items()}
+        CONFIRMED_OUT_BY_DATE[today_iso] = CONFIRMED_OUT_TODAY
+    except Exception:
+        CONFIRMED_OUT_TODAY = set(_ovr_out) | RW_FALLBACK_OUTS | NEWS_OUTS
+    return out
+
+
+def genuinely_out(name):
+    """Is a player the ESPN feed calls 'Out'/'Doubtful' REALLY out? One cross-check only:
+    RotoWire's GTD tier (posted + locked closer to tip than ESPN, and often correct when ESPN
+    is stale). A GTD tag = game-time decision, NOT a firm out — this BEATS the ESPN 'Out'.
+    (7/14: ESPN said Griner 'Out'; RotoWire had her 'GTD'; she played.)
+
+    ⚡ The PROP-SLATE check was REMOVED 2026-07-16 (user call): gating on "FanDuel pulled her
+    props" meant waiting until the book had already PROCESSED the injury news — which is
+    exactly when the beneficiary lines get repriced. The whole edge is beating that reprice
+    (the $15k method), so the gate was structurally self-defeating (it cost the entire
+    Gustafson window on 7/16 while FD was slow to pull her slate). Speed > certainty: a rare
+    stale-'Out' costs one bet; waiting for the book costs the edge on every bet."""
+    try:
+        if RW.norm(name) in RW.questionable_players(rw_lineups()):
+            return False                                  # RotoWire GTD -> game-time decision, not firm out
+    except Exception:
+        pass
+    return True                                           # trust the Out — race the book, don't follow it
+
+
+# --- Questionable / GTD tier ------------------------------------------------------------------
+# The timing edge is positioning on a beneficiary WHILE the star is still a game-time decision,
+# not only once ESPN/RotoWire flips them to OUT (which is when the market moves too). These surface
+# as an early WATCHLIST: the full "if he sits" projection, tagged with the star it hinges on and how
+# likely that star is to sit. They are NOT logged as firm graded bets — the moment the star is ruled
+# OUT they graduate into the normal firm pipeline. sit_prob is a LABELING prior (recalibrate once
+# resolutions are logged) shown for the user to weight; it does not discount the projection itself.
+# Sit probability by designation AND LEAD TIME. The user's NBA read (2026-07-11): a player listed
+# questionable LONG before tip usually PLAYS; one who was clean then tagged questionable a few HOURS
+# before tip has <20% chance of playing. So lead time (tip - when we FIRST saw the tag) flips the
+# prior — and that late-breaking tag is also the WIDEST timing edge (closest to tip, least time for
+# the line to move). Priors below encode that read; wnba_question_log recalibrates
+# P(sit | designation, bucket) from resolved outcomes into wnba_sit_prob.json (keys "DESIG|bucket"),
+# which sit_prob() prefers. WNBA may differ from the NBA read — the loop is exactly how we find out.
+LEAD_SPLIT = 6.0                 # hours before tip: first tagged >=6h out = "early", <6h = "late"
+SIT_PROB = {
+    "QUESTIONABLE": {"early": 0.30, "late": 0.80, "unk": 0.50},   # lead time DOMINATES
+    "GTD":          {"early": 0.35, "late": 0.75, "unk": 0.50},
+    "DOUBTFUL":     {"early": 0.80, "late": 0.88, "unk": 0.80},
+    "OUT":          {"early": 1.0,  "late": 1.0,  "unk": 1.0},
+    "PROBABLE":     {"early": 0.15, "late": 0.30, "unk": 0.20},
+}
+_SIT_FILE = Path(__file__).resolve().parent / "wnba_sit_prob.json"   # empirical override (recalibrated)
+SIT_GATE = 0.5   # only SURFACE a questionable/GTD star when they're MORE LIKELY OUT than in (user's
+                 # rule: don't get pinged on a questionable player who'll probably play — noise/misfire)
+_SIT_OVERRIDE = None
+
+
+def lead_bucket(lead_hours):
+    """early / late / unk from hours-before-tip the questionable tag first appeared."""
+    if lead_hours is None:
+        return "unk"
+    return "early" if lead_hours >= LEAD_SPLIT else "late"
+
+
+def _lead_hours(first_seen, tip):
+    """Hours from when we FIRST saw the questionable tag (first_seen, naive-UTC iso) to tip
+    (naive-UTC datetime). None if either is missing/unparseable."""
+    if not first_seen or tip is None:
+        return None
+    try:
+        return (tip - dt.datetime.fromisoformat(first_seen)).total_seconds() / 3600.0
+    except (ValueError, TypeError):
+        return None
+
+
+def sit_prob(status, lead_hours=None):
+    """P(this player SITS | designation, lead-time bucket). Prefers the EMPIRICAL rate once
+    wnba_question_log has resolved enough real outcomes (wnba_sit_prob.json, keyed 'DESIG|bucket',
+    then pooled 'DESIG|unk'); else the lead-aware SIT_PROB prior. Recalibrate with:
+    python wnba_question_log.py --resolve --recalibrate."""
+    global _SIT_OVERRIDE
+    if _SIT_OVERRIDE is None:
+        try:
+            _SIT_OVERRIDE = json.loads(_SIT_FILE.read_text())
+        except (OSError, ValueError):
+            _SIT_OVERRIDE = {}
+    s = (status or "").strip().upper()
+    b = lead_bucket(lead_hours)
+    if f"{s}|{b}" in _SIT_OVERRIDE:                 # bucketed empirical (enough n in this bucket)
+        return _SIT_OVERRIDE[f"{s}|{b}"]
+    if f"{s}|unk" in _SIT_OVERRIDE:                 # pooled empirical (designation-level)
+        return _SIT_OVERRIDE[f"{s}|unk"]
+    tbl = SIT_PROB.get(s, {})
+    return tbl.get(b, tbl.get("unk", 0.5))
+
+
+def tip_times(date=None):
+    """{team_abbr: tip_datetime_naive_utc} for the given ET slate date (default today) — for
+    lead-time (how long before tip a questionable tag first appeared). Empty on failure."""
+    out = {}
+    try:
+        et = date or dt.datetime.now(ET).strftime("%Y%m%d")
+        for e in _espn(f"scoreboard?dates={et}").get("events", []):
+            try:
+                tip = dt.datetime.fromisoformat((e.get("date") or "").replace("Z", "+00:00")) \
+                        .astimezone(dt.timezone.utc).replace(tzinfo=None)
+            except (ValueError, AttributeError):
+                continue
+            for c in (e.get("competitions") or [{}])[0].get("competitors", []):
+                ab = c.get("team", {}).get("abbreviation")
+                if ab:
+                    out[ab] = tip
+    except Exception:
+        pass
+    return out
+
+
+def questionable_stars(pl, playing, inj, firm_out, date=None, tips=None, first_seen=None):
+    """{team: [(name, status, player, sit_prob, lead_hours)]} — impact players who are QUESTIONABLE
+    tonight: ESPN 'Questionable' UNION RotoWire 'GTD', minus anyone already firm-out. Impact = >=20
+    mpg OR >=10 ppg. sit_prob is conditioned on LEAD TIME (tip - when we first logged the tag): an
+    early tag usually plays, a late-breaking one usually sits (the user's NBA read)."""
+    date = date or dt.datetime.now(ET).date().isoformat()
+    if tips is None:
+        tips = tip_times()
+    if first_seen is None:
+        try:
+            import wnba_question_log as QL
+            first_seen = QL.first_seen_map(date)              # {player: earliest-seen iso}
+        except Exception:
+            first_seen = {}
+    cand = {n: "Questionable" for n, s in inj.items() if s == "Questionable"}
+    # RotoWire names are first-initial+lastname, so a norm can map to 2+ real players (Chelsea vs
+    # Chance Gray). A last-wins dict would tag whichever roster player sorted last, dropping the real
+    # star's GTD. Build norm counts and only accept norms that resolve to a SINGLE roster player.
+    norm2name, norm_ct = {}, {}
+    for n in pl:
+        k = RW.norm(n)
+        norm2name[k] = n
+        norm_ct[k] = norm_ct.get(k, 0) + 1
+    for nnm, tag in RW.questionable_players(rw_lineups() or []).items():
+        full = norm2name.get(nnm)
+        if full and norm_ct.get(nnm) == 1 and full not in cand and full not in firm_out:
+            cand[full] = tag                                  # RotoWire game-time decision (unambiguous)
+    by_team = defaultdict(list)
+    off = OFFICIAL_BY_DATE.get(date, {})
+    for n, status in cand.items():
+        # OFFICIAL REPORT OUTRANKS the RW-GTD union (2026-07-18, user: "since clark is probable
+        # she should be taken off the watchlist"): injuries() pops officially-Probable players,
+        # but RotoWire's GTD tag re-added Clark here. Official Probable/Available = playing.
+        if off.get(n) in ("Probable", "Available"):
+            continue
+        p = pl.get(n)
+        if not p or p["team"] not in playing or n in firm_out:
+            continue
+        if p["min"] < 20 and p["pts"] < 10:                   # impact filter (matches firm outs)
+            continue
+        lead = _lead_hours(first_seen.get(n), tips.get(p["team"]))
+        by_team[p["team"]].append((n, status, p, sit_prob(status, lead), lead))
+    return by_team
+
+
+def questionable_beneficiaries(pl, playing, matchups, lines, rates, inj, firm_out, firm_by_team,
+                               glog=None, date=None, tips=None):
+    """Provisional +EV OVERS that open up IF tonight's questionable stars sit. Out-set = the team's
+    firm outs PLUS the questionable star(s), so each spot is the incremental upside on top of any
+    firm play. Returns [{player, team, star, status, sit, conf, ...prop_edge fields}] for an early
+    watchlist. Deliberately lighter than the firm projection (no mate/context weighting) — a heads-up
+    that graduates into the fully modelled firm pipeline the instant the star is ruled out."""
+    glog = glog or W.game_log
+    spots = []
+    for team, qs in questionable_stars(pl, playing, inj, firm_out, date=date, tips=tips).items():
+        outs = list(firm_by_team.get(team, [])) + [(n, p) for n, _, p, _, _ in qs]
+        star = "+".join(n.split()[-1] for n, _, _, _, _ in qs)
+        status = qs[0][1] if len(qs) == 1 else "Questionable"
+        sit = min(t[3] for t in qs)                           # conservative: scenario needs all to sit
+        # SIT-GATE MOVED TO THE NTFY LAYER (2026-07-16, user): the DASHBOARD watchlist shows every
+        # impact-Q contingent play with its posted line regardless of sit% — "plays contingent on
+        # the questionable player being out is how we beat the books" (position while lines are
+        # stale). Phone pings stay gated at SIT_GATE in wnba_alert so unlikely sits don't spam.
+        lead = min((t[4] for t in qs if t[4] is not None), default=None)   # most late-breaking tag
+        for s in outset_beneficiaries(team, outs, pl, firm_out, matchups, lines, rates, glog):
+            spots.append({**s, "star": star, "status": status, "sit": sit,
+                          "lead": round(lead, 1) if lead is not None else None})
+    return spots
+
+
+def outset_beneficiaries(team, outs, pl, skip_names, matchups, lines, rates, glog=None):
+    """Over-edges for TEAM under a hypothetical out-set `outs` [(name, p), ...] — the shared
+    core of the Q-tier watchlist and the scenario matrix. Deliberately lighter than the firm
+    projection (no mate/context weighting): a heads-up that graduates into the fully modelled
+    firm pipeline the instant a ruling lands."""
+    glog = glog or W.game_log
+    try:
+        out_logs = [glog(p["id"]) for _, p in outs]
+    except Exception:
+        return []
+    if not out_logs or not all(out_logs):
+        return []
+    vacated = {"points": sum(p["pts"] for _, p in outs),
+               "rebounds": sum(p["reb"] for _, p in outs),
+               "assists": sum(p["ast"] for _, p in outs)}
+    ctx = CTX.matchup_context(team, matchups.get(team, ""), lines, rates)
+    out_here = {n for n, _ in outs}
+    spots = []
+    for n, v in pl.items():
+        if v["team"] != team or n in skip_names or n in out_here or v["gp"] < 5:
+            continue
+        try:
+            blog = glog(v["id"])
+        except Exception:
+            continue
+        if not blog:
+            continue
+        w = W.wowy_multi(blog, out_logs)
+        if w["n_without"] < 2 and len(out_logs) > 1:
+            # combo (Clark+Boston) rarely has 2+ games with ALL out — best single-out
+            # split as the proxy, same fallback the firm pipeline uses
+            cands = [W.wowy(blog, ol) for ol in out_logs]
+            w = max(cands, key=lambda x: x["n_without"])
+        if w["n_without"] < 1:
+            continue
+        proj = w["without"]["min"]["mean"]
+        recent5 = [g["min"] for g in blog[:5] if g["min"] > 8]   # newest-first; only lifts
+        if recent5:
+            proj = max(proj, st.median(recent5))
+        if proj - w["with"]["min"]["mean"] <= 0.3:              # no real minutes bump
+            continue
+        conf = starter_label(n, team, None, proj)
+        for e in prop_edges(n, blog, proj, w, vacated, ctx,
+                            opp=matchups.get(team, ""), pos=v.get("position")):
+            if e["side"] != "over":                             # watchlist thesis = role UP
+                continue
+            spots.append({"player": n, "team": team, "conf": conf,
+                          "proj_min": round(proj, 1), **e})
+    return spots
+
+
+_TIER_SINGLES = ("points", "rebounds", "assists")
+
+
+def top_play(spots, band_gate=True):
+    """The single play the firm pipeline would flag FIRST for an out-set: band-gated (d_min
+    0-8 or no-sample), anchor line per (player, stat) (lowest posted rung = the main market),
+    then the MARKET FAVORITE (lowest odds; EV breaks ties) — mirroring selection stage 3's
+    favorite-first slot. Tier letter matches the board legend (favorite by construction)."""
+    ok = [s for s in spots
+          if not band_gate or s.get("d_min") is None or 0 <= s["d_min"] <= 8]
+    anchors = {}
+    for s in ok:
+        k = (s["player"], s["stat"])
+        if k not in anchors or s["line"] < anchors[k]["line"]:
+            anchors[k] = s
+    # SAME-FAMILY CAP, mirroring the firm pipeline (2026-07-18, the Sydney Taylor case): the
+    # firm pass keeps ONE leg per production family per team (best EV — Cloud's PR out-EV'd
+    # Taylor's points, so Taylor never flagged), but the scenario top play skipped the cap and
+    # advertised her [A] as "the play". The watchlist must never promise a leg the firm engine
+    # will cap out. Family map identical to wnba_alert's.
+    FAM = {"points": "PTS", "pra": "PTS", "pts_reb": "PTS", "pts_ast": "PTS",
+           "rebounds": "REB", "reb_ast": "REB", "assists": "AST"}
+    best_fam = {}
+    for k, s in anchors.items():
+        f = FAM.get(s["stat"], s["stat"])
+        cand = (s.get("dec") or 99, -(s.get("ev") or 0))    # favorite first, EV tie-break —
+        if f not in best_fam or cand < best_fam[f][0]:      # identical to the firm cap's keep-rule
+            best_fam[f] = (cand, s)
+    anchors = {(s["player"], s["stat"]): s for _, s in best_fam.values()}
+    if not anchors:
+        return None
+    s = min(anchors.values(), key=lambda x: (x.get("dec") or 99, -(x.get("ev") or 0)))
+    import wnba_slip as SLIP                 # canonical rule; scenario winner = cascade favorite
+    tier = SLIP.tier_of(s, True)
+    dm = s.get("d_min")
+    return {"player": s["player"], "stat": s["stat"], "line": s["line"],
+            "dec": s.get("dec"), "am": _am(s.get("dec") or 0), "tier": tier,
+            "ev": s.get("ev"), "d_min": dm, "conf": s.get("conf")}
+
+
+def scenario_matrix(pl, playing, matchups, lines, rates, inj, firm_out, firm_by_team,
+                    glog=None, date=None, tips=None):
+    """Dashboard watchlist v2: per-team 'if X sits → play THIS' variants. For each team with
+    questionable star(s), every subset of the top-2 (by minutes) Q stars — each solo AND the
+    combo — computed on top of the team's firm outs, reduced to the ONE top play per scenario.
+    Display-only: never bets, never pings ([[feedback_ping_board_coherence]])."""
+    out = []
+    for team, qs in questionable_stars(pl, playing, inj, firm_out, date=date, tips=tips).items():
+        qs = sorted(qs, key=lambda t: -(t[2]["min"] or 0))[:2]
+        subs = [[q] for q in qs] + ([list(qs)] if len(qs) > 1 else [])
+        for sub in subs:
+            outs = list(firm_by_team.get(team, [])) + [(n, p) for n, _, p, _, _ in sub]
+            play = top_play(outset_beneficiaries(team, outs, pl, firm_out,
+                                                 matchups, lines, rates, glog))
+            if not play:
+                continue
+            in_names = [n for n, _, _, _, _ in qs if n not in {m for m, _, _, _, _ in sub}]
+            out.append({"team": team, "opp": matchups.get(team, ""), "date": date,
+                        "kind": "q", "stars": [n for n, _, _, _, _ in sub],
+                        "also_in": in_names,
+                        "status": sub[0][1] if len(sub) == 1 else "Questionable",
+                        "sit": min(t[3] for t in sub),
+                        "firm_outs": [n for n, _ in firm_by_team.get(team, [])],
+                        "play": play})
+    return out
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--min-out", type=float, default=20.0,
+                    help="only flag absences of players averaging >= this many minutes")
+    args = ap.parse_args()
+
+    pl = W.players()
+    matchups = tonight_matchups()
+    playing = set(matchups)
+    inj = injuries()
+    # truly out = listed Out/Doubtful AND no fresh posted props (books pull props for the
+    # genuinely out; a returning player still tagged 'Out' still has a full slate)
+    out_names = {n for n, s in inj.items() if s in ("Out", "Doubtful")
+                 and not (n in pl and confirmed_playing(n, pl[n]["team"])) and genuinely_out(n)}
+    lines, rates = CTX.game_lines(), CTX.team_rates()     # Vegas total + pace, once
+    print(f"Tonight: {len(playing)} teams in action · {len(inj)} injury-listed players\n")
+
+    # key OUT players whose team plays tonight
+    flagged = []
+    for name, status in inj.items():
+        p = pl.get(name)
+        if not p or p["team"] not in playing or p["min"] < args.min_out:
+            continue
+        if status not in ("Out", "Doubtful") or confirmed_playing(name, p["team"]) or not genuinely_out(name):
+            continue                                       # feed 'Out' but props still posted = playing
+        flagged.append((name, status, p))
+    flagged.sort(key=lambda x: -x[2]["min"])
+
+    if not flagged:
+        print("no key players ruled out on tonight's slate yet — check back ~30min pre-tip.")
+        return
+
+    for name, status, p in flagged:
+        opp = matchups.get(p["team"], "")
+        note = CTX.matchup_note(p["team"], opp, lines, rates)
+        ctx = CTX.matchup_context(p["team"], opp, lines, rates)
+        print(f"=== {name} ({p['team']}) {status} — {p['min']:.0f} mpg, {p['pts']:.0f} ppg "
+              f"vacated ===" + (f"  [{note}]" if note else ""))
+        try:
+            tlog = W.game_log(p["id"])
+            team_pl = {n: v for n, v in pl.items()
+                       if v["team"] == p["team"] and n != name and v["gp"] >= 5
+                       and n not in out_names}
+            rows = []
+            for n, v in team_pl.items():
+                blog = W.game_log(v["id"])
+                w = W.wowy(blog, tlog)
+                if w["n_without"] >= 2:
+                    dmin = w["without"]["min"]["mean"] - w["with"]["min"]["mean"]
+                    dpts = w["without"]["pts"]["mean"] - w["with"]["pts"]["mean"]
+                    dfga = w["without"]["fga"]["mean"] - w["with"]["fga"]["mean"]
+                    rows.append((dmin, dpts, dfga, n, w, blog))
+            vacated = {"points": p["pts"], "rebounds": p["reb"], "assists": p["ast"]}
+            for dmin, dpts, dfga, n, w, blog in sorted(rows, key=lambda r: (-r[0], -r[1]))[:4]:
+                proj_min = w["without"]["min"]["mean"]
+                # the user's judgment, on one line: more minutes, more shots, more production
+                print(f"  {n:22} → ~{proj_min:.0f}min ({dmin:+.0f}), {dpts:+.1f}pts, "
+                      f"{dfga:+.1f}FGA w/o {name.split()[-1]}")
+                for e in prop_edges(n, blog, proj_min, w, vacated, ctx):
+                    star = " ⟵ stale line" if e["stale"] else ""
+                    dl = {"points": "FGA", "rebounds": "reb", "assists": "ast"}.get(e["stat"], "FGA")
+                    d = f"{dl} {e['driver']:+g}, min {e['d_min']:+g} w/o, " if e["driver"] is not None else ""
+                    ch = (f" [FTA {e['d_fta']:+g}, 3PA {e['d_3pa']:+g}]"
+                          if e["stat"] == "points" and e["d_fta"] is not None else "")
+                    print(f"       ✅ {e['stat']} over {e['line']:g} @ {_am(e['dec'])} — "
+                          f"{d}elev {e['elev_avg']:g} vs season {e['season_avg']:g}, "
+                          f"hit {e['hit']*100:.0f}%/{e['n']}g (+{e['ev']*100:.0f}% EV){star}{ch}")
+                dd = double_double_rate(blog, proj_min, w)
+                if dd and dd["rate"] >= 0.35:            # check the lagging DD market
+                    wo = ""
+                    if dd["d_reb"] is not None:
+                        wo = f" (reb {dd['d_reb']:+g}, pts {dd['d_pts']:+g} w/o)"
+                    print(f"       ★ double-double {dd['rate']*100:.0f}% in {dd['n']} elevated "
+                          f"games{wo} — check the DD price (often stale for backup bigs)")
+        except RuntimeError:
+            print("  (stats fetch failed, retry)")
+        print()
+
+
+if __name__ == "__main__":
+    main()

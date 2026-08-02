@@ -1,0 +1,25 @@
+{
+ "version": "v1.2",
+ "frozen": "2026-07-31",
+ "sha256_16": "433b9e32404d015d",
+ "source_sha256_16": "323d26d55c6d35fc",
+ "source_files": {
+  "wnba_alert.py": "d45852a3cadeae17",
+  "wnba_slip.py": "366584f30ccda1eb",
+  "wnba_tonight.py": "1918505b1705e8dc",
+  "wnba_wowy.py": "2dfa0bb4844e7ea3"
+ },
+ "decision": "v1.2 (2026-07-31) \u2014 the sticky-incumbent swap test is now BAND-AWARE. It compared raw EV while the ranking uses (odds, band, EV), so an incumbent could hold a slot while ranking WORSE on the canonical key, and hold it on the one metric this ledger shows is ANTI-predictive. Live case: DiLeo (band 0, odds 1.9091, EV 0.213) could not displace Carleton (band 1, odds 1.9804, EV 0.462), so the card kept a TIER B play over a TIER A one \u2014 and Carleton only held the slot because she was carded at 04:08, before the v1.1 correlation-cap fix. Stickiness was protecting the output of the bug v1.1 corrected. A challenger now displaces when it is better ON THE BAND (structural, and band membership barely moves during a slate, so it cannot churn); within the same band the original SWAP_MARGIN EV rule is unchanged, preserving the anti-churn property that stickiness exists for (57% of pools once carded more than the two plays a card holds). Tier records behind the ordering: A 14-3 / 82.4% / +0.73u per bet vs B 17-11 / 60.7% / +0.20u. RESTATEMENT COST: the counted record moves 33-15 / +19.05u to 33-16 / +18.05u \u2014 one additional graded loss enters as a different incumbent yields. Reported, not hidden.",
+ "constants": {
+  "wnba_slip": {
+   "COMPONENT_CAP_U": 2.5,
+   "LADDER_ANCHOR_U": 1.0,
+   "LADDER_CAP_U": 2.5,
+   "LADDER_RUNG_DEFAULT_U": 0.25,
+   "PARLAY_EPOCH": "2026-07-13",
+   "SWAP_MARGIN": 0.05,
+   "_SCHEMA": "CREATE TABLE IF NOT EXISTS parlays(\n  pred_date TEXT, key TEXT, legs TEXT, n INTEGER, dec REAL, ev REAL,\n  result TEXT, pnl REAL, played INTEGER DEFAULT 0, graded INTEGER DEFAULT 0, graded_at TEXT,\n  UNIQUE(pred_date, key));",
+   "_SEL_SCHEMA": "CREATE TABLE IF NOT EXISTS selections (\n    pred_date TEXT, team TEXT, player TEXT, stat TEXT, selected_at TEXT,\n    PRIMARY KEY (pred_date, team, player, stat))"
+  }
+ }
+}

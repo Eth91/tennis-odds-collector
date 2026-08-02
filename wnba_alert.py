@@ -1,0 +1,1032 @@
+"""WNBA props phone alert — the hands-off trigger.
+
+Runs the tonight board (injuries -> WOWY beneficiaries -> elevated-role prop edges) and
+pushes the flagged +EV spots to ntfy, deduped so each fires once. Meant to run a few
+times through the afternoon/evening on GitHub Actions — the last run before tip catches
+confirmed lineups, which is the speed window the whole edge lives in.
+
+Line:  WNBA A.Wilson OUT -> J.Loyd pts o12.5 -104 (67% in 9 role games, +18% est)
+
+    NTFY_TOPIC=xxx python wnba_alert.py
+"""
+from __future__ import annotations
+
+import datetime
+import json
+import os
+import statistics as st
+import time
+from collections import defaultdict
+from pathlib import Path
+
+import requests
+
+import wnba_context as CTX
+import wnba_ledger as L
+import wnba_clv as CLV
+import wnba_proj_log as PL
+import wnba_regime as RG
+import wnba_tonight as T
+import wnba_wowy as W
+
+# FIRST-OCCURRENCE SPEED PILOT (2026-07-13). Also surface beneficiaries with only ONE game without
+# the out star (normally gated at n_without>=2), but ONLY when the posted line is still STALE and the
+# minutes bump is meaningful — the pre-move window the n1 backtest showed +15% ROI (vs -11% once the
+# line adjusts). These go to a distinct ⚡1G alert + the CLV shadow (tier='n1_speed') ONLY — never the
+# firm ledger/record (single-game sample; CLV judges it forward). Flip False to kill instantly.
+N1_PILOT = True
+
+# COLD-START n=0 PILOT (2026-07-16, user: "predict the beneficiary without history — the bot
+# must guess the replacement accurately"). When the team has NEVER played without the out star
+# (Gustafson/POR 7/16), WHO inherits isn't a guess: RotoWire's lineup page NAMES the promoted
+# starter (starter_label confirmed/likely). Minutes via proportional redistribution — the
+# NBA-validated cold-start cell (proj-line margin >=5 -> 63.7-67.8%, +17-24% ROI on 1,345
+# flags). ⚡COLD alert + CLV shadow (tier='n0_cold') ONLY — never the firm record.
+N0_COLD = True
+USG_SHADOW = True     # ⚡USG n<=2 usage-bump shadow (board+CLV only, never pings/record)
+
+HERE = Path(__file__).resolve().parent
+SEEN = HERE / "wnba_notified.txt"
+
+
+def _short(name):
+    p = name.split()
+    return f"{p[0][0]}.{p[-1]}" if len(p) >= 2 else name
+
+
+# Positional role groups — a vacated role goes mostly to SAME-position players. A guard
+# (Clark) sitting hands minutes/usage to other GUARDS, not to a forward (Billings). So we
+# scale a beneficiary's projected elevation by how well their position matches the out
+# player's. This is the fix for flagging Billings (F) hard off Clark (G) — she was never a
+# real beneficiary of a guard's absence (tonight the guards Hull/Harris cashed, she didn't).
+_POSG = {"G": "G", "PG": "G", "SG": "G", "GF": "G", "F": "F", "SF": "F", "PF": "F",
+         "FC": "C", "C": "C", "CF": "C"}
+_COMPAT = {("G", "G"): 1.0, ("F", "F"): 1.0, ("C", "C"): 1.0,
+           ("F", "C"): 0.6, ("C", "F"): 0.6, ("G", "F"): 0.3, ("F", "G"): 0.3,
+           ("G", "C"): 0.15, ("C", "G"): 0.15}
+
+
+def position_compat(bene_pos, out_positions):
+    """1.0 = same role as an out player (a real beneficiary), down to 0.15 = opposite (a
+    guard's absence barely elevates a center). Best match across the out players."""
+    bg = _POSG.get((bene_pos or "F").upper(), "F")
+    return max((_COMPAT.get((bg, _POSG.get((op or "F").upper(), "F")), 0.4)
+                for op in out_positions), default=0.5)
+
+
+# How many prior games with the EXACT absence set before we call it priced. Below this the
+# combination is novel -> a stale cascade still runs (2026-07-28 combination-novelty rule).
+COMBO_PRICED_N = 6
+
+
+# n1 BY STAT (backtest 2023-26, real FanDuel tip lines): rebounds 8-2 (+41.6% ROI),
+# assists 2-1 (+31.0%), POINTS 4-4 (50%, -3.5%). The points family is the losing half of the
+# tier, so every points-family pilot carries a visible warning.
+N1_WEAK_STATS = ("points", "pra", "pts_reb", "pts_ast")
+
+
+# PEER GATE (2026-07-29): stats whose production a positional teammate can cannibalise
+# WITHOUT taking minutes -- the Nelson-Ododa/Morrow shape the minutes-based peer_regime_scan
+# is blind to. Pure points is exempt, same reasoning as the role-depth cap.
+_PEER_GATED = {"rebounds": lambda g: g["reb"],
+               "assists": lambda g: g["ast"],
+               "reb_ast": lambda g: g["reb"] + g["ast"],
+               "pts_reb": lambda g: g["pts"] + g["reb"],
+               "pts_ast": lambda g: g["pts"] + g["ast"],
+               "pra": lambda g: g["pts"] + g["reb"] + g["ast"]}
+
+
+def _n1_warn(stat):
+    return (" ⚠ n1 POINTS — backtest 4-4 / -3.5% ROI on this stat (reb is the edge, 8-2)"
+            if stat in N1_WEAK_STATS else "")
+
+
+# -- ROLE GATE (2026-07-30, measured on the ledger). A beneficiary who is NOT confirmed/likely
+# STARTING is not a bet:
+#     STARTING (confirmed+likely)    n=111  62-49  55.9%  +11.32u
+#     NOT STARTING (bench+projected) n= 23   6-17  26.1%  -11.26u
+# z = -2.52 vs the odds-implied break-even (52.3%; expected 12 wins, got 6) -- not noise. The
+# mechanism is minutes that never arrive: Chen 7/29 was tagged "bench", projected 21.5 min off
+# five prior 22-25 min games, and played 12 for 4 pts. The label was already computed and shown
+# on the board as "NOT STARTING"; nothing ever gated on it.
+#
+# ONE gate shared by ping and record. A blocked play stays in `preds` (board coverage, projection
+# tracker) but carries bettable=0: no ledger row, no parlay leg, no push.
+BET_ROLES = {"confirmed", "likely"}
+
+
+def role_ok(conf):
+    """True when the beneficiary is confirmed or likely STARTING."""
+    return str(conf) in BET_ROLES
+
+
+def collect():
+    """Returns (alerts, preds): alerts are ntfy message tuples, preds are the full
+    prediction rows logged to the ledger so every flagged spot gets graded and fed back
+    into the model."""
+    pl = W.players()
+    inj = T.injuries()
+    # ET slate date, NOT UTC — else a game tipping ~02:00Z (10pm ET) gets logged under two
+    # different UTC dates across midnight and the SAME bets double-count in the tracker.
+    today = datetime.datetime.now(T.ET).date().isoformat()
+    # BOTH SLATES (2026-07-16, user: "there's so many WNBA games tomorrow"): next-day lines
+    # post the evening before, and a CONFIRMED out for tomorrow = the stalest-line version of
+    # the edge (9 impact outs sat unflagged on the 7/17 slate). The firm pipeline now runs
+    # per-slate; bet keys/pred_date/CLV all carry the slate date, and the ledger dedupes.
+    _tom = datetime.datetime.now(T.ET) + datetime.timedelta(days=1)
+    tom_ymd, tom_iso = _tom.strftime("%Y%m%d"), _tom.date().isoformat()
+    matchups_by = {today: T.tonight_matchups(), tom_iso: T.tonight_matchups(tom_ymd)}
+    tips_by = {today: T.tip_times(), tom_iso: T.tip_times(tom_ymd)}
+    gids_by = {today: T.game_ids(), tom_iso: T.game_ids(tom_ymd)}
+    matchups, tips, gids = matchups_by[today], tips_by[today], gids_by[today]
+    playing = set(matchups)
+    lines, rates = CTX.game_lines(), CTX.team_rates()    # Vegas total + pace, fetched once
+    # FIRM OUT = the feed (ESPN ∪ RotoWire out-list) says Out/Doubtful and they're not
+    # confirmed-starting. RotoWire GTD vetoes (the Griner case); NO book-reaction gates —
+    # ⚡ speed doctrine: race the reprice, never wait for it. Evaluated PER SLATE.
+    out_names, outs_by_team = set(), defaultdict(list)
+    for sdate, mus in matchups_by.items():
+        pset = set(mus)
+        for name, status in inj.items():
+            p = pl.get(name)
+            if not (p and p["team"] in pset and status in ("Out", "Doubtful")
+                    and not T.confirmed_playing(name, p["team"])):
+                continue
+            if not T.genuinely_out(name):                # RotoWire says GTD -> not a firm out, skip
+                continue
+            out_names.add(name)
+            # impact out = vacates real MINUTES (>=20mpg) OR real USAGE (>=10ppg) — a depressed-
+            # minutes but high-usage scorer is the 2nd star whose absence compounds a beneficiary's
+            # role. A beneficiary gets ONE projection off the COMBINED absence per slate.
+            if p["min"] >= 20 or p["pts"] >= 10:
+                outs_by_team[(sdate, p["team"])].append((name, p))
+
+    alerts, preds, proj_rows, cold_spots = [], [], [], []
+    usg_spots = []                                   # ⚡USG shadows (board + CLV only)
+    n1_spots = []                                    # ⚡1G speed pilots -> board (they PING)
+    _band_shadowed = set()
+    _band_seen = {}
+    _tmrw_seen = {}                                      # next-day CONTINGENT spots (not bets)
+    log_cache = {}                                   # fetch each player's game log at most once
+
+    def glog(pid):
+        if pid not in log_cache:
+            try:
+                log_cache[pid] = W.game_log(pid)
+            except Exception:
+                log_cache[pid] = []
+        return log_cache[pid]
+
+    # PARALLEL PREFETCH (2026-07-16, "full accuracy + speed"): the scan's whole cost was
+    # ~60-100 SERIAL game-log fetches. Warm them concurrently (6 workers — modest, ESPN
+    # throttles aggressive clients) for every out + every candidate on both slates; the
+    # disk cache (6h TTL) makes repeat scans near-free. Then the loop runs on hot caches.
+    t0 = time.time()
+    want = []
+    for (sdate, team), outs_l in outs_by_team.items():
+        want += [p["id"] for _, p in outs_l]
+        want += [v["id"] for n, v in pl.items()
+                 if v["team"] == team and n not in out_names and v["gp"] >= 5]
+    want = list(dict.fromkeys(want))
+    if want:
+        from concurrent.futures import ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=6) as ex:
+            list(ex.map(glog, want))
+    print(f"prefetched {len(want)} game logs in {time.time()-t0:.1f}s")
+    # 🏥 BOARD INJURY SNAPSHOT — shared module; wnba_watch calls the same writer every
+    # ~25s in hot windows, so the board section live-updates between fullscans too.
+    import wnba_injury_snapshot as SNAP
+    _n_inj = SNAP.write_snapshot(pl, inj, glog)
+    if _n_inj is not None:
+        print(f"injury snapshot: {_n_inj} impact players")
+
+    for (slate_date, team), outs in outs_by_team.items():
+        # CONFIRMED-OUT gate (2026-07-18): any out in this cascade not confirmed for its game
+        # (RW game-day list / override / fresh-today ruling; next-day never confirmed the night
+        # before) routes the WHOLE cascade's edges to the ⏳ contingent tier instead of firm bets.
+        # per-date confirmation: today = official report + fast sources; NEXT-day = the
+        # OFFICIAL report's night-before ruling (or user override) — an official tomorrow-Out
+        # now promotes the contingent play to a firm bet the evening before, officially.
+        unconfirmed = [nm for nm, _ in outs if nm not in T.confirmed_for(slate_date)]
+        out_logs = [glog(p["id"]) for _, p in outs]
+        if not all(out_logs):
+            continue
+        # STALE-VACANCY GATE (2026-07-19, the Bonner/Nogic case — user: "why is it a play
+        # when mack is back?"): when Mack returned, the PHX cascade collapsed to Nogic-only —
+        # last played June 18, a month-priced vacancy. Model-vs-book "EV" at equilibrium is
+        # exactly where our EV calibration is weakest (the fat-EV inversion); the validated
+        # edge is REACTING TO NEWS. A cascade emits flags only if >=1 out's absence is fresh
+        # (last appearance within 21 days of the slate). Stale outs still shape the
+        # projection when combined with a fresh one.
+        try:
+            _sd = datetime.date.fromisoformat(slate_date)
+            all_stale = all(
+                (not lg) or (_sd - datetime.date.fromisoformat(lg[0]["date"][:10])).days > 21
+                for lg in out_logs)
+        except (ValueError, KeyError, IndexError):
+            all_stale = False
+        if all_stale:
+            # COMBINATION NOVELTY (2026-07-28, user: "the unique combo of players out
+            # matters"). Per-player recency is the wrong question -- what the market prices
+            # is the SET. NY: 12 games without Fiebich+Sabally (priced) vs 4 without
+            # Fiebich+Sabally+Johannes (not). So only skip when the books have had the reps
+            # with THIS exact absence set; a rare combination is unpriced no matter how long
+            # each individual has been out.
+            _tdates = set()
+            for _tn, _tv in pl.items():
+                if _tv.get("team") != team:
+                    continue
+                for _g in glog(_tv["id"]) or []:
+                    _tdates.add(_g["date"][:10])
+            _absent = []
+            for _ol in out_logs:
+                _absent.append({g["date"][:10] for g in _ol if (g.get("min") or 0) > 0})
+            _n_combo = sum(1 for d in _tdates
+                           if d < slate_date and all(d not in a for a in _absent))
+            if _n_combo >= COMBO_PRICED_N:
+                print(f"stale-vacancy cascade skipped: {team} {slate_date} "
+                      f"({', '.join(nm for nm, _ in outs)}) — combo seen {_n_combo}x, priced")
+                continue
+            print(f"stale outs but NOVEL combination: {team} {slate_date} "
+                  f"({', '.join(nm for nm, _ in outs)}) — only {_n_combo} prior game(s) "
+                  f"with this exact set, running cascade")
+        out_label = "+".join(_short(nm) for nm, _ in outs)      # "C.Clark+A.Boston"
+        out_full = ", ".join(nm for nm, _ in outs)
+        # combined vacated pool = all the out players' production is up for grabs tonight
+        vacated = {"points": sum(p["pts"] for _, p in outs),
+                   "rebounds": sum(p["reb"] for _, p in outs),
+                   "assists": sum(p["ast"] for _, p in outs)}
+        ctx = CTX.matchup_context(team, matchups_by[slate_date].get(team, ""), lines, rates)
+        env = []
+        if ctx["total"]:
+            env.append(f"O/U{ctx['total']:g}")
+        if ctx["pace_vs_lg"] is not None and abs(ctx["pace_vs_lg"]) > 2:
+            env.append("fast" if ctx["pace_vs_lg"] > 0 else "slow")
+        env_tag = " · " + " ".join(env) if env else ""
+        starters = T.game_starters(gids_by[slate_date].get(team))       # None until the lineup posts
+        # per-out-player date->minutes maps: which of the beneficiary's past games were played WITHOUT
+        # each out star, so the chart + record show the same-injury-context games (the user's "only the
+        # bars without X"). Feeds prop_edges' out_logs. (The old context-WEIGHTED projection that also
+        # pulled every starter's game log per cycle was dropped — the pivot backtest showed it diluted
+        # the under edge — so that plumbing is gone.)
+        out_dm = [{g["date"][:10]: g.get("min", 0) for g in ol} for ol in out_logs]
+        team_pl = {n: v for n, v in pl.items()
+                   if v["team"] == team and n not in out_names and v["gp"] >= 5}
+        # the team's OTHER impact players expected to PLAY tonight (Ionescu, Stewart...) — a game is
+        # only a true comp if these were ALSO on the floor, since their presence caps a beneficiary's
+        # usage (Johannes averages 15.8 with Ionescu also out but 9.5 with her in). >=20mpg OR >=10ppg.
+        in_impact = [(nm, vv) for nm, vv in team_pl.items() if vv["min"] >= 20 or vv["pts"] >= 10]
+        for n, v in team_pl.items():
+            blog = glog(v["id"])
+            if not blog:
+                continue
+            # combined absence (all outs sitting together) — the compounded boost
+            w = W.wowy_multi(blog, out_logs)
+            if w["n_without"] < 2 and len(outs) > 1:
+                # too few games with ALL out together -> best single-out split as the proxy
+                cands = [(W.wowy(blog, ol), nm) for (nm, _), ol in zip(outs, out_logs)]
+                w = max(cands, key=lambda x: x[0]["n_without"])[0]
+            n1 = (w["n_without"] == 1)                     # first-occurrence speed-pilot tier (below)
+            # ── ⚡USG SHADOW (2026-07-29, user; the "Ionescu hole") ── n=1/n=2 without-samples
+            # showing a real USAGE bump (FGA+FTA >= +3) with or without a minutes bump. The firm
+            # engine cannot see these (elevated basis needs n>=3; its fallback is minutes-scaled
+            # season rates ~= the book's line). Backtest: the cell is 1-0 ALL-TIME at tip lines —
+            # unvalidatable from history, so this accrues FORWARD evidence only: board + CLV
+            # shadow, never a ping, never the record. Points only.
+            try:
+                _nwo = w["n_without"]
+                if USG_SHADOW and _nwo in (1, 2):
+                    _vw = ((w["with"].get("fga") or {}).get("mean") or 0) + \
+                          ((w["with"].get("fta") or {}).get("mean") or 0)
+                    _vo = ((w["without"].get("fga") or {}).get("mean") or 0) + \
+                          ((w["without"].get("fta") or {}).get("mean") or 0)
+                    _dvol = _vo - _vw
+                    if _dvol >= 3.0 and _vw > 0:
+                        _sv = [(g["fga"] + g["fta"], g["pts"]) for g in blog if g["min"] > 8]
+                        _tvol = sum(x for x, _ in _sv)
+                        if len(_sv) >= 5 and _tvol > 0:
+                            _pps = sum(pt for _, pt in _sv) / _tvol   # season pts per FGA+FTA
+                            _proj = _pps * _vo
+                            _sig = max(st.pstdev([pt for _, pt in _sv]), 4.0)
+                            _pn = T.posted_props(n)
+                            _best = None
+                            for _ln, _pair in ((_pn or {}).get("points") or {}).items():
+                                _od = _pair[0]
+                                if not _od or _od < 1.05:
+                                    continue
+                                _pp = T._norm_sf((_ln - _proj) / _sig)
+                                _e2 = _pp * _od - 1
+                                if _pp >= (1 / _od) + 0.02 and (_best is None or _e2 > _best["ev"]):
+                                    _best = {"stat": "points", "line": _ln, "dec": _od,
+                                             "side": "over", "hit": round(_pp, 3),
+                                             "ev": round(_e2, 3), "elev_avg": round(_proj, 1),
+                                             "season_avg": v["pts"], "stale": False, "n": _nwo,
+                                             "d_min": round((w["without"]["min"]["mean"] or 0)
+                                                            - (w["with"]["min"]["mean"] or 0), 1),
+                                             "d_vol": round(_dvol, 1)}
+                            if _best:
+                                if _pn:
+                                    CLV.log_shadow(slate_date, n, out_full, {"points": _proj},
+                                                   _pn, tip=tips_by[slate_date].get(team),
+                                                   tier="usg")
+                                usg_spots.append({"player": n, "team": team, "star": out_full,
+                                                  "status": "OUT", "sit": 1.0, "lead": None,
+                                                  "conf": T.starter_label(n, team, starters, 0),
+                                                  "date": slate_date, "usg": True, **_best})
+                                print(f"⚡USG shadow: {n} pts o{_best['line']:g} "
+                                      f"proj {_proj:.1f} (vol {_vw:.1f}->{_vo:.1f}, "
+                                      f"n={_nwo}, dmin {_best['d_min']:+g})")
+            except Exception as _ue:
+                print(f"usg shadow skipped: {str(_ue)[:60]}")
+
+            if w["n_without"] < 1:
+                # ── COLD-START n=0 ── the team has never played without this star. Only a
+                # RotoWire-NAMED promoted starter qualifies (that answers "which of the two
+                # candidates" — RW's lineup call), minutes = proportional share of the vacated
+                # pool with a starter floor, and only the validated margin >= 5 cell alerts.
+                if not N0_COLD:
+                    continue
+                lbl = T.starter_label(n, team, starters, 0)
+                if lbl not in ("confirmed", "likely") or v["min"] >= 22:
+                    continue                               # not RW-promoted into tonight's five
+                pw0 = position_compat(v.get("position"), [op.get("position") for _, op in outs])
+                rot = sum(vv["min"] for vv in team_pl.values() if 12 <= vv["min"] <= 32) or 1.0
+                vac_min = sum(op["min"] for _, op in outs)
+                proj0 = min(max(v["min"] + pw0 * vac_min * (v["min"] / rot), 22.0), 30.0)
+                pa0 = T.project_all(blog, proj0)
+                cold = [e for e in T.prop_edges(n, blog, proj0, None, vacated, ctx,
+                                                out_logs=out_dm, opp=matchups_by[slate_date].get(team, ""),
+                                                pos=v.get("position"))
+                        if e["side"] == "over"
+                        and (e["elev_avg"] - e["line"]) >= T.COLD_START_MARGIN]
+                if cold:
+                    pn0 = T.posted_props(n)
+                    if pa0 and pn0:
+                        CLV.log_shadow(slate_date, n, out_full,
+                                       {"points": pa0["proj_pts"], "rebounds": pa0["proj_reb"],
+                                        "assists": pa0["proj_ast"]}, pn0,
+                                       tip=tips_by[slate_date].get(team), tier="n0_cold")
+                    for e in cold:
+                        # ⚡COLD = BOARD-ONLY shadow (user 2026-07-18: shadow tiers never ping)
+                        cold_spots.append({"player": n, "team": team, "star": out_full,
+                                           "status": "OUT", "sit": 1.0, "lead": None,
+                                           "conf": lbl, "proj_min": round(proj0, 1),
+                                           "date": slate_date, "cold": True, **e})
+                continue
+            if n1 and not N1_PILOT:
+                continue                                   # pilot off -> drop 1-game samples
+            # POSITION MATCH (minutes): a vacated role's MINUTES go to same-position players,
+            # so scale the projected minutes-elevation by positional fit — a forward barely
+            # inherits a guard's minutes. But DON'T hard-drop cross-position beneficiaries: a
+            # high-usage / rebounding guard (Clark) still vacates shots + boards that reach the
+            # forwards on the floor. That production flows through the minutes-honest projection
+            # + the vacated pool, not a binary position gate.
+            pw = position_compat(v.get("position"), [op.get("position") for _, op in outs])
+            with_min = w["with"]["min"]["mean"]
+            proj = with_min + pw * (w["without"]["min"]["mean"] - with_min)
+            # RECENCY: the WOWY split averages OLD without-them games, so it lags a player whose
+            # role is actively expanding (Allemand: split says 30, she's played 35 the last 3).
+            # Credit the higher of the role estimate and recent minutes — only lifts ascending
+            # players, never lowers anyone. (Fixes the live-model stale-minutes gap; the backtest
+            # baseline already used trailing-5 minutes, so this closes LIVE up to that level.)
+            recent5 = [g["min"] for g in blog[:5] if g["min"] > 8]   # game_log is NEWEST-first
+            if recent5:
+                proj = max(proj, st.median(recent5))
+            if proj - with_min <= 0.3 and pw < 0.6:        # no minutes bump AND no role overlap
+                continue
+            if n1:                                          # ── FIRST-OCCURRENCE SPEED PILOT ──
+                # One game without the star. Bet ONLY a MEANINGFUL minutes bump, and ONLY while the
+                # posted line is still STALE (book hasn't moved) — the pre-move window the backtest
+                # showed +15% ROI (vs -11% once it adjusts). Elevated OVER only. Distinct ⚡1G alert +
+                # CLV shadow (tier n1_speed); NEVER logged to the firm ledger/record. CLV judges it.
+                if (w["without"]["min"]["mean"] - with_min) < 3.0:
+                    continue
+                pa1 = T.project_all(blog, proj)
+                e1 = [e for e in T.prop_edges(n, blog, proj, w, vacated, ctx, out_logs=out_dm,
+                                              opp=matchups_by[slate_date].get(team, ""), pos=v.get("position"))
+                      if e["side"] == "over" and e["stale"]]
+                if e1:
+                    pn = T.posted_props(n)
+                    if pa1 and pn:
+                        CLV.log_shadow(slate_date, n, out_full,
+                                       {"points": pa1["proj_pts"], "rebounds": pa1["proj_reb"],
+                                        "assists": pa1["proj_ast"]}, pn,
+                                       tip=tips_by[slate_date].get(team), tier="n1_speed")
+                    for e in e1:
+                        # COHERENCE (2026-07-28): this tier PINGS, so it must render. It used
+                        # to exist only in `alerts` and vanished from the board entirely.
+                        _c1 = T.starter_label(n, team, starters, proj)
+                        preds.append({
+                            "pred_date": slate_date, "out_player": out_full, "player": n,
+                            "tier": "n1",              # graded, but never in the firm record
+                            "team": team, "opp": matchups_by[slate_date].get(team, ""),
+                            "stat": e["stat"], "line": e["line"], "odds": e["dec"],
+                            "odds_other": e.get("odds_other"), "book": "fd",
+                            "proj_hit": round(e["hit"], 3), "side": e["side"],
+                            "pi_role": e.get("pi_role"), "season_avg": e["season_avg"],
+                            "elev_avg": e["elev_avg"], "proj_min": round(proj, 1),
+                            "n_elev": e["n"], "ev": round(e["ev"], 3),
+                            "stale": int(e["stale"]), "d_stat": e["d_stat"],
+                            "d_fga": e["d_fga"], "d_min": e["d_min"], "driver": e["driver"],
+                            "vac": e["vac"], "total": e["total"], "pace": e["pace"],
+                            "opp_def": e["opp_def"], "spread": e.get("spread"),
+                            "d_fta": e["d_fta"], "d_3pa": e["d_3pa"], "basis": e["basis"],
+                            "samples": json.dumps(e["samples"]),
+                            "vol": json.dumps(e.get("vol") or {}), "confidence": _c1})
+                        n1_spots.append({"player": n, "team": team, "star": out_full,
+                                         "status": "OUT", "sit": 1.0, "lead": None,
+                                         "conf": T.starter_label(n, team, starters, proj),
+                                         "proj_min": round(proj, 1), "date": slate_date,
+                                         "n1": True, **e})
+                        if not role_ok(_c1):
+                            preds[-1]["bettable"] = 0    # board keeps it; no bet, no ping
+                        if role_ok(_c1):
+                            alerts.append((e["ev"], f"n1|{slate_date}|{n}|{e['stat']}|{e['line']:g}",
+                                f"⚡1G {out_label} OUT -> {_short(n)} {e['stat'][:3]} o{e['line']:g} "
+                                f"{T._am(e['dec'])} | proj {e['elev_avg']:g} +{e['ev']*100:.0f}%EV "
+                                f"· 1-game sample · STALE line — SPEED PILOT (graded, tier n1)"
+                                + _n1_warn(e["stat"])))
+                continue
+            conf = T.starter_label(n, team, starters, proj)  # RotoWire-first confirmed/likely/bench
+            # PROJECTION TRACKER: log this beneficiary's FULL projection (min + pts/reb/ast +
+            # assumptions) whether or not any prop flags — the background learner grades it later.
+            pa = T.project_all(blog, proj)
+            prow = None
+            if pa:
+                prow = {"date": slate_date, "pid": v["id"], "player": n, "team": team,
+                        "opp": matchups_by[slate_date].get(team, ""), "out_player": out_full,
+                        "confidence": conf, "pos": v.get("position"), "flagged": 0,
+                        "d_min": round(w["without"]["min"]["mean"]
+                                       - w["with"]["min"]["mean"], 1), **pa}
+                proj_rows.append(prow)
+                # CLV shadow: capture our injury-driven projection vs the line AT DETECTION TIME
+                # (INSERT-OR-IGNORE keeps the earliest flag) — the timing-edge proof loop.
+                props_now = T.posted_props(n)
+                if props_now:
+                    CLV.log_shadow(slate_date, n, out_full,
+                                   {"points": pa["proj_pts"], "rebounds": pa["proj_reb"],
+                                    "assists": pa["proj_ast"]}, props_now, tip=tips_by[slate_date].get(team))
+            n_preds0 = len(preds)                            # to mark whether this player got a bet
+            for e in T.prop_edges(n, blog, proj, w, vacated, ctx, out_logs=out_dm,
+                                  opp=matchups_by[slate_date].get(team, ""), pos=v.get("position")):
+                if e.get("band_pilot"):
+                    # suspect d_min band (outside 3-8) -> DASHBOARD-visible shadow, NO phone ping
+                    # (2026-07-16 user confusion: BAND pinged 5x for a non-bet that wasn't on the
+                    # board — coherence rule: if it pings it's on the board; shadows don't ping).
+                    bk = (n, e["stat"])
+                    prev = _band_seen.get(bk)
+                    if prev is None or e["ev"] > prev["ev"]:
+                        _band_seen[bk] = {"player": n, "team": team, "star": out_full,
+                                          "status": "OUT", "sit": 1.0, "lead": None,
+                                          "conf": T.starter_label(n, team, starters, proj),
+                                          "proj_min": round(proj, 1), "date": slate_date,
+                                          "band": True, **e}
+                    if n not in _band_shadowed and pa:
+                        _band_shadowed.add(n)
+                        pn_b = T.posted_props(n)
+                        if pn_b:
+                            CLV.log_shadow(slate_date, n, out_full,
+                                           {"points": pa["proj_pts"], "rebounds": pa["proj_reb"],
+                                            "assists": pa["proj_ast"]}, pn_b,
+                                           tip=tips_by[slate_date].get(team), tier="band_pilot")
+                    continue
+                if unconfirmed:
+                    # CONFIRMED-OUT SAFEGUARD (2026-07-18, user: McBride was flagged off Juhasz/
+                    # Miles' LAST-GAME status and both played the next night). A rolling-feed
+                    # 'Out' is last game's status, NOT a ruling for this game — edges stay
+                    # CONTINGENT (lines scouted, no bet) until every out in the cascade is
+                    # confirmed FOR THIS SLATE. Next-day confirmation exists now (official
+                    # night-before report; ESPN returnDate past the slate = season/long-term
+                    # outs — the user's 7/18 catch: Plum/Diggins/R.Jackson/Nogic sat in ⏳ limbo
+                    # forever), so a fully-confirmed next-day cascade goes FIRM tonight at
+                    # tonight's stalest lines. Partially confirmed keeps the whole cascade
+                    # contingent (the combined-vacancy premise isn't fully ruled).
+                    bkt = (n, e["stat"])
+                    prevs = _tmrw_seen.get(bkt)
+                    if prevs is None or e["ev"] > prevs["ev"]:
+                        _tmrw_seen[bkt] = {"player": n, "team": team, "star": out_full,
+                                           "status": "awaiting official ruling",
+                                           "pend_confirm": True, "sit": 1.0, "lead": None,
+                                           "conf": conf, "proj_min": round(proj, 1),
+                                           "date": slate_date, **e}
+                    # contingent = BOARD-ONLY (user 2026-07-18: ping only when it turns firm)
+                    continue
+                # PEER GATE: kill an over whose edge exists only when a rotation teammate
+                # sits -- and that teammate plays tonight. Fully guarded: any failure here
+                # must never cost a flag.
+                if e["side"] == "over" and e["stat"] in _PEER_GATED:
+                    try:
+                        import peer_gate as _PG
+                        _tlogs = {x: glog(vv["id"]) for x, vv in pl.items()
+                                  if vv.get("team") == team and x != n
+                                  and (vv.get("gp") or 0) >= 5}
+                        _hit = _PG.peer_stat_gate(
+                            blog, _PEER_GATED[e["stat"]], e["line"], e["dec"], _tlogs,
+                            lambda x: inj.get(x) not in ("Out", "Doubtful"),
+                            exclude=[nm for nm, _ in outs], proj_min=proj,
+                            mpg_of=lambda x: (pl.get(x) or {}).get("min"))
+                    except Exception:
+                        _hit = None
+                    if _hit:
+                        print(f"peer-gate SUPPRESSED {n} {e['stat']} o{e['line']:g}: "
+                              f"{_hit['peer']} plays — {_hit['rate_with']*100:.0f}% with vs "
+                              f"{_hit['rate_without']*100:.0f}% without "
+                              f"(breakeven {_hit['breakeven']*100:.0f}%)", flush=True)
+                        continue
+                # beneficiary+stat+line, dated (re-fires next slate)
+                key = f"{slate_date}|{n}|{e['stat']}|{e['line']}"
+                tag = " [stale line]" if e["stale"] else ""
+                # 2-day backtest tell: EV >40% flags went 0-4 — implausibly-fat EV on a
+                # mainstream line = a thin-sample over-projection, not real. Warn on it.
+                if e["ev"] > 0.35 or e["n"] < 6:
+                    tag += " [thin-sample, be skeptical]"
+                if e.get("alt_ladder"):
+                    tag += " [ALT ladder — one-sided, fatter hold]"
+                # per-stat driver: points shows FGA (+FTA/3PA), rebounds reb, assists ast
+                dl = {"points": "FGA", "rebounds": "reb", "assists": "ast"}.get(e["stat"], "FGA")
+                bits = [f"{dl} {e['driver']:+g}" if e["driver"] is not None else "",
+                        f"min {e['d_min']:+g}" if e["d_min"] is not None else ""]
+                if e["stat"] == "points" and e["d_fta"] is not None:
+                    bits += [f"FTA {e['d_fta']:+g}", f"3PA {e['d_3pa']:+g}"]
+                wo = " | w/o: " + ", ".join(b for b in bits if b) if any(bits) else ""
+                hits = round(e["hit"] * e["n"])           # bet-side record in the role games
+                rec = f"{hits}-{e['n']-hits}"
+                ctag = {"confirmed": " ✓STARTING", "bench": " ⚠NOT STARTING",
+                        "likely": " (likely starts)", "projected": " (lineup TBD)"}[conf]
+                # ⚠ PEER-REGIME WARNING (2026-07-28, user-caught on Edwards) — the elevated
+                # sample conditions on the OUT player only, so it can be built on games where a
+                # positional PEER was also out. If that peer plays tonight, the projected
+                # minutes are borrowed from a lineup that is not happening. DISPLAY ONLY: it
+                # tags the ping, never suppresses the flag (~51 selected bets can't validate a
+                # hard gate). Fully guarded — a failure here must never cost a flag.
+                rtag = ""
+                try:
+                    _rw = W.peer_regime_scan(
+                        n, [x for x, vv in pl.items() if vv.get("team") == team],
+                        [nm for nm, _ in outs], {x: glog(vv["id"]) for x, vv in pl.items()
+                                                 if vv.get("team") == team},
+                        lambda x: (pl.get(x) or {}).get("position"),
+                        lambda x: inj.get(x) not in ("Out", "Doubtful"))
+                    if _rw:
+                        rtag = (f" ⚠REGIME({_rw['peer']} plays; sample {_rw['n_match']}/"
+                                f"{_rw['n_elev']}, ~{_rw['gap_min']:g}min borrowed)")
+                except Exception:
+                    rtag = ""
+                sd = "o" if e["side"] == "over" else "u"   # over/under prefix on the line
+                if role_ok(conf):
+                    alerts.append((e["ev"], key,
+                        f"{out_label} OUT -> {_short(n)} {e['stat'][:3]} {sd}{e['line']:g} "
+                        f"{T._am(e['dec'])}{wo} | {rec} {e['hit']*100:.0f}% "
+                        f"| proj {e['elev_avg']:g} +{e['ev']*100:.0f}%EV{ctag}{tag}{env_tag}{rtag}"))
+                preds.append({"pred_date": slate_date, "out_player": out_full, "player": n,
+                              "tier": "firm", "bettable": 1 if role_ok(conf) else 0,
+                              "team": team, "opp": matchups_by[slate_date].get(team, ""),
+                              "stat": e["stat"], "line": e["line"], "odds": e["dec"],
+                              "odds_other": e.get("odds_other"),
+                              "book": "fd", "proj_hit": round(e["hit"], 3), "side": e["side"],
+                              "pi_role": e.get("pi_role"),
+                              "season_avg": e["season_avg"], "elev_avg": e["elev_avg"],
+                              "proj_min": round(proj, 1), "n_elev": e["n"],
+                              "ev": round(e["ev"], 3), "stale": int(e["stale"]),
+                              "d_stat": e["d_stat"], "d_fga": e["d_fga"], "d_min": e["d_min"],
+                              "driver": e["driver"], "vac": e["vac"],
+                              "total": e["total"], "pace": e["pace"], "opp_def": e["opp_def"],
+                              "spread": e.get("spread"),
+                              "d_fta": e["d_fta"], "d_3pa": e["d_3pa"],
+                              "basis": e["basis"], "samples": json.dumps(e["samples"]),
+                              "vol": json.dumps(e.get("vol") or {}),
+                              "confidence": conf,
+                              # injury-regime comps (display flag): closest historical games to
+                              # tonight's EXACT absence set, for a consistent-minutes player
+                              "regime": json.dumps(RG.regime_note(
+                                  blog, out_logs, [_short(nm) for nm, _ in outs], e["stat"],
+                                  in_logs=[glog(vv["id"]) for nm2, vv in in_impact if nm2 != n],
+                                  in_names=[_short(nm2) for nm2, vv in in_impact if nm2 != n]) or {})})
+            if prow is not None:                            # did any prop for this player flag a bet?
+                prow["flagged"] = 1 if len(preds) > n_preds0 else 0
+            dd = T.double_double_rate(blog, proj, w)
+            if dd and dd["rate"] >= 0.40:                # strong lagging-market DD candidate
+                bits = [f"reb {dd['d_reb']:+g}" if dd["d_reb"] is not None else "",
+                        f"pts {dd['d_pts']:+g}" if dd["d_pts"] is not None else "",
+                        f"min {dd['d_min']:+g}" if dd["d_min"] is not None else ""]
+                wo = " | w/o: " + ", ".join(b for b in bits if b) if any(bits) else ""
+                print(f"DD note (no ping): {out_label} OUT -> {_short(n)} "
+                      f"{dd['rate']*100:.0f}% in {dd['n']} role gms")
+    # ROLE-DEPTH CAP (2026-07-23, VALIDATED on 81 graded overs as a FLAG-TIME feature). The vacated
+    # production is contested by the beneficiary's healthy SAME-ROLE teammates — rebounds by the
+    # FRONTCOURT, assists by the GUARDS. When 3+ such rotation bodies (season >=18mpg, EXPECTED to
+    # play — a Questionable teammate is NOT in out_names so it COUNTS, which IS the "questionable-
+    # teammate premise" check the CON post-mortem asked for) are on the floor, the role is too crowded
+    # for the beneficiary to clear an elevated OVER. Dose-response (season-min proxy, overs): depth
+    # 1->60.9% / 2->50.0% / 3+->40.6% (-18.6% ROI); skipping depth>=3 lifts overs 40-41 (+1.7% ROI) ->
+    # 27-22 (+14.9%) and would have KILLED both CON read-error bets (Nelson-Ododa pts_reb d3, Lacan
+    # ast d3, both lost). EV does NOT rescue contested overs (depth>=2 hi-EV still 47%), so the gate
+    # is depth-only. FIRM OVERS only — unders + the full projection tracker are untouched. Breadcrumb
+    # (wnba_depth_capped.csv) grades the suppressed overs forward. DEPTH_CAP=False kills it instantly.
+    # PURE-POINTS EXEMPT (2026-07-23 refinement): the cap's mechanism — a vacated role CONTESTED by
+    # same-role bodies — only bites POSITION-LOCKED production: rebounds (the frontcourt fights for the
+    # same boards) and assists (the backcourt shares the creation). It does NOT apply to points, which
+    # come off a player's OWN usage — a crowd doesn't stop you scoring. Capping points was an over-reach
+    # of the mechanism; the ledger confirms it (crowded-depth>=3 pure-points overs went 5-2 / 71%, while
+    # reb/ast/combo went 4-8). So `points` is exempt (still capped: rebounds, assists, pts_reb, pts_ast,
+    # reb_ast, pra). On the curated headline record this takes 34-17 -> 30-9 (vs 25-7 for the blunt
+    # all-stats cap) and still kills all three CON disasters (Ododa pts_reb ×2 + Lacan assists).
+    DEPTH_CAP = True
+    if DEPTH_CAP and preds:
+        def _role_depth(p):
+            pos = (pl.get(p["player"]) or {}).get("position")
+            s = p["stat"]
+            if "reb" in s:
+                poolset = {"F", "C"}                     # rebounding is frontcourt-locked
+            elif "ast" in s:
+                poolset = {"G"}                          # playmaking is guard-locked
+            else:                                        # points -> the beneficiary's own group
+                bg = _POSG.get((pos or "F").upper(), "F")
+                poolset = {"F", "C"} if bg in ("F", "C") else {"G"}
+            outs_here = {x.strip() for x in (p.get("out_player") or "").split(",")}
+            return sum(1 for nm, vv in pl.items()
+                       if vv.get("team") == p["team"] and nm != p["player"]
+                       and nm not in outs_here and nm not in out_names
+                       and (vv.get("min") or 0) >= 18
+                       and _POSG.get((vv.get("position") or "F").upper(), "F") in poolset)
+        # pure points exempt — the cap only applies to position-locked stats (reb/ast/combos)
+        dcap = [p for p in preds if p.get("side") == "over" and p["stat"] != "points"
+                and _role_depth(p) >= 3]
+        if dcap:
+            drop_d = {(p["player"], p["stat"]) for p in dcap}
+            try:                                         # breadcrumb (like wnba_capped_legs.csv) so
+                import csv                                # the suppressed overs still grade forward
+                with open(HERE / "wnba_depth_capped.csv", "a", newline="") as f:
+                    wcsv = csv.writer(f)
+                    for p in dcap:
+                        wcsv.writerow([p["pred_date"], p["team"], p["player"], p["stat"],
+                                       p["line"], p.get("odds"), p.get("ev"), _role_depth(p)])
+            except OSError:
+                pass
+            preds = [p for p in preds
+                     if not (p.get("side") == "over" and (p["player"], p["stat"]) in drop_d)]
+            alerts = [a for a in alerts
+                      if tuple(a[1].split("|")[1:3]) not in drop_d]
+            print(f"role-depth cap: dropped {len(dcap)} over(s) with 3+ same-role bodies on the floor")
+
+    # CORRELATION CAP (user preference): don't recommend 2+ players' OVERS on the same team + same
+    # prop FAMILY in one game — they're correlated, so one blowout / team-cold-shooting night sinks
+    # them together (PHX went 0-6 on its overs 2026-07-11; 5 were points-family across Copper+Ayayi).
+    # Keep the single highest-EV player per (team, family, over); drop other players' same-family
+    # overs. Different families on one team (a points over + a rebounds over) are fine — low
+    # correlation — and a single player's ladder rungs are kept (that's intentional laddering).
+    FAM = {"points": "PTS", "pra": "PTS", "pts_reb": "PTS", "pts_ast": "PTS",
+           "rebounds": "REB", "reb_ast": "REB", "assists": "AST"}
+    # KEEP-RULE = FAVORITE FIRST, EV tie-break (2026-07-18, the Sydney Taylor case — user:
+    # "the flags is going against the data we have so far"). The cap used to keep the highest-
+    # EV leg, i.e. the ONE spot where the weakest signal outranked every validated one: ledger
+    # says singles 17-4 (81%) vs combos 6-4 (60%), EV>=.20 hits WORSE than EV<.20 (67% vs 79%,
+    # the known fat-EV inversion), and favorite-first is the triple-backtested slot order. Taylor
+    # (favorite single, in-band, 5 straight overs) lost the CHI pool to a .24-EV combo under the
+    # old rule. Same (odds, -ev) order as selection's gkey. Key now carries pred_date (the old
+    # date-less key let today's and tomorrow's cascades contest one pool on back-to-backs).
+    top = {}                                # (date, team, family) -> ((oob, odds, -ev), player)
+    for p in preds:
+        if p.get("side") != "over" or not p.get("team"):
+            continue
+        k = (p.get("pred_date"), p["team"], FAM.get(p["stat"], p["stat"]))
+        # BAND BEFORE ODDS (2026-07-19, the Nelson-Ododa/Leger-Walker case, user: "why didn't the
+        # board update when Rivers and Morrow were ruled out?"). The cap runs BEFORE the selection
+        # band gate, so an out-of-band shorter-odds play could win the pool and DELETE the in-band
+        # play — then selection gates the survivor and the pool is empty. Leger-Walker d_min 8.3
+        # (out) at -130 was capping out Nelson-Ododa d_min 7.6 (in-band) +23% at -102, and the
+        # starting center with both bigs out vanished. In-band/cold ALWAYS beats out-of-band; only
+        # then favorite (odds) then EV — matching the validated gate-then-favorite hierarchy.
+        dm = p.get("d_min")
+        oob = 1 if (dm is not None and (dm < 0 or dm > 8)) else 0
+        # A-BAND BEFORE ODDS (2026-07-31, the Carleton/DiLeo case). `oob` is the SHADOW band, so
+        # when both legs sit inside 0-8 it is identical for both and the tie falls to odds — a
+        # coin-flip price gap then decides. POR 7/31: Carleton d_min +0.3 at 1.9804 beat DiLeo
+        # d_min +4.2 at 2.04, 1.5 pts of implied probability. And since the cap keeps exactly ONE
+        # player per family, the survivor is automatically the cascade favourite, so this was not
+        # a choice between two B plays: DiLeo surviving is TIER A (in band + favourite + single),
+        # Carleton surviving is TIER B. Counted ledger: A 14-3 / 82.4% / +0.73u per bet vs
+        # B 17-11 / 60.7% / +0.20u. Ranking the A-band ahead of odds is what the 2026-07-19
+        # comment above already intended; it was implemented with the shadow band, so it only
+        # fired when a leg fell outside 0-8 (Leger-Walker 8.3 vs Nelson-Ododa 7.6) and never for
+        # a 0.3-vs-4.2 split. Reconstructed over all 32 logged contests this changes ZERO past
+        # bets — no contest in the record has the split-band shape — so it cannot break a winning
+        # pattern; tonight is the first occurrence.
+        _notA = 0 if (dm is not None and 3 <= dm <= 8) else 1
+        cand = (oob, _notA, float(p.get("odds") or 99), -(p.get("ev") or 0))
+        if k not in top or cand < top[k][0]:
+            top[k] = (cand, p["player"])
+    drop = {(p["player"], p["stat"]) for p in preds                     # (player, stat) legs to cut
+            if p.get("side") == "over" and p.get("team")
+            and top[(p.get("pred_date"), p["team"], FAM.get(p["stat"], p["stat"]))][1] != p["player"]}
+    if drop:
+        # breadcrumb every capped leg (line/odds/ev) so the checkpoint can grade BOTH sides of
+        # each pool contest at real lines — the ledger alone can't (capped legs never log).
+        try:
+            import csv
+            with open(HERE / "wnba_capped_legs.csv", "a", newline="") as f:
+                wcsv = csv.writer(f)
+                for p in preds:
+                    if p.get("side") == "over" and (p["player"], p["stat"]) in drop:
+                        kk = (p.get("pred_date"), p["team"], FAM.get(p["stat"], p["stat"]))
+                        wcsv.writerow([p.get("pred_date"), p["team"], top[kk][1],
+                                       p["player"], p["stat"], p["line"], p.get("odds"),
+                                       p.get("ev"), p.get("d_min")])
+        except OSError:
+            pass
+        preds = [p for p in preds
+                 if not (p.get("side") == "over" and (p["player"], p["stat"]) in drop)]
+        alerts = [a for a in alerts                                     # key = today|player|stat|line
+                  if tuple(a[1].split("|")[1:3]) not in drop]
+        print(f"correlation cap: dropped {len(drop)} redundant same-team same-family over-leg(s)")
+    PL.log(proj_rows)                       # background projection tracker (learning loop)
+    # OPENER CACHE: persist each beneficiary's LINE-INDEPENDENT projection (it depends on the injury
+    # picture, not on when a line posts) so the 60s poll can flag a freshly-posted opening line against
+    # it in milliseconds — the sub-minute alert — WITHOUT waiting for this full ~47s scan to re-run.
+    # Rewritten every scan, i.e. whenever the injury picture moves.
+    try:
+        cache = {"date": slate_date,
+                 "ts": datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0, tzinfo=None).isoformat(),
+                 "proj": {r["player"]: {"out": r["out_player"], "conf": r["confidence"],
+                                        "min": r["proj_min"], "pts": r["proj_pts"],
+                                        "reb": r["proj_reb"], "ast": r["proj_ast"]}
+                          for r in proj_rows if r.get("proj_pts") is not None}}
+        (HERE / "wnba_proj_cache.json").write_text(json.dumps(cache))
+    except Exception as e:
+        print("opener cache write skipped:", str(e)[:60])
+
+    # QUESTIONABLE-TIER WATCHLIST: surface beneficiaries EARLY while a star is still a game-time
+    # decision (the timing edge), tagged with who it hinges on + how likely they are to sit — but
+    # keep them OUT of the graded ledger (preds) so the track record only counts resolved bets.
+    # They graduate into the firm pipeline the moment the star is ruled OUT. Appended to `alerts`
+    # so both push paths (wnba_alert.main + wnba_watch) surface them via the same dedup.
+    firm_today = {tm: o for (sd, tm), o in outs_by_team.items() if sd == today}
+    watch = T.questionable_beneficiaries(pl, playing, matchups, lines, rates, inj,
+                                         out_names, firm_today, glog=glog)
+    for s in watch:
+        s["date"] = today
+    # WATCHLIST v2 SCENARIOS (user 2026-07-18): per-game "if X sits -> play THIS" variant
+    # rows — each Q star solo AND the combo — one top play + tier per scenario. Display-only.
+    scen = []
+    try:
+        for s in T.scenario_matrix(pl, playing, matchups, lines, rates, inj, out_names,
+                                   firm_today, glog=glog, tips=tips):
+            s["date"] = today
+            scen.append(s)
+    except Exception as e:
+        print("scenario matrix (today) skipped:", str(e)[:70])
+    # TOMORROW'S CONTINGENT PLAYS (2026-07-16, user): next-day lines post the evening before,
+    # while tomorrow's stars are still Questionable — the widest version of the timing edge.
+    # Same machinery on tomorrow's slate; spots carry date + the actual posted line.
+    try:
+        tom_dt = datetime.datetime.now(T.ET) + datetime.timedelta(days=1)
+        tom_ymd, tom_iso = tom_dt.strftime("%Y%m%d"), tom_dt.strftime("%Y-%m-%d")
+        matchups2 = T.tonight_matchups(tom_ymd)
+        playing2 = set(matchups2)
+        if playing2:
+            tips2 = T.tip_times(tom_ymd)
+            out_names2, outs_by_team2 = set(), defaultdict(list)
+            for nm2, st2 in inj.items():
+                p2 = pl.get(nm2)
+                if (p2 and p2["team"] in playing2 and st2 in ("Out", "Doubtful")
+                        and not T.confirmed_playing(nm2, p2["team"]) and T.genuinely_out(nm2)):
+                    out_names2.add(nm2)
+                    if p2["min"] >= 20 or p2["pts"] >= 10:
+                        outs_by_team2[p2["team"]].append((nm2, p2))
+            watch2 = T.questionable_beneficiaries(pl, playing2, matchups2, lines, rates, inj,
+                                                  out_names2, outs_by_team2, glog=glog,
+                                                  date=tom_iso, tips=tips2)
+            for s in watch2:
+                s["date"] = tom_iso
+            watch += watch2
+            for s in T.scenario_matrix(pl, playing2, matchups2, lines, rates, inj, out_names2,
+                                       outs_by_team2, glog=glog, date=tom_iso, tips=tips2):
+                s["date"] = tom_iso
+                scen.append(s)
+    except Exception as e:
+        print(f"tomorrow watchlist skipped: {str(e)[:80]}")
+    watch += n1_spots                                    # ⚡1G pilots -> dashboard (they ping)
+    watch += cold_spots                                  # ⚡COLD spots -> dashboard too
+    watch += usg_spots                                   # ⚡USG shadows -> dashboard (no ping)
+    watch += list(_band_seen.values())                   # ⚡BAND shadows -> dashboard (no ping)
+    watch += list(_tmrw_seen.values())                   # next-day CONTINGENT spots -> dashboard
+
+    def _fold(vals, kind, band_gate=True):
+        grp = defaultdict(list)
+        for s in vals:
+            grp[(s.get("date") or today, s.get("team"), s.get("star"))].append(s)
+        for (dte, team, star), ss in grp.items():
+            play = T.top_play(ss, band_gate=band_gate)
+            if play:
+                scen.append({"team": team, "opp": matchups_by.get(dte, {}).get(team, ""),
+                             "date": dte, "kind": kind, "stars": [star or "?"], "also_in": [],
+                             "status": ss[0].get("status") or "", "sit": ss[0].get("sit"),
+                             "firm_outs": [], "play": play})
+    _fold(_tmrw_seen.values(), "contingent")
+    _fold(n1_spots, "n1", band_gate=False)               # pilots are out-of-band by nature
+    _fold(cold_spots, "cold")
+    _fold(usg_spots, "usg", band_gate=False)             # usage shadows are out-of-band by design
+    _fold(_band_seen.values(), "band", band_gate=False)  # band = out-of-band by definition
+
+    # STAR WATCH (2026-07-19, user): Q/Out top-scorers the WOWY CAN'T project (a star who's barely
+    # missed a game has no without-sample) — the model would go silent on the juiciest spot. Surface
+    # them for MANUAL review with the likely #2/#3 inheritors. Purely informational: not a bet, not
+    # graded; the backtest says the #2's boost is real but modest + the book reprices, so it's a
+    # human call. Star = team's #1 season scorer, >=14 ppg & >=26 mpg, whom the model flagged
+    # NO beneficiary off (so it's genuinely a blind spot, not double-listing a modelled team).
+    star_watch, seen_star = [], set()
+    flagged_outs = {nm.strip() for p in preds for nm in (p.get("out_player") or "").split(",")}
+    for sdate, mus in matchups_by.items():
+        pset = set(mus)
+        for nm, stt in inj.items():
+            if stt not in ("Out", "Doubtful", "Questionable"):
+                continue
+            p = pl.get(nm)
+            if not p or p["team"] not in pset or p["min"] < 26 or p["pts"] < 14:
+                continue
+            mates = sorted(((v["pts"], n) for n, v in pl.items()
+                            if v["team"] == p["team"] and v["gp"] >= 5), reverse=True)
+            if not mates or mates[0][1] != nm or nm in flagged_outs or (sdate, nm) in seen_star:
+                continue                                  # not the #1 option, or model already has it
+            seen_star.add((sdate, nm))
+            out_here = {n for n, s in inj.items() if s in ("Out", "Doubtful")
+                        and pl.get(n) and pl[n]["team"] == p["team"]}
+            opts = [n for _, n in mates[1:] if n not in out_here][:3]
+            # honest status: an 'Out' tag absent from the OFFICIAL injury report (source #1) is a stale
+            # rolling-feed/RotoWire tag, not a league ruling (Bueckers 7/20: ESPN Out + returnDate TODAY,
+            # but Dallas's official report lists only Alanna Smith — i.e. Bueckers is NOT ruled out, and
+            # the book still prices her). Relabel those to GTD so the display stops contradicting the
+            # board; a genuine official out (Satou Sabally, on the report) keeps 'Out'. Guard: only
+            # override when the official report is populated for that date — else trust the feed.
+            official = T.OFFICIAL_BY_DATE.get(sdate) or {}
+            eff_status = ("GTD" if (stt in ("Out", "Doubtful") and official and nm not in official)
+                          else stt)
+            star_watch.append({"player": nm, "team": p["team"], "status": eff_status, "date": sdate,
+                               "opp": mus.get(p["team"], ""), "mpg": round(p["min"]),
+                               "ppg": round(p["pts"], 1), "ast": round(p.get("ast") or 0, 1),
+                               "options": opts})
+    _write_watchlist(watch, today, scen, star_watch)     # dashboard JSON (separate from the ledger)
+    for s in sorted(watch, key=lambda s: -(s.get("ev") or 0)):
+        if s.get("cold"):
+            continue                                     # already ntfy'd by the n0 branch
+        if (s.get("sit") or 0) <= T.SIT_GATE:
+            continue                                     # dashboard shows it; don't PING unlikely sits
+        tmrw = "TMRW " if s.get("date") not in (None, today) else ""
+        sd = "o" if s["side"] == "over" else "u"
+        hits = round(s["hit"] * s["n"])
+        ctag = {"confirmed": " ✓STARTING", "bench": " ⚠NOT STARTING",
+                "likely": " (likely starts)", "projected": " (lineup TBD)"}.get(s["conf"], "")
+        lead = s.get("lead")
+        # lead time is the tell: a LATE-breaking Q usually sits (and is the widest timing edge)
+        ltag = (f", {'LATE ' if lead < 6 else ''}Q'd {lead:.0f}h pre-tip" if lead is not None else "")
+        alerts.append((s["ev"] - 1.0,                    # sort BELOW firm bets (never outrank a real bet)
+            f"watch|{s.get('date', today)}|{s['player']}|{s['stat']}|{s['line']}",
+            f"{tmrw}{s['star']} {s['status'].upper()} (LIKELY OUT {s['sit']*100:.0f}%) -> "
+            f"{_short(s['player'])} {s['stat'][:3]} "
+            f"{sd}{s['line']:g} {T._am(s['dec'])} | {hits}-{s['n']-hits} {s['hit']*100:.0f}% "
+            f"| proj {s['elev_avg']:g} +{s['ev']*100:.0f}%EV{ltag}{ctag}"))
+    try:
+        W.flush_glog_cache()                         # persist fresh logs for the next scan/process
+    except Exception:
+        pass
+    return sorted(alerts, reverse=True), preds
+
+
+def _write_watchlist(watch, today, scenarios=None, stars=None):
+    """Dump the questionable-tier watchlist to JSON for the dashboard. Intra-job only (read by
+    dashboard.py in the same loop step), so it's never committed — no churn, no conflicts."""
+    try:
+        (HERE / "wnba_watchlist.json").write_text(
+            json.dumps({"date": today, "spots": watch,
+                        "scenarios": scenarios or [], "stars": stars or []}, default=str))
+    except OSError:
+        pass
+
+
+
+# ── CONCISE PER-PLAY PUSHES (user spec 2026-07-18): one push per play so each iPhone banner
+# is a complete bet: "🚨 {Full Name} {ABBREV} o{line} {odds} {tier}". Tier = the dashboard's
+# validated-split letters (A = 3-8 band + cascade favorite + single stat; B = solid middle;
+# C = combos/marginal). Watch-tier keys never push (board-only). Body = the premise, one line.
+# Shared by wnba_alert (fullscan) and wnba_watch (inline scan) so the format can't drift.
+NOTIF_AB = {"points": "PTS", "rebounds": "REB", "assists": "AST", "pts_ast": "PA",
+            "pra": "PRA", "pts_reb": "PR", "reb_ast": "RA"}
+
+
+def push_plays(fresh, preds, topic):
+    """Send one concise push per fresh play; return the keys actually delivered."""
+    import wnba_slip as SLIP
+    bykey = {}
+    for p in preds:
+        bykey[f"{p['pred_date']}|{p['player']}|{p['stat']}|{p['line']}"] = p
+    try:                       # CANONICAL tiers over the BOARD's universe (open ledger rows ∪
+        # this scan) — scan-only preds omit permanent open bets the cap no longer re-emits
+        # (Cloud after the keep-rule flip), which flips favorite/sticky context and lets a ping
+        # letter disagree with the board chip. One universe, one letter.
+        import sqlite3 as _sq
+        con = _sq.connect(str(HERE / "wnba_ledger.sqlite")); con.row_factory = _sq.Row
+        open_rows = [dict(r) for r in con.execute(
+            "SELECT * FROM predictions WHERE result IS NULL AND (side IS NULL OR side='over')")]
+        con.close()
+        seen_k = {(p["pred_date"], p["player"], p["stat"], p["line"]) for p in preds}
+        uni = list(preds) + [r for r in open_rows
+                             if (r["pred_date"], r["player"], r["stat"], r["line"]) not in seen_k]
+        tmap = SLIP.tier_map(uni)
+    except Exception:
+        tmap = {}
+
+    def _tier_of(p):
+        k = (p["pred_date"], p["player"], p["stat"])
+        # non-selected overflow plays ping too — favorite is a selected-universe property,
+        # so anything outside it tiers as non-favorite (matches the board's chips)
+        return tmap.get(k) or SLIP.tier_of(p, False)
+
+    delivered = []
+    try:                                              # pings must match the LEDGER's truth: the
+        import sqlite3 as _sq3                        # play-lock can refuse a flag collect()
+        _lcon = _sq3.connect(str(HERE / "wnba_ledger.sqlite"))   # alerted (orphan-ping guard,
+        _open_keys = {f"{a}|{b}|{c}|{e}" for a, b, c, e in _lcon.execute(   # Bonner 2026-07-19)
+            "SELECT pred_date, player, stat, line FROM predictions WHERE result IS NULL")}
+        _lcon.close()
+    except Exception:
+        _open_keys = None
+    for _ev, k, msg in fresh:
+        if k.startswith("watch|"):                    # Q-tier: board-only, never a push
+            delivered.append(k)                       # mark seen so it doesn't re-surface
+            continue
+        if _open_keys is not None and k in bykey and k not in _open_keys:
+            delivered.append(k)                       # lock-refused: retire silently, no ping
+            print(f"orphan-ping suppressed (not in ledger): {k}")
+            continue
+        p = bykey.get(k)
+        if p is not None:
+            # BODY-only, no title (user 2026-07-18 v2): iOS bolds titles and truncates them
+            # sooner; body text is unbold and fits the whole play on one banner. No ntfy tags
+            # either — known tags render as an extra leading emoji (🏀). Team joins with a
+            # plain space, no separator.
+            tm = f"{p['team']} " if p.get("team") else ""
+            text = (f"🚨 {tm}{p['player']} {NOTIF_AB.get(p['stat'], p['stat'].upper())} "
+                    f"o{p['line']:g} {T._am(float(p['odds']))} {_tier_of(p)}")
+        else:                                         # non-pred alert (rare) — send as-is
+            text = msg[:160]
+        try:
+            # short static title: with NO title ntfy shows the raw topic URL as the header
+            # line (user: "the header line is now ntfy.sh/ttelite..."). "Pickz" = his
+            # home-screen app name; the play line below stays unbold and full-length.
+            resp = requests.post(f"https://ntfy.sh/{topic}", data=text.encode("utf-8"),
+                                 params={"title": "Pickz", "priority": "high"}, timeout=15)
+            resp.raise_for_status()
+            delivered.append(k)
+            print(f"pushed: {text}")
+        except requests.RequestException as e:
+            print("push failed — not marking SEEN, will retry:", str(e)[:80])
+    return delivered
+
+
+def main():
+    alerts, preds = collect()
+    # ROLE GATE applied ONCE here, so the ledger, the parlays and the pushes cannot disagree
+    # about what counted as a bet. Blocked rows stay in `preds` for the board.
+    bet_preds = [p for p in preds if p.get("bettable", 1)]
+    _blocked = len(preds) - len(bet_preds)
+    if _blocked:
+        print(f"role gate: {_blocked} play(s) held — beneficiary not confirmed/likely starting")
+    logged = L.log_predictions(bet_preds)                # feed the learning loop
+    # persist the day's recommended PARLAYS (from the flagged overs) so their ROI is tracked too.
+    # Built per slate-date; replaces the still-pending set each scan (graded ones are locked).
+    try:
+        import wnba_slip as SLIP
+        from collections import defaultdict as _dd
+        byd = _dd(list)
+        for p in bet_preds:
+            if (p.get("side") or "over") == "over":
+                byd[p["pred_date"]].append(p)
+        for d, overs in byd.items():
+            overs = SLIP.current_selection(overs, commit=True)[0]  # sticky: alert is the selection WRITER
+            SLIP.log_parlays(d, SLIP.build(overs)["parlays"])
+    except Exception as e:
+        print(f"parlay logging skipped: {e}")
+    seen = set(SEEN.read_text().splitlines()) if SEEN.exists() else set()
+    fresh, seen_this_run = [], set()
+    for ev, k, msg in alerts:                             # alerts sorted by EV desc
+        if k in seen or k in seen_this_run:               # collapse same-spot duplicates
+            continue
+        seen_this_run.add(k)
+        fresh.append((ev, k, msg))
+    print(f"wnba: {len(alerts)} +EV spots, {len(fresh)} new, {logged} logged to ledger")
+    for _ev, _k, msg in fresh:
+        print("  " + msg)
+    topic = os.environ.get("NTFY_TOPIC")
+    push_ok = False
+    if topic and fresh:
+        delivered = push_plays(fresh, bet_preds, topic)
+        push_ok = bool(delivered)
+        fresh = [(e2, k2, m2) for e2, k2, m2 in fresh if k2 in delivered]
+    if push_ok:                                          # only remember spots we ACTUALLY delivered
+        for _e, k, _m in fresh:
+            seen.add(k)
+        SEEN.write_text("\n".join(sorted(seen)[-2000:]))
+
+
+if __name__ == "__main__":
+    main()

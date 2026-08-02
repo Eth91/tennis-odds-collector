@@ -1,0 +1,1746 @@
+<!doctype html><html lang="en"><head>
+<script>(function(){try{if(!location.hostname.endsWith('github.io'))return;fetch('live_board.json',{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){if(!d||!d.url)return;fetch(d.url+'/live_board.json',{cache:'no-store',signal:AbortSignal.timeout(2500)}).then(function(){location.replace(d.url)}).catch(function(){});}).catch(function(){});}catch(e){}})();</script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0B0D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pickz">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="64x64" href="icon-64.png">
+<meta name="bv" content="80cf742eb9">
+<title>Today's Plays</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { margin:0; background:#08090c; color:#e8ecf2;
+    font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:600px; margin:0 auto; padding:22px 16px 48px; }
+  h1 { font-size:21px; font-weight:800; margin:0; letter-spacing:-.02em; }
+  .live { display:flex; align-items:center; flex-wrap:wrap; gap:6px; color:#78818f; font-size:12px; margin-top:5px; }
+  .rfrsh { background:#161d28; color:#8ab4ff; border:1px solid #24304a; border-radius:7px; width:24px; height:24px; font-size:14px; line-height:1; cursor:pointer; padding:0; display:inline-flex; align-items:center; justify-content:center; }
+  .rfrsh:active { background:#1d2740; } .rfrsh:disabled { opacity:.6; }
+  .rfrsh.spin { animation:rfspin .6s linear infinite; }
+  @keyframes rfspin { to { transform:rotate(360deg); } }
+  #rfchk { color:#5b6b82; font-size:11px; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#22c55e; box-shadow:0 0 0 3px #22c55e22; }
+  .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:16px 0 24px; }
+  .stat { background:#121620; border:1px solid #1f2836; border-radius:14px; padding:13px 12px; min-height:74px;
+    display:flex; flex-direction:column; justify-content:space-between; }
+  .stat .k { color:#7d8696; font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; }
+  .stat .v { font-size:21px; font-weight:700; line-height:1; }
+  .stat .sv { color:#7d8696; font-size:12px; font-weight:500; }
+  h2 { font-size:10.5px; color:#5c6572; text-transform:uppercase; letter-spacing:.08em; margin:0 0 10px; font-weight:700; }
+  .fbar { display:flex; justify-content:flex-end; gap:8px; margin:0 0 6px; flex-wrap:wrap; }
+  .fgrp { display:flex; gap:3px; background:#0f1116; border:1px solid #191d26; border-radius:11px; padding:3px; }
+  .pill { padding:6px 13px; font-size:12.5px; font-weight:700; color:#78818f; border-radius:8px; cursor:pointer; user-select:none; }
+  .pill.on { background:#232c3d; color:#f2f5f9; }
+  /* DAY divider — clear break between slates (Today / Tomorrow / weekday) */
+  .dayhdr { display:flex; align-items:baseline; gap:10px; margin:30px 2px 14px; padding-top:17px;
+    border-top:1px solid #232a35; color:#eef1f6; font-size:16.5px; font-weight:800; letter-spacing:-.01em; }
+  .dayhdr:first-of-type { border-top:none; padding-top:2px; margin-top:2px; }
+  .dayhdr span { color:#6b7484; font-size:12px; font-weight:600; letter-spacing:0; }
+  /* IN PROGRESS: positions already running. Muted so it never competes with the live board,
+     with a pulsing dot so it reads as in-flight rather than as another slate day. */
+  .dayhdr.live { color:#8a93a6; }
+  .dayhdr.live::before { content:""; width:7px; height:7px; border-radius:50%;
+      background:#e0a04a; display:inline-block; margin-right:2px; animation:lvpulse 2s infinite; }
+  @keyframes lvpulse { 0%,100% { opacity:1; } 50% { opacity:.35; } }
+  /* GAME group — the top of the hierarchy: logos + matchup, hairline rule, generous separation */
+  .game { margin-bottom:22px; }
+  .ghd { display:flex; justify-content:space-between; align-items:center; padding:0 2px 9px;
+    margin-bottom:11px; border-bottom:1px solid #14181f; }
+  .gmatch { font-size:17px; font-weight:800; letter-spacing:-.01em; display:flex; align-items:center; gap:7px; }
+  .glogo { width:22px; height:22px; object-fit:contain; background:#dbe1ea; border-radius:50%; padding:2.5px; }
+  .tlogo { width:20px; height:20px; object-fit:contain; vertical-align:-4px; margin-right:3px; }
+  .gvs { color:#4d5560; font-weight:600; font-size:11px; margin:0 1px; }
+  .gtime { color:#c3c9d4; font-size:14px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .gout { display:flex; align-items:center; gap:6px; color:#c08a4d; font-size:12px; font-weight:600;
+    margin:-3px 2px 12px; }
+  .sdot { width:6px; height:6px; border-radius:50%; display:inline-block; flex:none; }
+  .sdot.ok { background:#37d67f; } .sdot.warn { background:#eaa15a; } .sdot.mid { background:#5b9dff; }
+  /* PLAYER block — logo + name lead; status is a quiet dot-chip; minutes right-aligned meta */
+  .pblk { background:#0f1116; border:1px solid #191d26; border-radius:14px; padding:13px 14px 8px; margin-bottom:9px; }
+  .phd { display:flex; align-items:center; gap:9px; }
+  .plogo { width:28px; height:28px; object-fit:contain; background:#dbe1ea; border-radius:50%; padding:3px; }
+  .pname { font-size:22px; font-weight:800; letter-spacing:-.015em; white-space:nowrap;
+           overflow:hidden; text-overflow:ellipsis; min-width:0; flex:0 1 auto; }
+  .pflag { display:flex; align-items:center; gap:5px; color:#8a93a3; font-size:13px; font-weight:600; white-space:nowrap; }
+  .psp2 { flex:1; }
+  .pmin { color:#78818f; font-size:13.5px; font-weight:600; white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .dog { color:#d9985c; font-size:12.5px; font-weight:700; }
+  .watchlist { margin-top:24px; padding-top:2px; border-top:1px solid #171c25; }
+  .wl-title { color:#eaa15a; font-size:12px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; margin:16px 2px 11px; }
+  /* STAR WATCH — Q/Out #1 scorers the model can't project; manual-review card (not a bet) */
+  .starwatch { margin:16px 0 4px; border:1px solid #262d38; border-radius:14px; padding:12px 14px 6px;
+    background:radial-gradient(140% 170% at 50% -20%, #16130c, #0d0f14 66%); }
+  .sw-title { color:#d0a45e; font-size:10.5px; text-transform:uppercase; letter-spacing:.07em; font-weight:700; }
+  .sw-title span { color:#7d8696; text-transform:none; letter-spacing:.02em; font-weight:600; }
+  .swrow { padding:10px 0; border-top:1px solid #1a1f28; }
+  .swrow:nth-of-type(2) { border-top:none; }
+  .swhd { display:flex; align-items:center; gap:7px; color:#e8ecf2; font-size:13.5px; }
+  .swhd b { font-weight:800; }
+  .swstat { font-size:9px; font-weight:800; letter-spacing:.04em; padding:1.5px 5px; border-radius:4px; }
+  .swstat.out { color:#ef8f6a; background:rgba(239,143,106,.13); }
+  .swstat.q { color:#d7ad63; background:rgba(215,173,99,.13); }
+  .swn { font-size:9px; font-weight:800; padding:1.5px 5px; border-radius:4px; color:#7d8696; background:rgba(125,134,150,.12); }
+  .swn.hot { color:#6aa5ef; background:rgba(106,165,239,.16); }
+  .swvs { color:#6b7484; font-size:11.5px; }
+  .swday { color:#6b7484; font-size:10.5px; }
+  .pgahead { display:flex; align-items:center; gap:8px; padding-bottom:2px; }
+  .pgatitle { color:#e8ecf2; font-size:15px; font-weight:800; letter-spacing:-.01em; }
+  .pgapaper { font-size:9px; font-weight:800; letter-spacing:.06em; color:#d0a45e;
+               border:1px solid #d0a45e55; border-radius:5px; padding:2px 5px; }
+  .pgarec { color:#7d8696; font-size:11.5px; font-variant-numeric:tabular-nums; }
+  .pgamkt { margin:17px 0 1px; font-size:10px; letter-spacing:.09em; font-weight:800;
+             color:#79828f; text-transform:uppercase; }
+  .pgamkt:first-of-type { margin-top:11px; }
+  .pgabet { padding:10px 0 9px; border-top:1px solid #1a1f28; }
+  .pgatop { display:flex; align-items:center; gap:8px; }
+  .pgasel { color:#e8ecf2; font-size:14.5px; font-weight:700; letter-spacing:-.01em; }
+  .pgasp { flex:1 1 auto; }
+  .pgasub { color:#7d8696; font-size:12px; margin-top:2px; }
+  .swusg { margin-left:auto; color:#8b94a3; font-size:11.5px; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .swo { color:#7d8696; font-size:12px; margin-top:4px; }
+  .swo b { color:#c3c9d4; font-weight:700; }
+  .wl-title span { color:#7d8696; font-weight:600; text-transform:none; letter-spacing:0; }
+  .tchip.tS { background:#8a6d1a; color:#ffd75e; }
+  .op-title { color:#5b9dff; font-size:12px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; margin:16px 2px 11px; }
+  .op-title span { color:#7d8696; font-weight:600; text-transform:none; letter-spacing:0; }
+  .parlays, .ladders { margin-top:22px; }
+  /* parlay bet-slips */
+  .slips { display:flex; flex-direction:column; gap:10px; }
+  .slip { background:#0b0e13; border:1px solid #1b2130; border-radius:11px; overflow:hidden; }
+  .slip.splayed { border-color:#1f4a37; box-shadow:inset 0 0 0 1px #12301f; }
+  .shd { display:flex; align-items:center; gap:8px; padding:8px 12px; background:#0e131b; border-bottom:1px solid #171c26; }
+  .sn { color:#c3c9d4; font-weight:800; font-size:11px; text-transform:uppercase; letter-spacing:.04em; }
+  .sv { color:#37d67f; font-size:10px; font-weight:800; }
+  .ssp { flex:1; }
+  .sid { color:#59606d; font-size:10px; font-variant-numeric:tabular-nums; letter-spacing:.03em; }
+  .slegs { padding:4px 14px 6px; }
+  .sleg { display:flex; align-items:center; gap:10px; padding:9px 0 9px 24px; position:relative; }
+  .sleg::before { content:""; position:absolute; left:7px; top:0; bottom:0; width:2px;
+                  background:#26314a; }
+  .sleg:first-child::before { top:50%; }
+  .sleg:last-child::before { bottom:50%; }
+  .sleg:only-child::before { display:none; }
+  .sleg::after { content:""; position:absolute; left:2.5px; top:50%; transform:translateY(-50%);
+                 width:11px; height:11px; border-radius:50%; border:2.5px solid var(--sky, #4DA3FF);
+                 background:#0b0e13; box-sizing:border-box; }
+  .sllogo { width:27px; height:27px; object-fit:contain; background:#dbe1ea; border-radius:50%;
+            padding:2.5px; flex:0 0 auto; }
+  .slbody { flex:1; min-width:0; }
+  .slp { color:#e7ebf0; font-weight:700; font-size:13.5px; white-space:nowrap; overflow:hidden;
+         text-overflow:ellipsis; }
+  .slm { color:#8b94a3; font-size:11.5px; margin-top:1.5px; }
+  .slo { color:#c3c9d4; font-weight:700; font-size:12.5px; font-variant-numeric:tabular-nums; }
+  .sft { display:flex; align-items:center; gap:10px; padding:8px 12px; background:#0e131b; border-top:1px solid #171c26; }
+  .sstake { color:#9aa3b2; font-size:11.5px; font-variant-numeric:tabular-nums; }
+  .sstake b { color:#c3c9d4; font-weight:700; }
+  .sodds { color:#37d67f; font-weight:800; font-size:15px; font-variant-numeric:tabular-nums; }
+  .spay { color:#5b9dff; font-weight:700; font-size:12px; font-variant-numeric:tabular-nums; }
+  .sft .sid { margin-left:auto; }
+  /* record strip on the board (audit: the record lived a tab away) */
+  .recstrip { display:flex; align-items:baseline; gap:7px; background:#0f1116; border:1px solid #191d26;
+              border-radius:10px; padding:8px 12px; margin:2px 0 10px; font-size:13.5px; color:#c6cdd8;
+              cursor:pointer; }
+  .recstrip b { color:#e7ebf0; } .recstrip b.up { color:#39d98a; } .recstrip b.down { color:#f87171; }
+  .recstrip span { color:#5b6b82; font-size:11px; margin-left:auto; }
+  /* tappable played mark + contra warning on the card face */
+  .pmark { color:#2c3442; font-size:15px; font-weight:800; cursor:pointer; padding:0 3px; user-select:none; }
+  .pmark.on { color:#39d98a; }
+  .contra { color:#e0a95e; font-size:12px; margin-left:0; }
+  .rwatch { color:var(--warm); border:1px dashed rgba(255,138,61,.4); border-radius:var(--pill);
+            padding:1px 7px; font-size:9.5px; font-weight:700; letter-spacing:.03em; }
+  .tchip { display:inline-grid; place-items:center; width:18px; height:18px; border-radius:6px;
+           font-size:10.5px; font-weight:800; margin-left:2px; }
+  .tchip.tA { background:linear-gradient(180deg, rgba(77,163,255,.32), rgba(77,163,255,.16));
+              color:#dbeafe; border:1px solid rgba(77,163,255,.4); }
+  .tchip.tB { background:rgba(255,255,255,.07); color:var(--t2); border:1px solid var(--hair2); }
+  .tchip.tC { background:rgba(255,255,255,.03); color:var(--t3); border:1px solid var(--hair); }
+  .tierleg { background:radial-gradient(140% 170% at 50% -20%, #15181f, #0d0f14 65%);
+             border:1px solid var(--hair); border-radius:14px; padding:11px 13px; margin-top:12px;
+             box-shadow:inset 0 1px 0 rgba(255,255,255,.05); }
+  .tlrow { display:flex; align-items:center; gap:9px; padding:4px 0; }
+  .tld { color:var(--t3); font-size:11.5px; }
+  .tlr { margin-left:auto; color:var(--t2); font-size:11.5px; font-weight:700;
+         font-variant-numeric:tabular-nums; }
+  .xteam { color:#5b6b82; font-size:10.5px; }
+  .stag { color:#c9a06a; font-size:10px; font-weight:700; margin-left:6px; }
+  .tcard.diag .tbody { display:none; } .tcard.diag.open .tbody { display:block; }
+  /* plain-language hit meters (replaced the ROLE/L5/L10/SZN/H2H chip grid) */
+  .meters { display:flex; flex-direction:column; gap:7px; margin-top:12px; }
+  /* meters moved into the drawer (2026-07-19): separate them from the reasoning below */
+  .bwrap .meters { margin:2px 0 14px; padding-bottom:14px; border-bottom:1px solid #14181f; }
+  .meter { display:flex; align-items:center; gap:10px; }
+  .mlab { flex:0 0 92px; color:var(--t3); font-weight:600; font-size:11px; }
+  .mbar { flex:1; height:6px; border-radius:999px; background:rgba(255,255,255,.07); overflow:hidden; }
+  .mbar i { display:block; height:100%; border-radius:999px; background:#8b94a3;
+            transition:width .5s var(--easeout); }
+  .meter.good .mbar i { background:var(--up); } .meter.bad .mbar i { background:var(--dn); }
+  .mval { flex:0 0 auto; font-variant-numeric:tabular-nums; font-weight:700; font-size:11.5px;
+          color:var(--t2); }
+  .meter.good .mval { color:var(--up); } .meter.bad .mval { color:var(--dn); }
+  .tup { color:var(--up); } .tdn { color:var(--dn); }
+  .bklogo { width:17px; height:17px; border-radius:5px; vertical-align:-3.5px; margin-left:5px; }
+  .rgsub { color:var(--t3); font-size:10.5px; margin:3px 0 7px; }
+  .rgnone { color:var(--warm); font-size:12.5px; line-height:1.45; }
+  .rgnone b { color:#f4ddc2; }
+  /* also-flagged coherence strip (everything that pinged but sits below the top-3 cards) */
+  .xtras { background:#0b0e13; border:1px solid #1b2130; border-radius:11px; padding:9px 12px; margin:10px 0; }
+  .xt { font-size:10.5px; color:#8b93a1; letter-spacing:.02em; margin-bottom:6px; }
+  .xchip { display:inline-block; font-size:12px; color:#c6cdd8; background:#10141c; border:1px solid #1e2431;
+           border-radius:8px; padding:3px 8px; margin:2px 4px 2px 0; }
+  .xchip .tchip { vertical-align:-4px; margin-left:5px; }
+  .xchip b { color:#e7ebf0; }
+  /* laddered plays */
+  .ladder { background:#0b0e13; border:1px solid #1b2130; border-radius:11px; margin-bottom:10px; overflow:hidden; }
+  .lhd { display:flex; align-items:baseline; gap:9px; padding:8px 12px; background:#0e131b; border-bottom:1px solid #171c26; }
+  .lname { color:#e7ebf0; font-weight:800; font-size:13px; }
+  .lstat { color:#5b9dff; font-weight:800; font-size:10.5px; text-transform:uppercase; letter-spacing:.03em; }
+  .lrange { color:#9aa3b2; font-size:12px; font-variant-numeric:tabular-nums; }
+  .lsp { flex:1; }
+  .ltot { color:#37d67f; font-weight:800; font-size:12.5px; font-variant-numeric:tabular-nums; }
+  .ltot span { color:#59606d; font-weight:600; font-size:9.5px; text-transform:uppercase; }
+  .lrungs { display:flex; flex-wrap:wrap; gap:8px; padding:10px 12px; }
+  .lrung { display:flex; align-items:baseline; gap:6px; background:#12161e; border:1px solid #1b2130; border-radius:8px; padding:5px 10px; }
+  .lrung b { color:#e7ebf0; font-size:12.5px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .lro { color:#7d8696; font-size:11px; font-variant-numeric:tabular-nums; }
+  .lst { color:#5b9dff; font-size:11px; font-weight:800; }
+  .lv { color:#37d67f; font-size:10px; }
+  .wlg { border-radius:14px; padding:11px 14px 6px; margin-bottom:10px; }
+  .wlg-hd { display:flex; justify-content:space-between; align-items:center; padding-bottom:8px;
+            border-bottom:1px solid var(--hair, #171c25); }
+  .wlg-hd .gmatch { display:flex; align-items:center; gap:7px; color:#c3c9d4; font-weight:800;
+                    font-size:12.5px; letter-spacing:.02em; }
+  .wlg-hd .gtime { color:#7d8696; font-size:11.5px; font-variant-numeric:tabular-nums; }
+  .wlrow { padding:9px 0 10px; border-top:1px solid #12161e; }
+  .wlrow:first-of-type { border-top:none; }
+  .wlcond { color:#c9a06a; font-size:11.5px; font-weight:600; }
+  .wlcond b { color:#f4ddc2; font-weight:800; }
+  .wlin { color:#7d8696; font-weight:600; }
+  .wlplay { display:flex; align-items:center; flex-wrap:wrap; gap:4px 7px; margin-top:4px;
+            color:#cdd4de; font-size:13.5px; }
+  .wlplay b { white-space:nowrap; }
+  .wlplay b { color:#e8ecf2; font-weight:800; }
+  .wlright { margin-left:auto; display:flex; align-items:center; gap:7px; white-space:nowrap; }
+  .wlodds { color:#9aa3b2; font-variant-numeric:tabular-nums; font-weight:700; font-size:12.5px; }
+  .wlrow.wlshadow { opacity:.55; }
+  /* PROP row — the read order is bet -> price -> EDGE (the one saturated-green number) */
+  .prop { padding:13px 0 5px; cursor:pointer; border-top:1px solid #14181f; margin-top:9px; }
+  .pblk .prop:first-of-type { border-top:0; margin-top:8px; }
+  .prow { display:flex; align-items:center; gap:7px; }
+  /* Over/Under marker — filled tint + bold bright letter (was a thin ring around the letter, which
+     read as a confusing double-O) */
+  .pind { width:26px; height:26px; border-radius:8px; display:grid; place-items:center;
+    font-size:15px; font-weight:900; flex:none; }
+  .pind.o { color:#5ad98a; background:rgba(90,217,138,.16); }
+  .pind.u { color:#74a8ef; background:rgba(116,168,239,.16); }
+  #mlb .pind.u { color:#ef6a6a; background:rgba(239,106,106,.16); }   /* MLB: unders RED */
+  /* TT likely-flag bet row — mirrors the WNBA prop-row design system */
+  .ttbet { display:flex; align-items:center; gap:11px; padding:11px 0 10px; border-bottom:1px solid #161d28; }
+  .ttbet:last-of-type { border-bottom:none; }
+  .ttbln { font-size:16px; font-weight:800; color:var(--t1); font-variant-numeric:tabular-nums; min-width:52px; letter-spacing:-.01em; }
+  .ttbln .tld { color:#5b6b82; font-weight:600; margin-right:1px; }
+  .ttbmid { flex:1; min-width:0; }
+  /* FULL NAMES (2026-07-31, user): ellipsis truncation made Polish pairs unreadable on a
+     phone, and a name you cannot read is a bet you cannot place. Wrap instead. */
+  .ttbnm { font-size:14px; color:#cdd5e0; white-space:normal; overflow-wrap:anywhere; line-height:1.32; }
+  .ttbsb .bmgm { color:#c9a227; }     /* BetMGM gold, so the book is never misread */
+  .podds.bmgm { color:#c9a227; }
+  .ttbnm b { color:var(--t1); font-weight:700; }
+  .ttbsb { color:#93a0b4; font-size:12px; margin-top:2px; }
+  .shop { color:#6f7d92; font-size:11px; }
+  .shop b { color:#8fa4c0; font-weight:600; }
+  .stalechip { color:#e0a33a; font-size:11px; }
+  .ttbsb .pj { color:#8ea2bd; font-weight:600; }
+  .ttbsb .fd { color:#4da3ff; font-weight:600; }
+  .ttbet .pind.u { color:#ef6a6a; background:rgba(239,106,106,.16); }   /* TT: unders RED (over stays green) */
+  .mlbaway { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.04em;
+             color:#5ad98a; background:rgba(90,217,138,.14); border-radius:5px; padding:1px 5px;
+             margin-left:5px; vertical-align:1px; }   /* ★ the away+contact outs-under edge */
+  .bktag { display:inline-block; font-size:9px; font-weight:800; color:#9aa3b2; background:#1a1f29;
+           border-radius:5px; padding:2px 5px; margin-left:5px; vertical-align:2px; }
+  .mlbprem { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.04em;
+             color:#f2c14e; background:rgba(242,193,78,.15); border:1px solid rgba(242,193,78,.35);
+             border-radius:5px; padding:1px 5px; margin-left:5px; vertical-align:1px; }  /* ★★ +49% tier */
+  .mlbwarn { font-size:12px; font-weight:700; color:#ffb4a2; background:rgba(224,90,74,.14);
+              border:1px solid rgba(224,90,74,.45); border-radius:8px; padding:8px 10px;
+              margin:2px 0 10px; line-height:1.4; }  /* LOUD: feed broken, not a quiet slate */
+  .ttconf { display:flex; flex-direction:column; align-items:center; gap:3px; flex:none; }
+  /* TT %-chip holds "73%" (3 chars), not a single A/B/C letter — override the fixed 18px box so the
+     number sits centered with even padding on all sides instead of spilling out the edges */
+  .ttconf .tchip { margin:0; vertical-align:0; width:auto; height:auto; min-width:46px;
+                   padding:5px 11px; border-radius:9px; font-size:12.5px; line-height:1;
+                   font-variant-numeric:tabular-nums; box-sizing:border-box; }
+  .ttconflab { font-size:8px; color:#5b6b82; text-transform:uppercase; letter-spacing:.04em; font-weight:700; white-space:nowrap; }
+  .plno { font-size:24px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.015em;
+          white-space:nowrap; }
+  .plno.rng { font-size:16px; }
+  .pstat { color:#78818f; font-weight:700; font-size:13px; letter-spacing:.04em; }
+  .psp { flex:1; }
+  /* BOOK-COLORED ODDS: FanDuel blue, DraftKings green — the color is the book tag */
+  .podds { font-weight:700; font-size:15.5px; font-variant-numeric:tabular-nums; letter-spacing:-.01em; }
+  .podds.fd { color:#4da3ff; }
+  .podds.dk { color:#54cc4a; }
+  .podds.oth { color:#9aa3b2; }
+  .pbk { font-size:9px; font-weight:800; letter-spacing:.05em; margin-left:4px; padding:1.5px 4px;
+    border-radius:4px; position:relative; top:-1px; }
+  .pbk.fd { color:#4da3ff; background:rgba(77,163,255,.12); }
+  .pbk.dk { color:#54cc4a; background:rgba(84,204,74,.15); }
+  .pbk.oth { color:#78818f; background:#161b24; border:1px solid #1d232e; }
+  .pedge { font-weight:800; font-size:20px; font-variant-numeric:tabular-nums; letter-spacing:-.015em; }
+  .prop:has(.plno.rng) .pedge { font-size:18px; }
+  .prop:has(.plno.rng) .podds { font-size:15px; }
+  .pedge.hi { color:#37d67f; } .pedge.mid { color:#c3cdda; } .pedge.lo { color:#6b7484; }
+  .pnote { color:#6b7484; font-size:10.5px; margin-left:7px; white-space:nowrap; }
+  .pchev { color:#3b4452; font-size:18px; transition:transform .15s; margin-left:-2px; }
+  .prop:has(+ .bars.open) .pchev { transform:rotate(90deg); }
+  .pv { color:#78818f; font-weight:800; font-size:13px; }
+  .juice { color:#c08a4d; font-size:10px; font-weight:700; white-space:nowrap; }
+  /* HEATMAP — tint the CELL (faint wash), not the text; values stay near-neutral */
+  .pgrid { display:grid; grid-template-columns:repeat(5,1fr); gap:5px; margin:10px 0 2px; }
+  .gc { background:#0b0d12; border:1px solid #161b24; border-radius:8px; padding:6px 2px 5px;
+    display:flex; flex-direction:column; align-items:center; gap:1px; }
+  .gc.hot { background:rgba(55,214,127,.07); border-color:rgba(55,214,127,.22); }
+  .gc.cold { background:rgba(248,113,107,.06); border-color:rgba(248,113,107,.20); }
+  .gc.r .gcl { color:#7aa2e3; }
+  .gcl { color:#59606d; font-size:8.5px; font-weight:700; letter-spacing:.05em; }
+  .gcv { font-size:13.5px; font-weight:800; font-variant-numeric:tabular-nums; color:#dbe2ec; }
+  .gc.hot .gcv { color:#7fe0ac; } .gc.cold .gcv { color:#f0928c; } .gcv.dim { color:#3b4452; }
+  .gcs { color:#5c6572; font-size:9.5px; font-weight:600; font-variant-numeric:tabular-nums; }
+  .pctx { color:#67707f; font-size:11px; font-weight:500; margin:8px 1px 3px; }
+  .prungs { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:7px 1px 2px; }
+  .rlbl { color:#5c6572; font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; }
+  .rung { background:#161d29; border:1px solid #263041; border-radius:6px; padding:2px 7px; font-size:12px; color:#98a4b5; font-variant-numeric:tabular-nums; }
+  .rung b { color:#c9d2de; font-weight:700; } .rung .ro { color:#6ba3f5; font-weight:700; }
+  .cdrv { color:#98a4b5; font-weight:600; }
+  .cdvp.soft { color:#79b598; } .cdvp.tough { color:#d9a05f; }
+  .bars { display:none; padding:20px 2px 4px; }
+  .bars.open { display:block; }
+  .chart { position:relative; display:flex; gap:5px; height:104px; overflow:visible; }
+  .col { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; position:relative; }
+  .b { width:100%; max-width:30px; border-radius:5px 5px 0 0; position:relative;
+        min-height:26px; z-index:1; }
+  .b.o { background:#2f9e63; }
+  .b.u { background:#8a3b46; }
+  .bv { position:absolute; bottom:4px; left:0; right:0; text-align:center; font-size:11.5px;
+         font-weight:700; color:rgba(255,255,255,.96); text-shadow:0 1px 2px rgba(0,0,0,.35); }
+  .bp { position:absolute; top:-16px; left:0; right:0; text-align:center; font-size:10px;
+         font-weight:600; color:#8b94a3; letter-spacing:-.2px; }
+  .m { position:absolute; bottom:0; left:3px; right:3px; background:rgba(255,255,255,.055);
+        border-radius:3px 3px 0 0; z-index:0; }
+  .mv { position:absolute; top:3px; left:0; right:0; text-align:center; font-size:10px;
+         font-weight:700; color:#aeb7c6; letter-spacing:-.2px; }
+  .why { color:#9aa3b2; font-size:12.5px; line-height:1.55; margin:0 2px 14px; }
+  .why b { color:#d3dae4; font-weight:700; }
+  .opps { display:flex; gap:5px; margin-top:7px; }
+  .opps span { flex:1; text-align:center; font-size:10px; color:#7d8696; line-height:1.25; }
+  .opps span i { display:block; font-style:normal; font-size:9.5px; color:#59616f;
+                  font-weight:600; letter-spacing:-.2px; }
+  .pline { position:absolute; left:0; right:0; height:0; border-top:1.5px dashed #5b9dff88; z-index:2; }
+  .pline span { position:absolute; left:0; top:-8px; font-size:9.5px; color:#5b9dff;
+                 background:#08090c; padding:0 4px; border-radius:3px; }
+  .bnote { color:#7d8696; font-size:11.5px; margin-top:9px; text-align:center; }
+  .regime { margin:10px 0 4px; padding:9px 11px; background:#141c28; border:1px solid #223047; border-radius:8px; }
+.rgh { font-size:12px; color:#aab3c1; margin-bottom:7px; }
+.cmps { display:flex; flex-wrap:wrap; gap:6px; }
+.cmp { font-size:11px; color:#8b94a3; background:#1c2634; border-radius:5px; padding:2px 7px; opacity:.5; }
+.cmp.pr { opacity:1; box-shadow:inset 0 0 0 1px #5b9dff66; }
+.cmp b { color:#e6ebf2; }
+.sup { color:#4ea373; }
+.warn { color:#c98a3c; }
+  .nodata { color:#6b7484; font-size:12px; padding:8px 0; }
+  .empty { color:#93a0b4; background:#121620; border:1px solid #1f2836; border-radius:16px; padding:26px 20px; text-align:center; font-size:15px; }
+  .empty span { color:#6b7484; font-size:13px; }
+  .foot { color:#525b6a; font-size:11px; text-align:center; margin-top:26px; line-height:1.6; }
+  .tabs { display:flex; gap:6px; margin:16px 0 20px; background:#101520; border:1px solid #1f2836;
+    border-radius:12px; padding:4px; }
+  .tab { flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:9px 0;
+    font-size:13.5px; font-weight:600; color:#8b94a3; border-radius:9px; cursor:pointer; }
+  .tab.active { background:#1c2534; color:#e8ecf2; }
+  .tabic { width:15px; height:15px; flex:none; opacity:.85; }
+  .tab.active .tabic { opacity:1; }
+  .panel { display:block; }
+  .panel.hidden { display:none; }
+  .ttlg { font-size:13px; font-weight:700; color:#cdd5e0; margin:0 0 10px; }
+  .ttrow { padding:10px 0 9px; border-bottom:1px solid #161d28; cursor:pointer; }
+  .ttmain { font-size:15px; display:flex; align-items:center; }
+  .ttchev { margin-left:auto; color:#404b5e; font-size:19px; transition:transform .15s; }
+  .ttrow:has(+ .ttlad.open) .ttchev { transform:rotate(90deg); }
+  .ttsub { color:#93a0b4; font-size:12.5px; margin-top:3px; }
+  .ttside { color:#5b9dff; font-weight:700; }
+  .ttbook { color:#8ae0b0; font-weight:700; font-variant-numeric:tabular-nums; }
+  .tflat { cursor:default; }
+  .ttnum { margin-left:auto; padding-left:10px; display:flex; flex-direction:column; align-items:flex-end; line-height:1.15; }
+  .tttot { color:#5b9dff; font-weight:700; font-size:15px; font-variant-numeric:tabular-nums; }
+  .ttodds { color:#8a93a3; font-size:10.5px; font-weight:600; font-variant-numeric:tabular-nums; margin-top:1px; white-space:nowrap; }
+  .ttrec { color:#cdd5e0; font-weight:700; font-variant-numeric:tabular-nums; }
+  .ttpick { margin-left:auto; padding-left:10px; font-size:14px; font-weight:800; letter-spacing:.01em; color:#8ae0b0; white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .ttedge { color:#8ae0b0; font-weight:700; }
+  .ttempty { color:#93a0b4; font-size:13px; line-height:1.5; }
+  .ttrk { margin-top:5px; }
+  .ttrkrow { display:grid; grid-template-columns:1fr auto auto 62px; gap:10px; padding:6px 0; border-top:1px solid #161d28; font-size:13px; font-variant-numeric:tabular-nums; }
+  .ttrkrow span { text-align:right; } .ttrkrow span:first-child { text-align:left; font-weight:600; }
+  .ttrkhd { border-top:0; color:#5b6b82; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+  .tsh { color:#5b6b82; font-size:11px; font-weight:600; }
+  .ttcnt { color:#5b6b82; font-weight:600; font-size:11px; margin-left:6px; }
+  .ttfoot { color:#5b6b82; font-size:11px; margin-top:9px; }
+  .ttlad { display:none; padding:6px 0 12px; }
+  .ttlad.open { display:block; }
+  .ttlad:last-child { border-bottom:0; }
+  .ladhead, .ladrow { display:grid; grid-template-columns:56px 1fr 36px 38px 46px; gap:9px;
+    align-items:center; }
+  .ladod { color:#5b9dff; font-weight:700; text-align:right; font-variant-numeric:tabular-nums; }
+  .ladrow .ladod { color:#cdd6e4; }
+  .ladhead { color:#6b7484; font-size:9.5px; text-transform:uppercase; letter-spacing:.04em;
+    padding:4px 6px 6px; }
+  .ladrow { padding:5px 6px; border-radius:7px; font-size:12.5px; }
+  .ladrow.mark { background:#15263b; box-shadow:inset 2px 0 0 #5b9dff; }
+  .ladrow.mark .ladl { color:#7aa2e3; }
+  .ladrow.dim { opacity:.34; }
+  .ladl { color:#aeb8c7; font-weight:700; font-variant-numeric:tabular-nums; }
+  .ladm { color:#5b9dff; font-size:10px; }
+  .ladbar { display:flex; height:7px; border-radius:4px; overflow:hidden; background:#0f141d; }
+  .ladbar i { background:#2f9e63; }
+  .ladv { text-align:right; font-variant-numeric:tabular-nums; font-weight:600; font-size:12px;
+    color:#cdd5e0; }
+  .ladr { text-align:right; color:#7d8696; font-size:11px; font-variant-numeric:tabular-nums; }
+  .ladnote { color:#5a6474; font-size:10.5px; margin-top:9px; padding:0 6px; }
+  .tcard { background:#0f1116; border:1px solid #191d26; border-radius:14px; padding:16px 15px; margin-bottom:11px; }
+  .thead { font-size:15px; font-weight:800; margin-bottom:13px; }
+  .trow { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .tbox { text-align:center; background:#080a0e; border:1px solid #171c26; border-radius:9px; padding:9px 4px; }
+  .tk { color:#59606d; font-size:9px; text-transform:uppercase; letter-spacing:.05em; font-weight:700; margin-bottom:5px; }
+  .tv { font-size:22px; font-weight:800; line-height:1; font-variant-numeric:tabular-nums; }
+  .tv.up { color:#37d67f; } .tv.down { color:#f8716b; }
+  .tsub { color:#7d8696; font-size:11.5px; text-align:center; margin-top:12px; }
+  /* last-24h bet dropdown (WNBA + TT Elite trackers) */
+  .tdd { margin-top:12px; border-top:1px solid #191d26; padding-top:9px; }
+  .tdd summary { list-style:none; cursor:pointer; color:#93a0b4; font-size:12px; font-weight:600;
+    display:flex; align-items:center; gap:7px; user-select:none; }
+  .tdd summary::-webkit-details-marker { display:none; }
+  .tdd summary::before { content:"\25B8"; color:#5b6b82; font-size:10px; transition:transform .15s ease; }
+  .tdd[open] summary::before { transform:rotate(90deg); }
+  .ddcnt { color:#5b6b82; font-weight:600; }
+  .ddbody { margin-top:6px; }
+  .ddday { display:flex; justify-content:space-between; align-items:baseline; font-size:11px;
+    font-weight:700; color:#7d8696; text-transform:uppercase; letter-spacing:.04em;
+    margin:10px 0 3px; padding-bottom:4px; border-bottom:1px solid #161d28; }
+  .ddtot { font-variant-numeric:tabular-nums; letter-spacing:0; text-transform:none; color:#cdd5e0; }
+  .ddbet { display:grid; grid-template-columns:1fr auto 62px; gap:9px; align-items:center;
+    padding:5px 0; font-size:13px; }
+  .ddnm { color:#cdd5e0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ddwl { font-weight:800; font-size:10.5px; width:19px; text-align:center; border-radius:5px; padding:1px 0; }
+  .ddwl.w { color:#5ad98a; background:rgba(90,217,138,.14); }
+  .ddwl.l { color:#ef7a7a; background:rgba(239,122,122,.13); }
+  .ddu { text-align:right; font-variant-numeric:tabular-nums; font-weight:600; }
+
+  /* ═══════════ DESIGN OVERHAUL (2026-07-17) — ProspectScore visual language ═══════════
+     Tokens + surfaces from web2/design-system: near-black graphite, ONE blue accent (#4DA3FF),
+     liquid-glass chrome (blur+saturate), premium radial cards with inset highlights, 200-300ms
+     ease-out motion, color = meaning (green/red money · amber provisional · blue interactive). */
+  :root {
+    --bg:#0B0B0D; --surface:#101114; --card:rgba(18,19,24,.72);
+    --t1:#fff; --t2:#B5B8C0; --t3:#7A7D85;
+    --sky:#4DA3FF; --up:#43E08A; --dn:#F2565C; --warm:#FF8A3D;
+    --hair:rgba(255,255,255,.08); --hair2:rgba(255,255,255,.12);
+    --ease:cubic-bezier(.16,1,.3,1); --easesoft:cubic-bezier(.4,0,.2,1); --easeout:cubic-bezier(.22,1,.36,1);
+    --r:16px; --pill:999px;
+  }
+  body { background:var(--bg);
+    background-image:radial-gradient(120% 55% at 50% -12%, rgba(77,163,255,.075), transparent 60%);
+    background-repeat:no-repeat; color:var(--t1); }
+  h1 { font-size:22px; letter-spacing:-.02em; }
+  h2 { color:var(--t3); letter-spacing:.07em; font-weight:600; }
+  .live { color:var(--t3); }
+  #rfchk { color:var(--t3); }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+  @keyframes pulse { 0%,100% { box-shadow:0 0 0 0 rgba(67,224,138,.45); } 60% { box-shadow:0 0 0 5px rgba(67,224,138,0); } }
+  .dot { background:var(--up); animation:pulse 2.6s var(--easesoft) infinite; }
+  /* liquid-glass floating tab bar (sticks while content scrolls beneath) */
+  .tabs { position:sticky; top:calc(10px + env(safe-area-inset-top)); z-index:50;
+    background:linear-gradient(180deg, rgba(255,255,255,.085), rgba(255,255,255,.04));
+    backdrop-filter:blur(32px) saturate(170%); -webkit-backdrop-filter:blur(32px) saturate(170%);
+    border:1px solid var(--hair2); border-radius:var(--pill); padding:4px; gap:0;
+    box-shadow:0 12px 32px rgba(0,0,0,.45); }
+  .tab { position:relative; z-index:2; background:none !important; color:var(--t3); border-radius:var(--pill);
+    transition:color .25s var(--easesoft); padding:9px 0; }
+  .tab.active { color:var(--t1); }
+  .tabthumb { position:absolute; z-index:1; top:4px; bottom:4px; left:4px; width:0; border-radius:var(--pill);
+    background:linear-gradient(180deg, rgba(77,163,255,.28), rgba(77,163,255,.14));
+    border:1px solid rgba(77,163,255,.35); box-shadow:inset 0 1px 0 rgba(255,255,255,.15);
+    transition:left .38s var(--easeout), width .38s var(--easeout); }
+  .panel { animation:fadeIn .28s var(--easesoft); }
+  /* record strip -> glass chip row */
+  .recstrip { background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+    backdrop-filter:blur(16px) saturate(140%); -webkit-backdrop-filter:blur(16px) saturate(140%);
+    border:1px solid var(--hair2); border-radius:12px; animation:fadeUp .4s var(--easeout) both; }
+  .recstrip b.up { color:var(--up); }
+  /* filter pills */
+  .fbar { align-items:center; }
+  .fmeta { margin-left:auto; color:var(--t3); font-size:11px; font-weight:600; letter-spacing:.03em; }
+  .fgrp { background:rgba(255,255,255,.045); border:1px solid var(--hair); border-radius:var(--pill); padding:3px; }
+  .pill { border-radius:var(--pill); transition:color .2s var(--easesoft), background .25s var(--easesoft); }
+  .pill.on { background:linear-gradient(180deg, rgba(77,163,255,.26), rgba(77,163,255,.13));
+    color:#dbeafe; border:0; box-shadow:inset 0 1px 0 rgba(255,255,255,.12); }
+  /* game sections + premium player cards */
+  .game { animation:fadeUp .5s var(--easeout) both; animation-delay:calc(var(--i,0)*55ms); }
+  .ghd { border-bottom:1px solid var(--hair); }
+  .gtime { color:var(--t3); }
+  .pblk { background:radial-gradient(130% 150% at 50% -10%, #181B22, #0F1116 62%);
+    border:1px solid rgba(255,255,255,.10); border-radius:18px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 16px 40px rgba(0,0,0,.5);
+    position:relative; overflow:hidden;
+    transition:transform .22s var(--ease), box-shadow .22s var(--ease); }
+  .pblk::before { content:""; position:absolute; inset:0 0 auto 0; height:1.5px;
+    background:linear-gradient(90deg, transparent, var(--sky) 30%, var(--sky) 70%, transparent);
+    opacity:.8; }
+  @media (hover:hover) {
+    .pblk:hover { transform:translateY(-2px);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 24px 54px rgba(0,0,0,.6); }
+  }
+  .prop { transition:background .15s var(--easesoft); border-radius:10px; }
+  .prop:active { background:rgba(255,255,255,.045); }
+  .pedge.hi { color:var(--up); }
+  .pmark { transition:transform .16s var(--ease), color .2s var(--easesoft); }
+  .pmark:active { transform:scale(1.35); }
+  .pmark.on { color:var(--up); }
+  /* drawer opens like a sheet: grid-rows 0fr -> 1fr */
+  .bars { display:grid; grid-template-rows:0fr; opacity:0; visibility:hidden; padding:0 2px;
+    transition:grid-template-rows .32s var(--easeout), opacity .26s var(--easesoft),
+               visibility 0s .32s, padding .32s var(--easeout); }
+  .bars.open { display:grid; grid-template-rows:1fr; opacity:1; visibility:visible;
+    padding:20px 2px 4px; transition:grid-template-rows .32s var(--easeout),
+               opacity .3s var(--easesoft) .06s, visibility 0s; }
+  .bwrap { overflow:hidden; min-height:0; }
+  /* sections inherit the flat-card family */
+  .xtras, .parlays .slip, .ladders .ladder, .watchlist .wlg, .tcard, .regime {
+    background:radial-gradient(140% 170% at 50% -20%, #15181f, #0d0f14 65%);
+    border:1px solid var(--hair); border-radius:14px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 10px 28px rgba(0,0,0,.35); }
+  .xtras, .ladders, .parlays, .watchlist { animation:fadeUp .45s var(--easeout) both; }
+  .watchlist .wlg { border-style:dashed; border-color:rgba(255,138,61,.28); }
+  .op-title, .wl-title, .xt { color:var(--t3); font-size:10.5px; text-transform:uppercase;
+    letter-spacing:.07em; font-weight:600; }
+  .op-title span, .wl-title span, .xt span { text-transform:none; letter-spacing:.02em; color:var(--t3);
+    font-weight:500; }
+  .xchip { background:rgba(255,255,255,.045); border:1px solid var(--hair); border-radius:var(--pill);
+    transition:background .2s var(--easesoft); }
+  .rfrsh { border-radius:var(--pill); background:rgba(255,255,255,.06); border:1px solid var(--hair2);
+    color:var(--sky); transition:transform .3s var(--ease); }
+  .rfrsh:active { transform:rotate(180deg); }
+  .tv.up { color:var(--up); } .tv.down { color:var(--dn); }
+  .foot { color:#3f434c; font-size:10px; }
+  /* TT + GG tabs — same flat-card family, eyebrow headers, semantic colors */
+  .card { background:radial-gradient(140% 170% at 50% -20%, #15181f, #0d0f14 65%);
+    border:1px solid var(--hair); border-radius:14px; padding:14px 15px; margin-bottom:12px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 10px 28px rgba(0,0,0,.35);
+    animation:fadeUp .45s var(--easeout) both; }
+  .ttlg { color:var(--t3); font-size:10.5px; text-transform:uppercase; letter-spacing:.07em;
+    font-weight:600; display:flex; align-items:center; gap:7px; }
+  .ttcnt { background:linear-gradient(180deg, rgba(77,163,255,.26), rgba(77,163,255,.13));
+    color:#dbeafe; border-radius:var(--pill); padding:2px 9px; font-size:11px; font-weight:700; }
+  .ttrow { border-bottom:1px solid var(--hair); transition:background .15s var(--easesoft);
+    border-radius:8px; }
+  .ttrow:active { background:rgba(255,255,255,.045); }
+  .ttmain b { color:var(--t1); }
+  .ttpick { color:var(--up); }
+  .ttsub, .ttfoot, .ttempty { color:var(--t3); }
+  .ttodds, .ttbook { color:var(--sky); }
+  .ttlad.open { animation:fadeIn .25s var(--easesoft); }
+  .ttrkrow span:last-child.up { color:var(--up); }
+  @media (prefers-reduced-motion:reduce) {
+    *, *::before, *::after { animation:none !important; transition:none !important; }
+  }
+
+  /* ══════════════════ CUPERTINO-CSS2 ══════════════════
+     Apple dark, matching the approved render 1:1. Scoped to #wnba; #tt/#pga/#mlb are untouched.
+     Dark mode is not an inversion — elevation REVERSES (the drawer rises to #2C2C2E inside a
+     #1C1C1E group), semantics use Apple's brighter dark variants, and the hover wash is white. */
+  :root {
+    --cu-bg:#000; --cu-grp:#1c1c1e; --cu-grp2:#2c2c2e;
+    --cu-lbl:#fff; --cu-lbl2:rgba(235,235,245,.6); --cu-lbl3:rgba(235,235,245,.3);
+    --cu-fill:rgba(120,120,128,.24); --cu-sep:rgba(84,84,88,.65);
+    --cu-blue:#0a84ff; --cu-grn:#30d158; --cu-org:#ff9f0a; --cu-red:#ff453a;
+  }
+  body { background:var(--cu-bg); color:var(--cu-lbl);
+          font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif; }
+
+  /* ---- grouped-list section header ---- */
+  #wnba .cu-sh { display:flex; align-items:center; gap:8px; padding:8px 4px 7px;
+                  font-size:13px; letter-spacing:.02em; text-transform:uppercase;
+                  color:var(--cu-lbl2); }
+  #wnba .cu-sh b { font-weight:600; letter-spacing:0; text-transform:none; font-size:13px; }
+  #wnba .cu-dot { color:var(--cu-lbl3); }
+  #wnba .cu-shm { display:inline-flex; align-items:center; gap:5px; text-transform:none;
+                   letter-spacing:0; font-size:13px; }
+  #wnba .cu-shr { margin-left:auto; text-transform:none; letter-spacing:0; font-size:13px;
+                   font-variant-numeric:tabular-nums; }
+  #wnba .cu-gl { width:20px; height:20px; object-fit:contain; border-radius:5px;
+                  background:var(--cu-fill); padding:2px; }
+  #wnba .llogo { width:24px; height:24px; border-radius:6px; flex:none; display:inline-flex;
+                  align-items:center; justify-content:center; overflow:hidden;
+                  background:var(--cu-fill); }
+  #wnba .llogo img { width:100%; height:100%; object-fit:contain; padding:3px; }
+  #wnba .llogo.mono { font-size:8px; font-weight:700; color:var(--cu-lbl2); }
+  #wnba .cu-out { display:flex; align-items:center; gap:7px; padding:0 4px 8px;
+                   font-size:13px; color:var(--cu-lbl2); }
+
+  /* ---- the rounded group + card ---- */
+  #wnba .cu-grp { background:var(--cu-grp); border-radius:12px; overflow:hidden;
+                   margin-bottom:20px; }
+  #wnba .cu-c { border-bottom:.5px solid var(--cu-sep); }
+  #wnba .cu-c:last-child { border-bottom:0; }
+  #wnba .cu-sum { padding:13px 16px 14px; cursor:pointer; transition:background .13s; }
+  #wnba .cu-sum:hover { background:rgba(255,255,255,.04); }
+  #wnba .cu-sum:active { background:rgba(255,255,255,.07); }
+
+  /* header row: status pill, book mark, lock time */
+  #wnba .cu-hd { display:flex; align-items:center; gap:8px; margin-bottom:9px; }
+  #wnba .cu-st { font-size:12px; font-weight:600; padding:2px 8px; border-radius:11px; }
+  #wnba .cu-st.ok { color:var(--cu-grn); background:rgba(48,209,88,.18); }
+  #wnba .cu-st.mid { color:var(--cu-blue); background:rgba(10,132,255,.18); }
+  #wnba .cu-st.pp { color:var(--cu-org); background:rgba(255,159,10,.18); }
+  #wnba .cu-st.no { color:var(--cu-lbl2); background:var(--cu-fill); }
+  #wnba .cu-st.live { color:var(--cu-org); background:rgba(255,159,10,.18); }
+  #wnba .cu-hd .bklogo { width:24px; height:24px; border-radius:6px; background:var(--cu-fill);
+                          padding:3px; margin:0; vertical-align:0; }
+  #wnba .cu-time { margin-left:auto; font-size:14px; color:var(--cu-lbl2);
+                    font-variant-numeric:tabular-nums; }
+
+  /* title + team marks */
+  #wnba .cu-ttl { font-size:19px; font-weight:640; letter-spacing:-.022em; color:var(--cu-lbl);
+                   display:flex; align-items:center; gap:8px; margin-bottom:2px; }
+  #wnba .cu-tms { display:inline-flex; align-items:center; gap:4px; }
+  #wnba .cu-tms i { font-style:normal; font-size:13px; color:var(--cu-lbl3); font-weight:400; }
+  #wnba .cu-tm { width:22px; height:22px; object-fit:contain; border-radius:50%;
+                  background:var(--cu-fill); padding:2px; }
+  #wnba .cu-sub { font-size:15px; color:var(--cu-lbl2); margin-bottom:14px; }
+
+  /* THE BET — 36px number, direction subordinate, price right-aligned */
+  #wnba .cu-bet { display:flex; align-items:baseline; gap:8px; margin-bottom:14px; }
+  #wnba .cu-dir { font-size:13px; font-weight:700; letter-spacing:.06em; color:var(--cu-lbl2); }
+  #wnba .cu-line { font-size:36px; font-weight:680; letter-spacing:-.04em; line-height:1;
+                    font-variant-numeric:tabular-nums; }
+  #wnba .cu-line.rng { font-size:26px; }
+  #wnba .cu-unit { font-size:14px; font-weight:600; color:var(--cu-lbl2); }
+  #wnba .cu-price { margin-left:auto; display:flex; align-items:center; gap:9px; }
+  #wnba .cu-od { font-size:20px; font-weight:640; letter-spacing:-.02em;
+                  font-variant-numeric:tabular-nums; }
+  #wnba .cu-chev { color:var(--cu-lbl3); font-size:15px; transition:transform .18s; }
+  #wnba .cu-c:has(.bars.open) .cu-chev { transform:rotate(90deg); }
+  #wnba .cu-warn { color:var(--cu-org); font-size:14px; }
+
+  /* confidence on the FACE */
+  #wnba .cu-cf { display:flex; align-items:center; gap:11px; }
+  #wnba .cu-bar { flex:1; height:7px; background:var(--cu-fill); border-radius:4px;
+                   overflow:hidden; }
+  #wnba .cu-bar i { display:block; height:100%; background:var(--cu-blue); border-radius:4px; }
+  #wnba .cu-bar i.g { background:var(--cu-grn); }
+  #wnba .cu-pc { font-size:16px; font-weight:640; letter-spacing:-.02em;
+                  font-variant-numeric:tabular-nums; }
+  #wnba .cu-pc.na { color:var(--cu-lbl3); }
+  #wnba .cu-n { font-size:14px; color:var(--cu-lbl2); font-variant-numeric:tabular-nums; }
+  #wnba .cu-n.na { color:var(--cu-lbl3); }
+  #wnba .cu-rungs { display:flex; gap:6px; flex-wrap:wrap; margin-top:11px; }
+  #wnba .cu-rungs .rung { font-size:12px; color:var(--cu-lbl2); background:var(--cu-fill);
+                           border-radius:7px; padding:3px 8px; font-variant-numeric:tabular-nums; }
+  #wnba .cu-rungs .rung b { color:var(--cu-lbl); font-weight:600; }
+
+  /* ---- the drawer ELEVATES (tertiary above secondary) ---- */
+  #wnba .bwrap { background:var(--cu-grp2); border-radius:10px; padding:12px 14px; }
+  #wnba .bwrap .meters { margin:0 0 12px; padding-bottom:12px;
+                          border-bottom:.5px solid var(--cu-sep); }
+  #wnba .meter { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  #wnba .meter .mlab { font-size:13px; color:var(--cu-lbl2); }
+  #wnba .meter .mbar { flex:1; height:7px; background:var(--cu-fill); border-radius:4px;
+                        overflow:hidden; }
+  #wnba .meter .mbar i { display:block; height:100%; background:var(--cu-blue); border-radius:4px; }
+  #wnba .meter.good .mbar i { background:var(--cu-grn); }
+  #wnba .meter.bad .mbar i { background:var(--cu-red); }
+  #wnba .meter .mval { font-size:13px; color:var(--cu-lbl);
+                        font-variant-numeric:tabular-nums; }
+  #wnba .why, #wnba .regime { font-size:14px; line-height:1.42; color:var(--cu-lbl2); }
+  #wnba .why b, #wnba .regime b { color:var(--cu-lbl); font-weight:600; }
+
+  @media (max-width:520px) {
+    #wnba .cu-line { font-size:34px; }
+    #wnba .cu-ttl { font-size:18px; }
+    #wnba .cu-sub { font-size:14px; }
+  }
+
+  /* ══════════════════ CUPERTINO-CHROME ══════════════════
+     Page chrome to match the iPhone render: iOS large title, segmented tabs, filter chips. */
+  .wrap { padding:14px 20px 48px; }
+  header { padding:0 0 2px; }
+  h1 { font-size:34px; font-weight:700; letter-spacing:-.037em; line-height:1.1;
+        color:var(--cu-lbl); }
+  .live { font-size:14px; color:var(--cu-lbl2); gap:7px; margin-top:3px;
+           font-variant-numeric:tabular-nums; }
+  .live .dot { width:7px; height:7px; border-radius:50%; background:var(--cu-grn); flex:none; }
+  .rfrsh { width:28px; height:28px; border-radius:14px; background:var(--cu-fill);
+            border:0; color:var(--cu-lbl2); font-size:14px; margin-left:auto; }
+  .rfrsh:active { background:rgba(120,120,128,.4); }
+
+  /* segmented control — .tabthumb becomes the selected segment, so showTab() is untouched */
+  .tabs { background:var(--cu-fill); border:0; border-radius:9px; padding:2px; gap:2px;
+           margin:13px 0 0; }
+  .tab { border-radius:7px; padding:6px 0; font-size:13px; font-weight:590;
+          color:var(--cu-lbl2) !important; gap:5px; }
+  .tab.active { color:var(--cu-lbl) !important; }
+  .tabthumb { top:2px; bottom:2px; left:2px; border-radius:7px; background:#636366 !important;
+               box-shadow:0 3px 8px rgba(0,0,0,.3); }
+  .tabic { width:14px; height:14px; opacity:1; }
+
+  /* filter chips — rendered only for filters that actually match something */
+  .cu-chips { display:flex; gap:7px; padding:12px 0 4px; overflow-x:auto;
+               -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .cu-chips::-webkit-scrollbar { display:none; }
+  .cu-chips[hidden] { display:none; }
+  .cu-ch { background:var(--cu-grp); border:0; border-radius:15px; font:inherit; font-size:13px;
+            font-weight:500; color:var(--cu-lbl); padding:6px 12px; white-space:nowrap;
+            cursor:pointer; display:inline-flex; gap:5px; align-items:center;
+            transition:background .14s,color .14s; }
+  .cu-ch:hover { background:var(--cu-grp2); }
+  .cu-ch[aria-current="true"] { background:var(--cu-blue); color:#fff; }
+  .cu-ch .ct { font-size:12px; color:var(--cu-lbl2); font-variant-numeric:tabular-nums; }
+  .cu-ch[aria-current="true"] .ct { color:rgba(255,255,255,.7); }
+  .cu-ch:focus-visible { outline:2px solid var(--cu-blue); outline-offset:2px; }
+
+  /* ══════════════════ CUPERTINO-POLISH ══════════════════ */
+  /* closed drawer must be ZERO tall: padding is intrinsic and survives a 0fr row, so it only
+     exists once open. This was 50px of dead space under every card. */
+  #wnba .bwrap { background:none; padding:0; border-radius:0; }
+  #wnba .bars.open .bwrap { background:var(--cu-grp2); border-radius:10px; padding:12px 14px; }
+
+  /* the bet holds 36px on phones — no step-down */
+  @media (max-width:520px) {
+    #wnba .cu-line { font-size:36px; }
+    #wnba .cu-ttl { font-size:19px; }
+    #wnba .cu-sub { font-size:15px; }
+  }
+
+  /* record strip -> an iOS grouped row */
+  .recstrip { background:var(--cu-grp); border:0; border-radius:12px; padding:12px 16px;
+               margin:14px 0 0; gap:8px; font-size:15px; color:var(--cu-lbl2); }
+  .recstrip b { color:var(--cu-lbl); font-weight:640; }
+  .recstrip b.up { color:var(--cu-grn); }
+  .recstrip b.down { color:var(--cu-red); }
+  .recstrip span { color:var(--cu-lbl3); font-size:13px; }
+
+  /* the in-progress banner */
+  #wnba .dayhdr { font-size:13px; letter-spacing:.02em; text-transform:uppercase;
+                   color:var(--cu-lbl2); padding:16px 4px 6px; }
+  #wnba .dayhdr.live { color:var(--cu-org); }
+
+  /* Watchlist / Injury / Also-considered -> grouped cards */
+  #wnba .card { background:var(--cu-grp); border:0; border-radius:12px; padding:14px 16px;
+                 margin:0 0 20px; }
+  #wnba .ttlg { font-size:13px; font-weight:600; letter-spacing:.02em; text-transform:uppercase;
+                 color:var(--cu-lbl2); margin:0 0 10px; }
+
+  /* the active tab had a leftover border from the old pill bar */
+  .tab { border:0 !important; box-shadow:none !important; }
+  .tab.active { background:none !important; }
+
+  /* ══════════════════ CUPERTINO-ALL ══════════════════
+     Every remaining component in #wnba, on the same tokens as the card. */
+
+  /* ---- section titles shared by every panel ---- */
+  #wnba .ttlg, #wnba .wl-title, #wnba .sw-title, #wnba .tierleg > b,
+  #wnba .xtras > b { font-size:13px; font-weight:600; letter-spacing:.02em;
+        text-transform:uppercase; color:var(--cu-lbl2); margin:0 0 10px; display:block; }
+  #wnba .ttfoot, #wnba .bnote { font-size:13px; color:var(--cu-lbl3); line-height:1.45;
+        margin-top:10px; }
+
+  /* ---- ALSO CONSIDERED · NOT BET ---- */
+  #wnba .ttbet { display:flex; align-items:baseline; gap:10px; padding:11px 0;
+        border-bottom:.5px solid var(--cu-sep); }
+  #wnba .ttbet:last-of-type { border-bottom:0; }
+  #wnba .ttbet .pind { width:auto; height:auto; border-radius:0; background:none;
+        font-size:13px; font-weight:700; letter-spacing:.06em; color:var(--cu-lbl2);
+        display:inline; place-items:unset; }
+  #wnba .ttbln { font-size:19px; font-weight:680; letter-spacing:-.03em; color:var(--cu-lbl);
+        font-variant-numeric:tabular-nums; }
+  #wnba .ttbmid { flex:1; min-width:0; }
+  #wnba .ttbnm { font-size:15px; font-weight:600; color:var(--cu-lbl); letter-spacing:-.01em; }
+  #wnba .ttbnm b { font-weight:600; }
+  #wnba .ttbsb { font-size:13px; color:var(--cu-lbl2); margin-top:2px; }
+
+  /* ---- CONFIDENCE TIERS ---- */
+  #wnba .tierleg { background:var(--cu-grp); border:0; border-radius:12px; padding:14px 16px;
+        margin:0 0 20px; }
+  #wnba .tlrow { display:flex; align-items:center; gap:10px; padding:9px 0;
+        border-bottom:.5px solid var(--cu-sep); font-size:15px; }
+  #wnba .tlrow:last-child { border-bottom:0; }
+  #wnba .tld { color:var(--cu-lbl2); flex:1; }
+  #wnba .tlr { color:var(--cu-lbl); font-weight:590; font-variant-numeric:tabular-nums;
+        text-align:right; white-space:nowrap; }
+  #wnba .tchip { width:24px; height:24px; border-radius:12px; flex:none; display:inline-flex;
+        align-items:center; justify-content:center; font-size:12px; font-weight:700;
+        padding:0; background:var(--cu-fill); color:var(--cu-lbl2); }
+  #wnba .tchip.tA { background:rgba(10,132,255,.18); color:var(--cu-blue); }
+  #wnba .tchip.tB { background:var(--cu-fill); color:var(--cu-lbl2); }
+  #wnba .tchip.tC { background:var(--cu-fill); color:var(--cu-lbl3); }
+
+  /* ---- ALSO FLAGGED ---- */
+  #wnba .xtras { background:var(--cu-grp); border:0; border-radius:12px; padding:14px 16px;
+        margin:0 0 20px; }
+  #wnba .xchip { display:inline-flex; align-items:center; gap:7px; background:var(--cu-grp2);
+        border:0; border-radius:15px; padding:7px 12px; margin:0 6px 7px 0; font-size:14px;
+        color:var(--cu-lbl); }
+  #wnba .xteam { font-size:12px; font-weight:600; color:var(--cu-lbl3); text-transform:uppercase;
+        letter-spacing:.04em; }
+  #wnba .xt { color:var(--cu-lbl2); font-variant-numeric:tabular-nums; }
+
+  /* ---- WATCHLIST ---- */
+  #wnba .watchlist { background:var(--cu-grp); border:0; border-radius:12px; padding:14px 16px;
+        margin:0 0 20px; }
+  #wnba .wlg { background:var(--cu-grp2); border:0; border-radius:10px; padding:12px 14px;
+        margin-bottom:10px; }
+  #wnba .wlg:last-child { margin-bottom:0; }
+  #wnba .wlg-hd { display:flex; align-items:center; gap:7px; padding:0 0 9px;
+        border-bottom:.5px solid var(--cu-sep); margin-bottom:9px; }
+  #wnba .wlg-hd .gmatch { font-size:15px; font-weight:600; color:var(--cu-lbl);
+        text-transform:none; letter-spacing:-.01em; }
+  #wnba .wlg-hd .gvs { color:var(--cu-lbl3); font-weight:400; }
+  #wnba .wlg-hd .gtime { margin-left:auto; font-size:13px; color:var(--cu-lbl2);
+        font-variant-numeric:tabular-nums; }
+  #wnba .wlcond { font-size:13px; color:var(--cu-lbl2); margin-bottom:7px; }
+  #wnba .wlcond .out { color:var(--cu-org); font-weight:600; }
+  #wnba .wlin { color:var(--cu-lbl3); }
+  #wnba .wlplay { display:flex; align-items:center; gap:8px; font-size:15px; color:var(--cu-lbl2); }
+  #wnba .wlplay b { color:var(--cu-lbl); font-weight:600; }
+  #wnba .wlright { margin-left:auto; display:flex; align-items:center; gap:8px; }
+  #wnba .wlodds { font-size:15px; font-weight:590; color:var(--cu-lbl);
+        font-variant-numeric:tabular-nums; }
+
+  /* ---- INJURY REPORT ---- */
+  #wnba .starwatch { background:var(--cu-grp); border:0; border-radius:12px; padding:14px 16px;
+        margin:0 0 20px; }
+  #wnba .swrow { display:flex; align-items:center; gap:10px; padding:11px 0;
+        border-bottom:.5px solid var(--cu-sep); }
+  #wnba .swrow:last-child { border-bottom:0; }
+  #wnba .swhd { font-size:15px; font-weight:600; color:var(--cu-lbl); letter-spacing:-.01em; }
+  #wnba .swstat { font-size:12px; font-weight:600; padding:2px 8px; border-radius:11px;
+        background:var(--cu-fill); color:var(--cu-lbl2); }
+  #wnba .swstat.out { color:var(--cu-red); background:rgba(255,69,58,.18); }
+  #wnba .swstat.q { color:var(--cu-org); background:rgba(255,159,10,.18); }
+  #wnba .swn { margin-left:auto; font-size:12px; font-weight:590; padding:2px 8px;
+        border-radius:11px; background:var(--cu-fill); color:var(--cu-lbl2);
+        font-variant-numeric:tabular-nums; }
+  #wnba .swrow .glogo { width:26px; height:26px; background:var(--cu-fill); padding:2px;
+        border-radius:50%; }
+
+  /* ---- drawer internals ---- */
+  #wnba .rgh, #wnba .rgsub { font-size:14px; line-height:1.45; color:var(--cu-lbl2); }
+  #wnba .rgh b { color:var(--cu-lbl); font-weight:600; }
+  #wnba .sup { color:var(--cu-grn); }
+  #wnba .warn { color:var(--cu-org); }
+  #wnba .regime { margin-top:10px; padding-top:10px; border-top:.5px solid var(--cu-sep); }
+  #wnba .why { margin-top:10px; }
+  #wnba .opps, #wnba .pline { color:var(--cu-lbl3); font-size:12px; }
+
+  /* ══════════════════ CUPERTINO-SIMFIX ══════════════════
+     Two things only visible on a real device screenshot, not in computed styles:
+     1. .tabthumb kept `border:1px solid rgba(77,163,255,.35)` + an inset highlight from the old
+        pill bar — a blue ring around the grey iOS thumb. Overriding background alone missed it.
+     2. The in-progress banner was uppercased by my own rule, so it SHOUTED and wrapped to two
+        lines. iOS uses sentence case at this size; only the tiny section eyebrows are caps. */
+  .tabthumb { border:0 !important; box-shadow:0 3px 8px rgba(0,0,0,.3) !important;
+               background:#636366 !important; }
+  #wnba .dayhdr { text-transform:none; font-size:15px; letter-spacing:0;
+                   color:var(--cu-lbl2); padding:16px 4px 6px; line-height:1.35; }
+  #wnba .dayhdr.live { color:var(--cu-lbl2); }
+  #wnba .dayhdr.live b { color:var(--cu-org); font-weight:600; }
+
+  /* ══════════════════ CUPERTINO-SIM2 ══════════════════
+     Found on the device: the injury card showed four orange "Available" badges, so the single
+     red "Out" — the only one that changes a bet — did not stand out. Available is now neutral. */
+  #wnba .swstat.avail { color:var(--cu-lbl2); background:var(--cu-fill); }
+  /* the leading O/U in Also-considered was orphaned from its number */
+  #wnba .ttbet { gap:6px; }
+  #wnba .ttbet .pind { margin-right:-2px; }
+  #wnba .ttbmid { margin-left:6px; }
+
+  /* ══════════════════ CUPERTINO-GLOBAL ══════════════════
+     One system for all four tabs. Semantic colour is preserved and renormalised; decorative
+     colour is removed. Scoped rules above (#wnba) still win where they are more specific. */
+
+  /* panel subtitle — was scrolling UNDER the sticky tab bar on #tt/#pga/#tracker */
+  .panel > h2 { font-size:13px; font-weight:600; letter-spacing:.02em; text-transform:uppercase;
+                 color:var(--cu-lbl2); margin:18px 4px 10px; }
+
+  /* every card surface */
+  .card, .tcard, .starwatch, .watchlist, .tierleg, .xtras {
+      background:var(--cu-grp); border:0 !important; border-radius:12px; padding:14px 16px;
+      margin:0 0 20px; box-shadow:none !important; }
+  .thead, .pgahead, .ttlg, .wl-title, .sw-title { font-size:13px; font-weight:600;
+      letter-spacing:.02em; text-transform:uppercase; color:var(--cu-lbl2); margin:0 0 12px;
+      display:flex; align-items:center; gap:8px; }
+  .tsub, .pgasub, .ttfoot, .bnote { font-size:13px; color:var(--cu-lbl2); line-height:1.45; }
+
+  /* ---- TRACKER stat tiles ---- */
+  .trow { display:flex; gap:8px; margin:0 0 12px; }
+  .tbox { flex:1; background:var(--cu-grp2); border:0 !important; border-radius:10px;
+           padding:10px 12px; text-align:center; }
+  .tk { font-size:12px; font-weight:600; letter-spacing:.02em; text-transform:uppercase;
+         color:var(--cu-lbl2); display:block; margin-bottom:4px; }
+  .tv { font-size:26px; font-weight:680; letter-spacing:-.035em; color:var(--cu-lbl);
+         font-variant-numeric:tabular-nums; display:block; }
+  .tv.up, .tbox .up { color:var(--cu-grn); }     /* units stay green — that is meaning */
+  .ddbet { display:flex; align-items:center; gap:8px; padding:9px 0;
+            border-bottom:.5px solid var(--cu-sep); font-size:15px; }
+  .ddbet:last-child { border-bottom:0; }
+  .ddnm { color:var(--cu-lbl); flex:1; min-width:0; }
+  .ddday { font-size:13px; color:var(--cu-lbl3); }
+  .ddwl { font-size:12px; font-weight:600; padding:2px 8px; border-radius:11px;
+           background:var(--cu-fill); color:var(--cu-lbl2); }
+  .ddwl.w { color:var(--cu-grn); background:rgba(48,209,88,.18); }
+  .ddu { font-variant-numeric:tabular-nums; color:var(--cu-lbl2); }
+  .ddu.up { color:var(--cu-grn); }
+
+  /* ---- PGA rows ---- */
+  .pgatitle { font-size:19px; font-weight:640; letter-spacing:-.022em; color:var(--cu-lbl);
+               text-transform:none; }
+  .pgapaper { font-size:12px; font-weight:600; padding:2px 8px; border-radius:11px;
+               color:var(--cu-org); background:rgba(255,159,10,.18); border:0; }
+  .pgarec { margin-left:auto; font-size:14px; color:var(--cu-lbl2);
+             font-variant-numeric:tabular-nums; }
+  .pgamkt { font-size:13px; font-weight:600; letter-spacing:.02em; text-transform:uppercase;
+             color:var(--cu-lbl2); margin:16px 0 2px; border:0; padding:0; }
+  .pgabet { display:flex; align-items:center; gap:10px; padding:11px 0;
+             border-bottom:.5px solid var(--cu-sep); }
+  .pgabet:last-child { border-bottom:0; }
+  .pgasel { font-size:16px; font-weight:600; color:var(--cu-lbl); letter-spacing:-.015em; }
+  .pgasp { flex:1; }
+  /* PGA odds were blue for decoration only — no book or side meaning. Neutral. */
+  #pga .podds, #pga .podds.fd { color:var(--cu-lbl) !important; font-size:17px; font-weight:640;
+                                 letter-spacing:-.02em; }
+  #pga .bklogo, #tracker .bklogo { width:24px; height:24px; border-radius:6px;
+                                    background:var(--cu-fill); padding:3px; vertical-align:-6px;
+                                    margin-left:7px; }
+
+  /* ---- TT rows: keep the side semantics, drop the glow ---- */
+  #tt .ttbet { display:flex; align-items:center; gap:11px; padding:12px 0;
+                border-bottom:.5px solid var(--cu-sep); }
+  #tt .ttbet:last-of-type { border-bottom:0; }
+  #tt .pind { width:30px; height:30px; border-radius:8px; font-size:13px; font-weight:700;
+               display:grid; place-items:center; }
+  #tt .pind.o { color:var(--cu-grn); background:rgba(48,209,88,.18); }
+  #tt .pind.u { color:var(--cu-red); background:rgba(255,69,58,.18); }   /* under = red, kept */
+  #tt .ttbln { font-size:22px; font-weight:680; letter-spacing:-.035em; color:var(--cu-lbl);
+                font-variant-numeric:tabular-nums; }
+  #tt .ttbnm { font-size:15px; font-weight:600; color:var(--cu-lbl); }
+  #tt .ttbsb { font-size:13px; color:var(--cu-lbl2); margin-top:2px; }
+  #tt .podds { font-size:15px; font-weight:640; color:var(--cu-lbl) !important; }
+  #tt .podds.bmgm { color:#d4af37 !important; }      /* BetMGM identity — kept */
+  #tt .bklogo { width:24px; height:24px; border-radius:6px; background:var(--cu-fill);
+                 padding:3px; vertical-align:-6px; margin-left:6px; }
+
+  /* ══════════════════ CUPERTINO-SPACING ══════════════════
+     Rhythm: 20pt between groups, 12pt inside them, footnotes quiet above a hairline. */
+  .foot { font-size:13px; color:var(--cu-lbl3); text-align:center; padding:8px 0 28px; }
+  .ttfoot, .bnote { font-size:13px; color:var(--cu-lbl3); line-height:1.4;
+                     margin-top:12px; padding-top:12px; border-top:.5px solid var(--cu-sep); }
+  .tcard, .card, .starwatch, .watchlist, .tierleg, .xtras { margin-bottom:20px; }
+  .panel { padding-bottom:8px; }
+  .thead, .ttlg, .pgahead { line-height:1.3; }
+  #wnba .game { margin-bottom:20px; }
+  #wnba .cu-grp { margin-bottom:0; }
+
+  /* ══════════════════ CUPERTINO-PGAFIX ══════════════════
+     I styled these blind from class names and got the structure backwards. Real markup is:
+         .pgabet  vertical wrapper
+           .pgatop   name · .pgasp spacer · odds + book logo   (the horizontal row)
+           .pgasub   context line
+     So .pgabet must be a BLOCK (I had made it a flex row, which put the sub-line beside the row),
+     and .pgatop is not a card surface (it was in the card group, giving every row card padding
+     and a 20pt margin — hence the huge gaps). */
+  #pga .pgabet { display:block !important; padding:12px 0; margin:0;
+                  border-bottom:.5px solid var(--cu-sep); background:none !important;
+                  border-radius:0 !important; }
+  #pga .pgabet:last-child { border-bottom:0; }
+  #pga .pgatop { display:flex; align-items:center; gap:8px; background:none !important;
+                  padding:0 !important; margin:0 !important; border-radius:0 !important; }
+  #pga .pgasp { flex:1 1 auto; }
+  #pga .pgasel { font-size:16px; font-weight:600; color:var(--cu-lbl); letter-spacing:-.015em;
+                  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #pga .pgasub { font-size:13px; color:var(--cu-lbl2); margin-top:3px; }
+  #pga .podds, #pga .podds.fd { color:var(--cu-lbl) !important; font-size:17px; font-weight:640;
+                                 white-space:nowrap; }
+  /* header: title must not wrap next to the pill and record */
+  #pga .pgahead { display:flex; align-items:center; gap:8px; flex-wrap:nowrap; }
+  #pga .pgatitle { font-size:17px; font-weight:640; white-space:nowrap; overflow:hidden;
+                    text-overflow:ellipsis; flex:0 1 auto; }
+  #pga .pgarec { font-size:13px; white-space:nowrap; flex:none; text-transform:none; }
+  #pga .pgarec b { color:var(--cu-grn); font-weight:600; }
+  #pga .pgapaper { flex:none; }
+  #pga .pgamkt { margin:18px 0 4px; }
+
+  /* ══════════════════ CUPERTINO-TTFIX ══════════════════
+     TT structure is: .ttbet > .pind, .ttbln, .ttbmid(.ttbnm + .ttbsb), .ttconf(.tchip + .ttconflab)
+
+     Two real bugs found on device:
+     1. The hit-rate pill is .ttconf > .tchip.tA — the original blue-GLOW rule, which I had only
+        overridden inside #wnba. It encodes a number that is already printed, so the glow is
+        decoration; neutral it goes.
+     2. `.ttbet:last-of-type` never matched. :last-of-type keys off the TAG, and .ttfoot is also a
+        div sitting after the rows — so the final row kept its border-bottom and stacked with the
+        footnote's border-top, giving the double hairline. Fixed by dropping the footnote's own
+        top border and letting the last row's separator do that job. */
+  .ttfoot { border-top:0 !important; padding-top:0 !important; margin-top:14px !important; }
+  #tt .ttconf { display:flex; flex-direction:column; align-items:flex-end; gap:2px; flex:none; }
+  #tt .ttconf .tchip { background:var(--cu-fill) !important; color:var(--cu-lbl) !important;
+                        border:0 !important; box-shadow:none !important; border-radius:11px;
+                        font-size:15px; font-weight:640; padding:3px 10px; width:auto; height:auto;
+                        font-variant-numeric:tabular-nums; }
+  #tt .ttconflab { font-size:12px; color:var(--cu-lbl2); text-transform:none;
+                    letter-spacing:0; font-weight:400; }
+  #tt .ttbmid { flex:1; min-width:0; }
+  #tt .ttbnm { font-size:15px; font-weight:600; color:var(--cu-lbl); line-height:1.3; }
+  #tt .ttbnm b { font-weight:600; }
+  #tt .ttbsb { font-size:13px; color:var(--cu-lbl2); margin-top:3px; line-height:1.45; }
+  #tt .ttbsb .fd, #tt .ttbsb .bmgm { color:var(--cu-lbl2) !important; }
+  #tt .ttbsb .podds.bmgm { color:#d4af37 !important; }   /* BetMGM identity kept on the PRICE */
+  #tt .ttbsb .podds.fd { color:var(--cu-lbl) !important; }
+  #tt .ttbsb .bklogo { width:20px; height:20px; border-radius:5px; padding:2px;
+                        vertical-align:-5px; margin-left:5px; }
+  #tt .pj { color:var(--cu-lbl3); }
+  #tt .ttcnt { background:var(--cu-fill); color:var(--cu-lbl2); border-radius:11px;
+                padding:1px 8px; font-size:12px; font-weight:600; margin-left:auto; }
+  #tt .tld { color:var(--cu-lbl3); }
+
+  /* ══════════════════ CUPERTINO-POLISH2 ══════════════════
+     The WNBA drawer OPENS fine — its CONTENTS were never styled. Everything below .meters was
+     still the old design, including a .regime block with its own DARKER background, which pushed
+     elevation the wrong way (dark mode raises, it does not recede). Plus TT/PGA spacing. */
+
+  /* ---- WNBA drawer: one elevated panel, flat sections inside it ---- */
+  #wnba .bwrap { padding:14px 16px; }
+  #wnba .bwrap .meters { margin:0 0 14px; padding-bottom:14px; }
+  #wnba .meter { gap:12px; margin-bottom:10px; }
+  #wnba .meter:last-child { margin-bottom:0; }
+  #wnba .meter .mlab { font-size:14px; width:110px; flex:none; }
+  #wnba .meter .mval { font-size:14px; font-weight:590; margin-left:auto; }
+  #wnba .why { font-size:15px; line-height:1.45; color:var(--cu-lbl2); margin:0 0 14px; }
+  /* the regime block sat in its own dark box — flatten it onto the drawer surface */
+  #wnba .regime { background:none !important; border:0 !important; border-radius:0 !important;
+                   padding:14px 0 0 !important; margin:0 !important;
+                   border-top:.5px solid var(--cu-sep) !important; }
+  #wnba .rgh { font-size:15px; line-height:1.45; color:var(--cu-lbl2); }
+  #wnba .rgsub { font-size:13px; color:var(--cu-lbl3); margin-top:6px; }
+  #wnba .sup { color:var(--cu-grn); }
+  #wnba .warn { color:var(--cu-org); }
+  #wnba .cmps { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+  #wnba .cmp { background:var(--cu-fill); border:0; border-radius:11px; padding:4px 10px;
+                font-size:13px; color:var(--cu-lbl2); font-variant-numeric:tabular-nums; }
+  #wnba .cmp b { color:var(--cu-lbl); font-weight:600; }
+  #wnba .chart { margin:16px 0 0; padding-top:14px; border-top:.5px solid var(--cu-sep); }
+  #wnba .opps { font-size:12px; color:var(--cu-lbl3); }
+  #wnba .bnote { font-size:13px; color:var(--cu-lbl3); border-top:0 !important;
+                  padding-top:0 !important; margin-top:10px !important; }
+  #wnba .bv { font-size:12px; font-weight:600; }
+  #wnba .pline span { font-size:12px; color:var(--cu-lbl3); }
+
+  /* ---- TT spacing: the row was cramped and the meta line wrapped three ways ---- */
+  #tt .card { padding:14px 16px 16px; }
+  #tt .ttbet { gap:12px; padding:14px 0; align-items:flex-start; }
+  #tt .pind { margin-top:2px; }
+  #tt .ttbln { min-width:58px; margin-top:-2px; }
+  #tt .ttbnm { margin-bottom:4px; }
+  #tt .ttbsb { line-height:1.5; }
+  #tt .ttconf { margin-top:1px; }
+  #tt .ttlg { margin-bottom:14px; }
+
+  /* ---- PGA spacing ---- */
+  #pga .starwatch { padding:14px 16px 16px; }
+  #pga .pgahead { margin-bottom:4px; padding-bottom:12px;
+                   border-bottom:.5px solid var(--cu-sep); }
+  #pga .pgamkt { margin:16px 0 2px; }
+  #pga .pgabet { padding:13px 0; }
+  #pga .pgabet:first-of-type { padding-top:8px; }
+
+  /* ---- Tracker spacing ---- */
+  #tracker .tcard { padding:14px 16px 16px; }
+  #tracker .thead { margin-bottom:14px; }
+  #tracker .trow { margin-bottom:14px; }
+  #tracker .tsub { padding-top:12px; border-top:.5px solid var(--cu-sep); margin-top:0; }
+
+  /* ══════════════════ CUPERTINO-REBUILD ══════════════════ */
+  /* WNBA drawer: labelled sections, hairline-ruled, one rhythm */
+  /* Drawer spacing is owned ENTIRELY by `#wnba .bwrap > * + *` further down. The two rules
+     that used to live here fought it: `.bwrap > .meters + .dsec` scores (1,3,0) and beat
+     the (1,1,0) parent rule outright, zeroing the gap and the hairline between the meters
+     and the first labelled section — which is what jammed 'WHY THIS FLAGGED' against the
+     block above it. They existed to avoid doubling up when .meters still had its own
+     border-bottom; it no longer does, so they are pure interference. */
+  #wnba .dlab { font-size:12px; font-weight:600; letter-spacing:.02em; text-transform:uppercase;
+                 color:var(--cu-lbl2); margin-bottom:8px; }
+  #wnba .dsec .why { margin:0; }
+  #wnba .regime { padding-top:14px !important; margin-top:14px !important; }
+
+  /* TT now uses the WNBA card components — inherit them inside #tt */
+  #tt .cu-c { border-bottom:.5px solid var(--cu-sep); }
+  #tt .cu-c:last-child { border-bottom:0; }
+  #tt .cu-sum { padding:14px 0; }
+  #tt .cu-hd { display:flex; align-items:center; gap:8px; margin-bottom:9px; }
+  #tt .cu-st { font-size:12px; font-weight:600; padding:2px 8px; border-radius:11px; }
+  #tt .cu-st.ok { color:var(--cu-grn); background:rgba(48,209,88,.18); }
+  #tt .cu-st.no { color:var(--cu-lbl2); background:var(--cu-fill); }
+  #tt .cu-time { margin-left:auto; font-size:14px; color:var(--cu-lbl2);
+                  font-variant-numeric:tabular-nums; }
+  #tt .cu-ttl { font-size:19px; font-weight:640; letter-spacing:-.022em; color:var(--cu-lbl);
+                 margin-bottom:2px; }
+  #tt .cu-sub { font-size:15px; color:var(--cu-lbl2); margin-bottom:14px; }
+  #tt .cu-bet { display:flex; align-items:baseline; gap:8px; margin-bottom:14px; }
+  #tt .cu-dir { font-size:13px; font-weight:700; letter-spacing:.06em; color:var(--cu-lbl2); }
+  #tt .cu-line { font-size:36px; font-weight:680; letter-spacing:-.04em; line-height:1;
+                  color:var(--cu-lbl); font-variant-numeric:tabular-nums; }
+  #tt .cu-price { margin-left:auto; }
+  #tt .cu-od { font-size:20px; font-weight:640; letter-spacing:-.02em; color:var(--cu-lbl);
+                font-variant-numeric:tabular-nums; }
+  #tt .cu-od.bmgm { color:#d4af37; }
+  #tt .cu-cf { display:flex; align-items:center; gap:11px; }
+  #tt .cu-bar { flex:1; height:7px; background:var(--cu-fill); border-radius:4px; overflow:hidden; }
+  #tt .cu-bar i { display:block; height:100%; background:var(--cu-blue); border-radius:4px; }
+  #tt .cu-bar i.g { background:var(--cu-grn); }
+  #tt .cu-pc { font-size:16px; font-weight:640; font-variant-numeric:tabular-nums; }
+  #tt .cu-pc.na { color:var(--cu-lbl3); }
+  #tt .cu-n { font-size:14px; color:var(--cu-lbl2); }
+  #tt .cu-n.na { color:var(--cu-lbl3); }
+  #tt .tld { color:var(--cu-lbl3); font-size:22px; }
+
+  /* ══════════════════ CUPERTINO-CLEAN ══════════════════
+     No boxes behind marks. A league or team logo is already a designed shape with its own
+     silhouette; wrapping it in a tinted rounded square adds a container the brand never had.
+     Only the MONOGRAM fallback keeps a box — a bare two-letter string needs one to read as a mark
+     rather than as stray text. */
+  .mk, .glogo, .plogo, .bklogo, .llogo, .tlogo,
+  #wnba .cu-tm, #wnba .cu-gl, #wnba .glogo, #wnba .plogo, #wnba .bklogo,
+  #wnba .llogo, #wnba .swrow .glogo, #tt .bklogo, #pga .bklogo, #tracker .bklogo {
+      background:none !important; border:0 !important; padding:0 !important;
+      border-radius:0 !important; }
+  #wnba .llogo, #wnba .cu-gl { overflow:visible; }
+  #wnba .llogo img { padding:0 !important; }
+  /* monogram fallback keeps its container */
+  .llogo.mono, #wnba .llogo.mono { background:var(--cu-fill) !important; border-radius:6px !important;
+      display:inline-flex; align-items:center; justify-content:center; }
+  /* marks are round-ish artwork; give them consistent optical sizes now the boxes are gone */
+  #wnba .cu-tm { width:20px; height:20px; }
+  #wnba .cu-gl, #wnba .glogo { width:20px; height:20px; }
+  #wnba .swrow .glogo { width:24px; height:24px; }
+  .bklogo { width:22px !important; height:22px !important; }
+  #wnba .cu-hd .bklogo { width:24px !important; height:24px !important; }
+
+  /* ══════════════════ CUPERTINO-DRAWER ══════════════════
+     The drawer's spacing was coming from four different sources stacked on each other: .meters had
+     its own bottom border, .dsec added a rule, .regime added another, and .chart a third — so gaps
+     doubled wherever two met and collapsed where a block was empty. One rule now: every section is
+     a .dsec, separated by exactly one 16px gap and one hairline, and empty sections emit nothing. */
+  /* PADDING ONLY WHEN OPEN. A 0fr grid row clips CONTENT but cannot collapse the child's own
+     padding, so an unconditional .bwrap padding re-creates the dead space under every closed card
+     — the same bug fixed once already in CUPERTINO-POLISH and reintroduced here. */
+  #wnba .bwrap { padding:0; }
+  #wnba .bars.open .bwrap { padding:16px; }
+  #wnba .bwrap > * { margin:0; }
+  #wnba .bwrap > * + * { margin-top:16px; padding-top:16px; border-top:.5px solid var(--cu-sep); }
+  #wnba .bwrap .meters { margin:0 !important; padding:0 !important; border:0 !important; }
+  /* NO .dsec reset here. It would score (1,1,0) — identical to `.bwrap > * + *` — and being
+     later it would cancel the very spacing that rule provides, which is exactly what jammed the
+     section labels against the block above them. The parent rule already beats the earlier
+     CUPERTINO-REBUILD .dsec rule on source order at equal specificity. */
+  #wnba .dlab { font-size:12px; font-weight:600; letter-spacing:.02em; text-transform:uppercase;
+                 color:var(--cu-lbl2); margin:0 0 10px; }
+  #wnba .dsec > .why, #wnba .dsec .rgh { margin:0; font-size:15px; line-height:1.45;
+                                          color:var(--cu-lbl2); }
+  #wnba .dsec .regime { background:none !important; border:0 !important; padding:0 !important;
+                         margin:0 !important; }
+  #wnba .rgsub { margin-top:8px; font-size:13px; color:var(--cu-lbl3); }
+  #wnba .cmps { margin-top:12px; gap:6px; }
+  #wnba .chart { margin:0 !important; padding-top:0 !important; border-top:0 !important; }
+  #wnba .bnote { margin-top:10px !important; }
+  #wnba .meter { gap:12px; margin:0 0 10px; }
+  #wnba .meter:last-child { margin-bottom:0; }
+
+  /* ══════════════════ CUPERTINO-DW ══════════════════
+     The drawer, rebuilt under its own namespace. Nothing above this block matches dw-*, so this is
+     the only place its spacing is defined. Collapsed state carries NO padding — padding is
+     intrinsic and a 0fr grid row cannot collapse it, which is what left dead space under every
+     closed card twice before. */
+
+  #wnba .dw-s + .dw-s { margin-top:16px; padding-top:16px; border-top:.5px solid var(--cu-sep); }
+  #wnba .dw-l { font-size:12px; font-weight:600; letter-spacing:.02em; text-transform:uppercase;
+                 color:var(--cu-lbl2); margin:0 0 10px; }
+  #wnba .dw-p { font-size:15px; line-height:1.45; color:var(--cu-lbl2); margin:0; }
+  #wnba .dw-p b { color:var(--cu-lbl); font-weight:600; }
+
+  /* meters, inherited from the card's language */
+  #wnba .dw .meter { display:flex; align-items:center; gap:12px; margin:0 0 10px; }
+  #wnba .dw .meter:last-child { margin-bottom:0; }
+  #wnba .dw .mlab { font-size:14px; color:var(--cu-lbl2); width:112px; flex:none; }
+  #wnba .dw .mbar { flex:1; height:7px; background:var(--cu-fill); border-radius:4px; overflow:hidden; }
+  #wnba .dw .mbar i { display:block; height:100%; background:var(--cu-blue); border-radius:4px; }
+  #wnba .dw .meter.good .mbar i { background:var(--cu-grn); }
+  #wnba .dw .meter.bad .mbar i { background:var(--cu-red); }
+  #wnba .dw .mval { font-size:14px; font-weight:590; color:var(--cu-lbl); margin-left:auto;
+                     font-variant-numeric:tabular-nums; }
+
+  /* regime block, flattened onto the drawer surface */
+  #wnba .dw .regime { background:none !important; border:0 !important; padding:0 !important;
+                       margin:0 !important; }
+  #wnba .dw .rgh { font-size:15px; line-height:1.45; color:var(--cu-lbl2); }
+  #wnba .dw .rgh b { color:var(--cu-lbl); font-weight:600; }
+  #wnba .dw .rgsub { font-size:13px; color:var(--cu-lbl3); margin-top:8px; }
+  #wnba .dw .cmps { display:flex; gap:6px; flex-wrap:wrap; margin-top:12px; }
+  #wnba .dw .cmp { background:var(--cu-fill); border:0; border-radius:11px; padding:4px 10px;
+                    font-size:13px; color:var(--cu-lbl2); font-variant-numeric:tabular-nums; }
+  #wnba .dw .cmp b { color:var(--cu-lbl); font-weight:600; }
+  #wnba .dw .sup { color:var(--cu-grn); }
+  #wnba .dw .warn { color:var(--cu-org); }
+
+  /* game log */
+  #wnba .dw-chart { position:relative; display:flex; align-items:flex-end; gap:5px; height:96px;
+                     margin:0; }
+  #wnba .dw-col { position:relative; flex:1; height:100%; display:flex; align-items:flex-end;
+                   justify-content:center; }
+  #wnba .dw-min { position:absolute; bottom:0; left:0; right:0; background:var(--cu-fill);
+                   border-radius:3px 3px 0 0; }
+  #wnba .dw-bar { position:relative; width:100%; border-radius:3px 3px 0 0; min-height:15px;
+                   display:flex; align-items:flex-start; justify-content:center; }
+  #wnba .dw-bar.on { background:var(--cu-grn); }
+  #wnba .dw-bar.off { background:rgba(255,69,58,.55); }
+  #wnba .dw-bar span { font-size:11px; font-weight:600; color:#000; margin-top:2px;
+                        font-variant-numeric:tabular-nums; }
+  #wnba .dw-line { position:absolute; left:0; right:0; height:1px; background:var(--cu-lbl3);
+                    z-index:2; }
+  #wnba .dw-line span { position:absolute; right:0; top:-16px; font-size:11px;
+                         color:var(--cu-lbl3); font-variant-numeric:tabular-nums; }
+  #wnba .dw-opps { display:flex; gap:5px; margin-top:6px; }
+  #wnba .dw-opps span { flex:1; text-align:center; font-size:11px; color:var(--cu-lbl3); }
+  #wnba .dw-note { font-size:13px; color:var(--cu-lbl3); margin-top:10px; }
+
+  /* ══════════════════ CUPERTINO-SPACE4 ══════════════════
+     One 4pt scale for the WNBA card and drawer. Every value below is 4/8/12/16/20 — no exceptions,
+     because the consistency is the design. Previous values were 13/14/9/7/8/11/12, which is a
+     sequence of guesses rather than a system, and that is what made it not read as Apple.
+
+     Also consolidates the .bars.open padding, which had accumulated into three separate rules
+     across earlier passes, so the card-to-drawer gap depended on which one happened to win. */
+
+  /* section header -> group */
+  #wnba .cu-sh { padding:8px 4px; gap:8px; }
+  #wnba .cu-out { padding:0 4px 8px; gap:8px; }
+  #wnba .game { margin-bottom:20px; }          /* card -> card */
+  #wnba .cu-grp { margin-bottom:0; }
+
+  /* inside the card */
+  #wnba .cu-sum { padding:16px; }
+  #wnba .cu-hd { margin-bottom:12px; gap:8px; }
+  #wnba .cu-ttl { margin-bottom:2px; gap:8px; }   /* title+sub are one pair, deliberately tight */
+  #wnba .cu-sub { margin-bottom:16px; }
+  #wnba .cu-bet { margin-bottom:16px; gap:8px; }
+  #wnba .cu-cf { gap:12px; }
+
+  /* card -> drawer: 16 from the summary plus 4 here = 20, one step ABOVE the 16 used inside the
+     panel, so the drawer reads as nested rather than welded to the card */
+
+  /* inside the drawer */
+  #wnba .dw-s + .dw-s { margin-top:16px; padding-top:16px; }
+  #wnba .dw-l { margin-bottom:8px; }
+  #wnba .dw .meter { margin-bottom:12px; gap:12px; }
+  #wnba .dw .meter:last-child { margin-bottom:0; }
+  #wnba .dw .rgsub { margin-top:8px; }
+  #wnba .dw .cmps { margin-top:12px; gap:8px; }
+  #wnba .dw-opps { margin-top:8px; }
+  #wnba .dw-note { margin-top:12px; }
+
+  @media (max-width:520px) {
+    #wnba .cu-sum { padding:16px; }
+  }
+
+  /* ══════════════════ CUPERTINO-DW2 ══════════════════
+     Compacted after looking at it on device. The rebuild was structurally right but far too tall:
+     two of its four labels sat above content that already describes itself, and 16pt gaps are more
+     air than this density needs. 12pt rhythm, 14pt panel padding, and drawer type a step smaller
+     than the card face — detail should read as subordinate to the headline, not compete with it. */
+  #wnba .dw-s + .dw-s { margin-top:12px; padding-top:12px; }
+  #wnba .dw-l { font-size:11px; margin-bottom:6px; }
+  #wnba .dw-p { font-size:14px; line-height:1.4; }
+  #wnba .dw .meter { margin-bottom:8px; gap:10px; }
+  #wnba .dw .mlab { font-size:13px; width:100px; }
+  #wnba .dw .mbar { height:6px; }
+  #wnba .dw .mval { font-size:13px; }
+  #wnba .dw .rgh { font-size:14px; line-height:1.4; }
+  #wnba .dw .rgsub { font-size:12px; margin-top:6px; }
+  #wnba .dw .cmps { margin-top:8px; gap:6px; }
+  #wnba .dw .cmp { font-size:12px; padding:3px 8px; }
+  #wnba .dw-chart { height:76px; gap:4px; }
+  #wnba .dw-bar span { font-size:10px; }
+  #wnba .dw-opps { margin-top:6px; }
+  #wnba .dw-opps span { font-size:10px; }
+  #wnba .dw-note { font-size:12px; margin-top:8px; }
+  #wnba .dw-line span { font-size:10px; top:-14px; }
+
+  /* ══════════════════ CUPERTINO-COLLAPSE ══════════════════
+     THE COLLAPSE CONTRACT. `.bars` is a grid that animates between 0fr and 1fr. A 0fr row only
+     clips its child if that child carries BOTH `overflow:hidden` and `min-height:0` — otherwise the
+     child keeps its intrinsic height and the row grows to fit it, which is why closing the drawer
+     was hiding the content but leaving the space.
+
+     The old .bwrap had this pair. Renaming it to .dw during the rebuild carried the padding, the
+     background and the radius across but not this, because the rule lived far away and unscoped.
+
+     This block is also the ONLY place .bars/.dw padding is declared — four rules had accumulated,
+     one per pass, each added rather than edited. */
+  #wnba .dw { overflow:hidden; min-height:0; padding:0; }
+  #wnba .bars { padding:0; }
+  #wnba .bars.open { padding:4px 12px 12px; }
+  #wnba .bars.open .dw { background:var(--cu-grp2); border-radius:10px; padding:14px; }
+
+  /* ══════════════════ CUPERTINO-CARD2 ══════════════════
+     Context line gone; the name takes the space it vacated. 24pt against the 36pt bet keeps the
+     bet unmistakably the object of the card while giving the player real presence. */
+  #wnba .cu-ttl { font-size:24px; font-weight:660; letter-spacing:-.028em; gap:10px;
+                   margin-bottom:16px; align-items:center; }
+  #wnba .cu-tms { display:inline-flex; align-items:center; }
+  #wnba .cu-tm { width:26px; height:26px; }
+  #wnba .cu-tier { font-size:12px; font-weight:600; padding:2px 8px; border-radius:11px;
+                    background:var(--cu-fill); color:var(--cu-lbl2); }
+  @media (max-width:520px) {
+    #wnba .cu-ttl { font-size:23px; }
+  }
+
+  /* ══════════════════ CUPERTINO-TIER2 ══════════════════
+     Tier moves off the header and onto the title row, pushed right — so it sits on the same right
+     edge as the lock time above it and the price below, vertically between the two. Tier A takes
+     the blue it already has in the confidence-tier legend, so the two places agree; B and C stay
+     neutral because only A is the band the model treats as its own. */
+  #wnba .cu-tier { margin-left:auto; flex:none; }
+  #wnba .cu-tier.tA { color:var(--cu-blue); background:rgba(10,132,255,.18); }
+  #wnba .cu-tier.tB { color:var(--cu-lbl2); background:var(--cu-fill); }
+  #wnba .cu-tier.tC { color:var(--cu-lbl3); background:var(--cu-fill); }
+
+  /* ══════════════════ CUPERTINO-TIER3 ══════════════════
+     The letter alone, in the circular badge the confidence-tier legend already uses — same object
+     in both places rather than a word here and a badge there. The word "Tier" was carrying no
+     information the badge does not. */
+  #wnba .cu-tier { width:26px; height:26px; border-radius:13px; padding:0; flex:none;
+                    display:inline-flex; align-items:center; justify-content:center;
+                    font-size:13px; font-weight:700; letter-spacing:0; margin-left:auto; }
+  #wnba .cu-tier.tA { color:var(--cu-blue); background:rgba(10,132,255,.18);
+                       border:1px solid rgba(10,132,255,.42); }
+  #wnba .cu-tier.tB { color:var(--cu-lbl2); background:var(--cu-fill); border:1px solid transparent; }
+  #wnba .cu-tier.tC { color:var(--cu-lbl3); background:var(--cu-fill); border:1px solid transparent; }
+
+  /* ══════════════════ CUPERTINO-TRACK16 ══════════════════
+     Tracker stat tiles wrapped on iPhone 16. Measured at 393pt: the tile content box is 74px and
+     "33-17" at 26px needs ~80px, so the browser broke it at the HYPHEN — records wrapped while
+     percentages and units did not. iPhone 17 is 402pt, which is why it never showed up in testing.
+
+     26 -> 22px, tile padding 12 -> 8px side (content 74 -> 86px), and white-space:nowrap as a
+     guard so a future three-digit record (100-17) degrades by overflowing visibly rather than
+     silently wrapping to two lines. Verified at 393pt: nothing wraps, nothing overflows. */
+  #tracker .tbox { padding:10px 8px; }
+  #tracker .tv { font-size:22px; white-space:nowrap; }
+  #tracker .tk { font-size:11px; white-space:nowrap; }
+  #tracker .tsub { font-size:12px; }
+</style></head><body><div class="wrap">
+  <header>
+    <h1>Today's Plays</h1>
+    <div class="live"><span class="dot"></span>12:57 AM MT
+      <button class="rfrsh" onclick="manualRefresh(this)" title="Pull new plays now" aria-label="Refresh now">↻</button>
+      <span id="rfchk"></span></div>
+  </header>
+  <div class="tabs">
+    <div class="tabthumb" id="tabthumb"></div>
+    <div class="tab active" data-tab="wnba" onclick="showTab('wnba')"><svg class="tabic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 2.8v18.4"/><path d="M2.8 12h18.4"/><path d="M5.2 5.2C8 8 9 12 9 12s-1 4-3.8 6.8"/><path d="M18.8 5.2C16 8 15 12 15 12s1 4 3.8 6.8"/></svg><span>WNBA</span></div>
+    <div class="tab" data-tab="tt" onclick="showTab('tt')"><svg class="tabic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.6" cy="9.6" r="5.6"/><path d="M13.6 13.6l4.6 5"/><circle cx="16.4" cy="6.6" r="1.35" fill="currentColor" stroke="none"/></svg><span>TT</span></div>
+    <div class="tab" data-tab="pga" onclick="showTab('pga')"><svg class="tabic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7.4 20.4V3.6l8.4 3-8.4 3"/><circle cx="16.2" cy="17.8" r="2.1"/><path d="M3.6 20.4h16.8"/></svg><span>PGA</span></div>
+    
+    <div class="tab" data-tab="tracker" onclick="showTab('tracker')"><svg class="tabic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/></svg><span>Tracker</span></div>
+  </div>
+  <div class="panel" id="wnba">
+    <div class="recstrip" onclick="showTab('tracker')"><b>34-17</b> · 67% hit · <b class="up">+13.9u</b><span>since 7/9 · Tracker →</span></div>
+    <div id="wnbafilters" class="cu-chips" hidden></div>
+    <div id="games"><div class="dayhdr">Today<span>Sun · Aug 2</span></div>
+<div class="game" data-edge="0.1350" data-tip="1785717000" style="--i:0"><div class="cu-sh"><span class="llogo"><img src="logos/wnba.png" alt="WNB" loading="lazy" onerror="this.parentNode.className='llogo mono';this.parentNode.textContent='WNB'"></span><b>WNBA</b><span class="cu-dot">·</span><span class="cu-shm"><img class="cu-gl" src="logos/tor.png" alt="" loading="lazy" onerror="this.style.display='none'">TOR @ <img class="cu-gl" src="logos/gs.png" alt="" loading="lazy" onerror="this.style.display='none'">GS</span><span class="cu-shr">6:30 PM</span></div><div class="cu-out"><i class="sdot warn"></i>A. Morrow + B. Sykes out</div><div class="cu-grp">
+      <div class="cu-c" data-status="mid" data-book="dk" data-lad="0">
+        <div class="cu-sum" data-side="over" data-k="2026-08-02|Julie Allemand|assists|5.5"
+             onclick="this.parentNode.querySelector('.bars').classList.toggle('open')">
+          <div class="cu-hd"><span class="cu-st mid">Likely</span><img class="bklogo" src="book-dk.png" alt="DK">
+            <span class="cu-time">6:30 PM</span></div>
+          <div class="cu-ttl"><span class="cu-tms"><img class="cu-tm" src="logos/tor.png" alt="TOR" loading="lazy" onerror="this.style.display='none'"></span>J. Allemand<span class="cu-tier tA" title="confidence tier">A</span></div>
+          <div class="cu-bet"><span class="cu-dir o">OVER</span>
+            <span class="cu-line">5.5</span><span class="cu-unit">ast</span>
+            <span class="cu-price"><span class="cu-od">-118</span>
+              <span class="cu-chev">›</span></span></div>
+          <div class="cu-cf"><span class="cu-bar"><i class="g" style="width:78%"></i></span><span class="cu-pc">78%</span><span class="cu-n">7/9 when out</span></div>
+        </div><div class="bars"><div class="dw"><div class="dw-s"><div class="meter good" title="her games with tonight’s ruled-out players actually out"><span class="mlab">when they sit</span><span class="mbar"><i style="width:78%"></i></span><span class="mval">7/9 over</span></div><div class="meter good" title="all recent games, any lineup"><span class="mlab">last 10 games</span><span class="mbar"><i style="width:80%"></i></span><span class="mval">8/10 over</span></div></div><div class="dw-s"><div class="dw-p">Projects <b>6.2 AST</b> vs the 5.5 line — A. Morrow + B. Sykes out (+6 min, +3 ast).</div></div><div class="dw-s"><div class="dw-l">Same-lineup history</div><div class="regime"><div class="rgh">Games with <b>A.Morrow, B.Sykes</b> actually out — avg <b>7.8</b> AST <span class="sup">over friendly</span></div><div class="rgsub">lineup match ranked by: M.Conde, I.Harrison, L.Juskaite playing</div><div class="cmps"><span class="cmp">07-29 MIN <b>7</b> · 32'</span><span class="cmp pr">07-17 ATL <b>6</b> · 32'</span><span class="cmp pr">07-14 WSH <b>2</b> · 33'</span><span class="cmp pr">07-12 NY <b>10</b> · 34'</span><span class="cmp pr">07-08 GS <b>7</b> · 36'</span><span class="cmp pr">06-25 LA <b>14</b> · 30'</span></div></div></div><div class="dw-s"><div class="dw-l">Recent games</div><div class="dw-chart"><div class="dw-line" style="bottom:24.3%"><span>5.5</span></div><div class="dw-col"><div class="dw-min" style="height:71%"></div><div class="dw-bar on" style="height:61.7%"><span>14</span></div></div><div class="dw-col"><div class="dw-min" style="height:93%"></div><div class="dw-bar on" style="height:44.1%"><span>10</span></div></div><div class="dw-col"><div class="dw-min" style="height:86%"></div><div class="dw-bar on" style="height:30.9%"><span>7</span></div></div><div class="dw-col"><div class="dw-min" style="height:81%"></div><div class="dw-bar on" style="height:35.3%"><span>8</span></div></div><div class="dw-col"><div class="dw-min" style="height:81%"></div><div class="dw-bar on" style="height:44.1%"><span>10</span></div></div><div class="dw-col"><div class="dw-min" style="height:79%"></div><div class="dw-bar off" style="height:8.8%"><span>2</span></div></div><div class="dw-col"><div class="dw-min" style="height:76%"></div><div class="dw-bar on" style="height:26.5%"><span>6</span></div></div><div class="dw-col"><div class="dw-min" style="height:74%"></div><div class="dw-bar off" style="height:17.6%"><span>4</span></div></div><div class="dw-col"><div class="dw-min" style="height:76%"></div><div class="dw-bar on" style="height:30.9%"><span>7</span></div></div></div><div class="dw-opps"><span>LA</span><span>PHX</span><span>GS</span><span>DAL</span><span>NY</span><span>WSH</span><span>ATL</span><span>LV</span><span>MIN</span></div><div class="dw-note">7/9 over 5.5</div></div></div></div>
+      </div></div></div></div>
+    <div class="starwatch"><div class="sw-title">Star Watch <span>· big names out that the model can't project — your call</span></div><div class="swrow"><div class="swhd"><img class="glogo" src="logos/tor.png" alt="" loading="lazy" onerror="this.style.display='none'"><b>M. Mabrey</b><span class="swstat q">Questionable</span><span class="swvs">vs GS</span><span class="swusg">29' · 21.0p · 3.7a</span></div><div class="swo">likely to inherit the role: <b>I. Harrison, N. Sabally, K. Rice</b></div></div></div>
+    
+    
+    <div class="watchlist"><div class="wl-title">Watchlist <span>· if they sit, play this</span></div><div class="wlg"><div class="wlg-hd"><span class="gmatch"><img class="glogo" src="logos/gs.png" alt="" loading="lazy" onerror="this.style.display='none'">GS<span class="gvs">vs</span><img class="glogo" src="logos/tor.png" alt="" loading="lazy" onerror="this.style.display='none'">TOR</span><span class="gtime">6:30 PM</span></div><div class="wlrow" title="~50% to sit · +16%EV"><div class="wlcond">if <b>Williams</b> out</div><div class="wlplay"><b>Veronica Burton</b> Over 15.5 Pts + Reb<span class="wlright"><span class="wlodds">-130</span><span class="tchip tB">B</span></span></div></div></div><div class="wlg"><div class="wlg-hd"><span class="gmatch"><img class="glogo" src="logos/chi.png" alt="" loading="lazy" onerror="this.style.display='none'">CHI<span class="gvs">vs</span><img class="glogo" src="logos/phx.png" alt="" loading="lazy" onerror="this.style.display='none'">PHX</span><span class="gtime">Mon 8/3 · 7:00 PM</span></div><div class="wlrow" title="~100% to sit · +23%EV"><div class="wlcond">if <b>Diggins + Stevens</b> confirmed out</div><div class="wlplay"><b>Natasha Cloud</b> Over 10.5 Points<span class="wlright"><span class="wlodds">-104</span><span class="tchip tA">A</span></span></div></div><div class="wlrow" title="~100% to sit · +27%EV"><div class="wlcond">if <b>Makani</b> confirmed out</div><div class="wlplay"><b>DeWanna Bonner</b> Over 6.5 Rebounds<span class="wlright"><span class="wlodds">+118</span><span class="tchip tB">B</span></span></div></div></div></div>
+    <div class="starwatch"><div class="sw-title">Injury report <span>· today · 5 hidden (not playing) · n = team games without her</span></div><div class="swrow"><div class="swhd"><img class="glogo" src="logos/por.png" alt="" loading="lazy" onerror="this.style.display='none'"><b>S. Barker</b><span class="swstat out">Out</span><span class="swn" title="games her team has played without her — n&le;2 means the model cannot project the beneficiaries">n=3</span></div></div><div class="swrow"><div class="swhd"><img class="glogo" src="logos/tor.png" alt="" loading="lazy" onerror="this.style.display='none'"><b>B. Sykes</b><span class="swstat out">Out</span><span class="swn" title="games her team has played without her — n&le;2 means the model cannot project the beneficiaries">n=14</span></div></div><div class="swrow"><div class="swhd"><img class="glogo" src="logos/tor.png" alt="" loading="lazy" onerror="this.style.display='none'"><b>A. Morrow</b><span class="swstat out">Out</span><span class="swn" title="games her team has played without her — n&le;2 means the model cannot project the beneficiaries">n=22</span></div></div><div class="swrow"><div class="swhd"><img class="glogo" src="logos/con.png" alt="" loading="lazy" onerror="this.style.display='none'"><b>B. Griner</b><span class="swstat q">Questionable</span><span class="swn" title="games her team has played without her — n&le;2 means the model cannot project the beneficiaries">n=13</span></div></div><div class="swrow"><div class="swhd"><img class="glogo" src="logos/gs.png" alt="" loading="lazy" onerror="this.style.display='none'"><b>G. Williams</b><span class="swstat q">Questionable</span><span class="swn hot" title="games her team has played without her — n&le;2 means the model cannot project the beneficiaries">n=2</span></div></div><div class="swrow"><div class="swhd"><img class="glogo" src="logos/ind.png" alt="" loading="lazy" onerror="this.style.display='none'"><b>C. Clark</b><span class="swstat avail">Probable</span><span class="swn" title="games her team has played without her — n&le;2 means the model cannot project the beneficiaries">n=4</span></div></div><div class="swrow"><div class="swhd"><img class="glogo" src="logos/ind.png" alt="" loading="lazy" onerror="this.style.display='none'"><b>A. Boston</b><span class="swstat avail">Probable</span><span class="swn" title="games her team has played without her — n&le;2 means the model cannot project the beneficiaries">n=3</span></div></div><div class="swrow"><div class="swhd"><img class="glogo" src="logos/la.png" alt="" loading="lazy" onerror="this.style.display='none'"><b>K. Plum</b><span class="swstat avail">Probable</span><span class="swn" title="games her team has played without her — n&le;2 means the model cannot project the beneficiaries">n=16</span></div></div><div class="swrow"><div class="swhd"><img class="glogo" src="logos/tor.png" alt="" loading="lazy" onerror="this.style.display='none'"><b>M. Mabrey</b><span class="swstat q">Questionable</span><span class="swn hot" title="games her team has played without her — n&le;2 means the model cannot project the beneficiaries">n=1</span></div></div></div>
+    <div class="card"><h3 class="ttlg">Also considered · NOT BET</h3><div class="ttbet"><span class="pind o">O</span><span class="ttbln">13.5</span><div class="ttbmid"><div class="ttbnm"><b>Bridget Carleton</b> PTS</div><div class="ttbsb">lost the points pool to N. Puoch · min +1.1</div></div></div><div class="ttfoot">Rejected by the selection rules. No stake, no alert.</div></div>
+    <div class="tierleg"><div class="xt">confidence tiers · live record at real lines</div><div class="tlrow"><span class="tchip tA">A</span><span class="tld">3-8 bump · favorite · single stat</span><span class="tlr">14-4 · 78% · +10.7u</span></div><div class="tlrow"><span class="tchip tB">B</span><span class="tld">3-8 others · cold-vetted · supported 0-3</span><span class="tlr">19-12 · 61% · +7.0u</span></div><div class="tlrow"><span class="tchip tC">C</span><span class="tld">combos · marginal</span><span class="tlr">2-1 · 67% · +1.0u</span></div></div>
+    <div class="xtras"><div class="xt" title="pinged &amp; ledger-logged — dropped by the 2-per-team / rung-gap rules; not in the tracked record">Also flagged <span>· not picks</span></div><span class="xchip"><span class="xteam">TOR</span> <b>M. Mabrey</b> P+A o23.5 -104<span class="tchip tC">C</span></span></div>
+  </div>
+  <div class="panel hidden" id="tt">
+    <h2>Table tennis · real FD lines</h2>
+    <script>window._TT_BOOT={"board": [{"event_id": 35894829, "p1": "Jakub Kaczmarek", "p2": "Mariusz Koczyba", "p1_norm": "jakub kaczmarek", "p2_norm": "mariusz koczyba", "open_date": "2026-08-02T06:45:00.000Z", "line": 71.5, "over_odds": -110, "under_odds": -125}, {"event_id": 35894839, "p1": "Piotr Maruszak", "p2": "Arkadiusz Mugowski", "p1_norm": "piotr maruszak", "p2_norm": "arkadiusz mugowski", "open_date": "2026-08-02T06:50:00.000Z", "line": 69.5, "over_odds": -115, "under_odds": -120}, {"event_id": 35894842, "p1": "Dawid Poloszczanski", "p2": "Mariusz Zwolinski", "p1_norm": "dawid poloszczanski", "p2_norm": "mariusz zwolinski", "open_date": "2026-08-02T06:55:00.000Z", "line": 76.5, "over_odds": -125, "under_odds": -110}, {"event_id": 35894843, "p1": "Petr David", "p2": "Marcin Jadczyk", "p1_norm": "petr david", "p2_norm": "marcin jadczyk", "open_date": "2026-08-02T06:55:00.000Z", "line": 76.5, "over_odds": -120, "under_odds": -115}, {"event_id": 35894844, "p1": "Jacek Wieczerzak", "p2": "Sebastian Szostok", "p1_norm": "jacek wieczerzak", "p2_norm": "sebastian szostok", "open_date": "2026-08-02T06:55:00.000Z", "line": 77.5, "over_odds": -110, "under_odds": -125}, {"event_id": 35894854, "p1": "Pawel Adamus", "p2": "Krzysztof Juszczyk", "p1_norm": "pawel adamus", "p2_norm": "krzysztof juszczyk", "open_date": "2026-08-02T07:10:00.000Z", "line": 78.5, "over_odds": -116, "under_odds": -116}, {"event_id": 35894855, "p1": "Dawid Jendrysik", "p2": "Kacper Adamus", "p1_norm": "dawid jendrysik", "p2_norm": "kacper adamus", "open_date": "2026-08-02T07:10:00.000Z", "line": 77.5, "over_odds": -112, "under_odds": -118}, {"event_id": 35894858, "p1": "Mateusz Woskowicz", "p2": "Dominik Solilo", "p1_norm": "mateusz woskowicz", "p2_norm": "dominik solilo", "open_date": "2026-08-02T07:15:00.000Z", "line": 79.5, "over_odds": -112, "under_odds": -118}, {"event_id": 35894862, "p1": "Piotr Staniszewski", "p2": "Artur Szoltysek", "p1_norm": "piotr staniszewski", "p2_norm": "artur szoltysek", "open_date": "2026-08-02T07:20:00.000Z", "line": 79.5, "over_odds": -118, "under_odds": -112}, {"event_id": 35894863, "p1": "Jakub Kosowski", "p2": "Konrad Kulpa", "p1_norm": "jakub kosowski", "p2_norm": "konrad kulpa", "open_date": "2026-08-02T07:20:00.000Z", "line": 79.5, "over_odds": -112, "under_odds": -118}, {"event_id": 35894864, "p1": "Marian Lebek", "p2": "Marcin Lach", "p1_norm": "marian lebek", "p2_norm": "marcin lach", "open_date": "2026-08-02T07:20:00.000Z", "line": 75.5, "over_odds": -118, "under_odds": -112}], "h2h": [{"p1n": "jakub kaczmarek", "p2n": "mariusz koczyba", "totals": [77, 87, 58, 74, 72, 90, 57, 82, 54, 96, 92, 94, 59, 70, 92, 69, 55, 56, 75, 48, 92, 73, 93, 94, 60, 88, 52]}, {"p1n": "piotr maruszak", "p2n": "arkadiusz mugowski", "totals": [74, 56, 59, 74]}, {"p1n": "dawid poloszczanski", "p2n": "mariusz zwolinski", "totals": [95, 87, 90, 83, 100, 96]}, {"p1n": "petr david", "p2n": "marcin jadczyk", "totals": [96, 57, 59, 75, 82, 58, 97, 75, 49, 92, 90, 75, 94, 92, 105, 78, 77, 85, 78, 99, 65, 88, 90, 90, 81, 102, 100, 62, 97, 79, 104, 98, 84, 96, 88, 115, 54, 81, 74, 97, 102, 74, 91]}, {"p1n": "jacek wieczerzak", "p2n": "sebastian szostok", "totals": [93, 65]}, {"p1n": "pawel adamus", "p2n": "krzysztof juszczyk", "totals": [95, 76, 90, 103, 98, 90, 95]}, {"p1n": "dawid jendrysik", "p2n": "kacper adamus", "totals": [93]}, {"p1n": "mateusz woskowicz", "p2n": "dominik solilo", "totals": [66]}], "upcoming": [{"p1": "Jakub Nowak", "p2": "Piotr Przewlocki", "p1n": "jakub nowak", "p2n": "piotr przewlocki", "ts": 1785655800, "proj": 75.5, "n": 18, "over": 14, "side": "over", "hit": 78}, {"p1": "Dawid Poloszczanski", "p2": "Piotr Staniszewski", "p1n": "dawid poloszczanski", "p2n": "piotr staniszewski", "ts": 1785659700, "proj": 77.5, "n": 41, "over": 31, "side": "over", "hit": 76}], "bets": [], "skipped": [{"skip_bet": "u80_90", "league": "TT Elite Series", "tag": "Elite", "p1": "Mateusz Zagajewski", "p2": "Arkadiusz Mugowski", "side": "U\u226574.5", "conf": 71, "raw": 71, "rec": "12-5", "n": 17, "avg": 71.2, "ts": 1785661200, "u": 2.0, "tier": "", "deep": false, "ladder": [{"line": 70.5, "o": 10, "u": 7, "op": 59}, {"line": 71.5, "o": 8, "u": 9, "op": 47}, {"line": 72.5, "o": 8, "u": 9, "op": 47}, {"line": 73.5, "o": 8, "u": 9, "op": 47}, {"line": 74.5, "o": 8, "u": 9, "op": 47}, {"line": 75.5, "o": 8, "u": 9, "op": 47}, {"line": 76.5, "o": 7, "u": 10, "op": 41}, {"line": 77.5, "o": 7, "u": 10, "op": 41}, {"line": 78.5, "o": 7, "u": 10, "op": 41}, {"line": 79.5, "o": 6, "u": 11, "op": 35}, {"line": 80.5, "o": 5, "u": 12, "op": 29, "od": 1.83, "nb": 1}, {"line": 81.5, "o": 5, "u": 12, "op": 29}, {"line": 82.5, "o": 5, "u": 12, "op": 29}, {"line": 83.5, "o": 5, "u": 12, "op": 29}, {"line": 84.5, "o": 4, "u": 13, "op": 24}, {"line": 85.5, "o": 4, "u": 13, "op": 24}, {"line": 86.5, "o": 4, "u": 13, "op": 24}, {"line": 87.5, "o": 4, "u": 13, "op": 24}, {"line": 88.5, "o": 4, "u": 13, "op": 24}, {"line": 89.5, "o": 4, "u": 13, "op": 24}, {"line": 90.5, "o": 4, "u": 13, "op": 24}], "play_to": 74.5, "line": 80.5, "odds": -120, "book_name": "betmgm", "book": {"line": 80.5, "od": 1.83, "nb": 1}}]};</script><div id="tt-totals"></div>
+  </div>
+  <div class="panel hidden" id="pga">
+    <h2>PGA Tour · FanDuel</h2>
+    <div class="starwatch"><div class="pgahead"><span class="pgatitle">PGA Rocket Classic</span><span class="pgapaper">PAPER</span><span class="pgasp"></span><span class="pgarec">14-10 <b class="pos">+1.38u</b></span></div><div class="pgamkt">MATCHUPS</div><div class="pgabet"><div class="pgatop"><span class="pgasel">Xander Schauffele</span><span class="pgasp"></span><span title="2.62 decimal"><span class="podds fd">+162</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div><div class="pgasub">72 holes vs Cameron Young</div></div><div class="pgamkt">TOP 10 FINISH</div><div class="pgabet"><div class="pgatop"><span class="pgasel">Jackson Koivun</span><span class="pgasp"></span><span title="6.50 decimal"><span class="podds fd">+550</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div></div><div class="pgabet"><div class="pgatop"><span class="pgasel">Akshay Bhatia</span><span class="pgasp"></span><span title="7.50 decimal"><span class="podds fd">+650</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div></div><div class="pgabet"><div class="pgatop"><span class="pgasel">Michael Thorbjornsen</span><span class="pgasp"></span><span title="11.00 decimal"><span class="podds fd">+1000</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div></div><div class="pgamkt">ROUND 2 BIRDIES</div><div class="pgabet"><div class="pgatop"><span class="pgasel">Seamus Power</span><span class="pgasp"></span><span title="1.67 decimal"><span class="podds fd">-150</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div><div class="pgasub">over 3.5</div></div><div class="pgabet"><div class="pgatop"><span class="pgasel">Ryan Gerard</span><span class="pgasp"></span><span title="2.02 decimal"><span class="podds fd">+102</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div><div class="pgasub">over 4.5</div></div><div class="pgabet"><div class="pgatop"><span class="pgasel">Seamus Power</span><span class="pgasp"></span><span title="2.40 decimal"><span class="podds fd">+140</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div><div class="pgasub">over 4.5</div></div><div class="pgamkt">ROUND 2 SCORE</div><div class="pgabet"><div class="pgatop"><span class="pgasel">Stefano Mazzoli</span><span class="pgasp"></span><span title="2.10 decimal"><span class="podds fd">+110</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div><div class="pgasub">under 69.5</div></div><div class="pgamkt">ROUND 4 BIRDIES</div><div class="pgabet"><div class="pgatop"><span class="pgasel">Patrick Fishburn</span><span class="pgasp"></span><span title="1.61 decimal"><span class="podds fd">-164</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div><div class="pgasub">over 3.5</div></div><div class="pgabet"><div class="pgatop"><span class="pgasel">Patrick Cantlay</span><span class="pgasp"></span><span title="2.00 decimal"><span class="podds fd">+100</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div><div class="pgasub">under 4.5</div></div><div class="pgabet"><div class="pgatop"><span class="pgasel">Xander Schauffele</span><span class="pgasp"></span><span title="2.12 decimal"><span class="podds fd">+112</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div><div class="pgasub">under 4.5</div></div><div class="pgabet"><div class="pgatop"><span class="pgasel">Cameron Young</span><span class="pgasp"></span><span title="2.26 decimal"><span class="podds fd">+126</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div><div class="pgasub">under 4.5</div></div><div class="pgamkt">ROUND 4 SCORE</div><div class="pgabet"><div class="pgatop"><span class="pgasel">Rasmus Højgaard</span><span class="pgasp"></span><span title="2.20 decimal"><span class="podds fd">+120</span><img class="bklogo" src="book-fd.png" alt="FD"></span></div><div class="pgasub">under 68.5</div></div></div>
+  </div>
+  <div class="panel hidden" id="mlb">
+    <h2>MLB pitcher props · best book</h2>
+    
+  </div>
+  <div class="panel hidden" id="tracker">
+    <h2>Live record</h2>
+    
+      <div class="tcard">
+        <div class="thead"><img class="tlogo" src="logos/wnba.png" alt=""> WNBA</div>
+        <div class="trow">
+          <div class="tbox"><div class="tk">Record</div><div class="tv">34-17</div></div>
+          <div class="tbox"><div class="tk">Hit rate</div><div class="tv">67%</div></div>
+          <div class="tbox"><div class="tk">Units</div><div class="tv up">+13.9u</div></div>
+        </div>
+        <div class="tsub">1u base + declining rungs · since 7/9 · ROI +27%</div>
+        <details class="tdd"><summary>last 24h <span class="ddcnt">1</span></summary><div class="ddbody"><div class="ddday"><span>Sat 8/1</span><span class="ddtot">1-0 · <span class="up">+0.87u</span></span></div><div class="ddbet"><span class="ddnm">N. Cloud PTS o9.5</span><span class="ddwl w">W</span><span class="ddu up">+0.87u</span></div></div></details>
+      </div>
+      <div class="tcard">
+        <div class="thead"> TT Elite</div>
+        <div class="trow">
+          <div class="tbox"><div class="tk">Record</div><div class="tv">36-11</div></div>
+          <div class="tbox"><div class="tk">Hit rate</div><div class="tv">77%</div></div>
+          <div class="tbox"><div class="tk">Units</div><div class="tv up">+21.2u</div></div>
+        </div>
+        <div class="tsub">graded at the actual FanDuel line + odds · 4 pending · shadow 80-90u 262-162 (+64.2u, filtered out — validating) · ROI +45%</div>
+        <details class="tdd"><summary>last 24h <span class="ddcnt">7</span></summary><div class="ddbody"><div class="ddday"><span>Sat 8/1</span><span class="ddtot">1-1 · <span class="down">-0.13u</span></span></div><div class="ddbet"><span class="ddnm">Wojcik v Morawiec u95.5</span><span class="ddwl w">W</span><span class="ddu up">+0.87u</span></div><div class="ddbet"><span class="ddnm">Daniel v Grela u75.5</span><span class="ddwl l">L</span><span class="ddu down">-1.00u</span></div><div class="ddday"><span>Fri 7/31</span><span class="ddtot">4-1 · <span class="up">+3.93u</span></span></div><div class="ddbet"><span class="ddnm">Szostok v Urban u96.5</span><span class="ddwl w">W</span><span class="ddu up">+0.91u</span></div><div class="ddbet"><span class="ddnm">Trela v Piecowski u96.5</span><span class="ddwl l">L</span><span class="ddu down">-1.00u</span></div><div class="ddbet"><span class="ddnm">Adamus v Ruszkiewicz o78.5</span><span class="ddwl w">W</span><span class="ddu up">+0.87u</span></div><div class="ddbet"><span class="ddnm">Grela v Kolasa u92.5</span><span class="ddwl w">W</span><span class="ddu up">+2.20u</span></div><div class="ddbet"><span class="ddnm">Nowak v Kurek o66.5</span><span class="ddwl w">W</span><span class="ddu up">+0.95u</span></div></div></details>
+      </div><div class="tcard"><div class="thead">WNBA Parlays</div><div class="trow"><div class="tbox"><div class="tk">Record</div><div class="tv">6-11</div></div><div class="tbox"><div class="tk">Hit rate</div><div class="tv">35%</div></div><div class="tbox"><div class="tk">Units</div><div class="tv up">+2.51u</div></div></div><div class="tsub">every suggested parlay counts · .25u · .15u ≥+1000 · 1 pending · 1 suggested · ROI +59%</div></div>
+  </div>
+  <div class="foot">auto-generated · self-refreshing</div>
+</div>
+<script>
+  function _thumb() {
+    const a = document.querySelector('.tab.active'), th = document.getElementById('tabthumb');
+    if (a && th) { th.style.left = a.offsetLeft + 'px'; th.style.width = a.offsetWidth + 'px'; }
+  }
+
+  // ---- CUPERTINO-CHROME: real filter chips -------------------------------------------------
+  // Counts are measured from the rendered cards, never precomputed, so a chip cannot claim a
+  // number it did not find. A filter matching zero cards is not rendered at all rather than
+  // shown as a dead affordance.
+  (function () {
+    var host = document.getElementById('wnbafilters');
+    if (!host) return;
+    var cards = [].slice.call(document.querySelectorAll('#wnba .cu-c[data-status]'));
+    if (cards.length < 2) return;                       // one card needs no filter row
+    var defs = [
+      { k: 'all', l: 'All',         m: function () { return true; } },
+      { k: 'ok',  l: 'Starting',    m: function (c) { return c.dataset.status === 'ok'; } },
+      { k: 'mid', l: 'Likely',      m: function (c) { return c.dataset.status === 'mid'; } },
+      { k: 'pp',   l: 'Bench',       m: function (c) { return c.dataset.status === 'pp'; } },
+      { k: 'live', l: 'In progress', m: function (c) { return c.dataset.status === 'live'; } },
+      { k: 'lad', l: 'Ladders',     m: function (c) { return c.dataset.lad === '1'; } },
+      { k: 'fd',  l: 'FanDuel',     m: function (c) { return c.dataset.book === 'fd'; } },
+      { k: 'dk',  l: 'DraftKings',  m: function (c) { return c.dataset.book === 'dk'; } }
+    ];
+    var cur = 'all';
+    function apply() {
+      var d = defs.filter(function (x) { return x.k === cur; })[0] || defs[0];
+      cards.forEach(function (c) { c.style.display = d.m(c) ? '' : 'none'; });
+      // a section whose cards are all hidden collapses, header and all
+      [].forEach.call(document.querySelectorAll('#wnba .game'), function (g) {
+        var any = [].some.call(g.querySelectorAll('.cu-c'), function (c) {
+          return c.style.display !== 'none';
+        });
+        g.style.display = any ? '' : 'none';
+      });
+    }
+    function draw() {
+      host.innerHTML = '';
+      var shown = 0;
+      defs.forEach(function (d) {
+        var n = cards.filter(d.m).length;
+        if (!n) return;                                 // never render an empty filter
+        shown++;
+        var b = document.createElement('button');
+        b.className = 'cu-ch';
+        b.type = 'button';
+        if (d.k === cur) b.setAttribute('aria-current', 'true');
+        b.appendChild(document.createTextNode(d.l + ' '));
+        var ct = document.createElement('span');
+        ct.className = 'ct';
+        ct.textContent = n;
+        b.appendChild(ct);
+        b.addEventListener('click', function () { cur = d.k; apply(); draw(); });
+        host.appendChild(b);
+      });
+      host.hidden = shown < 2;                          // one chip is not a filter
+    }
+    draw();
+    apply();
+  })();
+
+  function showTab(t) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('hidden', p.id !== t));
+    document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
+    _thumb();
+    try { localStorage.setItem('tab', t); } catch (e) {}
+  }
+  try { const s = localStorage.getItem('tab'); if (s) showTab(s); } catch (e) {}
+  addEventListener('resize', _thumb); addEventListener('load', _thumb); _thumb();
+  // PLAYED MARKS: tap ✓ on any card/slip — instant, survives refresh via localStorage (the durable
+  // wnba_played.txt ✓ bakes in as .baked and always wins; local marks are the phone-side layer).
+  function _marks() { try { return JSON.parse(localStorage.getItem('marks') || '{}'); } catch (e) { return {}; } }
+  function togglePlayed(el) {
+    if (event) event.stopPropagation();
+    const host = el.closest('[data-k]'); if (!host) return;
+    const m = _marks(); m[host.dataset.k] = !m[host.dataset.k];
+    localStorage.setItem('marks', JSON.stringify(m));
+    el.classList.toggle('on', !!m[host.dataset.k] || el.classList.contains('baked'));
+  }
+  function applyMarks() {
+    const m = _marks();
+    document.querySelectorAll('[data-k] .pmark').forEach(el => {
+      if (el.classList.contains('baked')) { el.classList.add('on'); return; }
+      el.classList.toggle('on', !!m[el.closest('[data-k]').dataset.k]);
+    });
+  }
+  // WNBA sort (edge/time) — pure client-side over the server-rendered games
+  const F = { side:'all', sort:'time' };
+  function applyF() {
+    document.querySelectorAll('.prop').forEach(p =>
+      p.style.display = (F.side==='all' || p.dataset.side===F.side) ? '' : 'none');
+    document.querySelectorAll('.pblk').forEach(b =>
+      b.style.display = [...b.querySelectorAll('.prop')].some(p => p.style.display!=='none') ? '' : 'none');
+    document.querySelectorAll('.game').forEach(g =>
+      g.style.display = [...g.querySelectorAll('.pblk')].some(b => b.style.display!=='none') ? '' : 'none');
+  }
+  function setF(k,v) {
+    F[k]=v;
+    document.querySelectorAll(`[data-f="${k}"] .pill`).forEach(p => p.classList.toggle('on', p.dataset.v===v));
+    applyF();
+  }
+  // Background refresh: fetch the freshly-built page every 90s and swap ONLY the panels whose
+  // data changed — no full reload, so scroll position, expanded ladders, active tab and filters
+  // all survive untouched unless there's genuinely new data. Replaces the old <meta refresh>.
+  async function bgRefresh() {
+    try {
+      const r = await fetch(location.pathname + '?_=' + Date.now(), { cache: 'no-store' });
+      if (!r.ok) return;
+      const doc = new DOMParser().parseFromString(await r.text(), 'text/html');
+      const nbv = doc.querySelector('meta[name="bv"]'), cbv = document.querySelector('meta[name="bv"]');
+      if (nbv && cbv && nbv.content !== cbv.content) { location.reload(); return; }
+      const y = window.scrollY;
+      // remember which game-log drawers are open so the panel swap doesn't slam them shut mid-read
+      const openK = [...document.querySelectorAll('.prop')].filter(p =>
+        p.nextElementSibling && p.nextElementSibling.classList.contains('open')).map(p => p.dataset.k);
+      let touched = false, wnba = false;
+      ['wnba','tt','tracker'].forEach(id => {
+        const nw = doc.getElementById(id), cur = document.getElementById(id);
+        if (nw && cur && nw.innerHTML !== cur.innerHTML) {
+          cur.innerHTML = nw.innerHTML; touched = true; if (id === 'wnba') wnba = true;
+        }
+      });
+      if (wnba) {   // fresh cards come in server-default order/visibility — restore the user's state
+        document.querySelectorAll('[data-f] .pill').forEach(p => {
+          const g = p.closest('[data-f]').dataset.f;
+          p.classList.toggle('on', p.dataset.v === F[g]);
+        });
+        applyF();
+        document.querySelectorAll('.prop').forEach(p => {     // re-open the drawers the user had open
+          if (openK.includes(p.dataset.k) && p.nextElementSibling)
+            p.nextElementSibling.classList.add('open');
+        });
+      }
+      if (touched) applyMarks();
+      if (touched) window.scrollTo(0, y);
+      if (window._applyTTTotals) window._applyTTTotals();   // keep live TT totals over the swapped-in bake
+    } catch (e) {}
+  }
+  if (location.hostname.endsWith('github.io')) setInterval(bgRefresh, 90000);
+  applyMarks();
+
+  const TT_BOARD_URL = 'https://raw.githubusercontent.com/fgf9p6ks2f-ux/tennis-odds-collector/main/fd_board.json';
+  const TT_H2H_URL = 'https://raw.githubusercontent.com/fgf9p6ks2f-ux/tennis-odds-collector/main/tt_board.json';
+  let _ttBoard = null, _ttH2H = null, _ttUpcoming = null, _ttBets = null, _ttSkipped = null;
+  function _ttEsc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function _ttTime(iso){ try { return new Date(iso).toLocaleTimeString('en-US', {timeZone:'America/Denver', hour:'numeric', minute:'2-digit'}); } catch(e){ return ''; } }
+  function _ttAm(o){ return (o != null && o > 0) ? '+' + o : '' + o; }
+  function _ttKey(a, b){ return [a, b].sort().join('|'); }
+  function _ttLast(s){ var a = String(s == null ? '' : s).split(/\s+/).filter(Boolean); return a.length ? a[a.length-1] : ''; }
+  // mirrors fd_tt.norm EXACTLY: NFKD, drop combining marks, lowercase, collapse whitespace.
+  // toLowerCase().trim() agrees only while names are ASCII; TT is full of Polish names, and one
+  // diacritic would break the dedup key and render a FanDuel-priced bet twice.
+  // bmbets stores DECIMAL odds; the existing _ttAm formats an AMERICAN number, so a decimal
+  // pushed through it would render "1.87" as a price. Convert explicitly.
+  function _ttDecAm(v){
+    var n = Number(v); if (!isFinite(n) || n <= 1) return null;
+    n = (n >= 2) ? Math.round((n-1)*100) : -Math.round(100/(n-1));
+    return (n > 0 ? '+' + n : String(n));
+  }
+  // Real BetMGM mark when docs/book-mgm.png exists; the monogram below is only the
+  // fallback for when it does not (no BetMGM SVG is publicly obtainable).
+  var _TTMGM = "book-mgm.svg";
+  var _TTMGM_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'"
+    + " viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23c9a227'/%3E"
+    + "%3Ctext x='12' y='16' font-size='8.5' font-weight='700' text-anchor='middle'"
+    + " fill='%23151b24' font-family='Arial,sans-serif'%3EMGM%3C/text%3E%3C/svg%3E";
+  function _ttNorm(x){
+    return String(x||'').normalize('NFKD').replace(/[̀-ͯ]/g,'')
+      .toLowerCase().split(/\s+/).filter(Boolean).join(' ');
+  }
+  window._applyTTTotals = function(){
+    var el = document.getElementById('tt-totals');
+    if (!el) return;
+    var now = Date.now(), mid = '\u00B7';
+    var entries = [], boardPairs = {}, boardLast = {};
+    // real FanDuel-priced games — keep ONLY those with a +EV pick (a flagged bet)
+    (_ttBoard || []).forEach(function(m){
+      if (!m || m.line == null || !m.open_date || new Date(m.open_date).getTime() <= now) return;
+      var key = _ttKey(m.p1_norm, m.p2_norm); boardPairs[key] = 1;
+      boardLast[_ttKey(_ttLast(m.p1_norm), _ttLast(m.p2_norm))] = 1;   // last-name fallback key
+      var entry = _ttH2H ? _ttH2H[key] : null; if (!entry || !entry.pick) return;
+      var tots = entry.totals || [], n = tots.length, ov = 0, j;
+      for (j=0;j<n;j++){ if (tots[j] > +m.line) ov++; }
+      var hit = n ? Math.round((entry.pick.side==='over'?ov:n-ov)/n*100) : null;
+      var _od = (entry.pick.side === 'over') ? m.over_odds : m.under_odds;
+      entries.push({start: new Date(m.open_date).getTime(), p1: m.p1, p2: m.p2, line: +m.line,
+                    side: entry.pick.side, hit: hit, real: true, book: 'FanDuel',
+                    odds: (_od == null ? null : _ttAm(_od))});
+    });
+    // BETS PRICED AWAY FROM FANDUEL. The loop above only sees fd_board pairs, and elite_h2h is
+    // itself built from fd_board, so a bet taken at a fresh BetMGM line renders nowhere — it sat in
+    // `bets`, counted in the record, invisible. An EXTRA play gets noticed; a MISSING one does not.
+    // `bets` is post-gate (tt_board routes refused plays to `skipped`), so this cannot loosen anything.
+    (_ttBets || []).forEach(function(b){
+      if (!b || !b.play_to || !b.ts) return;
+      var n1 = _ttNorm(b.p1), n2 = _ttNorm(b.p2);
+      var k = _ttKey(n1, n2);
+      // two guards: the exact normalised key, and the last-name fallback the projections loop
+      // already uses, so a first-name spelling difference between sources cannot duplicate a play
+      if (boardPairs[k] || boardLast[_ttKey(_ttLast(n1), _ttLast(n2))]) return;
+      var st = b.ts * 1000; if (st <= now) return;
+      boardPairs[k] = 1;
+      // the REAL wager: line/odds/book_name are what the bet is struck at. b.side and b.play_to
+      // are the card's ladder ZONE, which is why an 81.5 line used to render as "O<=82.5".
+      // b.odds is already AMERICAN (converted at the fd_tt boundary), so no second conversion.
+      var _bn = (b.book_name === 'betmgm') ? 'BetMGM' : 'FanDuel';
+      entries.push({start: st, p1: b.p1, p2: b.p2,
+                    line: (b.line != null ? +b.line : +b.play_to),
+                    side: (String(b.side||'').charAt(0) === 'O') ? 'over' : 'under',
+                    hit: b.raw, real: true, book: _bn,
+                    odds: (b.odds != null ? _ttAm(b.odds) : _ttDecAm((b.book||{}).od))});
+    });
+    // REFUSED PLAYS SUPPRESS THEIR OWN PROJECTION. They are never rendered, but a pair that has a
+    // real FanDuel/BetMGM line and failed the gate must LEAVE the board rather than fall back to a
+    // projected row at an invented line — that reads as an available bet when the model said no.
+    (_ttSkipped || []).forEach(function(b){
+      if (!b || !b.p1 || !b.p2) return;
+      var s1 = _ttNorm(b.p1), s2 = _ttNorm(b.p2);
+      boardPairs[_ttKey(s1, s2)] = 1;
+      boardLast[_ttKey(_ttLast(s1), _ttLast(s2))] = 1;
+    });
+    // projected likely-flags (pre-filtered to >=70% in tt_board) — DROP the moment FanDuel posts
+    // this pair (exact key OR last-name fallback), so a "projected" tag never lingers past the real line
+    (_ttUpcoming || []).forEach(function(e){
+      if (!e.side || boardPairs[_ttKey(e.p1n, e.p2n)] || boardLast[_ttKey(_ttLast(e.p1n), _ttLast(e.p2n))]) return;
+      var st = e.ts * 1000; if (st <= now) return;
+      entries.push({start: st, p1: e.p1, p2: e.p2, line: e.proj, side: e.side, hit: e.hit, real: false});
+    });
+    if (!entries.length){
+      el.innerHTML = '<div class="card"><h3 class="ttlg">\uD83C\uDFD3 TT Elite ' + mid + ' Flags</h3>'
+        + '<div class="ttempty">No TT Elite flags right now ' + mid + ' no pair clears the 70% bar at its line (real or projected).</div></div>';
+      return;
+    }
+    entries.sort(function(a,b){ return (a.real?0:1)-(b.real?0:1) || a.start-b.start; });
+    entries = entries.slice(0, 16);
+    var rows = '';
+    for (var i=0; i<entries.length; i++){
+      var x = entries[i], tip = _ttTime(new Date(x.start).toISOString()), o = x.side==='over'?'O':'U';
+      var chip = (x.hit != null) ? ('<div class="ttconf"><span class="tchip ' + (x.hit>=78?'tA':'tB') + '">' + x.hit + '%</span><span class="ttconflab">hit rate</span></div>') : '';
+      var lncell = x.real ? (''+x.line) : ('<span class="tld">~</span>' + x.line);
+      var _bk = x.book || 'FanDuel', _mgm = (_bk === 'BetMGM'), _cls = _mgm ? 'bmgm' : 'fd';
+      var _bklogo = '<img class="bklogo" src="' + (_mgm ? _TTMGM : 'book-fd.png')
+            + '" onerror="this.onerror=null;this.src=_TTMGM_FALLBACK" alt="'
+            + (_mgm ? 'MGM' : 'FD') + '">';
+      var _oddstxt = x.odds ? ('<span class="cu-od' + (_mgm ? ' bmgm' : '') + '">' + x.odds + '</span>') : '';
+      var _price = '';
+      var src = x.real ? ('<span class="' + _cls + '">' + _bk + ' ' + mid + ' confirmed</span> ' + _price)
+                       : '<span class="pj">projected</span>';
+      // CUPERTINO-REBUILD: same anatomy as a WNBA card — status pill + book + lock, title,
+      // context sub-line, the bet at display size, hit-rate bar on the face. No drawer.
+      var _st = x.real ? '<span class="cu-st ok">Confirmed</span>'
+                       : '<span class="cu-st no">Projected</span>';
+      var _hit = (x.hit != null)
+            ? ('<span class="cu-bar"><i class="' + (x.hit >= 78 ? 'g' : '') + '" style="width:'
+               + Math.min(x.hit, 100) + '%"></i></span><span class="cu-pc">' + x.hit + '%</span>'
+               + '<span class="cu-n">hit rate</span>')
+            : '<span class="cu-bar"></span><span class="cu-pc na">—</span>'
+              + '<span class="cu-n na">no sample</span>';
+      rows += '<div class="cu-c"><div class="cu-sum">'
+            + '<div class="cu-hd">' + _st + _bklogo + '<span class="cu-time">' + tip + ' MT</span></div>'
+            + '<div class="cu-ttl">' + _ttEsc(x.p1) + ' v ' + _ttEsc(x.p2) + '</div>'
+            + '<div class="cu-sub">Head-to-head total' + (x.real ? (' · ' + _bk) : '') + '</div>'
+            + '<div class="cu-bet"><span class="cu-dir">' + (x.side === 'over' ? 'OVER' : 'UNDER')
+            + '</span><span class="cu-line">' + lncell + '</span>'
+            + '<span class="cu-price">' + _oddstxt + '</span></div>'
+            + '<div class="cu-cf">' + _hit + '</div>'
+            + '</div></div>';
+    }
+    el.innerHTML = '<div class="card"><h3 class="ttlg">TT Elite ' + mid + ' Flags'
+      + '<span class="ttcnt">' + entries.length + '</span></h3>' + rows
+      + '<div class="ttfoot">projected = no posted line yet, never tracked</div></div>';
+  };
+  window._fetchTTTotals = async function(){
+    try {
+      var r = await fetch(TT_BOARD_URL + '?_=' + Date.now(), { cache: 'no-store' });
+      if (r.ok){ var d = await r.json(); _ttBoard = Array.isArray(d.matches) ? d.matches : []; }
+    } catch(e){}
+    try {
+      var r2 = await fetch(TT_H2H_URL + '?_=' + Date.now(), { cache: 'no-store' });
+      if (r2.ok){ var d2 = await r2.json(); var mp = {}; (d2.elite_h2h || []).forEach(function(e){ mp[_ttKey(e.p1n, e.p2n)] = e; }); _ttH2H = mp; _ttUpcoming = Array.isArray(d2.elite_upcoming) ? d2.elite_upcoming : []; _ttBets = Array.isArray(d2.bets) ? d2.bets : []; _ttSkipped = Array.isArray(d2.skipped) ? d2.skipped : []; }
+    } catch(e){}
+    window._applyTTTotals();
+    _ttStamp();
+  };
+  function _ttStamp(){
+    var el = document.getElementById('rfchk');
+    if (!el) return;
+    var d = new Date(), p = function(n){ return (n<10?'0':'') + n; };
+    var h12 = (d.getHours() % 12) || 12, ap = d.getHours() < 12 ? ' AM' : ' PM';
+    el.textContent = '\u00B7 checked ' + h12 + ':' + p(d.getMinutes()) + ap;
+  }
+  window.manualRefresh = async function(btn){
+    if (btn){ btn.classList.add('spin'); btn.disabled = true; }
+    try { await window._fetchTTTotals(); } catch(e){}       // freshest TT picks (raw fd_board + tt_board)
+    try { if (typeof bgRefresh === 'function') await bgRefresh(); } catch(e){}  // latest baked WNBA/tracker panels
+    if (btn){ setTimeout(function(){ btn.classList.remove('spin'); btn.disabled = false; }, 450); }
+  };
+  // SEED FROM THE SERVER-EMBEDDED BOOTSTRAP, then poll. This is what replaced the Python bake:
+  // the markup is built here and only here, but the DATA arrives with the page, so first paint is
+  // instant and survives a failed fetch — which is the only thing the second renderer was buying.
+  (function(){
+    var b = window._TT_BOOT;
+    if (!b) return;
+    _ttBoard = Array.isArray(b.board) ? b.board : [];
+    var mp = {}; (b.h2h || []).forEach(function(e){ mp[_ttKey(e.p1n, e.p2n)] = e; });
+    _ttH2H = mp;
+    _ttUpcoming = Array.isArray(b.upcoming) ? b.upcoming : [];
+    _ttBets = Array.isArray(b.bets) ? b.bets : [];
+    _ttSkipped = Array.isArray(b.skipped) ? b.skipped : [];
+    try { window._applyTTTotals(); } catch(e){}
+  })();
+  window._fetchTTTotals();
+  setInterval(window._fetchTTTotals, 60000);
+
+</script>
+<script>(function(){if(location.hostname.endsWith('github.io'))return;var last=null;setInterval(function(){fetch('/bump',{cache:'no-store'}).then(function(r){return r.text()}).then(function(v){if(last===null){last=v;return;}if(v!==last){sessionStorage.setItem('_sy',scrollY);location.reload();}}).catch(function(){});},2000);var y=sessionStorage.getItem('_sy');if(y){scrollTo(0,+y);sessionStorage.removeItem('_sy');}})();</script>
+</body></html>

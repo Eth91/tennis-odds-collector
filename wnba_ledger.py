@@ -1,0 +1,620 @@
+"""WNBA prediction ledger — the learning loop (predict -> grade -> retrain).
+
+Every flagged spot the tool produces is logged here BEFORE the game. The next day the
+player's actual box score (ESPN) grades it: did the over hit, and what did they actually
+produce vs what we projected. That accumulates the (features -> outcome) pairs the
+judgment model trains on — the thing that lets it eventually price the elevated role
+itself instead of leaning on the raw hit-rate. No historical closing prop lines exist to
+backtest against (books hide them), so this IS the dataset: built forward, on real spots.
+
+The edge it's learning to price, in one line: the beneficiary's ELEVATED-role production
+vs a line the book anchored to their SEASON AVERAGE. So we log both, and grade against
+what actually happened.
+
+    python wnba_ledger.py --grade     # grade yesterday's logged spots off box scores
+    python wnba_ledger.py --report    # win rate, ROI, projection error by stat
+    python wnba_ledger.py --train     # fit the projection calibration (once enough data)
+"""
+from __future__ import annotations
+
+import argparse
+import datetime
+import json
+import statistics as st
+import urllib.request
+from pathlib import Path
+
+import wnba_wowy as W
+
+HERE = Path(__file__).resolve().parent
+DB = HERE / "wnba_ledger.sqlite"
+CAL = HERE / "wnba_proj_cal.json"
+PLAYED = HERE / "wnba_played.txt"      # durable user-played marks (plain text: merges clean,
+                                       # re-applied on every DB open so a CI DB-reset can't lose them)
+STATKEY = {"points": "pts", "rebounds": "reb", "assists": "ast"}
+
+_BOX_CACHE = {}
+
+
+def box_actuals(date):
+    """{player displayName -> {points,rebounds,assists,pts_reb,pts_ast,reb_ast,pra}} for all FINAL games
+    on `date` (YYYY-MM-DD), from ESPN BOX SCORES. Fallback for grade() when the player game log lags or
+    goes stale (Rae Burrell 7/15: gamelog ended May 10, so a settled game silently never graded). Cached
+    per date; only hit when the game-log path fails, so normal grading is unaffected."""
+    if date in _BOX_CACHE:
+        return _BOX_CACHE[date]
+    out = {}
+
+    def _get(url):
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        return json.load(urllib.request.urlopen(req, timeout=20))
+
+    try:
+        base = "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba"
+        sb = _get(f"{base}/scoreboard?dates={date.replace('-', '')}")
+        for ev in sb.get("events", []):
+            if ((ev.get("status") or {}).get("type") or {}).get("state") != "post":
+                continue                                          # only settled games
+            summ = _get(f"{base}/summary?event={ev['id']}")
+            for team in (summ.get("boxscore") or {}).get("players", []):
+                for grp in team.get("statistics", []):
+                    labels = grp.get("names") or grp.get("labels") or []
+                    for a in grp.get("athletes", []):
+                        nm = (a.get("athlete") or {}).get("displayName")
+                        z = dict(zip(labels, a.get("stats", [])))
+                        try:
+                            p, r, s = int(z["PTS"]), int(z["REB"]), int(z["AST"])
+                        except (KeyError, ValueError, TypeError):
+                            continue                              # DNP / missing line
+                        rec = {"points": p, "rebounds": r, "assists": s, "pts_reb": p + r,
+                               "pts_ast": p + s, "reb_ast": r + s, "pra": p + r + s}
+                        if nm:
+                            out[nm] = rec
+                            out.setdefault(nm.lower().replace(".", ""), rec)   # light name-norm fallback
+    except Exception as e:
+        print(f"box_actuals({date}) failed: {str(e)[:80]}")
+    _BOX_CACHE[date] = out
+    return out
+MIN_TRAIN = 30                     # graded spots before a calibration is trustworthy
+
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS predictions(
+  pred_date TEXT, out_player TEXT, player TEXT, team TEXT, opp TEXT,
+  stat TEXT, line REAL, odds REAL, odds_other REAL, book TEXT,
+  proj_hit REAL, season_avg REAL, elev_avg REAL, proj_min REAL, n_elev INTEGER,
+  ev REAL, stale INTEGER, pi_role REAL,
+  d_stat REAL, d_fga REAL, d_min REAL, driver REAL, vac REAL,
+  total REAL, pace REAL, opp_def REAL, spread REAL, d_fta REAL, d_3pa REAL,
+  basis TEXT, samples TEXT, confidence TEXT, regime TEXT, vol TEXT,
+  side TEXT DEFAULT 'over',
+  result TEXT, actual REAL, graded INTEGER DEFAULT 0,
+  UNIQUE(pred_date, player, stat, line)
+);
+"""
+# Model features, migrated into older DBs in place. driver = per-stat deciding delta
+# (FGA rise for points, reb/ast rise otherwise); vac = out player's own avg in the stat
+# (pool size); total/pace/opp_def = matchup environment; d_fta/d_3pa = points channels.
+# spread = signed line FOR the beneficiary's team (+mag = underdog / blowout risk).
+_MIGRATE = ("d_stat", "d_fga", "d_min", "driver", "vac",
+            "total", "pace", "opp_def", "spread", "d_fta", "d_3pa", "pi_role",
+            "odds_other")   # opposite-side price at flag time — lets side-flips (role_flip) be backtested
+_MIGRATE_TEXT = ("basis", "samples", "confidence", "regime", "vol")   # regime/vol = display JSON
+
+
+def _con():
+    import sqlite3
+    con = sqlite3.connect(DB)
+    con.executescript(SCHEMA)
+    have = {r[1] for r in con.execute("PRAGMA table_info(predictions)")}
+    for col in _MIGRATE:
+        if col not in have:
+            con.execute(f"ALTER TABLE predictions ADD COLUMN {col} REAL")
+    for col in _MIGRATE_TEXT:
+        if col not in have:
+            con.execute(f"ALTER TABLE predictions ADD COLUMN {col} TEXT")
+    if "played" not in have:      # user-approval label: did the user actually bet this flag?
+        con.execute("ALTER TABLE predictions ADD COLUMN played INTEGER DEFAULT 0")
+    if "side" not in have:        # which side we bet ('over'/'under'); win = (result == side)
+        con.execute("ALTER TABLE predictions ADD COLUMN side TEXT DEFAULT 'over'")
+    if "tier" not in have:        # 'firm' = the validated record; 'n1' = the ⚡1G speed pilot,
+        # graded and tracked but reported SEPARATELY so it never moves the headline number
+        con.execute("ALTER TABLE predictions ADD COLUMN tier TEXT DEFAULT 'firm'")
+    con.commit()
+    _apply_played(con)            # re-derive played marks from the durable text file
+    return con
+
+
+def _apply_played(con):
+    """Re-apply the durable played marks (wnba_played.txt) onto the DB, so a fresh/reset CI
+    database always reflects what the user bet."""
+    if not PLAYED.exists():
+        return
+    for ln in PLAYED.read_text().splitlines():
+        p = ln.strip().split("|")
+        if len(p) == 4:
+            con.execute("UPDATE predictions SET played=1 WHERE pred_date=? AND player LIKE ? "
+                        "AND stat=? AND line=?", (p[0], f"%{p[1]}%", p[2], float(p[3])))
+    con.commit()
+
+
+def mark_played(specs, date=None):
+    """Tag flagged rows the USER actually bet — the human-approval label the learner trains
+    on (what distinguishes the plays he takes from the ones he passes). Writes to the durable
+    text file AND the DB. specs = list of (player_substr, stat, line); date defaults to the
+    latest slate. Returns count matched in the DB."""
+    con = _con()
+    if date is None:
+        row = con.execute("SELECT MAX(pred_date) FROM predictions").fetchone()
+        date = row[0] if row else None
+    keys = set(PLAYED.read_text().splitlines()) if PLAYED.exists() else set()
+    n = 0
+    for player, stat, line in specs:
+        keys.add(f"{date}|{player}|{stat}|{line:g}")
+        n += con.execute(
+            "UPDATE predictions SET played=1 WHERE pred_date=? AND player LIKE ? "
+            "AND stat=? AND line=?", (date, f"%{player}%", stat, float(line))).rowcount
+    PLAYED.write_text("\n".join(sorted(keys)))
+    con.commit()
+    con.close()
+    return n
+
+
+def log_predictions(rows):
+    """rows: list of dicts (one per flagged spot). Deduped per (date,player,stat,line)
+    so the 4 daily CI runs don't double-log. Returns count newly inserted."""
+    if not rows:
+        return 0
+    con = _con()
+    cols = ("pred_date", "out_player", "player", "team", "opp", "stat", "line", "odds", "odds_other",
+            "book", "proj_hit", "season_avg", "elev_avg", "proj_min", "n_elev", "ev", "stale",
+            "d_stat", "d_fga", "d_min", "driver", "vac",
+            "total", "pace", "opp_def", "spread", "d_fta", "d_3pa", "basis", "samples", "confidence",
+            "side", "regime", "vol", "pi_role", "tier")
+    n = 0
+    # LOCK THE PLAY (2026-07-13, user): a player's play (stat+side) is fixed at FIRST flag. Later
+    # scans may add more ladder RUNGS of that SAME play, but must NEVER introduce a different stat/
+    # side for an already-flagged player — the first flag is the bet you got down on the opener, and
+    # a re-scan changing its mind (a pts-over turning into an assists-under once the line moves) must
+    # not spawn a competing bet. `locked` is a pre-loop snapshot, so a net-new player's first batch
+    # (incl. the 2-uncorrelated selection) inserts freely; only cross-scan NEW plays are cut.
+    locked = {}
+    for d in {r.get("pred_date") for r in rows if r.get("pred_date")}:
+        for pl, s, sd in con.execute("SELECT player, stat, side FROM predictions WHERE pred_date=? "
+                                     "AND graded=0 AND result IS NULL", (d,)).fetchall():
+            locked.setdefault((d, pl), set()).add((s, sd or "over"))
+    resurrected = []
+    for r in rows:
+        lk = locked.get((r.get("pred_date"), r.get("player")))
+        if lk and (r.get("stat"), r.get("side") or "over") not in lk:
+            continue                                     # already flagged a different play — locked
+        ex = con.execute("SELECT result, graded, out_player FROM predictions WHERE pred_date=? "
+                         "AND player=? AND stat=? AND line=?", (r.get("pred_date"), r.get("player"),
+                                                               r.get("stat"), r.get("line"))).fetchone()
+        if ex and ex[0] == "void" and not ex[1]:
+            resurrected.append(f"{r.get('pred_date')}|{r.get('player')}|{r.get('stat')}|{r.get('line')}")
+        if ex and ex[0] is None and ex[2]:
+            # NEVER-SHRINK PREMISE (2026-07-19, Bonner/Mack): refresh may ADD outs (multi-out
+            # compounding) but a strictly SMALLER out-set means a premise member RETURNED —
+            # rewriting out_player then hides the return from the premise sweep. Skip the
+            # re-log entirely; the sweep judges the original basis.
+            old_set = {x.strip() for x in ex[2].split(",") if x.strip()}
+            new_set = {x.strip() for x in (r.get("out_player") or "").split(",") if x.strip()}
+            if new_set and new_set < old_set:
+                continue
+        # insert new spots idempotently, and REFRESH on re-log so the row tracks live info through
+        # the day: the confidence label (projected -> likely -> confirmed/bench as RotoWire locks),
+        # AND the out-set + projection when a SECOND star is ruled out later (the timing edge — the
+        # multi-out boost compounds; the row must reflect it, not freeze at the single-out read).
+        # The earliest-flag record for CLV lives in wnba_clv's own table, so this can't corrupt it.
+        # The recorded ODDS stay flag-time (the price we'd have locked).
+        cur = con.execute(
+            f"INSERT INTO predictions({','.join(cols)}) VALUES ({','.join('?' * len(cols))}) "
+            f"ON CONFLICT(pred_date, player, stat, line) DO UPDATE SET confidence=excluded.confidence, "
+            f"side=excluded.side, samples=excluded.samples, regime=excluded.regime, vol=excluded.vol, "
+            f"out_player=excluded.out_player, elev_avg=excluded.elev_avg, ev=excluded.ev, "
+            f"proj_hit=excluded.proj_hit, proj_min=excluded.proj_min, n_elev=excluded.n_elev, "
+            f"d_fga=excluded.d_fga, d_min=excluded.d_min, d_fta=excluded.d_fta, "
+            f"d_3pa=excluded.d_3pa, driver=excluded.driver, stale=excluded.stale, vac=excluded.vac, "
+            f"spread=excluded.spread, pi_role=excluded.pi_role, "
+            # VOID RESURRECTION (2026-07-18): a safeguard-voided row keeps its key, which blocked
+            # the SAME bet from re-flagging once its premise became GENUINELY confirmed (Plum/
+            # Diggins long-term outs -> 7/19 beneficiaries stayed dead). The flagger only emits
+            # confirmed premises, so an ungraded 'void' it re-emits is alive again — at TODAY'S
+            # odds (the original flag was premature; this is the real flag time). Graded rows
+            # never resurrect.
+            f"odds=CASE WHEN predictions.result='void' AND predictions.graded=0 "
+            f"THEN excluded.odds ELSE predictions.odds END, "
+            f"odds_other=CASE WHEN predictions.result='void' AND predictions.graded=0 "
+            f"THEN excluded.odds_other ELSE predictions.odds_other END, "
+            f"result=CASE WHEN predictions.result='void' AND predictions.graded=0 "
+            f"THEN NULL ELSE predictions.result END",
+            tuple((r.get(c) or "over") if c == "side" else r.get(c) for c in cols))
+        n += cur.rowcount
+    # A FLAG IS A PLACED BET — kept FOREVER (2026-07-13, user's rule). He bets the soft opener early
+    # to capture the CLV, so a flagged bet must persist at its ORIGINAL line/odds until it GRADES; a
+    # re-scan must NEVER drop or replace it. (A prior "self-heal" deleted a player's pending bets when
+    # the model re-selected a different play — that nuked a WINNING Rae Burrell pts o14.5 the moment
+    # the line moved to 15.5 in his favour, so he cashed it out thinking it had died. Only grade()
+    # removes a pending bet, when its game settles.) INSERT-OR-IGNORE above keeps the earliest log,
+    # so the same (date, player, stat, line) never double-counts and its opening odds are preserved.
+    con.commit()
+    con.close()
+    # a resurrected void is a NEW actionable flag — clear its ntfy-SEEN key (set when the
+    # premature original pinged) so the sender re-pings it (ping↔board coherence).
+    if resurrected:
+        try:
+            seen_f = Path(__file__).resolve().parent / "wnba_notified.txt"
+            seen = seen_f.read_text().splitlines() if seen_f.exists() else []
+            keep = [k for k in seen if k not in set(resurrected)]
+            if len(keep) != len(seen):
+                seen_f.write_text("\n".join(keep))
+            print(f"resurrected {len(resurrected)} voided flag(s) — re-ping armed")
+        except OSError:
+            pass
+    return n
+
+
+def grade():
+    """Grade every ungraded spot whose game has now been PLAYED, matched by OPPONENT — not
+    date alone. Date-only matching silently mis-fires: ESPN's gamelog dates games in UTC, so
+    a team that plays consecutive ET nights (e.g. IND @LA at 02:00Z, then IND vs PHX the next
+    ET night) has TWO games sharing one UTC date — and a prediction for the 2nd would grade
+    against the 1st. So we match the game whose opponent == the prediction's opp, that is
+    FINAL (has a W/L result), and is on/after the slate date. Reads the actual stat + records
+    over/under."""
+    try:                                             # projection-tracker grading (calibration
+        import wnba_proj_log as _PL                  # feed) — was never called anywhere, so the
+        _PL.grade()                                  # learner silently stalled after 7/14
+    except Exception:
+        pass
+    con = _con()
+    rows = con.execute(
+        "SELECT rowid, pred_date, player, stat, line, opp, team FROM predictions WHERE graded=0"
+    ).fetchall()
+    if not rows:
+        con.close()
+        return 0
+    # POSTPONEMENT SWEEP (2026-07-16: NY@DAL postponed AFTER the Stewart spot was logged —
+    # append-only state kept a "tonight" play for a game that won't happen). For each open
+    # slate date, any game whose scoreboard status says Postponed/Canceled voids its spots:
+    # result='void', graded=1 — excluded from the record like 'push' (FD voids the real bet
+    # too). Runs BEFORE the roster gate so voids land even when ESPN throttles rosters.
+    try:
+        def _sb(date):
+            req = urllib.request.Request(
+                "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/"
+                f"scoreboard?dates={date.replace('-', '')}",
+                headers={"User-Agent": "Mozilla/5.0"})
+            return json.load(urllib.request.urlopen(req, timeout=20))
+        voided = 0
+        for d in sorted({r[1] for r in rows}):
+            dead = []                                   # [{ABBR, ABBR}] postponed pairs
+            for ev in _sb(d).get("events", []):
+                desc = (((ev.get("status") or {}).get("type") or {}).get("description") or "")
+                if not any(k in desc.lower() for k in ("postpon", "cancel")):
+                    continue
+                comp = (ev.get("competitions") or [{}])[0].get("competitors", [])
+                abs_ = {(c.get("team", {}).get("abbreviation") or "").upper() for c in comp}
+                if len(abs_) == 2:
+                    dead.append(abs_)
+            if not dead:
+                continue
+            for rowid, pd, player, stat, line, opp, team in rows:
+                if pd == d and {(team or "").upper(), (opp or "").upper()} in dead:
+                    con.execute("UPDATE predictions SET result='void', graded=1 "
+                                "WHERE rowid=? AND graded=0", (rowid,))
+                    voided += 1
+        if voided:
+            con.commit()
+            print(f"grade: voided {voided} spot(s) on postponed/canceled games")
+            rows = [r for r in rows
+                    if con.execute("SELECT graded FROM predictions WHERE rowid=?",
+                                   (r[0],)).fetchone()[0] == 0]
+    except Exception as e:
+        print(f"grade: postponement sweep skipped: {str(e)[:80]}")
+    # PREMISE SWEEP (2026-07-16, the Rivers case): a pending bet's BASIS is the out_player(s)
+    # being out — if any of them flips to playing (feed update / manual override) before the
+    # game, the bet is mispriced and must VOID (excluded from the record like push/postponed).
+    # The next alert pass re-evaluates the team with the corrected absence set.
+    try:
+        import wnba_tonight as _T
+        _inj = _T.injuries()
+        _today_et = _T.dt.datetime.now(_T.ET).date().isoformat()
+        # BLIND-READ GUARD (2026-07-28): the sweep voids a bet when its out-basis player is
+        # NOT in the injury view -- which is indistinguishable from the view failing to load.
+        # It did fail: while the official-report cache was being rebuilt, injuries() returned
+        # {} for a few minutes and a live +31%EV bet (A.Edwards off Griner, who WAS out) was
+        # voided with graded=1, so it could never resurrect. An empty view is a SOURCE
+        # OUTAGE, never evidence that every injured player suddenly cleared -- refuse to
+        # void anything on it. Same discipline as the roster-map guard below.
+        if not _inj:
+            raise RuntimeError("injury view empty (source outage) -- refusing to void")
+        swept = 0
+        for rowid, pd_, player, stat, line, opp, team in rows:
+            if pd_ < _today_et:
+                continue                                 # past slates grade normally
+            op = con.execute("SELECT out_player FROM predictions WHERE rowid=?",
+                             (rowid,)).fetchone()
+            names = [x.strip() for x in (op[0] or "").split(",") if x.strip()] if op else []
+            if names and any(_inj.get(nm) not in ("Out", "Doubtful") for nm in names):
+                con.execute("UPDATE predictions SET result='void', graded=1 "
+                            "WHERE rowid=? AND graded=0", (rowid,))
+                swept += 1
+        if swept:
+            con.commit()
+            print(f"grade: premise sweep voided {swept} spot(s) — an out-basis player "
+                  f"is no longer out")
+            rows = [r for r in rows
+                    if con.execute("SELECT graded FROM predictions WHERE rowid=?",
+                                   (r[0],)).fetchone()[0] == 0]
+    except Exception as e:
+        print(f"grade: premise sweep SKIPPED (no bets voided): {str(e)[:90]}")
+    # name->id from the cheap guarded roster map (NOT players()'s ~180-call rebuild, which throttles
+    # and used to abort the whole pass -> final bets sat ungraded, inflating the record).
+    ids = W.roster_ids()
+    if not ids:
+        print("grade: roster map empty (ESPN fetch failed) — leaving bets open, retry next run")
+        con.close()
+        return 0
+    graded = 0
+    log_cache = {}
+    for rowid, pred_date, player, stat, line, opp, team in rows:
+        try:                                          # one bad row must never roll back the batch
+            actual = None
+            pid = ids.get(player)
+            if pid:
+                if pid not in log_cache:
+                    try:
+                        log_cache[pid] = W.game_log(pid, max_age_h=0)   # grading = always fresh (Rae Burrell class)
+                    except RuntimeError:
+                        log_cache[pid] = []
+                # the game this prediction was FOR: same opponent, FINAL, on/after the slate date
+                cand = sorted(
+                    (g for g in log_cache[pid]
+                     if g.get("result")                                    # FINAL (has W/L)
+                     and g["date"][:10] >= pred_date                       # on/after the slate we bet
+                     and (not opp or (g.get("matchup") or "").upper() == opp.upper())),
+                    key=lambda g: g["date"])
+                # combo stats (pra/pts_reb/...) keyed by their own name; base stats map to pts/reb/ast.
+                # .get() (not []) so a missing stat skips, never KeyErrors the whole pass.
+                if cand:
+                    actual = cand[0].get(STATKEY.get(stat, stat))
+            if actual is None:
+                # FALLBACK: the player game log lags/goes stale (Rae Burrell 7/15 -> log ended May 10) so a
+                # FINAL game silently never grades. The ESPN box score is fresh — grade from it, keyed by name.
+                bx = box_actuals(pred_date)
+                pa = bx.get(player) or bx.get(player.lower().replace(".", ""))
+                if pa is not None:
+                    actual = pa.get(stat)
+            if actual is None:
+                # DNP VOID (2026-07-28, the Marine Johannes 7/20 case): the sweeps above cover a
+                # POSTPONED game and a broken premise, but nothing covered a game that was PLAYED
+                # while the player sat. NY@DAL 7/20 went Final and Johannes never appeared, so
+                # there was no stat line to read and `continue` parked the row as pending FOREVER
+                # (it was still open 8 days later). A book voids a prop when the player doesn't
+                # play, so we do too.
+                # Guarded so an in-progress game or a failed box fetch can never void a live bet:
+                # only fires >=2 days after the slate AND only when that date's box scores parsed
+                # non-empty (i.e. the day really was played and we simply are not in it).
+                try:
+                    import datetime as _dt
+                    _age = (_dt.date.today() - _dt.date.fromisoformat(pred_date)).days
+                    if _age >= 2 and box_actuals(pred_date):
+                        con.execute("UPDATE predictions SET result='void', graded=1 "
+                                    "WHERE rowid=? AND graded=0", (rowid,))
+                        graded += 1
+                        print(f"grade: voided {player} {stat} {pred_date} — DNP "
+                              f"(game played, player absent from the box)")
+                except Exception as _e:
+                    print(f"grade: DNP check skipped for row {rowid}: {str(_e)[:60]}")
+                continue                       # game not final yet / player not found — leave open
+            res = "over" if actual > line else ("push" if actual == line else "under")
+            con.execute("UPDATE predictions SET result=?, actual=?, graded=1 WHERE rowid=?",
+                        (res, actual, rowid))
+            graded += 1
+        except Exception as e:
+            print(f"grade: row {rowid} ({player} {stat}) skipped: {str(e)[:80]}")
+    con.commit()
+    con.close()
+    return graded
+
+
+def report():
+    con = _con()
+    rows = con.execute(
+        "SELECT stat, result, line, elev_avg, season_avg, actual, odds, stale, side "
+        "FROM predictions WHERE graded=1").fetchall()
+    n_open = con.execute("SELECT COUNT(*) FROM predictions WHERE graded=0").fetchone()[0]
+    con.close()
+    print(f"WNBA prediction ledger — {len(rows)} graded, {n_open} awaiting results\n")
+    if not rows:
+        print("no graded spots yet — accumulating. Grades land the morning after each slate.")
+        return
+    by = {}
+    for stat, res, line, elev, savg, actual, odds, stale, side in rows:
+        if res in ("push", "void"):                    # no-action results — not W, not L
+            continue
+        won = res == side                                              # side-aware win
+        by.setdefault(stat, []).append((won, elev, actual, odds, side))
+        by.setdefault("ALL", []).append((won, elev, actual, odds, side))
+    for stat, rs in sorted(by.items()):
+        wins = sum(1 for r in rs if r[0])
+        units = sum((r[3] - 1) if r[0] else -1 for r in rs)            # 1u flat
+        wr = wins / len(rs) * 100 if rs else 0
+        roi = units / len(rs) * 100 if rs else 0
+        nu = sum(1 for r in rs if r[4] == "under")
+        print(f"  {stat:9} {wins}-{len(rs)-wins}  win {wr:4.0f}%  ROI {roi:+5.1f}%  "
+              f"({nu} under / {len(rs)-nu} over)")
+
+
+def train():
+    """Fit the projection calibration: actual ~ a + b·elev_avg via least squares, once
+    enough graded spots exist. Corrects the raw elevated-average's bias (it tends to run
+    hot — best games get remembered). Written to wnba_proj_cal.json for the projector to
+    apply. Honest until then: reports how far off the sample is."""
+    con = _con()
+    rows = con.execute(
+        "SELECT elev_avg, actual FROM predictions WHERE graded=1 AND result IN ('over','under')"
+    ).fetchall()
+    con.close()
+    n = len(rows)
+    if n < MIN_TRAIN:
+        print(f"train: {n}/{MIN_TRAIN} graded spots — need more before a calibration is "
+              f"trustworthy. Loop is accumulating; re-run as results land.")
+        return
+    xs = [e for e, _ in rows]
+    ys = [a for _, a in rows]
+    mx, my = st.mean(xs), st.mean(ys)
+    vx = sum((x - mx) ** 2 for x in xs)
+    b = sum((x - mx) * (y - my) for x, y in rows) / vx if vx else 1.0
+    a = my - b * mx
+    mae_raw = st.mean([abs(y - x) for x, y in rows])
+    mae_cal = st.mean([abs(y - (a + b * x)) for x, y in rows])
+    CAL.write_text(json.dumps({"a": round(a, 3), "b": round(b, 3), "n": n,
+                               "mae_raw": round(mae_raw, 2),
+                               "mae_cal": round(mae_cal, 2)}, indent=1))
+    print(f"train: calibrated actual = {a:+.2f} + {b:.2f}·elev_avg  (n={n})")
+    print(f"       calibration {'sharpens the fit' if mae_cal < mae_raw else 'no gain — raw avg already fine'}")
+
+
+def calibrate(elev_avg):
+    """Apply the fitted calibration to a raw elevated-average projection (identity until
+    trained)."""
+    if not CAL.exists():
+        return elev_avg
+    c = json.loads(CAL.read_text())
+    return c["a"] + c["b"] * elev_avg
+
+
+# The winner/loser-similarity learner: what do WINNING bets have in common vs losing ones.
+LEARN = HERE / "wnba_learn.json"
+MIN_LEARN = 40                       # graded bets before a profile means anything
+LEARN_FEATURES = ["proj_hit", "ev", "n_elev", "d_min", "d_fga", "d_stat", "driver", "vac",
+                  "elev_avg", "season_avg", "proj_min", "total", "pace", "opp_def"]
+
+
+def learn():
+    """Find what separates WINNERS from LOSERS across every graded bet — the judgment
+    learning the user asked for, made interpretable. For each feature, the winner-mean vs
+    loser-mean and a standardized separation (Cohen's d); the strongest separators are the
+    traits your winning spots share. Writes wnba_learn.json (per-feature separations) so the
+    flagger can eventually re-weight EV toward the winning profile. Gated on sample size —
+    below a real N this is noise, and it says so."""
+    con = _con()
+    rows = con.execute(
+        f"SELECT result, {','.join(LEARN_FEATURES)}, side FROM predictions "
+        f"WHERE graded=1 AND result IN ('over','under')").fetchall()
+    con.close()
+    wins = [r for r in rows if r[0] == r[-1]]        # result == side we bet
+    loss = [r for r in rows if r[0] != r[-1]]
+    n = len(rows)
+    if n < MIN_LEARN or len(wins) < 8 or len(loss) < 8:
+        print(f"learn: {n}/{MIN_LEARN} graded bets ({len(wins)}W-{len(loss)}L) — accumulating. "
+              f"A winner/loser profile on a thinner sample is just noise; the loop is "
+              f"building the dataset (fast once NBA starts in Oct).")
+        return
+    seps = []
+    for i, f in enumerate(LEARN_FEATURES, start=1):
+        wv = [r[i] for r in wins if r[i] is not None]
+        lv = [r[i] for r in loss if r[i] is not None]
+        if len(wv) < 5 or len(lv) < 5:
+            continue
+        mw, ml = st.mean(wv), st.mean(lv)
+        sd = st.pstdev(wv + lv) or 1.0
+        seps.append((round((mw - ml) / sd, 3), f, round(mw, 2), round(ml, 2)))
+    seps.sort(key=lambda x: -abs(x[0]))
+    print(f"learn: winner vs loser profile over {n} graded bets ({len(wins)}W-{len(loss)}L)\n")
+    for d, f, mw, ml in seps:
+        tag = "WINNERS higher" if d > 0 else "losers higher"
+        print(f"  {f:11} win {mw:>6} vs loss {ml:>6}  sep {d:+.2f}  {tag}")
+    LEARN.write_text(json.dumps({"n": n, "w": len(wins), "l": len(loss),
+                                 "separations": {f: d for d, f, _, _ in seps}}, indent=1))
+    print("\n  -> wrote wnba_learn.json. The top separators ARE the shared traits of your "
+          "winners; as the sample grows they firm up and can re-weight the flagger's EV.")
+
+
+SELECT = HERE / "wnba_select.json"
+# selection also cares about price + line depth, so add them to the model features
+SELECT_FEATURES = LEARN_FEATURES + ["odds", "line"]
+
+
+def learn_selection():
+    """What separates the flags the USER PLAYS from the ones he PASSES — his selection filter,
+    learned from the `played` label rather than win/loss (juice aversion, role-jump preference,
+    …). Same Cohen's-d method as learn(). Independent of grading, so it fires as soon as there
+    are enough played+passed flags. This is the human-in-the-loop signal: eventually the
+    flagger can pre-rank toward what he'd actually bet."""
+    con = _con()
+    rows = con.execute(
+        f"SELECT played, {','.join(SELECT_FEATURES)} FROM predictions").fetchall()
+    con.close()
+    played = [r for r in rows if r[0] == 1]
+    passed = [r for r in rows if not r[0]]
+    if len(played) < 8 or len(passed) < 15:
+        print(f"\nselect: {len(played)} played / {len(passed)} passed — accumulating your "
+              f"selection profile (needs ~8 played / 15 passed to separate signal from noise).")
+        return
+    seps = []
+    for i, f in enumerate(SELECT_FEATURES, start=1):
+        pv = [r[i] for r in played if r[i] is not None]
+        qv = [r[i] for r in passed if r[i] is not None]
+        if len(pv) < 5 or len(qv) < 5:
+            continue
+        mp, mq = st.mean(pv), st.mean(qv)
+        sd = st.pstdev(pv + qv) or 1.0
+        seps.append((round((mp - mq) / sd, 3), f, round(mp, 2), round(mq, 2)))
+    seps.sort(key=lambda x: -abs(x[0]))
+    print(f"\nselect: PLAYED vs PASSED over {len(played)}+{len(passed)} flags\n")
+    for d, f, mp, mq in seps:
+        print(f"  {f:11} play {mp:>7} vs pass {mq:>7}  sep {d:+.2f}  "
+              f"{'PLAYS higher' if d > 0 else 'passes higher'}")
+    SELECT.write_text(json.dumps({"played": len(played), "passed": len(passed),
+                                  "separations": {f: d for d, f, _, _ in seps}}, indent=1))
+    print("  -> wrote wnba_select.json = your selection filter (what makes you take a flag).")
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--grade", action="store_true")
+    ap.add_argument("--report", action="store_true")
+    ap.add_argument("--train", action="store_true")
+    ap.add_argument("--learn", action="store_true")
+    ap.add_argument("--played", nargs="+", metavar="PLAYER/STAT/LINE",
+                    help="mark flagged rows the user bet, e.g. 'Billings/rebounds/5.5'")
+    args = ap.parse_args()
+    if args.played:
+        specs = [(s.rsplit("/", 2)[0], s.rsplit("/", 2)[1], float(s.rsplit("/", 2)[2]))
+                 for s in args.played]
+        print(f"marked {mark_played(specs)} row(s) as played")
+        return
+    if args.grade:
+        print(f"graded {grade()} spots")
+        # SELF-HEAL odds_other every grade cycle (both workflows call --grade). The ledger is a
+        # binary blob committed by BOTH wnba-props and wnba-watch with `git pull --rebase -X theirs`;
+        # a long-running loop that checked out before a manual odds_other write re-commits its stale
+        # DB and wipes it. Recomputing here (idempotent, fills only NULLs from fd_lines) means every
+        # loop's committed DB carries odds_other — so whichever wins the -X theirs race still has it,
+        # exactly how grades survive. Never fatal to grading.
+        try:
+            import backfill_odds_other
+            backfill_odds_other.main()
+        except Exception as e:
+            print(f"odds_other self-heal skipped: {e}")
+        try:                                              # self-heal + grade tracked parlays (both loops)
+            import wnba_slip
+            gp = wnba_slip.sync_parlays()
+            if gp:
+                print(f"graded {gp} parlays")
+        except Exception as e:
+            print(f"parlay sync/grading skipped: {e}")
+    if args.train:
+        train()
+    if args.learn:
+        learn()
+        learn_selection()
+    if args.report or not (args.grade or args.train or args.learn):
+        report()
+
+
+if __name__ == "__main__":
+    main()

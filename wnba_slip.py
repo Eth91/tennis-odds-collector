@@ -1,0 +1,854 @@
+#!/usr/bin/env python3
+"""Bet-slip constructor: turn the day's flagged OVERS into the user's actual bet structure —
+per-player ladders (+ the same-player combo logic) and 2-3 leg parlays from the most confident
+ladders, honoring his correlation rules. The model is overs-only upstream, so every leg is an over.
+
+RULES (2026-07-13, user):
+- Ladders are the money: a confident over is bet across its rungs (alt lines).
+- Same player, multiple overs: ladder the strongest single stat + fold a secondary "kinda-like"
+  stat into the COMBO rather than a standalone (really like rebounds + kinda like points -> ladder
+  rebounds + play P+R; love both -> points, rebounds, P+R).
+- Parlays: 2-3 legs from two confident ladders. Correlation rules:
+    * max 2 different players per team;
+    * same-team legs must have DISJOINT production components (one rule covering BOTH "no repeat
+      prop" — two points legs share P — AND "no reverse correlation" — a rebounds leg + a
+      teammate's pts_reb share R, or two bigs' rebounds);
+    * cross-team legs are unconstrained (his call).
+"""
+from collections import defaultdict
+import hashlib
+import json
+import sqlite3
+from itertools import combinations
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+LEDGER = HERE / "wnba_ledger.sqlite"        # parlays live in the same DB as the straights (self-heals)
+PARLAY_MARKS = HERE / "wnba_parlays_played.txt"   # durable played marks (date|key), like wnba_played.txt
+
+
+def _stake(dec):
+    """User's parlay staking (2026-07-13): 0.25u, but 0.15u on a longshot at +1000 (dec 11.0) or longer."""
+    return 0.15 if (dec or 0) >= 11.0 else 0.25
+
+
+# STRAIGHT-LADDER staking (2026-07-14, user): 1u on the base (main -110) line, then DECLINING rungs up
+# the ladder (0.5 / 0.25 / 0.25 ...), total per player-stat ladder CAPPED at 2.5u — the exposure cap so
+# one cold game fully laddered (e.g. Copper's 3 rungs on a 9-pt night) can't run past 2.5u.
+LADDER_ANCHOR_U = 1.0
+LADDER_RUNG_US = (0.5, 0.25, 0.25)
+LADDER_RUNG_DEFAULT_U = 0.25
+LADDER_CAP_U = 2.5
+# per-player-GAME cap: at most COMPONENT_CAP_U riding on any ONE production component (P/R/A) in a
+# single player-game. Scales down CORRELATED stacking (Copper: points+pts_reb+pra all key on points ->
+# 3u -> 2.5u) while leaving DISJOINT bets alone (Stewart: points+assists+rebounds are uncorrelated ->
+# untouched). Same disjoint-pool logic as the parlay rule. Validated: worst 1-game loss -3.0u -> -2.5u.
+COMPONENT_CAP_U = 2.5
+
+
+def ladder_stake_map(rows):
+    """Map each OVER row to its stake: {(pred_date, player, stat, line): stake}. Shape (real-line
+    sim 2026-07-17): 1u anchor + at most ONE 0.25u rung on d_min 3-8 plays only — rung 2 hit 27%
+    at real alt odds (-18% EV), rung 3+ dead, so depth bleeds the base edge. TWO caps unchanged:
+    per-ladder LADDER_CAP_U and per-player-game component cap COMPONENT_CAP_U."""
+    from collections import defaultdict
+    groups = defaultdict(list)
+    for r in rows:
+        if (r.get("side") or "over") != "over":
+            continue
+        groups[(r.get("pred_date"), r.get("player"), r.get("stat"))].append(r)
+    out = {}
+    for rungs in groups.values():
+        total = 0.0
+        # REAL-LINE LADDER FINDING (2026-07-17, wnba_ladder_sim.py, 21 selected plays with the
+        # full posted alt ladders): base rungs 76% (+41.6% ROI) but rung-2 hit only 27% at avg
+        # +202 (-18% EV) and rung 3+ is dead — blanket rungs cut ROI from +41.6% to +10.5%.
+        # New shape: 1u anchor + at most ONE 0.25u rung, and only on d_min 3-8 band plays (the
+        # twice-validated cell); everything else rides the anchor alone. Re-widen only if the
+        # rung-2 sample (n=15) flips at ~40 graded ladders.
+        srt = sorted(rungs, key=lambda x: (x.get("line") or 0))
+        dm = srt[0].get("d_min")
+        inband = dm is not None and 3 <= dm <= 8
+        for i, r in enumerate(srt):
+            base = (LADDER_ANCHOR_U if i == 0
+                    else (0.25 if (i == 1 and inband) else 0.0))
+            s = min(base, max(0.0, LADDER_CAP_U - total))
+            total += s
+            out[(r.get("pred_date"), r.get("player"), r.get("stat"), r.get("line"))] = s
+    # (2) per-player-game component cap
+    comp_exp = defaultdict(lambda: defaultdict(float))     # (date,player) -> component -> exposure
+    for (d, p, stat, ln), stake in out.items():
+        for c in _comps(stat):
+            comp_exp[(d, p)][c] += stake
+    for k in list(out):
+        exps = comp_exp[(k[0], k[1])]
+        mx = max(exps.values()) if exps else 0.0
+        if mx > COMPONENT_CAP_U:
+            out[k] *= COMPONENT_CAP_U / mx
+    return out
+
+
+_SEL_SCHEMA = """CREATE TABLE IF NOT EXISTS selections (
+    pred_date TEXT, team TEXT, player TEXT, stat TEXT, selected_at TEXT,
+    PRIMARY KEY (pred_date, team, player, stat))"""
+
+
+def _sel_log():
+    """{(date, team): [(player, stat), ...] in first-selected order} — the sticky-selection log."""
+    try:
+        con = sqlite3.connect(LEDGER)
+        con.execute(_SEL_SCHEMA)
+        rows = con.execute("SELECT pred_date, team, player, stat FROM selections "
+                           "ORDER BY selected_at").fetchall()
+        con.close()
+    except sqlite3.Error:
+        return {}
+    out = {}
+    for pd_, tm, pl, st in rows:
+        out.setdefault((pd_, tm), []).append((pl, st))
+    return out
+
+
+def _sel_commit(new_picks):
+    """Persist first-selections: [(pred_date, team, player, stat)]."""
+    if not new_picks:
+        return
+    try:
+        import datetime as _dt
+        con = sqlite3.connect(LEDGER)
+        con.execute(_SEL_SCHEMA)
+        con.executemany("INSERT OR IGNORE INTO selections VALUES (?,?,?,?,?)",
+                        [(*p, _dt.datetime.utcnow().isoformat()) for p in new_picks])
+        con.commit()
+        con.close()
+    except sqlite3.Error:
+        pass
+
+
+def _pid(date, key):
+    """Short stable id for a parlay (shown on the dashboard; used to mark it played)."""
+    return hashlib.sha1(f"{date}|{key}".encode()).hexdigest()[:4]
+
+# the finite production pools each market draws from
+COMPONENTS = {"points": frozenset("P"), "rebounds": frozenset("R"), "assists": frozenset("A"),
+              "pts_reb": frozenset("PR"), "pts_ast": frozenset("PA"), "reb_ast": frozenset("RA"),
+              "pra": frozenset("PRA"), "threes": frozenset("3")}
+STAT_LABEL = {"points": "pts", "rebounds": "reb", "assists": "ast", "pts_reb": "P+R",
+              "pts_ast": "P+A", "reb_ast": "R+A", "pra": "P+R+A", "threes": "3PM"}
+
+
+def _comps(stat):
+    return COMPONENTS.get(stat, frozenset())
+
+
+# LADDER RUNG SPACING (user 2026-07-17): "you can't ladder a +1 — o14.5 then o15.5 is kinda
+# dumb; points ladders should step like o14.5 -> o17.5 -> o19.5. Assist/rebound rungs can be
+# +1 each." Points-BASED markets (anything containing P) need >=2-pt gaps between kept rungs;
+# pure reb/ast markets keep +1 steps. Applied at the selection layer so the board, record,
+# stake map and slips all inherit it; the ledger still logs every flagged rung as data.
+LADDER_MIN_GAP = {"points": 2.0, "pra": 2.0, "pts_reb": 2.0, "pts_ast": 2.0,
+                  "rebounds": 1.0, "assists": 1.0, "reb_ast": 1.0, "threes": 1.0}
+
+
+def thin_rungs(rungs, stat=None):
+    """Keep the base (lowest) rung, then only rungs >= the stat's min gap above the last kept."""
+    if not rungs:
+        return []
+    st = stat or rungs[0].get("stat")
+    gap = LADDER_MIN_GAP.get(st, 2.0)
+    out = []
+    for r in sorted(rungs, key=lambda x: x["line"]):
+        if not out or r["line"] - out[-1]["line"] >= gap:
+            out.append(r)
+    return out
+
+
+def _am(dec):
+    if not dec:
+        return "?"
+    return f"+{round((dec - 1) * 100)}" if dec >= 2 else f"-{round(100 / (dec - 1))}"
+
+
+def _dec(o):
+    return o.get("dec") or o.get("odds")
+
+
+def ladders(overs):
+    """Group flagged OVERS into per-(player, stat) ladders: rungs sorted low->high, with anchor EV."""
+    by = {}
+    for o in overs:
+        if (o.get("side") or "over") != "over":
+            continue
+        by.setdefault((o["player"], o["stat"]), []).append(o)
+    out = []
+    for (player, stat), rungs in by.items():
+        rungs = sorted(rungs, key=lambda r: r["line"])
+        out.append({"player": player, "team": rungs[0].get("team"), "stat": stat, "rungs": rungs,
+                    "ev": max((r.get("ev") or 0) for r in rungs), "comps": _comps(stat)})
+    return out
+
+
+TIER_SINGLES = ("points", "rebounds", "assists")
+
+
+def tier_of(r, is_fav):
+    """CANONICAL confidence tier — the ONLY implementation (dashboard chips, notification
+    titles and watchlist scenarios all call this; 2026-07-18 audit: two parallel copies
+    disagreed on 3/31 graded plays via different favorite scopes). Rule, from already-
+    validated real-line splits: A = 3-8 band + cascade favorite + single stat; B = the solid
+    middle (3-8 others, cold tier, supported 0-3 singles); C = combos and marginal 0-3."""
+    dm = r.get("d_min")
+    single = r.get("stat") in TIER_SINGLES
+    inband = dm is not None and 3 <= dm <= 8
+    if inband and is_fav and single:
+        return "A"
+    if inband or dm is None or (0 <= (dm if dm is not None else -1) < 3 and single):
+        return "B"
+    return "C"
+
+
+def fav_keys(rows):
+    """{(date, player, stat)} of each team-cascade's shortest-odds group. CANONICAL SCOPE:
+    pass the SELECTED universe (current_selection output), never raw preds — favorite status
+    is defined among the plays actually on the board."""
+    bycas = defaultdict(lambda: defaultdict(list))
+    for r in rows:
+        bycas[(r.get("pred_date"), r.get("team"))][(r.get("player"), r.get("stat"))].append(r)
+    def _grank(rr):
+        """(odds, out-of-band, -ev, ...) — at an EXACT odds tie (both -114, Ionescu/Stewart
+        2026-07-18) the book calls the plays equally likely, so the tag falls to the STRONGEST
+        validated signal: core-band membership (twice real-line validated), never model EV
+        (the fat-EV inversion — EV>=.20 hits WORSE than EV<.20). EV then name close it out.
+        Odds leads the tuple, so nothing changes except exact ties (none exist in the graded
+        ledger — legend untouched)."""
+        dm = rr[0].get("d_min")
+        return (min(float(x.get("odds") or 99) for x in rr),
+                0 if (dm is not None and 3 <= dm <= 8) else 1,
+                -max((x.get("ev") or 0.0) for x in rr))
+
+    out = set()
+    for (pd_, tm), groups in bycas.items():
+        fav = min(groups, key=lambda k: _grank(groups[k]) + (k[0],))
+        out.add((pd_, fav[0], fav[1]))
+    return out
+
+
+def tier_map(rows):
+    """{(pred_date, player, stat): tier} for every flagged row. FAVORITE = shortest odds among
+    ALL flagged plays in the (date,team) cascade — the MARKET's pecking order, NOT 'shortest among
+    the 1-2 we carded'. 2026-07-19 Burrell/Wheeler inversion: sticky benched the -128 market
+    favorite (Wheeler) to the strip, leaving the +102 dog (Burrell) 'favorite among selected' and
+    mis-crowned A. A market dog can never be the favorite while a shorter-odds sibling is flagged."""
+    favs = fav_keys(rows)
+    return {(r["pred_date"], r["player"], r["stat"]):
+            tier_of(r, (r["pred_date"], r["player"], r["stat"]) in favs) for r in rows}
+
+
+PLAYED_MARKS = HERE / "wnba_played.txt"      # durable "I actually placed this" marks
+
+
+def _played_marks():
+    """{(date, player_lastname_lower, stat, line)} from wnba_played.txt.
+
+    Plain text on purpose: it merges cleanly across the VM/Actions/Mac writers where a sqlite
+    blob would not. Matched on SURNAME because the file is hand-edited and the ledger spells
+    names in full ("Nelson-Ododa" vs "Olivia Nelson-Ododa").
+    """
+    out = set()
+    try:
+        for ln in PLAYED_MARKS.read_text().splitlines():
+            ln = ln.strip()
+            if not ln or ln.startswith("#"):
+                continue
+            parts = [x.strip() for x in ln.split("|")]
+            if len(parts) < 4:
+                continue
+            d, name, stat, line = parts[0], parts[1], parts[2], parts[3]
+            try:
+                line = float(line)
+            except ValueError:
+                continue
+            out.add((d, name.split()[-1].lower(), stat, line))
+    except OSError:
+        pass
+    return out
+
+
+def _is_played(r, marks):
+    nm = str(r.get("player") or "").split()
+    if not nm:
+        return False
+    try:
+        ln = float(r.get("line"))
+    except (TypeError, ValueError):
+        return False
+    return (r.get("pred_date"), nm[-1].lower(), r.get("stat"), ln) in marks
+
+
+SWAP_MARGIN = 0.05      # EV a challenger must BEAT a carded play by before it may take the slot.
+                        # "genuinely better", not a hair: ~1/3 of a typical flagged edge (~0.15).
+                        # Every margin 0.00-0.10 backtested identically on the ledger (the
+                        # incumbent was already the EV leader in each case), so this is chosen for
+                        # meaning rather than fitted — and it is the knob to turn if the card ever
+                        # feels too rigid.
+
+
+def current_selection(rows, commit=False):
+    """The subset of OVER rows the CURRENT model would actually pick — used to restate the tracked
+    record to the new bot's selection. Three rule-based stages (returns (kept, dropped) where
+    dropped is [(row, reason)]):
+      1. THIN-SAMPLE over-extrapolation — n_elev<7 AND d_min>10 (the shipped guard; the Ayayi 0-5 pattern).
+      2. CORRELATED over-stack — per player-game, when 3+ DISTINCT stats share a production pool (P/R/A),
+         keep only the highest-EV stat (its ladder rungs included) and drop the redundant ones (Copper
+         bet points+pts_reb+pra, all keyed on her scoring).
+      3. TOP-2 DISJOINT per team-game — favorite group first, plus the best group sharing no
+         P/R/A component with it (backtested 2026-07-17: WNBA/NBA/live ledger all agree)."""
+    from collections import defaultdict
+    overs = [r for r in rows if (r.get("side") or "over") == "over"]
+    kept, dropped = [], []
+
+    # PLACED BETS BYPASS EVERY GATE (2026-07-29). A mark in wnba_played.txt means the user put
+    # real money on it; the record must show it whatever the model thought. These are pulled out
+    # BEFORE the gates and re-added at the end, so they also never consume a TOP-2 slot from a
+    # play the model did pick. Nothing here changes what gets flagged or pinged.
+    _marks = _played_marks()
+    forced = [r for r in overs if _is_played(r, _marks)] if _marks else []
+    if forced:
+        _fid = {id(r) for r in forced}
+        overs = [r for r in overs if id(r) not in _fid]
+
+    # 0. OUT-OF-BAND GATE at the selection layer too (2026-07-18): the flag-time gate stops NEW
+    # d_min <0 / >8 bets, but pre-gate rows (and any future leak) must not ride the board or the
+    # record either — the record's universe IS the flag universe. Cold tier (d_min None) passes.
+    banded = []
+    for r in overs:
+        dm = r.get("d_min")
+        if dm is not None and (dm < 0 or dm > 8):
+            dropped.append((r, "out-of-band d_min (gate)"))
+        else:
+            banded.append(r)
+    overs = banded
+
+    def thin(r):
+        n, dm = r.get("n_elev"), r.get("d_min")
+        return n is not None and dm is not None and n < 7 and dm > 10
+
+    survivors = []
+    for r in overs:
+        (dropped.append((r, "thin-sample guard")) if thin(r) else survivors.append(r))
+
+    bypg = defaultdict(list)
+    for r in survivors:
+        bypg[(r.get("pred_date"), r.get("player"))].append(r)
+    for rr in bypg.values():
+        stat_ev = defaultdict(lambda: -1.0)
+        for r in rr:
+            stat_ev[r["stat"]] = max(stat_ev[r["stat"]], r.get("ev") or 0.0)
+        stats = list(stat_ev)
+        parent = {s: s for s in stats}                    # union-find: cluster stats that share a pool
+
+        def find(s):
+            while parent[s] != s:
+                parent[s] = parent[parent[s]]
+                s = parent[s]
+            return s
+        for i, a in enumerate(stats):
+            for b in stats[i + 1:]:
+                if _comps(a) & _comps(b):
+                    parent[find(a)] = find(b)
+        clusters = defaultdict(list)
+        for s in stats:
+            clusters[find(s)].append(s)
+        keep_stats = set()
+        for cl in clusters.values():
+            keep_stats.add(max(cl, key=lambda s: stat_ev[s])) if len(cl) >= 3 else keep_stats.update(cl)
+        for r in rr:
+            (kept if r["stat"] in keep_stats else dropped).append(
+                r if r["stat"] in keep_stats else (r, "correlated over-stack (3+ stats share a pool)"))
+
+    # 3. UP TO TWO PLAYS PER TEAM-GAME, DISJOINT COMPONENTS — user call 2026-07-17, backtested:
+    # per (date, team), rank play-groups (player x stat, rungs travel together) favorite-first
+    # (shortest odds, then EV — keeps the 2026-07-15 book's-most-likely instinct for slot 1);
+    # take the top group, then the best remaining group sharing NO P/R/A component with it
+    # (over pts + over ast fine; over pts + over P+A not — the user's exact rule). Evidence:
+    # WNBA 6-season walk-forward: 2nd disjoint play hits 65.4% vs top play 66.4%, per-game
+    # units +0.30 -> +0.55 (n=81 pools with a 2nd play); NBA 4-season (1,828 pools, slot-2
+    # 69.1% vs 68.9%) and the live real-line ledger (+4.5u vs +2.9u over 16 pools) agree.
+    # Strict disjointness BEAT overlap-allowed in WNBA (65.4% vs 62.9%) — so this supersedes
+    # both the old one-favorite-only rule and same-player stat+combo overlap at selection.
+    # STICKY SELECTION (2026-07-17, user: "I played Ododa before she was replaced by Miller"):
+    # a play-group that ENTERS the board for a slate STAYS selected for that slate — the user
+    # bets when it's on the board, so a later re-rank (a new shorter-odds flag landing) must
+    # never retro-drop a live recommendation. Logged first-selections take the slots in order;
+    # newcomers only fill what's open. wnba_alert commits new selections (commit=True); every
+    # other caller reads the same log so board/record/slips agree.
+    slog = _sel_log()
+    new_sel = []
+    bycas = defaultdict(list)
+    for r in kept:
+        bycas[(r.get("pred_date"), r.get("team"))].append(r)
+    sel_kept = []
+    for (pd_, tm), grp in bycas.items():
+        groups = defaultdict(list)                        # (player, stat) ladder groups
+        for r in grp:
+            groups[(r.get("player"), r["stat"])].append(r)
+
+        def gkey(k):
+            rr = groups[k]
+            dm = rr[0].get("d_min")
+            # identical tuple to fav_keys._grank — favorite and slot-1 must agree at ties
+            return (min((x.get("odds") or 99) for x in rr),
+                    0 if (dm is not None and 3 <= dm <= 8) else 1,
+                    -max((x.get("ev") or 0.0) for x in rr))
+        # STICKY WITH A MARGIN (2026-07-30). 2026-07-19 removed stickiness entirely on "if a
+        # better play comes up you can replace the current card play with the better one". That
+        # over-corrected: with no hysteresis the card re-ranked on EVERY scan, and 12 of 21
+        # logged team-game pools (57%) ended up carding MORE THAN the 2 plays a card can hold —
+        # TOR 2026-07-20 cycled through SEVEN, GS 2026-07-29 through four (Salaun pts_reb ->
+        # Chen points -> Salaun rebounds -> Salaun pra in twelve minutes). A card that changes
+        # under you is not a card.
+        #
+        # So replacement is still allowed, but only for a GENUINELY better play: an incumbent
+        # holds its slot unless a challenger beats it by SWAP_MARGIN of EV. Measured on the
+        # graded ledger (36 team-game pools, 106 graded overs): no-stickiness +17.36u vs any
+        # sticky variant +16.85u — a 0.51u difference over the 17 pools that have a selection
+        # log, i.e. noise, and every margin from 0.00 to 0.10 scored identically because the
+        # incumbent was already the EV leader in every discriminating case. Stability is
+        # therefore free here.
+        #
+        # NOT CHANGED: the ranking itself. Promoting single-stat above the favourite term was
+        # measured and is WORSE (+16.28u vs +17.36u); adding it as a tiebreaker AFTER odds and
+        # band is a literal no-op (identical picks). Pure EV is worst of all (+12.61u), which is
+        # what the favourite-first term is there to prevent.
+        incumbents = [g for g in slog.get((pd_, tm), []) if g in groups]
+        ranked = sorted(groups, key=gkey)
+
+        def _ev(g):
+            return max((x.get("ev") or 0.0) for x in groups[g])
+
+        def _band_of(g):
+            """0 when the group sits in the validated 3-8 d_min band, else 1.
+
+            The swap test below used EV alone while gkey ranks on (odds, band, EV), so an incumbent
+            could hold a slot while ranking WORSE on the canonical key — and hold it on EV, which
+            this ledger shows is anti-predictive (tier A 82.4% vs tier B 60.7%). 2026-07-31: DiLeo
+            (band 0, odds 1.9091) could not displace Carleton (band 1, odds 1.9804) because
+            Carleton's EV was higher, so the card kept the tier-B play over the tier-A one."""
+            dm = groups[g][0].get("d_min")
+            return 0 if (dm is not None and 3 <= dm <= 8) else 1
+
+        picks, used = [], set()
+        for g in incumbents:                              # carded plays hold their slot
+            if len(picks) == 2:
+                break
+            cs = _comps(g[1])
+            if cs & used:
+                continue
+            best = next((x for x in ranked
+                         if x != g and not (_comps(x[1]) & used) and x not in picks), None)
+            # A challenger displaces the incumbent when it is BETTER ON THE BAND (structural, and
+            # band membership barely moves during a slate, so this cannot churn), or when the two
+            # share a band and it beats EV by the margin (the original anti-churn rule, unchanged).
+            # Using EV alone let a tier-B incumbent block a tier-A challenger indefinitely.
+            if best is not None and (
+                    _band_of(best) < _band_of(g)
+                    or (_band_of(best) == _band_of(g) and _ev(best) - _ev(g) >= SWAP_MARGIN)):
+                g, cs = best, _comps(best[1])             # genuinely better -> allowed to displace
+            picks.append(g)
+            used |= cs
+            new_sel.append((pd_, tm, g[0], g[1]))
+        for k in ranked:                                  # newcomers fill whatever is still open
+            if len(picks) == 2:
+                break
+            cs = _comps(k[1])
+            if k in picks or (cs & used):
+                continue
+            picks.append(k)
+            used |= cs
+            new_sel.append((pd_, tm, k[0], k[1]))
+        pick_set = set(picks)
+        for r in grp:
+            (sel_kept.append(r) if (r.get("player"), r["stat"]) in pick_set else
+             dropped.append((r, "outside top-2 disjoint plays (2-per-team rule)")))
+    kept = sel_kept
+    if commit:
+        _sel_commit(new_sel)
+
+    # 4. LADDER RUNG SPACING — user rule 2026-07-17: no +1 rungs on points-based markets
+    # (o14.5 + o15.5 = the same bet twice); reb/ast ladders may step +1. Base rung always kept.
+    bygrp = defaultdict(list)
+    for r in kept:
+        bygrp[(r.get("pred_date"), r.get("player"), r["stat"])].append(r)
+    spaced = []
+    for rr in bygrp.values():
+        keep_r = thin_rungs(rr, rr[0].get("stat"))
+        keep_ids = {id(x) for x in keep_r}
+        spaced += keep_r
+        dropped += [(x, "ladder rung too close (min-gap rule)") for x in rr if id(x) not in keep_ids]
+    kept = spaced
+    if forced:
+        _k, _d = kept, dropped
+        return forced + list(_k), _d
+    return kept, dropped
+
+
+def player_bets(lads):
+    """Same-player combo logic. Per player: keep the highest-EV anchor ladder; keep a combo that
+    EXTENDS it (shares a component) to carry the secondary; DROP a standalone single that a kept
+    combo already contains and out-EVs (it's folded into the combo). Returns {player: [ladders]}."""
+    byp = {}
+    for L in lads:
+        byp.setdefault(L["player"], []).append(L)
+    result = {}
+    for player, pl in byp.items():
+        pl = sorted(pl, key=lambda L: -L["ev"])
+        kept = [pl[0]]                                    # anchor = highest EV
+        for L in pl[1:]:
+            folded = any(len(L["comps"]) == 1 and L["comps"] < k["comps"] and k["ev"] >= L["ev"]
+                         for k in kept)                   # single already inside a stronger kept combo
+            if not folded:
+                kept.append(L)
+        result[player] = kept
+    return result
+
+
+def _compatible(a, b):
+    """Two parlay legs: OK unless SAME team AND overlapping production components."""
+    if a["team"] and a["team"] == b["team"]:
+        return _comps(a["stat"]).isdisjoint(_comps(b["stat"]))
+    return True
+
+
+def parlays(lads, sizes=(2, 3), top=3):
+    """Best 2-3 leg parlays from the confident ladders (one safest rung per ladder, distinct
+    players), honoring max-2-per-team + same-team disjoint components. Parlay EV estimated as
+    prod(1+ev_leg)-1 (assumes ~independence; same-team legs are disjoint-pool by rule)."""
+    legs = []
+    for L in sorted(lads, key=lambda L: -L["ev"]):
+        r = L["rungs"][0]                                 # safest (lowest) rung = the parlay leg
+        legs.append({"player": L["player"], "team": L["team"], "stat": L["stat"],
+                     "line": r["line"], "dec": _dec(r), "ev": L["ev"]})
+    seen, out = set(), []
+    for n in sizes:
+        for combo in combinations(legs, n):
+            if len({l["player"] for l in combo}) != n:    # distinct players
+                continue
+            teams = [l["team"] for l in combo if l["team"]]
+            if any(teams.count(t) > 2 for t in teams):    # max 2 players/team
+                continue
+            if not all(_compatible(a, b) for a, b in combinations(combo, 2)):
+                continue
+            key = frozenset((l["player"], l["stat"], l["line"]) for l in combo)
+            if key in seen:
+                continue
+            seen.add(key)
+            dec = 1.0
+            ev = 1.0
+            for l in combo:
+                dec *= (l["dec"] or 1)
+                # EV CAP (calibration 2026-07-17): claimed EV >= 0.25 delivered 50% over 10 graded
+                # bets — cap the leg EV used for parlay RANKING so a fat-EV phantom can't dominate
+                # ticket selection. Flags/record/display EV stay raw.
+                ev *= (1 + min(l["ev"] or 0, 0.25))
+            out.append({"legs": list(combo), "dec": round(dec, 2), "ev": ev - 1, "n": n})
+    out.sort(key=lambda p: -p["ev"])
+    # DIVERSITY (2026-07-17 audit): the top-EV combos are permutations of the same legs (three
+    # tickets sharing Griner+Cloud read as one bet x3). Greedily keep tickets that share at most
+    # ONE leg with anything already kept — genuinely different parlays, not reshuffles.
+    kept = []
+    for p in out:
+        ls = {(l["player"], l["stat"]) for l in p["legs"]}
+        if all(len(ls & {(l["player"], l["stat"]) for l in k["legs"]}) <= 1 for k in kept):
+            kept.append(p)
+        if len(kept) == top:
+            break
+    return kept
+
+
+def build(overs):
+    """Full slip from the day's flagged overs: {'bets': {player: [ladders]}, 'parlays': [...]}.
+    Overs are reduced to current_selection FIRST (top-2 disjoint plays per team-game + thin-sample &
+    over-stack filters), so every ladder and parlay slip only ever contains the plays the tracked
+    record also counts — source-of-truth so sync_parlays/wnba_alert stay consistent."""
+    overs = current_selection(overs)[0]
+    lads = ladders(overs)
+    bets = player_bets(lads)
+    kept = [L for pl in bets.values() for L in pl]        # ladders that survived the combo logic
+    return {"bets": bets, "parlays": parlays(kept)}
+
+
+def render(slip):
+    """Plain-text slip for daily.md / notifications."""
+    lines = ["STRAIGHTS & LADDERS (overs):"]
+    for player in sorted(slip["bets"], key=lambda p: -max(L["ev"] for L in slip["bets"][p])):
+        for L in sorted(slip["bets"][player], key=lambda L: -L["ev"]):
+            rungs = " / ".join(f"o{r['line']:g} {_am(_dec(r))}" for r in L["rungs"])
+            tag = "  ⟵ LADDER" if len(L["rungs"]) > 1 else ""
+            lines.append(f"  {player} {STAT_LABEL.get(L['stat'], L['stat'])}: {rungs}"
+                         f"  (+{L['ev'] * 100:.0f}%){tag}")
+    if slip["parlays"]:
+        lines.append("\nPARLAYS (from confident ladders):")
+        for p in slip["parlays"]:
+            legs = "  ×  ".join(f"{l['player'].split()[-1]} {STAT_LABEL.get(l['stat'], l['stat'])} "
+                                f"o{l['line']:g}" for l in p["legs"])
+            lines.append(f"  {p['n']}-leg @ {_am(p['dec'])} (+{p['ev'] * 100:.0f}%):  {legs}")
+    return "\n".join(lines)
+
+
+PARLAY_EPOCH = "2026-07-13"                  # overs-only + slip era; parlay record starts here
+
+_SCHEMA = """CREATE TABLE IF NOT EXISTS parlays(
+  pred_date TEXT, key TEXT, legs TEXT, n INTEGER, dec REAL, ev REAL,
+  result TEXT, pnl REAL, played INTEGER DEFAULT 0, graded INTEGER DEFAULT 0, graded_at TEXT,
+  UNIQUE(pred_date, key));"""
+
+
+def _pcon():
+    con = sqlite3.connect(LEDGER)
+    con.execute(_SCHEMA)
+    if "played" not in {r[1] for r in con.execute("PRAGMA table_info(parlays)")}:
+        con.execute("ALTER TABLE parlays ADD COLUMN played INTEGER DEFAULT 0")
+    con.commit()
+    return con
+
+
+def _apply_parlay_marks(con):
+    """Re-apply the durable played marks (wnba_parlays_played.txt: date|key) onto the DB, so a
+    rebuilt/clobbered parlays table still reflects what the user actually bet."""
+    if not PARLAY_MARKS.exists():
+        return
+    for ln in PARLAY_MARKS.read_text().splitlines():
+        p = ln.strip().split("|", 1)
+        if len(p) == 2:
+            con.execute("UPDATE parlays SET played=1 WHERE pred_date=? AND key=?", (p[0], p[1]))
+    con.commit()
+
+
+def _key(legs):
+    return "|".join(sorted(f"{l['player']}/{l['stat']}/{l['line']:g}" for l in legs))
+
+
+def log_parlays(date, pars):
+    """Persist the day's recommended parlays for grading. Each scan REPLACES the still-pending set
+    for the date (live suggestions), EXCEPT: (a) once the slate starts settling (any leg graded),
+    the pre-tip set is FROZEN — post-tip scans have a shrinking pred set and must not churn/erase
+    it; (b) a transient EMPTY build never wipes the day's parlays. 2026-07-19: the selection
+    churned through same-day fixes, a scan built 0, and the day's parlays were erased then froze
+    at zero once games tipped. Graded/played parlays are never touched."""
+    con = _pcon()
+    settling = con.execute("SELECT 1 FROM predictions WHERE pred_date=? AND graded=1 LIMIT 1",
+                           (date,)).fetchone()
+    if settling or not pars:                      # frozen post-tip, or nothing to log -> leave as-is
+        con.close()
+        return
+    # drop only the still-pending, NOT-yet-played suggestions; a played parlay is a placed bet and
+    # survives the rebuild (like a flagged straight) until it grades.
+    con.execute("DELETE FROM parlays WHERE pred_date=? AND graded=0 AND played=0", (date,))
+    for p in pars:
+        legs = [{"player": l["player"], "team": l.get("team"), "stat": l["stat"],
+                 "line": l["line"], "side": "over", "odds": l.get("dec")} for l in p["legs"]]
+        con.execute("INSERT OR IGNORE INTO parlays(pred_date,key,legs,n,dec,ev,result) "
+                    "VALUES(?,?,?,?,?,?,'pending')",
+                    (date, _key(legs), json.dumps(legs), p["n"], p["dec"], p["ev"]))
+    _apply_parlay_marks(con)
+    con.commit()
+    con.close()
+
+
+def grade_parlays():
+    """Grade pending parlays whose legs have ALL settled, against the graded predictions. A voided
+    leg drops out and the parlay reprices on the survivors: loses if any non-void leg lost, wins if
+    all non-void legs won (payout = product of won legs' odds), void if every leg voided."""
+    con = _pcon()
+    con.row_factory = sqlite3.Row
+    _apply_parlay_marks(con)                              # re-assert played state before grading
+    pend = con.execute("SELECT rowid, pred_date, legs, dec FROM parlays WHERE graded=0").fetchall()
+    n = 0
+    for row in pend:
+        stake = _stake(row["dec"])                        # .25u, or .15u on a +1000-or-longer parlay
+        legs = json.loads(row["legs"])
+        st = []
+        for l in legs:
+            r = con.execute(
+                "SELECT result FROM predictions WHERE pred_date=? AND player=? AND stat=? "
+                "AND ABS(line-?)<1e-6 AND graded=1",
+                (row["pred_date"], l["player"], l["stat"], l["line"])).fetchone()
+            if not r:
+                # leg row gone/ungraded: if the SLATE is fully settled (no open rows left for
+                # the date), the leg can never grade — a re-keyed line or wiped flag. Void-drop
+                # it (reprice on survivors) instead of pinning the parlay 'pending' forever
+                # (2026-07-19: 4 stuck suggestions were silently missing from the record).
+                openrow = con.execute(
+                    "SELECT 1 FROM predictions WHERE pred_date=? AND result IS NULL LIMIT 1",
+                    (row["pred_date"],)).fetchone()
+                st.append("pending" if openrow else "void")
+            elif r["result"] in (None, "push", "void"):
+                st.append("void")
+            elif r["result"] == (l.get("side") or "over"):
+                st.append(("win", l))
+            elif r["result"] in ("over", "under"):
+                st.append("loss")
+            else:
+                st.append("pending")
+        if any(s == "pending" for s in st):
+            continue                                     # not all legs settled -> leave pending
+        if any(s == "loss" for s in st):
+            result, pnl = "loss", -stake
+        else:
+            won = [s[1] for s in st if isinstance(s, tuple)]
+            if not won:
+                result, pnl = "void", 0.0                 # all legs void -> stake returned
+            else:
+                payout = 1.0
+                for l in won:
+                    payout *= (l["odds"] or 1)
+                result, pnl = "win", stake * (payout - 1)
+        con.execute("UPDATE parlays SET result=?, pnl=?, graded=1, graded_at=datetime('now') "
+                    "WHERE rowid=?", (result, pnl, row["rowid"]))
+        n += 1
+    con.commit()
+    con.close()
+    return n
+
+
+def sync_parlays():
+    """Self-heal + grade, run every grade cycle by BOTH loops (like odds_other): for each slate that
+    hasn't started settling yet, REBUILD its parlays from the predictions-table overs and persist them
+    — so a stale-loop ledger commit can't leave the parlays table wiped. A slate is frozen the moment
+    any leg grades (rebuilding from only-unsettled legs then would mangle a placed parlay). Returns the
+    number of parlays graded."""
+    con = _pcon()
+    con.row_factory = sqlite3.Row
+    dates = [r[0] for r in con.execute(
+        "SELECT DISTINCT pred_date FROM predictions WHERE result IS NULL "
+        "AND (side='over' OR side IS NULL)").fetchall()]
+    fresh = {}
+    for d in dates:
+        if con.execute("SELECT 1 FROM predictions WHERE pred_date=? AND graded=1 LIMIT 1", (d,)).fetchone():
+            continue                                      # slate settling -> freeze its parlays
+        fresh[d] = [dict(r) for r in con.execute(
+            "SELECT player, team, stat, line, side, odds, ev FROM predictions WHERE pred_date=? "
+            "AND result IS NULL AND (side='over' OR side IS NULL)", (d,)).fetchall()]
+    con.close()
+    for d, overs in fresh.items():
+        if overs:
+            log_parlays(d, build(overs)["parlays"])
+    return grade_parlays()
+
+
+def parlay_record(epoch=PARLAY_EPOCH, played_only=False):
+    """Record of ALL recommended parlays since epoch, staked .25u / .15u by odds — every
+    suggestion counts as played (user 2026-07-19: "track them all as if they are all played").
+    Returns a dict: w, l, void, units, staked, roi (units/staked), pending, suggested.
+    played_only=True gives the marked-played subset (his actual tickets)."""
+    con = _pcon()
+    con.row_factory = sqlite3.Row
+    _apply_parlay_marks(con)
+    where = "played=1 AND " if played_only else ""
+    g = con.execute(f"SELECT result, pnl, dec FROM parlays WHERE graded=1 AND {where}pred_date>=?",
+                    (epoch,)).fetchall()
+    pending = con.execute(f"SELECT COUNT(*) FROM parlays WHERE graded=0 AND {where}pred_date>=?",
+                          (epoch,)).fetchone()[0]
+    suggested = con.execute("SELECT COUNT(*) FROM parlays WHERE graded=0 AND played=0 AND pred_date>=?",
+                            (epoch,)).fetchone()[0]
+    con.close()
+    w = sum(1 for r in g if r["result"] == "win")
+    l = sum(1 for r in g if r["result"] == "loss")
+    void = sum(1 for r in g if r["result"] == "void")
+    units = sum((r["pnl"] or 0) for r in g)
+    staked = sum(_stake(r["dec"]) for r in g if r["result"] in ("win", "loss"))
+    return {"w": w, "l": l, "void": void, "units": units, "staked": staked,
+            "roi": (units / staked if staked else 0.0), "pending": pending, "suggested": suggested}
+
+
+def mark_parlay_played(pid, date=None, unmark=False):
+    """Mark a parlay (by its short id + slate date) as PLACED — durable in wnba_parlays_played.txt +
+    the DB. date defaults to the latest slate with parlays. Returns the matched leg description or None."""
+    con = _pcon()
+    con.row_factory = sqlite3.Row
+    if date is None:
+        r = con.execute("SELECT MAX(pred_date) FROM parlays").fetchone()
+        date = r[0] if r else None
+    hit = None
+    for row in con.execute("SELECT key, legs FROM parlays WHERE pred_date=?", (date,)):
+        if _pid(date, row["key"]) == pid:
+            hit = (row["key"], row["legs"])
+            break
+    if not hit:
+        con.close()
+        return None
+    key, legs = hit
+    marks = set(PARLAY_MARKS.read_text().splitlines()) if PARLAY_MARKS.exists() else set()
+    line = f"{date}|{key}"
+    if unmark:
+        marks.discard(line)
+        con.execute("UPDATE parlays SET played=0 WHERE pred_date=? AND key=?", (date, key))
+    else:
+        marks.add(line)
+        con.execute("UPDATE parlays SET played=1 WHERE pred_date=? AND key=?", (date, key))
+    con.commit()
+    con.close()
+    PARLAY_MARKS.write_text("\n".join(sorted(marks)))
+    return " × ".join(f"{l['player'].split()[-1]} {STAT_LABEL.get(l['stat'], l['stat'])} o{l['line']:g}"
+                      for l in json.loads(legs))
+
+
+def list_parlays(date=None):
+    """Persisted parlays for a slate (default latest), each with its short id + stake + played mark."""
+    con = _pcon()
+    con.row_factory = sqlite3.Row
+    if date is None:
+        r = con.execute("SELECT MAX(pred_date) FROM parlays").fetchone()
+        date = r[0] if r else None
+    out = []
+    for row in con.execute("SELECT key, legs, dec, played, result FROM parlays WHERE pred_date=? "
+                           "ORDER BY ev DESC", (date,)):
+        legs = " × ".join(f"{l['player'].split()[-1]} {STAT_LABEL.get(l['stat'], l['stat'])} o{l['line']:g}"
+                          for l in json.loads(row["legs"]))
+        out.append({"pid": _pid(date, row["key"]), "legs": legs, "dec": row["dec"],
+                    "stake": _stake(row["dec"]), "played": row["played"], "result": row["result"]})
+    con.close()
+    return date, out
+
+
+if __name__ == "__main__":
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--played", nargs="+", metavar="PID", help="mark parlay(s) played by short id")
+    ap.add_argument("--unplay", nargs="+", metavar="PID", help="un-mark parlay(s) played")
+    ap.add_argument("--date", help="slate date (default: latest)")
+    ap.add_argument("--grade", action="store_true", help="self-heal + grade parlays")
+    ap.add_argument("--list", action="store_true", help="list a slate's parlays with ids")
+    ap.add_argument("--report", action="store_true", help="print the played-parlay record")
+    a = ap.parse_args()
+    if a.played or a.unplay:
+        for pid in (a.played or []):
+            d = mark_parlay_played(pid, a.date)
+            print(f"✓ played #{pid}: {d}" if d else f"no parlay #{pid} on {a.date or 'latest slate'}")
+        for pid in (a.unplay or []):
+            d = mark_parlay_played(pid, a.date, unmark=True)
+            print(f"un-played #{pid}: {d}" if d else f"no parlay #{pid}")
+    elif a.grade:
+        print(f"graded {sync_parlays()} parlays")
+    elif a.list:
+        date, ps = list_parlays(a.date)
+        print(f"parlays for {date}:")
+        for p in ps:
+            mk = " ✓PLAYED" if p["played"] else ""
+            st = f"{p['result']}" if p["result"] else "pending"
+            print(f"  #{p['pid']}  {_am(p['dec'])} · {p['stake']:g}u · {st}{mk}   {p['legs']}")
+    elif a.report:
+        r = parlay_record()
+        print(f"ALL suggested parlays: {r['w']}-{r['l']} (void {r['void']}), {r['units']:+.2f}u on "
+              f"{r['staked']:.2f}u staked -> ROI {r['roi']:+.0%}; "
+              f"{r['pending']} pending, {r['suggested']} un-played suggestions")
+    else:
+        _demo = [
+        {"player": "A Center", "team": "X", "stat": "rebounds", "line": 7.5, "dec": 1.9, "ev": 0.15, "side": "over"},
+        {"player": "A Center", "team": "X", "stat": "rebounds", "line": 9.5, "dec": 2.4, "ev": 0.11, "side": "over"},
+        {"player": "A Center", "team": "X", "stat": "pts_reb", "line": 18.5, "dec": 1.9, "ev": 0.12, "side": "over"},
+        {"player": "A Center", "team": "X", "stat": "points", "line": 10.5, "dec": 1.85, "ev": 0.08, "side": "over"},
+        {"player": "B Guard", "team": "X", "stat": "assists", "line": 5.5, "dec": 1.95, "ev": 0.13, "side": "over"},
+        {"player": "C Wing", "team": "Y", "stat": "points", "line": 14.5, "dec": 1.9, "ev": 0.14, "side": "over"},
+        ]
+        print(render(build(_demo)))

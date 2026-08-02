@@ -1,0 +1,662 @@
+at://did:plc:4yhok6xz4n6xl2uxyjiyxwgv/app.bsky.feed.post/3mrbn5zjs4c2h
+at://did:plc:6ahv2jk7wea2fql74oiisng6/app.bsky.feed.post/3mrbg3dhvuc2d
+at://did:plc:7x3skqr64ypmqca7oaiytqmx/app.bsky.feed.post/3mr32r4j5bu2e
+at://did:plc:f47unotfhxdmxbw7uszcjwvp/app.bsky.feed.post/3mrsv4niz7c2w
+at://did:plc:fy5zsacoomxwwsx7pjkfan3o/app.bsky.feed.post/3mrvdoyxcwu2n
+at://did:plc:hsqmfwk3ly7wn2pa6ec7rcpn/app.bsky.feed.post/3mr2wlaexov2n
+at://did:plc:ixpz6747fqmabsqf4l2wavv6/app.bsky.feed.post/3mr3pq3cnac2z
+at://did:plc:iy2zdnktyl3rvq24nohhrlkm/app.bsky.feed.post/3mr53mz5z4q2s
+at://did:plc:npwuvhuq3bv4m4mjlkq77cjw/app.bsky.feed.post/3mr3wkfpy4l2c
+at://did:plc:npwuvhuq3bv4m4mjlkq77cjw/app.bsky.feed.post/3mrxafpmfzt2u
+at://did:plc:p7aohoffitierwrxuud3sptd/app.bsky.feed.post/3mrsvyvoicc2i
+at://did:plc:rp4ituzorpuyyk5wmaitxx4d/app.bsky.feed.post/3mrqtcr3g522y
+at://did:plc:rwx7lnjebqrm6cozzjqobqvd/app.bsky.feed.post/3mr3umardoc2q
+at://did:plc:rwx7lnjebqrm6cozzjqobqvd/app.bsky.feed.post/3mrbgxtiusk2v
+at://did:plc:tlmzz5zhk4vlbutyjsvj2hso/app.bsky.feed.post/3mrswfklbic2a
+at://did:plc:uf6566ur4zv2h7yl4les2ygh/app.bsky.feed.post/3mr3wwnlyfh2c
+at://did:plc:ugoqmdaxl4utnj4csujswwlj/app.bsky.feed.post/3mrb4jesr3i2v
+at://did:plc:ugoqmdaxl4utnj4csujswwlj/app.bsky.feed.post/3mrbde3yxlq26
+at://did:plc:ugoqmdaxl4utnj4csujswwlj/app.bsky.feed.post/3mrqeegrad622
+at://did:plc:ugoqmdaxl4utnj4csujswwlj/app.bsky.feed.post/3mrswqsb7zf2u
+at://did:plc:xpez3ourgb6u7hoiqwvq4mlz/app.bsky.feed.post/3mr63yklzt42a
+at://did:plc:ywnkvncvnvg326vjtxfolose/app.bsky.feed.post/3mraf7rggfk26
+gn|"It’s those brick shoes", "Took her out cuz she suck" - WNBA
+gn|Angel Reese QUESTIONABLE (Leg) Vs Portland | Aaliyah Nye CLE
+gn|BREAKING: Angel Reese Out With Injury For Remainder Of The W
+gn|Bueckers sidelined after collision as WNBA fines Atkins - MS
+gn|Caitlin Clark Injured & Ruled Out For The WNBA Season! Udine
+gn|Caitlin Clark's Teammate Aliyah Boston INJURED - Out For Unr
+gn|Lynx star Collier probable to make season debut Wed. vs. Sto
+gn|Lynx's Napheesa Collier probable vs. Storm for season debut 
+gn|Lynx’s Olivia Miles off injury report as Napheesa Collier re
+gn|Minnesota Lynx star Napheesa Collier 'probable' to make seas
+gn|Napheesa Collier probable for Lynx at Storm in her first act
+gn|Napheesa Collier probable to make WNBA return tonight after 
+gn|Paige Bueckers 'questionable' for WNBA return after missing 
+gn|Paige Bueckers Injury Status Questionable Heading Into Wings
+gn|Paige Bueckers Ruled Out, Alanna Smith Doubtful For Dallas W
+gn|Paige Bueckers ruled out for Liberty game but avoids concuss
+gn|Paige Bueckers, Alanna Smith Listed As Questionable For Dall
+gn|The Athletes Went All Out With Their Style During WNBA All-S
+gn|UConn great Paige Bueckers won't play vs. NY Liberty on Mond
+gn|UConn's Napheesa Collier 'probable' to make WNBA return afte
+gn|Wings star Paige Bueckers out Monday vs. Liberty despite cle
+gn|“Figure That Out Now”: WNBA Legend Raises Concern Over Fever
+rw|1001|Ruled out Friday
+rw|1001|Ruled out for Sunday
+rw|1001|Signs with Fever
+rw|1002|Considered week-to-week
+rw|1007|Adds 13 points off bench
+rw|1007|Available Tuesday
+rw|1007|Available to play
+rw|1007|Likely to play Tuesday
+rw|1007|Notches 11 points
+rw|1007|Questionable for Wednesday
+rw|1013|Held to four points
+rw|1015|Not listed on injury report
+rw|1015|Won't play Tuesday
+rw|1015|Won't play Wednesday
+rw|1016|Available to play
+rw|1016|Downgraded to out
+rw|1016|Not on injury report for Saturday
+rw|1016|Out Wednesday
+rw|1018|Inactive versus Toronto
+rw|1018|Omitted from injury report
+rw|1018|Sitting out Wednesday
+rw|1021|Paces Golden State off bench
+rw|1043|Not listed on injury report
+rw|1043|Not on injury report
+rw|1043|Off injury report
+rw|1043|Omitted from injury report
+rw|1043|Out Tuesday
+rw|1043|Ruled out Thursday
+rw|1043|Ruled out Wednesday
+rw|1044|Limited to four minutes
+rw|1045|Racks up 13 points in victory
+rw|1046|Logs four minutes in win
+rw|1047|Ends with 11 points Tuesday
+rw|1047|Records double-double in home loss
+rw|1047|Season-high 11 rebounds
+rw|1048|Crowned 3-Point Contest champ
+rw|1048|Crowned three-point champ
+rw|1048|Goes for 11 points in victory
+rw|1048|Miled effort in win
+rw|1048|Quality showing in loss Wednesday
+rw|1048|Records 11 points in victory
+rw|1050|Active at charity stripe Tuesday
+rw|1050|Provides scoring punch
+rw|1050|Scores team-high 26 points
+rw|1051|Left off injury report
+rw|1051|Unavailable versus Sun
+rw|1053|Avoids injury report
+rw|1053|Avoids injury report for Tuesday
+rw|1053|Inactive Thursday
+rw|1053|Won't play Wednesday
+rw|1054|Chips in seven points in upset win
+rw|1055|Explodes for 32 points
+rw|1055|Mild effort in win
+rw|1055|Paces Minnesota in win
+rw|1055|Records double-double in win
+rw|1055|Sniffs triple-double in ASG win
+rw|1056|Produces 14 points in 11 minutes
+rw|1057|Full practice participant Sunday
+rw|1057|Iffy for Tuesday
+rw|1057|Quiet outing in loss
+rw|1057|Will play on minutes restriction
+rw|1058|Agrees to new seven-day deal
+rw|1058|Let go by Mercury
+rw|1060|Drops 18 points in loss
+rw|1060|Drops 19 points in blowout loss
+rw|1061|Left off injury report
+rw|1061|Not on injury report
+rw|1061|Ruled out Friday
+rw|1061|Ruled out for Wednesday
+rw|1064|Cut loose by Lynx
+rw|1064|Inks another seven-day deal
+rw|1066|Adds 12 points off bench
+rw|1067|Cleared to play
+rw|1067|Let go by Phoenix
+rw|1067|Not listed on injury report
+rw|1067|Ruled out Wednesday
+rw|1068|Holding down starting role
+rw|1068|Provides scoring spark
+rw|1069|Mild effort in 27 minutes
+rw|1071|Erupts with 31 points Wednesday
+rw|1071|Tacks on 14 points in win
+rw|1071|Totals 18 points in road loss
+rw|1073|Fares well off bench
+rw|1074|Not listed on injury report
+rw|1074|Ruled out Wednesday
+rw|1075|Pops for season-high 15 points
+rw|1075|Strong line off bench
+rw|1077|Continues cooling off
+rw|1078|Available to play
+rw|1078|Listed out Wednesday
+rw|1078|Out again Tuesday
+rw|1078|Ruled out for Friday
+rw|1084|Left off injury report
+rw|1084|Won't play Tuesday
+rw|1084|Won't suit up Friday
+rw|1087|Quiet rookie season continues
+rw|1088|Inactive versus Valkyries
+rw|1088|Joins Phoenix on developmental deal
+rw|1088|Off Injury report for Wednesday
+rw|1088|Off injury report against Liberty
+rw|1093|Avoids injury report for Wednesday
+rw|1093|Fades injury report
+rw|1093|Not listed on injury report
+rw|1093|Sitting out Wednesday
+rw|1093|Won't suit up Wednesday
+rw|1095|Provides spark defensively
+rw|1098|Headed to bench
+rw|1100|Muted output in win
+rw|1103|Omitted from injury report
+rw|1103|Out Friday
+rw|1120|Scores six points off bench
+rw|1134|Off injury report
+rw|1134|Won't play Wednesday
+rw|1135|Waived by Tempo
+rw|1137|Left off injury report
+rw|1137|Ruled out Thursday
+rw|228|Listed out for Wednesday
+rw|228|Out for Tuesday
+rw|228|Remaining out for Friday
+rw|229|Drops 11 points against Phoenix
+rw|233|Chips in with season-high 12 points
+rw|238|No timetable for return
+rw|246|Records season-high 14 points
+rw|249|Stuck in bench role
+rw|252|Out again Thursday
+rw|252|Won't play Saturday
+rw|252|Won't play Tuesday
+rw|254|Drops 25 points in loss
+rw|254|Produces 18 points in win
+rw|254|Scores game-high 21 points
+rw|254|Top scorer in victory
+rw|258|Quiet again off bench
+rw|258|Terrific outing in win
+rw|272|Picks up triple-double Wednesday
+rw|272|Scores season-high 25 points
+rw|272|Well-rounded effort in loss
+rw|276|Another quality showing Wednesday
+rw|276|Double-doubles in win
+rw|276|Named All-Star Game MVP
+rw|276|Sniffs double-double in victory
+rw|278|Dishes five dimes in victory
+rw|278|Reaches 20-point plateau
+rw|278|Scoreless in road win
+rw|280|Plays well off bench
+rw|287|Return not imminent
+rw|291|Goes for 15 points in loss
+rw|291|Hauls in eight boards in loss
+rw|297|Another productive showing
+rw|297|Generates 29 points against Chicago
+rw|297|Rolls up 29 points against Sky
+rw|297|Scores 25 points in win
+rw|309|Another single-digit scoring effort
+rw|309|Just misses double-double
+rw|309|Plays well in loss
+rw|326|Another double-double Wednesday
+rw|326|Another double-double in loss
+rw|326|Just misses double-double
+rw|326|Misses practice with illness
+rw|326|Omitted from injury report
+rw|330|Not starting Wednesday
+rw|330|Starting Monday
+rw|331|Drills four treys
+rw|331|Nets 19 points in Washington
+rw|331|Shooting woes in defeat
+rw|331|Strong line in win
+rw|331|Strong outing in win
+rw|344|Available for Wednesday
+rw|344|Subdued campaign continues
+rw|354|Chips in with 11 points
+rw|354|Very efficient in home victory
+rw|358|Starting versus Minnesota
+rw|376|Plays 18 minutes in defeat
+rw|378|Muted effort in win
+rw|378|Starting Monday
+rw|394|Another absence coming
+rw|394|Downgraded to doubtful
+rw|394|Iffy for Wednesday
+rw|394|Ruled out Wednesday
+rw|394|Shines in return to Phoenix
+rw|394|Won't play Tuesday
+rw|401|Phased out in defeat
+rw|412|Let go by Toronto
+rw|413|Buries four triples Tuesday
+rw|413|Leads Lynx with 24 points
+rw|413|Nets 20 points in road win
+rw|413|Scores 33 points in win Monday
+rw|415|Records double-double Wednesday
+rw|415|Totals 16 points in loss in Dallas
+rw|416|Dealing with knee issue
+rw|416|Fades injury report
+rw|416|Out versus Lynx
+rw|416|Posts career-high 26 points
+rw|416|Questionable for Thursday
+rw|416|Questionable for Tuesday
+rw|416|Ruled out Tuesday
+rw|423|Moving to bench
+rw|425|Officially probable for Sunday
+rw|425|Practicing Thursday
+rw|425|Remains out Tuesday
+rw|425|Remains out for Tuesday
+rw|425|Traded to Phoenix
+rw|425|Will play Sunday
+rw|432|Available for Wednesday
+rw|432|Logs 18 minutes in return
+rw|432|Probable for Sunday
+rw|432|Shooting woes in loss
+rw|436|Fares well off bench
+rw|436|Scores 11 off bench
+rw|440|Double-doubles in win
+rw|440|Drops 26 points in Saturday's loss
+rw|440|Ends with 20 points Wednesday
+rw|440|Flirts with triple-double in OT win
+rw|440|Full stat line in victory
+rw|440|Moves to 10th in all-time scoring
+rw|453|Adds 11 points Saturday
+rw|453|Scores nine points in loss
+rw|453|Tallies 11 points in victory
+rw|462|Cools off Wednesday
+rw|462|Drops 21 points against former team
+rw|462|Well-rounded contributor in win
+rw|468|Leading scorer in defeat
+rw|479|Productive from charity stripe
+rw|481|Dominant in win Monday
+rw|481|Leads all scorers Tuesday
+rw|481|Posts 38 points in road loss
+rw|481|Strikes for 33 points in victory
+rw|483|Out for personal reasons
+rw|483|Paces Sky with 20 points
+rw|483|Ruled out for Saturday
+rw|483|Stuffs stat sheet in defeat
+rw|484|Iffy for Wednesday
+rw|484|Questionable for Sunday
+rw|484|Ruled out Wednesday
+rw|485|Held in check
+rw|485|Hits game-winning shot at buzzer
+rw|488|Available Friday
+rw|488|Double-double in win
+rw|488|Fares well in win
+rw|488|Probable for Friday
+rw|489|Logs 14 minutes in loss
+rw|495|Traded to Sun
+rw|498|Strong effort in loss
+rw|498|Strong line in loss
+rw|501|Sees 11 minutes in win
+rw|539|Another 30-point performance
+rw|539|Drops 28 points in ASG loss
+rw|539|Erupts in second half vs. Portland
+rw|539|Nets 28 points in win
+rw|539|Posts 23 points in rout
+rw|571|Drops 24 in nation's capital
+rw|571|Picks up another double-double
+rw|571|Pours in 29 points
+rw|571|Stays hot in win
+rw|574|Full stat line in win
+rw|574|Posts another solid final line
+rw|574|Probable for Wednesday
+rw|574|Shines in season debut
+rw|574|To make season debut
+rw|576|Matches season high in boards
+rw|577|Available Wednesday
+rw|577|Downgraded to out
+rw|577|Out again Wednesday
+rw|577|Probable for Wednesday
+rw|577|Questionable for Wednesday
+rw|577|Unlikely to play Monday
+rw|578|Plays well off bench
+rw|578|Provides spark in victory
+rw|579|Fares well in loss
+rw|579|Not listed on injury report
+rw|579|Paces Portland in loss
+rw|580|Leading scorer in win
+rw|580|Leads Wings in scoring once again
+rw|580|Racks up 20 points in Sunday's win
+rw|580|Scores team-high 29 points
+rw|581|Drains seven triples in loss
+rw|581|On fire from perimeter
+rw|581|Tallies 18 points in loss
+rw|583|Not starting Thursday
+rw|583|Starting versus Portland
+rw|584|Notches eight points in win
+rw|584|Scores in double figures off bench
+rw|585|Cleared from injury report
+rw|586|Drops triple-double in win
+rw|586|Posts double-double in victory
+rw|586|Pulls down 16 boards in loss
+rw|586|Records another double-double
+rw|587|Hands out 10 dimes in loss
+rw|587|Leading scorer in loss
+rw|587|Leads all scorers in loss
+rw|587|Records pair of steals Wednesday
+rw|599|Struggles in loss
+rw|603|Adds 16 points in loss
+rw|603|Drops 25 points in defeat
+rw|603|Iffy for Sunday
+rw|603|Rough shooting night in loss
+rw|603|Strikes for 23 points in ASG loss
+rw|605|Double-double in defeat
+rw|605|Scores 15 points in loss Monday
+rw|610|Held to one point
+rw|615|Doesn't return Saturday
+rw|615|Goes to locker room
+rw|615|Iffy for Wednesday
+rw|615|Listed out for Monday
+rw|615|Questionable for Tuesday
+rw|615|Questionable versus Aces
+rw|615|Will play Thursday
+rw|615|Won't face minutes limit
+rw|615|Won't play Tuesday
+rw|615|Won't play Wednesday
+rw|640|Hands out four dimes in loss
+rw|640|Notches 10 points in loss
+rw|641|Chips in 12 points in loss
+rw|641|Nets 21 points in overtime win
+rw|641|Puts up 15 points in loss
+rw|641|Season-high 29 points in win
+rw|642|Not traveling with team
+rw|642|Still out Thursday
+rw|647|Plays well off bench
+rw|661|Stuck in backup role
+rw|663|Posts double-double as starter
+rw|663|Starting Wednesday
+rw|678|Cleared to play Thursday
+rw|678|Closing in on return
+rw|678|Hopeful for season debut Thursday
+rw|678|Intends to play Thursday
+rw|678|Officially listed as questionable
+rw|678|Provides spark in win
+rw|687|Progresses to individual drills
+rw|703|Another quiet effort
+rw|720|Lacking clear role
+rw|724|Full stat line Tuesday
+rw|733|Swats four shots in loss
+rw|735|Limited production in return
+rw|735|Notches 10 points
+rw|735|On track to return Sunday
+rw|735|Playing limited minutes
+rw|739|Records 10 points in win
+rw|751|Listed as questionable
+rw|751|Upgraded to available
+rw|755|Cools off Wednesday
+rw|755|Double-doubles off bench
+rw|757|Logs 28 minutes in win
+rw|782|Dodges injury report for Saturday
+rw|782|Not listed on injury report
+rw|782|Out Wednesday
+rw|782|Unavailable versus Las Vegas
+rw|784|Records three steals
+rw|784|Solid defensively once again
+rw|785|Expected to play Thursday
+rw|785|Good to go Thursday
+rw|785|Productive in win over Tempo
+rw|785|Questionable for Thursday
+rw|785|Scores 17 points in loss
+rw|785|Upgraded to probable
+rw|785|Won't play Tuesday
+rw|786|Another productive showing Tuesday
+rw|786|Double-doubles in win
+rw|786|Grabs 15 boards in win
+rw|786|Paces Mystics with 25 points
+rw|789|Available off bench Thursday
+rw|789|Goes through practice
+rw|789|Iffy for Thursday
+rw|789|Logs 10 points in return
+rw|789|Questionable for Tuesday
+rw|789|Upgraded to probable
+rw|789|Won't play Tuesday
+rw|792|Doubtful for Thursday
+rw|792|Questionable against Chicago
+rw|792|Quiet outing in return
+rw|792|Ruled out for Tuesday
+rw|792|Won't play Wednesday
+rw|792|Won't suit up Thursday
+rw|793|Keeps picking up steals
+rw|796|Another strong performance
+rw|797|Returns after brief exit
+rw|797|Scores team-high 20 points
+rw|798|Stumbles in loss
+rw|799|Quiet outing in win
+rw|799|Scores 18 points Friday
+rw|807|Posts double-double in road loss
+rw|807|Posts strong double-double
+rw|807|Productive in loss to Mystics
+rw|807|Settling into starting lineup
+rw|809|Scoreless in 17 minutes
+rw|836|Available Thursday
+rw|836|Inactive versus Liberty
+rw|836|Signs offer sheet with Minnesota
+rw|852|Doesn't return Tuesday
+rw|852|Drops 22 points in blowout win
+rw|852|Exits to locker room Tuesday
+rw|852|Logs 15 points vs. New York
+rw|852|Probable versus Fire
+rw|852|Questionable to return Tuesday
+rw|852|Records seven stocks Friday
+rw|852|Upgraded to available
+rw|853|Another double-digit scoring effort
+rw|853|Paces Connecticut in loss
+rw|854|Available for Monday
+rw|854|Inactive against Mystics
+rw|854|Not listed on injury report
+rw|854|Won't suit up Wednesday
+rw|855|Not starting Friday
+rw|855|Starting against Indiana
+rw|855|Stuck in reserve role
+rw|856|Plays well off bench
+rw|859|Scores in double figures off bench
+rw|860|Added to injury report
+rw|860|Back with 12 points off bench
+rw|860|Catches fire from deep
+rw|860|Logs 15 minutes in win
+rw|860|Now available Thursday
+rw|860|Upgraded to probable
+rw|863|Explodes for 18 points off bench
+rw|863|Reaches double figures off bench
+rw|911|Available against Connecticut
+rw|911|Cleared to play Friday
+rw|911|Dishes seven dimes Saturday
+rw|911|Double-double in blowout win
+rw|911|Expected to play Friday
+rw|911|Expected to play Tuesday
+rw|911|Good to go Tuesday
+rw|911|Probable for Wednesday
+rw|911|Scores 32 points in win
+rw|911|Triple-double in Friday's win
+rw|911|Triple-doubles in Friday's win
+rw|912|Logs 21 minutes Sunday
+rw|912|Minutes restriction lifted
+rw|912|Records five points in loss
+rw|914|Downgraded to out
+rw|914|Probable for Tuesday
+rw|914|Ruled out for Wednesday
+rw|914|Won't play Thursday
+rw|915|Another double-double in win
+rw|915|Available for All-Star Game
+rw|915|Leads Dream to another win
+rw|916|Posts 15 points despite restriction
+rw|916|Scores 10 points in loss
+rw|916|Scores 26 points Thursday
+rw|916|Struggles offensively in win
+rw|916|Will play on minutes limit Thursday
+rw|917|Plays five minutes Tuesday
+rw|923|Listed out for Wednesday
+rw|923|Not listed on injury report
+rw|923|Off injury report for Tuesday
+rw|926|Starting against Aces
+rw|926|Stumbles in first unit
+rw|927|Double-double in defeat
+rw|927|Double-doubles in loss
+rw|927|Leads team with seven assists
+rw|927|Notches 11 points in loss
+rw|930|Plays well off bench
+rw|935|Commits nine turnovers in loss
+rw|935|Decent production in loss
+rw|935|Makes most of playing time
+rw|953|Scoreless in win
+rw|969|Manages 11 points in loss
+rw|969|Puts up 13 points off bench
+rw|971|Fades injury report
+rw|971|Remains away from team
+rw|972|Another quiet effort
+rw|972|Not listed on injury report
+rw|973|Bottoms out Wednesday
+rw|977|Fares well against Sparks
+rw|977|Heading to Los Angeles
+rw|979|Drops 23 points in loss
+rw|979|Good to go Wednesday
+rw|979|Nets 21 points Wednesday
+rw|979|Not on injury report
+rw|979|Off night in loss to Atlanta
+rw|979|Questionable for Wednesday
+rw|979|Sitting out Monday
+rw|980|Double-double in return
+rw|980|Double-doubles in return
+rw|980|Flirts with double-double
+rw|980|Good to go Friday
+rw|980|Huge two-way showing in loss
+rw|980|On track for Friday return
+rw|980|Questionable against Fever
+rw|980|Won't play Tuesday
+rw|981|Nearly double-doubles
+rw|981|Sees 25 minutes in win
+rw|982|Leaves for locker room
+rw|982|Rolls up 21 points in road loss
+rw|982|To undergo season-ending surgery
+rw|982|Won't return Wednesday
+rw|984|Falls just short of double-double
+rw|984|Fills box score in win
+rw|984|Solid on both ends Tuesday
+rw|985|Starting against Sun
+rw|987|Doesn't play Tuesday
+rw|987|Not listed on injury report
+rw|987|Omitted from injury report
+rw|987|Probable versus Seattle
+rw|987|Won't play Friday
+rw|991|Posts another double-double
+rw|991|Posts double-double Monday
+rw|991|Records another double-double
+rw|992|Playing minimal role
+rw|998|Could return Sunday
+rw|998|Matches career high in scoring
+rw|998|Nears double-double in return
+rw|998|Removed from injury report
+rw|998|Scores career-high 21 points
+rw|998|Starting against Indiana
+rw|998|Traded to Tempo
+rw|998|Won't play Sunday
+rw|aaliyahedwards|Edwards (knee) is out for Tuesday's game
+rw|aaliyahedwards|Edwards (knee) is out for Wednesday's ga
+rw|aaliyahedwards|Edwards (knee) won't return to Sunday's 
+rw|alannasmith|Smith (leg) is doubtful for Monday's gam
+rw|alannasmith|Smith (leg) is listed as out for Wednesd
+rw|alannasmith|Smith (leg) is out for Monday's game ver
+rw|alannasmith|Smith (leg) is probable for Wednesday's 
+rw|alannasmith|Smith (leg) is questionable for Wednesda
+rw|alissapili|Pili (coach's decision) is out for Wedne
+rw|aliyahboston|Boston (leg) is listed as probable for F
+rw|aliyahboston|Boston (lower leg) is listed as availabl
+rw|aliyahboston|Boston is questionable to return to Tues
+rw|aneesahmorrow|Morrow (reconditioning) is listed as que
+rw|angelreese|Reese won't return to Sunday's game agai
+rw|annelimaley|Maley (coach's decision) is out for Wedn
+rw|annelimaley|Maley (coach's decision) won't play in T
+rw|ashlonjackson|Jackson (coach's decision) is listed as 
+rw|ashlonjackson|Jackson (coach's decision) is out for Su
+rw|ashlonjackson|Jackson (coach's decision) is out for Th
+rw|ashlonjackson|Jackson (coach's decision) is out for Tu
+rw|ashlonjackson|Jackson (coach's decision) will remain o
+rw|azurastevens|Stevens is out for Thursday's game again
+rw|breehall|Hall (ankle) is listed as probable for T
+rw|breehall|Hall (coach's decision) has been ruled o
+rw|brittneygriner|Griner (knee) is doubtful for Wednesday'
+rw|brittneygriner|Griner (knee) is out for Wednesday's gam
+rw|brittneygriner|Griner is probable for Sunday's game in 
+rw|caitlinclark|Clark (back) is listed as probable for F
+rw|caitlinclark|Clark (back) is listed as probable for T
+rw|caitlinclark|Clark (back) is probable for Wednesday's
+rw|cheyenneparkertyus|Parker-Tyus (concussion) has been ruled 
+rw|cheyenneparkertyus|Parker-Tyus (concussion) is listed as ou
+rw|chloebibby|Bibby (coach's decision) is listed as ou
+rw|chloebibby|Bibby is listed as active for Thursday's
+rw|costanzaverona|Verona (coach's decision) is listed as o
+rw|costanzaverona|Verona (coach's decision) won't play Wed
+rw|courtneyvandersloot|Vandersloot (illness) is questionable to
+rw|damirisdantas|Dantas (knee) has been ruled out for Fri
+rw|damirisdantas|Dantas (knee) has been ruled out for Tue
+rw|damirisdantas|Dantas (knee) is out for Wednesday's gam
+rw|dariannalittlepagebuggs|Littlepage-Buggs (coach's decision) has 
+rw|dijonaicarrington|Carrington (foot) is officially listed a
+rw|dijonaicarrington|Carrington (foot), who is out for Wednes
+rw|dominiquemalonga|Malonga (back) has been ruled out for Tu
+rw|dominiquemalonga|Malonga (back) is listed as available fo
+rw|dominiquemalonga|Malonga (back) is listed as questionable
+rw|dominiquemalonga|Malonga (back) is probable for Friday's 
+rw|dorkajuhasz|Juhasz (knee) is listed as available for
+rw|dorkajuhasz|Juhasz (knee) is listed as probable for 
+rw|dorkajuhasz|Juhasz (knee) is questionable for Thursd
+rw|gabbywilliams|Williams (reconditioning) is listed as o
+rw|gabbywilliams|Williams (reconditioning) is questionabl
+rw|haileyvanlith|Van Lith (coach's decision) has been rul
+rw|haileyvanlith|Van Lith (coach's decision) is out for W
+rw|haleyjones|Jones (coach's decision) is listed as ou
+rw|indyanivar|Nivar (coach's decision) has been ruled 
+rw|isabelleharrison|Harrison (knee) has been ruled out for T
+rw|isabelleharrison|Harrison (knee) is listed as questionabl
+rw|isabelleharrison|Harrison (knee) won't play in Thursday's
+rw|isabelleharrison|Harrison is questionable for Thursday's 
+rw|jordanharrison|Harrison (coach's decision) is out for W
+rw|justejocyte|Jocyte is out for Saturday's game agains
+rw|karadunn|Dunn (coach's decision) is listed as out
+rw|kelseyplum|Plum (leg) is listed as out for Tuesday'
+rw|kianawilliams|Williams (hand) is questionable for Wedn
+rw|kierstanbell|Bell (leg) has been ruled out for Tuesda
+rw|kierstanbell|Bell (leg) is doubtful for Thursday's ga
+rw|kierstanbell|Bell (leg) is listed as out for Thursday
+rw|kierstanbell|Bell (leg) is out for Wednesday's game a
+rw|liatuking|King (coach's decision) is listed as out
+rw|liatuking|King (coach's decision) is out for Wedne
+rw|maddywestbeld|Westbeld (coach's decision) is out for T
+rw|maddywestbeld|Westbeld (coach's decision) is out for W
+rw|maiyamamoto|Yamamoto (not with team) is out for Wedn
+rw|marinejohannes|Johannes (ankle) is listed as out for Tu
+rw|marinejohannes|Johannes (ankle) is listed as questionab
+rw|marinejohannes|Johannes (ankle) is out for Monday's gam
+rw|marinejohannes|Johannes (ankle) is out for Wednesday's 
+rw|marinejohannes|Johannes (ankle) is questionable for Wed
+rw|moniquebillings|Billings is probable for Friday's game a
+rw|nalyssasmith|Smith (illness) is now listed as probabl
+rw|nalyssasmith|Smith (undisclosed) has been ruled out f
+rw|nalyssasmith|Smith is questionable to face the Libert
+rw|napheesacollier|Collier (ankle) is probable for Wednesda
+rw|natashamack|Mack (foot) has been ruled out for Frida
+rw|natashamack|Mack (foot) is listed as probable for Su
+rw|nyarasabally|Sabally (ribs) is probable for Thursday'
+rw|nyarasabally|Sabally (ribs) is questionable for Thurs
+rw|nyarasabally|Sabally (ribs) is questionable for Tuesd
+rw|nyarasabally|Sabally (ribs) won't play in Tuesday's g
+rw|ornellabankole|Bankole (coach's decision) is out for Th
+rw|paigebueckers|Bueckers (rest) is questionable for Wedn
+rw|paigebueckers|Bueckers won't play in Monday's game aga
+rw|quionchecarter|Carter (coach's decision) has been ruled
+rw|quionchecarter|Carter (coach's decision) is out for Wed
+rw|ravenjohnson|Johnson (lower body) is listed as out fo
+rw|samiwhitcomb|Whitcomb (knee) is probable for Sunday's
+rw|samiwhitcomb|Whitcomb is out for Sunday's game agains
+rw|saniyarivers|Rivers (ankle) is probable for Sunday's 
+rw|saniyarivers|Rivers (ankle/foot) is questionable for 
+rw|satousabally|Sabally (concussion) will remain on the 
+rw|shayciezki|Ciezki (coach's decision) has been ruled
+rw|shayciezki|Ciezki (coach's decision) has been ruledrw|tainamair|Mai (coach's decision) is out for Monday
+rw|shayciezki|Ciezki (coach's decision) is listed as o
+rw|shayciezki|Ciezki (coach's decision) is out for Wed
+rw|tainamair|Mai (coach's decision) is out for Mondayrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|alannasmith|Smith (leg) is doubtful for Monday's gamrw|marinejohannes|Johannes (ankle) is out for Monday's gamrw|marinejohannes|Johannes (ankle) is out for Monday's gamrw|marinejohannes|Johannes (ankle) is out for Monday's gamrw|marinejohannes|Johannes (ankle) is out for Monday's gamrw|marinejohannes|Johannes (ankle) is out for Monday's gamrw|marinejohannes|Johannes (ankle) is out for Monday's gamrw|marinejohannes|Johannes (ankle) is out for Monday's gamrw|marinejohannes|Johannes (ankle) is out for Monday's gamrw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|paigebueckers|Bueckers won't play in Monday's game agarw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|alannasmith|Smith (leg) is out for Monday's game verrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|kianawilliams|Williams (hand) is questionable for Wednrw|liatuking|King (coach's decision) is out for Wednerw|liatuking|King (coach's decision) is out for Wednerw|liatuking|King (coach's decision) is out for Wednerw|liatuking|King (coach's decision) is out for Wednerw|liatuking|King (coach's decision) is out for Wednerw|liatuking|King (coach's decision) is out for Wednerw|liatuking|King (coach's decision) is out for Wednerw|alissapili|Pili (coach's decision) is out for Wednerw|toniemorgan|Morgan (coach's decision) is out for Wedrw|toniemorgan|Morgan (coach's decision) is out for Wedrw|toniemorgan|Morgan (coach's decision) is out for Wedrw|toniemorgan|Morgan (coach's decision) is out for Wedrw|toniemorgan|Morgan (coach's decision) is out for Wedrw|tainamair|Mair (coach's decision) is out for Wedne
+rw|tainamair|Mair (coach's decision) is listed as out
+rw|tainamair|Mair (coach's decision) is out for Wedne
+rw|taniyalatson|Latson (coach's decision) is out for Wed
+rw|toniemorgan|Morgan (coach's decision) is out for Wed
+rw|toniemorgan|Morgan (coach's decision) is out for Wedrw|tainamair|Mair (coach's decision) is out for Wednerw|tainamair|Mair (coach's decision) is out for Wednerw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedrw|quionchecarter|Carter (coach's decision) is out for Wedgn|Paige Bueckers 'questionable' for WNBA return after missing gn|Paige Bueckers 'questionable' for WNBA return after missing gn|Paige Bueckers 'questionable' for WNBA return after missing gn|Paige Bueckers 'questionable' for WNBA return after missing gn|Paige Bueckers 'questionable' for WNBA return after missing rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|marinejohannes|Johannes (ankle) is out for Wednesday's rw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|dijonaicarrington|Carrington (foot), who is out for Wednesrw|brittneygriner|Griner (knee) is doubtful for Wednesday'rw|brittneygriner|Griner (knee) is doubtful for Wednesday'rw|brittneygriner|Griner (knee) is doubtful for Wednesday'rw|brittneygriner|Griner (knee) is doubtful for Wednesday'rw|brittneygriner|Griner (knee) is doubtful for Wednesday'rw|brittneygriner|Griner (knee) is doubtful for Wednesday'rw|brittneygriner|Griner (knee) is doubtful for Wednesday'rw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|maddywestbeld|Westbeld (coach's decision) is out for Wrw|annelimaley|Maley (coach's decision) is out for Wednrw|annelimaley|Maley (coach's decision) is out for Wednrw|annelimaley|Maley (coach's decision) is out for Wednrw|annelimaley|Maley (coach's decision) is out for Wednrw|annelimaley|Maley (coach's decision) is out for Wednrw|annelimaley|Maley (coach's decision) is out for Wednrw|haileyvanlith|Van Lith (coach's decision) is out for Wrw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ashlonjackson|Jackson (coach's decision) is listed as rw|ravenjohnson|Johnson (lower body) is listed as out forw|ravenjohnson|Johnson (lower body) is listed as out forw|taniyalatson|Latson (coach's decision) is out for Wedrw|taniyalatson|Latson (coach's decision) is out for Wedrw|taniyalatson|Latson (coach's decision) is out for Wedrw|taniyalatson|Latson (coach's decision) is out for Wedrw|taniyalatson|Latson (coach's decision) is out for Wedrw|taniyalatson|Latson (coach's decision) is out for Wedrw|alannasmith|Smith (leg) is listed as out for Wednesdrw|alannasmith|Smith (leg) is listed as out for Wednesdrw|costanzaverona|Verona (coach's decision) won't play Wedrw|haleyjones|Jones (coach's decision) is listed as ourw|jordanharrison|Harrison (coach's decision) is out for Wrw|kelseyplum|Plum (leg) is listed as out for Tuesday'rw|kelseyplum|Plum (leg) is listed as out for Tuesday'rw|kelseyplum|Plum (leg) is listed as out for Tuesday'rw|ashlonjackson|Jackson (coach's decision) is out for Turw|ashlonjackson|Jackson (coach's decision) is out for Turw|ashlonjackson|Jackson (coach's decision) is out for Turw|ashlonjackson|Jackson (coach's decision) is out for Turw|ashlonjackson|Jackson (coach's decision) is out for Turw|ashlonjackson|Jackson (coach's decision) is out for Turw|ashlonjackson|Jackson (coach's decision) is out for Turw|ashlonjackson|Jackson (coach's decision) is out for Turw|ashlonjackson|Jackson (coach's decision) is out for Turw|ashlonjackson|Jackson (coach's decision) is out for Turw|ashlonjackson|Jackson (coach's decision) is out for Turw|ashlonjackson|Jackson (coach's decision) is out for Turw|ashlonjackson|Jackson (coach's decision) is out for Turw|ashlonjackson|Jackson (coach's decision) is out for Turw|ashlonjackson|Jackson (coach's decision) is out for Turw|ashlonjackson|Jackson (coach's decision) is out for Turw|ashlonjackson|Jackson (coach's decision) is out for Turw|gabbywilliams|Williams (reconditioning) is questionablrw|gabbywilliams|Williams (reconditioning) is questionablrw|gabbywilliams|Williams (reconditioning) is questionablrw|gabbywilliams|Williams (reconditioning) is questionablrw|gabbywilliams|Williams (reconditioning) is questionablrw|dominiquemalonga|Malonga (back) has been ruled out for Turw|nalyssasmith|Smith (undisclosed) has been ruled out frw|nalyssasmith|Smith (undisclosed) has been ruled out frw|nalyssasmith|Smith (undisclosed) has been ruled out frw|nalyssasmith|Smith (undisclosed) has been ruled out frw|marinejohannes|Johannes (ankle) is listed as out for Turw|marinejohannes|Johannes (ankle) is listed as out for Turw|aliyahboston|Boston is questionable to return to Tuesrw|aliyahboston|Boston is questionable to return to Tuesrw|aliyahboston|Boston is questionable to return to Tuesrw|shayciezki|Ciezki (coach's decision) is listed as orw|shayciezki|Ciezki (coach's decision) is listed as ogn|Caitlin Clark Injured & Ruled Out For The WNBA Season! Udinegn|Caitlin Clark Injured & Ruled Out For The WNBA Season! Udinegn|Caitlin Clark Injured & Ruled Out For The WNBA Season! Udinegn|Caitlin Clark Injured & Ruled Out For The WNBA Season! Udinerw|nyarasabally|Sabally (ribs) is probable for Thursday'rw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dorkajuhasz|Juhasz (knee) is questionable for Thursdrw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dominiquemalonga|Malonga (back) is probable for Friday's rw|dorkajuhasz|Juhasz (knee) is listed as probable for rw|ashlonjackson|Jackson (coach's decision) is out for Thrw|liatuking|King (coach's decision) is listed as outrw|liatuking|King (coach's decision) is listed as outrw|liatuking|King (coach's decision) is listed as outrw|chloebibby|Bibby is listed as active for Thursday'srw|dorkajuhasz|Juhasz (knee) is listed as available forrw|dorkajuhasz|Juhasz (knee) is listed as available forrw|isabelleharrison|Harrison (knee) won't play in Thursday'srw|isabelleharrison|Harrison (knee) won't play in Thursday'srw|ornellabankole|Bankole (coach's decision) is out for Thrw|ornellabankole|Bankole (coach's decision) is out for Thrw|ornellabankole|Bankole (coach's decision) is out for Thrw|moniquebillings|Billings is probable for Friday's game arw|moniquebillings|Billings is probable for Friday's game arw|damirisdantas|Dantas (knee) has been ruled out for Frirw|damirisdantas|Dantas (knee) has been ruled out for Frirw|aliyahboston|Boston (leg) is listed as probable for Frw|aliyahboston|Boston (leg) is listed as probable for Frw|annelimaley|Maley (coach's decision) won't play in Trw|annelimaley|Maley (coach's decision) won't play in Trw|nalyssasmith|Smith (illness) is now listed as probablrw|nalyssasmith|Smith (illness) is now listed as probablrw|kierstanbell|Bell (leg) is listed as out for Thursdayrw|kierstanbell|Bell (leg) is listed as out for Thursdayrw|ugonneonyiah|Onyiah (not with team) is listed as out 
+rw|ugonneonyiah|Onyiah (not with team) is listed as out 

@@ -1,0 +1,13 @@
+{
+ "version": "v1.3",
+ "frozen": "2026-07-31",
+ "sha256_16": "c8853aca20240f19",
+ "source_sha256_16": "a66f897cc5f58310",
+ "source_files": {
+  "pga_ruler.py": "ce9013952e943a39",
+  "pga_e3.py": "302fc33aa6a63a06",
+  "pga_birdies.py": "8c36d395e2bd7f03",
+  "pga_context.py": "97f98a861a6fe4d0"
+ },
+ "decision": "v1.3 (2026-07-31) \u2014 H-P1 REVERTED, hours after v1.2 adopted it. FORM_R 0.152 -> 0.0. The +0.152 that justified it was de-conditioned at the ROUND level only. Event factors span 0.81-1.24, so a week that plays easy against a player's history lifts EVERY one of their residuals that week, and R1 'predicts' R2 for reasons unrelated to form. Removing the EVENT level too: r=+0.152 -> +0.012 (0.019 birdies per 18), within-event null +0.145 -> +0.006. The original cross-event null (-0.005) could not catch it, because pairing residuals across DIFFERENT events destroys the shared week level as well as player identity and therefore tests a weaker claim than it appears to. The correct null shuffles WITHIN an event: player identity dies, the week survives. That null was what exposed it. The machinery is left in place at FORM_R=0.0 rather than deleted, because the idea is intuitive enough to be proposed again and the refutation belongs where the next person will look. Behaviour is identical to v1.1: flags back to 3 over / 6 under. LESSON RECORDED: de-condition at EVERY level that varies. Round-level alone was not enough, and a null that also breaks the confound cannot detect the confound."
+}

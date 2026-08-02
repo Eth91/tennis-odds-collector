@@ -1,0 +1,22 @@
+{
+ "played": 8,
+ "passed": 155,
+ "separations": {
+  "odds": 1.423,
+  "n_elev": -1.179,
+  "proj_min": -0.978,
+  "d_stat": 0.88,
+  "driver": 0.875,
+  "d_fga": 0.76,
+  "ev": 0.676,
+  "d_min": 0.586,
+  "season_avg": -0.575,
+  "line": -0.325,
+  "elev_avg": -0.253,
+  "vac": -0.196,
+  "opp_def": 0.119,
+  "pace": 0.104,
+  "total": 0.058,
+  "proj_hit": -0.055
+ }
+}

@@ -1,0 +1,42 @@
+name: wnba-watchlist-digest
+
+# Cloud-side consolidated QUESTIONABLE-TIER watchlist -> ntfy, so the full "if he sits" board lands
+# on the phone a few hours before games WITHOUT any local machine open. The 60s watcher already
+# pushes NEW questionables in real time; this is the tidy periodic snapshot of the whole board.
+# Fires only when there are questionable stars (never spams an empty slate). Times cover the usual
+# WNBA shape (afternoon + evening ET); workflow_dispatch to send one on demand.
+# CRONS CUT 2026-07-29: every step below now runs on the Oracle VM (vm_loop.sh).
+# Kept dispatch-only as a manual fallback if the VM is down. Do NOT re-add a
+# schedule without first removing the step from vm_loop.sh -- two writers on the
+# same SQLite files and the same git remote is what caused the fd_lines blob war.
+on:
+  workflow_dispatch:
+    inputs:
+      test:
+        description: "send a clearly-marked SAMPLE push to verify delivery (ignores the slate)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: wnba-watchlist-digest
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests curl_cffi numpy
+      - name: push the watchlist digest (only if any questionable stars)
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          TEST: ${{ github.event.inputs.test }}
+        run: |
+          if [ "$TEST" = "true" ]; then
+            python show_watchlist.py --push --test
+          else
+            python show_watchlist.py --push || echo "digest skipped"
+          fi
