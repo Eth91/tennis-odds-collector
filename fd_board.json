@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-02T19:18:02Z",
+ "captured_at": "2026-08-02T19:24:58Z",
  "matches": [
-  {
-   "event_id": 35896887,
-   "p1": "Sebastian Juzek",
-   "p2": "Michal Paszkiewicz",
-   "p1_norm": "sebastian juzek",
-   "p2_norm": "michal paszkiewicz",
-   "open_date": "2026-08-02T19:10:00.000Z",
-   "line": 52.5,
-   "over_odds": -105,
-   "under_odds": -135
-  },
   {
    "event_id": 35896890,
    "p1": "Filip Mlynarski",
@@ -19,20 +8,9 @@
    "p1_norm": "filip mlynarski",
    "p2_norm": "mateusz rutkowski",
    "open_date": "2026-08-02T19:15:00.000Z",
-   "line": 77.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35896893,
-   "p1": "Tomasz Filbrandt",
-   "p2": "Jakub Michalczyk",
-   "p1_norm": "tomasz filbrandt",
-   "p2_norm": "jakub michalczyk",
-   "open_date": "2026-08-02T19:20:00.000Z",
-   "line": 74.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 63.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35896894,
@@ -41,9 +19,9 @@
    "p1_norm": "kazimierz rybak",
    "p2_norm": "michal guzik",
    "open_date": "2026-08-02T19:20:00.000Z",
-   "line": 72.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 64.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35896916,
