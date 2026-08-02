@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-02T11:27:28Z",
+ "captured_at": "2026-08-02T11:32:41Z",
  "matches": [
-  {
-   "event_id": 35895512,
-   "p1": "Petr David",
-   "p2": "Krzysztof Wloczko",
-   "p1_norm": "petr david",
-   "p2_norm": "krzysztof wloczko",
-   "open_date": "2026-08-02T11:15:00.000Z",
-   "line": 70.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35895519,
    "p1": "Piotr Maruszak",
@@ -19,9 +8,9 @@
    "p1_norm": "piotr maruszak",
    "p2_norm": "arkadiusz mugowski",
    "open_date": "2026-08-02T11:20:00.000Z",
-   "line": 78.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 69.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35895525,
@@ -30,9 +19,9 @@
    "p1_norm": "rafal glica",
    "p2_norm": "marcin lach",
    "open_date": "2026-08-02T11:25:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 72.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35895526,
@@ -41,9 +30,9 @@
    "p1_norm": "dawid poloszczanski",
    "p2_norm": "mikolaj lukaszewski",
    "open_date": "2026-08-02T11:25:00.000Z",
-   "line": 76.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 77.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35895542,
@@ -52,9 +41,9 @@
    "p1_norm": "pawel adamus",
    "p2_norm": "krzysztof juszczyk",
    "open_date": "2026-08-02T11:30:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35895570,
