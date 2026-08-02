@@ -242,6 +242,7 @@ rw|425|Officially probable for Sunday
 rw|425|Practicing Thursday
 rw|425|Remains out Tuesday
 rw|425|Remains out for Tuesday
+rw|425|Traded to Phoenix
 rw|425|Will play Sunday
 rw|432|Available for Wednesday
 rw|432|Logs 18 minutes in return
@@ -504,6 +505,7 @@ rw|972|Another quiet effort
 rw|972|Not listed on injury report
 rw|973|Bottoms out Wednesday
 rw|977|Fares well against Sparks
+rw|977|Heading to Los Angeles
 rw|979|Drops 23 points in loss
 rw|979|Good to go Wednesday
 rw|979|Nets 21 points Wednesday

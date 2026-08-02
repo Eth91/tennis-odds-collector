@@ -1,61 +1,6 @@
 {
- "captured_at": "2026-08-02T06:13:16Z",
+ "captured_at": "2026-08-02T06:34:17Z",
  "matches": [
-  {
-   "event_id": 35894798,
-   "p1": "Arkadiusz Mugowski",
-   "p2": "Mateusz Woskowicz",
-   "p1_norm": "arkadiusz mugowski",
-   "p2_norm": "mateusz woskowicz",
-   "open_date": "2026-08-02T06:00:00.000Z",
-   "line": 86.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
-  {
-   "event_id": 35894799,
-   "p1": "Dawid Jendrysik",
-   "p2": "Mariusz Koczyba",
-   "p1_norm": "dawid jendrysik",
-   "p2_norm": "mariusz koczyba",
-   "open_date": "2026-08-02T06:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35894802,
-   "p1": "Sebastian Szostok",
-   "p2": "Marian Lebek",
-   "p1_norm": "sebastian szostok",
-   "p2_norm": "marian lebek",
-   "open_date": "2026-08-02T06:05:00.000Z",
-   "line": 66.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35894803,
-   "p1": "Marcin Jadczyk",
-   "p2": "Jakub Kosowski",
-   "p1_norm": "marcin jadczyk",
-   "p2_norm": "jakub kosowski",
-   "open_date": "2026-08-02T06:05:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35894804,
-   "p1": "Mariusz Zwolinski",
-   "p2": "Piotr Staniszewski",
-   "p1_norm": "mariusz zwolinski",
-   "p2_norm": "piotr staniszewski",
-   "open_date": "2026-08-02T06:05:00.000Z",
-   "line": 84.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35894812,
    "p1": "Jakub Nowak",
@@ -63,9 +8,9 @@
    "p1_norm": "jakub nowak",
    "p2_norm": "pawel adamus",
    "open_date": "2026-08-02T06:20:00.000Z",
-   "line": 81.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 90.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35894816,
@@ -74,9 +19,9 @@
    "p1_norm": "tadeusz piotrowski",
    "p2_norm": "mateusz zagajewski",
    "open_date": "2026-08-02T06:25:00.000Z",
-   "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 58.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35894817,
@@ -85,9 +30,9 @@
    "p1_norm": "kacper adamus",
    "p2_norm": "patryk mecik",
    "open_date": "2026-08-02T06:25:00.000Z",
-   "line": 81.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 87.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35894821,
@@ -96,9 +41,9 @@
    "p1_norm": "mikolaj lukaszewski",
    "p2_norm": "bartlomiej wisniewski",
    "open_date": "2026-08-02T06:30:00.000Z",
-   "line": 81.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 71.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35894822,
@@ -107,9 +52,9 @@
    "p1_norm": "rafal glica",
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-08-02T06:30:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35894823,
@@ -118,6 +63,72 @@
    "p1_norm": "krzysztof wloczko",
    "p2_norm": "tibor spanik",
    "open_date": "2026-08-02T06:30:00.000Z",
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
+  },
+  {
+   "event_id": 35894829,
+   "p1": "Jakub Kaczmarek",
+   "p2": "Mariusz Koczyba",
+   "p1_norm": "jakub kaczmarek",
+   "p2_norm": "mariusz koczyba",
+   "open_date": "2026-08-02T06:45:00.000Z",
+   "line": 71.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35894836,
+   "p1": "Oskar Sokolowski",
+   "p2": "Rafal Wojcik",
+   "p1_norm": "oskar sokolowski",
+   "p2_norm": "rafal wojcik",
+   "open_date": "2026-08-02T06:45:00.000Z",
+   "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35894839,
+   "p1": "Piotr Maruszak",
+   "p2": "Arkadiusz Mugowski",
+   "p1_norm": "piotr maruszak",
+   "p2_norm": "arkadiusz mugowski",
+   "open_date": "2026-08-02T06:50:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35894842,
+   "p1": "Dawid Poloszczanski",
+   "p2": "Mariusz Zwolinski",
+   "p1_norm": "dawid poloszczanski",
+   "p2_norm": "mariusz zwolinski",
+   "open_date": "2026-08-02T06:55:00.000Z",
+   "line": 81.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35894843,
+   "p1": "Petr David",
+   "p2": "Marcin Jadczyk",
+   "p1_norm": "petr david",
+   "p2_norm": "marcin jadczyk",
+   "open_date": "2026-08-02T06:55:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35894844,
+   "p1": "Jacek Wieczerzak",
+   "p2": "Sebastian Szostok",
+   "p1_norm": "jacek wieczerzak",
+   "p2_norm": "sebastian szostok",
+   "open_date": "2026-08-02T06:55:00.000Z",
    "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
