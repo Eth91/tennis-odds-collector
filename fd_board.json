@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-02T11:22:19Z",
+ "captured_at": "2026-08-02T11:27:28Z",
  "matches": [
   {
    "event_id": 35895512,
@@ -8,9 +8,9 @@
    "p1_norm": "petr david",
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-08-02T11:15:00.000Z",
-   "line": 76.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 70.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35895519,
@@ -19,7 +19,7 @@
    "p1_norm": "piotr maruszak",
    "p2_norm": "arkadiusz mugowski",
    "open_date": "2026-08-02T11:20:00.000Z",
-   "line": 72.5,
+   "line": 78.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -31,8 +31,8 @@
    "p2_norm": "marcin lach",
    "open_date": "2026-08-02T11:25:00.000Z",
    "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35895526,
@@ -41,9 +41,9 @@
    "p1_norm": "dawid poloszczanski",
    "p2_norm": "mikolaj lukaszewski",
    "open_date": "2026-08-02T11:25:00.000Z",
-   "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35895542,
@@ -52,9 +52,9 @@
    "p1_norm": "pawel adamus",
    "p2_norm": "krzysztof juszczyk",
    "open_date": "2026-08-02T11:30:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35895570,
@@ -66,6 +66,39 @@
    "line": 79.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35895586,
+   "p1": "Sebastian Szostok",
+   "p2": "Schaniel Krzysztof",
+   "p1_norm": "sebastian szostok",
+   "p2_norm": "schaniel krzysztof",
+   "open_date": "2026-08-02T11:50:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35895587,
+   "p1": "Mariusz Zwolinski",
+   "p2": "Jakub Michalczyk",
+   "p1_norm": "mariusz zwolinski",
+   "p2_norm": "jakub michalczyk",
+   "open_date": "2026-08-02T11:50:00.000Z",
+   "line": 79.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35895592,
+   "p1": "Rafal Wojcik",
+   "p2": "Piotr Przewlocki",
+   "p1_norm": "rafal wojcik",
+   "p2_norm": "piotr przewlocki",
+   "open_date": "2026-08-02T11:55:00.000Z",
+   "line": 80.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
