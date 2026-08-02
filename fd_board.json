@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-02T13:15:15Z",
+ "captured_at": "2026-08-02T13:20:53Z",
  "matches": [
   {
    "event_id": 35895794,
@@ -8,9 +8,9 @@
    "p1_norm": "tibor spanik",
    "p2_norm": "jakub kosowski",
    "open_date": "2026-08-02T12:55:00.000Z",
-   "line": 99.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 101.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35895832,
@@ -19,9 +19,9 @@
    "p1_norm": "mariusz zwolinski",
    "p2_norm": "artur szoltysek",
    "open_date": "2026-08-02T13:05:00.000Z",
-   "line": 82.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 88.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35895833,
@@ -30,9 +30,9 @@
    "p1_norm": "sebastian szostok",
    "p2_norm": "jacek wieczerzak",
    "open_date": "2026-08-02T13:05:00.000Z",
-   "line": 85.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 97.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35895903,
@@ -42,8 +42,8 @@
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-08-02T13:20:00.000Z",
    "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35895912,
@@ -52,9 +52,9 @@
    "p1_norm": "tadeusz piotrowski",
    "p2_norm": "arkadiusz mugowski",
    "open_date": "2026-08-02T13:25:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 78.5,
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35895918,
@@ -88,6 +88,17 @@
    "line": 85.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35895954,
+   "p1": "Petr David",
+   "p2": "Jakub Kosowski",
+   "p1_norm": "petr david",
+   "p2_norm": "jakub kosowski",
+   "open_date": "2026-08-02T13:45:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
