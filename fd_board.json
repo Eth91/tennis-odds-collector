@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-02T15:52:33Z",
+ "captured_at": "2026-08-02T16:00:42Z",
  "matches": [
-  {
-   "event_id": 35896228,
-   "p1": "Lukasz Pietraszko",
-   "p2": "Dawid Kosmal",
-   "p1_norm": "lukasz pietraszko",
-   "p2_norm": "dawid kosmal",
-   "open_date": "2026-08-02T15:45:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35896237,
    "p1": "Zbigniew Nocun",
@@ -19,9 +8,9 @@
    "p1_norm": "zbigniew nocun",
    "p2_norm": "mateusz baran",
    "open_date": "2026-08-02T15:50:00.000Z",
-   "line": 77.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 87.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35896238,
@@ -30,20 +19,9 @@
    "p1_norm": "kacper szurlej",
    "p2_norm": "szymon brud",
    "open_date": "2026-08-02T15:50:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35896249,
-   "p1": "Piotr Przewlocki",
-   "p2": "Krzysztof Juszczyk",
-   "p1_norm": "piotr przewlocki",
-   "p2_norm": "krzysztof juszczyk",
-   "open_date": "2026-08-02T15:55:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 83.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35896260,
@@ -53,8 +31,8 @@
    "p2_norm": "michal paszkiewicz",
    "open_date": "2026-08-02T16:00:00.000Z",
    "line": 73.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35896263,
@@ -88,6 +66,28 @@
    "line": 80.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35896280,
+   "p1": "Rafal Wojcik",
+   "p2": "Oskar Sokolowski",
+   "p1_norm": "rafal wojcik",
+   "p2_norm": "oskar sokolowski",
+   "open_date": "2026-08-02T16:20:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35896286,
+   "p1": "Sebastian Juzek",
+   "p2": "Jaroslaw Badura",
+   "p1_norm": "sebastian juzek",
+   "p2_norm": "jaroslaw badura",
+   "open_date": "2026-08-02T16:25:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
