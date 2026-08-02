@@ -3923,7 +3923,12 @@ def build():
   #pga .pgatitle {{ font-size:17px; font-weight:640; white-space:nowrap; overflow:hidden;
                     text-overflow:ellipsis; flex:0 1 auto; }}
   #pga .pgarec {{ font-size:13px; white-space:nowrap; flex:none; text-transform:none; }}
-  #pga .pgarec b {{ color:var(--cu-grn); font-weight:600; }}
+  /* The record's <b> carries a .pos/.neg class from the emitter; colouring every <b> green
+     rendered a LOSING record in the winning colour — the PGA board showed 16-20 -5.37u in
+     green. Colour is meaning on this board, so it has to follow the sign. */
+  #pga .pgarec b {{ font-weight:600; }}
+  #pga .pgarec b.pos {{ color:var(--cu-grn); }}
+  #pga .pgarec b.neg {{ color:var(--cu-red); }}
   #pga .pgapaper {{ flex:none; }}
   #pga .pgamkt {{ margin:18px 0 4px; }}
 
