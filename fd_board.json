@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-02T13:53:06Z",
+ "captured_at": "2026-08-02T13:58:38Z",
  "matches": [
-  {
-   "event_id": 35895918,
-   "p1": "Marian Lebek",
-   "p2": "Marcin Lach",
-   "p1_norm": "marian lebek",
-   "p2_norm": "marcin lach",
-   "open_date": "2026-08-02T13:30:00.000Z",
-   "line": 100.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35895954,
    "p1": "Petr David",
@@ -19,42 +8,9 @@
    "p1_norm": "petr david",
    "p2_norm": "jakub kosowski",
    "open_date": "2026-08-02T13:45:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35895970,
-   "p1": "Rafal Wojcik",
-   "p2": "Krzysztof Juszczyk",
-   "p1_norm": "rafal wojcik",
-   "p2_norm": "krzysztof juszczyk",
-   "open_date": "2026-08-02T13:55:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
-  },
-  {
-   "event_id": 35895971,
-   "p1": "Rafal Glica",
-   "p2": "Jacek Wieczerzak",
-   "p1_norm": "rafal glica",
-   "p2_norm": "jacek wieczerzak",
-   "open_date": "2026-08-02T13:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
-  {
-   "event_id": 35895972,
-   "p1": "Dawid Poloszczanski",
-   "p2": "Artur Szoltysek",
-   "p1_norm": "dawid poloszczanski",
-   "p2_norm": "artur szoltysek",
-   "open_date": "2026-08-02T13:55:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 87.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35895993,
@@ -75,6 +31,39 @@
    "p2_norm": "arkadiusz mugowski",
    "open_date": "2026-08-02T14:15:00.000Z",
    "line": 80.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35896009,
+   "p1": "Jakub Michalczyk",
+   "p2": "Mikolaj Lukaszewski",
+   "p1_norm": "jakub michalczyk",
+   "p2_norm": "mikolaj lukaszewski",
+   "open_date": "2026-08-02T14:20:00.000Z",
+   "line": 81.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35896010,
+   "p1": "Pawel Adamus",
+   "p2": "Jakub Nowak",
+   "p1_norm": "pawel adamus",
+   "p2_norm": "jakub nowak",
+   "open_date": "2026-08-02T14:20:00.000Z",
+   "line": 81.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35896011,
+   "p1": "Schaniel Krzysztof",
+   "p2": "Marcin Lach",
+   "p1_norm": "schaniel krzysztof",
+   "p2_norm": "marcin lach",
+   "open_date": "2026-08-02T14:20:00.000Z",
+   "line": 75.5,
    "over_odds": -116,
    "under_odds": -116
   }
