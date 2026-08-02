@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-02T22:18:22Z",
+ "captured_at": "2026-08-02T22:26:47Z",
  "matches": [
-  {
-   "event_id": 35897206,
-   "p1": "Jacek Mitas",
-   "p2": "Dawid Kosmal",
-   "p1_norm": "jacek mitas",
-   "p2_norm": "dawid kosmal",
-   "open_date": "2026-08-02T22:05:00.000Z",
-   "line": 58.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35897210,
    "p1": "Mateusz Baran",
@@ -19,9 +8,9 @@
    "p1_norm": "mateusz baran",
    "p2_norm": "michal machelski",
    "open_date": "2026-08-02T22:10:00.000Z",
-   "line": 86.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 104.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35897248,
@@ -30,7 +19,7 @@
    "p1_norm": "marcin marchlewski",
    "p2_norm": "szymon brud",
    "open_date": "2026-08-02T22:15:00.000Z",
-   "line": 75.5,
+   "line": 87.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -41,9 +30,9 @@
    "p1_norm": "mariusz baron",
    "p2_norm": "lukasz oracz",
    "open_date": "2026-08-02T22:20:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 82.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35897237,
@@ -52,9 +41,9 @@
    "p1_norm": "michal paszkiewicz",
    "p2_norm": "jaroslaw badura",
    "open_date": "2026-08-02T22:25:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35897239,
@@ -97,6 +86,28 @@
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-08-02T22:40:00.000Z",
    "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35897256,
+   "p1": "Sebastian Juzek",
+   "p2": "Jakub Jesiek",
+   "p1_norm": "sebastian juzek",
+   "p2_norm": "jakub jesiek",
+   "open_date": "2026-08-02T22:50:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35897257,
+   "p1": "Mateusz Rutkowski",
+   "p2": "Dawid Kosmal",
+   "p1_norm": "mateusz rutkowski",
+   "p2_norm": "dawid kosmal",
+   "open_date": "2026-08-02T22:50:00.000Z",
+   "line": 75.5,
    "over_odds": -118,
    "under_odds": -112
   }
