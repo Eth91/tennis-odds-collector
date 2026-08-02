@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-02T23:10:37Z",
+ "captured_at": "2026-08-02T23:16:27Z",
  "matches": [
   {
    "event_id": 35897260,
@@ -8,9 +8,9 @@
    "p1_norm": "pawel kurek",
    "p2_norm": "wojciech urban",
    "open_date": "2026-08-02T23:05:00.000Z",
-   "line": 82.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 81.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35897270,
@@ -19,9 +19,9 @@
    "p1_norm": "adam ruszkiewicz",
    "p2_norm": "mateusz sikon",
    "open_date": "2026-08-02T23:10:00.000Z",
-   "line": 69.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35897276,
@@ -42,7 +42,7 @@
    "p2_norm": "marcin marchlewski",
    "open_date": "2026-08-02T23:20:00.000Z",
    "line": 79.5,
-   "over_odds": -116,
+   "over_odds": -112,
    "under_odds": -118
   },
   {
@@ -63,9 +63,9 @@
    "p1_norm": "lukasz oracz",
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-08-02T23:30:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35897289,
