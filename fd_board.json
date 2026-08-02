@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-02T22:26:47Z",
+ "captured_at": "2026-08-02T22:33:44Z",
  "matches": [
-  {
-   "event_id": 35897210,
-   "p1": "Mateusz Baran",
-   "p2": "Michal Machelski",
-   "p1_norm": "mateusz baran",
-   "p2_norm": "michal machelski",
-   "open_date": "2026-08-02T22:10:00.000Z",
-   "line": 104.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
-  {
-   "event_id": 35897248,
-   "p1": "Marcin Marchlewski",
-   "p2": "Szymon Brud",
-   "p1_norm": "marcin marchlewski",
-   "p2_norm": "szymon brud",
-   "open_date": "2026-08-02T22:15:00.000Z",
-   "line": 87.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35897236,
    "p1": "Mariusz Baron",
@@ -30,9 +8,9 @@
    "p1_norm": "mariusz baron",
    "p2_norm": "lukasz oracz",
    "open_date": "2026-08-02T22:20:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -115
+   "line": 102.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35897237,
@@ -41,9 +19,9 @@
    "p1_norm": "michal paszkiewicz",
    "p2_norm": "jaroslaw badura",
    "open_date": "2026-08-02T22:25:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 72.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35897239,
@@ -53,8 +31,8 @@
    "p2_norm": "jacek mitas",
    "open_date": "2026-08-02T22:30:00.000Z",
    "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35897246,
@@ -108,6 +86,28 @@
    "p2_norm": "dawid kosmal",
    "open_date": "2026-08-02T22:50:00.000Z",
    "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35897258,
+   "p1": "Zbigniew Nocun",
+   "p2": "Kazimierz Rybak",
+   "p1_norm": "zbigniew nocun",
+   "p2_norm": "kazimierz rybak",
+   "open_date": "2026-08-02T22:55:00.000Z",
+   "line": 70.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35897259,
+   "p1": "Kacper Szurlej",
+   "p2": "Szymon Brud",
+   "p1_norm": "kacper szurlej",
+   "p2_norm": "szymon brud",
+   "open_date": "2026-08-02T22:55:00.000Z",
+   "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
   }
