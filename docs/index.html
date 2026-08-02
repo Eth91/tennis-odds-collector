@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-title" content="Pickz">
 <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="64x64" href="icon-64.png">
-<meta name="bv" content="1e08ea58dd">
+<meta name="bv" content="5905d668fb">
 <title>Today's Plays</title>
 <style>
   :root { color-scheme: dark; }
@@ -973,7 +973,12 @@
   #pga .pgatitle { font-size:17px; font-weight:640; white-space:nowrap; overflow:hidden;
                     text-overflow:ellipsis; flex:0 1 auto; }
   #pga .pgarec { font-size:13px; white-space:nowrap; flex:none; text-transform:none; }
-  #pga .pgarec b { color:var(--cu-grn); font-weight:600; }
+  /* The record's <b> carries a .pos/.neg class from the emitter; colouring every <b> green
+     rendered a LOSING record in the winning colour — the PGA board showed 16-20 -5.37u in
+     green. Colour is meaning on this board, so it has to follow the sign. */
+  #pga .pgarec b { font-weight:600; }
+  #pga .pgarec b.pos { color:var(--cu-grn); }
+  #pga .pgarec b.neg { color:var(--cu-red); }
   #pga .pgapaper { flex:none; }
   #pga .pgamkt { margin:18px 0 4px; }
 
@@ -1421,7 +1426,7 @@
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
-    <div class="live"><span class="dot"></span>3:56 AM MT
+    <div class="live"><span class="dot"></span>3:58 AM MT
       <button class="rfrsh" onclick="manualRefresh(this)" title="Pull new plays now" aria-label="Refresh now">↻</button>
       <span id="rfchk"></span></div>
   </header>
