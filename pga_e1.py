@@ -192,18 +192,37 @@ def main():
 def _write_board(event_name, open_rows=None, note=""):
     """pga_board.json — everything the dashboard panel renders. Rewritten by e1 AND grade."""
     rec = {"w": 0, "l": 0, "p": 0, "units": 0.0}
+    filt = {"w": 0, "l": 0, "p": 0, "units": 0.0, "open": 0}
     opens = []
     try:
         con = sqlite3.connect(PAPER)
         con.execute(DDL)
-        for r, in con.execute("SELECT result FROM flags WHERE result IS NOT NULL"):
+        # PRICE-FLOOR SPLIT (2026-08-02). Streams carrying `lowprice` were rejected by
+        # PRICE_FLOOR before the round started. They still price and still grade, so the filter
+        # keeps being tested — but they are not bets we would take, so they belong neither in the
+        # headline record nor on the board. Their own record is reported separately below; that
+        # line is what would falsify the floor.
+        NOTLOW = "COALESCE(stream,'') NOT LIKE '%lowprice%'"
+        for r, in con.execute(
+                f"SELECT result FROM flags WHERE result IS NOT NULL AND {NOTLOW}"):
             rec["w" if r == "W" else ("l" if r == "L" else "p")] += 1
         rec["units"] = round(con.execute(
-            "SELECT COALESCE(SUM(pnl),0) FROM flags WHERE pnl IS NOT NULL").fetchone()[0], 2)
+            f"SELECT COALESCE(SUM(pnl),0) FROM flags WHERE pnl IS NOT NULL AND {NOTLOW}"
+        ).fetchone()[0], 2)
         opens = [dict(zip(("market", "runner", "opp", "odds", "d_wind", "flagged_at"), row))
                  for row in con.execute(
                      "SELECT market, runner, opp, odds, d_wind, flagged_at FROM flags "
-                     "WHERE result IS NULL ORDER BY flagged_at DESC LIMIT 12")]
+                     f"WHERE result IS NULL AND {NOTLOW} ORDER BY flagged_at DESC LIMIT 12")]
+        filt = {"w": 0, "l": 0, "p": 0, "units": 0.0, "open": 0}
+        for r, in con.execute(
+                "SELECT result FROM flags WHERE COALESCE(stream,'') LIKE '%lowprice%'"):
+            if r is None:
+                filt["open"] += 1
+            else:
+                filt["w" if r == "W" else ("l" if r == "L" else "p")] += 1
+        filt["units"] = round(con.execute(
+            "SELECT COALESCE(SUM(pnl),0) FROM flags WHERE pnl IS NOT NULL "
+            "AND COALESCE(stream,'') LIKE '%lowprice%'").fetchone()[0], 2)
         con.close()
     except Exception as e:                                    # noqa: BLE001
         note = note or f"board data error: {str(e)[:40]}"
@@ -215,7 +234,8 @@ def _write_board(event_name, open_rows=None, note=""):
     tmp = BOARD.with_suffix(".tmp")
     tmp.write_text(json.dumps({
         "ts": dt.datetime.utcnow().replace(microsecond=0).isoformat() + "Z",
-        "event": event_name, "note": note, "record": rec, "open": opens, "clv": clv}))
+        "event": event_name, "note": note, "record": rec, "open": opens,
+        "filtered": filt, "clv": clv}))
     tmp.replace(BOARD)
 
 
