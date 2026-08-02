@@ -99,6 +99,8 @@
 2026-08-02|Marina Mabrey|pts_ast|23.5
 2026-08-02|Nyadiew Puoch|points|4.5
 2026-08-02|Nyadiew Puoch|points|5.5
+2026-08-03|Sydney Taylor|points|17.5
+2026-08-03|Sydney Taylor|points|19.5
 n1|2026-07-20|Arike Ogunbowale|points|14.5
 n1|2026-07-20|Arike Ogunbowale|points|15.5
 n1|2026-07-20|Arike Ogunbowale|points|16.5
@@ -226,4 +228,6 @@ watch|2026-08-01|Natasha Cloud|pts_reb|13.5
 watch|2026-08-01|Natasha Cloud|reb_ast|7.5
 watch|2026-08-03|DeWanna Bonner|rebounds|6.5
 watch|2026-08-03|Natasha Cloud|points|10.5
+watch|2026-08-03|Natasha Cloud|pra|18.5
+watch|2026-08-03|Natasha Cloud|pts_ast|15.5
 watch|2026-08-03|Sydney Taylor|points|19.5

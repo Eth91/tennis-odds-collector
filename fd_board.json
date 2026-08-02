@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-02T21:46:04Z",
+ "captured_at": "2026-08-02T21:56:23Z",
  "matches": [
-  {
-   "event_id": 35897202,
-   "p1": "Tomasz Filbrandt",
-   "p2": "Szymon Brud",
-   "p1_norm": "tomasz filbrandt",
-   "p2_norm": "szymon brud",
-   "open_date": "2026-08-02T21:30:00.000Z",
-   "line": 92.5,
-   "over_odds": -105,
-   "under_odds": -135
-  },
-  {
-   "event_id": 35897149,
-   "p1": "Jaroslaw Badura",
-   "p2": "Mateusz Sikon",
-   "p1_norm": "jaroslaw badura",
-   "p2_norm": "mateusz sikon",
-   "open_date": "2026-08-02T21:35:00.000Z",
-   "line": 83.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35897160,
    "p1": "Filip Mlynarski",
@@ -30,9 +8,9 @@
    "p1_norm": "filip mlynarski",
    "p2_norm": "lukasz pietraszko",
    "open_date": "2026-08-02T21:45:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 81.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35897161,
@@ -41,9 +19,9 @@
    "p1_norm": "zbigniew nocun",
    "p2_norm": "grzegorz mucha",
    "open_date": "2026-08-02T21:45:00.000Z",
-   "line": 76.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35897204,
@@ -52,9 +30,9 @@
    "p1_norm": "wojciech urban",
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-08-02T21:55:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35897205,
@@ -88,6 +66,17 @@
    "line": 78.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35897236,
+   "p1": "Mariusz Baron",
+   "p2": "Lukasz Oracz",
+   "p1_norm": "mariusz baron",
+   "p2_norm": "lukasz oracz",
+   "open_date": "2026-08-02T22:20:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -116
   }
  ]
 }
