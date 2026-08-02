@@ -83,9 +83,25 @@ def _out_marks():
         return None
 
 
-def _is_pulled(r, outs):
-    """Is this bet's own SUBJECT ruled out? `outs` of None means unknown -> never suppress."""
-    if not outs:
+def _is_pulled(r, outs, slate=None):
+    """Is this bet's own SUBJECT ruled out FOR AN UNPLAYED GAME? None outs = unknown -> never fires.
+
+    ⚠️ SCOPE IS THE WHOLE POINT, and getting it wrong silently rewrites history. `outs` is TONIGHT's
+    injury list. A bet that has already SETTLED happened in a game the player did play — that a
+    different game weeks later has her scratched says nothing about it. The first version of this
+    checked only the name, so every graded Mabrey bet in the ledger vanished from the record the
+    night she was ruled out: 39-20 +19.79u collapsed to 34-19 +15.68u and would have "recovered"
+    on its own once she was healthy again. A record that moves when nothing about those bets
+    changed is not a record.
+
+    The veto path never had this bug because its marks carry a DATE. This filter did not, so it
+    silently generalised from "this play tonight" to "this player, always". Two guards:
+      * a settled row (result is not None) is never suppressed — the game is already history, and
+      * with `slate` given, only rows on that slate are eligible.
+    """
+    if not outs or r.get("result") is not None:
+        return False
+    if slate and str(r.get("pred_date") or "")[:10] != slate:
         return False
     try:
         return str(r.get("player") or "").split()[-1].lower() in outs
@@ -96,7 +112,7 @@ def _is_pulled(r, outs):
 _UNSET = object()      # distinct from None, which legitimately MEANS "out-status unknown"
 
 
-def suppressed(rows, vetoes=_UNSET, outs=_UNSET):
+def suppressed(rows, vetoes=_UNSET, outs=_UNSET, slate=_UNSET):
     """Split `rows` into (keep, dropped) on the ONE gate the board and the slip must share.
 
     A play is suppressed when a human vetoed it, or when its subject is firm-out. Both are display
@@ -107,10 +123,16 @@ def suppressed(rows, vetoes=_UNSET, outs=_UNSET):
     # it must get that meaning, not a silent re-lookup. Hence a separate not-supplied sentinel.
     vetoes = _veto_marks() if vetoes is _UNSET else vetoes
     outs = _out_marks() if outs is _UNSET else outs
+    if slate is _UNSET:
+        # Tonight's slate in ET — the basis pred_date is written on. The out-list describes THIS
+        # slate and nothing else, so it must not be allowed to reach any other day's rows.
+        import datetime as _dt
+        from zoneinfo import ZoneInfo as _Z
+        slate = _dt.datetime.now(_Z("America/New_York")).date().isoformat()
     keep, drop = [], []
     for r in rows:
         why = ("vetoed" if (vetoes and _is_vetoed(r, vetoes))
-               else "subject ruled out" if _is_pulled(r, outs) else None)
+               else "subject ruled out" if _is_pulled(r, outs, slate) else None)
         (drop if why else keep).append(r if not why else dict(r, _suppressed=why))
     return keep, drop
 
