@@ -559,3 +559,15 @@ competition sweep: 7 comps, +1143 rows (40 birdie rows)
 golf: BIRDIES MARKET CAPTURED - calibration data accruing
 golf_collect 2026-08-02T15:40:02: 705 rows
 golf_moves 2026-08-02T15:40:02: 1143 keys folded, 0 closes frozen
+golf_collect: dense pass (a tee lands within 75 min)
+golf trap: 🐦 BIRDIES COUPON HYDRATING (module 2240, open coupons [50970]) — markets should land this pass or next
+competition sweep: 7 comps, +1146 rows (42 birdie rows)
+golf: BIRDIES MARKET CAPTURED - calibration data accruing
+golf_collect 2026-08-02T15:45:02: 705 rows
+golf_moves 2026-08-02T15:45:02: 1146 keys folded, 0 closes frozen
+golf_collect: dense pass (a tee lands within 75 min)
+golf trap: 🐦 BIRDIES COUPON HYDRATING (module 2240, open coupons [50970]) — markets should land this pass or next
+competition sweep: 7 comps, +1144 rows (42 birdie rows)
+golf: BIRDIES MARKET CAPTURED - calibration data accruing
+golf_collect 2026-08-02T15:50:02: 703 rows
+golf_moves 2026-08-02T15:50:02: 1145 keys folded, 16 closes frozen
