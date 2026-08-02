@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS predictions(
   ev REAL, stale INTEGER,
   d_stat REAL, d_fga REAL, d_min REAL, driver REAL, vac REAL,
   total REAL, pace REAL, opp_def REAL, d_fta REAL, d_3pa REAL,
-  result TEXT, actual REAL, graded INTEGER DEFAULT 0, basis TEXT, samples TEXT, confidence TEXT, played INTEGER DEFAULT 0, side TEXT DEFAULT 'over', regime TEXT, vol TEXT, spread REAL, pi_role REAL, actual_total REAL, actual_margin REAL, odds_other REAL, tier TEXT DEFAULT 'firm',
+  result TEXT, actual REAL, graded INTEGER DEFAULT 0, basis TEXT, samples TEXT, confidence TEXT, played INTEGER DEFAULT 0, side TEXT DEFAULT 'over', regime TEXT, vol TEXT, spread REAL, pi_role REAL, actual_total REAL, actual_margin REAL, odds_other REAL, tier TEXT DEFAULT 'firm', peer_regime TEXT, peer_ramp TEXT,
   UNIQUE(pred_date, player, stat, line)
 );
 CREATE TABLE IF NOT EXISTS parlays(
