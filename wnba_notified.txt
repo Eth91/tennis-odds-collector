@@ -92,6 +92,7 @@
 2026-07-31|Megan DiLeo|points|15.5
 2026-08-01|Kamilla Cardoso|rebounds|8.5
 2026-08-01|Natasha Cloud|points|9.5
+2026-08-02|Bridget Carleton|points|13.5
 2026-08-02|Julie Allemand|assists|5.5
 2026-08-02|Marina Mabrey|pts_ast|23.5
 2026-08-02|Nyadiew Puoch|points|5.5
