@@ -30,7 +30,8 @@ unstage_big(){
 stage_all(){
   git add -A -f -- . \
     ':(exclude)fanduel_props.sqlite' ':(exclude)fanduel_props.bak.sqlite' \
-    ':(exclude)wnba_lines.sqlite' ':(exclude)golf_lines.sqlite' 2>/dev/null
+    ':(exclude)wnba_lines.sqlite' ':(exclude)golf_lines.sqlite' \
+    ':(exclude)__pycache__' ':(exclude)*.pyc' 2>/dev/null
   git rm --cached -q wnba_lines.sqlite golf_lines.sqlite wnba_glog_cache.json \
     fanduel_props.sqlite fanduel_props.bak.sqlite tt.sqlite tt.sqlite-wal tt.sqlite-shm \
     wnba_ledger.sqlite wnba_proj_log.sqlite wnba_clv.sqlite pga_model.sqlite 2>/dev/null || true

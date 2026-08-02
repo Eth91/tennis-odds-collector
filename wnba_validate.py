@@ -99,8 +99,17 @@ def _universe():
     try:
         import wnba_slip as S
         sel, _ = S.current_selection(overs, commit=False)
-    except Exception:                                          # noqa: BLE001
-        sel = overs
+    except Exception as e:                                     # noqa: BLE001
+        # REFUSE, do not silently widen. The pre-registered universe is
+        # "graded overs -> current_selection -> confidence in {confirmed, likely}". Falling back to
+        # `sel = overs` does not handle an error, it REDEFINES THE TEST mid-flight: the universe
+        # jumps from the selected subset to every graded over (59 -> 115 as measured on
+        # 2026-08-02), with no signal in the report that a different question was answered. That is
+        # the same class as reporting a missing ledger as "no bets". If selection is unavailable
+        # the universe is undefined, and an undefined universe cannot be scored.
+        raise SystemExit("wnba_validate: current_selection() failed (%s: %s) — refusing to score a "
+                         "universe the pre-registration does not define"
+                         % (type(e).__name__, str(e)[:80]))
     uni = [r for r in sel if str(r.get("confidence")) in BET_ROLES]
     pre = [r for r in uni if str(r.get("pred_date"))[:10] < FROZEN_ON]
     post = [r for r in uni if str(r.get("pred_date"))[:10] >= FROZEN_ON]
