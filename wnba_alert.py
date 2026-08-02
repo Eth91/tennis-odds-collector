@@ -162,6 +162,8 @@ def collect():
                 outs_by_team[(sdate, p["team"])].append((name, p))
 
     alerts, preds, proj_rows, cold_spots = [], [], [], []
+    _gated_rows = []          # bets a gate SUPPRESSED — separate table, never `predictions`
+    now_iso = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
     usg_spots = []                                   # ⚡USG shadows (board + CLV only)
     n1_spots = []                                    # ⚡1G speed pilots -> board (they PING)
     _band_shadowed = set()
@@ -532,6 +534,30 @@ def collect():
                               f"{_hit['peer']} plays — {_hit['rate_with']*100:.0f}% with vs "
                               f"{_hit['rate_without']*100:.0f}% without "
                               f"(breakeven {_hit['breakeven']*100:.0f}%)", flush=True)
+                        # CAPTURE WHAT THE GATE KILLED. Until now a suppressed bet left no trace
+                        # at all — no ping, no row — so the only question that matters about a
+                        # filter ("were the bets it killed actually losers?") could not be asked
+                        # without reconstructing it, which is a guess at what the live gate did.
+                        # Separate table: these must never enter `predictions`, which IS the
+                        # pre-registered universe for the frozen v1.2 SPRT.
+                        try:
+                            _gated_rows.append({
+                                "pred_date": slate_date, "player": n, "team": team,
+                                "opp": matchups_by[slate_date].get(team, ""),
+                                "stat": e["stat"], "line": e["line"], "odds": e["dec"],
+                                "side": e["side"], "gate": "peer_stat",
+                                "peer": _hit.get("peer"),
+                                "rate_with": _hit.get("rate_with"),
+                                "rate_without": _hit.get("rate_without"),
+                                "breakeven": _hit.get("breakeven"),
+                                # the gate's OWN gap, not a recomputation — storing the
+                                # decision means storing the numbers it decided on
+                                "gap": _hit.get("gap"),
+                                "n_with": _hit.get("n_with"), "n_without": _hit.get("n_without"),
+                                "proj_hit": round(e["hit"], 3), "ev": round(e["ev"], 3),
+                                "confidence": conf, "decided_at": now_iso})
+                        except Exception:                          # noqa: BLE001
+                            pass                                   # never cost a suppression
                         continue
                 # beneficiary+stat+line, dated (re-fires next slate)
                 key = f"{slate_date}|{n}|{e['stat']}|{e['line']}"
@@ -1014,6 +1040,13 @@ def main():
     alerts, preds = collect()
     # ROLE GATE applied ONCE here, so the ledger, the parlays and the pushes cannot disagree
     # about what counted as a bet. Blocked rows stay in `preds` for the board.
+    try:
+        import wnba_ledger as _WL
+        if _gated_rows:
+            _ng = _WL.log_gated(_gated_rows)
+            print("gate-log: %d suppressed bet(s) recorded" % _ng, flush=True)
+    except Exception as _ge:                                   # noqa: BLE001
+        print("gate-log skipped: %s" % str(_ge)[:80], flush=True)
     bet_preds = [p for p in preds if p.get("bettable", 1)]
     _blocked = len(preds) - len(bet_preds)
     if _blocked:

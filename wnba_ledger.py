@@ -166,6 +166,48 @@ def mark_played(specs, date=None):
     return n
 
 
+GATED_SCHEMA = """
+CREATE TABLE IF NOT EXISTS gated(
+    pred_date TEXT, player TEXT, team TEXT, opp TEXT, stat TEXT, line REAL,
+    odds REAL, side TEXT, gate TEXT,
+    peer TEXT, rate_with REAL, rate_without REAL, breakeven REAL, gap REAL,
+    n_with INTEGER, n_without INTEGER,
+    proj_hit REAL, ev REAL, confidence TEXT, decided_at TEXT,
+    result TEXT, actual REAL, graded INTEGER DEFAULT 0,
+    PRIMARY KEY(pred_date, player, stat, line, gate));
+"""
+
+
+def log_gated(rows):
+    """Persist bets a gate SUPPRESSED, with the gate's own numbers at decision time.
+
+    Deliberately a separate table from `predictions`. That ledger is the pre-registered universe
+    for the frozen v1.2 SPRT; adding rows the model refused to bet would silently redefine the
+    test. These grade independently and are compared to it, never merged into it.
+
+    The gate's numbers are STORED rather than recomputed later on purpose — a with-peer rate
+    re-derived next month from a longer game log is not the rate the gate actually acted on.
+    """
+    if not rows:
+        return 0
+    con = _con()
+    con.executescript(GATED_SCHEMA)
+    cols = ("pred_date", "player", "team", "opp", "stat", "line", "odds", "side", "gate",
+            "peer", "rate_with", "rate_without", "breakeven", "gap", "n_with", "n_without",
+            "proj_hit", "ev", "confidence", "decided_at")
+    q = ("INSERT OR REPLACE INTO gated(%s) VALUES (%s)"
+         % (",".join(cols), ",".join("?" * len(cols))))
+    n = 0
+    for r in rows:
+        try:
+            con.execute(q, tuple(r.get(c) for c in cols))
+            n += 1
+        except Exception:                                        # noqa: BLE001
+            continue
+    con.commit()
+    con.close()
+    return n
+
 def log_predictions(rows):
     """rows: list of dicts (one per flagged spot). Deduped per (date,player,stat,line)
     so the 4 daily CI runs don't double-log. Returns count newly inserted."""

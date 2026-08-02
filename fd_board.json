@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-08-02T08:43:15Z",
+ "captured_at": "2026-08-02T08:49:04Z",
  "matches": [
-  {
-   "event_id": 35894934,
-   "p1": "Mariusz Koczyba",
-   "p2": "Mariusz Adamus",
-   "p1_norm": "mariusz koczyba",
-   "p2_norm": "mariusz adamus",
-   "open_date": "2026-08-02T08:20:00.000Z",
-   "line": 109.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35894937,
-   "p1": "Piotr Maruszak",
-   "p2": "Mateusz Woskowicz",
-   "p1_norm": "piotr maruszak",
-   "p2_norm": "mateusz woskowicz",
-   "open_date": "2026-08-02T08:30:00.000Z",
-   "line": 87.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35894941,
-   "p1": "Petr David",
-   "p2": "Jakub Kosowski",
-   "p1_norm": "petr david",
-   "p2_norm": "jakub kosowski",
-   "open_date": "2026-08-02T08:30:00.000Z",
-   "line": 68.5,
-   "over_odds": -115,
-   "under_odds": -115
-  },
   {
    "event_id": 35894945,
    "p1": "Jacek Wieczerzak",
@@ -41,8 +8,8 @@
    "p1_norm": "jacek wieczerzak",
    "p2_norm": "marian lebek",
    "open_date": "2026-08-02T08:35:00.000Z",
-   "line": 81.5,
-   "over_odds": -115,
+   "line": 88.5,
+   "over_odds": -120,
    "under_odds": -115
   },
   {
@@ -52,9 +19,9 @@
    "p1_norm": "pawel adamus",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-08-02T08:45:00.000Z",
-   "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35894950,
@@ -63,9 +30,9 @@
    "p1_norm": "dawid jendrysik",
    "p2_norm": "patryk mecik",
    "open_date": "2026-08-02T08:45:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 78.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35894960,
