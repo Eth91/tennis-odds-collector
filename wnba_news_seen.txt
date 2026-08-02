@@ -542,6 +542,7 @@ rw|984|Solid on both ends Tuesday
 rw|985|Starting against Sun
 rw|987|Doesn't play Tuesday
 rw|987|Not listed on injury report
+rw|987|Not playing Sunday
 rw|987|Omitted from injury report
 rw|987|Probable versus Seattle
 rw|987|Won't play Friday
