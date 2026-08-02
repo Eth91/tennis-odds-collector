@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-02T14:13:10Z",
+ "captured_at": "2026-08-02T14:19:19Z",
  "matches": [
   {
    "event_id": 35895993,
@@ -8,9 +8,9 @@
    "p1_norm": "konrad kulpa",
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-08-02T14:10:00.000Z",
-   "line": 71.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 69.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35895996,
@@ -19,9 +19,9 @@
    "p1_norm": "piotr staniszewski",
    "p2_norm": "arkadiusz mugowski",
    "open_date": "2026-08-02T14:15:00.000Z",
-   "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 81.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35896009,
@@ -99,6 +99,17 @@
    "line": 78.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35896046,
+   "p1": "Oskar Sokolowski",
+   "p2": "Piotr Przewlocki",
+   "p1_norm": "oskar sokolowski",
+   "p2_norm": "piotr przewlocki",
+   "open_date": "2026-08-02T14:45:00.000Z",
+   "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
