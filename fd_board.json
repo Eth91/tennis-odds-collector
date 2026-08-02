@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-02T10:19:04Z",
+ "captured_at": "2026-08-02T10:23:47Z",
  "matches": [
   {
    "event_id": 35895034,
@@ -8,20 +8,9 @@
    "p1_norm": "tibor spanik",
    "p2_norm": "petr david",
    "open_date": "2026-08-02T10:00:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35895039,
-   "p1": "Mateusz Zagajewski",
-   "p2": "Piotr Maruszak",
-   "p1_norm": "mateusz zagajewski",
-   "p2_norm": "piotr maruszak",
-   "open_date": "2026-08-02T10:05:00.000Z",
-   "line": 87.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 76.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35895044,
@@ -30,20 +19,9 @@
    "p1_norm": "mariusz zwolinski",
    "p2_norm": "dawid poloszczanski",
    "open_date": "2026-08-02T10:10:00.000Z",
-   "line": 83.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35895045,
-   "p1": "Sebastian Szostok",
-   "p2": "Rafal Glica",
-   "p1_norm": "sebastian szostok",
-   "p2_norm": "rafal glica",
-   "open_date": "2026-08-02T10:10:00.000Z",
-   "line": 52.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 90.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35895087,
@@ -52,9 +30,9 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "pawel adamus",
    "open_date": "2026-08-02T10:20:00.000Z",
-   "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 73.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35895091,
@@ -74,9 +52,9 @@
    "p1_norm": "mateusz woskowicz",
    "p2_norm": "arkadiusz mugowski",
    "open_date": "2026-08-02T10:30:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 76.5,
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35895318,
@@ -110,6 +88,17 @@
    "line": 74.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35895481,
+   "p1": "Konrad Kulpa",
+   "p2": "Krystian Kolodziej",
+   "p1_norm": "konrad kulpa",
+   "p2_norm": "krystian kolodziej",
+   "open_date": "2026-08-02T10:50:00.000Z",
+   "line": 69.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
