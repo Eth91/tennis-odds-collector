@@ -43,6 +43,7 @@ gn|UConn's Napheesa Collier 'probable' to make WNBA return afte
 gn|Wings star Paige Bueckers out Monday vs. Liberty despite cle
 gn|“Figure That Out Now”: WNBA Legend Raises Concern Over Fever
 rw|1001|Ruled out Friday
+rw|1001|Ruled out for Sunday
 rw|1001|Signs with Fever
 rw|1002|Considered week-to-week
 rw|1007|Adds 13 points off bench
@@ -155,6 +156,7 @@ rw|1120|Scores six points off bench
 rw|1134|Off injury report
 rw|1134|Won't play Wednesday
 rw|1135|Waived by Tempo
+rw|1137|Left off injury report
 rw|1137|Ruled out Thursday
 rw|228|Listed out for Wednesday
 rw|228|Out for Tuesday
@@ -167,6 +169,7 @@ rw|249|Stuck in bench role
 rw|252|Out again Thursday
 rw|252|Won't play Saturday
 rw|252|Won't play Tuesday
+rw|254|Drops 25 points in loss
 rw|254|Produces 18 points in win
 rw|254|Scores game-high 21 points
 rw|254|Top scorer in victory
@@ -174,9 +177,11 @@ rw|258|Quiet again off bench
 rw|258|Terrific outing in win
 rw|272|Picks up triple-double Wednesday
 rw|272|Scores season-high 25 points
+rw|272|Well-rounded effort in loss
 rw|276|Another quality showing Wednesday
 rw|276|Double-doubles in win
 rw|276|Named All-Star Game MVP
+rw|276|Sniffs double-double in victory
 rw|278|Dishes five dimes in victory
 rw|278|Reaches 20-point plateau
 rw|278|Scoreless in road win
@@ -200,6 +205,7 @@ rw|330|Not starting Wednesday
 rw|330|Starting Monday
 rw|331|Drills four treys
 rw|331|Nets 19 points in Washington
+rw|331|Shooting woes in defeat
 rw|331|Strong line in win
 rw|331|Strong outing in win
 rw|344|Available for Wednesday
@@ -225,12 +231,14 @@ rw|413|Scores 33 points in win Monday
 rw|415|Records double-double Wednesday
 rw|415|Totals 16 points in loss in Dallas
 rw|416|Dealing with knee issue
+rw|416|Fades injury report
 rw|416|Out versus Lynx
 rw|416|Posts career-high 26 points
 rw|416|Questionable for Thursday
 rw|416|Questionable for Tuesday
 rw|416|Ruled out Tuesday
 rw|423|Moving to bench
+rw|425|Officially probable for Sunday
 rw|425|Practicing Thursday
 rw|425|Remains out Tuesday
 rw|425|Remains out for Tuesday
@@ -238,13 +246,16 @@ rw|425|Will play Sunday
 rw|432|Available for Wednesday
 rw|432|Logs 18 minutes in return
 rw|432|Probable for Sunday
+rw|432|Shooting woes in loss
 rw|436|Fares well off bench
 rw|436|Scores 11 off bench
+rw|440|Double-doubles in win
 rw|440|Drops 26 points in Saturday's loss
 rw|440|Ends with 20 points Wednesday
 rw|440|Flirts with triple-double in OT win
 rw|440|Full stat line in victory
 rw|440|Moves to 10th in all-time scoring
+rw|453|Adds 11 points Saturday
 rw|453|Scores nine points in loss
 rw|453|Tallies 11 points in victory
 rw|462|Cools off Wednesday
@@ -261,6 +272,7 @@ rw|483|Paces Sky with 20 points
 rw|483|Ruled out for Saturday
 rw|483|Stuffs stat sheet in defeat
 rw|484|Iffy for Wednesday
+rw|484|Questionable for Sunday
 rw|484|Ruled out Wednesday
 rw|485|Held in check
 rw|485|Hits game-winning shot at buzzer
@@ -295,6 +307,7 @@ rw|577|Probable for Wednesday
 rw|577|Questionable for Wednesday
 rw|577|Unlikely to play Monday
 rw|578|Plays well off bench
+rw|578|Provides spark in victory
 rw|579|Fares well in loss
 rw|579|Not listed on injury report
 rw|579|Paces Portland in loss
@@ -321,6 +334,7 @@ rw|587|Records pair of steals Wednesday
 rw|599|Struggles in loss
 rw|603|Adds 16 points in loss
 rw|603|Drops 25 points in defeat
+rw|603|Iffy for Sunday
 rw|603|Rough shooting night in loss
 rw|603|Strikes for 23 points in ASG loss
 rw|605|Double-double in defeat
@@ -353,6 +367,7 @@ rw|678|Closing in on return
 rw|678|Hopeful for season debut Thursday
 rw|678|Intends to play Thursday
 rw|678|Officially listed as questionable
+rw|678|Provides spark in win
 rw|687|Progresses to individual drills
 rw|703|Another quiet effort
 rw|720|Lacking clear role
@@ -378,6 +393,7 @@ rw|785|Expected to play Thursday
 rw|785|Good to go Thursday
 rw|785|Productive in win over Tempo
 rw|785|Questionable for Thursday
+rw|785|Scores 17 points in loss
 rw|785|Upgraded to probable
 rw|785|Won't play Tuesday
 rw|786|Another productive showing Tuesday
@@ -393,6 +409,7 @@ rw|789|Upgraded to probable
 rw|789|Won't play Tuesday
 rw|792|Doubtful for Thursday
 rw|792|Questionable against Chicago
+rw|792|Quiet outing in return
 rw|792|Ruled out for Tuesday
 rw|792|Won't play Wednesday
 rw|792|Won't suit up Thursday
@@ -462,6 +479,7 @@ rw|915|Leads Dream to another win
 rw|916|Posts 15 points despite restriction
 rw|916|Scores 10 points in loss
 rw|916|Scores 26 points Thursday
+rw|916|Struggles offensively in win
 rw|916|Will play on minutes limit Thursday
 rw|917|Plays five minutes Tuesday
 rw|923|Listed out for Wednesday
@@ -513,6 +531,7 @@ rw|984|Solid on both ends Tuesday
 rw|985|Starting against Sun
 rw|987|Doesn't play Tuesday
 rw|987|Not listed on injury report
+rw|987|Omitted from injury report
 rw|987|Probable versus Seattle
 rw|987|Won't play Friday
 rw|991|Posts another double-double
@@ -526,6 +545,7 @@ rw|998|Removed from injury report
 rw|998|Scores career-high 21 points
 rw|998|Starting against Indiana
 rw|998|Traded to Tempo
+rw|998|Won't play Sunday
 rw|aaliyahedwards|Edwards (knee) is out for Tuesday's game
 rw|aaliyahedwards|Edwards (knee) is out for Wednesday's ga
 rw|aaliyahedwards|Edwards (knee) won't return to Sunday's 
