@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-02T09:43:57Z",
+ "captured_at": "2026-08-02T09:48:38Z",
  "matches": [
-  {
-   "event_id": 35894989,
-   "p1": "Dawid Poloszczanski",
-   "p2": "Bartlomiej Wisniewski",
-   "p1_norm": "dawid poloszczanski",
-   "p2_norm": "bartlomiej wisniewski",
-   "open_date": "2026-08-02T09:25:00.000Z",
-   "line": 91.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35894996,
-   "p1": "Oskar Sokolowski",
-   "p2": "Pawel Adamus",
-   "p1_norm": "oskar sokolowski",
-   "p2_norm": "pawel adamus",
-   "open_date": "2026-08-02T09:30:00.000Z",
-   "line": 92.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
   {
    "event_id": 35895007,
    "p1": "Konrad Kulpa",
@@ -30,7 +8,7 @@
    "p1_norm": "konrad kulpa",
    "p2_norm": "jakub kosowski",
    "open_date": "2026-08-02T09:40:00.000Z",
-   "line": 74.5,
+   "line": 82.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -41,9 +19,9 @@
    "p1_norm": "piotr staniszewski",
    "p2_norm": "mateusz woskowicz",
    "open_date": "2026-08-02T09:45:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 77.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35895022,
@@ -53,8 +31,8 @@
    "p2_norm": "artur szoltysek",
    "open_date": "2026-08-02T09:50:00.000Z",
    "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35895023,
