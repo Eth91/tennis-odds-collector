@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-02T11:53:31Z",
+ "captured_at": "2026-08-02T11:58:23Z",
  "matches": [
-  {
-   "event_id": 35895570,
-   "p1": "Mateusz Zagajewski",
-   "p2": "Piotr Staniszewski",
-   "p1_norm": "mateusz zagajewski",
-   "p2_norm": "piotr staniszewski",
-   "open_date": "2026-08-02T11:45:00.000Z",
-   "line": 78.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35895586,
    "p1": "Sebastian Szostok",
@@ -19,9 +8,9 @@
    "p1_norm": "sebastian szostok",
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-08-02T11:50:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 89.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35895587,
@@ -30,9 +19,9 @@
    "p1_norm": "mariusz zwolinski",
    "p2_norm": "jakub michalczyk",
    "open_date": "2026-08-02T11:50:00.000Z",
-   "line": 77.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 80.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35895592,
@@ -41,9 +30,9 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-08-02T11:55:00.000Z",
-   "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35895608,
@@ -53,8 +42,8 @@
    "p2_norm": "krystian kolodziej",
    "open_date": "2026-08-02T12:05:00.000Z",
    "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35895627,
