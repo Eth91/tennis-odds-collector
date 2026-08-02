@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-02T07:49:43Z",
+ "captured_at": "2026-08-02T07:54:21Z",
  "matches": [
-  {
-   "event_id": 35894881,
-   "p1": "Patryk Mecik",
-   "p2": "Mariusz Adamus",
-   "p1_norm": "patryk mecik",
-   "p2_norm": "mariusz adamus",
-   "open_date": "2026-08-02T07:35:00.000Z",
-   "line": 95.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
   {
    "event_id": 35894885,
    "p1": "Tadeusz Piotrowski",
@@ -19,9 +8,9 @@
    "p1_norm": "tadeusz piotrowski",
    "p2_norm": "arkadiusz mugowski",
    "open_date": "2026-08-02T07:40:00.000Z",
-   "line": 84.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 100.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35894886,
@@ -30,9 +19,9 @@
    "p1_norm": "mikolaj lukaszewski",
    "p2_norm": "mariusz zwolinski",
    "open_date": "2026-08-02T07:40:00.000Z",
-   "line": 81.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 84.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35894893,
@@ -41,7 +30,7 @@
    "p1_norm": "rafal glica",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-08-02T07:45:00.000Z",
-   "line": 72.5,
+   "line": 71.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -52,9 +41,9 @@
    "p1_norm": "krzysztof wloczko",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-08-02T07:45:00.000Z",
-   "line": 54.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 65.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35894912,
