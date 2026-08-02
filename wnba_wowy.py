@@ -331,6 +331,51 @@ def peer_regime_scan(bene, team_players, out_names, logs, pos_of, plays_tonight,
     return worst
 
 
+def ramp_state(peer_log, as_of, missed_days=12, back_max=4, deficit_min=2.0):
+    """Is this peer still CLIMBING BACK into their role as of `as_of`? None when not.
+
+    peer_regime asks whether a peer played — a binary. That is the right question for a stable
+    role and the wrong one for someone working back from an absence, because their minutes are a
+    moving target and every game they take back is a game the beneficiary gives up.
+
+    The case this was built from: Julie Allemand's elevated sample had 11 games, 9 of them with
+    Kiki Rice out. peer_regime correctly flagged that. But the 2 games it said to trust were Rice's
+    first two back — 17 and 23 minutes against a 26.7-minute pre-absence norm — so the "good"
+    sub-sample was itself taken from a lineup that had not settled. Rice climbed 17 -> 23, and the
+    game where she came closest to her norm is the game Allemand dropped 32 -> 22 minutes.
+
+    Strictly-prior games only. UNPROVEN: measured at 3 of 52 graded bets (6%), all from one slate
+    and one peer, which is too rare to validate. Logged, never gated.
+    """
+    import datetime as _dt
+    gs = sorted([g for g in peer_log if str(g.get("date"))[:10] < as_of],
+                key=lambda g: str(g.get("date"))[:10])
+    played = [g for g in gs if (g.get("min") or 0) > 0]
+    if len(played) < 4:
+        return None
+
+    def _d(x):
+        return _dt.date.fromisoformat(str(x.get("date"))[:10])
+
+    for nb in range(1, back_max + 1):
+        if len(played) < nb + 1:
+            return None
+        gap = (_d(played[-nb]) - _d(played[-nb - 1])).days
+        if gap >= missed_days:                       # found the absence behind this stretch
+            cur = played[-nb:]
+            pre = played[:-nb][-8:]
+            if len(pre) < 3:
+                return None
+            norm = sum(g["min"] for g in pre) / len(pre)
+            mins = [g["min"] for g in cur]
+            deficit = norm - (sum(mins) / len(mins))
+            if deficit < deficit_min:
+                return None                          # role already restored
+            return {"games_back": nb, "gap_days": gap, "norm": round(norm, 1),
+                    "since": mins, "deficit": round(deficit, 1),
+                    "trend": round(mins[-1] - mins[0], 1) if len(mins) > 1 else 0.0}
+    return None
+
 def top_peer(bene, team_players, out_names, logs, pos_of, min_each=2):
     """The same-position teammate whose ABSENCE actually moves `bene`'s minutes most.
 

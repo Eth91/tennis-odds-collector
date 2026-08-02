@@ -560,6 +560,7 @@ def collect():
                 # tags the ping, never suppresses the flag (~51 selected bets can't validate a
                 # hard gate). Fully guarded — a failure here must never cost a flag.
                 rtag = ""
+                _regime_json = _ramp_json = None
                 try:
                     _rw = W.peer_regime_scan(
                         n, [x for x, vv in pl.items() if vv.get("team") == team],
@@ -570,6 +571,31 @@ def collect():
                     if _rw:
                         rtag = (f" ⚠REGIME({_rw['peer']} plays; sample {_rw['n_match']}/"
                                 f"{_rw['n_elev']}, ~{_rw['gap_min']:g}min borrowed)")
+                        # PERSIST IT. Until now this existed only in the ping text, so evaluating
+                        # it meant reconstructing it from game logs — and a reconstruction can
+                        # never be the prospective test, because it is not what the model saw.
+                        # Measured retrospectively at 8-7 / +2.2% ROI against 27-10 / +49.7% for
+                        # unwarned bets; direction strong, but p=0.149 and the day-clustered CI
+                        # spans zero over 16 slates, so this LOGS and does not gate.
+                        _regime_json = json.dumps(_rw)
+                    # RAMP: is a peer who plays tonight still climbing back into their role? The
+                    # binary "did they play" misses it. Unproven (3/52 bets, one slate) — logged.
+                    try:
+                        _rmp = None
+                        for _pn in [x for x, vv in pl.items() if vv.get("team") == team]:
+                            if _pn == n or _pn in [nm for nm, _ in outs]:
+                                continue
+                            if inj.get(_pn) in ("Out", "Doubtful"):
+                                continue
+                            _st = W.ramp_state(glog(pl[_pn]["id"]), today)
+                            if _st and (_rmp is None or _st["deficit"] > _rmp[1]["deficit"]):
+                                _rmp = (_pn, _st)
+                        if _rmp:
+                            _ramp_json = json.dumps(dict(_rmp[1], peer=_rmp[0]))
+                            rtag += (f" ⚠RAMP({_rmp[0]} back {_rmp[1]['games_back']}g, "
+                                     f"{_rmp[1]['deficit']:g}min under norm)")
+                    except Exception:                                  # noqa: BLE001
+                        pass
                 except Exception:
                     rtag = ""
                 sd = "o" if e["side"] == "over" else "u"   # over/under prefix on the line
@@ -578,7 +604,8 @@ def collect():
                         f"{out_label} OUT -> {_short(n)} {e['stat'][:3]} {sd}{e['line']:g} "
                         f"{T._am(e['dec'])}{wo} | {rec} {e['hit']*100:.0f}% "
                         f"| proj {e['elev_avg']:g} +{e['ev']*100:.0f}%EV{ctag}{tag}{env_tag}{rtag}"))
-                preds.append({"pred_date": slate_date, "out_player": out_full, "player": n,
+                preds.append({"peer_regime": _regime_json, "peer_ramp": _ramp_json,
+                              "pred_date": slate_date, "out_player": out_full, "player": n,
                               "tier": "firm", "bettable": 1 if role_ok(conf) else 0,
                               "team": team, "opp": matchups_by[slate_date].get(team, ""),
                               "stat": e["stat"], "line": e["line"], "odds": e["dec"],

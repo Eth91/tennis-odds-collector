@@ -98,7 +98,14 @@ CREATE TABLE IF NOT EXISTS predictions(
 _MIGRATE = ("d_stat", "d_fga", "d_min", "driver", "vac",
             "total", "pace", "opp_def", "spread", "d_fta", "d_3pa", "pi_role",
             "odds_other")   # opposite-side price at flag time — lets side-flips (role_flip) be backtested
-_MIGRATE_TEXT = ("basis", "samples", "confidence", "regime", "vol")   # regime/vol = display JSON
+_MIGRATE_TEXT = ("basis", "samples", "confidence", "regime", "vol",
+                 # peer_regime: is the elevated sample borrowed from a lineup that is not
+                 # happening (peer_regime_scan). peer_ramp: is a peer who plays tonight still
+                 # climbing back into their role. BOTH TELEMETRY — nothing gates on them.
+                 # They were previously computed and thrown away into the ntfy text, so the
+                 # only way to evaluate them was reconstruction, which can never BE the
+                 # prospective test. Logging them is the prerequisite for the paired SPRT.
+                 "peer_regime", "peer_ramp")   # regime/vol = display JSON
 
 
 def _con():
