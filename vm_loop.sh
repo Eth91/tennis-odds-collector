@@ -19,6 +19,24 @@ unstage_big(){
   done
 }
 
+# THE ONLY PLACE ANYTHING GETS STAGED (2026-08-02). There used to be two copies of this — one in
+# push(), one in the rebase-recovery — and they had already drifted: the recovery copy was missing
+# pga_model.sqlite, so a DB the normal path refuses to commit was committed by the recovery. Worse,
+# unstage_big was called ONLY from the normal path, so the recovery's `git checkout "$C" -- *.sqlite`
+# happily re-staged the 114MB golf_lines.sqlite the guard had just removed -> push rejected by
+# GitHub's 100MB hard limit -> recovery -> repeat, for 19 hours, with the heartbeat green.
+# -f is kept because several tracked-and-gitignored caches are what the digests read; that is also
+# why .gitignore alone cannot protect a file here and the :(exclude) pathspec must carry it.
+stage_all(){
+  git add -A -f -- . \
+    ':(exclude)fanduel_props.sqlite' ':(exclude)fanduel_props.bak.sqlite' \
+    ':(exclude)wnba_lines.sqlite' ':(exclude)golf_lines.sqlite' 2>/dev/null
+  git rm --cached -q wnba_lines.sqlite golf_lines.sqlite wnba_glog_cache.json \
+    fanduel_props.sqlite fanduel_props.bak.sqlite tt.sqlite tt.sqlite-wal tt.sqlite-shm \
+    wnba_ledger.sqlite wnba_proj_log.sqlite wnba_clv.sqlite pga_model.sqlite 2>/dev/null || true
+  unstage_big
+}
+
 # DB SYMLINK GUARD (2026-07-29): the live databases live in ~/wnba_data and the repo holds
 # symlinks, so a git checkout/reset can only overwrite a POINTER. If that happens, re-link.
 # A real file found in the link's place is an old tracked blob -- park it, never delete it.
@@ -116,19 +134,17 @@ push(){
     echo "[$(date +%H:%M)] low disk -> git gc"; git gc --prune=now -q 2>/dev/null || true
   fi
   python3 db_sync.py --export >/dev/null 2>&1 || true   # WNBA DBs -> data/*/
-  git add -A -f -- . ':(exclude)fanduel_props.sqlite' ':(exclude)fanduel_props.bak.sqlite' ':(exclude)wnba_lines.sqlite' 2>/dev/null
+  stage_all
   # NEVER commit wnba_lines.sqlite: it's the VM-local WNBA lines DB, gitignored, and was
   # ballooning to 100MB (the 2-day prune lived in the now-disabled wnba-watch.yml and was
   # dropped on the VM migration). `git add -A -f` force-re-adds it every cycle despite the
   # ignore -> committing/hashing 100MB every 75s + git auto-gc repacking those blobs = the
   # swap-thrash. Unstage it here each cycle (keeps -f for the small caches the digests need).
-  git rm --cached -q wnba_lines.sqlite wnba_glog_cache.json fanduel_props.sqlite fanduel_props.bak.sqlite tt.sqlite tt.sqlite-wal tt.sqlite-shm wnba_ledger.sqlite wnba_proj_log.sqlite wnba_clv.sqlite pga_model.sqlite 2>/dev/null || true
   # NOTE: use `|| true`, NOT `|| return 0`. Since wnba_lines.sqlite (the file that changed every
   # cycle) is now excluded, many cycles have "nothing to commit" — returning early there SKIPS the
   # push, so any already-committed-but-unpushed commits (e.g. a fresh dashboard from fullscan, or a
   # push that failed during a thrash) pile up and origin/Pages/Actions all lag the VM. Always fall
   # through to pull+push so pending commits flush even on a no-change cycle.
-  unstage_big
   git commit -m "vm loop data [skip ci]" -q 2>/dev/null || true
   git pull --rebase --autostash -X theirs -q "$URL" main 2>/dev/null || {
     # Rebase wedged (usually an OOM kill mid-rebase on this 956MB box). Unwedge WITHOUT losing
@@ -172,12 +188,17 @@ push(){
     # (2026-07-27) fanduel_props.sqlite is VM-LOCAL now (untracked, 100MB vs
     # GitHub hard limit); never replay it from origin.
     python3 db_sync.py --export >/dev/null 2>&1 || true   # WNBA DBs -> data/*/
-  git add -A -f -- . ':(exclude)fanduel_props.sqlite' ':(exclude)fanduel_props.bak.sqlite' ':(exclude)wnba_lines.sqlite' 2>/dev/null
-    git rm --cached -q wnba_lines.sqlite wnba_glog_cache.json fanduel_props.sqlite fanduel_props.bak.sqlite tt.sqlite tt.sqlite-wal tt.sqlite-shm wnba_ledger.sqlite wnba_proj_log.sqlite wnba_clv.sqlite 2>/dev/null || true
+  stage_all
     git commit -qm "vm loop data (replayed after failed rebase) [skip ci]" 2>/dev/null || true
     echo "[$(date +%H:%M)] rebase failed -> data replayed onto origin tip"
   }
-  git push -q "$URL" HEAD:main 2>/dev/null || echo "[$(date +%H:%M)] push deferred"; }
+  # STAMP ONLY ON A REAL SUCCESS. This file is what beat() reads to decide whether the loop has
+  # earned a heartbeat, so it must record that git push exited 0 -- not that push() was reached.
+  if git push -q "$URL" HEAD:main 2>/dev/null; then
+    date -u +%s > "$HOME/.wnba_push_ok"
+  else
+    echo "[$(date +%H:%M)] push deferred"
+  fi; }
 
 collectors(){
   # Absorb Actions'/Mac's fresh line rows. lines_ingest.py reads the small per-source delta
@@ -212,9 +233,30 @@ collectors(){
 # reuses freed pages so the file stays ~1-2MB after the one-time VACUUM done at deploy.
 prune_lines(){ python3 - >/dev/null 2>&1 <<'PY' || true
 import sqlite3, os
-c=sqlite3.connect("wnba_lines.sqlite")
+c=sqlite3.connect("wnba_lines.sqlite"); c.execute("PRAGMA busy_timeout=60000")
 c.execute("DELETE FROM fd_lines WHERE collected_at < datetime('now','-2 days')")
-c.commit(); c.close()
+c.commit()
+# VACUUM, which this never did. The old comment claimed "sqlite reuses freed pages so the file
+# stays ~1-2MB" -- pages ARE reused, but the file never RETURNS space without a VACUUM. Measured
+# 2026-08-02: 274MB holding a 136MB freelist, i.e. half the file was deleted rows it would not
+# give back. A third of the boot disk, on the box whose worst documented outage was disk-full.
+if os.path.getsize("wnba_lines.sqlite") > 40*1024*1024:
+    c.execute("VACUUM")
+c.close()
+# golf_lines.sqlite: THE THIRD FILE to hit this exact cliff (wnba_lines 100MB, fanduel_props 100MB
+# on 2026-07-25 = an 18h line freeze, now this one at 114.2MB = a 19h publish outage). It is
+# excluded from git entirely now, so the 100MB limit no longer applies -- this is purely disk. The
+# durable record lives in golf_moves.sqlite, which keeps the paired open->close permanently, so the
+# raw snapshot archive genuinely does not need to be kept forever.
+try:
+    c=sqlite3.connect("golf_lines.sqlite"); c.execute("PRAGMA busy_timeout=60000")
+    c.execute("DELETE FROM golf_lines WHERE collected_at < datetime('now','-2 days')")
+    c.commit()
+    if os.path.getsize("golf_lines.sqlite") > 60*1024*1024:
+        c.execute("VACUUM")
+    c.close()
+except Exception:
+    pass
 # fanduel_props hit GitHub's HARD 100MB blob limit 2026-07-25 (99.x committed, pushes of bigger
 # versions rejected outright -> the 18h line freeze). This VM is now the ONLY committer of the
 # blob: keep 3 days of rows and VACUUM when the file nears the cliff so it never crosses again.
@@ -273,13 +315,29 @@ in_hot(){ python3 hot_window.py >/dev/null 2>&1; }
 # liveness heartbeat: one parentless commit force-pushed to the `heartbeat` branch each cycle
 # (no history growth). The Actions vm-watchdog alerts if this stops updating (VM down / token dead).
 beat(){
-  local c b t k
+  local c b t k last now age
+  # A HEARTBEAT MUST MEAN "I AM PUBLISHING", NOT "I AM LOOPING". This commit is synthesised with
+  # plumbing and force-pushed to its own branch, so it bypasses the index, HEAD and main entirely
+  # -- which is exactly why it stayed green through 19 hours of rejected pushes, a detached HEAD
+  # and a missing refs/heads/main. Withholding it when the publisher is stale routes a dead
+  # publisher into the alert path that already exists: Actions' vm-watchdog pages at 15 minutes.
+  # PROCESS liveness is a different question and keeps its own separate signal
+  # (~/.wnba_loop_beat + the on-box wnba-watchdog.timer, which restarts rather than pages).
+  last=$(cat "$HOME/.wnba_push_ok" 2>/dev/null || echo 0)
+  now=$(date -u +%s); age=$(( now - last ))
+  if [ "$age" -gt 1800 ]; then
+    echo "[$(date +%H:%M)] heartbeat WITHHELD -- no successful push for $((age/60)) min"
+    return 0
+  fi
   c="$(date -u +%s) $(date -u +%FT%TZ)"
   b=$(printf '%s\n' "$c" | git hash-object -w --stdin 2>/dev/null) || return 0
   t=$(printf '100644 blob %s\theartbeat.txt\n' "$b" | git mktree 2>/dev/null) || return 0
   k=$(printf 'vm heartbeat %s\n' "$c" | git commit-tree "$t" 2>/dev/null) || return 0
   git push -q --force "$URL" "$k:refs/heads/heartbeat" 2>/dev/null || true; }
 
+# Seed the publish stamp on a cold start so a freshly booted box does not page before its first
+# push cycle has run. A genuinely broken publisher still pages ~30 min after boot.
+[ -f "$HOME/.wnba_push_ok" ] || date -u +%s > "$HOME/.wnba_push_ok"
 echo "[$(date)] wnba-loop up (topic:$([ -n "$NTFY_TOPIC" ]&&echo yes||echo NO) pat:$([ -n "$GIT_PAT" ]&&echo yes||echo NO))"
 i=0; hot_ticks=0; cold_i=0; was_hot=2
 while true; do i=$((i+1))
