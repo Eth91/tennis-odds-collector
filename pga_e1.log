@@ -1314,3 +1314,27 @@ E1 wave meter — Rocket Classic [In Progress]
   no tee times posted yet — meter waits (they release Tue/Wed)
 pga grade: +0 newly graded — E1 record 16-20  -5.37u
    E1 below breakeven (44% vs 48%, z=-0.44) but not yet distinguishable from noise at n=36 — keep collecting
+E1 wave meter — Rocket Classic [In Progress]
+  no tee times posted yet — meter waits (they release Tue/Wed)
+  crawl 2026: +12368 round rows
+  crawl 2026: +7221 round rows
+  rounds table: 117932 rows, 2459 players
+G2: 4 gradeable closes [R4=4] from 14 collected matchup markets
+     dropped   5  no two-sided pre-round close
+     dropped   5  round not both posted / tie
+G2: n=4 < 15 -> gate INCONCLUSIVE. This is a FORWARD test and cannot be backtested: it needs OUR OWN collected closes, and the collector only has history from the day it started.
+e3: pricing PGA Rocket Classic 2026  (G2 pending n=4 — preview only)
+  capture: snapshot 2026-08-02T20:00:02 | R1 first tee 2026-07-30T11:00:00 (per-flag deadlines from pga_tee_gate)
+  ruler: course-fit players 147, wave split 151, wave shift +0.11 strokes [exposure gap +1.0 km/h -> +0.11 str]
+  skip TOP_10_FINISH_IMG: implied vig 2.740 outside [1.01, 1.75] (30 priced, N_eff 3.87)
+  birdies: course factor 1.048 (4 prior editions), wind 15.2 km/h
+  birdies: course R2026524 par mix {3: 4, 4: 12, 5: 2}
+  birdies: devig on 15/15 two-sided lines — raw Over 0.4671 vs FAIR 0.4406 (vig 2.65 pts)
+  birdies: course-level LAM=0.866 (market-anchored on 15 Over lines, mix {3: 4, 4: 12, 5: 2})
+  birdies: flags 2 over / 5 under
+  round-score [SHADOW, armable=False]: 10 flags (delta 69.849 strokes)
+  make-cut [SHADOW, armable=True]: 0 flags
+  price floor: 7 flag(s) below p_fair 0.50 retagged -lowprice (logged + graded, off the board)
+  E3 logged: 0 armed + 0 shadow, 17 skipped (player already teed off) (G2 not passed — everything logs as shadow)
+pga grade: +0 newly graded — E1 record 16-20  -5.37u
+   E1 below breakeven (44% vs 48%, z=-0.44) but not yet distinguishable from noise at n=36 — keep collecting
