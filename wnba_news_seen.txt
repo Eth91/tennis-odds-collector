@@ -136,6 +136,7 @@ rw|1071|Tacks on 14 points in win
 rw|1071|Totals 18 points in road loss
 rw|1073|Fares well off bench
 rw|1074|Not listed on injury report
+rw|1074|Not playing Sunday
 rw|1074|Ruled out Wednesday
 rw|1075|Pops for season-high 15 points
 rw|1075|Strong line off bench
@@ -164,6 +165,7 @@ rw|1103|Omitted from injury report
 rw|1103|Out Friday
 rw|1120|Scores six points off bench
 rw|1134|Off injury report
+rw|1134|Out Sunday
 rw|1134|Won't play Wednesday
 rw|1135|Waived by Tempo
 rw|1137|Left off injury report
@@ -498,6 +500,7 @@ rw|917|Plays five minutes Tuesday
 rw|923|Listed out for Wednesday
 rw|923|Not listed on injury report
 rw|923|Off injury report for Tuesday
+rw|923|Won't play vs. Portland
 rw|926|Starting against Aces
 rw|926|Stumbles in first unit
 rw|927|Double-double in defeat
