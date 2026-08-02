@@ -105,7 +105,10 @@ _MIGRATE_TEXT = ("basis", "samples", "confidence", "regime", "vol",
                  # They were previously computed and thrown away into the ntfy text, so the
                  # only way to evaluate them was reconstruction, which can never BE the
                  # prospective test. Logging them is the prerequisite for the paired SPRT.
-                 "peer_regime", "peer_ramp")   # regime/vol = display JSON
+                 # rungs: the FULL posted ladder + prices at flag time. Without it the
+                 # "should we ladder up?" question needs historical rung prices, and the
+                 # line DBs prune at 2-3 days — only 4 of 52 graded bets still had them.
+                 "peer_regime", "peer_ramp", "rungs")   # regime/vol = display JSON
 
 
 def _con():

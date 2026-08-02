@@ -630,7 +630,14 @@ def collect():
                         f"{out_label} OUT -> {_short(n)} {e['stat'][:3]} {sd}{e['line']:g} "
                         f"{T._am(e['dec'])}{wo} | {rec} {e['hit']*100:.0f}% "
                         f"| proj {e['elev_avg']:g} +{e['ev']*100:.0f}%EV{ctag}{tag}{env_tag}{rtag}"))
+                # the whole posted ladder as the model saw it: {stat: {line: [over, under]}}
+                try:
+                    _lad = json.dumps({str(k): v for k, v in
+                                       ((T.posted_props(n) or {}).get(e["stat"]) or {}).items()})
+                except Exception:                                      # noqa: BLE001
+                    _lad = None
                 preds.append({"peer_regime": _regime_json, "peer_ramp": _ramp_json,
+                              "rungs": _lad,
                               "pred_date": slate_date, "out_player": out_full, "player": n,
                               "tier": "firm", "bettable": 1 if role_ok(conf) else 0,
                               "team": team, "opp": matchups_by[slate_date].get(team, ""),
