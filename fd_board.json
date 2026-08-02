@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-08-02T15:31:36Z",
+ "captured_at": "2026-08-02T15:40:18Z",
  "matches": [
-  {
-   "event_id": 35896169,
-   "p1": "Jakub Glanowski",
-   "p2": "Tomasz Filbrandt",
-   "p1_norm": "jakub glanowski",
-   "p2_norm": "tomasz filbrandt",
-   "open_date": "2026-08-02T15:25:00.000Z",
-   "line": 50.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
-  {
-   "event_id": 35896170,
-   "p1": "Krystian Kolodziej",
-   "p2": "Filip Mlynarski",
-   "p1_norm": "krystian kolodziej",
-   "p2_norm": "filip mlynarski",
-   "open_date": "2026-08-02T15:25:00.000Z",
-   "line": 60.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35896171,
-   "p1": "Michal Machelski",
-   "p2": "Kazimierz Rybak",
-   "p1_norm": "michal machelski",
-   "p2_norm": "kazimierz rybak",
-   "open_date": "2026-08-02T15:25:00.000Z",
-   "line": 55.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
   {
    "event_id": 35896228,
    "p1": "Lukasz Pietraszko",
@@ -77,6 +44,28 @@
    "line": 75.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35896260,
+   "p1": "Adam Ruszkiewicz",
+   "p2": "Michal Paszkiewicz",
+   "p1_norm": "adam ruszkiewicz",
+   "p2_norm": "michal paszkiewicz",
+   "open_date": "2026-08-02T16:00:00.000Z",
+   "line": 73.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35896263,
+   "p1": "Jacek Mitas",
+   "p2": "Krystian Kolodziej",
+   "p1_norm": "jacek mitas",
+   "p2_norm": "krystian kolodziej",
+   "open_date": "2026-08-02T16:05:00.000Z",
+   "line": 75.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
