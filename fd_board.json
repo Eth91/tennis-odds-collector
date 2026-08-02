@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-02T07:09:44Z",
+ "captured_at": "2026-08-02T07:14:15Z",
  "matches": [
   {
    "event_id": 35894844,
@@ -9,8 +9,8 @@
    "p2_norm": "sebastian szostok",
    "open_date": "2026-08-02T06:55:00.000Z",
    "line": 89.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35894854,
@@ -20,8 +20,8 @@
    "p2_norm": "krzysztof juszczyk",
    "open_date": "2026-08-02T07:10:00.000Z",
    "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35894855,
@@ -31,8 +31,8 @@
    "p2_norm": "kacper adamus",
    "open_date": "2026-08-02T07:10:00.000Z",
    "line": 73.5,
-   "over_odds": -118,
-   "under_odds": -116
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35894858,
@@ -99,6 +99,28 @@
    "line": 81.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35894885,
+   "p1": "Tadeusz Piotrowski",
+   "p2": "Arkadiusz Mugowski",
+   "p1_norm": "tadeusz piotrowski",
+   "p2_norm": "arkadiusz mugowski",
+   "open_date": "2026-08-02T07:40:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35894886,
+   "p1": "Mikolaj Lukaszewski",
+   "p2": "Mariusz Zwolinski",
+   "p1_norm": "mikolaj lukaszewski",
+   "p2_norm": "mariusz zwolinski",
+   "open_date": "2026-08-02T07:40:00.000Z",
+   "line": 80.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
