@@ -200,6 +200,7 @@ rw|276|Sniffs double-double in victory
 rw|278|Dishes five dimes in victory
 rw|278|Reaches 20-point plateau
 rw|278|Scoreless in road win
+rw|278|Strikes for 27 points in win
 rw|280|Plays well off bench
 rw|287|Return not imminent
 rw|291|Goes for 15 points in loss
