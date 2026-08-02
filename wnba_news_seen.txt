@@ -454,6 +454,7 @@ rw|852|Probable versus Fire
 rw|852|Questionable to return Tuesday
 rw|852|Records seven stocks Friday
 rw|852|Upgraded to available
+rw|852|Well-rounded effort in loss
 rw|853|Another double-digit scoring effort
 rw|853|Paces Connecticut in loss
 rw|854|Available for Monday
