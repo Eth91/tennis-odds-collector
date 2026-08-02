@@ -178,6 +178,38 @@ FRESH_MIN = 10   # a book's CURRENT ladder = rungs re-posted within this many mi
                  # never merge into tonight's ladder (the bug that logged o14.5 @ +280 vs a real 17.5).
 
 
+
+# A ladder's own arithmetic: a HIGHER line cannot be CHEAPER. Violations are not soft lines, they
+# are foreign markets wearing this stat's label (measured 2026-08-02: 45 of 269 live WNBA ladders,
+# every player carrying a bogus points 2.5/4.5 priced 5-10x too long). They are dangerous rather
+# than merely wrong — a fat price on an easy threshold reads as an enormous edge, so anything that
+# ladders mechanically attacks them first, on every player, every night.
+RUNG_INVERSION_TOL = 0.05     # rungs are collected at slightly different instants inside the
+                              # freshness window, so 1-2% inversions are timing noise, not breakage
+
+
+def _drop_inverted(byline):
+    """{line: [over, under]} -> the same with arithmetically impossible rungs removed.
+
+    Walks from the HIGHEST line down keeping the cheapest over-price seen above; any rung quoting
+    more than something already harder to hit is discarded. Book-agnostic on purpose: it survives
+    whatever the upstream mislabel turns out to be, instead of hard-coding which market leaked.
+    """
+    if len(byline) < 2:
+        return byline
+    out, cheapest = {}, None
+    for ln in sorted(byline, reverse=True):
+        ov = byline[ln][0]
+        if not ov:                                   # under-only rung: nothing to test
+            out[ln] = byline[ln]
+            continue
+        if cheapest is not None and ov > cheapest * (1.0 + RUNG_INVERSION_TOL):
+            continue                                 # easier line, longer price -> not this market
+        out[ln] = byline[ln]
+        cheapest = ov if cheapest is None else min(cheapest, ov)
+    return out
+
+
 def posted_props(player):
     """CURRENT WNBA ladder for a player: {stat_key: {line: (best_over_dec, best_under_dec)}} across
     books. Both sides (the model bets whichever side the projection favors; 0.0 if a book posted only
@@ -215,7 +247,11 @@ def posted_props(player):
     for (stat, line, side, bk), (ca, odds) in newest.items():
         i = 0 if side == "over" else 1
         best[stat][line][i] = max(best[stat][line][i], odds)      # best price across BOOKS, same cycle
-    return {s: {k: tuple(v) for k, v in d.items()} for s, d in best.items()}
+    # strip arithmetically impossible rungs before ANY consumer sees them — pricing, the
+    # board's live-line filter, the ladder section and the `rungs` telemetry all read this
+    return {st: {k: tuple(v) for k, v in _drop_inverted(
+                {k2: list(v2) for k2, v2 in d.items()}).items()}
+            for st, d in best.items()}
 
 
 # Role floor scaled for WNBA's shorter 40-min game (NBA is 48): a bench player promoted
