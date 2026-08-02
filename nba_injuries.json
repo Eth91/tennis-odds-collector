@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-08-02T20:12:33+00:00",
+ "fetched_at": "2026-08-02T20:43:42+00:00",
  "injuries": {
   "Mouhamed Gueye": {
    "team": "",
@@ -199,6 +199,12 @@
    "detail": "Rest",
    "date": "2026-07-18"
   },
+  "Naji Marshall": {
+   "team": "",
+   "status": "Day-To-Day",
+   "detail": "Hip",
+   "date": "2026-08-02"
+  },
   "Kyrie Irving": {
    "team": "",
    "status": "Day-To-Day",
@@ -221,12 +227,6 @@
    "team": "",
    "status": "Day-To-Day",
    "detail": "Foot",
-   "date": "2026-06-26"
-  },
-  "Naji Marshall": {
-   "team": "",
-   "status": "Day-To-Day",
-   "detail": "Hip",
    "date": "2026-06-26"
   },
   "Cooper Flagg": {
