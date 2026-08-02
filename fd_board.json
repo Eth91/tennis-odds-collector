@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-02T15:15:06Z",
+ "captured_at": "2026-08-02T15:20:28Z",
  "matches": [
-  {
-   "event_id": 35896079,
-   "p1": "Jacek Mitas",
-   "p2": "Mateusz Rutkowski",
-   "p1_norm": "jacek mitas",
-   "p2_norm": "mateusz rutkowski",
-   "open_date": "2026-08-02T15:00:00.000Z",
-   "line": 64.5,
-   "over_odds": -130,
-   "under_odds": -105
-  },
   {
    "event_id": 35896101,
    "p1": "Sebastian Juzek",
@@ -20,8 +9,8 @@
    "p2_norm": "jakub jesiek",
    "open_date": "2026-08-02T15:10:00.000Z",
    "line": 78.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35896169,
@@ -63,9 +52,20 @@
    "p1_norm": "pawel adamus",
    "p2_norm": "oskar sokolowski",
    "open_date": "2026-08-02T15:30:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35896228,
+   "p1": "Lukasz Pietraszko",
+   "p2": "Dawid Kosmal",
+   "p1_norm": "lukasz pietraszko",
+   "p2_norm": "dawid kosmal",
+   "open_date": "2026-08-02T15:45:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
