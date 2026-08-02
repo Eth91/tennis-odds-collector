@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-02T10:02:49Z",
+ "captured_at": "2026-08-02T10:07:48Z",
  "matches": [
-  {
-   "event_id": 35895007,
-   "p1": "Konrad Kulpa",
-   "p2": "Jakub Kosowski",
-   "p1_norm": "konrad kulpa",
-   "p2_norm": "jakub kosowski",
-   "open_date": "2026-08-02T09:40:00.000Z",
-   "line": 94.5,
-   "over_odds": -115,
-   "under_odds": -115
-  },
   {
    "event_id": 35895022,
    "p1": "Jakub Michalczyk",
@@ -19,20 +8,9 @@
    "p1_norm": "jakub michalczyk",
    "p2_norm": "artur szoltysek",
    "open_date": "2026-08-02T09:50:00.000Z",
-   "line": 63.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35895023,
-   "p1": "Schaniel Krzysztof",
-   "p2": "Jacek Wieczerzak",
-   "p1_norm": "schaniel krzysztof",
-   "p2_norm": "jacek wieczerzak",
-   "open_date": "2026-08-02T09:50:00.000Z",
-   "line": 73.5,
-   "over_odds": -130,
-   "under_odds": -105
+   "line": 62.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35895029,
@@ -41,9 +19,9 @@
    "p1_norm": "piotr przewlocki",
    "p2_norm": "krzysztof juszczyk",
    "open_date": "2026-08-02T09:55:00.000Z",
-   "line": 80.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 74.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35895039,
@@ -52,9 +30,9 @@
    "p1_norm": "mateusz zagajewski",
    "p2_norm": "piotr maruszak",
    "open_date": "2026-08-02T10:05:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35895044,
@@ -75,8 +53,8 @@
    "p2_norm": "rafal glica",
    "open_date": "2026-08-02T10:10:00.000Z",
    "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35895087,
@@ -97,6 +75,39 @@
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-08-02T10:25:00.000Z",
    "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35895315,
+   "p1": "Mateusz Woskowicz",
+   "p2": "Arkadiusz Mugowski",
+   "p1_norm": "mateusz woskowicz",
+   "p2_norm": "arkadiusz mugowski",
+   "open_date": "2026-08-02T10:30:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35895318,
+   "p1": "Jacek Wieczerzak",
+   "p2": "Marcin Lach",
+   "p1_norm": "jacek wieczerzak",
+   "p2_norm": "marcin lach",
+   "open_date": "2026-08-02T10:35:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35895319,
+   "p1": "Artur Szoltysek",
+   "p2": "Mikolaj Lukaszewski",
+   "p1_norm": "artur szoltysek",
+   "p2_norm": "mikolaj lukaszewski",
+   "open_date": "2026-08-02T10:35:00.000Z",
+   "line": 80.5,
    "over_odds": -112,
    "under_odds": -118
   }
