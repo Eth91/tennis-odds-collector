@@ -602,9 +602,15 @@ def main():
             _st = _pv.get("stream") or ""
             if not (_st.startswith("E3-birdies") or _st.startswith("E3-rscore")):
                 continue                       # top-N is structurally longshot; matchups have n=0
-            if (_pv.get("p_fair") or 0.0) >= PRICE_FLOOR:
+            if (_pv.get("p_fair") or 0.0) >= PRICE_FLOOR or "lowprice" in _st:
                 continue
-            _pv["stream"] = _st + "-lowprice"
+            # THE TAG MUST SIT IN A CANONICAL POSITION. pga_rscore already ships its stream as
+            # "E3-rscore-shadow", so appending blindly gave "E3-rscore-shadow-lowprice" — and the
+            # writer below then appended a SECOND "-shadow". Different stream string means a
+            # different ledger key, so the same bet was logged twice, once on each side of the
+            # filter. Strip the suffix first and let the writer re-add exactly one.
+            _base = _st[:-len("-shadow")] if _st.endswith("-shadow") else _st
+            _pv["stream"] = _base + "-lowprice"
             _pv["shadow"] = True               # never competes with v1.0 for a board slot
             _floored += 1
     if _floored:
