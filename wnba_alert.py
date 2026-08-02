@@ -942,6 +942,15 @@ def collect():
         W.flush_glog_cache()                         # persist fresh logs for the next scan/process
     except Exception:
         pass
+    # flush the gate captures HERE, in the scope that produced them (they were briefly
+    # accumulated in collect() but flushed in main(), where the name does not exist)
+    try:
+        import wnba_ledger as _WL
+        if _gated_rows:
+            print("gate-log: %d suppressed bet(s) recorded" % _WL.log_gated(_gated_rows),
+                  flush=True)
+    except Exception as _ge:                                   # noqa: BLE001
+        print("gate-log skipped: %s" % str(_ge)[:80], flush=True)
     return sorted(alerts, reverse=True), preds
 
 
@@ -1040,13 +1049,6 @@ def main():
     alerts, preds = collect()
     # ROLE GATE applied ONCE here, so the ledger, the parlays and the pushes cannot disagree
     # about what counted as a bet. Blocked rows stay in `preds` for the board.
-    try:
-        import wnba_ledger as _WL
-        if _gated_rows:
-            _ng = _WL.log_gated(_gated_rows)
-            print("gate-log: %d suppressed bet(s) recorded" % _ng, flush=True)
-    except Exception as _ge:                                   # noqa: BLE001
-        print("gate-log skipped: %s" % str(_ge)[:80], flush=True)
     bet_preds = [p for p in preds if p.get("bettable", 1)]
     _blocked = len(preds) - len(bet_preds)
     if _blocked:
