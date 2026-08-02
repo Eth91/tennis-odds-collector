@@ -15,3 +15,11 @@ CREATE TABLE IF NOT EXISTS parlays(
 CREATE TABLE IF NOT EXISTS selections (
     pred_date TEXT, team TEXT, player TEXT, stat TEXT, selected_at TEXT,
     PRIMARY KEY (pred_date, team, player, stat));
+CREATE TABLE IF NOT EXISTS gated(
+    pred_date TEXT, player TEXT, team TEXT, opp TEXT, stat TEXT, line REAL,
+    odds REAL, side TEXT, gate TEXT,
+    peer TEXT, rate_with REAL, rate_without REAL, breakeven REAL, gap REAL,
+    n_with INTEGER, n_without INTEGER,
+    proj_hit REAL, ev REAL, confidence TEXT, decided_at TEXT,
+    result TEXT, actual REAL, graded INTEGER DEFAULT 0,
+    PRIMARY KEY(pred_date, player, stat, line, gate));
