@@ -1124,3 +1124,29 @@ e3: pricing PGA Rocket Classic 2026  (G2 pending n=0 — preview only)
   E3 logged: 0 armed + 0 shadow, 3 skipped (player already teed off) (G2 not passed — everything logs as shadow)
 pga grade: +0 newly graded — E1 record 16-20  -5.37u
    E1 below breakeven (44% vs 48%, z=-0.44) but not yet distinguishable from noise at n=36 — keep collecting
+E1 wave meter — Rocket Classic [In Progress]
+  no tee times posted yet — meter waits (they release Tue/Wed)
+  crawl 2026: +12315 round rows
+  crawl 2026: +7221 round rows
+  rounds table: 117879 rows, 2459 players
+G2: 0 gradeable closes [none] from 14 collected matchup markets
+     dropped   9  round not both posted / tie
+     dropped   5  no two-sided pre-round close
+G2: n=0 < 15 -> gate INCONCLUSIVE. This is a FORWARD test and cannot be backtested: it needs OUR OWN collected closes, and the collector only has history from the day it started.
+e3: pricing PGA Rocket Classic 2026  (G2 pending n=0 — preview only)
+  capture: snapshot 2026-08-02T15:30:02 | R1 first tee 2026-07-30T11:00:00 (per-flag deadlines from pga_tee_gate)
+  ruler: course-fit players 147, wave split 151, wave shift +0.11 strokes [exposure gap +1.0 km/h -> +0.11 str]
+  TOP_10_FINISH_IMG: 72 priced, N_eff 6.77 (nominal 10), implied vig 1.655
+  skip TOP_20_FINISH_IMG: implied vig 1.894 outside [1.01, 1.75] (52 priced, N_eff 11.15)
+  TOP_5_FINISH_IMG: 72 priced, N_eff 3.52 (nominal 5), implied vig 1.671
+  birdies: course factor 1.047 (4 prior editions), wind 16.9 km/h
+  birdies: course R2026524 par mix {3: 4, 4: 12, 5: 2}
+  birdies: devig on 40/40 two-sided lines — raw Over 0.5224 vs FAIR 0.4930 (vig 2.94 pts)
+  birdies: course-level LAM=1.190 (market-anchored on 40 Over lines, mix {3: 4, 4: 12, 5: 2})
+  birdies: flags 3 over / 5 under
+  round-score [SHADOW, armable=False]: 3 flags (delta 69.201 strokes)
+  make-cut [SHADOW, armable=True]: 0 flags
+  price floor: 6 flag(s) below p_fair 0.50 retagged -lowprice (logged + graded, off the board)
+  E3 logged: 0 armed + 1 shadow, 9 skipped (player already teed off) (G2 not passed — everything logs as shadow)
+pga grade: +0 newly graded — E1 record 16-20  -5.37u
+   E1 below breakeven (44% vs 48%, z=-0.44) but not yet distinguishable from noise at n=36 — keep collecting
