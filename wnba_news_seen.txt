@@ -478,6 +478,7 @@ rw|911|Available against Connecticut
 rw|911|Cleared to play Friday
 rw|911|Dishes seven dimes Saturday
 rw|911|Double-double in blowout win
+rw|911|Double-doubles in defeat
 rw|911|Expected to play Friday
 rw|911|Expected to play Tuesday
 rw|911|Good to go Tuesday
