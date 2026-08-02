@@ -2207,8 +2207,10 @@ def _injury_html():
         body = '<div class="swo">No impact players carry an injury status right now.</div>'
     _scope = ("· today" if _today_teams else "· all teams (slate lookup failed)")
     _hid = (" · %d hidden (not playing)" % _hidden) if _hidden else ""
+    # `n = team games without her` removed: it wrapped the header to two lines on a phone and the
+    # badge already carries that definition in its own title attribute.
     return ('<div class="starwatch"><div class="sw-title">Injury report '
-            f'<span>{_scope}{_hid} · n = team games without her</span></div>'
+            f'<span>{_scope}{_hid}</span></div>'
             + stale + body + '</div>')
 
 
@@ -4336,9 +4338,16 @@ def build():
                 font-variant-numeric:tabular-nums; }}
   #wnba .sleg .glogo, #wnba .sleg img {{ width:28px; height:28px; border-radius:50%;
                                           background:var(--cu-fill); }}
-  #wnba .sfoot {{ padding:12px 16px; border-top:.5px solid var(--cu-sep);
-                  color:var(--cu-lbl2); font-size:14px; }}
-  #wnba .sfoot b {{ color:var(--cu-lbl); font-weight:600; }}
+  /* the footer is .sft, NOT .sfoot — .sfoot matches nothing in the markup, which is why the old
+     navy `background:#0e131b` and the blue .spay survived the first pass. One surface, one
+     hairline: the stake line is a footnote, not a third panel. */
+  #wnba .sft {{ display:flex; align-items:center; gap:10px; padding:12px 16px;
+                background:none; border-top:.5px solid var(--cu-sep); }}
+  #wnba .sstake {{ color:var(--cu-lbl2); font-size:14px; font-variant-numeric:tabular-nums; }}
+  #wnba .sstake b {{ color:var(--cu-lbl); font-weight:600; }}
+  #wnba .spay {{ color:var(--cu-grn); font-weight:600; font-size:14px;
+                 font-variant-numeric:tabular-nums; }}
+  #wnba .sft .sid {{ margin-left:auto; color:var(--cu-lbl3); font-size:12px; }}
   #wnba .stag {{ font-size:12px; font-weight:600; padding:2px 8px; border-radius:11px;
                  background:var(--cu-fill); color:var(--cu-lbl2); letter-spacing:0; }}
   #wnba .sv {{ color:var(--cu-grn); font-size:13px; font-weight:600; }}
