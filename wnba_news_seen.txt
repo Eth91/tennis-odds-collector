@@ -301,6 +301,7 @@ rw|498|Strong line in loss
 rw|501|Sees 11 minutes in win
 rw|539|Another 30-point performance
 rw|539|Drops 28 points in ASG loss
+rw|539|Drops 37 points in loss
 rw|539|Erupts in second half vs. Portland
 rw|539|Nets 28 points in win
 rw|539|Posts 23 points in rout

@@ -95,6 +95,7 @@
 2026-08-02|Bridget Carleton|points|13.5
 2026-08-02|Bridget Carleton|points|14.5
 2026-08-02|Julie Allemand|assists|5.5
+2026-08-02|Maria Conde|points|10.5
 2026-08-02|Marina Mabrey|pts_ast|23.5
 2026-08-02|Nyadiew Puoch|points|5.5
 n1|2026-07-20|Arike Ogunbowale|points|14.5
