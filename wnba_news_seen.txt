@@ -185,6 +185,7 @@ rw|238|No timetable for return
 rw|246|Records season-high 14 points
 rw|249|Stuck in bench role
 rw|252|Out again Thursday
+rw|252|Won't play Monday
 rw|252|Won't play Saturday
 rw|252|Won't play Tuesday
 rw|254|Drops 25 points in loss
