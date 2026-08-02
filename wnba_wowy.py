@@ -255,8 +255,24 @@ def wowy_multi(player_log, teammate_logs):
     def block(gs):
         return {s: _summ(gs, s) for s in ("min", "pts", "reb", "ast", "fga", "fta", "fg3a",
                                           "pra", "pts_reb", "pts_ast", "reb_ast")}
-    return {"with": block(with_g), "without": block(without_g),
-            "n_with": len(with_g), "n_without": len(without_g)}
+    res = {"with": block(with_g), "without": block(without_g),
+           "n_with": len(with_g), "n_without": len(without_g)}
+    # NO BASELINE MEANS NO SPLIT. `_summ` reports mean 0 for an empty list, so a with-set of zero
+    # games makes every delta the FULL without-mean: Conde vs Morrow computed d_min = +26.7, a
+    # fabricated role explosion far worse than the wrong-split bug this same-side test just fixed.
+    # Excluding opponents correctly drives n_with to 0 for a traded-in player, so that case is now
+    # REACHABLE and must fail closed.
+    #
+    # n_without is reported as 0 because it means "usable without-games", and with nothing to
+    # compare against there are none. This makes every existing `n_without >= 2` gate reject the
+    # split with no call-site changes — which is the point: a guard that needs every caller updated
+    # is a guard that one missed caller turns back into a +26.7 boost. True count kept for
+    # diagnostics.
+    if not with_g:
+        res["n_without_raw"] = len(without_g)
+        res["n_without"] = 0
+        res["degenerate"] = True
+    return res
 
 
 def wowy(player_log, teammate_log):
