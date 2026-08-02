@@ -23,6 +23,7 @@ at://did:plc:ugoqmdaxl4utnj4csujswwlj/app.bsky.feed.post/3mrb4jesr3i2v
 at://did:plc:ugoqmdaxl4utnj4csujswwlj/app.bsky.feed.post/3mrbde3yxlq26
 at://did:plc:ugoqmdaxl4utnj4csujswwlj/app.bsky.feed.post/3mrqeegrad622
 at://did:plc:ugoqmdaxl4utnj4csujswwlj/app.bsky.feed.post/3mrswqsb7zf2u
+at://did:plc:ugoqmdaxl4utnj4csujswwlj/app.bsky.feed.post/3ms4okgtpb223
 at://did:plc:wrsf35zye5xmlfaje5zyyega/app.bsky.feed.post/3ms3ywu2pdu2e
 at://did:plc:xpez3ourgb6u7hoiqwvq4mlz/app.bsky.feed.post/3mr63yklzt42a
 at://did:plc:ywnkvncvnvg326vjtxfolose/app.bsky.feed.post/3mraf7rggfk26
@@ -349,6 +350,7 @@ rw|603|Adds 16 points in loss
 rw|603|Drops 25 points in defeat
 rw|603|Iffy for Sunday
 rw|603|Rough shooting night in loss
+rw|603|Ruled out for Sunday
 rw|603|Strikes for 23 points in ASG loss
 rw|605|Double-double in defeat
 rw|605|Scores 15 points in loss Monday
