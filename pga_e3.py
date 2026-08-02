@@ -29,6 +29,23 @@ HERE = Path(__file__).resolve().parent
 LINES = HERE / "golf_lines.sqlite"
 PAPER = HERE / "pga_paper.sqlite"
 
+PRICE_FLOOR = 0.50      # MEASURED 2026-08-02 on 36 graded flags. A round-scoped bet must be
+                        # on a side the MARKET does not price as a dog. Splitting birdies at even
+                        # money: 13-4 +6.06u above vs 1-7 -5.68u below, Fisher p=0.0072, monotone
+                        # across five buckets. The claimed edge itself orders nothing (corr +0.053
+                        # with winning) while the market price orders well (+0.383) — so the edge
+                        # says WHICH side, and the price says WHETHER to bet at all.
+                        #
+                        # This is the fix top-N already received on 2026-07-30 for the identical
+                        # finding (absolute edge test "structurally excluding favourites"). Birdies
+                        # was exempted then; the live record withdrew the exemption.
+                        #
+                        # NOTE ON BASIS: birdies stores p_fair as raw 1/odds (vig included), rscore
+                        # stores it devigged. The floor is applied to each stream's OWN p_fair
+                        # because that is the quantity the backtest above was run on — restating it
+                        # on a common basis would invalidate the number it is set from.
+                        #
+                        # Set to 0.0 to disarm.
 M_EDGE = 0.06
 M_RATIO_MAX = 1.6       # PRUDENTIAL, not measured — G2 is still n=0, so there is no matchup-specific
                         # evidence. Carried over from the top-N ratio result because the audit found
@@ -574,6 +591,25 @@ def main():
         print(f"  make-cut [SHADOW, armable={_CUT.ARMABLE}]: {len(_cutrows)} flags")
     except Exception as _ce:
         print(f"  make-cut pricing skipped: {str(_ce)[:70]}")
+
+    # ---- PRICE FLOOR on round-scoped streams (2026-08-02) ----
+    # See PRICE_FLOOR. Rejected flags are RETAGGED, never dropped: they still price, still log,
+    # still grade, and are excluded from the board record — so the floor keeps accumulating the
+    # evidence that would overturn it. Deleting them would make the filter unfalsifiable.
+    _floored = 0
+    if PRICE_FLOOR > 0:
+        for _pv in preview:
+            _st = _pv.get("stream") or ""
+            if not (_st.startswith("E3-birdies") or _st.startswith("E3-rscore")):
+                continue                       # top-N is structurally longshot; matchups have n=0
+            if (_pv.get("p_fair") or 0.0) >= PRICE_FLOOR:
+                continue
+            _pv["stream"] = _st + "-lowprice"
+            _pv["shadow"] = True               # never competes with v1.0 for a board slot
+            _floored += 1
+    if _floored:
+        print(f"  price floor: {_floored} flag(s) below p_fair {PRICE_FLOOR:.2f} "
+              f"retagged -lowprice (logged + graded, off the board)")
 
     # DEDUPE (2026-07-29): the same underlying market reaches us under several mtypes
     # (TOP_20_FINISH_IMG vs TOP_20_FINISH_(INCL._TIES)) and again from the competition
