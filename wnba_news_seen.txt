@@ -149,6 +149,7 @@ rw|1078|Available to play
 rw|1078|Listed out Wednesday
 rw|1078|Out again Tuesday
 rw|1078|Ruled out for Friday
+rw|1078|Won't play Monday
 rw|1084|Left off injury report
 rw|1084|Won't play Tuesday
 rw|1084|Won't suit up Friday
@@ -165,6 +166,7 @@ rw|1093|Won't suit up Wednesday
 rw|1095|Provides spark defensively
 rw|1098|Headed to bench
 rw|1100|Muted output in win
+rw|1103|Left off injury report
 rw|1103|Omitted from injury report
 rw|1103|Out Friday
 rw|1120|Scores six points off bench
