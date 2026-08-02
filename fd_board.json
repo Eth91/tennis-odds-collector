@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-02T07:34:31Z",
+ "captured_at": "2026-08-02T07:39:47Z",
  "matches": [
   {
    "event_id": 35894862,
@@ -8,20 +8,9 @@
    "p1_norm": "piotr staniszewski",
    "p2_norm": "artur szoltysek",
    "open_date": "2026-08-02T07:20:00.000Z",
-   "line": 92.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35894863,
-   "p1": "Jakub Kosowski",
-   "p2": "Konrad Kulpa",
-   "p1_norm": "jakub kosowski",
-   "p2_norm": "konrad kulpa",
-   "open_date": "2026-08-02T07:20:00.000Z",
-   "line": 83.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 93.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35894873,
@@ -30,7 +19,7 @@
    "p1_norm": "jakub nowak",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-08-02T07:30:00.000Z",
-   "line": 77.5,
+   "line": 87.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -41,9 +30,9 @@
    "p1_norm": "patryk mecik",
    "p2_norm": "mariusz adamus",
    "open_date": "2026-08-02T07:35:00.000Z",
-   "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35894885,
@@ -52,7 +41,7 @@
    "p1_norm": "tadeusz piotrowski",
    "p2_norm": "arkadiusz mugowski",
    "open_date": "2026-08-02T07:40:00.000Z",
-   "line": 78.5,
+   "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
   },
@@ -63,7 +52,7 @@
    "p1_norm": "mikolaj lukaszewski",
    "p2_norm": "mariusz zwolinski",
    "open_date": "2026-08-02T07:40:00.000Z",
-   "line": 80.5,
+   "line": 77.5,
    "over_odds": -116,
    "under_odds": -116
   },
@@ -108,8 +97,30 @@
    "p2_norm": "kacper adamus",
    "open_date": "2026-08-02T08:00:00.000Z",
    "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35894920,
+   "p1": "Tibor Spanik",
+   "p2": "Konrad Kulpa",
+   "p1_norm": "tibor spanik",
+   "p2_norm": "konrad kulpa",
+   "open_date": "2026-08-02T08:05:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35894921,
+   "p1": "Mateusz Zagajewski",
+   "p2": "Dominik Solilo",
+   "p1_norm": "mateusz zagajewski",
+   "p2_norm": "dominik solilo",
+   "open_date": "2026-08-02T08:05:00.000Z",
+   "line": 78.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
