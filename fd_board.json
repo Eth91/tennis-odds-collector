@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-02T17:33:19Z",
+ "captured_at": "2026-08-02T17:37:56Z",
  "matches": [
-  {
-   "event_id": 35896727,
-   "p1": "Jaroslaw Badura",
-   "p2": "Jakub Jesiek",
-   "p1_norm": "jaroslaw badura",
-   "p2_norm": "jakub jesiek",
-   "open_date": "2026-08-02T17:35:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
   {
    "event_id": 35896736,
    "p1": "Jacek Mitas",
@@ -42,8 +31,8 @@
    "p2_norm": "kacper szurlej",
    "open_date": "2026-08-02T17:45:00.000Z",
    "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -116
+   "over_odds": -116,
+   "under_odds": -118
   },
   {
    "event_id": 35896768,
@@ -52,9 +41,9 @@
    "p1_norm": "mariusz baron",
    "p2_norm": "wojciech urban",
    "open_date": "2026-08-02T17:55:00.000Z",
-   "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 81.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35896776,
@@ -64,8 +53,19 @@
    "p2_norm": "adam ruszkiewicz",
    "open_date": "2026-08-02T18:00:00.000Z",
    "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35896781,
+   "p1": "Dawid Kosmal",
+   "p2": "Filip Mlynarski",
+   "p1_norm": "dawid kosmal",
+   "p2_norm": "filip mlynarski",
+   "open_date": "2026-08-02T18:05:00.000Z",
+   "line": 75.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
