@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-02T19:11:13Z",
+ "captured_at": "2026-08-02T19:18:02Z",
  "matches": [
-  {
-   "event_id": 35896876,
-   "p1": "Marcin Marchlewski",
-   "p2": "Szymon Brud",
-   "p1_norm": "marcin marchlewski",
-   "p2_norm": "szymon brud",
-   "open_date": "2026-08-02T18:55:00.000Z",
-   "line": 91.5,
-   "over_odds": 105,
-   "under_odds": -145
-  },
   {
    "event_id": 35896887,
    "p1": "Sebastian Juzek",
@@ -19,9 +8,9 @@
    "p1_norm": "sebastian juzek",
    "p2_norm": "michal paszkiewicz",
    "open_date": "2026-08-02T19:10:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 52.5,
+   "over_odds": -105,
+   "under_odds": -135
   },
   {
    "event_id": 35896890,
@@ -30,9 +19,9 @@
    "p1_norm": "filip mlynarski",
    "p2_norm": "mateusz rutkowski",
    "open_date": "2026-08-02T19:15:00.000Z",
-   "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35896893,
@@ -77,6 +66,39 @@
    "line": 79.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35896932,
+   "p1": "Krystian Kolodziej",
+   "p2": "Dawid Kosmal",
+   "p1_norm": "krystian kolodziej",
+   "p2_norm": "dawid kosmal",
+   "open_date": "2026-08-02T19:40:00.000Z",
+   "line": 68.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35896933,
+   "p1": "Michal Machelski",
+   "p2": "Mateusz Baran",
+   "p1_norm": "michal machelski",
+   "p2_norm": "mateusz baran",
+   "open_date": "2026-08-02T19:40:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35896934,
+   "p1": "Jakub Glanowski",
+   "p2": "Szymon Brud",
+   "p1_norm": "jakub glanowski",
+   "p2_norm": "szymon brud",
+   "open_date": "2026-08-02T19:40:00.000Z",
+   "line": 81.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
