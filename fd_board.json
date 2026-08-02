@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-02T13:26:14Z",
+ "captured_at": "2026-08-02T13:32:17Z",
  "matches": [
-  {
-   "event_id": 35895832,
-   "p1": "Mariusz Zwolinski",
-   "p2": "Artur Szoltysek",
-   "p1_norm": "mariusz zwolinski",
-   "p2_norm": "artur szoltysek",
-   "open_date": "2026-08-02T13:05:00.000Z",
-   "line": 91.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35895833,
-   "p1": "Sebastian Szostok",
-   "p2": "Jacek Wieczerzak",
-   "p1_norm": "sebastian szostok",
-   "p2_norm": "jacek wieczerzak",
-   "open_date": "2026-08-02T13:05:00.000Z",
-   "line": 100.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35895903,
    "p1": "Krystian Kolodziej",
@@ -30,9 +8,9 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-08-02T13:20:00.000Z",
-   "line": 73.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 83.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35895912,
@@ -41,7 +19,7 @@
    "p1_norm": "tadeusz piotrowski",
    "p2_norm": "arkadiusz mugowski",
    "open_date": "2026-08-02T13:25:00.000Z",
-   "line": 76.5,
+   "line": 83.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -52,31 +30,9 @@
    "p1_norm": "marian lebek",
    "p2_norm": "marcin lach",
    "open_date": "2026-08-02T13:30:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
-  {
-   "event_id": 35895919,
-   "p1": "Bartlomiej Wisniewski",
-   "p2": "Mikolaj Lukaszewski",
-   "p1_norm": "bartlomiej wisniewski",
-   "p2_norm": "mikolaj lukaszewski",
-   "open_date": "2026-08-02T13:30:00.000Z",
-   "line": 81.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35895920,
-   "p1": "Jakub Nowak",
-   "p2": "Piotr Przewlocki",
-   "p1_norm": "jakub nowak",
-   "p2_norm": "piotr przewlocki",
-   "open_date": "2026-08-02T13:30:00.000Z",
-   "line": 85.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35895954,
@@ -99,6 +55,39 @@
    "line": 79.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35895970,
+   "p1": "Rafal Wojcik",
+   "p2": "Krzysztof Juszczyk",
+   "p1_norm": "rafal wojcik",
+   "p2_norm": "krzysztof juszczyk",
+   "open_date": "2026-08-02T13:55:00.000Z",
+   "line": 78.5,
+   "over_odds": -110,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35895971,
+   "p1": "Rafal Glica",
+   "p2": "Jacek Wieczerzak",
+   "p1_norm": "rafal glica",
+   "p2_norm": "jacek wieczerzak",
+   "open_date": "2026-08-02T13:55:00.000Z",
+   "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35895972,
+   "p1": "Dawid Poloszczanski",
+   "p2": "Artur Szoltysek",
+   "p1_norm": "dawid poloszczanski",
+   "p2_norm": "artur szoltysek",
+   "open_date": "2026-08-02T13:55:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
