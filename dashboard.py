@@ -322,6 +322,19 @@ def _load(mt_date):
         "SELECT * FROM predictions WHERE pred_date>=? AND result IS NULL "
         "ORDER BY pred_date ASC, ev DESC",
         (mt_date,))]
+    # THE BOARD MUST USE THE SAME GATE AS THE SLIP (2026-08-02). This query used to render every
+    # un-settled row and consult nothing, so a manual veto freed the slip's TOP-2 slot while the
+    # board kept showing the play, and a subject ruled out after flag time never came off at all
+    # (Marina Mabrey, OUT with a neck injury, still showing pts_ast 22.5/23.5). The ledger row is
+    # untouched and still grades — this only decides what a human is shown right now.
+    try:
+        import wnba_slip as _WSUP
+        rows, _sup = _WSUP.suppressed(rows)
+        for _d in _sup:
+            print("board: suppressed (%s) %s %s %s" % (_d.get("_suppressed"), _d.get("player"),
+                                                       _d.get("stat"), _d.get("line")))
+    except Exception as _se:                                         # noqa: BLE001
+        print("board: suppression gate unavailable (%s) — showing every open row" % str(_se)[:60])
     g = [dict(r) for r in con.execute("SELECT result,odds,side,pred_date,player,team,stat,line,n_elev,d_min,ev,elev_avg, "
                                       # confidence/tier/played are READ below and were absent:
                                       # tier=None made the n1 exclusion a no-op (always True),
