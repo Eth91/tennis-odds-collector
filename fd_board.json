@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-02T14:37:54Z",
+ "captured_at": "2026-08-02T14:43:10Z",
  "matches": [
   {
    "event_id": 35896037,
@@ -8,9 +8,9 @@
    "p1_norm": "mateusz zagajewski",
    "p2_norm": "tadeusz piotrowski",
    "open_date": "2026-08-02T14:35:00.000Z",
-   "line": 75.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 85.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35896038,
@@ -19,20 +19,9 @@
    "p1_norm": "tibor spanik",
    "p2_norm": "krystian kolodziej",
    "open_date": "2026-08-02T14:35:00.000Z",
-   "line": 78.5,
+   "line": 81.5,
    "over_odds": -120,
    "under_odds": -115
-  },
-  {
-   "event_id": 35896041,
-   "p1": "Mariusz Zwolinski",
-   "p2": "Bartlomiej Wisniewski",
-   "p1_norm": "mariusz zwolinski",
-   "p2_norm": "bartlomiej wisniewski",
-   "open_date": "2026-08-02T14:40:00.000Z",
-   "line": 81.5,
-   "over_odds": -118,
-   "under_odds": -112
   },
   {
    "event_id": 35896042,
@@ -41,9 +30,9 @@
    "p1_norm": "sebastian szostok",
    "p2_norm": "marian lebek",
    "open_date": "2026-08-02T14:40:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 77.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35896046,
@@ -99,6 +88,17 @@
    "line": 84.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35896101,
+   "p1": "Sebastian Juzek",
+   "p2": "Jakub Jesiek",
+   "p1_norm": "sebastian juzek",
+   "p2_norm": "jakub jesiek",
+   "open_date": "2026-08-02T15:10:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
