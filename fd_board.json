@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-02T08:54:33Z",
+ "captured_at": "2026-08-02T08:59:23Z",
  "matches": [
   {
    "event_id": 35894949,
@@ -8,9 +8,9 @@
    "p1_norm": "pawel adamus",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-08-02T08:45:00.000Z",
-   "line": 87.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 103.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35894950,
@@ -19,9 +19,9 @@
    "p1_norm": "dawid jendrysik",
    "p2_norm": "patryk mecik",
    "open_date": "2026-08-02T08:45:00.000Z",
-   "line": 77.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 93.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35894960,
@@ -99,6 +99,28 @@
    "line": 71.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35894989,
+   "p1": "Dawid Poloszczanski",
+   "p2": "Bartlomiej Wisniewski",
+   "p1_norm": "dawid poloszczanski",
+   "p2_norm": "bartlomiej wisniewski",
+   "open_date": "2026-08-02T09:25:00.000Z",
+   "line": 81.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35894990,
+   "p1": "Rafal Glica",
+   "p2": "Marian Lebek",
+   "p1_norm": "rafal glica",
+   "p2_norm": "marian lebek",
+   "open_date": "2026-08-02T09:25:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
