@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-02T17:46:57Z",
+ "captured_at": "2026-08-02T17:54:56Z",
  "matches": [
   {
    "event_id": 35896736,
@@ -8,7 +8,7 @@
    "p1_norm": "jacek mitas",
    "p2_norm": "lukasz pietraszko",
    "open_date": "2026-08-02T17:40:00.000Z",
-   "line": 73.5,
+   "line": 88.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -19,9 +19,9 @@
    "p1_norm": "grzegorz mucha",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-08-02T17:45:00.000Z",
-   "line": 72.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 57.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35896749,
@@ -30,9 +30,9 @@
    "p1_norm": "marcin marchlewski",
    "p2_norm": "kacper szurlej",
    "open_date": "2026-08-02T17:45:00.000Z",
-   "line": 76.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 83.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35896768,
@@ -42,8 +42,8 @@
    "p2_norm": "wojciech urban",
    "open_date": "2026-08-02T17:55:00.000Z",
    "line": 81.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35896776,
@@ -88,6 +88,17 @@
    "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35896823,
+   "p1": "Grzegorz Marud",
+   "p2": "Lukasz Oracz",
+   "p1_norm": "grzegorz marud",
+   "p2_norm": "lukasz oracz",
+   "open_date": "2026-08-02T18:20:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
