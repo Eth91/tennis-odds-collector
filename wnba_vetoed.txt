@@ -1,0 +1,8 @@
+# Durable manual vetoes: plays the model flagged that a human declined to BET.
+# Format: date|surname|stat|line|reason        ('#' comments allowed)
+#
+# A veto does NOT remove the flag from the ledger and does NOT stop it grading. WNBA v1.2 is a
+# frozen PROSPECTIVE test, and a test you can retroactively withdraw entries from measures
+# nothing — if skips deleted flags, the record would improve every time a human overrode it.
+# The veto only frees the TOP-2 slot so the next-best play on that team-game is promoted.
+2026-08-02|Allemand|assists|5.5|Kiki Rice back+ramping (2g of a 56d absence, 8.5min under norm, trend +6.0). 9 of the 11 elevated games also had Rice OUT; the 2 that match tonight's lineup are themselves ramp games. Needs ~23+ min, came off 22.

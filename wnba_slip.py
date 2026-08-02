@@ -245,6 +245,46 @@ def tier_map(rows):
 
 
 PLAYED_MARKS = HERE / "wnba_played.txt"      # durable "I actually placed this" marks
+VETO_MARKS = HERE / "wnba_vetoed.txt"        # durable "I looked at this and passed" marks
+
+
+def _veto_marks():
+    """{(date, surname, stat, line)} from wnba_vetoed.txt — the human override of a flag.
+
+    Same format and same surname matching as _played_marks, for the same reasons: the file is
+    hand-edited and the ledger spells names in full. Format, '#' comments allowed:
+
+        2026-08-02|Allemand|assists|5.5|Rice back+ramping, 9/11 elevated games had her out
+
+    A vetoed play is NOT removed from the ledger and still grades. v1.2 is a frozen prospective
+    test; letting a human delete entries from it would measure a model nobody is running.
+    """
+    out = set()
+    try:
+        for ln in VETO_MARKS.read_text().splitlines():
+            ln = ln.strip()
+            if not ln or ln.startswith("#"):
+                continue
+            p = [x.strip() for x in ln.split("|")]
+            if len(p) < 4:
+                continue
+            try:
+                out.add((p[0], p[1].split()[-1].lower(), p[2].lower(), float(p[3])))
+            except ValueError:
+                continue
+    except OSError:
+        pass
+    return out
+
+
+def _is_vetoed(r, marks):
+    try:
+        return (str(r.get("pred_date"))[:10],
+                str(r.get("player") or "").split()[-1].lower(),
+                str(r.get("stat") or "").lower(),
+                float(r.get("line"))) in marks
+    except (ValueError, TypeError, IndexError):
+        return False
 
 
 def _played_marks():
@@ -311,6 +351,13 @@ def current_selection(rows, commit=False):
     # real money on it; the record must show it whatever the model thought. These are pulled out
     # BEFORE the gates and re-added at the end, so they also never consume a TOP-2 slot from a
     # play the model did pick. Nothing here changes what gets flagged or pinged.
+    # VETO FIRST. Removing it here (rather than filtering the final selection) is what lets the
+    # next-best play on that team-game be promoted into the freed TOP-2 slot — filtering at the
+    # end would leave a hole instead of a swap. A vetoed play keeps its ledger row and its grade.
+    _vetoes = _veto_marks()
+    if _vetoes:
+        overs = [r for r in overs if not _is_vetoed(r, _vetoes)]
+
     _marks = _played_marks()
     forced = [r for r in overs if _is_played(r, _marks)] if _marks else []
     if forced:
