@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-02T20:54:21Z",
+ "captured_at": "2026-08-02T20:59:58Z",
  "matches": [
   {
    "event_id": 35897091,
@@ -8,20 +8,9 @@
    "p1_norm": "sebastian juzek",
    "p2_norm": "mateusz sikon",
    "open_date": "2026-08-02T20:45:00.000Z",
-   "line": 84.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35897092,
-   "p1": "Lukasz Oracz",
-   "p2": "Wojciech Urban",
-   "p1_norm": "lukasz oracz",
-   "p2_norm": "wojciech urban",
-   "open_date": "2026-08-02T20:45:00.000Z",
-   "line": 83.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 75.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35897104,
@@ -52,9 +41,9 @@
    "p1_norm": "mariusz baron",
    "p2_norm": "grzegorz marud",
    "open_date": "2026-08-02T21:05:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35897123,
