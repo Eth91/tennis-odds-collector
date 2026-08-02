@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-02T07:59:05Z",
+ "captured_at": "2026-08-02T08:05:57Z",
  "matches": [
-  {
-   "event_id": 35894893,
-   "p1": "Rafal Glica",
-   "p2": "Sebastian Szostok",
-   "p1_norm": "rafal glica",
-   "p2_norm": "sebastian szostok",
-   "open_date": "2026-08-02T07:45:00.000Z",
-   "line": 67.5,
-   "over_odds": 100,
-   "under_odds": -140
-  },
   {
    "event_id": 35894894,
    "p1": "Krzysztof Wloczko",
@@ -19,9 +8,9 @@
    "p1_norm": "krzysztof wloczko",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-08-02T07:45:00.000Z",
-   "line": 79.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 84.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35894912,
@@ -30,7 +19,7 @@
    "p1_norm": "rafal wojcik",
    "p2_norm": "krzysztof juszczyk",
    "open_date": "2026-08-02T07:55:00.000Z",
-   "line": 76.5,
+   "line": 88.5,
    "over_odds": -110,
    "under_odds": -125
   },
@@ -41,9 +30,9 @@
    "p1_norm": "jakub kaczmarek",
    "p2_norm": "kacper adamus",
    "open_date": "2026-08-02T08:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 77.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35894920,
@@ -53,8 +42,8 @@
    "p2_norm": "konrad kulpa",
    "open_date": "2026-08-02T08:05:00.000Z",
    "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35894921,
@@ -63,9 +52,9 @@
    "p1_norm": "mateusz zagajewski",
    "p2_norm": "dominik solilo",
    "open_date": "2026-08-02T08:05:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 76.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35894928,
@@ -86,8 +75,8 @@
    "p2_norm": "artur szoltysek",
    "open_date": "2026-08-02T08:10:00.000Z",
    "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35894933,
@@ -110,6 +99,17 @@
    "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35894937,
+   "p1": "Piotr Maruszak",
+   "p2": "Mateusz Woskowicz",
+   "p1_norm": "piotr maruszak",
+   "p2_norm": "mateusz woskowicz",
+   "open_date": "2026-08-02T08:30:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
