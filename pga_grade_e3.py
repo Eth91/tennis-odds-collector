@@ -86,6 +86,45 @@ def positions(scores):
     return out
 
 
+
+VOID_FIELD_MIN = 20      # players who must already have a score for round k before "no score for
+                         # THIS player" can mean withdrawal rather than "the round is still running"
+
+
+def void_dnps(con, scores):
+    """Settle round-scoped flags whose player never teed off. Returns how many were voided.
+
+    A withdrawal produces the same observation as an unfinished round — no score — so this only
+    fires once the FIELD has demonstrably completed that round. Without that guard it would void
+    live bets mid-round, which is far worse than a stale row on the board.
+    """
+    import re as _re
+    done = {}
+    for _p, _rs in (scores or {}).items():
+        for k in range(1, 5):
+            if len(_rs) >= k:
+                done[k] = done.get(k, 0) + 1
+    n = 0
+    for key, market, runner, stream in con.execute(
+            "SELECT key, market, runner, stream FROM flags WHERE result IS NULL").fetchall():
+        rm = _re.search(r"Round\s+(\d)", market or "")
+        if not rm:
+            continue                                  # 72-hole markets settle at event end
+        k = int(rm.group(1))
+        if done.get(k, 0) < VOID_FIELD_MIN:
+            continue                                  # round not finished for the field — leave it
+        m = _re.search(r"^(.*?)\s+(over|under)\s+[\d.]+$", (runner or "").strip(), _re.I)
+        who = _norm(m.group(1)) if m else None
+        if who is None:
+            continue
+        rs = scores.get(who)
+        if rs is not None and len(rs) >= k:
+            continue                                  # they DID play it; the normal grader owns it
+        con.execute("UPDATE flags SET result='V', pnl=0.0, graded_at=? WHERE key=?",
+                    (__import__("datetime").datetime.utcnow().replace(microsecond=0).isoformat(), key))
+        n += 1
+    return n
+
 def grade_one(stream, market, runner, odds, ctx):
     """(result, pnl) or None when the bet is not yet decidable. Never guesses."""
     scores, pos, cut_known, final = ctx["scores"], ctx["pos"], ctx["cut_known"], ctx["final"]
@@ -226,6 +265,13 @@ def main():
                     (res, round(pnl, 4),
                      dt.datetime.utcnow().replace(microsecond=0).isoformat(), key))
         n += 1
+    # settle withdrawals so round-scoped flags cannot sit on the board forever
+    try:
+        _nv = void_dnps(con, scores)
+        if _nv:
+            print('pga_grade_e3: voided %d flag(s) whose player never teed off' % _nv)
+    except Exception as _ve:
+        print('void sweep skipped: %s' % str(_ve)[:70])
     con.commit()
     tot = con.execute("SELECT COUNT(*) FROM flags WHERE stream LIKE 'E3-%'").fetchone()[0]
     done = con.execute("SELECT COUNT(*) FROM flags WHERE stream LIKE 'E3-%' "
