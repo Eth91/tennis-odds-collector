@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-02T16:40:17Z",
+ "captured_at": "2026-08-02T16:45:00Z",
  "matches": [
   {
    "event_id": 35896291,
@@ -8,9 +8,9 @@
    "p1_norm": "dawid kosmal",
    "p2_norm": "mateusz rutkowski",
    "open_date": "2026-08-02T16:30:00.000Z",
-   "line": 85.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 79.5,
+   "over_odds": 110,
+   "under_odds": -150
   },
   {
    "event_id": 35896294,
@@ -19,20 +19,9 @@
    "p1_norm": "mateusz baran",
    "p2_norm": "michal guzik",
    "open_date": "2026-08-02T16:35:00.000Z",
-   "line": 84.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35896300,
-   "p1": "Jakub Nowak",
-   "p2": "Krzysztof Juszczyk",
-   "p1_norm": "jakub nowak",
-   "p2_norm": "krzysztof juszczyk",
-   "open_date": "2026-08-02T16:40:00.000Z",
-   "line": 70.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 67.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35896327,
@@ -85,9 +74,20 @@
    "p1_norm": "pawel adamus",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-08-02T17:05:00.000Z",
-   "line": 81.5,
+   "line": 85.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35896626,
+   "p1": "Adam Ruszkiewicz",
+   "p2": "Mateusz Sikon",
+   "p1_norm": "adam ruszkiewicz",
+   "p2_norm": "mateusz sikon",
+   "open_date": "2026-08-02T17:10:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
