@@ -2122,11 +2122,13 @@ def _starwatch_html():
                 pass
         opp = (s.get("opp") or "").upper()
         vs = f'<span class="swvs">vs {opp}</span>' if opp else ""
+        _usg = (f"{s.get('mpg')}' · {s.get('ppg')}p"
+                + (f" · {s.get('ast')}a" if s.get("ast") else ""))
+        _meta = " · ".join(x for x in (vs, dtag, _usg) if x)
         rows += (f'<div class="swrow">'
                  f'<div class="swhd">{_logo(s.get("team"))}<b>{html.escape(_short(s.get("player") or ""))}</b>'
-                 f'<span class="swstat {scls}">{html.escape(stt)}</span>{vs}{dtag}'
-                 f'<span class="swusg">{s.get("mpg")}\' · {s.get("ppg")}p'
-                 + (f" · {s.get('ast')}a" if s.get("ast") else "") + '</span></div>'
+                 f'<span class="swstat {scls}">{html.escape(stt)}</span></div>'
+                 f'<div class="swmeta">{_meta}</div>'
                  f'<div class="swo">likely to inherit the role: <b>{html.escape(opts)}</b></div></div>')
     # Subtitle dropped: it wrapped to two lines at 402pt and restated the section name. The
     # INJURY REPORT keeps its subtitle because that one defines `n=`, which the badge does not.
@@ -4309,11 +4311,12 @@ def build():
   #wnba .swhd {{ display:flex; align-items:center; gap:8px; flex-wrap:wrap;
                  font-size:16px; font-weight:600; letter-spacing:-.01em; color:var(--cu-lbl); }}
   #wnba .swhd b {{ font-weight:600; }}
-  /* usage numbers are a trailing detail, not a competing column — they push right and never wrap */
-  #wnba .swusg {{ margin-left:auto; color:var(--cu-lbl2); font-size:14px;
-                  font-variant-numeric:tabular-nums; white-space:nowrap; }}
-  #wnba .swvs {{ color:var(--cu-lbl2); font-size:14px; }}
-  #wnba .swday {{ color:var(--cu-lbl3); font-size:13px; }}
+  /* meta is a SUBTITLE line, not a right-aligned column. Pushing it right with margin-left:auto
+     worked until the badge made the row too wide, then it wrapped and hung alone on its own line.
+     Stacked title/subtitle/detail is width-independent — identical at 393pt and 430pt. */
+  #wnba .swmeta {{ margin-top:3px; color:var(--cu-lbl2); font-size:14px;
+                   font-variant-numeric:tabular-nums; }}
+  #wnba .swvs, #wnba .swday {{ color:inherit; font-size:inherit; }}
   #wnba .swo {{ margin-top:6px; color:var(--cu-lbl2); font-size:14px; line-height:1.4; }}
   #wnba .swo b {{ color:var(--cu-lbl); font-weight:600; }}
   #wnba .sw-title {{ margin-bottom:2px; }}
@@ -4359,9 +4362,12 @@ def build():
   #wnba .empty {{ background:var(--cu-grp); border:0; border-radius:12px;
                   padding:32px 20px; text-align:center; margin:4px 0 20px; }}
   #wnba .empty-t {{ color:var(--cu-lbl); font-size:17px; font-weight:600;
-                    letter-spacing:-.02em; }}
+                    letter-spacing:-.02em; text-wrap:balance; }}
+  /* text-wrap:pretty, not a shorter string. At 30ch the last line was the orphan "out." — a
+     one-word line under a three-line paragraph. Rewriting the copy would fix it at exactly one
+     viewport width; letting the browser rebalance fixes it at every width. */
   #wnba .empty-s {{ color:var(--cu-lbl2); font-size:14px; line-height:1.45;
-                    margin:6px auto 0; max-width:30ch; }}
+                    margin:6px auto 0; max-width:30ch; text-wrap:pretty; }}
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
