@@ -1,8 +1,8 @@
 # WNBA prop edge report
 
-_2026-08-02 08:27 UTC_
+_2026-08-02 08:39 UTC_
 
-Pinnacle snapshot: `None`  |  FanDuel snapshot: `2026-08-02T08:21:06`
+Pinnacle snapshot: `None`  |  FanDuel snapshot: `2026-08-02T08:29:42`
 
 No Pinnacle WNBA props in the latest snapshot — props post gameday; the scan fills in once they're up.
 
