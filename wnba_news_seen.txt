@@ -246,6 +246,7 @@ rw|378|Starting Monday
 rw|394|Another absence coming
 rw|394|Downgraded to doubtful
 rw|394|Iffy for Wednesday
+rw|394|Out Sunday
 rw|394|Ruled out Wednesday
 rw|394|Shines in return to Phoenix
 rw|394|Won't play Tuesday
