@@ -413,9 +413,13 @@ def loss_profile():
     a round it can only ever raise a question. The answer comes from the field."""
     try:
         c = sqlite3.connect(PAPER_DB)
-        rows = [dict(zip([d[0] for d in c.description], r)) for r in c.execute(
-            "SELECT market, runner, result, p_bet, p_fair, odds FROM flags "
-            "WHERE result IN ('W','L')")]
+        # `description` lives on the CURSOR execute() returns, not the connection. Reading it off
+        # the connection raised AttributeError — uncaught by the sqlite3.Error handler — so every
+        # --round run died here and the loss profile has never actually been produced.
+        cur = c.execute(
+            "SELECT stream, market, runner, result, p_bet, p_fair, odds FROM flags "
+            "WHERE result IN ('W','L')")
+        rows = [dict(zip([d[0] for d in cur.description], r)) for r in cur]
         c.close()
     except sqlite3.Error:
         return []
