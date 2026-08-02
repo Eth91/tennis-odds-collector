@@ -339,6 +339,7 @@ rw|577|Downgraded to out
 rw|577|Out again Wednesday
 rw|577|Probable for Wednesday
 rw|577|Questionable for Wednesday
+rw|577|Starting Sunday
 rw|577|Unlikely to play Monday
 rw|578|Plays well off bench
 rw|578|Provides spark in victory
@@ -366,6 +367,7 @@ rw|587|Hands out 10 dimes in loss
 rw|587|Leading scorer in loss
 rw|587|Leads all scorers in loss
 rw|587|Records pair of steals Wednesday
+rw|599|Starting Sunday
 rw|599|Struggles in loss
 rw|603|Adds 16 points in loss
 rw|603|Drops 25 points in defeat
@@ -410,6 +412,7 @@ rw|687|Won't play Monday
 rw|703|Another quiet effort
 rw|720|Lacking clear role
 rw|724|Full stat line Tuesday
+rw|733|Headed to bench
 rw|733|Swats four shots in loss
 rw|735|Limited production in return
 rw|735|Notches 10 points

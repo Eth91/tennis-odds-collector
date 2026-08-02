@@ -24,3 +24,30 @@ TOURNAMENT_MATCHBETS_IMG     n=   16 open/close mean 1.000 median 1.000
 WILL_THERE_BE_A_HOLE-IN-ONE_IMG n=    2 open/close mean 1.000 median 1.000
 done
 done
+TOP_REGION_IMG               n=  254 open/close mean 0.972 median 1.000
+WIN_ONLY_IMG                 n=  129 open/close mean 1.060 median 1.000
+OUTRIGHT_WINNER_WITHOUT_X_IMG n=  126 open/close mean 0.960 median 1.000
+TOP_5_FINISH_IMG             n=  125 open/close mean 0.858 median 1.000
+TOP_10_FINISH_IMG            n=  125 open/close mean 1.190 median 0.837
+TOP_20_FINISH_IMG            n=   92 open/close mean 1.229 median 0.956
+OUTRIGHT_BETTING             n=   88 open/close mean 1.000 median 1.000
+WHO_WILL_WIN_A_GROUP_OF_HOLES_IMG n=   73 open/close mean 1.016 median 0.725
+3_BALLS_IMG                  n=   69 open/close mean 1.026 median 0.466
+PLAYER_BIRDIES_OR_BETTER     n=   46 open/close mean 0.998 median 0.998
+PLAYER_ROUND_SCORE           n=   46 open/close mean 1.011 median 1.000
+PLAYER_HOLE_2_SCORE          n=   45 open/close mean 1.075 median 0.917
+PLAYER_HOLE_3_SCORE          n=   45 open/close mean 1.043 median 1.000
+PLAYER_HOLE_1_SCORE          n=   45 open/close mean 1.030 median 0.846
+2_BALLS_IMG                  n=   32 open/close mean 1.000 median 1.000
+TOP_GROUP_IMG                n=   26 open/close mean 1.596 median 0.434
+THREE_CHANCES_TO_WIN         n=   20 open/close mean 1.000 median 1.000
+ROUND_MATCHBETS_IMG          n=   18 open/close mean 1.004 median 0.942
+PLAYER_HOLE_11_SCORE         n=   18 open/close mean 1.100 median 0.663
+PLAYER_HOLE_10_SCORE         n=   18 open/close mean 1.321 median 0.899
+PLAYER_HOLE_12_SCORE         n=   18 open/close mean 1.122 median 1.035
+BIG_GUNS_V_THE_FIELD         n=   15 open/close mean 1.000 median 1.000
+TOURNAMENT_MATCHBETS_IMG     n=   10 open/close mean 1.250 median 0.978
+TWO_CHANCES_TO_WIN           n=   10 open/close mean 1.000 median 1.000
+WINNING_TEAM                 n=    3 open/close mean 1.000 median 1.000
+WINNING_SCORE_IMG            n=    2 open/close mean 1.018 median 1.018
+done
