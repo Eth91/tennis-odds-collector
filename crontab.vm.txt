@@ -5,3 +5,19 @@
 10 23 * * 1 cd /home/ubuntu/tennis-odds-collector && /usr/bin/python3 pga_birdies.py --harvest >> birdie_harvest.log 2>&1
 */10 * * * * /bin/bash /home/ubuntu/tt_board_watchdog.sh >> /home/ubuntu/tt_watchdog.log 2>&1
 */5 * * * * cd /home/ubuntu/tennis-odds-collector && /usr/bin/python3 golf_collect.py --only-if-tee-within 75 >> golf_collect.log 2>&1
+# ── MAIN VM (wnba-loop-vm, 155.248.217.149) ────────────────────────────────────────────────────
+0 19 * * * cd /home/ubuntu/tennis-odds-collector && /usr/bin/python3 wnba_selfcheck.py >> /tmp/wnba_selfcheck.log 2>&1
+*/30 * * * * cd /home/ubuntu/tennis-odds-collector && /usr/bin/python3 golf_collect.py >> golf_collect.log 2>&1 && /usr/bin/python3 pga_e1.py >> pga_e1.log 2>&1; /usr/bin/python3 pga_e3.py >> pga_e1.log 2>&1; /usr/bin/python3 pga_grade.py >> pga_e1.log 2>&1
+0 23 * * * cd /home/ubuntu/tennis-odds-collector && /usr/bin/python3 golf_clv.py >> golf_clv.log 2>&1
+10 9 * * * cd /home/ubuntu/tennis-odds-collector && /usr/bin/python3 fd_maintain.py >> fd_maintain.log 2>&1
+10 23 * * 1 cd /home/ubuntu/tennis-odds-collector && /usr/bin/python3 pga_birdies.py --harvest >> birdie_harvest.log 2>&1
+*/10 * * * * /bin/bash /home/ubuntu/tt_board_watchdog.sh >> /home/ubuntu/tt_watchdog.log 2>&1
+*/5 * * * * cd /home/ubuntu/tennis-odds-collector && /usr/bin/python3 golf_collect.py --only-if-tee-within 75 >> golf_collect.log 2>&1
+
+# ── WORKER-2 (wnba-worker-2, 140.238.143.104) — install THERE, not here ────────────────────────
+# worker-2: */3 * * * * /bin/bash /home/ubuntu/tt_publish_board.sh >> /home/ubuntu/tt_publish.log 2>&1
+# worker-2: */3 * * * * cd /home/ubuntu/tt-elite && /usr/bin/python3 bmgm_tt.py >> /home/ubuntu/bmgm_tt.log 2>&1
+# worker-2: */10 * * * * /bin/bash /home/ubuntu/vm_publish_watchdog.sh
+# worker-2: 17 * * * * /bin/bash /home/ubuntu/tt_ship_stranded.sh
+# worker-2: 40 10 * * * /bin/bash /home/ubuntu/git_reshallow_any.sh /home/ubuntu/toc-pub main >/dev/null 2>&1
+# worker-2: 45 10 * * * /bin/bash /home/ubuntu/git_reshallow_any.sh /home/ubuntu/tt-elite main --allow-convert >/dev/null 2>&1
