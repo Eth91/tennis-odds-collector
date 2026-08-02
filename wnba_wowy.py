@@ -232,9 +232,24 @@ def wowy_multi(player_log, teammate_logs):
     'without' = games none of them played (the multi-out scenario the user cares about —
     a beneficiary often gets a BIGGER boost when 2+ impact players sit together); 'with' =
     at least one of them played. Returns per-stat means over MIN/PTS/REB/AST/FGA/FTA/3PA."""
+    # SAME-SIDE ONLY. A game_id identifies a GAME, not a SIDE, so two players who faced each other
+    # share one. For a player traded in mid-season that is the ONLY way she ever shares a game_id
+    # with her new teammates, which made her "with" set a single game played AGAINST them and her
+    # "without" set the beneficiary's entire season. Teammates record the same opponent in a shared
+    # game; opponents record each other's team — verified a perfect discriminator (22/22 and 21/21
+    # for real TOR pairs, 0/1 for Morrow, who has never played a game FOR Toronto).
+    own = {g["game_id"]: g.get("matchup") for g in player_log}
     present = set()
     for tl in teammate_logs:
-        present |= {g["game_id"] for g in tl}
+        for g in tl:
+            gid = g["game_id"]
+            if gid not in own:
+                continue
+            mine, theirs = own[gid], g.get("matchup")
+            # Missing discriminator -> keep the old behaviour for that game. Treating an unknown
+            # as "opponent" would reclassify real teammates and corrupt the splits that work.
+            if mine is None or theirs is None or mine == theirs:
+                present.add(gid)
     with_g = [g for g in player_log if g["game_id"] in present]
     without_g = [g for g in player_log if g["game_id"] not in present]
     def block(gs):
