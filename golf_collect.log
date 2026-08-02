@@ -618,3 +618,21 @@ competition sweep: 7 comps, +1092 rows (42 birdie rows)
 golf: BIRDIES MARKET CAPTURED - calibration data accruing
 golf_collect 2026-08-02T16:25:01: 671 rows
 golf_moves 2026-08-02T16:25:01: 1092 keys folded, 20 closes frozen
+golf_collect: dense pass (a tee lands within 75 min)
+Traceback (most recent call last):
+  File "/home/ubuntu/tennis-odds-collector/golf_collect.py", line 246, in <module>
+    main()
+  File "/home/ubuntu/tennis-odds-collector/golf_collect.py", line 92, in main
+    con.execute("INSERT INTO golf_lines VALUES (?,?,?,?,?,?,?)",
+sqlite3.OperationalError: database is locked
+golf trap: 🐦 BIRDIES COUPON HYDRATING (module 2240, open coupons [50970]) — markets should land this pass or next
+competition sweep: 7 comps, +1089 rows (42 birdie rows)
+golf: BIRDIES MARKET CAPTURED - calibration data accruing
+golf_collect 2026-08-02T16:30:03: 667 rows
+golf_moves 2026-08-02T16:30:03: 1089 keys folded, 0 closes frozen
+golf_collect: dense pass (a tee lands within 75 min)
+golf trap: 🐦 BIRDIES COUPON HYDRATING (module 2240, open coupons [50970]) — markets should land this pass or next
+competition sweep: 7 comps, +1069 rows (42 birdie rows)
+golf: BIRDIES MARKET CAPTURED - calibration data accruing
+golf_collect 2026-08-02T16:35:02: 659 rows
+golf_moves 2026-08-02T16:35:02: 1069 keys folded, 20 closes frozen

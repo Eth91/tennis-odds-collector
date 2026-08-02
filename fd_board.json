@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-08-02T16:26:07Z",
+ "captured_at": "2026-08-02T16:35:46Z",
  "matches": [
-  {
-   "event_id": 35896270,
-   "p1": "Grzegorz Mucha",
-   "p2": "Michal Machelski",
-   "p1_norm": "grzegorz mucha",
-   "p2_norm": "michal machelski",
-   "open_date": "2026-08-02T16:15:00.000Z",
-   "line": 73.5,
-   "over_odds": -115,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35896271,
-   "p1": "Marcin Marchlewski",
-   "p2": "Jakub Glanowski",
-   "p1_norm": "marcin marchlewski",
-   "p2_norm": "jakub glanowski",
-   "open_date": "2026-08-02T16:15:00.000Z",
-   "line": 83.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35896286,
-   "p1": "Sebastian Juzek",
-   "p2": "Jaroslaw Badura",
-   "p1_norm": "sebastian juzek",
-   "p2_norm": "jaroslaw badura",
-   "open_date": "2026-08-02T16:25:00.000Z",
-   "line": 78.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35896291,
    "p1": "Dawid Kosmal",
@@ -41,20 +8,9 @@
    "p1_norm": "dawid kosmal",
    "p2_norm": "mateusz rutkowski",
    "open_date": "2026-08-02T16:30:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35896293,
-   "p1": "Szymon Brud",
-   "p2": "Jakub Michalczyk",
-   "p1_norm": "szymon brud",
-   "p2_norm": "jakub michalczyk",
-   "open_date": "2026-08-02T16:35:00.000Z",
-   "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 81.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35896294,
@@ -64,8 +20,8 @@
    "p2_norm": "michal guzik",
    "open_date": "2026-08-02T16:35:00.000Z",
    "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35896300,
@@ -88,6 +44,39 @@
    "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35896426,
+   "p1": "Lukasz Pietraszko",
+   "p2": "Filip Mlynarski",
+   "p1_norm": "lukasz pietraszko",
+   "p2_norm": "filip mlynarski",
+   "open_date": "2026-08-02T16:55:00.000Z",
+   "line": 72.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35896427,
+   "p1": "Zbigniew Nocun",
+   "p2": "Kazimierz Rybak",
+   "p1_norm": "zbigniew nocun",
+   "p2_norm": "kazimierz rybak",
+   "open_date": "2026-08-02T16:55:00.000Z",
+   "line": 70.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35896428,
+   "p1": "Kacper Szurlej",
+   "p2": "Tomasz Filbrandt",
+   "p1_norm": "kacper szurlej",
+   "p2_norm": "tomasz filbrandt",
+   "open_date": "2026-08-02T16:55:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }

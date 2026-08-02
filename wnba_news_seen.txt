@@ -112,6 +112,7 @@ rw|1057|Quiet outing in loss
 rw|1057|Will play on minutes restriction
 rw|1058|Agrees to new seven-day deal
 rw|1058|Let go by Mercury
+rw|1058|Waived by Phoenix
 rw|1060|Drops 18 points in loss
 rw|1060|Drops 19 points in blowout loss
 rw|1061|Left off injury report
@@ -119,6 +120,7 @@ rw|1061|Not on injury report
 rw|1061|Ruled out Friday
 rw|1061|Ruled out for Wednesday
 rw|1064|Cut loose by Lynx
+rw|1064|Inks ROS contract with Minnesota
 rw|1064|Inks another seven-day deal
 rw|1066|Adds 12 points off bench
 rw|1067|Cleared to play
