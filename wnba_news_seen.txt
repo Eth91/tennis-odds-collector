@@ -381,6 +381,7 @@ rw|641|Nets 21 points in overtime win
 rw|641|Puts up 15 points in loss
 rw|641|Season-high 29 points in win
 rw|642|Not traveling with team
+rw|642|Ruled out for Monday
 rw|642|Still out Thursday
 rw|647|Plays well off bench
 rw|661|Stuck in backup role
@@ -393,6 +394,7 @@ rw|678|Intends to play Thursday
 rw|678|Officially listed as questionable
 rw|678|Provides spark in win
 rw|687|Progresses to individual drills
+rw|687|Won't play Monday
 rw|703|Another quiet effort
 rw|720|Lacking clear role
 rw|724|Full stat line Tuesday
