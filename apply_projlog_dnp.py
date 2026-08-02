@@ -55,15 +55,30 @@ NEW = '''        if not cand:
             # the slate is old enough to be over, AND this player's own feed is demonstrably
             # current past it (she has a later game). Without the second guard a stale or broken
             # game-log feed would be silently recorded as "she was a scratch".
-            if _dnp_resolvable(date, cache[pid]):
+            if _dnp_resolvable(date, cache[pid], _feed_max):
                 con.execute("UPDATE projections SET graded=2 WHERE rowid=?", (rid,))
                 dnp += 1
             continue'''
 assert OLD in s, "cand anchor"
 s = s.replace(OLD, NEW, 1)
 
+# The feed high-water mark is accumulated from the SAME game-log fetches the grading loop already
+# makes, so proving the source is current costs no extra requests.
+OLD_FM = """        cand = sorted((g for g in cache[pid]"""
+NEW_FM = """        for _g in cache[pid]:
+            _gd = str(_g.get("date"))[:10]
+            if _gd and (_feed_max is None or _gd > _feed_max):
+                _feed_max = _gd
+        cand = sorted((g for g in cache[pid]"""
+assert OLD_FM in s, "feed-max anchor"
+s = s.replace(OLD_FM, NEW_FM, 1)
+
 OLD2 = '''    cache, graded = {}, 0'''
-NEW2 = '''    cache, graded, dnp = {}, 0, 0'''
+NEW2 = '''    cache, graded, dnp = {}, 0, 0
+    # Feed high-water mark: the newest game date anywhere in the logs this run touches. Computed
+    # from the same fetches the grading loop already makes, so it costs nothing extra, and it is
+    # the honest proof that the data source is current rather than silently truncated.
+    _feed_max = None'''
 assert OLD2 in s, "counter anchor"
 s = s.replace(OLD2, NEW2, 1)
 
@@ -80,11 +95,19 @@ s = s.replace(OLD3, NEW3, 1)
 
 HELPER = '''
 
-def _dnp_resolvable(date, log):
+def _dnp_resolvable(date, log, feed_max=None):
     """May a projection with no box score be settled as DID-NOT-PLAY? Both guards must hold.
 
     Returns False whenever we cannot TELL, which leaves the row pending and visible rather than
     silently recording a scratch that may just be a broken feed.
+
+    CURRENCY IS PROVEN AT THE FEED, NOT THE PLAYER. The first version of this asked whether the
+    PLAYER had a later game — and that fails on exactly the dominant case: a player on a long
+    absence has no later game BECAUSE she never came back, which is the very thing we are trying to
+    record. Haley Jones was projected 2026-07-20 with her last game on 05-20; her own log can never
+    clear that bar. `feed_max` is the newest game date seen anywhere in this run, so it answers the
+    question actually being asked — did our data source advance past this slate? If it did, an
+    absent player was absent. If it did not, we know nothing and refuse.
     """
     import datetime as _dt
     try:
@@ -93,9 +116,10 @@ def _dnp_resolvable(date, log):
         return False
     if (_dt.date.today() - d).days < DNP_MIN_AGE_DAYS:
         return False                       # slate may still be in progress
-    # The player's own feed must have moved PAST this slate. A later game proves the log is current,
-    # so her absence from this one is a real scratch and not a gap in our data.
-    return any(str(g.get("date"))[:10] > str(date)[:10] for g in (log or []))
+    ds = str(date)[:10]
+    if feed_max and str(feed_max)[:10] > ds:
+        return True                        # the SOURCE moved past this slate: absence is real
+    return any(str(g.get("date"))[:10] > ds for g in (log or []))
 
 '''
 anchor2 = "\ndef grade():"

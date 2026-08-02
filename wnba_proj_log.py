@@ -69,11 +69,19 @@ def log(rows):
 
 
 
-def _dnp_resolvable(date, log):
+def _dnp_resolvable(date, log, feed_max=None):
     """May a projection with no box score be settled as DID-NOT-PLAY? Both guards must hold.
 
     Returns False whenever we cannot TELL, which leaves the row pending and visible rather than
     silently recording a scratch that may just be a broken feed.
+
+    CURRENCY IS PROVEN AT THE FEED, NOT THE PLAYER. The first version of this asked whether the
+    PLAYER had a later game — and that fails on exactly the dominant case: a player on a long
+    absence has no later game BECAUSE she never came back, which is the very thing we are trying to
+    record. Haley Jones was projected 2026-07-20 with her last game on 05-20; her own log can never
+    clear that bar. `feed_max` is the newest game date seen anywhere in this run, so it answers the
+    question actually being asked — did our data source advance past this slate? If it did, an
+    absent player was absent. If it did not, we know nothing and refuse.
     """
     import datetime as _dt
     try:
@@ -82,9 +90,10 @@ def _dnp_resolvable(date, log):
         return False
     if (_dt.date.today() - d).days < DNP_MIN_AGE_DAYS:
         return False                       # slate may still be in progress
-    # The player's own feed must have moved PAST this slate. A later game proves the log is current,
-    # so her absence from this one is a real scratch and not a gap in our data.
-    return any(str(g.get("date"))[:10] > str(date)[:10] for g in (log or []))
+    ds = str(date)[:10]
+    if feed_max and str(feed_max)[:10] > ds:
+        return True                        # the SOURCE moved past this slate: absence is real
+    return any(str(g.get("date"))[:10] > ds for g in (log or []))
 
 
 def grade():
@@ -95,12 +104,20 @@ def grade():
         return 0
     ids = {v["id"]: n for n, v in W.players().items()}     # ensure name cache warm (pid is the key)
     cache, graded, dnp = {}, 0, 0
+    # Feed high-water mark: the newest game date anywhere in the logs this run touches. Computed
+    # from the same fetches the grading loop already makes, so it costs nothing extra, and it is
+    # the honest proof that the data source is current rather than silently truncated.
+    _feed_max = None
     for rid, date, pid, opp in rows:
         if pid not in cache:
             try:
                 cache[pid] = W.game_log(pid)
             except RuntimeError:
                 cache[pid] = []
+        for _g in cache[pid]:
+            _gd = str(_g.get("date"))[:10]
+            if _gd and (_feed_max is None or _gd > _feed_max):
+                _feed_max = _gd
         cand = sorted((g for g in cache[pid]
                        if g.get("result") and g["date"][:10] >= date
                        and (not opp or (g.get("matchup") or "").upper() == opp.upper())),
@@ -111,7 +128,7 @@ def grade():
             # the slate is old enough to be over, AND this player's own feed is demonstrably
             # current past it (she has a later game). Without the second guard a stale or broken
             # game-log feed would be silently recorded as "she was a scratch".
-            if _dnp_resolvable(date, cache[pid]):
+            if _dnp_resolvable(date, cache[pid], _feed_max):
                 con.execute("UPDATE projections SET graded=2 WHERE rowid=?", (rid,))
                 dnp += 1
             continue
