@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-02T07:44:58Z",
+ "captured_at": "2026-08-02T07:49:43Z",
  "matches": [
-  {
-   "event_id": 35894873,
-   "p1": "Jakub Nowak",
-   "p2": "Piotr Przewlocki",
-   "p1_norm": "jakub nowak",
-   "p2_norm": "piotr przewlocki",
-   "open_date": "2026-08-02T07:30:00.000Z",
-   "line": 92.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
   {
    "event_id": 35894881,
    "p1": "Patryk Mecik",
@@ -19,9 +8,9 @@
    "p1_norm": "patryk mecik",
    "p2_norm": "mariusz adamus",
    "open_date": "2026-08-02T07:35:00.000Z",
-   "line": 90.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 95.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35894885,
@@ -30,7 +19,7 @@
    "p1_norm": "tadeusz piotrowski",
    "p2_norm": "arkadiusz mugowski",
    "open_date": "2026-08-02T07:40:00.000Z",
-   "line": 83.5,
+   "line": 84.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -41,9 +30,9 @@
    "p1_norm": "mikolaj lukaszewski",
    "p2_norm": "mariusz zwolinski",
    "open_date": "2026-08-02T07:40:00.000Z",
-   "line": 76.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 81.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35894893,
@@ -52,9 +41,9 @@
    "p1_norm": "rafal glica",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-08-02T07:45:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 72.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35894894,
@@ -63,9 +52,9 @@
    "p1_norm": "krzysztof wloczko",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-08-02T07:45:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 54.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35894912,
@@ -75,8 +64,8 @@
    "p2_norm": "krzysztof juszczyk",
    "open_date": "2026-08-02T07:55:00.000Z",
    "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35894916,
