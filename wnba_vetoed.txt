@@ -5,4 +5,11 @@
 # frozen PROSPECTIVE test, and a test you can retroactively withdraw entries from measures
 # nothing — if skips deleted flags, the record would improve every time a human overrode it.
 # The veto only frees the TOP-2 slot so the next-best play on that team-game is promoted.
-2026-08-02|Allemand|assists|5.5|Kiki Rice back+ramping (2g of a 56d absence, 8.5min under norm, trend +6.0). 9 of the 11 elevated games also had Rice OUT; the 2 that match tonight's lineup are themselves ramp games. Needs ~23+ min, came off 22.
+# A LIFTED VETO IS COMMENTED OUT, NEVER DELETED. Why it was written and why it was withdrawn are
+# both the audit trail — a file showing only current state cannot be checked against what was known
+# when the call was made.
+#
+# LIFTED 2026-08-02 ~18:20 ET by the user. Sound on what was known that morning, but it priced only
+# one side of the change. Marina Mabrey (29.1 mpg, 21.0 ppg, primary ball-handler) was ruled OUT at
+# 16:30 ET, AFTER this was written, which pushes Allemand's playmaking role hard the other way.
+# 2026-08-02|Allemand|assists|5.5|Kiki Rice back+ramping (2g of a 56d absence, 8.5min under norm, trend +6.0). 9 of the 11 elevated games also had Rice OUT; the 2 that match tonight's lineup are themselves ramp games. Needs ~23+ min, came off 22.
