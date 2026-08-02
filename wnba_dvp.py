@@ -203,13 +203,42 @@ def dvp_table():
     return t
 
 
+# Combo markets decompose into the base stats the table is keyed on. Mirrors
+# wnba_tonight._STAT_COMPONENTS deliberately — a second, independent mapping would drift the first
+# time a market is added, which is the exact failure two copies of a gate already caused here.
+_COMBO_PARTS = {"pra": ("pts", "reb", "ast"), "pts_reb": ("pts", "reb"),
+                "pts_ast": ("pts", "ast"), "reb_ast": ("reb", "ast")}
+
+
 def dvp(team, pos, stat):
-    """Opponent-adjusted DvP coefficient (stat-units per minute; + = opponent allows more)."""
+    """Opponent-adjusted DvP coefficient (stat-units per minute; + = opponent allows more).
+
+    COMBOS SUM THEIR PARTS. The table is keyed on base stats (pts|G, reb|F, ...), so a lookup for
+    "pts_ast" missed and fell through to the 0.0 default — silently pricing every combo market with
+    no opponent adjustment while looking exactly like an average matchup. 17 of 52 graded selected
+    bets were affected. The coefficient is per-minute stat units, so addition is the correct
+    composition: +0.010 pts/min and +0.005 ast/min is +0.015 pts_ast/min.
+    """
+    if stat in _COMBO_PARTS:
+        return sum(dvp(team, pos, p) for p in _COMBO_PARTS[stat])
     return dvp_table().get(f"{stat}|{_PG.get(pos, pos)}", {}).get(team, 0.0)
 
 
+def _coef_spread(pos, stat):
+    """Every team's coefficient for this (stat, pos) — summed across parts for a combo, so the
+    soft/tough percentile band works for combos instead of returning an empty list."""
+    g = _PG.get(pos, pos)
+    if stat in _COMBO_PARTS:
+        teams = set()
+        for p in _COMBO_PARTS[stat]:
+            teams |= set(dvp_table().get(f"{p}|{g}", {}))
+        return {t: sum(dvp_table().get(f"{p}|{g}", {}).get(t, 0.0)
+                       for p in _COMBO_PARTS[stat]) for t in teams}
+    return dvp_table().get(f"{stat}|{g}", {})
+
+
 def matchup_note(team, pos, stat):
-    coefs = sorted(dvp_table().get(f"{stat}|{_PG.get(pos, pos)}", {}).values())
+    coefs = sorted(_coef_spread(pos, stat).values())
     c = dvp(team, pos, stat)
     if not coefs or len(coefs) < 6 or c == 0:
         return None

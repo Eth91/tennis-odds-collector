@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-02T09:38:43Z",
+ "captured_at": "2026-08-02T09:43:57Z",
  "matches": [
   {
    "event_id": 35894989,
@@ -8,7 +8,7 @@
    "p1_norm": "dawid poloszczanski",
    "p2_norm": "bartlomiej wisniewski",
    "open_date": "2026-08-02T09:25:00.000Z",
-   "line": 87.5,
+   "line": 91.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -19,9 +19,9 @@
    "p1_norm": "oskar sokolowski",
    "p2_norm": "pawel adamus",
    "open_date": "2026-08-02T09:30:00.000Z",
-   "line": 86.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 92.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35895007,
@@ -30,9 +30,9 @@
    "p1_norm": "konrad kulpa",
    "p2_norm": "jakub kosowski",
    "open_date": "2026-08-02T09:40:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35895019,
@@ -79,12 +79,45 @@
    "under_odds": -112
   },
   {
+   "event_id": 35895034,
+   "p1": "Tibor Spanik",
+   "p2": "Petr David",
+   "p1_norm": "tibor spanik",
+   "p2_norm": "petr david",
+   "open_date": "2026-08-02T10:00:00.000Z",
+   "line": 74.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
    "event_id": 35895039,
    "p1": "Mateusz Zagajewski",
    "p2": "Piotr Maruszak",
    "p1_norm": "mateusz zagajewski",
    "p2_norm": "piotr maruszak",
    "open_date": "2026-08-02T10:05:00.000Z",
+   "line": 79.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35895044,
+   "p1": "Mariusz Zwolinski",
+   "p2": "Dawid Poloszczanski",
+   "p1_norm": "mariusz zwolinski",
+   "p2_norm": "dawid poloszczanski",
+   "open_date": "2026-08-02T10:10:00.000Z",
+   "line": 80.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35895045,
+   "p1": "Sebastian Szostok",
+   "p2": "Rafal Glica",
+   "p1_norm": "sebastian szostok",
+   "p2_norm": "rafal glica",
+   "open_date": "2026-08-02T10:10:00.000Z",
    "line": 79.5,
    "over_odds": -116,
    "under_odds": -116
