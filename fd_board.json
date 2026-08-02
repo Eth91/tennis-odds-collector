@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-02T14:54:22Z",
+ "captured_at": "2026-08-02T14:59:29Z",
  "matches": [
-  {
-   "event_id": 35896037,
-   "p1": "Mateusz Zagajewski",
-   "p2": "Tadeusz Piotrowski",
-   "p1_norm": "mateusz zagajewski",
-   "p2_norm": "tadeusz piotrowski",
-   "open_date": "2026-08-02T14:35:00.000Z",
-   "line": 98.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35896038,
-   "p1": "Tibor Spanik",
-   "p2": "Krystian Kolodziej",
-   "p1_norm": "tibor spanik",
-   "p2_norm": "krystian kolodziej",
-   "open_date": "2026-08-02T14:35:00.000Z",
-   "line": 77.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35896042,
    "p1": "Sebastian Szostok",
@@ -30,9 +8,9 @@
    "p1_norm": "sebastian szostok",
    "p2_norm": "marian lebek",
    "open_date": "2026-08-02T14:40:00.000Z",
-   "line": 84.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 78.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35896079,
@@ -64,7 +42,7 @@
    "p2_norm": "michal guzik",
    "open_date": "2026-08-02T15:00:00.000Z",
    "line": 74.5,
-   "over_odds": -112,
+   "over_odds": -116,
    "under_odds": -118
   },
   {
@@ -88,6 +66,39 @@
    "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35896169,
+   "p1": "Jakub Glanowski",
+   "p2": "Tomasz Filbrandt",
+   "p1_norm": "jakub glanowski",
+   "p2_norm": "tomasz filbrandt",
+   "open_date": "2026-08-02T15:25:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35896170,
+   "p1": "Krystian Kolodziej",
+   "p2": "Filip Mlynarski",
+   "p1_norm": "krystian kolodziej",
+   "p2_norm": "filip mlynarski",
+   "open_date": "2026-08-02T15:25:00.000Z",
+   "line": 74.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35896171,
+   "p1": "Michal Machelski",
+   "p2": "Kazimierz Rybak",
+   "p1_norm": "michal machelski",
+   "p2_norm": "kazimierz rybak",
+   "open_date": "2026-08-02T15:25:00.000Z",
+   "line": 71.5,
+   "over_odds": -120,
+   "under_odds": -110
   }
  ]
 }
