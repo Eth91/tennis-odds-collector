@@ -105,7 +105,8 @@ def _rows():
     """Settled bets carrying both probabilities. Rows logged before the ledger was
     instrumented have no p_bet and are counted for ROI but cannot be scored."""
     if not PAPER.exists():
-        return [], 0, {}
+        # Same rule as wnba_validate: an unreadable ledger is not evidence of no bets.
+        raise SystemExit("pga_validate: %s is missing — refusing to report an empty record" % PAPER)
     con = sqlite3.connect(PAPER)
     cols = {d[1] for d in con.execute("PRAGMA table_info(flags)")}
     if not {"p_bet", "p_fair"} <= cols:

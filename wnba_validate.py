@@ -84,7 +84,12 @@ BET_ROLES = {"confirmed", "likely"}
 def _universe():
     """The pre-registered universe: graded overs -> current_selection -> role gate."""
     if not LEDGER.exists():
-        return [], []
+        # REFUSE, never report zero. A missing ledger and an empty one are not the same fact, and
+        # the caller writes WNBA_EVIDENCE.md from this return value — so guessing here publishes a
+        # false verdict over a true one. Path.exists() also follows symlinks, so a BROKEN link
+        # (the ledger is a symlink into ~/wnba_data on the VM) lands right here.
+        raise SystemExit("wnba_validate: %s is missing or its symlink is broken — refusing to "
+                         "write an evidence file that would read as 'no bets'" % LEDGER)
     con = sqlite3.connect(LEDGER)
     cols = [d[1] for d in con.execute("PRAGMA table_info(predictions)")]
     rows = [dict(zip(cols, r)) for r in con.execute("SELECT * FROM predictions WHERE graded=1")]
