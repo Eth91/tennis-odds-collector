@@ -271,6 +271,7 @@ rw|425|Traded to Phoenix
 rw|425|Will play Sunday
 rw|432|Available for Wednesday
 rw|432|Logs 18 minutes in return
+rw|432|Probable for Monday
 rw|432|Probable for Sunday
 rw|432|Shooting woes in loss
 rw|436|Fares well off bench
@@ -343,6 +344,7 @@ rw|580|Leading scorer in win
 rw|580|Leads Wings in scoring once again
 rw|580|Racks up 20 points in Sunday's win
 rw|580|Scores team-high 29 points
+rw|581|Double-doubles with seven treys
 rw|581|Drains seven triples in loss
 rw|581|On fire from perimeter
 rw|581|Tallies 18 points in loss
