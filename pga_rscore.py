@@ -55,6 +55,22 @@ RS_MIN_LINES = 6        # below this the DELTA anchor is fitted on too little an
                         # silently priced unanchored when Rocket Classic R1 posted only 7.
 ARMABLE = False         # flip only via the paired-SPRT adoption rule in pga_validate.py
 
+RETIRED = True          # ⚰️ 2026-08-02, user-approved kill after the Rocket Classic settled.
+                        #
+                        # The hypothesis was that a sigma right to 0.4% could price round-score
+                        # O/U once DELTA re-anchored the level. The live answer, both rungs
+                        # combined: 3-9 (-4.55u), with the model's own probabilities over-confident
+                        # by +21.9 points — on top of the 2026-08-01 finding that round-score MAE
+                        # sits AT the projection floor (2.236 vs 2.231 pre-event), i.e. there is no
+                        # informational content left for a two-way ~6% book to pay us for. A stream
+                        # that is out of information does not need more validation; it needs to
+                        # stop. Never re-open without a NEW information source (live strokes-gained
+                        # feeds, weather nowcasts) — re-running the same inputs is how MLB died.
+                        #
+                        # Retired = price() returns nothing, so no flags, no board rows, no ledger
+                        # writes. The code and the graded 3-9 record stay, so the conclusion cannot
+                        # be silently re-litigated by deleting its evidence.
+
 _MKT = re.compile(r"^(.*?)\s+Round\s+(\d)\s+Score$", re.I)
 _RUN = re.compile(r"^(.*?)\s+(Over|Under)\s+([\d.]+)$", re.I)
 
@@ -72,6 +88,8 @@ def price(rows, R, norm, blend, spread):
     `R` is the raw rating map {player: (mu, sigma, ...)}; `spread` is pga_ruler.SPREAD so this
     stream and the simulator never disagree about the same player.
     """
+    if RETIRED:
+        return []
     out = []
     quotes = {}                                        # (player, rnd, line) -> {side: odds}
     for mkt, mt, run, od in rows:

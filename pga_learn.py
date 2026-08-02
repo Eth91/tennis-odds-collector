@@ -480,6 +480,30 @@ def report(with_round=False):
                     L.append("| %s | %.3f | %.3f |"
                              % (lab, sum(x["p_bet"] or 0 for x in g) / len(g),
                                 sum(x["p_fair"] or 0 for x in g) / len(g)))
+            # Per-stream and price-floor splits — the two cuts that have actually driven policy
+            # (rscore's retirement and PRICE_FLOOR were both decided off exactly these numbers).
+            # Still descriptive: n per cell is tiny and the verdicts above own the evidence.
+            def _grp(r):
+                return (r.get("stream") or "?").replace("E3-", "").replace("-shadow", "")
+            L += ["", "| stream | record | mean model p | mean market p |", "|---|---|---|---|"]
+            for gname in sorted({_grp(r) for r in lp}):
+                g = [r for r in lp if _grp(r) == gname]
+                gw = sum(1 for r in g if r["result"] == "W")
+                L.append("| %s | %d-%d | %.3f | %.3f |"
+                         % (gname, gw, len(g) - gw,
+                            sum(x["p_bet"] or 0 for x in g) / len(g),
+                            sum(x["p_fair"] or 0 for x in g) / len(g)))
+            fl_hi = [r for r in lp if (r["p_fair"] or 0) >= 0.50
+                     and ("birdies" in _grp(r) or "rscore" in _grp(r))]
+            fl_lo = [r for r in lp if (r["p_fair"] or 0) < 0.50
+                     and ("birdies" in _grp(r) or "rscore" in _grp(r))]
+            if fl_hi or fl_lo:
+                L += ["", "Price-floor split (round-scoped streams): "
+                      "kept side %d-%d, floored side %d-%d."
+                      % (sum(1 for r in fl_hi if r["result"] == "W"),
+                         sum(1 for r in fl_hi if r["result"] == "L"),
+                         sum(1 for r in fl_lo if r["result"] == "W"),
+                         sum(1 for r in fl_lo if r["result"] == "L"))]
             L += ["", "At this sample size this can only raise questions. Anything it suggests has "
                   "to be answered against the field above before it means anything.", ""]
         else:
