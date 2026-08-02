@@ -59,6 +59,7 @@ rw|1007|Available to play
 rw|1007|Likely to play Tuesday
 rw|1007|Notches 11 points
 rw|1007|Questionable for Wednesday
+rw|1013|Efficient outing in defeat
 rw|1013|Held to four points
 rw|1015|Not listed on injury report
 rw|1015|Won't play Tuesday
