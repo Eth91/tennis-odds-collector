@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-02T20:28:22Z",
+ "captured_at": "2026-08-02T20:34:51Z",
  "matches": [
-  {
-   "event_id": 35897057,
-   "p1": "Adam Ruszkiewicz",
-   "p2": "Jakub Jesiek",
-   "p1_norm": "adam ruszkiewicz",
-   "p2_norm": "jakub jesiek",
-   "open_date": "2026-08-02T20:20:00.000Z",
-   "line": 75.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35897058,
-   "p1": "Pawel Kurek",
-   "p2": "Grzegorz Marud",
-   "p1_norm": "pawel kurek",
-   "p2_norm": "grzegorz marud",
-   "open_date": "2026-08-02T20:20:00.000Z",
-   "line": 52.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35897084,
    "p1": "Grzegorz Mucha",
@@ -30,9 +8,9 @@
    "p1_norm": "grzegorz mucha",
    "p2_norm": "kazimierz rybak",
    "open_date": "2026-08-02T20:30:00.000Z",
-   "line": 72.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35897085,
@@ -41,9 +19,9 @@
    "p1_norm": "jacek mitas",
    "p2_norm": "filip mlynarski",
    "open_date": "2026-08-02T20:30:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 84.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35897086,
@@ -52,9 +30,9 @@
    "p1_norm": "marcin marchlewski",
    "p2_norm": "tomasz filbrandt",
    "open_date": "2026-08-02T20:30:00.000Z",
-   "line": 83.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35897091,
@@ -75,6 +53,28 @@
    "p2_norm": "wojciech urban",
    "open_date": "2026-08-02T20:45:00.000Z",
    "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35897104,
+   "p1": "Mateusz Baran",
+   "p2": "Michal Guzik",
+   "p1_norm": "mateusz baran",
+   "p2_norm": "michal guzik",
+   "open_date": "2026-08-02T21:00:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35897105,
+   "p1": "Mateusz Rutkowski",
+   "p2": "Jacek Mitas",
+   "p1_norm": "mateusz rutkowski",
+   "p2_norm": "jacek mitas",
+   "open_date": "2026-08-02T21:00:00.000Z",
+   "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
   }
