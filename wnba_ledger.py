@@ -211,6 +211,45 @@ def log_gated(rows):
     con.close()
     return n
 
+
+def _premise_really_broke(names, slate):
+    """Did an out-basis player ACTUALLY play on `slate`? Ground truth beats the injury feed.
+
+    Returns True only on positive evidence that someone the bet assumed absent did take the floor.
+    Returns False when the box score shows they did not — the premise held and the bet must grade,
+    not void. Returns None when it cannot be established, and the caller then leaves the row alone.
+
+    This exists because `injuries()` is a REPORT, not a roster: a player vanishes from it both when
+    she recovers and when the report rolls to the next slate. The feed cannot tell those apart. The
+    box score can.
+    """
+    try:
+        import wnba_wowy as _W
+        pl = _W.players()
+    except Exception:                                                # noqa: BLE001
+        return None
+    feed_max, played = None, False
+    for nm in names:
+        p = pl.get(nm)
+        if not p:
+            return None                                  # unknown player -> cannot establish
+        try:
+            lg = _W.game_log(p["id"])
+        except Exception:                                            # noqa: BLE001
+            return None
+        for g in lg or []:
+            gd = str(g.get("date"))[:10]
+            if gd and (feed_max is None or gd > feed_max):
+                feed_max = gd
+            if gd == str(slate)[:10]:
+                played = True
+    if played:
+        return True                                      # she suited up: the premise really broke
+    if feed_max and feed_max > str(slate)[:10]:
+        return False                                     # feed is past the slate and she is absent
+    return None                                          # feed not current: refuse to conclude
+
+
 def log_predictions(rows):
     """rows: list of dicts (one per flagged spot). Deduped per (date,player,stat,line)
     so the 4 daily CI runs don't double-log. Returns count newly inserted."""
@@ -388,10 +427,21 @@ def grade():
             op = con.execute("SELECT out_player FROM predictions WHERE rowid=?",
                              (rowid,)).fetchone()
             names = [x.strip() for x in (op[0] or "").split(",") if x.strip()] if op else []
-            if names and any(_inj.get(nm) not in ("Out", "Doubtful") for nm in names):
-                con.execute("UPDATE predictions SET result='void', graded=1 "
-                            "WHERE rowid=? AND graded=0", (rowid,))
-                swept += 1
+            # A MISSING KEY IS NOT EVIDENCE SHE IS BACK. injuries() is an injury report, not a
+            # roster, so a player drops out of it both when she recovers AND when the report rolls
+            # to the next slate. `.get()` returning None was treated as "playing" and voided 4 real
+            # bets whose out-basis player genuinely never took the floor.
+            if not (names and any(_inj.get(nm) not in ("Out", "Doubtful") for nm in names)):
+                continue
+            # The feed says the premise broke. If the slate has been played, the BOX SCORE decides.
+            _truth = _premise_really_broke(names, pd_)
+            if _truth is False:
+                continue                                 # she did not play: premise held, grade it
+            if _truth is None and pd_ < _today_et:
+                continue                                 # past slate we cannot verify: never guess
+            con.execute("UPDATE predictions SET result='void', graded=1 "
+                        "WHERE rowid=? AND graded=0", (rowid,))
+            swept += 1
         if swept:
             con.commit()
             print(f"grade: premise sweep voided {swept} spot(s) — an out-basis player "
