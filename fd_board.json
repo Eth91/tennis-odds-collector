@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-02T18:44:59Z",
+ "captured_at": "2026-08-02T18:49:06Z",
  "matches": [
   {
    "event_id": 35896834,
@@ -8,31 +8,9 @@
    "p1_norm": "jakub glanowski",
    "p2_norm": "kacper szurlej",
    "open_date": "2026-08-02T18:30:00.000Z",
-   "line": 88.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
-  {
-   "event_id": 35896855,
-   "p1": "Pawel Kurek",
-   "p2": "Mariusz Baron",
-   "p1_norm": "pawel kurek",
-   "p2_norm": "mariusz baron",
-   "open_date": "2026-08-02T18:45:00.000Z",
-   "line": 78.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35896856,
-   "p1": "Jaroslaw Badura",
-   "p2": "Adam Ruszkiewicz",
-   "p1_norm": "jaroslaw badura",
-   "p2_norm": "adam ruszkiewicz",
-   "open_date": "2026-08-02T18:45:00.000Z",
-   "line": 77.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 89.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35896869,
@@ -88,6 +66,17 @@
    "line": 79.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35896890,
+   "p1": "Filip Mlynarski",
+   "p2": "Mateusz Rutkowski",
+   "p1_norm": "filip mlynarski",
+   "p2_norm": "mateusz rutkowski",
+   "open_date": "2026-08-02T19:15:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
