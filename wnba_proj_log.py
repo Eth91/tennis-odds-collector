@@ -36,6 +36,9 @@ COLS = ("date", "pid", "player", "team", "opp", "out_player", "confidence", "bas
         "logged_at")
 
 
+DNP_MIN_AGE_DAYS = 2     # a slate younger than this may still be in progress; never resolve it
+
+
 def _con():
     con = sqlite3.connect(DB)
     con.execute(SCHEMA)
@@ -65,6 +68,25 @@ def log(rows):
     return n
 
 
+
+def _dnp_resolvable(date, log):
+    """May a projection with no box score be settled as DID-NOT-PLAY? Both guards must hold.
+
+    Returns False whenever we cannot TELL, which leaves the row pending and visible rather than
+    silently recording a scratch that may just be a broken feed.
+    """
+    import datetime as _dt
+    try:
+        d = _dt.date.fromisoformat(str(date)[:10])
+    except (TypeError, ValueError):
+        return False
+    if (_dt.date.today() - d).days < DNP_MIN_AGE_DAYS:
+        return False                       # slate may still be in progress
+    # The player's own feed must have moved PAST this slate. A later game proves the log is current,
+    # so her absence from this one is a real scratch and not a gap in our data.
+    return any(str(g.get("date"))[:10] > str(date)[:10] for g in (log or []))
+
+
 def grade():
     con = _con()
     rows = con.execute("SELECT rowid, date, pid, opp FROM projections WHERE graded=0").fetchall()
@@ -72,7 +94,7 @@ def grade():
         con.close()
         return 0
     ids = {v["id"]: n for n, v in W.players().items()}     # ensure name cache warm (pid is the key)
-    cache, graded = {}, 0
+    cache, graded, dnp = {}, 0, 0
     for rid, date, pid, opp in rows:
         if pid not in cache:
             try:
@@ -84,6 +106,14 @@ def grade():
                        and (not opp or (g.get("matchup") or "").upper() == opp.upper())),
                       key=lambda g: g["date"])
         if not cand:
+            # DID NOT PLAY, or the game has not happened yet — the SAME observation. Resolving the
+            # second would destroy live rows, so this only fires with both guards satisfied:
+            # the slate is old enough to be over, AND this player's own feed is demonstrably
+            # current past it (she has a later game). Without the second guard a stale or broken
+            # game-log feed would be silently recorded as "she was a scratch".
+            if _dnp_resolvable(date, cache[pid]):
+                con.execute("UPDATE projections SET graded=2 WHERE rowid=?", (rid,))
+                dnp += 1
             continue
         g = cand[0]
         con.execute("UPDATE projections SET actual_min=?, actual_pts=?, actual_reb=?, "
@@ -92,6 +122,8 @@ def grade():
         graded += 1
     con.commit()
     con.close()
+    if dnp:
+        print("proj grade: %d row(s) resolved as DID-NOT-PLAY (graded=2, actual_min left NULL)" % dnp)
     return graded
 
 
