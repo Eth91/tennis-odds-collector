@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-02T16:53:11Z",
+ "captured_at": "2026-08-02T17:03:12Z",
  "matches": [
-  {
-   "event_id": 35896294,
-   "p1": "Mateusz Baran",
-   "p2": "Michal Guzik",
-   "p1_norm": "mateusz baran",
-   "p2_norm": "michal guzik",
-   "open_date": "2026-08-02T16:35:00.000Z",
-   "line": 109.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35896327,
    "p1": "Michal Paszkiewicz",
@@ -19,9 +8,9 @@
    "p1_norm": "michal paszkiewicz",
    "p2_norm": "jakub jesiek",
    "open_date": "2026-08-02T16:50:00.000Z",
-   "line": 73.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 86.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35896426,
@@ -30,9 +19,9 @@
    "p1_norm": "lukasz pietraszko",
    "p2_norm": "filip mlynarski",
    "open_date": "2026-08-02T16:55:00.000Z",
-   "line": 72.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 77.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35896427,
@@ -41,9 +30,9 @@
    "p1_norm": "zbigniew nocun",
    "p2_norm": "kazimierz rybak",
    "open_date": "2026-08-02T16:55:00.000Z",
-   "line": 70.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35896428,
@@ -52,9 +41,9 @@
    "p1_norm": "kacper szurlej",
    "p2_norm": "tomasz filbrandt",
    "open_date": "2026-08-02T16:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 74.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35896567,
