@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T15:38:20Z",
+ "captured_at": "2026-08-03T15:43:41Z",
  "matches": [
   {
    "event_id": 35899132,
@@ -8,9 +8,9 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "tibor spanik",
    "open_date": "2026-08-03T15:25:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 59.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35899154,
@@ -19,9 +19,9 @@
    "p1_norm": "oskar jadach",
    "p2_norm": "grzegorz wichowski",
    "open_date": "2026-08-03T15:30:00.000Z",
-   "line": 79.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 86.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35899160,
@@ -30,9 +30,9 @@
    "p1_norm": "dariusz maszczynski",
    "p2_norm": "adam staniczek",
    "open_date": "2026-08-03T15:40:00.000Z",
-   "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 71.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35899211,
