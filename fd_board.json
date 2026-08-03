@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-03T19:24:44Z",
+ "captured_at": "2026-08-03T19:30:21Z",
  "matches": [
-  {
-   "event_id": 35900600,
-   "p1": "Tibor Spanik",
-   "p2": "Jakub Glanowski",
-   "p1_norm": "tibor spanik",
-   "p2_norm": "jakub glanowski",
-   "open_date": "2026-08-03T19:15:00.000Z",
-   "line": 70.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35900604,
    "p1": "Marcin Kowalczyk",
@@ -19,9 +8,9 @@
    "p1_norm": "marcin kowalczyk",
    "p2_norm": "bartlomiej wisniewski",
    "open_date": "2026-08-03T19:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 85.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35900615,
@@ -30,9 +19,9 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "wojciech urban",
    "open_date": "2026-08-03T19:30:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35900617,
@@ -77,6 +66,17 @@
    "line": 69.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35900631,
+   "p1": "Kacper Adamus",
+   "p2": "Jakub Pruszkowski",
+   "p1_norm": "kacper adamus",
+   "p2_norm": "jakub pruszkowski",
+   "open_date": "2026-08-03T19:55:00.000Z",
+   "line": 81.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
