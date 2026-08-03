@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T18:28:12Z",
+ "captured_at": "2026-08-03T18:34:56Z",
  "matches": [
   {
    "event_id": 35900109,
@@ -8,7 +8,7 @@
    "p1_norm": "piotr gesiarz",
    "p2_norm": "adam staniczek",
    "open_date": "2026-08-03T18:25:00.000Z",
-   "line": 73.5,
+   "line": 65.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -19,9 +19,9 @@
    "p1_norm": "dariusz wrobel",
    "p2_norm": "adrian eliasz",
    "open_date": "2026-08-03T18:30:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35900117,
@@ -30,9 +30,9 @@
    "p1_norm": "miroslaw warzecha",
    "p2_norm": "grzegorz mucha",
    "open_date": "2026-08-03T18:30:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 83.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35900118,
@@ -41,9 +41,9 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "artur gromek",
    "open_date": "2026-08-03T18:30:00.000Z",
-   "line": 74.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 59.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35900556,
@@ -53,8 +53,8 @@
    "p2_norm": "michal guzik",
    "open_date": "2026-08-03T18:45:00.000Z",
    "line": 65.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35900557,
