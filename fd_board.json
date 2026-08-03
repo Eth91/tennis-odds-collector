@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-03T23:44:38Z",
+ "captured_at": "2026-08-03T23:49:27Z",
  "matches": [
-  {
-   "event_id": 35901024,
-   "p1": "Jakub Kuzmicz",
-   "p2": "Lukasz Pietraszko",
-   "p1_norm": "jakub kuzmicz",
-   "p2_norm": "lukasz pietraszko",
-   "open_date": "2026-08-03T23:20:00.000Z",
-   "line": 101.5,
-   "over_odds": 135,
-   "under_odds": -195
-  },
   {
    "event_id": 35901031,
    "p1": "Jerzy Michalik",
@@ -19,9 +8,9 @@
    "p1_norm": "jerzy michalik",
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-08-03T23:35:00.000Z",
-   "line": 68.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 90.5,
+   "over_odds": -140,
+   "under_odds": 100
   },
   {
    "event_id": 35901033,
@@ -30,9 +19,9 @@
    "p1_norm": "aleksander barton",
    "p2_norm": "grzegorz mucha",
    "open_date": "2026-08-03T23:45:00.000Z",
-   "line": 68.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 70.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35901034,
@@ -41,9 +30,9 @@
    "p1_norm": "michal skorski",
    "p2_norm": "wojciech gluszek",
    "open_date": "2026-08-03T23:45:00.000Z",
-   "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35901035,
@@ -52,9 +41,9 @@
    "p1_norm": "jakub glanowski",
    "p2_norm": "mateusz rutkowski",
    "open_date": "2026-08-03T23:45:00.000Z",
-   "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35901041,
