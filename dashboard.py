@@ -1061,7 +1061,49 @@ def _tracker_panel(wnba_rec, tt_json):
     except Exception:
         pass
 
-    return wnba_card + mlb_card + tt_card + parlay_card
+    # 5) WNBA ladder rungs vs main lines (user 2026-08-03): the headline blends 1u anchors with
+    # 0.25u rungs, hiding both populations. Same selection + stake map as the headline record —
+    # ladder_stake_map is the ONE source of what counts as a rung; a second copy would drift.
+    ladder_card = ""
+    try:
+        import wnba_slip as SLIP2
+        con2 = sqlite3.connect(LEDGER)
+        con2.row_factory = sqlite3.Row
+        g2 = [dict(r) for r in con2.execute(
+            "SELECT * FROM predictions WHERE graded=1 AND result IN ('over','under') "
+            "AND (side IS NULL OR side='over') AND COALESCE(tier,'')!='n1'")]
+        con2.close()
+        sel2, _x = SLIP2.current_selection(g2)
+        sel2 = _bet_only(sel2)
+        sm2 = SLIP2.ladder_stake_map(sel2)
+
+        def _stk2(r):
+            return sm2.get((r["pred_date"], r["player"], r["stat"], r["line"]), 1.0)
+        mains = [r for r in sel2 if _stk2(r) >= 1.0]
+        rungs = [r for r in sel2 if _stk2(r) < 1.0]
+
+        def _rec(rows, staked):
+            wn = sum(1 for r in rows if r["result"] == "over")
+            uu = sum((_stk2(r) if staked else 1.0)
+                     * ((float(r["odds"]) - 1) if r["result"] == "over" else -1.0) for r in rows)
+            return wn, len(rows) - wn, uu
+        if mains or rungs:
+            mw, ml, mu = _rec(mains, True)
+            rw, rl, ru_st = _rec(rungs, True)
+            _rw2, _rl2, ru_flat = _rec(rungs, False)
+            _uc = lambda v: "up" if v > 0 else ("down" if v < 0 else "")     # noqa: E731
+            ladder_card = (
+                '<div class="tcard"><div class="thead">WNBA Ladder Rungs</div><div class="trow">'
+                f'<div class="tbox"><div class="tk">Main lines</div><div class="tv">{mw}-{ml}</div></div>'
+                f'<div class="tbox"><div class="tk">Rungs</div><div class="tv">{rw}-{rl}</div></div>'
+                f'<div class="tbox"><div class="tk">Rung units</div>'
+                f'<div class="tv {_uc(ru_st)}">{ru_st:+.2f}u</div></div>'
+                f'</div><div class="tsub">main lines {mu:+.2f}u at 1u · rungs staked 0.25u '
+                f'(flat-1u basis: {ru_flat:+.2f}u) · same selection as the headline</div></div>')
+    except Exception:                                                # noqa: BLE001
+        ladder_card = ""
+
+    return wnba_card + mlb_card + tt_card + parlay_card + ladder_card
 
 def _tt_ladder(lad, play_to, zone):
     """Tap-to-expand hit-rate ladder: the raw H2H hit rate of the FLAGGED SIDE at every line
