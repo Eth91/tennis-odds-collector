@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-03T03:51:54Z",
+ "captured_at": "2026-08-03T03:56:05Z",
  "matches": [
-  {
-   "event_id": 35897474,
-   "p1": "Michal Minda",
-   "p2": "Przemyslaw Blocho",
-   "p1_norm": "michal minda",
-   "p2_norm": "przemyslaw blocho",
-   "open_date": "2026-08-03T03:40:00.000Z",
-   "line": 73.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
   {
    "event_id": 35897475,
    "p1": "Josef Braun",
@@ -19,9 +8,9 @@
    "p1_norm": "josef braun",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-08-03T03:45:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 62.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35897476,
@@ -30,9 +19,9 @@
    "p1_norm": "schaniel krzysztof",
    "p2_norm": "piotr zemla",
    "open_date": "2026-08-03T03:50:00.000Z",
-   "line": 73.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 68.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35897477,
@@ -41,9 +30,9 @@
    "p1_norm": "kamil klocek",
    "p2_norm": "krzysztof kotyl",
    "open_date": "2026-08-03T03:50:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35897478,
@@ -52,9 +41,9 @@
    "p1_norm": "wojciech urban",
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-08-03T03:55:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35897479,
@@ -110,6 +99,17 @@
    "line": 80.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35897517,
+   "p1": "Mariusz Baron",
+   "p2": "Pawel Kurek",
+   "p1_norm": "mariusz baron",
+   "p2_norm": "pawel kurek",
+   "open_date": "2026-08-03T04:20:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
