@@ -325,6 +325,17 @@ HYPOTHESES = {
     "cut pressure (R2)": f_cut_pressure,
     "position vs field entering round": f_position,
     "par-5 skill x course par-5 share": f_par5_fit,
+    # SG BY CATEGORY — registered 2026-08-03. Written with the engine, never plugged in: the one
+    # input the DataGolf audit ranked as blind spot #1 sat unevaluated while tee times were being
+    # exhaustively disproved. Expectation is a recorded null (pga_sg.py's 2026-07-30 head-on test:
+    # partials over SG_TOT ~zero, every ruler blend hurt), but the registry is where that has to
+    # be WRITTEN DOWN. Caveat: _sg() keys by player only (years collapse, last write wins), so a
+    # surviving candidate here is suspect until re-run season-aligned; the genuinely open question
+    # is ROUND-level SG, which needs its own collector.
+    "SG off-the-tee (season avg)": f_sg("SG_OTT"),
+    "SG approach (season avg)": f_sg("SG_APP"),
+    "SG around-green (season avg)": f_sg("SG_ARG"),
+    "SG putting (season avg)": f_sg("SG_PUTT"),
 }
 
 
