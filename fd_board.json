@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-03T05:11:28Z",
+ "captured_at": "2026-08-03T05:16:37Z",
  "matches": [
-  {
-   "event_id": 35897529,
-   "p1": "Kamil Klocek",
-   "p2": "Kamil Rudomina",
-   "p1_norm": "kamil klocek",
-   "p2_norm": "kamil rudomina",
-   "open_date": "2026-08-03T04:55:00.000Z",
-   "line": 74.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35897530,
    "p1": "Schaniel Krzysztof",
@@ -19,9 +8,9 @@
    "p1_norm": "schaniel krzysztof",
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-08-03T04:55:00.000Z",
-   "line": 61.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 76.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35897531,
@@ -30,20 +19,9 @@
    "p1_norm": "josef braun",
    "p2_norm": "piotr cyrnek",
    "open_date": "2026-08-03T04:55:00.000Z",
-   "line": 58.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
-  {
-   "event_id": 35897657,
-   "p1": "Lukasz Oracz",
-   "p2": "Wojciech Urban",
-   "p1_norm": "lukasz oracz",
-   "p2_norm": "wojciech urban",
-   "open_date": "2026-08-03T05:05:00.000Z",
-   "line": 74.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 92.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35897775,
@@ -52,9 +30,9 @@
    "p1_norm": "michal wolny",
    "p2_norm": "andriej fomin",
    "open_date": "2026-08-03T05:10:00.000Z",
-   "line": 76.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 68.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35897866,
@@ -64,8 +42,8 @@
    "p2_norm": "sebastian szostok",
    "open_date": "2026-08-03T05:15:00.000Z",
    "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35897867,
@@ -74,7 +52,7 @@
    "p1_norm": "adrian wiecek",
    "p2_norm": "grzegorz felkel",
    "open_date": "2026-08-03T05:15:00.000Z",
-   "line": 80.5,
+   "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
   },
@@ -85,18 +63,7 @@
    "p1_norm": "dominik solilo",
    "p2_norm": "stapor rafal",
    "open_date": "2026-08-03T05:15:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35897869,
-   "p1": "Adrian Myszewski",
-   "p2": "Mikolaj Lukaszewski",
-   "p1_norm": "adrian myszewski",
-   "p2_norm": "mikolaj lukaszewski",
-   "open_date": "2026-08-03T05:15:00.000Z",
-   "line": 78.5,
+   "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
   },
@@ -132,6 +99,39 @@
    "line": 78.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35897960,
+   "p1": "Witold Buczynski",
+   "p2": "Schaniel Krzysztof",
+   "p1_norm": "witold buczynski",
+   "p2_norm": "schaniel krzysztof",
+   "open_date": "2026-08-03T05:40:00.000Z",
+   "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35897961,
+   "p1": "Wojciech Iwasyszyn",
+   "p2": "Kamil Klocek",
+   "p1_norm": "wojciech iwasyszyn",
+   "p2_norm": "kamil klocek",
+   "open_date": "2026-08-03T05:40:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35897962,
+   "p1": "Szymon Kolasa",
+   "p2": "Josef Braun",
+   "p1_norm": "szymon kolasa",
+   "p2_norm": "josef braun",
+   "open_date": "2026-08-03T05:40:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
