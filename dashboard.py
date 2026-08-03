@@ -2961,7 +2961,8 @@ def build():
         # PLAIN WORDS (user 2026-08-02): the legend is a reader's aid, not a spec — tier
         # definitions live in wnba_slip. Just what a tier means at a glance, plus the live record.
         tier_legend = ('<div class="tierleg">'
-                       + _leg("A", "good") + _leg("B", "okay") + _leg("C", "mid") + '</div>')
+                       + _leg("A", "prime spot") + _leg("B", "solid spot")
+                       + _leg("C", "thin edge") + '</div>')
     else:
         tier_legend = ""
     tt_live_js = TT_LIVE_JS
