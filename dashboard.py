@@ -3823,7 +3823,7 @@ def build():
 
   /* ---- INJURY REPORT ---- */
   #wnba .starwatch {{ background:var(--cu-grp); border:0; border-radius:12px; padding:14px 16px;
-        margin:0 0 20px; }}
+        margin:24px 0 20px; }}
   /* .swrow / .swhd moved to CUPERTINO-SECTIONS below — the flex here broke Star Watch, whose
      rows have TWO children (.swhd + .swo) rather than the injury report's one. */
   #wnba .swstat {{ font-size:12px; font-weight:600; padding:2px 8px; border-radius:11px;
