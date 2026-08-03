@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-03T09:15:27Z",
+ "captured_at": "2026-08-03T09:23:04Z",
  "matches": [
-  {
-   "event_id": 35898147,
-   "p1": "Jakub Kaczmarek",
-   "p2": "Sebastian Szostok",
-   "p1_norm": "jakub kaczmarek",
-   "p2_norm": "sebastian szostok",
-   "open_date": "2026-08-03T09:00:00.000Z",
-   "line": 98.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35898148,
    "p1": "Kamil Klocek",
@@ -19,20 +8,9 @@
    "p1_norm": "kamil klocek",
    "p2_norm": "adrian myszewski",
    "open_date": "2026-08-03T09:00:00.000Z",
-   "line": 91.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35898150,
-   "p1": "Adrian Wiecek",
-   "p2": "Grzegorz Felkel",
-   "p1_norm": "adrian wiecek",
-   "p2_norm": "grzegorz felkel",
-   "open_date": "2026-08-03T09:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 92.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35898154,
@@ -41,9 +19,9 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "rafal skotniczny",
    "open_date": "2026-08-03T09:05:00.000Z",
-   "line": 66.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 89.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35898193,
@@ -52,9 +30,9 @@
    "p1_norm": "marcin balcerzak",
    "p2_norm": "miroslav sklensky",
    "open_date": "2026-08-03T09:20:00.000Z",
-   "line": 73.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35898194,
@@ -63,9 +41,9 @@
    "p1_norm": "szymon kolasa",
    "p2_norm": "josef braun",
    "open_date": "2026-08-03T09:20:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35898202,
@@ -87,7 +65,7 @@
    "open_date": "2026-08-03T09:25:00.000Z",
    "line": 78.5,
    "over_odds": -116,
-   "under_odds": -116
+   "under_odds": -118
   },
   {
    "event_id": 35898210,
@@ -110,6 +88,17 @@
    "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35898228,
+   "p1": "Tibor Spanik",
+   "p2": "Karol Wisniewski",
+   "p1_norm": "tibor spanik",
+   "p2_norm": "karol wisniewski",
+   "open_date": "2026-08-03T09:45:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
