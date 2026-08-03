@@ -403,6 +403,7 @@ rw|583|Starting versus Portland
 rw|584|Notches eight points in win
 rw|584|Scores in double figures off bench
 rw|585|Cleared from injury report
+rw|585|Starting against New York
 rw|586|Drops triple-double in win
 rw|586|Posts double-double in victory
 rw|586|Pulls down 16 boards in loss

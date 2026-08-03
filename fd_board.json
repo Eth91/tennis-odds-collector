@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T22:41:27Z",
+ "captured_at": "2026-08-03T22:45:28Z",
  "matches": [
   {
    "event_id": 35900984,
@@ -8,9 +8,9 @@
    "p1_norm": "mateusz rutkowski",
    "p2_norm": "lukasz pietraszko",
    "open_date": "2026-08-03T22:35:00.000Z",
-   "line": 72.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 70.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35900985,
@@ -19,7 +19,7 @@
    "p1_norm": "miroslaw lewczuk",
    "p2_norm": "artur kubiak",
    "open_date": "2026-08-03T22:35:00.000Z",
-   "line": 81.5,
+   "line": 86.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -30,9 +30,9 @@
    "p1_norm": "wojciech gluszek",
    "p2_norm": "marcin kowalczyk",
    "open_date": "2026-08-03T22:35:00.000Z",
-   "line": 78.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 63.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35900990,
@@ -88,6 +88,17 @@
    "line": 79.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35901010,
+   "p1": "Michal Guzik",
+   "p2": "Adam Staniczek",
+   "p1_norm": "michal guzik",
+   "p2_norm": "adam staniczek",
+   "open_date": "2026-08-03T23:10:00.000Z",
+   "line": 71.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
