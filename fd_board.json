@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-03T02:29:53Z",
+ "captured_at": "2026-08-03T02:35:48Z",
  "matches": [
-  {
-   "event_id": 35897434,
-   "p1": "Lukasz Oracz",
-   "p2": "Grzegorz Marud",
-   "p1_norm": "lukasz oracz",
-   "p2_norm": "grzegorz marud",
-   "open_date": "2026-08-03T02:20:00.000Z",
-   "line": 50.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35897439,
    "p1": "Mateusz Baran",
@@ -20,8 +9,8 @@
    "p2_norm": "kazimierz rybak",
    "open_date": "2026-08-03T02:35:00.000Z",
    "line": 74.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35897448,
@@ -31,8 +20,8 @@
    "p2_norm": "mateusz sikon",
    "open_date": "2026-08-03T02:45:00.000Z",
    "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35897449,
@@ -44,6 +33,39 @@
    "line": 79.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35897450,
+   "p1": "Witold Buczynski",
+   "p2": "Sebastian Szostok",
+   "p1_norm": "witold buczynski",
+   "p2_norm": "sebastian szostok",
+   "open_date": "2026-08-03T03:00:00.000Z",
+   "line": 77.5,
+   "over_odds": -110,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35897451,
+   "p1": "Szymon Kolasa",
+   "p2": "Grzegorz Felkel",
+   "p1_norm": "szymon kolasa",
+   "p2_norm": "grzegorz felkel",
+   "open_date": "2026-08-03T03:00:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35897452,
+   "p1": "Wojciech Iwasyszyn",
+   "p2": "Mikolaj Lukaszewski",
+   "p1_norm": "wojciech iwasyszyn",
+   "p2_norm": "mikolaj lukaszewski",
+   "open_date": "2026-08-03T03:00:00.000Z",
+   "line": 81.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
