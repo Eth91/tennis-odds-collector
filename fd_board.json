@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T05:21:48Z",
+ "captured_at": "2026-08-03T05:26:59Z",
  "matches": [
   {
    "event_id": 35897866,
@@ -8,9 +8,9 @@
    "p1_norm": "piotr przewlocki",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-08-03T05:15:00.000Z",
-   "line": 73.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 85.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35897867,
@@ -19,7 +19,7 @@
    "p1_norm": "adrian wiecek",
    "p2_norm": "grzegorz felkel",
    "open_date": "2026-08-03T05:15:00.000Z",
-   "line": 76.5,
+   "line": 75.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,9 +30,9 @@
    "p1_norm": "dominik solilo",
    "p2_norm": "stapor rafal",
    "open_date": "2026-08-03T05:15:00.000Z",
-   "line": 78.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 75.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35897869,
@@ -41,9 +41,9 @@
    "p1_norm": "adrian myszewski",
    "p2_norm": "mikolaj lukaszewski",
    "open_date": "2026-08-03T05:15:00.000Z",
-   "line": 72.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 71.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35897944,
@@ -97,8 +97,8 @@
    "p2_norm": "kamil klocek",
    "open_date": "2026-08-03T05:40:00.000Z",
    "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35897962,
