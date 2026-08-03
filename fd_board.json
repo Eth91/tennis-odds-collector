@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T08:50:56Z",
+ "captured_at": "2026-08-03T08:55:26Z",
  "matches": [
   {
    "event_id": 35898109,
@@ -8,9 +8,9 @@
    "p1_norm": "jakub skorupa",
    "p2_norm": "andriej fomin",
    "open_date": "2026-08-03T08:45:00.000Z",
-   "line": 70.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 75.5,
+   "over_odds": 100,
+   "under_odds": -140
   },
   {
    "event_id": 35898110,
@@ -19,7 +19,7 @@
    "p1_norm": "oskar jadach",
    "p2_norm": "wojciech tobiasz",
    "open_date": "2026-08-03T08:45:00.000Z",
-   "line": 82.5,
+   "line": 83.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -77,6 +77,28 @@
    "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35898193,
+   "p1": "Marcin Balcerzak",
+   "p2": "Miroslav Sklensky",
+   "p1_norm": "marcin balcerzak",
+   "p2_norm": "miroslav sklensky",
+   "open_date": "2026-08-03T09:20:00.000Z",
+   "line": 73.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35898194,
+   "p1": "Szymon Kolasa",
+   "p2": "Josef Braun",
+   "p1_norm": "szymon kolasa",
+   "p2_norm": "josef braun",
+   "open_date": "2026-08-03T09:20:00.000Z",
+   "line": 78.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
