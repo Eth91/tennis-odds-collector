@@ -1,14 +1,14 @@
 # WNBA injury-timing CLV — does the line move our way, open to close?
 
-_2026-08-02 22:20 UTC · 488 closed shadows (opening line vs closing line)_
+_2026-08-03 06:23 UTC · 512 closed shadows (opening line vs closing line)_
 
 ## Does the line move toward our read from open to close?
 ```
-closed shadows:            488
-avg line move toward us:   +0.14 pts   (>0 = the close moved our way)
+closed shadows:            512
+avg line move toward us:   +0.15 pts   (>0 = the close moved our way)
 positive-CLV rate:         19%
 corr(our edge, line move): +0.41   (does proj-minus-open predict open-to-close?)
-realized hit (our side):   54% (461)
+realized hit (our side):   54% (480)
 ```
 The line moving toward our read between the flag (open) and the close = we price the injury reprice BEFORE the book. That is the timing edge — the green light to bet real money.
 

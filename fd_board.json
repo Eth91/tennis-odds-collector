@@ -1,50 +1,6 @@
 {
- "captured_at": "2026-08-03T06:18:58Z",
+ "captured_at": "2026-08-03T06:25:21Z",
  "matches": [
-  {
-   "event_id": 35897980,
-   "p1": "Przemyslaw Blocho",
-   "p2": "Artur Sobel",
-   "p1_norm": "przemyslaw blocho",
-   "p2_norm": "artur sobel",
-   "open_date": "2026-08-03T06:00:00.000Z",
-   "line": 87.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35897983,
-   "p1": "Krzysztof Kotyl",
-   "p2": "Kamil Rudomina",
-   "p1_norm": "krzysztof kotyl",
-   "p2_norm": "kamil rudomina",
-   "open_date": "2026-08-03T06:05:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35897984,
-   "p1": "Piotr Zemla",
-   "p2": "Wojciech Wojtaszczyk",
-   "p1_norm": "piotr zemla",
-   "p2_norm": "wojciech wojtaszczyk",
-   "open_date": "2026-08-03T06:05:00.000Z",
-   "line": 66.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35897985,
-   "p1": "Marcin Jadczyk",
-   "p2": "Piotr Cyrnek",
-   "p1_norm": "marcin jadczyk",
-   "p2_norm": "piotr cyrnek",
-   "open_date": "2026-08-03T06:05:00.000Z",
-   "line": 86.5,
-   "over_odds": -115,
-   "under_odds": -115
-  },
   {
    "event_id": 35897995,
    "p1": "Rafal Skotniczny",
@@ -52,9 +8,9 @@
    "p1_norm": "rafal skotniczny",
    "p2_norm": "oskar jadach",
    "open_date": "2026-08-03T06:20:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35898000,
@@ -63,9 +19,9 @@
    "p1_norm": "janus slawomir",
    "p2_norm": "andriej fomin",
    "open_date": "2026-08-03T06:25:00.000Z",
-   "line": 73.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 72.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35898001,
@@ -75,8 +31,8 @@
    "p2_norm": "michal minda",
    "open_date": "2026-08-03T06:25:00.000Z",
    "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35898010,
@@ -132,6 +88,17 @@
    "line": 78.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35898028,
+   "p1": "Marcin Balcerzak",
+   "p2": "Przemyslaw Blocho",
+   "p1_norm": "marcin balcerzak",
+   "p2_norm": "przemyslaw blocho",
+   "open_date": "2026-08-03T06:50:00.000Z",
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
