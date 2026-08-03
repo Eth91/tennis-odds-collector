@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-03T23:25:57Z",
+ "captured_at": "2026-08-03T23:29:59Z",
  "matches": [
-  {
-   "event_id": 35901010,
-   "p1": "Michal Guzik",
-   "p2": "Adam Staniczek",
-   "p1_norm": "michal guzik",
-   "p2_norm": "adam staniczek",
-   "open_date": "2026-08-03T23:10:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35901022,
    "p1": "Miroslaw Warzecha",
@@ -19,9 +8,9 @@
    "p1_norm": "miroslaw warzecha",
    "p2_norm": "artur kubiak",
    "open_date": "2026-08-03T23:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 75.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35901023,
@@ -30,9 +19,9 @@
    "p1_norm": "miroslaw piecowski",
    "p2_norm": "marcin kowalczyk",
    "open_date": "2026-08-03T23:20:00.000Z",
-   "line": 72.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 54.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35901024,
@@ -41,9 +30,9 @@
    "p1_norm": "jakub kuzmicz",
    "p2_norm": "lukasz pietraszko",
    "open_date": "2026-08-03T23:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 65.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35901031,
@@ -88,6 +77,17 @@
    "line": 74.5,
    "over_odds": -110,
    "under_odds": -120
+  },
+  {
+   "event_id": 35901041,
+   "p1": "Kacper Adamus",
+   "p2": "Wojciech Urban",
+   "p1_norm": "kacper adamus",
+   "p2_norm": "wojciech urban",
+   "open_date": "2026-08-03T23:55:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
