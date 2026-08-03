@@ -1189,11 +1189,17 @@ TT_LIVE_JS = """
     // posted line, so they get full cards even when the board's live re-check no longer ranks
     // them a fresh flag (price drift or gate refusal after flag time changes nothing about the
     // wager). Deduped against the live-flag loops above; tipped positions stay in the strip.
+    // Dedupe against cards ACTUALLY RENDERED, never against boardPairs: the fd loop marks every
+    // listed pair and the skipped loop marks every refused one, so a committed wager on a pair
+    // the live re-check later refused would be suppressed by the projection guard. A position is
+    // not a projection — only an identical rendered card may suppress it.
+    var havePair = {};
+    entries.forEach(function(e){ havePair[_ttKey(_ttNorm(e.p1), _ttNorm(e.p2))] = 1; });
     (_ttPositions || []).forEach(function(p){
       if (!p || !p.ts || (p.ts * 1000) <= now) return;
       var n1 = _ttNorm(p.p1), n2 = _ttNorm(p.p2), k = _ttKey(n1, n2);
-      if (boardPairs[k] || boardLast[_ttKey(_ttLast(n1), _ttLast(n2))]) return;
-      boardPairs[k] = 1;
+      if (havePair[k]) return;
+      havePair[k] = 1;
       entries.push({start: p.ts * 1000, p1: p.p1, p2: p.p2, line: +p.line,
                     side: String(p.side || '').toLowerCase(), hit: p.conf, real: true,
                     book: (p.book === 'betmgm') ? 'BetMGM' : 'FanDuel',
