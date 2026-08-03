@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-03T02:50:53Z",
+ "captured_at": "2026-08-03T02:55:34Z",
  "matches": [
-  {
-   "event_id": 35897448,
-   "p1": "Michal Paszkiewicz",
-   "p2": "Mateusz Sikon",
-   "p1_norm": "michal paszkiewicz",
-   "p2_norm": "mateusz sikon",
-   "open_date": "2026-08-03T02:45:00.000Z",
-   "line": 70.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35897449,
    "p1": "Pawel Kurek",
@@ -19,9 +8,9 @@
    "p1_norm": "pawel kurek",
    "p2_norm": "wojciech urban",
    "open_date": "2026-08-03T02:45:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 61.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35897450,
@@ -52,9 +41,9 @@
    "p1_norm": "wojciech iwasyszyn",
    "p2_norm": "mikolaj lukaszewski",
    "open_date": "2026-08-03T03:00:00.000Z",
-   "line": 81.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 80.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35897453,
@@ -64,8 +53,8 @@
    "p2_norm": "grzegorz marud",
    "open_date": "2026-08-03T03:05:00.000Z",
    "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35897455,
@@ -77,6 +66,17 @@
    "line": 73.5,
    "over_odds": -110,
    "under_odds": -120
+  },
+  {
+   "event_id": 35897457,
+   "p1": "Dominik Solilo",
+   "p2": "Artur Sobel",
+   "p1_norm": "dominik solilo",
+   "p2_norm": "artur sobel",
+   "open_date": "2026-08-03T03:20:00.000Z",
+   "line": 79.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
