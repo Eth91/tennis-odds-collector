@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-03T13:23:51Z",
+ "captured_at": "2026-08-03T13:31:33Z",
  "matches": [
-  {
-   "event_id": 35898770,
-   "p1": "Grzegorz Wichowski",
-   "p2": "Grzegorz Jurowicz",
-   "p1_norm": "grzegorz wichowski",
-   "p2_norm": "grzegorz jurowicz",
-   "open_date": "2026-08-03T13:10:00.000Z",
-   "line": 57.5,
-   "over_odds": -105,
-   "under_odds": -135
-  },
   {
    "event_id": 35898805,
    "p1": "Josef Braun",
@@ -19,7 +8,7 @@
    "p1_norm": "josef braun",
    "p2_norm": "grzegorz felkel",
    "open_date": "2026-08-03T13:20:00.000Z",
-   "line": 73.5,
+   "line": 83.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -31,8 +20,8 @@
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-08-03T13:25:00.000Z",
    "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35898813,
@@ -41,9 +30,9 @@
    "p1_norm": "przemyslaw blocho",
    "p2_norm": "adrian myszewski",
    "open_date": "2026-08-03T13:30:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 73.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35898814,
@@ -52,9 +41,9 @@
    "p1_norm": "piotr przewlocki",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-08-03T13:30:00.000Z",
-   "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35898815,
@@ -63,9 +52,9 @@
    "p1_norm": "rafal skotniczny",
    "p2_norm": "wojciech tobiasz",
    "open_date": "2026-08-03T13:30:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35898833,
@@ -86,6 +75,39 @@
    "p2_norm": "karol wisniewski",
    "open_date": "2026-08-03T13:50:00.000Z",
    "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35898843,
+   "p1": "Mariusz Adamus",
+   "p2": "Grzegorz Jurowicz",
+   "p1_norm": "mariusz adamus",
+   "p2_norm": "grzegorz jurowicz",
+   "open_date": "2026-08-03T13:55:00.000Z",
+   "line": 79.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35898844,
+   "p1": "Wojciech Iwasyszyn",
+   "p2": "Artur Sobel",
+   "p1_norm": "wojciech iwasyszyn",
+   "p2_norm": "artur sobel",
+   "open_date": "2026-08-03T13:55:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35898845,
+   "p1": "Wojciech Wojtaszczyk",
+   "p2": "Witold Buczynski",
+   "p1_norm": "wojciech wojtaszczyk",
+   "p2_norm": "witold buczynski",
+   "open_date": "2026-08-03T13:55:00.000Z",
+   "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
   }
