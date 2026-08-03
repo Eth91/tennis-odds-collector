@@ -92,6 +92,7 @@ rw|1018|Inactive versus Toronto
 rw|1018|Omitted from injury report
 rw|1018|Sitting out Wednesday
 rw|1018|Won't go Sunday
+rw|1021|Muted effort in win
 rw|1021|Paces Golden State off bench
 rw|1043|Not listed on injury report
 rw|1043|Not on injury report
