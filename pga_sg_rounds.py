@@ -21,6 +21,7 @@ without a mapping is SKIPPED AND COUNTED, never guessed — a wrong pid silently
 else's rounds, which is the name-join corruption class again.
 """
 import datetime as dt
+import os
 import sqlite3
 import sys
 import time
@@ -29,7 +30,12 @@ from pathlib import Path
 import pga_birdies as B
 
 HERE = Path(__file__).resolve().parent
-DB = HERE / "pga_model.sqlite"
+# READS come from the tracked warehouse, opened read-only. WRITES go to their own UNTRACKED file:
+# pga_model.sqlite is in git, and the first harvest run lost ~1,000 rows when a loop reset
+# replaced the file under the writer ("attempt to write a readonly database"). Generated data
+# never lives in a git-tracked file on a box that hard-resets — the blob-war lesson.
+SRC = HERE / "pga_model.sqlite"
+DB = Path(os.environ.get("PGA_SG_DB") or (HERE / "sg_rounds.sqlite"))
 D = chr(36)
 
 DDL = """CREATE TABLE IF NOT EXISTS sg_rounds(
@@ -56,22 +62,25 @@ def harvest(season=None, sleep=0.35, verbose=True):
     Resumable by construction: (tid, player_id) pairs with ANY stored round are skipped, so a
     killed run continues where it stopped instead of refetching.
     """
+    src = sqlite3.connect(f"file:{SRC}?mode=ro", uri=True)   # never the writer of the warehouse
     con = sqlite3.connect(DB)
     con.execute(DDL)
     con.commit()
 
     # name -> pid from the season-SG harvest; skip-and-count on misses, never guess.
-    pids = {_norm(p): (i, p) for i, p in con.execute(
+    pids = {_norm(p): (i, p) for i, p in src.execute(
         "SELECT DISTINCT player_id, player FROM sg_stats")}
 
     want = {}
     q = "SELECT DISTINCT tid, player FROM birdie_rounds"
     if season:
         q += " WHERE tid LIKE 'R%d%%'" % int(season)
-    for tid, player in con.execute(q):
+    for tid, player in src.execute(q):
         hit = pids.get(_norm(player))
         if hit:
             want.setdefault(str(tid), {})[hit[0]] = hit[1]
+    _unmapped_src = {_norm(p) for _, p in src.execute(q)} - set(pids)
+    src.close()
 
     have = {(t, p) for t, p in con.execute(
         "SELECT DISTINCT tid, player_id FROM sg_rounds")}
@@ -79,7 +88,7 @@ def harvest(season=None, sleep=0.35, verbose=True):
     now = dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat()
     total_pairs = sum(len(v) for v in want.values())
     done = wrote = errs = 0
-    unmapped = len({_norm(p) for _, p in con.execute(q)} - set(pids))
+    unmapped = len(_unmapped_src)
     if verbose:
         print("sg_rounds: %d tournaments, %d mapped pairs to check (%d already stored, "
               "%d player names unmapped -> skipped)"
