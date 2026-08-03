@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-03T15:26:49Z",
+ "captured_at": "2026-08-03T15:32:37Z",
  "matches": [
-  {
-   "event_id": 35899007,
-   "p1": "Lukasz Pietraszko",
-   "p2": "Jakub Glanowski",
-   "p1_norm": "lukasz pietraszko",
-   "p2_norm": "jakub glanowski",
-   "open_date": "2026-08-03T15:00:00.000Z",
-   "line": 92.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
   {
    "event_id": 35899029,
    "p1": "Jacek Zelezik",
@@ -19,9 +8,42 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-08-03T15:20:00.000Z",
-   "line": 81.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 96.5,
+   "over_odds": -115,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35899131,
+   "p1": "Dariusz Wrobel",
+   "p2": "Marcin Kowalczyk",
+   "p1_norm": "dariusz wrobel",
+   "p2_norm": "marcin kowalczyk",
+   "open_date": "2026-08-03T15:25:00.000Z",
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35899132,
+   "p1": "Krystian Kolodziej",
+   "p2": "Tibor Spanik",
+   "p1_norm": "krystian kolodziej",
+   "p2_norm": "tibor spanik",
+   "open_date": "2026-08-03T15:25:00.000Z",
+   "line": 77.5,
+   "over_odds": -110,
+   "under_odds": -125
+  },
+  {
+   "event_id": 35899133,
+   "p1": "Miroslaw Warzecha",
+   "p2": "Michal Krutak",
+   "p1_norm": "miroslaw warzecha",
+   "p2_norm": "michal krutak",
+   "open_date": "2026-08-03T15:25:00.000Z",
+   "line": 71.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35899154,
@@ -30,9 +52,9 @@
    "p1_norm": "oskar jadach",
    "p2_norm": "grzegorz wichowski",
    "open_date": "2026-08-03T15:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35899160,
@@ -77,6 +99,17 @@
    "line": 74.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35899266,
+   "p1": "Wojciech Tobiasz",
+   "p2": "Grzegorz Jurowicz",
+   "p1_norm": "wojciech tobiasz",
+   "p2_norm": "grzegorz jurowicz",
+   "open_date": "2026-08-03T15:55:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
