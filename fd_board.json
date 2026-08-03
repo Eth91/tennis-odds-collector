@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-03T11:18:50Z",
+ "captured_at": "2026-08-03T11:24:07Z",
  "matches": [
-  {
-   "event_id": 35898320,
-   "p1": "Grzegorz Wichowski",
-   "p2": "Wojciech Tobiasz",
-   "p1_norm": "grzegorz wichowski",
-   "p2_norm": "wojciech tobiasz",
-   "open_date": "2026-08-03T11:05:00.000Z",
-   "line": 72.5,
-   "over_odds": -180,
-   "under_odds": 125
-  },
   {
    "event_id": 35898334,
    "p1": "Szymon Kolasa",
@@ -19,9 +8,9 @@
    "p1_norm": "szymon kolasa",
    "p2_norm": "grzegorz felkel",
    "open_date": "2026-08-03T11:15:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35898354,
@@ -30,9 +19,9 @@
    "p1_norm": "marcin balcerzak",
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-08-03T11:20:00.000Z",
-   "line": 74.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 77.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35898576,
@@ -77,6 +66,28 @@
    "line": 77.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35898617,
+   "p1": "Kamil Klocek",
+   "p2": "Kamil Rudomina",
+   "p1_norm": "kamil klocek",
+   "p2_norm": "kamil rudomina",
+   "open_date": "2026-08-03T11:50:00.000Z",
+   "line": 77.5,
+   "over_odds": -110,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35898618,
+   "p1": "Jakub Kaczmarek",
+   "p2": "Schaniel Krzysztof",
+   "p1_norm": "jakub kaczmarek",
+   "p2_norm": "schaniel krzysztof",
+   "open_date": "2026-08-03T11:50:00.000Z",
+   "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
