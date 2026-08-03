@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-03T15:32:37Z",
+ "captured_at": "2026-08-03T15:38:20Z",
  "matches": [
-  {
-   "event_id": 35899029,
-   "p1": "Jacek Zelezik",
-   "p2": "Henryk Tkaczyk",
-   "p1_norm": "jacek zelezik",
-   "p2_norm": "henryk tkaczyk",
-   "open_date": "2026-08-03T15:20:00.000Z",
-   "line": 96.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35899131,
-   "p1": "Dariusz Wrobel",
-   "p2": "Marcin Kowalczyk",
-   "p1_norm": "dariusz wrobel",
-   "p2_norm": "marcin kowalczyk",
-   "open_date": "2026-08-03T15:25:00.000Z",
-   "line": 77.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35899132,
    "p1": "Krystian Kolodziej",
@@ -30,18 +8,7 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "tibor spanik",
    "open_date": "2026-08-03T15:25:00.000Z",
-   "line": 77.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35899133,
-   "p1": "Miroslaw Warzecha",
-   "p2": "Michal Krutak",
-   "p1_norm": "miroslaw warzecha",
-   "p2_norm": "michal krutak",
-   "open_date": "2026-08-03T15:25:00.000Z",
-   "line": 71.5,
+   "line": 82.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -52,9 +19,9 @@
    "p1_norm": "oskar jadach",
    "p2_norm": "grzegorz wichowski",
    "open_date": "2026-08-03T15:30:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 79.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35899160,
@@ -108,6 +75,28 @@
    "p2_norm": "grzegorz jurowicz",
    "open_date": "2026-08-03T15:55:00.000Z",
    "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35899273,
+   "p1": "Michal Guzik",
+   "p2": "Piotr Gesiarz",
+   "p1_norm": "michal guzik",
+   "p2_norm": "piotr gesiarz",
+   "open_date": "2026-08-03T16:00:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35899311,
+   "p1": "Lukasz Pietraszko",
+   "p2": "Krystian Kolodziej",
+   "p1_norm": "lukasz pietraszko",
+   "p2_norm": "krystian kolodziej",
+   "open_date": "2026-08-03T16:05:00.000Z",
+   "line": 69.5,
    "over_odds": -118,
    "under_odds": -112
   }
