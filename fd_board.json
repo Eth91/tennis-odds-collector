@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-03T20:46:32Z",
+ "captured_at": "2026-08-03T20:52:42Z",
  "matches": [
-  {
-   "event_id": 35900662,
-   "p1": "Miroslaw Lewczuk",
-   "p2": "Michal Krutak",
-   "p1_norm": "miroslaw lewczuk",
-   "p2_norm": "michal krutak",
-   "open_date": "2026-08-03T20:30:00.000Z",
-   "line": 77.5,
-   "over_odds": 100,
-   "under_odds": -140
-  },
-  {
-   "event_id": 35900663,
-   "p1": "Miroslaw Piecowski",
-   "p2": "Marcin Kowalczyk",
-   "p1_norm": "miroslaw piecowski",
-   "p2_norm": "marcin kowalczyk",
-   "open_date": "2026-08-03T20:30:00.000Z",
-   "line": 78.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
   {
    "event_id": 35900712,
    "p1": "Jacek Zelezik",
@@ -30,9 +8,9 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "adam staniczek",
    "open_date": "2026-08-03T20:45:00.000Z",
-   "line": 73.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 79.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35900789,
