@@ -1292,7 +1292,8 @@ TT_LIVE_JS = """
                + (x.side === 'over' ? 'line at or below ' : 'line at or above ') + x.pt
                + ' \u00b7 past it the H2H hit rate drops under the bar</div></div></div>';
       }
-      rows += '<div class="cu-c' + (_ptRow ? ' haspt' : '') + '"><div class="cu-sum">'
+      rows += '<div class="cu-c' + (_ptRow ? ' haspt' : '') + '" data-k="'
+            + _ttKey(_ttNorm(x.p1), _ttNorm(x.p2)) + '"><div class="cu-sum">'
             + '<div class="cu-hd">' + _st + _bklogo + '<span class="cu-time">' + tip + ' MT</span></div>'
             + '<div class="cu-ttl">' + _ttEsc(x.p1) + ' v ' + _ttEsc(x.p2) + '</div>'
             + '<div class="cu-sub">Head-to-head total' + (x.real ? (' \u00b7 ' + _bk) : '') + '</div>'
@@ -1339,8 +1340,16 @@ TT_LIVE_JS = """
       + '<div class="ttfoot">confirmed at a posted line only \\u00b7 positions ride until settled</div></div>';
     // card tap toggles the play-to drawer; bound here so every 60s re-render re-binds, and no
     // inline onclick attribute has to survive three quoting layers (node --check caught that).
+    // OPEN STATE SURVIVES THE RE-RENDER: innerHTML replacement was silently closing any open
+    // drawer on every live poll, so open pair-keys are captured before the rebuild (stored on
+    // _ttOpenKeys by the previous pass) and re-applied here.
     [].slice.call(el.querySelectorAll('.cu-c.haspt')).forEach(function(c){
-      c.addEventListener('click', function(){ c.classList.toggle('open'); });
+      if (window._ttOpenKeys && window._ttOpenKeys[c.getAttribute('data-k')]) c.classList.add('open');
+      c.addEventListener('click', function(){
+        c.classList.toggle('open');
+        window._ttOpenKeys = window._ttOpenKeys || {};
+        window._ttOpenKeys[c.getAttribute('data-k')] = c.classList.contains('open');
+      });
     });
   };
   window._fetchTTTotals = async function(){
