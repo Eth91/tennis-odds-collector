@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T11:24:07Z",
+ "captured_at": "2026-08-03T11:29:32Z",
  "matches": [
   {
    "event_id": 35898334,
@@ -8,9 +8,9 @@
    "p1_norm": "szymon kolasa",
    "p2_norm": "grzegorz felkel",
    "open_date": "2026-08-03T11:15:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 58.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35898354,
@@ -19,9 +19,9 @@
    "p1_norm": "marcin balcerzak",
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-08-03T11:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 64.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35898576,
@@ -30,9 +30,9 @@
    "p1_norm": "wojciech wojtaszczyk",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-08-03T11:25:00.000Z",
-   "line": 75.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 78.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35898586,
@@ -88,6 +88,17 @@
    "line": 77.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35898626,
+   "p1": "Mariusz Adamus",
+   "p2": "Wojciech Tobiasz",
+   "p1_norm": "mariusz adamus",
+   "p2_norm": "wojciech tobiasz",
+   "open_date": "2026-08-03T11:55:00.000Z",
+   "line": 80.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
