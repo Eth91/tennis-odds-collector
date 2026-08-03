@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-03T05:39:06Z",
+ "captured_at": "2026-08-03T05:44:49Z",
  "matches": [
-  {
-   "event_id": 35897867,
-   "p1": "Adrian Wiecek",
-   "p2": "Grzegorz Felkel",
-   "p1_norm": "adrian wiecek",
-   "p2_norm": "grzegorz felkel",
-   "open_date": "2026-08-03T05:15:00.000Z",
-   "line": 75.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35897944,
    "p1": "Grzegorz Wichowski",
@@ -19,9 +8,9 @@
    "p1_norm": "grzegorz wichowski",
    "p2_norm": "grzegorz jurowicz",
    "open_date": "2026-08-03T05:30:00.000Z",
-   "line": 83.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 72.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35897952,
@@ -30,9 +19,9 @@
    "p1_norm": "marcin balcerzak",
    "p2_norm": "michal minda",
    "open_date": "2026-08-03T05:35:00.000Z",
-   "line": 69.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 82.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35897953,
@@ -41,7 +30,7 @@
    "p1_norm": "dariusz maszczynski",
    "p2_norm": "witold stechly",
    "open_date": "2026-08-03T05:35:00.000Z",
-   "line": 81.5,
+   "line": 88.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -52,9 +41,9 @@
    "p1_norm": "witold buczynski",
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-08-03T05:40:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35897961,
@@ -63,9 +52,9 @@
    "p1_norm": "wojciech iwasyszyn",
    "p2_norm": "kamil klocek",
    "open_date": "2026-08-03T05:40:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35897962,
@@ -75,8 +64,8 @@
    "p2_norm": "josef braun",
    "open_date": "2026-08-03T05:40:00.000Z",
    "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35897975,
@@ -130,8 +119,8 @@
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-08-03T06:05:00.000Z",
    "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35897985,
