@@ -1185,6 +1185,20 @@ TT_LIVE_JS = """
     // pipeline behind it is unchanged and a projection still graduates to a real card the moment
     // a book posts the line; it just never occupies the board as a look-alike bet beforehand.
 
+    // UPCOMING POSITIONS ARE ACTUAL PLAYS (user, 2026-08-02): money is committed at a struck
+    // posted line, so they get full cards even when the board's live re-check no longer ranks
+    // them a fresh flag (price drift or gate refusal after flag time changes nothing about the
+    // wager). Deduped against the live-flag loops above; tipped positions stay in the strip.
+    (_ttPositions || []).forEach(function(p){
+      if (!p || !p.ts || (p.ts * 1000) <= now) return;
+      var n1 = _ttNorm(p.p1), n2 = _ttNorm(p.p2), k = _ttKey(n1, n2);
+      if (boardPairs[k] || boardLast[_ttKey(_ttLast(n1), _ttLast(n2))]) return;
+      boardPairs[k] = 1;
+      entries.push({start: p.ts * 1000, p1: p.p1, p2: p.p2, line: +p.line,
+                    side: String(p.side || '').toLowerCase(), hit: p.conf, real: true,
+                    book: (p.book === 'betmgm') ? 'BetMGM' : 'FanDuel',
+                    odds: (p.odds != null ? _ttAm(p.odds) : null)});
+    });
     entries = entries.filter(function(x){ return x.real; });   // confirmed at a posted line ONLY
     entries.sort(function(a,b){ return a.start-b.start; });
     entries = entries.slice(0, 16);
@@ -1228,6 +1242,7 @@ TT_LIVE_JS = """
     var posRows = '';
     (_ttPositions || []).forEach(function(p){
       if (!p || !p.ts) return;
+      if ((p.ts * 1000) > now) return;   // not tipped yet -> it renders as a full card above
       var o = (String(p.side||'').toLowerCase() === 'over') ? 'O' : 'U';
       var od = (p.odds != null) ? ((p.odds > 0 ? '+' : '') + p.odds) : '';
       var bk = (p.book === 'betmgm') ? 'BetMGM' : 'FanDuel';
