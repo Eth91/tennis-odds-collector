@@ -9,6 +9,7 @@ at://did:plc:7x3skqr64ypmqca7oaiytqmx/app.bsky.feed.post/3mr32r4j5bu2e
 at://did:plc:bchqjudfulvukrz3g3n26f3f/app.bsky.feed.post/3ms5642ey5k2m
 at://did:plc:dglzm4uipfqmphcdo27wpioa/app.bsky.feed.post/3ms6ta3vkut2i
 at://did:plc:f47unotfhxdmxbw7uszcjwvp/app.bsky.feed.post/3mrsv4niz7c2w
+at://did:plc:f4zfqcpv7c3yqbqcdzwwnhum/app.bsky.feed.post/3ms6uoahxwv22
 at://did:plc:fy5zsacoomxwwsx7pjkfan3o/app.bsky.feed.post/3mrvdoyxcwu2n
 at://did:plc:hsqmfwk3ly7wn2pa6ec7rcpn/app.bsky.feed.post/3mr2wlaexov2n
 at://did:plc:ixpz6747fqmabsqf4l2wavv6/app.bsky.feed.post/3mr3pq3cnac2z
@@ -581,6 +582,7 @@ rw|935|Decent production in loss
 rw|935|Makes most of playing time
 rw|953|Scoreless in win
 rw|969|Manages 11 points in loss
+rw|969|Pours in 24 points
 rw|969|Puts up 13 points off bench
 rw|971|Fades injury report
 rw|971|Remains away from team
