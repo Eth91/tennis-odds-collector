@@ -1102,7 +1102,7 @@ def _tt_ladder(lad, play_to, zone):
 TT_LIVE_JS = """
   const TT_BOARD_URL = 'https://raw.githubusercontent.com/fgf9p6ks2f-ux/tennis-odds-collector/main/fd_board.json';
   const TT_H2H_URL = 'https://raw.githubusercontent.com/fgf9p6ks2f-ux/tennis-odds-collector/main/tt_board.json';
-  let _ttBoard = null, _ttH2H = null, _ttUpcoming = null, _ttBets = null, _ttSkipped = null;
+  let _ttBoard = null, _ttH2H = null, _ttUpcoming = null, _ttBets = null, _ttSkipped = null, _ttPositions = null;
   function _ttEsc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
   function _ttTime(iso){ try { return new Date(iso).toLocaleTimeString('en-US', {timeZone:'America/Denver', hour:'numeric', minute:'2-digit'}); } catch(e){ return ''; } }
   function _ttAm(o){ return (o != null && o > 0) ? '+' + o : '' + o; }
@@ -1227,8 +1227,29 @@ TT_LIVE_JS = """
             + '<div class="cu-cf">' + _hit + '</div>'
             + '</div></div>';
     }
+    // OPEN POSITIONS (board coherence): once flagged+logged a bet is money at risk, and the
+    // flags list above deliberately drops a match once it tips (st <= now) or its price moves off.
+    // Without this strip the user sees "2 plays" while seven positions ride invisibly. Ledger
+    // display-state only — grading owns the outcome, nothing here re-evaluates.
+    var posRows = '';
+    (_ttPositions || []).forEach(function(p){
+      if (!p || !p.ts) return;
+      var o = (String(p.side||'').toLowerCase() === 'over') ? 'O' : 'U';
+      var od = (p.odds != null) ? ((p.odds > 0 ? '+' : '') + p.odds) : '';
+      var bk = (p.book === 'betmgm') ? 'BetMGM' : 'FanDuel';
+      var stat = p.status === 'in play' ? '<span class="cu-st ok">In play</span>'
+               : p.status === 'awaiting result' ? '<span class="cu-st no">Awaiting result</span>'
+               : ('<span class="cu-st">' + _ttTime(new Date(p.ts * 1000).toISOString()) + ' MT</span>');
+      posRows += '<div class="ttpos-row"><span class="ttpos-pair">' + _ttEsc(p.p1) + ' v ' + _ttEsc(p.p2)
+            + '</span><span class="ttpos-bet">' + o + p.line + ' ' + od + ' \u00b7 ' + bk + '</span>'
+            + stat + '</div>';
+    });
+    var posBlock = posRows
+      ? ('<div class="ttpos"><div class="ttpos-hd">Open positions \u00b7 price at flag \u00b7 '
+         + (_ttPositions || []).length + '</div>' + posRows + '</div>')
+      : '';
     el.innerHTML = '<div class="card"><h3 class="ttlg">TT Elite ' + mid + ' Flags'
-      + '<span class="ttcnt">' + entries.length + '</span></h3>' + rows
+      + '<span class="ttcnt">' + entries.length + '</span></h3>' + rows + posBlock
       + '<div class="ttfoot">projected = no posted line yet, never tracked</div></div>';
   };
   window._fetchTTTotals = async function(){
@@ -1238,7 +1259,7 @@ TT_LIVE_JS = """
     } catch(e){}
     try {
       var r2 = await fetch(TT_H2H_URL + '?_=' + Date.now(), { cache: 'no-store' });
-      if (r2.ok){ var d2 = await r2.json(); var mp = {}; (d2.elite_h2h || []).forEach(function(e){ mp[_ttKey(e.p1n, e.p2n)] = e; }); _ttH2H = mp; _ttUpcoming = Array.isArray(d2.elite_upcoming) ? d2.elite_upcoming : []; _ttBets = Array.isArray(d2.bets) ? d2.bets : []; _ttSkipped = Array.isArray(d2.skipped) ? d2.skipped : []; }
+      if (r2.ok){ var d2 = await r2.json(); var mp = {}; (d2.elite_h2h || []).forEach(function(e){ mp[_ttKey(e.p1n, e.p2n)] = e; }); _ttH2H = mp; _ttUpcoming = Array.isArray(d2.elite_upcoming) ? d2.elite_upcoming : []; _ttBets = Array.isArray(d2.bets) ? d2.bets : []; _ttSkipped = Array.isArray(d2.skipped) ? d2.skipped : []; _ttPositions = Array.isArray(d2.positions) ? d2.positions : []; }
     } catch(e){}
     window._applyTTTotals();
     _ttStamp();
@@ -1267,6 +1288,7 @@ TT_LIVE_JS = """
     _ttH2H = mp;
     _ttUpcoming = Array.isArray(b.upcoming) ? b.upcoming : [];
     _ttBets = Array.isArray(b.bets) ? b.bets : [];
+    _ttPositions = Array.isArray(b.positions) ? b.positions : [];
     _ttSkipped = Array.isArray(b.skipped) ? b.skipped : [];
     try { window._applyTTTotals(); } catch(e){}
   })();
@@ -1562,6 +1584,7 @@ def _tt_panel(data):
             "h2h": (data or {}).get("elite_h2h") or [],
             "upcoming": (data or {}).get("elite_upcoming") or [],
             "bets": (data or {}).get("bets") or [],
+            "positions": (data or {}).get("positions") or [],
             # REFUSED plays travel too — not to render, but so their PROJECTION is suppressed.
             # A pair with a real line the model said no to must leave the board, and without this
             # it silently reverts to a projected row at a made-up line, which reads as a live bet.
@@ -4050,6 +4073,18 @@ def build():
   /* TT now uses the WNBA card components — inherit them inside #tt */
   #tt .cu-c {{ border-bottom:.5px solid var(--cu-sep); }}
   #tt .cu-c:last-child {{ border-bottom:0; }}
+  /* Open-positions strip (board coherence): money at risk stays visible after tip/price-move. */
+  #tt .ttpos {{ margin-top:14px; border-top:.5px solid var(--cu-sep); padding-top:10px; }}
+  #tt .ttpos-hd {{ font-size:12px; font-weight:640; text-transform:uppercase;
+                   letter-spacing:.05em; color:var(--cu-lbl3); margin-bottom:6px; }}
+  #tt .ttpos-row {{ display:flex; align-items:center; gap:10px; padding:7px 0;
+                    border-bottom:.5px solid var(--cu-sep); }}
+  #tt .ttpos-row:last-child {{ border-bottom:0; }}
+  #tt .ttpos-pair {{ font-size:14px; font-weight:600; color:var(--cu-lbl);
+                     overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }}
+  #tt .ttpos-bet {{ font-size:13px; color:var(--cu-lbl2); font-variant-numeric:tabular-nums;
+                    white-space:nowrap; }}
+  #tt .ttpos-row .cu-st {{ margin-left:auto; flex:none; white-space:nowrap; }}
   #tt .cu-sum {{ padding:14px 0; }}
   #tt .cu-hd {{ display:flex; align-items:center; gap:8px; margin-bottom:9px; }}
   #tt .cu-st {{ font-size:12px; font-weight:600; padding:2px 8px; border-radius:11px; }}
