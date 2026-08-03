@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-08-03T13:11:08Z",
+ "captured_at": "2026-08-03T13:17:32Z",
  "matches": [
-  {
-   "event_id": 35898714,
-   "p1": "Oskar Jadach",
-   "p2": "Mariusz Adamus",
-   "p1_norm": "oskar jadach",
-   "p2_norm": "mariusz adamus",
-   "open_date": "2026-08-03T12:45:00.000Z",
-   "line": 98.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35898752,
-   "p1": "Krystian Kolodziej",
-   "p2": "Karol Wisniewski",
-   "p1_norm": "krystian kolodziej",
-   "p2_norm": "karol wisniewski",
-   "open_date": "2026-08-03T13:00:00.000Z",
-   "line": 92.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35898762,
-   "p1": "Kamil Klocek",
-   "p2": "Artur Sobel",
-   "p1_norm": "kamil klocek",
-   "p2_norm": "artur sobel",
-   "open_date": "2026-08-03T13:05:00.000Z",
-   "line": 58.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35898770,
    "p1": "Grzegorz Wichowski",
@@ -41,9 +8,9 @@
    "p1_norm": "grzegorz wichowski",
    "p2_norm": "grzegorz jurowicz",
    "open_date": "2026-08-03T13:10:00.000Z",
-   "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 70.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35898805,
