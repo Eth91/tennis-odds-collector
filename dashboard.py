@@ -1180,19 +1180,13 @@ TT_LIVE_JS = """
       boardPairs[_ttKey(s1, s2)] = 1;
       boardLast[_ttKey(_ttLast(s1), _ttLast(s2))] = 1;
     });
-    // projected likely-flags (pre-filtered to >=70% in tt_board) — DROP the moment FanDuel posts
-    // this pair (exact key OR last-name fallback), so a "projected" tag never lingers past the real line
-    (_ttUpcoming || []).forEach(function(e){
-      if (!e.side || boardPairs[_ttKey(e.p1n, e.p2n)] || boardLast[_ttKey(_ttLast(e.p1n), _ttLast(e.p2n))]) return;
-      var st = e.ts * 1000; if (st <= now) return;
-      entries.push({start: st, p1: e.p1, p2: e.p2, line: e.proj, side: e.side, hit: e.hit, real: false});
-    });
-    if (!entries.length){
-      el.innerHTML = '<div class="card"><h3 class="ttlg">\\uD83C\\uDFD3 TT Elite ' + mid + ' Flags</h3>'
-        + '<div class="ttempty">No TT Elite flags right now ' + mid + ' no pair clears the 70% bar at its line (real or projected).</div></div>';
-      return;
-    }
-    entries.sort(function(a,b){ return (a.real?0:1)-(b.real?0:1) || a.start-b.start; });
+    // PROJECTED ROWS NO LONGER RENDER (user call, 2026-08-02: "only post plays that are
+    // confirmed at a posted line — actual plays"). _ttUpcoming still arrives in the boot so the
+    // pipeline behind it is unchanged and a projection still graduates to a real card the moment
+    // a book posts the line; it just never occupies the board as a look-alike bet beforehand.
+
+    entries = entries.filter(function(x){ return x.real; });   // confirmed at a posted line ONLY
+    entries.sort(function(a,b){ return a.start-b.start; });
     entries = entries.slice(0, 16);
     var rows = '';
     for (var i=0; i<entries.length; i++){
@@ -1248,9 +1242,17 @@ TT_LIVE_JS = """
       ? ('<div class="ttpos"><div class="ttpos-hd">Open positions \u00b7 price at flag \u00b7 '
          + (_ttPositions || []).length + '</div>' + posRows + '</div>')
       : '';
+    if (!rows && !posRows){
+      el.innerHTML = '<div class="card"><h3 class="ttlg">\\uD83C\\uDFD3 TT Elite ' + mid + ' Flags</h3>'
+        + '<div class="ttempty">No confirmed TT Elite plays right now ' + mid + ' nothing clears the bar at a posted line.</div></div>';
+      return;
+    }
+    if (!rows){
+      rows = '<div class="ttempty">No new confirmed plays ' + mid + ' open positions below.</div>';
+    }
     el.innerHTML = '<div class="card"><h3 class="ttlg">TT Elite ' + mid + ' Flags'
       + '<span class="ttcnt">' + entries.length + '</span></h3>' + rows + posBlock
-      + '<div class="ttfoot">projected = no posted line yet, never tracked</div></div>';
+      + '<div class="ttfoot">confirmed at a posted line only \\u00b7 positions ride until settled</div></div>';
   };
   window._fetchTTTotals = async function(){
     try {
