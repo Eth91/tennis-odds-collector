@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T12:59:41Z",
+ "captured_at": "2026-08-03T13:05:01Z",
  "matches": [
   {
    "event_id": 35898714,
@@ -8,9 +8,9 @@
    "p1_norm": "oskar jadach",
    "p2_norm": "mariusz adamus",
    "open_date": "2026-08-03T12:45:00.000Z",
-   "line": 90.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 80.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35898752,
@@ -19,9 +19,9 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "karol wisniewski",
    "open_date": "2026-08-03T13:00:00.000Z",
-   "line": 74.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 68.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35898761,
@@ -31,8 +31,8 @@
    "p2_norm": "witold buczynski",
    "open_date": "2026-08-03T13:05:00.000Z",
    "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35898762,
@@ -41,9 +41,9 @@
    "p1_norm": "kamil klocek",
    "p2_norm": "artur sobel",
    "open_date": "2026-08-03T13:05:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35898770,
@@ -53,8 +53,8 @@
    "p2_norm": "grzegorz jurowicz",
    "open_date": "2026-08-03T13:10:00.000Z",
    "line": 74.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35898805,
@@ -77,6 +77,39 @@
    "line": 78.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35898813,
+   "p1": "Przemyslaw Blocho",
+   "p2": "Adrian Myszewski",
+   "p1_norm": "przemyslaw blocho",
+   "p2_norm": "adrian myszewski",
+   "open_date": "2026-08-03T13:30:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35898814,
+   "p1": "Piotr Przewlocki",
+   "p2": "Sebastian Szostok",
+   "p1_norm": "piotr przewlocki",
+   "p2_norm": "sebastian szostok",
+   "open_date": "2026-08-03T13:30:00.000Z",
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35898815,
+   "p1": "Rafal Skotniczny",
+   "p2": "Wojciech Tobiasz",
+   "p1_norm": "rafal skotniczny",
+   "p2_norm": "wojciech tobiasz",
+   "open_date": "2026-08-03T13:30:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
