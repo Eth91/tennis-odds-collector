@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-03T20:22:01Z",
+ "captured_at": "2026-08-03T20:27:37Z",
  "matches": [
-  {
-   "event_id": 35900639,
-   "p1": "Adrian Eliasz",
-   "p2": "Bartlomiej Wisniewski",
-   "p1_norm": "adrian eliasz",
-   "p2_norm": "bartlomiej wisniewski",
-   "open_date": "2026-08-03T20:05:00.000Z",
-   "line": 100.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35900650,
    "p1": "Michal Guzik",
@@ -19,9 +8,9 @@
    "p1_norm": "michal guzik",
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-08-03T20:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 64.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35900651,
@@ -30,9 +19,9 @@
    "p1_norm": "pawel kurek",
    "p2_norm": "grzegorz marud",
    "open_date": "2026-08-03T20:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35900662,
