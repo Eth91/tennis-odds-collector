@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T22:20:40Z",
+ "captured_at": "2026-08-03T22:25:12Z",
  "matches": [
   {
    "event_id": 35900972,
@@ -9,8 +9,8 @@
    "p2_norm": "miroslaw warzecha",
    "open_date": "2026-08-03T22:10:00.000Z",
    "line": 85.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35900977,
@@ -20,8 +20,8 @@
    "p2_norm": "jerzy michalik",
    "open_date": "2026-08-03T22:25:00.000Z",
    "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35900984,
@@ -66,6 +66,17 @@
    "line": 80.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35900990,
+   "p1": "Jacek Zelezik",
+   "p2": "Henryk Tkaczyk",
+   "p1_norm": "jacek zelezik",
+   "p2_norm": "henryk tkaczyk",
+   "open_date": "2026-08-03T22:50:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
