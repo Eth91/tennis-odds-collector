@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T01:11:10Z",
+ "captured_at": "2026-08-03T01:18:41Z",
  "matches": [
   {
    "event_id": 35897370,
@@ -8,7 +8,7 @@
    "p1_norm": "michal paszkiewicz",
    "p2_norm": "sebastian juzek",
    "open_date": "2026-08-03T01:10:00.000Z",
-   "line": 76.5,
+   "line": 87.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -42,8 +42,19 @@
    "p2_norm": "jakub jesiek",
    "open_date": "2026-08-03T01:35:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
+   "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35897415,
+   "p1": "Michal Machelski",
+   "p2": "Grzegorz Mucha",
+   "p1_norm": "michal machelski",
+   "p2_norm": "grzegorz mucha",
+   "open_date": "2026-08-03T01:45:00.000Z",
+   "line": 75.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
