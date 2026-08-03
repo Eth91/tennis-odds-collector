@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-03T08:29:00Z",
+ "captured_at": "2026-08-03T08:33:02Z",
  "matches": [
-  {
-   "event_id": 35898088,
-   "p1": "Schaniel Krzysztof",
-   "p2": "Sebastian Szostok",
-   "p1_norm": "schaniel krzysztof",
-   "p2_norm": "sebastian szostok",
-   "open_date": "2026-08-03T08:10:00.000Z",
-   "line": 85.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
   {
    "event_id": 35898090,
    "p1": "Michal Wolny",
@@ -19,7 +8,7 @@
    "p1_norm": "michal wolny",
    "p2_norm": "witold stechly",
    "open_date": "2026-08-03T08:20:00.000Z",
-   "line": 82.5,
+   "line": 91.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -30,7 +19,7 @@
    "p1_norm": "grzegorz wichowski",
    "p2_norm": "rafal skotniczny",
    "open_date": "2026-08-03T08:20:00.000Z",
-   "line": 83.5,
+   "line": 84.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -41,9 +30,9 @@
    "p1_norm": "szymon kolasa",
    "p2_norm": "piotr cyrnek",
    "open_date": "2026-08-03T08:30:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 77.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35898101,
@@ -52,9 +41,9 @@
    "p1_norm": "marcin balcerzak",
    "p2_norm": "artur sobel",
    "open_date": "2026-08-03T08:30:00.000Z",
-   "line": 75.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35898105,
