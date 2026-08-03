@@ -288,3 +288,21 @@ CALIBRATION (out-of-sample: 14 train / 2 test slates, 6 held-out bets):
 
 Focus: TT + WNBA. MLB / tennis / esports benched (data kept). Table tennis has its own nightly digest.
 ```
+
+## 2026-08-02
+
+```
+Daily digest - 2026-08-02 (MT)
+
+WNBA AUTOBETTER (injury props · current-model picks):
+TODAY: 2-2  +0.43u ($+43)
+ALL-TIME (current-model, since 7/9): 42-23  +16.35u ($+1,635)
+Pending: 4 (grade after games settle)
+Calib: 131/100 · optimism +4% · ranking -1% (hi 55%/lo 56%) · HOLD
+
+CALIBRATION (out-of-sample: 16 train / 2 test slates, 8 held-out bets):
+  shipped k=11/14: 6-2, ROI +49%, over-conf gap +15p
+  -> mixed -- keep measuring
+
+Focus: TT + WNBA. MLB / tennis / esports benched (data kept). Table tennis has its own nightly digest.
+```
