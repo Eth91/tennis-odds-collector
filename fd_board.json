@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T06:13:08Z",
+ "captured_at": "2026-08-03T06:18:58Z",
  "matches": [
   {
    "event_id": 35897980,
@@ -9,8 +9,8 @@
    "p2_norm": "artur sobel",
    "open_date": "2026-08-03T06:00:00.000Z",
    "line": 87.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35897983,
@@ -19,9 +19,9 @@
    "p1_norm": "krzysztof kotyl",
    "p2_norm": "kamil rudomina",
    "open_date": "2026-08-03T06:05:00.000Z",
-   "line": 82.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 79.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35897984,
@@ -30,9 +30,9 @@
    "p1_norm": "piotr zemla",
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-08-03T06:05:00.000Z",
-   "line": 77.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 66.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35897985,
@@ -41,9 +41,9 @@
    "p1_norm": "marcin jadczyk",
    "p2_norm": "piotr cyrnek",
    "open_date": "2026-08-03T06:05:00.000Z",
-   "line": 85.5,
+   "line": 86.5,
    "over_odds": -115,
-   "under_odds": -120
+   "under_odds": -115
   },
   {
    "event_id": 35897995,
@@ -53,8 +53,8 @@
    "p2_norm": "oskar jadach",
    "open_date": "2026-08-03T06:20:00.000Z",
    "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35898000,
@@ -108,6 +108,28 @@
    "p2_norm": "josef braun",
    "open_date": "2026-08-03T06:30:00.000Z",
    "line": 84.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35898024,
+   "p1": "Dariusz Maszczynski",
+   "p2": "Michal Wolny",
+   "p1_norm": "dariusz maszczynski",
+   "p2_norm": "michal wolny",
+   "open_date": "2026-08-03T06:45:00.000Z",
+   "line": 75.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35898025,
+   "p1": "Grzegorz Wichowski",
+   "p2": "Mariusz Adamus",
+   "p1_norm": "grzegorz wichowski",
+   "p2_norm": "mariusz adamus",
+   "open_date": "2026-08-03T06:45:00.000Z",
+   "line": 78.5,
    "over_odds": -112,
    "under_odds": -118
   }
