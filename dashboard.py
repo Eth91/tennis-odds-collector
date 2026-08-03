@@ -3768,7 +3768,7 @@ def build():
 
   /* segmented control — .tabthumb becomes the selected segment, so showTab() is untouched */
   .tabs {{ background:var(--cu-fill); border:0; border-radius:9px; padding:2px; gap:2px;
-           margin:13px 0 0; }}
+           margin:13px 0 16px; }}
   .tab {{ border-radius:7px; padding:6px 0; font-size:13px; font-weight:590;
           color:var(--cu-lbl2) !important; gap:5px; }}
   .tab.active {{ color:var(--cu-lbl) !important; }}
