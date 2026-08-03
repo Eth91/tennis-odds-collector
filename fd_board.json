@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T15:11:07Z",
+ "captured_at": "2026-08-03T15:16:12Z",
  "matches": [
   {
    "event_id": 35899007,
@@ -8,20 +8,9 @@
    "p1_norm": "lukasz pietraszko",
    "p2_norm": "jakub glanowski",
    "open_date": "2026-08-03T15:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35899008,
-   "p1": "Miroslaw Piecowski",
-   "p2": "Bartlomiej Wisniewski",
-   "p1_norm": "miroslaw piecowski",
-   "p2_norm": "bartlomiej wisniewski",
-   "open_date": "2026-08-03T15:00:00.000Z",
-   "line": 53.5,
-   "over_odds": -105,
-   "under_odds": -135
+   "line": 82.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35899011,
@@ -30,7 +19,7 @@
    "p1_norm": "miroslaw lewczuk",
    "p2_norm": "artur kubiak",
    "open_date": "2026-08-03T15:00:00.000Z",
-   "line": 88.5,
+   "line": 80.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -41,9 +30,9 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "rafal skotniczny",
    "open_date": "2026-08-03T15:05:00.000Z",
-   "line": 80.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 86.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35899029,
