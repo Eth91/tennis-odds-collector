@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-03T15:49:18Z",
+ "captured_at": "2026-08-03T15:54:26Z",
  "matches": [
-  {
-   "event_id": 35899160,
-   "p1": "Dariusz Maszczynski",
-   "p2": "Adam Staniczek",
-   "p1_norm": "dariusz maszczynski",
-   "p2_norm": "adam staniczek",
-   "open_date": "2026-08-03T15:40:00.000Z",
-   "line": 53.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35899211,
    "p1": "Artur Gromek",
@@ -19,9 +8,9 @@
    "p1_norm": "artur gromek",
    "p2_norm": "miroslav sklensky",
    "open_date": "2026-08-03T15:45:00.000Z",
-   "line": 73.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 58.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35899220,
@@ -30,9 +19,9 @@
    "p1_norm": "adrian eliasz",
    "p2_norm": "michal skorski",
    "open_date": "2026-08-03T15:50:00.000Z",
-   "line": 81.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 82.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35899221,
@@ -41,9 +30,9 @@
    "p1_norm": "grzegorz mucha",
    "p2_norm": "aleksander barton",
    "open_date": "2026-08-03T15:50:00.000Z",
-   "line": 74.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 72.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35899266,
@@ -52,7 +41,7 @@
    "p1_norm": "wojciech tobiasz",
    "p2_norm": "grzegorz jurowicz",
    "open_date": "2026-08-03T15:55:00.000Z",
-   "line": 77.5,
+   "line": 75.5,
    "over_odds": -118,
    "under_odds": -112
   },
@@ -97,6 +86,17 @@
    "p2_norm": "dariusz wrobel",
    "open_date": "2026-08-03T16:15:00.000Z",
    "line": 80.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35899597,
+   "p1": "Mariusz Adamus",
+   "p2": "Grzegorz Wichowski",
+   "p1_norm": "mariusz adamus",
+   "p2_norm": "grzegorz wichowski",
+   "open_date": "2026-08-03T16:20:00.000Z",
+   "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
   }
