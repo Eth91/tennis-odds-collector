@@ -865,7 +865,7 @@ def _game_group(players, tips, today=None, idx=0):
     outline = (f'<div class="cu-out"><i class="sdot warn"></i>{html.escape(outs)} out</div>'
                if outs else "")
     return (f'<div class="game" data-edge="{gedge:.4f}" data-tip="{gtip:.0f}" style="--i:{idx}">'
-            f'<div class="cu-sh">{_llogo("wnba")}<b>WNBA</b><span class="cu-dot">·</span>'
+            f'<div class="cu-sh">'
             f'<span class="cu-shm">{glogo(team)}{team} @ {glogo(opp)}{opp or "—"}</span>'
             f'<span class="cu-shr">{tiptime}</span></div>'
             f'{outline}<div class="cu-grp">{cards}</div></div>')
@@ -2649,10 +2649,7 @@ def build():
         _i += 1
     if _live:
         _npos = sum(len(prs) for _k, _pl in _live for _p, prs in _pl)
-        _parts.append(
-            f'<div class="dayhdr live">In progress'
-            f'<span>{len(_live)} game{"s" if len(_live) != 1 else ""} · '
-            f'{_npos} open position{"s" if _npos != 1 else ""} · price at flag</span></div>')
+
         for _key, pl in _live:
             _parts.append(_game_group(pl, tips, today, _i))
             _i += 1
@@ -2668,7 +2665,6 @@ def build():
     considered_html = _considered_html(rows)   # flagged-then-rejected, context only
     slip_html = _slip_html(rows)
     wl_html = _watchlist_html({(r.get("pred_date"), r.get("player"), r.get("stat")) for r in rows}, tips)
-    starwatch_html = _starwatch_html()
     injury_html = _injury_html()
     tt_json = _load_tt()
     _feed_health_ping(tt_json)                             # once/day ntfy if TT/WNBA is broken (not quiet)
@@ -4447,9 +4443,7 @@ def build():
 </style></head><body><div class="wrap">
   <header>
     <h1>Today's Plays</h1>
-    <div class="live"><span class="dot"></span>{now:%-I:%M %p} MT
-      <button class="rfrsh" onclick="manualRefresh(this)" title="Pull new plays now" aria-label="Refresh now">↻</button>
-      <span id="rfchk"></span></div>
+
   </header>
   <div class="tabs">
     <div class="tabthumb" id="tabthumb"></div>
@@ -4463,7 +4457,6 @@ def build():
     {recstrip_html}
     <div id="wnbafilters" class="cu-chips" hidden></div>
     <div id="games">{cards}</div>
-    {starwatch_html}
     {ladders_html}
     {slip_html}
     {wl_html}
