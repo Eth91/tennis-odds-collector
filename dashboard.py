@@ -1287,12 +1287,13 @@ TT_LIVE_JS = """
       var _ptRow = '';
       if (x.pt != null && isFinite(x.pt)){
         var _ptTxt = (x.side === 'over') ? ('Play up to ' + x.pt) : ('Play down to ' + x.pt);
-        _ptRow = '<details class="ttpt"><summary>' + _ptTxt + '</summary>'
+        _ptRow = '<div class="ttpt"><div class="ttpt-t">' + _ptTxt + '</div>'
                + '<div class="ttpt-b">still model-flagged at any '
                + (x.side === 'over' ? 'line at or below ' : 'line at or above ') + x.pt
-               + ' \u00b7 past it the H2H hit rate drops under the bar</div></details>';
+               + ' \u00b7 past it the H2H hit rate drops under the bar</div></div>';
       }
-      rows += '<div class="cu-c"><div class="cu-sum">'
+      rows += '<div class="cu-c' + (_ptRow ? ' haspt' : '') + '"'
+            + (_ptRow ? ' onclick="this.classList.toggle(\'open\')"' : '') + '><div class="cu-sum">'
             + '<div class="cu-hd">' + _st + _bklogo + '<span class="cu-time">' + tip + ' MT</span></div>'
             + '<div class="cu-ttl">' + _ttEsc(x.p1) + ' v ' + _ttEsc(x.p2) + '</div>'
             + '<div class="cu-sub">Head-to-head total' + (x.real ? (' \u00b7 ' + _bk) : '') + '</div>'
@@ -4156,14 +4157,14 @@ def build():
   #tt .cu-c {{ border-bottom:.5px solid var(--cu-sep); }}
   #tt .cu-c:last-child {{ border-bottom:0; }}
   /* Open-positions strip (board coherence): money at risk stays visible after tip/price-move. */
-  #tt .ttpt {{ margin-top:10px; border-top:.5px solid var(--cu-sep); padding-top:8px; }}
-  #tt .ttpt summary {{ list-style:none; cursor:pointer; display:flex; align-items:center;
-                       font-size:14px; font-weight:600; color:var(--cu-blue); }}
-  #tt .ttpt summary::-webkit-details-marker {{ display:none; }}
-  #tt .ttpt summary::after {{ content:'\u203a'; margin-left:auto; color:var(--cu-lbl3);
-                              transition:transform .15s ease; }}
-  #tt .ttpt[open] summary::after {{ transform:rotate(90deg); }}
-  #tt .ttpt-b {{ padding:7px 0 2px; font-size:13px; line-height:1.4; color:var(--cu-lbl2); }}
+  /* play-to drawer: INVISIBLE on the card face (user 2026-08-03) — the whole card is the tap
+     target and the row only exists while the card carries .open. */
+  #tt .cu-c.haspt {{ cursor:pointer; }}
+  #tt .ttpt {{ display:none; }}
+  #tt .cu-c.open .ttpt {{ display:block; margin-top:10px;
+                          border-top:.5px solid var(--cu-sep); padding-top:8px; }}
+  #tt .ttpt-t {{ font-size:14px; font-weight:600; color:var(--cu-blue); }}
+  #tt .ttpt-b {{ padding:6px 0 2px; font-size:13px; line-height:1.4; color:var(--cu-lbl2); }}
   #tt .ttpos {{ margin-top:14px; border-top:.5px solid var(--cu-sep); padding-top:10px; }}
   #tt .ttpos-hd {{ font-size:12px; font-weight:640; text-transform:uppercase;
                    letter-spacing:.05em; color:var(--cu-lbl3); margin-bottom:6px; }}
