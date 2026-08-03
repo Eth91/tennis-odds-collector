@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T07:24:36Z",
+ "captured_at": "2026-08-03T07:32:20Z",
  "matches": [
   {
    "event_id": 35898040,
@@ -8,20 +8,9 @@
    "p1_norm": "jakub skorupa",
    "p2_norm": "janus slawomir",
    "open_date": "2026-08-03T07:10:00.000Z",
-   "line": 94.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35898045,
-   "p1": "Artur Sobel",
-   "p2": "Stapor Rafal",
-   "p1_norm": "artur sobel",
-   "p2_norm": "stapor rafal",
-   "open_date": "2026-08-03T07:15:00.000Z",
-   "line": 61.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 98.5,
+   "over_odds": -105,
+   "under_odds": -135
   },
   {
    "event_id": 35898052,
@@ -30,18 +19,7 @@
    "p1_norm": "wojciech wojtaszczyk",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-08-03T07:20:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35898053,
-   "p1": "Kamil Rudomina",
-   "p2": "Mikolaj Lukaszewski",
-   "p1_norm": "kamil rudomina",
-   "p2_norm": "mikolaj lukaszewski",
-   "open_date": "2026-08-03T07:20:00.000Z",
-   "line": 73.5,
+   "line": 82.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -52,9 +30,9 @@
    "p1_norm": "piotr cyrnek",
    "p2_norm": "grzegorz felkel",
    "open_date": "2026-08-03T07:20:00.000Z",
-   "line": 75.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 53.5,
+   "over_odds": 105,
+   "under_odds": -145
   },
   {
    "event_id": 35898058,
@@ -63,9 +41,9 @@
    "p1_norm": "rafal skotniczny",
    "p2_norm": "wojciech tobiasz",
    "open_date": "2026-08-03T07:30:00.000Z",
-   "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 71.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35898060,
@@ -121,6 +99,17 @@
    "line": 84.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35898073,
+   "p1": "Mariusz Adamus",
+   "p2": "Grzegorz Jurowicz",
+   "p1_norm": "mariusz adamus",
+   "p2_norm": "grzegorz jurowicz",
+   "open_date": "2026-08-03T07:55:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
