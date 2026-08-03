@@ -1217,7 +1217,7 @@ TT_LIVE_JS = """
       entries.push({start: st, p1: b.p1, p2: b.p2,
                     line: (b.line != null ? +b.line : +b.play_to),
                     side: (String(b.side||'').charAt(0) === 'O') ? 'over' : 'under',
-                    hit: b.raw, real: true, book: _bn,
+                    hit: b.raw, real: true, book: _bn, pt: (b.play_to != null ? +b.play_to : null),
                     odds: (b.odds != null ? _ttAm(b.odds) : _ttDecAm((b.book||{}).od))});
     });
     // REFUSED PLAYS SUPPRESS THEIR OWN PROJECTION. They are never rendered, but a pair that has a
@@ -1252,6 +1252,7 @@ TT_LIVE_JS = """
       entries.push({start: p.ts * 1000, p1: p.p1, p2: p.p2, line: +p.line,
                     side: String(p.side || '').toLowerCase(), hit: p.conf, real: true,
                     book: (p.book === 'betmgm') ? 'BetMGM' : 'FanDuel',
+                    pt: (p.play_to != null ? +p.play_to : null),
                     odds: (p.odds != null ? _ttAm(p.odds) : null)});
     });
     entries = entries.filter(function(x){ return x.real; });   // confirmed at a posted line ONLY
@@ -1280,6 +1281,17 @@ TT_LIVE_JS = """
                + '<span class="cu-n">hit rate</span>')
             : '<span class="cu-bar"></span><span class="cu-pc na">\u2014</span>'
               + '<span class="cu-n na">no sample</span>';
+      // PLAY-TO DRAWER (user 2026-08-03): the furthest line the flagged side still clears the
+      // model's bar — served by tt_board's play_to (same ladder + same gate as the flag itself,
+      // never recomputed here). No cutoff -> no drawer, not a dash.
+      var _ptRow = '';
+      if (x.pt != null && isFinite(x.pt)){
+        var _ptTxt = (x.side === 'over') ? ('Play up to ' + x.pt) : ('Play down to ' + x.pt);
+        _ptRow = '<details class="ttpt"><summary>' + _ptTxt + '</summary>'
+               + '<div class="ttpt-b">still model-flagged at any '
+               + (x.side === 'over' ? 'line at or below ' : 'line at or above ') + x.pt
+               + ' \u00b7 past it the H2H hit rate drops under the bar</div></details>';
+      }
       rows += '<div class="cu-c"><div class="cu-sum">'
             + '<div class="cu-hd">' + _st + _bklogo + '<span class="cu-time">' + tip + ' MT</span></div>'
             + '<div class="cu-ttl">' + _ttEsc(x.p1) + ' v ' + _ttEsc(x.p2) + '</div>'
@@ -1288,6 +1300,7 @@ TT_LIVE_JS = """
             + '</span><span class="cu-line">' + lncell + '</span>'
             + '<span class="cu-price">' + _oddstxt + '</span></div>'
             + '<div class="cu-cf">' + _hit + '</div>'
+            + _ptRow
             + '</div></div>';
     }
     // OPEN POSITIONS (board coherence): once flagged+logged a bet is money at risk, and the
@@ -4143,6 +4156,14 @@ def build():
   #tt .cu-c {{ border-bottom:.5px solid var(--cu-sep); }}
   #tt .cu-c:last-child {{ border-bottom:0; }}
   /* Open-positions strip (board coherence): money at risk stays visible after tip/price-move. */
+  #tt .ttpt {{ margin-top:10px; border-top:.5px solid var(--cu-sep); padding-top:8px; }}
+  #tt .ttpt summary {{ list-style:none; cursor:pointer; display:flex; align-items:center;
+                       font-size:14px; font-weight:600; color:var(--cu-blue); }}
+  #tt .ttpt summary::-webkit-details-marker {{ display:none; }}
+  #tt .ttpt summary::after {{ content:'\u203a'; margin-left:auto; color:var(--cu-lbl3);
+                              transition:transform .15s ease; }}
+  #tt .ttpt[open] summary::after {{ transform:rotate(90deg); }}
+  #tt .ttpt-b {{ padding:7px 0 2px; font-size:13px; line-height:1.4; color:var(--cu-lbl2); }}
   #tt .ttpos {{ margin-top:14px; border-top:.5px solid var(--cu-sep); padding-top:10px; }}
   #tt .ttpos-hd {{ font-size:12px; font-weight:640; text-transform:uppercase;
                    letter-spacing:.05em; color:var(--cu-lbl3); margin-bottom:6px; }}
