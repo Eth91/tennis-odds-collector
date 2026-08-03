@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T18:46:37Z",
+ "captured_at": "2026-08-03T18:53:30Z",
  "matches": [
   {
    "event_id": 35900576,
@@ -8,8 +8,8 @@
    "p1_norm": "lukasz pietraszko",
    "p2_norm": "miroslav sklensky",
    "open_date": "2026-08-03T18:50:00.000Z",
-   "line": 73.5,
-   "over_odds": -110,
+   "line": 76.5,
+   "over_odds": -115,
    "under_odds": -120
   },
   {
@@ -42,6 +42,39 @@
    "p2_norm": "piotr gesiarz",
    "open_date": "2026-08-03T19:10:00.000Z",
    "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35900600,
+   "p1": "Tibor Spanik",
+   "p2": "Jakub Glanowski",
+   "p1_norm": "tibor spanik",
+   "p2_norm": "jakub glanowski",
+   "open_date": "2026-08-03T19:15:00.000Z",
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35900604,
+   "p1": "Marcin Kowalczyk",
+   "p2": "Bartlomiej Wisniewski",
+   "p1_norm": "marcin kowalczyk",
+   "p2_norm": "bartlomiej wisniewski",
+   "open_date": "2026-08-03T19:20:00.000Z",
+   "line": 81.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35900605,
+   "p1": "Michal Krutak",
+   "p2": "Artur Kubiak",
+   "p1_norm": "michal krutak",
+   "p2_norm": "artur kubiak",
+   "open_date": "2026-08-03T19:20:00.000Z",
+   "line": 80.5,
    "over_odds": -112,
    "under_odds": -118
   }
