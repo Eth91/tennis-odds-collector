@@ -1,27 +1,16 @@
 {
- "captured_at": "2026-08-03T14:33:08Z",
+ "captured_at": "2026-08-03T14:38:41Z",
  "matches": [
   {
-   "event_id": 35898887,
-   "p1": "Oskar Jadach",
-   "p2": "Rafal Skotniczny",
-   "p1_norm": "oskar jadach",
-   "p2_norm": "rafal skotniczny",
-   "open_date": "2026-08-03T14:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35898888,
-   "p1": "Kamil Rudomina",
-   "p2": "Adrian Myszewski",
-   "p1_norm": "kamil rudomina",
-   "p2_norm": "adrian myszewski",
-   "open_date": "2026-08-03T14:20:00.000Z",
-   "line": 84.5,
-   "over_odds": 110,
-   "under_odds": -155
+   "event_id": 35898871,
+   "p1": "Piotr Cyrnek",
+   "p2": "Grzegorz Felkel",
+   "p1_norm": "piotr cyrnek",
+   "p2_norm": "grzegorz felkel",
+   "open_date": "2026-08-03T14:10:00.000Z",
+   "line": 100.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35898930,
@@ -30,9 +19,9 @@
    "p1_norm": "adrian wiecek",
    "p2_norm": "josef braun",
    "open_date": "2026-08-03T14:35:00.000Z",
-   "line": 83.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 77.5,
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35898931,
@@ -41,9 +30,9 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "miroslav sklensky",
    "open_date": "2026-08-03T14:35:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35898942,
@@ -77,6 +66,50 @@
    "line": 74.5,
    "over_odds": -110,
    "under_odds": -120
+  },
+  {
+   "event_id": 35899007,
+   "p1": "Lukasz Pietraszko",
+   "p2": "Jakub Glanowski",
+   "p1_norm": "lukasz pietraszko",
+   "p2_norm": "jakub glanowski",
+   "open_date": "2026-08-03T15:00:00.000Z",
+   "line": 80.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35899008,
+   "p1": "Miroslaw Piecowski",
+   "p2": "Bartlomiej Wisniewski",
+   "p1_norm": "miroslaw piecowski",
+   "p2_norm": "bartlomiej wisniewski",
+   "open_date": "2026-08-03T15:00:00.000Z",
+   "line": 81.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35899011,
+   "p1": "Miroslaw Lewczuk",
+   "p2": "Artur Kubiak",
+   "p1_norm": "miroslaw lewczuk",
+   "p2_norm": "artur kubiak",
+   "open_date": "2026-08-03T15:00:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35899019,
+   "p1": "Mariusz Adamus",
+   "p2": "Rafal Skotniczny",
+   "p1_norm": "mariusz adamus",
+   "p2_norm": "rafal skotniczny",
+   "open_date": "2026-08-03T15:05:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
