@@ -4,6 +4,7 @@ at://did:plc:6n4ucijqe66jz5f7figmpinl/app.bsky.feed.post/3ms3wgcge4s2p
 at://did:plc:76spnmye6riclxl5gk5aktrr/app.bsky.feed.post/3ms3xfmew3c2p
 at://did:plc:7t25cchnadfczqclty7gw6mk/app.bsky.feed.post/3ms3uf3jrvv2u
 at://did:plc:7x3skqr64ypmqca7oaiytqmx/app.bsky.feed.post/3mr32r4j5bu2e
+at://did:plc:bchqjudfulvukrz3g3n26f3f/app.bsky.feed.post/3ms5642ey5k2m
 at://did:plc:f47unotfhxdmxbw7uszcjwvp/app.bsky.feed.post/3mrsv4niz7c2w
 at://did:plc:fy5zsacoomxwwsx7pjkfan3o/app.bsky.feed.post/3mrvdoyxcwu2n
 at://did:plc:hsqmfwk3ly7wn2pa6ec7rcpn/app.bsky.feed.post/3mr2wlaexov2n
@@ -126,6 +127,7 @@ rw|1061|Left off injury report
 rw|1061|Not on injury report
 rw|1061|Ruled out Friday
 rw|1061|Ruled out for Wednesday
+rw|1062|Ruled out for Sunday
 rw|1064|Cut loose by Lynx
 rw|1064|Inks ROS contract with Minnesota
 rw|1064|Inks another seven-day deal
@@ -180,6 +182,7 @@ rw|1134|Out Sunday
 rw|1134|Won't play Wednesday
 rw|1135|Waived by Tempo
 rw|1137|Left off injury report
+rw|1137|Ruled out Sunday
 rw|1137|Ruled out Thursday
 rw|228|Listed out for Wednesday
 rw|228|Out for Tuesday
