@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T20:15:29Z",
+ "captured_at": "2026-08-03T20:22:01Z",
  "matches": [
   {
    "event_id": 35900639,
@@ -8,31 +8,9 @@
    "p1_norm": "adrian eliasz",
    "p2_norm": "bartlomiej wisniewski",
    "open_date": "2026-08-03T20:05:00.000Z",
-   "line": 93.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35900640,
-   "p1": "Artur Gromek",
-   "p2": "Jakub Glanowski",
-   "p1_norm": "artur gromek",
-   "p2_norm": "jakub glanowski",
-   "open_date": "2026-08-03T20:05:00.000Z",
-   "line": 75.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
-  {
-   "event_id": 35900641,
-   "p1": "Grzegorz Mucha",
-   "p2": "Artur Kubiak",
-   "p1_norm": "grzegorz mucha",
-   "p2_norm": "artur kubiak",
-   "open_date": "2026-08-03T20:05:00.000Z",
-   "line": 88.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 100.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35900650,
@@ -42,8 +20,8 @@
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-08-03T20:20:00.000Z",
    "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35900651,
@@ -52,9 +30,9 @@
    "p1_norm": "pawel kurek",
    "p2_norm": "grzegorz marud",
    "open_date": "2026-08-03T20:20:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 76.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35900662,
@@ -88,6 +66,17 @@
    "line": 73.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35900712,
+   "p1": "Jacek Zelezik",
+   "p2": "Adam Staniczek",
+   "p1_norm": "jacek zelezik",
+   "p2_norm": "adam staniczek",
+   "open_date": "2026-08-03T20:45:00.000Z",
+   "line": 72.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
