@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-03T16:56:06Z",
+ "captured_at": "2026-08-03T17:02:17Z",
  "matches": [
-  {
-   "event_id": 35899614,
-   "p1": "Miroslav Sklensky",
-   "p2": "Jakub Glanowski",
-   "p1_norm": "miroslav sklensky",
-   "p2_norm": "jakub glanowski",
-   "open_date": "2026-08-03T16:30:00.000Z",
-   "line": 88.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
-  {
-   "event_id": 35899714,
-   "p1": "Piotr Gesiarz",
-   "p2": "Henryk Tkaczyk",
-   "p1_norm": "piotr gesiarz",
-   "p2_norm": "henryk tkaczyk",
-   "open_date": "2026-08-03T16:50:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35899846,
    "p1": "Adrian Eliasz",
@@ -30,9 +8,9 @@
    "p1_norm": "adrian eliasz",
    "p2_norm": "marcin kowalczyk",
    "open_date": "2026-08-03T16:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35899847,
@@ -41,9 +19,9 @@
    "p1_norm": "grzegorz mucha",
    "p2_norm": "michal krutak",
    "open_date": "2026-08-03T16:55:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 82.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35899849,
@@ -52,9 +30,9 @@
    "p1_norm": "artur gromek",
    "p2_norm": "tibor spanik",
    "open_date": "2026-08-03T16:55:00.000Z",
-   "line": 70.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 54.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35899869,
