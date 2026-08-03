@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-03T04:37:44Z",
+ "captured_at": "2026-08-03T04:42:58Z",
  "matches": [
-  {
-   "event_id": 35897518,
-   "p1": "Jakub Skorupa",
-   "p2": "Dariusz Maszczynski",
-   "p1_norm": "jakub skorupa",
-   "p2_norm": "dariusz maszczynski",
-   "open_date": "2026-08-03T04:25:00.000Z",
-   "line": 66.5,
-   "over_odds": -140,
-   "under_odds": 100
-  },
   {
    "event_id": 35897519,
    "p1": "Przemyslaw Blocho",
@@ -19,7 +8,7 @@
    "p1_norm": "przemyslaw blocho",
    "p2_norm": "stapor rafal",
    "open_date": "2026-08-03T04:25:00.000Z",
-   "line": 89.5,
+   "line": 94.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -30,7 +19,7 @@
    "p1_norm": "krzysztof kotyl",
    "p2_norm": "mikolaj lukaszewski",
    "open_date": "2026-08-03T04:30:00.000Z",
-   "line": 86.5,
+   "line": 90.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -41,9 +30,9 @@
    "p1_norm": "piotr zemla",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-08-03T04:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 87.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35897523,
@@ -52,9 +41,9 @@
    "p1_norm": "marcin jadczyk",
    "p2_norm": "grzegorz felkel",
    "open_date": "2026-08-03T04:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 83.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35897524,
@@ -63,9 +52,9 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-08-03T04:40:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35897527,
