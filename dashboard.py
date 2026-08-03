@@ -2955,13 +2955,13 @@ def build():
     if tr:
         def _leg(t, desc):
             w, n, u = tr[t]
-            recs = f"{w}-{n-w} · {w/max(1,n)*100:.0f}% · {u:+.1f}u" if n else "no graded bets yet"
+            recs = f"{w}-{n-w} · {u:+.1f}u" if n else "—"
             return (f'<div class="tlrow"><span class="tchip t{t}">{t}</span>'
                     f'<span class="tld">{desc}</span><span class="tlr">{recs}</span></div>')
-        tier_legend = ('<div class="tierleg"><div class="xt">confidence tiers · live record at real lines</div>'
-                       + _leg("A", "3-8 bump · favorite · single stat")
-                       + _leg("B", "3-8 others · cold-vetted · supported 0-3")
-                       + _leg("C", "combos · marginal") + '</div>')
+        # PLAIN WORDS (user 2026-08-02): the legend is a reader's aid, not a spec — tier
+        # definitions live in wnba_slip. Just what a tier means at a glance, plus the live record.
+        tier_legend = ('<div class="tierleg">'
+                       + _leg("A", "good") + _leg("B", "okay") + _leg("C", "mid") + '</div>')
     else:
         tier_legend = ""
     tt_live_js = TT_LIVE_JS
@@ -3076,7 +3076,7 @@ def build():
   .watchlist {{ margin-top:24px; padding-top:2px; border-top:1px solid #171c25; }}
   .wl-title {{ color:#eaa15a; font-size:12px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; margin:16px 2px 11px; }}
   /* STAR WATCH — Q/Out #1 scorers the model can't project; manual-review card (not a bet) */
-  .starwatch {{ margin:16px 0 4px; border:1px solid #262d38; border-radius:14px; padding:12px 14px 6px;
+  .starwatch {{ margin:24px 0 4px; border:1px solid #262d38; border-radius:14px; padding:12px 14px 6px;
     background:radial-gradient(140% 170% at 50% -20%, #16130c, #0d0f14 66%); }}
   .sw-title {{ color:#d0a45e; font-size:10.5px; text-transform:uppercase; letter-spacing:.07em; font-weight:700; }}
   .sw-title span {{ color:#7d8696; text-transform:none; letter-spacing:.02em; font-weight:600; }}
@@ -3578,11 +3578,11 @@ def build():
                   color:var(--cu-lbl2); }}
   #wnba .cu-sh b {{ font-weight:600; letter-spacing:0; text-transform:none; font-size:13px; }}
   #wnba .cu-dot {{ color:var(--cu-lbl3); }}
-  #wnba .cu-shm {{ display:inline-flex; align-items:center; gap:5px; text-transform:none;
-                   letter-spacing:0; font-size:13px; }}
+  #wnba .cu-shm {{ display:inline-flex; align-items:center; gap:7px; text-transform:none;
+                   letter-spacing:-.02em; font-size:20px; font-weight:700; color:var(--cu-lbl); }}
   #wnba .cu-shr {{ margin-left:auto; text-transform:none; letter-spacing:0; font-size:13px;
                    font-variant-numeric:tabular-nums; }}
-  #wnba .cu-gl {{ width:20px; height:20px; object-fit:contain; border-radius:5px;
+  #wnba .cu-gl {{ width:24px; height:24px; object-fit:contain; border-radius:6px;
                   background:var(--cu-fill); padding:2px; }}
   #wnba .llogo {{ width:24px; height:24px; border-radius:6px; flex:none; display:inline-flex;
                   align-items:center; justify-content:center; overflow:hidden;
@@ -3774,10 +3774,10 @@ def build():
   #wnba .ttbsb {{ font-size:13px; color:var(--cu-lbl2); margin-top:2px; }}
 
   /* ---- CONFIDENCE TIERS ---- */
-  #wnba .tierleg {{ background:var(--cu-grp); border:0; border-radius:12px; padding:14px 16px;
+  #wnba .tierleg {{ background:var(--cu-grp); border:0; border-radius:12px; padding:6px 16px;
         margin:0 0 20px; }}
-  #wnba .tlrow {{ display:flex; align-items:center; gap:10px; padding:9px 0;
-        border-bottom:.5px solid var(--cu-sep); font-size:15px; }}
+  #wnba .tlrow {{ display:flex; align-items:center; gap:10px; padding:7px 0;
+        border-bottom:.5px solid var(--cu-sep); font-size:13px; }}
   #wnba .tlrow:last-child {{ border-bottom:0; }}
   #wnba .tld {{ color:var(--cu-lbl2); flex:1; }}
   #wnba .tlr {{ color:var(--cu-lbl); font-weight:590; font-variant-numeric:tabular-nums;
@@ -4454,15 +4454,12 @@ def build():
     <div class="tab" data-tab="tracker" onclick="showTab('tracker')">{ICON_TRK}<span>Tracker</span></div>
   </div>
   <div class="panel" id="wnba">
-    {recstrip_html}
-    <div id="wnbafilters" class="cu-chips" hidden></div>
     <div id="games">{cards}</div>
-    {ladders_html}
+    {tier_legend}
     {slip_html}
     {wl_html}
     {injury_html}
     {considered_html}
-    {tier_legend}
     {extras_html}
   </div>
   <div class="panel hidden" id="tt">
