@@ -307,6 +307,7 @@ rw|483|Out for personal reasons
 rw|483|Paces Sky with 20 points
 rw|483|Ruled out for Saturday
 rw|483|Stuffs stat sheet in defeat
+rw|484|Available to play
 rw|484|Iffy for Wednesday
 rw|484|Questionable for Sunday
 rw|484|Ruled out Wednesday
@@ -402,6 +403,7 @@ rw|642|Ruled out for Monday
 rw|642|Still out Thursday
 rw|647|Plays well off bench
 rw|661|Stuck in backup role
+rw|663|Back to bench
 rw|663|Posts double-double as starter
 rw|663|Starting Wednesday
 rw|678|Cleared to play Thursday
