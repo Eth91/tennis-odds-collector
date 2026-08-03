@@ -1,6 +1,17 @@
 {
- "captured_at": "2026-08-03T21:03:02Z",
+ "captured_at": "2026-08-03T21:09:05Z",
  "matches": [
+  {
+   "event_id": 35900789,
+   "p1": "Jakub Glanowski",
+   "p2": "Lukasz Pietraszko",
+   "p1_norm": "jakub glanowski",
+   "p2_norm": "lukasz pietraszko",
+   "open_date": "2026-08-03T21:00:00.000Z",
+   "line": 71.5,
+   "over_odds": -110,
+   "under_odds": -125
+  },
   {
    "event_id": 35900790,
    "p1": "Aleksander Barton",
@@ -8,9 +19,9 @@
    "p1_norm": "aleksander barton",
    "p2_norm": "artur kubiak",
    "open_date": "2026-08-03T21:00:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 72.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35900823,
@@ -19,9 +30,9 @@
    "p1_norm": "kacper adamus",
    "p2_norm": "grzegorz marud",
    "open_date": "2026-08-03T21:05:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 74.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35900824,
@@ -30,9 +41,9 @@
    "p1_norm": "michal skorski",
    "p2_norm": "marcin kowalczyk",
    "open_date": "2026-08-03T21:05:00.000Z",
-   "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 78.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35900836,
@@ -63,6 +74,28 @@
    "p1_norm": "jakub kuzmicz",
    "p2_norm": "artur gromek",
    "open_date": "2026-08-03T21:25:00.000Z",
+   "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35900876,
+   "p1": "Miroslaw Piecowski",
+   "p2": "Adrian Eliasz",
+   "p1_norm": "miroslaw piecowski",
+   "p2_norm": "adrian eliasz",
+   "open_date": "2026-08-03T21:30:00.000Z",
+   "line": 80.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35900877,
+   "p1": "Jerzy Michalik",
+   "p2": "Adam Staniczek",
+   "p1_norm": "jerzy michalik",
+   "p2_norm": "adam staniczek",
+   "open_date": "2026-08-03T21:35:00.000Z",
    "line": 77.5,
    "over_odds": -112,
    "under_odds": -118
