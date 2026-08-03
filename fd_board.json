@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T04:16:45Z",
+ "captured_at": "2026-08-03T04:21:42Z",
  "matches": [
   {
    "event_id": 35897481,
@@ -8,7 +8,7 @@
    "p1_norm": "szymon kolasa",
    "p2_norm": "adrian wiecek",
    "open_date": "2026-08-03T04:10:00.000Z",
-   "line": 77.5,
+   "line": 83.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -19,9 +19,9 @@
    "p1_norm": "wojciech iwasyszyn",
    "p2_norm": "adrian myszewski",
    "open_date": "2026-08-03T04:10:00.000Z",
-   "line": 60.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35897483,
@@ -30,9 +30,9 @@
    "p1_norm": "witold buczynski",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-08-03T04:10:00.000Z",
-   "line": 76.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 79.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35897517,
@@ -41,9 +41,9 @@
    "p1_norm": "mariusz baron",
    "p2_norm": "pawel kurek",
    "open_date": "2026-08-03T04:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 74.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35897518,
@@ -54,7 +54,7 @@
    "open_date": "2026-08-03T04:25:00.000Z",
    "line": 75.5,
    "over_odds": -118,
-   "under_odds": -112
+   "under_odds": -116
   },
   {
    "event_id": 35897519,
