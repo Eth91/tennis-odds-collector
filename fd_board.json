@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T17:14:00Z",
+ "captured_at": "2026-08-03T17:19:44Z",
  "matches": [
   {
    "event_id": 35899869,
@@ -8,9 +8,9 @@
    "p1_norm": "oskar jadach",
    "p2_norm": "wojciech tobiasz",
    "open_date": "2026-08-03T17:05:00.000Z",
-   "line": 69.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35899884,
@@ -20,8 +20,8 @@
    "p2_norm": "adam staniczek",
    "open_date": "2026-08-03T17:10:00.000Z",
    "line": 67.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35899895,
@@ -52,9 +52,9 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "jakub glanowski",
    "open_date": "2026-08-03T17:20:00.000Z",
-   "line": 68.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 67.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35899929,
@@ -88,6 +88,28 @@
    "line": 79.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35900049,
+   "p1": "Miroslaw Piecowski",
+   "p2": "Adrian Eliasz",
+   "p1_norm": "miroslaw piecowski",
+   "p2_norm": "adrian eliasz",
+   "open_date": "2026-08-03T17:45:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35900050,
+   "p1": "Miroslaw Lewczuk",
+   "p2": "Grzegorz Mucha",
+   "p1_norm": "miroslaw lewczuk",
+   "p2_norm": "grzegorz mucha",
+   "open_date": "2026-08-03T17:45:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
