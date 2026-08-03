@@ -113,6 +113,7 @@ rw|1044|Limited to four minutes
 rw|1045|Racks up 13 points in victory
 rw|1046|Logs four minutes in win
 rw|1047|Ends with 11 points Tuesday
+rw|1047|Headed to bench
 rw|1047|Records double-double in home loss
 rw|1047|Season-high 11 rebounds
 rw|1048|Crowned 3-Point Contest champ
