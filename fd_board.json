@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T23:04:02Z",
+ "captured_at": "2026-08-03T23:08:30Z",
  "matches": [
   {
    "event_id": 35900991,
@@ -8,7 +8,7 @@
    "p1_norm": "grzegorz mucha",
    "p2_norm": "michal krutak",
    "open_date": "2026-08-03T22:55:00.000Z",
-   "line": 80.5,
+   "line": 85.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -19,9 +19,9 @@
    "p1_norm": "jakub glanowski",
    "p2_norm": "artur gromek",
    "open_date": "2026-08-03T22:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 87.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35901004,
@@ -30,9 +30,9 @@
    "p1_norm": "pawel kurek",
    "p2_norm": "wojciech urban",
    "open_date": "2026-08-03T23:05:00.000Z",
-   "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35901010,
@@ -42,8 +42,8 @@
    "p2_norm": "adam staniczek",
    "open_date": "2026-08-03T23:10:00.000Z",
    "line": 71.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35901022,
@@ -76,7 +76,18 @@
    "open_date": "2026-08-03T23:20:00.000Z",
    "line": 75.5,
    "over_odds": -116,
-   "under_odds": -116
+   "under_odds": -118
+  },
+  {
+   "event_id": 35901031,
+   "p1": "Jerzy Michalik",
+   "p2": "Henryk Tkaczyk",
+   "p1_norm": "jerzy michalik",
+   "p2_norm": "henryk tkaczyk",
+   "open_date": "2026-08-03T23:35:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
