@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-03T17:47:28Z",
+ "captured_at": "2026-08-03T17:52:43Z",
  "matches": [
-  {
-   "event_id": 35900043,
-   "p1": "Lukasz Pietraszko",
-   "p2": "Artur Gromek",
-   "p1_norm": "lukasz pietraszko",
-   "p2_norm": "artur gromek",
-   "open_date": "2026-08-03T17:40:00.000Z",
-   "line": 67.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35900049,
    "p1": "Miroslaw Piecowski",
@@ -19,9 +8,9 @@
    "p1_norm": "miroslaw piecowski",
    "p2_norm": "adrian eliasz",
    "open_date": "2026-08-03T17:45:00.000Z",
-   "line": 77.5,
+   "line": 85.5,
    "over_odds": -115,
-   "under_odds": -120
+   "under_odds": -115
   },
   {
    "event_id": 35900050,
@@ -30,7 +19,7 @@
    "p1_norm": "miroslaw lewczuk",
    "p2_norm": "grzegorz mucha",
    "open_date": "2026-08-03T17:45:00.000Z",
-   "line": 77.5,
+   "line": 82.5,
    "over_odds": -115,
    "under_odds": -120
   },
