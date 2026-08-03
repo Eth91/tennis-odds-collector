@@ -441,6 +441,7 @@ rw|687|Progresses to individual drills
 rw|687|Won't play Monday
 rw|703|Another quiet effort
 rw|703|Scores 12 off bench
+rw|706|Secures four rebounds in victory
 rw|720|Lacking clear role
 rw|724|Full stat line Tuesday
 rw|733|Headed to bench
