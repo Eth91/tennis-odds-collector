@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-03T01:03:46Z",
+ "captured_at": "2026-08-03T01:11:10Z",
  "matches": [
-  {
-   "event_id": 35897358,
-   "p1": "Mateusz Baran",
-   "p2": "Grzegorz Mucha",
-   "p1_norm": "mateusz baran",
-   "p2_norm": "grzegorz mucha",
-   "open_date": "2026-08-03T01:00:00.000Z",
-   "line": 78.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
-  {
-   "event_id": 35897369,
-   "p1": "Pawel Kurek",
-   "p2": "Jakub Pruszkowski",
-   "p1_norm": "pawel kurek",
-   "p2_norm": "jakub pruszkowski",
-   "open_date": "2026-08-03T01:10:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
   {
    "event_id": 35897370,
    "p1": "Michal Paszkiewicz",
@@ -30,9 +8,9 @@
    "p1_norm": "michal paszkiewicz",
    "p2_norm": "sebastian juzek",
    "open_date": "2026-08-03T01:10:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35897394,
@@ -55,6 +33,17 @@
    "line": 79.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35897396,
+   "p1": "Mateusz Sikon",
+   "p2": "Jakub Jesiek",
+   "p1_norm": "mateusz sikon",
+   "p2_norm": "jakub jesiek",
+   "open_date": "2026-08-03T01:35:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -116
   }
  ]
 }
