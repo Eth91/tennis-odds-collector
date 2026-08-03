@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T10:00:10Z",
+ "captured_at": "2026-08-03T10:04:42Z",
  "matches": [
   {
    "event_id": 35898225,
@@ -8,9 +8,9 @@
    "p1_norm": "piotr cyrnek",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-08-03T09:40:00.000Z",
-   "line": 87.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35898228,
@@ -19,9 +19,9 @@
    "p1_norm": "tibor spanik",
    "p2_norm": "karol wisniewski",
    "open_date": "2026-08-03T09:45:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 93.5,
+   "over_odds": 100,
+   "under_odds": -140
   },
   {
    "event_id": 35898234,
@@ -30,9 +30,9 @@
    "p1_norm": "schaniel krzysztof",
    "p2_norm": "witold buczynski",
    "open_date": "2026-08-03T09:50:00.000Z",
-   "line": 57.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 69.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35898235,
@@ -41,9 +41,9 @@
    "p1_norm": "kamil rudomina",
    "p2_norm": "artur sobel",
    "open_date": "2026-08-03T09:50:00.000Z",
-   "line": 82.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 75.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35898237,
@@ -52,9 +52,9 @@
    "p1_norm": "wojciech tobiasz",
    "p2_norm": "grzegorz jurowicz",
    "open_date": "2026-08-03T09:55:00.000Z",
-   "line": 76.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 88.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35898240,
@@ -75,8 +75,8 @@
    "p2_norm": "marcin balcerzak",
    "open_date": "2026-08-03T10:05:00.000Z",
    "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -120,
+   "under_odds": -110
   },
   {
    "event_id": 35898248,
@@ -121,6 +121,17 @@
    "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35898278,
+   "p1": "Karol Wisniewski",
+   "p2": "Krzysztof Wloczko",
+   "p1_norm": "karol wisniewski",
+   "p2_norm": "krzysztof wloczko",
+   "open_date": "2026-08-03T10:30:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
