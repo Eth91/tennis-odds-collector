@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-03T18:04:51Z",
+ "captured_at": "2026-08-03T18:10:09Z",
  "matches": [
-  {
-   "event_id": 35900050,
-   "p1": "Miroslaw Lewczuk",
-   "p2": "Grzegorz Mucha",
-   "p1_norm": "miroslaw lewczuk",
-   "p2_norm": "grzegorz mucha",
-   "open_date": "2026-08-03T17:45:00.000Z",
-   "line": 93.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
   {
    "event_id": 35900076,
    "p1": "Jacek Zelezik",
@@ -19,7 +8,7 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "michal guzik",
    "open_date": "2026-08-03T18:00:00.000Z",
-   "line": 67.5,
+   "line": 69.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -30,9 +19,9 @@
    "p1_norm": "miroslav sklensky",
    "p2_norm": "tibor spanik",
    "open_date": "2026-08-03T18:05:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 80.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35900088,
@@ -53,8 +42,8 @@
    "p2_norm": "marcin kowalczyk",
    "open_date": "2026-08-03T18:10:00.000Z",
    "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35900109,
@@ -75,8 +64,8 @@
    "p2_norm": "adrian eliasz",
    "open_date": "2026-08-03T18:30:00.000Z",
    "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35900117,
