@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T00:25:43Z",
+ "captured_at": "2026-08-03T00:31:51Z",
  "matches": [
   {
    "event_id": 35897310,
@@ -8,9 +8,9 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "pawel kurek",
    "open_date": "2026-08-03T00:20:00.000Z",
-   "line": 71.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 86.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35897311,
@@ -19,9 +19,9 @@
    "p1_norm": "lukasz pietraszko",
    "p2_norm": "dawid kosmal",
    "open_date": "2026-08-03T00:20:00.000Z",
-   "line": 81.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 84.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35897313,
@@ -30,9 +30,9 @@
    "p1_norm": "sebastian juzek",
    "p2_norm": "mateusz sikon",
    "open_date": "2026-08-03T00:25:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -116
+   "line": 72.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35897315,
@@ -52,9 +52,9 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "szymon brud",
    "open_date": "2026-08-03T00:35:00.000Z",
-   "line": 81.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 80.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35897322,
