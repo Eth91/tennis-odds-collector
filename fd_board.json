@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-03T11:54:49Z",
+ "captured_at": "2026-08-03T12:00:22Z",
  "matches": [
-  {
-   "event_id": 35898598,
-   "p1": "Adrian Wiecek",
-   "p2": "Piotr Cyrnek",
-   "p1_norm": "adrian wiecek",
-   "p2_norm": "piotr cyrnek",
-   "open_date": "2026-08-03T11:40:00.000Z",
-   "line": 68.5,
-   "over_odds": -105,
-   "under_odds": -135
-  },
   {
    "event_id": 35898613,
    "p1": "Krystian Kolodziej",
@@ -19,9 +8,9 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "tibor spanik",
    "open_date": "2026-08-03T11:45:00.000Z",
-   "line": 60.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 65.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35898617,
@@ -30,9 +19,9 @@
    "p1_norm": "kamil klocek",
    "p2_norm": "kamil rudomina",
    "open_date": "2026-08-03T11:50:00.000Z",
-   "line": 75.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 83.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35898618,
@@ -41,9 +30,9 @@
    "p1_norm": "jakub kaczmarek",
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-08-03T11:50:00.000Z",
-   "line": 77.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35898626,
@@ -52,9 +41,9 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "wojciech tobiasz",
    "open_date": "2026-08-03T11:55:00.000Z",
-   "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35898641,
