@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-03T12:54:15Z",
+ "captured_at": "2026-08-03T12:59:41Z",
  "matches": [
-  {
-   "event_id": 35898712,
-   "p1": "Wojciech Iwasyszyn",
-   "p2": "Kamil Rudomina",
-   "p1_norm": "wojciech iwasyszyn",
-   "p2_norm": "kamil rudomina",
-   "open_date": "2026-08-03T12:40:00.000Z",
-   "line": 71.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35898714,
    "p1": "Oskar Jadach",
@@ -19,20 +8,9 @@
    "p1_norm": "oskar jadach",
    "p2_norm": "mariusz adamus",
    "open_date": "2026-08-03T12:45:00.000Z",
-   "line": 82.5,
+   "line": 90.5,
    "over_odds": -115,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35898750,
-   "p1": "Adrian Wiecek",
-   "p2": "Marcin Jadczyk",
-   "p1_norm": "adrian wiecek",
-   "p2_norm": "marcin jadczyk",
-   "open_date": "2026-08-03T12:55:00.000Z",
-   "line": 84.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "under_odds": -120
   },
   {
    "event_id": 35898752,
@@ -64,8 +42,8 @@
    "p2_norm": "artur sobel",
    "open_date": "2026-08-03T13:05:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -116
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35898770,
@@ -86,6 +64,17 @@
    "p2_norm": "grzegorz felkel",
    "open_date": "2026-08-03T13:20:00.000Z",
    "line": 73.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35898811,
+   "p1": "Miroslav Sklensky",
+   "p2": "Krzysztof Wloczko",
+   "p1_norm": "miroslav sklensky",
+   "p2_norm": "krzysztof wloczko",
+   "open_date": "2026-08-03T13:25:00.000Z",
+   "line": 78.5,
    "over_odds": -112,
    "under_odds": -118
   }
