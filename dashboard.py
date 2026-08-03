@@ -964,7 +964,6 @@ def _tracker_panel(wnba_rec, tt_json):
           <div class="tbox"><div class="tk">Hit rate</div><div class="tv">{hit}</div></div>
           <div class="tbox"><div class="tk">Units</div><div class="tv {ucls}">{u:+.1f}u</div></div>
         </div>
-        <div class="tsub">{html.escape(note)}{(' · ROI ' + roi) if roi else ''}</div>
         {_recent_dd(recent)}
       </div>"""
 
@@ -1092,8 +1091,7 @@ def _tracker_panel(wnba_rec, tt_json):
                            f'<div class="tbox"><div class="tk">Record</div><div class="tv">{pr["w"]}-{pr["l"]}</div></div>'
                            f'<div class="tbox"><div class="tk">Hit rate</div><div class="tv">{hit}</div></div>'
                            f'<div class="tbox"><div class="tk">Units</div><div class="tv {ucls}">{pr["units"]:+.2f}u</div></div>'
-                           f'</div><div class="tsub">{html.escape(sub)}'
-                           + (f' · ROI {roi}' if (pr["w"] + pr["l"]) >= 10 else '') + '</div></div>')
+                           '</div></div>')
     except Exception:
         pass
 
@@ -1102,7 +1100,7 @@ def _tracker_panel(wnba_rec, tt_json):
     ladder_card = ""
     if _rungs:
         rw, rl, ru_st = _rec2(_rungs, True)
-        _w2, _l2, ru_flat = _rec2(_rungs, False)
+        _w2, _l2, _ru_flat = _rec2(_rungs, False)      # still computed; no longer rendered
         hit = f"{rw / (rw + rl) * 100:.0f}%" if (rw + rl) else "—"
         _uc = "up" if ru_st > 0 else ("down" if ru_st < 0 else "")
         ladder_card = (
@@ -1110,8 +1108,7 @@ def _tracker_panel(wnba_rec, tt_json):
             f'<div class="tbox"><div class="tk">Record</div><div class="tv">{rw}-{rl}</div></div>'
             f'<div class="tbox"><div class="tk">Hit rate</div><div class="tv">{hit}</div></div>'
             f'<div class="tbox"><div class="tk">Units</div><div class="tv {_uc}">{ru_st:+.2f}u</div></div>'
-            f'</div><div class="tsub">0.25u per rung · flat-1u basis {ru_flat:+.2f}u · '
-            'alt lines above the main play, same selection rules</div></div>')
+            '</div></div>')
 
     return wnba_card + mlb_card + tt_card + parlay_card + ladder_card
 
