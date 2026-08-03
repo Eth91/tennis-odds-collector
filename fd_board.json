@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-08-03T11:13:52Z",
+ "captured_at": "2026-08-03T11:18:50Z",
  "matches": [
-  {
-   "event_id": 35898298,
-   "p1": "Piotr Cyrnek",
-   "p2": "Josef Braun",
-   "p1_norm": "piotr cyrnek",
-   "p2_norm": "josef braun",
-   "open_date": "2026-08-03T10:50:00.000Z",
-   "line": 83.5,
-   "over_odds": -105,
-   "under_odds": -135
-  },
-  {
-   "event_id": 35898307,
-   "p1": "Schaniel Krzysztof",
-   "p2": "Piotr Przewlocki",
-   "p1_norm": "schaniel krzysztof",
-   "p2_norm": "piotr przewlocki",
-   "open_date": "2026-08-03T11:00:00.000Z",
-   "line": 78.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35898308,
-   "p1": "Kamil Rudomina",
-   "p2": "Przemyslaw Blocho",
-   "p1_norm": "kamil rudomina",
-   "p2_norm": "przemyslaw blocho",
-   "open_date": "2026-08-03T11:00:00.000Z",
-   "line": 86.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35898320,
    "p1": "Grzegorz Wichowski",
@@ -41,9 +8,9 @@
    "p1_norm": "grzegorz wichowski",
    "p2_norm": "wojciech tobiasz",
    "open_date": "2026-08-03T11:05:00.000Z",
-   "line": 77.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 72.5,
+   "over_odds": -180,
+   "under_odds": 125
   },
   {
    "event_id": 35898334,
@@ -52,9 +19,9 @@
    "p1_norm": "szymon kolasa",
    "p2_norm": "grzegorz felkel",
    "open_date": "2026-08-03T11:15:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35898354,
@@ -97,6 +64,17 @@
    "p2_norm": "piotr cyrnek",
    "open_date": "2026-08-03T11:40:00.000Z",
    "line": 85.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35898613,
+   "p1": "Krystian Kolodziej",
+   "p2": "Tibor Spanik",
+   "p1_norm": "krystian kolodziej",
+   "p2_norm": "tibor spanik",
+   "open_date": "2026-08-03T11:45:00.000Z",
+   "line": 77.5,
    "over_odds": -116,
    "under_odds": -116
   }
