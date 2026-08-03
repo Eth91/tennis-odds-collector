@@ -1287,10 +1287,10 @@ TT_LIVE_JS = """
       var _ptRow = '';
       if (x.pt != null && isFinite(x.pt)){
         var _ptTxt = (x.side === 'over') ? ('Play up to ' + x.pt) : ('Play down to ' + x.pt);
-        _ptRow = '<div class="ttpt"><div class="ttpt-t">' + _ptTxt + '</div>'
+        _ptRow = '<div class="ttpt"><div class="ttpt-in"><div class="ttpt-t">' + _ptTxt + '</div>'
                + '<div class="ttpt-b">still model-flagged at any '
                + (x.side === 'over' ? 'line at or below ' : 'line at or above ') + x.pt
-               + ' \u00b7 past it the H2H hit rate drops under the bar</div></div>';
+               + ' \u00b7 past it the H2H hit rate drops under the bar</div></div></div>';
       }
       rows += '<div class="cu-c' + (_ptRow ? ' haspt' : '') + '"><div class="cu-sum">'
             + '<div class="cu-hd">' + _st + _bklogo + '<span class="cu-time">' + tip + ' MT</span></div>'
@@ -1298,7 +1298,8 @@ TT_LIVE_JS = """
             + '<div class="cu-sub">Head-to-head total' + (x.real ? (' \u00b7 ' + _bk) : '') + '</div>'
             + '<div class="cu-bet"><span class="cu-dir">' + (x.side === 'over' ? 'OVER' : 'UNDER')
             + '</span><span class="cu-line">' + lncell + '</span>'
-            + '<span class="cu-price">' + _oddstxt + '</span></div>'
+            + '<span class="cu-price">' + _oddstxt
+            + (_ptRow ? '<span class="cu-chev">\u203a</span>' : '') + '</span></div>'
             + '<div class="cu-cf">' + _hit + '</div>'
             + _ptRow
             + '</div></div>';
@@ -4162,11 +4163,20 @@ def build():
   #tt .cu-c:last-child {{ border-bottom:0; }}
   /* Open-positions strip (board coherence): money at risk stays visible after tip/price-move. */
   /* play-to drawer: INVISIBLE on the card face (user 2026-08-03) — the whole card is the tap
-     target and the row only exists while the card carries .open. */
+     target and the row only exists while the card carries .open. ANIMATED via the
+     grid-template-rows 0fr -> 1fr height-auto transition (max-height hacks jump on tall
+     content); the chevron is the same affordance the WNBA cards use, rotating on open. */
   #tt .cu-c.haspt {{ cursor:pointer; }}
-  #tt .ttpt {{ display:none; }}
-  #tt .cu-c.open .ttpt {{ display:block; margin-top:10px;
-                          border-top:.5px solid var(--cu-sep); padding-top:8px; }}
+  #tt .cu-c.haspt .cu-chev {{ color:var(--cu-lbl3); font-size:15px; margin-left:6px;
+                              transition:transform .18s ease; display:inline-block; }}
+  #tt .cu-c.haspt.open .cu-chev {{ transform:rotate(90deg); }}
+  #tt .ttpt {{ display:grid; grid-template-rows:0fr; opacity:0;
+               transition:grid-template-rows .25s ease, opacity .2s ease, margin-top .25s ease,
+                          padding-top .25s ease; margin-top:0; padding-top:0;
+               border-top:.5px solid transparent; }}
+  #tt .cu-c.open .ttpt {{ grid-template-rows:1fr; opacity:1; margin-top:10px; padding-top:8px;
+                          border-top-color:var(--cu-sep); }}
+  #tt .ttpt-in {{ overflow:hidden; min-height:0; }}
   #tt .ttpt-t {{ font-size:14px; font-weight:600; color:var(--cu-blue); }}
   #tt .ttpt-b {{ padding:6px 0 2px; font-size:13px; line-height:1.4; color:var(--cu-lbl2); }}
   #tt .ttpos {{ margin-top:14px; border-top:.5px solid var(--cu-sep); padding-top:10px; }}
