@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T19:12:03Z",
+ "captured_at": "2026-08-03T19:19:13Z",
  "matches": [
   {
    "event_id": 35900593,
@@ -8,9 +8,9 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "piotr gesiarz",
    "open_date": "2026-08-03T19:10:00.000Z",
-   "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 48.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35900600,
@@ -19,9 +19,9 @@
    "p1_norm": "tibor spanik",
    "p2_norm": "jakub glanowski",
    "open_date": "2026-08-03T19:15:00.000Z",
-   "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 69.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35900604,
@@ -30,9 +30,9 @@
    "p1_norm": "marcin kowalczyk",
    "p2_norm": "bartlomiej wisniewski",
    "open_date": "2026-08-03T19:20:00.000Z",
-   "line": 81.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 80.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35900605,
@@ -66,6 +66,39 @@
    "line": 70.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35900620,
+   "p1": "Krystian Kolodziej",
+   "p2": "Miroslav Sklensky",
+   "p1_norm": "krystian kolodziej",
+   "p2_norm": "miroslav sklensky",
+   "open_date": "2026-08-03T19:40:00.000Z",
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -110
+  },
+  {
+   "event_id": 35900621,
+   "p1": "Dariusz Wrobel",
+   "p2": "Michal Skorski",
+   "p1_norm": "dariusz wrobel",
+   "p2_norm": "michal skorski",
+   "open_date": "2026-08-03T19:40:00.000Z",
+   "line": 81.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35900622,
+   "p1": "Miroslaw Warzecha",
+   "p2": "Aleksander Barton",
+   "p1_norm": "miroslaw warzecha",
+   "p2_norm": "aleksander barton",
+   "open_date": "2026-08-03T19:40:00.000Z",
+   "line": 69.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
