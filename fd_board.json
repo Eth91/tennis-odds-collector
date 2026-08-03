@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-03T05:55:39Z",
+ "captured_at": "2026-08-03T06:01:37Z",
  "matches": [
-  {
-   "event_id": 35897952,
-   "p1": "Marcin Balcerzak",
-   "p2": "Michal Minda",
-   "p1_norm": "marcin balcerzak",
-   "p2_norm": "michal minda",
-   "open_date": "2026-08-03T05:35:00.000Z",
-   "line": 94.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35897960,
-   "p1": "Witold Buczynski",
-   "p2": "Schaniel Krzysztof",
-   "p1_norm": "witold buczynski",
-   "p2_norm": "schaniel krzysztof",
-   "open_date": "2026-08-03T05:40:00.000Z",
-   "line": 92.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35897961,
    "p1": "Wojciech Iwasyszyn",
@@ -30,9 +8,9 @@
    "p1_norm": "wojciech iwasyszyn",
    "p2_norm": "kamil klocek",
    "open_date": "2026-08-03T05:40:00.000Z",
-   "line": 76.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 93.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35897975,
@@ -41,9 +19,9 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "wojciech tobiasz",
    "open_date": "2026-08-03T05:55:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35897979,
@@ -52,9 +30,9 @@
    "p1_norm": "jakub skorupa",
    "p2_norm": "michal wolny",
    "open_date": "2026-08-03T06:00:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35897980,
@@ -63,9 +41,9 @@
    "p1_norm": "przemyslaw blocho",
    "p2_norm": "artur sobel",
    "open_date": "2026-08-03T06:00:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35897983,
@@ -75,8 +53,8 @@
    "p2_norm": "kamil rudomina",
    "open_date": "2026-08-03T06:05:00.000Z",
    "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35897984,
@@ -109,6 +87,28 @@
    "open_date": "2026-08-03T06:20:00.000Z",
    "line": 78.5,
    "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35898000,
+   "p1": "Janus Slawomir",
+   "p2": "Andriej Fomin",
+   "p1_norm": "janus slawomir",
+   "p2_norm": "andriej fomin",
+   "open_date": "2026-08-03T06:25:00.000Z",
+   "line": 73.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35898001,
+   "p1": "Dominik Solilo",
+   "p2": "Michal Minda",
+   "p1_norm": "dominik solilo",
+   "p2_norm": "michal minda",
+   "open_date": "2026-08-03T06:25:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
    "under_odds": -116
   }
  ]
