@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-03T00:41:39Z",
+ "captured_at": "2026-08-03T00:46:37Z",
  "matches": [
-  {
-   "event_id": 35897311,
-   "p1": "Lukasz Pietraszko",
-   "p2": "Dawid Kosmal",
-   "p1_norm": "lukasz pietraszko",
-   "p2_norm": "dawid kosmal",
-   "open_date": "2026-08-03T00:20:00.000Z",
-   "line": 91.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35897315,
    "p1": "Michal Machelski",
@@ -19,9 +8,9 @@
    "p1_norm": "michal machelski",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-08-03T00:35:00.000Z",
-   "line": 80.5,
+   "line": 88.5,
    "over_odds": -115,
-   "under_odds": -120
+   "under_odds": -115
   },
   {
    "event_id": 35897316,
@@ -30,9 +19,9 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "szymon brud",
    "open_date": "2026-08-03T00:35:00.000Z",
-   "line": 84.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 90.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35897322,
@@ -41,9 +30,9 @@
    "p1_norm": "jaroslaw badura",
    "p2_norm": "adam ruszkiewicz",
    "open_date": "2026-08-03T00:45:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35897323,
@@ -52,9 +41,9 @@
    "p1_norm": "lukasz oracz",
    "p2_norm": "mariusz baron",
    "open_date": "2026-08-03T00:45:00.000Z",
-   "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -120,
+   "under_odds": -110
   },
   {
    "event_id": 35897358,
@@ -66,6 +55,28 @@
    "line": 78.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35897369,
+   "p1": "Pawel Kurek",
+   "p2": "Jakub Pruszkowski",
+   "p1_norm": "pawel kurek",
+   "p2_norm": "jakub pruszkowski",
+   "open_date": "2026-08-03T01:10:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35897370,
+   "p1": "Michal Paszkiewicz",
+   "p2": "Sebastian Juzek",
+   "p1_norm": "michal paszkiewicz",
+   "p2_norm": "sebastian juzek",
+   "open_date": "2026-08-03T01:10:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
