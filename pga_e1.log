@@ -1927,3 +1927,26 @@ e3: pricing PGA Wyndham Championship 2026  (G2 pending n=7 — preview only)
   make-cut [SHADOW, armable=True]: 0 flags
   E3 logged: 0 armed + 0 shadow, 1 skipped (player already teed off) (G2 not passed — everything logs as shadow)
 pga grade: +0 newly graded — E1 record 23-30  +0.99u
+E1 wave meter — Rocket Classic [Final]
+  no tee times posted yet — meter waits (they release Tue/Wed)
+  crawl 2026: +12388 round rows
+  crawl 2026: +7221 round rows
+  rounds table: 117952 rows, 2459 players
+G2: 7 gradeable closes [R4=7] from 24 collected matchup markets
+     dropped  10  no same-edition result yet
+     dropped   5  no two-sided pre-round close
+     dropped   2  round not both posted / tie
+G2: n=7 < 15 -> gate INCONCLUSIVE. This is a FORWARD test and cannot be backtested: it needs OUR OWN collected closes, and the collector only has history from the day it started.
+e3: pricing PGA Wyndham Championship 2026  (G2 pending n=7 — preview only)
+  capture: snapshot 2026-08-03T21:00:02 | R1 first tee UNKNOWN (per-flag deadlines from pga_tee_gate)
+  ruler: course-fit players 107, wave split 0, wave shift +0.00 strokes [tee sheet not posted]
+  TOP_10_FINISH_IMG: 119 priced, N_eff 6.58 (nominal 10), implied vig 1.407
+  TOP_10_FINISH_(INCL._TIES): 118 priced, N_eff 8.01 (nominal 10), implied vig 1.493
+  TOP_20_FINISH_IMG: 116 priced, N_eff 13.85 (nominal 20), implied vig 1.283
+  TOP_20_FINISH_(INCL._TIES): 117 priced, N_eff 16.17 (nominal 20), implied vig 1.437
+  TOP_5_FINISH_IMG: 119 priced, N_eff 3.14 (nominal 5), implied vig 1.592
+  TOP_5_FINISH_(INCL._TIES): 118 priced, N_eff 3.96 (nominal 5), implied vig 1.591
+  round-score [SHADOW]: 0 flags (needs >= 6 two-sided lines to anchor the level)
+  make-cut [SHADOW, armable=True]: 0 flags
+  E3 logged: 0 armed + 0 shadow, 1 skipped (player already teed off) (G2 not passed — everything logs as shadow)
+pga grade: +0 newly graded — E1 record 23-30  +0.99u

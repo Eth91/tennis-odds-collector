@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-03T20:58:53Z",
+ "captured_at": "2026-08-03T21:03:02Z",
  "matches": [
-  {
-   "event_id": 35900712,
-   "p1": "Jacek Zelezik",
-   "p2": "Adam Staniczek",
-   "p1_norm": "jacek zelezik",
-   "p2_norm": "adam staniczek",
-   "open_date": "2026-08-03T20:45:00.000Z",
-   "line": 89.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35900789,
-   "p1": "Jakub Glanowski",
-   "p2": "Lukasz Pietraszko",
-   "p1_norm": "jakub glanowski",
-   "p2_norm": "lukasz pietraszko",
-   "open_date": "2026-08-03T21:00:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
   {
    "event_id": 35900790,
    "p1": "Aleksander Barton",
@@ -30,9 +8,9 @@
    "p1_norm": "aleksander barton",
    "p2_norm": "artur kubiak",
    "open_date": "2026-08-03T21:00:00.000Z",
-   "line": 63.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 75.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35900823,
