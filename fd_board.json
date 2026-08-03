@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T10:26:35Z",
+ "captured_at": "2026-08-03T10:32:28Z",
  "matches": [
   {
    "event_id": 35898240,
@@ -8,20 +8,9 @@
    "p1_norm": "adrian wiecek",
    "p2_norm": "szymon kolasa",
    "open_date": "2026-08-03T10:00:00.000Z",
-   "line": 92.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35898249,
-   "p1": "Jakub Kaczmarek",
-   "p2": "Wojciech Wojtaszczyk",
-   "p1_norm": "jakub kaczmarek",
-   "p2_norm": "wojciech wojtaszczyk",
-   "open_date": "2026-08-03T10:10:00.000Z",
-   "line": 97.5,
-   "over_odds": 100,
-   "under_odds": -140
+   "line": 93.5,
+   "over_odds": -180,
+   "under_odds": 125
   },
   {
    "event_id": 35898254,
@@ -30,20 +19,9 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "oskar jadach",
    "open_date": "2026-08-03T10:20:00.000Z",
-   "line": 78.5,
+   "line": 89.5,
    "over_odds": -115,
    "under_odds": -120
-  },
-  {
-   "event_id": 35898278,
-   "p1": "Karol Wisniewski",
-   "p2": "Krzysztof Wloczko",
-   "p1_norm": "karol wisniewski",
-   "p2_norm": "krzysztof wloczko",
-   "open_date": "2026-08-03T10:30:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
   },
   {
    "event_id": 35898282,
@@ -86,6 +64,17 @@
    "p2_norm": "josef braun",
    "open_date": "2026-08-03T10:50:00.000Z",
    "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35898302,
+   "p1": "Tibor Spanik",
+   "p2": "Miroslav Sklensky",
+   "p1_norm": "tibor spanik",
+   "p2_norm": "miroslav sklensky",
+   "open_date": "2026-08-03T10:55:00.000Z",
+   "line": 78.5,
    "over_odds": -112,
    "under_odds": -118
   }
