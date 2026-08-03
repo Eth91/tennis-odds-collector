@@ -1,5 +1,5 @@
 {
- "updated": "2026-08-02T23:57:50.047788",
+ "updated": "2026-08-03T02:11:44.320739",
  "results": [
   {
    "name": "wave (PM vs AM)",
@@ -34,6 +34,22 @@
    "effect": 0.03432023407951344
   },
   {
+   "name": "SG off-the-tee (season avg)",
+   "n": 42214,
+   "r": 0.020665411121415247,
+   "null": 0.002395368445614293,
+   "stable": true,
+   "effect": 0.03399004178495428
+  },
+  {
+   "name": "SG approach (season avg)",
+   "n": 42214,
+   "r": 0.0193471168205646,
+   "null": -0.010812052902997329,
+   "stable": true,
+   "effect": 0.03182173852171333
+  },
+  {
    "name": "prev_round_residual (H-P1 control)",
    "n": 32038,
    "r": 0.012508370841625817,
@@ -56,6 +72,22 @@
    "null": 0.001506149563549678,
    "stable": true,
    "effect": 0.017724855981188187
+  },
+  {
+   "name": "SG around-green (season avg)",
+   "n": 42214,
+   "r": 0.01011222233569261,
+   "null": -0.005215525887347799,
+   "stable": true,
+   "effect": 0.016632374633609556
+  },
+  {
+   "name": "SG putting (season avg)",
+   "n": 42214,
+   "r": 0.004537423147069004,
+   "null": -0.005782430682640968,
+   "stable": true,
+   "effect": 0.00746305996327704
   },
   {
    "name": "position vs field entering round",
