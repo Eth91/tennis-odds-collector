@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-03T03:00:19Z",
+ "captured_at": "2026-08-03T03:11:19Z",
  "matches": [
-  {
-   "event_id": 35897449,
-   "p1": "Pawel Kurek",
-   "p2": "Wojciech Urban",
-   "p1_norm": "pawel kurek",
-   "p2_norm": "wojciech urban",
-   "open_date": "2026-08-03T02:45:00.000Z",
-   "line": 77.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
-  {
-   "event_id": 35897450,
-   "p1": "Witold Buczynski",
-   "p2": "Sebastian Szostok",
-   "p1_norm": "witold buczynski",
-   "p2_norm": "sebastian szostok",
-   "open_date": "2026-08-03T03:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
   {
    "event_id": 35897451,
    "p1": "Szymon Kolasa",
@@ -30,9 +8,9 @@
    "p1_norm": "szymon kolasa",
    "p2_norm": "grzegorz felkel",
    "open_date": "2026-08-03T03:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 59.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35897452,
@@ -41,9 +19,9 @@
    "p1_norm": "wojciech iwasyszyn",
    "p2_norm": "mikolaj lukaszewski",
    "open_date": "2026-08-03T03:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 89.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35897453,
@@ -52,9 +30,9 @@
    "p1_norm": "mariusz baron",
    "p2_norm": "grzegorz marud",
    "open_date": "2026-08-03T03:05:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 51.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35897455,
@@ -63,8 +41,8 @@
    "p1_norm": "jakub skorupa",
    "p2_norm": "witold stechly",
    "open_date": "2026-08-03T03:10:00.000Z",
-   "line": 73.5,
-   "over_odds": -110,
+   "line": 76.5,
+   "over_odds": -115,
    "under_odds": -120
   },
   {
@@ -108,6 +86,28 @@
    "p2_norm": "piotr cyrnek",
    "open_date": "2026-08-03T03:25:00.000Z",
    "line": 82.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35897468,
+   "p1": "Lukasz Oracz",
+   "p2": "Pawel Kurek",
+   "p1_norm": "lukasz oracz",
+   "p2_norm": "pawel kurek",
+   "open_date": "2026-08-03T03:30:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35897473,
+   "p1": "Dariusz Maszczynski",
+   "p2": "Andriej Fomin",
+   "p1_norm": "dariusz maszczynski",
+   "p2_norm": "andriej fomin",
+   "open_date": "2026-08-03T03:35:00.000Z",
+   "line": 69.5,
    "over_odds": -112,
    "under_odds": -118
   }
