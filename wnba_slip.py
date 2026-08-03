@@ -46,6 +46,36 @@ LADDER_CAP_U = 2.5
 COMPONENT_CAP_U = 2.5
 
 
+
+# ── rung sizing v2 (2026-08-03, user) ───────────────────────────────────────────
+# A flat 0.25u treated a +120 rung and a +350 rung as the same bet. They are not: at a comparable
+# relative edge the Kelly fraction SHRINKS as odds lengthen, so flat sizing over-risks the longshot
+# and under-risks the near-even rung. Stake is now LINEAR IN THE RUNG'S OWN IMPLIED PROBABILITY —
+# floor 0.25u at +300 or longer (p<=0.25), cap 0.75u at -150 or shorter (p>=0.60), straight line
+# between. The probability comes from the POSTED PRICE, never our projection: the price is the
+# low-variance quantity, and keying size to our own edge would double down on our noisiest number.
+#
+# DATE-GATED: rungs recorded before RUNG_V2_FROM keep the flat 0.25u they were earned under. A
+# sizing change that restates history manufactures a record nobody was running — the 4-3 (+0.52u)
+# old-rule sample stays frozen and the new rule accrues its own.
+RUNG_V2_FROM = "2026-08-03"
+RUNG_MIN_U, RUNG_MAX_U = 0.25, 0.75
+_RUNG_P_LO, _RUNG_P_HI = 0.25, 0.60          # +300 and -150, the interpolation landmarks
+
+
+def _rung_stake(r):
+    """Stake for the single qualifying alt rung: linear in implied probability, clamped."""
+    if str(r.get("pred_date") or "")[:10] < RUNG_V2_FROM:
+        return 0.25                                   # the sizing this row's record was earned under
+    try:
+        p = 1.0 / float(r.get("odds"))                # ledger odds are DECIMAL; p includes the vig
+    except (TypeError, ValueError, ZeroDivisionError):
+        return RUNG_MIN_U                             # unpriceable -> smallest stake, never a guess up
+    frac = (p - _RUNG_P_LO) / (_RUNG_P_HI - _RUNG_P_LO)
+    return round(min(RUNG_MAX_U, max(RUNG_MIN_U,
+                 RUNG_MIN_U + frac * (RUNG_MAX_U - RUNG_MIN_U))), 2)
+
+
 def ladder_stake_map(rows):
     """Map each OVER row to its stake: {(pred_date, player, stat, line): stake}. Shape (real-line
     sim 2026-07-17): 1u anchor + at most ONE 0.25u rung on d_min 3-8 plays only — rung 2 hit 27%
@@ -71,7 +101,7 @@ def ladder_stake_map(rows):
         inband = dm is not None and 3 <= dm <= 8
         for i, r in enumerate(srt):
             base = (LADDER_ANCHOR_U if i == 0
-                    else (0.25 if (i == 1 and inband) else 0.0))
+                    else (_rung_stake(r) if (i == 1 and inband) else 0.0))
             s = min(base, max(0.0, LADDER_CAP_U - total))
             total += s
             out[(r.get("pred_date"), r.get("player"), r.get("stat"), r.get("line"))] = s
