@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-03T22:03:11Z",
+ "captured_at": "2026-08-03T22:07:15Z",
  "matches": [
-  {
-   "event_id": 35900919,
-   "p1": "Grzegorz Mucha",
-   "p2": "Miroslaw Lewczuk",
-   "p1_norm": "grzegorz mucha",
-   "p2_norm": "miroslaw lewczuk",
-   "open_date": "2026-08-03T21:45:00.000Z",
-   "line": 77.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35900934,
    "p1": "Jakub Kuzmicz",
@@ -19,9 +8,9 @@
    "p1_norm": "jakub kuzmicz",
    "p2_norm": "mateusz rutkowski",
    "open_date": "2026-08-03T21:50:00.000Z",
-   "line": 87.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 76.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35900960,
@@ -30,9 +19,9 @@
    "p1_norm": "wojciech urban",
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-08-03T21:55:00.000Z",
-   "line": 79.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35900961,
@@ -41,7 +30,7 @@
    "p1_norm": "miroslaw piecowski",
    "p2_norm": "wojciech gluszek",
    "open_date": "2026-08-03T21:55:00.000Z",
-   "line": 76.5,
+   "line": 78.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -52,9 +41,9 @@
    "p1_norm": "michal guzik",
    "p2_norm": "jacek zelezik",
    "open_date": "2026-08-03T22:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 71.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35900971,
