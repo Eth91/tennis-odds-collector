@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T06:57:15Z",
+ "captured_at": "2026-08-03T07:04:52Z",
  "matches": [
   {
    "event_id": 35898025,
@@ -8,9 +8,9 @@
    "p1_norm": "grzegorz wichowski",
    "p2_norm": "mariusz adamus",
    "open_date": "2026-08-03T06:45:00.000Z",
-   "line": 85.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 104.5,
+   "over_odds": 100,
+   "under_odds": -140
   },
   {
    "event_id": 35898028,
@@ -19,9 +19,9 @@
    "p1_norm": "marcin balcerzak",
    "p2_norm": "przemyslaw blocho",
    "open_date": "2026-08-03T06:50:00.000Z",
-   "line": 67.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 53.5,
+   "over_odds": 100,
+   "under_odds": -140
   },
   {
    "event_id": 35898031,
@@ -30,9 +30,20 @@
    "p1_norm": "wojciech iwasyszyn",
    "p2_norm": "krzysztof kotyl",
    "open_date": "2026-08-03T06:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": null,
+   "under_odds": null
+  },
+  {
+   "event_id": 35898032,
+   "p1": "Witold Buczynski",
+   "p2": "Piotr Zemla",
+   "p1_norm": "witold buczynski",
+   "p2_norm": "piotr zemla",
+   "open_date": "2026-08-03T06:55:00.000Z",
+   "line": 85.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35898033,
@@ -41,7 +52,7 @@
    "p1_norm": "szymon kolasa",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-08-03T06:55:00.000Z",
-   "line": 76.5,
+   "line": 88.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -110,6 +121,17 @@
    "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35898058,
+   "p1": "Rafal Skotniczny",
+   "p2": "Wojciech Tobiasz",
+   "p1_norm": "rafal skotniczny",
+   "p2_norm": "wojciech tobiasz",
+   "open_date": "2026-08-03T07:30:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
