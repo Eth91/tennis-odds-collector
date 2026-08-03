@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T09:02:16Z",
+ "captured_at": "2026-08-03T09:06:42Z",
  "matches": [
   {
    "event_id": 35898110,
@@ -8,9 +8,9 @@
    "p1_norm": "oskar jadach",
    "p2_norm": "wojciech tobiasz",
    "open_date": "2026-08-03T08:45:00.000Z",
-   "line": 92.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 98.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35898147,
@@ -19,9 +19,9 @@
    "p1_norm": "jakub kaczmarek",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-08-03T09:00:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 85.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35898148,
@@ -30,9 +30,9 @@
    "p1_norm": "kamil klocek",
    "p2_norm": "adrian myszewski",
    "open_date": "2026-08-03T09:00:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 62.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35898149,
@@ -41,9 +41,9 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-08-03T09:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 85.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35898150,
@@ -53,8 +53,8 @@
    "p2_norm": "grzegorz felkel",
    "open_date": "2026-08-03T09:00:00.000Z",
    "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35898154,
@@ -63,9 +63,9 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "rafal skotniczny",
    "open_date": "2026-08-03T09:05:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35898193,
@@ -110,6 +110,17 @@
    "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35898210,
+   "p1": "Grzegorz Wichowski",
+   "p2": "Oskar Jadach",
+   "p1_norm": "grzegorz wichowski",
+   "p2_norm": "oskar jadach",
+   "open_date": "2026-08-03T09:30:00.000Z",
+   "line": 78.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
