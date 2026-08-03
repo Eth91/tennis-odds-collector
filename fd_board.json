@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T19:56:47Z",
+ "captured_at": "2026-08-03T20:03:11Z",
  "matches": [
   {
    "event_id": 35900620,
@@ -8,9 +8,9 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "miroslav sklensky",
    "open_date": "2026-08-03T19:40:00.000Z",
-   "line": 87.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 78.5,
+   "over_odds": -105,
+   "under_odds": -135
   },
   {
    "event_id": 35900631,
@@ -19,9 +19,9 @@
    "p1_norm": "kacper adamus",
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-08-03T19:55:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 55.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35900638,
@@ -30,9 +30,9 @@
    "p1_norm": "dariusz maszczynski",
    "p2_norm": "piotr gesiarz",
    "open_date": "2026-08-03T20:00:00.000Z",
-   "line": 74.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 68.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35900639,
