@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T13:17:32Z",
+ "captured_at": "2026-08-03T13:23:51Z",
  "matches": [
   {
    "event_id": 35898770,
@@ -8,9 +8,9 @@
    "p1_norm": "grzegorz wichowski",
    "p2_norm": "grzegorz jurowicz",
    "open_date": "2026-08-03T13:10:00.000Z",
-   "line": 70.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 57.5,
+   "over_odds": -105,
+   "under_odds": -135
   },
   {
    "event_id": 35898805,
@@ -20,8 +20,8 @@
    "p2_norm": "grzegorz felkel",
    "open_date": "2026-08-03T13:20:00.000Z",
    "line": 73.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35898811,
@@ -63,6 +63,28 @@
    "p1_norm": "rafal skotniczny",
    "p2_norm": "wojciech tobiasz",
    "open_date": "2026-08-03T13:30:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35898833,
+   "p1": "Szymon Kolasa",
+   "p2": "Marcin Jadczyk",
+   "p1_norm": "szymon kolasa",
+   "p2_norm": "marcin jadczyk",
+   "open_date": "2026-08-03T13:45:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35898840,
+   "p1": "Marcin Balcerzak",
+   "p2": "Karol Wisniewski",
+   "p1_norm": "marcin balcerzak",
+   "p2_norm": "karol wisniewski",
+   "open_date": "2026-08-03T13:50:00.000Z",
    "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
