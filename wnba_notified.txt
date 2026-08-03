@@ -100,6 +100,7 @@
 2026-08-02|Marina Mabrey|pts_ast|23.5
 2026-08-02|Nyadiew Puoch|points|4.5
 2026-08-02|Nyadiew Puoch|points|5.5
+2026-08-03|Kamilla Cardoso|rebounds|8.5
 2026-08-03|Sydney Taylor|points|17.5
 2026-08-03|Sydney Taylor|points|19.5
 n1|2026-07-20|Arike Ogunbowale|points|14.5
