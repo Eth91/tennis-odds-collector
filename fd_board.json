@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T04:21:42Z",
+ "captured_at": "2026-08-03T04:26:59Z",
  "matches": [
   {
    "event_id": 35897481,
@@ -8,9 +8,9 @@
    "p1_norm": "szymon kolasa",
    "p2_norm": "adrian wiecek",
    "open_date": "2026-08-03T04:10:00.000Z",
-   "line": 83.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 88.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35897482,
@@ -19,9 +19,9 @@
    "p1_norm": "wojciech iwasyszyn",
    "p2_norm": "adrian myszewski",
    "open_date": "2026-08-03T04:10:00.000Z",
-   "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 94.5,
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35897483,
@@ -30,9 +30,9 @@
    "p1_norm": "witold buczynski",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-08-03T04:10:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 70.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35897517,
@@ -41,9 +41,9 @@
    "p1_norm": "mariusz baron",
    "p2_norm": "pawel kurek",
    "open_date": "2026-08-03T04:20:00.000Z",
-   "line": 74.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 69.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35897518,
@@ -52,9 +52,9 @@
    "p1_norm": "jakub skorupa",
    "p2_norm": "dariusz maszczynski",
    "open_date": "2026-08-03T04:25:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -116
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35897519,
@@ -63,9 +63,9 @@
    "p1_norm": "przemyslaw blocho",
    "p2_norm": "stapor rafal",
    "open_date": "2026-08-03T04:25:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35897521,
@@ -110,6 +110,28 @@
    "line": 80.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35897527,
+   "p1": "Janus Slawomir",
+   "p2": "Witold Stechly",
+   "p1_norm": "janus slawomir",
+   "p2_norm": "witold stechly",
+   "open_date": "2026-08-03T04:50:00.000Z",
+   "line": 71.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35897528,
+   "p1": "Michal Minda",
+   "p2": "Artur Sobel",
+   "p1_norm": "michal minda",
+   "p2_norm": "artur sobel",
+   "open_date": "2026-08-03T04:50:00.000Z",
+   "line": 80.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
