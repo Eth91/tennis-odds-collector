@@ -1976,3 +1976,22 @@ e3: pricing PGA Wyndham Championship 2026  (G2 pending n=7 — preview only)
   make-cut [SHADOW, armable=True]: 0 flags
   E3 logged: 0 armed + 0 shadow, 1 skipped (player already teed off) (G2 not passed — everything logs as shadow)
 pga grade: +0 newly graded — E1 record 23-30  +0.99u
+E1 wave meter — Rocket Classic [Final]
+  no tee times posted yet — meter waits (they release Tue/Wed)
+  crawl 2026: +12388 round rows
+  crawl 2026: +7221 round rows
+  rounds table: 117952 rows, 2459 players
+G2: 7 gradeable closes [R4=7] from 24 collected matchup markets
+     dropped  10  no same-edition result yet
+     dropped   5  no two-sided pre-round close
+     dropped   2  round not both posted / tie
+G2: n=7 < 15 -> gate INCONCLUSIVE. This is a FORWARD test and cannot be backtested: it needs OUR OWN collected closes, and the collector only has history from the day it started.
+Traceback (most recent call last):
+  File "/home/ubuntu/tennis-odds-collector/pga_e3.py", line 725, in <module>
+    main()
+  File "/home/ubuntu/tennis-odds-collector/pga_e3.py", line 149, in main
+    evn, rows, snap_ts = latest_event_rows()
+  File "/home/ubuntu/tennis-odds-collector/pga_e3.py", line 132, in latest_event_rows
+    ts = con.execute("SELECT MAX(collected_at) FROM golf_lines WHERE event=?", (evn,)).fetchone()[0]
+sqlite3.OperationalError: database is locked
+pga grade: +0 newly graded — E1 record 23-30  +0.99u
