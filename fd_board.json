@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-03T21:48:49Z",
+ "captured_at": "2026-08-03T21:53:46Z",
  "matches": [
-  {
-   "event_id": 35900876,
-   "p1": "Miroslaw Piecowski",
-   "p2": "Adrian Eliasz",
-   "p1_norm": "miroslaw piecowski",
-   "p2_norm": "adrian eliasz",
-   "open_date": "2026-08-03T21:30:00.000Z",
-   "line": 97.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35900877,
-   "p1": "Jerzy Michalik",
-   "p2": "Adam Staniczek",
-   "p1_norm": "jerzy michalik",
-   "p2_norm": "adam staniczek",
-   "open_date": "2026-08-03T21:35:00.000Z",
-   "line": 79.5,
-   "over_odds": 100,
-   "under_odds": -140
-  },
   {
    "event_id": 35900919,
    "p1": "Grzegorz Mucha",
@@ -30,7 +8,7 @@
    "p1_norm": "grzegorz mucha",
    "p2_norm": "miroslaw lewczuk",
    "open_date": "2026-08-03T21:45:00.000Z",
-   "line": 76.5,
+   "line": 81.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -41,9 +19,9 @@
    "p1_norm": "jakub kuzmicz",
    "p2_norm": "mateusz rutkowski",
    "open_date": "2026-08-03T21:50:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35900960,
@@ -63,9 +41,9 @@
    "p1_norm": "miroslaw piecowski",
    "p2_norm": "wojciech gluszek",
    "open_date": "2026-08-03T21:55:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35900963,
@@ -96,9 +74,9 @@
    "p1_norm": "aleksander barton",
    "p2_norm": "miroslaw warzecha",
    "open_date": "2026-08-03T22:10:00.000Z",
-   "line": 67.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 63.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35900974,
