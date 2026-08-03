@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T12:06:15Z",
+ "captured_at": "2026-08-03T12:11:15Z",
  "matches": [
   {
    "event_id": 35898617,
@@ -8,9 +8,9 @@
    "p1_norm": "kamil klocek",
    "p2_norm": "kamil rudomina",
    "open_date": "2026-08-03T11:50:00.000Z",
-   "line": 88.5,
-   "over_odds": -145,
-   "under_odds": 105
+   "line": 89.5,
+   "over_odds": -135,
+   "under_odds": 100
   },
   {
    "event_id": 35898618,
@@ -19,9 +19,9 @@
    "p1_norm": "jakub kaczmarek",
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-08-03T11:50:00.000Z",
-   "line": 77.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 99.5,
+   "over_odds": 135,
+   "under_odds": -195
   },
   {
    "event_id": 35898626,
@@ -30,9 +30,20 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "wojciech tobiasz",
    "open_date": "2026-08-03T11:55:00.000Z",
-   "line": 92.5,
+   "line": 96.5,
    "over_odds": -120,
    "under_odds": -115
+  },
+  {
+   "event_id": 35898641,
+   "p1": "Marcin Jadczyk",
+   "p2": "Josef Braun",
+   "p1_norm": "marcin jadczyk",
+   "p2_norm": "josef braun",
+   "open_date": "2026-08-03T12:05:00.000Z",
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35898647,
@@ -63,9 +74,9 @@
    "p1_norm": "witold buczynski",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-08-03T12:15:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35898654,
@@ -88,6 +99,17 @@
    "line": 80.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35898704,
+   "p1": "Marcin Balcerzak",
+   "p2": "Tibor Spanik",
+   "p1_norm": "marcin balcerzak",
+   "p2_norm": "tibor spanik",
+   "open_date": "2026-08-03T12:35:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
