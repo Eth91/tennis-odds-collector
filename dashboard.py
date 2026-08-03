@@ -968,9 +968,45 @@ def _tracker_panel(wnba_rec, tt_json):
         {_recent_dd(recent)}
       </div>"""
 
-    # 1) WNBA injury props
-    w, l, u = wnba_rec
-    wnba_card = card('<img class="tlogo" src="logos/wnba.png" alt="">', "WNBA", w, l, u, "1u base + declining rungs · since 7/9", recent=_wnba_recent())
+    # 1) WNBA injury props — MAIN LINES ONLY (user 2026-08-03): the 1u anchors are the record;
+    # the 0.25u ladder rungs live in their own card below. Split computed ONCE here from
+    # ladder_stake_map (the single source of what counts as a rung) and shared by both cards, so
+    # they always reconcile. If the split cannot be computed the card falls back to the blended
+    # record — wrong-but-visible beats missing.
+    _mains = _rungs = None
+    _stk2 = None
+    try:
+        import wnba_slip as SLIP2
+        con2 = sqlite3.connect(LEDGER)
+        con2.row_factory = sqlite3.Row
+        g2 = [dict(r) for r in con2.execute(
+            "SELECT * FROM predictions WHERE graded=1 AND result IN ('over','under') "
+            "AND (side IS NULL OR side='over') AND COALESCE(tier,'')!='n1'")]
+        con2.close()
+        sel2, _x = SLIP2.current_selection(g2)
+        sel2 = _bet_only(sel2)
+        sm2 = SLIP2.ladder_stake_map(sel2)
+
+        def _stk2(r):
+            return sm2.get((r["pred_date"], r["player"], r["stat"], r["line"]), 1.0)
+        _mains = [r for r in sel2 if _stk2(r) >= 1.0]
+        _rungs = [r for r in sel2 if _stk2(r) < 1.0]
+    except Exception:                                                # noqa: BLE001
+        _mains = _rungs = None
+
+    def _rec2(rows, staked):
+        wn = sum(1 for r in rows if r["result"] == "over")
+        uu = sum((_stk2(r) if staked else 1.0)
+                 * ((float(r["odds"]) - 1) if r["result"] == "over" else -1.0) for r in rows)
+        return wn, len(rows) - wn, uu
+
+    if _mains is not None:
+        w, l, u = _rec2(_mains, True)
+        _wnote = "main lines only · 1u · rungs tracked below · since 7/9"
+    else:
+        w, l, u = wnba_rec
+        _wnote = "1u base + declining rungs · since 7/9"
+    wnba_card = card('<img class="tlogo" src="logos/wnba.png" alt="">', "WNBA", w, l, u, _wnote, recent=_wnba_recent())
 
     # 2) MLB = the two live COMPASS models (u15.5 route-A model RETIRED by user 2026-07-26 —
     # k_paper flagging benched; its 12-3 era lives in git history)
@@ -1061,47 +1097,21 @@ def _tracker_panel(wnba_rec, tt_json):
     except Exception:
         pass
 
-    # 5) WNBA ladder rungs vs main lines (user 2026-08-03): the headline blends 1u anchors with
-    # 0.25u rungs, hiding both populations. Same selection + stake map as the headline record —
-    # ladder_stake_map is the ONE source of what counts as a rung; a second copy would drift.
+    # 5) WNBA ladder rungs — their own record, parlay-card format. Uses the split computed for
+    # the WNBA card above, so the two always reconcile.
     ladder_card = ""
-    try:
-        import wnba_slip as SLIP2
-        con2 = sqlite3.connect(LEDGER)
-        con2.row_factory = sqlite3.Row
-        g2 = [dict(r) for r in con2.execute(
-            "SELECT * FROM predictions WHERE graded=1 AND result IN ('over','under') "
-            "AND (side IS NULL OR side='over') AND COALESCE(tier,'')!='n1'")]
-        con2.close()
-        sel2, _x = SLIP2.current_selection(g2)
-        sel2 = _bet_only(sel2)
-        sm2 = SLIP2.ladder_stake_map(sel2)
-
-        def _stk2(r):
-            return sm2.get((r["pred_date"], r["player"], r["stat"], r["line"]), 1.0)
-        mains = [r for r in sel2 if _stk2(r) >= 1.0]
-        rungs = [r for r in sel2 if _stk2(r) < 1.0]
-
-        def _rec(rows, staked):
-            wn = sum(1 for r in rows if r["result"] == "over")
-            uu = sum((_stk2(r) if staked else 1.0)
-                     * ((float(r["odds"]) - 1) if r["result"] == "over" else -1.0) for r in rows)
-            return wn, len(rows) - wn, uu
-        if mains or rungs:
-            mw, ml, mu = _rec(mains, True)
-            rw, rl, ru_st = _rec(rungs, True)
-            _rw2, _rl2, ru_flat = _rec(rungs, False)
-            _uc = lambda v: "up" if v > 0 else ("down" if v < 0 else "")     # noqa: E731
-            ladder_card = (
-                '<div class="tcard"><div class="thead">WNBA Ladder Rungs</div><div class="trow">'
-                f'<div class="tbox"><div class="tk">Main lines</div><div class="tv">{mw}-{ml}</div></div>'
-                f'<div class="tbox"><div class="tk">Rungs</div><div class="tv">{rw}-{rl}</div></div>'
-                f'<div class="tbox"><div class="tk">Rung units</div>'
-                f'<div class="tv {_uc(ru_st)}">{ru_st:+.2f}u</div></div>'
-                f'</div><div class="tsub">main lines {mu:+.2f}u at 1u · rungs staked 0.25u '
-                f'(flat-1u basis: {ru_flat:+.2f}u) · same selection as the headline</div></div>')
-    except Exception:                                                # noqa: BLE001
-        ladder_card = ""
+    if _rungs:
+        rw, rl, ru_st = _rec2(_rungs, True)
+        _w2, _l2, ru_flat = _rec2(_rungs, False)
+        hit = f"{rw / (rw + rl) * 100:.0f}%" if (rw + rl) else "—"
+        _uc = "up" if ru_st > 0 else ("down" if ru_st < 0 else "")
+        ladder_card = (
+            '<div class="tcard"><div class="thead">WNBA Ladder Rungs</div><div class="trow">'
+            f'<div class="tbox"><div class="tk">Record</div><div class="tv">{rw}-{rl}</div></div>'
+            f'<div class="tbox"><div class="tk">Hit rate</div><div class="tv">{hit}</div></div>'
+            f'<div class="tbox"><div class="tk">Units</div><div class="tv {_uc}">{ru_st:+.2f}u</div></div>'
+            f'</div><div class="tsub">0.25u per rung · flat-1u basis {ru_flat:+.2f}u · '
+            'alt lines above the main play, same selection rules</div></div>')
 
     return wnba_card + mlb_card + tt_card + parlay_card + ladder_card
 
