@@ -1,16 +1,16 @@
 {
- "captured_at": "2026-08-03T15:05:53Z",
+ "captured_at": "2026-08-03T15:11:07Z",
  "matches": [
   {
-   "event_id": 35898930,
-   "p1": "Adrian Wiecek",
-   "p2": "Josef Braun",
-   "p1_norm": "adrian wiecek",
-   "p2_norm": "josef braun",
-   "open_date": "2026-08-03T14:35:00.000Z",
-   "line": 103.5,
-   "over_odds": null,
-   "under_odds": null
+   "event_id": 35899007,
+   "p1": "Lukasz Pietraszko",
+   "p2": "Jakub Glanowski",
+   "p1_norm": "lukasz pietraszko",
+   "p2_norm": "jakub glanowski",
+   "open_date": "2026-08-03T15:00:00.000Z",
+   "line": 77.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35899008,
@@ -19,9 +19,9 @@
    "p1_norm": "miroslaw piecowski",
    "p2_norm": "bartlomiej wisniewski",
    "open_date": "2026-08-03T15:00:00.000Z",
-   "line": 75.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 53.5,
+   "over_odds": -105,
+   "under_odds": -135
   },
   {
    "event_id": 35899011,
@@ -30,9 +30,9 @@
    "p1_norm": "miroslaw lewczuk",
    "p2_norm": "artur kubiak",
    "open_date": "2026-08-03T15:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 88.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35899019,
@@ -41,9 +41,9 @@
    "p1_norm": "mariusz adamus",
    "p2_norm": "rafal skotniczny",
    "open_date": "2026-08-03T15:05:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 80.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35899029,
@@ -51,7 +51,7 @@
    "p2": "Henryk Tkaczyk",
    "p1_norm": "jacek zelezik",
    "p2_norm": "henryk tkaczyk",
-   "open_date": "2026-08-03T15:10:00.000Z",
+   "open_date": "2026-08-03T15:20:00.000Z",
    "line": 76.5,
    "over_odds": -116,
    "under_odds": -116
@@ -97,6 +97,17 @@
    "p2_norm": "grzegorz wichowski",
    "open_date": "2026-08-03T15:30:00.000Z",
    "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35899160,
+   "p1": "Dariusz Maszczynski",
+   "p2": "Adam Staniczek",
+   "p1_norm": "dariusz maszczynski",
+   "p2_norm": "adam staniczek",
+   "open_date": "2026-08-03T15:40:00.000Z",
+   "line": 74.5,
    "over_odds": -118,
    "under_odds": -112
   }
