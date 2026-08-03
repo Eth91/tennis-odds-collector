@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-03T14:15:40Z",
+ "captured_at": "2026-08-03T14:21:11Z",
  "matches": [
-  {
-   "event_id": 35898844,
-   "p1": "Wojciech Iwasyszyn",
-   "p2": "Artur Sobel",
-   "p1_norm": "wojciech iwasyszyn",
-   "p2_norm": "artur sobel",
-   "open_date": "2026-08-03T13:55:00.000Z",
-   "line": 101.5,
-   "over_odds": -105,
-   "under_odds": -135
-  },
   {
    "event_id": 35898871,
    "p1": "Piotr Cyrnek",
@@ -19,9 +8,9 @@
    "p1_norm": "piotr cyrnek",
    "p2_norm": "grzegorz felkel",
    "open_date": "2026-08-03T14:10:00.000Z",
-   "line": 77.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 80.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35898877,
@@ -30,9 +19,9 @@
    "p1_norm": "tibor spanik",
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-08-03T14:15:00.000Z",
-   "line": 74.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 72.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35898887,
@@ -41,18 +30,7 @@
    "p1_norm": "oskar jadach",
    "p2_norm": "rafal skotniczny",
    "open_date": "2026-08-03T14:20:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35898888,
-   "p1": "Kamil Rudomina",
-   "p2": "Adrian Myszewski",
-   "p1_norm": "kamil rudomina",
-   "p2_norm": "adrian myszewski",
-   "open_date": "2026-08-03T14:20:00.000Z",
-   "line": 79.5,
+   "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
   },
@@ -63,7 +41,7 @@
    "p1_norm": "schaniel krzysztof",
    "p2_norm": "sebastian szostok",
    "open_date": "2026-08-03T14:20:00.000Z",
-   "line": 79.5,
+   "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
   },
@@ -86,8 +64,8 @@
    "p2_norm": "miroslav sklensky",
    "open_date": "2026-08-03T14:35:00.000Z",
    "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35898942,
@@ -110,6 +88,17 @@
    "line": 76.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35898956,
+   "p1": "Grzegorz Wichowski",
+   "p2": "Wojciech Tobiasz",
+   "p1_norm": "grzegorz wichowski",
+   "p2_norm": "wojciech tobiasz",
+   "open_date": "2026-08-03T14:45:00.000Z",
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -120
   }
  ]
 }
