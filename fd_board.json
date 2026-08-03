@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T22:54:43Z",
+ "captured_at": "2026-08-03T22:59:21Z",
  "matches": [
   {
    "event_id": 35900984,
@@ -8,18 +8,7 @@
    "p1_norm": "mateusz rutkowski",
    "p2_norm": "lukasz pietraszko",
    "open_date": "2026-08-03T22:35:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35900985,
-   "p1": "Miroslaw Lewczuk",
-   "p2": "Artur Kubiak",
-   "p1_norm": "miroslaw lewczuk",
-   "p2_norm": "artur kubiak",
-   "open_date": "2026-08-03T22:35:00.000Z",
-   "line": 90.5,
+   "line": 77.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -30,9 +19,9 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-08-03T22:50:00.000Z",
-   "line": 75.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 72.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35900991,
@@ -52,20 +41,9 @@
    "p1_norm": "jakub glanowski",
    "p2_norm": "artur gromek",
    "open_date": "2026-08-03T22:55:00.000Z",
-   "line": 79.5,
+   "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
-  },
-  {
-   "event_id": 35900993,
-   "p1": "Michal Skorski",
-   "p2": "Adrian Eliasz",
-   "p1_norm": "michal skorski",
-   "p2_norm": "adrian eliasz",
-   "open_date": "2026-08-03T22:55:00.000Z",
-   "line": 81.5,
-   "over_odds": -112,
-   "under_odds": -118
   },
   {
    "event_id": 35901004,
@@ -75,8 +53,8 @@
    "p2_norm": "wojciech urban",
    "open_date": "2026-08-03T23:05:00.000Z",
    "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35901010,
