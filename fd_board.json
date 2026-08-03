@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T23:40:00Z",
+ "captured_at": "2026-08-03T23:44:38Z",
  "matches": [
   {
    "event_id": 35901024,
@@ -8,9 +8,9 @@
    "p1_norm": "jakub kuzmicz",
    "p2_norm": "lukasz pietraszko",
    "open_date": "2026-08-03T23:20:00.000Z",
-   "line": 98.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 101.5,
+   "over_odds": 135,
+   "under_odds": -195
   },
   {
    "event_id": 35901031,
@@ -19,9 +19,9 @@
    "p1_norm": "jerzy michalik",
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-08-03T23:35:00.000Z",
-   "line": 62.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 68.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35901033,
@@ -77,6 +77,39 @@
    "line": 72.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35901066,
+   "p1": "Jakub Kuzmicz",
+   "p2": "Jakub Glanowski",
+   "p1_norm": "jakub kuzmicz",
+   "p2_norm": "jakub glanowski",
+   "open_date": "2026-08-04T00:10:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35901067,
+   "p1": "Miroslaw Lewczuk",
+   "p2": "Michal Krutak",
+   "p1_norm": "miroslaw lewczuk",
+   "p2_norm": "michal krutak",
+   "open_date": "2026-08-04T00:10:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35901068,
+   "p1": "Miroslaw Piecowski",
+   "p2": "Michal Skorski",
+   "p1_norm": "miroslaw piecowski",
+   "p2_norm": "michal skorski",
+   "open_date": "2026-08-04T00:10:00.000Z",
+   "line": 82.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
