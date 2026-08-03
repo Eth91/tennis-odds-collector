@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T19:51:07Z",
+ "captured_at": "2026-08-03T19:56:47Z",
  "matches": [
   {
    "event_id": 35900620,
@@ -8,20 +8,9 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "miroslav sklensky",
    "open_date": "2026-08-03T19:40:00.000Z",
-   "line": 74.5,
+   "line": 87.5,
    "over_odds": -120,
    "under_odds": -115
-  },
-  {
-   "event_id": 35900622,
-   "p1": "Miroslaw Warzecha",
-   "p2": "Aleksander Barton",
-   "p1_norm": "miroslaw warzecha",
-   "p2_norm": "aleksander barton",
-   "open_date": "2026-08-03T19:40:00.000Z",
-   "line": 67.5,
-   "over_odds": -125,
-   "under_odds": -110
   },
   {
    "event_id": 35900631,
@@ -30,9 +19,9 @@
    "p1_norm": "kacper adamus",
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-08-03T19:55:00.000Z",
-   "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35900638,
@@ -75,6 +64,28 @@
    "p2_norm": "artur kubiak",
    "open_date": "2026-08-03T20:05:00.000Z",
    "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35900650,
+   "p1": "Michal Guzik",
+   "p2": "Henryk Tkaczyk",
+   "p1_norm": "michal guzik",
+   "p2_norm": "henryk tkaczyk",
+   "open_date": "2026-08-03T20:20:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35900651,
+   "p1": "Pawel Kurek",
+   "p2": "Grzegorz Marud",
+   "p1_norm": "pawel kurek",
+   "p2_norm": "grzegorz marud",
+   "open_date": "2026-08-03T20:20:00.000Z",
+   "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
   }
