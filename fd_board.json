@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-03T23:17:12Z",
+ "captured_at": "2026-08-03T23:25:57Z",
  "matches": [
-  {
-   "event_id": 35900992,
-   "p1": "Jakub Glanowski",
-   "p2": "Artur Gromek",
-   "p1_norm": "jakub glanowski",
-   "p2_norm": "artur gromek",
-   "open_date": "2026-08-03T22:55:00.000Z",
-   "line": 89.5,
-   "over_odds": -190,
-   "under_odds": 135
-  },
-  {
-   "event_id": 35901004,
-   "p1": "Pawel Kurek",
-   "p2": "Wojciech Urban",
-   "p1_norm": "pawel kurek",
-   "p2_norm": "wojciech urban",
-   "open_date": "2026-08-03T23:05:00.000Z",
-   "line": 80.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
   {
    "event_id": 35901010,
    "p1": "Michal Guzik",
@@ -30,9 +8,9 @@
    "p1_norm": "michal guzik",
    "p2_norm": "adam staniczek",
    "open_date": "2026-08-03T23:10:00.000Z",
-   "line": 70.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 79.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35901022,
@@ -41,9 +19,9 @@
    "p1_norm": "miroslaw warzecha",
    "p2_norm": "artur kubiak",
    "open_date": "2026-08-03T23:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35901023,
@@ -52,9 +30,9 @@
    "p1_norm": "miroslaw piecowski",
    "p2_norm": "marcin kowalczyk",
    "open_date": "2026-08-03T23:20:00.000Z",
-   "line": 79.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 72.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35901024,
@@ -63,9 +41,9 @@
    "p1_norm": "jakub kuzmicz",
    "p2_norm": "lukasz pietraszko",
    "open_date": "2026-08-03T23:20:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35901031,
@@ -77,6 +55,39 @@
    "line": 76.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35901033,
+   "p1": "Aleksander Barton",
+   "p2": "Grzegorz Mucha",
+   "p1_norm": "aleksander barton",
+   "p2_norm": "grzegorz mucha",
+   "open_date": "2026-08-03T23:45:00.000Z",
+   "line": 68.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35901034,
+   "p1": "Michal Skorski",
+   "p2": "Wojciech Gluszek",
+   "p1_norm": "michal skorski",
+   "p2_norm": "wojciech gluszek",
+   "open_date": "2026-08-03T23:45:00.000Z",
+   "line": 80.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35901035,
+   "p1": "Jakub Glanowski",
+   "p2": "Mateusz Rutkowski",
+   "p1_norm": "jakub glanowski",
+   "p2_norm": "mateusz rutkowski",
+   "open_date": "2026-08-03T23:45:00.000Z",
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -120
   }
  ]
 }
