@@ -1,72 +1,6 @@
 {
- "captured_at": "2026-08-03T18:40:22Z",
+ "captured_at": "2026-08-03T18:46:37Z",
  "matches": [
-  {
-   "event_id": 35900109,
-   "p1": "Piotr Gesiarz",
-   "p2": "Adam Staniczek",
-   "p1_norm": "piotr gesiarz",
-   "p2_norm": "adam staniczek",
-   "open_date": "2026-08-03T18:25:00.000Z",
-   "line": 79.5,
-   "over_odds": 105,
-   "under_odds": -145
-  },
-  {
-   "event_id": 35900116,
-   "p1": "Dariusz Wrobel",
-   "p2": "Adrian Eliasz",
-   "p1_norm": "dariusz wrobel",
-   "p2_norm": "adrian eliasz",
-   "open_date": "2026-08-03T18:30:00.000Z",
-   "line": 78.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35900117,
-   "p1": "Miroslaw Warzecha",
-   "p2": "Grzegorz Mucha",
-   "p1_norm": "miroslaw warzecha",
-   "p2_norm": "grzegorz mucha",
-   "open_date": "2026-08-03T18:30:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35900118,
-   "p1": "Krystian Kolodziej",
-   "p2": "Artur Gromek",
-   "p1_norm": "krystian kolodziej",
-   "p2_norm": "artur gromek",
-   "open_date": "2026-08-03T18:30:00.000Z",
-   "line": 55.5,
-   "over_odds": -140,
-   "under_odds": 100
-  },
-  {
-   "event_id": 35900556,
-   "p1": "Dariusz Maszczynski",
-   "p2": "Michal Guzik",
-   "p1_norm": "dariusz maszczynski",
-   "p2_norm": "michal guzik",
-   "open_date": "2026-08-03T18:45:00.000Z",
-   "line": 64.5,
-   "over_odds": -116,
-   "under_odds": -116
-  },
-  {
-   "event_id": 35900557,
-   "p1": "Pawel Kurek",
-   "p2": "Kacper Adamus",
-   "p1_norm": "pawel kurek",
-   "p2_norm": "kacper adamus",
-   "open_date": "2026-08-03T18:45:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
   {
    "event_id": 35900576,
    "p1": "Lukasz Pietraszko",
@@ -99,6 +33,17 @@
    "line": 80.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35900593,
+   "p1": "Jacek Zelezik",
+   "p2": "Piotr Gesiarz",
+   "p1_norm": "jacek zelezik",
+   "p2_norm": "piotr gesiarz",
+   "open_date": "2026-08-03T19:10:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
