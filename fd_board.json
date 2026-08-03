@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-03T21:20:58Z",
+ "captured_at": "2026-08-03T21:27:41Z",
  "matches": [
-  {
-   "event_id": 35900789,
-   "p1": "Jakub Glanowski",
-   "p2": "Lukasz Pietraszko",
-   "p1_norm": "jakub glanowski",
-   "p2_norm": "lukasz pietraszko",
-   "open_date": "2026-08-03T21:00:00.000Z",
-   "line": 90.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35900823,
-   "p1": "Kacper Adamus",
-   "p2": "Grzegorz Marud",
-   "p1_norm": "kacper adamus",
-   "p2_norm": "grzegorz marud",
-   "open_date": "2026-08-03T21:05:00.000Z",
-   "line": 73.5,
-   "over_odds": -1450,
-   "under_odds": 550
-  },
   {
    "event_id": 35900865,
    "p1": "Miroslaw Warzecha",
@@ -30,20 +8,9 @@
    "p1_norm": "miroslaw warzecha",
    "p2_norm": "michal krutak",
    "open_date": "2026-08-03T21:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
-  },
-  {
-   "event_id": 35900866,
-   "p1": "Jakub Kuzmicz",
-   "p2": "Artur Gromek",
-   "p1_norm": "jakub kuzmicz",
-   "p2_norm": "artur gromek",
-   "open_date": "2026-08-03T21:25:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35900876,
@@ -53,8 +20,8 @@
    "p2_norm": "adrian eliasz",
    "open_date": "2026-08-03T21:30:00.000Z",
    "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35900877,
@@ -77,6 +44,39 @@
    "line": 77.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35900934,
+   "p1": "Jakub Kuzmicz",
+   "p2": "Mateusz Rutkowski",
+   "p1_norm": "jakub kuzmicz",
+   "p2_norm": "mateusz rutkowski",
+   "open_date": "2026-08-03T21:50:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35900960,
+   "p1": "Wojciech Urban",
+   "p2": "Jakub Pruszkowski",
+   "p1_norm": "wojciech urban",
+   "p2_norm": "jakub pruszkowski",
+   "open_date": "2026-08-03T21:55:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35900961,
+   "p1": "Miroslaw Piecowski",
+   "p2": "Wojciech Gluszek",
+   "p1_norm": "miroslaw piecowski",
+   "p2_norm": "wojciech gluszek",
+   "open_date": "2026-08-03T21:55:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }

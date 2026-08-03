@@ -314,6 +314,7 @@ rw|425|Will play Sunday
 rw|431|Plays 17 minute off bench
 rw|431|Plays 17 minutes off bench
 rw|432|Available for Wednesday
+rw|432|Available to play Monday
 rw|432|Logs 18 minutes in return
 rw|432|Probable for Monday
 rw|432|Probable for Sunday
