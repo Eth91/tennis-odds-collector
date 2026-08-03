@@ -242,6 +242,7 @@ rw|344|Subdued campaign continues
 rw|354|Chips in with 11 points
 rw|354|Efficient performance in win
 rw|354|Very efficient in home victory
+rw|358|Not starting Sunday
 rw|358|Starting versus Minnesota
 rw|376|Plays 18 minutes in defeat
 rw|378|Muted effort in win
@@ -451,6 +452,7 @@ rw|789|Goes through practice
 rw|789|Iffy for Thursday
 rw|789|Logs 10 points in return
 rw|789|Questionable for Tuesday
+rw|789|Starting Sunday
 rw|789|Upgraded to probable
 rw|789|Won't play Tuesday
 rw|792|Doubtful for Thursday
