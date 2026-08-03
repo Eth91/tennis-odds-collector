@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T14:54:21Z",
+ "captured_at": "2026-08-03T14:59:18Z",
  "matches": [
   {
    "event_id": 35898930,
@@ -8,9 +8,9 @@
    "p1_norm": "adrian wiecek",
    "p2_norm": "josef braun",
    "open_date": "2026-08-03T14:35:00.000Z",
-   "line": 98.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 102.5,
+   "over_odds": 110,
+   "under_odds": -150
   },
   {
    "event_id": 35898931,
@@ -19,9 +19,9 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "miroslav sklensky",
    "open_date": "2026-08-03T14:35:00.000Z",
-   "line": 80.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 98.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35898942,
@@ -30,9 +30,9 @@
    "p1_norm": "kamil klocek",
    "p2_norm": "przemyslaw blocho",
    "open_date": "2026-08-03T14:40:00.000Z",
-   "line": 93.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 82.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35898956,
@@ -41,9 +41,9 @@
    "p1_norm": "grzegorz wichowski",
    "p2_norm": "wojciech tobiasz",
    "open_date": "2026-08-03T14:45:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 91.5,
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35899007,
@@ -64,8 +64,8 @@
    "p2_norm": "bartlomiej wisniewski",
    "open_date": "2026-08-03T15:00:00.000Z",
    "line": 81.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35899011,
@@ -75,8 +75,8 @@
    "p2_norm": "artur kubiak",
    "open_date": "2026-08-03T15:00:00.000Z",
    "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35899019,
@@ -99,6 +99,39 @@
    "line": 76.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35899131,
+   "p1": "Dariusz Wrobel",
+   "p2": "Marcin Kowalczyk",
+   "p1_norm": "dariusz wrobel",
+   "p2_norm": "marcin kowalczyk",
+   "open_date": "2026-08-03T15:25:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35899132,
+   "p1": "Krystian Kolodziej",
+   "p2": "Tibor Spanik",
+   "p1_norm": "krystian kolodziej",
+   "p2_norm": "tibor spanik",
+   "open_date": "2026-08-03T15:25:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35899133,
+   "p1": "Miroslaw Warzecha",
+   "p2": "Michal Krutak",
+   "p1_norm": "miroslaw warzecha",
+   "p2_norm": "michal krutak",
+   "open_date": "2026-08-03T15:25:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
