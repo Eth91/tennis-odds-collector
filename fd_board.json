@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-03T09:27:50Z",
+ "captured_at": "2026-08-03T09:34:37Z",
  "matches": [
-  {
-   "event_id": 35898154,
-   "p1": "Mariusz Adamus",
-   "p2": "Rafal Skotniczny",
-   "p1_norm": "mariusz adamus",
-   "p2_norm": "rafal skotniczny",
-   "open_date": "2026-08-03T09:05:00.000Z",
-   "line": 94.5,
-   "over_odds": -145,
-   "under_odds": 105
-  },
-  {
-   "event_id": 35898193,
-   "p1": "Marcin Balcerzak",
-   "p2": "Miroslav Sklensky",
-   "p1_norm": "marcin balcerzak",
-   "p2_norm": "miroslav sklensky",
-   "open_date": "2026-08-03T09:20:00.000Z",
-   "line": 73.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35898194,
    "p1": "Szymon Kolasa",
@@ -30,7 +8,7 @@
    "p1_norm": "szymon kolasa",
    "p2_norm": "josef braun",
    "open_date": "2026-08-03T09:20:00.000Z",
-   "line": 81.5,
+   "line": 77.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -41,9 +19,9 @@
    "p1_norm": "wojciech wojtaszczyk",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-08-03T09:25:00.000Z",
-   "line": 70.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 69.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35898203,
@@ -52,9 +30,9 @@
    "p1_norm": "wojciech iwasyszyn",
    "p2_norm": "przemyslaw blocho",
    "open_date": "2026-08-03T09:25:00.000Z",
-   "line": 73.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 68.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35898210,
@@ -63,9 +41,9 @@
    "p1_norm": "grzegorz wichowski",
    "p2_norm": "oskar jadach",
    "open_date": "2026-08-03T09:30:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 77.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35898225,
@@ -121,6 +99,17 @@
    "line": 78.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35898240,
+   "p1": "Adrian Wiecek",
+   "p2": "Szymon Kolasa",
+   "p1_norm": "adrian wiecek",
+   "p2_norm": "szymon kolasa",
+   "open_date": "2026-08-03T10:00:00.000Z",
+   "line": 83.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
