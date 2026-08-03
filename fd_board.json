@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-03T00:12:35Z",
+ "captured_at": "2026-08-03T00:16:47Z",
  "matches": [
   {
    "event_id": 35897307,
@@ -8,9 +8,9 @@
    "p1_norm": "tomasz filbrandt",
    "p2_norm": "kacper szurlej",
    "open_date": "2026-08-03T00:10:00.000Z",
-   "line": 75.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 53.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35897308,
@@ -19,9 +19,9 @@
    "p1_norm": "grzegorz mucha",
    "p2_norm": "kazimierz rybak",
    "open_date": "2026-08-03T00:10:00.000Z",
-   "line": 79.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 73.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35897310,
@@ -64,8 +64,8 @@
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-08-03T00:35:00.000Z",
    "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35897316,
