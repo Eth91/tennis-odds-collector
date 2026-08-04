@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-04T12:58:02Z",
+ "captured_at": "2026-08-04T13:04:27Z",
  "matches": [
-  {
-   "event_id": 35902752,
-   "p1": "Kamil Klocek",
-   "p2": "Artur Sobel",
-   "p1_norm": "kamil klocek",
-   "p2_norm": "artur sobel",
-   "open_date": "2026-08-04T12:40:00.000Z",
-   "line": 92.5,
-   "over_odds": -115,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35902777,
-   "p1": "Martin Olejnik",
-   "p2": "Adrian Wiecek",
-   "p1_norm": "martin olejnik",
-   "p2_norm": "adrian wiecek",
-   "open_date": "2026-08-04T12:55:00.000Z",
-   "line": 76.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35902786,
    "p1": "Miroslav Sklensky",
@@ -31,8 +9,8 @@
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-08-04T13:00:00.000Z",
    "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35902789,
@@ -88,6 +66,39 @@
    "line": 79.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35902874,
+   "p1": "Rafal Idaczyk",
+   "p2": "Jerzy Pelka",
+   "p1_norm": "rafal idaczyk",
+   "p2_norm": "jerzy pelka",
+   "open_date": "2026-08-04T13:30:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35902875,
+   "p1": "Wojciech Wojtaszczyk",
+   "p2": "Kamil Kowalski",
+   "p1_norm": "wojciech wojtaszczyk",
+   "p2_norm": "kamil kowalski",
+   "open_date": "2026-08-04T13:30:00.000Z",
+   "line": 69.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35902876,
+   "p1": "Karol Wisniewski",
+   "p2": "Przemyslaw Blocho",
+   "p1_norm": "karol wisniewski",
+   "p2_norm": "przemyslaw blocho",
+   "open_date": "2026-08-04T13:30:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
