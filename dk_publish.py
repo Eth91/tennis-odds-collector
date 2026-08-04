@@ -70,34 +70,36 @@ def publish(lines):
         print(f"no change ({len(lines)} lines) — skip commit")
         return
     body["hash"] = digest
-    # SYNC-THEN-WRITE (2026-07-29). The old flow committed locally first and then tried
-    # `pull --rebase -X ours` — once this clone drifted (it reached 2,172 commits behind),
-    # every rebase blew its 90s timeout and the push failed SILENTLY every 5 minutes for
-    # 3 days while the VM read a stale board. This clone only ever authors dk_board.json,
-    # so the right move is: adopt origin's tip wholesale, THEN write the board on top.
-    # A local commit that never leaves this Mac has negative value — don't create one.
+    # DIRECT TO THE VM (2026-08-04). GitHub account gone, user off Actions for
+    # good -- the git hop is deleted, not routed around. The VM's dk_ingest.py
+    # reads ~/tennis-odds-collector/dk_board.json each loop cycle; deliver it
+    # there atomically (tmp+mv) exactly like worker-2 delivers tt_board.json.
+    # The 4-attempt + phone-ping shape is KEPT: this path once failed silently
+    # for 3 days, and a silent DK outage degrades line-shopping to FD-only.
+    BOARD.write_text(json.dumps(body))     # local copy always current
+    VM = "ubuntu@155.248.217.149"
+    DEST = "/home/ubuntu/tennis-odds-collector"
+    KEY = str(Path.home() / ".ssh" / "oracle_vm")
     for attempt in range(4):
         try:
-            subprocess.run(["git", "fetch", "-q", "origin", "main"], cwd=HERE, check=True, timeout=60)
-            subprocess.run(["git", "reset", "--hard", "FETCH_HEAD", "-q"], cwd=HERE, check=True, timeout=60)
-            BOARD.write_text(json.dumps(body))
-            subprocess.run(["git", "add", "dk_board.json"], cwd=HERE, check=True, timeout=30)
-            subprocess.run(["git", "commit", "-q", "-m", "dk board [skip ci]"],
-                           cwd=HERE, check=False, timeout=30)
-            subprocess.run(["git", "push", "-q", "origin", "HEAD:main"], cwd=HERE, check=True, timeout=90)
-            print(f"published {len(lines)} DK lines")
+            subprocess.run(["scp", "-q", "-i", KEY, "-o", "BatchMode=yes",
+                            "-o", "ConnectTimeout=20", str(BOARD),
+                            f"{VM}:{DEST}/dk_board.json.tmp"], check=True, timeout=60)
+            subprocess.run(["ssh", "-i", KEY, "-o", "BatchMode=yes",
+                            "-o", "ConnectTimeout=20", VM,
+                            f"mv {DEST}/dk_board.json.tmp {DEST}/dk_board.json"],
+                           check=True, timeout=60)
+            print(f"published {len(lines)} DK lines -> VM (direct scp)")
             return
-        except subprocess.CalledProcessError:
-            continue                       # lost a race with the VM's push — refetch and retry
-    # Total failure is worth a phone ping: this exact path failed silently for 3 days once.
-    BOARD.write_text(json.dumps(body))     # keep the local copy current even when unpublished
-    print("PUSH FAILED 4x — DK board NOT published; VM will degrade to FanDuel-only")
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            continue
+    print("SCP FAILED 4x — DK board NOT published; VM will degrade to FanDuel-only")
     try:
         import urllib.request
         topic = "ttelite-bets-f2002ae9"
         req = urllib.request.Request("https://ntfy.sh/" + topic,
-                                     data=b"dk_publish: 4 push attempts failed - DK board is not reaching the VM. Best-price line shopping is degraded to FanDuel-only until this is fixed.",
-                                     headers={"Title": "DK board push failing", "Tags": "warning"})
+                                     data=b"dk_publish: 4 scp attempts failed - DK board is not reaching the VM. Line shopping degraded to FanDuel-only until fixed.",
+                                     headers={"Title": "DK board delivery failing", "Tags": "warning"})
         urllib.request.urlopen(req, timeout=10)
     except Exception:
         pass
