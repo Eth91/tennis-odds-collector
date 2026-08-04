@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T23:17:13Z",
+ "captured_at": "2026-08-04T23:21:50Z",
  "matches": [
   {
    "event_id": 35904531,
@@ -8,9 +8,9 @@
    "p1_norm": "marian brunner",
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-08-04T23:05:00.000Z",
-   "line": 78.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 72.5,
+   "over_odds": 105,
+   "under_odds": -145
   },
   {
    "event_id": 35904532,
@@ -19,20 +19,9 @@
    "p1_norm": "lukasz oracz",
    "p2_norm": "pawel polok",
    "open_date": "2026-08-04T23:10:00.000Z",
-   "line": 84.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35904538,
-   "p1": "Adrian Fabis",
-   "p2": "Jaroslaw Rolak",
-   "p1_norm": "adrian fabis",
-   "p2_norm": "jaroslaw rolak",
-   "open_date": "2026-08-04T23:20:00.000Z",
-   "line": 85.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 99.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35904539,
@@ -41,20 +30,9 @@
    "p1_norm": "maciej kolek",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-08-04T23:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
-  },
-  {
-   "event_id": 35904540,
-   "p1": "Jakub Nowak",
-   "p2": "Schaniel Krzysztof",
-   "p1_norm": "jakub nowak",
-   "p2_norm": "schaniel krzysztof",
-   "open_date": "2026-08-04T23:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35904545,
@@ -77,6 +55,39 @@
    "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35904560,
+   "p1": "Oliwier Sokolowski",
+   "p2": "Mateusz Sikon",
+   "p1_norm": "oliwier sokolowski",
+   "p2_norm": "mateusz sikon",
+   "open_date": "2026-08-04T23:45:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35904561,
+   "p1": "Mateusz Rutkowski",
+   "p2": "Jakub Glanowski",
+   "p1_norm": "mateusz rutkowski",
+   "p2_norm": "jakub glanowski",
+   "open_date": "2026-08-04T23:45:00.000Z",
+   "line": 74.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35904562,
+   "p1": "Wojciech Gluszek",
+   "p2": "Mateusz Trela",
+   "p1_norm": "wojciech gluszek",
+   "p2_norm": "mateusz trela",
+   "open_date": "2026-08-04T23:45:00.000Z",
+   "line": 80.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
