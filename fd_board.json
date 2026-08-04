@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T23:26:31Z",
+ "captured_at": "2026-08-04T23:31:10Z",
  "matches": [
   {
    "event_id": 35904532,
@@ -8,20 +8,9 @@
    "p1_norm": "lukasz oracz",
    "p2_norm": "pawel polok",
    "open_date": "2026-08-04T23:10:00.000Z",
-   "line": 105.5,
-   "over_odds": -140,
-   "under_odds": 100
-  },
-  {
-   "event_id": 35904539,
-   "p1": "Maciej Kolek",
-   "p2": "Jakub Kuzmicz",
-   "p1_norm": "maciej kolek",
-   "p2_norm": "jakub kuzmicz",
-   "open_date": "2026-08-04T23:20:00.000Z",
-   "line": 74.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 107.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35904545,
@@ -30,9 +19,9 @@
    "p1_norm": "jerzy michalik",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-08-04T23:30:00.000Z",
-   "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 73.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35904551,
@@ -75,6 +64,17 @@
    "p2_norm": "mateusz trela",
    "open_date": "2026-08-04T23:45:00.000Z",
    "line": 80.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35904566,
+   "p1": "Jakub Skorupa",
+   "p2": "Henryk Tkaczyk",
+   "p1_norm": "jakub skorupa",
+   "p2_norm": "henryk tkaczyk",
+   "open_date": "2026-08-04T23:55:00.000Z",
+   "line": 74.5,
    "over_odds": -116,
    "under_odds": -116
   }
