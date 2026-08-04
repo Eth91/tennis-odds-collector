@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T13:04:27Z",
+ "captured_at": "2026-08-04T13:09:31Z",
  "matches": [
   {
    "event_id": 35902786,
@@ -8,9 +8,9 @@
    "p1_norm": "miroslav sklensky",
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-08-04T13:00:00.000Z",
-   "line": 78.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 71.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35902789,
@@ -19,9 +19,9 @@
    "p1_norm": "witold buczynski",
    "p2_norm": "michal durda",
    "open_date": "2026-08-04T13:05:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 71.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35902790,
@@ -30,9 +30,9 @@
    "p1_norm": "dominik solilo",
    "p2_norm": "jakub zochniak",
    "open_date": "2026-08-04T13:05:00.000Z",
-   "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35902798,
@@ -41,9 +41,9 @@
    "p1_norm": "patryk mecik",
    "p2_norm": "oskar jadach",
    "open_date": "2026-08-04T13:10:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35902843,
