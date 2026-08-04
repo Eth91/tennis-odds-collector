@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T23:36:28Z",
+ "captured_at": "2026-08-04T23:40:48Z",
  "matches": [
   {
    "event_id": 35904545,
@@ -8,9 +8,9 @@
    "p1_norm": "jerzy michalik",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-08-04T23:30:00.000Z",
-   "line": 72.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 75.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35904551,
@@ -19,9 +19,9 @@
    "p1_norm": "marek tkocz",
    "p2_norm": "marian lebek",
    "open_date": "2026-08-04T23:35:00.000Z",
-   "line": 77.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 79.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35904560,
