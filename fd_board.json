@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T04:10:53Z",
+ "captured_at": "2026-08-04T04:15:59Z",
  "matches": [
-  {
-   "event_id": 35901290,
-   "p1": "Wojciech Urban",
-   "p2": "Jakub Pruszkowski",
-   "p1_norm": "wojciech urban",
-   "p2_norm": "jakub pruszkowski",
-   "open_date": "2026-08-04T03:55:00.000Z",
-   "line": 97.5,
-   "over_odds": 105,
-   "under_odds": -145
-  },
   {
    "event_id": 35901293,
    "p1": "Jakub Zochniak",
@@ -19,20 +8,9 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "przemyslaw blocho",
    "open_date": "2026-08-04T04:00:00.000Z",
-   "line": 87.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35901294,
-   "p1": "Krzysztof Hetnar",
-   "p2": "Milosz Cesarz",
-   "p1_norm": "krzysztof hetnar",
-   "p2_norm": "milosz cesarz",
-   "open_date": "2026-08-04T04:00:00.000Z",
-   "line": 51.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 73.5,
+   "over_odds": 100,
+   "under_odds": -140
   },
   {
    "event_id": 35901477,
@@ -41,9 +19,9 @@
    "p1_norm": "michal durda",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-08-04T04:10:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -118
+   "line": 80.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35901478,
@@ -52,9 +30,9 @@
    "p1_norm": "kamil klocek",
    "p2_norm": "krzysztof kotyl",
    "open_date": "2026-08-04T04:10:00.000Z",
-   "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35901479,
@@ -63,9 +41,9 @@
    "p1_norm": "piotr cyrnek",
    "p2_norm": "petr david",
    "open_date": "2026-08-04T04:10:00.000Z",
-   "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -118
+   "line": 78.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35901662,
@@ -130,6 +108,17 @@
    "p2_norm": "szymon kolasa",
    "open_date": "2026-08-04T04:30:00.000Z",
    "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35901723,
+   "p1": "Grzegorz Marud",
+   "p2": "Jakub Pruszkowski",
+   "p1_norm": "grzegorz marud",
+   "p2_norm": "jakub pruszkowski",
+   "open_date": "2026-08-04T04:40:00.000Z",
+   "line": 80.5,
    "over_odds": -112,
    "under_odds": -118
   }
