@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T08:39:50Z",
+ "captured_at": "2026-08-04T08:45:01Z",
  "matches": [
   {
    "event_id": 35901944,
@@ -8,9 +8,9 @@
    "p1_norm": "patryk mecik",
    "p2_norm": "rafal idaczyk",
    "open_date": "2026-08-04T08:20:00.000Z",
-   "line": 98.5,
-   "over_odds": -130,
-   "under_odds": -105
+   "line": 115.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35901962,
@@ -20,8 +20,8 @@
    "p2_norm": "adrian wiecek",
    "open_date": "2026-08-04T08:30:00.000Z",
    "line": 88.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35901963,
@@ -31,19 +31,8 @@
    "p2_norm": "stapor rafal",
    "open_date": "2026-08-04T08:30:00.000Z",
    "line": 72.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
-  {
-   "event_id": 35901970,
-   "p1": "Kamil Klocek",
-   "p2": "Kamil Rudomina",
-   "p1_norm": "kamil klocek",
-   "p2_norm": "kamil rudomina",
-   "open_date": "2026-08-04T08:35:00.000Z",
-   "line": 52.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35901971,
@@ -52,9 +41,9 @@
    "p1_norm": "michal durda",
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-08-04T08:35:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 55.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35901976,
@@ -63,9 +52,9 @@
    "p1_norm": "adam ruszkiewicz",
    "p2_norm": "jakub nowak",
    "open_date": "2026-08-04T08:45:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35901981,
