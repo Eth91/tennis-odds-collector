@@ -1,6 +1,17 @@
 {
- "captured_at": "2026-08-04T16:51:32Z",
+ "captured_at": "2026-08-04T16:55:36Z",
  "matches": [
+  {
+   "event_id": 35903785,
+   "p1": "Kaczynski Piotr",
+   "p2": "Jakub Kaczmarek",
+   "p1_norm": "kaczynski piotr",
+   "p2_norm": "jakub kaczmarek",
+   "open_date": "2026-08-04T16:50:00.000Z",
+   "line": 76.5,
+   "over_odds": -125,
+   "under_odds": -110
+  },
   {
    "event_id": 35903798,
    "p1": "Maciej Nowalinski",
@@ -53,6 +64,39 @@
    "p2_norm": "pawel polok",
    "open_date": "2026-08-04T17:10:00.000Z",
    "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35903841,
+   "p1": "Mariusz Koczyba",
+   "p2": "Schaniel Krzysztof",
+   "p1_norm": "mariusz koczyba",
+   "p2_norm": "schaniel krzysztof",
+   "open_date": "2026-08-04T17:20:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35903842,
+   "p1": "Karol Strowski",
+   "p2": "Artur Gromek",
+   "p1_norm": "karol strowski",
+   "p2_norm": "artur gromek",
+   "open_date": "2026-08-04T17:20:00.000Z",
+   "line": 73.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35903843,
+   "p1": "Marcin Kowalczyk",
+   "p2": "Wojciech Gluszek",
+   "p1_norm": "marcin kowalczyk",
+   "p2_norm": "wojciech gluszek",
+   "open_date": "2026-08-04T17:20:00.000Z",
+   "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
   }
