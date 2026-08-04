@@ -4032,7 +4032,17 @@ def build():
   .ddbet:last-child {{ border-bottom:0; }}
   .ddnm {{ color:var(--cu-lbl); flex:1; min-width:0; }}
   .ddday {{ font-size:13px; color:var(--cu-lbl3); }}
-  .ddwl {{ font-size:12px; font-weight:600; padding:2px 8px; border-radius:11px;
+  /* W/L BADGE CENTRING (2026-08-04). Was `padding:2px 8px; border-radius:11px`
+     with NO width, height or line-height: the box was a wide pill sized by its
+     padding, and the single glyph sat on the font BASELINE rather than the box
+     centre, so it read low and left inside the circle. Explicit square box +
+     inline-flex centres it on both axes independently of font metrics;
+     line-height:1 stops the inherited body line-height re-introducing the
+     vertical offset. border-radius:50% now makes the circle from the box rather
+     than hoping padding happens to square it. */
+  .ddwl {{ font-size:12px; font-weight:600; width:22px; height:22px;
+           border-radius:50%; display:inline-flex; align-items:center;
+           justify-content:center; line-height:1; flex:none;
            background:var(--cu-fill); color:var(--cu-lbl2); }}
   .ddwl.w {{ color:var(--cu-grn); background:rgba(48,209,88,.18); }}
   .ddu {{ font-variant-numeric:tabular-nums; color:var(--cu-lbl2); }}
