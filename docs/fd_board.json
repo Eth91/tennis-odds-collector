@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T17:51:51Z",
+ "captured_at": "2026-08-04T17:55:55Z",
  "matches": [
   {
    "event_id": 35903873,
@@ -8,18 +8,7 @@
    "p1_norm": "marian brunner",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-08-04T17:30:00.000Z",
-   "line": 83.5,
-   "over_odds": -140,
-   "under_odds": 100
-  },
-  {
-   "event_id": 35903915,
-   "p1": "Grzegorz Marud",
-   "p2": "Mateusz Sikon",
-   "p1_norm": "grzegorz marud",
-   "p2_norm": "mateusz sikon",
-   "open_date": "2026-08-04T17:45:00.000Z",
-   "line": 69.5,
+   "line": 81.5,
    "over_odds": null,
    "under_odds": null
   },
@@ -30,20 +19,9 @@
    "p1_norm": "adrian fabis",
    "p2_norm": "dawid kotwica",
    "open_date": "2026-08-04T17:45:00.000Z",
-   "line": 82.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35903946,
-   "p1": "Jakub Skorupa",
-   "p2": "Henryk Tkaczyk",
-   "p1_norm": "jakub skorupa",
-   "p2_norm": "henryk tkaczyk",
-   "open_date": "2026-08-04T17:55:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 84.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35903961,
@@ -88,6 +66,17 @@
    "line": 80.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35903991,
+   "p1": "Kamil Delikatny",
+   "p2": "Dariusz Molenda",
+   "p1_norm": "kamil delikatny",
+   "p2_norm": "dariusz molenda",
+   "open_date": "2026-08-04T18:20:00.000Z",
+   "line": 70.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }

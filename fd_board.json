@@ -1,27 +1,16 @@
 {
- "captured_at": "2026-08-04T17:55:55Z",
+ "captured_at": "2026-08-04T18:00:30Z",
  "matches": [
   {
-   "event_id": 35903873,
-   "p1": "Marian Brunner",
-   "p2": "Zbigniew Nocun",
-   "p1_norm": "marian brunner",
-   "p2_norm": "zbigniew nocun",
-   "open_date": "2026-08-04T17:30:00.000Z",
-   "line": 81.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35903916,
-   "p1": "Adrian Fabis",
-   "p2": "Dawid Kotwica",
-   "p1_norm": "adrian fabis",
-   "p2_norm": "dawid kotwica",
-   "open_date": "2026-08-04T17:45:00.000Z",
-   "line": 84.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "event_id": 35903946,
+   "p1": "Jakub Skorupa",
+   "p2": "Henryk Tkaczyk",
+   "p1_norm": "jakub skorupa",
+   "p2_norm": "henryk tkaczyk",
+   "open_date": "2026-08-04T17:55:00.000Z",
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35903961,
@@ -30,7 +19,7 @@
    "p1_norm": "tomasz wrzalik",
    "p2_norm": "wojciech pytlas",
    "open_date": "2026-08-04T18:00:00.000Z",
-   "line": 78.5,
+   "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
   },
@@ -77,6 +66,17 @@
    "line": 70.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35904004,
+   "p1": "Kaczynski Piotr",
+   "p2": "Pawel Polok",
+   "p1_norm": "kaczynski piotr",
+   "p2_norm": "pawel polok",
+   "open_date": "2026-08-04T18:25:00.000Z",
+   "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
