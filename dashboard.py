@@ -232,7 +232,17 @@ def _tip_times():
                 "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard"
                 f"?dates={day:%Y%m%d}",
                 headers={"User-Agent": "Mozilla/5.0"}, timeout=15).json()
-        except requests.RequestException:
+        # ValueError IS REQUIRED HERE (2026-08-04). `.json()` raises
+        # json.JSONDecodeError -- a ValueError -- not a RequestException, so when
+        # ESPN answered with a non-JSON error page the exception escaped this
+        # guard and killed the ENTIRE dashboard build. docs/index.html went
+        # unbuilt for 5.7 hours while pickz-bake.service reported active; the
+        # board only looked live because the page fetches tt_board.json
+        # client-side, so fresh DATA masked a dead SHELL.
+        # These tip times are decoration on one WNBA card. Nothing about them
+        # justifies taking the whole board down, so the failure is scoped to the
+        # day it belongs to.
+        except (requests.RequestException, ValueError):
             continue
         for e in j.get("events", []):
             try:
