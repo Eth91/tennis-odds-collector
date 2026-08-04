@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T05:03:56Z",
+ "captured_at": "2026-08-04T05:09:22Z",
  "matches": [
-  {
-   "event_id": 35901735,
-   "p1": "Maciej Kolek",
-   "p2": "Stapor Rafal",
-   "p1_norm": "maciej kolek",
-   "p2_norm": "stapor rafal",
-   "open_date": "2026-08-04T04:50:00.000Z",
-   "line": 74.5,
-   "over_odds": -130,
-   "under_odds": -105
-  },
   {
    "event_id": 35901740,
    "p1": "Martin Olejnik",
@@ -19,9 +8,9 @@
    "p1_norm": "martin olejnik",
    "p2_norm": "adrian wiecek",
    "open_date": "2026-08-04T04:55:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 82.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35901741,
@@ -30,20 +19,9 @@
    "p1_norm": "rafal gajda",
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-08-04T04:55:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35901742,
-   "p1": "Mikolaj Lukaszewski",
-   "p2": "Kamil Rudomina",
-   "p1_norm": "mikolaj lukaszewski",
-   "p2_norm": "kamil rudomina",
-   "open_date": "2026-08-04T04:55:00.000Z",
-   "line": 51.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 92.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35901767,
@@ -97,6 +75,39 @@
    "p2_norm": "szymon kolasa",
    "open_date": "2026-08-04T05:15:00.000Z",
    "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35901790,
+   "p1": "Patryk Mecik",
+   "p2": "Oskar Jadach",
+   "p1_norm": "patryk mecik",
+   "p2_norm": "oskar jadach",
+   "open_date": "2026-08-04T05:30:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35901793,
+   "p1": "Jakub Zochniak",
+   "p2": "Maciej Kolek",
+   "p1_norm": "jakub zochniak",
+   "p2_norm": "maciej kolek",
+   "open_date": "2026-08-04T05:35:00.000Z",
+   "line": 81.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35901794,
+   "p1": "Mariusz Adamus",
+   "p2": "Jakub Kaczmarek",
+   "p1_norm": "mariusz adamus",
+   "p2_norm": "jakub kaczmarek",
+   "open_date": "2026-08-04T05:35:00.000Z",
+   "line": 81.5,
    "over_odds": -112,
    "under_odds": -118
   }
