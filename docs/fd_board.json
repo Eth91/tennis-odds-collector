@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T15:38:37Z",
+ "captured_at": "2026-08-04T15:43:06Z",
  "matches": [
-  {
-   "event_id": 35903212,
-   "p1": "Karol Strowski",
-   "p2": "Artur Daniel",
-   "p1_norm": "karol strowski",
-   "p2_norm": "artur daniel",
-   "open_date": "2026-08-04T15:25:00.000Z",
-   "line": 77.5,
-   "over_odds": 100,
-   "under_odds": -140
-  },
   {
    "event_id": 35903213,
    "p1": "Mariusz Koczyba",
@@ -20,8 +9,8 @@
    "p2_norm": "pawel adamus",
    "open_date": "2026-08-04T15:25:00.000Z",
    "line": 91.5,
-   "over_odds": -135,
-   "under_odds": 100
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35903379,
