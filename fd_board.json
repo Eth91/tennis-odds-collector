@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T01:49:05Z",
+ "captured_at": "2026-08-04T01:55:45Z",
  "matches": [
-  {
-   "event_id": 35901164,
-   "p1": "Grzegorz Marud",
-   "p2": "Wojciech Urban",
-   "p1_norm": "grzegorz marud",
-   "p2_norm": "wojciech urban",
-   "open_date": "2026-08-04T01:30:00.000Z",
-   "line": 94.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
   {
    "event_id": 35901175,
    "p1": "Miroslaw Warzecha",
@@ -19,8 +8,8 @@
    "p1_norm": "miroslaw warzecha",
    "p2_norm": "miroslaw lewczuk",
    "open_date": "2026-08-04T01:45:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
+   "line": 89.5,
+   "over_odds": -115,
    "under_odds": -115
   },
   {
@@ -30,7 +19,7 @@
    "p1_norm": "kacper adamus",
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-08-04T01:55:00.000Z",
-   "line": 81.5,
+   "line": 77.5,
    "over_odds": -112,
    "under_odds": -118
   },
@@ -55,6 +44,17 @@
    "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35901185,
+   "p1": "Michal Guzik",
+   "p2": "Henryk Tkaczyk",
+   "p1_norm": "michal guzik",
+   "p2_norm": "henryk tkaczyk",
+   "open_date": "2026-08-04T02:20:00.000Z",
+   "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
