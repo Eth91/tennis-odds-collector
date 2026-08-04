@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-08-04T16:47:08Z",
+ "captured_at": "2026-08-04T16:51:32Z",
  "matches": [
-  {
-   "event_id": 35903708,
-   "p1": "Dariusz Szlubowski",
-   "p2": "Wojciech Gluszek",
-   "p1_norm": "dariusz szlubowski",
-   "p2_norm": "wojciech gluszek",
-   "open_date": "2026-08-04T16:35:00.000Z",
-   "line": 58.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35903733,
-   "p1": "Rafal Idaczyk",
-   "p2": "Oskar Jadach",
-   "p1_norm": "rafal idaczyk",
-   "p2_norm": "oskar jadach",
-   "open_date": "2026-08-04T16:40:00.000Z",
-   "line": 55.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
-  {
-   "event_id": 35903785,
-   "p1": "Kaczynski Piotr",
-   "p2": "Jakub Kaczmarek",
-   "p1_norm": "kaczynski piotr",
-   "p2_norm": "jakub kaczmarek",
-   "open_date": "2026-08-04T16:50:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
   {
    "event_id": 35903798,
    "p1": "Maciej Nowalinski",
