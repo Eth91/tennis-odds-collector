@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T14:58:12Z",
+ "captured_at": "2026-08-04T15:04:33Z",
  "matches": [
-  {
-   "event_id": 35903103,
-   "p1": "Patryk Mecik",
-   "p2": "Jerzy Pelka",
-   "p1_norm": "patryk mecik",
-   "p2_norm": "jerzy pelka",
-   "open_date": "2026-08-04T14:45:00.000Z",
-   "line": 84.5,
-   "over_odds": -130,
-   "under_odds": -105
-  },
   {
    "event_id": 35903136,
    "p1": "Jakub Kuzmicz",
@@ -19,9 +8,9 @@
    "p1_norm": "jakub kuzmicz",
    "p2_norm": "artur gromek",
    "open_date": "2026-08-04T15:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35903137,
@@ -30,9 +19,9 @@
    "p1_norm": "adrian fabis",
    "p2_norm": "wojciech gluszek",
    "open_date": "2026-08-04T15:00:00.000Z",
-   "line": 81.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 77.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35903138,
@@ -41,9 +30,9 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-08-04T15:00:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35903140,
