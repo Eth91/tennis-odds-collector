@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T15:55:30Z",
+ "captured_at": "2026-08-04T15:59:52Z",
  "matches": [
   {
    "event_id": 35903379,
@@ -8,9 +8,9 @@
    "p1_norm": "maciej nowalinski",
    "p2_norm": "miroslav sklensky",
    "open_date": "2026-08-04T15:45:00.000Z",
-   "line": 85.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 95.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35903487,
@@ -19,20 +19,9 @@
    "p1_norm": "mateusz sikon",
    "p2_norm": "oliwier sokolowski",
    "open_date": "2026-08-04T15:50:00.000Z",
-   "line": 68.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35903489,
-   "p1": "Dawid Kotwica",
-   "p2": "Dariusz Szlubowski",
-   "p1_norm": "dawid kotwica",
-   "p2_norm": "dariusz szlubowski",
-   "open_date": "2026-08-04T15:50:00.000Z",
-   "line": 53.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 50.5,
+   "over_odds": 110,
+   "under_odds": -155
   },
   {
    "event_id": 35903582,
@@ -41,9 +30,9 @@
    "p1_norm": "jerzy pelka",
    "p2_norm": "oskar jadach",
    "open_date": "2026-08-04T15:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -118
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35903601,
@@ -52,9 +41,9 @@
    "p1_norm": "wojciech pytlas",
    "p2_norm": "kaczynski piotr",
    "open_date": "2026-08-04T16:00:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35903626,
@@ -99,6 +88,17 @@
    "line": 82.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35903696,
+   "p1": "Tomasz Wrzalik",
+   "p2": "Marek Tkocz",
+   "p1_norm": "tomasz wrzalik",
+   "p2_norm": "marek tkocz",
+   "open_date": "2026-08-04T16:25:00.000Z",
+   "line": 71.5,
+   "over_odds": -120,
+   "under_odds": -110
   }
  ]
 }
