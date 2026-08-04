@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T00:27:07Z",
+ "captured_at": "2026-08-04T00:35:16Z",
  "matches": [
-  {
-   "event_id": 35901067,
-   "p1": "Miroslaw Lewczuk",
-   "p2": "Michal Krutak",
-   "p1_norm": "miroslaw lewczuk",
-   "p2_norm": "michal krutak",
-   "open_date": "2026-08-04T00:10:00.000Z",
-   "line": 92.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35901073,
    "p1": "Grzegorz Marud",
@@ -19,9 +8,9 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "pawel kurek",
    "open_date": "2026-08-04T00:20:00.000Z",
-   "line": 83.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 89.5,
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35901087,
@@ -30,7 +19,7 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "adam staniczek",
    "open_date": "2026-08-04T00:25:00.000Z",
-   "line": 75.5,
+   "line": 84.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -74,6 +63,17 @@
    "p1_norm": "jerzy michalik",
    "p2_norm": "michal guzik",
    "open_date": "2026-08-04T00:45:00.000Z",
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35901118,
+   "p1": "Aleksander Barton",
+   "p2": "Miroslaw Lewczuk",
+   "p1_norm": "aleksander barton",
+   "p2_norm": "miroslaw lewczuk",
+   "open_date": "2026-08-04T01:00:00.000Z",
    "line": 74.5,
    "over_odds": -118,
    "under_odds": -112
