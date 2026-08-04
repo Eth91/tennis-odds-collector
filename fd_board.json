@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T17:17:23Z",
+ "captured_at": "2026-08-04T17:21:24Z",
  "matches": [
   {
    "event_id": 35903828,
@@ -8,9 +8,9 @@
    "p1_norm": "wojciech pytlas",
    "p2_norm": "pawel polok",
    "open_date": "2026-08-04T17:10:00.000Z",
-   "line": 53.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 58.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35903841,
@@ -19,9 +19,9 @@
    "p1_norm": "mariusz koczyba",
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-08-04T17:20:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35903842,
@@ -30,9 +30,9 @@
    "p1_norm": "karol strowski",
    "p2_norm": "artur gromek",
    "open_date": "2026-08-04T17:20:00.000Z",
-   "line": 73.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 71.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35903843,
@@ -41,7 +41,7 @@
    "p1_norm": "marcin kowalczyk",
    "p2_norm": "wojciech gluszek",
    "open_date": "2026-08-04T17:20:00.000Z",
-   "line": 78.5,
+   "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
   },
@@ -77,6 +77,28 @@
    "line": 80.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35903915,
+   "p1": "Grzegorz Marud",
+   "p2": "Mateusz Sikon",
+   "p1_norm": "grzegorz marud",
+   "p2_norm": "mateusz sikon",
+   "open_date": "2026-08-04T17:45:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35903916,
+   "p1": "Adrian Fabis",
+   "p2": "Dawid Kotwica",
+   "p1_norm": "adrian fabis",
+   "p2_norm": "dawid kotwica",
+   "open_date": "2026-08-04T17:45:00.000Z",
+   "line": 80.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
