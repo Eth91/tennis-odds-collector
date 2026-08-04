@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-08-04T17:08:48Z",
+ "captured_at": "2026-08-04T17:12:53Z",
  "matches": [
-  {
-   "event_id": 35903785,
-   "p1": "Kaczynski Piotr",
-   "p2": "Jakub Kaczmarek",
-   "p1_norm": "kaczynski piotr",
-   "p2_norm": "jakub kaczmarek",
-   "open_date": "2026-08-04T16:50:00.000Z",
-   "line": 98.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35903798,
-   "p1": "Maciej Nowalinski",
-   "p2": "Artur Daniel",
-   "p1_norm": "maciej nowalinski",
-   "p2_norm": "artur daniel",
-   "open_date": "2026-08-04T16:55:00.000Z",
-   "line": 93.5,
-   "over_odds": 100,
-   "under_odds": -140
-  },
-  {
-   "event_id": 35903799,
-   "p1": "Dawid Kotwica",
-   "p2": "Jaroslaw Rolak",
-   "p1_norm": "dawid kotwica",
-   "p2_norm": "jaroslaw rolak",
-   "open_date": "2026-08-04T16:55:00.000Z",
-   "line": 75.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
   {
    "event_id": 35903800,
    "p1": "Mateusz Sikon",
@@ -41,9 +8,9 @@
    "p1_norm": "mateusz sikon",
    "p2_norm": "pawel adamus",
    "open_date": "2026-08-04T16:55:00.000Z",
-   "line": 93.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 90.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35903828,
@@ -53,8 +20,8 @@
    "p2_norm": "pawel polok",
    "open_date": "2026-08-04T17:10:00.000Z",
    "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35903841,
