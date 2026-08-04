@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T03:50:53Z",
+ "captured_at": "2026-08-04T03:55:20Z",
  "matches": [
-  {
-   "event_id": 35901269,
-   "p1": "Mariusz Adamus",
-   "p2": "Jakub Nowak",
-   "p1_norm": "mariusz adamus",
-   "p2_norm": "jakub nowak",
-   "open_date": "2026-08-04T03:35:00.000Z",
-   "line": 87.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35901280,
    "p1": "Maciej Kolek",
@@ -19,9 +8,9 @@
    "p1_norm": "maciej kolek",
    "p2_norm": "dominik solilo",
    "open_date": "2026-08-04T03:40:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 88.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35901285,
@@ -30,9 +19,9 @@
    "p1_norm": "martin olejnik",
    "p2_norm": "marcin jadczyk",
    "open_date": "2026-08-04T03:45:00.000Z",
-   "line": 79.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35901287,
@@ -52,9 +41,9 @@
    "p1_norm": "rafal gajda",
    "p2_norm": "witold buczynski",
    "open_date": "2026-08-04T03:50:00.000Z",
-   "line": 76.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 66.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35901290,
@@ -86,8 +75,8 @@
    "p2_norm": "milosz cesarz",
    "open_date": "2026-08-04T04:00:00.000Z",
    "line": 72.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35901477,
@@ -121,6 +110,17 @@
    "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35901662,
+   "p1": "Kacper Adamus",
+   "p2": "Pawel Kurek",
+   "p1_norm": "kacper adamus",
+   "p2_norm": "pawel kurek",
+   "open_date": "2026-08-04T04:20:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
