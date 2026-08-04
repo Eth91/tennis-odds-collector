@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T20:00:00Z",
+ "captured_at": "2026-08-04T20:05:02Z",
  "matches": [
   {
    "event_id": 35904220,
@@ -8,7 +8,7 @@
    "p1_norm": "jakub skorupa",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-08-04T19:55:00.000Z",
-   "line": 54.5,
+   "line": 71.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -20,8 +20,8 @@
    "p2_norm": "kaczynski piotr",
    "open_date": "2026-08-04T20:00:00.000Z",
    "line": 74.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35904226,
@@ -31,8 +31,8 @@
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-08-04T20:05:00.000Z",
    "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35904227,
@@ -52,9 +52,9 @@
    "p1_norm": "dawid kotwica",
    "p2_norm": "wojciech gluszek",
    "open_date": "2026-08-04T20:05:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 78.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35904258,
