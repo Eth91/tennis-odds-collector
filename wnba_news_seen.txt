@@ -189,6 +189,7 @@ rw|1077|Continues cooling off
 rw|1078|Available to play
 rw|1078|Listed out Wednesday
 rw|1078|Out again Tuesday
+rw|1078|Out again Wednesday
 rw|1078|Ruled out for Friday
 rw|1078|Won't play Monday
 rw|1084|Left off injury report
