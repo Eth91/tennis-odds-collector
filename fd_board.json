@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T10:24:46Z",
+ "captured_at": "2026-08-04T10:29:42Z",
  "matches": [
-  {
-   "event_id": 35902072,
-   "p1": "Martin Olejnik",
-   "p2": "Piotr Cyrnek",
-   "p1_norm": "martin olejnik",
-   "p2_norm": "piotr cyrnek",
-   "open_date": "2026-08-04T10:00:00.000Z",
-   "line": 79.5,
-   "over_odds": -115,
-   "under_odds": -115
-  },
   {
    "event_id": 35902077,
    "p1": "Miroslav Sklensky",
@@ -20,8 +9,8 @@
    "p2_norm": "krystian kolodziej",
    "open_date": "2026-08-04T10:05:00.000Z",
    "line": 75.5,
-   "over_odds": -105,
-   "under_odds": -135
+   "over_odds": 110,
+   "under_odds": -155
   },
   {
    "event_id": 35902154,
@@ -30,9 +19,9 @@
    "p1_norm": "adrian wiecek",
    "p2_norm": "petr david",
    "open_date": "2026-08-04T10:25:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35902165,
@@ -86,6 +75,17 @@
    "p2_norm": "karol strowski",
    "open_date": "2026-08-04T10:50:00.000Z",
    "line": 82.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35902200,
+   "p1": "Artur Daniel",
+   "p2": "Maciej Nowalinski",
+   "p1_norm": "artur daniel",
+   "p2_norm": "maciej nowalinski",
+   "open_date": "2026-08-04T10:55:00.000Z",
+   "line": 79.5,
    "over_odds": -118,
    "under_odds": -112
   }
