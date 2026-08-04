@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T18:26:27Z",
+ "captured_at": "2026-08-04T18:30:32Z",
  "matches": [
-  {
-   "event_id": 35903977,
-   "p1": "Dariusz Szlubowski",
-   "p2": "Jaroslaw Rolak",
-   "p1_norm": "dariusz szlubowski",
-   "p2_norm": "jaroslaw rolak",
-   "open_date": "2026-08-04T18:10:00.000Z",
-   "line": 98.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
   {
    "event_id": 35903991,
    "p1": "Kamil Delikatny",
@@ -19,20 +8,9 @@
    "p1_norm": "kamil delikatny",
    "p2_norm": "dariusz molenda",
    "open_date": "2026-08-04T18:20:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35904004,
-   "p1": "Kaczynski Piotr",
-   "p2": "Pawel Polok",
-   "p1_norm": "kaczynski piotr",
-   "p2_norm": "pawel polok",
-   "open_date": "2026-08-04T18:25:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35904013,
@@ -41,7 +19,7 @@
    "p1_norm": "mariusz koczyba",
    "p2_norm": "mateusz sikon",
    "open_date": "2026-08-04T18:30:00.000Z",
-   "line": 75.5,
+   "line": 73.5,
    "over_odds": -118,
    "under_odds": -112
   },
@@ -52,9 +30,9 @@
    "p1_norm": "karol strowski",
    "p2_norm": "maciej nowalinski",
    "open_date": "2026-08-04T18:30:00.000Z",
-   "line": 81.5,
+   "line": 77.5,
    "over_odds": -118,
-   "under_odds": -116
+   "under_odds": -112
   },
   {
    "event_id": 35904015,
@@ -63,7 +41,7 @@
    "p1_norm": "marcin kowalczyk",
    "p2_norm": "dawid kotwica",
    "open_date": "2026-08-04T18:30:00.000Z",
-   "line": 78.5,
+   "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
   },
@@ -99,6 +77,28 @@
    "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35904059,
+   "p1": "Adrian Fabis",
+   "p2": "Dariusz Szlubowski",
+   "p1_norm": "adrian fabis",
+   "p2_norm": "dariusz szlubowski",
+   "open_date": "2026-08-04T18:55:00.000Z",
+   "line": 80.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35904060,
+   "p1": "Grzegorz Marud",
+   "p2": "Oliwier Sokolowski",
+   "p1_norm": "grzegorz marud",
+   "p2_norm": "oliwier sokolowski",
+   "open_date": "2026-08-04T18:55:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }

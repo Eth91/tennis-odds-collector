@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T18:30:32Z",
+ "captured_at": "2026-08-04T18:35:11Z",
  "matches": [
   {
    "event_id": 35903991,
@@ -8,9 +8,9 @@
    "p1_norm": "kamil delikatny",
    "p2_norm": "dariusz molenda",
    "open_date": "2026-08-04T18:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 91.5,
+   "over_odds": 105,
+   "under_odds": -145
   },
   {
    "event_id": 35904013,
@@ -19,9 +19,9 @@
    "p1_norm": "mariusz koczyba",
    "p2_norm": "mateusz sikon",
    "open_date": "2026-08-04T18:30:00.000Z",
-   "line": 73.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35904014,
@@ -30,9 +30,9 @@
    "p1_norm": "karol strowski",
    "p2_norm": "maciej nowalinski",
    "open_date": "2026-08-04T18:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35904015,
@@ -42,8 +42,8 @@
    "p2_norm": "dawid kotwica",
    "open_date": "2026-08-04T18:30:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35904050,
