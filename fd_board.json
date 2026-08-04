@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T11:43:08Z",
+ "captured_at": "2026-08-04T11:48:04Z",
  "matches": [
-  {
-   "event_id": 35902263,
-   "p1": "Piotr Przewlocki",
-   "p2": "Kamil Kowalski",
-   "p1_norm": "piotr przewlocki",
-   "p2_norm": "kamil kowalski",
-   "open_date": "2026-08-04T11:25:00.000Z",
-   "line": 92.5,
-   "over_odds": -145,
-   "under_odds": 105
-  },
   {
    "event_id": 35902288,
    "p1": "Martin Olejnik",
@@ -19,9 +8,9 @@
    "p1_norm": "martin olejnik",
    "p2_norm": "szymon kolasa",
    "open_date": "2026-08-04T11:40:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35902297,
@@ -30,9 +19,9 @@
    "p1_norm": "miroslav sklensky",
    "p2_norm": "artur daniel",
    "open_date": "2026-08-04T11:45:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35902303,
@@ -88,6 +77,28 @@
    "line": 80.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35902685,
+   "p1": "Jakub Zochniak",
+   "p2": "Karol Wisniewski",
+   "p1_norm": "jakub zochniak",
+   "p2_norm": "karol wisniewski",
+   "open_date": "2026-08-04T12:15:00.000Z",
+   "line": 82.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35902686,
+   "p1": "Michal Durda",
+   "p2": "Wojciech Wojtaszczyk",
+   "p1_norm": "michal durda",
+   "p2_norm": "wojciech wojtaszczyk",
+   "open_date": "2026-08-04T12:15:00.000Z",
+   "line": 77.5,
+   "over_odds": -120,
+   "under_odds": -110
   }
  ]
 }
