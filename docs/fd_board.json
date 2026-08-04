@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T15:43:06Z",
+ "captured_at": "2026-08-04T15:47:06Z",
  "matches": [
-  {
-   "event_id": 35903213,
-   "p1": "Mariusz Koczyba",
-   "p2": "Pawel Adamus",
-   "p1_norm": "mariusz koczyba",
-   "p2_norm": "pawel adamus",
-   "open_date": "2026-08-04T15:25:00.000Z",
-   "line": 91.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35903379,
    "p1": "Maciej Nowalinski",
@@ -19,9 +8,9 @@
    "p1_norm": "maciej nowalinski",
    "p2_norm": "miroslav sklensky",
    "open_date": "2026-08-04T15:45:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -116
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35903487,
