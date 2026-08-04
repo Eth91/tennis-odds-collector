@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T18:44:41Z",
+ "captured_at": "2026-08-04T18:48:48Z",
  "matches": [
-  {
-   "event_id": 35904013,
-   "p1": "Mariusz Koczyba",
-   "p2": "Mateusz Sikon",
-   "p1_norm": "mariusz koczyba",
-   "p2_norm": "mateusz sikon",
-   "open_date": "2026-08-04T18:30:00.000Z",
-   "line": 98.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35904050,
    "p1": "Marek Tkocz",
@@ -20,8 +9,8 @@
    "p2_norm": "wojciech pytlas",
    "open_date": "2026-08-04T18:45:00.000Z",
    "line": 74.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35904051,
@@ -30,9 +19,9 @@
    "p1_norm": "marian brunner",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-08-04T18:45:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 73.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35904054,
@@ -88,6 +77,17 @@
    "line": 73.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35904093,
+   "p1": "Artur Daniel",
+   "p2": "Artur Gromek",
+   "p1_norm": "artur daniel",
+   "p2_norm": "artur gromek",
+   "open_date": "2026-08-04T19:15:00.000Z",
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -110
   }
  ]
 }
