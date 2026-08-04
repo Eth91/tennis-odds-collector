@@ -50,9 +50,21 @@ for src, gate in SOURCES:
             wm[key] = con.execute("SELECT COALESCE(MAX(collected_at),'') FROM fd_lines "
                                   "WHERE sport=? AND book=?", key).fetchone()[0]
         if r[0] > wm[key]:
-            con.execute("INSERT INTO fd_lines (collected_at, sport, event, player, stat, line, "
-                        "side, odds, book) VALUES (?,?,?,?,?,?,?,?,?)", r)
-            ins += 1
+            # INSERT OR IGNORE (2026-08-04). The watermark above is keyed on
+            # (sport, book) but the UNIQUE constraint is on
+            # (collected_at, sport, player, stat, line, side) -- no book. So one
+            # player/stat/line/side quoted by TWO books at the same capture
+            # instant passes the watermark and then violates the constraint. The
+            # unhandled IntegrityError aborted the whole script, and everything
+            # after this line -- including the injury snapshot refresh -- never
+            # ran. Measured: wnba_injuries_board.json went 6.9 HOURS stale while
+            # wnba-loop.service reported active, because it crashed here every
+            # cycle. A duplicate capture carries no new information and is a
+            # normal condition, not an error; rowcount keeps `ins` truthful so a
+            # run that inserts nothing cannot report that it did.
+            ins += con.execute(
+                "INSERT OR IGNORE INTO fd_lines (collected_at, sport, event, player, "
+                "stat, line, side, odds, book) VALUES (?,?,?,?,?,?,?,?,?)", r).rowcount
     con.commit()
     gate.write_text(stamp)
     if ins:

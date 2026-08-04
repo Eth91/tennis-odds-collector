@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T21:44:59Z",
+ "captured_at": "2026-08-04T21:49:40Z",
  "matches": [
   {
    "event_id": 35904369,
@@ -8,9 +8,9 @@
    "p1_norm": "marian brunner",
    "p2_norm": "dariusz molenda",
    "open_date": "2026-08-04T21:30:00.000Z",
-   "line": 75.5,
-   "over_odds": 100,
-   "under_odds": -140
+   "line": 105.5,
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35904381,
@@ -19,9 +19,9 @@
    "p1_norm": "marek tkocz",
    "p2_norm": "pawel polok",
    "open_date": "2026-08-04T21:35:00.000Z",
-   "line": 82.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 88.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35904432,
@@ -30,9 +30,9 @@
    "p1_norm": "mateusz sikon",
    "p2_norm": "grzegorz marud",
    "open_date": "2026-08-04T21:45:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 80.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35904436,
@@ -41,8 +41,8 @@
    "p1_norm": "maciej kolek",
    "p2_norm": "jakub glanowski",
    "open_date": "2026-08-04T21:50:00.000Z",
-   "line": 81.5,
-   "over_odds": -116,
+   "line": 84.5,
+   "over_odds": -118,
    "under_odds": -116
   },
   {
@@ -97,6 +97,17 @@
    "p2_norm": "jakub nowak",
    "open_date": "2026-08-04T22:10:00.000Z",
    "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35904491,
+   "p1": "Jaroslaw Rolak",
+   "p2": "Dawid Kotwica",
+   "p1_norm": "jaroslaw rolak",
+   "p2_norm": "dawid kotwica",
+   "open_date": "2026-08-04T22:15:00.000Z",
+   "line": 83.5,
    "over_odds": -118,
    "under_odds": -112
   }
