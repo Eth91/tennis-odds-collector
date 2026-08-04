@@ -1005,6 +1005,18 @@ def _tracker_panel(wnba_rec, tt_json):
     else:
         w, l, u = wnba_rec
         _wnote = "1u base + declining rungs · since 7/9"
+    # COMBO-CELL CHECKPOINT (pre-registered 2026-08-04, wnba_slip.combo_watch).
+    # Appended to the card note so the forward sample is visible while it fills.
+    # Read-only: this never changes what is selected or bet.
+    try:
+        import wnba_slip as _SL
+        _cw = _SL.combo_watch()
+        _cb, _st = _cw["combo"], _cw["straight"]
+        _wnote += (f" · combo cell {_cb['w']}-{_cb['l']} {_cb['u']:+.2f}u "
+                   f"({_cw['progress']}, {_cw['verdict']}) vs straight "
+                   f"{_st['w']}-{_st['l']} {_st['u']:+.2f}u")
+    except Exception:
+        pass
     wnba_card = card('<img class="tlogo" src="logos/wnba.png" alt="">', "WNBA", w, l, u, _wnote, recent=_wnba_recent())
 
     # 2) MLB = the two live COMPASS models (u15.5 route-A model RETIRED by user 2026-07-26 —
