@@ -1151,7 +1151,8 @@ def _tt_ladder(lad, play_to, zone):
 TT_LIVE_JS = """
   const TT_BOARD_URL = 'https://raw.githubusercontent.com/fgf9p6ks2f-ux/tennis-odds-collector/main/fd_board.json';
   const TT_H2H_URL = 'https://raw.githubusercontent.com/fgf9p6ks2f-ux/tennis-odds-collector/main/tt_board.json';
-  let _ttBoard = null, _ttH2H = null, _ttUpcoming = null, _ttBets = null, _ttSkipped = null, _ttPositions = null;
+  let _ttBoard = null, _ttH2H = null, _ttUpcoming = null, _ttBets = null, _ttSkipped = null, _ttPositions = null
+  let _ttV11 = null;   // v1.1 candidate block (forward test) from tt_board.json
   function _ttEsc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
   function _ttTime(iso){ try { return new Date(iso).toLocaleTimeString('en-US', {timeZone:'America/Denver', hour:'numeric', minute:'2-digit'}); } catch(e){ return ''; } }
   function _ttAm(o){ return (o != null && o > 0) ? '+' + o : '' + o; }
@@ -1323,6 +1324,36 @@ TT_LIVE_JS = """
             + '</span><span class="ttpos-bet">' + o + p.line + ' ' + od + ' \u00b7 ' + bk + '</span>'
             + stat + '</div>';
     });
+    // ── TT v1.1 CANDIDATE STRIP (pre-registered forward test, 2026-08-04) ──────
+    // CANDIDATES ARE NOT BETS: not alerted, not in the headline record, never a
+    // bet card. Rendered as a labelled strip (reusing the positions classes) so
+    // the forward sample is visible while it accumulates toward the pre-set
+    // decision rule (adopt only at n>=50 forward, hit>=68%, units>0).
+    var v11Rows = '';
+    (_ttSkipped || []).forEach(function(b){
+      if (!b || !b.v11) return;
+      var o = (String(b.side||'').charAt(0) === 'O') ? 'O' : 'U';
+      var ln = (b.line != null ? b.line : b.play_to);
+      var od = (b.odds != null) ? ((b.odds > 0 ? '+' : '') + b.odds) : '';
+      v11Rows += '<div class="ttpos-row"><span class="ttpos-pair">' + _ttEsc(b.p1) + ' v ' + _ttEsc(b.p2)
+            + '</span><span class="ttpos-bet">' + o + ln + ' ' + od + ' \u00b7 ' + (b.raw || '') + '% / n' + (b.n || '')
+            + '</span><span class="cu-st no">Candidate</span></div>';
+    });
+    ((_ttV11 && _ttV11.open) || []).forEach(function(c){
+      var o = (String(c.side||'').toLowerCase() === 'over') ? 'O' : 'U';
+      var od = (c.odds != null) ? ((c.odds > 0 ? '+' : '') + c.odds) : '';
+      v11Rows += '<div class="ttpos-row"><span class="ttpos-pair">' + _ttEsc(c.p1) + ' v ' + _ttEsc(c.p2)
+            + '</span><span class="ttpos-bet">' + o + c.line + ' ' + od + ' \u00b7 '
+            + ((c.book === 'betmgm') ? 'BetMGM' : 'FanDuel')
+            + '</span><span class="cu-st no">Candidate open</span></div>';
+    });
+    var v11Block = '';
+    if (_ttV11 && (v11Rows || (_ttV11.forward && (_ttV11.forward.w + _ttV11.forward.l) > 0))){
+      var fw = _ttV11.forward || {w:0,l:0,u:0};
+      v11Block = '<div class="ttpos"><div class="ttpos-hd">v1.1 candidate \u00b7 forward test \u00b7 not bets \u00b7 '
+        + fw.w + '-' + fw.l + ' ' + (fw.u >= 0 ? '+' : '') + fw.u + 'u \u00b7 ' + (_ttV11.progress || '')
+        + '</div>' + v11Rows + '</div>';
+    }
     var posBlock = posRows
       ? ('<div class="ttpos"><div class="ttpos-hd">Open positions \u00b7 price at flag \u00b7 '
          + (_ttPositions || []).length + '</div>' + posRows + '</div>')
@@ -1336,7 +1367,7 @@ TT_LIVE_JS = """
       rows = '<div class="ttempty">No new confirmed plays ' + mid + ' open positions below.</div>';
     }
     el.innerHTML = '<div class="card"><h3 class="ttlg">TT Elite ' + mid + ' Flags'
-      + '<span class="ttcnt">' + entries.length + '</span></h3>' + rows + posBlock
+      + '<span class="ttcnt">' + entries.length + '</span></h3>' + rows + posBlock + v11Block
       + '<div class="ttfoot">confirmed at a posted line only \\u00b7 positions ride until settled</div></div>';
     // card tap toggles the play-to drawer; bound here so every 60s re-render re-binds, and no
     // inline onclick attribute has to survive three quoting layers (node --check caught that).
@@ -1359,7 +1390,7 @@ TT_LIVE_JS = """
     } catch(e){}
     try {
       var r2 = await fetch(TT_H2H_URL + '?_=' + Date.now(), { cache: 'no-store' });
-      if (r2.ok){ var d2 = await r2.json(); var mp = {}; (d2.elite_h2h || []).forEach(function(e){ mp[_ttKey(e.p1n, e.p2n)] = e; }); _ttH2H = mp; _ttUpcoming = Array.isArray(d2.elite_upcoming) ? d2.elite_upcoming : []; _ttBets = Array.isArray(d2.bets) ? d2.bets : []; _ttSkipped = Array.isArray(d2.skipped) ? d2.skipped : []; _ttPositions = Array.isArray(d2.positions) ? d2.positions : []; }
+      if (r2.ok){ var d2 = await r2.json(); var mp = {}; (d2.elite_h2h || []).forEach(function(e){ mp[_ttKey(e.p1n, e.p2n)] = e; }); _ttH2H = mp; _ttUpcoming = Array.isArray(d2.elite_upcoming) ? d2.elite_upcoming : []; _ttBets = Array.isArray(d2.bets) ? d2.bets : []; _ttSkipped = Array.isArray(d2.skipped) ? d2.skipped : []; _ttPositions = Array.isArray(d2.positions) ? d2.positions : []; _ttV11 = d2.v11 || null; }
     } catch(e){}
     window._applyTTTotals();
     _ttStamp();
@@ -1390,6 +1421,7 @@ TT_LIVE_JS = """
     _ttBets = Array.isArray(b.bets) ? b.bets : [];
     _ttPositions = Array.isArray(b.positions) ? b.positions : [];
     _ttSkipped = Array.isArray(b.skipped) ? b.skipped : [];
+    _ttV11 = b.v11 || null;
     try { window._applyTTTotals(); } catch(e){}
   })();
   window._fetchTTTotals();
