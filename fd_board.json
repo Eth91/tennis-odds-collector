@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T12:52:16Z",
+ "captured_at": "2026-08-04T12:58:02Z",
  "matches": [
   {
    "event_id": 35902752,
@@ -8,20 +8,9 @@
    "p1_norm": "kamil klocek",
    "p2_norm": "artur sobel",
    "open_date": "2026-08-04T12:40:00.000Z",
-   "line": 93.5,
-   "over_odds": -120,
+   "line": 92.5,
+   "over_odds": -115,
    "under_odds": -115
-  },
-  {
-   "event_id": 35902753,
-   "p1": "Piotr Przewlocki",
-   "p2": "Rafal Gajda",
-   "p1_norm": "piotr przewlocki",
-   "p2_norm": "rafal gajda",
-   "open_date": "2026-08-04T12:40:00.000Z",
-   "line": 82.5,
-   "over_odds": -110,
-   "under_odds": -125
   },
   {
    "event_id": 35902777,
@@ -30,9 +19,9 @@
    "p1_norm": "martin olejnik",
    "p2_norm": "adrian wiecek",
    "open_date": "2026-08-04T12:55:00.000Z",
-   "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -118
+   "line": 76.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35902786,
@@ -64,8 +53,8 @@
    "p2_norm": "jakub zochniak",
    "open_date": "2026-08-04T13:05:00.000Z",
    "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35902798,
@@ -77,6 +66,28 @@
    "line": 75.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35902843,
+   "p1": "Karol Strowski",
+   "p2": "Petr David",
+   "p1_norm": "karol strowski",
+   "p2_norm": "petr david",
+   "open_date": "2026-08-04T13:20:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35902863,
+   "p1": "Maciej Nowalinski",
+   "p2": "Dawid Kosmal",
+   "p1_norm": "maciej nowalinski",
+   "p2_norm": "dawid kosmal",
+   "open_date": "2026-08-04T13:25:00.000Z",
+   "line": 79.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
