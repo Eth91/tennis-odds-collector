@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-04T16:43:06Z",
+ "captured_at": "2026-08-04T16:47:08Z",
  "matches": [
-  {
-   "event_id": 35903696,
-   "p1": "Tomasz Wrzalik",
-   "p2": "Marek Tkocz",
-   "p1_norm": "tomasz wrzalik",
-   "p2_norm": "marek tkocz",
-   "open_date": "2026-08-04T16:25:00.000Z",
-   "line": 92.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
-  {
-   "event_id": 35903707,
-   "p1": "Oliwier Sokolowski",
-   "p2": "Schaniel Krzysztof",
-   "p1_norm": "oliwier sokolowski",
-   "p2_norm": "schaniel krzysztof",
-   "open_date": "2026-08-04T16:35:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35903708,
    "p1": "Dariusz Szlubowski",
@@ -30,7 +8,7 @@
    "p1_norm": "dariusz szlubowski",
    "p2_norm": "wojciech gluszek",
    "open_date": "2026-08-04T16:35:00.000Z",
-   "line": 70.5,
+   "line": 58.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -41,7 +19,7 @@
    "p1_norm": "rafal idaczyk",
    "p2_norm": "oskar jadach",
    "open_date": "2026-08-04T16:40:00.000Z",
-   "line": 73.5,
+   "line": 55.5,
    "over_odds": -125,
    "under_odds": -110
   },
