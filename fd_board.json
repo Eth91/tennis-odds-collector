@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-04T02:32:45Z",
+ "captured_at": "2026-08-04T02:39:39Z",
  "matches": [
-  {
-   "event_id": 35901183,
-   "p1": "Grzegorz Mucha",
-   "p2": "Artur Kubiak",
-   "p1_norm": "grzegorz mucha",
-   "p2_norm": "artur kubiak",
-   "open_date": "2026-08-04T02:10:00.000Z",
-   "line": 102.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35901185,
-   "p1": "Michal Guzik",
-   "p2": "Henryk Tkaczyk",
-   "p1_norm": "michal guzik",
-   "p2_norm": "henryk tkaczyk",
-   "open_date": "2026-08-04T02:20:00.000Z",
-   "line": 57.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35901193,
    "p1": "Aleksander Barton",
@@ -30,9 +8,9 @@
    "p1_norm": "aleksander barton",
    "p2_norm": "michal krutak",
    "open_date": "2026-08-04T02:35:00.000Z",
-   "line": 61.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 52.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35901205,
@@ -42,8 +20,8 @@
    "p2_norm": "wojciech urban",
    "open_date": "2026-08-04T02:45:00.000Z",
    "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35901206,
@@ -53,8 +31,63 @@
    "p2_norm": "adam staniczek",
    "open_date": "2026-08-04T02:45:00.000Z",
    "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35901213,
+   "p1": "Jakub Zochniak",
+   "p2": "Dawid Kosmal",
+   "p1_norm": "jakub zochniak",
+   "p2_norm": "dawid kosmal",
+   "open_date": "2026-08-04T03:00:00.000Z",
+   "line": 79.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35901214,
+   "p1": "Piotr Cyrnek",
+   "p2": "Szymon Kolasa",
+   "p1_norm": "piotr cyrnek",
+   "p2_norm": "szymon kolasa",
+   "open_date": "2026-08-04T03:00:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35901215,
+   "p1": "Kamil Klocek",
+   "p2": "Artur Sobel",
+   "p1_norm": "kamil klocek",
+   "p2_norm": "artur sobel",
+   "open_date": "2026-08-04T03:00:00.000Z",
+   "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35901216,
+   "p1": "Michal Durda",
+   "p2": "Kamil Kowalski",
+   "p1_norm": "michal durda",
+   "p2_norm": "kamil kowalski",
+   "open_date": "2026-08-04T03:00:00.000Z",
+   "line": 67.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35901219,
+   "p1": "Kacper Adamus",
+   "p2": "Grzegorz Marud",
+   "p1_norm": "kacper adamus",
+   "p2_norm": "grzegorz marud",
+   "open_date": "2026-08-04T03:05:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
