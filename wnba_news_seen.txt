@@ -346,6 +346,7 @@ rw|453|Scores nine points in loss
 rw|453|Tallies 11 points in victory
 rw|462|Cools off Wednesday
 rw|462|Drops 21 points against former team
+rw|462|Historic night in win
 rw|462|Well-rounded contributor in win
 rw|468|Leading scorer in defeat
 rw|479|Productive from charity stripe
