@@ -125,6 +125,7 @@ rw|1048|Quality showing in loss Wednesday
 rw|1048|Records 11 points in victory
 rw|1050|Active at charity stripe Tuesday
 rw|1050|Provides scoring punch
+rw|1050|Scores game-high 25 points
 rw|1050|Scores team-high 26 points
 rw|1051|Left off injury report
 rw|1051|Unavailable versus Sun
