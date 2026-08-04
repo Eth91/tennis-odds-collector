@@ -1038,3 +1038,7 @@ golf trap: 🐦 BIRDIES COUPON HYDRATING (module 2240, open coupons [50970]) —
 competition sweep skipped: database is locked
 golf_collect 2026-08-04T18:00:02: 1729 rows
 golf_moves 2026-08-04T18:00:02: 1729 keys folded, 430 closes frozen
+golf trap: 🐦 BIRDIES COUPON HYDRATING (module 2240, open coupons [50970]) — markets should land this pass or next
+competition sweep skipped: database is locked
+golf_collect 2026-08-04T18:30:02: 1707 rows
+golf_moves 2026-08-04T18:30:02: 1707 keys folded, 0 closes frozen
