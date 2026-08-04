@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T00:58:49Z",
+ "captured_at": "2026-08-04T01:02:58Z",
  "matches": [
   {
    "event_id": 35901103,
@@ -8,9 +8,9 @@
    "p1_norm": "jerzy michalik",
    "p2_norm": "michal guzik",
    "open_date": "2026-08-04T00:45:00.000Z",
-   "line": 89.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 92.5,
+   "over_odds": -140,
+   "under_odds": 100
   },
   {
    "event_id": 35901118,
@@ -19,9 +19,9 @@
    "p1_norm": "aleksander barton",
    "p2_norm": "miroslaw lewczuk",
    "open_date": "2026-08-04T01:00:00.000Z",
-   "line": 70.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 50.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35901138,
@@ -55,6 +55,17 @@
    "line": 79.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35901164,
+   "p1": "Grzegorz Marud",
+   "p2": "Wojciech Urban",
+   "p1_norm": "grzegorz marud",
+   "p2_norm": "wojciech urban",
+   "open_date": "2026-08-04T01:30:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
