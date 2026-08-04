@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T14:18:06Z",
+ "captured_at": "2026-08-04T14:23:06Z",
  "matches": [
-  {
-   "event_id": 35902979,
-   "p1": "Szymon Kolasa",
-   "p2": "Petr David",
-   "p1_norm": "szymon kolasa",
-   "p2_norm": "petr david",
-   "open_date": "2026-08-04T14:10:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
   {
    "event_id": 35902995,
    "p1": "Artur Daniel",
@@ -20,8 +9,8 @@
    "p2_norm": "dawid kosmal",
    "open_date": "2026-08-04T14:15:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35903034,
@@ -30,9 +19,9 @@
    "p1_norm": "rafal gajda",
    "p2_norm": "kamil kowalski",
    "open_date": "2026-08-04T14:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35903035,
@@ -41,9 +30,9 @@
    "p1_norm": "artur sobel",
    "p2_norm": "przemyslaw blocho",
    "open_date": "2026-08-04T14:20:00.000Z",
-   "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35903076,
