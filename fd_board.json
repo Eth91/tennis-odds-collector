@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-08-04T23:12:30Z",
+ "captured_at": "2026-08-04T23:17:13Z",
  "matches": [
-  {
-   "event_id": 35904527,
-   "p1": "Mateusz Sikon",
-   "p2": "Pawel Adamus",
-   "p1_norm": "mateusz sikon",
-   "p2_norm": "pawel adamus",
-   "open_date": "2026-08-04T22:55:00.000Z",
-   "line": 77.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35904528,
-   "p1": "Wojciech Gluszek",
-   "p2": "Dawid Kotwica",
-   "p1_norm": "wojciech gluszek",
-   "p2_norm": "dawid kotwica",
-   "open_date": "2026-08-04T22:55:00.000Z",
-   "line": 89.5,
-   "over_odds": 100,
-   "under_odds": -140
-  },
-  {
-   "event_id": 35904529,
-   "p1": "Mateusz Rutkowski",
-   "p2": "Artur Gromek",
-   "p1_norm": "mateusz rutkowski",
-   "p2_norm": "artur gromek",
-   "open_date": "2026-08-04T22:55:00.000Z",
-   "line": 80.5,
-   "over_odds": -105,
-   "under_odds": -135
-  },
   {
    "event_id": 35904531,
    "p1": "Marian Brunner",
@@ -52,9 +19,9 @@
    "p1_norm": "lukasz oracz",
    "p2_norm": "pawel polok",
    "open_date": "2026-08-04T23:10:00.000Z",
-   "line": 77.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 84.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35904538,
@@ -75,8 +42,8 @@
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-08-04T23:20:00.000Z",
    "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35904540,
