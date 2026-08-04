@@ -236,6 +236,7 @@ rw|252|Won't play Tuesday
 rw|254|Drops 25 points in loss
 rw|254|Produces 18 points in win
 rw|254|Scores game-high 21 points
+rw|254|Strong performance Monday
 rw|254|Top scorer in victory
 rw|258|Quiet again off bench
 rw|258|Terrific outing in win
