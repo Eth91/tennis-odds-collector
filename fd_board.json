@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T00:54:04Z",
+ "captured_at": "2026-08-04T00:58:49Z",
  "matches": [
-  {
-   "event_id": 35901096,
-   "p1": "Wojciech Gluszek",
-   "p2": "Adrian Eliasz",
-   "p1_norm": "wojciech gluszek",
-   "p2_norm": "adrian eliasz",
-   "open_date": "2026-08-04T00:35:00.000Z",
-   "line": 101.5,
-   "over_odds": 135,
-   "under_odds": -195
-  },
   {
    "event_id": 35901103,
    "p1": "Jerzy Michalik",
@@ -19,9 +8,9 @@
    "p1_norm": "jerzy michalik",
    "p2_norm": "michal guzik",
    "open_date": "2026-08-04T00:45:00.000Z",
-   "line": 78.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 89.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35901118,
@@ -53,6 +42,17 @@
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-08-04T01:10:00.000Z",
    "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35901158,
+   "p1": "Michal Krutak",
+   "p2": "Artur Kubiak",
+   "p1_norm": "michal krutak",
+   "p2_norm": "artur kubiak",
+   "open_date": "2026-08-04T01:25:00.000Z",
+   "line": 79.5,
    "over_odds": -118,
    "under_odds": -112
   }
