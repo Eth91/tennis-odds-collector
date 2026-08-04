@@ -1,6 +1,6 @@
 # WNBA prop edge report
 
-_2026-08-04 12:21 UTC_
+_2026-08-04 12:33 UTC_
 
 Pinnacle snapshot: `None`  |  FanDuel snapshot: `2026-08-02T09:20:08`
 
