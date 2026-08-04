@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T04:15:59Z",
+ "captured_at": "2026-08-04T04:20:58Z",
  "matches": [
-  {
-   "event_id": 35901293,
-   "p1": "Jakub Zochniak",
-   "p2": "Przemyslaw Blocho",
-   "p1_norm": "jakub zochniak",
-   "p2_norm": "przemyslaw blocho",
-   "open_date": "2026-08-04T04:00:00.000Z",
-   "line": 73.5,
-   "over_odds": 100,
-   "under_odds": -140
-  },
   {
    "event_id": 35901477,
    "p1": "Michal Durda",
@@ -19,9 +8,9 @@
    "p1_norm": "michal durda",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-08-04T04:10:00.000Z",
-   "line": 80.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 100.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35901478,
@@ -30,7 +19,7 @@
    "p1_norm": "kamil klocek",
    "p2_norm": "krzysztof kotyl",
    "open_date": "2026-08-04T04:10:00.000Z",
-   "line": 76.5,
+   "line": 82.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -41,9 +30,9 @@
    "p1_norm": "piotr cyrnek",
    "p2_norm": "petr david",
    "open_date": "2026-08-04T04:10:00.000Z",
-   "line": 78.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 89.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35901662,
@@ -52,9 +41,9 @@
    "p1_norm": "kacper adamus",
    "p2_norm": "pawel kurek",
    "open_date": "2026-08-04T04:20:00.000Z",
-   "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35901703,
