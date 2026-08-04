@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T20:09:13Z",
+ "captured_at": "2026-08-04T20:14:21Z",
  "matches": [
   {
    "event_id": 35904225,
@@ -8,9 +8,9 @@
    "p1_norm": "marek tkocz",
    "p2_norm": "kaczynski piotr",
    "open_date": "2026-08-04T20:00:00.000Z",
-   "line": 79.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 98.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35904226,
@@ -19,18 +19,7 @@
    "p1_norm": "mateusz sikon",
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-08-04T20:05:00.000Z",
-   "line": 73.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35904227,
-   "p1": "Maciej Nowalinski",
-   "p2": "Artur Gromek",
-   "p1_norm": "maciej nowalinski",
-   "p2_norm": "artur gromek",
-   "open_date": "2026-08-04T20:05:00.000Z",
-   "line": 81.5,
+   "line": 85.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -41,7 +30,7 @@
    "p1_norm": "dawid kotwica",
    "p2_norm": "wojciech gluszek",
    "open_date": "2026-08-04T20:05:00.000Z",
-   "line": 81.5,
+   "line": 86.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -97,8 +86,8 @@
    "p2_norm": "pawel adamus",
    "open_date": "2026-08-04T20:30:00.000Z",
    "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }

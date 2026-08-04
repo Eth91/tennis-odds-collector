@@ -444,6 +444,7 @@ rw|599|Starting Sunday
 rw|599|Struggles in loss
 rw|603|Adds 16 points in loss
 rw|603|Drops 25 points in defeat
+rw|603|Good to go Tuesday
 rw|603|Iffy for Sunday
 rw|603|Might miss another game
 rw|603|Rough shooting night in loss
@@ -682,6 +683,7 @@ rw|991|Posts another double-double
 rw|991|Posts double-double Monday
 rw|991|Records another double-double
 rw|992|Playing minimal role
+rw|998|Available to play
 rw|998|Could return Sunday
 rw|998|Matches career high in scoring
 rw|998|Nears double-double in return
