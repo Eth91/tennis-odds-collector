@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T15:25:49Z",
+ "captured_at": "2026-08-04T15:34:17Z",
  "matches": [
-  {
-   "event_id": 35903158,
-   "p1": "Tomasz Wrzalik",
-   "p2": "Jakub Kaczmarek",
-   "p1_norm": "tomasz wrzalik",
-   "p2_norm": "jakub kaczmarek",
-   "open_date": "2026-08-04T15:10:00.000Z",
-   "line": 91.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
   {
    "event_id": 35903211,
    "p1": "Marcin Kowalczyk",
@@ -19,7 +8,7 @@
    "p1_norm": "marcin kowalczyk",
    "p2_norm": "jaroslaw rolak",
    "open_date": "2026-08-04T15:25:00.000Z",
-   "line": 83.5,
+   "line": 80.5,
    "over_odds": null,
    "under_odds": null
   },
@@ -30,9 +19,9 @@
    "p1_norm": "karol strowski",
    "p2_norm": "artur daniel",
    "open_date": "2026-08-04T15:25:00.000Z",
-   "line": 81.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 83.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35903213,
@@ -41,9 +30,9 @@
    "p1_norm": "mariusz koczyba",
    "p2_norm": "pawel adamus",
    "open_date": "2026-08-04T15:25:00.000Z",
-   "line": 77.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 87.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35903379,
@@ -77,6 +66,17 @@
    "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35903582,
+   "p1": "Jerzy Pelka",
+   "p2": "Oskar Jadach",
+   "p1_norm": "jerzy pelka",
+   "p2_norm": "oskar jadach",
+   "open_date": "2026-08-04T15:55:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
