@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T21:18:09Z",
+ "captured_at": "2026-08-04T21:22:24Z",
  "matches": [
-  {
-   "event_id": 35904316,
-   "p1": "Oliwier Sokolowski",
-   "p2": "Schaniel Krzysztof",
-   "p1_norm": "oliwier sokolowski",
-   "p2_norm": "schaniel krzysztof",
-   "open_date": "2026-08-04T21:00:00.000Z",
-   "line": 94.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35904319,
    "p1": "Wojciech Gluszek",
@@ -19,20 +8,9 @@
    "p1_norm": "wojciech gluszek",
    "p2_norm": "jaroslaw rolak",
    "open_date": "2026-08-04T21:05:00.000Z",
-   "line": 83.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
-  {
-   "event_id": 35904320,
-   "p1": "Jakub Skorupa",
-   "p2": "Kamil Delikatny",
-   "p1_norm": "jakub skorupa",
-   "p2_norm": "kamil delikatny",
-   "open_date": "2026-08-04T21:05:00.000Z",
-   "line": 72.5,
-   "over_odds": null,
-   "under_odds": null
+   "line": 86.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35904327,
@@ -41,20 +19,9 @@
    "p1_norm": "piotr gumulinski",
    "p2_norm": "marian lebek",
    "open_date": "2026-08-04T21:10:00.000Z",
-   "line": 81.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
-  {
-   "event_id": 35904354,
-   "p1": "Jakub Nowak",
-   "p2": "Pawel Adamus",
-   "p1_norm": "jakub nowak",
-   "p2_norm": "pawel adamus",
-   "open_date": "2026-08-04T21:20:00.000Z",
-   "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 85.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35904363,
