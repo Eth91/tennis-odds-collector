@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T23:03:32Z",
+ "captured_at": "2026-08-04T23:08:16Z",
  "matches": [
-  {
-   "event_id": 35904515,
-   "p1": "Tomasz Wrzalik",
-   "p2": "Marian Lebek",
-   "p1_norm": "tomasz wrzalik",
-   "p2_norm": "marian lebek",
-   "open_date": "2026-08-04T22:50:00.000Z",
-   "line": 74.5,
-   "over_odds": -115,
-   "under_odds": -115
-  },
   {
    "event_id": 35904527,
    "p1": "Mateusz Sikon",
@@ -19,9 +8,9 @@
    "p1_norm": "mateusz sikon",
    "p2_norm": "pawel adamus",
    "open_date": "2026-08-04T22:55:00.000Z",
-   "line": 81.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 90.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35904528,
@@ -30,8 +19,8 @@
    "p1_norm": "wojciech gluszek",
    "p2_norm": "dawid kotwica",
    "open_date": "2026-08-04T22:55:00.000Z",
-   "line": 87.5,
-   "over_odds": -115,
+   "line": 90.5,
+   "over_odds": -110,
    "under_odds": -120
   },
   {
@@ -41,9 +30,9 @@
    "p1_norm": "mateusz rutkowski",
    "p2_norm": "artur gromek",
    "open_date": "2026-08-04T22:55:00.000Z",
-   "line": 56.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 63.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35904531,
@@ -52,9 +41,9 @@
    "p1_norm": "marian brunner",
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-08-04T23:05:00.000Z",
-   "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35904532,
@@ -99,6 +88,28 @@
    "line": 76.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35904545,
+   "p1": "Jerzy Michalik",
+   "p2": "Zbigniew Nocun",
+   "p1_norm": "jerzy michalik",
+   "p2_norm": "zbigniew nocun",
+   "open_date": "2026-08-04T23:30:00.000Z",
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35904551,
+   "p1": "Marek Tkocz",
+   "p2": "Marian Lebek",
+   "p1_norm": "marek tkocz",
+   "p2_norm": "marian lebek",
+   "open_date": "2026-08-04T23:35:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
