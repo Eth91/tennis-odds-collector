@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T06:35:43Z",
+ "captured_at": "2026-08-04T06:41:43Z",
  "matches": [
   {
    "event_id": 35901845,
@@ -8,20 +8,9 @@
    "p1_norm": "milosz cesarz",
    "p2_norm": "jakub nowak",
    "open_date": "2026-08-04T06:25:00.000Z",
-   "line": 88.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35901846,
-   "p1": "Przemyslaw Blocho",
-   "p2": "Maciej Kolek",
-   "p1_norm": "przemyslaw blocho",
-   "p2_norm": "maciej kolek",
-   "open_date": "2026-08-04T06:25:00.000Z",
-   "line": 73.5,
-   "over_odds": -105,
-   "under_odds": -130
+   "line": 95.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35901850,
@@ -30,9 +19,9 @@
    "p1_norm": "krzysztof kotyl",
    "p2_norm": "mikolaj lukaszewski",
    "open_date": "2026-08-04T06:30:00.000Z",
-   "line": 81.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 73.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35901851,
@@ -41,9 +30,9 @@
    "p1_norm": "piotr przewlocki",
    "p2_norm": "rafal gajda",
    "open_date": "2026-08-04T06:30:00.000Z",
-   "line": 74.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 97.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35901852,
@@ -52,9 +41,9 @@
    "p1_norm": "petr david",
    "p2_norm": "martin olejnik",
    "open_date": "2026-08-04T06:30:00.000Z",
-   "line": 78.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 83.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35901858,
@@ -64,8 +53,8 @@
    "p2_norm": "mariusz baron",
    "open_date": "2026-08-04T06:45:00.000Z",
    "line": 81.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35901859,
@@ -75,8 +64,8 @@
    "p2_norm": "krzysztof hetnar",
    "open_date": "2026-08-04T06:45:00.000Z",
    "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35901866,
@@ -86,8 +75,8 @@
    "p2_norm": "dominik solilo",
    "open_date": "2026-08-04T06:50:00.000Z",
    "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35901871,
@@ -119,8 +108,8 @@
    "p2_norm": "michal minda",
    "open_date": "2026-08-04T06:55:00.000Z",
    "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
