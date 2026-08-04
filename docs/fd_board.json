@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T19:20:07Z",
+ "captured_at": "2026-08-04T19:24:20Z",
  "matches": [
   {
    "event_id": 35904090,
@@ -8,9 +8,9 @@
    "p1_norm": "dariusz molenda",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-08-04T19:10:00.000Z",
-   "line": 78.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 59.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35904093,
@@ -19,9 +19,9 @@
    "p1_norm": "artur daniel",
    "p2_norm": "artur gromek",
    "open_date": "2026-08-04T19:15:00.000Z",
-   "line": 61.5,
-   "over_odds": -115,
-   "under_odds": -115
+   "line": 47.5,
+   "over_odds": 115,
+   "under_odds": -160
   },
   {
    "event_id": 35904099,
@@ -30,20 +30,9 @@
    "p1_norm": "jaroslaw rolak",
    "p2_norm": "wojciech gluszek",
    "open_date": "2026-08-04T19:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
-  },
-  {
-   "event_id": 35904100,
-   "p1": "Pawel Adamus",
-   "p2": "Schaniel Krzysztof",
-   "p1_norm": "pawel adamus",
-   "p2_norm": "schaniel krzysztof",
-   "open_date": "2026-08-04T19:20:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35904125,
