@@ -205,6 +205,7 @@ rw|1093|Avoids injury report for Wednesday
 rw|1093|Fades injury report
 rw|1093|Not listed on injury report
 rw|1093|Off injury report
+rw|1093|Off injury report for Wednesday
 rw|1093|Out for Monday
 rw|1093|Sitting out Wednesday
 rw|1093|Won't suit up Wednesday
