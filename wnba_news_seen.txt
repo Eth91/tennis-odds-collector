@@ -212,6 +212,7 @@ rw|1134|Out Sunday
 rw|1134|Won't play Wednesday
 rw|1135|Waived by Tempo
 rw|1137|Left off injury report
+rw|1137|Not listed on injury report
 rw|1137|Ruled out Sunday
 rw|1137|Ruled out Thursday
 rw|228|Listed out for Wednesday
@@ -418,6 +419,7 @@ rw|599|Struggles in loss
 rw|603|Adds 16 points in loss
 rw|603|Drops 25 points in defeat
 rw|603|Iffy for Sunday
+rw|603|Might miss another game
 rw|603|Rough shooting night in loss
 rw|603|Ruled out for Sunday
 rw|603|Strikes for 23 points in ASG loss
