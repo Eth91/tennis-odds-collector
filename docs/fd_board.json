@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T12:47:19Z",
+ "captured_at": "2026-08-04T12:52:16Z",
  "matches": [
   {
    "event_id": 35902752,
@@ -8,9 +8,9 @@
    "p1_norm": "kamil klocek",
    "p2_norm": "artur sobel",
    "open_date": "2026-08-04T12:40:00.000Z",
-   "line": 79.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 93.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35902753,
@@ -19,9 +19,9 @@
    "p1_norm": "piotr przewlocki",
    "p2_norm": "rafal gajda",
    "open_date": "2026-08-04T12:40:00.000Z",
-   "line": 79.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 82.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35902777,
