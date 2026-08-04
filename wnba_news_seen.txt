@@ -310,6 +310,7 @@ rw|416|Questionable for Tuesday
 rw|416|Ruled out Tuesday
 rw|423|Moving to bench
 rw|425|Available to play
+rw|425|Coming off the bench
 rw|425|Officially probable for Sunday
 rw|425|Practicing Thursday
 rw|425|Questionable for Monday
