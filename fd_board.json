@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-04T11:27:00Z",
+ "captured_at": "2026-08-04T11:32:48Z",
  "matches": [
-  {
-   "event_id": 35902227,
-   "p1": "Patryk Mecik",
-   "p2": "Jerzy Pelka",
-   "p1_norm": "patryk mecik",
-   "p2_norm": "jerzy pelka",
-   "open_date": "2026-08-04T11:05:00.000Z",
-   "line": 109.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35902247,
-   "p1": "Piotr Cyrnek",
-   "p2": "Petr David",
-   "p1_norm": "piotr cyrnek",
-   "p2_norm": "petr david",
-   "open_date": "2026-08-04T11:15:00.000Z",
-   "line": 87.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35902258,
    "p1": "Krystian Kolodziej",
@@ -30,9 +8,9 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "dawid kosmal",
    "open_date": "2026-08-04T11:20:00.000Z",
-   "line": 73.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 60.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35902262,
@@ -41,9 +19,9 @@
    "p1_norm": "kamil klocek",
    "p2_norm": "przemyslaw blocho",
    "open_date": "2026-08-04T11:25:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 59.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35902263,
@@ -52,20 +30,9 @@
    "p1_norm": "piotr przewlocki",
    "p2_norm": "kamil kowalski",
    "open_date": "2026-08-04T11:25:00.000Z",
-   "line": 77.5,
-   "over_odds": -115,
+   "line": 81.5,
+   "over_odds": -120,
    "under_odds": -115
-  },
-  {
-   "event_id": 35902275,
-   "p1": "Kacper Slawinski",
-   "p2": "Oskar Jadach",
-   "p1_norm": "kacper slawinski",
-   "p2_norm": "oskar jadach",
-   "open_date": "2026-08-04T11:30:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
   },
   {
    "event_id": 35902288,
@@ -85,9 +52,9 @@
    "p1_norm": "miroslav sklensky",
    "p2_norm": "artur daniel",
    "open_date": "2026-08-04T11:45:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35902303,
@@ -96,9 +63,9 @@
    "p1_norm": "dominik solilo",
    "p2_norm": "artur sobel",
    "open_date": "2026-08-04T11:50:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35902304,
@@ -119,8 +86,8 @@
    "p2_norm": "jerzy pelka",
    "open_date": "2026-08-04T11:55:00.000Z",
    "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
