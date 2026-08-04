@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-04T03:55:20Z",
+ "captured_at": "2026-08-04T03:59:46Z",
  "matches": [
-  {
-   "event_id": 35901280,
-   "p1": "Maciej Kolek",
-   "p2": "Dominik Solilo",
-   "p1_norm": "maciej kolek",
-   "p2_norm": "dominik solilo",
-   "open_date": "2026-08-04T03:40:00.000Z",
-   "line": 88.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
-  {
-   "event_id": 35901285,
-   "p1": "Martin Olejnik",
-   "p2": "Marcin Jadczyk",
-   "p1_norm": "martin olejnik",
-   "p2_norm": "marcin jadczyk",
-   "open_date": "2026-08-04T03:45:00.000Z",
-   "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35901287,
    "p1": "Mikolaj Lukaszewski",
@@ -30,18 +8,7 @@
    "p1_norm": "mikolaj lukaszewski",
    "p2_norm": "michal minda",
    "open_date": "2026-08-04T03:50:00.000Z",
-   "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35901288,
-   "p1": "Rafal Gajda",
-   "p2": "Witold Buczynski",
-   "p1_norm": "rafal gajda",
-   "p2_norm": "witold buczynski",
-   "open_date": "2026-08-04T03:50:00.000Z",
-   "line": 66.5,
+   "line": 51.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -52,9 +19,9 @@
    "p1_norm": "wojciech urban",
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-08-04T03:55:00.000Z",
-   "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35901293,
@@ -85,9 +52,9 @@
    "p1_norm": "michal durda",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-08-04T04:10:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 76.5,
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35901478,
@@ -119,6 +86,28 @@
    "p2_norm": "pawel kurek",
    "open_date": "2026-08-04T04:20:00.000Z",
    "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35901703,
+   "p1": "Adam Ruszkiewicz",
+   "p2": "Mariusz Adamus",
+   "p1_norm": "adam ruszkiewicz",
+   "p2_norm": "mariusz adamus",
+   "open_date": "2026-08-04T04:25:00.000Z",
+   "line": 79.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35901704,
+   "p1": "Dominik Solilo",
+   "p2": "Dawid Kosmal",
+   "p1_norm": "dominik solilo",
+   "p2_norm": "dawid kosmal",
+   "open_date": "2026-08-04T04:25:00.000Z",
+   "line": 77.5,
    "over_odds": -112,
    "under_odds": -118
   }
