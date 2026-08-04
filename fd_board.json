@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T06:18:49Z",
+ "captured_at": "2026-08-04T06:23:52Z",
  "matches": [
   {
    "event_id": 35901830,
@@ -8,9 +8,9 @@
    "p1_norm": "marcin jadczyk",
    "p2_norm": "adrian wiecek",
    "open_date": "2026-08-04T06:05:00.000Z",
-   "line": 84.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 80.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35901845,
@@ -19,9 +19,9 @@
    "p1_norm": "milosz cesarz",
    "p2_norm": "jakub nowak",
    "open_date": "2026-08-04T06:25:00.000Z",
-   "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35901846,
