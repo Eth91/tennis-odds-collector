@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T13:56:59Z",
+ "captured_at": "2026-08-04T14:02:49Z",
  "matches": [
   {
    "event_id": 35902920,
@@ -8,7 +8,7 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-08-04T13:50:00.000Z",
-   "line": 80.5,
+   "line": 96.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -19,9 +19,9 @@
    "p1_norm": "piotr przewlocki",
    "p2_norm": "michal durda",
    "open_date": "2026-08-04T13:55:00.000Z",
-   "line": 73.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 80.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35902943,
@@ -30,9 +30,9 @@
    "p1_norm": "kamil klocek",
    "p2_norm": "jakub zochniak",
    "open_date": "2026-08-04T13:55:00.000Z",
-   "line": 68.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 51.5,
+   "over_odds": -105,
+   "under_odds": -135
   },
   {
    "event_id": 35902944,
@@ -41,7 +41,7 @@
    "p1_norm": "mariusz baron",
    "p2_norm": "oskar jadach",
    "open_date": "2026-08-04T13:55:00.000Z",
-   "line": 76.5,
+   "line": 60.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -64,8 +64,8 @@
    "p2_norm": "dawid kosmal",
    "open_date": "2026-08-04T14:15:00.000Z",
    "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35903034,
