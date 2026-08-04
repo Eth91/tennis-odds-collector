@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T04:58:16Z",
+ "captured_at": "2026-08-04T05:03:56Z",
  "matches": [
   {
    "event_id": 35901735,
@@ -8,9 +8,9 @@
    "p1_norm": "maciej kolek",
    "p2_norm": "stapor rafal",
    "open_date": "2026-08-04T04:50:00.000Z",
-   "line": 67.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 74.5,
+   "over_odds": -130,
+   "under_odds": -105
   },
   {
    "event_id": 35901740,
@@ -19,9 +19,9 @@
    "p1_norm": "martin olejnik",
    "p2_norm": "adrian wiecek",
    "open_date": "2026-08-04T04:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35901741,
@@ -30,9 +30,9 @@
    "p1_norm": "rafal gajda",
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-08-04T04:55:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 82.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35901742,
@@ -41,9 +41,9 @@
    "p1_norm": "mikolaj lukaszewski",
    "p2_norm": "kamil rudomina",
    "open_date": "2026-08-04T04:55:00.000Z",
-   "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 51.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35901767,
