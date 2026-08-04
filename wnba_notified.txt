@@ -238,4 +238,5 @@ watch|2026-08-03|Sydney Taylor|points|19.5
 watch|2026-08-04|Isabelle Harrison|pts_reb|16.5
 watch|2026-08-04|Julie Allemand|assists|6.5
 watch|2026-08-04|Maria Conde|points|10.5
+watch|2026-08-05|Natasha Cloud|assists|5.5
 watch|2026-08-05|Natasha Cloud|pts_ast|16.5
