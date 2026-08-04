@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T17:21:24Z",
+ "captured_at": "2026-08-04T17:25:46Z",
  "matches": [
   {
    "event_id": 35903828,
@@ -8,20 +8,9 @@
    "p1_norm": "wojciech pytlas",
    "p2_norm": "pawel polok",
    "open_date": "2026-08-04T17:10:00.000Z",
-   "line": 58.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35903841,
-   "p1": "Mariusz Koczyba",
-   "p2": "Schaniel Krzysztof",
-   "p1_norm": "mariusz koczyba",
-   "p2_norm": "schaniel krzysztof",
-   "open_date": "2026-08-04T17:20:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 71.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35903842,
@@ -30,9 +19,9 @@
    "p1_norm": "karol strowski",
    "p2_norm": "artur gromek",
    "open_date": "2026-08-04T17:20:00.000Z",
-   "line": 71.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 73.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35903843,
@@ -41,9 +30,9 @@
    "p1_norm": "marcin kowalczyk",
    "p2_norm": "wojciech gluszek",
    "open_date": "2026-08-04T17:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35903873,
