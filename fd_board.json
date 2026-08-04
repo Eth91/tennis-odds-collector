@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T03:26:28Z",
+ "captured_at": "2026-08-04T03:32:34Z",
  "matches": [
   {
    "event_id": 35901254,
@@ -8,9 +8,31 @@
    "p1_norm": "przemyslaw blocho",
    "p2_norm": "stapor rafal",
    "open_date": "2026-08-04T03:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 87.5,
+   "over_odds": -115,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35901261,
+   "p1": "Krzysztof Kotyl",
+   "p2": "Kamil Rudomina",
+   "p1_norm": "krzysztof kotyl",
+   "p2_norm": "kamil rudomina",
+   "open_date": "2026-08-04T03:25:00.000Z",
+   "line": 82.5,
+   "over_odds": -115,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35901262,
+   "p1": "Petr David",
+   "p2": "Adrian Wiecek",
+   "p1_norm": "petr david",
+   "p2_norm": "adrian wiecek",
+   "open_date": "2026-08-04T03:25:00.000Z",
+   "line": 73.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35901263,
@@ -19,9 +41,9 @@
    "p1_norm": "piotr przewlocki",
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-08-04T03:25:00.000Z",
-   "line": 74.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 93.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35901269,
@@ -77,6 +99,17 @@
    "line": 80.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35901290,
+   "p1": "Wojciech Urban",
+   "p2": "Jakub Pruszkowski",
+   "p1_norm": "wojciech urban",
+   "p2_norm": "jakub pruszkowski",
+   "open_date": "2026-08-04T03:55:00.000Z",
+   "line": 80.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
