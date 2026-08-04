@@ -1350,8 +1350,8 @@ TT_LIVE_JS = """
     var v11Block = '';
     if (_ttV11 && (v11Rows || (_ttV11.forward && (_ttV11.forward.w + _ttV11.forward.l) > 0))){
       var fw = _ttV11.forward || {w:0,l:0,u:0};
-      v11Block = '<div class="ttpos"><div class="ttpos-hd">v1.1 candidate \u00b7 forward test \u00b7 not bets \u00b7 '
-        + fw.w + '-' + fw.l + ' ' + (fw.u >= 0 ? '+' : '') + fw.u + 'u \u00b7 ' + (_ttV11.progress || '')
+      v11Block = '<div class="ttpos"><div class="ttpos-hd">v1.1 expansion \u00b7 LIVE since 8/4 \u00b7 new-cell record '
+        + fw.w + '-' + fw.l + ' ' + (fw.u >= 0 ? '+' : '') + fw.u + 'u \u00b7 revert check at 50 (need 68%+)'
         + '</div>' + v11Rows + '</div>';
     }
     var posBlock = posRows
