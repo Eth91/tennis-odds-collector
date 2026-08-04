@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T16:34:17Z",
+ "captured_at": "2026-08-04T16:38:41Z",
  "matches": [
-  {
-   "event_id": 35903636,
-   "p1": "Adrian Fabis",
-   "p2": "Marcin Kowalczyk",
-   "p1_norm": "adrian fabis",
-   "p2_norm": "marcin kowalczyk",
-   "open_date": "2026-08-04T16:15:00.000Z",
-   "line": 99.5,
-   "over_odds": 135,
-   "under_odds": -195
-  },
   {
    "event_id": 35903696,
    "p1": "Tomasz Wrzalik",
@@ -19,9 +8,9 @@
    "p1_norm": "tomasz wrzalik",
    "p2_norm": "marek tkocz",
    "open_date": "2026-08-04T16:25:00.000Z",
-   "line": 73.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 85.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35903704,
@@ -30,9 +19,9 @@
    "p1_norm": "miroslav sklensky",
    "p2_norm": "artur gromek",
    "open_date": "2026-08-04T16:30:00.000Z",
-   "line": 73.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 83.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35903707,
@@ -41,20 +30,9 @@
    "p1_norm": "oliwier sokolowski",
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-08-04T16:35:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
-  },
-  {
-   "event_id": 35903708,
-   "p1": "Dariusz Szlubowski",
-   "p2": "Wojciech Gluszek",
-   "p1_norm": "dariusz szlubowski",
-   "p2_norm": "wojciech gluszek",
-   "open_date": "2026-08-04T16:35:00.000Z",
-   "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -118
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35903733,
@@ -74,9 +52,9 @@
    "p1_norm": "kaczynski piotr",
    "p2_norm": "jakub kaczmarek",
    "open_date": "2026-08-04T16:50:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35903798,
@@ -85,9 +63,9 @@
    "p1_norm": "maciej nowalinski",
    "p2_norm": "artur daniel",
    "open_date": "2026-08-04T16:55:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35903799,
@@ -110,6 +88,17 @@
    "line": 77.5,
    "over_odds": -120,
    "under_odds": -110
+  },
+  {
+   "event_id": 35903812,
+   "p1": "Kacper Slawinski",
+   "p2": "Jerzy Pelka",
+   "p1_norm": "kacper slawinski",
+   "p2_norm": "jerzy pelka",
+   "open_date": "2026-08-04T17:05:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
