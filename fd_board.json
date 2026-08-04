@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T02:23:57Z",
+ "captured_at": "2026-08-04T02:32:45Z",
  "matches": [
   {
    "event_id": 35901183,
@@ -8,9 +8,9 @@
    "p1_norm": "grzegorz mucha",
    "p2_norm": "artur kubiak",
    "open_date": "2026-08-04T02:10:00.000Z",
-   "line": 79.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 102.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35901185,
@@ -19,9 +19,9 @@
    "p1_norm": "michal guzik",
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-08-04T02:20:00.000Z",
-   "line": 77.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 57.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35901193,
@@ -42,8 +42,8 @@
    "p2_norm": "wojciech urban",
    "open_date": "2026-08-04T02:45:00.000Z",
    "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35901206,
