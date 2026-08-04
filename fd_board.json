@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T10:14:33Z",
+ "captured_at": "2026-08-04T10:19:52Z",
  "matches": [
   {
    "event_id": 35902072,
@@ -8,9 +8,9 @@
    "p1_norm": "martin olejnik",
    "p2_norm": "piotr cyrnek",
    "open_date": "2026-08-04T10:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 81.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35902077,
@@ -19,9 +19,9 @@
    "p1_norm": "miroslav sklensky",
    "p2_norm": "krystian kolodziej",
    "open_date": "2026-08-04T10:05:00.000Z",
-   "line": 74.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 60.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35902105,
@@ -30,7 +30,7 @@
    "p1_norm": "dominik solilo",
    "p2_norm": "kamil klocek",
    "open_date": "2026-08-04T10:10:00.000Z",
-   "line": 75.5,
+   "line": 56.5,
    "over_odds": -110,
    "under_odds": -125
   },
@@ -41,9 +41,9 @@
    "p1_norm": "witold buczynski",
    "p2_norm": "piotr przewlocki",
    "open_date": "2026-08-04T10:10:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 86.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35902127,
