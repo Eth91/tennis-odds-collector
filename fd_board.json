@@ -1,50 +1,6 @@
 {
- "captured_at": "2026-08-04T11:11:31Z",
+ "captured_at": "2026-08-04T11:16:37Z",
  "matches": [
-  {
-   "event_id": 35902211,
-   "p1": "Artur Sobel",
-   "p2": "Karol Wisniewski",
-   "p1_norm": "artur sobel",
-   "p2_norm": "karol wisniewski",
-   "open_date": "2026-08-04T11:00:00.000Z",
-   "line": 73.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
-  {
-   "event_id": 35902212,
-   "p1": "Rafal Gajda",
-   "p2": "Wojciech Wojtaszczyk",
-   "p1_norm": "rafal gajda",
-   "p2_norm": "wojciech wojtaszczyk",
-   "open_date": "2026-08-04T11:00:00.000Z",
-   "line": 84.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35902227,
-   "p1": "Patryk Mecik",
-   "p2": "Jerzy Pelka",
-   "p1_norm": "patryk mecik",
-   "p2_norm": "jerzy pelka",
-   "open_date": "2026-08-04T11:05:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35902247,
-   "p1": "Piotr Cyrnek",
-   "p2": "Petr David",
-   "p1_norm": "piotr cyrnek",
-   "p2_norm": "petr david",
-   "open_date": "2026-08-04T11:15:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
-  },
   {
    "event_id": 35902258,
    "p1": "Krystian Kolodziej",
@@ -88,6 +44,17 @@
    "line": 80.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35902288,
+   "p1": "Martin Olejnik",
+   "p2": "Szymon Kolasa",
+   "p1_norm": "martin olejnik",
+   "p2_norm": "szymon kolasa",
+   "open_date": "2026-08-04T11:40:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
