@@ -239,6 +239,7 @@ rw|254|Scores game-high 21 points
 rw|254|Top scorer in victory
 rw|258|Quiet again off bench
 rw|258|Terrific outing in win
+rw|272|Another triple-double Monday
 rw|272|Picks up triple-double Wednesday
 rw|272|Scores season-high 25 points
 rw|272|Well-rounded effort in loss
