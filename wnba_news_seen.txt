@@ -512,6 +512,7 @@ rw|755|Cools off Wednesday
 rw|755|Double-doubles off bench
 rw|755|Sees 14 minutes in win
 rw|757|Logs 28 minutes in win
+rw|782|Avoids injury report
 rw|782|Dodges injury report for Saturday
 rw|782|Inactive against Seattle
 rw|782|Not listed on injury report
