@@ -243,6 +243,7 @@ rw|272|Well-rounded effort in loss
 rw|276|Another quality showing Wednesday
 rw|276|Double-doubles in win
 rw|276|Named All-Star Game MVP
+rw|276|Scores 20 points Monday
 rw|276|Sniffs double-double in victory
 rw|278|Dishes five dimes in victory
 rw|278|Reaches 20-point plateau
