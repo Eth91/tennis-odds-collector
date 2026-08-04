@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T04:32:15Z",
+ "captured_at": "2026-08-04T04:37:59Z",
  "matches": [
   {
    "event_id": 35901662,
@@ -8,9 +8,9 @@
    "p1_norm": "kacper adamus",
    "p2_norm": "pawel kurek",
    "open_date": "2026-08-04T04:20:00.000Z",
-   "line": 88.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 92.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35901703,
@@ -19,7 +19,7 @@
    "p1_norm": "adam ruszkiewicz",
    "p2_norm": "mariusz adamus",
    "open_date": "2026-08-04T04:25:00.000Z",
-   "line": 76.5,
+   "line": 84.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -30,9 +30,9 @@
    "p1_norm": "dominik solilo",
    "p2_norm": "dawid kosmal",
    "open_date": "2026-08-04T04:25:00.000Z",
-   "line": 76.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 82.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35901706,
@@ -41,9 +41,9 @@
    "p1_norm": "witold buczynski",
    "p2_norm": "kamil kowalski",
    "open_date": "2026-08-04T04:30:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35901707,
@@ -52,9 +52,9 @@
    "p1_norm": "michal minda",
    "p2_norm": "artur sobel",
    "open_date": "2026-08-04T04:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 83.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35901723,
@@ -64,8 +64,8 @@
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-08-04T04:40:00.000Z",
    "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35901735,
@@ -75,8 +75,8 @@
    "p2_norm": "stapor rafal",
    "open_date": "2026-08-04T04:50:00.000Z",
    "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35901736,
