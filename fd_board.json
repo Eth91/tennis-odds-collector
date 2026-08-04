@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T18:48:48Z",
+ "captured_at": "2026-08-04T18:53:12Z",
  "matches": [
   {
    "event_id": 35904050,
@@ -8,9 +8,9 @@
    "p1_norm": "marek tkocz",
    "p2_norm": "wojciech pytlas",
    "open_date": "2026-08-04T18:45:00.000Z",
-   "line": 74.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 57.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35904051,
@@ -19,9 +19,9 @@
    "p1_norm": "marian brunner",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-08-04T18:45:00.000Z",
-   "line": 73.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 85.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35904054,
@@ -30,9 +30,9 @@
    "p1_norm": "jakub kuzmicz",
    "p2_norm": "miroslav sklensky",
    "open_date": "2026-08-04T18:50:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35904059,
@@ -42,8 +42,8 @@
    "p2_norm": "dariusz szlubowski",
    "open_date": "2026-08-04T18:55:00.000Z",
    "line": 80.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35904060,
