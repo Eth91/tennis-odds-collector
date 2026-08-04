@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T01:23:08Z",
+ "captured_at": "2026-08-04T01:27:10Z",
  "matches": [
   {
    "event_id": 35901139,
@@ -8,9 +8,9 @@
    "p1_norm": "pawel kurek",
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-08-04T01:10:00.000Z",
-   "line": 80.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 96.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35901158,
@@ -19,9 +19,9 @@
    "p1_norm": "michal krutak",
    "p2_norm": "artur kubiak",
    "open_date": "2026-08-04T01:25:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35901164,
@@ -30,9 +30,9 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "wojciech urban",
    "open_date": "2026-08-04T01:30:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35901174,
