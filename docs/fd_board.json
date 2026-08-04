@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T23:31:10Z",
+ "captured_at": "2026-08-04T23:36:28Z",
  "matches": [
-  {
-   "event_id": 35904532,
-   "p1": "Lukasz Oracz",
-   "p2": "Pawel Polok",
-   "p1_norm": "lukasz oracz",
-   "p2_norm": "pawel polok",
-   "open_date": "2026-08-04T23:10:00.000Z",
-   "line": 107.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35904545,
    "p1": "Jerzy Michalik",
@@ -19,7 +8,7 @@
    "p1_norm": "jerzy michalik",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-08-04T23:30:00.000Z",
-   "line": 73.5,
+   "line": 72.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -30,9 +19,9 @@
    "p1_norm": "marek tkocz",
    "p2_norm": "marian lebek",
    "open_date": "2026-08-04T23:35:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35904560,
@@ -53,8 +42,8 @@
    "p2_norm": "jakub glanowski",
    "open_date": "2026-08-04T23:45:00.000Z",
    "line": 74.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35904562,
@@ -75,8 +64,19 @@
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-08-04T23:55:00.000Z",
    "line": 74.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35904569,
+   "p1": "Piotr Gumulinski",
+   "p2": "Lukasz Oracz",
+   "p1_norm": "piotr gumulinski",
+   "p2_norm": "lukasz oracz",
+   "open_date": "2026-08-05T00:00:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
