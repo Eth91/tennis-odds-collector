@@ -373,6 +373,7 @@ rw|484|Questionable for Sunday
 rw|484|Ruled out Wednesday
 rw|485|Held in check
 rw|485|Hits game-winning shot at buzzer
+rw|485|Struggles with shot
 rw|488|Available Friday
 rw|488|Double-double in win
 rw|488|Fares well in win
