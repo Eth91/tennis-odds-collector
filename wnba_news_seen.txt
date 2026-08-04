@@ -184,6 +184,7 @@ rw|1071|Won't return Monday
 rw|1073|Fares well off bench
 rw|1074|Not listed on injury report
 rw|1074|Not playing Sunday
+rw|1074|Omitted from injury report
 rw|1074|Ruled out Wednesday
 rw|1075|Pops for season-high 15 points
 rw|1075|Strong line off bench
@@ -633,6 +634,7 @@ rw|916|Strong effort in loss
 rw|916|Struggles offensively in win
 rw|916|Will play on minutes limit Thursday
 rw|917|Plays five minutes Tuesday
+rw|923|Dodges injury report for Wednesday
 rw|923|Listed out for Wednesday
 rw|923|Not listed on injury report
 rw|923|Off injury report for Tuesday
