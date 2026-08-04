@@ -3,3 +3,4 @@ fd_maintain: pruned 0 rows older than 45d · backup 77MB · db 77MB
 fd_maintain: pruned 0 rows older than 45d · backup 46MB · db 84MB
 fd_maintain: pruned 0 rows older than 45d · backup 33MB · db 84MB
 fd_maintain: pruned 0 rows older than 45d · backup 14MB · db 84MB
+fd_maintain: pruned 0 rows older than 45d · backup 5MB · db 84MB
