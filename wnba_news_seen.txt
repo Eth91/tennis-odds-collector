@@ -319,6 +319,7 @@ rw|425|Practicing Thursday
 rw|425|Questionable for Monday
 rw|425|Remains out Tuesday
 rw|425|Remains out for Tuesday
+rw|425|Scores 20 points in Mercury debut
 rw|425|Traded to Phoenix
 rw|425|Will play Sunday
 rw|431|Plays 17 minute off bench
