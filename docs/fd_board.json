@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T21:04:22Z",
+ "captured_at": "2026-08-04T21:08:57Z",
  "matches": [
   {
    "event_id": 35904315,
@@ -8,9 +8,9 @@
    "p1_norm": "mateusz rutkowski",
    "p2_norm": "jakub kuzmicz",
    "open_date": "2026-08-04T21:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35904316,
@@ -19,7 +19,7 @@
    "p1_norm": "oliwier sokolowski",
    "p2_norm": "schaniel krzysztof",
    "open_date": "2026-08-04T21:00:00.000Z",
-   "line": 74.5,
+   "line": 80.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -30,9 +30,9 @@
    "p1_norm": "wojciech gluszek",
    "p2_norm": "jaroslaw rolak",
    "open_date": "2026-08-04T21:05:00.000Z",
-   "line": 83.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 71.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35904320,
@@ -41,9 +41,9 @@
    "p1_norm": "jakub skorupa",
    "p2_norm": "kamil delikatny",
    "open_date": "2026-08-04T21:05:00.000Z",
-   "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35904327,
@@ -99,6 +99,17 @@
    "line": 68.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35904381,
+   "p1": "Marek Tkocz",
+   "p2": "Pawel Polok",
+   "p1_norm": "marek tkocz",
+   "p2_norm": "pawel polok",
+   "open_date": "2026-08-04T21:35:00.000Z",
+   "line": 75.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
