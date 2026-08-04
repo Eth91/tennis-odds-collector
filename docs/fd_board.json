@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-04T12:20:19Z",
+ "captured_at": "2026-08-04T12:25:52Z",
  "matches": [
-  {
-   "event_id": 35902665,
-   "p1": "Adrian Wiecek",
-   "p2": "Karol Strowski",
-   "p1_norm": "adrian wiecek",
-   "p2_norm": "karol strowski",
-   "open_date": "2026-08-04T12:05:00.000Z",
-   "line": 60.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35902680,
-   "p1": "Krzysztof Wloczko",
-   "p2": "Maciej Nowalinski",
-   "p1_norm": "krzysztof wloczko",
-   "p2_norm": "maciej nowalinski",
-   "open_date": "2026-08-04T12:10:00.000Z",
-   "line": 67.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
   {
    "event_id": 35902685,
    "p1": "Jakub Zochniak",
@@ -30,9 +8,9 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "karol wisniewski",
    "open_date": "2026-08-04T12:15:00.000Z",
-   "line": 58.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 71.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35902686,
@@ -41,7 +19,7 @@
    "p1_norm": "michal durda",
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-08-04T12:15:00.000Z",
-   "line": 79.5,
+   "line": 82.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -52,9 +30,9 @@
    "p1_norm": "rafal idaczyk",
    "p2_norm": "patryk mecik",
    "open_date": "2026-08-04T12:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 68.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35902734,
@@ -64,8 +42,8 @@
    "p2_norm": "szymon kolasa",
    "open_date": "2026-08-04T12:30:00.000Z",
    "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35902740,
