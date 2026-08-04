@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T19:51:19Z",
+ "captured_at": "2026-08-04T19:55:50Z",
  "matches": [
   {
    "event_id": 35904159,
@@ -8,9 +8,9 @@
    "p1_norm": "mariusz koczyba",
    "p2_norm": "oliwier sokolowski",
    "open_date": "2026-08-04T19:40:00.000Z",
-   "line": 84.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 85.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35904220,
@@ -20,8 +20,8 @@
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-08-04T19:55:00.000Z",
    "line": 75.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35904225,
@@ -66,6 +66,28 @@
    "line": 79.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35904258,
+   "p1": "Marian Brunner",
+   "p2": "Kamil Delikatny",
+   "p1_norm": "marian brunner",
+   "p2_norm": "kamil delikatny",
+   "open_date": "2026-08-04T20:20:00.000Z",
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35904259,
+   "p1": "Wojciech Pytlas",
+   "p2": "Jakub Kaczmarek",
+   "p1_norm": "wojciech pytlas",
+   "p2_norm": "jakub kaczmarek",
+   "open_date": "2026-08-04T20:20:00.000Z",
+   "line": 74.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
