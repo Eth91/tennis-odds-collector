@@ -1138,8 +1138,12 @@ def _tt_ladder(lad, play_to, zone):
         pct = r["op"] if over_side else 100 - r["op"]
         hit = r["o"] if over_side else r["u"]
         miss = r["u"] if over_side else r["o"]
-        edge = abs(r["line"] - play_to) < 0.01
-        noplay = (r["line"] > play_to) if over_side else (r["line"] < play_to)
+        # play_to is None when NO ladder line clears the bet gate (tt_board stopped
+        # inventing a cutoff on 2026-08-04). Comparing a float to None raises, and
+        # the honest render is that EVERY row is unplayable -- not that all are fine.
+        edge = play_to is not None and abs(r["line"] - play_to) < 0.01
+        noplay = True if play_to is None else (
+            (r["line"] > play_to) if over_side else (r["line"] < play_to))
         cls = " mark" if edge else (" dim" if noplay else "")
         lbl = f'{r["line"]:g}' + (' <span class="ladm">◄</span>' if edge else "")
         od = f'{r["od"]:.2f}' if r.get("od") else '·'    # actual bmbets soft price at this line
@@ -1220,7 +1224,10 @@ TT_LIVE_JS = """
     // `bets`, counted in the record, invisible. An EXTRA play gets noticed; a MISSING one does not.
     // `bets` is post-gate (tt_board routes refused plays to `skipped`), so this cannot loosen anything.
     (_ttBets || []).forEach(function(b){
-      if (!b || !b.play_to || !b.ts) return;
+      // NOT `!b.play_to`: play_to is legitimately null when no ladder line clears
+      // the gate, and a falsy test dropped those bets from this cross-check --
+      // precisely the "a MISSING one does not get noticed" failure named above.
+      if (!b || !b.ts) return;
       var n1 = _ttNorm(b.p1), n2 = _ttNorm(b.p2);
       var k = _ttKey(n1, n2);
       // two guards: the exact normalised key, and the last-name fallback the projections loop
