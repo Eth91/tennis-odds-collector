@@ -474,6 +474,7 @@ rw|678|Hopeful for season debut Thursday
 rw|678|Intends to play Thursday
 rw|678|Officially listed as questionable
 rw|678|Provides spark in win
+rw|678|Records 16 points in loss
 rw|687|Progresses to individual drills
 rw|687|Won't play Monday
 rw|703|Another quiet effort
