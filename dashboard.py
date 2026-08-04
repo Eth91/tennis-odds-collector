@@ -1149,7 +1149,9 @@ def _tt_ladder(lad, play_to, zone):
 # from a fresh fetch of fd_board.json (raw URL, ~5-min CDN cache) every 60s, and bgRefresh calls
 # window._applyTTTotals() after it swaps the TT panel so the live data survives the rebake swap.
 TT_LIVE_JS = """
-  const TT_BOARD_URL = 'https://raw.githubusercontent.com/fgf9p6ks2f-ux/tennis-odds-collector/main/fd_board.json';
+  // fd_board.json is written LOCALLY by fd_tt.py on this same VM; the raw fetch
+  // was a pointless round-trip through GitHub even before the account died.
+  const TT_BOARD_URL = '/fd_board.json';
   // GITHUB REMOVED (2026-08-04, account suspended mid-deploy): tt_board.json now
   // arrives by direct scp from worker-2 into docs/, served by the same tunnel
   // that serves this page -- one origin, no third-party relay, no Pages lag.
