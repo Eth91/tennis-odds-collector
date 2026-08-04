@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-08-04T04:43:01Z",
+ "captured_at": "2026-08-04T04:48:02Z",
  "matches": [
-  {
-   "event_id": 35901703,
-   "p1": "Adam Ruszkiewicz",
-   "p2": "Mariusz Adamus",
-   "p1_norm": "adam ruszkiewicz",
-   "p2_norm": "mariusz adamus",
-   "open_date": "2026-08-04T04:25:00.000Z",
-   "line": 96.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35901704,
-   "p1": "Dominik Solilo",
-   "p2": "Dawid Kosmal",
-   "p1_norm": "dominik solilo",
-   "p2_norm": "dawid kosmal",
-   "open_date": "2026-08-04T04:25:00.000Z",
-   "line": 79.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35901706,
-   "p1": "Witold Buczynski",
-   "p2": "Kamil Kowalski",
-   "p1_norm": "witold buczynski",
-   "p2_norm": "kamil kowalski",
-   "open_date": "2026-08-04T04:30:00.000Z",
-   "line": 82.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35901707,
    "p1": "Michal Minda",
@@ -41,9 +8,9 @@
    "p1_norm": "michal minda",
    "p2_norm": "artur sobel",
    "open_date": "2026-08-04T04:30:00.000Z",
-   "line": 84.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 91.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35901723,
@@ -52,7 +19,7 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "jakub pruszkowski",
    "open_date": "2026-08-04T04:40:00.000Z",
-   "line": 76.5,
+   "line": 72.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -110,6 +77,61 @@
    "line": 77.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35901767,
+   "p1": "Krzysztof Hetnar",
+   "p2": "Jakub Nowak",
+   "p1_norm": "krzysztof hetnar",
+   "p2_norm": "jakub nowak",
+   "open_date": "2026-08-04T05:10:00.000Z",
+   "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35901773,
+   "p1": "Piotr Przewlocki",
+   "p2": "Kamil Kowalski",
+   "p1_norm": "piotr przewlocki",
+   "p2_norm": "kamil kowalski",
+   "open_date": "2026-08-04T05:15:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35901774,
+   "p1": "Krzysztof Kotyl",
+   "p2": "Artur Sobel",
+   "p1_norm": "krzysztof kotyl",
+   "p2_norm": "artur sobel",
+   "open_date": "2026-08-04T05:15:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35901775,
+   "p1": "Przemyslaw Blocho",
+   "p2": "Dawid Kosmal",
+   "p1_norm": "przemyslaw blocho",
+   "p2_norm": "dawid kosmal",
+   "open_date": "2026-08-04T05:15:00.000Z",
+   "line": 76.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35901776,
+   "p1": "Petr David",
+   "p2": "Szymon Kolasa",
+   "p1_norm": "petr david",
+   "p2_norm": "szymon kolasa",
+   "open_date": "2026-08-04T05:15:00.000Z",
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
