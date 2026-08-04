@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-04T22:57:27Z",
+ "captured_at": "2026-08-04T23:03:32Z",
  "matches": [
-  {
-   "event_id": 35904499,
-   "p1": "Grzegorz Marud",
-   "p2": "Schaniel Krzysztof",
-   "p1_norm": "grzegorz marud",
-   "p2_norm": "schaniel krzysztof",
-   "open_date": "2026-08-04T22:35:00.000Z",
-   "line": 101.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35904514,
-   "p1": "Kamil Delikatny",
-   "p2": "Zbigniew Nocun",
-   "p1_norm": "kamil delikatny",
-   "p2_norm": "zbigniew nocun",
-   "open_date": "2026-08-04T22:40:00.000Z",
-   "line": 82.5,
-   "over_odds": -105,
-   "under_odds": -135
-  },
   {
    "event_id": 35904515,
    "p1": "Tomasz Wrzalik",
@@ -30,9 +8,9 @@
    "p1_norm": "tomasz wrzalik",
    "p2_norm": "marian lebek",
    "open_date": "2026-08-04T22:50:00.000Z",
-   "line": 76.5,
+   "line": 74.5,
    "over_odds": -115,
-   "under_odds": -120
+   "under_odds": -115
   },
   {
    "event_id": 35904527,
@@ -41,9 +19,9 @@
    "p1_norm": "mateusz sikon",
    "p2_norm": "pawel adamus",
    "open_date": "2026-08-04T22:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 81.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35904528,
@@ -52,9 +30,9 @@
    "p1_norm": "wojciech gluszek",
    "p2_norm": "dawid kotwica",
    "open_date": "2026-08-04T22:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 87.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35904529,
@@ -63,9 +41,9 @@
    "p1_norm": "mateusz rutkowski",
    "p2_norm": "artur gromek",
    "open_date": "2026-08-04T22:55:00.000Z",
-   "line": 74.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 56.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35904531,

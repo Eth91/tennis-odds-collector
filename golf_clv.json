@@ -1,70 +1,75 @@
 {
- "updated": "2026-08-03T23:00:17",
+ "updated": "2026-08-04T23:01:04",
  "markets": {
   "TOP_REGION_IMG": {
-   "n": 403,
-   "mean_open_over_close": 1.504,
+   "n": 448,
+   "mean_open_over_close": 1.6002,
+   "median": 1.0
+  },
+  "OUTRIGHT_BETTING": {
+   "n": 301,
+   "mean_open_over_close": 1.0218,
    "median": 1.0
   },
   "WIN_ONLY_IMG": {
-   "n": 271,
-   "mean_open_over_close": 1.0271,
+   "n": 278,
+   "mean_open_over_close": 1.0134,
    "median": 1.0
   },
   "TOP_5_FINISH_IMG": {
-   "n": 267,
-   "mean_open_over_close": 0.9335,
+   "n": 274,
+   "mean_open_over_close": 0.9282,
    "median": 1.0
   },
   "TOP_10_FINISH_IMG": {
-   "n": 267,
-   "mean_open_over_close": 1.0859,
-   "median": 0.9333
+   "n": 274,
+   "mean_open_over_close": 1.0761,
+   "median": 0.9
   },
   "OUTRIGHT_WINNER_WITHOUT_X_IMG": {
-   "n": 266,
-   "mean_open_over_close": 1.0019,
+   "n": 273,
+   "mean_open_over_close": 0.9868,
    "median": 1.0
   },
   "TOP_20_FINISH_IMG": {
-   "n": 230,
-   "mean_open_over_close": 1.0883,
-   "median": 0.9452
+   "n": 235,
+   "mean_open_over_close": 1.0862,
+   "median": 0.945
+  },
+  "ROUND_LEADER_IMG": {
+   "n": 148,
+   "mean_open_over_close": 0.9856,
+   "median": 1.0
   },
   "TOP_10_FINISH_(INCL._TIES)": {
    "n": 143,
-   "mean_open_over_close": 0.9911,
-   "median": 0.9333
+   "mean_open_over_close": 0.9769,
+   "median": 0.9286
   },
   "TOP_5_FINISH_(INCL._TIES)": {
    "n": 142,
-   "mean_open_over_close": 0.9827,
-   "median": 0.9428
+   "mean_open_over_close": 0.9572,
+   "median": 0.9258
   },
   "TOP_20_FINISH_(INCL._TIES)": {
    "n": 140,
-   "mean_open_over_close": 0.9907,
-   "median": 0.9539
+   "mean_open_over_close": 0.9689,
+   "median": 0.9333
   },
   "THREE_CHANCES_TO_WIN": {
    "n": 104,
-   "mean_open_over_close": 1.037,
-   "median": 1.0085
-  },
-  "OUTRIGHT_BETTING": {
-   "n": 91,
-   "mean_open_over_close": 1.0,
-   "median": 1.0
+   "mean_open_over_close": 1.0954,
+   "median": 1.0909
   },
   "BIG_GUNS_V_THE_FIELD": {
    "n": 85,
-   "mean_open_over_close": 1.0399,
-   "median": 1.04
+   "mean_open_over_close": 1.0942,
+   "median": 1.0769
   },
   "TWO_CHANCES_TO_WIN": {
    "n": 76,
-   "mean_open_over_close": 1.0299,
-   "median": 1.0
+   "mean_open_over_close": 1.0726,
+   "median": 1.0646
   },
   "WHO_WILL_WIN_A_GROUP_OF_HOLES_IMG": {
    "n": 73,
@@ -77,9 +82,9 @@
    "median": 0.4661
   },
   "TOP_GROUP_IMG": {
-   "n": 46,
-   "mean_open_over_close": 1.3385,
-   "median": 0.9583
+   "n": 51,
+   "mean_open_over_close": 1.3021,
+   "median": 0.9298
   },
   "PLAYER_BIRDIES_OR_BETTER": {
    "n": 46,
@@ -111,20 +116,25 @@
    "mean_open_over_close": 0.9996,
    "median": 1.0
   },
-  "GOLF_MATCH_SPECIALS_3": {
-   "n": 29,
-   "mean_open_over_close": 1.0,
+  "TOURNAMENT_MATCHBETS_IMG": {
+   "n": 30,
+   "mean_open_over_close": 1.0806,
    "median": 1.0
   },
   "GOLF_MATCH_SPECIALS_2": {
-   "n": 26,
-   "mean_open_over_close": 1.0,
-   "median": 1.0
+   "n": 29,
+   "mean_open_over_close": 1.2457,
+   "median": 1.2273
+  },
+  "GOLF_MATCH_SPECIALS_3": {
+   "n": 29,
+   "mean_open_over_close": 1.2528,
+   "median": 1.3077
   },
   "GOLF_MATCH_SPECIALS_4": {
    "n": 20,
-   "mean_open_over_close": 1.0,
-   "median": 1.0
+   "mean_open_over_close": 1.3693,
+   "median": 1.4
   },
   "ROUND_MATCHBETS_IMG": {
    "n": 18,
@@ -146,25 +156,25 @@
    "mean_open_over_close": 1.1224,
    "median": 1.0353
   },
-  "TOURNAMENT_MATCHBETS_IMG": {
-   "n": 10,
-   "mean_open_over_close": 1.2496,
-   "median": 0.9781
-  },
   "GOLF_MATCH_SPECIALS_1": {
-   "n": 7,
-   "mean_open_over_close": 1.0,
-   "median": 1.0
+   "n": 8,
+   "mean_open_over_close": 1.258,
+   "median": 1.0333
+  },
+  "WINNING_SCORE_IMG": {
+   "n": 4,
+   "mean_open_over_close": 1.0365,
+   "median": 1.0191
   },
   "WINNING_TEAM": {
    "n": 3,
    "mean_open_over_close": 1.0,
    "median": 1.0
   },
-  "WINNING_SCORE_IMG": {
+  "WILL_THERE_BE_A_HOLE-IN-ONE_IMG": {
    "n": 2,
-   "mean_open_over_close": 1.0182,
-   "median": 1.0182
+   "mean_open_over_close": 1.0592,
+   "median": 1.0592
   }
  }
 }
