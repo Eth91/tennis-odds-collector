@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T07:22:43Z",
+ "captured_at": "2026-08-04T07:27:29Z",
  "matches": [
   {
    "event_id": 35901886,
@@ -8,20 +8,9 @@
    "p1_norm": "adam ruszkiewicz",
    "p2_norm": "milosz cesarz",
    "open_date": "2026-08-04T07:10:00.000Z",
-   "line": 86.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
-  {
-   "event_id": 35901896,
-   "p1": "Stapor Rafal",
-   "p2": "Dawid Kosmal",
-   "p1_norm": "stapor rafal",
-   "p2_norm": "dawid kosmal",
-   "open_date": "2026-08-04T07:15:00.000Z",
-   "line": 58.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 75.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35901897,
@@ -30,9 +19,9 @@
    "p1_norm": "kamil rudomina",
    "p2_norm": "artur sobel",
    "open_date": "2026-08-04T07:20:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 70.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35901899,
@@ -41,9 +30,9 @@
    "p1_norm": "adrian wiecek",
    "p2_norm": "szymon kolasa",
    "open_date": "2026-08-04T07:20:00.000Z",
-   "line": 75.5,
-   "over_odds": -115,
-   "under_odds": -115
+   "line": 74.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35901904,
