@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T22:02:42Z",
+ "captured_at": "2026-08-04T22:06:51Z",
  "matches": [
-  {
-   "event_id": 35904432,
-   "p1": "Mateusz Sikon",
-   "p2": "Grzegorz Marud",
-   "p1_norm": "mateusz sikon",
-   "p2_norm": "grzegorz marud",
-   "open_date": "2026-08-04T21:45:00.000Z",
-   "line": 88.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35904456,
    "p1": "Adrian Fabis",
@@ -19,9 +8,9 @@
    "p1_norm": "adrian fabis",
    "p2_norm": "mateusz trela",
    "open_date": "2026-08-04T21:55:00.000Z",
-   "line": 88.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 82.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35904458,
@@ -30,9 +19,9 @@
    "p1_norm": "henryk tkaczyk",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-08-04T21:55:00.000Z",
-   "line": 73.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 53.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35904465,
@@ -41,9 +30,9 @@
    "p1_norm": "lukasz oracz",
    "p2_norm": "tomasz wrzalik",
    "open_date": "2026-08-04T22:00:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35904477,
