@@ -237,6 +237,93 @@ def tier_of(r, is_fav):
     return "C"
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+# COMBO-PROP CELL — PRE-REGISTERED FORWARD TEST (registered 2026-08-04)
+#
+# WHAT IS BEING TESTED. Combo props (two stats summed) versus straight props, on
+# the SELECTED bets only. Forward record since v1.2 split cleanly:
+#     straight props  8-3   72.7%   +4.46u
+#     combo props     0-2    0.0%   -2.00u
+# Both combo losses were near-misses on high combined lines (Stewart reb_ast
+# 12.5 -> 11.0, Cloud pts_reb 14.5 -> 11.0). PROPOSED MECHANISM: a combo line
+# stacks TWO elevation estimates, so the projection error compounds -- which is
+# the same "big line + big d_min" weakness the loss profile keeps surfacing.
+# n=2 is not evidence; this registration exists so it becomes evidence.
+#
+# DECISION RULE, FIXED IN ADVANCE:
+#   At n >= 20 forward combo positions (LADDER-COLLAPSED -- a ladder is ONE
+#   position, anchored on its lowest rung, per 2026-08-04), EXCLUDE combo props
+#   from selection if cumulative units <= 0. Otherwise combos stay.
+#
+# OPERATING CHARACTERISTICS, computed before adopting the rule (price dec 1.82,
+# break-even 54.9%, 40k sims). P(units <= 0) at n=20 by TRUE hit rate:
+#     45% -> 75%   50% -> 59%   55% -> 42%   60% -> 25%   65% -> 12%   70% -> 5%
+# So the rule catches a genuinely bad cell ~75% of the time and wrongly excludes
+# a genuinely good one (65%) ~12% of the time. That asymmetry is accepted
+# deliberately: combos are a small share of volume, the objective is hit rate
+# under a limited-bets constraint, and a losing cell costs more than a missed one.
+#
+# THE 0-2 ABOVE DOES NOT COUNT toward the decision -- it is what generated the
+# hypothesis, so scoring it would be circular. Only positions dated on or after
+# COMBO_EPOCH count.
+# ══════════════════════════════════════════════════════════════════════════════
+COMBO_EPOCH = "2026-08-04"
+COMBO_N_DECIDE = 20
+COMBO_STATS = frozenset({"reb_ast", "pts_reb", "pts_ast", "pra", "pts_reb_ast"})
+
+
+def is_combo(r):
+    """True if the row is a combo (two-stat) prop."""
+    return (r.get("stat") or "") in COMBO_STATS
+
+
+def combo_watch(ledger_path=None):
+    """Forward record of the pre-registered combo cell. READ-ONLY -- reports the
+    checkpoint, never changes selection. Ladder-collapsed: one position per
+    (date, player, stat), anchored on the lowest rung."""
+    import sqlite3 as _sq
+    from pathlib import Path as _P
+    db = _P(ledger_path) if ledger_path else _P(__file__).resolve().parent / "wnba_ledger.sqlite"
+    con = _sq.connect(f"file:{db}?mode=ro", uri=True)
+    con.row_factory = _sq.Row
+    rows = [dict(r) for r in con.execute(
+        "SELECT * FROM predictions WHERE graded=1 AND pred_date >= ? ORDER BY pred_date",
+        (COMBO_EPOCH,))]
+    con.close()
+    byday = defaultdict(list)
+    for r in rows:
+        byday[r["pred_date"]].append(r)
+    sel = []
+    for d in sorted(byday):
+        try:
+            out = current_selection(byday[d])
+        except Exception:
+            continue
+        picks = out[0] if isinstance(out, tuple) else out
+        sel += [r for r in picks
+                if isinstance(r, dict) and r.get("result") in ("over", "under")]
+    lad = defaultdict(list)
+    for r in sel:
+        lad[(r["pred_date"], r.get("player"), r.get("stat"))].append(r)
+    positions = [min(v, key=lambda x: float(x.get("line") or 0)) for v in lad.values()]
+
+    def tally(rs):
+        w = sum(1 for r in rs if r["result"] == r["side"])
+        u = sum((float(r["odds"]) - 1) if r["result"] == r["side"] else -1.0 for r in rs)
+        return {"n": len(rs), "w": w, "l": len(rs) - w, "u": round(u, 2)}
+
+    combo = tally([r for r in positions if is_combo(r)])
+    straight = tally([r for r in positions if not is_combo(r)])
+    n = combo["n"]
+    if n < COMBO_N_DECIDE:
+        verdict = f"accumulating ({n}/{COMBO_N_DECIDE})"
+    else:
+        verdict = "EXCLUDE combos" if combo["u"] <= 0 else "RETAIN combos"
+    return {"epoch": COMBO_EPOCH, "combo": combo, "straight": straight,
+            "progress": f"{n}/{COMBO_N_DECIDE}", "verdict": verdict,
+            "rule": "at n>=20 forward ladder-collapsed combo positions, exclude if units<=0"}
+
+
 def fav_keys(rows):
     """{(date, player, stat)} of each team-cascade's shortest-odds group. CANONICAL SCOPE:
     pass the SELECTED universe (current_selection output), never raw preds — favorite status
