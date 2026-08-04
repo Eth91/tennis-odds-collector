@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T09:44:37Z",
+ "captured_at": "2026-08-04T09:50:04Z",
  "matches": [
-  {
-   "event_id": 35902021,
-   "p1": "Piotr Cyrnek",
-   "p2": "Karol Strowski",
-   "p1_norm": "piotr cyrnek",
-   "p2_norm": "karol strowski",
-   "open_date": "2026-08-04T09:20:00.000Z",
-   "line": 79.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35902041,
    "p1": "Szymon Kolasa",
@@ -19,9 +8,9 @@
    "p1_norm": "szymon kolasa",
    "p2_norm": "adrian wiecek",
    "open_date": "2026-08-04T09:40:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35902053,
@@ -30,9 +19,9 @@
    "p1_norm": "artur daniel",
    "p2_norm": "krzysztof wloczko",
    "open_date": "2026-08-04T09:45:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -110
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35902063,
@@ -41,9 +30,9 @@
    "p1_norm": "rafal gajda",
    "p2_norm": "michal durda",
    "open_date": "2026-08-04T09:50:00.000Z",
-   "line": 75.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 73.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35902064,
@@ -52,7 +41,7 @@
    "p1_norm": "artur sobel",
    "p2_norm": "jakub zochniak",
    "open_date": "2026-08-04T09:50:00.000Z",
-   "line": 84.5,
+   "line": 77.5,
    "over_odds": -112,
    "under_odds": -118
   },
