@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T02:59:46Z",
+ "captured_at": "2026-08-04T03:06:39Z",
  "matches": [
-  {
-   "event_id": 35901205,
-   "p1": "Pawel Kurek",
-   "p2": "Wojciech Urban",
-   "p1_norm": "pawel kurek",
-   "p2_norm": "wojciech urban",
-   "open_date": "2026-08-04T02:45:00.000Z",
-   "line": 82.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35901213,
    "p1": "Jakub Zochniak",
@@ -19,9 +8,9 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "dawid kosmal",
    "open_date": "2026-08-04T03:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -110
+   "line": 79.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35901214,
@@ -30,9 +19,9 @@
    "p1_norm": "piotr cyrnek",
    "p2_norm": "szymon kolasa",
    "open_date": "2026-08-04T03:00:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 82.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35901215,
@@ -41,9 +30,9 @@
    "p1_norm": "kamil klocek",
    "p2_norm": "artur sobel",
    "open_date": "2026-08-04T03:00:00.000Z",
-   "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 72.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35901216,
@@ -52,8 +41,8 @@
    "p1_norm": "michal durda",
    "p2_norm": "kamil kowalski",
    "open_date": "2026-08-04T03:00:00.000Z",
-   "line": 69.5,
-   "over_odds": -110,
+   "line": 63.5,
+   "over_odds": -115,
    "under_odds": -120
   },
   {
@@ -63,9 +52,9 @@
    "p1_norm": "kacper adamus",
    "p2_norm": "grzegorz marud",
    "open_date": "2026-08-04T03:05:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35901245,
@@ -118,9 +107,9 @@
    "p1_norm": "piotr przewlocki",
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-08-04T03:25:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 80.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
