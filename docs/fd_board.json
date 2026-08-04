@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T17:43:18Z",
+ "captured_at": "2026-08-04T17:47:25Z",
  "matches": [
   {
    "event_id": 35903873,
@@ -8,9 +8,9 @@
    "p1_norm": "marian brunner",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-08-04T17:30:00.000Z",
-   "line": 85.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 84.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35903880,
@@ -19,9 +19,9 @@
    "p1_norm": "marek tkocz",
    "p2_norm": "jakub kaczmarek",
    "open_date": "2026-08-04T17:35:00.000Z",
-   "line": 55.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 51.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35903915,
@@ -30,9 +30,9 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "mateusz sikon",
    "open_date": "2026-08-04T17:45:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 77.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35903916,
@@ -41,9 +41,9 @@
    "p1_norm": "adrian fabis",
    "p2_norm": "dawid kotwica",
    "open_date": "2026-08-04T17:45:00.000Z",
-   "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35903946,
