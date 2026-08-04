@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T15:13:17Z",
+ "captured_at": "2026-08-04T15:17:34Z",
  "matches": [
   {
    "event_id": 35903136,
@@ -8,9 +8,9 @@
    "p1_norm": "jakub kuzmicz",
    "p2_norm": "artur gromek",
    "open_date": "2026-08-04T15:00:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 98.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35903137,
@@ -19,9 +19,9 @@
    "p1_norm": "adrian fabis",
    "p2_norm": "wojciech gluszek",
    "open_date": "2026-08-04T15:00:00.000Z",
-   "line": 96.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 101.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35903140,
@@ -30,9 +30,9 @@
    "p1_norm": "mariusz baron",
    "p2_norm": "rafal idaczyk",
    "open_date": "2026-08-04T15:05:00.000Z",
-   "line": 89.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 79.5,
+   "over_odds": -135,
+   "under_odds": -105
   },
   {
    "event_id": 35903158,
@@ -41,9 +41,9 @@
    "p1_norm": "tomasz wrzalik",
    "p2_norm": "jakub kaczmarek",
    "open_date": "2026-08-04T15:10:00.000Z",
-   "line": 77.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35903211,

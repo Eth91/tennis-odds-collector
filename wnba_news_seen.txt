@@ -279,6 +279,7 @@ rw|330|Productive off bench
 rw|330|Starting Monday
 rw|331|Drills four treys
 rw|331|Nets 19 points in Washington
+rw|331|Notches 17 points in win
 rw|331|Shooting woes in defeat
 rw|331|Strong line in win
 rw|331|Strong outing in win
@@ -300,6 +301,7 @@ rw|394|Out Sunday
 rw|394|Ruled out Wednesday
 rw|394|Shines in return to Phoenix
 rw|394|Won't play Tuesday
+rw|401|Limited to eight minutes
 rw|401|Phased out in defeat
 rw|412|Let go by Toronto
 rw|413|Buries four triples Tuesday
@@ -602,6 +604,7 @@ rw|914|Won't play Thursday
 rw|915|Another double-double in win
 rw|915|Available for All-Star Game
 rw|915|Leads Dream to another win
+rw|915|Monster line in loss
 rw|916|Posts 15 points despite restriction
 rw|916|Scores 10 points in loss
 rw|916|Scores 26 points Thursday
