@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T09:24:55Z",
+ "captured_at": "2026-08-04T09:29:51Z",
  "matches": [
   {
    "event_id": 35901983,
@@ -9,8 +9,19 @@
    "p2_norm": "petr david",
    "open_date": "2026-08-04T09:00:00.000Z",
    "line": 96.5,
-   "over_odds": 100,
-   "under_odds": -140
+   "over_odds": null,
+   "under_odds": null
+  },
+  {
+   "event_id": 35902020,
+   "p1": "Krystian Kolodziej",
+   "p2": "Maciej Nowalinski",
+   "p1_norm": "krystian kolodziej",
+   "p2_norm": "maciej nowalinski",
+   "open_date": "2026-08-04T09:20:00.000Z",
+   "line": 75.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35902021,
@@ -30,9 +41,9 @@
    "p1_norm": "piotr przewlocki",
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-08-04T09:25:00.000Z",
-   "line": 75.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 66.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35902036,
@@ -41,9 +52,9 @@
    "p1_norm": "kamil klocek",
    "p2_norm": "karol wisniewski",
    "open_date": "2026-08-04T09:25:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 80.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35902039,
@@ -99,6 +110,17 @@
    "line": 84.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35902066,
+   "p1": "Jerzy Pelka",
+   "p2": "Oskar Jadach",
+   "p1_norm": "jerzy pelka",
+   "p2_norm": "oskar jadach",
+   "open_date": "2026-08-04T09:55:00.000Z",
+   "line": 79.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
