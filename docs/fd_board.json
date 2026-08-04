@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T12:09:50Z",
+ "captured_at": "2026-08-04T12:15:02Z",
  "matches": [
-  {
-   "event_id": 35902303,
-   "p1": "Dominik Solilo",
-   "p2": "Artur Sobel",
-   "p1_norm": "dominik solilo",
-   "p2_norm": "artur sobel",
-   "open_date": "2026-08-04T11:50:00.000Z",
-   "line": 88.5,
-   "over_odds": 120,
-   "under_odds": -165
-  },
   {
    "event_id": 35902665,
    "p1": "Adrian Wiecek",
@@ -19,7 +8,7 @@
    "p1_norm": "adrian wiecek",
    "p2_norm": "karol strowski",
    "open_date": "2026-08-04T12:05:00.000Z",
-   "line": 77.5,
+   "line": 74.5,
    "over_odds": -125,
    "under_odds": -110
   },
@@ -30,9 +19,9 @@
    "p1_norm": "krzysztof wloczko",
    "p2_norm": "maciej nowalinski",
    "open_date": "2026-08-04T12:10:00.000Z",
-   "line": 80.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 81.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35902685,
@@ -41,9 +30,9 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "karol wisniewski",
    "open_date": "2026-08-04T12:15:00.000Z",
-   "line": 82.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35902686,
@@ -52,9 +41,9 @@
    "p1_norm": "michal durda",
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-08-04T12:15:00.000Z",
-   "line": 78.5,
-   "over_odds": -110,
-   "under_odds": -120
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35902695,
@@ -75,8 +64,8 @@
    "p2_norm": "szymon kolasa",
    "open_date": "2026-08-04T12:30:00.000Z",
    "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35902740,
@@ -86,8 +75,30 @@
    "p2_norm": "artur daniel",
    "open_date": "2026-08-04T12:35:00.000Z",
    "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35902752,
+   "p1": "Kamil Klocek",
+   "p2": "Artur Sobel",
+   "p1_norm": "kamil klocek",
+   "p2_norm": "artur sobel",
+   "open_date": "2026-08-04T12:40:00.000Z",
+   "line": 77.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35902753,
+   "p1": "Piotr Przewlocki",
+   "p2": "Rafal Gajda",
+   "p1_norm": "piotr przewlocki",
+   "p2_norm": "rafal gajda",
+   "open_date": "2026-08-04T12:40:00.000Z",
+   "line": 81.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
