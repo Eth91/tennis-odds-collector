@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T18:04:41Z",
+ "captured_at": "2026-08-04T18:09:27Z",
  "matches": [
   {
    "event_id": 35903946,
@@ -8,9 +8,9 @@
    "p1_norm": "jakub skorupa",
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-08-04T17:55:00.000Z",
-   "line": 82.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 75.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35903961,
@@ -19,9 +19,9 @@
    "p1_norm": "tomasz wrzalik",
    "p2_norm": "wojciech pytlas",
    "open_date": "2026-08-04T18:00:00.000Z",
-   "line": 76.5,
+   "line": 88.5,
    "over_odds": -115,
-   "under_odds": -115
+   "under_odds": -120
   },
   {
    "event_id": 35903963,
@@ -30,9 +30,9 @@
    "p1_norm": "miroslav sklensky",
    "p2_norm": "artur daniel",
    "open_date": "2026-08-04T18:05:00.000Z",
-   "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35903977,
@@ -52,9 +52,9 @@
    "p1_norm": "oliwier sokolowski",
    "p2_norm": "pawel adamus",
    "open_date": "2026-08-04T18:10:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35903991,
