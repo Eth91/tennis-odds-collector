@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T13:19:35Z",
+ "captured_at": "2026-08-04T13:25:01Z",
  "matches": [
   {
    "event_id": 35902790,
@@ -8,9 +8,9 @@
    "p1_norm": "dominik solilo",
    "p2_norm": "jakub zochniak",
    "open_date": "2026-08-04T13:05:00.000Z",
-   "line": 91.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 75.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35902843,
@@ -19,9 +19,9 @@
    "p1_norm": "karol strowski",
    "p2_norm": "petr david",
    "open_date": "2026-08-04T13:20:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 73.5,
+   "over_odds": -110,
+   "under_odds": -120
   },
   {
    "event_id": 35902863,
@@ -31,8 +31,8 @@
    "p2_norm": "dawid kosmal",
    "open_date": "2026-08-04T13:25:00.000Z",
    "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35902874,
@@ -42,8 +42,8 @@
    "p2_norm": "jerzy pelka",
    "open_date": "2026-08-04T13:30:00.000Z",
    "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35902875,
@@ -77,6 +77,17 @@
    "line": 81.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35902920,
+   "p1": "Krystian Kolodziej",
+   "p2": "Krzysztof Wloczko",
+   "p1_norm": "krystian kolodziej",
+   "p2_norm": "krzysztof wloczko",
+   "open_date": "2026-08-04T13:50:00.000Z",
+   "line": 77.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
