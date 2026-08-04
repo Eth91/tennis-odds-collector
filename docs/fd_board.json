@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T20:27:26Z",
+ "captured_at": "2026-08-04T20:32:53Z",
  "matches": [
-  {
-   "event_id": 35904258,
-   "p1": "Marian Brunner",
-   "p2": "Kamil Delikatny",
-   "p1_norm": "marian brunner",
-   "p2_norm": "kamil delikatny",
-   "open_date": "2026-08-04T20:20:00.000Z",
-   "line": 51.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
   {
    "event_id": 35904259,
    "p1": "Wojciech Pytlas",
@@ -19,9 +8,9 @@
    "p1_norm": "wojciech pytlas",
    "p2_norm": "jakub kaczmarek",
    "open_date": "2026-08-04T20:20:00.000Z",
-   "line": 78.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 84.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35904284,
@@ -41,9 +30,9 @@
    "p1_norm": "jakub kuzmicz",
    "p2_norm": "artur daniel",
    "open_date": "2026-08-04T20:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 78.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35904286,
@@ -52,9 +41,9 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "pawel adamus",
    "open_date": "2026-08-04T20:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35904293,
