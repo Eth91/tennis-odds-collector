@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-04T00:19:25Z",
+ "captured_at": "2026-08-04T00:27:07Z",
  "matches": [
-  {
-   "event_id": 35901046,
-   "p1": "Andriej Fomin",
-   "p2": "Michal Guzik",
-   "p1_norm": "andriej fomin",
-   "p2_norm": "michal guzik",
-   "open_date": "2026-08-04T00:00:00.000Z",
-   "line": 93.5,
-   "over_odds": -105,
-   "under_odds": -135
-  },
-  {
-   "event_id": 35901066,
-   "p1": "Jakub Kuzmicz",
-   "p2": "Jakub Glanowski",
-   "p1_norm": "jakub kuzmicz",
-   "p2_norm": "jakub glanowski",
-   "open_date": "2026-08-04T00:10:00.000Z",
-   "line": 78.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
   {
    "event_id": 35901067,
    "p1": "Miroslaw Lewczuk",
@@ -30,20 +8,9 @@
    "p1_norm": "miroslaw lewczuk",
    "p2_norm": "michal krutak",
    "open_date": "2026-08-04T00:10:00.000Z",
-   "line": 84.5,
-   "over_odds": -115,
-   "under_odds": -120
-  },
-  {
-   "event_id": 35901068,
-   "p1": "Miroslaw Piecowski",
-   "p2": "Michal Skorski",
-   "p1_norm": "miroslaw piecowski",
-   "p2_norm": "michal skorski",
-   "open_date": "2026-08-04T00:10:00.000Z",
-   "line": 75.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 92.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35901073,
@@ -52,9 +19,9 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "pawel kurek",
    "open_date": "2026-08-04T00:20:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 83.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35901087,
@@ -63,9 +30,9 @@
    "p1_norm": "jacek zelezik",
    "p2_norm": "adam staniczek",
    "open_date": "2026-08-04T00:25:00.000Z",
-   "line": 72.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35901094,
