@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-04T00:46:27Z",
+ "captured_at": "2026-08-04T00:54:04Z",
  "matches": [
-  {
-   "event_id": 35901094,
-   "p1": "Miroslaw Warzecha",
-   "p2": "Grzegorz Mucha",
-   "p1_norm": "miroslaw warzecha",
-   "p2_norm": "grzegorz mucha",
-   "open_date": "2026-08-04T00:35:00.000Z",
-   "line": 87.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35901095,
-   "p1": "Mateusz Rutkowski",
-   "p2": "Artur Gromek",
-   "p1_norm": "mateusz rutkowski",
-   "p2_norm": "artur gromek",
-   "open_date": "2026-08-04T00:35:00.000Z",
-   "line": 60.5,
-   "over_odds": 100,
-   "under_odds": -140
-  },
   {
    "event_id": 35901096,
    "p1": "Wojciech Gluszek",
@@ -30,9 +8,9 @@
    "p1_norm": "wojciech gluszek",
    "p2_norm": "adrian eliasz",
    "open_date": "2026-08-04T00:35:00.000Z",
-   "line": 86.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 101.5,
+   "over_odds": 135,
+   "under_odds": -195
   },
   {
    "event_id": 35901103,
@@ -41,9 +19,9 @@
    "p1_norm": "jerzy michalik",
    "p2_norm": "michal guzik",
    "open_date": "2026-08-04T00:45:00.000Z",
-   "line": 74.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 78.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35901118,
