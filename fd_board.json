@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-04T20:46:26Z",
+ "captured_at": "2026-08-04T20:51:05Z",
  "matches": [
-  {
-   "event_id": 35904293,
-   "p1": "Tomasz Wrzalik",
-   "p2": "Pawel Polok",
-   "p1_norm": "tomasz wrzalik",
-   "p2_norm": "pawel polok",
-   "open_date": "2026-08-04T20:45:00.000Z",
-   "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35904294,
-   "p1": "Dariusz Molenda",
-   "p2": "Henryk Tkaczyk",
-   "p1_norm": "dariusz molenda",
-   "p2_norm": "henryk tkaczyk",
-   "open_date": "2026-08-04T20:45:00.000Z",
-   "line": 75.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35904315,
    "p1": "Mateusz Rutkowski",
