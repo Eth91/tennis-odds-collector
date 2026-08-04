@@ -476,6 +476,7 @@ rw|735|Limited production in return
 rw|735|Notches 10 points
 rw|735|On track to return Sunday
 rw|735|Playing limited minutes
+rw|735|Starting against Sky
 rw|739|Records 10 points in win
 rw|751|Listed as questionable
 rw|751|Upgraded to available
