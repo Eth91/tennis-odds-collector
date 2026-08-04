@@ -96,6 +96,7 @@ rw|1015|Won't play Wednesday
 rw|1016|Available to play
 rw|1016|Downgraded to out
 rw|1016|Fades injury report
+rw|1016|Not mentioned on injury report
 rw|1016|Not on injury report for Saturday
 rw|1016|Out Wednesday
 rw|1016|Ruled out Monday
@@ -655,6 +656,7 @@ rw|971|Remains away from team
 rw|972|Another quiet effort
 rw|972|Not listed on injury report
 rw|973|Bottoms out Wednesday
+rw|977|Could make team debut Wednesday
 rw|977|Fares well against Sparks
 rw|977|Heading to Los Angeles
 rw|979|Drops 23 points in loss
