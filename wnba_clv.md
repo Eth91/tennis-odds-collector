@@ -1,6 +1,6 @@
 # WNBA injury-timing CLV — does the line move our way, open to close?
 
-_2026-08-04 14:35 UTC · 537 closed shadows (opening line vs closing line)_
+_2026-08-04 18:35 UTC · 537 closed shadows (opening line vs closing line)_
 
 ## Does the line move toward our read from open to close?
 ```
