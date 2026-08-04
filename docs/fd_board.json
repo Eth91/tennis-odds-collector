@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T21:22:24Z",
+ "captured_at": "2026-08-04T21:26:59Z",
  "matches": [
-  {
-   "event_id": 35904319,
-   "p1": "Wojciech Gluszek",
-   "p2": "Jaroslaw Rolak",
-   "p1_norm": "wojciech gluszek",
-   "p2_norm": "jaroslaw rolak",
-   "open_date": "2026-08-04T21:05:00.000Z",
-   "line": 86.5,
-   "over_odds": -135,
-   "under_odds": -105
-  },
   {
    "event_id": 35904327,
    "p1": "Piotr Gumulinski",
@@ -19,9 +8,20 @@
    "p1_norm": "piotr gumulinski",
    "p2_norm": "marian lebek",
    "open_date": "2026-08-04T21:10:00.000Z",
-   "line": 85.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 77.5,
+   "over_odds": null,
+   "under_odds": null
+  },
+  {
+   "event_id": 35904354,
+   "p1": "Jakub Nowak",
+   "p2": "Pawel Adamus",
+   "p1_norm": "jakub nowak",
+   "p2_norm": "pawel adamus",
+   "open_date": "2026-08-04T21:20:00.000Z",
+   "line": 78.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35904363,
@@ -30,9 +30,9 @@
    "p1_norm": "maciej kolek",
    "p2_norm": "artur gromek",
    "open_date": "2026-08-04T21:25:00.000Z",
-   "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35904368,
@@ -77,6 +77,17 @@
    "line": 80.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35904436,
+   "p1": "Maciej Kolek",
+   "p2": "Jakub Glanowski",
+   "p1_norm": "maciej kolek",
+   "p2_norm": "jakub glanowski",
+   "open_date": "2026-08-04T21:50:00.000Z",
+   "line": 81.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
