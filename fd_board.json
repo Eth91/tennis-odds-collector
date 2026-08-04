@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T02:39:39Z",
+ "captured_at": "2026-08-04T02:46:35Z",
  "matches": [
   {
    "event_id": 35901193,
@@ -8,9 +8,9 @@
    "p1_norm": "aleksander barton",
    "p2_norm": "michal krutak",
    "open_date": "2026-08-04T02:35:00.000Z",
-   "line": 52.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 47.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35901205,
@@ -19,9 +19,9 @@
    "p1_norm": "pawel kurek",
    "p2_norm": "wojciech urban",
    "open_date": "2026-08-04T02:45:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 76.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35901206,
@@ -30,9 +30,9 @@
    "p1_norm": "andriej fomin",
    "p2_norm": "adam staniczek",
    "open_date": "2026-08-04T02:45:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35901213,
@@ -41,9 +41,9 @@
    "p1_norm": "jakub zochniak",
    "p2_norm": "dawid kosmal",
    "open_date": "2026-08-04T03:00:00.000Z",
-   "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 75.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35901214,
@@ -88,6 +88,17 @@
    "line": 80.5,
    "over_odds": -112,
    "under_odds": -118
+  },
+  {
+   "event_id": 35901245,
+   "p1": "Adam Ruszkiewicz",
+   "p2": "Jakub Kaczmarek",
+   "p1_norm": "adam ruszkiewicz",
+   "p2_norm": "jakub kaczmarek",
+   "open_date": "2026-08-04T03:10:00.000Z",
+   "line": 80.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }

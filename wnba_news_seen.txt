@@ -421,6 +421,7 @@ rw|587|Hands out 10 dimes in loss
 rw|587|Leading scorer in loss
 rw|587|Leads all scorers in loss
 rw|587|Records pair of steals Wednesday
+rw|587|Shoots better from deep
 rw|599|Productive as starter
 rw|599|Starting Sunday
 rw|599|Struggles in loss
