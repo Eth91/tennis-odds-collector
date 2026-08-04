@@ -751,7 +751,7 @@ def double_double_rate(log, proj_min, w=None):
             "d_reb": d_reb, "d_pts": d_pts, "d_min": d_min}
 
 ESPN = "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba"
-EH = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
+EH = {"Accept": "application/json"}  # NO spoofed UA: ESPN 403s browser UAs on site.api (2026-08-04)
 
 # Pooled session (2026-07-29 latency work): a fresh requests.get() per call rebuilt the SSL
 # context and re-read the CA bundle every time — profiled at 166ms of load_verify_locations

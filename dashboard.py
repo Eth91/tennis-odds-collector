@@ -231,7 +231,9 @@ def _tip_times():
             j = requests.get(
                 "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard"
                 f"?dates={day:%Y%m%d}",
-                headers={"User-Agent": "Mozilla/5.0"}, timeout=15).json()
+                # No spoofed UA: ESPN 403s browser User-Agents on site.api and
+                # serves the default python-requests client. See wnba_wowy.H.
+                headers={"Accept": "application/json"}, timeout=15).json()
         # ValueError IS REQUIRED HERE (2026-08-04). `.json()` raises
         # json.JSONDecodeError -- a ValueError -- not a RequestException, so when
         # ESPN answered with a non-JSON error page the exception escaped this

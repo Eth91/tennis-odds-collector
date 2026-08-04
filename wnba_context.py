@@ -22,7 +22,7 @@ from pathlib import Path
 import requests
 
 SITE = "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba"
-H = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
+H = {"Accept": "application/json"}  # NO spoofed UA: ESPN 403s browser UAs on site.api (2026-08-04)
 CACHE = Path(__file__).resolve().parent / "wnba_context_cache.json"
 ET = dt.timezone(dt.timedelta(hours=-4))
 

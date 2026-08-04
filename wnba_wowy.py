@@ -65,7 +65,17 @@ def flush_glog_cache():
         _GLOG_FILE.write_text(_json.dumps(disk))
     except OSError:
         pass
-H = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
+# NO SPOOFED BROWSER UA (2026-08-04). ESPN's site.api endpoint 403s a browser
+# User-Agent and serves the DEFAULT python-requests client normally. Measured
+# back to back on /wnba/teams: bare requests.get -> 200, 61,232 bytes;
+# session + "Mozilla/5.0" -> 403, 438 bytes. The 403 raised RuntimeError out of
+# _get, which killed wnba_alert before it could write wnba_injuries_board.json --
+# the board showed a 6.9-HOUR-stale injury snapshot while the loop reported
+# healthy. The same spoof in dashboard.py._tip_times returned a 403 HTML page
+# whose .json() raised JSONDecodeError and killed the whole board build for 5.7
+# hours. One root cause, two outages. Send Accept only and let requests
+# identify itself honestly.
+H = {"Accept": "application/json"}
 
 # Pooled session (2026-07-29 latency work): a fresh requests.get() per call rebuilt the SSL
 # context and re-read the CA bundle every time — profiled at 166ms of load_verify_locations
