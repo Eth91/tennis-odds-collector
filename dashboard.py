@@ -1150,7 +1150,10 @@ def _tt_ladder(lad, play_to, zone):
 # window._applyTTTotals() after it swaps the TT panel so the live data survives the rebake swap.
 TT_LIVE_JS = """
   const TT_BOARD_URL = 'https://raw.githubusercontent.com/fgf9p6ks2f-ux/tennis-odds-collector/main/fd_board.json';
-  const TT_H2H_URL = 'https://raw.githubusercontent.com/fgf9p6ks2f-ux/tennis-odds-collector/main/tt_board.json';
+  // GITHUB REMOVED (2026-08-04, account suspended mid-deploy): tt_board.json now
+  // arrives by direct scp from worker-2 into docs/, served by the same tunnel
+  // that serves this page -- one origin, no third-party relay, no Pages lag.
+  const TT_H2H_URL = '/tt_board.json';
   let _ttBoard = null, _ttH2H = null, _ttUpcoming = null, _ttBets = null, _ttSkipped = null, _ttPositions = null
   let _ttV11 = null;   // v1.1 candidate block (forward test) from tt_board.json
   function _ttEsc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
@@ -1350,8 +1353,8 @@ TT_LIVE_JS = """
     var v11Block = '';
     if (_ttV11 && (v11Rows || (_ttV11.forward && (_ttV11.forward.w + _ttV11.forward.l) > 0))){
       var fw = _ttV11.forward || {w:0,l:0,u:0};
-      v11Block = '<div class="ttpos"><div class="ttpos-hd">v1.1 candidate \u00b7 forward test \u00b7 not bets \u00b7 '
-        + fw.w + '-' + fw.l + ' ' + (fw.u >= 0 ? '+' : '') + fw.u + 'u \u00b7 ' + (_ttV11.progress || '')
+      v11Block = '<div class="ttpos"><div class="ttpos-hd">v1.1 expansion \u00b7 LIVE since 8/4 \u00b7 new-cell record '
+        + fw.w + '-' + fw.l + ' ' + (fw.u >= 0 ? '+' : '') + fw.u + 'u \u00b7 revert check at 50 (need 68%+)'
         + '</div>' + v11Rows + '</div>';
     }
     var posBlock = posRows
