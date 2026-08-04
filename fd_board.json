@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T09:34:55Z",
+ "captured_at": "2026-08-04T09:39:50Z",
  "matches": [
   {
    "event_id": 35902020,
@@ -8,9 +8,9 @@
    "p1_norm": "krystian kolodziej",
    "p2_norm": "maciej nowalinski",
    "open_date": "2026-08-04T09:20:00.000Z",
-   "line": 87.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 80.5,
+   "over_odds": 100,
+   "under_odds": -140
   },
   {
    "event_id": 35902021,
@@ -19,7 +19,7 @@
    "p1_norm": "piotr cyrnek",
    "p2_norm": "karol strowski",
    "open_date": "2026-08-04T09:20:00.000Z",
-   "line": 77.5,
+   "line": 85.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -30,9 +30,9 @@
    "p1_norm": "piotr przewlocki",
    "p2_norm": "wojciech wojtaszczyk",
    "open_date": "2026-08-04T09:25:00.000Z",
-   "line": 54.5,
-   "over_odds": -105,
-   "under_odds": -135
+   "line": 93.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35902036,
@@ -41,9 +41,9 @@
    "p1_norm": "kamil klocek",
    "p2_norm": "karol wisniewski",
    "open_date": "2026-08-04T09:25:00.000Z",
-   "line": 82.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 74.5,
+   "over_odds": 105,
+   "under_odds": -145
   },
   {
    "event_id": 35902041,
@@ -52,9 +52,9 @@
    "p1_norm": "szymon kolasa",
    "p2_norm": "adrian wiecek",
    "open_date": "2026-08-04T09:40:00.000Z",
-   "line": 82.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35902053,
@@ -75,8 +75,8 @@
    "p2_norm": "michal durda",
    "open_date": "2026-08-04T09:50:00.000Z",
    "line": 75.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35902064,
@@ -110,6 +110,17 @@
    "line": 78.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35902077,
+   "p1": "Miroslav Sklensky",
+   "p2": "Krystian Kolodziej",
+   "p1_norm": "miroslav sklensky",
+   "p2_norm": "krystian kolodziej",
+   "open_date": "2026-08-04T10:05:00.000Z",
+   "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
