@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T18:40:14Z",
+ "captured_at": "2026-08-04T18:44:41Z",
  "matches": [
   {
    "event_id": 35904013,
@@ -8,18 +8,7 @@
    "p1_norm": "mariusz koczyba",
    "p2_norm": "mateusz sikon",
    "open_date": "2026-08-04T18:30:00.000Z",
-   "line": 91.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35904015,
-   "p1": "Marcin Kowalczyk",
-   "p2": "Dawid Kotwica",
-   "p1_norm": "marcin kowalczyk",
-   "p2_norm": "dawid kotwica",
-   "open_date": "2026-08-04T18:30:00.000Z",
-   "line": 58.5,
+   "line": 98.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -77,6 +66,28 @@
    "line": 76.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35904089,
+   "p1": "Tomasz Wrzalik",
+   "p2": "Kaczynski Piotr",
+   "p1_norm": "tomasz wrzalik",
+   "p2_norm": "kaczynski piotr",
+   "open_date": "2026-08-04T19:10:00.000Z",
+   "line": 76.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35904090,
+   "p1": "Dariusz Molenda",
+   "p2": "Zbigniew Nocun",
+   "p1_norm": "dariusz molenda",
+   "p2_norm": "zbigniew nocun",
+   "open_date": "2026-08-04T19:10:00.000Z",
+   "line": 73.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
