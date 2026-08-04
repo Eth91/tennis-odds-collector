@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-04T15:47:06Z",
+ "captured_at": "2026-08-04T15:51:28Z",
  "matches": [
   {
    "event_id": 35903379,
@@ -8,9 +8,9 @@
    "p1_norm": "maciej nowalinski",
    "p2_norm": "miroslav sklensky",
    "open_date": "2026-08-04T15:45:00.000Z",
-   "line": 76.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 83.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35903487,
@@ -19,9 +19,9 @@
    "p1_norm": "mateusz sikon",
    "p2_norm": "oliwier sokolowski",
    "open_date": "2026-08-04T15:50:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -110
   },
   {
    "event_id": 35903489,
@@ -30,9 +30,9 @@
    "p1_norm": "dawid kotwica",
    "p2_norm": "dariusz szlubowski",
    "open_date": "2026-08-04T15:50:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -125,
+   "under_odds": -110
   },
   {
    "event_id": 35903582,
@@ -42,8 +42,8 @@
    "p2_norm": "oskar jadach",
    "open_date": "2026-08-04T15:55:00.000Z",
    "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35903601,
@@ -63,7 +63,29 @@
    "p1_norm": "jakub kuzmicz",
    "p2_norm": "karol strowski",
    "open_date": "2026-08-04T16:05:00.000Z",
-   "line": 85.5,
+   "line": 87.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35903635,
+   "p1": "Grzegorz Marud",
+   "p2": "Mariusz Koczyba",
+   "p1_norm": "grzegorz marud",
+   "p2_norm": "mariusz koczyba",
+   "open_date": "2026-08-04T16:15:00.000Z",
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -110
+  },
+  {
+   "event_id": 35903636,
+   "p1": "Adrian Fabis",
+   "p2": "Marcin Kowalczyk",
+   "p1_norm": "adrian fabis",
+   "p2_norm": "marcin kowalczyk",
+   "open_date": "2026-08-04T16:15:00.000Z",
+   "line": 80.5,
    "over_odds": -116,
    "under_odds": -116
   }
