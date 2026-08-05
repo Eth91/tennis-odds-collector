@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-05T06:54:01Z",
+ "captured_at": "2026-08-05T07:03:09Z",
  "matches": [
   {
    "event_id": 35905279,
@@ -8,31 +8,9 @@
    "p1_norm": "kacper adamus",
    "p2_norm": "grzegorz jurowicz",
    "open_date": "2026-08-05T06:45:00.000Z",
-   "line": 89.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35905280,
-   "p1": "Michal Paszkiewicz",
-   "p2": "Lukasz Oracz",
-   "p1_norm": "michal paszkiewicz",
-   "p2_norm": "lukasz oracz",
-   "open_date": "2026-08-05T06:45:00.000Z",
-   "line": 68.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
-  {
-   "event_id": 35905284,
-   "p1": "Dawid Kosmal",
-   "p2": "Marcin Balcerzak",
-   "p1_norm": "dawid kosmal",
-   "p2_norm": "marcin balcerzak",
-   "open_date": "2026-08-05T06:50:00.000Z",
-   "line": 71.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 90.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35905287,
@@ -41,9 +19,9 @@
    "p1_norm": "petr david",
    "p2_norm": "jan zandecki",
    "open_date": "2026-08-05T06:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 82.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35905288,
@@ -52,9 +30,9 @@
    "p1_norm": "mariusz zwolinski",
    "p2_norm": "karol sulkowski",
    "open_date": "2026-08-05T06:55:00.000Z",
-   "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 83.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35905290,
@@ -63,9 +41,9 @@
    "p1_norm": "piotr przewlocki",
    "p2_norm": "rafal niemiec",
    "open_date": "2026-08-05T06:55:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 86.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35905307,
@@ -119,8 +97,8 @@
    "p2_norm": "kamil kowalski",
    "open_date": "2026-08-05T07:20:00.000Z",
    "line": 67.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35905322,
@@ -129,9 +107,9 @@
    "p1_norm": "krzysztof kotyl",
    "p2_norm": "kamil klocek",
    "open_date": "2026-08-05T07:20:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 79.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
