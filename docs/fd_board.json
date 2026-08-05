@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-05T06:19:08Z",
+ "captured_at": "2026-08-05T06:27:04Z",
  "matches": [
-  {
-   "event_id": 35905271,
-   "p1": "Marcin Balcerzak",
-   "p2": "Stapor Rafal",
-   "p1_norm": "marcin balcerzak",
-   "p2_norm": "stapor rafal",
-   "open_date": "2026-08-05T06:10:00.000Z",
-   "line": 67.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
   {
    "event_id": 35905250,
    "p1": "Kamil Smolka",
@@ -19,9 +8,9 @@
    "p1_norm": "kamil smolka",
    "p2_norm": "sebastian juzek",
    "open_date": "2026-08-05T06:20:00.000Z",
-   "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 67.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35905254,
@@ -30,9 +19,9 @@
    "p1_norm": "piotr gumulinski",
    "p2_norm": "wojciech urban",
    "open_date": "2026-08-05T06:25:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35905266,
@@ -77,6 +66,17 @@
    "line": 76.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35905284,
+   "p1": "Dawid Kosmal",
+   "p2": "Marcin Balcerzak",
+   "p1_norm": "dawid kosmal",
+   "p2_norm": "marcin balcerzak",
+   "open_date": "2026-08-05T06:50:00.000Z",
+   "line": 76.5,
+   "over_odds": -110,
+   "under_odds": -120
   }
  ]
 }
