@@ -1,28 +1,6 @@
 {
- "captured_at": "2026-08-05T05:33:13Z",
+ "captured_at": "2026-08-05T05:37:29Z",
  "matches": [
-  {
-   "event_id": 35905149,
-   "p1": "Mateusz Trela",
-   "p2": "Kamil Klocek",
-   "p1_norm": "mateusz trela",
-   "p2_norm": "kamil klocek",
-   "open_date": "2026-08-05T05:15:00.000Z",
-   "line": 79.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35905151,
-   "p1": "Jakub Kosowski",
-   "p2": "Kacper Glazowski",
-   "p1_norm": "jakub kosowski",
-   "p2_norm": "kacper glazowski",
-   "open_date": "2026-08-05T05:15:00.000Z",
-   "line": 76.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35905179,
    "p1": "Kacper Adamus",
@@ -30,9 +8,9 @@
    "p1_norm": "kacper adamus",
    "p2_norm": "rafal gajda",
    "open_date": "2026-08-05T05:30:00.000Z",
-   "line": 71.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 79.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35905205,
@@ -41,9 +19,9 @@
    "p1_norm": "kamil rudomina",
    "p2_norm": "dominik solilo",
    "open_date": "2026-08-05T05:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 79.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35905182,
@@ -52,9 +30,9 @@
    "p1_norm": "michal paszkiewicz",
    "p2_norm": "marian lebek",
    "open_date": "2026-08-05T05:35:00.000Z",
-   "line": 76.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 75.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35905188,
@@ -74,9 +52,9 @@
    "p1_norm": "mariusz zwolinski",
    "p2_norm": "bartosz sulkowski",
    "open_date": "2026-08-05T05:40:00.000Z",
-   "line": 78.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35905190,
@@ -97,6 +75,17 @@
    "p2_norm": "jerzy pelka",
    "open_date": "2026-08-05T05:55:00.000Z",
    "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35905218,
+   "p1": "Oliver Vincenec",
+   "p2": "Lukasz Oracz",
+   "p1_norm": "oliver vincenec",
+   "p2_norm": "lukasz oracz",
+   "open_date": "2026-08-05T06:00:00.000Z",
+   "line": 79.5,
    "over_odds": -118,
    "under_odds": -112
   }
