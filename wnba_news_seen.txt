@@ -240,6 +240,7 @@ rw|228|Out for Tuesday
 rw|228|Remaining out for Friday
 rw|228|To miss rest of season
 rw|229|Drops 11 points against Phoenix
+rw|229|Shows quick hands off bench
 rw|233|Chips in with season-high 12 points
 rw|238|No timetable for return
 rw|246|Double-double in loss
@@ -565,6 +566,7 @@ rw|792|Won't suit up Thursday
 rw|793|Contributes in multiple areas
 rw|793|Keeps picking up steals
 rw|796|Another strong performance
+rw|796|Fills up stat sheet in home win
 rw|797|Returns after brief exit
 rw|797|Scores team-high 20 points
 rw|798|Sees 24 minutes in loss

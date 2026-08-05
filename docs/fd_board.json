@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-05T04:59:56Z",
+ "captured_at": "2026-08-05T05:04:45Z",
  "matches": [
   {
    "event_id": 35904977,
@@ -8,9 +8,9 @@
    "p1_norm": "artur grela",
    "p2_norm": "artur daniel",
    "open_date": "2026-08-05T04:55:00.000Z",
-   "line": 76.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35904978,
@@ -19,9 +19,9 @@
    "p1_norm": "jakub kaczmarek",
    "p2_norm": "pawel slosarczyk",
    "open_date": "2026-08-05T04:55:00.000Z",
-   "line": 78.5,
-   "over_odds": -110,
-   "under_odds": -125
+   "line": 70.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35904979,
@@ -30,9 +30,9 @@
    "p1_norm": "bartosz sulkowski",
    "p2_norm": "krzysztof kotyl",
    "open_date": "2026-08-05T04:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 57.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35905135,
@@ -88,6 +88,17 @@
    "line": 74.5,
    "over_odds": -110,
    "under_odds": -120
+  },
+  {
+   "event_id": 35905179,
+   "p1": "Kacper Adamus",
+   "p2": "Rafal Gajda",
+   "p1_norm": "kacper adamus",
+   "p2_norm": "rafal gajda",
+   "open_date": "2026-08-05T05:30:00.000Z",
+   "line": 81.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
