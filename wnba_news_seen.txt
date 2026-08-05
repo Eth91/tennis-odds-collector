@@ -275,6 +275,7 @@ rw|287|Remains out for Monday
 rw|287|Return not imminent
 rw|291|Goes for 15 points in loss
 rw|291|Hauls in eight boards in loss
+rw|291|Scores season-high 20 points
 rw|297|Another productive showing
 rw|297|Generates 29 points against Chicago
 rw|297|Rolls up 29 points against Sky
@@ -456,6 +457,7 @@ rw|599|Productive as starter
 rw|599|Starting Sunday
 rw|599|Struggles in loss
 rw|603|Adds 16 points in loss
+rw|603|Back with 12 points
 rw|603|Drops 25 points in defeat
 rw|603|Good to go Tuesday
 rw|603|Iffy for Sunday
