@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-05T01:09:57Z",
+ "captured_at": "2026-08-05T01:17:12Z",
  "matches": [
-  {
-   "event_id": 35904655,
-   "p1": "Piotr Gumulinski",
-   "p2": "Tomasz Wrzalik",
-   "p1_norm": "piotr gumulinski",
-   "p2_norm": "tomasz wrzalik",
-   "open_date": "2026-08-05T01:10:00.000Z",
-   "line": 79.5,
-   "over_odds": null,
-   "under_odds": null
-  },
   {
    "event_id": 35904656,
    "p1": "Marian Brunner",
@@ -19,9 +8,9 @@
    "p1_norm": "marian brunner",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-08-05T01:10:00.000Z",
-   "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 79.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35904671,
@@ -41,9 +30,9 @@
    "p1_norm": "kamil delikatny",
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-08-05T01:30:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 73.5,
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35904675,
@@ -53,8 +42,8 @@
    "p2_norm": "marian lebek",
    "open_date": "2026-08-05T01:35:00.000Z",
    "line": 76.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -120,
+   "under_odds": -110
   }
  ]
 }
