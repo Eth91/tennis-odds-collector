@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-05T06:02:51Z",
+ "captured_at": "2026-08-05T06:10:55Z",
  "matches": [
   {
    "event_id": 35905250,
@@ -9,8 +9,8 @@
    "p2_norm": "sebastian juzek",
    "open_date": "2026-08-05T06:20:00.000Z",
    "line": 79.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35905254,
@@ -20,6 +20,28 @@
    "p2_norm": "wojciech urban",
    "open_date": "2026-08-05T06:25:00.000Z",
    "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35905266,
+   "p1": "Jakub Kosowski",
+   "p2": "Artur Grela",
+   "p1_norm": "jakub kosowski",
+   "p2_norm": "artur grela",
+   "open_date": "2026-08-05T06:30:00.000Z",
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35905267,
+   "p1": "Mateusz Trela",
+   "p2": "Bartosz Sulkowski",
+   "p1_norm": "mateusz trela",
+   "p2_norm": "bartosz sulkowski",
+   "open_date": "2026-08-05T06:30:00.000Z",
+   "line": 80.5,
    "over_odds": -118,
    "under_odds": -112
   }
