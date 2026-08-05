@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-05T00:40:27Z",
+ "captured_at": "2026-08-05T00:47:31Z",
  "matches": [
   {
    "event_id": 35904607,
@@ -8,7 +8,7 @@
    "p1_norm": "jakub nowak",
    "p2_norm": "mateusz sikon",
    "open_date": "2026-08-05T00:35:00.000Z",
-   "line": 79.5,
+   "line": 89.5,
    "over_odds": -120,
    "under_odds": -115
   },
@@ -19,9 +19,9 @@
    "p1_norm": "jerzy michalik",
    "p2_norm": "jakub skorupa",
    "open_date": "2026-08-05T00:45:00.000Z",
-   "line": 79.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 77.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35904612,
@@ -30,9 +30,9 @@
    "p1_norm": "marek tkocz",
    "p2_norm": "lukasz oracz",
    "open_date": "2026-08-05T00:45:00.000Z",
-   "line": 74.5,
+   "line": 68.5,
    "over_odds": -120,
-   "under_odds": -110
+   "under_odds": -115
   },
   {
    "event_id": 35904636,
@@ -44,6 +44,28 @@
    "line": 76.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35904655,
+   "p1": "Piotr Gumulinski",
+   "p2": "Tomasz Wrzalik",
+   "p1_norm": "piotr gumulinski",
+   "p2_norm": "tomasz wrzalik",
+   "open_date": "2026-08-05T01:10:00.000Z",
+   "line": 79.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35904656,
+   "p1": "Marian Brunner",
+   "p2": "Zbigniew Nocun",
+   "p1_norm": "marian brunner",
+   "p2_norm": "zbigniew nocun",
+   "open_date": "2026-08-05T01:10:00.000Z",
+   "line": 75.5,
+   "over_odds": -110,
+   "under_odds": -120
   }
  ]
 }
