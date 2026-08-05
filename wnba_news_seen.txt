@@ -150,6 +150,7 @@ rw|1057|Fares well in start
 rw|1057|Full practice participant Sunday
 rw|1057|Iffy for Tuesday
 rw|1057|Quiet outing in loss
+rw|1057|Retreating to bench Tuesday
 rw|1057|Will play on minutes restriction
 rw|1058|Agrees to new seven-day deal
 rw|1058|Let go by Mercury
@@ -228,6 +229,7 @@ rw|1134|Off injury report
 rw|1134|Out Sunday
 rw|1134|Won't play Wednesday
 rw|1135|Waived by Tempo
+rw|1137|Inactive versus Golden State
 rw|1137|Left off injury report
 rw|1137|Not listed on injury report
 rw|1137|Ruled out Sunday
