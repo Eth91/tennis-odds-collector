@@ -3260,3 +3260,20 @@ pga scoreboard fetch failed (HTTP Error 403: Forbidden) — using cache
   E3: no rows to log
 pga scoreboard fetch failed (HTTP Error 403: Forbidden) — using cache
 pga grade: +0 newly graded — E1 record 23-30  +0.99u
+pga scoreboard fetch failed (HTTP Error 403: Forbidden) — using cache
+E1 wave meter — Wyndham Championship [Scheduled]
+  no tee times posted yet — meter waits (they release Tue/Wed)
+  rounds table: 117952 rows, 2459 players
+G2: 0 gradeable closes [none] from 19 collected matchup markets
+     dropped  19  no same-edition result yet
+G2: n=0 < 15 -> gate INCONCLUSIVE. This is a FORWARD test and cannot be backtested: it needs OUR OWN collected closes, and the collector only has history from the day it started.
+e3: pricing PGA Wyndham Championship 2026  (G2 pending n=0 — preview only)
+  capture: snapshot 2026-08-05T06:30:03 | R1 first tee 2026-08-06T10:50:00 (per-flag deadlines from pga_tee_gate)
+pga scoreboard fetch failed (HTTP Error 403: Forbidden) — using cache
+pga scoreboard fetch failed (HTTP Error 403: Forbidden) — using cache
+  ruler: course-fit players 0, wave split 148, wave shift +0.27 strokes [exposure gap +2.6 km/h -> +0.27 str]
+  round-score [SHADOW]: 0 flags (needs >= 6 two-sided lines to anchor the level)
+  make-cut [SHADOW, armable=True]: 0 flags
+  E3: no rows to log
+pga scoreboard fetch failed (HTTP Error 403: Forbidden) — using cache
+pga grade: +0 newly graded — E1 record 23-30  +0.99u
