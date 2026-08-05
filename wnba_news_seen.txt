@@ -161,6 +161,7 @@ rw|1061|Left off injury report
 rw|1061|Not on injury report
 rw|1061|Ruled out Friday
 rw|1061|Ruled out for Wednesday
+rw|1062|Inactive Tuesday
 rw|1062|Not listed on injury report
 rw|1062|Ruled out for Sunday
 rw|1064|Cut loose by Lynx
@@ -603,6 +604,7 @@ rw|860|Now available Thursday
 rw|860|Upgraded to probable
 rw|863|Explodes for 18 points off bench
 rw|863|Reaches double figures off bench
+rw|895|Unavailable versus Toronto
 rw|911|Available Sunday
 rw|911|Available against Connecticut
 rw|911|Cleared to play Friday
