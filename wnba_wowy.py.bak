@@ -237,34 +237,6 @@ def _summ(games, stat):
             "vals": sorted(vals, reverse=True)}
 
 
-def played_effectively(g, log, frac=0.55, floor=8.0):
-    """Did this player actually PLAY, or did she leave early?
-
-    WHY THIS EXISTS (2026-08-05). Every on/off set in this module tested
-    `(g.get("min") or 0) > 0`, so a player who went down in the 3rd quarter counted
-    as PRESENT. Her absence then became invisible, and the production boost her
-    teammates got from it was credited to whoever else was already ruled out.
-
-    Concretely: Vandersloot's 08/03 line was the one game with genuinely boosted
-    shot volume, and it was boosted because Sydney Taylor left early in the 3rd --
-    not because Stevens and Diggins were out. The flag read as
-    "Stevens + Diggins out" when the real regime was "Stevens + Diggins + Taylor".
-    That is a bet on the wrong contingency.
-
-    A game counts as effectively absent when minutes collapse to well under the
-    player's own median -- her own baseline, never a league constant, because a
-    12-minute night is normal for a bench player and a catastrophe for a starter.
-    """
-    m = g.get("min") or 0
-    if m <= 0:
-        return False
-    mins = sorted(x for x in ((q.get("min") or 0) for q in (log or [])) if x > 0)
-    if len(mins) < 4:
-        return True                       # too little history to call it a collapse
-    med = mins[len(mins) // 2]
-    return not (m < max(floor, frac * med))
-
-
 def wowy_multi(player_log, teammate_logs):
     """Split player's games by whether ALL the given teammates were ABSENT that game.
     'without' = games none of them played (the multi-out scenario the user cares about —
@@ -387,10 +359,8 @@ def peer_regime_scan(bene, team_players, out_names, logs, pos_of, plays_tonight,
 
     mine = g_of(bene)
     blog = logs.get(bene) or []
-    # A player who LEFT EARLY is not "in". See played_effectively().
     out_ids = {g["game_id"] for o in out_names
-               for g in (logs.get(o) or [])
-               if played_effectively(g, logs.get(o))}
+               for g in (logs.get(o) or []) if (g.get("min") or 0) > 0}
     worst = None
     for n in team_players:
         if n == bene or n in out_names or g_of(n) != mine:
