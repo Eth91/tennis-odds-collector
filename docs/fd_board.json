@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-05T01:47:41Z",
+ "captured_at": "2026-08-05T01:55:25Z",
  "matches": [
   {
    "event_id": 35904675,
@@ -8,9 +8,9 @@
    "p1_norm": "pawel polok",
    "p2_norm": "marian lebek",
    "open_date": "2026-08-05T01:35:00.000Z",
-   "line": 84.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 51.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35904707,
@@ -19,7 +19,7 @@
    "p1_norm": "jakub skorupa",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-08-05T01:55:00.000Z",
-   "line": 71.5,
+   "line": 74.5,
    "over_odds": -118,
    "under_odds": -112
   },
@@ -44,6 +44,28 @@
    "line": 75.5,
    "over_odds": -118,
    "under_odds": -116
+  },
+  {
+   "event_id": 35904718,
+   "p1": "Jerzy Michalik",
+   "p2": "Kamil Delikatny",
+   "p1_norm": "jerzy michalik",
+   "p2_norm": "kamil delikatny",
+   "open_date": "2026-08-05T02:20:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35904719,
+   "p1": "Lukasz Oracz",
+   "p2": "Marian Lebek",
+   "p1_norm": "lukasz oracz",
+   "p2_norm": "marian lebek",
+   "open_date": "2026-08-05T02:20:00.000Z",
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   }
  ]
 }
