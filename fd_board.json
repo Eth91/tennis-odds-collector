@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-05T03:54:35Z",
+ "captured_at": "2026-08-05T03:59:06Z",
  "matches": [
   {
    "event_id": 35904761,
@@ -8,9 +8,9 @@
    "p1_norm": "artur grela",
    "p2_norm": "jan zandecki",
    "open_date": "2026-08-05T03:45:00.000Z",
-   "line": 87.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 91.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35904769,
@@ -19,7 +19,7 @@
    "p1_norm": "bartosz sulkowski",
    "p2_norm": "karol sulkowski",
    "open_date": "2026-08-05T03:50:00.000Z",
-   "line": 75.5,
+   "line": 87.5,
    "over_odds": -115,
    "under_odds": -120
   },
@@ -30,9 +30,9 @@
    "p1_norm": "kamil rudomina",
    "p2_norm": "stapor rafal",
    "open_date": "2026-08-05T03:55:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 76.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35904773,
@@ -41,9 +41,9 @@
    "p1_norm": "henryk tkaczyk",
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-08-05T03:55:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 74.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35904775,
@@ -97,6 +97,17 @@
    "p2_norm": "marian brunner",
    "open_date": "2026-08-05T04:20:00.000Z",
    "line": 77.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35904791,
+   "p1": "Oliver Vincenec",
+   "p2": "Michal Paszkiewicz",
+   "p1_norm": "oliver vincenec",
+   "p2_norm": "michal paszkiewicz",
+   "open_date": "2026-08-05T04:25:00.000Z",
+   "line": 79.5,
    "over_odds": -112,
    "under_odds": -118
   }
