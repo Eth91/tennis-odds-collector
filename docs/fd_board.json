@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-05T04:22:32Z",
+ "captured_at": "2026-08-05T04:31:24Z",
  "matches": [
-  {
-   "event_id": 35904781,
-   "p1": "Mariusz Zwolinski",
-   "p2": "Mateusz Trela",
-   "p1_norm": "mariusz zwolinski",
-   "p2_norm": "mateusz trela",
-   "open_date": "2026-08-05T04:10:00.000Z",
-   "line": 89.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35904789,
    "p1": "Jakub Skorupa",
@@ -19,20 +8,9 @@
    "p1_norm": "jakub skorupa",
    "p2_norm": "marian brunner",
    "open_date": "2026-08-05T04:20:00.000Z",
-   "line": 72.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35904791,
-   "p1": "Oliver Vincenec",
-   "p2": "Michal Paszkiewicz",
-   "p1_norm": "oliver vincenec",
-   "p2_norm": "michal paszkiewicz",
-   "open_date": "2026-08-05T04:25:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 87.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35904793,
@@ -41,9 +19,9 @@
    "p1_norm": "rafal niemiec",
    "p2_norm": "kamil kowalski",
    "open_date": "2026-08-05T04:30:00.000Z",
-   "line": 68.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 73.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35904794,
@@ -53,8 +31,8 @@
    "p2_norm": "kacper glazowski",
    "open_date": "2026-08-05T04:30:00.000Z",
    "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35904795,
@@ -63,9 +41,9 @@
    "p1_norm": "karol sulkowski",
    "p2_norm": "kamil klocek",
    "open_date": "2026-08-05T04:30:00.000Z",
-   "line": 78.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 77.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35904800,
@@ -77,6 +55,39 @@
    "line": 75.5,
    "over_odds": -118,
    "under_odds": -112
+  },
+  {
+   "event_id": 35904868,
+   "p1": "Piotr Gumulinski",
+   "p2": "Marian Lebek",
+   "p1_norm": "piotr gumulinski",
+   "p2_norm": "marian lebek",
+   "open_date": "2026-08-05T04:50:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35904977,
+   "p1": "Artur Grela",
+   "p2": "Artur Daniel",
+   "p1_norm": "artur grela",
+   "p2_norm": "artur daniel",
+   "open_date": "2026-08-05T04:55:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35904979,
+   "p1": "Bartosz Sulkowski",
+   "p2": "Krzysztof Kotyl",
+   "p1_norm": "bartosz sulkowski",
+   "p2_norm": "krzysztof kotyl",
+   "open_date": "2026-08-05T04:55:00.000Z",
+   "line": 79.5,
+   "over_odds": -116,
+   "under_odds": -116
   }
  ]
 }
