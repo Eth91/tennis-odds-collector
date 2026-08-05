@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-05T02:33:19Z",
+ "captured_at": "2026-08-05T02:41:43Z",
  "matches": [
   {
    "event_id": 35904722,
@@ -8,9 +8,9 @@
    "p1_norm": "oliwier sokolowski",
    "p2_norm": "pawel adamus",
    "open_date": "2026-08-05T02:35:00.000Z",
-   "line": 79.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 84.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35904725,
@@ -31,8 +31,63 @@
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-08-05T02:45:00.000Z",
    "line": 74.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35904727,
+   "p1": "Mariusz Zwolinski",
+   "p2": "Kamil Klocek",
+   "p1_norm": "mariusz zwolinski",
+   "p2_norm": "kamil klocek",
+   "open_date": "2026-08-05T03:00:00.000Z",
+   "line": 76.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35904728,
+   "p1": "Petr David",
+   "p2": "Kacper Glazowski",
+   "p1_norm": "petr david",
+   "p2_norm": "kacper glazowski",
+   "open_date": "2026-08-05T03:00:00.000Z",
+   "line": 71.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35904729,
+   "p1": "Piotr Przewlocki",
+   "p2": "Kamil Kowalski",
+   "p1_norm": "piotr przewlocki",
+   "p2_norm": "kamil kowalski",
+   "open_date": "2026-08-05T03:00:00.000Z",
+   "line": 75.5,
+   "over_odds": -110,
+   "under_odds": -120
+  },
+  {
+   "event_id": 35904730,
+   "p1": "Dawid Kosmal",
+   "p2": "Dominik Solilo",
+   "p1_norm": "dawid kosmal",
+   "p2_norm": "dominik solilo",
+   "open_date": "2026-08-05T03:00:00.000Z",
+   "line": 78.5,
    "over_odds": -116,
    "under_odds": -116
+  },
+  {
+   "event_id": 35904736,
+   "p1": "Jakub Skorupa",
+   "p2": "Kamil Delikatny",
+   "p1_norm": "jakub skorupa",
+   "p2_norm": "kamil delikatny",
+   "open_date": "2026-08-05T03:05:00.000Z",
+   "line": 75.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
