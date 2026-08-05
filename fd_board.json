@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-05T00:25:03Z",
+ "captured_at": "2026-08-05T00:33:16Z",
  "matches": [
-  {
-   "event_id": 35904586,
-   "p1": "Grzegorz Marud",
-   "p2": "Pawel Adamus",
-   "p1_norm": "grzegorz marud",
-   "p2_norm": "pawel adamus",
-   "open_date": "2026-08-05T00:10:00.000Z",
-   "line": 89.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
   {
    "event_id": 35904592,
    "p1": "Kamil Delikatny",
@@ -19,9 +8,9 @@
    "p1_norm": "kamil delikatny",
    "p2_norm": "marian brunner",
    "open_date": "2026-08-05T00:20:00.000Z",
-   "line": 74.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 87.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35904603,
@@ -30,9 +19,9 @@
    "p1_norm": "tomasz wrzalik",
    "p2_norm": "pawel polok",
    "open_date": "2026-08-05T00:25:00.000Z",
-   "line": 77.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 68.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35904606,
@@ -52,7 +41,7 @@
    "p1_norm": "jakub nowak",
    "p2_norm": "mateusz sikon",
    "open_date": "2026-08-05T00:35:00.000Z",
-   "line": 78.5,
+   "line": 82.5,
    "over_odds": -118,
    "under_odds": -112
   },
