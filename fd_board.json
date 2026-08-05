@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-05T00:17:43Z",
+ "captured_at": "2026-08-05T00:25:03Z",
  "matches": [
-  {
-   "event_id": 35904585,
-   "p1": "Maciej Kolek",
-   "p2": "Mateusz Rutkowski",
-   "p1_norm": "maciej kolek",
-   "p2_norm": "mateusz rutkowski",
-   "open_date": "2026-08-05T00:10:00.000Z",
-   "line": 57.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
   {
    "event_id": 35904586,
    "p1": "Grzegorz Marud",
@@ -19,9 +8,9 @@
    "p1_norm": "grzegorz marud",
    "p2_norm": "pawel adamus",
    "open_date": "2026-08-05T00:10:00.000Z",
-   "line": 79.5,
-   "over_odds": -120,
-   "under_odds": -115
+   "line": 89.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35904592,
@@ -31,8 +20,8 @@
    "p2_norm": "marian brunner",
    "open_date": "2026-08-05T00:20:00.000Z",
    "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35904603,
@@ -42,8 +31,8 @@
    "p2_norm": "pawel polok",
    "open_date": "2026-08-05T00:25:00.000Z",
    "line": 77.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "over_odds": -112,
+   "under_odds": -118
   },
   {
    "event_id": 35904606,
@@ -74,9 +63,9 @@
    "p1_norm": "mateusz trela",
    "p2_norm": "dawid kotwica",
    "open_date": "2026-08-05T00:35:00.000Z",
-   "line": 81.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 80.5,
+   "over_odds": -118,
+   "under_odds": -112
   },
   {
    "event_id": 35904611,
