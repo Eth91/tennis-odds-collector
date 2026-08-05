@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-05T04:31:24Z",
+ "captured_at": "2026-08-05T04:39:31Z",
  "matches": [
-  {
-   "event_id": 35904789,
-   "p1": "Jakub Skorupa",
-   "p2": "Marian Brunner",
-   "p1_norm": "jakub skorupa",
-   "p2_norm": "marian brunner",
-   "open_date": "2026-08-05T04:20:00.000Z",
-   "line": 87.5,
-   "over_odds": -105,
-   "under_odds": -130
-  },
   {
    "event_id": 35904793,
    "p1": "Rafal Niemiec",
@@ -19,9 +8,9 @@
    "p1_norm": "rafal niemiec",
    "p2_norm": "kamil kowalski",
    "open_date": "2026-08-05T04:30:00.000Z",
-   "line": 73.5,
-   "over_odds": -115,
-   "under_odds": -120
+   "line": 71.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35904794,
@@ -30,9 +19,9 @@
    "p1_norm": "jan zandecki",
    "p2_norm": "kacper glazowski",
    "open_date": "2026-08-05T04:30:00.000Z",
-   "line": 74.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 58.5,
+   "over_odds": -105,
+   "under_odds": -130
   },
   {
    "event_id": 35904795,
@@ -41,9 +30,20 @@
    "p1_norm": "karol sulkowski",
    "p2_norm": "kamil klocek",
    "open_date": "2026-08-05T04:30:00.000Z",
-   "line": 77.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 91.5,
+   "over_odds": -125,
+   "under_odds": -110
+  },
+  {
+   "event_id": 35905035,
+   "p1": "Dawid Kosmal",
+   "p2": "Kamil Rudomina",
+   "p1_norm": "dawid kosmal",
+   "p2_norm": "kamil rudomina",
+   "open_date": "2026-08-05T04:35:00.000Z",
+   "line": 74.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35904800,
@@ -53,8 +53,8 @@
    "p2_norm": "zbigniew nocun",
    "open_date": "2026-08-05T04:40:00.000Z",
    "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "over_odds": -116,
+   "under_odds": -116
   },
   {
    "event_id": 35904868,
@@ -86,6 +86,17 @@
    "p2_norm": "krzysztof kotyl",
    "open_date": "2026-08-05T04:55:00.000Z",
    "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35905135,
+   "p1": "Jerzy Michalik",
+   "p2": "Henryk Tkaczyk",
+   "p1_norm": "jerzy michalik",
+   "p2_norm": "henryk tkaczyk",
+   "open_date": "2026-08-05T05:05:00.000Z",
+   "line": 75.5,
    "over_odds": -116,
    "under_odds": -116
   }

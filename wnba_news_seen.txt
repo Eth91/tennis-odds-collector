@@ -149,6 +149,7 @@ rw|1057|Enters starting lineup
 rw|1057|Fares well in start
 rw|1057|Full practice participant Sunday
 rw|1057|Iffy for Tuesday
+rw|1057|Logs 23 minutes off bench
 rw|1057|Quiet outing in loss
 rw|1057|Retreating to bench Tuesday
 rw|1057|Will play on minutes restriction
