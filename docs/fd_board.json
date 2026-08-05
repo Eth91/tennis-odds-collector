@@ -1,5 +1,5 @@
 {
- "captured_at": "2026-08-05T03:32:21Z",
+ "captured_at": "2026-08-05T03:39:49Z",
  "matches": [
   {
    "event_id": 35904741,
@@ -8,9 +8,9 @@
    "p1_norm": "mateusz trela",
    "p2_norm": "krzysztof kotyl",
    "open_date": "2026-08-05T03:25:00.000Z",
-   "line": 78.5,
-   "over_odds": -125,
-   "under_odds": -110
+   "line": 88.5,
+   "over_odds": -110,
+   "under_odds": -125
   },
   {
    "event_id": 35904742,
@@ -19,31 +19,9 @@
    "p1_norm": "jakub kosowski",
    "p2_norm": "artur daniel",
    "open_date": "2026-08-05T03:25:00.000Z",
-   "line": 75.5,
-   "over_odds": -125,
-   "under_odds": -110
-  },
-  {
-   "event_id": 35904751,
-   "p1": "Michal Paszkiewicz",
-   "p2": "Wojciech Urban",
-   "p1_norm": "michal paszkiewicz",
-   "p2_norm": "wojciech urban",
-   "open_date": "2026-08-05T03:35:00.000Z",
-   "line": 83.5,
-   "over_odds": -118,
-   "under_odds": -112
-  },
-  {
-   "event_id": 35904738,
-   "p1": "Kamil Rudomina",
-   "p2": "Stapor Rafal",
-   "p1_norm": "kamil rudomina",
-   "p2_norm": "stapor rafal",
-   "open_date": "2026-08-05T03:40:00.000Z",
-   "line": 78.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 66.5,
+   "over_odds": null,
+   "under_odds": null
   },
   {
    "event_id": 35904761,
@@ -79,6 +57,17 @@
    "under_odds": -118
   },
   {
+   "event_id": 35904738,
+   "p1": "Kamil Rudomina",
+   "p2": "Stapor Rafal",
+   "p1_norm": "kamil rudomina",
+   "p2_norm": "stapor rafal",
+   "open_date": "2026-08-05T03:55:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
    "event_id": 35904773,
    "p1": "Henryk Tkaczyk",
    "p2": "Zbigniew Nocun",
@@ -90,15 +79,15 @@
    "under_odds": -112
   },
   {
-   "event_id": 35904758,
-   "p1": "Jakub Zochniak",
-   "p2": "Marcin Balcerzak",
-   "p1_norm": "jakub zochniak",
-   "p2_norm": "marcin balcerzak",
+   "event_id": 35904775,
+   "p1": "Lukasz Oracz",
+   "p2": "Piotr Gumulinski",
+   "p1_norm": "lukasz oracz",
+   "p2_norm": "piotr gumulinski",
    "open_date": "2026-08-05T04:00:00.000Z",
-   "line": 82.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 80.5,
+   "over_odds": -112,
+   "under_odds": -118
   }
  ]
 }
