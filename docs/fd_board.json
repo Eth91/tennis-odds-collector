@@ -1,39 +1,6 @@
 {
- "captured_at": "2026-08-05T06:45:43Z",
+ "captured_at": "2026-08-05T06:54:01Z",
  "matches": [
-  {
-   "event_id": 35905254,
-   "p1": "Piotr Gumulinski",
-   "p2": "Wojciech Urban",
-   "p1_norm": "piotr gumulinski",
-   "p2_norm": "wojciech urban",
-   "open_date": "2026-08-05T06:25:00.000Z",
-   "line": 91.5,
-   "over_odds": null,
-   "under_odds": null
-  },
-  {
-   "event_id": 35905267,
-   "p1": "Mateusz Trela",
-   "p2": "Bartosz Sulkowski",
-   "p1_norm": "mateusz trela",
-   "p2_norm": "bartosz sulkowski",
-   "open_date": "2026-08-05T06:30:00.000Z",
-   "line": 92.5,
-   "over_odds": 105,
-   "under_odds": -145
-  },
-  {
-   "event_id": 35905292,
-   "p1": "Kamil Rudomina",
-   "p2": "Jakub Zochniak",
-   "p1_norm": "kamil rudomina",
-   "p2_norm": "jakub zochniak",
-   "open_date": "2026-08-05T06:30:00.000Z",
-   "line": 87.5,
-   "over_odds": 110,
-   "under_odds": -150
-  },
   {
    "event_id": 35905279,
    "p1": "Kacper Adamus",
@@ -41,9 +8,9 @@
    "p1_norm": "kacper adamus",
    "p2_norm": "grzegorz jurowicz",
    "open_date": "2026-08-05T06:45:00.000Z",
-   "line": 76.5,
-   "over_odds": -116,
-   "under_odds": -116
+   "line": 89.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35905280,
@@ -52,9 +19,9 @@
    "p1_norm": "michal paszkiewicz",
    "p2_norm": "lukasz oracz",
    "open_date": "2026-08-05T06:45:00.000Z",
-   "line": 74.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 68.5,
+   "over_odds": -120,
+   "under_odds": -115
   },
   {
    "event_id": 35905284,
@@ -63,9 +30,9 @@
    "p1_norm": "dawid kosmal",
    "p2_norm": "marcin balcerzak",
    "open_date": "2026-08-05T06:50:00.000Z",
-   "line": 75.5,
-   "over_odds": -118,
-   "under_odds": -112
+   "line": 71.5,
+   "over_odds": -115,
+   "under_odds": -120
   },
   {
    "event_id": 35905287,
@@ -119,6 +86,50 @@
    "p2_norm": "piotr gumulinski",
    "open_date": "2026-08-05T07:10:00.000Z",
    "line": 79.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35905316,
+   "p1": "Stapor Rafal",
+   "p2": "Dominik Solilo",
+   "p1_norm": "stapor rafal",
+   "p2_norm": "dominik solilo",
+   "open_date": "2026-08-05T07:15:00.000Z",
+   "line": 78.5,
+   "over_odds": -118,
+   "under_odds": -112
+  },
+  {
+   "event_id": 35905320,
+   "p1": "Artur Daniel",
+   "p2": "Kacper Glazowski",
+   "p1_norm": "artur daniel",
+   "p2_norm": "kacper glazowski",
+   "open_date": "2026-08-05T07:20:00.000Z",
+   "line": 78.5,
+   "over_odds": -112,
+   "under_odds": -118
+  },
+  {
+   "event_id": 35905321,
+   "p1": "Pawel Slosarczyk",
+   "p2": "Kamil Kowalski",
+   "p1_norm": "pawel slosarczyk",
+   "p2_norm": "kamil kowalski",
+   "open_date": "2026-08-05T07:20:00.000Z",
+   "line": 67.5,
+   "over_odds": -116,
+   "under_odds": -116
+  },
+  {
+   "event_id": 35905322,
+   "p1": "Krzysztof Kotyl",
+   "p2": "Kamil Klocek",
+   "p1_norm": "krzysztof kotyl",
+   "p2_norm": "kamil klocek",
+   "open_date": "2026-08-05T07:20:00.000Z",
+   "line": 78.5,
    "over_odds": -118,
    "under_odds": -112
   }
