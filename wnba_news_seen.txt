@@ -463,6 +463,7 @@ rw|603|Might miss another game
 rw|603|Rough shooting night in loss
 rw|603|Ruled out for Sunday
 rw|603|Strikes for 23 points in ASG loss
+rw|605|Accurate from perimeter
 rw|605|Double-double in defeat
 rw|605|Scores 15 points in loss Monday
 rw|605|Struggles with shot
