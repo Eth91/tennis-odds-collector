@@ -1,17 +1,6 @@
 {
- "captured_at": "2026-08-04T23:58:56Z",
+ "captured_at": "2026-08-05T00:03:52Z",
  "matches": [
-  {
-   "event_id": 35904561,
-   "p1": "Mateusz Rutkowski",
-   "p2": "Jakub Glanowski",
-   "p1_norm": "mateusz rutkowski",
-   "p2_norm": "jakub glanowski",
-   "open_date": "2026-08-04T23:45:00.000Z",
-   "line": 86.5,
-   "over_odds": -120,
-   "under_odds": -115
-  },
   {
    "event_id": 35904566,
    "p1": "Jakub Skorupa",
@@ -19,20 +8,9 @@
    "p1_norm": "jakub skorupa",
    "p2_norm": "henryk tkaczyk",
    "open_date": "2026-08-04T23:55:00.000Z",
-   "line": 74.5,
-   "over_odds": -110,
-   "under_odds": -125
-  },
-  {
-   "event_id": 35904569,
-   "p1": "Piotr Gumulinski",
-   "p2": "Lukasz Oracz",
-   "p1_norm": "piotr gumulinski",
-   "p2_norm": "lukasz oracz",
-   "open_date": "2026-08-05T00:00:00.000Z",
-   "line": 80.5,
-   "over_odds": -112,
-   "under_odds": -118
+   "line": 83.5,
+   "over_odds": -115,
+   "under_odds": -115
   },
   {
    "event_id": 35904584,
