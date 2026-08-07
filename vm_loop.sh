@@ -332,6 +332,17 @@ fullscan(){
   # a book we bet with, so it must not fire every 25s hot-window pass. Non-fatal.
   python3 wnba_fd_search.py 2>&1 | head -20 || true
 
+  # STINT-REBOUND SHADOW (2026-08-07) — PRE-REGISTERED, PAPER ONLY.
+  # Rebound overs on the same-position replacement, priced off the beneficiary's rebounds per
+  # minute while the injured teammate was OFF the floor (play-by-play), shrunk toward the book
+  # and held to +10% EV. Backtest 34-20 / 63.0% across 2025+2026 with the seasons agreeing
+  # (+11.1 and +12.4) — but that config was chosen after ~11 variants, so it must earn its
+  # keep forward. Writes to wnba_shadow.sqlite ONLY: never the ledger, never the board.
+  # PINGS ARE LABELLED "SHADOW" at the user's explicit request — this deliberately breaks the
+  # standing ping/board coherence rule, and the label is the only thing preventing a paper
+  # play from reading as a live one. Non-fatal.
+  python3 wnba_stint_shadow.py 2>&1 | head -12 || true
+
   # LADDER GUARD (2026-08-06). Names players whose posted ladder has NO two-sided rung, so
   # prop_edges anchors on a milestone rung instead of the market's main line and returns an
   # EV that is correct for the rung it priced and meaningless for the bet that exists.

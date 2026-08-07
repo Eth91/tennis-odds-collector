@@ -1,73 +1,65 @@
 #!/usr/bin/env python3
-"""Calibration + discrimination monitor for the WNBA overs model — the data-triggered green light
-for expanding props / edge-sizing.
+"""Why are we not gaining units? First question: is the model's own confidence predictive?
 
-Two very different questions, both measured off the graded overs:
-  LEVEL (calibration): when the model says 63%, does ~63% happen? -> the OPTIMISM gap. Fixable by a
-    haircut; cosmetic (rescaling preserves the order).
-  RANKING (discrimination): do the bets it rates HIGHER actually win MORE? -> hi-conf vs lo-conf
-    realized hit-rate. THIS is what Kelly/edge-sizing and expanding props require — a model that
-    can't rank its own bets can't be sized by edge, and fanning out to marginal spots just dilutes
-    a thin aggregate edge with variance.
+If a +40% EV flag does not beat a +11% EV flag, the ranking is noise — and every gate built on
+it (TOP-2, tier ordering, swap rules) is sorting randomly. That would explain flat results far
+better than any single filter would.
 
-So we only turn GREEN (expand + edge-size) once, at a real sample, the higher-confidence bets
-genuinely win more. Until then: flat sizing + current selection. (2026-07-14 baseline: 33 overs,
-+8.4% optimism, discrimination -9% i.e. hi-conf hit LESS — no green light.)
+Buckets every graded ledger row by the model's ev and proj_hit, and compares the PREDICTED win
+rate to the REALISED one. Runs on all rows and on the tracked selection separately.
 """
-import sqlite3
-from pathlib import Path
+import sqlite3, statistics as st, sys
+sys.path.insert(0, "/home/ubuntu/tennis-odds-collector")
+import wnba_slip as S
 
-HERE = Path(__file__).resolve().parent
-LEDGER = HERE / "wnba_ledger.sqlite"
-
-MIN_N = 100         # graded overs before a hi/lo-half discrimination split is worth trusting
-GAP_BAR = 0.10      # hi-conf minus lo-conf realized hit-rate that counts as real ranking (>~1 SE)
-BREAKEVEN = 0.524   # -110 two-way
-
-
-def calibration(epoch="2026-07-09"):
-    """Returns the calibration/discrimination snapshot, or None if no graded overs."""
-    con = sqlite3.connect(LEDGER)
-    con.row_factory = sqlite3.Row
-    rows = [dict(r) for r in con.execute(
-        "SELECT ev, odds, result FROM predictions WHERE side='over' AND result IN ('over','under') "
-        "AND ev IS NOT NULL AND odds IS NOT NULL AND pred_date>=?", (epoch,))]
-    con.close()
-    n = len(rows)
-    if n == 0:
-        return None
-    for r in rows:
-        r["p"] = (r["ev"] + 1) / r["odds"]           # model's shrunk P(over), the number EV is built on
-        r["win"] = 1 if r["result"] == "over" else 0
-    realized = sum(r["win"] for r in rows) / n
-    optimism = sum(r["p"] for r in rows) / n - realized
-    srt = sorted(rows, key=lambda r: -r["p"])
-    h = n // 2
-    top = sum(r["win"] for r in srt[:h]) / h if h else 0.0
-    bot = sum(r["win"] for r in srt[h:]) / (n - h) if n - h else 0.0
-    disc = top - bot                                 # >0 = higher-confidence bets win more (good)
-    ready = n >= MIN_N
-    if not ready:
-        verdict = f"accumulating {n}/{MIN_N} graded — flat sizing + current selection (no expand)"
-    elif disc >= GAP_BAR and realized > BREAKEVEN:
-        verdict = "GREEN — model ranks its bets; consider edge-sizing + expanding props"
-    else:
-        verdict = "HOLD — no ranking edge; keep flat sizing, do NOT expand"
-    return {"n": n, "realized": realized, "edge": realized - BREAKEVEN, "optimism": optimism,
-            "disc": disc, "top": top, "bot": bot, "ready": ready, "verdict": verdict}
+L = "/home/ubuntu/wnba_data/wnba_ledger.sqlite"
+c = sqlite3.connect(f"file:{L}?mode=ro", uri=True)
+c.row_factory = sqlite3.Row
+rows = [dict(r) for r in c.execute(
+    "SELECT * FROM predictions WHERE result IS NOT NULL AND result<>'' AND result<>'void'")]
+kept, _ = S.current_selection(rows)
 
 
-def report():
-    c = calibration()
-    if not c:
-        print("calibration monitor: no graded overs yet")
-        return
-    print(f"CALIBRATION MONITOR ({c['n']} graded overs):")
-    print(f"  aggregate over-rate {c['realized']:.1%}  (breakeven {BREAKEVEN:.1%}, edge {c['edge']:+.1%})")
-    print(f"  LEVEL   — optimism (pred - real): {c['optimism']:+.1%}")
-    print(f"  RANKING — hi-conf {c['top']:.0%} vs lo-conf {c['bot']:.0%}  = {c['disc']:+.0%} discrimination")
-    print(f"  -> {c['verdict']}")
+def graded(rs):
+    out = []
+    for r in rs:
+        side = r.get("side") or "over"
+        res = r.get("result") or ""
+        od = r.get("odds") or 0
+        if not od:
+            continue
+        out.append({"win": 1 if res == side else 0, "ev": r.get("ev"),
+                    "ph": r.get("proj_hit"), "odds": od,
+                    "dmin": r.get("d_min"), "n": r.get("n_elev")})
+    return out
 
 
-if __name__ == "__main__":
-    report()
+def bucket(rs, field, edges, label):
+    print(f"\n  -- {label} --")
+    for lo, hi in zip(edges, edges[1:]):
+        sel = [x for x in rs if x[field] is not None and lo <= x[field] < hi]
+        if len(sel) < 8:
+            print(f"    {lo:>5.2f}-{hi:<5.2f} n={len(sel):<4} (thin)")
+            continue
+        w = sum(x["win"] for x in sel)
+        hit = w / len(sel)
+        be = st.mean([1.0 / x["odds"] for x in sel])
+        u = sum((x["odds"] - 1.0) if x["win"] else -1.0 for x in sel)
+        pred = st.mean([x["ph"] for x in sel if x["ph"] is not None] or [float("nan")])
+        print(f"    {lo:>5.2f}-{hi:<5.2f} n={len(sel):<4} {w}-{len(sel)-w}  "
+              f"hit {100*hit:5.1f}%  predicted {100*pred:5.1f}%  "
+              f"be {100*be:5.1f}%  edge {100*(hit-be):+6.1f}  {u:+7.2f}u")
+
+
+for name, rs in (("ALL GRADED", graded(rows)), ("TRACKED SELECTION", graded(kept))):
+    print(f"\n{'='*74}\n{name}  (n={len(rs)})\n{'='*74}")
+    if len(rs) < 20:
+        print("  too few to bucket")
+        continue
+    w = sum(x["win"] for x in rs)
+    be = st.mean([1.0 / x["odds"] for x in rs])
+    print(f"  overall {w}-{len(rs)-w}  hit {100*w/len(rs):.1f}%  breakeven {100*be:.1f}%")
+    bucket(rs, "ev", [0.0, 0.10, 0.15, 0.25, 0.40, 9.0], "by model EV")
+    bucket(rs, "ph", [0.0, 0.55, 0.65, 0.75, 0.85, 1.01], "by projected hit rate")
+    bucket(rs, "dmin", [-99, 1, 3, 8, 99], "by minutes bump")
+    bucket(rs, "n", [0, 5, 8, 12, 999], "by elevated-sample size")
