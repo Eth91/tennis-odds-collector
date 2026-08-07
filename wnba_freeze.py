@@ -22,33 +22,31 @@ MANIFEST = "wnba_v1_freeze.json"
 # "no edge" -> +11.8% EV on exactly that difference. A fingerprint that omits it does not
 # describe what determines the bets, which is the whole point of the fingerprint.
 FILES = ["wnba_alert.py", "wnba_slip.py", "wnba_tonight.py", "wnba_wowy.py",
-         "wnba_fd_search.py", "wnba_ladder_guard.py"]
+         "wnba_fd_search.py", "wnba_ladder_guard.py",
+         "wnba_premise_sweep.py"]
 MODULES = ("wnba_slip",)
-VERSION = "v1.4"
+VERSION = "v1.5"
 FROZEN_ON = "2026-08-06"
 DECISION = (
-    "v1.4 (2026-08-06) — the fingerprint now covers WHAT REACHES THE PRICER, not just how it is "
-    "priced. FanDuel serves some player main lines ONLY via its search host "
-    "(api.sportsbook.fanduel.com/search/tabs, headers x-sportsbook-region + x-app-version); those "
-    "markets are on NONE of the 16 event-page tabs, on either the NY or Alberta book. Without "
-    "recovery, prop_edges anchors such a player on a shared 'To Score 5+/10+ Points' milestone "
-    "rung at a short price (Puoch points 4.5 @ 1.5618 = 64% implied), which cannot clear the +10% "
-    "over bar arithmetically — so a DATA gap is reported as a model 'no edge'. 28 players / 37 "
-    "stats were in that state on the 2026-08-06 slate. With her real 5.5 recovered Puoch flagged "
-    "at +11.8% EV and the over won (6 points). wnba_fd_search.py and wnba_ladder_guard.py are "
-    "therefore selection-affecting and are now fingerprinted. "
-    "⚠ THE RECOVERY PATH IS UNVALIDATED AT THIS STAMP. It shipped with two bugs that were both "
-    "invisible to a single hand-run and only appear on a SECOND pass: FD_SEARCH_GAP was 600s == "
-    "FRESH_MIN (posted_props cutoff = newest-stamp-any-stat minus FRESH_MIN, and fd_collect "
-    "rewrites the milestone rungs every ~4 min, so a recovered line went stale the instant it "
-    "became eligible to refresh — it worked exactly once), and fetch() queried the FULL name when "
-    "FanDuel search only matches the surname ('Nyadiew Puoch' -> nothing, 'Puoch' -> her market). "
-    "Both are fixed but NOT yet proven: wnba_twopass_test.py is cron'd for 2026-08-07 22:00Z to "
-    "recover, wait past FRESH_MIN, and confirm the rung survives. If that test FAILS, this "
-    "fingerprint covers a broken recovery path and must be re-stamped after the fix. "
-    "RECORD CONTINUITY: v1.3 evidence does NOT pool into v1.4 — recovery changes which lines are "
-    "priced, so it changes the bet population. v1.3 was itself a re-pin of the nine post-freeze "
-    "commits; the last independently-validated line remains v1.2 at 33-16 / +18.05u.")
+    "v1.5 (2026-08-06) — adds wnba_premise_sweep.py: pull plays whose PREMISE has publicly "
+    "returned, BEFORE tip. Live case: Wheeler reb_ast 8.5 and Makani points 7.5/9.5 were flagged "
+    "and PINGED on 'Ariel Atkins is out'; RotoWire posted 'Will play Thursday' (class IN) at "
+    "00:07:19Z, 1h53m before the 02:00Z tip; the news was LOGGED and never consumed. Atkins "
+    "started and played 29 min. The rows voided post-game via _premise_really_broke(), which runs "
+    "at GRADING time — a post-mortem, not a guard — so for two hours the plays sat live on the "
+    "board, on the phone, and held TOP-2 slots on LA/MIN a real play could have used. A void is "
+    "not free; 6 of the last 26 rows were premise-break voids. "
+    "suppressed() is the one gate the board and slip share, but it only knows 'human vetoed' and "
+    "'SUBJECT ruled out' — not 'the OUT player came back'. The sweep writes the durable veto that "
+    "gate already honours (data, not code), so board+slip+alert drop together and the coherence "
+    "rule holds. Ledger rows are left to grade normally: a wrong call must surface in the record "
+    "rather than hide there. Conservative on multi-out — ANY returning member pulls the play, "
+    "since the projection was priced on the full vacated pool. "
+    "Validated by --replay 2026-08-06: matches all three real rows off the real RotoWire event, "
+    "writing nothing. "
+    "STILL UNVALIDATED FROM v1.4: the fd_search recovery path (wnba_twopass_test.py, cron "
+    "2026-08-07 22:00Z). Record continuity unchanged — the last independently-validated line "
+    "remains v1.2 at 33-16 / +18.05u.")
 
 
 def _fingerprint():

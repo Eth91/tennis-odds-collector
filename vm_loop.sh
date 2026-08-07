@@ -311,6 +311,16 @@ fullscan(){
         -d "$err" "https://ntfy.sh/$NTFY_TOPIC" >/dev/null 2>&1 || true
     fi
   fi
+  # LIVE PREMISE SWEEP (2026-08-06). Three LA plays were flagged AND PINGED on "Ariel Atkins
+  # is out". At 00:07:19Z RotoWire posted "Will play Thursday" (class IN) -- 1h53m before tip.
+  # The system logged that news and did nothing: the plays stayed live on the board and on the
+  # phone for two hours, holding TOP-2 slots on LA/MIN, and only voided AFTER the game via
+  # wnba_ledger._premise_really_broke() -- a post-mortem, not a guard. Atkins played 29 min.
+  # suppressed() is the one gate board+slip share but only knows "human vetoed" and "SUBJECT
+  # ruled out", not "the OUT player came back". This writes the durable veto that gate already
+  # honours, so all three surfaces drop the play together. Ledger rows still grade. Non-fatal.
+  python3 wnba_premise_sweep.py 2>&1 | head -12 || true
+
   # MAIN-LINE RECOVERY (2026-08-06). FanDuel posts "Nyadiew Puoch - Points" O 5.5 -106 /
   # U 5.5 -122, but that market is referenced by NO card in any of the 16 event-page tabs on
   # either the NY or Alberta book -- only the site's own SEARCH returns it, from a different
