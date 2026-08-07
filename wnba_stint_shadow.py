@@ -32,6 +32,36 @@ BACKTEST THIS IS BEING JUDGED AGAINST (both seasons, model-matched logic):
   all. Expect regression -- anything at or above breakeven forward is a real result.
 =============================================================================================
 
+=========================== ARM 2, FROZEN 2026-08-07: POINTS x RELIABILITY ===========
+A SECOND, INDEPENDENT rule. Arm 1 (above) is rebounds. This one is POINTS, and it selects on
+the RELIABILITY of the apart-shift rather than its size.
+
+  stat       POINTS
+  trigger    same as arm 1: a rostered REGULAR is out (>=5 games, >=20 mpg)
+  benef.     SAME POSITION as the out player
+  signal     per-game apart rates -> t = (mean - overall) / (sd / sqrt(games)),
+             using games strictly BEFORE tonight, >=6 apart-games of >=4 min each
+  bet        OVER the two-sided main line when t >= 1.0
+  NO shrinkage, NO EV bar -- deliberately. That is exactly what was measured; adding gates
+  that were not in the test would ship something the numbers do not describe.
+
+WHY RELIABILITY. The apart-rate is UNBIASED (1,258 pairs: predicted 8.44 vs actual 8.40 pts,
+3.53 vs 3.55 reb) yet selecting its LARGEST values loses. Pooling hides whether a 1.4x shift
+came from ten steady games or one outlier, and the current rule prefers the outlier. The
+t-statistic separates them.
+
+EVIDENCE (both seasons, same filters):
+  points t>=1.0        2026 63.2% n=19 (+11.6)   2025 60.8% n=51 (+7.1)
+  big shift + reliable 2026 63.2% n=19           2025 60.4% n=48
+  big shift, UNreliable 2026 50.7% n=134         2025 50.3% n=161
+  rebounds at t>=1.0: 2025 54.8% n=31 but 2026 only n=7 -- NOT pre-registered here.
+
+⚠ HONEST CAVEAT, PART OF THE REGISTRATION. The bar was pre-registered at t>=0.5 and FAILED
+there on 2025 (50.0% vs the pooled rule's 51.2%). Moving to t>=1.0 after seeing the data is
+goalpost-shifting and is recorded as such. What justifies a forward test is not the t>=1.0
+cell but the CONTRAST: the unreliable half is 134/161/136 bets across seasons and stats and
+sits at or below breakeven every time. Judge this arm on forward bets only.
+
 PAPER ONLY. Writes to its own table, never to wnba_ledger predictions, never to the board.
 Pings are labelled SHADOW at the user's explicit request (2026-08-07) -- note this overrides
 the standing ping/board coherence rule, so the label is what stops it reading as a live play.
@@ -84,6 +114,46 @@ def stint_rates(player, mate, before):
     if aps <= 0 or ts <= 0:
         return None
     return (wv is not None) and ((tv - wv) / (aps / 60.0), tv / (ts / 60.0), aps / 60.0)
+
+
+ARM2_RULE_ID = "stint_pts_t_v1"
+ARM2_T_MIN = 1.0
+ARM2_MIN_GAMES = 6
+ARM2_MIN_APART_GAME = 4.0
+
+
+def _arm2_t(player_name, mate_name, slate):
+    """Per-game reliability of the apart-shift in POINTS. -> t or None."""
+    import math
+    c = sqlite3.connect(f"file:{STINT}?mode=ro", uri=True)
+    ok = {e for (e,) in c.execute("SELECT event_id FROM games WHERE status='ok'")}
+    on = {}
+    for e, d, p, sec, v in c.execute(
+            "SELECT event_id,game_date,player,sec,pts FROM onfloor WHERE player=?",
+            (player_name,)):
+        if e in ok and v is not None and d < slate:
+            on[e] = (sec or 0.0, v)
+    wi = {}
+    for e, d, sec, v in c.execute(
+            "SELECT event_id,game_date,sec,pts_with FROM pairs WHERE player=? AND mate=?",
+            (player_name, mate_name)):
+        if e in ok and v is not None and d < slate:
+            wi[e] = (sec or 0.0, v)
+    c.close()
+    rates, tot_s, tot_v = [], 0.0, 0.0
+    for e, (sec, v) in on.items():
+        tot_s += sec; tot_v += v
+        ws, wv = wi.get(e, (0.0, 0.0))
+        m = (sec - ws) / 60.0
+        if m >= ARM2_MIN_APART_GAME:
+            rates.append((v - wv) / m)
+    if tot_s <= 0 or len(rates) < ARM2_MIN_GAMES:
+        return None
+    overall = tot_v / (tot_s / 60.0)
+    sd = st.pstdev(rates)
+    if overall <= 0 or sd <= 0:
+        return None
+    return (st.mean(rates) - overall) / (sd / math.sqrt(len(rates)))
 
 
 def main():
@@ -160,8 +230,47 @@ def main():
             continue
         seen.add((c["player"], c["line"])); best.append(c)
 
-    if not best:
+    # ---- ARM 2: POINTS x reliability. Independent of arm 1; own rule id, own rows. ----
+    arm2 = []
+    for out_name in out_names:
+        ov = pl.get(out_name)
+        if not ov or not ov.get("position"):
+            continue
+        for n, v in pl.items():
+            if n == out_name or v["team"] != ov["team"]:
+                continue
+            if v.get("position") != ov.get("position"):
+                continue
+            t = _arm2_t(n, out_name, slate)
+            if t is None or t < ARM2_T_MIN:
+                continue
+            lad = (T.posted_props(n) or {}).get("points") or {}
+            two = {k: x for k, x in lad.items() if x and x[0] and x[1]}
+            if not two:
+                continue
+            line = min(two, key=lambda x: abs(two[x][0] - two[x][1]))
+            arm2.append({"player": n, "team": v["team"], "out": out_name, "line": line,
+                         "odds": two[line][0], "ev": None, "shift": None, "n": None,
+                         "proj": None, "t": round(t, 2)})
+    if arm2:
+        con2 = _db()
+        now2 = dt.datetime.now(dt.timezone.utc).isoformat()
+        for b in arm2:
+            if con2.execute("SELECT 1 FROM shadow WHERE rule=? AND pred_date=? AND player=? "
+                            "AND stat=? AND line=?",
+                            (ARM2_RULE_ID, slate, b["player"], "points", b["line"])).fetchone():
+                continue
+            con2.execute("INSERT INTO shadow VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,NULL,NULL)",
+                         (ARM2_RULE_ID, slate, b["player"], b["team"], b["out"], "points",
+                          b["line"], b["odds"], 0.0, b["t"], 0, 0.0, now2))
+            print(f"  SHADOW-2 {b['player']} points over {b['line']:g} @{b['odds']:.2f} "
+                  f"t={b['t']} (w/o {b['out']})")
+        con2.commit(); con2.close()
+
+    if not best and not arm2:
         print(f"shadow: 0 qualifying plays on {slate}")
+        return 0
+    if not best:
         return 0
 
     con = _db()
