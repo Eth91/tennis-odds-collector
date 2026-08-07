@@ -1,26 +1,16 @@
 #!/usr/bin/env bash
 cd "$HOME/tennis-odds-collector" || exit 1
+# MOVED TO CRON 2026-08-07. The ladder guard, stint shadow and line recovery used to run
+# inside this scan. Heartbeat readings swung 8s -> 727s depending on whether a pass hit them,
+# and two crossings tripped wnba-watchdog into restarting the service mid-scan (the "heartbeat
+# was 637s stale" alerts). Throttling them to once per 10 min reduced how OFTEN a pass stalled
+# but not that it stalled -- readings still reached 600s.
+# A 600s pass is not just a heartbeat problem: it is ten minutes where fresh injury news is not
+# being acted on, and speed is where the edge actually lives. So they now run on their own cron
+# schedule and this loop does only what it must be fast at.
+# The premise sweep deliberately STAYS inline: it pulls plays whose premise has already broken,
+# and being late with that is the failure it exists to prevent.
 
-# ---- THROTTLE HELPER (2026-08-07) ----------------------------------------------------
-# Four things were added to this loop today (line recovery, ladder guard, premise sweep,
-# stint shadow) and each ran on EVERY pass. Full scans went from minutes to ~17 min apart,
-# which trips the heartbeat and makes wnba-watchdog restart the service mid-scan -- that is
-# where the "heartbeat was 637s stale" alerts came from. A slow cycle also blunts the actual
-# edge, which is reacting to injury news fast.
-# _every <seconds> <stamp-name> <command...>  -> runs at most once per interval.
-# The premise sweep is deliberately NOT throttled: it pulls plays whose premise has already
-# broken, and being late with that is the failure it exists to prevent.
-_every() {
-  local gap="$1"; local name="$2"; shift 2
-  local stamp="/tmp/.wnba_${name}.stamp"
-  local now; now=$(date +%s)
-  local last=0
-  [ -f "$stamp" ] && last=$(stat -c %Y "$stamp" 2>/dev/null || echo 0)
-  if [ $(( now - last )) -ge "$gap" ]; then
-    touch "$stamp"
-    "$@"
-  fi
-}
 export FD_DB="$(pwd)/wnba_lines.sqlite"
 GHREPO="github.com/fgf9p6ks2f-ux/tennis-odds-collector.git"
 git config user.name "odds-bot" 2>/dev/null; git config user.email "odds-bot@users.noreply.github.com" 2>/dev/null
@@ -351,7 +341,6 @@ fullscan(){
   # +11.8% EV. Runs BEFORE the guard so the guard reports what is still missing AFTER
   # recovery. Self-throttled (FD_SEARCH_GAP, default 600s) -- this hits a search endpoint on
   # a book we bet with, so it must not fire every 25s hot-window pass. Non-fatal.
-  python3 wnba_fd_search.py 2>&1 | head -20 || true
 
   # STINT-REBOUND SHADOW (2026-08-07) — PRE-REGISTERED, PAPER ONLY.
   # Rebound overs on the same-position replacement, priced off the beneficiary's rebounds per
@@ -362,7 +351,6 @@ fullscan(){
   # PINGS ARE LABELLED "SHADOW" at the user's explicit request — this deliberately breaks the
   # standing ping/board coherence rule, and the label is the only thing preventing a paper
   # play from reading as a live one. Non-fatal.
-  _every 600 shadow bash -c 'python3 wnba_stint_shadow.py 2>&1 | head -12' || true
 
   # LADDER GUARD (2026-08-06). Names players whose posted ladder has NO two-sided rung, so
   # prop_edges anchors on a milestone rung instead of the market's main line and returns an
@@ -373,7 +361,6 @@ fullscan(){
   # markets, anchor 4.5 @ 1.5618 (64% implied), and report "no edge" for a bet we never saw.
   # REPORTS, never suppresses: Makani flagged +40% EV off exactly such a ladder the same
   # night. Non-fatal -- a reporting failure must not kill the scan that places bets.
-  _every 600 guard bash -c 'python3 wnba_ladder_guard.py 2>&1 | head -50' || true
   python3 dashboard.py >/dev/null 2>&1 || true
   python3 wnba_oppbig_shadow.py >/dev/null 2>&1 || true
   python3 wnba_ledger.py --train >/dev/null 2>&1 || true
