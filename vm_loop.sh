@@ -311,6 +311,17 @@ fullscan(){
         -d "$err" "https://ntfy.sh/$NTFY_TOPIC" >/dev/null 2>&1 || true
     fi
   fi
+  # MAIN-LINE RECOVERY (2026-08-06). FanDuel posts "Nyadiew Puoch - Points" O 5.5 -106 /
+  # U 5.5 -122, but that market is referenced by NO card in any of the 16 event-page tabs on
+  # either the NY or Alberta book -- only the site's own SEARCH returns it, from a different
+  # host (api.sportsbook.fanduel.com). Without this we banked only her legs of the shared
+  # "To Score 5+/10+ Points" markets, anchored 4.5 @ 1.5618 (64% implied), and reported
+  # "no edge" for a bet we never saw. With it she prices on the real 5.5 and flags at
+  # +11.8% EV. Runs BEFORE the guard so the guard reports what is still missing AFTER
+  # recovery. Self-throttled (FD_SEARCH_GAP, default 600s) -- this hits a search endpoint on
+  # a book we bet with, so it must not fire every 25s hot-window pass. Non-fatal.
+  python3 wnba_fd_search.py 2>&1 | head -20 || true
+
   # LADDER GUARD (2026-08-06). Names players whose posted ladder has NO two-sided rung, so
   # prop_edges anchors on a milestone rung instead of the market's main line and returns an
   # EV that is correct for the rung it priced and meaningless for the bet that exists.
