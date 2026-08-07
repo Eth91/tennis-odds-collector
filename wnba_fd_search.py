@@ -44,7 +44,13 @@ SEARCH = "https://api.sportsbook.fanduel.com/search/tabs"
 REGION = os.environ.get("FD_REGION", "AB")          # the book the user actually bets
 APPVER = os.environ.get("FD_APP_VERSION", "6.32.0")
 STAMP = "/home/ubuntu/tennis-odds-collector/.fd_search_last"
-MIN_GAP_S = int(os.environ.get("FD_SEARCH_GAP", "600"))   # never hammer the book
+# MUST stay comfortably BELOW wnba_tonight.FRESH_MIN (10 min). posted_props sets
+# cutoff = (newest stamp for this player, ANY stat) - FRESH_MIN, and fd_collect
+# re-writes the milestone rungs every ~4 min -- which keeps advancing `latest` and
+# ages out a recovered main line that is not itself refreshed. At 600s (== FRESH_MIN)
+# the recovered 5.5 went stale the instant it became eligible to refresh: it worked
+# exactly once, then Puoch silently reverted to anchoring on the 4.5 milestone.
+MIN_GAP_S = int(os.environ.get("FD_SEARCH_GAP", "180"))
 PACE_S = 1.2                                        # between players
 MAX_PLAYERS = 40
 
@@ -93,12 +99,18 @@ def _markets(j):
 
 
 def fetch(name, headers):
-    req = urllib.request.Request(_url(name), headers=headers)
+    # QUERY THE SURNAME, NOT THE FULL NAME. FanDuel's search does not reliably match a full
+    # name -- "Nyadiew Puoch" returns "Nothing turned up" while "Puoch" returns her market.
+    # The first live pass worked only because it was hand-tested with q=Puoch; wired up with
+    # q=<full name> it silently returned zero rows for every player, which then read as
+    # "no line found" rather than "bad query". Filter on the full name AFTER the fetch.
+    surname = name.split()[-1]
+    req = urllib.request.Request(_url(surname), headers=headers)
     j = json.load(urllib.request.urlopen(req, timeout=25))
     rows, ev = [], ""
     for m in _markets(j):
         mn = m.get("marketName") or ""
-        if name.split()[-1] not in mn:              # this market belongs to another player
+        if surname not in mn:                       # this market belongs to another player
             continue
         for (pl, st, ln, sd, od) in FD.extract(m, "wnba", ev):
             rows.append(("wnba", ev, pl, st, ln, sd, od, 0))
