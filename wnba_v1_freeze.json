@@ -1,23 +1,31 @@
 {
- "version": "v1.2",
- "frozen": "2026-07-31",
- "sha256_16": "433b9e32404d015d",
- "source_sha256_16": "323d26d55c6d35fc",
+ "version": "v1.3",
+ "frozen": "2026-08-06",
+ "sha256_16": "ff41188c503439af",
+ "source_sha256_16": "1e863b1609d5beaf",
  "source_files": {
-  "wnba_alert.py": "d45852a3cadeae17",
-  "wnba_slip.py": "366584f30ccda1eb",
-  "wnba_tonight.py": "1918505b1705e8dc",
-  "wnba_wowy.py": "2dfa0bb4844e7ea3"
+  "wnba_alert.py": "73897e7b1f13256d",
+  "wnba_slip.py": "f7a90e57c1c45600",
+  "wnba_tonight.py": "51a528df07df18e1",
+  "wnba_wowy.py": "f1b79aee2ea3f522"
  },
- "decision": "v1.2 (2026-07-31) \u2014 the sticky-incumbent swap test is now BAND-AWARE. It compared raw EV while the ranking uses (odds, band, EV), so an incumbent could hold a slot while ranking WORSE on the canonical key, and hold it on the one metric this ledger shows is ANTI-predictive. Live case: DiLeo (band 0, odds 1.9091, EV 0.213) could not displace Carleton (band 1, odds 1.9804, EV 0.462), so the card kept a TIER B play over a TIER A one \u2014 and Carleton only held the slot because she was carded at 04:08, before the v1.1 correlation-cap fix. Stickiness was protecting the output of the bug v1.1 corrected. A challenger now displaces when it is better ON THE BAND (structural, and band membership barely moves during a slate, so it cannot churn); within the same band the original SWAP_MARGIN EV rule is unchanged, preserving the anti-churn property that stickiness exists for (57% of pools once carded more than the two plays a card holds). Tier records behind the ordering: A 14-3 / 82.4% / +0.73u per bet vs B 17-11 / 60.7% / +0.20u. RESTATEMENT COST: the counted record moves 33-15 / +19.05u to 33-16 / +18.05u \u2014 one additional graded loss enters as a different incumbent yields. Reported, not hidden.",
+ "decision": "v1.3 (2026-08-06) \u2014 RE-PIN, not a model change. The v1.2 fingerprint was taken 2026-07-31 and then never updated while NINE deliberate commits landed on the frozen files, so the SPRT has been validating a moving target since. Nothing here alters selection; this records what has actually been running. Folded in: d0080478 (an empty with-set must fail CLOSED \u2014 it was worth a +26.7 min FAKE minutes boost), bab18b59 (a traded-in player's split was measured against games she played AGAINST the team), 1fa916d2 (_drop_inverted was destroying the real main line \u2014 anchor on the two-sided rung), aa9ff17c (drop rungs violating the ladder's own arithmetic; 17% of ladders did), 7d7462cf (the out-check was rewriting HISTORY), 4cc6d2f0 (the board never shared the slip's gate), 0f3601bf (ladder rung stake scales with implied probability), 3e9dec7a (capture the full posted rung ladder per flag), fcf68e06 (ESPN 403s / spoofed UAs). Plus working-tree changes: the stint code path DELETED (its rate signal measured rho~0 on 30k+ observations, so admitting a spot on it was admitting noise) and the Q-tier fold fix of 2026-08-05. ALSO CARRIED, INERT: USAGE_RATE_ADJ=False. Usage-conditioning was built and REJECTED \u2014 on 1,083 walk-forward beneficiary-games with real lines the flat-minutes/usage-up class hit 27.8% (z=-2.07) with a MONOTONE INVERTED dose-response (d_FGA/36 >=1.0 -> -13.0, >=1.5 -> -17.1, >=2.0 -> -23.8, z=-3.30). _usage_mult() returns 1.0 while the flag is False, so it cannot touch a price. Kept as documentation of a tested negative, not as a live path. RECORD CONTINUITY: evidence gathered under v1.2 is NOT pooled with v1.3 \u2014 the nine commits include real selection-affecting fixes, so the counted record restarts from this fingerprint. The v1.2 line stood at 33-16 / +18.05u.",
  "constants": {
   "wnba_slip": {
+   "COMBO_EPOCH": "2026-08-04",
+   "COMBO_N_DECIDE": 20,
    "COMPONENT_CAP_U": 2.5,
    "LADDER_ANCHOR_U": 1.0,
    "LADDER_CAP_U": 2.5,
    "LADDER_RUNG_DEFAULT_U": 0.25,
+   "OUT_MAX_AGE_H": 6.0,
    "PARLAY_EPOCH": "2026-07-13",
+   "RUNG_MAX_U": 0.75,
+   "RUNG_MIN_U": 0.25,
+   "RUNG_V2_FROM": "2026-08-03",
    "SWAP_MARGIN": 0.05,
+   "_RUNG_P_HI": 0.6,
+   "_RUNG_P_LO": 0.25,
    "_SCHEMA": "CREATE TABLE IF NOT EXISTS parlays(\n  pred_date TEXT, key TEXT, legs TEXT, n INTEGER, dec REAL, ev REAL,\n  result TEXT, pnl REAL, played INTEGER DEFAULT 0, graded INTEGER DEFAULT 0, graded_at TEXT,\n  UNIQUE(pred_date, key));",
    "_SEL_SCHEMA": "CREATE TABLE IF NOT EXISTS selections (\n    pred_date TEXT, team TEXT, player TEXT, stat TEXT, selected_at TEXT,\n    PRIMARY KEY (pred_date, team, player, stat))"
   }
