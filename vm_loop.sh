@@ -129,6 +129,25 @@ db_guard(){
 }
 
 push(){
+  # ── PUSH DISABLED 2026-08-05 ──────────────────────────────────────────────
+  # The GitHub account is SUSPENDED, so every push has been rejected for 24.5h
+  # (1,787 commits ahead, "heartbeat WITHHELD -- no successful push for 1471 min").
+  #
+  # A REJECTED PUSH IS NOT A NO-OP HERE -- this file's own header says so at line 9:
+  # the rebase-recovery below RESTORES CODE FROM ORIGIN. Against a dead remote that
+  # machinery ran every cycle, clearing corrupt rebase dirs and "replaying data onto
+  # origin tip", which is precisely the failure mode that has silently reverted
+  # patches on this box before.
+  #
+  # Returning HERE, before the disk guard and before any git call, means no pull,
+  # no rebase, no recovery, no reset. Data still collects, scans still run, the
+  # board still bakes and publishes -- only the dead-remote round trip is gone.
+  #
+  # REVERSIBLE: delete /home/ubuntu/.wnba_push_disabled to restore the old
+  # behaviour. Do that only once a working remote exists.
+  if [ -f /home/ubuntu/.wnba_push_disabled ]; then
+    return 0
+  fi
   # disk guard (same postmortem): if the root FS dips under 2GB free, repack immediately —
   # bounded by pack.threads=1 / windowMemory=32m so it can't swap-storm the 956MB box.
   if [ "$(df --output=avail / | tail -1 | tr -d ' ')" -lt 2000000 ]; then
@@ -292,6 +311,16 @@ fullscan(){
         -d "$err" "https://ntfy.sh/$NTFY_TOPIC" >/dev/null 2>&1 || true
     fi
   fi
+  # LADDER GUARD (2026-08-06). Names players whose posted ladder has NO two-sided rung, so
+  # prop_edges anchors on a milestone rung instead of the market's main line and returns an
+  # EV that is correct for the rung it priced and meaningless for the bet that exists.
+  # Live case: FanDuel posts "Nyadiew Puoch - Points" O 5.5 -106 / U 5.5 -120, but that
+  # market is absent from all 16 event-page tabs on BOTH the NY and Alberta books and is
+  # reachable only by search -- so we bank her legs of the shared "To Score 5+/10+ Points"
+  # markets, anchor 4.5 @ 1.5618 (64% implied), and report "no edge" for a bet we never saw.
+  # REPORTS, never suppresses: Makani flagged +40% EV off exactly such a ladder the same
+  # night. Non-fatal -- a reporting failure must not kill the scan that places bets.
+  python3 wnba_ladder_guard.py 2>&1 | head -50 || true
   python3 dashboard.py >/dev/null 2>&1 || true
   python3 wnba_oppbig_shadow.py >/dev/null 2>&1 || true
   python3 wnba_ledger.py --train >/dev/null 2>&1 || true
@@ -324,20 +353,43 @@ beat(){
   # publisher into the alert path that already exists: Actions' vm-watchdog pages at 15 minutes.
   # PROCESS liveness is a different question and keeps its own separate signal
   # (~/.wnba_loop_beat + the on-box wnba-watchdog.timer, which restarts rather than pages).
-  last=$(cat "$HOME/.wnba_push_ok" 2>/dev/null || echo 0)
+  # ── REPOINTED 2026-08-05: PUBLISHING, NOT PUSHING ────────────────────────
+  # This checked $HOME/.wnba_push_ok -- a PUSH timestamp -- and then delivered the
+  # beat by force-pushing a synthesised commit to refs/heads/heartbeat. With the
+  # GitHub account suspended BOTH halves are dead: the gate can never open, and the
+  # delivery could never arrive. It printed "heartbeat WITHHELD" every ~40s forever,
+  # which is a permanent false alarm -- exactly how a real outage gets missed.
+  #
+  # It now measures the thing that actually reaches a human: the freshness of the
+  # published board, written by pickz-bake (dashboard.py, ~20s). And it delivers by
+  # ntfy, because that is the only channel that still works.
+  last=$(stat -c %Y "$PUBFILE" 2>/dev/null || echo 0)
   now=$(date -u +%s); age=$(( now - last ))
   if [ "$age" -gt 1800 ]; then
-    echo "[$(date +%H:%M)] heartbeat WITHHELD -- no successful push for $((age/60)) min"
+    # ONE alert per outage. A nag every 40s is what the old version did, and a
+    # signal that always fires is the same as no signal at all.
+    if [ ! -f "$HOME/.wnba_pub_stale" ]; then
+      date -u +%FT%TZ > "$HOME/.wnba_pub_stale"
+      echo "[$(date +%H:%M)] PUBLISHER STALE -- $PUBFILE is $((age/60)) min old"
+      [ -n "$NTFY_TOPIC" ] && curl -s -m 15 \
+        -H "Title: WNBA publisher STALE" -H "Priority: high" -H "Tags: warning" \
+        -d "$PUBFILE has not been rebuilt for $((age/60)) min. pickz-bake may be dead." \
+        "https://ntfy.sh/$NTFY_TOPIC" >/dev/null 2>&1 || true
+    fi
     return 0
   fi
-  c="$(date -u +%s) $(date -u +%FT%TZ)"
-  b=$(printf '%s\n' "$c" | git hash-object -w --stdin 2>/dev/null) || return 0
-  t=$(printf '100644 blob %s\theartbeat.txt\n' "$b" | git mktree 2>/dev/null) || return 0
-  k=$(printf 'vm heartbeat %s\n' "$c" | git commit-tree "$t" 2>/dev/null) || return 0
-  git push -q --force "$URL" "$k:refs/heads/heartbeat" 2>/dev/null || true; }
+  # Healthy: clear the outage marker and stamp locally. No git, no network.
+  if [ -f "$HOME/.wnba_pub_stale" ]; then
+    rm -f "$HOME/.wnba_pub_stale"
+    echo "[$(date +%H:%M)] publisher RECOVERED"
+    [ -n "$NTFY_TOPIC" ] && curl -s -m 15 -H "Title: WNBA publisher recovered" \
+      -d "$PUBFILE is fresh again." "https://ntfy.sh/$NTFY_TOPIC" >/dev/null 2>&1 || true
+  fi
+  date -u +%s > "$HOME/.wnba_publish_ok"; }
 
 # Seed the publish stamp on a cold start so a freshly booted box does not page before its first
 # push cycle has run. A genuinely broken publisher still pages ~30 min after boot.
+PUBFILE="${PUBFILE:-$HOME/tennis-odds-collector/docs/index.html}"
 [ -f "$HOME/.wnba_push_ok" ] || date -u +%s > "$HOME/.wnba_push_ok"
 echo "[$(date)] wnba-loop up (topic:$([ -n "$NTFY_TOPIC" ]&&echo yes||echo NO) pat:$([ -n "$GIT_PAT" ]&&echo yes||echo NO))"
 i=0; hot_ticks=0; cold_i=0; was_hot=2
