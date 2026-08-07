@@ -865,6 +865,13 @@ def collect():
                 scen.append(s)
     except Exception as e:
         print(f"tomorrow watchlist skipped: {str(e)[:80]}")
+    # THE Q-TIER WAS NEVER FOLDED INTO SCENARIOS (2026-08-05). `_fold` ran on the
+    # five shadow lists and on next-day contingents, but never on `watch` itself --
+    # so questionable_beneficiaries output reached `spots` in the JSON and NEVER
+    # became a `scenario`, which is the list the watchlist CARD renders from. The
+    # dashboard even reserves KIND_ORD["q"] = 0 for it; nothing ever produced that
+    # kind. Captured here, before the shadow appends contaminate `watch`.
+    q_spots = list(watch)
     watch += n1_spots                                    # ⚡1G pilots -> dashboard (they ping)
     watch += cold_spots                                  # ⚡COLD spots -> dashboard too
     watch += usg_spots                                   # ⚡USG shadows -> dashboard (no ping)
@@ -881,7 +888,12 @@ def collect():
                 scen.append({"team": team, "opp": matchups_by.get(dte, {}).get(team, ""),
                              "date": dte, "kind": kind, "stars": [star or "?"], "also_in": [],
                              "status": ss[0].get("status") or "", "sit": ss[0].get("sit"),
-                             "firm_outs": [], "play": play})
+                             "firm_outs": [], "play": play,
+                             "subset": ss[0].get("subset"),
+                             "subset_n": ss[0].get("subset_n"),
+                             "unstable": ss[0].get("unstable"),
+                             "unstable_why": ss[0].get("unstable_why")})
+    _fold(q_spots, "q")                                 # the actual "if they sit" rows
     _fold(_tmrw_seen.values(), "contingent")
     _fold(n1_spots, "n1", band_gate=False)               # pilots are out-of-band by nature
     _fold(cold_spots, "cold")

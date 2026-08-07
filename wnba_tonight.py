@@ -410,6 +410,78 @@ def volume_points(log, proj_min, n_recent=4):
             "recent_fga": round(recent_fga, 1), "fga_proj": round(fga_p, 1)}
 
 
+USAGE_RATE_ADJ = False     # OFF pending a proper gate (2026-08-06).
+# The projection multiplier was measured against the 65 tracked graded bets: of the
+# 16 it reaches, the 14 it would RAISE went 6-8 (-1.93u) and the 2 it would LOWER
+# went 2-0 (+2.08u) -- backwards on every bet that can be scored. n is tiny (14 and
+# 2), and this is NOT a true A/B: current_selection replays STORED rows and cannot
+# re-derive a projection, so what was measured is the multiplier's DIRECTION on bets
+# already made, not the bets it would ADD. Both readings argue for off.
+#
+# THIS FLAG ALSO GATES THE RANKING CHANGE BELOW (production-first, cut 4->5).
+# THAT CHANGE IS DISPLAY-ONLY. Verified 2026-08-06: the block it affects lives in
+# main()'s end-of-run printout -- it only print()s. It never appends to `spots`,
+# never reaches wnba_slip, and never reaches wnba_ledger.log_predictions. The path
+# that actually flags, pings and records is wnba_alert.py, which runs its OWN
+# beneficiary loop (W.wowy_multi at :286, T.prop_edges at :472) and imports this
+# module only for prop_edges/questionable_beneficiaries. So changing the rank key
+# here CANNOT change a bet. Do not "fix" selection by editing this sort.
+#
+# The Carleton case that motivated it was traced end-to-end through the REAL alert
+# gates and she is NOT excluded by any of them: n_without=4, minutes bump +0.76
+# (passes the >0.3 bar), 24/29 games at the 27-min elevated floor, and a full posted
+# ladder on 7 stats. She reaches prop_edges, which returns ZERO edges -- no rung
+# clears the +10% over bar. Reason: she is already a 30.2-min starter, so 31.0 min
+# without Barker is not an elevated role; her elevated sample IS her season, making
+# elev_avg ~ season_avg and leaving no gap against the line. There is no Carleton
+# bet being missed -- the book has her priced correctly.
+USAGE_SHRINK_K = 6.0       # credibility weight on the without-sample
+USAGE_CAP_LO, USAGE_CAP_HI = 0.85, 1.30
+_USAGE_STATS = __import__("collections").Counter()   # PROVE IT FIRES -- a silent no-op reads as a
+# null result, which is how three red-zone arms were wasted before anyone checked.
+
+
+def _usage_mult(w, key):
+    """Per-minute USAGE shift when the out player sits, as a multiplier.
+
+    WHY. The beneficiary path selects on a MINUTES bump and projects from the
+    player's own elevated games -- which include the games the out player PLAYED.
+    A player who absorbs usage without absorbing court time is therefore invisible.
+    Carleton with Barker: 30.24 min / 13.76 pts. Without: 31.00 min / 18.75 pts.
+    That is +0.76 minutes and +5.0 points -- a 33% jump in per-minute scoring, the
+    largest on the team, and the model ranked four smaller MINUTES bumps above it.
+
+    wowy_multi returns per-stat MEANS with no raw rows, so this is a rate ratio
+    rather than a resample. Credibility-shrunk by n_without (these splits are
+    routinely 3-5 games) and capped BOTH ways: the same logic says a player losing
+    usage should come down, and an unfloored noisy split could halve a projection.
+    """
+    if not USAGE_RATE_ADJ or not w:
+        return 1.0
+    if w.get("n_without", 0) < 3 or w.get("n_with", 0) < 1:
+        _USAGE_STATS["thin_split"] += 1
+        return 1.0
+    try:
+        mwo = float(w["without"]["min"]["mean"]); mwi = float(w["with"]["min"]["mean"])
+        vwo = float(w["without"][key]["mean"]);   vwi = float(w["with"][key]["mean"])
+    except (KeyError, TypeError, ValueError):
+        _USAGE_STATS["no_stat"] += 1
+        return 1.0
+    if mwo <= 0 or mwi <= 0 or vwi <= 0:
+        _USAGE_STATS["degenerate"] += 1
+        return 1.0
+    n = w["n_without"]
+    cred = n / (n + USAGE_SHRINK_K)
+    f = 1.0 + cred * ((vwo / mwo) / (vwi / mwi) - 1.0)
+    capped = min(max(f, USAGE_CAP_LO), USAGE_CAP_HI)
+    _USAGE_STATS["applied"] += 1
+    if abs(capped - 1.0) > 1e-9:
+        _USAGE_STATS["moved"] += 1
+    if capped != f:
+        _USAGE_STATS["capped"] += 1
+    return capped
+
+
 def prop_edges(player, log, proj_min, w=None, vacated=None, ctx=None, out_logs=None,
                opp=None, pos=None):
     """+EV over-props, framed as the user's actual edge: the gap between ELEVATED-ROLE
@@ -437,8 +509,10 @@ def prop_edges(player, log, proj_min, w=None, vacated=None, ctx=None, out_logs=N
             # minutes. Otherwise the model cherry-picks a player's 26-min games (Billings'
             # 7.4 reb) to project a ~19-min role. Capped at 1.35x so a genuine bump isn't
             # clipped; counting stats only (rate stats like FGA-per already normalize).
-            r = min(proj_min / max(g["min"], 1.0), 1.35) if key in ("pts", "reb", "ast", "fga", "fta", "fg3a", "pra", "pts_reb", "pts_ast", "reb_ast") else 1.0
-            return g[key] * r
+            _cnt = key in ("pts", "reb", "ast", "fga", "fta", "fg3a", "pra",
+                           "pts_reb", "pts_ast", "reb_ast")
+            r = min(proj_min / max(g["min"], 1.0), 1.35) if _cnt else 1.0
+            return g[key] * r * (_usage_mult(w, key) if _cnt else 1.0)
     else:
         # BREAKOUT fallback: thin elevated history but a real projected role. Project each
         # game to the projected minutes via per-minute rate (the user's method for a bench
@@ -449,7 +523,7 @@ def prop_edges(player, log, proj_min, w=None, vacated=None, ctx=None, out_logs=N
             return []
         sample, basis, shrink_k = base, "projected", 14   # 9->14: thin breakout sample regresses even
         def val(g, key):
-            return g[key] * min(proj_min / g["min"], 2.2)
+            return g[key] * min(proj_min / g["min"], 2.2) * _usage_mult(w, key)
     fga = st.mean([val(g, "fga") for g in sample])
     ctx = ctx or {}
 
@@ -1263,6 +1337,32 @@ def questionable_stars(pl, playing, inj, firm_out, date=None, tips=None, first_s
     return by_team
 
 
+def _regime_support(team, names, pl, glog):
+    """Games this TEAM played with every one of `names` absent.
+
+    Universe is the TEAM's games, NOT the out-players' own logs -- ESPN game logs
+    omit DNPs, so a player's own log can never show his own absence and every
+    regime would score 0. That exact bug produced a whole backtest of zeros before
+    it was caught.
+    """
+    ids = set()
+    for n, d in (pl or {}).items():
+        if d.get("team") == team:
+            try:
+                ids |= {g["game_id"] for g in (glog(d["id"]) or []) if (g.get("min") or 0) > 0}
+            except Exception:                                     # noqa: BLE001
+                pass
+    for n in names:
+        d = (pl or {}).get(n)
+        if not d:
+            return 0
+        try:
+            ids -= {g["game_id"] for g in (glog(d["id"]) or []) if (g.get("min") or 0) > 0}
+        except Exception:                                         # noqa: BLE001
+            return 0
+    return len(ids)
+
+
 def questionable_beneficiaries(pl, playing, matchups, lines, rates, inj, firm_out, firm_by_team,
                                glog=None, date=None, tips=None):
     """Provisional +EV OVERS that open up IF tonight's questionable stars sit. Out-set = the team's
@@ -1282,13 +1382,132 @@ def questionable_beneficiaries(pl, playing, matchups, lines, rates, inj, firm_ou
         # the questionable player being out is how we beat the books" (position while lines are
         # stale). Phone pings stay gated at SIT_GATE in wnba_alert so unlikely sits don't spam.
         lead = min((t[4] for t in qs if t[4] is not None), default=None)   # most late-breaking tag
-        for s in outset_beneficiaries(team, outs, pl, firm_out, matchups, lines, rates, glog):
+        _sp = outset_beneficiaries(team, outs, pl, firm_out, matchups, lines, rates, glog)
+        _sup_n, _sub_lab = None, None
+        if not _sp and len(outs) > 1:
+            # SUBSET FALLBACK (user 2026-08-05). The Q-tier tested ONLY the full
+            # union of firm outs + the questionable star. CHI showed why that
+            # fails: Diggins + Stevens + Taylor has n=0 historical games, so the
+            # watchlist could not answer "what if Taylor sits" at all -- while
+            # TAYLOR ALONE is n=2 and points straight at Cardoso assists.
+            #
+            # Always keep the questionable star in the subset (the whole question
+            # is what HER sitting unlocks) and drop firm outs, largest subset
+            # first, until one has support AND yields a beneficiary.
+            #
+            # SHOWN, NEVER PROMOTED. The ledger says thin-support regimes are 0-5
+            # (n=1-2 support, -100% ROI), so these must not become bets. They are
+            # tagged with their support so the thinness is visible on the card,
+            # and the caller's existing shadow/band gating still applies.
+            _qnames = {n for n, _, _, _, _ in qs}
+            _firm = [o for o in outs if o[0] not in _qnames]
+            _qout = [o for o in outs if o[0] in _qnames]
+            import itertools as _it
+            for _k in range(len(_firm) - 1, -1, -1):
+                _best = None
+                for _c in _it.combinations(_firm, _k):
+                    _try = list(_c) + _qout
+                    _n = _regime_support(team, [n for n, _ in _try], pl, glog)
+                    if _n and (_best is None or _n > _best[0]):
+                        _best = (_n, _try)
+                if _best:
+                    _cand = outset_beneficiaries(team, _best[1], pl, firm_out,
+                                                 matchups, lines, rates, glog)
+                    if _cand:
+                        _sp, _sup_n = _cand, _best[0]
+                        _sub_lab = "+".join(x.split()[-1] for x, _ in _best[1])
+                        break
+        # UNSTABLE-REGIME TAG (2026-08-05): a regime whose top beneficiary is
+        # himself a game-time decision is not a stable regime. Tagged, never
+        # silently dropped -- one gate, every surface.
+        _unst, _why = unstable_regime(outs, _sp, inj)
+        for s in _sp:
             spots.append({**s, "star": star, "status": status, "sit": sit,
+                          "unstable": _unst, "unstable_why": _why,
+                          "subset": _sub_lab, "subset_n": _sup_n,
                           "lead": round(lead, 1) if lead is not None else None})
     return spots
 
 
-def outset_beneficiaries(team, outs, pl, skip_names, matchups, lines, rates, glog=None):
+def unstable_regime(outs, spots, inj, min_support=None):
+    """Is this out-set's edge resting on a player who might not sit?
+
+    THE CASE THAT MOTIVATED IT (2026-08-05). CHI with Diggins + Stevens out
+    produced exactly ONE beneficiary -- Sydney Taylor, points 18.5, n=11. Taylor
+    was then listed QUESTIONABLE. So the regime's own designated beneficiary was a
+    game-time decision, and the historical sample behind it was only n=4 -- one of
+    which was the 08/04 game where Taylor LEFT EARLY, meaning it was not a clean
+    pair-out game either. Strip that and the support is n=3 with the beneficiary
+    unavailable.
+
+    Worse, the fallback has no data: Diggins+Stevens+Taylor is n=0 games, and
+    Diggins+Taylor is n=0. There is nowhere for the usage to go that this model has
+    ever observed.
+
+    A regime whose top beneficiary is a game-time decision is NOT a stable regime.
+    Nothing in the existing gates checked for that, so the edge got priced anyway.
+
+    Returns (bool, reason). Callers TAG rather than silently drop -- one gate, every
+    surface, which is the standing rule after the board/alert divergence.
+    """
+    if not spots:
+        return False, ""
+    q = {n for n, s in (inj or {}).items() if s in ("Questionable", "GTD")}
+    if not q:
+        return False, ""
+    top = max(spots, key=lambda s: (s.get("edge") or 0))
+    who = top.get("player")
+    if who in q:
+        return True, "top beneficiary %s is Questionable" % str(who).split()[-1]
+    # also unstable if ANY named out is only questionable rather than ruled out
+    soft = [n for n, _ in outs if n in q]
+    if soft:
+        return True, "out-set depends on %s (Questionable)" % ", ".join(
+            str(n).split()[-1] for n in soft)
+    return False, ""
+
+
+# ── STINT-WOWY: TESTED AND REMOVED 2026-08-06 ─────────────────────────────────
+# The idea: game-level WOWY needs a teammate to have MISSED A GAME, so a thin or
+# absent `n_without` kills the spot. Stints measure the same split in MINUTES,
+# which exist every night, so they should rescue the thin-sample cases.
+#
+# Both limbs of that thesis were measured on the 538-game stint corpus, walk-
+# forward, and BOTH failed:
+#
+#   RATE LIFT -- does (pts/min without mate) - (pts/min with) predict a player's
+#   over-baseline scoring when the mate sits?  Spearman rho at every min_sec:
+#       min_sec   120     300     600     900    1200
+#       rho     +0.0005 +0.0003 +0.0070 +0.0133 +0.0147     (n = 30k-49k)
+#       sign hit 49.9%   49.9%   50.2%   50.3%   50.3%
+#   Zero at every resolution; the sign of the lift is a coin flip. min_sec was
+#   never the constraint -- there was no signal to threshold.
+#
+#   MINUTES BUMP -- does the off-floor fraction predict playing time better than
+#   the recent-5 median the model already uses?  n = 32,851:
+#       recent-5 median   rho +0.7241     <- what we already do
+#       stint off-floor   rho +0.5400     <- real signal, but strictly worse
+#       rho(stint, residual of recent-5) = +0.0342, i.e. ~0.1% of what recent-5
+#       misses. Stint is better CALIBRATED (bias -0.05 vs +0.19) but calibration
+#       is a constant; ordering is the hard part and recent-5 wins it.
+#
+# Four smaller tests agree: ungated backtest a wash; full ledger 46.3% where
+# stint agreed vs 50.0% where it disagreed; tracked current_selection 7-8 where
+# stint had an opinion against 35-15 where it was silent.
+#
+# The earlier justification here (-124.04u vs -134.67u "stint wins on coverage
+# AND record") was VOID: it came from a replay whose as_of was hard-coded to
+# today, so the stint arm saw the whole corpus including future games while the
+# game-level arm was correctly truncated.
+#
+# The corpus (wnba_stints.sqlite) and its builders (wnba_stints.py, stint_attr.py,
+# stint_cache.py) are KEPT -- they are the evidence, and rebuilding them to re-ask
+# a settled question would cost more than the disk. The DECISION PATH is gone so
+# there is no switch left to flip.
+
+
+def outset_beneficiaries(team, outs, pl, skip_names, matchups, lines, rates, glog=None,
+                         as_of=None):
     """Over-edges for TEAM under a hypothetical out-set `outs` [(name, p), ...] — the shared
     core of the Q-tier watchlist and the scenario matrix. Deliberately lighter than the firm
     projection (no mate/context weighting): a heads-up that graduates into the fully modelled
@@ -1321,14 +1540,30 @@ def outset_beneficiaries(team, outs, pl, skip_names, matchups, lines, rates, glo
             # split as the proxy, same fallback the firm pipeline uses
             cands = [W.wowy(blog, ol) for ol in out_logs]
             w = max(cands, key=lambda x: x["n_without"])
+        # STINT PRECEDENCE. Measured on 1,914 lines: stint-WOWY -124.04u vs
+        # game-WOWY -134.67u, adjusting 325 lines against 176. `both` (prefer
+        # game-level where it exists) scored WORSE at -129.06u, so stint leads
+        # rather than backfills.
+        # OFF IN THE DECISION PATH (2026-08-05). The only validation is an
+        # ALL-LINES simulation with no edge threshold, and every arm LOST there:
+        # plain -150.11u, game-WOWY -134.67u, stint-WOWY -124.04u. Stint beating
+        # game-level says the signal is directionally real; it does NOT say the
+        # live selection profits from it, and nothing has tested it inside the
+        # tier / TOP-2 / peer gates. Turning it on immediately re-surfaced a
+        # Vandersloot spot on an n=2 subset -- the same regime vetoed hours
+        # earlier -- and today's ledger work put n=1-2 support at 0-5.
+        # Flip to True only after the SELECTION-level backtest.
+        # NO GAME-LEVEL SPLIT -> NO SPOT. The stint fallback that used to admit these
+        # was removed 2026-08-06 (see the tombstone above): its rate signal measured
+        # rho ~0 on 30k+ observations, so admitting a spot on it was admitting noise.
         if w["n_without"] < 1:
             continue
         proj = w["without"]["min"]["mean"]
         recent5 = [g["min"] for g in blog[:5] if g["min"] > 8]   # newest-first; only lifts
         if recent5:
             proj = max(proj, st.median(recent5))
-        if proj - w["with"]["min"]["mean"] <= 0.3:              # no real minutes bump
-            continue
+        if proj - w["with"]["min"]["mean"] <= 0.3:
+            continue                                            # no real minutes bump
         conf = starter_label(n, team, None, proj)
         for e in prop_edges(n, blog, proj, w, vacated, ctx,
                             opp=matchups.get(team, ""), pos=v.get("position")):
@@ -1459,7 +1694,19 @@ def main():
                     dfga = w["without"]["fga"]["mean"] - w["with"]["fga"]["mean"]
                     rows.append((dmin, dpts, dfga, n, w, blog))
             vacated = {"points": p["pts"], "rebounds": p["reb"], "assists": p["ast"]}
-            for dmin, dpts, dfga, n, w, blog in sorted(rows, key=lambda r: (-r[0], -r[1]))[:4]:
+            # RANK ON PRODUCTION, NOT MINUTES (2026-08-06). This sorted by dmin first
+            # and cut at 4, so a player who absorbs USAGE without absorbing COURT TIME
+            # was eliminated before prop_edges ever saw her. Carleton with Barker out:
+            # +0.76 min but +5.0 pts -- the largest scoring jump on the roster, ranked
+            # below four smaller minutes bumps (+5/+4/+4/+2 min, +4.5/-0.9/+2.9/+0.1
+            # pts) and cut. dpts already contains BOTH channels (more minutes and/or
+            # more per-minute usage), which is what the over is actually betting on;
+            # dmin is only a proxy for it. Kept as the tiebreak, and the cut widened
+            # 4->5 so the change adds a candidate rather than swapping one out.
+            _key = ((lambda r: (-r[1], -r[0])) if USAGE_RATE_ADJ
+                    else (lambda r: (-r[0], -r[1])))
+            _cut = 5 if USAGE_RATE_ADJ else 4
+            for dmin, dpts, dfga, n, w, blog in sorted(rows, key=_key)[:_cut]:
                 proj_min = w["without"]["min"]["mean"]
                 # the user's judgment, on one line: more minutes, more shots, more production
                 print(f"  {n:22} → ~{proj_min:.0f}min ({dmin:+.0f}), {dpts:+.1f}pts, "
