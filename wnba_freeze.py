@@ -16,32 +16,39 @@ import json
 import sys
 
 MANIFEST = "wnba_v1_freeze.json"
-FILES = ["wnba_alert.py", "wnba_slip.py", "wnba_tonight.py", "wnba_wowy.py"]
+# WIDENED 2026-08-06. The old four covered projection and selection but NOT what reaches
+# the pricer. wnba_fd_search.py recovers main lines FanDuel serves only via search, and a
+# player priced on a recovered 5.5 vs a milestone 4.5 is a different bet -- Puoch went
+# "no edge" -> +11.8% EV on exactly that difference. A fingerprint that omits it does not
+# describe what determines the bets, which is the whole point of the fingerprint.
+FILES = ["wnba_alert.py", "wnba_slip.py", "wnba_tonight.py", "wnba_wowy.py",
+         "wnba_fd_search.py", "wnba_ladder_guard.py"]
 MODULES = ("wnba_slip",)
-VERSION = "v1.3"
+VERSION = "v1.4"
 FROZEN_ON = "2026-08-06"
 DECISION = (
-    "v1.3 (2026-08-06) — RE-PIN, not a model change. The v1.2 fingerprint was taken 2026-07-31 "
-    "and then never updated while NINE deliberate commits landed on the frozen files, so the "
-    "SPRT has been validating a moving target since. Nothing here alters selection; this records "
-    "what has actually been running. Folded in: d0080478 (an empty with-set must fail CLOSED — "
-    "it was worth a +26.7 min FAKE minutes boost), bab18b59 (a traded-in player's split was "
-    "measured against games she played AGAINST the team), 1fa916d2 (_drop_inverted was destroying "
-    "the real main line — anchor on the two-sided rung), aa9ff17c (drop rungs violating the "
-    "ladder's own arithmetic; 17% of ladders did), 7d7462cf (the out-check was rewriting HISTORY), "
-    "4cc6d2f0 (the board never shared the slip's gate), 0f3601bf (ladder rung stake scales with "
-    "implied probability), 3e9dec7a (capture the full posted rung ladder per flag), fcf68e06 "
-    "(ESPN 403s / spoofed UAs). Plus working-tree changes: the stint code path DELETED (its rate "
-    "signal measured rho~0 on 30k+ observations, so admitting a spot on it was admitting noise) "
-    "and the Q-tier fold fix of 2026-08-05. "
-    "ALSO CARRIED, INERT: USAGE_RATE_ADJ=False. Usage-conditioning was built and REJECTED — on "
-    "1,083 walk-forward beneficiary-games with real lines the flat-minutes/usage-up class hit "
-    "27.8% (z=-2.07) with a MONOTONE INVERTED dose-response (d_FGA/36 >=1.0 -> -13.0, >=1.5 -> "
-    "-17.1, >=2.0 -> -23.8, z=-3.30). _usage_mult() returns 1.0 while the flag is False, so it "
-    "cannot touch a price. Kept as documentation of a tested negative, not as a live path. "
-    "RECORD CONTINUITY: evidence gathered under v1.2 is NOT pooled with v1.3 — the nine commits "
-    "include real selection-affecting fixes, so the counted record restarts from this fingerprint. "
-    "The v1.2 line stood at 33-16 / +18.05u.")
+    "v1.4 (2026-08-06) — the fingerprint now covers WHAT REACHES THE PRICER, not just how it is "
+    "priced. FanDuel serves some player main lines ONLY via its search host "
+    "(api.sportsbook.fanduel.com/search/tabs, headers x-sportsbook-region + x-app-version); those "
+    "markets are on NONE of the 16 event-page tabs, on either the NY or Alberta book. Without "
+    "recovery, prop_edges anchors such a player on a shared 'To Score 5+/10+ Points' milestone "
+    "rung at a short price (Puoch points 4.5 @ 1.5618 = 64% implied), which cannot clear the +10% "
+    "over bar arithmetically — so a DATA gap is reported as a model 'no edge'. 28 players / 37 "
+    "stats were in that state on the 2026-08-06 slate. With her real 5.5 recovered Puoch flagged "
+    "at +11.8% EV and the over won (6 points). wnba_fd_search.py and wnba_ladder_guard.py are "
+    "therefore selection-affecting and are now fingerprinted. "
+    "⚠ THE RECOVERY PATH IS UNVALIDATED AT THIS STAMP. It shipped with two bugs that were both "
+    "invisible to a single hand-run and only appear on a SECOND pass: FD_SEARCH_GAP was 600s == "
+    "FRESH_MIN (posted_props cutoff = newest-stamp-any-stat minus FRESH_MIN, and fd_collect "
+    "rewrites the milestone rungs every ~4 min, so a recovered line went stale the instant it "
+    "became eligible to refresh — it worked exactly once), and fetch() queried the FULL name when "
+    "FanDuel search only matches the surname ('Nyadiew Puoch' -> nothing, 'Puoch' -> her market). "
+    "Both are fixed but NOT yet proven: wnba_twopass_test.py is cron'd for 2026-08-07 22:00Z to "
+    "recover, wait past FRESH_MIN, and confirm the rung survives. If that test FAILS, this "
+    "fingerprint covers a broken recovery path and must be re-stamped after the fix. "
+    "RECORD CONTINUITY: v1.3 evidence does NOT pool into v1.4 — recovery changes which lines are "
+    "priced, so it changes the bet population. v1.3 was itself a re-pin of the nine post-freeze "
+    "commits; the last independently-validated line remains v1.2 at 33-16 / +18.05u.")
 
 
 def _fingerprint():
