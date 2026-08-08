@@ -30,11 +30,23 @@ DESIGN NOTES SPECIFIC TO THIS BOX
     only, which is UNSET under cron, so an env-only alert here would be a silent no-op.
 """
 import argparse, gzip, hashlib, io, json, os, shutil, sqlite3, sys, datetime as dt
+import code_backup
 
 OUT = "/home/ubuntu/backups/wnba"
 ENV_FILE = "/home/ubuntu/wnba-loop.env"
 REPO = "/home/ubuntu/tennis-odds-collector"
 DATA = "/home/ubuntu/wnba_data"
+
+# ⚠️ ROLLING-WINDOW SOURCES. `fd_maintain.py` prunes fd_lines to KEEP_DAYS (~2 days), so
+# wnba_lines is NOT a historical archive -- it is a rotating buffer that drops ~500k rows/day.
+# Two consequences, both learned the hard way when the monotone guard fired on 2026-08-07:
+#   1. the shrink guard must NOT apply to these, or the backup fails every single day and the
+#      net effect is NO backup at all -- strictly worse than the risk the guard protects against
+#   2. their snapshots must NEVER be pruned. Every daily file is the ONLY surviving copy of that
+#      day's lines; deleting one deletes that day permanently. Non-rolling DBs can be thinned
+#      because the source still holds their history -- these cannot.
+ROLLING = {"wnba_lines"}
+ROLLING_FLOOR = 50_000        # a rolling table below this is broken, not merely rotating
 
 DBS = [
     ("wnba_lines",      f"{DATA}/wnba_lines.sqlite"),       # 1.6M line snapshots -- the CLV substrate
@@ -144,6 +156,9 @@ def prune(today):
         except ValueError:
             continue
         age = (today - d).days
+        # a rolling source's snapshot is the ONLY copy of that day -- never thin those
+        if any(fn.startswith(r + ".") for r in ROLLING):
+            continue
         keep = (age <= 7) or (age <= 60 and d.weekday() == 6) or (d.day == 1)
         if not keep:
             os.unlink(os.path.join(OUT, fn))
@@ -163,6 +178,15 @@ def cmd_run(force=False):
             continue
         info, part, final = snapshot(label, src, stamp)
         was = prev.get(label, {}).get("rows")
+        if label in ROLLING:
+            # rotating buffer: judge it against a floor, not against yesterday
+            if info["rows"] < ROLLING_FLOOR:
+                for p, _f in staged:
+                    os.unlink(p)
+                os.unlink(part)
+                fail("%s is ROLLING but only %d rows (floor %d) -- collector may be dead"
+                     % (label, info["rows"], ROLLING_FLOOR))
+            was = None
         if was is not None and info["rows"] < was and not force:
             for p, _f in staged:
                 os.unlink(p)
@@ -175,6 +199,21 @@ def cmd_run(force=False):
         fail("nothing was backed up -- every source was missing or a stub")
     for part, final in staged:
         os.replace(part, final)
+    # CODE, not just data. This box cannot push (suspended GitHub account) and the repo is
+    # 1,805 commits ahead of an origin last updated 2026-08-02, so the source exists ONLY here.
+    # A git bundle was tried first and REJECTED: `git bundle verify` passed it but cloning it
+    # back failed ("Failed to traverse parents"), because git_reshallow_any.sh keeps the repo
+    # shallow. Source tar restores; a bundle of pruned history does not.
+    try:
+        prevc = (last_good() or {}).get("code") or {}
+        man["code"] = code_backup.snapshot(REPO, OUT, stamp, prev=prevc)
+        cd = man["code"]
+        print("  %-16s %9d files %7.1f MB -> %6.2f MB  [restore-tested]"
+              % ("SOURCE", cd["files"], 0.0, cd["bytes"] / 1e6))
+    except Exception as e:
+        notify("code snapshot FAILED -- %s (DB backup is good)" % str(e)[:160])
+        print("  SOURCE snapshot FAILED: %s" % str(e)[:200])
+
     io.open(os.path.join(OUT, "latest.json"), "w").write(json.dumps(man, indent=2))
     io.open(os.path.join(OUT, "manifest.%s.json" % stamp), "w").write(json.dumps(man, indent=2))
     tot_raw = sum(d["raw_bytes"] for d in man["dbs"].values())
