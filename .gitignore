@@ -69,3 +69,27 @@ golf_lines.sqlite-wal
 golf_lines.sqlite-shm
 .git-clobbered/
 pga_tees.sqlite
+
+# --- sqlite binaries, untracked 2026-08-07 ---
+# Binaries do not delta: every commit stored a fresh full-size blob, which is how
+# tt-elite's .git reached 1.4 GB. 87 MB across 23 DBs here. Nothing reads these
+# from the repo -- vm_loop.sh's `git checkout "$C" -- *.sqlite` only UNDOES its own
+# `reset --hard`, and once untracked the reset cannot touch them at all.
+# Durability now comes from wnba_backup.py (off-box to worker-2), not from git.
+bet_ledger.sqlite
+gg.sqlite
+golf_moves.sqlite
+k_compass.sqlite
+k_paper.sqlite
+mlb_kprops.sqlite
+mlb_totals.sqlite
+nba_wowy.sqlite
+nfl_totals.sqlite
+oa_golf.sqlite
+odds.sqlite
+pga_model.sqlite
+pga_paper.sqlite
+walks_paper.sqlite
+wnba.sqlite
+wnba_props.sqlite
+wnba_question_log.sqlite

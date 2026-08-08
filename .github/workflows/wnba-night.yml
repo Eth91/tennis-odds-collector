@@ -53,6 +53,7 @@ jobs:
               for f in wnba_lines_ts.txt wnba_priced_state.json wnba_status_state.json wnba_confirm_state.json wnba_players_cache.json wnba_context_cache.json wnba_notified.txt wnba_ledger.sqlite wnba_played.txt wnba_parlays_played.txt wnba_clv.sqlite wnba_proj_log.sqlite wnba_news_seen.txt wnba_question_log.sqlite wnba_sit_prob.json wnba_watchdog_state.json wnba_proj_cache.json; do
                 git add -f "$f" 2>/dev/null || true
               done
+          git rm --cached -q --ignore-unmatch "*.sqlite" 2>/dev/null || true  # self-heal: `git add -f` overrides .gitignore and would re-track the binaries
               if git commit -m "wnba night watch [skip ci]" -q >/dev/null 2>&1; then
                 # reconcile onto origin; NEVER reset --hard (would discard fresh shadows/SEEN and re-fire alerts)
                 git pull --rebase --autostash -X theirs -q 2>/dev/null || git rebase --abort 2>/dev/null || true

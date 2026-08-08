@@ -59,6 +59,27 @@ DBS = [
     ("wnba_props_hist", f"{REPO}/wnba_props_hist.sqlite"),
     ("wnba_boxscores",  f"{REPO}/wnba_boxscores.sqlite"),
     ("bet_ledger",      f"{REPO}/bet_ledger.sqlite"),
+    # --- BOARD DBs added 2026-08-07, immediately BEFORE untracking them from git ---
+    # These 17 were tracked binaries; git was their only versioned copy. git was never real
+    # protection here (same disk, and this box cannot push), but it must not be removed and
+    # leave nothing behind, so they are backed up FIRST and untracked SECOND.
+    ("odds",            f"{REPO}/odds.sqlite"),
+    ("pga_model",       f"{REPO}/pga_model.sqlite"),
+    ("mlb_kprops",      f"{REPO}/mlb_kprops.sqlite"),
+    ("pga_tees",        f"{REPO}/pga_tees.sqlite"),
+    ("nfl_totals",      f"{REPO}/nfl_totals.sqlite"),
+    ("golf_moves",      f"{REPO}/golf_moves.sqlite"),
+    ("tt_replica",      f"{REPO}/tt.sqlite"),
+    ("mlb_totals",      f"{REPO}/mlb_totals.sqlite"),
+    ("gg",              f"{REPO}/gg.sqlite"),
+    ("nba_wowy",        f"{REPO}/nba_wowy.sqlite"),
+    ("oa_golf",         f"{REPO}/oa_golf.sqlite"),
+    ("pga_paper",       f"{REPO}/pga_paper.sqlite"),
+    ("k_compass",       f"{REPO}/k_compass.sqlite"),
+    ("k_paper",         f"{REPO}/k_paper.sqlite"),
+    ("walks_paper",     f"{REPO}/walks_paper.sqlite"),
+    ("wnba_props_live", f"{REPO}/wnba_props.sqlite"),
+    ("wnba_qlog",       f"{REPO}/wnba_question_log.sqlite"),
 ]
 
 

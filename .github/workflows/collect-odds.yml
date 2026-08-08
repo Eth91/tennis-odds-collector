@@ -64,6 +64,7 @@ jobs:
           for f in lines_delta.json; do
             git add -f "$f" 2>/dev/null || true
           done
+          git rm --cached -q --ignore-unmatch "*.sqlite" 2>/dev/null || true  # self-heal: `git add -f` overrides .gitignore and would re-track the binaries
           git commit -m "odds snapshot [skip ci]" -q || { echo "no change"; exit 0; }
           # ROBUST push, 2026-07-25 rewrite: the VM loop pushes every ~2min, so two attempts ALWAYS
           # lost the race ("push skipped" on every run for 18h -> repo-wide MLB line freeze), and the
