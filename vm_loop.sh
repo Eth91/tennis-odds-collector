@@ -12,7 +12,15 @@ cd "$HOME/tennis-odds-collector" || exit 1
 # and being late with that is the failure it exists to prevent.
 
 export FD_DB="$(pwd)/wnba_lines.sqlite"
-GHREPO="github.com/fgf9p6ks2f-ux/tennis-odds-collector.git"
+# 2026-08-12: re-pointed off fgf9p6ks2f-ux, whose GitHub account is SUSPENDED (that
+# suspension is why push() has been disabled since 2026-08-05). New home is the Eth91
+# account, which is live and already hosts cfl-engine. History was pushed there from the
+# Mac (which holds the Eth91 credential); origin and this working copy are in sync.
+# ⚠️ STILL DISABLED. $GIT_PAT in ~/wnba-loop.env is the OLD suspended account's token and
+# cannot push here. To finish: put an Eth91 PAT with `repo` scope in ~/wnba-loop.env, then
+# `rm /home/ubuntu/.wnba_push_disabled`. Any failure after that lands in ~/push_err.log
+# rather than /dev/null.
+GHREPO="github.com/Eth91/tennis-odds-collector.git"
 git config user.name "odds-bot" 2>/dev/null; git config user.email "odds-bot@users.noreply.github.com" 2>/dev/null
 URL="https://x-access-token:${GIT_PAT}@${GHREPO}"
 
