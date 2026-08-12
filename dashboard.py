@@ -740,6 +740,32 @@ def _prop_row(r, rungs=None, player=None):
     else:
         best_dec, best_bk = float(r["odds"]), "fd"
         btag = '<img class="bklogo" src="book-fd.png" alt="FD">'
+    # ---- PRICE DRIFT vs the price this bet was FLAGGED at (2026-08-12) ----
+    # The live-line filter above is BINARY -- line posted or gone. It cannot see a rung
+    # still posted at a WORSE number than when we flagged it, which on a speed edge is
+    # the state that actually costs money. `best_dec` is the live best price the card is
+    # already showing and r["odds"] is the flagged price, so this is a pure comparison of
+    # two numbers in hand -- NO second query, and it can never disagree with the price
+    # printed beside it.
+    # ⚠️ MEASURED IN IMPLIED PROBABILITY, NOT AMERICAN POINTS. American odds are
+    # discontinuous at even money (+100 and -100 are adjacent yet 200 apart). Scored in
+    # points, a live 2.02->1.98 tick (1.0pp, nothing) outranked a 2.85->2.14 collapse
+    # (11.6pp, the whole edge) by 3x -- backwards. Decimal odds invert straight to
+    # implied probability, so 1/dec differencing sidesteps the discontinuity entirely.
+    # +ve = price improved for us. Only |drift| >= 1.5pp is shown: a warning that fires
+    # on every row is a warning nobody reads.
+    dchip = ""
+    if bp and not r.get("_tipped"):
+        try:
+            _fl = float(r["odds"])
+            if _fl > 1.0 and best_dec > 1.0:
+                _pp = (1.0 / _fl - 1.0 / best_dec) * 100.0
+                if abs(_pp) >= 1.5:
+                    _c = "up" if _pp > 0 else "dn"
+                    dchip = (f'<span class="cu-drift {_c}" title="live price vs the price '
+                             f'this bet was flagged at">{_pp:+.1f}pp</span>')
+        except Exception:
+            dchip = ""
     tipt = r.get("_tiptime") or ""
 
     # ---- title: player + both team marks ----
@@ -829,7 +855,7 @@ def _prop_row(r, rungs=None, player=None):
           <div class="cu-ttl">{tms}{nm}{tchip}</div>
           <div class="cu-bet"><span class="cu-dir {o}">{oword}</span>
             <span class="cu-line{rng}">{line_disp}</span>{unit}
-            <span class="cu-price">{contra}<span class="cu-od">{_am(best_dec)}</span>
+            <span class="cu-price">{contra}<span class="cu-od">{_am(best_dec)}</span>{dchip}
               <span class="cu-chev">\u203a</span></span></div>
           <div class="cu-cf">{bar}</div>{rungs_html}
         </div>{_bars(r, "".join(ms))}
@@ -1186,6 +1212,7 @@ TT_LIVE_JS = """
   const TT_H2H_URL = '/tt_board.json';
   let _ttBoard = null, _ttH2H = null, _ttUpcoming = null, _ttBets = null, _ttSkipped = null, _ttPositions = null
   let _ttV11 = null;   // v1.1 candidate block (forward test) from tt_board.json
+  let _ttPrequal = null;   // pre-qualified upcoming pairs (projected line, not yet priced)
   function _ttEsc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
   function _ttTime(iso){ try { return new Date(iso).toLocaleTimeString('en-US', {timeZone:'America/Denver', hour:'numeric', minute:'2-digit'}); } catch(e){ return ''; } }
   function _ttAm(o){ return (o != null && o > 0) ? '+' + o : '' + o; }
@@ -1255,7 +1282,8 @@ TT_LIVE_JS = """
                     line: (b.line != null ? +b.line : +b.play_to),
                     side: (String(b.side||'').charAt(0) === 'O') ? 'over' : 'under',
                     hit: b.raw, real: true, book: _bn, pt: (b.play_to != null ? +b.play_to : null),
-                    odds: (b.odds != null ? _ttAm(b.odds) : _ttDecAm((b.book||{}).od))});
+                    odds: (b.odds != null ? _ttAm(b.odds) : _ttDecAm((b.book||{}).od)),
+                    mgm_url: b.mgm_url || null});
     });
     // REFUSED PLAYS SUPPRESS THEIR OWN PROJECTION. They are never rendered, but a pair that has a
     // real FanDuel/BetMGM line and failed the gate must LEAVE the board rather than fall back to a
@@ -1290,12 +1318,41 @@ TT_LIVE_JS = """
                     side: String(p.side || '').toLowerCase(), hit: p.conf, real: true,
                     book: (p.book === 'betmgm') ? 'BetMGM' : 'FanDuel',
                     pt: (p.play_to != null ? +p.play_to : null),
-                    odds: (p.odds != null ? _ttAm(p.odds) : null)});
+                    odds: (p.odds != null ? _ttAm(p.odds) : null),
+                    mgm_url: p.mgm_url || null});
     });
-    entries = entries.filter(function(x){ return x.real; });   // confirmed at a posted line ONLY
-    entries.sort(function(a,b){ return a.start-b.start; });
+    // PROJECTED CARDS (user 2026-08-06). Restored deliberately and marked YELLOW so
+    // they can never be mistaken for the green confirmed plays -- the 2026-08-02 removal
+    // was because a projection at an invented line "reads as an available bet". The line
+    // here is not invented: it is the average of the pair's last two PRICED lines
+    // (BetMGM/FanDuel), which predicts the next posted line with +0.07 bias and 2.38 pts
+    // median error, measured over 3,303 pair-days. Still ~2.4 pts of error, hence yellow
+    // and the explicit "projected" wording -- watch order, not a position.
+    (_ttPrequal || []).forEach(function(p){
+      if (!p || !p.p1 || !p.p2 || p.proj_line == null) return;
+      // v1.6 overs-only (user 2026-08-09): projected UNDER cards never render
+      if (String(p.side || "").toLowerCase() !== "over") return;
+      var n1 = _ttNorm(p.p1), n2 = _ttNorm(p.p2), k = _ttKey(n1, n2);
+      // suppressed by a real card, a refused play, OR a already-priced pair: a pair the
+      // gate has actually seen must never reappear as a projection
+      if (havePair[k] || boardPairs[k] || boardLast[_ttKey(_ttLast(n1), _ttLast(n2))]) return;
+      if (p.priced) return;
+      havePair[k] = 1;
+      entries.push({start: now + (p.hours || 0) * 3600000, p1: p.p1, p2: p.p2,
+                    line: +p.proj_line, side: String(p.side || '').toLowerCase(),
+                    hit: (p.raw != null ? Math.round(p.raw * 100) : null),
+                    real: false, proj: true, n: p.n, off: (p.off != null ? +p.off : 0),
+                    book: null, odds: null});
+    });
+    // CONFIRMED FIRST (user 2026-08-09): a struck bet outranks any projection
+    // regardless of tip time; each tier keeps its own time order.
+    entries.sort(function(a,b){
+      if (!!a.real !== !!b.real) return a.real ? -1 : 1;
+      return a.start - b.start;
+    });
     entries = entries.slice(0, 16);
     var rows = '';
+    var _projHdrDone = false;
     for (var i=0; i<entries.length; i++){
       var x = entries[i], tip = _ttTime(new Date(x.start).toISOString()), o = x.side==='over'?'O':'U';
       var chip = (x.hit != null) ? ('<div class="ttconf"><span class="tchip ' + (x.hit>=78?'tA':'tB') + '">' + x.hit + '%</span><span class="ttconflab">hit rate</span></div>') : '';
@@ -1307,13 +1364,15 @@ TT_LIVE_JS = """
       var _oddstxt = x.odds ? ('<span class="cu-od' + (_mgm ? ' bmgm' : '') + '">' + x.odds + '</span>') : '';
       var _price = '';
       var src = x.real ? ('<span class="' + _cls + '">' + _bk + ' ' + mid + ' confirmed</span> ' + _price)
-                       : '<span class="pj">projected</span>';
+                       : ('<span class="pj">projected line ' + mid + ' n=' + (x.n || 0) + ' H2H'
+                          + (x.off ? (' ' + mid + ' needs ' + (x.off > 0 ? '+' : '') + x.off) : '')
+                          + '</span>');
       // CUPERTINO-REBUILD: same anatomy as a WNBA card — status pill + book + lock, title,
       // context sub-line, the bet at display size, hit-rate bar on the face. No drawer.
       var _st = x.real ? '<span class="cu-st ok">Confirmed</span>'
-                       : '<span class="cu-st no">Projected</span>';
+                       : '<span class="cu-st pj">Projected</span>';
       var _hit = (x.hit != null)
-            ? ('<span class="cu-bar"><i class="' + (x.hit >= 78 ? 'g' : '') + '" style="width:'
+            ? ('<span class="cu-bar"><i class="' + (x.proj ? 'y' : (x.hit >= 78 ? 'g' : '')) + '" style="width:'
                + Math.min(x.hit, 100) + '%"></i></span><span class="cu-pc">' + x.hit + '%</span>'
                + '<span class="cu-n">hit rate</span>')
             : '<span class="cu-bar"></span><span class="cu-pc na">\u2014</span>'
@@ -1329,6 +1388,20 @@ TT_LIVE_JS = """
                + (x.side === 'over' ? 'line at or below ' : 'line at or above ') + x.pt
                + ' \u00b7 past it the H2H hit rate drops under the bar</div></div></div>';
       }
+      if (!x.real && !_projHdrDone){
+        rows += '<div class="ttpos-hd" style="margin-top:10px">Projected · watch orders, not positions</div>';
+        _projHdrDone = true;
+      }
+      // BETMGM TAP-THROUGH (user 2026-08-12): opens this exact match in the app, so the
+      // bet does not have to be hunted for at T-2. The href is built ONCE, server-side, in
+      // tt_board.mgm_url() -- the URL shape lives in a single constant there and is never
+      // reassembled here, because a second copy of a template always drifts.
+      // NO URL -> NO BUTTON. mgm_url is null when the flag was not struck at BetMGM
+      // (7 of 131 rows); a button that lands nowhere is worse than none at T-2.
+      var _mgmBtn = x.mgm_url
+            ? ('<a class="cu-mgm" href="' + _ttEsc(x.mgm_url) + '" target="_blank" '
+               + 'rel="noopener noreferrer">Open \u00b7 BetMGM \u203a</a>')
+            : '';
       rows += '<div class="cu-c' + (_ptRow ? ' haspt' : '') + '" data-k="'
             + _ttKey(_ttNorm(x.p1), _ttNorm(x.p2)) + '"><div class="cu-sum">'
             + '<div class="cu-hd">' + _st + _bklogo + '<span class="cu-time">' + tip + ' MT</span></div>'
@@ -1338,7 +1411,7 @@ TT_LIVE_JS = """
             + '</span><span class="cu-line">' + lncell + '</span>'
             + '<span class="cu-price">' + _oddstxt
             + (_ptRow ? '<span class="cu-chev">\u203a</span>' : '') + '</span></div>'
-            + '<div class="cu-cf">' + _hit + '</div>'
+            + '<div class="cu-cf">' + _hit + _mgmBtn + '</div>'
             + _ptRow
             + '</div></div>';
     }
@@ -1418,6 +1491,12 @@ TT_LIVE_JS = """
         window._ttOpenKeys[c.getAttribute('data-k')] = c.classList.contains('open');
       });
     });
+    // The BetMGM button lives INSIDE that clickable card, so without this a tap both
+    // navigates and silently toggles the drawer underneath. Bound the same delegated way
+    // for the same reason: no inline onclick has to survive three quoting layers.
+    [].slice.call(el.querySelectorAll('.cu-mgm')).forEach(function(a){
+      a.addEventListener('click', function(e){ e.stopPropagation(); });
+    });
   };
   window._fetchTTTotals = async function(){
     try {
@@ -1426,7 +1505,7 @@ TT_LIVE_JS = """
     } catch(e){}
     try {
       var r2 = await fetch(TT_H2H_URL + '?_=' + Date.now(), { cache: 'no-store' });
-      if (r2.ok){ var d2 = await r2.json(); var mp = {}; (d2.elite_h2h || []).forEach(function(e){ mp[_ttKey(e.p1n, e.p2n)] = e; }); _ttH2H = mp; _ttUpcoming = Array.isArray(d2.elite_upcoming) ? d2.elite_upcoming : []; _ttBets = Array.isArray(d2.bets) ? d2.bets : []; _ttSkipped = Array.isArray(d2.skipped) ? d2.skipped : []; _ttPositions = Array.isArray(d2.positions) ? d2.positions : []; _ttV11 = d2.v11 || null; }
+      if (r2.ok){ var d2 = await r2.json(); var mp = {}; (d2.elite_h2h || []).forEach(function(e){ mp[_ttKey(e.p1n, e.p2n)] = e; }); _ttH2H = mp; _ttUpcoming = Array.isArray(d2.elite_upcoming) ? d2.elite_upcoming : []; _ttBets = Array.isArray(d2.bets) ? d2.bets : []; _ttSkipped = Array.isArray(d2.skipped) ? d2.skipped : []; _ttPositions = Array.isArray(d2.positions) ? d2.positions : []; _ttV11 = d2.v11 || null; _ttPrequal = Array.isArray(d2.prequalified) ? d2.prequalified : []; }
     } catch(e){}
     window._applyTTTotals();
     _ttStamp();
@@ -1458,6 +1537,7 @@ TT_LIVE_JS = """
     _ttPositions = Array.isArray(b.positions) ? b.positions : [];
     _ttSkipped = Array.isArray(b.skipped) ? b.skipped : [];
     _ttV11 = b.v11 || null;
+    _ttPrequal = Array.isArray(b.prequalified) ? b.prequalified : [];
     try { window._applyTTTotals(); } catch(e){}
   })();
   window._fetchTTTotals();
@@ -2204,6 +2284,16 @@ def _watchlist_html(firm_keys=frozenset(), tips=None):
         return ""
     scen = d.get("scenarios") or []
     scen = [s for s in scen if s.get("play")]
+    # WATCHLIST IS A CONTINGENCY BOARD (user 2026-08-05). Its header reads "if they
+    # sit, play this", so every row must hang on a NAMED availability decision:
+    # Questionable / GTD (may sit) or Out (already sitting, the play it unlocks).
+    # Rows with any other status are shadow spots that arrived here through the
+    # shared `watch` list -- band/usg/cold pilots keyed on nothing a human is
+    # waiting on. They were rendering under "if they sit" describing players whose
+    # status was not a pending decision at all.
+    _WSTAT = {"questionable", "gtd", "out", "doubtful"}
+    scen = [s for s in scen
+            if str(s.get("status") or "").strip().lower() in _WSTAT]
     # one bet, one place: a scenario whose play is already a FIRM card never re-lists
     scen = [s for s in scen if (s.get("date"), s["play"].get("player"),
                                 s["play"].get("stat")) not in firm_keys]
@@ -2270,7 +2360,19 @@ def _watchlist_html(firm_keys=frozenset(), tips=None):
             else:
                 cond = (f'<b>{html.escape("+".join(stars))}</b> out '
                         f'<span class="wlin">· out of band · shadow, not a bet</span>')
+            # SUBSET PROVENANCE (2026-08-05). When the full out-set (firm outs +
+            # the questionable star) has NO historical games, the Q-tier falls back
+            # to the best-supported SUBSET. The card must name that regime and its
+            # support: the ledger has n=1-2 regimes at 0-5, so an unlabelled subset
+            # row reads like a normal contingency when it is the worst bucket there
+            # is. Thin subsets are forced to shadow styling regardless of kind.
+            _sub, _subn = s.get("subset"), s.get("subset_n")
+            if _sub:
+                _sn = f" · n={_subn}" if _subn is not None else ""
+                cond += (f'<span class="wlin"> · via {html.escape(_sub)} out{_sn}</span>')
             shadow = " wlshadow" if kind in ("cold", "band", "n1", "usg") else ""
+            if _sub and (_subn or 0) <= 2:
+                shadow = " wlshadow"
             rows += (f'<div class="wlrow{shadow}"{ttl}>'
                      f'<div class="wlcond">{cond}</div>'
                      f'<div class="wlplay"><b>{html.escape(p.get("player") or "")}</b> '
@@ -3714,6 +3816,7 @@ def build():
     --cu-lbl:#fff; --cu-lbl2:rgba(235,235,245,.6); --cu-lbl3:rgba(235,235,245,.3);
     --cu-fill:rgba(120,120,128,.24); --cu-sep:rgba(84,84,88,.65);
     --cu-blue:#0a84ff; --cu-grn:#30d158; --cu-org:#ff9f0a; --cu-red:#ff453a;
+    --cu-yel:#ffd60a;   /* projected: Apple system yellow, matching the palette */
   }}
   body {{ background:var(--cu-bg); color:var(--cu-lbl);
           font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif; }}
@@ -3779,6 +3882,12 @@ def build():
   #wnba .cu-price {{ margin-left:auto; display:flex; align-items:center; gap:9px; }}
   #wnba .cu-od {{ font-size:20px; font-weight:640; letter-spacing:-.02em;
                   font-variant-numeric:tabular-nums; }}
+  /* price drift vs the flagged price. Semantic red/green only -- the existing system
+     tokens, not a new hue, so it reads on the same scale as every other state chip. */
+  #wnba .cu-drift {{ font-size:11px; font-weight:650; font-variant-numeric:tabular-nums;
+                     padding:1px 5px; border-radius:5px; white-space:nowrap; }}
+  #wnba .cu-drift.dn {{ color:var(--cu-red); background:rgba(255,69,58,.14); }}
+  #wnba .cu-drift.up {{ color:var(--cu-grn); background:rgba(48,209,88,.14); }}
   #wnba .cu-chev {{ color:var(--cu-lbl3); font-size:15px; transition:transform .18s; }}
   #wnba .cu-c:has(.bars.open) .cu-chev {{ transform:rotate(90deg); }}
   #wnba .cu-warn {{ color:var(--cu-org); font-size:14px; }}
@@ -4282,6 +4391,9 @@ def build():
   #tt .cu-st {{ font-size:12px; font-weight:600; padding:2px 8px; border-radius:11px; }}
   #tt .cu-st.ok {{ color:var(--cu-grn); background:rgba(48,209,88,.18); }}
   #tt .cu-st.no {{ color:var(--cu-lbl2); background:var(--cu-fill); }}
+  /* PROJECTED = YELLOW, CONFIRMED STAYS GREEN. New class names, so nothing
+     existing is overridden and no rule is left shadowed. */
+  #tt .cu-st.pj {{ color:var(--cu-yel); background:rgba(255,214,10,.18); }}
   #tt .cu-time {{ margin-left:auto; font-size:14px; color:var(--cu-lbl2);
                   font-variant-numeric:tabular-nums; }}
   #tt .cu-ttl {{ font-size:19px; font-weight:640; letter-spacing:-.022em; color:var(--cu-lbl);
@@ -4299,10 +4411,19 @@ def build():
   #tt .cu-bar {{ flex:1; height:7px; background:var(--cu-fill); border-radius:4px; overflow:hidden; }}
   #tt .cu-bar i {{ display:block; height:100%; background:var(--cu-blue); border-radius:4px; }}
   #tt .cu-bar i.g {{ background:var(--cu-grn); }}
+  #tt .cu-bar i.y {{ background:var(--cu-yel); }}
   #tt .cu-pc {{ font-size:16px; font-weight:640; font-variant-numeric:tabular-nums; }}
   #tt .cu-pc.na {{ color:var(--cu-lbl3); }}
   #tt .cu-n {{ font-size:14px; color:var(--cu-lbl2); }}
   #tt .cu-n.na {{ color:var(--cu-lbl3); }}
+  /* BetMGM tap-through, footer right. Gold is already this card's BetMGM signal
+     (.cu-od.bmgm) -- reused, not a new colour. Sits at the end of the flex row and
+     .cu-bar is flex:1, so it pins to the card's bottom-right on its own. */
+  #tt .cu-mgm {{ flex:0 0 auto; font-size:13px; font-weight:640; letter-spacing:-.01em;
+                 color:#d4af37; text-decoration:none; padding:5px 11px; border-radius:13px;
+                 border:.5px solid rgba(212,175,55,.45); background:rgba(212,175,55,.10);
+                 white-space:nowrap; -webkit-tap-highlight-color:transparent; }}
+  #tt .cu-mgm:active {{ background:rgba(212,175,55,.24); }}
   #tt .tld {{ color:var(--cu-lbl3); font-size:22px; }}
 
   /* ══════════════════ CUPERTINO-CLEAN ══════════════════
