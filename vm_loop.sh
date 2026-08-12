@@ -62,11 +62,11 @@ cross_sport_block(){
   local last; last=$(cat "$m" 2>/dev/null || echo 0)
   [ $(( now - last )) -lt 1800 ] && return 0
   echo "$now" > "$m"
-  python3 collect.py       >/dev/null 2>&1 || true   # tennis (Pinnacle)
-  python3 nba_injuries.py  >/dev/null 2>&1 || true
-  python3 nba_flags.py     >/dev/null 2>&1 || true
-  python3 nfl_totals.py    >/dev/null 2>&1 || true
-  python3 bet_ledger.py    >/dev/null 2>&1 || true
+  timeout 180 python3 collect.py >/dev/null 2>&1 || echo "collect fail $(date -Is)" >>$HOME/loop_fail.log # tennis (Pinnacle)
+  timeout 180 python3 nba_injuries.py >/dev/null 2>&1 || echo "nba_injuries fail $(date -Is)" >>$HOME/loop_fail.log
+  timeout 180 python3 nba_flags.py >/dev/null 2>&1 || echo "nba_flags fail $(date -Is)" >>$HOME/loop_fail.log
+  timeout 180 python3 nfl_totals.py >/dev/null 2>&1 || echo "nfl_totals fail $(date -Is)" >>$HOME/loop_fail.log
+  timeout 180 python3 bet_ledger.py >/dev/null 2>&1 || echo "bet_ledger fail $(date -Is)" >>$HOME/loop_fail.log
 }
 
 # NIGHTLY DIGEST (ported from nightly-digest.yml). Actions needed five crons because its
@@ -79,11 +79,11 @@ nightly_block(){
   [ "$(cat "$m" 2>/dev/null)" = "$key" ] && return 0
   echo "$key" > "$m"
   echo "[$(date -u +%H:%M)] nightly digest"
-  python3 db_sync.py --build  >/dev/null 2>&1 || true
-  python3 bet_ledger.py       >/dev/null 2>&1 || true
-  python3 daily_digest.py     >/dev/null 2>&1 || true
-  python3 dashboard.py        >/dev/null 2>&1 || true
-  python3 db_sync.py --export >/dev/null 2>&1 || true
+  timeout 180 python3 db_sync.py --build >/dev/null 2>&1 || echo "db_sync fail $(date -Is)" >>$HOME/loop_fail.log
+  timeout 180 python3 bet_ledger.py >/dev/null 2>&1 || echo "bet_ledger fail $(date -Is)" >>$HOME/loop_fail.log
+  timeout 180 python3 daily_digest.py >/dev/null 2>&1 || echo "daily_digest fail $(date -Is)" >>$HOME/loop_fail.log
+  timeout 180 python3 dashboard.py >/dev/null 2>&1 || echo "dashboard fail $(date -Is)" >>$HOME/loop_fail.log
+  timeout 180 python3 db_sync.py --export >/dev/null 2>&1 || echo "db_sync fail $(date -Is)" >>$HOME/loop_fail.log
 }
 
 # PINNACLE + EDGE SCAN (ported from collect-odds.yml 2026-07-29). Verified reachable from
@@ -94,8 +94,8 @@ pin_block(){
   local last; last=$(cat "$m" 2>/dev/null || echo 0)
   [ $(( now - last )) -lt 600 ] && return 0
   echo "$now" > "$m"
-  python3 wnba_collect.py   >/dev/null 2>&1 || true
-  python3 wnba_edge_scan.py >/dev/null 2>&1 || true
+  timeout 180 python3 wnba_collect.py >/dev/null 2>&1 || echo "wnba_collect fail $(date -Is)" >>$HOME/loop_fail.log
+  timeout 180 python3 wnba_edge_scan.py >/dev/null 2>&1 || echo "wnba_edge_scan fail $(date -Is)" >>$HOME/loop_fail.log
 }
 
 slow_block(){
@@ -104,13 +104,13 @@ slow_block(){
   [ $(( now - last )) -lt 14400 ] && return 0
   echo "$now" > "$m"
   echo "[$(date -u +%H:%M)] slow block: clv report + model fits"
-  python3 wnba_clv.py --report >/dev/null 2>&1 || true
-  python3 wnba_question_log.py --resolve --recalibrate >/dev/null 2>&1 || true
-  python3 wnba_ledger.py --learn >/dev/null 2>&1 || true
-  python3 learn.py     >/dev/null 2>&1 || true   # benches negative-CLV markets
-  python3 gg_timing.py >/dev/null 2>&1 || true   # NBA line-timing (name is legacy)
-  python3 wnba_lineup_model.py >/dev/null 2>&1 || true
-  python3 wnba_redist.py --fit --teams ATL,CHI,CON,DAL,GS,IND,LA,LV,MIN,NY,PHX,POR,SEA,TOR,WSH >/dev/null 2>&1 || true
+  timeout 120 python3 wnba_clv.py --report >/dev/null 2>&1 || echo "clv-report timeout/fail $(date -Is)" >>$HOME/fd_collect.log
+  timeout 180 python3 wnba_question_log.py --resolve --recalibrate >/dev/null 2>&1 || echo "wnba_question_log fail $(date -Is)" >>$HOME/loop_fail.log
+  timeout 180 python3 wnba_ledger.py --learn >/dev/null 2>&1 || echo "wnba_ledger fail $(date -Is)" >>$HOME/loop_fail.log
+  timeout 180 python3 learn.py >/dev/null 2>&1 || echo "learn fail $(date -Is)" >>$HOME/loop_fail.log # benches negative-CLV markets
+  timeout 180 python3 gg_timing.py >/dev/null 2>&1 || echo "gg_timing fail $(date -Is)" >>$HOME/loop_fail.log # NBA line-timing (name is legacy)
+  timeout 180 python3 wnba_lineup_model.py >/dev/null 2>&1 || echo "wnba_lineup_model fail $(date -Is)" >>$HOME/loop_fail.log
+  timeout 180 python3 wnba_redist.py --fit --teams ATL,CHI,CON,DAL,GS,IND,LA,LV,MIN,NY,PHX,POR,SEA,TOR,WSH >/dev/null 2>&1 || echo "wnba_redist fail $(date -Is)" >>$HOME/loop_fail.log
 }
 
 # WATCHLIST DIGEST (ported): fires once per target UTC hour. TIME-based, not tick-based, and
@@ -122,7 +122,7 @@ digest_block(){
   [ "$(cat "$m" 2>/dev/null)" = "$key" ] && return 0
   echo "$key" > "$m"
   echo "[$(date -u +%H:%M)] watchlist digest -> ntfy"
-  python3 show_watchlist.py --push >/dev/null 2>&1 || true
+  timeout 180 python3 show_watchlist.py --push >/dev/null 2>&1 || echo "show_watchlist fail $(date -Is)" >>$HOME/loop_fail.log
 }
 
 db_guard(){
@@ -164,7 +164,7 @@ push(){
   if [ "$(df --output=avail / | tail -1 | tr -d ' ')" -lt 2000000 ]; then
     echo "[$(date +%H:%M)] low disk -> git gc"; git gc --prune=now -q 2>/dev/null || true
   fi
-  python3 db_sync.py --export >/dev/null 2>&1 || true   # WNBA DBs -> data/*/
+  timeout 180 python3 db_sync.py --export >/dev/null 2>&1 || echo "db_sync fail $(date -Is)" >>$HOME/loop_fail.log # WNBA DBs -> data/*/
   stage_all
   # NEVER commit wnba_lines.sqlite: it's the VM-local WNBA lines DB, gitignored, and was
   # ballooning to 100MB (the 2-day prune lived in the now-disabled wnba-watch.yml and was
@@ -203,6 +203,14 @@ push(){
       echo "[$(date +%H:%M)] cleared a corrupt rebase dir (abort could not)"
     }
     C=$(git rev-parse HEAD)
+    # ⚠️ STAMP THE LOCAL TIP BEFORE DISCARDING IT (2026-08-12). This reset restores
+    # ORIGIN's history over the local one. On 2026-08-08 this repo was re-cloned from a
+    # filter-repo rewrite, so local and origin diverged and the push has been rejected
+    # ever since -- meaning this line would have silently reverted every commit made
+    # since the rewrite. That exact sequence has burned this box before. The branch ref
+    # is free, keeps the work reachable from the reflog, and changes NO control flow:
+    # the loop still self-heals exactly as it did.
+    git branch -f "recovery_backup_$(date -u +%Y%m%d_%H%M%S)" HEAD 2>/dev/null || true
     git fetch -q "$URL" main 2>/dev/null && git reset --hard FETCH_HEAD -q 2>/dev/null
     git checkout "$C" -- "*.sqlite" 2>/dev/null || true
     git checkout "$C" -- "*.json"   2>/dev/null || true
@@ -218,16 +226,26 @@ push(){
     # a new 45MB blob per cycle with gc off -> 39GB of loose objects -> disk 100% -> loop dead).
     # (2026-07-27) fanduel_props.sqlite is VM-LOCAL now (untracked, 100MB vs
     # GitHub hard limit); never replay it from origin.
-    python3 db_sync.py --export >/dev/null 2>&1 || true   # WNBA DBs -> data/*/
+    timeout 180 python3 db_sync.py --export >/dev/null 2>&1 || echo "db_sync fail $(date -Is)" >>$HOME/loop_fail.log # WNBA DBs -> data/*/
   stage_all
     git commit -qm "vm loop data (replayed after failed rebase) [skip ci]" 2>/dev/null || true
     echo "[$(date +%H:%M)] rebase failed -> data replayed onto origin tip"
   }
   # STAMP ONLY ON A REAL SUCCESS. This file is what beat() reads to decide whether the loop has
   # earned a heartbeat, so it must record that git push exited 0 -- not that push() was reached.
-  if git push -q "$URL" HEAD:main 2>/dev/null; then
+  # 2026-08-12: was `2>/dev/null` -- the REASON a push failed was discarded, so a push
+  # that had been failing since 2026-08-04 looked identical to one that never ran. The
+  # only trace was .wnba_push_ok quietly going stale, which nothing watches. Same class
+  # as the fd_collect errors that hid a DB-lock outage for a full day.
+  # ⚠️ $URL EMBEDS THE PAT. git prints the full remote URL in its auth errors, so the
+  # stderr MUST be redacted before it touches a plaintext log or the token leaks.
+  _perr=$(git push "$URL" HEAD:main 2>&1); _prc=$?
+  if [ $_prc -eq 0 ]; then
     date -u +%s > "$HOME/.wnba_push_ok"
   else
+    printf '[%s] push FAILED rc=%s: %s\n' "$(date -Is)" "$_prc" \
+      "$(printf '%s' "$_perr" | sed -E 's#//[^@]*@#//***@#g' | tr '\n' ' ' | cut -c1-400)" \
+      >> "$HOME/push_err.log"
     echo "[$(date +%H:%M)] push deferred"
   fi; }
 
@@ -237,7 +255,11 @@ collectors(){
   # 2026-07-25 and blob pushes are rejected outright); fd_merge stays as legacy-blob belt.
   python3 lines_ingest.py 2>&1 | grep -v "^$" || true
   python3 fd_merge.py 2>&1 | grep -v "^$" || true
-  python3 fd_collect.py --wnba >/dev/null 2>&1 || true
+  # 2026-08-12: was >/dev/null 2>&1 || true — output AND errors discarded, so a failing
+  # collector looked identical to a healthy one. FD lines went 33+ min stale with no trace.
+  # Log both; keep || true so a collector failure still cannot kill the loop.
+  python3 fd_collect.py --wnba >>$HOME/fd_collect.log 2>&1 || \
+    echo "fd_collect FAILED $(date -Is)" >>$HOME/fd_collect.log
   # NOTE (2026-07-23): MLB FD collection is NOT run here. Tried it for board responsiveness but the
   # loop git-commits the 81MB fanduel_props.sqlite every cycle and its conflict-fallback (reset --hard)
   # reverts the loop's fresh MLB writes back to Actions' version — so per-cycle MLB never persisted, and
@@ -246,17 +268,20 @@ collectors(){
   # fix for a fast board = stop committing the 81MB DB to git each cycle (push a small JSON, like TT).
   # DK lines arrive via the Mac's residential IP (dk_publish.py -> dk_board.json, git-pulled
   # each cycle); ingest lights up book-aware prices everywhere. Local-only, cheap, idempotent.
-  python3 dk_ingest.py >/dev/null 2>&1 || true
+  timeout 180 python3 dk_ingest.py >/dev/null 2>&1 || echo "dk_ingest fail $(date -Is)" >>$HOME/loop_fail.log
   # dk_collect DISABLED on the VM (2026-07-16): DraftKings Akamai-blocks the Oracle datacenter
   # IP -> it 403s EVERY cycle (never once landed a row from here), but still spawns a curl_cffi
   # chrome-impersonation process each time = pure memory pressure on the 956MB box for nothing.
   # Re-enable only behind a residential proxy. (DK line-shopping runs fine from the Mac.)
   # python3 dk_collect.py --wnba >/dev/null 2>&1 || true
-  python3 wnba_ledger.py --grade >/dev/null 2>&1 || true
-  python3 wnba_clv.py --close >/dev/null 2>&1 || true
+  timeout 180 python3 wnba_ledger.py --grade >/dev/null 2>&1 || echo "wnba_ledger fail $(date -Is)" >>$HOME/loop_fail.log
+  # 2026-08-12: THIS HUNG AND FROZE THE WHOLE CYCLE for ~3h. fd_collect sits earlier in the
+  # script, so the loop never came back around to it and FD lines went stale with no error.
+  # A blocking call with no timeout can starve every step downstream of it.
+  timeout 180 python3 wnba_clv.py --close >/dev/null 2>&1 || echo "clv-close timeout/fail $(date -Is)" >>$HOME/fd_collect.log
   # PORTED FROM ACTIONS 2026-07-29 — cheap grading belongs next to the action, not on a cron.
-  python3 wnba_clv.py --grade >/dev/null 2>&1 || true
-  python3 wnba_proj_log.py --grade >/dev/null 2>&1 || true
+  timeout 120 python3 wnba_clv.py --grade >/dev/null 2>&1 || echo "clv-grade timeout/fail $(date -Is)" >>$HOME/fd_collect.log
+  timeout 180 python3 wnba_proj_log.py --grade >/dev/null 2>&1 || echo "wnba_proj_log fail $(date -Is)" >>$HOME/loop_fail.log
   prune_lines; board; }
 
 # Keep wnba_lines.sqlite at its intended ~2-day WNBA window (the retention that lived in the
@@ -361,10 +386,10 @@ fullscan(){
   # markets, anchor 4.5 @ 1.5618 (64% implied), and report "no edge" for a bet we never saw.
   # REPORTS, never suppresses: Makani flagged +40% EV off exactly such a ladder the same
   # night. Non-fatal -- a reporting failure must not kill the scan that places bets.
-  python3 dashboard.py >/dev/null 2>&1 || true
-  python3 wnba_oppbig_shadow.py >/dev/null 2>&1 || true
-  python3 wnba_ledger.py --train >/dev/null 2>&1 || true
-  python3 wnba_context_report.py >/dev/null 2>&1 || true; }
+  timeout 180 python3 dashboard.py >/dev/null 2>&1 || echo "dashboard fail $(date -Is)" >>$HOME/loop_fail.log
+  timeout 180 python3 wnba_oppbig_shadow.py >/dev/null 2>&1 || echo "wnba_oppbig_shadow fail $(date -Is)" >>$HOME/loop_fail.log
+  timeout 180 python3 wnba_ledger.py --train >/dev/null 2>&1 || echo "wnba_ledger fail $(date -Is)" >>$HOME/loop_fail.log
+  timeout 180 python3 wnba_context_report.py >/dev/null 2>&1 || echo "wnba_context_report fail \$(date -Is)" >>\$HOME/loop_fail.log; }
 
 # exit 0 when a game is live or tips within ~75min -> switch to fast scratch polling
 # Sleep, but wake every second to look for a fresh @UnderdogWNBA ruling. The flag used to be
@@ -444,7 +469,7 @@ while true; do i=$((i+1))
   slow_block
   date -u +%s > "$HOME/.wnba_loop_beat"   # re-stamp: the 4h slow block is a legitimately long tick
   digest_block
-  python3 wnba_watch.py --watchdog >/dev/null 2>&1 || true
+  timeout 180 python3 wnba_watch.py --watchdog >/dev/null 2>&1 || echo "wnba_watch fail $(date -Is)" >>$HOME/loop_fail.log
   beat
   if in_hot; then
     # HOT PATH: wnba_watch (scratch detector -> instant ntfy) every ~25s.
@@ -459,7 +484,7 @@ while true; do i=$((i+1))
       rm -f /tmp/.force_fullscan
       echo "[$(date +%H:%M)] TRIGGERED full scan (fresh out / new lines)"; fullscan
     fi
-    python3 wnba_watch.py >/dev/null 2>&1 || true
+    timeout 180 python3 wnba_watch.py >/dev/null 2>&1 || echo "wnba_watch fail $(date -Is)" >>$HOME/loop_fail.log
     python3 wnba_news_watch.py 2>&1 | grep -i "NEWS\|trigger" || true
     # underdog_watch runs as its own systemd daemon (underdog-watch.service, --loop 10s) — NOT here,
     # so it polls @UnderdogWNBA every 10s independently without waiting on this loop's 25-60s cadence.
@@ -470,7 +495,7 @@ while true; do i=$((i+1))
     if [ $((hot_ticks % 3)) -eq 0 ]; then
       git pull -q "$URL" main 2>/dev/null || true
       collectors
-      python3 dashboard.py >/dev/null 2>&1 || true
+      timeout 180 python3 dashboard.py >/dev/null 2>&1 || echo "dashboard fail $(date -Is)" >>$HOME/loop_fail.log
       push
     fi
     # next-day plays must fire fast too (user: post as soon as 1 out-confirmation + FD lines):
@@ -488,7 +513,7 @@ while true; do i=$((i+1))
     was_hot=0; cold_i=$((cold_i+1))
     git pull -q "$URL" main 2>/dev/null || true
     collectors
-    python3 wnba_watch.py >/dev/null 2>&1 || true
+    timeout 180 python3 wnba_watch.py >/dev/null 2>&1 || echo "wnba_watch fail $(date -Is)" >>$HOME/loop_fail.log
     python3 wnba_news_watch.py 2>&1 | grep -i "NEWS\|trigger" || true
     # underdog_watch runs as its own systemd daemon (underdog-watch.service, --loop 10s) — NOT here,
     # so it polls @UnderdogWNBA every 10s independently without waiting on this loop's 25-60s cadence.
