@@ -45,17 +45,38 @@ LINES = defaultdict(list)           # (player, market) -> [(date, line, price, b
 # BOTH archives. wnba_props_hist covers 2026-05-10+ only; the 2025 file carries
 # 2024-10-21 -> 2025-10-11. Using just the first gave n=47 bets -- far too thin for any
 # split to mean anything, and every "finding" in it was inside the noise.
-for _db in ("wnba_props_hist.sqlite", "wnba_props_2025.sqlite"):
+# THREE archives now. basketball_wnba_odds_hist.sqlite is the 2026-08-13 full pull from The
+# Odds API: 2023-05-21 -> 2026-08-13, 1,057 events, 183 players, 4 books, and the four COMBO
+# markets (PRA/PA/PR/RA) that the older files never had at all. The two legacy files are kept
+# for union coverage. Column names differ between the schemas -- new uses snapshot_ts /
+# home_team, old uses snapshot / home -- so each is queried with its own SELECT.
+# ⚠️ BOTH SIDES, not just overs. real_line() pairs the over with its matching under to build a
+# DE-VIGGED shrink target, so entries must carry `side`. Loading over-only silently produced
+# 4-tuples where 5 were expected and blew up with "tuple index out of range" 180 lines in.
+_ARCH = [("basketball_wnba_odds_hist.sqlite",
+          "SELECT player, market, game_date, line, price, book, side FROM props "
+          "WHERE sport='basketball_wnba'"),
+         ("wnba_props_hist.sqlite",
+          "SELECT player, market, game_date, line, price, book, side FROM props"),
+         ("wnba_props_2025.sqlite",
+          "SELECT player, market, game_date, line, price, book, side FROM props")]
+_seen = set()
+for _db, _q in _ARCH:
     try:
         ph = sqlite3.connect(f"file:{_db}?mode=ro", uri=True, timeout=30)
         ph.row_factory = sqlite3.Row
         k = 0
-        for r in ph.execute("SELECT player, market, game_date, line, price, book, side FROM props"):
+        for r in ph.execute(_q):
+            # de-dup across archives: same player/market/date/line/book/side is ONE quote
+            sig = (r["player"], r["market"], r["game_date"], r["line"], r["book"], r["side"])
+            if sig in _seen:
+                continue
+            _seen.add(sig)
             LINES[(r["player"], r["market"])].append(
                 (r["game_date"], r["line"], r["price"], r["book"], r["side"]))
             k += 1
         ph.close()
-        print(f"  {_db}: {k:,} over-quotes")
+        print(f"  {_db}: {k:,} new quotes (both sides)")
     except Exception as e:
         print(f"  {_db}: SKIPPED ({e})")
 print(f"loaded {sum(len(v) for v in LINES.values()):,} real over-quotes total")
@@ -89,7 +110,7 @@ def real_line(player, stat, date):
 
 # ── team/game scaffolding ─────────────────────────────────────────────────────
 games = [(r["event_id"], r["game_date"]) for r in mem.execute(
-    "SELECT DISTINCT event_id, game_date FROM onfloor WHERE game_date >= '2024-05-01' "
+    "SELECT DISTINCT event_id, game_date FROM onfloor WHERE game_date >= '2023-05-01' "
     "ORDER BY game_date")]
 print(f"{len(games)} games from 2024-01-01")
 

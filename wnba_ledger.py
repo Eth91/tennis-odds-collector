@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import datetime
 import json
+import time
 import statistics as st
 import urllib.request
 from pathlib import Path
@@ -34,6 +35,7 @@ PLAYED = HERE / "wnba_played.txt"      # durable user-played marks (plain text: 
 STATKEY = {"points": "pts", "rebounds": "reb", "assists": "ast"}
 
 _BOX_CACHE = {}
+_BOX_COMPLETE = {}
 
 
 def box_actuals(date):
@@ -45,17 +47,49 @@ def box_actuals(date):
         return _BOX_CACHE[date]
     out = {}
 
+    # 2026-08-13: bare "Mozilla/5.0" started drawing HTTP 403 from ESPN. A full browser UA
+    # plus Accept headers restores it; retried once because the 403 is intermittent.
     def _get(url):
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        return json.load(urllib.request.urlopen(req, timeout=20))
+        last = None
+        for _try in range(2):
+            try:
+                req = urllib.request.Request(url, headers={
+                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                                  "AppleWebKit/537.36 (KHTML, like Gecko) "
+                                  "Chrome/126.0.0.0 Safari/537.36",
+                    "Accept": "application/json, text/plain, */*",
+                    "Accept-Language": "en-US,en;q=0.9",
+                    "Referer": "https://www.espn.com/"})
+                return json.load(urllib.request.urlopen(req, timeout=20))
+            except Exception as e:                                   # noqa: BLE001
+                last = e
+                time.sleep(1.5)
+        raise last
 
+    # ⚠️ COMPLETENESS IS TRACKED SEPARATELY FROM CONTENT. The DNP-void path treats "player not
+    # in this dict" as "she did not play". A PARTIAL parse is therefore far more dangerous than
+    # a total failure: an empty dict is falsy and voids nothing, but a dict holding 2 of 4 games
+    # is truthy and makes everyone from the other 2 games look like a DNP. That is how two real
+    # LOSSES (Nelson-Ododa 07-28, Ogunbowale 08-09) were recorded as voids, quietly removing
+    # them from the record. Callers that can void MUST consult box_complete().
+    _ok = True
     try:
-        base = "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba"
+        # ⚠️ site.api.espn.com returns 403 to this VM's IP (not a UA problem -- a full browser
+        # UA still 403s, while site.web.api and cdn.espn.com both return 200 from the same box).
+        # site.web.api serves the IDENTICAL path and payload shape, so this is a host swap, not
+        # a parser change. Probed 2026-08-13: site.api 403, site.web.api 200, cdn 200.
+        base = "https://site.web.api.espn.com/apis/site/v2/sports/basketball/wnba"
         sb = _get(f"{base}/scoreboard?dates={date.replace('-', '')}")
         for ev in sb.get("events", []):
             if ((ev.get("status") or {}).get("type") or {}).get("state") != "post":
                 continue                                          # only settled games
-            summ = _get(f"{base}/summary?event={ev['id']}")
+            try:
+                summ = _get(f"{base}/summary?event={ev['id']}")
+            except Exception as _e:                                  # noqa: BLE001
+                _ok = False                                          # this game never parsed
+                print(f"box_actuals({date}): summary failed for event {ev.get('id')} "
+                      f"-- marking the date INCOMPLETE ({str(_e)[:50]})")
+                continue
             for team in (summ.get("boxscore") or {}).get("players", []):
                 for grp in team.get("statistics", []):
                     labels = grp.get("names") or grp.get("labels") or []
@@ -72,9 +106,23 @@ def box_actuals(date):
                             out[nm] = rec
                             out.setdefault(nm.lower().replace(".", ""), rec)   # light name-norm fallback
     except Exception as e:
+        _ok = False
         print(f"box_actuals({date}) failed: {str(e)[:80]}")
-    _BOX_CACHE[date] = out
+    # never cache an incomplete read: a transient 403 would otherwise poison the whole run
+    if _ok:
+        _BOX_CACHE[date] = out
+    _BOX_COMPLETE[date] = _ok
     return out
+
+
+def box_complete(date):
+    """Did box_actuals(date) parse EVERY settled game on that date?
+
+    Any caller about to VOID on the strength of a player's absence must check this. Absence
+    from an incomplete box is not evidence of a DNP -- it is evidence of a failed fetch.
+    Returns False when the date was never attempted, so the default is fail-closed.
+    """
+    return bool(_BOX_COMPLETE.get(date, False))
 MIN_TRAIN = 30                     # graded spots before a calibration is trustworthy
 
 SCHEMA = """
@@ -501,7 +549,9 @@ def grade():
                 try:
                     import datetime as _dt
                     _age = (_dt.date.today() - _dt.date.fromisoformat(pred_date)).days
-                    if _age >= 2 and box_actuals(pred_date):
+                    # FAIL CLOSED: only void on a COMPLETE box. "Not in the dict" means
+                    # DNP only if every settled game that day actually parsed.
+                    if _age >= 2 and box_actuals(pred_date) and box_complete(pred_date):
                         con.execute("UPDATE predictions SET result='void', graded=1 "
                                     "WHERE rowid=? AND graded=0", (rowid,))
                         graded += 1

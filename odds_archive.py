@@ -244,7 +244,12 @@ def cmd_fetch(a):
             eid, ct = ev.get("id"), ev.get("commence_time")
             if not eid:
                 continue
-            snaps = [("tip", a.lead)] + ([("opener", None)] if a.opener else [])
+            # --snap-kind lets several LEADS coexist: both the row PRIMARY KEY and the
+            # resume-dedupe key include snap_kind, so without a distinct label a second lead
+            # would be skipped as "already done" and silently return the first lead's data.
+            # Default stays "tip" so existing behaviour is byte-identical.
+            _kind = getattr(a, "snap_kind", None) or "tip"
+            snaps = [(_kind, a.lead)] + ([("opener", None)] if a.opener else [])
             for kind, lead in snaps:
                 if _done(c, f"ev:{eid}:{kind}"):
                     continue
@@ -342,6 +347,9 @@ def main():
             s.add_argument("--books", default=BOOKS_DEFAULT,
                            help="comma book keys (default FD,DK,BetMGM,Caesars — all 'us' region)")
             s.add_argument("--lead", type=int, default=25, help="min before tip for the snapshot")
+            s.add_argument("--snap-kind", dest="snap_kind", default=None,
+                           help="label for this snapshot (default 'tip'); use t240/t120/... "
+                                "when pulling several leads so they do not collide")
             s.add_argument("--sleep", type=float, default=0.2)
             s.add_argument("--refresh", action="store_true")
             s.add_argument("--all-days", action="store_true", help="don't skip offseason months")
