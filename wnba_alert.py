@@ -530,8 +530,12 @@ def collect():
                                    {"points": pa["proj_pts"], "rebounds": pa["proj_reb"],
                                     "assists": pa["proj_ast"]}, props_now, tip=tips_by[slate_date].get(team))
             n_preds0 = len(preds)                            # to mark whether this player got a bet
+            # _gw also weights the ELEVATED SAMPLE inside prop_edges. Correcting only the
+            # wowy baseline left the actual projection reading a rotation that no longer
+            # exists: 12 of Sheldon's 14 elevated games predate Carrington's arrival.
             for e in T.prop_edges(n, blog, proj, w, vacated, ctx, out_logs=out_dm,
-                                  opp=matchups_by[slate_date].get(team, ""), pos=v.get("position")):
+                                  opp=matchups_by[slate_date].get(team, ""), pos=v.get("position"),
+                                  game_weights=_gw):
                 if e.get("band_pilot"):
                     # suspect d_min band (outside 3-8) -> DASHBOARD-visible shadow, NO phone ping
                     # (2026-07-16 user confusion: BAND pinged 5x for a non-bet that wasn't on the
