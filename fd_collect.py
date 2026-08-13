@@ -94,13 +94,13 @@ def extract(m, sport, event_name=""):
                     continue
                 toks = rn.split()
                 if toks and toks[-1] in ("over", "under"):
-                    rows.append((player, wstat, float(h), toks[-1], o))
+                    rows.append((player, wstat, float(h), toks[-1], o, r.get("selectionId")))
         elif (mm := re.search(r"(\d+)\+", nm)):
             line = int(mm.group(1)) - 0.5
             for r in m.get("runners") or []:
                 o = _odds(r)
                 if o is not None:
-                    rows.append((r.get("runnerName") or "", wstat, line, "over", o))
+                    rows.append((r.get("runnerName") or "", wstat, line, "over", o, r.get("selectionId")))
         return rows
     # 0) pitcher OUTS: FanDuel names it "{Player} [Alt ]Outs Recorded" / "{Player} Pitching Outs"
     #    — NO dash (strikeouts use "{Player} - Strikeouts"), and runners are "{Player} Over/Under
@@ -122,7 +122,7 @@ def extract(m, sport, event_name=""):
             mm = re.search(r"(\d+(?:\.\d+)?)", rn)
             h = float(mm.group(1)) if mm else (r.get("handicap") or 0)
             if h and float(h) > 0:                        # 0.0 = no real line -> skip (no junk row)
-                rows.append((player, "outs", float(h), side, o))
+                rows.append((player, "outs", float(h), side, o, r.get("selectionId")))
         if rows:
             return rows
     # 1) pitcher prop: "{Pitcher} - [Alt ]Strikeouts / Outs / ..." — match on the STAT portion
@@ -144,11 +144,11 @@ def extract(m, sport, event_name=""):
                 continue
             h = r.get("handicap")
             if rn.lower().startswith("over") and h is not None:
-                rows.append((player, pstat, float(h), "over", o))
+                rows.append((player, pstat, float(h), "over", o, r.get("selectionId")))
             elif rn.lower().startswith("under") and h is not None:
-                rows.append((player, pstat, float(h), "under", o))
+                rows.append((player, pstat, float(h), "under", o, r.get("selectionId")))
             elif (mm := re.search(r"(\d+)\+", rn)):
-                rows.append((player, pstat, int(mm.group(1)) - 0.5, "over", o))
+                rows.append((player, pstat, int(mm.group(1)) - 0.5, "over", o, r.get("selectionId")))
         return rows
     # 2) batter prop: "To Record X+ <Stat>" (players are runners)
     bstat = next((v for k, v in BATTER_STATS.items() if k in low), None)
@@ -158,7 +158,7 @@ def extract(m, sport, event_name=""):
             o, rn = _odds(r), (r.get("runnerName") or "")
             if o is None or " & " in rn:     # 'A & B' = two-player combo market, not a prop
                 continue
-            rows.append((rn, bstat, line, "over", o))
+            rows.append((rn, bstat, line, "over", o, r.get("selectionId")))
         return rows
     # 3) tennis: player/team total games ("{Player} Total Games 19.5" — the line lives in
     #    the MARKET NAME, not the runner handicap), plus set betting / correct score.
@@ -175,7 +175,7 @@ def extract(m, sport, event_name=""):
             for r in m.get("runners") or []:
                 o, rn = _odds(r), (r.get("runnerName") or "").lower()
                 if o is not None and rn.startswith(("over", "under")):
-                    rows.append((event_name, "match_games", ln, rn.split()[0], o))
+                    rows.append((event_name, "match_games", ln, rn.split()[0], o, r.get("selectionId")))
             return rows
         if (pm := re.match(r"(?P<pl>.+?)\s+Total Games\s+(?P<ln>\d+(?:\.\d+)?)$", nm)) \
                 and not low.startswith("set"):
@@ -183,17 +183,17 @@ def extract(m, sport, event_name=""):
             for r in m.get("runners") or []:
                 o, rn = _odds(r), (r.get("runnerName") or "").lower()
                 if o is not None and rn.startswith(("over", "under")):
-                    rows.append((pl, "player_games", ln, rn.split()[0], o))
+                    rows.append((pl, "player_games", ln, rn.split()[0], o, r.get("selectionId")))
         elif "total games" in low or ("games" in low and "over" in low):
             for r in m.get("runners") or []:
                 o, rn, h = _odds(r), (r.get("runnerName") or ""), r.get("handicap")
                 if o is not None and h is not None and rn.lower().startswith(("over", "under")):
-                    rows.append((nm, "total_games", float(h), rn.split()[0].lower(), o))
+                    rows.append((nm, "total_games", float(h), rn.split()[0].lower(), o, r.get("selectionId")))
         elif "set betting" in low or "correct" in low and "set" in low:
             for r in m.get("runners") or []:
                 o = _odds(r)
                 if o is not None:
-                    rows.append((r.get("runnerName") or "", "set_score", None, "yes", o))
+                    rows.append((r.get("runnerName") or "", "set_score", None, "yes", o, r.get("selectionId")))
     return rows
 
 
@@ -242,9 +242,38 @@ def collect_page(customPageId, sport, is_match):
                 if mid in seen:
                     continue
                 seen.add(mid)
-                for (pl, st, ln, sd, od) in extract(m, sport, nm):
-                    out.append((sport, nm, pl, st, ln, sd, od, is_live))
+                for _row in extract(m, sport, nm):
+                    # TOLERANT UNPACK (2026-08-12): extract() yields 5-tuples
+                    # historically and 6-tuples where a runner selectionId was
+                    # available. Any site not yet extended degrades to a NULL id
+                    # instead of raising -- a ValueError here would silently stop
+                    # line collection, which is the failure the 2026-07-25
+                    # postmortem describes (models starve at line lookup).
+                    pl, st, ln, sd, od = _row[:5]
+                    sel = _row[5] if len(_row) > 5 else None
+                    out.append((sport, nm, pl, st, ln, sd, od, is_live,
+                                str(eid) if eid is not None else None,
+                                str(mid) if mid is not None else None,
+                                str(sel) if sel is not None else None))
     return out
+
+
+def _bind(ts, r):
+    """Normalise ANY historical row shape to the 12-value insert tuple.
+
+    Shapes seen in this file: 7 (pre-`live`), 8 (with live), 11 (with the
+    2026-08-12 deep-link ids). The old inline form was
+    `(ts,*r) if len(r)==8 else (ts,*r,0)` — an 11-element row fell into the else
+    and got `live` appended a SECOND time (13 values vs 12 bindings). That is the
+    same positional-insert failure the comment above the executemany already
+    warns about; pad by NAME-COUNT, never by an is/else on one length.
+    """
+    r = list(r)
+    if len(r) == 7:                 # legacy row with no live flag
+        r.append(0)
+    while len(r) < 11:              # event_id, market_id, selection_id
+        r.append(None)
+    return (ts, *r[:11])
 
 
 def main():
@@ -277,7 +306,12 @@ def main():
                 rows += collect_page(pg.strip(), "tennis", lambda n: " v " in n.lower())
             except Exception as e:
                 print(f"tennis page {pg} err:", str(e)[:80])
-    con = sqlite3.connect(DB)
+    # 2026-08-12: default timeout is 5s and fd_lines has concurrent writers (fd_merge,
+    # dk_ingest, board_server) on a ~100MB file — commit() was dying with
+    # "database is locked" EVERY cycle. It was invisible because vm_loop sent this
+    # collector to /dev/null; FD lines sat 3h stale with no error anywhere.
+    con = sqlite3.connect(DB, timeout=60)
+    con.execute("PRAGMA busy_timeout=60000")
     con.execute("""CREATE TABLE IF NOT EXISTS fd_lines (
         collected_at TEXT, sport TEXT, event TEXT, player TEXT, stat TEXT, line REAL,
         side TEXT, odds REAL, book TEXT DEFAULT 'fd', live INTEGER DEFAULT 0,
@@ -289,12 +323,28 @@ def main():
         con.execute("ALTER TABLE fd_lines ADD COLUMN book TEXT DEFAULT 'fd'")
     if "live" not in _cols:                     # in-play tag (2026-07-28)
         con.execute("ALTER TABLE fd_lines ADD COLUMN live INTEGER DEFAULT 0")
+    # ── BET-SLIP DEEP-LINK IDS (2026-08-12) ────────────────────────────────
+    # A slip link cannot be addressed by player name + line; it needs the book's
+    # OWN selection id. The API already returns these (runners carry selectionId,
+    # markets carry marketId, and eventId is the page key) -- the parser simply
+    # dropped them. Columns first, capture second: they are NULLable and no
+    # consumer reads them, so this is inert until the parser fills them.
+    # ⚠️ MUST STAY IDEMPOTENT AND RUN EVERY START. fd_lines has THREE writers
+    # (Actions collect-odds.yml, the VM loop, the Mac dkpublish launchd job) that
+    # each commit the whole binary DB. If a writer without these columns wins the
+    # git push race, the committed blob loses them -- exactly how the `book`
+    # column vanished in the 2026-07-17 recovery. Self-healing here is what makes
+    # that survivable; do not move this behind a one-time migration.
+    for _c, _t in (("event_id", "TEXT"), ("market_id", "TEXT"), ("selection_id", "TEXT")):
+        if _c not in _cols:
+            con.execute(f"ALTER TABLE fd_lines ADD COLUMN {_c} {_t}")
     # explicit column list: dk_collect added a 'book' column (DEFAULT 'fd'), so a
     # positional 8-value insert crashes against the 9-column table
     con.executemany("INSERT OR REPLACE INTO fd_lines "
-                    "(collected_at,sport,event,player,stat,line,side,odds,live) "
-                    "VALUES (?,?,?,?,?,?,?,?,?)",
-                    [(ts, *r) if len(r) == 8 else (ts, *r, 0) for r in rows])
+                    "(collected_at,sport,event,player,stat,line,side,odds,live,"
+                    "event_id,market_id,selection_id) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                    [_bind(ts, r) for r in rows])
     con.commit()
     con.close()
     by = Counter((r[0], r[3]) for r in rows)
