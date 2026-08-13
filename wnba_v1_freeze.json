@@ -1,18 +1,19 @@
 {
- "version": "v1.5",
- "frozen": "2026-08-06",
+ "version": "v1.6",
+ "frozen": "2026-08-12",
  "sha256_16": "ff41188c503439af",
- "source_sha256_16": "d1a20aa867679f92",
+ "source_sha256_16": "b1ada53d6ea95c50",
  "source_files": {
-  "wnba_alert.py": "73897e7b1f13256d",
+  "wnba_alert.py": "013bcfeb30382241",
   "wnba_slip.py": "f7a90e57c1c45600",
-  "wnba_tonight.py": "51a528df07df18e1",
-  "wnba_wowy.py": "f1b79aee2ea3f522",
+  "wnba_tonight.py": "c25bf9b229813fa4",
+  "wnba_wowy.py": "7e4d5f4f01773e06",
   "wnba_fd_search.py": "1c1ca884eeae839d",
   "wnba_ladder_guard.py": "72d450e6b232a8d2",
-  "wnba_premise_sweep.py": "eb7f14fd84ec3264"
+  "wnba_premise_sweep.py": "eb7f14fd84ec3264",
+  "wnba_availability.py": "0a8c3118ace4a3ff"
  },
- "decision": "v1.5 (2026-08-06) \u2014 adds wnba_premise_sweep.py: pull plays whose PREMISE has publicly returned, BEFORE tip. Live case: Wheeler reb_ast 8.5 and Makani points 7.5/9.5 were flagged and PINGED on 'Ariel Atkins is out'; RotoWire posted 'Will play Thursday' (class IN) at 00:07:19Z, 1h53m before the 02:00Z tip; the news was LOGGED and never consumed. Atkins started and played 29 min. The rows voided post-game via _premise_really_broke(), which runs at GRADING time \u2014 a post-mortem, not a guard \u2014 so for two hours the plays sat live on the board, on the phone, and held TOP-2 slots on LA/MIN a real play could have used. A void is not free; 6 of the last 26 rows were premise-break voids. suppressed() is the one gate the board and slip share, but it only knows 'human vetoed' and 'SUBJECT ruled out' \u2014 not 'the OUT player came back'. The sweep writes the durable veto that gate already honours (data, not code), so board+slip+alert drop together and the coherence rule holds. Ledger rows are left to grade normally: a wrong call must surface in the record rather than hide there. Conservative on multi-out \u2014 ANY returning member pulls the play, since the projection was priced on the full vacated pool. Validated by --replay 2026-08-06: matches all three real rows off the real RotoWire event, writing nothing. STILL UNVALIDATED FROM v1.4: the fd_search recovery path (wnba_twopass_test.py, cron 2026-08-07 22:00Z). Record continuity unchanged \u2014 the last independently-validated line remains v1.2 at 33-16 / +18.05u.",
+ "decision": "v1.6 (2026-08-12) \u2014 ROTATION-AWARE PROJECTIONS. Three linked corrections; the record restarts because the PROJECTION changed, not because a gate moved. (1) AVAILABILITY IS DERIVED FROM APPEARANCES, not just the injury report. A season-ending injury drops off the daily report, so the model went blind to it: EIGHT players above 12 mpg had missed 2+ straight games with NO report entry \u2014 Fiebich (NY, 29.3mpg, 14 games), Nogic (PHX, 18), Satou Sabally (NY, 17), Barker (POR, 5). Portland alone hid 54 mpg, New York 46. Two sets, deliberately NOT nested: baseline_out cleans comparison samples however stale; flag_out fires only while an absence is still news. Barker cleans every POR baseline but can never generate a flag. (2) ARRIVALS ARE THE MIRROR CASE and are corrected too. Carrington first played for CHI on 07-31 (corr with Sheldon PTS = -0.60) and Morrow for TOR on 08-05 (Juskaite went 35 -> 30 -> 25 -> 26 -> 14 min). Absence-only weighting gave pre-arrival games FULL credit so long as tonight's injured players were also out. Team membership uses the wowy_multi discriminator (same game_id AND same matchup) because ESPN's game_log is per PLAYER \u2014 keying on 'earliest game in the log' MISSED Morrow entirely while flagging Ionescu and Cotie McMahon, who had merely missed two or three early games. (3) THE ELEVATED SAMPLE IS WEIGHTED and `n` is now the Kish EFFECTIVE size. This is the one that moves bets: n feeds the credibility shrink toward the book, so a weighted mean with a raw count trusts a 3-game-equivalent sample as though it were 14. Sheldon's o6.5 (ev +0.104 on 13 elevated games) becomes NO EDGE once those 13 collapse to n_eff 5.1 \u2014 12 of them predate Carrington. League-wide: 11 raw edges -> 6, two players reduced, three unchanged; Wheeler's stable rotation untouched at n_eff 29.0 of 29. EXPECT LOWER VOLUME \u2014 that is the intended effect, not a regression. UNWEIGHTED PATHS ARE BYTE-IDENTICAL: game_weights=None regression-tested on wowy (20 pairs) and prop_edges (24 combos, 4 producing real edges). An earlier prop_edges run passed VACUOUSLY on 45 combos that produced none, proving only [] == [] \u2014 the silent-zero class. wnba_availability.py is now a tracked source file; it drives every projection. v1.5 evidence does NOT pool with v1.6: v1.5 counted a model projecting from rotations that no longer existed. The last independently-validated line remains v1.2 at 33-16 / +18.05u.",
  "constants": {
   "wnba_slip": {
    "COMBO_EPOCH": "2026-08-04",

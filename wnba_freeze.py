@@ -23,30 +23,40 @@ MANIFEST = "wnba_v1_freeze.json"
 # describe what determines the bets, which is the whole point of the fingerprint.
 FILES = ["wnba_alert.py", "wnba_slip.py", "wnba_tonight.py", "wnba_wowy.py",
          "wnba_fd_search.py", "wnba_ladder_guard.py",
-         "wnba_premise_sweep.py"]
+         "wnba_premise_sweep.py", "wnba_availability.py"]
 MODULES = ("wnba_slip",)
-VERSION = "v1.5"
-FROZEN_ON = "2026-08-06"
+VERSION = "v1.6"
+FROZEN_ON = "2026-08-12"
 DECISION = (
-    "v1.5 (2026-08-06) — adds wnba_premise_sweep.py: pull plays whose PREMISE has publicly "
-    "returned, BEFORE tip. Live case: Wheeler reb_ast 8.5 and Makani points 7.5/9.5 were flagged "
-    "and PINGED on 'Ariel Atkins is out'; RotoWire posted 'Will play Thursday' (class IN) at "
-    "00:07:19Z, 1h53m before the 02:00Z tip; the news was LOGGED and never consumed. Atkins "
-    "started and played 29 min. The rows voided post-game via _premise_really_broke(), which runs "
-    "at GRADING time — a post-mortem, not a guard — so for two hours the plays sat live on the "
-    "board, on the phone, and held TOP-2 slots on LA/MIN a real play could have used. A void is "
-    "not free; 6 of the last 26 rows were premise-break voids. "
-    "suppressed() is the one gate the board and slip share, but it only knows 'human vetoed' and "
-    "'SUBJECT ruled out' — not 'the OUT player came back'. The sweep writes the durable veto that "
-    "gate already honours (data, not code), so board+slip+alert drop together and the coherence "
-    "rule holds. Ledger rows are left to grade normally: a wrong call must surface in the record "
-    "rather than hide there. Conservative on multi-out — ANY returning member pulls the play, "
-    "since the projection was priced on the full vacated pool. "
-    "Validated by --replay 2026-08-06: matches all three real rows off the real RotoWire event, "
-    "writing nothing. "
-    "STILL UNVALIDATED FROM v1.4: the fd_search recovery path (wnba_twopass_test.py, cron "
-    "2026-08-07 22:00Z). Record continuity unchanged — the last independently-validated line "
-    "remains v1.2 at 33-16 / +18.05u.")
+    "v1.6 (2026-08-12) — ROTATION-AWARE PROJECTIONS. Three linked corrections; the record "
+    "restarts because the PROJECTION changed, not because a gate moved. "
+    "(1) AVAILABILITY IS DERIVED FROM APPEARANCES, not just the injury report. A season-ending "
+    "injury drops off the daily report, so the model went blind to it: EIGHT players above 12 "
+    "mpg had missed 2+ straight games with NO report entry — Fiebich (NY, 29.3mpg, 14 games), "
+    "Nogic (PHX, 18), Satou Sabally (NY, 17), Barker (POR, 5). Portland alone hid 54 mpg, New "
+    "York 46. Two sets, deliberately NOT nested: baseline_out cleans comparison samples however "
+    "stale; flag_out fires only while an absence is still news. Barker cleans every POR baseline "
+    "but can never generate a flag. "
+    "(2) ARRIVALS ARE THE MIRROR CASE and are corrected too. Carrington first played for CHI on "
+    "07-31 (corr with Sheldon PTS = -0.60) and Morrow for TOR on 08-05 (Juskaite went 35 -> 30 "
+    "-> 25 -> 26 -> 14 min). Absence-only weighting gave pre-arrival games FULL credit so long "
+    "as tonight's injured players were also out. Team membership uses the wowy_multi "
+    "discriminator (same game_id AND same matchup) because ESPN's game_log is per PLAYER — "
+    "keying on 'earliest game in the log' MISSED Morrow entirely while flagging Ionescu and "
+    "Cotie McMahon, who had merely missed two or three early games. "
+    "(3) THE ELEVATED SAMPLE IS WEIGHTED and `n` is now the Kish EFFECTIVE size. This is the "
+    "one that moves bets: n feeds the credibility shrink toward the book, so a weighted mean "
+    "with a raw count trusts a 3-game-equivalent sample as though it were 14. Sheldon's o6.5 "
+    "(ev +0.104 on 13 elevated games) becomes NO EDGE once those 13 collapse to n_eff 5.1 — 12 "
+    "of them predate Carrington. League-wide: 11 raw edges -> 6, two players reduced, three "
+    "unchanged; Wheeler's stable rotation untouched at n_eff 29.0 of 29. EXPECT LOWER VOLUME — "
+    "that is the intended effect, not a regression. "
+    "UNWEIGHTED PATHS ARE BYTE-IDENTICAL: game_weights=None regression-tested on wowy (20 pairs) "
+    "and prop_edges (24 combos, 4 producing real edges). An earlier prop_edges run passed "
+    "VACUOUSLY on 45 combos that produced none, proving only [] == [] — the silent-zero class. "
+    "wnba_availability.py is now a tracked source file; it drives every projection. "
+    "v1.5 evidence does NOT pool with v1.6: v1.5 counted a model projecting from rotations that "
+    "no longer existed. The last independently-validated line remains v1.2 at 33-16 / +18.05u.")
 
 
 def _fingerprint():
