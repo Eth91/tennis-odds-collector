@@ -24,7 +24,7 @@ except Exception:
 HERE = Path(__file__).resolve().parent
 LEDGER = HERE / "wnba_ledger.sqlite"
 OUT = HERE / "wnba_context.md"
-SB = "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard?dates={}"
+SB = "https://site.web.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard?dates={}"
 
 
 def _finals(dates):

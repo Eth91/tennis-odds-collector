@@ -21,7 +21,7 @@ import requests
 
 HERE = Path(__file__).resolve().parent
 OUT = HERE / "nba_injuries.json"
-URL = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/injuries"
+URL = "https://site.web.api.espn.com/apis/site/v2/sports/basketball/nba/injuries"
 UA = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"}
 
 

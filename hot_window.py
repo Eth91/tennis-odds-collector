@@ -6,7 +6,7 @@ import sys, json, datetime, urllib.request
 
 HOT_LEAD_MIN = 90      # go hot 1.5h before tip (user 2026-07-17: late rulings — Boston — need the fast probe BEFORE lineup lock; repriced lines repost in this window)
 HOT_TRAIL_MIN = 200    # stay hot up to this long after tip if ESPN hasn't flipped state to "post"
-URL = "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard"
+URL = "https://site.web.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard"
 
 
 def _hot():

@@ -1,19 +1,19 @@
 {
- "version": "v1.7",
- "frozen": "2026-08-12",
+ "version": "v1.8",
+ "frozen": "2026-08-13",
  "sha256_16": "ff41188c503439af",
- "source_sha256_16": "635649f1f92e1ae8",
+ "source_sha256_16": "ba729c43d3caa274",
  "source_files": {
   "wnba_alert.py": "0fd2bfbd05636608",
   "wnba_slip.py": "f7a90e57c1c45600",
-  "wnba_tonight.py": "c25bf9b229813fa4",
-  "wnba_wowy.py": "7e4d5f4f01773e06",
+  "wnba_tonight.py": "9180e1b57cee55ea",
+  "wnba_wowy.py": "0a5433bbe2a8771c",
   "wnba_fd_search.py": "1c1ca884eeae839d",
   "wnba_ladder_guard.py": "72d450e6b232a8d2",
   "wnba_premise_sweep.py": "eb7f14fd84ec3264",
   "wnba_availability.py": "0a8c3118ace4a3ff"
  },
- "decision": "v1.7 (2026-08-12) \u2014 v1.6 REVERTED AFTER BACKTEST. The rotation-aware weighting shipped hours earlier was replayed against all 182 graded ledger rows on REAL lines and REAL results, walk-forward, and it LOSES: v1.5 baseline 75 bets 61.3% +15.54u | wowy-weighting only 68 bets 57.4% +8.80u | full (wowy+elevated) 44 bets 63.6% +10.09u. v1.5 wins on TOTAL UNITS, the optimisation target. v1.6's better hit rate is an ARTIFACT of dropping 41% of the bets: the dropped rows went 19-18 (+3.9% ROI) \u2014 marginal winners, not losers \u2014 while the full arm ADDED 6 rows that went 1-5. Isolating the components is worse still: wowy-weighting alone drops 7 bets that went 7-0 (+6.74u, +96.3% ROI). Lowering the weighted EV threshold does not rescue it (0.07 and 0.05 both land at +8.76u, below the 0.10 arm). EVERY DIAGNOSIS BEHIND v1.6 HELD UP \u2014 Carrington/Sheldon corr -0.60, eight players above 12 mpg invisible to the injury report, Sheldon's elevated sample 12 of 14 pre-Carrington. The thesis got more accurate and the betting got worse. That is the standing lesson restated: the edge comes from PRICE, not from refining the thesis. WHAT v1.7 IS: bet selection is byte-identical to v1.5. REGIME_WEIGHTS_LIVE=False gates the wiring, so game_weights is None at every call site, and the None path was regression-proven identical on wowy (20 pairs) and prop_edges (24 combos, 4 producing real edges). Verified live after the revert: Sheldon's o6.5/o9.5 edges reappear exactly as under v1.5. RECORD CONTINUITY: v1.6 was live only after the 8/12 slate had finished and placed ZERO bets, so no evidence is orphaned and v1.7 POOLS WITH v1.5 \u2014 the counted record does NOT restart. The v1.6 epoch is a documented no-op. KEPT ON PURPOSE: wnba_availability.py and the optional game_weights parameters stay. The DIAGNOSIS is genuinely valuable \u2014 it is how the Sheldon, Puoch and Juskaite confounds were identified \u2014 and it remains available for confidence/diagnostics. It simply must not silently delete bets. Re-arm only with a backtest that beats +15.54u. The last independently-validated line remains v1.2 at 33-16 / +18.05u.",
+ "decision": "v1.8 (2026-08-13) \u2014 ESPN HOST SWAP ONLY. site.api.espn.com began returning 403 to this VM's IP; it is NOT a User-Agent problem (a full Chrome UA still 403s) and NOT transient (every path 403s while site.web.api.espn.com and cdn.espn.com both return 200 from the same box). site.web.api serves the IDENTICAL path and payload, so the change in the two frozen files is one constant each: ESPN=/SITE= rewritten to the working host. No logic, no gate, no threshold moved. RECORD CONTINUITY: bet selection is unchanged, so v1.8 POOLS WITH v1.5/v1.7 \u2014 the counted record does NOT restart and the forward window stays 7/31-based. \u26a0\ufe0f SCOPE OF THE OUTAGE, MEASURED NOT ASSUMED. 27 URLs across 24 files pointed at the blocked host, 10 of them reachable from live code. But every call site has try/except plus a cache, so almost nothing actually broke: tip_times, players, matchup_context and the board all kept returning correct, per-game values (total 187.5/184.5/167.5, pace 177.3/175.2/169.6 on 08-12/13). The real damage was confined to box_actuals, which is only invoked as a FALLBACK when the game-log path fails \u2014 and there it caused TWO REAL LOSSES to be recorded as voids (Nelson-Ododa 07-28 rebounds o6.5, actual 6; Ogunbowale 08-09 points o14.5, actual 5). Those rows are re-graded; the corrected forward record is 13-10 / 56.5% / +11.1% ROI, down from the 13-9 / 59.1% / +16.2% previously reported. THE BUG WAS NOT THE 403. A total failure was always safe: box_actuals returned an empty dict, which is falsy, and the DNP guard voids nothing. A PARTIAL parse is the danger \u2014 a dict holding 2 of 4 games is truthy, and every player from the other two looks like a DNP. box_actuals now tracks completeness separately from content (box_complete(), defaulting False so an unattempted date fails closed), marks a date incomplete when any single game's summary fails, never caches an incomplete read, and the DNP-void path requires a complete box. Same discipline _premise_really_broke already used: refuse to conclude rather than guess. The last independently-validated line remains v1.2 at 33-16 / +18.05u.",
  "constants": {
   "wnba_slip": {
    "COMBO_EPOCH": "2026-08-04",

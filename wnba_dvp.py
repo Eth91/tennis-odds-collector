@@ -50,7 +50,7 @@ def _game_ids(days):
     for d in range(days):
         date = (now - dt.timedelta(days=d)).strftime("%Y%m%d")
         try:
-            j = s.get("https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/"
+            j = s.get("https://site.web.api.espn.com/apis/site/v2/sports/basketball/wnba/"
                       f"scoreboard?dates={date}", timeout=20).json()
         except Exception:
             continue

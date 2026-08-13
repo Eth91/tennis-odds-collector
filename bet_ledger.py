@@ -801,7 +801,7 @@ def settle_nfl(player, stat, start, event=None):
     """NFL game/team totals from ESPN's scoreboard final scores."""
     date = _game_date(start).replace("-", "")
     try:
-        j = requests.get("https://site.api.espn.com/apis/site/v2/sports/football/nfl/"
+        j = requests.get("https://site.web.api.espn.com/apis/site/v2/sports/football/nfl/"
                          "scoreboard", params={"dates": date}, headers=MLB_H, timeout=25).json()
     except (requests.RequestException, ValueError):
         return None
@@ -848,14 +848,14 @@ def settle_nba(player, stat, start, event=None):
     if date not in _NBA_BOX_CACHE:
         rows = []
         try:
-            sb = requests.get("https://site.api.espn.com/apis/site/v2/sports/basketball/"
+            sb = requests.get("https://site.web.api.espn.com/apis/site/v2/sports/basketball/"
                               "nba/scoreboard", params={"dates": date}, headers=MLB_H,
                               timeout=25).json()
             for gm in sb.get("events", []):
                 if (gm.get("competitions") or [{}])[0].get("status", {}).get(
                         "type", {}).get("state") != "post":
                     continue
-                summ = requests.get("https://site.api.espn.com/apis/site/v2/sports/"
+                summ = requests.get("https://site.web.api.espn.com/apis/site/v2/sports/"
                                     "basketball/nba/summary",
                                     params={"event": gm.get("id")}, headers=MLB_H,
                                     timeout=25).json()
