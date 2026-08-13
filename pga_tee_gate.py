@@ -58,12 +58,42 @@ def _load():
     return _IDX, _FIRST
 
 
-def _event_key(event):
-    idx, _ = _load()
-    ev = str(event or "")
+def _norm_ev(x):
+    """Event name -> comparable form: lowercase alphanumerics, trailing year dropped.
+    'FedEx St. Jude Championship' and 'PGA FedEx St Jude Championship 2026' must compare
+    equal -- the period in 'St.' alone was enough to stop them matching."""
+    import re as _re
+    t = _re.sub(r"(19|20)\d{2}", "", str(x or ""))
+    return "".join(ch for ch in t.lower() if ch.isalnum())
+
+
+def _event_key(event, when=None):
+    """The tee_sheet key for `event`, choosing the RIGHT EDITION when a tournament recurs.
+
+    ⚠️ THIS PICKED THE WRONG YEAR AND SILENTLY CLOSED THE WHOLE BOARD. The tee sheet holds a
+    row set per edition -- 'FedEx St. Jude Championship' (2024/2025) alongside 'PGA FedEx St
+    Jude Championship 2026'. The old rule returned the LONGEST NAME MATCH, which has nothing
+    to do with which tournament is being played, and 'St.' vs 'St ' meant the 2026 key did not
+    even match. Deadlines resolved to 2024-08-15, every one of them already past, and
+    is_open() correctly reported CLOSED for every market -- so the model flagged NOTHING for
+    the live event and looked merely quiet rather than broken.
+    Ties are now broken by TIME: the edition whose tee times sit nearest `when` wins.
+    """
+    idx, first = _load()
+    evn = _norm_ev(event)
     names = {k[0] for k in idx}
-    hits = [n for n in names if n and (n in ev or ev in n)]
-    return sorted(hits, key=len)[-1] if hits else None
+    hits = [n for n in names if n and evn and (_norm_ev(n) in evn or evn in _norm_ev(n))]
+    if not hits:
+        return None
+    if len(hits) == 1:
+        return hits[0]
+    now = when or dt.datetime.utcnow()
+
+    def _dist(n):
+        ts = [t for (nm, _r), t in first.items() if nm == n]
+        return min(abs((t - now).total_seconds()) for t in ts) if ts else float("inf")
+
+    return sorted(hits, key=_dist)[0]
 
 
 def deadline(event, market):
