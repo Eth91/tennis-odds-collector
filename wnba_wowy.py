@@ -231,6 +231,35 @@ def roster_ids():
     return out
 
 
+def _wsumm(games, stat, gw):
+    """Regime-WEIGHTED counterpart of `_summ`. Same keys, so every consumer works unchanged.
+
+    `gw` maps game_id -> weight in [0,1]: the share of TONIGHT's missing minutes that was
+    also missing in that game. A game from the current rotation approaches 1.0; a game from
+    a healthy early-season rotation approaches 0 and stops dragging the average.
+
+    ⚠️ THE CORRECTION LANDS ON THE *WITH* SIDE. It is tempting to think this reweights the
+    without-games; mostly it does not, because weights normalise WITHIN a group. What it
+    fixes is the baseline: Puoch's "with Leite" mean of 16.5 min was built almost entirely
+    from pre-Barker games in a rotation that no longer exists, which is what inflated her
+    d_min to +9.5. Pulling that baseline toward the current regime is the whole point.
+
+    `n` stays the RAW game count on purpose. Every gate in the engine reads n_without >= 2,
+    and handing them a fractional effective count would silently change which bets clear
+    thresholds — a much larger behaviour change than the one being made here. The effective
+    size is reported separately as `n_eff` for callers that want to judge reliability.
+    """
+    pairs = [(g[stat], max(0.0, min(1.0, gw.get(g.get("game_id"), 1.0)))) for g in games]
+    num = sum(v * w for v, w in pairs)
+    den = sum(w for _v, w in pairs)
+    sq = sum(w * w for _v, w in pairs)
+    if den <= 0:                       # every game is out-of-regime -> fall back to unweighted
+        return _summ(games, stat)      # rather than report a mean of 0 and fabricate a delta
+    return {"n": len(pairs), "mean": num / den,
+            "n_eff": (den * den / sq) if sq > 0 else 0.0,
+            "vals": sorted((v for v, _w in pairs), reverse=True)}
+
+
 def _summ(games, stat):
     vals = [g[stat] for g in games]
     return {"n": len(vals), "mean": st.mean(vals) if vals else 0,
@@ -265,7 +294,7 @@ def played_effectively(g, log, frac=0.55, floor=8.0):
     return not (m < max(floor, frac * med))
 
 
-def wowy_multi(player_log, teammate_logs):
+def wowy_multi(player_log, teammate_logs, game_weights=None):
     """Split player's games by whether ALL the given teammates were ABSENT that game.
     'without' = games none of them played (the multi-out scenario the user cares about —
     a beneficiary often gets a BIGGER boost when 2+ impact players sit together); 'with' =
@@ -290,9 +319,15 @@ def wowy_multi(player_log, teammate_logs):
                 present.add(gid)
     with_g = [g for g in player_log if g["game_id"] in present]
     without_g = [g for g in player_log if g["game_id"] not in present]
+    _STATS = ("min", "pts", "reb", "ast", "fga", "fta", "fg3a",
+              "pra", "pts_reb", "pts_ast", "reb_ast")
+
     def block(gs):
-        return {s: _summ(gs, s) for s in ("min", "pts", "reb", "ast", "fga", "fta", "fg3a",
-                                          "pra", "pts_reb", "pts_ast", "reb_ast")}
+        # game_weights=None reproduces the previous behaviour EXACTLY -- this is an additive
+        # correction, so every existing caller and every backtest is untouched until it opts in.
+        if game_weights is None:
+            return {s: _summ(gs, s) for s in _STATS}
+        return {s: _wsumm(gs, s, game_weights) for s in _STATS}
     res = {"with": block(with_g), "without": block(without_g),
            "n_with": len(with_g), "n_without": len(without_g)}
     # NO BASELINE MEANS NO SPLIT. `_summ` reports mean 0 for an empty list, so a with-set of zero
@@ -313,9 +348,9 @@ def wowy_multi(player_log, teammate_logs):
     return res
 
 
-def wowy(player_log, teammate_log):
+def wowy(player_log, teammate_log, game_weights=None):
     """Single-teammate with/without split (thin wrapper over wowy_multi)."""
-    return wowy_multi(player_log, [teammate_log])
+    return wowy_multi(player_log, [teammate_log], game_weights=game_weights)
 
 
 def peer_regime(player_log, peer_log, peer_plays_tonight, out_game_ids, min_gap=3.0):

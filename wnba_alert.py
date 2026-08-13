@@ -27,6 +27,7 @@ import wnba_clv as CLV
 import wnba_proj_log as PL
 import wnba_regime as RG
 import wnba_tonight as T
+import wnba_availability as AV
 import wnba_wowy as W
 
 # FIRST-OCCURRENCE SPEED PILOT (2026-07-13). Also surface beneficiaries with only ONE game without
@@ -126,6 +127,9 @@ def collect():
     into the model."""
     pl = W.players()
     inj = T.injuries()
+    # per-team availability derived from APPEARANCES, not just the report -- see the block at
+    # the wowy call below for why. Cached per team; one entry per team per run.
+    _base_out_by_team = {}
     # ET slate date, NOT UTC — else a game tipping ~02:00Z (10pm ET) gets logged under two
     # different UTC dates across midnight and the SAME bets double-count in the tracker.
     today = datetime.datetime.now(T.ET).date().isoformat()
@@ -209,10 +213,34 @@ def collect():
         # per-date confirmation: today = official report + fast sources; NEXT-day = the
         # OFFICIAL report's night-before ruling (or user override) — an official tomorrow-Out
         # now promotes the contingent play to a firm bet the evening before, officially.
-        unconfirmed = [nm for nm, _ in outs if nm not in T.confirmed_for(slate_date)]
+        # ── LOGLESS OUT: DROP THE PLAYER, NOT THE TEAM (2026-08-12) ────────────────
+        # This was `if not all(out_logs): continue` — one out player with an EMPTY ESPN
+        # game log silently killed EVERY flag for that team, with no log line and no error.
+        # Live on 2026-08-12 it blacked out TWO teams at once: Minnesota via Elena Buenavida
+        # and Toronto via Zaay Green, both 0.0 mpg / gp=0 — players who have never appeared
+        # in a WNBA game were suppressing every beneficiary on their roster.
+        # A player with no game log also vacates no measurable role, so the correct handling
+        # is to drop THEM from the cascade and evaluate the rest. Only skip the team when
+        # nothing usable is left.
         out_logs = [glog(p["id"]) for _, p in outs]
-        if not all(out_logs):
-            continue
+        _logless = [nm for (nm, _p), lg in zip(outs, out_logs) if not lg]
+        if _logless:
+            print(f"cascade {team}: dropping logless out(s) {_logless} "
+                  f"(no game log -> no measurable vacancy); {len(outs) - len(_logless)} remain",
+                  flush=True)
+            _keep = [(o, lg) for o, lg in zip(outs, out_logs) if lg]
+            outs = [o for o, _lg in _keep]
+            out_logs = [lg for _o, lg in _keep]
+        if not outs:
+            continue                       # nothing measurable left in the cascade
+        # ⚠️ COMPUTED AFTER THE DROP, NOT BEFORE. A logless player is never in
+        # `confirmed_for`, so leaving them in this list would hold the whole cascade in the
+        # contingent tier permanently — trading a silent total blackout for a silent
+        # permanent downgrade. Zaay Green would have done exactly that to Toronto.
+        # CONFIRMED-OUT gate (2026-07-18): any out in this cascade not confirmed for its game
+        # (RW game-day list / override / fresh-today ruling; next-day never confirmed the night
+        # before) routes the WHOLE cascade's edges to the contingent tier instead of firm bets.
+        unconfirmed = [nm for nm, _ in outs if nm not in T.confirmed_for(slate_date)]
         # STALE-VACANCY GATE (2026-07-19, the Bonner/Nogic case — user: "why is it a play
         # when mack is back?"): when Mack returned, the PHX cascade collapsed to Nogic-only —
         # last played June 18, a month-priced vacancy. Model-vs-book "EV" at equilibrium is
@@ -271,6 +299,12 @@ def collect():
         # bars without X"). Feeds prop_edges' out_logs. (The old context-WEIGHTED projection that also
         # pulled every starter's game log per cycle was dropped — the pivot backtest showed it diluted
         # the under edge — so that plumbing is gone.)
+        if team not in _base_out_by_team:
+            try:
+                _base_out_by_team[team] = AV.absent_sets(
+                    team, pl, glog, injuries=inj)["baseline_out"]
+            except Exception:
+                _base_out_by_team[team] = {}       # fail open -> unweighted = old behaviour
         out_dm = [{g["date"][:10]: g.get("min", 0) for g in ol} for ol in out_logs]
         team_pl = {n: v for n, v in pl.items()
                    if v["team"] == team and n not in out_names and v["gp"] >= 5}
@@ -283,10 +317,29 @@ def collect():
             if not blog:
                 continue
             # combined absence (all outs sitting together) — the compounded boost
-            w = W.wowy_multi(blog, out_logs)
+            # ── REGIME WEIGHTS (2026-08-12) ────────────────────────────────────────
+            # The with/without baseline averages over a rotation that may no longer exist.
+            # EIGHT players above 12 mpg were missing 2+ straight games with NO injury-report
+            # entry at all (Fiebich 14, Nogic 18, Barker 5...), because a season-ending injury
+            # drops off the daily report. Portland alone was hiding 54 mpg. Those games sit
+            # inside every "with" average, so the engine credited tonight's out star with a
+            # role change a DIFFERENT absence had already caused: Puoch's d_min read +9.5 when
+            # her current-rotation baseline is ~20 min, not the 16.5 the raw split reported.
+            # The weight is the share of tonight's missing minutes also missing in that game.
+            # Tonight's out players are deliberately INCLUDED in the set: inside the `with`
+            # group they contribute nothing (they played), so what remains is precisely the
+            # other-absence contamination being removed.
+            _gw = None
+            try:
+                _pairs = AV.regime_weights(blog, _base_out_by_team.get(team, {}), pl, glog)
+                _gw = {g.get("game_id"): wt for g, wt in _pairs if g.get("game_id")}
+            except Exception:
+                _gw = None                    # fail open: unweighted is the previous behaviour
+            w = W.wowy_multi(blog, out_logs, game_weights=_gw)
             if w["n_without"] < 2 and len(outs) > 1:
                 # too few games with ALL out together -> best single-out split as the proxy
-                cands = [(W.wowy(blog, ol), nm) for (nm, _), ol in zip(outs, out_logs)]
+                cands = [(W.wowy(blog, ol, game_weights=_gw), nm)
+                         for (nm, _), ol in zip(outs, out_logs)]
                 w = max(cands, key=lambda x: x[0]["n_without"])[0]
             n1 = (w["n_without"] == 1)                     # first-occurrence speed-pilot tier (below)
             # ── ⚡USG SHADOW (2026-07-29, user; the "Ionescu hole") ── n=1/n=2 without-samples
