@@ -18,7 +18,7 @@ MODEL. r_i = recency-weighted mean of (score_i - field_mean_event_round), shrunk
 global sd. A round is simulated as r_i + week_i + eps, where week_i ~ N(0, RHO*sig^2) is a
 player-week form effect shared across the event's rounds (the plan's round-to-round
 dependence) and eps ~ N(0, (1-RHO)*sig^2). Tournament outcomes come from Monte Carlo with a
-top-65-and-ties-proxy cut after R2.
+top-65-and-ties cut after R2 (see CUT_N).
 """
 import datetime as dt
 import json
@@ -87,6 +87,49 @@ MIN_ROUNDS = 20         # user 2026-07-29: '20 rounds or less is a good rule'. B
                         # this a rating is HALVED toward field-average and sigma widens
                         # — it still prices (Koivun at 46 rounds is genuinely good and
                         # unaffected), it just stops speaking with unearned confidence.
+
+# ── CUT RULE (2026-08-13) ───────────────────────────────────────────────────────────────────
+CUT_N = 65              # MEASURED over the 242 warehouse events that cut after R2 (2023-2026).
+                        # "top N and ties" is NOT point-identified from results: ties make every
+                        # N in (count(tot<S), count(tot<=S)] produce the SAME advancing set, so a
+                        # best-fit scan just returns the smallest consistent N and the answer
+                        # looks like noise spread over 40-70. The identified object is the RANGE,
+                        # and the test is whether a candidate falls inside it. Share of events
+                        # whose range contains the candidate: top-65 .909 · top-70 .628 ·
+                        # top-60 .566 · top-50 .112. The old code used min(69, k-1) -- a top-70
+                        # proxy, the PRE-2024 tour rule -- which is the worse answer in EVERY
+                        # season present (2023 .676, 2024 .636, 2025 .569, 2026 .628).
+
+# ⚠️ FIELD SIZE CANNOT SUBSTITUTE FOR THIS TABLE. Genesis/Arnold Palmer/Memorial cut at 50 with
+# 69-73 starters, while Heritage/Travelers/St Jude do NOT cut at 69-72. Same size, opposite rule.
+# ⚠️ AND `cut_n=None` IS NOT A COSMETIC RENAME OF THE OLD BEHAVIOUR. On a field of <=70,
+# min(69, k-1) selects the LARGEST score, so everyone "made the cut" -- which is precisely why a
+# wrong constant looked healthy on every playoff event. Moving to 65 without a no-cut branch
+# would START eliminating players from St Jude, the BMW and the TOUR Championship.
+_NO_CUT = ("fedex st jude", "st jude championship", "bmw championship", "tour championship",
+           "hero world challenge", "the sentry", "sentry tournament of champions",
+           "dp world tour championship", "nedbank golf challenge", "dubai invitational",
+           "zozo championship", "baycurrent classic", "cadillac championship",
+           "korea championship", "isps handa championship", "q school", "qschool")
+# 2024 is when the tour created the signature format. Before it these were ordinary full-field
+# events on the standard rule, so the era boundary is part of the rule, not a detail.
+# (pattern, first season the event stopped cutting). Pebble Beach is 2025, not 2024: in
+# 2023-24 it was still a 54-hole-cut pro-am, so a single shared boundary gets it wrong.
+_NO_CUT_SINCE = (("rbc heritage", "2024"), ("travelers championship", "2024"),
+                 ("truist championship", "2024"), ("wells fargo", "2024"),
+                 ("abu dhabi hsbc", "2024"), ("pebble beach", "2025"))
+_CUT_50 = (("masters tournament", None), ("genesis invitational", "2024"),
+           ("arnold palmer", "2024"), ("memorial tournament", "2024"))
+# EXACT normalised match only: "BMW PGA Championship" and "BMW Australian PGA Championship" are
+# ordinary 65 events, and "Genesis Scottish Open" must not match "the open".
+_CUT_70 = ("pga championship", "the open")
+# ⚠️ TWO DIFFERENT EVENTS, ONE NORMALISED NAME. "ISPS Handa Championship" (2023, 72
+# players, no cut) and "ISPS HANDA - CHAMPIONSHIP" (2024, 155 players, cuts) collapse to
+# the same string, so no name table can separate them -- only the field size can. The
+# guard is deliberately scoped to this one pattern: a general "no-cut events are small"
+# rule is FALSE, because Q-School is a genuine 170-player no-cut event.
+_NO_CUT_AMBIGUOUS = ("isps handa championship",)
+NO_CUT_MAX_FIELD = 100
 
 
 def _get(url):
@@ -275,6 +318,51 @@ def resolve(name, candidates):
     return hits.pop() if len(hits) == 1 else None
 
 
+def _evnorm(s):
+    return " ".join("".join(c if c.isalnum() else " "
+                            for c in _deaccent(str(s or "")).lower()).split())
+
+
+def cut_rule(event, date=None, n_field=None):
+    """Cut size for `event` as of `date`: 65 (standard), 50, 70, or None for a no-cut event.
+
+    Unrecognised names get the default 65. That is the right prior -- 242 of the 296 warehouse
+    events cut after R2 and 90.9% of those are consistent with 65 -- and an unknown name is far
+    likelier to be an ordinary full-field stop than a playoff.
+
+    ⚠️ THE COST OF BEING WRONG IS ASYMMETRIC. Calling a no-cut event a cutting one ELIMINATES
+    players who never faced a cut and zeroes their top-N and win probabilities outright; the
+    reverse merely leaves a few extra players in the last two rounds. Every no-cut family on
+    tour is enumerated above for that reason, and the default leans the safe way only because
+    a full-field event is the overwhelming base case.
+
+    `date=None` means "now", so the era-dependent entries resolve to their CURRENT rule.
+    """
+    n = _evnorm(event)
+    if not n:
+        return CUT_N
+    yr = str(date)[:4] if date else None
+
+    def _guard(pat):
+        # Only for the known-colliding name; everything else is trusted as written.
+        if pat in _NO_CUT_AMBIGUOUS and n_field and int(n_field) > NO_CUT_MAX_FIELD:
+            return CUT_N
+        return None
+    for pat in _CUT_70:
+        if n == pat or n == pat + " championship":
+            return 70
+    for pat in _NO_CUT:
+        if pat in n:
+            return _guard(pat)
+    for pat, since in _NO_CUT_SINCE:
+        if pat in n and (yr is None or yr >= since):
+            return None
+    for pat, since in _CUT_50:
+        if pat in n and (since is None or yr is None or yr >= since):
+            return 50
+    return CUT_N
+
+
 def _phi(z):
     return 0.5 * (1.0 + math.erf(z / math.sqrt(2)))
 
@@ -339,7 +427,7 @@ def _recal_shape(out, keys, slope=None):
 
 
 def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
-             wave_shift=0.0, progress=None, partial=None, reps=1):
+             wave_shift=0.0, progress=None, partial=None, reps=1, cut_n=CUT_N):
     """reps>1 averages independent runs to cut Monte Carlo noise at CONSTANT peak memory.
     Measured across five seeds at 8000 sims, worst-case seed-to-seed sd was 0.70 points on
     top-20 and 1.00 on make-cut — 14-20% of the 5-point edge threshold, so a flagged 5.0%
@@ -350,7 +438,7 @@ def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
         for i in range(int(reps)):
             one = simulate(R, field, n_sims=n_sims, seed=seed + 1000 * i,
                            course_fit=course_fit, wave=wave, wave_shift=wave_shift,
-                           progress=progress, partial=partial, reps=1)
+                           progress=progress, partial=partial, reps=1, cut_n=cut_n)
             if not one:
                 return {}
             for pl, v in one.items():
@@ -358,7 +446,7 @@ def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
                 for k_, val in v.items():
                     a[k_] = a.get(k_, 0.0) + val / float(reps)
         return acc
-    """Win/top5/10/20/make-cut probs via MC: 4 rounds, player-week effect, top-70 cut."""
+    """Win/top5/10/20/make-cut probs via MC: 4 rounds, player-week effect, `cut_n` cut."""
     import numpy as np
     rng = np.random.default_rng(seed)
     names = [p for p in field if (norm(p) in R or p in R)]
@@ -453,8 +541,15 @@ def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
     # BOTH rank distributions from one pass.
     tot2 = np.rint(tot2)
     rest = np.rint(rest)
-    cutline = np.sort(tot2, axis=1)[:, min(69, k - 1)][:, None]
-    made = tot2 <= cutline
+    # NO-CUT EVENTS AND SHORT FIELDS: `cut_n=None` is a playoff/limited-field event, and
+    # k <= cut_n means top-N-and-ties admits the whole field anyway. Both must short-circuit
+    # BEFORE the index, or a 50-man TOUR Championship reads tot2[:, 64] and dies.
+    if cut_n is None or k <= int(cut_n):
+        made = np.ones(tot2.shape, dtype=bool)
+    else:
+        # 'and ties': the line is the cut_n-th best 36-hole total and <= admits every tie.
+        cutline = np.sort(tot2, axis=1)[:, int(cut_n) - 1][:, None]
+        made = tot2 <= cutline
     if forced is not None and forced.any():
         made = made | forced[None, :]
     if gone is not None and gone.any():

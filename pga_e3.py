@@ -296,8 +296,12 @@ def main():
         print(f"  ruler: context unavailable ({str(_xe)[:40]})")
     # reps=4 halves Monte Carlo noise (worst case 0.70pt on top-20, ~14% of the 5pt edge
     # threshold) without growing peak memory on this box
+    # CUT RULE PER EVENT (2026-08-13). Passing this is not optional: the default 65 would
+    # eliminate players from St Jude / BMW / TOUR Championship, which have no cut at all.
+    _cutn = RU.cut_rule(evn, n_field=len(field) if field else None)
+    print(f"  cut rule: {evn} -> {'no cut' if _cutn is None else 'top-%d and ties' % _cutn}")
     sim = RU.simulate(R, field, course_fit=cfit, wave=wave,
-                      wave_shift=wshift, reps=4) if field else {}
+                      wave_shift=wshift, reps=4, cut_n=_cutn) if field else {}
     # DEDUPE BEFORE DEVIG (2026-07-29) — this was manufacturing fake +20-27% edges.
     # The one-sided devig normalizes by sum(1/odds) over the market, so DUPLICATE runners
     # (the same top-20 market arrives as TOP_20_FINISH_IMG, TOP_20_FINISH_(INCL._TIES),
@@ -601,6 +605,14 @@ def main():
     # pga_cut so the v1.0 constant fingerprint stays byte-identical.
     try:
         import pga_cut as _CUT
+        # ⚠️ NO CUT => EVERY PLAYER PRICES AT 1.0, AND 1.0 BEATS ANY ODDS. On a playoff or
+        # signature no-cut event the sim correctly reports make-cut = 1.000 for the whole
+        # field, so if a book ever posted the market (or the event were misclassified) this
+        # stream would flag a 'guaranteed' edge on all 70 runners. Today it is inert only
+        # because FanDuel posts no such market -- which is a property of the book, not a
+        # guard. make-cut is ARMABLE, so it gets a real one.
+        if _cutn is None:
+            raise RuntimeError('no-cut event: make-cut is not a market here')
         _fn = {RU.norm(f) for f in field} if field else None
         _cutrows = _CUT.price(rows, sim, _blend, field_norm=_fn)
         if _cutrows:
