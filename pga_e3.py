@@ -29,6 +29,17 @@ HERE = Path(__file__).resolve().parent
 LINES = HERE / "golf_lines.sqlite"
 PAPER = HERE / "pga_paper.sqlite"
 
+# ── FAMILIES HELD IN SHADOW REGARDLESS OF G2 (2026-08-13) ─────────────────────────────
+# G2 was measured on MATCHUPS -- 47 real FD closes, ruler within 1.8pts of the devigged
+# close. Top-N inherits none of that evidence: it is a different market, priced by
+# normalising MARGINALS to the nominal count (N_eff 9.97 vs 10), and project_pga_edge_
+# forensics measured the identical compression defect at -85.6% ROI on real outright closes
+# (9 majors, 528 flagged runners, predicted 3.6 winners, got 1). Outrights were gated off
+# for it; top-5/10/20 were knowingly LEFT ARMED with the same defect.
+# So a G2 pass must not silently arm the one family with a measured disaster behind it.
+# These log and grade exactly as before -- they simply never become real bets. Remove a
+# family from this set only with its OWN realized ROI/CLV evidence.
+SHADOW_ONLY_FAMILIES = ("top5", "top10", "top20", "top40", "outright")
 PRICE_FLOOR = 0.50      # MEASURED 2026-08-02 on 36 graded flags. A round-scoped bet must be
                         # on a side the MARKET does not price as a dog. Splitting birdies at even
                         # money: 13-4 +6.06u above vs 1-7 -5.68u below, Fisher p=0.0072, monotone
@@ -121,7 +132,7 @@ import pga_tee_gate as _TEEGATE
 
 
 def latest_event_rows():
-    con = sqlite3.connect(LINES)
+    con = sqlite3.connect(LINES, timeout=60)
     # ⚠️ '%PGA%' ALSO MATCHES 'LPGA'. The board carried 252,293 LPGA Portland Classic rows
     # against 93,341 for the PGA FedEx St Jude Championship, so ORDER BY c DESC picked the
     # LPGA event every pass -- the model was pricing a women's tour field with PGA player
@@ -166,7 +177,7 @@ def main():
         import pga_birdies as _B0
         _tid0 = _B0.tid_for_name(evn)
         if _tid0:
-            _c0 = sqlite3.connect(HERE / "pga_tees.sqlite")
+            _c0 = sqlite3.connect(HERE / "pga_tees.sqlite", timeout=60)
             _r0 = _c0.execute("SELECT MIN(tee_ms) FROM tee_sheet WHERE tid=? AND rnd=1",
                               (str(_tid0),)).fetchone()
             _c0.close()
@@ -656,7 +667,7 @@ def main():
     # Nothing about PRICING changes: same probabilities, same gates, same constants. Only what
     # is written down changes.
     if preview:
-        con = sqlite3.connect(PAPER)
+        con = sqlite3.connect(PAPER, timeout=60)
         con.execute(E1.DDL)
         # migration hoisted out of the arming branch — it was unreachable in there
         for _c in ("p_bet", "p_fair", "snapshot_ts", "first_tee", "lam", "n_lines"):
@@ -687,7 +698,9 @@ def main():
             # where the tee sheet is reloaded between the two calls.
             _dl, _ = _TEEGATE.deadline(evn, pv["market"])
             _tee_stamp = (_dl.replace(microsecond=0).isoformat() if _dl else None)
-            _is_shadow = bool(pv.get("shadow")) or not armed
+            _fam = pv["stream"].replace("E3-", "").replace("-shadow", "").replace("-lowprice", "")
+            _held = _fam in SHADOW_ONLY_FAMILIES
+            _is_shadow = bool(pv.get("shadow")) or not armed or _held
             _stream = pv["stream"] + ("-shadow" if _is_shadow
                                       and not pv["stream"].endswith("-shadow") else "")
             key = f"{evn}|{pv['market']}|{pv['runner']}|{_stream}"
@@ -709,6 +722,11 @@ def main():
                     flags.append(pv)
         con.commit()
         con.close()
+        if any(f in SHADOW_ONLY_FAMILIES for f in
+               {p["stream"].replace("E3-", "").replace("-shadow", "").replace("-lowprice", "")
+                for p in _best.values()}):
+            print(f"  HELD IN SHADOW regardless of G2: {', '.join(SHADOW_ONLY_FAMILIES)} "
+                  f"(G2 evidence is matchup-only; top-N carries the -85.6% outright defect)")
         print(f"  E3 logged: {len(flags)} armed + {_n_shadow} shadow, "
               f"{_n_teed} skipped (player already teed off) "
               f"(G2 {'PASS' if armed else 'not passed — everything logs as shadow'})")

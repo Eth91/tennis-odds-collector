@@ -36,7 +36,7 @@ def main():
     sn = {E1.norm(k): v for k, v in scores.items()}
     cut_done = any(len(v) >= 3 for v in scores.values())
 
-    con = sqlite3.connect(PAPER)
+    con = sqlite3.connect(PAPER, timeout=60)
     con.execute(E1.DDL)
     graded = 0
     for key, mkt, runner, opp, odds in con.execute(

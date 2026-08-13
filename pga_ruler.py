@@ -34,6 +34,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 DB = HERE / "pga_model.sqlite"
 LINES = HERE / "golf_lines.sqlite"
+MOVES = HERE / "golf_moves.sqlite"
 UA = {"User-Agent": "Mozilla/5.0"}
 
 HALF_LIFE_D = 270.0     # TUNED 2026-07-29 on 2024-25 with 2026 HELD OUT — the only tuned
@@ -102,14 +103,14 @@ def crawl(seasons=(2023, 2024, 2025, 2026), leagues=("pga", "eur")):
     only through shared players, so a disjoint tour would get ratings on an uncalibrated scale that
     look comparable and are not. eur is the one safe addition.
     """
-    con = sqlite3.connect(DB)
+    con = sqlite3.connect(DB, timeout=60)
     con.execute("""CREATE TABLE IF NOT EXISTS rounds(
         event_id TEXT, event TEXT, date TEXT, player TEXT, rnd INTEGER, score REAL,
         PRIMARY KEY(event_id, player, rnd))""")
     for yr in seasons:
       for _lg in leagues:
         try:
-            d = _get("https://site.api.espn.com/apis/site/v2/sports/golf/%s/scoreboard?dates=%d"
+            d = _get("https://site.web.api.espn.com/apis/site/v2/sports/golf/%s/scoreboard?dates=%d"
                      % (_lg, yr))
         except Exception:                                          # noqa: BLE001
             continue                                               # a tour missing a season is fine
@@ -138,7 +139,7 @@ def crawl(seasons=(2023, 2024, 2025, 2026), leagues=("pga", "eur")):
 def all_rows():
     """Every round, sorted by date — pass to fit(rows=...) to avoid re-querying per as-of
     fit. A half-life grid search is ~350 fits and the query dominates otherwise."""
-    con = sqlite3.connect(DB)
+    con = sqlite3.connect(DB, timeout=60)
     rows = con.execute("SELECT event_id, date, player, rnd, score FROM rounds "
                        "ORDER BY date").fetchall()
     con.close()
@@ -158,7 +159,7 @@ def fit(asof=None, rows=None, half_life=None, k_shrink=None, sig_shrink=None,
     SS = float(sig_shrink if sig_shrink is not None else SIG_SHRINK)
     MR = int(min_rounds if min_rounds is not None else MIN_ROUNDS)
     if rows is None:
-        con = sqlite3.connect(DB)
+        con = sqlite3.connect(DB, timeout=60)
         rows = con.execute("SELECT event_id, date, player, rnd, score FROM rounds "
                            "WHERE date < ? ORDER BY date", (asof,)).fetchall()
         con.close()
@@ -530,7 +531,7 @@ def walk_forward(seasons=(2025, 2026), verbose=True, season_max=None, rows=None,
     measure how well the predicted score ordering holds. Reported as pairwise accuracy
     (share of same-round player pairs where the better-rated player actually shot lower)
     plus RMSE against the field-relative score."""
-    con = sqlite3.connect(DB)
+    con = sqlite3.connect(DB, timeout=60)
     if season_max:
         evs = con.execute(
             "SELECT event_id, MIN(date) d, event FROM rounds GROUP BY event_id "
@@ -550,7 +551,7 @@ def walk_forward(seasons=(2025, 2026), verbose=True, season_max=None, rows=None,
     for eid, d0, ev in evs:
         R, _ = fit(asof=d0, rows=rows, **fitkw)
         Rn = {norm(k): v for k, v in R.items()}
-        con = sqlite3.connect(DB)
+        con = sqlite3.connect(DB, timeout=60)
         erows = con.execute("SELECT player, rnd, score FROM rounds WHERE event_id=?",
                             (eid,)).fetchall()
         con.close()
@@ -594,7 +595,7 @@ def noise_floor(verbose=True):
     If our RMSE sits at that floor and our accuracy sits at that ceiling, the weakness is
     golf rather than the ruler — and more work on the round model is wasted motion.
     """
-    con = sqlite3.connect(DB)
+    con = sqlite3.connect(DB, timeout=60)
     raw = {}
     for eid, rnd, pl, sc in con.execute(
             "SELECT event_id, rnd, player, score FROM rounds WHERE score > 0"):
@@ -695,15 +696,34 @@ def g2_gate(verbose=True):
     MAX(collected_at), which during a live event is an IN-PLAY price that already knows the
     result.
     """
-    con = sqlite3.connect(LINES)
-    raw = con.execute(
+    # ⚠️ golf_lines IS A 2-DAY ROLLING BUFFER. Reading the gate off it alone meant a completed
+    # event's matchups were PRUNED long before its results landed, so the gate could only ever
+    # see markets whose outcome did not exist yet -- n stayed 0 permanently and NOT ONE FLAG
+    # HAS EVER ARMED. That is not "give it time"; it was structurally unreachable.
+    # golf_moves is the durable, write-once store built for exactly this: one row per
+    # (event, market, runner) carrying the CLOSE as the last price before that round's tee,
+    # with the deadline already resolved through pga_tee_gate. Read it FIRST, then union the
+    # live buffer so an event still in progress is not missed. Overlap is harmless: the
+    # per-runner selection below keeps the latest quote before the cutoff either way.
+    raw = []
+    try:
+        cm = sqlite3.connect(MOVES, timeout=60)
+        raw += cm.execute(
+            "SELECT event, market, runner, close_odds, close_ts FROM moves "
+            "WHERE market LIKE '%Matchbet%' AND close_odds > 1.0 "
+            "AND close_ts IS NOT NULL").fetchall()
+        cm.close()
+    except sqlite3.Error as _me:
+        print(f"G2: golf_moves unreadable ({str(_me)[:50]}) — live buffer only")
+    con = sqlite3.connect(LINES, timeout=60)
+    raw += con.execute(
         "SELECT event, market, runner, odds, collected_at FROM golf_lines "
         "WHERE market LIKE '%Matchbet%' AND odds > 1.0").fetchall()
     con.close()
     by_m = defaultdict(list)
     for evn, mkt, run, od, ts in raw:
         by_m[(str(evn).strip(), mkt)].append((run, od, ts))
-    conr = sqlite3.connect(DB)
+    conr = sqlite3.connect(DB, timeout=60)
     ll_book, ll_ruler, n_used = [], [], 0
     fits = {}
     n_fam = defaultdict(int)
