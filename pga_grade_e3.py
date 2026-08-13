@@ -307,7 +307,7 @@ def main():
     ev = F.event()
     ctx, state = _ctx_for(ev)
     scores = ctx["scores"]
-    con = sqlite3.connect(PAPER)
+    con = sqlite3.connect(PAPER, timeout=60)
     con.execute(E1.DDL)
     rows = con.execute("SELECT key, stream, market, runner, odds, event, flagged_at FROM flags "
                        "WHERE (result IS NULL OR result='') AND stream LIKE 'E3-%'").fetchall()
