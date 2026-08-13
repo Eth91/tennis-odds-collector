@@ -20,7 +20,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 CACHE = HERE / "wnba_pbp_cache"
-SUMMARY = "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/summary?event={}"
+SUMMARY = "https://site.web.api.espn.com/apis/site/v2/sports/basketball/wnba/summary?event={}"
 
 
 def _sess():

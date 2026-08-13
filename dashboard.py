@@ -229,7 +229,7 @@ def _tip_times():
     for day in (et_now, et_now + dt.timedelta(days=1)):
         try:
             j = requests.get(
-                "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard"
+                "https://site.web.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard"
                 f"?dates={day:%Y%m%d}",
                 # No spoofed UA: ESPN 403s browser User-Agents on site.api and
                 # serves the default python-requests client. See wnba_wowy.H.

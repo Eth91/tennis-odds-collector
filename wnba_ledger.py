@@ -421,7 +421,7 @@ def grade():
     try:
         def _sb(date):
             req = urllib.request.Request(
-                "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/"
+                "https://site.web.api.espn.com/apis/site/v2/sports/basketball/wnba/"
                 f"scoreboard?dates={date.replace('-', '')}",
                 headers={"User-Agent": "Mozilla/5.0"})
             return json.load(urllib.request.urlopen(req, timeout=20))

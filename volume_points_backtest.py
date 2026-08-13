@@ -51,7 +51,7 @@ def gamelog(pid, cache):
     if pid in cache:
         return cache[pid]
     try:
-        d = requests.get(f"https://site.api.espn.com/apis/common/v3/sports/basketball/wnba/"
+        d = requests.get(f"https://site.web.api.espn.com/apis/common/v3/sports/basketball/wnba/"
                          f"athletes/{pid}/gamelog", headers=UA, timeout=30).json()
     except Exception:
         cache[pid] = []

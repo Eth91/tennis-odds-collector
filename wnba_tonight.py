@@ -867,7 +867,7 @@ def double_double_rate(log, proj_min, w=None):
     return {"rate": sum(1 for g in elevated if g["dd"]) / len(elevated), "n": len(elevated),
             "d_reb": d_reb, "d_pts": d_pts, "d_min": d_min}
 
-ESPN = "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba"
+ESPN = "https://site.web.api.espn.com/apis/site/v2/sports/basketball/wnba"
 EH = {"Accept": "application/json"}  # NO spoofed UA: ESPN 403s browser UAs on site.api (2026-08-04)
 
 # Pooled session (2026-07-29 latency work): a fresh requests.get() per call rebuilt the SSL

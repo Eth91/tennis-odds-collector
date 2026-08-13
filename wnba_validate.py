@@ -258,6 +258,15 @@ def report():
           "No model change is proposed or adopted on this evidence. Every modification is a new "
           "hypothesis and must clear the adoption rule above on PROSPECTIVE data.", "",
           "### Registered open hypotheses", "",
+          "- **H-7 — upper ladder rungs underperform the base line (registered 2026-08-09,"
+          " user observation confirmed on the tracked selection).** Grouping tracked graded"
+          " bets by (date, player, stat) and ranking by line: BASE rungs are 42-21 / 66.7% /"
+          " +18.69u all-time (8-3, +4.22u forward since 7/31) while SECOND rungs are 3-5 /"
+          " 37.5% / +0.08u (forward upper rungs 0-3, -3.00u -- the entire negative drag on"
+          " the forward record). Candidate change: cap the slip at the base rung, or raise"
+          " LADDER_EV_MIN. **NOT adopted -- n=9 upper-rung bets all-time is far below any"
+          " decision bar.** Adoption requires the standing paired-SPRT rule on PROSPECTIVE"
+          " data; until then the rungs keep accruing their own record here.\n\n"
           "- **H-6 — should DvP carry more than TIEBREAKER weight?** `prop_edges` adds "
           "`dvp(opp,pos,stat) * proj_min` to `elev_avg` and nothing more, on the basis that the "
           "backtest looked marginal. Re-run leak-free on 954 spots (`dvp_backtest.py`), it is not "

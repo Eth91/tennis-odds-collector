@@ -12,7 +12,7 @@ HERE = Path(__file__).resolve().parent
 CACHE = HERE / "pga_scoreboard_cache.json"
 META = HERE / "pga_meta.json"
 UA = {"User-Agent": "Mozilla/5.0"}
-SB = "https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard"
+SB = "https://site.web.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard"
 
 
 def _get(url):

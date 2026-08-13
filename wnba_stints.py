@@ -29,7 +29,7 @@ from collections import defaultdict
 
 import requests
 
-SITE = "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba"
+SITE = "https://site.web.api.espn.com/apis/site/v2/sports/basketball/wnba"
 HEADERS = {"Accept": "application/json"}          # ESPN 403s browser UAs
 _S = requests.Session()
 _SUB_RE = re.compile(r"^(.*?)\s+enters the game for\s+(.*?)\s*$", re.I)

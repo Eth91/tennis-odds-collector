@@ -25,7 +25,7 @@ import requests
 
 # ESPN's public API — datacenter-reachable (stats.nba.com blocks cloud IPs, so we can't
 # run that in CI). Rosters + per-game logs with the fields the usage model needs.
-SITE = "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba"
+SITE = "https://site.web.api.espn.com/apis/site/v2/sports/basketball/wnba"
 WEB = "https://site.web.api.espn.com/apis/common/v3/sports/basketball/wnba"
 
 # GAME-LOG DISK CACHE (2026-07-16, "full accuracy + speed"): logs only change when a game

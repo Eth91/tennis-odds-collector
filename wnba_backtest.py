@@ -27,7 +27,7 @@ import wnba_wowy as W
 DATES = ["2026-07-07", "2026-07-08"]
 FD_DB = Path(__file__).resolve().parent / "fanduel_props.sqlite"
 H = {"Accept": "application/json"}  # NO spoofed UA: ESPN 403s browser UAs on site.api (2026-08-04)
-SITE = "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba"
+SITE = "https://site.web.api.espn.com/apis/site/v2/sports/basketball/wnba"
 
 
 def teams_on(date_iso):
