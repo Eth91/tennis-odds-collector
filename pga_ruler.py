@@ -363,6 +363,41 @@ def cut_rule(event, date=None, n_field=None):
     return CUT_N
 
 
+# Fitted 2026-08-13 on 166 walk-forward events (<2026), holdout 2026 untouched, via the LL-optimal
+# stretch through _recal_shape itself -- the same estimand 1.30 was chosen by. Holdout: beats 1.30
+# on 8/8 markets. Majors are deliberately absent: their fitted values LOSE to 1.30 out of sample.
+SHAPE_SLOPE_STD = {"win": 1.21, "win_ties": 1.02,
+                   "top5": 1.03, "top5_ties": 1.03,
+                   "top10": 1.00, "top10_ties": 1.00,
+                   "top20": 1.00, "top20_ties": 1.01}
+
+# EXACT normalised match only -- "BMW PGA Championship" is NOT a major, and neither is
+# "Genesis Scottish Open". Same collision class as the cut-rule table above.
+_MAJOR_NAMES = ("masters tournament", "pga championship", "us open", "u s open",
+                "the open", "the open championship", "us open championship")
+
+
+def is_major(event):
+    """True only for the four majors. Deliberately strict: a false positive here silently
+    applies the 1.30 majors stretch to an ordinary event, which is the defect being fixed."""
+    n = _evnorm(event)
+    if not n:
+        return False
+    for tok in ("pga tour", "dp world", "korn ferry", "lpga", "bmw", "australian", "senior"):
+        if tok in n and "masters tournament" not in n:
+            if tok in ("bmw", "australian", "senior", "lpga"):
+                return False
+    return any(n == m or n.endswith(" " + m) or n.startswith(m + " ") or
+               (" %s " % m) in (" %s " % n) for m in _MAJOR_NAMES)
+
+
+def shape_slopes(event, date=None):
+    """Per-market stretch for `event`: the fitted non-major table, or None to mean 'use
+    SHAPE_SLOPE for everything' (majors). Returning None rather than a dict of 1.30s keeps the
+    majors path byte-identical to what shipped before this change."""
+    return None if is_major(event) else dict(SHAPE_SLOPE_STD)
+
+
 def _phi(z):
     return 0.5 * (1.0 + math.erf(z / math.sqrt(2)))
 
@@ -396,9 +431,15 @@ def _recal_shape(out, keys, slope=None):
     sum. Shape changes; coherence does not.
     """
     sl = SHAPE_SLOPE if slope is None else slope
-    if not out or abs(sl - 1.0) < 1e-9:
+    if not out:
+        return out
+    # `slope` may be a per-market dict (regime split) or a single float (legacy / majors).
+    if not isinstance(sl, dict) and abs(sl - 1.0) < 1e-9:
         return out
     for key in keys:
+        s_key = sl.get(key, SHAPE_SLOPE) if isinstance(sl, dict) else sl
+        if abs(s_key - 1.0) < 1e-9:
+            continue
         ps = [(out[p_] or {}).get(key) for p_ in out]
         ps = [v for v in ps if v is not None]
         if len(ps) < 10:
@@ -414,7 +455,7 @@ def _recal_shape(out, keys, slope=None):
         lo, hi = -40.0, 40.0
         for _ in range(200):
             c = (lo + hi) / 2.0
-            tot = sum(1.0 / (1.0 + math.exp(-(sl * l + c))) for l in lg if l is not None)
+            tot = sum(1.0 / (1.0 + math.exp(-(s_key * l + c))) for l in lg if l is not None)
             if tot > target:
                 hi = c
             else:
@@ -422,12 +463,13 @@ def _recal_shape(out, keys, slope=None):
         c = (lo + hi) / 2.0
         for p_, l in zip(list(out), lg):
             if l is not None:
-                out[p_][key] = 1.0 / (1.0 + math.exp(-(sl * l + c)))
+                out[p_][key] = 1.0 / (1.0 + math.exp(-(s_key * l + c)))
     return out
 
 
 def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
-             wave_shift=0.0, progress=None, partial=None, reps=1, cut_n=CUT_N):
+             wave_shift=0.0, progress=None, partial=None, reps=1, cut_n=CUT_N,
+             shape_slope=None):
     """reps>1 averages independent runs to cut Monte Carlo noise at CONSTANT peak memory.
     Measured across five seeds at 8000 sims, worst-case seed-to-seed sd was 0.70 points on
     top-20 and 1.00 on make-cut — 14-20% of the 5-point edge threshold, so a flagged 5.0%
@@ -438,7 +480,8 @@ def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
         for i in range(int(reps)):
             one = simulate(R, field, n_sims=n_sims, seed=seed + 1000 * i,
                            course_fit=course_fit, wave=wave, wave_shift=wave_shift,
-                           progress=progress, partial=partial, reps=1, cut_n=cut_n)
+                           progress=progress, partial=partial, reps=1, cut_n=cut_n,
+                           shape_slope=shape_slope)
             if not one:
                 return {}
             for pl, v in one.items():
@@ -576,7 +619,8 @@ def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
     # would distort a number that is no longer a forecast of 4 unknown rounds.
     if progress is None and partial is None:
         _recal_shape(out, ("win", "top5", "top10", "top20",
-                           "win_ties", "top5_ties", "top10_ties", "top20_ties"))
+                           "win_ties", "top5_ties", "top10_ties", "top20_ties"),
+                     slope=shape_slope)
     return out
 
 

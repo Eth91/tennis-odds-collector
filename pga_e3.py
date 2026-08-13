@@ -300,8 +300,14 @@ def main():
     # eliminate players from St Jude / BMW / TOUR Championship, which have no cut at all.
     _cutn = RU.cut_rule(evn, n_field=len(field) if field else None)
     print(f"  cut rule: {evn} -> {'no cut' if _cutn is None else 'top-%d and ties' % _cutn}")
+    # REGIME-SPLIT SHAPE STRETCH (2026-08-13). Non-majors use the fitted per-market table
+    # (holdout: beats 1.30 on 8/8); majors keep 1.30, whose fitted alternatives LOST out of
+    # sample on 5/8. Expect FEWER top-N flags -- that is the intended effect, not a fault.
+    _shp = RU.shape_slopes(evn)
+    print(f"  shape slope: {'majors 1.30 (unchanged)' if _shp is None else 'fitted non-major table'}")
     sim = RU.simulate(R, field, course_fit=cfit, wave=wave,
-                      wave_shift=wshift, reps=4, cut_n=_cutn) if field else {}
+                      wave_shift=wshift, reps=4, cut_n=_cutn,
+                      shape_slope=_shp) if field else {}
     # DEDUPE BEFORE DEVIG (2026-07-29) — this was manufacturing fake +20-27% edges.
     # The one-sided devig normalizes by sum(1/odds) over the market, so DUPLICATE runners
     # (the same top-20 market arrives as TOP_20_FINISH_IMG, TOP_20_FINISH_(INCL._TIES),

@@ -107,7 +107,25 @@ def deadline(event, market):
     m = str(market or "")
     g = re.search(r"Round (\d)", m)
     rnd = int(g.group(1)) if g else 1
-    if m.upper().startswith("TOP_") or "FINISH" in m.upper():
+    mu = m.upper()
+    # ROUND LEADER closes at THAT round's first tee. Must be tested BEFORE the outright branch:
+    # folding it in would stamp a 2nd-round market with Wednesday's R1 tee, which is precisely the
+    # `_first_tee` hard-coded-rnd=1 defect in another file.
+    gl = re.search(r"(\d)\s*(?:ST|ND|RD|TH)\s+ROUND\s+LEADER", mu)
+    if gl:
+        r = int(gl.group(1))
+        return first.get((tname, r)), "round-%d leader -> R%d first tee" % (r, r)
+    # FIELD-WIDE OUTRIGHT -> R1 first tee (a 72-hole market is live from the first ball).
+    # Matches the mtype form (TOP_10_FINISH_IMG) AND the bare names FanDuel actually posts:
+    # "Top 5", "Top 10", "Top 20", "Win Only", "Winner", "Winner w/o X", "Top USA",
+    # "Top European", "Three Chances to Win". All are field-wide 72-hole markets.
+    if (mu.startswith("TOP_") or "FINISH" in mu
+            or re.match(r"^TOP\s+\d+\b", mu)
+            or re.match(r"^TOP\s+(USA|EUROPEAN|NORTH AMERICAN|REST OF|AUSTRAL|ASIAN|"
+                        r"ENGLISH|IRISH|SCOTTISH|SOUTH AFRICAN|CONTINENTAL)", mu)
+            or mu in ("WIN ONLY", "WINNER", "OUTRIGHT", "TO WIN", "TOURNAMENT WINNER")
+            or mu.startswith("WINNER W/O")
+            or re.search(r"\bCHANCES TO WIN\b", mu)):
         return first.get((tname, 1)), "field outright -> R1 first tee"
     mm = re.search(r"Matchbet\s+(.+?)\s+vs\.?\s+(.+?)$", m, re.I)
     if mm:
