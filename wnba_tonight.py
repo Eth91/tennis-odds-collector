@@ -483,8 +483,37 @@ def _usage_mult(w, key):
     return capped
 
 
+
+def _rw_mean(vals, wts):
+    if not wts:
+        return st.mean(vals) if vals else 0
+    den = sum(wts)
+    return (sum(v * x for v, x in zip(vals, wts)) / den) if den > 0 else (st.mean(vals) if vals else 0)
+
+
+def _rw_neff(wts, fallback):
+    """Kish effective sample size. THIS IS THE POINT OF THE CHANGE: `n` feeds the credibility
+    shrink toward the book, so reporting a raw 14 when only ~3 games resemble tonight makes
+    the model under-shrink and over-trust itself -- the over-confidence that turned Sheldon's
+    76.9% into a de-conditioned ~42%."""
+    if not wts:
+        return fallback
+    den, sq = sum(wts), sum(x * x for x in wts)
+    return (den * den / sq) if sq > 0 else fallback
+
+
+def _rw_hit(vals, line, side, wts):
+    if not wts:
+        k = (sum(1 for v in vals if v > line) if side == "over"
+             else sum(1 for v in vals if v < line))
+        return k / len(vals) if vals else 0.0
+    den = sum(wts)
+    num = sum(x for v, x in zip(vals, wts) if (v > line if side == "over" else v < line))
+    return (num / den) if den > 0 else 0.0
+
+
 def prop_edges(player, log, proj_min, w=None, vacated=None, ctx=None, out_logs=None,
-               opp=None, pos=None):
+               opp=None, pos=None, game_weights=None):
     """+EV over-props, framed as the user's actual edge: the gap between ELEVATED-ROLE
     production and a line the book anchored to the SEASON AVERAGE. For each posted line:
     hit rate in the player's elevated games (min >= max(proj-4, 22)), credibility-shrunk
@@ -499,6 +528,14 @@ def prop_edges(player, log, proj_min, w=None, vacated=None, ctx=None, out_logs=N
     post an over on a stat that DROPS without the player. Returns list of dicts."""
     floor = max(proj_min - 4, ROLE_FLOOR)
     elevated = [g for g in log if g["min"] >= floor]
+    # ── REGIME-WEIGHTED ELEVATED SAMPLE (2026-08-12) ───────────────────────────────
+    # The selection above is purely `min >= floor` and has no idea WHICH rotation those
+    # minutes came from. For Sheldon, 12 of 14 elevated games predate Carrington's arrival,
+    # so the "elevated role" being measured is a role that no longer exists. Correcting the
+    # wowy baseline while leaving THIS selection raw fixed nothing for the market that
+    # actually mattered. game_weights=None reproduces the previous behaviour exactly.
+    _wts = ([max(0.0, min(1.0, game_weights.get(g.get("game_id"), 1.0))) for g in elevated]
+            if game_weights else None)
     if len(elevated) >= 4:
         # shrink_k 6->11: the graded ledger showed the empirical hit is IN-SAMPLE OPTIMISTIC — the
         # shrunk P(win) read 64% vs a realized 51% (favorable-role games regress). A calibration
@@ -525,7 +562,9 @@ def prop_edges(player, log, proj_min, w=None, vacated=None, ctx=None, out_logs=N
         sample, basis, shrink_k = base, "projected", 14   # 9->14: thin breakout sample regresses even
         def val(g, key):
             return g[key] * min(proj_min / g["min"], 2.2) * _usage_mult(w, key)
-    fga = st.mean([val(g, "fga") for g in sample])
+    if game_weights is not None and sample is not elevated:   # the 'projected' fallback
+        _wts = [max(0.0, min(1.0, game_weights.get(g.get("game_id"), 1.0))) for g in sample]
+    fga = _rw_mean([val(g, "fga") for g in sample], _wts)
     ctx = ctx or {}
 
     def wdelta(k):                                  # without-minus-with, or None if no split
@@ -551,7 +590,7 @@ def prop_edges(player, log, proj_min, w=None, vacated=None, ctx=None, out_logs=N
         vals = [val(g, key) for g in sample]
         # plain minutes-honest mean. Context-weighting is dropped: the backtest showed it
         # diluted the under edge (MH-alone unders +8.4 vs +6.5 with context) for no MAE gain.
-        elev_avg = st.mean(vals)
+        elev_avg = _rw_mean(vals, _wts)
         # DvP tiebreaker: nudge toward the opponent's position- and pace-adjusted tendency to
         # allow this stat (small — dvp_backtest showed it's marginal, so it breaks ties/orders
         # overs by matchup but never overrides the validated under model). Logged as a feature.
@@ -560,7 +599,11 @@ def prop_edges(player, log, proj_min, w=None, vacated=None, ctx=None, out_logs=N
         use_vol = vol_ok and stat == "points" and VOL_LIVE     # VOL_LIVE=False: shadow only, no bets
         if use_vol:
             elev_avg = round(vp["vol_pts"], 1)      # sticky-volume projection drives the points ladder
-        n = len(vals)
+        n_raw = len(vals)
+        # ⚠️ n BECOMES THE EFFECTIVE SIZE when weights are supplied, deliberately: it drives
+        # the shrink toward the book below, and a weighted mean paired with a raw count would
+        # trust a 3-game-equivalent sample as though it were 14.
+        n = _rw_neff(_wts, n_raw)
         # per-game samples for the bar chart. Show the games that match TONIGHT's injury context —
         # the player's games where the SAME out-set was ABSENT (the user: "only the bars without
         # Mack and Nogic"). out_logs = each out player's {date: minutes}, so a game is same-context
@@ -696,8 +739,7 @@ def prop_edges(player, log, proj_min, w=None, vacated=None, ctx=None, out_logs=N
                 # single-game shooting variance the empirical elevated-game hit rate carries.
                 hit = _norm_sf((line - vp["vol_pts"]) / vp["sigma"])
             else:
-                hit = (sum(1 for v in vals if v > line) if side == "over"
-                       else sum(1 for v in vals if v < line)) / n
+                hit = _rw_hit(vals, line, side, _wts)
             # AVAILABILITY/DNP discount (OVERS only): `hit` is conditional on the elevated role; if the
             # player realizes that role only part of the time (fringe/bench), the over's unconditional
             # win prob is lower — the book's plus-money price already reflects it. Confirmed roles
