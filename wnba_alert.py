@@ -30,6 +30,26 @@ import wnba_tonight as T
 import wnba_availability as AV
 import wnba_wowy as W
 
+# ── v1.6 REGIME WEIGHTING: TESTED, FAILED, OFF (2026-08-12) ────────────────────────
+# Replaying all 182 graded ledger rows on REAL lines and REAL results, walk-forward:
+#     v1.5 baseline              75 bets  61.3%  +15.54u
+#     wowy-weighting only        68       57.4%   +8.80u   <- dropped 7 bets that went 7-0
+#     full (wowy + elevated)     44       63.6%  +10.09u
+# v1.5 wins on TOTAL UNITS, which is the optimisation target; v1.6's better hit% is an
+# artifact of dropping 41% of the bets. Lowering the weighted threshold does not rescue it
+# (0.07 and 0.05 are WORSE, +8.76u). The full arm also ADDS 6 bets that went 1-5.
+#
+# Every diagnosis behind v1.6 held up -- Carrington/Sheldon corr -0.60, 8 players invisible
+# to the injury report, Sheldon's elevated sample 12/14 pre-Carrington. The thesis got more
+# accurate and the betting got worse, which is the standing lesson: the edge comes from
+# PRICE, not from refining the thesis.
+#
+# The plumbing stays because the DIAGNOSIS is worth keeping (wnba_availability is how the
+# Sheldon, Puoch and Juskaite confounds were found). Flip this to True to re-arm, but only
+# with a backtest that beats +15.54u.
+REGIME_WEIGHTS_LIVE = False
+
+
 # FIRST-OCCURRENCE SPEED PILOT (2026-07-13). Also surface beneficiaries with only ONE game without
 # the out star (normally gated at n_without>=2), but ONLY when the posted line is still STALE and the
 # minutes bump is meaningful — the pre-move window the n1 backtest showed +15% ROI (vs -11% once the
@@ -337,12 +357,13 @@ def collect():
             # group they contribute nothing (they played), so what remains is precisely the
             # other-absence contamination being removed.
             _gw = None
-            try:
-                _pairs = AV.rotation_weights(blog, _base_out_by_team.get(team, {}),
-                                             _arrivals_by_team.get(team, {}), pl, glog)
-                _gw = {g.get("game_id"): wt for g, wt in _pairs if g.get("game_id")}
-            except Exception:
-                _gw = None                    # fail open: unweighted is the previous behaviour
+            if REGIME_WEIGHTS_LIVE:           # OFF: v1.6 backtested worse -- see flag above
+                try:
+                    _pairs = AV.rotation_weights(blog, _base_out_by_team.get(team, {}),
+                                                 _arrivals_by_team.get(team, {}), pl, glog)
+                    _gw = {g.get("game_id"): wt for g, wt in _pairs if g.get("game_id")}
+                except Exception:
+                    _gw = None                # fail open: unweighted is the previous behaviour
             w = W.wowy_multi(blog, out_logs, game_weights=_gw)
             if w["n_without"] < 2 and len(outs) > 1:
                 # too few games with ALL out together -> best single-out split as the proxy
