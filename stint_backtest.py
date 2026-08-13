@@ -150,9 +150,8 @@ for gi, (ev, d) in enumerate(games):
             # The five is recomputed WITHOUT the out player, so the next man up is
             # promoted exactly as a coach would. Pre-tip knowable: recent mpg + the
             # out list, no hindsight about who actually played.
-            _avail = [(mpg_before(p, d) or 0, p) for p in (prior - set(outs))]
-            _avail.sort(reverse=True)
-            _proj_start = {p for _m, p in _avail[:5]}
+            # ONE implementation, in the module beside the projection it gates.
+            _proj_start = SW.projected_starters(mem, prior, d, outs=outs)
             for ben in pl_now:
                 if ben not in _proj_start:
                     continue

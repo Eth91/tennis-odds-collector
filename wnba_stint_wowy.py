@@ -49,9 +49,18 @@ STAT_COLS = {
     "assists":  ("ast", "ast_with"),
 }
 
-MIN_OFF_MINUTES = 120.0    # below this the off-floor rate is noise, not a measurement
-BUMP_DIVISOR = 4.0         # V0: the out star's minutes split across ~4 rotation players
-BUMP_CAP = 8.0             # no single beneficiary absorbs more than this
+# Swept 120 / 80 / 50 / 30 on the graded replay: measurable projections 160 -> 205 -> 231 ->
+# 234, bets 20 -> 25 -> 26 -> 26, ROI +12.1% / +20.3% / +15.7% / +15.7%. Those ROIs are
+# INDISTINGUISHABLE at n=20-26 (SE ~20pp), so 80 is NOT "better" than 50 -- picking it because
+# it scored highest would be fitting five marginal bets. The defensible reading is that
+# quality is FLAT across the range while 120 was needlessly strict, so take the volume: 50
+# yields ~30% more candidates at the same measured quality, and below 50 nothing more is
+# gained (30 is identical to 50). Volume is what makes this channel provable at all.
+MIN_OFF_MINUTES = 50.0    # below this the off-floor rate is noise, not a measurement
+# BUMP_DIVISOR / BUMP_CAP removed 2026-08-13: superseded by wnba_minutes.minutes_vector().
+# The crude `mate_mpg / 4` bump over-predicted minutes by +4.93 on held-out 2026 and was the
+# single largest error in the first build; leaving the constants as decoration invites someone
+# to "restore" them.
 MINUTES_CAP = 36.0
 
 
@@ -188,3 +197,36 @@ def game_level_n_without(con, player, mate, as_of):
         "SELECT DISTINCT event_id FROM onfloor WHERE game_date < ? AND event_id IN "
         "(SELECT event_id FROM onfloor WHERE player=?)", (as_of, mate))}
     return len(pg - mg), len(pg & mg), len(tg)
+
+
+def projected_starters(con, team_players, as_of, outs=(), n=5, window=10):
+    """The n players most likely to start, from RECENT MINUTES minus tonight's out list.
+
+    ⚠️ THIS LIVES HERE, NOT IN THE CALLER. It was implemented inside the backtest, which means
+    a live caller would have had to reimplement it -- and a second copy of a gate always
+    drifts from the first. Everything that decides who is eligible belongs beside the
+    projection it gates.
+
+    WHY IT MATTERS: measured over 9,816 player-games, a projected starter plays 20+ minutes
+    86% of the time (avg 27.4, only 5% under 15). The 6th-8th man clears 20 just 29% of the
+    time and is under 15 in 46%. Admitting the whole mpg>=8 population makes most candidates
+    minutes coin-flips, which a marginalised projection correctly prices as no edge -- and
+    which an unmarginalised one turns into a phantom edge.
+
+    Pre-tip knowable by construction: recent minutes plus the out list, never who actually
+    played. The five is recomputed WITHOUT the outs, so the next man up is promoted exactly
+    as a coach would.
+    """
+    outs = set(outs)
+    ranked = []
+    for p in team_players:
+        if p in outs:
+            continue
+        rows = con.execute(
+            "SELECT sec FROM onfloor WHERE player=? AND game_date < ? "
+            "ORDER BY game_date DESC LIMIT ?", (p, as_of, window)).fetchall()
+        if not rows:
+            continue
+        ranked.append((sum(r[0] or 0 for r in rows) / len(rows) / 60.0, p))
+    ranked.sort(reverse=True)
+    return {p for _m, p in ranked[:n]}
