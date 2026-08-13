@@ -15,6 +15,7 @@ import datetime as dt
 import json
 import math
 import os
+import re
 import sqlite3
 import statistics as st
 from collections import defaultdict
@@ -1093,11 +1094,38 @@ def injuries():
             # so match the LONGEST roster name that prefixes it — no brittle regex, and it
             # handles both the parenthetical and bare forms.
             _low = _txt.lower()
+            # ── LEADING LABEL (2026-08-12) ──────────────────────────────────────────
+            # The rule below assumed the tweet OPENS with the player's name. 6 of 307
+            # logged items do not, and 3 of those were REAL rulings thrown away -- the
+            # worst being `Wings PR: "Azzi Fudd went through warmups ... she will not
+            # play tonight."`, a team PR statement, i.e. precisely the beat-confirmed
+            # ruling this block's own docstring calls "the whole edge".
+            # Strip ONE short label ending in a colon (plus an opening quote) and retry.
+            # The name must still START the remainder -- this widens the anchor by one
+            # label, it does NOT become a match-anywhere rule, which is what keeps the
+            # false-positive below impossible.
+            _cands = [_low]
+            _m = re.match(r'^[a-z][a-z .\'\-]{0,28}:\s*"?', _low)
+            if _m:
+                _cands.append(_low[_m.end():])
+            # ⚠️ A CONDITIONAL IS NOT A RULING, AND IT NAMES THE WRONG PLAYER FIRST.
+            # `Lineup alert: Jordan Harrison will start if Carla Leite (knee) is ruled
+            # out` leads with the BENEFICIARY. Any match-anywhere or post-label rule
+            # would happily rule OUT Harrison -- the player who is about to start. So
+            # anything carrying " if " is reported and never acted on. The information
+            # is real (Leite is doubtful) but it is a QUESTIONABLE at best, and turning
+            # it into an Out is a bet-moving error, not a parse improvement.
+            if " if " in _low:
+                print("underdog: CONTINGENT, not a ruling: %r" % _txt[:90], flush=True)
+                continue
             _nm = None
-            for _full in _roster:              # longest literal prefix wins (handles
-                if _low.startswith(_full.lower()):   # 'Alyssa Thomas' vs 'Alyssa Thom')
-                    if _nm is None or len(_full) > len(_nm):
-                        _nm = _full
+            for _cand in _cands:
+                for _full in _roster:          # longest literal prefix wins (handles
+                    if _cand.startswith(_full.lower()):   # 'Alyssa Thomas' vs 'Alyssa Thom')
+                        if _nm is None or len(_full) > len(_nm):
+                            _nm = _full
+                if _nm:
+                    break
             if not _nm:
                 print("underdog: unmatched name in %r" % _txt[:60], flush=True)
                 continue
