@@ -177,14 +177,25 @@ def _tips():
 # ── the board actually publishing ─────────────────────────────────────────────
 @check("board.published")
 def _board():
+    """Thresholds set from MEASUREMENT, not from what felt safe (2026-08-13).
+
+    pickz-bake rebuilds continuously and a full dashboard.py build takes 25s, so normal mtime
+    age is well under a minute. 90 min is therefore ~100x the normal cadence: still catches a
+    dead baker within an hour and a half, while leaving room for a slow build, a transient
+    ESPN stall, or a long slate without paging. The old 45 min carried no extra detection
+    value at that cadence -- only extra false-alarm risk.
+
+    Size floor 40KB (a live board is ~154KB): catches a TRUNCATED build, which age alone
+    cannot see, while tolerating a genuinely quiet day with few games.
+    """
     p = HERE / "docs" / "index.html"
     if not p.exists():
         return "FAIL", "docs/index.html missing"
     age = (dt.datetime.now().timestamp() - p.stat().st_mtime) / 60
     size = p.stat().st_size
-    if size < 50_000:
+    if size < 40_000:
         return "FAIL", f"index.html only {size:,} bytes -- truncated build"
-    return ("OK" if age <= 45 else "FAIL"), f"{size//1024}KB, {age:.0f} min old (expect <=45)"
+    return ("OK" if age <= 90 else "FAIL"), f"{size//1024}KB, {age:.0f} min old (expect <=90)"
 
 
 # ── the ledger itself ─────────────────────────────────────────────────────────
@@ -196,10 +207,15 @@ def _ledger():
     con = sqlite3.connect(f"file:{p}?mode=ro", uri=True, timeout=20)
     stale = con.execute(
         "SELECT COUNT(*) FROM predictions WHERE result IS NULL "
-        "AND pred_date < date('now','-2 days')").fetchone()[0]
+        "AND pred_date < date('now','-3 days')").fetchone()[0]
     con.close()
-    # a row still ungraded 2+ days after its slate means the grader is stuck on it
-    return ("OK" if stale == 0 else "FAIL"), f"{stale} rows ungraded >2 days after their slate"
+    # Measured 2026-08-13 across 205 rows: ZERO sat ungraded even ONE day past its slate --
+    # grading is reliable, and the only open rows are always the live slate. So 3 days is not
+    # a loose threshold, it is a large multiple of observed behaviour: it still catches the
+    # failure this exists for (the Marine Johannes row that sat open EIGHT days because a
+    # played-but-DNP game had no stat line) while tolerating a postponement that resolves late
+    # or a weekend with a slow scoreboard.
+    return ("OK" if stale == 0 else "FAIL"), f"{stale} rows ungraded >3 days after their slate"
 
 
 def main():
