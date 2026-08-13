@@ -110,14 +110,41 @@ def _box():
 # ── betting lines ─────────────────────────────────────────────────────────────
 @check("fanduel.fd_lines")
 def _fd():
+    """⚠️ 'database is locked' IS NOT A DATA-SOURCE FAILURE — it is the opposite.
+
+    fd_collect writes this DB continuously; a lock means the writer is ACTIVE, which is
+    evidence the collector is healthy. The first version of this probe made one attempt and
+    reported the exception as "WNBA data source FAILING", paging every 30 minutes while
+    fd_lines held 656k fresh quotes and the newest was 36 seconds old. A monitor that pages on
+    its own read contention is worse than no monitor: it trains you to ignore it.
+
+    So: retry patiently, and if it is STILL locked, decide by the file's own mtime. Recently
+    written == the writer is busy == SKIP. Only a DB that is both unreadable AND untouched is
+    a real failure.
+    """
+    import time as _t
     db = os.environ.get("FD_DB") or str(HERE / "wnba_lines.sqlite")
     if not Path(db).exists():
         return "FAIL", f"{Path(db).name} missing"
-    con = sqlite3.connect(f"file:{db}?mode=ro", uri=True, timeout=20)
-    con.execute("PRAGMA busy_timeout=20000")
-    row = con.execute("SELECT MAX(collected_at), COUNT(*) FROM fd_lines "
-                      "WHERE sport='wnba' AND collected_at > datetime('now','-2 hours')").fetchone()
-    con.close()
+    row, lasterr = None, None
+    for _try in range(4):
+        try:
+            con = sqlite3.connect(f"file:{db}?mode=ro", uri=True, timeout=45)
+            con.execute("PRAGMA busy_timeout=45000")
+            row = con.execute(
+                "SELECT MAX(collected_at), COUNT(*) FROM fd_lines "
+                "WHERE sport='wnba' AND collected_at > datetime('now','-2 hours')").fetchone()
+            con.close()
+            break
+        except sqlite3.OperationalError as e:
+            lasterr = e
+            _t.sleep(3)
+    if row is None:
+        mtime_age = (dt.datetime.now().timestamp() - Path(db).stat().st_mtime) / 60
+        if mtime_age <= 10:
+            return "SKIP", (f"locked after 4 tries, but the DB was written "
+                            f"{mtime_age:.1f} min ago -- the collector is ACTIVE")
+        return "FAIL", f"unreadable AND untouched for {mtime_age:.0f} min: {str(lasterr)[:40]}"
     newest, n = row[0], row[1]
     if not newest:
         return "SKIP", "no wnba quotes in 2h (off-hours or no slate)"
@@ -185,7 +212,27 @@ def main():
             mark = {"OK": "  ok  ", "FAIL": " FAIL ", "SKIP": " skip "}[state]
             print(f" [{mark}] {name:22s} {detail}")
     if fails and "--ping" in sys.argv:
-        topic = os.environ.get("NTFY_TOPIC")
+        # ⚠️ THROTTLE. Cron runs this every 30 min; without state, one stuck probe pages twice
+        # an hour forever and the alert becomes wallpaper. Re-page only when the SET of failing
+        # probes changes, or after 6h of the same failure as a reminder.
+        sig = "|".join(sorted(n for n, _s, _d in fails))
+        statef = Path.home() / ".wnba_health_pinged"
+        prev_sig, prev_ts = "", 0.0
+        try:
+            prev_sig, _, prev_raw = statef.read_text().partition("\n")
+            prev_ts = float(prev_raw.strip() or 0)
+        except Exception:                                            # noqa: BLE001
+            pass
+        now_ts = dt.datetime.now().timestamp()
+        fresh = sig != prev_sig or (now_ts - prev_ts) > 6 * 3600
+        if not fresh:
+            print(f"  (ping suppressed: same failure set as {(now_ts-prev_ts)/60:.0f} min ago)")
+        topic = os.environ.get("NTFY_TOPIC") if fresh else None
+        if fresh:
+            try:
+                statef.write_text(f"{sig}\n{now_ts}")
+            except Exception:                                        # noqa: BLE001
+                pass
         if topic:
             body = "; ".join(f"{n}: {d}" for n, _s, d in fails)[:400]
             try:
@@ -196,6 +243,12 @@ def main():
                 urllib.request.urlopen(req, timeout=15).read()
             except Exception as e:                                   # noqa: BLE001
                 print(f"  (ntfy failed: {str(e)[:50]})")
+    if not fails:
+        # recovered: forget the last-pinged set so the NEXT failure pages immediately
+        try:
+            (Path.home() / ".wnba_health_pinged").unlink(missing_ok=True)
+        except Exception:                                            # noqa: BLE001
+            pass
     if fails:
         with open(Path.home() / "loop_fail.log", "a") as fh:
             fh.write(f"health {dt.datetime.now(dt.timezone.utc).isoformat()} "
