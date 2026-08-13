@@ -49,6 +49,7 @@ from __future__ import annotations
 MIN_MPG = 12.0        # below this an absence does not move a team-mate's role
 MIN_MISSED = 2        # one miss is a rest day or a late scratch, not a regime change
 STALE_GAMES = 4       # a ghost older than this is priced in -- baseline only, never a flag
+ARRIVAL_WINDOW = 12   # first appearance within this many team games = still a new rotation
 MIN_GP = 5            # too few appearances to establish a role at all
 
 
@@ -197,3 +198,108 @@ def weighted_mean(pairs, key):
     if den <= 0:
         return None, 0.0
     return num / den, (den * den / sq if sq > 0 else 0.0)
+
+
+
+
+def _anchor_log(team, players, glog):
+    """A long-tenured team-mate's log, used to decide TEAM MEMBERSHIP per game.
+    Picked as the player with the most appearances, so a mid-season arrival is never the
+    yardstick for whether someone else had arrived."""
+    best, best_n = None, -1
+    for n, v in players.items():
+        if v.get("team") != team:
+            continue
+        lg = glog(v["id"]) or []
+        if len(lg) > best_n:
+            best, best_n = lg, len(lg)
+    return best or []
+
+
+def arrivals(team, players, glog, as_of=None, window=ARRIVAL_WINDOW):
+    """-> {name: team_games_before_first_appearance_FOR_THIS_TEAM}
+
+    THE MIRROR OF `absent_sets`, AND THE OTHER HALF OF THE SAME BUG. `baseline_out` fixes
+    past games where someone now gone was still playing; this fixes past games played before
+    a CURRENT rotation member ever took this floor. Both make a game a poor comparison for
+    tonight, and only the first was corrected.
+
+    Live, this produced two of the day's worst flags: Carrington first played for Chicago on
+    2026-07-31 (corr(Carrington MIN, Sheldon PTS) = -0.60), and Morrow first played for
+    Toronto on 2026-08-05, around which Juskaite went 35 -> 30 -> 25 -> 26 -> 14 minutes.
+
+    ⚠️ ESPN's game_log IS PER PLAYER, NOT PER TEAM. A traded player's log runs continuously
+    across both clubs, so "earliest game in the log" finds nothing — that is why a first pass
+    missed Morrow entirely while flagging Ionescu, Rebecca Allen and Cotie McMahon, who had
+    merely missed two or three early games. Team membership is therefore decided the same way
+    `wowy_multi` does it: teammates share a game_id AND record the SAME matchup, opponents
+    record each other's. That discriminator is already proven in this codebase.
+
+    ⚠️ TRADE, SIGNING AND RETURN-FROM-INJURY ARE NOT DISTINGUISHED, ON PURPOSE. All three mean
+    "was not on this floor before date X", the only thing the comparison cares about.
+    """
+    anchor = _anchor_log(team, players, glog)
+    if not anchor:
+        return {}
+    amap = {g["game_id"]: g.get("matchup") for g in anchor}
+    tdates = sorted({g["date"][:10] for g in anchor}, reverse=True)
+    if as_of:
+        tdates = [d for d in tdates if d < as_of]
+    if len(tdates) < 3:
+        return {}
+    recent_cut = tdates[min(window, len(tdates)) - 1]      # start of the recent window
+    out = {}
+    for n, v in players.items():
+        if v.get("team") != team or v.get("min", 0) < MIN_MPG:
+            continue
+        lg = glog(v["id"]) or []
+        if not lg:
+            continue
+        # games this player actually played FOR this team
+        own = [g["date"][:10] for g in lg
+               if g["game_id"] in amap and g.get("matchup")
+               and amap[g["game_id"]] == g.get("matchup")]
+        if not own:
+            continue
+        first = min(own)
+        if first <= recent_cut:                # been here the whole recent window -> not new
+            continue
+        missed = sum(1 for d in tdates if d < first)
+        if missed >= 2 and max(own) >= tdates[min(2, len(tdates) - 1)]:
+            out[n] = missed                    # ...and is still active now
+    return out
+
+def rotation_weights(log, baseline_out, new_arrivals, players, glog):
+    """Weight each past game by how closely its ROTATION matched tonight's -- both halves.
+
+    weight = (matched minutes) / (total minutes in play), where a past game earns credit for
+      * each currently-ABSENT player who was also absent then, and
+      * each recent ARRIVAL who was already present then.
+
+    Supersedes `regime_weights`, which only scored the absence half and therefore gave a
+    pre-trade game full credit as long as tonight's injured players were also out. That is
+    exactly how Sheldon's pre-Carrington games kept full weight.
+    """
+    terms = []            # (minutes, set_of_dates_player_appeared, want_present)
+    for n in baseline_out:
+        v = players.get(n)
+        if v:
+            terms.append((v.get("min", 0) or 0.0,
+                          {g["date"][:10] for g in (glog(v["id"]) or [])}, False))
+    for n in new_arrivals:
+        v = players.get(n)
+        if v:
+            terms.append((v.get("min", 0) or 0.0,
+                          {g["date"][:10] for g in (glog(v["id"]) or [])}, True))
+    tot = sum(m for m, _d, _w in terms)
+    if tot <= 0:
+        return [(g, 1.0) for g in log]
+    out = []
+    for g in log:
+        d = g["date"][:10]
+        matched = 0.0
+        for m, played, want_present in terms:
+            if (d in played) == want_present:
+                matched += m
+        out.append((g, matched / tot))
+    return out

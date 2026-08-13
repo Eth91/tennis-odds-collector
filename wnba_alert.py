@@ -130,6 +130,7 @@ def collect():
     # per-team availability derived from APPEARANCES, not just the report -- see the block at
     # the wowy call below for why. Cached per team; one entry per team per run.
     _base_out_by_team = {}
+    _arrivals_by_team = {}
     # ET slate date, NOT UTC — else a game tipping ~02:00Z (10pm ET) gets logged under two
     # different UTC dates across midnight and the SAME bets double-count in the tracker.
     today = datetime.datetime.now(T.ET).date().isoformat()
@@ -305,6 +306,12 @@ def collect():
                     team, pl, glog, injuries=inj)["baseline_out"]
             except Exception:
                 _base_out_by_team[team] = {}       # fail open -> unweighted = old behaviour
+            try:
+                # ARRIVALS: the other half of the same contamination. Team-aware, so a traded
+                # player's pre-trade games with her OLD club are not mistaken for tenure here.
+                _arrivals_by_team[team] = AV.arrivals(team, pl, glog)
+            except Exception:
+                _arrivals_by_team[team] = {}
         out_dm = [{g["date"][:10]: g.get("min", 0) for g in ol} for ol in out_logs]
         team_pl = {n: v for n, v in pl.items()
                    if v["team"] == team and n not in out_names and v["gp"] >= 5}
@@ -331,7 +338,8 @@ def collect():
             # other-absence contamination being removed.
             _gw = None
             try:
-                _pairs = AV.regime_weights(blog, _base_out_by_team.get(team, {}), pl, glog)
+                _pairs = AV.rotation_weights(blog, _base_out_by_team.get(team, {}),
+                                             _arrivals_by_team.get(team, {}), pl, glog)
                 _gw = {g.get("game_id"): wt for g, wt in _pairs if g.get("game_id")}
             except Exception:
                 _gw = None                    # fail open: unweighted is the previous behaviour
