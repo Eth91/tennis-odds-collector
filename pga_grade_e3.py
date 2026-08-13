@@ -49,10 +49,16 @@ def _norm(s):
     return E1.norm(s or "")
 
 
-def birdie_counts(rnd):
-    """{normalised player: birdies-or-better} for a COMPLETED round `rnd` (1-based)."""
+def birdie_counts(rnd, ev=None):
+    """{normalised player: birdies-or-better} for a COMPLETED round `rnd` (1-based).
+
+    ⚠️ `ev` IS NOT OPTIONAL IN PRACTICE. This used to call F.competitors() bare, which always
+    reads whatever event is LIVE. Even after main() learned to build a per-event context, every
+    birdie row was still being scored against the current tournament's holes -- so 8 finished
+    Wyndham props stayed unsettled while the grader reported success.
+    """
     out = {}
-    for c in F.competitors():
+    for c in F.competitors(ev):
         nm = ((c.get("athlete") or {}).get("displayName") or "").strip()
         ls = c.get("linescores") or []
         if not nm or len(ls) < rnd:
@@ -140,7 +146,7 @@ def grade_one(stream, market, runner, odds, ctx):
         _r = int(rm.group(1))
         _cache = ctx.setdefault("bird", {})
         if _r not in _cache:
-            _cache[_r] = birdie_counts(_r)
+            _cache[_r] = birdie_counts(_r, ctx.get("ev"))
         counts = _cache[_r]
         if who not in counts:
             return None
@@ -253,26 +259,75 @@ def grade_one(stream, market, runner, odds, ctx):
     return None
 
 
-def main():
-    ev = F.event()
+def _ctx_for(ev):
+    """Build the grading context from ONE event dict."""
     state, _desc = F.status(ev)
     scores = {_norm(k): v for k, v in F.round_scores(ev).items()}
-    ctx = {
+    return {
+        "ev": ev,                      # the event these scores came from -- birdie_counts needs it
         "scores": scores,
         "pos": positions(scores),
         # the cut is only KNOWN once some players have a third round and others stopped at two
         "cut_known": any(len(v) >= 3 for v in scores.values())
                      and any(len(v) == 2 for v in scores.values()),
         "final": state == "post" and sum(1 for v in scores.values() if len(v) >= 4) >= 20,
-    }
+    }, state
+
+
+def _ctx_for_flag_event(name, day):
+    """Context for a PAST event, resolved from its OWN dates.
+
+    ⚠️ THIS IS THE FIX. main() used to build one ctx from F.event() -- whatever is live right
+    now -- and grade every ungraded flag against it. A finished tournament's runners are not in
+    the live scoreboard, so grade_one() returned None and the flags sat forever. Nine Wyndham
+    flags were orphaned exactly this way, and nothing surfaced it because "+0 newly graded" is
+    also what a correctly-idle grader prints.
+    Scans a few days forward from the flag so a Thursday R1 flag still finds Sunday's finals.
+    """
+    import datetime as _dt
+    best, best_n = None, -1
+    try:
+        d0 = _dt.date.fromisoformat(str(day)[:10])
+    except Exception:                                              # noqa: BLE001
+        return None, None
+    for off in (3, 4, 2, 1, 0):                                    # prefer a completed board
+        ev = F.event_on((d0 + _dt.timedelta(days=off)).isoformat(), name_hint=name)
+        if not ev:
+            continue
+        c, st = _ctx_for(ev)
+        n = sum(len(v) for v in c["scores"].values())
+        if n > best_n:
+            best, best_n = (c, st), n
+        if c["final"]:
+            break
+    return best if best else (None, None)
+
+
+def main():
+    ev = F.event()
+    ctx, state = _ctx_for(ev)
+    scores = ctx["scores"]
     con = sqlite3.connect(PAPER)
     con.execute(E1.DDL)
-    rows = con.execute("SELECT key, stream, market, runner, odds FROM flags "
+    rows = con.execute("SELECT key, stream, market, runner, odds, event, flagged_at FROM flags "
                        "WHERE (result IS NULL OR result='') AND stream LIKE 'E3-%'").fetchall()
     n = 0
-    for key, stream, market, runner, odds in rows:
+    _evctx = {}                       # event name -> ctx, resolved once and reused
+    for key, stream, market, runner, odds, fev, fat in rows:
+        use = ctx
+        # If the flag belongs to an event that is NOT the live one, grade it against ITS OWN
+        # board. Falls back to the live ctx so behaviour is unchanged for current-event flags.
+        if fev and fev not in (ev.get("name") or ""):
+            if fev not in _evctx:
+                c, _st = _ctx_for_flag_event(fev, fat)
+                _evctx[fev] = c
+                if c:
+                    print(f"pga_grade_e3: resolved past event {fev!r} "
+                          f"({len(c['scores'])} players, final={c['final']})")
+            if _evctx[fev]:
+                use = _evctx[fev]
         try:
-            g = grade_one(stream or "", market or "", runner or "", float(odds or 0), ctx)
+            g = grade_one(stream or "", market or "", runner or "", float(odds or 0), use)
         except Exception:                                          # noqa: BLE001
             g = None
         if not g:
