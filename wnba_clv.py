@@ -48,7 +48,10 @@ SCHEMA = """CREATE TABLE IF NOT EXISTS clv(
 
 
 def _con():
-    con = sqlite3.connect(DB)
+    # 2026-08-12: no timeout meant lock contention blocked indefinitely (same bug that
+    # killed fd_collect). --close hung for ~3h and froze the whole vm_loop cycle.
+    con = sqlite3.connect(DB, timeout=60)
+    con.execute("PRAGMA busy_timeout=60000")
     con.execute(SCHEMA)
     # v = format version. v2 = flag_line & close_line are BOTH the book main line (opening vs closing).
     # Pre-v2 rows mixed nearest-rung flag with main-line close (the 24.5-vs-5.5 bug) -> excluded.
