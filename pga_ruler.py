@@ -748,6 +748,40 @@ def noise_floor(verbose=True):
     return out
 
 
+_TEE_CACHE = {}
+
+
+def _tee_deadline(evn, mkt):
+    """Actual tee-time deadline for a matchbet market, or None if it cannot be resolved.
+
+    ⚠️ A DATE IS NOT A DEADLINE. g2_gate used to cut on `str(ts)[:10] > event_date`, which
+    admits EVERY price stamped on the round's own day -- and the round tees off in the middle
+    of that day. On 2026-08-13 the Kitayama/Fowler R1 matchbet sat flat at 1.9091/1.8333 until
+    the 14:25 tee, then drifted 1.53 -> 1.13 -> 1.0033 as Kitayama played, and the gate scored
+    the 18:00 price of 1.002/26.0 as a "close". The book was not sharp; it was watching golf.
+    That single class of row took G2 from book LL .6782 (PASS, +1.8pts) to .6296 (FAIL, +6.7pts)
+    on four rows out of 51 -- their book log-loss was 0.058 against a ruler at 0.704.
+
+    This is the SAME defect the docstring already claims to have fixed ("it used to be
+    MAX(collected_at), which during a live event is an IN-PLAY price"). The fix went to date
+    granularity and stopped there, so it still fires on any round being played today.
+    """
+    key = (evn, mkt)
+    if key in _TEE_CACHE:
+        return _TEE_CACHE[key]
+    out = None
+    try:
+        import pga_tee_gate as _TG
+        d = _TG.deadline(evn, mkt)
+        d = d[0] if isinstance(d, tuple) else d      # deadline() returns (dt, reason)
+        if isinstance(d, dt.datetime):
+            out = d
+    except Exception:                                                  # noqa: BLE001
+        out = None
+    _TEE_CACHE[key] = out
+    return out
+
+
 def _same_edition_event(conr, odds_event, any_ts):
     """Resolve an odds-book event name to the results event for the SAME EDITION.
 
@@ -838,10 +872,23 @@ def g2_gate(verbose=True):
         except ValueError:
             dropped["bad event date"] += 1
             continue
+        # TEE-TIME CUTOFF (2026-08-13). Prefer the resolved tee; fall back to the DATE only
+        # for rows stamped strictly BEFORE the round's day. When the tee is unknown a same-day
+        # row is refused outright -- not knowing when the round started is not permission to
+        # treat a price from that day as a close.
+        _dl = _tee_deadline(evn, mkt)
         best = {}
         for run, od, ts in quotes:
-            if str(ts)[:10] > cutoff.isoformat():
-                continue                 # in-play or post-round: not a close
+            if _dl is not None:
+                try:
+                    _t = dt.datetime.fromisoformat(str(ts).replace("Z", ""))
+                except ValueError:
+                    dropped["unparseable timestamp"] += 1
+                    continue
+                if _t >= _dl:
+                    continue             # in-play or post-round: not a close
+            elif str(ts)[:10] >= cutoff.isoformat():
+                continue                 # tee unknown: refuse the round's own day entirely
             cur = best.get(run)
             if cur is None or str(ts) > str(cur[1]):
                 best[run] = (od, ts)
