@@ -122,8 +122,14 @@ import pga_tee_gate as _TEEGATE
 
 def latest_event_rows():
     con = sqlite3.connect(LINES)
+    # ⚠️ '%PGA%' ALSO MATCHES 'LPGA'. The board carried 252,293 LPGA Portland Classic rows
+    # against 93,341 for the PGA FedEx St Jude Championship, so ORDER BY c DESC picked the
+    # LPGA event every pass -- the model was pricing a women's tour field with PGA player
+    # ratings, printing "e3: pricing LPGA Portland Classic 2026" as though that were normal.
+    # No player matched, so it logged nothing and looked merely quiet.
     ev = con.execute("SELECT event, COUNT(*) c FROM golf_lines WHERE collected_at >= "
-                     "datetime('now','-1 day') AND event LIKE '%PGA%' AND event NOT LIKE "
+                     "datetime('now','-1 day') AND event LIKE '%PGA%' "
+                     "AND event NOT LIKE '%LPGA%' AND event NOT LIKE "
                      "'%202_'||'7%' GROUP BY event ORDER BY c DESC LIMIT 1").fetchone()
     if not ev:
         con.close()
