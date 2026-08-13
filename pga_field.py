@@ -12,7 +12,7 @@ HERE = Path(__file__).resolve().parent
 CACHE = HERE / "pga_scoreboard_cache.json"
 META = HERE / "pga_meta.json"
 UA = {"User-Agent": "Mozilla/5.0"}
-SB = "https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard"
+SB = "https://site.web.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard"
 
 
 def _get(url):
@@ -35,6 +35,35 @@ def scoreboard(fresh=True):
         return json.loads(CACHE.read_text())
     except (OSError, ValueError):
         return {}
+
+
+def scoreboard_on(date):
+    """Scoreboard for a SPECIFIC date (YYYY-MM-DD). Never cached -- the cache holds the LIVE
+    board and overwriting it with a historical one would silently corrupt every live caller.
+
+    Exists because both graders resolved every ungraded flag against whatever event happens to
+    be live NOW. Once the tour moved on, a finished tournament's flags could never be matched
+    and sat unsettled forever -- 9 Wyndham flags, 14% of the paper record, orphaned that way.
+    """
+    try:
+        return _get(f"{SB.split('?')[0]}?dates={date.replace('-', '')}")
+    except Exception as e:                                        # noqa: BLE001
+        print(f"pga scoreboard_on({date}) failed ({str(e)[:40]})")
+        return {}
+
+
+def event_on(date, name_hint=None):
+    """The event on `date`; if name_hint is given, prefer the event whose name matches it."""
+    evs = (scoreboard_on(date) or {}).get("events") or []
+    if not evs:
+        return {}
+    if name_hint:
+        h = "".join(ch for ch in name_hint.lower() if ch.isalnum())
+        for e in evs:
+            n = "".join(ch for ch in (e.get("name") or "").lower() if ch.isalnum())
+            if n and (n in h or h in n):
+                return e
+    return evs[0]
 
 
 def event(sb=None):
