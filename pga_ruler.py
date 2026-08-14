@@ -898,6 +898,7 @@ def g2_gate(verbose=True):
         by_m[(str(evn).strip(), mkt)].append((run, od, ts))
     conr = sqlite3.connect(DB, timeout=60)
     ll_book, ll_ruler, n_used = [], [], 0
+    ll_flat, edge_ruler, ev_used = [], [], set()
     fits = {}
     n_fam = defaultdict(int)
     dropped = defaultdict(int)
@@ -970,6 +971,11 @@ def g2_gate(verbose=True):
         p_rul = min(max(p_rul, 1e-6), 1 - 1e-6)
         ll_book.append(-(y * math.log(p_book) + (1 - y) * math.log(1 - p_book)))
         ll_ruler.append(-(y * math.log(p_rul) + (1 - y) * math.log(1 - p_rul)))
+        # PLACEBO: a model with NO information. If the ruler cannot beat this, "within 2 pts of
+        # the book" is being achieved by having no opinion rather than by being right.
+        ll_flat.append(math.log(2.0))
+        edge_ruler.append(abs(p_rul - 0.5))
+        ev_used.add(eid)
         n_used += 1
         n_fam["R%d" % rn if rn else "72H"] += 1
     conr.close()
@@ -985,10 +991,25 @@ def g2_gate(verbose=True):
                   f"collector only has history from the day it started.")
         else:
             lb, lr = st.mean(ll_book), st.mean(ll_ruler)
+            lf = st.mean(ll_flat)
             gap = (lr - lb) * 100
-            verdict = "PASS" if gap <= 2.0 else "FAIL"
-            print(f"G2 on {n_used} real FD closes: book logloss {lb:.4f}, ruler {lr:.4f} "
-                  f"(gap {gap:+.1f}pts) -> {verdict}")
+            plac = (lf - lr) * 100          # >0 means the ruler beats a coin flip
+            # TWO conditions now. The ceiling (near the book) was always necessary; the FLOOR
+            # (better than no information) is what was missing, and it is the one the model fails.
+            verdict = "PASS" if (gap <= 2.0 and plac >= 0.0) else "FAIL"
+            _sp = st.mean(edge_ruler) if edge_ruler else 0.0
+            print(f"G2 on {n_used} real FD closes from {len(ev_used)} EVENTS: "
+                  f"book {lb:.4f}, ruler {lr:.4f}, coin-flip {lf:.4f} "
+                  f"(vs book {gap:+.1f}pts, vs placebo {plac:+.1f}pts) -> {verdict}")
+            if plac < 0.0:
+                print(f"     ❌ THE RULER IS WORSE THAN A COIN FLIP ({-plac:.1f}pts). Its mean "
+                      f"|p-0.5| is {_sp:.4f} against a ~6% hold — it is functionally a constant, "
+                      f"so 'within 2pts of the book' is being cleared by having NO OPINION. "
+                      f"A near-book log-loss earned this way is not evidence of anything.")
+            if len(ev_used) < 30:
+                print(f"     ⚠️ n={n_used} closes but only {len(ev_used)} EVENTS. Closes inside "
+                      f"one tournament share weather, course and field, so the sample size is "
+                      f"the EVENT count. Every SE here is optimistic; do not arm on this.")
             # POWER-CHECKED 2026-07-30 against real out-of-sample matchup probabilities:
             # this gate fails a book 4+ pts sharper 100% of the time even at n=15, and passes
             # a book within 1 pt 100% of the time. n=15 is adequate; it was NOT a smoke test.
