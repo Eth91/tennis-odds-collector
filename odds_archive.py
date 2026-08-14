@@ -68,6 +68,19 @@ SPORTS = {
                     "player_rush_attempts", "player_receptions", "player_reception_yds",
                     "player_rush_reception_yds", "player_anytime_td"],
         "season": {9, 10, 11, 12, 1, 2}, "gpd": 3},
+    # NCAAF added 2026-08-13. Market list is DELIBERATELY the NFL set MINUS
+    # player_pass_interceptions and player_rush_reception_yds — The Odds API's
+    # NCAAF prop coverage is thinner than NFL's and unsupported markets still
+    # bill per event. Saturday-heavy: gpd is far higher than NFL's 3.
+    # ⚠️ NCAAF box scores carry NO TARGETS (RESEARCH.md), so the receiving
+    # allocation layer cannot be ported as-is — receptions-share only.
+    "americanfootball_ncaaf": {
+        "markets": ["player_pass_yds", "player_pass_tds", "player_pass_completions",
+                    "player_pass_attempts", "player_rush_yds", "player_rush_attempts",
+                    "player_receptions", "player_reception_yds", "player_anytime_td"],
+        # gpd is EVENTS PER IN-SEASON DAY, not per Saturday. FBS plays ~800-900 games
+        # over ~151 in-season days; gpd=40 overstated the pull 7x (543k credits).
+        "season": {8, 9, 10, 11, 12, 1}, "gpd": 6},
     "icehockey_nhl": {
         "markets": ["player_points", "player_goals", "player_assists", "player_shots_on_goal",
                     "player_blocked_shots", "player_power_play_points", "player_total_saves"],
@@ -231,7 +244,13 @@ def cmd_fetch(a):
         if d.month not in cfg["season"] and not a.all_days:
             continue
         dref = d.isoformat()
-        if _done(c, f"day:{dref}") and not a.refresh:
+        # ⚠️ THE DAY-KEY MUST CARRY THE SNAPSHOT SET. It used to be the bare date, so
+        # a later --opener pass over an already-tip-fetched range saw every day as
+        # done and skipped it: "0 new outcome rows", zero credits, silent no-op.
+        # Keying on the requested kinds lets an opener bracket be added to an
+        # existing tip-only archive without re-pulling tip.
+        _kinds = "tip+opener" if a.opener else "tip"
+        if _done(c, f"day:{dref}|{_kinds}") and not a.refresh:
             continue
         # snapshot the events list EARLY (13:00Z ≈ 9am ET) so the whole ET day is still upcoming — a
         # late snapshot silently drops games that already started (verified: 23:00Z returned 11/15 vs
@@ -244,13 +263,18 @@ def cmd_fetch(a):
             eid, ct = ev.get("id"), ev.get("commence_time")
             if not eid:
                 continue
-            snaps = [("tip", a.lead)] + ([("opener", None)] if a.opener else [])
+            # opener lead is configurable; 48 keeps the historical snap_kind
+            # name ("opener") so existing rows and event-log keys are untouched.
+            _oh = getattr(a, "opener_hours", 48) or 48
+            _okind = "opener" if _oh == 48 else f"open{_oh}"
+            snaps = [("tip", a.lead)] + ([(_okind, None)] if a.opener else [])
             for kind, lead in snaps:
                 if _done(c, f"ev:{eid}:{kind}"):
                     continue
                 when = ct
                 try:
-                    delta = dt.timedelta(minutes=lead) if lead is not None else dt.timedelta(days=2)
+                    delta = (dt.timedelta(minutes=lead) if lead is not None
+                             else dt.timedelta(hours=_oh))
                     when = (dt.datetime.fromisoformat(ct.replace("Z", "+00:00"))
                             - delta).strftime("%Y-%m-%dT%H:%M:%SZ")
                 except Exception:
@@ -275,7 +299,7 @@ def cmd_fetch(a):
                 _mark(c, f"ev:{eid}:{kind}")
                 c.commit()
                 time.sleep(a.sleep)
-        _mark(c, f"day:{dref}")
+        _mark(c, f"day:{dref}|{_kinds}")
         c.commit()
     print(f"done. {total} new outcome rows in {_db(a.sport).name}")
 
@@ -337,6 +361,12 @@ def main():
         s.add_argument("--end", required=True)
         s.add_argument("--markets", help="comma-separated override of the preset")
         s.add_argument("--opener", action="store_true", help="also grab a pre-news opener snapshot")
+        s.add_argument("--opener-hours", type=int, default=48,
+                       help="hours before kickoff for the opener snapshot (48 = the "
+                            "original 'opener' kind; anything else stores as 'open<N>'). "
+                            "MEASURED coverage: 48h all 4 books, 72h ~4 books/80%% of "
+                            "outcomes, 96h 0-3 books, 120h+ essentially nothing — NFL "
+                            "player props are not posted 4-5 days out.")
         s.add_argument("--games-per-day", type=int, default=0)
         if name == "fetch":
             s.add_argument("--books", default=BOOKS_DEFAULT,

@@ -12,6 +12,14 @@ returns markets + selections; we map each player O/U prop to our stat keys.
 
     python dk_collect.py            # MLB + WNBA current boards -> fd_lines(book='dk')
 """
+# ⚠️ TABLE NAME IS HISTORICAL AND MISLEADING. `fd_lines` is the MULTI-BOOK lines
+# table, not a FanDuel table. Writers: dk_collect/dk_ingest (book='dk'),
+# betmgm_collect (book='mgm'), fd_collect + fd_tt (book='fd'). As of 2026-08-13 the
+# WNBA content is 99.93% DRAFTKINGS (4,103,074 dk rows vs 2,820 fd), because
+# fd_collect.py only covers MLB + tennis and never touched WNBA.
+# ALWAYS filter on the `book` column. A view `book_lines` exists as an honest alias;
+# the table is NOT renamed because 40 files read it, including bet_ledger.py and the
+# live WNBA autobetter.
 from __future__ import annotations
 
 import datetime as dt
