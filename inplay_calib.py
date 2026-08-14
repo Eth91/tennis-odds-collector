@@ -48,7 +48,7 @@ else:
     burn = (dt.date.fromisoformat(str(first)[:10]) + dt.timedelta(days=270)).isoformat()
     usable = [e for e in events if e["date"] >= burn and e["struct"] in ("cut_R2", "no_cut")]
     print("scoring %d events x 4 stages, sims=%d" % (len(usable), SIMS), flush=True)
-    Pl, Yl, STl, EVl = [], [], [], []
+    Pl, Yl, STl, EVl, EIDS = [], [], [], [], []
     t0 = time.time()
     for i, ev in enumerate(usable, 1):
         d0, eid = ev["date"], ev["eid"]
@@ -71,6 +71,7 @@ else:
                     "SELECT player, rnd, score FROM rounds WHERE event_id=?", (eid,)):
                 byr[p][int(rnd)] = float(sc)
             c.close()
+        EIDS.append(str(eid))     # EVI is a positional counter; this is the real key
         for stage in (0, 1, 2, 3):
             prog = None
             if stage:
@@ -99,7 +100,7 @@ else:
                                 EVI=np.array(EVl, np.int32))
     P = np.array(Pl, np.float32); Y = np.array(Yl, np.float32)
     ST = np.array(STl, np.int8); EVI = np.array(EVl, np.int32)
-    np.savez_compressed(CKPT, P=P, Y=Y, ST=ST, EVI=EVI)
+    np.savez_compressed(CKPT, P=P, Y=Y, ST=ST, EVI=EVI, EID=np.array(EIDS))
     print("\ndone in %.1f min -> %s" % ((time.time() - t0) / 60, CKPT), flush=True)
 
 LBL = {0: "pre-tournament", 1: "after R1", 2: "after R2", 3: "after R3"}

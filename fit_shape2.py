@@ -92,6 +92,9 @@ _selftest()
 if os.path.exists(CKPT):
     z = np.load(CKPT, allow_pickle=False)
     P, Y, OFF, DATE_I, MAJ = z["P"], z["Y"], z["OFF"], z["DATE"], z["MAJ"]
+    if "EID" not in z.files:
+        print("⚠️  checkpoint predates the EID vector — positional joins to load_events()"
+              " are UNSAFE here; regenerate it before trusting any per-split number.")
     print("loaded checkpoint %s: %d events, %d rows" % (CKPT, len(OFF) - 1, P.shape[0]), flush=True)
 else:
     events = V.load_events()
@@ -100,7 +103,7 @@ else:
     burn = (dt.date.fromisoformat(str(first)[:10]) + dt.timedelta(days=270)).isoformat()
     usable = [e for e in events if e["date"] >= burn and e["struct"] in ("cut_R2", "no_cut")]
     print("simulating %d events, sims=%d" % (len(usable), SIMS), flush=True)
-    Pl, Yl, OFF, DATE_I, MAJ = [], [], [0], [], []
+    Pl, Yl, OFF, DATE_I, MAJ, EIDS = [], [], [0], [], [], []
     t0 = time.time()
     old = RU.SHAPE_SLOPE
     RU.SHAPE_SLOPE = 1.0                     # store UNSTRETCHED; the sweep applies the stretch
@@ -128,17 +131,22 @@ else:
             Yl.append(ym)
             OFF.append(OFF[-1] + len(names))
             DATE_I.append(int(str(d0)[:4]))
+            EIDS.append(str(eid))          # explicit join key: positional joins on a
+            #                              list that silently drops events are wrong
             MAJ.append(1 if is_major(ev["name"]) else 0)
             if i % 20 == 0:
                 print("   ... %d/%d  (%.1f min)" % (i, len(usable), (time.time() - t0) / 60),
                       flush=True)
                 np.savez_compressed(CKPT + ".part", P=np.vstack(Pl), Y=np.vstack(Yl),
-                                    OFF=np.array(OFF), DATE=np.array(DATE_I), MAJ=np.array(MAJ))
+                                    OFF=np.array(OFF), DATE=np.array(DATE_I),
+                                    MAJ=np.array(MAJ), EID=np.array(EIDS))
     finally:
         RU.SHAPE_SLOPE = old
     P, Y = np.vstack(Pl), np.vstack(Yl)
     OFF, DATE_I, MAJ = np.array(OFF), np.array(DATE_I), np.array(MAJ)
-    np.savez_compressed(CKPT, P=P, Y=Y, OFF=OFF, DATE=DATE_I, MAJ=MAJ)
+    EIDS = np.array(EIDS)
+    assert len(EIDS) == len(OFF) - 1, "EID vector must have one entry per event"
+    np.savez_compressed(CKPT, P=P, Y=Y, OFF=OFF, DATE=DATE_I, MAJ=MAJ, EID=EIDS)
     if os.path.exists(CKPT + ".part.npz"):
         os.unlink(CKPT + ".part.npz")
     print("\nsimulated %d events in %.1f min -> %s (%.1f MB)"
