@@ -120,7 +120,10 @@ def freeze(note=None):
     if prior:
         a, b = _flat(prior), _flat(snap)
         for k in sorted(set(a) | set(b)):
-            if k in ("git_sha", "purpose", "decision", "superseded"):
+            # Skip freeze METADATA in the re-stamp diff too, not just in verify(),
+            # or a re-stamp reports its own `superseded` block as a moved value and
+            # buries the real change under a copy of the previous record.
+            if k in ("git_sha", "purpose", "decision") or k.startswith("superseded"):
                 continue
             x, y = a.get(k), b.get(k)
             same = (x == y)

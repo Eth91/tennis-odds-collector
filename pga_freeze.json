@@ -46,7 +46,7 @@
     "K_FIT": 105.0,
     "WIND_REF": 15.0
   },
-  "decision": "v1.4 (2026-08-13). THREE changes, only the first is a model change I am endorsing.\n\n(1) SHAPE_SLOPE REGIME SPLIT. 1.30 was measured on 9 MAJORS on 2026-07-30 and installed as a GLOBAL constant over the ~141 non-major events the board prices. Refit the SAME estimand it was chosen by (LL-optimal stretch THROUGH _recal_shape, not a calibration slope) on 166 walk-forward events with 2026 held out. Non-majors -> per-market SHAPE_SLOPE_STD (top-N 1.00-1.03, win 1.21). On the 49-event untouched 2026 holdout the fitted values beat 1.30 on 8/8 markets, effect -0.00093 nats/row vs a PRE-REGISTERED -0.00088. MAJORS DELIBERATELY UNCHANGED at 1.30: their fitted slopes LOSE to 1.30 on 5 of 8 holdout majors, i.e. they are noise from 25 training events, and shipping them would repeat the very error being corrected. Majors path proven byte-identical (max |old-new| = 0.0).\n\n(2) CUT_N. simulate() cut at min(69,k-1), a top-70 proxy and the PRE-2024 tour rule, wrong in every season in the warehouse. Now per-event via cut_rule(): 65 default / 50 Masters+signature / 70 PGA Champ+The Open / None for no-cut events. Rule agreement 62.7% -> 97.6% over 287 events with ZERO errors in the dangerous direction. make-cut calibration slope 0.570 -> 1.060; predicted-vs-actual 56.0/51.7 -> 51.83/51.74. NO_CUT_MAX_FIELD=100 is a guard scoped to one ambiguous event name, not a general rule.\n\n(3) 14 PRE-EXISTING DRIFTS, NOT MINE, RECORDED NOT LAUNDERED. Before this re-stamp the manifest already reported 16 moved values; 14 predate today (TN_EDGE 0.04->0.02, and SHAPE_SLOPE/PRICE_FLOOR/BLEND_W/EV_MIN/VIG_*/B_RATIO_MAX/M_RATIO_MAX/TN_RATIO_* added post-freeze and never re-stamped). They are enumerated in superseded.values_moved. This re-stamp does NOT endorse them; it stops them hiding behind a stale manifest.\n\nCONSEQUENCE, PRE-REGISTERED AS ACCEPTABLE: at s~1.00 the top-N EV screen keeps ~3 of 17 flags. Fewer bets is the intended effect. Do NOT respond by lowering EV_MIN or TN_EDGE.\n\nThe counted out-of-sample record restarts here for anything priced through simulate(). The birdie stream (pga_birdies.py, PRE-TEE 23-13 +8.98u) is untouched by all three changes.",
+  "decision": "v1.5 (2026-08-14). IN_PLAY_SHAPE_SLOPE = 1.10 \u2014 the only model value moved.\n\nWHAT AND WHY. _recal_shape was skipped once rounds posted, so in-play shipped at an effective s=1.00 that no measurement ever chose \u2014 skipping the recal was never no-opinion. Fitted through _recal_shape own sum-preserving contract on inplay_calib.npz, train pre-2026, scored on the untouched 2026 holdout: mean LL 0.138938 -> 0.13874, event-clustered 95% CI [-0.00060, -0.00013], P(gain) 0.999, and all three in-play stages improve.\n\nWHY 1.10 AND NOT MORE. The LL surface is flat over [1.05, 1.225], so the argmin is not identified; 1.10 is interior to the train flat region AND is the holdout argmin \u2014 the one value both splits pick. 1.25 and 1.30 are actively WORSE than doing nothing on holdout. A single global constant BEAT both per-stage and per-stage-per-market out of sample, so the extra parameters were rejected rather than shipped.\n\nSCOPE. Pre-tournament path proven BIT-IDENTICAL (max |old-new| = 0.000000000000). _recal_rank stays OFF in-play: RANK_OFFSETS were fitted pre-tournament and have never been measured in-play, and stacking an unmeasured correction under a measured one is how a defect hides. Effect is ~0.2-0.3% of log-loss \u2014 a sharpness fix, NOT an edge. Do not size any bet off it.\n\nALSO REJECTED THIS PASS, recorded so they are not re-proposed: HALF_LIFE_D 90 vs 270 \u2014 270 wins 8/8 on train and 6/8 on the 2026 holdout, with top20 LL +0.0059 against it, so 270 STAYS and the separate recent-form term is moot with it. Course fit stays out: 74% of it survives a course-key placebo, i.e. it is form wearing a venue label. The wave tilt needed no change \u2014 it is already applied live via pga_wave.wave_shift_for, and its 36-hole net is -0.023 str/rnd (z=-0.43) because wave labels flip R1->R2 for 97.1% of players.\n\nNON-MODEL CHANGES in the same pass (no constants): golf_collect now strips FanDuel name padding and refuses market-group labels in the event column (85% of rows were padded, 12.3% carried a market name); the tee harvester covers Korn Ferry and Champions (+333 gradeable closes). G2 unchanged and still FAILING its placebo arm.",
   "e1": {
     "MIN_ODDS": 1.6,
     "THRESH_KMH": 6.0,
@@ -99,6 +99,7 @@
   "ruler": {
     "CUT_N": 65,
     "HALF_LIFE_D": 270.0,
+    "IN_PLAY_SHAPE_SLOPE": 1.1,
     "K_SHRINK": 11.0,
     "MIN_ROUNDS": 20,
     "NO_CUT_MAX_FIELD": 100,
@@ -118,127 +119,143 @@
     "SPREAD": 1.3
   },
   "superseded": {
-    "frozen_at_git": "a949e93b48b406eeafe1d0b462202fdac772efec",
+    "frozen_at_git": "46b7c435f886a7463ed0c81c6893fb4c90164b69",
     "values_moved": [
       {
-        "key": "birdies.FORM_MIN_HOLES",
-        "now": 15,
+        "key": "ruler.IN_PLAY_SHAPE_SLOPE",
+        "now": 1.1,
         "was": null
       },
       {
-        "key": "birdies.FORM_R",
-        "now": 0.0,
-        "was": null
+        "key": "superseded.frozen_at_git",
+        "now": null,
+        "was": "a949e93b48b406eeafe1d0b462202fdac772efec"
       },
       {
-        "key": "e3.BLEND_W",
-        "now": 0.4,
-        "was": null
-      },
-      {
-        "key": "e3.B_RATIO_MAX",
-        "now": 1.6,
-        "was": null
-      },
-      {
-        "key": "e3.EV_MIN",
-        "now": 0.03,
-        "was": null
-      },
-      {
-        "key": "e3.M_RATIO_MAX",
-        "now": 1.6,
-        "was": null
-      },
-      {
-        "key": "e3.PRICE_FLOOR",
-        "now": 0.5,
-        "was": null
-      },
-      {
-        "key": "e3.TN_EDGE",
-        "now": 0.02,
-        "was": 0.04
-      },
-      {
-        "key": "e3.TN_RATIO_MAX",
-        "now": 2.0,
-        "was": null
-      },
-      {
-        "key": "e3.TN_RATIO_MIN",
-        "now": 1.15,
-        "was": null
-      },
-      {
-        "key": "e3.VIG_MAX",
-        "now": 1.75,
-        "was": null
-      },
-      {
-        "key": "e3.VIG_MIN",
-        "now": 1.01,
-        "was": null
-      },
-      {
-        "key": "ruler.CUT_N",
-        "now": 65,
-        "was": null
-      },
-      {
-        "key": "ruler.NO_CUT_MAX_FIELD",
-        "now": 100,
-        "was": null
-      },
-      {
-        "key": "ruler.SHAPE_SLOPE",
-        "now": 1.3,
-        "was": null
-      },
-      {
-        "key": "ruler.SHAPE_SLOPE_STD.top10",
-        "now": 1.0,
-        "was": null
-      },
-      {
-        "key": "ruler.SHAPE_SLOPE_STD.top10_ties",
-        "now": 1.0,
-        "was": null
-      },
-      {
-        "key": "ruler.SHAPE_SLOPE_STD.top20",
-        "now": 1.0,
-        "was": null
-      },
-      {
-        "key": "ruler.SHAPE_SLOPE_STD.top20_ties",
-        "now": 1.01,
-        "was": null
-      },
-      {
-        "key": "ruler.SHAPE_SLOPE_STD.top5",
-        "now": 1.03,
-        "was": null
-      },
-      {
-        "key": "ruler.SHAPE_SLOPE_STD.top5_ties",
-        "now": 1.03,
-        "was": null
-      },
-      {
-        "key": "ruler.SHAPE_SLOPE_STD.win",
-        "now": 1.21,
-        "was": null
-      },
-      {
-        "key": "ruler.SHAPE_SLOPE_STD.win_ties",
-        "now": 1.02,
-        "was": null
-      },
-      {
-        "key": "thresholds.TN_EDGE",
-        "now": 0.02,
-        "was": 0.04
+        "key": "superseded.values_moved",
+        "now": null,
+        "was": [
+          {
+            "key": "birdies.FORM_MIN_HOLES",
+            "now": 15,
+            "was": null
+          },
+          {
+            "key": "birdies.FORM_R",
+            "now": 0.0,
+            "was": null
+          },
+          {
+            "key": "e3.BLEND_W",
+            "now": 0.4,
+            "was": null
+          },
+          {
+            "key": "e3.B_RATIO_MAX",
+            "now": 1.6,
+            "was": null
+          },
+          {
+            "key": "e3.EV_MIN",
+            "now": 0.03,
+            "was": null
+          },
+          {
+            "key": "e3.M_RATIO_MAX",
+            "now": 1.6,
+            "was": null
+          },
+          {
+            "key": "e3.PRICE_FLOOR",
+            "now": 0.5,
+            "was": null
+          },
+          {
+            "key": "e3.TN_EDGE",
+            "now": 0.02,
+            "was": 0.04
+          },
+          {
+            "key": "e3.TN_RATIO_MAX",
+            "now": 2.0,
+            "was": null
+          },
+          {
+            "key": "e3.TN_RATIO_MIN",
+            "now": 1.15,
+            "was": null
+          },
+          {
+            "key": "e3.VIG_MAX",
+            "now": 1.75,
+            "was": null
+          },
+          {
+            "key": "e3.VIG_MIN",
+            "now": 1.01,
+            "was": null
+          },
+          {
+            "key": "ruler.CUT_N",
+            "now": 65,
+            "was": null
+          },
+          {
+            "key": "ruler.NO_CUT_MAX_FIELD",
+            "now": 100,
+            "was": null
+          },
+          {
+            "key": "ruler.SHAPE_SLOPE",
+            "now": 1.3,
+            "was": null
+          },
+          {
+            "key": "ruler.SHAPE_SLOPE_STD.top10",
+            "now": 1.0,
+            "was": null
+          },
+          {
+            "key": "ruler.SHAPE_SLOPE_STD.top10_ties",
+            "now": 1.0,
+            "was": null
+          },
+          {
+            "key": "ruler.SHAPE_SLOPE_STD.top20",
+            "now": 1.0,
+            "was": null
+          },
+          {
+            "key": "ruler.SHAPE_SLOPE_STD.top20_ties",
+            "now": 1.01,
+            "was": null
+          },
+          {
+            "key": "ruler.SHAPE_SLOPE_STD.top5",
+            "now": 1.03,
+            "was": null
+          },
+          {
+            "key": "ruler.SHAPE_SLOPE_STD.top5_ties",
+            "now": 1.03,
+            "was": null
+          },
+          {
+            "key": "ruler.SHAPE_SLOPE_STD.win",
+            "now": 1.21,
+            "was": null
+          },
+          {
+            "key": "ruler.SHAPE_SLOPE_STD.win_ties",
+            "now": 1.02,
+            "was": null
+          },
+          {
+            "key": "thresholds.TN_EDGE",
+            "now": 0.02,
+            "was": 0.04
+          }
+        ]
       }
     ]
   },

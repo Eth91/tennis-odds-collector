@@ -371,6 +371,22 @@ SHAPE_SLOPE_STD = {"win": 1.21, "win_ties": 1.02,
                    "top10": 1.00, "top10_ties": 1.00,
                    "top20": 1.00, "top20_ties": 1.01}
 
+# IN-PLAY STRETCH. Fitted 2026-08-14 on inplay_calib.npz, 215 events x stages 1-3 (after R1/R2/
+# R3) x {win, top5, top10, top20}; train = events before 2026, holdout = 2026 untouched. Same
+# sum-preserving estimand as SHAPE_SLOPE, fitted through _recal_shape itself.
+#
+# Train argmin is 1.125 but the LL surface is FLAT: everything in [1.050, 1.225] sits within 2e-4
+# of the minimum, so the argmin is NOT identified and must not be shipped as though it were. 1.10
+# is interior to that region and is also the holdout argmin -- the one value both splits pick.
+#
+# Holdout mean LL 0.138938 (s=1.00, what shipped before) -> ~0.13874; event-clustered bootstrap
+# at 1.10 gives dLL -0.000360, 95% CI [-0.000596, -0.000127]. Real, and tiny: ~0.2-0.3%. A
+# sharpness fix, NOT an edge -- do not size anything differently because of it.
+#
+# Per-stage (holdout -0.000199) and per-stage-per-market (-0.000223) tables were both fitted and
+# both scored WORSE out of sample than this single constant. Do not add parameters here.
+IN_PLAY_SHAPE_SLOPE = 1.10
+
 # EXACT normalised match only -- "BMW PGA Championship" is NOT a major, and neither is
 # "Genesis Scottish Open". Same collision class as the cut-rule table above.
 _MAJOR_NAMES = ("masters tournament", "pga championship", "us open", "u s open",
@@ -689,6 +705,25 @@ def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
         _recal_shape(out, ("win", "top5", "top10", "top20",
                            "win_ties", "top5_ties", "top10_ties", "top20_ties"),
                      slope=shape_slope)
+    elif progress is not None:
+        # IN-PLAY (measured 2026-08-14; see IN_PLAY_SHAPE_SLOPE). Skipping the recal here was
+        # never "no opinion" -- it was s = 1.00, which no measurement ever chose. The stretch is
+        # far gentler than the pre-tournament one because posted scores have already sharpened
+        # the distribution.
+        #
+        # `shape_slope` is deliberately IGNORED on this branch: it is a pre-tournament constant
+        # and means nothing once rounds are on the board.
+        #
+        # _recal_rank stays OFF here on purpose: RANK_OFFSETS were fitted on pre-tournament
+        # probabilities and have never been measured in-play. Turning it on would stack an
+        # unmeasured correction under a measured one.
+        #
+        # The remaining case -- progress None, partial not None -- deliberately falls through
+        # with NO recal, exactly as before. simulate() ignores `partial` unless `progress` is
+        # set, so that is a pre-tournament sim and nothing here was measured on it.
+        _recal_shape(out, ("win", "top5", "top10", "top20",
+                           "win_ties", "top5_ties", "top10_ties", "top20_ties"),
+                     slope=IN_PLAY_SHAPE_SLOPE)
     return out
 
 

@@ -18,6 +18,7 @@ not, folds itself into golf_moves.sqlite, which is where the paired open->close 
 """
 import datetime as dt
 import json
+import re
 import sqlite3
 import sys
 import time
@@ -32,6 +33,114 @@ UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
 def get(url):
     req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "application/json"})
     return json.load(urllib.request.urlopen(req, timeout=25))
+
+
+# ── EVENT-NAME HYGIENE (2026-08-14) ───────────────────────────────────────────────────────
+# Two defects had been living in golf_lines.event since the table was created:
+#
+#   1. PADDING. FanDuel prefixes lobby event names with spaces to force sort order, and the
+#      count of spaces is not stable across pages ('  PGA FedEx…' from the pga page vs
+#      ' PGA FedEx…' elsewhere). Reading .name verbatim split ONE tournament into several
+#      keys — DPW Danish 2026 existed as both ' DPW…' (27,638 rows) and '  DPW…' (109,270).
+#
+#   2. MARKET GROUPS MODELLED AS EVENTS. FD hangs sibling pseudo-events off the same
+#      competitionId — 'Top Region', 'Specials', '2 Balls', '3 Balls', 'Hole Match Betting'.
+#      They are real entries in attachments.events with real eventIds, so eventId -> .name
+#      put a MARKET name in the EVENT column for 167,883 rows.
+#
+# The clean name FD does publish is attachments.competitions[competitionId].name — unpadded,
+# and never a market group ('PGA FedEx St Jude Championship 2026'). Every market carries
+# competitionId, so the write path now resolves competition-first and only then falls back to
+# the event name. Anything that still smells like a market group is REFUSED and shouted about;
+# it is never written and never silently accepted.
+#
+# FORWARD-ONLY: nothing here rewrites existing rows. Repaired rows land under the tournament
+# key from this pass on, so golf_moves will open new keys rather than continue the junk ones.
+EVENT_JUNK = {
+    "specials", "top region", "outrights", "props", "player props", "matchups",
+    "2 balls", "3 balls", "4 balls", "2 ball betting", "3 ball betting",
+    "hole match betting", "match betting", "tournament matchups", "round leader",
+    "top finishes", "to make the cut", "group betting", "?",
+}
+_YEAR = re.compile(r"(?:19|20)\d{2}")
+
+
+def norm_event(s):
+    """Strip FD's sort-order padding and collapse internal whitespace runs."""
+    return re.sub(r"\s+", " ", str(s or "")).strip()
+
+
+def looks_like_market(ev):
+    """True if `ev` is a market group wearing an event's clothes.
+
+    FALSIFIABLE, and checked against the live table before shipping: all 8 genuine events in
+    golf_lines carry a 4-digit season year ('… 2026', 'The Masters 2027', 'Fedex Cup 2026')
+    and not one of the 5 junk keys does. The blocklist pins the shapes we have actually seen;
+    the missing-year rule is what catches a group name FD invents next week. If FD ever ships
+    a yearless tournament name this refuses it — loudly, in the pass output — which is the
+    intended failure mode: a visible refusal beats a silent 26th event key.
+    """
+    e = norm_event(ev)
+    if not e:
+        return True
+    if e.lower() in EVENT_JUNK:
+        return True
+    return not _YEAR.search(e)
+
+
+COMP_NAMES = {}                                  # competitionId -> canonical event name
+_COMPF = HERE / ".golf_comp_names.json"
+REFUSED = {}                                     # refused event name -> rows dropped this pass
+try:
+    COMP_NAMES.update(json.loads(_COMPF.read_text()))
+except Exception:                                                  # noqa: BLE001
+    pass
+
+
+def learn_comps(payload):
+    """Harvest attachments.competitions — the one place FD spells the event name cleanly."""
+    try:
+        comps = ((payload or {}).get("attachments") or {}).get("competitions") or {}
+        for cid, c in comps.items():
+            nm = norm_event((c or {}).get("name"))
+            if nm and not looks_like_market(nm):
+                COMP_NAMES[str(cid)] = nm
+    except Exception:                                              # noqa: BLE001
+        pass
+
+
+def _sibling_event(evs_raw, cid):
+    """Last resort: the one sibling event under this competition that is not a market group.
+
+    Only accepted when it is UNAMBIGUOUS (exactly one distinct candidate). Two real events
+    sharing a competitionId would make the mapping a guess, and a guess is what put market
+    names in this column in the first place.
+    """
+    cand = {norm_event((v or {}).get("name")) for v in (evs_raw or {}).values()
+            if str((v or {}).get("competitionId")) == str(cid)
+            and not looks_like_market((v or {}).get("name"))}
+    return cand.pop() if len(cand) == 1 else None
+
+
+def put(con, ts, ev_raw, cid, mname, mtype, runner, handicap, odds, evs_raw=None):
+    """The ONLY way a row enters golf_lines. Normalises the event, repairs a market-group
+    event from the competition, and refuses (returning 0) if it cannot land a real event."""
+    ev = norm_event(ev_raw)
+    if looks_like_market(ev):
+        ev = COMP_NAMES.get(str(cid)) or _sibling_event(evs_raw, cid) or ""
+        if not ev:
+            key = norm_event(ev_raw) or "(blank)"
+            REFUSED[key] = REFUSED.get(key, 0) + 1
+            return 0
+    con.execute("INSERT INTO golf_lines VALUES (?,?,?,?,?,?,?)",
+                (ts, ev, mname or "?", mtype or "?", runner or "?", handicap,
+                 round(float(odds), 4)))
+    return 1
+
+
+def runner_odds(r):
+    return (((r.get("winRunnerOdds") or {}).get("trueOdds") or {})
+            .get("decimalOdds") or {}).get("decimalOdds")
 
 def tee_within(minutes):
     """Is any player teeing off in the next `minutes`? (window, so a just-started wave still counts)
@@ -80,19 +189,17 @@ def main():
         except Exception:
             continue
         att = d.get("attachments") or {}
-        evs = {str(k): (v.get("name") or "?") for k, v in (att.get("events") or {}).items()}
+        learn_comps(d)
+        evs_raw = att.get("events") or {}
         for m in (att.get("markets") or {}).values():
-            ev = evs.get(str(m.get("eventId")), "?")
+            ev = (evs_raw.get(str(m.get("eventId"))) or {}).get("name") or ""
             mname = m.get("marketName") or "?"
             mtype = m.get("marketType") or "?"
             for r in m.get("runners") or []:
-                odds = (((r.get("winRunnerOdds") or {}).get("trueOdds") or {})
-                        .get("decimalOdds") or {}).get("decimalOdds")
+                odds = runner_odds(r)
                 if odds:
-                    con.execute("INSERT INTO golf_lines VALUES (?,?,?,?,?,?,?)",
-                                (ts, ev, mname, mtype, r.get("runnerName") or "?",
-                                 r.get("handicap"), round(float(odds), 4)))
-                    n += 1
+                    n += put(con, ts, ev, m.get("competitionId"), mname, mtype,
+                             r.get("runnerName"), r.get("handicap"), odds, evs_raw)
 
     # DISCOVERY TRAP (2026-07-29): the user sees a birdies-or-better market in-app
     # ($2,880 limit) that none of the page slugs above have EVER returned. Sweep the
@@ -110,9 +217,10 @@ def main():
         d0 = get(f"https://sbapi.ny.sportsbook.fanduel.com/api/content-managed-page?"
                  f"page=CUSTOM&customPageId=pga&pbHorizontal=false&_ak={AK}"
                  f"&timezone=America%2FNew_York")
+        learn_comps(d0)
         evs0 = (d0.get("attachments") or {}).get("events") or {}
         eid0 = next((k for k, v in evs0.items()
-                     if row and (v.get("name") or "").strip() == row[0].strip()),
+                     if row and norm_event(v.get("name")) == norm_event(row[0])),
                     next(iter(evs0), None))
         new_types = set()
         if eid0:
@@ -125,19 +233,21 @@ def main():
                 except Exception:
                     continue
                 att2 = e2.get("attachments") or {}
-                evn2 = ((att2.get("events") or {}).get(str(eid0)) or {}).get("name") or "?"
+                learn_comps(e2)
+                evs2 = att2.get("events") or {}
+                ev2d = evs2.get(str(eid0)) or {}
+                evn2 = ev2d.get("name") or ""
+                cid2 = ev2d.get("competitionId")
                 for m in (att2.get("markets") or {}).values():
                     mt2 = m.get("marketType") or "?"
                     if mt2 not in seen:
                         new_types.add(mt2)
                     for r in m.get("runners") or []:
-                        odds = (((r.get("winRunnerOdds") or {}).get("trueOdds") or {})
-                                .get("decimalOdds") or {}).get("decimalOdds")
+                        odds = runner_odds(r)
                         if odds:
-                            con.execute("INSERT INTO golf_lines VALUES (?,?,?,?,?,?,?)",
-                                        (ts, evn2, m.get("marketName") or "?", mt2,
-                                         r.get("runnerName") or "?", r.get("handicap"),
-                                         round(float(odds), 4)))
+                            put(con, ts, evn2, m.get("competitionId") or cid2,
+                                m.get("marketName"), mt2, r.get("runnerName"),
+                                r.get("handicap"), odds, evs2)
         con.commit()
         # COUPON-HYDRATION WATCH (2026-07-29): the pga page's "Birdies or Better" module
         # (id 2240) carries coupons that are isCollapsed:true = content withheld from every
@@ -189,7 +299,13 @@ def main():
             if isinstance(o, dict):
                 cid = o.get("competitionId")
                 if cid:
-                    comps[str(cid)] = str(o.get("competitionName") or o.get("name") or "")[:60]
+                    # NOTE (2026-08-14): this walk hits coupon/link objects whose `name` is a
+                    # MARKET group, so its label is only a hint. norm+guard it here, and let
+                    # COMP_NAMES (attachments.competitions) win — that is the authoritative name.
+                    nm = norm_event(o.get("competitionName") or o.get("name"))[:60]
+                    if looks_like_market(nm):
+                        nm = ""
+                    comps[str(cid)] = COMP_NAMES.get(str(cid)) or nm or comps.get(str(cid), "")
                 for v in o.values():
                     _wc(v)
             elif isinstance(o, list):
@@ -197,7 +313,9 @@ def main():
                     _wc(v)
         for slug in ("pga", "golf-props", "golf-matchups"):
             try:
-                _wc(get(f"https://sbapi.ab.sportsbook.fanduel.ca/api/content-managed-page?page=CUSTOM&customPageId={slug}&pbHorizontal=false&_ak={AK}&timezone=America%2FEdmonton"))
+                _d = get(f"https://sbapi.ab.sportsbook.fanduel.ca/api/content-managed-page?page=CUSTOM&customPageId={slug}&pbHorizontal=false&_ak={AK}&timezone=America%2FEdmonton")
+                learn_comps(_d)
+                _wc(_d)
             except Exception:
                 pass
         n3 = 0
@@ -212,16 +330,16 @@ def main():
             if not d3:
                 continue
             att3 = d3.get("attachments") or {}
-            evs3 = {str(k): (v.get("name") or "?") for k, v in (att3.get("events") or {}).items()}
+            learn_comps(d3)
+            evs3 = att3.get("events") or {}
             for m in (att3.get("markets") or {}).values():
-                ev3 = evs3.get(str(m.get("eventId")), comps.get(cid) or "?")
+                ev3 = (evs3.get(str(m.get("eventId"))) or {}).get("name") or comps.get(cid) or ""
                 for r in m.get("runners") or []:
-                    odds = (((r.get("winRunnerOdds") or {}).get("trueOdds") or {}).get("decimalOdds") or {}).get("decimalOdds")
+                    odds = runner_odds(r)
                     if odds:
-                        con.execute("INSERT INTO golf_lines VALUES (?,?,?,?,?,?,?)",
-                                    (ts, ev3, m.get("marketName") or "?", m.get("marketType") or "?",
-                                     r.get("runnerName") or "?", r.get("handicap"), round(float(odds), 4)))
-                        n3 += 1
+                        n3 += put(con, ts, ev3, m.get("competitionId") or cid,
+                                  m.get("marketName"), m.get("marketType"),
+                                  r.get("runnerName"), r.get("handicap"), odds, evs3)
         con.commit()
         nb = con.execute("SELECT COUNT(*) FROM golf_lines WHERE collected_at=? AND (market LIKE '%irdie%' OR mtype LIKE '%BIRD%')", (ts,)).fetchone()[0]
         print(f"competition sweep: {len(comps)} comps, +{n3} rows ({nb} birdie rows)")
@@ -229,7 +347,21 @@ def main():
             print("golf: BIRDIES MARKET CAPTURED - calibration data accruing")
     except Exception as _ce:
         print(f"competition sweep skipped: {str(_ce)[:70]}")
-    print(f"golf_collect {ts}: {n} rows")
+    con.commit()
+    # THE GUARD'S RECEIPT. A refusal is a data loss, so it is never silent: every refused
+    # event name is named with its row count. A recurring line here means FD invented an
+    # event/group shape the guard does not understand and EVENT_JUNK/_YEAR needs a look —
+    # not that the rows were junk.
+    if REFUSED:
+        tot = sum(REFUSED.values())
+        top = sorted(REFUSED.items(), key=lambda kv: -kv[1])[:6]
+        print(f"golf_collect: ⚠️ REFUSED {tot} rows whose event looked like a market name "
+              f"and could not be resolved to a competition: {top}")
+    try:
+        _COMPF.write_text(json.dumps(COMP_NAMES, indent=0, sort_keys=True))
+    except Exception:                                              # noqa: BLE001
+        pass
+    print(f"golf_collect {ts}: {n} rows, {len(COMP_NAMES)} known competitions")
 
     # FOLD INTO THE MOVEMENT TABLE. Wrapped because a bug in the derived table must never be able
     # to cost us the raw capture — golf_lines is the irreplaceable artefact and this pass has
