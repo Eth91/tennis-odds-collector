@@ -398,6 +398,69 @@ def shape_slopes(event, date=None):
     return None if is_major(event) else dict(SHAPE_SLOPE_STD)
 
 
+# ── RANK-CONDITIONAL PLACEMENT OFFSETS (2026-08-14) ────────────────────────────────────────
+# Logit offsets by the model's OWN win-rank bucket, fitted 2023-25 and validated on the 2026
+# holdout. Buckets: rank 1 | 2-5 | 6-15 | 16-40 | 41+. Positive lifts, negative shrinks.
+# The shape is stable across all six markets, which is what says structure rather than noise.
+RANK_EDGES = (1, 2, 6, 16, 41)
+RANK_OFFSETS = {
+    "top5":       (+0.710, +0.270, +0.260, -0.040, -0.260),
+    "top10":      (+0.700, +0.320, +0.350, +0.050, -0.220),
+    "top20":      (+0.670, +0.360, +0.290, +0.040, -0.180),
+    "top5_ties":  (+0.690, +0.270, +0.270, +0.010, -0.240),
+    "top10_ties": (+0.720, +0.310, +0.340, +0.030, -0.200),
+    "top20_ties": (+0.690, +0.310, +0.240, +0.010, -0.200),
+}
+# win / win_ties are DELIBERATELY ABSENT: the same offsets make the win holdout worse.
+
+
+def _rank_bucket(rank):
+    b = 0
+    for i, e in enumerate(RANK_EDGES):
+        if rank >= e:
+            b = i
+    return b
+
+
+def _recal_rank(out, keys):
+    """Apply the win-rank offsets, re-solving one intercept per key so the FIELD TOTAL holds.
+
+    Same sum-preserving contract as _recal_shape: shape changes, coherence does not. Without it
+    the placement probabilities stop summing to 5/10/20 and every downstream devig is wrong.
+    """
+    if not out:
+        return out
+    players = list(out)
+    ranked = sorted(players, key=lambda p: -((out[p] or {}).get("win") or 0.0))
+    bucket = {p: _rank_bucket(i + 1) for i, p in enumerate(ranked)}
+    for key in keys:
+        offs = RANK_OFFSETS.get(key)
+        if not offs:
+            continue                      # win / win_ties fall through untouched, by design
+        vals = [(p, (out[p] or {}).get(key)) for p in players]
+        vals = [(p, v) for p, v in vals if v is not None]
+        if len(vals) < 10:
+            continue
+        target = sum(v for _p, v in vals)
+        if target <= 0:
+            continue
+        lg = []
+        for p, v in vals:
+            q = min(max(v, 1e-9), 1 - 1e-9)
+            lg.append((p, math.log(q / (1 - q)) + offs[bucket[p]]))
+        lo, hi = -40.0, 40.0
+        for _ in range(60):
+            c = (lo + hi) / 2.0
+            if sum(1.0 / (1.0 + math.exp(-(l + c))) for _p, l in lg) > target:
+                hi = c
+            else:
+                lo = c
+        c = (lo + hi) / 2.0
+        for p, l in lg:
+            out[p][key] = 1.0 / (1.0 + math.exp(-(l + c)))
+    return out
+
+
 def _phi(z):
     return 0.5 * (1.0 + math.erf(z / math.sqrt(2)))
 
@@ -618,6 +681,11 @@ def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
     # sims, and once posted scores condition the distribution it is already sharp — stretching it
     # would distort a number that is no longer a forecast of 4 unknown rounds.
     if progress is None and partial is None:
+        # RANK OFFSETS FIRST, then the global stretch. The offsets were fitted on unstretched
+        # probabilities, so applying them after the stretch would fit one correction on top of
+        # another's output and neither would mean what it was measured to mean.
+        _recal_rank(out, ("top5", "top10", "top20",
+                          "top5_ties", "top10_ties", "top20_ties"))
         _recal_shape(out, ("win", "top5", "top10", "top20",
                            "win_ties", "top5_ties", "top10_ties", "top20_ties"),
                      slope=shape_slope)
