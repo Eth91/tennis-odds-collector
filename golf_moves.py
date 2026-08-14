@@ -90,8 +90,16 @@ def _open_moves(write=True):
     if not write:
         if not MOVES.exists():
             return None
-        return sqlite3.connect("file:%s?mode=ro" % MOVES, uri=True)
-    con = sqlite3.connect(str(MOVES))
+        return sqlite3.connect("file:%s?mode=ro" % MOVES, uri=True, timeout=60)
+    con = sqlite3.connect(str(MOVES), timeout=60)
+    # WAL so a concurrent READER can never block this write. Default DELETE
+    # journaling takes an exclusive lock, which is how 429 price moves were
+    # silently skipped: the collector logged one line and exited 0.
+    con.execute("PRAGMA busy_timeout=60000")   # MUST be first: the WAL switch below
+    try:                                       # needs the very lock it exists to avoid
+        con.execute("PRAGMA journal_mode=WAL")
+    except sqlite3.OperationalError:
+        pass        # already WAL, or a reader holds it; busy_timeout still applies
     con.executescript(DDL)
     return con
 
@@ -128,7 +136,7 @@ def fold(ts, mc=None, lc=None, cache=None):
     """Fold one golf_lines snapshot into the movement table. Returns (n_keys, n_frozen)."""
     own = mc is None
     mc = mc or _open_moves()
-    lc = lc or sqlite3.connect(str(LINES))
+    lc = lc or sqlite3.connect(str(LINES), timeout=60)
     cache = {} if cache is None else cache
 
     rows = _snapshot(lc, ts)
@@ -193,7 +201,7 @@ def latest_ts(lc):
 
 def backfill():
     """Replay every snapshot in golf_lines, oldest first. VM only — the Mac has no raw history."""
-    lc = sqlite3.connect(str(LINES))
+    lc = sqlite3.connect(str(LINES), timeout=60)
     mc = _open_moves()
     cache = {}
     try:
@@ -287,7 +295,7 @@ def clv():
         print("golf_moves: no movement DB here — the VM's collector writes it; git pull first")
         return
     try:
-        pc = sqlite3.connect(str(PAPER))
+        pc = sqlite3.connect(str(PAPER), timeout=60)
         flags = pc.execute("SELECT event, market, runner, odds, stream, result FROM flags").fetchall()
         pc.close()
     except sqlite3.Error as e:
@@ -348,7 +356,7 @@ def main():
     if not LINES.exists():
         print("golf_moves: no golf_lines.sqlite here (the raw archive lives on the VM) — skipped")
         return
-    lc = sqlite3.connect(str(LINES))
+    lc = sqlite3.connect(str(LINES), timeout=60)
     ts = latest_ts(lc)
     if not ts:
         lc.close()
