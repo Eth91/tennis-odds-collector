@@ -46,7 +46,7 @@
     "K_FIT": 105.0,
     "WIND_REF": 15.0
   },
-  "decision": "v1.5 (2026-08-14). IN_PLAY_SHAPE_SLOPE = 1.10 \u2014 the only model value moved.\n\nWHAT AND WHY. _recal_shape was skipped once rounds posted, so in-play shipped at an effective s=1.00 that no measurement ever chose \u2014 skipping the recal was never no-opinion. Fitted through _recal_shape own sum-preserving contract on inplay_calib.npz, train pre-2026, scored on the untouched 2026 holdout: mean LL 0.138938 -> 0.13874, event-clustered 95% CI [-0.00060, -0.00013], P(gain) 0.999, and all three in-play stages improve.\n\nWHY 1.10 AND NOT MORE. The LL surface is flat over [1.05, 1.225], so the argmin is not identified; 1.10 is interior to the train flat region AND is the holdout argmin \u2014 the one value both splits pick. 1.25 and 1.30 are actively WORSE than doing nothing on holdout. A single global constant BEAT both per-stage and per-stage-per-market out of sample, so the extra parameters were rejected rather than shipped.\n\nSCOPE. Pre-tournament path proven BIT-IDENTICAL (max |old-new| = 0.000000000000). _recal_rank stays OFF in-play: RANK_OFFSETS were fitted pre-tournament and have never been measured in-play, and stacking an unmeasured correction under a measured one is how a defect hides. Effect is ~0.2-0.3% of log-loss \u2014 a sharpness fix, NOT an edge. Do not size any bet off it.\n\nALSO REJECTED THIS PASS, recorded so they are not re-proposed: HALF_LIFE_D 90 vs 270 \u2014 270 wins 8/8 on train and 6/8 on the 2026 holdout, with top20 LL +0.0059 against it, so 270 STAYS and the separate recent-form term is moot with it. Course fit stays out: 74% of it survives a course-key placebo, i.e. it is form wearing a venue label. The wave tilt needed no change \u2014 it is already applied live via pga_wave.wave_shift_for, and its 36-hole net is -0.023 str/rnd (z=-0.43) because wave labels flip R1->R2 for 97.1% of players.\n\nNON-MODEL CHANGES in the same pass (no constants): golf_collect now strips FanDuel name padding and refuses market-group labels in the event column (85% of rows were padded, 12.3% carried a market name); the tee harvester covers Korn Ferry and Champions (+333 gradeable closes). G2 unchanged and still FAILING its placebo arm.",
+  "decision": "v1.6 (2026-08-14). RANK_OFFSETS REVERTED, and the freeze can now see wiring.\n\nWHY REVERTED. RANK_OFFSETS were fitted on shape_sims.npz, which fit_shape2.py generated with the DEFAULT cut_n=65 for every event \u2014 the per-event cut rule (65/50/70/no-cut) shipped LATER THE SAME DAY. So they were fitted against a probability distribution the model no longer produces: the top-N tail of a 156-man field cut at 65 is not the tail of a 69-man no-cut playoff field.\n\nMEASURED ON THE CURRENT MODEL (2026, summed LL over 6 placement markets, identical cached ratings, identical draws): base 1.66917 | refitted offsets 1.66907 (-0.0001, nothing) | SHIPPED offsets 1.68538 (+0.0162, actively harmful). A correct refit has the OPPOSITE sign at rank 1 (top5 -0.19 vs the shipped +0.71). There is no rank-conditional bias left once the cut rule is right. EXP-008 separately showed ordering is irrelevant (0.0009), so this was never an ordering bug.\n\n\u26a0\ufe0f EVERY CHECK THAT BLESSED THE OFFSETS RAN INSIDE THE SAME STALE CHECKPOINT \u2014 +55.9 nats on the 2026 holdout, 8/8 markets, null on win, hurting when forced onto win. The train/holdout split was honest; the MODEL underneath both halves was wrong. A holdout cannot catch that, because it is not a data problem. A checkpoint is a snapshot of a MODEL, not of data.\n\nNEW: the freeze now records call-site WIRING (recal_rank_called / recal_shape_called / inplay_shape_called). Disabling _recal_rank changed the model by 0.016 summed LL and the freeze reported INTACT, because the constant was still defined and every value still matched. A snapshot of values cannot see whether anything calls them. Same blindness class as G2 passing a constant-0.5 model and aggregate slope hiding a rank-conditional defect: a check that cannot fail the way the system actually breaks.\n\nMachinery and the fitted table are KEPT but unwired, so the next person sees what was tried and why it failed.\n\nNo other model value moved. IN_PLAY_SHAPE_SLOPE 1.10, SHAPE_SLOPE 1.30 majors / fitted table non-majors, CUT_N 65 + per-event rule all unchanged.",
   "e1": {
     "MIN_ODDS": 1.6,
     "THRESH_KMH": 6.0,
@@ -94,7 +94,7 @@
       "w": -0.005152079885619044
     }
   },
-  "git_sha": "46b7c435f886a7463ed0c81c6893fb4c90164b69",
+  "git_sha": "f746d699b58c0bb3ff6c7bd85349ef09933d30de",
   "purpose": "frozen for the 2026 Rocket Classic G2 read (event unplayed at freeze time)",
   "ruler": {
     "CUT_N": 65,
@@ -122,140 +122,19 @@
     "frozen_at_git": "46b7c435f886a7463ed0c81c6893fb4c90164b69",
     "values_moved": [
       {
-        "key": "ruler.IN_PLAY_SHAPE_SLOPE",
-        "now": 1.1,
+        "key": "wiring.inplay_shape_called",
+        "now": true,
         "was": null
       },
       {
-        "key": "superseded.frozen_at_git",
-        "now": null,
-        "was": "a949e93b48b406eeafe1d0b462202fdac772efec"
+        "key": "wiring.recal_rank_called",
+        "now": false,
+        "was": null
       },
       {
-        "key": "superseded.values_moved",
-        "now": null,
-        "was": [
-          {
-            "key": "birdies.FORM_MIN_HOLES",
-            "now": 15,
-            "was": null
-          },
-          {
-            "key": "birdies.FORM_R",
-            "now": 0.0,
-            "was": null
-          },
-          {
-            "key": "e3.BLEND_W",
-            "now": 0.4,
-            "was": null
-          },
-          {
-            "key": "e3.B_RATIO_MAX",
-            "now": 1.6,
-            "was": null
-          },
-          {
-            "key": "e3.EV_MIN",
-            "now": 0.03,
-            "was": null
-          },
-          {
-            "key": "e3.M_RATIO_MAX",
-            "now": 1.6,
-            "was": null
-          },
-          {
-            "key": "e3.PRICE_FLOOR",
-            "now": 0.5,
-            "was": null
-          },
-          {
-            "key": "e3.TN_EDGE",
-            "now": 0.02,
-            "was": 0.04
-          },
-          {
-            "key": "e3.TN_RATIO_MAX",
-            "now": 2.0,
-            "was": null
-          },
-          {
-            "key": "e3.TN_RATIO_MIN",
-            "now": 1.15,
-            "was": null
-          },
-          {
-            "key": "e3.VIG_MAX",
-            "now": 1.75,
-            "was": null
-          },
-          {
-            "key": "e3.VIG_MIN",
-            "now": 1.01,
-            "was": null
-          },
-          {
-            "key": "ruler.CUT_N",
-            "now": 65,
-            "was": null
-          },
-          {
-            "key": "ruler.NO_CUT_MAX_FIELD",
-            "now": 100,
-            "was": null
-          },
-          {
-            "key": "ruler.SHAPE_SLOPE",
-            "now": 1.3,
-            "was": null
-          },
-          {
-            "key": "ruler.SHAPE_SLOPE_STD.top10",
-            "now": 1.0,
-            "was": null
-          },
-          {
-            "key": "ruler.SHAPE_SLOPE_STD.top10_ties",
-            "now": 1.0,
-            "was": null
-          },
-          {
-            "key": "ruler.SHAPE_SLOPE_STD.top20",
-            "now": 1.0,
-            "was": null
-          },
-          {
-            "key": "ruler.SHAPE_SLOPE_STD.top20_ties",
-            "now": 1.01,
-            "was": null
-          },
-          {
-            "key": "ruler.SHAPE_SLOPE_STD.top5",
-            "now": 1.03,
-            "was": null
-          },
-          {
-            "key": "ruler.SHAPE_SLOPE_STD.top5_ties",
-            "now": 1.03,
-            "was": null
-          },
-          {
-            "key": "ruler.SHAPE_SLOPE_STD.win",
-            "now": 1.21,
-            "was": null
-          },
-          {
-            "key": "ruler.SHAPE_SLOPE_STD.win_ties",
-            "now": 1.02,
-            "was": null
-          },
-          {
-            "key": "thresholds.TN_EDGE",
-            "now": 0.02,
-            "was": 0.04
-          }
-        ]
+        "key": "wiring.recal_shape_called",
+        "now": true,
+        "was": null
       }
     ]
   },
@@ -271,5 +150,10 @@
     "EXPOSURE_H": 5,
     "FIT_MIN_OBS": 20,
     "SPLIT_MIN": 20
+  },
+  "wiring": {
+    "inplay_shape_called": true,
+    "recal_rank_called": false,
+    "recal_shape_called": true
   }
 }

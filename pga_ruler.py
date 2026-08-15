@@ -414,6 +414,10 @@ def shape_slopes(event, date=None):
     return None if is_major(event) else dict(SHAPE_SLOPE_STD)
 
 
+# ⚠️ DISABLED 2026-08-14 — kept for the record, NOT wired into simulate().
+# Fitted on a checkpoint built with a uniform cut_n=65, which the per-event cut
+# rule invalidated hours later. On the current model they cost +0.0162 summed
+# LL on 2026 and a correct refit is worth -0.0001. See EXP-008/009.
 # ── RANK-CONDITIONAL PLACEMENT OFFSETS (2026-08-14) ────────────────────────────────────────
 # Logit offsets by the model's OWN win-rank bucket, fitted 2023-25 and validated on the 2026
 # holdout. Buckets: rank 1 | 2-5 | 6-15 | 16-40 | 41+. Positive lifts, negative shrinks.
@@ -697,11 +701,15 @@ def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
     # sims, and once posted scores condition the distribution it is already sharp — stretching it
     # would distort a number that is no longer a forecast of 4 unknown rounds.
     if progress is None and partial is None:
-        # RANK OFFSETS FIRST, then the global stretch. The offsets were fitted on unstretched
-        # probabilities, so applying them after the stretch would fit one correction on top of
-        # another's output and neither would mean what it was measured to mean.
-        _recal_rank(out, ("top5", "top10", "top20",
-                          "top5_ties", "top10_ties", "top20_ties"))
+        # ⚠️ RANK OFFSETS ARE DISABLED (2026-08-14, EXP-008/009). They were fitted on
+        # shape_sims.npz, generated with the DEFAULT cut_n=65 for every event — before the
+        # per-event cut rule shipped the same day. Measured on the CURRENT model, 2026 summed
+        # LL over the six placement markets: base 1.66917, refitted 1.66907 (nothing),
+        # SHIPPED 1.68538 (+0.0162, actively harmful). A correct refit is worth -0.0001 and
+        # has the opposite sign at rank 1, so there is no rank bias left once the cut rule is
+        # right. Re-enable ONLY if a refit on current-model probabilities earns its keep.
+        # _recal_rank(out, ("top5", "top10", "top20",
+        #                   "top5_ties", "top10_ties", "top20_ties"))
         _recal_shape(out, ("win", "top5", "top10", "top20",
                            "win_ties", "top5_ties", "top10_ties", "top20_ties"),
                      slope=shape_slope)

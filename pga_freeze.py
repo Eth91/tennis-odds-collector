@@ -63,6 +63,7 @@ def snapshot():
     wave = W.fit_wave(verbose=False) or {}
     bridge = C._birdie_bridge() or {}
     return {
+        "wiring": _wiring(),
         "git_sha": _sha(),
         "purpose": "frozen for the 2026 Rocket Classic G2 read (event unplayed at freeze time)",
         # discovered, not listed: a new pricing parameter must not be able to hide
@@ -96,6 +97,24 @@ def _flat(d, pre=""):
         else:
             out[kk] = v
     return out
+
+
+def _wiring():
+    """Which optional corrections are actually CALLED in pga_ruler.simulate().
+
+    A constant snapshot cannot see this: RANK_OFFSETS stayed defined when _recal_rank was
+    unwired, so the freeze reported INTACT across a change worth 0.016 summed log-loss.
+    """
+    try:
+        src = (Path(__file__).resolve().parent / "pga_ruler.py").read_text()
+    except OSError:
+        return {}
+    body = src[src.index("def simulate("):] if "def simulate(" in src else src
+    live = [ln for ln in body.split("\n") if not ln.lstrip().startswith("#")]
+    live = "\n".join(live)
+    return {"recal_rank_called": "_recal_rank(out," in live,
+            "recal_shape_called": "_recal_shape(out," in live,
+            "inplay_shape_called": "IN_PLAY_SHAPE_SLOPE" in live}
 
 
 def freeze(note=None):
