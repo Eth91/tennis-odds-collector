@@ -30,9 +30,19 @@ _IDX = None                       # (tname, rnd, normalised player) -> tee datet
 _FIRST = None                     # (tname, rnd) -> earliest tee that round
 
 
+# Latin letters with NO NFKD decomposition. Without this table the ASCII pass DELETES them
+# ('Højgaard' -> 'hjgaard') instead of folding them, and the tee sheet already carries BOTH
+# 'rasmus hjgaard' and 'rasmus hojgaard' as separate keys because two sources spell him
+# differently. Folding a character that is currently dropped can only turn a miss into a hit:
+# every comparison runs both sides through this function.
+_FOLD = str.maketrans({"ø": "o", "Ø": "O", "đ": "d", "Đ": "D", "ł": "l", "Ł": "L",
+                       "æ": "ae", "Æ": "AE", "ß": "ss", "þ": "th", "ð": "d", "Þ": "TH"})
+
+
 def norm_name(x):
     """Fold accents and punctuation so 'Nicolai Højgaard' matches the sheet's 'nicolai hojgaard'."""
-    n = unicodedata.normalize("NFKD", str(x or "")).encode("ascii", "ignore").decode()
+    n = unicodedata.normalize("NFKD", str(x or "").translate(_FOLD))
+    n = n.encode("ascii", "ignore").decode()
     return re.sub(r"[^a-z ]", "", n.lower()).strip()
 
 
@@ -127,6 +137,46 @@ def deadline(event, market):
             or mu.startswith("WINNER W/O")
             or re.search(r"\bCHANCES TO WIN\b", mu)):
         return first.get((tname, 1)), "field outright -> R1 first tee"
+    # 2-BALL / 3-BALL -> the EARLIEST tee in the group. Same rule as a matchbet and for the same
+    # reason: once any player in the group is away, the price is in-play. FanDuel writes the
+    # participants abbreviated after a ' - ' ("2 Ball (Round 4) - A. Iwai / Lopez Ramirez"), so
+    # match exact, then unique surname, then surname + first initial -- the initial exists
+    # precisely to separate the two Fitzpatricks and must not be discarded.
+    # ANY unresolved or still-ambiguous participant FAILS CLOSED. Guessing would pick an
+    # arbitrary tee, and picking the later one banks an in-play price as a close.
+    if re.match(r"^\s*[23]\s*BALL\b", mu):
+        tail = m.split(" - ", 1)[1] if " - " in m else ""
+        parts = [p.strip() for p in tail.split("/") if p.strip()]
+        if not parts:
+            return None, "ball market: no parsable participants"
+        pool = {}
+        for _k, _v in idx.items():
+            if _k[0] == tname and _k[1] == rnd:
+                pool[_k[2]] = _v
+        if not pool:
+            return None, "no R%d tee sheet for this event" % rnd
+        ts, bad = [], []
+        for p in parts:
+            n = norm_name(p)
+            t = pool.get(n)
+            if t is None and n:
+                toks = n.split()
+                cand = [(kk, vv) for kk, vv in pool.items()
+                        if kk.split() and kk.split()[-1] == toks[-1]]
+                if len(cand) > 1 and len(toks) > 1:
+                    cand = [c for c in cand if c[0].split()[0].startswith(toks[0][:1])]
+                if len(cand) == 1:
+                    t = cand[0][1]
+                elif len(cand) > 1:
+                    bad.append("%s ambiguous x%d" % (p[:18], len(cand)))
+                    continue
+            if t is None:
+                bad.append(p[:18])
+            else:
+                ts.append(t)
+        if bad or len(ts) != len(parts):
+            return None, "ball participants unresolved: %s" % ("; ".join(bad)[:56] or "none")
+        return min(ts), "%d-ball -> earliest of %d tees" % (len(parts), len(parts))
     mm = re.search(r"Matchbet\s+(.+?)\s+vs\.?\s+(.+?)$", m, re.I)
     if mm:
         ts = [idx.get((tname, rnd, norm_name(mm.group(i)))) for i in (1, 2)]

@@ -39,6 +39,10 @@ UNKNOWN = "unknown"
 
 _TOPN = re.compile(r"^top\s+(\d+)\b", re.I)
 _MATCH = re.compile(r"matchbet", re.I)
+# "2 Ball (Round 4) - A. Iwai / Lopez Ramirez", "3 Ball (Round 4) - Bezuidenhout / Finau / Blair".
+# Exhaustive over its own runners, so the target is 1.0. Ties settle as a PUSH, so this is
+# P(win | no tie) and the caller MUST exclude ties rather than grade them as losses.
+_BALL = re.compile(r"^\s*\d\s*ball\b", re.I)
 _LADDERISH = re.compile(r"(round\s+\d\s+score|total birdies or better|birdies or better)", re.I)
 _FIELDWIN = re.compile(r"^(win only|winner|outright|\d+(st|nd|rd|th) round leader|"
                        r"winner w/o|to win)", re.I)
@@ -57,6 +61,12 @@ def classify(market, n_runners=None):
         return UNKNOWN, None
     if _MATCH.search(m):
         return TWO_WAY, 1.0
+    if _BALL.match(m):
+        # 2 runners is a two-way; 3 runners is still an exhaustive win market summing to 1.0.
+        # Anything else under a "N Ball" name is malformed and must refuse, not be normalised.
+        if n_runners in (2, 3):
+            return (TWO_WAY if n_runners == 2 else FIELD_WIN), 1.0
+        return UNKNOWN, None
     t = _TOPN.match(m)
     if t:
         return TOP_N, float(int(t.group(1)))
@@ -183,6 +193,16 @@ if __name__ == "__main__":
     chk("broken ladder refuses",
         fair("X Round 2 Score", {"X Over 68.5": 1.9, "Y": 2.0, "Z": 3.0, "W": 4.0},
              n_runners=4)[0] is None)
+
+    print("\nball markets (EXP-014): exhaustive over their own runners")
+    chk("2 Ball -> two_way", classify("2 Ball (Round 2) - Cantlay / Theegala", 2) == (TWO_WAY, 1.0))
+    chk("3 Ball -> field_win", classify("3 Ball (Round 4) - A / B / C", 3) == (FIELD_WIN, 1.0))
+    chk("ball with 5 runners refuses", classify("2 Ball (Round 2) - X / Y", 5)[0] == UNKNOWN)
+    f, i = fair("2 Ball (Round 2) - Cantlay / Theegala", {"Cantlay": 1.83, "Theegala": 1.95})
+    chk("2-ball sums to 1", abs(sum(f.values()) - 1.0) < 1e-9, "%.6f" % sum(f.values()))
+    chk("2-ball hold ~5%", 3 < i["hold_pct"] < 9, "%.1f%%" % i["hold_pct"])
+    f3, i3 = fair("3 Ball (Round 4) - A / B / C", {"A": 2.7, "B": 2.8, "C": 3.1}, n_runners=3)
+    chk("3-ball sums to 1", abs(sum(f3.values()) - 1.0) < 1e-9, "%.6f" % sum(f3.values()))
 
     print("\nEV uses the OFFERED price, vig included")
     chk("p=0.5 @2.10 -> +5%", abs(ev(0.5, 2.10) - 0.05) < 1e-12)

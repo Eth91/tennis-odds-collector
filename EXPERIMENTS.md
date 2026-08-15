@@ -207,6 +207,85 @@ VERDICT: 2nd Round Leader OFF. Not "no edge found" — no edge is REACHABLE at t
 Round-leader hold falls hard by round: 1RL 32.1%, 2RL 26.7%, 3RL 16.0%. Only 3RL is close to
 a price where model skill could ever show up, and it is BLOCKED until R3 completes.
 
+## EXP-013 — HOLD CENSUS  ⭐ THE SCREEN THAT SHOULD HAVE COME FIRST
+
+Model-free: reads prices, nothing else. After EXP-012 showed a model agreeing with the book at
+corr +0.989 still losing 6% on its best selection, the obvious question is which markets can be
+beaten IN PRINCIPLE. 607 priced books, holds per family (ladders split per line — a pooled ladder
+overround is meaningless):
+
+    PLAYER_ROUND_SCORE        5.2%   (295 books, best 4.3%)
+    ROUND_MATCHBETS_IMG       5.3%   ( 75)
+    TOURNAMENT_MATCHBETS_IMG  5.3%   ( 24)
+    PLAYER_BIRDIES_OR_BETTER  5.7%   (199)
+    ---- everything field-wide ----
+    TOP_20 / TOP_10 / TOP_5 (dead heat)   11.2% / 13.1% / 17.5%
+    ROUND_LEADER              26.7%  (1st 32.1%, 2nd 26.7%, 3rd 16.0%)
+    WIN_ONLY                  28.0%
+    TOP_20 / TOP_10 / TOP_5 (incl. ties)  30.4% / 32.9% / 35.9%
+
+NOT ONE FAMILY IS UNDER 5%. And the four tightest are precisely the four already tested — round
+score (EXP-010/011, a conditions effect), matchbets (OFF, failed the placebo), birdies
+(EXP-004/006, the edge is the BOOK's). The reachable universe has already been swept, and it came
+back empty. Everything still untested is untested because it is unbeatable, not because it is
+unexplored.
+
+This also reprioritises the BLOCKED work. Top-N was the top blocked experiment; the census says
+TOP_5/10/20 hold 11-36%, so when St Jude finishes it will be measuring a market no model reaches.
+It is worth grading for calibration (Lane A), not as a candidate for money.
+
+⚠️ SCOPE. Proportional devigging, so per-runner vig is constant by construction; real books load
+longshots harder, and a power/Shin devig would move vig off the favourites. The favourite end of
+a big field is therefore better than its book average suggests — EXP-012's best runner sat at
+-6.0% against a 26.7% book average. That does not rescue any family here, but it means "hold" is
+an average, not a floor.
+
+BLIND SPOT FOUND: 17,257 rows in families with ZERO closes — never priced, which is not the same
+as no edge. Two causes. (a) market-group labels in the event column ('3 Balls', '2 Balls', 'Hole
+Match Betting', 'Top Region'), ALREADY FIXED — every such row stops at 2026-08-14T09:30:06, the
+moment the golf_collect guard landed, and clean names run to the present. (b) pga_tee_gate had no
+branch for ball markets and fed the whole market string to a player lookup ('2 Ball (Round 3) -
+Thorbjorn' is not a player). Fixed in EXP-014.
+
+## EXP-014 — 2-BALLS: a family we had never once priced
+
+Unblocked by two patches, each measured before shipping.
+
+pga_tee_gate: a ball market closes at the EARLIEST tee in the group (same rule as a matchbet —
+once any player is away the price is in-play). Participants parsed from the market string, matched
+exact -> unique surname -> surname + first initial, FAILING CLOSED on any ambiguity. Also folded
+the Latin letters NFKD cannot decompose: 'ø' was being DELETED, so 'Højgaard' -> 'hjgaard', and
+the tee sheet already held 'rasmus hjgaard' AND 'rasmus hojgaard' as two separate keys.
+    regression check over all 2598 (event, market) pairs: NEW 70, CHANGED 0, LOST 0
+    (68 ball markets + 2 Højgaard matchbets — the fold fixed a non-ball market too)
+
+pga_market: ball markets are exhaustive over their own runners, so they normalise to 1.0. Ties are
+a PUSH, so this is P(win | no tie) and ties MUST be excluded at grading rather than scored as
+losses — the two conventions travel together. Self-tests extended, ALL PASS.
+
+Closes were reconstructed straight from golf_lines (last price before the resolved deadline)
+rather than waiting on the moves backfill.
+
+    HOLD  67 books, median 5.26%, min 3.08%, max 7.35%
+          -> marginal, the same band as round score 5.2% / matchbets 5.3% / birdies 5.7%.
+          NOT the reachable family hoped for.
+
+    BOOK  n=59 (3 ties pushed)  mean p .4956  realised .4915  gap -.0041
+          book log-loss .66469 against .6931 for a coin flip — the book has real information
+
+    MODEL n=59  log-loss .67376 vs book .66469   +0.91 pts   BOOK BETTER
+          corr(model, book) +0.873   mean |model-book| .0247
+          corr(model-book disagreement, outcome) = -0.110   ANTI-predictive
+          EV>=2% n=11 -10.9% ROI | EV>=3% n=11 -10.9% | EV>=5% n=6 -4.2%
+
+VERDICT: 2-balls OFF. Same conclusion as matchbets, reached independently on a market the model
+had never seen. Disagreement is anti-predictive here (-0.110) exactly as in birdies (-0.032).
+n=59 over 2 event-rounds is small and the clustered SE is meaningless at 2 clusters — this is one
+observation, and it points the same way as all the others.
+
+The infrastructure win is permanent regardless: ~24k ball price rows per week now resolve and will
+keep accruing, and DP World events remain unreachable only because the tee sheet is PGA-only.
+
 # REJECTED — do not rediscover
 
 | hypothesis | why | evidence |
@@ -225,6 +304,8 @@ a price where model skill could ever show up, and it is BLOCKED until R3 complet
 | in-play birdie edge | no round shows significant disagreement-predicts-outcome | R3/R4 corr +0.044 (0.4 SE) |
 
 | rho form update on R1 residual | costs log-loss on the only market it was tried on | LL .06179 -> .06607, winner rank 10 -> 14 |
+
+| 2-balls as a tight market | 5.26% median hold, same band as everything else; model loses | LL .674 vs book .665, disagreement corr -0.110 |
 
 # METHOD RULES EARNED THE HARD WAY
 - A cheap proxy metric has pointed OPPOSITE to tournament probabilities 4 times in one day.
@@ -252,3 +333,16 @@ a price where model skill could ever show up, and it is BLOCKED until R3 complet
 - A DUPLICATE EVENT NAME IS A DUPLICATE SNAPSHOT. Two name variants each carried 69 closes at
   timestamps 2.5h apart; a dict built by iteration silently mixes them. Take the latest before the
   resolved deadline, and diff the earlier one as a free contamination control.
+- SCREEN BY VIG BEFORE MODELLING. Do the hold census first. Not one PGA family prices under a 5%
+  hold, and the four tightest are the four already tested and rejected. Markets left untested are
+  untested because they are unbeatable, not because they are unexplored.
+- ZERO CLOSES IS NOT ZERO EDGE. 17,257 rows sat unpriced because a gate could not resolve a
+  deadline. Fail-closed is right, but a permanently silent refusal is indistinguishable from a
+  market that does not exist. Count and report refusals by reason.
+- A GLOBAL NAME-NORMALISATION CHANGE SHIPS ONLY WITH A BEFORE/AFTER DIFF over every pair, split
+  into NEW / CHANGED / LOST. NEW is the point; CHANGED or LOST is a regression that would silently
+  re-date closes already graded against.
+- NFKD DOES NOT FOLD EVERY LATIN LETTER. ø, đ, ł, æ, ß have no decomposition and get DELETED by an
+  ASCII pass, so 'Højgaard' and 'Hojgaard' never match and the index silently splits in two.
+- REPORT WHY A PRICING LAYER REFUSED. 67 refused books read as an empty hold table because the
+  loop skipped them silently — the same silent-zero class, self-inflicted inside an experiment.
