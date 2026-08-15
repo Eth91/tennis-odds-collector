@@ -50,3 +50,57 @@ Direction agrees; magnitude does not. That is what a small-n selection effect lo
 PR-001's promotion bar is UNCHANGED and remains forward-only on tracked bets — this is
 retrospective context on a different population, recorded so the eventual forward read is
 interpreted against a realistic prior rather than the inflated in-sample one.
+
+## EXP-026 — THE SITUATION CARRIES NO SIGNAL (2026-08-15)
+
+**The axis was: can a situation-level gate work without `p_adj` or any probability-derived
+ranking? The answer is NO, and not because the gate was built badly — because the situation
+itself is not informative.**
+
+Flagged selections vs non-flagged market main lines, 2026-08-05..08-14, on a reconstructed
+11-day line archive:
+
+| | flagged | non-flagged main | gap |
+|---|---|---|---|
+| ALL | 44.4% (n=277) | 44.3% (n=734) | **+0.1pp, z=+0.04** |
+| points | 44.2% (n=113) | 44.2% (n=285) | +0.0pp |
+| rebounds | 47.4% (n=95) | 46.5% (n=243) | +0.9pp |
+| assists | 40.6% (n=69) | 41.7% (n=206) | −1.2pp |
+
+Zero in every market. **Identifying the beneficiary of an absence is worth 0.1pp.**
+
+This CORROBORATES and quantifies the existing finding that big WOWY/usage/minutes deltas are
+not what makes a beneficiary over hit. It extends it from the tracked pool to a 1011-row
+like-for-like comparison with a real baseline.
+
+**THE STRATEGIC CONSEQUENCE.** Whatever edge the tracked system has cannot be coming from
+situation identification. It has to come from the PRICE side — the EV gate and the TOP-2
+ranking — because the situation pool it draws from is indistinguishable from random. Research
+effort spent on better situation variables is spent on a channel measured at +0.1pp. Every
+future situation-variable hypothesis inherits this ceiling and should be scoped against it.
+
+### ⚠️ EXP-023 and EXP-024 ARE VOID — and how they lied
+
+Both reported the flag beating the market by **+12.8pp (z=5.53)** and **+12.0pp (z=2.54)**.
+Both were wrong, for two independent reasons, and both looked healthy:
+
+1. **`wnba_lines.sqlite` is a 3-DAY ROLLING BUFFER.** 1.5M rows spanning 2026-08-13..08-15 ONLY.
+   Querying `WHERE date BETWEEN '2026-07-12' AND '2026-08-14'` returns rows and raises no error
+   — it silently answers about 2 days while appearing to answer about 34. Row COUNT looks
+   enormous (1.5M) precisely because a buffer is dense, not long. **Always check
+   `COUNT(DISTINCT day)`, never `COUNT(*)`, before trusting a window.**
+2. **The market pool was the ALT LADDER.** One player's 2.5 main line also appears at 4.5/5.5/6.5.
+   The tell was a monotone slide in over% with line level inside every stat (assists 62.9 → 51.3
+   → 39.5 → 25.0 → 13.2%). Comparing our selections to that pool compares main lines against
+   longshots and manufactures a large fake edge.
+
+**The gate that caught it:** a main line must hit ~47-48% overs after vig. EXP-024's pool
+measured 40.5%, which is not a base rate, it is a defect. That single check is now mandatory
+before any market-relative claim — it is cheap, it is outcome-independent, and it would have
+killed both experiments before they were written up.
+
+**INFRASTRUCTURE BUILT:** `research/build_line_archive.py` → `research/line_archive.sqlite`,
+19,287 rows / 11 real days (2026-08-05..08-15), reconstructed by unioning the daily backups
+(each itself a 3-day window). One row per (date, player, stat, line, side) = last pre-game
+quote. This is the only WNBA line history that exists; the live DB cannot answer any question
+spanning more than 3 days. Research-only, imported by nothing in production.
