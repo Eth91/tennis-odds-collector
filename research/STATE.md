@@ -15,3 +15,11 @@ research_root: research/   (nothing here is imported by production)
 ## priority queue
 1 odds-timeline coverage   2 market timing   3 stint decomposition
 4 role-transition graph    5 market response 6 new markets  7 ranking failure
+
+## live research instruments
+- research/pr002_shadow.py  cron */20  -> research/pr002_shadow.sqlite  (PR-002 forward test)
+- wnba_health.py            cron */30  -> ~/health.log (empty = green)
+
+## next when data allows
+- PR-002 needs n>=40 shadow rows before any read. Do NOT peek at partial n.
+- PR-001 (vac) needs n>=40 tracked rows graded after 2026-08-13.
