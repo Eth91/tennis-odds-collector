@@ -152,6 +152,62 @@ mechanism -- but it does not replicate in 2025 and therefore does not enter the 
 regardless of conditions. That is a distribution-shape miss affecting every probability it quotes,
 and unlike the round effect it is large, stable and mechanistically obvious. Pursued in GM-004.
 
+## GM-004 — is a tournament's SCORING DISPERSION predictable before it is played?  ⭐ VERIFIED
+
+GM-003's real finding was not the round effect (which failed 2025) but what sat underneath it:
+spread tracks how hard a day plays, corr +0.271 over 944 event-rounds. The frozen model has ONE
+per-player sigma and applies it everywhere, so it quotes the same width at a benign resort course
+and a wind-blown major. That is a distribution-shape error, and unlike a ranking error it lands on
+every probability the model sells while leaving ordering metrics untouched -- which is exactly why
+nothing had caught it.
+
+But difficulty is only useful if it is knowable IN ADVANCE. A round's field mean is not known until
+the round is over; a course's own history is.
+
+    target      D = sd of RESIDUALS for an event-round, residual = (score - field mean) - rating
+                Residuals, not raw scores: raw spread also contains FIELD HETEROGENEITY, which the
+                model already knows about through the ratings. What it does not know is the
+                leftover dispersion, and that is what a sigma multiplier would have to capture.
+    predictor   the same event's dispersion in PRIOR YEARS ONLY
+    baseline    the global mean dispersion -- exactly what the model does today
+
+    dispersion runs 1.925 to 4.153, mean 2.836, sd 0.336 -- a 12% spread around one assumed number
+    persistence corr(year Y, year Y+1) = +0.692 over 71 consecutive same-event pairs
+    OOS 2025 from 2023-24:  MSE 0.07303 -> 0.03668, a 49.8% cut, corr(pred, actual) +0.717
+    optimal shrinkage weight = 1.0 -- the prior-edition mean needs NO shrinking toward the constant
+    PLACEBO, histories shuffled between events: beat the real one 0 times in 400, p = 0.000
+    mechanism: hardest third of events disperses 3.018 against 2.715 for the easiest third
+
+As-of ratings come from the cached walk-forward fit whose key matches the live constants, so no
+rating sees a round from its own event or later. 2026 untouched.
+
+## GM-005 — WHY is it persistent? Course property, or "how well do we know this field"?  ⭐
+
+Two stories fit every number in GM-004 and imply OPPOSITE fixes. COURSE: hard setups separate
+players, dispersion is a venue property, and the fix is a per-event sigma multiplier. FIELD:
+residual dispersion is inflated by players the RATING KNOWS BADLY -- a thin record means a noisy
+rating means a large residual whatever the course does -- and since tournaments draw similar fields
+every year, that repeats just as neatly. The residual nets out each player's rating, so field
+STRENGTH is handled; rating UNCERTAINTY is not, and that is the confound.
+
+    dispersion correlates with:  mean rating sigma of the field   +0.401
+                                 share of field under MIN_ROUNDS  +0.381
+                                 field size                       +0.254
+                                 event mean score (how hard)      +0.586
+
+    persistence RAW                          +0.703
+    persistence AFTER removing field-knowledge +0.611   (field-knowledge model R^2 = 0.296)
+    OOS 2025 on the field-ADJUSTED target:   MSE 0.06883 -> 0.03781, 45.1% better, corr +0.678
+
+THE VENUE CARRIES REAL DISPERSION INFORMATION. Field-knowledge is a genuine contributor and
+explains under a third of it; the persistence survives its removal almost intact. The most
+dispersed events are hard international ones (Hero Indian Open 3.61 and 3.63 in consecutive years,
+Investec SA Open 3.58) and the least are elite benign fields (Sony Open 2.34, Truist 2.42, RBC
+Heritage 2.49).
+
+⚠️ GM-006 then tested the obvious intervention and it did NOT improve probabilities. The effect is
+real and the lever it implies is only +-6.6% on sigma. Verified, and not acted on.
+
 ## GM-007 — the in-play advantage, and a shipped constant that looks too small  ⭐ VERIFIED
 
 In-play forecasting scores far better than pre-tournament, and that is used as evidence the
@@ -518,7 +574,6 @@ is still suspect. The structural fix is sound; the per-row audit is not complete
 ## INTEGRATED
 (nothing yet -- the research model is still the frozen model)
 
-## PROMISING (continued)
 - refit `wind_factor` on the rebuilt weather: the live fit used the bad-coordinate lookup and
   106 events; corrected data covers 168. Production is frozen, so flagged not done.
 - HOURLY wind would make the wave gap a PRE-round input. Daily max cannot separate the two waves.
