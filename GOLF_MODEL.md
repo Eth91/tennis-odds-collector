@@ -429,6 +429,28 @@ right place -- correcting it downstream in the simulator would leave the ratings
 `pga_context.field_strength()` is a SEPARATE implementation of the same idea and is called by
 nothing; it is dead code, not a missing feature.
 
+## METHOD NOTE — the A/B slopes are pga_sim's, NOT production's
+
+GM-006 and GM-010 both run in `pga_sim`, deliberately: it takes explicit (mean, sigma) per player,
+so a sigma multiplier or a rho change can be applied without touching the frozen `pga_ruler`. The
+cost is that pga_sim carries NONE of pga_ruler's downstream corrections -- no SHAPE_SLOPE tail
+recalibration, no `_recal_shape`. So the ABSOLUTE calibration slopes those experiments report:
+
+    cut 0.753   top20 1.070   top10 1.045   top5 1.024   win 1.109
+
+describe the RAW rank simulator and must not be read as production calibration. They are in fact
+consistent with the corrections production already applies: SHAPE_SLOPE_STD carries win 1.21
+precisely because raw log-odds come out too flat in the win tail, which is what a slope of 1.109
+means. And pga_ruler's own make-cut slope is 1.060 after the per-event cut rule landed, against
+0.753 here without it.
+
+WHAT REMAINS VALID is the DELTA between arms, because both arms are equally uncorrected, share a
+field, a seed and a cut rule, and were run against a CRN floor asserted at exactly 0.0000000000.
+An A/B answers "does this change help", not "is the model calibrated" -- and only the first
+question was asked.
+
+⚠️ Do not quote these slopes as evidence about the live model.
+
 ---
 
 # RESEARCH STATE
@@ -494,3 +516,5 @@ nothing; it is dead code, not a missing feature.
   predictable (45-50% MSE better) and the multiplier it implies is only +-6.6%, which a rank
   simulator barely feels. Ask how big the LEVER is, not just how real the EFFECT is.
 - A CALIBRATION SLOPE NEAR ZERO MEANS THE GRADER IS BROKEN, not that the model is uninformative.
+- AN A/B IN A STRIPPED-DOWN ENGINE MEASURES THE CHANGE, NOT THE MODEL. pga_sim has no tail
+  recalibration, so its absolute slopes are not production's; only the between-arm delta transfers.
