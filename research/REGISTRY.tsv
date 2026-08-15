@@ -24,3 +24,4 @@ EXP-023	2026-08-15	base-rate the flag vs market	fd_lines	over% vs non-flagged	+1
 EXP-024	2026-08-15	base-rate vs MAIN lines	fd_lines	nearest-even collapse	+12.0pp z=2.54 -- VOID, baseline over% was 40.5% not 47-48%	VOID
 EXP-025	2026-08-15	why is the baseline broken?	fd_lines	coverage audit	wnba_lines is a 3-DAY ROLLING BUFFER; 1.5M rows = 3 days, not a month	ROOT CAUSE
 EXP-026	2026-08-15	base-rate on a REAL archive	11-day rebuilt archive	flagged vs non-flagged main	+0.1pp z=0.04 -- the situation carries NO signal	AXIS ANSWERED
+EXP-027	2026-08-15	is PR-002 capturable at all?	instrument check (no outcomes read)	funnel + first-quote timing	arm had an INVERTED n_without gate and logged 0 rows in 2 days; fixed, 55 candidates now qualify	INSTRUMENT REPAIRED

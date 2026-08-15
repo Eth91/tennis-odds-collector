@@ -156,3 +156,38 @@ measuring the wrong thing.
 *worse*); line-movement-as-selector (57.8% vs 45.4%, z=1.98 — but only knowable after the fact
 and gating on the book having reacted violates the speed rule); market and line-level splits
 (chronologically unstable).
+
+### ⚠️ PR-002 CORRECTION — 2026-08-15: the forward arm was capturing NOTHING
+
+Registered 2026-08-13. Between then and 2026-08-15 the shadow arm logged **zero rows** while its
+`*/20` cron fired normally and its log looked healthy. Cause, found by EXP-027's funnel:
+
+```
+mates                        85
+projected starter            35
+n_without<2 (new ground)      0   <-- every candidate died here
+```
+
+The arm carried `if nwo >= 2: continue`, commented "production already covers this". That
+captures the n_without<2 tier — the candidates production deliberately never acts on — i.e. the
+**complement** of the universe PR-002 is about. PR-002 claims stint-WOWY edge is monetizable at
+T-8h..T-13h; that is a claim about WHEN a candidate is priced, not about WHICH candidates
+qualify. Testing it requires production's own universe (`n_without >= 2`) observed early.
+
+Gate corrected to `if nwo < 2: continue`. Dry-run on the 2026-08-15 slate: **55 candidates would
+be captured**, versus 0 before.
+
+**WHAT THIS COST:** nothing yet, because no rows were graded — but the failure mode is the
+dangerous one. The arm was indistinguishable from an arm that is merely *waiting*, and "waiting
+for n>=40" is what I would have assumed indefinitely. A capture path that yields nothing and a
+capture path that has nothing to yield look identical from outside. `--diag` now exists to tell
+them apart without writing a row (verified: 0 rows before, 0 after).
+
+**BAR UNCHANGED. START DATE CORRECTED.** The n>=40 / ROI>=+8% / calibration-gap<=0 / monotone
+thresholds are exactly as registered and are NOT being tuned. Only the clock moves: prospective
+capture effectively begins **2026-08-15**, since 08-13 and 08-14 captured nothing. Any row
+timestamped before 2026-08-15 does not exist and cannot be graded.
+
+**BACKUP:** `research/pr002_shadow.sqlite` holds prospective data that cannot be recreated and
+was covered by no backup. Added as a research-only cron at 08:25 UTC, 15 min ahead of the
+off-box pull. `wnba_backup.py` was deliberately NOT edited — production stays frozen.
