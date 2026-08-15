@@ -289,11 +289,61 @@ THIRD TIME FOR THIS PATTERN, and the number gets worse each time:
 Player-specific ability to handle a CONDITION does not exist in this data at a detectable level.
 Any future hypothesis of the form some players are better at X should be costed against this.
 
+## GM-012 — birdie skill: REAL, and par-5 is genuinely a separate axis  ⭐
+
+birdie_rounds carries what no other table does -- holes played AND birdies made, split by par
+type, at ROUND level with honest timestamps. 37,019 usable player-rounds, 1,194 players. Rates are
+taken against the FIELD rate for that (event, round, par type), so course, setup and par mix are
+absorbed before any skill is measured.
+
+LEG 1 -- is birdie-making a skill at all?
+    corr(birdies above field, 2024 vs 2025) = +0.518 over 171 players
+    observed variance .006717 | Poisson sampling noise .003679 | TRUE .003038
+    -> 45% of the spread is REAL SKILL
+That is a different world from the three player-condition hypotheses (streaky 8%, Sunday 7%,
+wind 0%). Birdie-making genuinely varies between players and repeats.
+
+LEG 2 -- are par-3/4/5 rates distinct skills, or one skill in three costumes? Partial correlation
+removes the players OVERALL birdie rate from both halves, which is exactly the test that killed
+strokes-gained (every SG partial was ~0 once SG_TOT was known):
+    par 3   raw +0.074   partial +0.025    not distinct
+    par 4   raw +0.397   partial +0.082    not distinct
+    par 5   raw +0.403   partial +0.215    DISTINCT
+Par-5 birdie skill survives, and mechanistically it should: reaching a par 5 in two is a different
+ability from scrambling a birdie on a par 4. This is the FIRST skill decomposition in this project
+to pass a partial test.
+
+## GM-013 — ...and it still does not PREDICT better  ❌ REJECTED
+
+Distinct is not useful. Predicting a players birdie count in a round, one rate against three:
+    field only (no skill)   Poisson deviance 0.76765
+    A  one birdie rate                       0.76123
+    B  par-type rates                        0.76209     B - A = +0.00086
+
+FAIR ON SHRINKAGE, which matters because B estimates three rates from the rounds that gave A one,
+so Bs inputs are noisier by construction. Each model was also allowed its OWN best shrinkage:
+As optimum is 0.77218 at K=160, Bs is 0.77278 at K=40. A still wins.
+
+THE MECHANISM CHECK FAILS TOO. If par-5 skill were the edge, B should win where par 5s are
+plentiful. It loses there and wins only where they are scarce:
+    0-2 par 5s   B -0.00100      3 par 5s   B +0.00290      4 par 5s   B +0.00063
+
+VERDICT: splitting one birdie skill into three triples the estimation noise, and a +0.215 partial
+on one of the three does not pay for it. Same conclusion as strokes-gained, reached from the
+opposite direction -- there the partial was absent, here the partial is real and still unprofitable.
+
+WORTH KEEPING: OVERALL birdie skill is clearly useful -- deviance 0.76765 -> 0.76123 against
+field-only, on 18,135 held-out player-rounds. Any birdie model should carry a shrunk player factor;
+it should not carry three.
+
 ---
 
 # RESEARCH STATE
 
 ## VERIFIED
+- **birdie-making is 45% real skill** (GM-012): corr +0.518 across halves, and a shrunk overall
+  player factor beats field-only out of sample (Poisson deviance .76765 -> .76123, n=18,135).
+  Par-5 birdie skill is genuinely distinct (partial +0.215) but does NOT improve prediction.
 - **event scoring dispersion is predictable from prior editions** (GM-004/005): persistence
   +0.692 raw / +0.611 after field-knowledge, OOS MSE -49.8% / -45.1%, placebo 0/400. Probability
   impact under test in GM-006.
@@ -310,6 +360,8 @@ Any future hypothesis of the form some players are better at X should be costed 
   round 4. n=27 no-cut events.
 
 ## REJECTED
+- par-TYPE birdie modelling (GM-013): distinct but not predictive; A beats B even at each model
+  own best shrinkage, and B loses precisely where par 5s are plentiful
 - wind x player, both as a skill interaction (fails OOS, and it is the best of 8) and as a
   player-specific slope (100% sampling noise, corr -0.036) -- GM-011
 - wind as a driver of DISPERSION (GM-009: -0.011/km/h, t=-1.25) -- GM-004 is not a wind effect
