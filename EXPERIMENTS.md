@@ -368,6 +368,45 @@ that wins more often. Both are coherent; one is simply dearer.
 VERDICT: no model-free inconsistency to exploit. This closes the last avenue that did not depend
 on out-predicting the book.
 
+## EXP-017 — 3rd Round Leader (54-hole) vs close  ⭐ THE CHEAPEST FIELD MARKET, STILL NEGATIVE
+
+Pre-registered and blocked until St Jude R3 completed (66 of 68 posted). Top-N still needs R4.
+
+WHY THIS MARKET WAS THE ONE TO WAIT FOR. EXP-013/015 priced the vig on every family. Round-leader
+hold falls hard by round -- 32.1% at R1, 26.7% at R2, 16.0% at R3 -- and under a Shin devig the
+favourite-end charge at R3 is +13.0% against +34.2% at R1. Of every field-wide market we hold, this
+is the cheapest, so it is where model skill had the best chance of ever showing.
+
+SETTLEMENT resolved from the book's own prices before grading, as in EXP-012: corr(devigged prob,
+36-hole total) = -0.406, so the price knows the 36-hole board and this is the 54-HOLE leader, not
+the low R3 score. The two readings had DIFFERENT winners here -- Fleetwood and Hovland tied for
+the low R3 at 55, Hovland alone led at 187 over 54 holes -- so getting the rule wrong would have
+graded a different event.
+
+Model draws only R3 on top of the known 36-hole totals; an unconditional sim would discard the two
+rounds the market is entirely about.
+
+    corr(model, book)                     +0.999
+    model LL 0.06014   book LL 0.05737    +0.28 pts, BOOK BETTER
+    winner rank        model 2nd, book 2nd of 67
+    p(winner)          model .0800  book .0764
+    MAX EV anywhere in the field          -0.009   (frozen)
+                                          -0.003   (rho=0.085, the GM-007 measured value)
+    EV >= 3% flags                        0
+
+THE MOST INTERESTING NUMBER IS -0.009. The book average hold is 16.0%, yet the best selection in
+the field is only 0.9% negative. That is EXP-015's favourite-longshot result landing exactly where
+predicted: proportional devigging says every runner pays 16%, and the favourite end actually pays
+almost nothing. The tightest corner of the tightest field market is nearly break-even -- and the
+model still cannot cross it, because it agrees with the book at +0.999.
+
+Reported at both rho values because GM-007/008 measured the within-week effect at ~0.085 against a
+shipped 0.050. The research value moves max EV the right way (-0.009 -> -0.003) and log-loss
+marginally the wrong way. Not tuned on: this is a pre-registered grading.
+
+VERDICT: 3rd Round Leader OFF. Round-leader markets are now graded at R1 (EXP-001), R2 (EXP-012)
+and R3, and the book has won all three.
+
 # REJECTED — do not rediscover
 
 | hypothesis | why | evidence |
@@ -390,6 +429,8 @@ on out-predicting the book.
 | 2-balls as a tight market | 5.26% median hold, same band as everything else; model loses | LL .674 vs book .665, disagreement corr -0.110 |
 
 | cross-market incoherence | book is coherent on every available axis | 0 violations in 207 dominance + 554 nesting + 138 win/top5 pairs |
+
+| 3rd Round Leader | model agrees at +0.999; best selection in the field is -0.9% EV | 16.0% hold, 0 flags, book LL better by 0.28pts |
 
 # METHOD RULES EARNED THE HARD WAY
 - A cheap proxy metric has pointed OPPOSITE to tournament probabilities 4 times in one day.
