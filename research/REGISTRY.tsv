@@ -1,0 +1,13 @@
+id	date	hypothesis	market	metric	result	status
+EXP-001	2026-08-13	odds-timeline coverage: when do WNBA props first exist?	all	event coverage per lead	opener 15.3%, t240 99.8%, nothing new 4h->tip; 44h GAP unmeasured between 48h and 4h	ACCEPTED
+EXP-003	2026-08-13	EV ranks price not conviction	all	p_adj/dec decomposition	REFUTED: dec flat (2.03/2.02/2.06), p_adj +0.243. Real cause = calibration gap SCALES with conviction (-4pp/-18pp/-27pp)	ACCEPTED
+EXP-004	2026-08-13	does ANY recorded field rank outcomes?	all	spearman rho vs win	proj_min -0.193/-0.422, vac +0.273/+0.231, total +0.167/+0.142 rank in both cuts; 15 fields tested so multiple-testing exposure	PROMISING
+EXP-005	2026-08-13	do proj_min/vac/total survive a temporal split?	all	median-split hit% gap	ALL HOLD DIRECTION: proj_min -11.4/-15.5pp, vac +28.3/+39.2pp, total +10.4/+16.3pp. Forward burned as confirmation (used in EXP-004 selection)	PROMISING
+EXP-006	2026-08-13	is vac collinear w/ proj_min or player-driven?	all	stratified + LOO	SURVIVES BOTH: within-stratum gaps +26.5/+35.7pp, corr(vac,proj_min)=+0.030, LOO range +26.7..+37.4pp	ACCEPTED
+EXP-007	2026-08-13	economic size of a vac gate	all	units + two-proportion z	fwd 13-13 -0.44u -> 9-4 +4.99u; z=2.52 vs Bonferroni 2.94 FAILS	PROMISING->PR-001
+EXP-008	2026-08-13	does vac rank the SUPPRESSED pool (volume recovery)?	all	hit% gap by vac	SIGN FLIP: tracked +31.5pp vs suppressed -21.0pp (z=-1.94). No volume recovery; high-vac suppressed = -26.8% ROI	REJECTED (volume) / weakens PR-001
+EXP-009	2026-08-13	does p_adj carry info beyond the market price?	all	rank-corr of residual	residual rho=-0.150 ANTI-predictive; model-below-book 64.3%/+35.1% vs model-above-book 54.8%/+5.1%; corr(p_adj,implied)=+0.621	ACCEPTED
+EXP-010	2026-08-13	does the anti-predictive residual hold FORWARD?	all	above-minus-below hit%	HOLDS: pre-freeze -10.3pp, forward -7.7pp. Edge = SITUATION SELECTION not probability	ACCEPTED
+EXP-011	2026-08-13	does harder shrink toward the book help (given the anti-predictive residual)?	all	units by k, temporal split	REJECTED: k=0/5/11 IDENTICAL (58 bets +17.32u pre; 26 -0.44u fwd), k>=20 monotonically worse. Probability is BOTH the anti-signal and the gate -- entangled	REJECTED
+EXP-012	2026-08-13	stint-WOWY at T-24h (the unmeasured gap)	all	ROI + calib	8 bets 62.5% +25.2% calib -0.095; lines exist at 24h for 82.9% of events	PROMISING
+EXP-013	2026-08-13	complete the decay curve at T-12h and T-8h	all	ROI + calib	t720 18 bets +18.9% calib -0.067; t480 17 bets +14.8% calib -0.042. MONOTONE across 8 leads. BUT 2026-only is +2.4%/+9.9% -- levels inflated by tiny 2025 cells	PROMISING->PR-002
