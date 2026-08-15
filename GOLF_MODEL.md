@@ -451,6 +451,35 @@ question was asked.
 
 ⚠️ Do not quote these slopes as evidence about the live model.
 
+## VERIFICATION — pga_wx.sqlite, and proof that per-event-year keying was the right fix
+
+The claim behind the rebuild was that keying a coordinate by TOURNAMENT NAME cannot be right for a
+rotating venue. That is now demonstrated rather than asserted: six events resolve to MORE THAN ONE
+coordinate across years, and they are exactly the ones that rotate.
+
+    The Open           Hoylake (53.39,-3.18) | Birkdale-area (53.65,-3.01) | Portrush (55.20,-6.65)
+    PGA Championship   Quail Hollow (35.23,-80.84) | Valhalla (38.25,-85.76) | (39.99,-75.40)
+    U.S. Open          LACC (34.05,-118.24) | Pinehurst (35.20,-79.47) | (36.68,-76.92)
+    BMW Championship   three venues        RBC Canadian Open  three venues
+    ISCO Championship  two venues
+
+The old cache held ONE coordinate per name, so for every one of these it was necessarily wrong for
+at least two editions out of three. That is a structural error, not a bad lookup, and it is the
+error the rebuild removes.
+
+TABLE STATE: 297 events, 169 venues resolved, 1,680 weather day-rows over 168 events, 10 days per
+event (start-3 to start+6, covering R1-R4 plus a Monday finish). Zero null wind. Wind 4.6-62.6
+km/h (mean 18.4), tmax 10.4-38.2 C, no out-of-range coordinates.
+
+STILL UNRESOLVED, and honestly so: 126 events fail because ESPN answers 403 on both the core and
+site endpoints, and 2 are REFUSED by the ambiguity gate (Yokohama has 7 same-name places, Troon
+has 2, and neither venue record carries a state). Refusing beats guessing -- guessing is what put
+the Masters in Maine.
+
+⚠️ Per-year keying is proven; INDIVIDUAL coordinates are not all audited. The U.S. Open entry at
+(36.68,-76.92) is coastal Virginia and matches no U.S. Open venue I can place, so at least one row
+is still suspect. The structural fix is sound; the per-row audit is not complete.
+
 ---
 
 # RESEARCH STATE
