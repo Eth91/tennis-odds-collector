@@ -258,6 +258,37 @@ weather-delayed or Monday finishes. That mis-dating is noise and can only bias t
 ⚠️ wind is wind_speed_10m_max for the DAY, so a calm morning wave and a gale-blown afternoon wave
 share one number.
 
+## GM-011 — WIND x PLAYER: both readings of the charter question are dead  ❌ REJECTED
+
+Run on the rebuilt weather, wind demeaned WITHIN EVENT so that a venue which is simply windy
+cannot masquerade as a wind effect. 23,370 rows, 87 events, within-event wind sd 4.78 km/h.
+Dev 2024 -> OOS 2025, prior-SEASON skill only, 2026 untouched.
+
+LEG A -- does a measurable SKILL buy wind resistance?
+    GIR x wind        d=+0.0588  t=+2.22   OOS MSE 7.6773 -> 7.6780  WORSE
+    DRIVE_ACC x wind  d=+0.0307  t=+1.44   OOS MSE improves in the 4th decimal
+    the other six     |t| < 1.4
+    placebo on GIR (wind shuffled between event-rounds): real +2.22 vs null sd 1.02, p=0.042
+
+GIR passes its placebo and STILL FAILS, for two reasons that both matter. It makes out-of-sample
+prediction WORSE, which is the standing rule from GM-001: a coefficient that improves in-sample
+and worsens OOS MSE is noise however significant. And the placebo was run on the strongest of
+EIGHT skills, chosen by its own t -- under the null the best of eight clears p=0.042 about 29% of
+the time. A per-test p-value applied to a hand-picked maximum is not a p-value.
+
+LEG B -- do INDIVIDUAL players have a repeatable wind slope? This is the charter's literal
+wording and it is the shape that has already produced two illusions here.
+    corr(wind slope 2024, wind slope 2025) = -0.036 over 119 players
+    observed slope variance 0.00298 | sampling noise 0.00348 | TRUE 0.00000
+    -> 100% of the apparent spread is sampling noise
+
+THIRD TIME FOR THIS PATTERN, and the number gets worse each time:
+    streaky players  8% real     (SIG_SHRINK, pre-existing)
+    Sunday players   7% real     (GM-002 leg B)
+    wind players     0% real     (here)
+Player-specific ability to handle a CONDITION does not exist in this data at a detectable level.
+Any future hypothesis of the form some players are better at X should be costed against this.
+
 ---
 
 # RESEARCH STATE
@@ -279,6 +310,8 @@ share one number.
   round 4. n=27 no-cut events.
 
 ## REJECTED
+- wind x player, both as a skill interaction (fails OOS, and it is the best of 8) and as a
+  player-specific slope (100% sampling noise, corr -0.036) -- GM-011
 - wind as a driver of DISPERSION (GM-009: -0.011/km/h, t=-1.25) -- GM-004 is not a wind effect
 - distance x par-5 count, and 7 other skill x par-mix pairings (GM-001)
 - player-specific round tendency / "Sunday players" (GM-002 leg B)
@@ -289,8 +322,6 @@ share one number.
 (nothing yet -- the research model is still the frozen model)
 
 ## BLOCKED
-- wind x PLAYER (does anyone handle wind better) -- needs the SG join; unblocked now that
-  pga_wx.sqlite exists (169 venues, 1,680 day-rows), not yet run
 - 128 of 297 events still have no venue: 126 fail ESPN with HTTP 403, 2 refused as ambiguous
   city names (Yokohama, Troon) by the fail-closed gate
 - Top-N / 3rd-round-leader grading, until St Jude 2026 completes
@@ -303,4 +334,8 @@ share one number.
   anyway. R3/R4 spread looks like a round effect and is truncation.
 - PARTIAL OUT DIFFICULTY BEFORE READING A ROUND EFFECT. It reversed the sign here.
 - A COEFFICIENT THAT IMPROVES IN-SAMPLE AND WORSENS OOS MSE IS NOISE, however significant.
+- A PLACEBO RUN ON THE STRONGEST OF N TESTS MUST BE CORRECTED FOR N. The best of eight skills
+  clears p=0.042 about 29% of the time under the null (GM-011).
+- "SOME PLAYERS ARE BETTER AT X" HAS FAILED THREE TIMES: streaky 8% real, Sunday 7%, wind 0%.
+  Always decompose between-player variance against sampling noise BEFORE believing the spread.
 - WHEN EVERY VARIANT SHARES A SIGN, suspect one shared artifact, not many findings.
