@@ -221,6 +221,43 @@ has no representation of, and it acts on exactly the pair where the correlation 
 ⚠️ n = 27 no-cut events. The five-pair cluster is solid; the R3-R4 exception rests on a modest
 sample and is PROMISING, not verified.
 
+## GM-009 — wind: real for scoring, NULL for dispersion, and a correction to my own claim
+
+Run on the rebuilt pga_wx table (per-event-year venues, country-gated, ambiguous cities refused,
+curated majors). Everything demeaned WITHIN EVENT across that event's rounds, so course, setup,
+field and par cancel and only day-to-day variation at one venue remains.
+
+    wind -> scoring      +0.0440 strokes per km/h  = +0.44 per 10 km/h   t=+1.75  n=128 events
+    wind -> dispersion   -0.0106 strokes per km/h                        t=-1.25  n=128 events
+
+WIND DOES NOT SPREAD THE FIELD. The sign is negative and insignificant. That MATTERS for GM-004:
+the dispersion that is predictable from prior editions is NOT a wind effect, so the two findings
+are independent and GM-004 does not reduce to windy venues stay windy.
+
+⚠️ CORRECTION TO MY OWN FIRST READING. The initial run compared old-pipeline wind (+0.3678) with
+rebuilt wind (+0.3935) and I called the fix real, more signal. Those were DIFFERENT SAMPLES --
+48 events versus 128. Restricted to the 47 events present in both:
+
+    old coordinates   n=187 days   corr(wind, scoring) +0.3398
+    new coordinates   n=187 days   corr(wind, scoring) +0.3159
+
+Indistinguishable, and if anything the old is higher. The correct claim is that the coordinate fix
+bought COVERAGE -- 48 -> 128 events, 191 -> 511 day-observations -- not a stronger per-observation
+signal. Only ~10.6% of old rows came from a known-wrong venue, and the shared events are largely
+the ones the bare-city geocode happened to get right, so the old correlation was DILUTED rather
+than destroyed. The Masters-from-Maine defect is still real; its measured cost is smaller than the
+headline comparison implied.
+
+USABILITY. Same-day wind is not a pre-tournament input -- charter rule 20 forbids using what was
+not known at prediction time. Archived actual wind is legitimate only for in-play or day-of
+pricing, which is where pga_context.wind_factor already lives.
+
+⚠️ ASSUMPTION: rounds.date is the event START date, identical for all four rounds; the warehouse
+has no per-round date. Round r is mapped to start+(r-1), correct for Thu-Sun and wrong for
+weather-delayed or Monday finishes. That mis-dating is noise and can only bias toward zero.
+⚠️ wind is wind_speed_10m_max for the DAY, so a calm morning wave and a gale-blown afternoon wave
+share one number.
+
 ---
 
 # RESEARCH STATE
@@ -242,6 +279,7 @@ sample and is PROMISING, not verified.
   round 4. n=27 no-cut events.
 
 ## REJECTED
+- wind as a driver of DISPERSION (GM-009: -0.011/km/h, t=-1.25) -- GM-004 is not a wind effect
 - distance x par-5 count, and 7 other skill x par-mix pairings (GM-001)
 - player-specific round tendency / "Sunday players" (GM-002 leg B)
 - round-variance rise as a modelling term (GM-003, fails 2025 OOS)
@@ -251,7 +289,10 @@ sample and is PROMISING, not verified.
 (nothing yet -- the research model is still the frozen model)
 
 ## BLOCKED
-- all weather and wind x player work, until pga_wx.sqlite finishes and R1/R2 are resolved
+- wind x PLAYER (does anyone handle wind better) -- needs the SG join; unblocked now that
+  pga_wx.sqlite exists (169 venues, 1,680 day-rows), not yet run
+- 128 of 297 events still have no venue: 126 fail ESPN with HTTP 403, 2 refused as ambiguous
+  city names (Yokohama, Troon) by the fail-closed gate
 - Top-N / 3rd-round-leader grading, until St Jude 2026 completes
 
 ---

@@ -39,7 +39,7 @@ import pga_ruler as RU
 import pga_sim as PS
 
 EPS = 1e-9
-NSIM = 20000
+NSIM = 8000
 SEED = 909
 
 KEY = hashlib.sha1(("%s|%s|%s|%s" % (RU.HALF_LIFE_D, RU.K_SHRINK, RU.SIG_SHRINK,
@@ -165,8 +165,14 @@ for i, eid in enumerate(sorted(test), 1):
     B = {n: (float(a), float(b) * m) for n, a, b in zip(names, mu, sg)}
     ra = PS.simulate(A, n=NSIM, seed=SEED, cut_n=cut_n)
     rb = PS.simulate(B, n=NSIM, seed=SEED, cut_n=cut_n)
+    # EVERY player who STARTED is graded. The previous version skipped anyone who was neither
+    # in  (four rounds) nor in , which is exactly the missed-cut players -- so 
+    # was scored on a sample whose outcome was always 1 (calibration slope came back 0.002, which
+    # is the tell) and top-N was scored only among survivors while the probabilities covered the
+    # whole field. A grader that silently drops the negative class cannot be trusted either way.
+    started = set(byr[1])
     for p in names:
-        if p not in pos and p not in made:
+        if p not in started:
             continue
         y = dict(cut=1.0 if p in made else 0.0,
                  top20=1.0 if pos.get(p, 999) <= 20 else 0.0,
@@ -176,9 +182,9 @@ for i, eid in enumerate(sorted(test), 1):
         for k in MK:
             Y[k].append(y[k])
             fa = (ra.make_cut if k == "cut" else ra.win if k == "win"
-                  else ra.top(int(k[3:]), ties=False))
+                  else ra.top(int(k[3:]), ties=True))
             fb = (rb.make_cut if k == "cut" else rb.win if k == "win"
-                  else rb.top(int(k[3:]), ties=False))
+                  else rb.top(int(k[3:]), ties=True))
             acc["A"][k].append(float(fa.get(p, 0.0)))
             acc["B"][k].append(float(fb.get(p, 0.0)))
     info.append((emeta[eid][0], m, len(names)))
