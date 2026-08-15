@@ -289,7 +289,13 @@ def main():
     print("weather to pull for %d events" % len(todo), flush=True)
     for i, (eid, lat, lon) in enumerate(todo, 1):
         d0, d1 = span[eid]
+        # rounds.date is the EVENT START date and is identical for all four rounds -- there is
+        # no per-round date in the warehouse. So the window must run from three days BEFORE the
+        # start (prior rain is the greens-softness mechanism) to six days after, which covers
+        # R1-R4 of any Thu-Sun event plus a Monday finish. Pulling only to d1 fetched four days
+        # per event and no weather at all for rounds 2-4.
         s = (dt.date.fromisoformat(d0) - dt.timedelta(days=3)).isoformat()
+        d1 = (dt.date.fromisoformat(d1) + dt.timedelta(days=6)).isoformat()
         u = ("https://archive-api.open-meteo.com/v1/archive?latitude=%s&longitude=%s"
              "&start_date=%s&end_date=%s&daily=wind_speed_10m_max,wind_gusts_10m_max,"
              "precipitation_sum,temperature_2m_max,temperature_2m_min,"

@@ -151,17 +151,95 @@ mechanism -- but it does not replicate in 2025 and therefore does not enter the 
 regardless of conditions. That is a distribution-shape miss affecting every probability it quotes,
 and unlike the round effect it is large, stable and mechanistically obvious. Pursued in GM-004.
 
+## GM-007 — the in-play advantage, and a shipped constant that looks too small  ⭐ VERIFIED
+
+In-play forecasting scores far better than pre-tournament, and that is used as evidence the
+in-play path is doing something clever. Most of it is arithmetic: a forecast made after R3 has
+HALF the remaining uncertainty of a pre-tournament one before it learns anything (remaining-total
+sd 5.64 -> 4.88 -> 3.99 -> 2.82 strokes). Sharpening from fewer rounds remaining cannot be ported
+back to a pre-tournament forecast, however good the log-loss looks. Any in-play vs pre-tournament
+comparison that does not hold rounds-remaining fixed is measuring this and nothing else.
+
+The part that COULD port back is within-week form, which the model prices through RHO = 0.05.
+
+    R1 -> R2   FULL FIELD, zero selection      corr +0.0954   t=+10.90   n=21,810 / 177 events
+    R1 -> R2   no-cut events only              corr +0.0905   t=+2.74
+    R1R2 -> R3R4  no-cut only                  corr +0.1587   t=+4.98
+    R3 -> R4   no-cut only                     corr +0.0161   t=+0.79
+    PLACEBO (partner-swapped within event)     +0.0118 mean, 0/200 beat the real one, p=0.000
+
+Everything is measured on RESIDUALS to the as-of rating, because a raw correlation between a
+players early and late rounds is guaranteed by TALENT. The partner-swap placebo confirms the
+residual really is ability-free: it sits at +0.012, not at +0.095.
+
+STABLE IN EVERY YEAR SEPARATELY -- a constant that only exists pooled is a pooled artifact:
+    2023 +0.1192 (t=3.87)   2024 +0.1015 (t=8.09)   2025 +0.0835 (t=6.28)
+
+TWO FUNCTIONAL FORMS AGREE. If rounds share a week effect of size rho, the correlation between
+TWO-ROUND AVERAGES is rho/(rho+(1-rho)/2). Observed +0.1587 implies rho ~ 0.086; rho=0.05 would
+predict +0.0952 and rho=0.0954 predicts +0.1742. Single rounds and two-round averages therefore
+point at the same rho ~ 0.086-0.095.
+
+WHY THE SHIPPED 0.05 IS LOW. The prior estimate of +0.039 came from ALL round pairs. R3->R4
+measures +0.0161 here because those rounds are reached only by cut-makers, whose R1-R2 is
+truncated by the very cut that selected them. Pooling a clean early correlation with a truncated
+late one lands between the two -- which is exactly where +0.039 sits. The nested-ANOVA (0.055) and
+36-hole-spread (0.109) estimates bracket the value found here; 0.0954 is at the top of the
+published [0.034, 0.109] range, not outside it.
+
+VERDICT: the within-event common component is ~0.09, not 0.05. RHO governs 72-hole variance and
+in-play updating, so the frozen model understates both. RESEARCH FINDING ONLY -- production is
+frozen and this changes no constant. Needs the same probability-calibration A/B that GM-006 runs
+for dispersion before it would ever be a change worth making.
+
+⚠️ ALSO FOUND: the within-event correlation DECAYS through the week. R1->R2 is +0.0905 and
+R3->R4 is +0.0161 in the SAME no-cut events, where neither is selection-affected. A single RHO
+cannot be right for both ends of the tournament.
+
+## GM-008 — the full round-pair matrix: the week effect is ~0.085, with ONE exception  ⭐
+
+The model represents within-week correlation as a single shared week effect, and that structure
+makes a falsifiable claim: all SIX round pairs must correlate equally. Measured on no-cut events
+only -- the sole place all six pairs share one unselected cohort:
+
+    pair    lag     corr        pair    lag     corr
+    R1-R2    1    +0.0905       R1-R3    2    +0.0833
+    R2-R3    1    +0.0996       R2-R4    2    +0.0887
+    R3-R4    1    +0.0161       R1-R4    3    +0.0709
+
+Five of six sit between +0.071 and +0.100. The structure is NOT lag decay -- averaged by lag it is
++0.069 / +0.086 / +0.071, flat, and the lag-1 average is dragged down solely by the outlier. It is
+also not a general late-tournament decay: R4 correlates perfectly normally with R1 (+0.0709) and
+R2 (+0.0887). What is missing is specifically the R3-R4 ADJACENCY, about 3.4 SE below the others.
+
+Read plainly: a constant week effect is the right SHAPE, its size is ~0.085 rather than the
+shipped 0.050, and one pair violates it. The natural mechanism for that one pair is CONTENTION --
+R3 sets the leaderboard, and R4 is then played under conditions R3 itself created (position,
+pairing, pressure, whether a player still has anything to play for). That is a feedback the model
+has no representation of, and it acts on exactly the pair where the correlation disappears.
+
+⚠️ n = 27 no-cut events. The five-pair cluster is solid; the R3-R4 exception rests on a modest
+sample and is PROMISING, not verified.
+
 ---
 
 # RESEARCH STATE
 
 ## VERIFIED
-(nothing yet this phase)
+- **event scoring dispersion is predictable from prior editions** (GM-004/005): persistence
+  +0.692 raw / +0.611 after field-knowledge, OOS MSE -49.8% / -45.1%, placebo 0/400. Probability
+  impact under test in GM-006.
+- **the within-event week effect is ~0.09, not the shipped RHO=0.05** (GM-007): +0.0954 on the
+  clean no-selection sample, stable in all three years, placebo p=0.000, and corroborated by the
+  two-round-average form. Decays through the week (R1->R2 +0.0905 vs R3->R4 +0.0161).
 
 ## PROMISING
 - spread scales with day difficulty (corr +0.271, 944 event-rounds) -- needs a PREDICTABLE
   difficulty proxy to be usable pre-tournament. GM-004.
 - R2 cut-pressure variance bump: right sign, right mechanism, absent in 2025 and in no-cut events.
+- the R3->R4 CONTENTION anomaly: five of six round pairs correlate ~+0.085, R3-R4 is +0.016
+  (GM-008). R4 still correlates normally with R1 and R2, so it is the adjacency that breaks, not
+  round 4. n=27 no-cut events.
 
 ## REJECTED
 - distance x par-5 count, and 7 other skill x par-mix pairings (GM-001)
