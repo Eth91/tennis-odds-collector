@@ -536,6 +536,47 @@ the Masters in Maine.
 (36.68,-76.92) is coastal Virginia and matches no U.S. Open venue I can place, so at least one row
 is still suspect. The structural fix is sound; the per-row audit is not complete.
 
+## GM-010 — does the MEASURED rho improve probabilities?  ❌ NO — and the reason matters
+
+The paired A/B for GM-007/008. A = rho 0.050 (frozen), B = rho 0.085 (measured three independent
+ways: the clean no-selection R1->R2 correlation +0.0954, stable in every year, placebo p=0.000,
+and corroborated by the two-round-average form). Same field, same seed, same cut rule, same sigma;
+CRN floor asserted at EXACTLY 0.0000000000. 75 events, 9,516 player-observations, 2026 untouched.
+
+    market     LL A       LL B      delta      slope A   slope B
+    cut        0.62004    0.62006   +0.00002     0.752     0.759
+    top20      0.43007    0.43043   +0.00036     1.030     1.063
+    top10      0.27986    0.28010   +0.00024     1.007     1.041
+    top5       0.17891    0.17900   +0.00009     0.982     1.018
+    win        0.05191    0.05198   +0.00006     1.086     1.127
+    summed     1.56080    1.56157   +0.00077
+
+THE SLOPES EXPLAIN IT. At rho=0.050 the placement markets are already very well calibrated --
+1.030, 1.007, 0.982, 1.086 against a target of 1.0. Raising rho puts more variance into the shared
+week component, which widens the 72-hole distribution, pulls every probability toward its base rate
+and FLATTENS the log-odds. Every placement slope moves further ABOVE 1.0, i.e. more under-confident.
+There was no room to widen: the distribution was already the right width.
+
+RECONCILING THIS WITH GM-007/008, because both cannot be casually true. The measurement is not in
+doubt -- it is the cleanest sample available, replicated per year, placebo-verified, and agreed by
+two functional forms. The leading explanation is that RHO IS NOT INDEPENDENTLY INTERPRETABLE IN
+THIS MODEL. SPREAD=1.30 was tuned on 2025 WITH rho fixed at 0.050, and its whole purpose is to
+widen the field's spread to fix probabilities that were too compressed. rho and SPREAD therefore
+push on the same quantity from opposite ends: rho widens each player's own 72-hole distribution
+(compressing relative differences), SPREAD widens the differences between players. Raising rho
+alone breaks a pair that was fitted together.
+
+THE TEST THAT WOULD SETTLE IT, not run: re-tune SPREAD on 2024 at rho=0.085, then compare
+(rho=0.085, SPREAD*) against (rho=0.050, SPREAD=1.30) on 2025 -- best-of-each rather than
+one-constant-at-a-time. Tuning SPREAD on 2025 and testing on 2025 would be circular, so it needs
+the earlier year.
+
+⚠️ THE GENERAL LESSON, and it applies to GM-004/006 as well. A constant in this model is not a
+measurement of the world that can be corrected in isolation; it is one member of a jointly-fitted
+set. Both verified findings of this phase -- dispersion predictability and the week effect --
+are REAL as measurements and NEITHER improves the model as a drop-in change. That is a coherent
+result, not a contradiction: the frozen model is at a local optimum in a coupled parameter space.
+
 ---
 
 # RESEARCH STATE
@@ -548,11 +589,15 @@ is still suspect. The structural fix is sound; the per-row audit is not complete
   +0.692 raw / +0.611 after field-knowledge, OOS MSE -49.8% / -45.1%, placebo 0/400. BUT the
   available lever is a +-6.6% sigma nudge, and GM-006 shows it does not improve probabilities
   (log-loss slightly worse, calibration slope slightly better). Real, and not worth acting on.
-- **the within-event week effect is ~0.09, not the shipped RHO=0.05** (GM-007): +0.0954 on the
-  clean no-selection sample, stable in all three years, placebo p=0.000, and corroborated by the
-  two-round-average form. Decays through the week (R1->R2 +0.0905 vs R3->R4 +0.0161).
+- **the within-event week effect is ~0.09, not the shipped RHO=0.05** (GM-007/008): +0.0954 on
+  the clean no-selection sample, stable in all three years, placebo p=0.000, corroborated by the
+  two-round-average form, and five of six round pairs agree. BUT GM-010 shows substituting it
+  makes probabilities WORSE (every placement slope moves further above 1.0) -- rho and SPREAD=1.30
+  were fitted together. Verified as a measurement; NOT a drop-in improvement.
 
 ## PROMISING
+- JOINT re-tune: SPREAD refitted on 2024 at rho=0.085, then (rho=0.085, SPREAD*) against
+  (rho=0.050, SPREAD=1.30) on 2025. The only clean way to ask whether the measured rho is usable.
 - spread scales with day difficulty (corr +0.271, 944 event-rounds) -- needs a PREDICTABLE
   difficulty proxy to be usable pre-tournament. GM-004.
 - R2 cut-pressure variance bump: right sign, right mechanism, absent in 2025 and in no-cut events.
@@ -572,7 +617,10 @@ is still suspect. The structural fix is sound; the per-row audit is not complete
 - SG as a main effect; personal course history; separate recent-form term (pre-existing)
 
 ## INTEGRATED
-(nothing yet -- the research model is still the frozen model)
+(nothing -- and that is the phase's headline. Both verified findings are real measurements that
+do NOT improve the model as drop-in changes: the dispersion lever is +-6.6% and too small to move
+a rank simulator, and the corrected rho degrades calibration because SPREAD was tuned against the
+old value. The frozen model sits at a local optimum in a coupled parameter space.)
 
 - refit `wind_factor` on the rebuilt weather: the live fit used the bad-coordinate lookup and
   106 events; corrected data covers 168. Production is frozen, so flagged not done.
@@ -602,3 +650,6 @@ is still suspect. The structural fix is sound; the per-row audit is not complete
 - A CALIBRATION SLOPE NEAR ZERO MEANS THE GRADER IS BROKEN, not that the model is uninformative.
 - AN A/B IN A STRIPPED-DOWN ENGINE MEASURES THE CHANGE, NOT THE MODEL. pga_sim has no tail
   recalibration, so its absolute slopes are not production's; only the between-arm delta transfers.
+- A CONSTANT IS NOT AN INDEPENDENT MEASUREMENT OF THE WORLD. rho and SPREAD push on the same
+  quantity from opposite ends and were fitted together; substituting a better-measured rho alone
+  made every calibration slope worse. Test coupled constants JOINTLY or not at all.
