@@ -336,6 +336,43 @@ WORTH KEEPING: OVERALL birdie skill is clearly useful -- deviance 0.76765 -> 0.7
 field-only, on 18,135 held-out player-rounds. Any birdie model should carry a shrunk player factor;
 it should not carry three.
 
+## GM-006 — does the dispersion multiplier improve PROBABILITIES?  ❌ NOT INTEGRATED
+
+The paired A/B for GM-004/005. A = one sigma (frozen), B = sigma x predicted dispersion from prior
+editions. Same field, same seed, same cut rule; the CRN floor was asserted at EXACTLY
+0.0000000000 before anything was read. 75 events, 9,516 player-observations, multiplier built from
+2023-24 only, 2026 untouched.
+
+    market     LL A       LL B      delta      slope A   slope B
+    cut        0.62049    0.62061   +0.00012     0.753     0.751
+    top20      0.43035    0.43045   +0.00010     1.070     1.061
+    top10      0.28014    0.28021   +0.00007     1.045     1.034
+    top5       0.17894    0.17900   +0.00006     1.024     1.011
+    win        0.05226    0.05240   +0.00014     1.109     1.077
+    summed     1.56219    1.56267   +0.00048
+
+SPLIT VERDICT, reported as one. Log-loss is worse on all five. Calibration SLOPE moves TOWARD 1.0
+on all four placement markets (top20 1.070->1.061, win 1.109->1.077) and marginally away on cut.
+Both movements are trivial in size.
+
+WHY SO SMALL, AND IT IS NOT THE FINDING THAT IS WRONG. The predicted multipliers have mean 0.997
+and sd 0.066 -- a typical +-6.6% nudge to sigma. Rank probabilities in this simulator are driven by
+the spread of player MEANS (SPREAD=1.30 exists precisely because shrunk means made fields look
+homogeneous and compressed every probability toward its base rate), and sigma enters second order.
+A 6.6% sigma change cannot move a rank distribution much, whatever it does to the width of one
+player's score.
+
+So GM-004 stands exactly as measured -- dispersion IS predictable, 45-50% better than the constant
+the model uses, placebo 0/400 -- and the lever available to exploit it is too small to matter. The
+effect is real; this intervention is not worth making.
+
+⚠️ A GRADING BUG WAS CAUGHT AND FIXED BEFORE THIS RESULT WAS BELIEVED. The first run skipped
+every player who was neither in `pos` nor `made` -- exactly the missed-cut players -- so `cut` was
+scored on a sample whose outcome was always 1 (the calibration slope came back 0.002, which is the
+tell) and top-N was scored only among survivors while the probabilities covered the whole field.
+Corrected: every player who STARTED is graded, with ties-inclusive probabilities matched to
+ties-inclusive positions. n went 5,363 -> 9,516 and the slopes went from 0.002 to 0.75-1.11.
+
 ---
 
 # RESEARCH STATE
@@ -345,8 +382,9 @@ it should not carry three.
   player factor beats field-only out of sample (Poisson deviance .76765 -> .76123, n=18,135).
   Par-5 birdie skill is genuinely distinct (partial +0.215) but does NOT improve prediction.
 - **event scoring dispersion is predictable from prior editions** (GM-004/005): persistence
-  +0.692 raw / +0.611 after field-knowledge, OOS MSE -49.8% / -45.1%, placebo 0/400. Probability
-  impact under test in GM-006.
+  +0.692 raw / +0.611 after field-knowledge, OOS MSE -49.8% / -45.1%, placebo 0/400. BUT the
+  available lever is a +-6.6% sigma nudge, and GM-006 shows it does not improve probabilities
+  (log-loss slightly worse, calibration slope slightly better). Real, and not worth acting on.
 - **the within-event week effect is ~0.09, not the shipped RHO=0.05** (GM-007): +0.0954 on the
   clean no-selection sample, stable in all three years, placebo p=0.000, and corroborated by the
   two-round-average form. Decays through the week (R1->R2 +0.0905 vs R3->R4 +0.0161).
@@ -391,3 +429,7 @@ it should not carry three.
 - "SOME PLAYERS ARE BETTER AT X" HAS FAILED THREE TIMES: streaky 8% real, Sunday 7%, wind 0%.
   Always decompose between-player variance against sampling noise BEFORE believing the spread.
 - WHEN EVERY VARIANT SHARES A SIGN, suspect one shared artifact, not many findings.
+- A VERIFIED EFFECT AND A USEFUL INTERVENTION ARE DIFFERENT THINGS. Dispersion is genuinely
+  predictable (45-50% MSE better) and the multiplier it implies is only +-6.6%, which a rank
+  simulator barely feels. Ask how big the LEVER is, not just how real the EFFECT is.
+- A CALIBRATION SLOPE NEAR ZERO MEANS THE GRADER IS BROKEN, not that the model is uninformative.
