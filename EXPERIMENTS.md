@@ -140,6 +140,73 @@ class         same as G2 passing a constant-0.5 model, and aggregate slope hidin
 
 ---
 
+## EXP-010 — Round Score markets (over/under a stroke count)
+
+First test of an entirely untested market family. Ladders, so pga_market splits them per line
+before devigging; a pooled devig would have priced every selection at a half or a third of value.
+Integer lines PUSH and were skipped, not graded as losses.
+
+    over side  n=192  book .523  realised .617  gap +.094  clustered SE .059  z = +1.59
+
+Blind over-betting reads +17.7% ROI, which is the shape of an edge. It is not one: z = +1.59 on
+7 event-rounds, and EXP-011 shows what is actually driving it.
+
+## EXP-011 — the birdie and round-score "edges" are ONE observation  ⭐ KILLED BOTH
+
+Fewer birdies IS a higher score, so "birdie unders profitable" and "round-score overs profitable"
+are not two confirmations. Per event-round gaps, correlated across the rounds carrying both:
+
+    corr(birdie-under gap, round-score-over gap)  -0.111   (7 event-rounds)
+    corr(field mean score, birdie gap)            +0.026
+    corr(field mean score, round-score gap)       +0.749
+
+The round-score "edge" is a CONDITIONS effect — the rounds simply played harder than the book
+priced them, and the model has no wind forecast. corr +0.749 with the field's own scoring is the
+whole result. Betting overs is betting that the weather beats the number, at 7 rounds of evidence.
+The birdie gap is NOT conditions-driven (+0.026) and is independent of it (-0.111), so it survives
+EXP-011 as a separate question — but EXP-004/006 already showed the edge there is the BOOK's.
+
+VERDICT: round-score overs REJECTED. The honest n was 7 event-rounds, not 192 selections.
+
+## EXP-012 — 2nd Round Leader (36-hole) vs close  ⭐ MARKET UNBETTABLE BY CONSTRUCTION
+
+Second field-wide observation after EXP-001, on a different round and a real dead-heat rule.
+
+SETTLEMENT HAD TO BE RESOLVED FIRST. "2nd Round Leader" can mean low round-2 score or low 36-hole
+total, and the model probability is completely different. Settled model-free from the book's own
+prices: corr(devigged prob, R1 score) = -0.716, and the five biggest price gains from 1RL to 2RL
+are exactly the five players who shot 65 in R1. It is the 36-HOLE market. (Both readings happened
+to have the same winner, so the outcome was robust — the model probability would not have been.)
+
+TWO SNAPSHOTS, ONE CLOSE. golf_moves holds this event under a padded AND a clean name, 69 closes
+each, stamped 09:30:06 and 12:05:02. Iterating rows into a dict mixes two snapshots 2.5h apart.
+Took the later (deadline = R2 first tee 12:10, so 12:05 is 5 min pre-tee) and used the earlier as
+a contamination control: 69/69 prices IDENTICAL, max relative move 0.0000 — the padded rows are
+duplicate writes, and no golf was played between them.
+
+Model priced by drawing only R2 on top of the known R1 (an unconditional sim would discard the
+head start the entire market is about). tau omitted deliberately: a common per-round shock cannot
+change a rank.
+
+    unconditional   model LL .06179  book .06387   -0.21 pts   winner rank 10 vs book 12
+    form-updated    model LL .06607  book .06387   +0.22 pts   winner rank 14 vs book 12
+    EV >= 3% flags: 0 (both)
+
+    corr(model, book) = +0.989      mean |model - book| = 0.0026
+    best runner in the field: EV -0.060      median EV -0.529      hold 26.7%
+
+TWO SEPARATE READINGS, AND ONLY ONE IS EVIDENCE. The log-loss gap is ONE winner's probability
+(.0402 vs .0349) — a single Bernoulli draw, worth nothing on its own. The zero flags are NOT a
+coin flip: they are deterministic given the model and the prices. The model agrees with the book
+at +0.989 and the vig is 26.7%, so the most favourable runner in a 68-man field is still a 6%
+loser. To clear +3% anywhere the model would have to beat the raw implied price by 10% relative.
+
+The rho=0.09 form update made it WORSE. Consistent with the rejected recent-form term.
+
+VERDICT: 2nd Round Leader OFF. Not "no edge found" — no edge is REACHABLE at this hold.
+Round-leader hold falls hard by round: 1RL 32.1%, 2RL 26.7%, 3RL 16.0%. Only 3RL is close to
+a price where model skill could ever show up, and it is BLOCKED until R3 completes.
+
 # REJECTED — do not rediscover
 
 | hypothesis | why | evidence |
@@ -157,6 +224,8 @@ class         same as G2 passing a constant-0.5 model, and aggregate slope hidin
 | rank-conditional offsets | fitted on a stale checkpoint (uniform cut_n=65); refit is worth -0.0001 | shipped cost +0.0162 summed LL on 2026 |
 | in-play birdie edge | no round shows significant disagreement-predicts-outcome | R3/R4 corr +0.044 (0.4 SE) |
 
+| rho form update on R1 residual | costs log-loss on the only market it was tried on | LL .06179 -> .06607, winner rank 10 -> 14 |
+
 # METHOD RULES EARNED THE HARD WAY
 - A cheap proxy metric has pointed OPPOSITE to tournament probabilities 4 times in one day.
   Never adopt a rating constant without a walk-forward on the markets, 2026 held out.
@@ -171,3 +240,15 @@ class         same as G2 passing a constant-0.5 model, and aggregate slope hidin
 - A freeze must record WIRING, not just values. A disabled correction is a model change.
 - Every market must declare its normaliser (pga_market). A guessed one produces a plausible fair
   price and a fake edge, silently.
+- TWO "EDGES" THAT ARE THE SAME PHYSICAL EVENT ARE ONE OBSERVATION. Fewer birdies is a higher
+  score. Before treating a second market as confirmation, correlate the per-event gaps and check
+  neither is just tracking conditions (round-score gap vs field mean score: +0.749).
+- RESOLVE SETTLEMENT BEFORE GRADING, FROM THE BOOK'S OWN PRICES. "2nd Round Leader" has two
+  readings with different model probabilities. corr(price, prior-round score) decides it model-free.
+  Grading the wrong rule yields a confident number about a question nobody asked.
+- CHECK THE HOLD BEFORE BUILDING THE MODEL. At a 26.7% overround the best runner in a 68-man field
+  was -6% EV with the model AGREEING with the book at +0.989. Screen markets by vig first; skill
+  cannot reach a price that keeps a quarter of the pool.
+- A DUPLICATE EVENT NAME IS A DUPLICATE SNAPSHOT. Two name variants each carried 69 closes at
+  timestamps 2.5h apart; a dict built by iteration silently mixes them. Take the latest before the
+  resolved deadline, and diff the earlier one as a free contamination control.
