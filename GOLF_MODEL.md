@@ -373,6 +373,41 @@ tell) and top-N was scored only among survivors while the probabilities covered 
 Corrected: every player who STARTED is graded, with ties-inclusive probabilities matched to
 ties-inclusive positions. n went 5,363 -> 9,516 and the slopes went from 0.002 to 0.75-1.11.
 
+## AUDIT — WAVE and WIND are already fitted; one of them was fitted on bad coordinates
+
+Checked before building anything, because the charter forbids rebuilding what exists.
+
+WAVE (charter 6) IS DONE AND IT IS REAL. `pga_wave.fit_wave()` measures the AM-vs-PM stroke gap
+WITHIN each event-round, so course, field and par mix cancel by construction. Cached fit:
+
+    n_gaps 479 over 120 events      mean gap +0.127 strokes      mean ABSOLUTE gap 0.671
+    beta 0.1007 strokes per km/h of wave wind-exposure gap       r = 0.375     assumed = false
+
+Two thirds of a stroke separates the waves in a typical event-round -- larger than most player
+edges -- and `pga_ruler.simulate()` already takes `wave` and `wave_shift`, so the model can carry
+it. Do not rebuild this.
+
+WHAT IS NOT DONE: the wave gap is only usable PRE-round if the AM/PM wind difference is known in
+advance, and that needs HOURLY wind. Both the old pipeline and the rebuilt pga_wx table store
+DAILY values (wind_speed_10m_max), which cannot distinguish a calm morning from a blown-out
+afternoon -- the two waves share one number. open-meteo's archive does serve hourly, so this is a
+data build, not a modelling problem. UNBLOCKED, not attempted.
+
+WIND (charter 5) IS FITTED BUT ON THE WRONG WEATHER. Cached `wind_factor`:
+
+    w = -0.00515 per km/h    n = 423 over 106 events    r = -0.201    mean wind 17.6 km/h
+
+The negative sign is CORRECT and is not a contradiction of GM-009's +0.44 strokes per 10 km/h:
+this coefficient multiplies a BIRDIE expectation, so more wind means fewer birdies means higher
+scores. The two agree.
+
+The problem is the input. This was fitted through `pga_context._course_latlon`, the same lookup
+that put the Masters in Augusta MAINE, the Memorial in Dublin IRELAND and the Puerto Rico Open in
+BRAZIL, and it covers 106 events where the rebuilt table covers 168. A refit on corrected
+coordinates is a concrete, well-scoped improvement to a LIVE production term.
+
+⚠️ NOT REFITTED. `wind_factor` is production and the simulator is frozen. Flagged for a decision.
+
 ---
 
 # RESEARCH STATE
@@ -410,6 +445,11 @@ ties-inclusive positions. n went 5,363 -> 9,516 and the slopes went from 0.002 t
 
 ## INTEGRATED
 (nothing yet -- the research model is still the frozen model)
+
+## PROMISING (continued)
+- refit `wind_factor` on the rebuilt weather: the live fit used the bad-coordinate lookup and
+  106 events; corrected data covers 168. Production is frozen, so flagged not done.
+- HOURLY wind would make the wave gap a PRE-round input. Daily max cannot separate the two waves.
 
 ## BLOCKED
 - 128 of 297 events still have no venue: 126 fail ESPN with HTTP 403, 2 refused as ambiguous
