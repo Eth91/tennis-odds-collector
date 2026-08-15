@@ -6,3 +6,4 @@
 | R3 | lower EV threshold to recover volume | 0.07/0.05 both WORSE (+8.76u vs +10.09u) | adds losers faster than winners | no |
 | R4 | narrow book to alt ladders | ladders 4-4 fwd vs main 9-6 | all-time ladder edge was in-sample | no |
 | R5 | USAGE_RATE_ADJ | tested, rejected pre-freeze | — | — |
+| R6 | harder shrink toward book fixes the anti-predictive residual | k=0/5/11 identical; k>=20 strictly worse | shrinking removes the BET, not just the bad probability -- p_adj is both signal and gate | only with a situation-gate that does not route through p_adj |
