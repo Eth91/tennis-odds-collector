@@ -339,6 +339,35 @@ timeout=60 + PRAGMA busy_timeout=60000 + WAL, and golf_moves' three LINES connec
 through a single _open_lines(). The file itself is now WAL, so readers no longer block on the
 writer at all.
 
+## EXP-016 — is the BOOK internally coherent? (model-free)  ⭐ CLEAN NEGATIVE
+
+Every test so far has been our number against theirs, and the book has won every time. This asks
+something the book cannot win by being smarter: do its own prices contradict each other? Three
+orderings are forced by logic alone for the same player in the same event.
+
+  A DOMINANCE  "Top 20 (Incl. Ties)" pays whenever "Top 20" (dead heat) pays and MORE -- a
+               five-way tie for 18th pays in full on one and a fraction on the other. So
+               odds_ties <= odds_dh always. EXP-015 made this worth asking: the same nominal
+               market holds 11.2% as dead-heat and ~30% incl.-ties, and a 19-point spread on two
+               products over one event is where a contradiction would hide.
+  B NESTING    top5 within top10 within top20 -> odds non-increasing, within each flavour.
+  C WIN        winning is a subset of top 5.
+
+Tested at RAW OFFERED ODDS, never on devigged probabilities: a devigged violation can be
+manufactured by the devig itself (EXP-015 moved the longshot end 142 points between methods),
+whereas a raw-odds violation is a statement about two prices actually on offer.
+
+    A dominance   0 violations / 207 pairs
+    B nesting     0 violations / 554 pairs (138 dead heat, 416 incl. ties)
+    C win vs top5 0 violations / 138 pairs
+
+FanDuel is internally coherent on every axis available. The 11.2% vs 30% hold gap is not an
+inconsistency -- it is the book pricing the tie probability and charging more vig on the product
+that wins more often. Both are coherent; one is simply dearer.
+
+VERDICT: no model-free inconsistency to exploit. This closes the last avenue that did not depend
+on out-predicting the book.
+
 # REJECTED — do not rediscover
 
 | hypothesis | why | evidence |
@@ -359,6 +388,8 @@ writer at all.
 | rho form update on R1 residual | costs log-loss on the only market it was tried on | LL .06179 -> .06607, winner rank 10 -> 14 |
 
 | 2-balls as a tight market | 5.26% median hold, same band as everything else; model loses | LL .674 vs book .665, disagreement corr -0.110 |
+
+| cross-market incoherence | book is coherent on every available axis | 0 violations in 207 dominance + 554 nesting + 138 win/top5 pairs |
 
 # METHOD RULES EARNED THE HARD WAY
 - A cheap proxy metric has pointed OPPOSITE to tournament probabilities 4 times in one day.
@@ -410,3 +441,5 @@ writer at all.
 - TWO DATABASES MEANS TWO LOCK FIXES. golf_moves was put into WAL after it deadlocked; golf_lines
   was left in DELETE mode and deadlocked the same way months later. Fix the class across every
   file it applies to, not the file that happened to fail.
+- TEST COHERENCE ON RAW ODDS, NOT DEVIGGED PROBABILITIES. A devigged "violation" can be an
+  artifact of the normaliser; a raw-price ordering violation is a fact about two live offers.
