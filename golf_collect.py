@@ -174,7 +174,15 @@ def main():
                 return                                             # silent: this fires ~250x/day
             print("golf_collect: dense pass (a tee lands within %d min)" % m)
 
-    con = sqlite3.connect(HERE / "golf_lines.sqlite")
+    # busy_timeout FIRST, then WAL: flipping journal_mode is itself lock-taking, and this
+    # process is the one holding the lock every 30 minutes. Readers of a DELETE-mode file
+    # are blocked for the whole write -- that is what killed the EXP-014 backfill.
+    con = sqlite3.connect(HERE / "golf_lines.sqlite", timeout=60)
+    con.execute("PRAGMA busy_timeout=60000")
+    try:
+        con.execute("PRAGMA journal_mode=WAL")
+    except sqlite3.Error:
+        pass        # already WAL, or a reader holds it; busy_timeout still applies
     con.execute("""CREATE TABLE IF NOT EXISTS golf_lines(
         collected_at TEXT, event TEXT, market TEXT, mtype TEXT, runner TEXT,
         handicap REAL, odds REAL)""")

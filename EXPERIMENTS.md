@@ -286,6 +286,59 @@ observation, and it points the same way as all the others.
 The infrastructure win is permanent regardless: ~24k ball price rows per week now resolve and will
 keep accruing, and DP World events remain unreachable only because the tee sheet is PGA-only.
 
+## EXP-015 — does EXP-013's strike-off survive a different devig? Testing my own claim
+
+EXP-013 struck every field-wide market off the programme using its HOLD. That verdict inherited an
+assumption: pga_market devigs PROPORTIONALLY, which makes per-runner vig constant by construction,
+so every runner in a 26.7% book reads as a 26.7% loser. Real books load longshots far harder. If
+so, the favourite end could be much cheaper than the book average and the strike-off would be an
+artifact of my own devig.
+
+Proportional vs power vs Shin (z = implied insider fraction), per-runner vig at each end:
+
+    favourites (5 shortest)   proportional +38.3%   shin  +25.7%   power +31.1%
+    longshots  (5 longest)    proportional +38.3%   shin +180.6%   power +66.6%
+
+THE BIAS IS REAL AND LARGE. Proportional devigging misallocates badly: it charges favourites ~12
+points more than Shin implies and longshots ~142 points less. Any "edge" found on a longshot under
+proportional devigging is the devig, not the market.
+
+Cheapest products once the vig is allocated (Shin, favourite end):
+    Top 20 (dead heat)   +9.4%      Top 10 (dead heat)  +10.5%
+    3rd Round Leader     +13.0%     Top 5  (dead heat)  +14.2%
+    2nd Round Leader     +22.2%     Win Only            +24.9%
+DEAD-HEAT top-N is 3-4x cheaper than the same market "incl. ties" (Top 20: 11.2% vs ~30% hold).
+
+VERDICT: STANDS. The cheapest favourite-end vig under the most generous devig is +9.4%, and every
+disagreement correlation measured anywhere in this programme is NEGATIVE (birdies -0.032, 2-balls
+-0.110, in-play +0.044 at 0.4 SE). Nothing here reaches 9.4%.
+
+BUT THE ORDERING IS REFINED, and it matters for the blocked work: Top 20 dead-heat, not Top 5 or
+the leader markets, is the cheapest field-wide product. When St Jude finishes, that is the one to
+grade.
+
+⚠️ This is a SENSITIVITY analysis and is labelled as one. Proving which devig is correct needs
+realised frequencies across the price range; the only field-market outcomes in hand are two single
+winners (1RL, 2RL). It shows the verdict is robust to the assumption, not that Shin is true.
+
+CAUGHT IN FLIGHT: the first run reported top-N vig of +40000%. Per-runner vig is implied/fair - 1
+and BOTH sides must be on one scale; rebuilding implied from the odds re-applied the target and
+put top-N out by N^2. Field-win markets hid it completely because their target is 1.
+
+## Infrastructure — golf_lines was still in DELETE journal mode
+
+The EXP-014 backfill died with 'database is locked' mid-read. Same class as the golf_moves
+deadlock, second database, never fixed there: golf_lines is 467 MB and written by golf_collect
+every 30 minutes, and in DELETE mode a writer blocks EVERY reader for the whole transaction. The
+writer was the least patient party in the system -- golf_collect opened it with no timeout
+argument at all, i.e. the 5-second default.
+
+Fixed on both sides, busy_timeout BEFORE the WAL switch (flipping journal_mode is itself
+lock-taking, which is the ordering that broke this the first time): golf_collect now opens with
+timeout=60 + PRAGMA busy_timeout=60000 + WAL, and golf_moves' three LINES connections route
+through a single _open_lines(). The file itself is now WAL, so readers no longer block on the
+writer at all.
+
 # REJECTED — do not rediscover
 
 | hypothesis | why | evidence |
@@ -346,3 +399,14 @@ keep accruing, and DP World events remain unreachable only because the tee sheet
   ASCII pass, so 'Højgaard' and 'Hojgaard' never match and the index silently splits in two.
 - REPORT WHY A PRICING LAYER REFUSED. 67 refused books read as an empty hold table because the
   loop skipped them silently — the same silent-zero class, self-inflicted inside an experiment.
+- PROPORTIONAL DEVIGGING MAKES PER-RUNNER VIG CONSTANT BY CONSTRUCTION. It is an assumption, not
+  a measurement. Shin puts the favourite end 12 points cheaper and the longshot end 142 points
+  dearer on the same books. Any edge found on a longshot under a proportional devig is the devig.
+- DEAD-HEAT AND INCL.-TIES ARE DIFFERENT MARKETS AT DIFFERENT PRICES, not two labels for one
+  product: Top 20 dead heat holds 11.2%, Top 20 incl. ties ~30%. Never pool them.
+- WHEN A VERDICT RESTS ON A METHOD CHOICE, RE-RUN IT UNDER THE ALTERNATIVES BEFORE BANKING IT.
+  EXP-013's strike-off survived; it might not have, and it was my own assumption that put it at
+  risk.
+- TWO DATABASES MEANS TWO LOCK FIXES. golf_moves was put into WAL after it deadlocked; golf_lines
+  was left in DELETE mode and deadlocked the same way months later. Fix the class across every
+  file it applies to, not the file that happened to fail.
