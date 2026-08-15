@@ -25,3 +25,10 @@ EXP-024	2026-08-15	base-rate vs MAIN lines	fd_lines	nearest-even collapse	+12.0p
 EXP-025	2026-08-15	why is the baseline broken?	fd_lines	coverage audit	wnba_lines is a 3-DAY ROLLING BUFFER; 1.5M rows = 3 days, not a month	ROOT CAUSE
 EXP-026	2026-08-15	base-rate on a REAL archive	11-day rebuilt archive	flagged vs non-flagged main	+0.1pp z=0.04 -- the situation carries NO signal	AXIS ANSWERED
 EXP-027	2026-08-15	is PR-002 capturable at all?	instrument check (no outcomes read)	funnel + first-quote timing	arm had an INVERTED n_without gate and logged 0 rows in 2 days; fixed, 55 candidates now qualify	INSTRUMENT REPAIRED
+EXP-028	2026-08-15	does a price exist at the event? (§30)	tick_archive 11d	availability matrix	46.6% NO pre-event price (market not yet posted); 36.3% tradable+measurable; pre-quote median 4.4min stale	TRADABLE UNIVERSE = 44%
+EXP-029	2026-08-15	price response at the flag (§10)	77 events, fd	matched placebo	paired diff -0.100pp t=-0.69 -- NO response above drift; ANY-change 35.1% vs 21.6%	NULL
+EXP-030	2026-08-15	time-to-reprice (§13)	73 events, 6 horizons	per-horizon placebo	all 6 positive (+0.26..+0.46pp) but t=0.89-1.50; horizons NESTED so not 6 confirmations	HOLD (underpowered)
+EXP-031	2026-08-15	book lead-lag (§14/15)	7421 both-book keys, 197k moves	follow-rate asymmetry	fd-leads 42.1% vs dk-leads 44.9%, z=-12.50 -- VOID, see EXP-032	VOID
+EXP-032	2026-08-15	audit EXP-031 (§40)	same 8104 keys	density + opposite-dir baseline	fd/dk sampling 2.34x asymmetric; opp-dir follow 41.0%/44.4% ~= same-dir 42.1%/44.9% -> CHURN, net gap only +0.6pp	NO INFO FLOW BETWEEN BOOKS
+EXP-033	2026-08-15	opener->close drift, flagged vs not	209 vs 8948 rungs, 11d	same-day baseline	flagged +0.89pp vs baseline -0.53pp = +1.417pp t=+4.34; flagged-before-open +1.733pp t=+4.22	PROMISING -> PR-004
+EXP-034	2026-08-15	audit EXP-033 (§40/§19)	same 9157 rungs	quintile + rung + trim	mean-reversion points WRONG way (flagged openers 0.509 vs 0.406, expensive zone); trim STRENGTHENS to t=+5.12; but only Q3 and points-mid significant of ~8 cells	SURVIVES, heterogeneous

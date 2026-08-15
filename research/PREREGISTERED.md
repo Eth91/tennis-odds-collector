@@ -191,3 +191,52 @@ timestamped before 2026-08-15 does not exist and cannot be graded.
 **BACKUP:** `research/pr002_shadow.sqlite` holds prospective data that cannot be recreated and
 was covered by no backup. Added as a research-only cron at 08:25 UTC, 15 min ahead of the
 off-box pull. `wnba_backup.py` was deliberately NOT edited — production stays frozen.
+
+## PR-004 — flagged rungs drift toward the over after the line opens (registered 2026-08-15)
+
+**CLAIM:** rungs the model flags drift toward the over, from the opening price to the last
+pre-game price, more than non-flagged rungs on the same days.
+
+**EFFECT (EXP-033, 11-day tick archive, FanDuel, n=209 flagged vs 8,948 non-flagged):**
+
+| | opener → last pre-game |
+|---|---|
+| flagged rungs | **+0.89pp** |
+| non-flagged baseline | **−0.53pp** |
+| difference | **+1.417pp, t = +4.34** |
+| flagged BEFORE the line opened (n=102) | +1.20pp → **+1.733pp vs baseline, t = +4.22** |
+
+**WHAT IT SURVIVED (EXP-034):**
+1. **Mean reversion — the §19 leakage kill-shot — points the WRONG WAY.** Drift by opening-price
+   quintile is strongly monotone (cheap overs +1.90pp → expensive overs **−5.11pp**), so a
+   price-triggered flag could trivially fake this. But flagged openers average **0.509** implied
+   vs 0.406 non-flagged: flagged rungs sit in the EXPENSIVE zone, where drift is normally ~0 to
+   negative. The confound predicts the opposite of what was measured.
+2. **Outlier trim makes it STRONGER.** Dropping the 5 largest and 5 smallest drifts from each side
+   gives +1.364pp at **t = +5.12** (vs +4.34 untrimmed). Not a few big moves.
+3. Positive in both usable opening-price quintiles.
+
+**WHAT IT DID NOT SURVIVE — why this is registered, not promoted:**
+1. **Heterogeneous and not pre-specified.** Within opening-price quintile only Q3 is significant
+   (+1.46pp, t=2.59); Q4 is +0.28pp (t=0.79). Within stat×level only points-mid holds (+2.25pp,
+   t=2.35) and **points-high is NEGATIVE** (−0.53pp, t=−1.34). ~8 cells were inspected; Bonferroni
+   needs |t| ~2.9, so no subcell clears on its own.
+2. **The flag remains price-dependent.** The direction check above is strong evidence, not proof.
+   A clean version must select rungs using price-free inputs only (`d_min`, `proj_min` — verified
+   price-free: `wnba_wowy.py` has zero `p_market`/`posted_props`/`de_vig`/`shrink` references).
+3. **11 days. One book. n=209.**
+
+**🚨 THE CAVEAT THAT MATTERS MOST — DRIFT IS NOT PROFIT.** EXP-018 already established on this
+system that market movement does **not** predict bet outcome: news recency predicted CLV at z=5.47
+and predicted whether the bet won at z=0.57, with the sign flipping across halves. So a robust
+drift finding may be economically worthless. **PR-004 must never be promoted on drift alone**; §29
+requires an economic test at the observed entry price.
+
+**PROMOTION BAR — all must hold on rungs opening AFTER 2026-08-15:**
+- n >= 120 newly observed flagged rungs
+- flagged-minus-baseline drift >= +0.8pp on the NEW rungs alone
+- t >= 2.9 on the NEW rungs alone (Bonferroni for the cells already inspected)
+- holds within opening-price quintile, not only in aggregate
+- **and a positive economic result at the entry price actually available** — drift alone fails it
+
+**FAILURE CONDITION:** difference <= 0, or sign flip, at n >= 120 → REJECTED.
