@@ -14,7 +14,8 @@ betting or outputs. 2026 is the protected holdout and is not read by any experim
 # AUDIT — what the frozen model actually does (2026-08-15)
 
 `pga_ruler.fit()` reads ONE table and five columns: `rounds(event_id, date, player, rnd, score)`.
-It is a round-score rating engine and nothing else. Everything below is either already measured
+It is a round-score rating engine -- but see the FIELD STRENGTH correction below: it also runs a
+two-pass field-quality adjustment internally, which the first draft of this audit missed. Everything below is either already measured
 into a constant, already tested and rejected, or absent.
 
 ## Already MEASURED (do not re-derive)
@@ -407,6 +408,26 @@ BRAZIL, and it covers 106 events where the rebuilt table covers 168. A refit on 
 coordinates is a concrete, well-scoped improvement to a LIVE production term.
 
 ⚠️ NOT REFITTED. `wind_factor` is production and the simulator is frozen. Flagged for a decision.
+
+## AUDIT CORRECTION — FIELD STRENGTH is already inside the rating fit (charter 16)
+
+My own audit said `pga_ruler.fit()` "reads ONE table and five columns" and left the impression that
+it does nothing but average them. That is right about the INPUTS and understates what it does with
+them. `fit()` runs a TWO-PASS fit:
+
+    pass 1   the naive fit
+    pass 2   subtracts each event-round's OWN field quality -- the mean pass-1 rating of everyone
+             who teed off in it -- so a round's baseline is its field mean OFFSET by that field's
+             quality:   fm = fm - fieldq[(event, rnd)]
+
+The reasoning is in the source: ratings are strokes-vs-field-mean, so without this "beating a
+Korn-Ferry-grade field by 2 counted the same as beating a signature field by 2, and opposite-field
+regulars were systematically flattered".
+
+CHARTER 16 IS THEREFORE ANSWERED. Field drift is corrected at the point it enters, which is the
+right place -- correcting it downstream in the simulator would leave the ratings themselves biased.
+`pga_context.field_strength()` is a SEPARATE implementation of the same idea and is called by
+nothing; it is dead code, not a missing feature.
 
 ---
 
