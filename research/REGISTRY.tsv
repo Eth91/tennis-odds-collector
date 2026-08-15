@@ -18,3 +18,5 @@ EXP-017	2026-08-13	does news-age survive chrono split + lead control?	all	diff +
 EXP-018	2026-08-13	does news-age predict the BET OUTCOME?	all	hat% + ROI	REJECTED for money: gap +2.9pp z=0.57 and SIGN FLIPS across halves (-7.2pp / +16.6pp). Predicts CLV, not profit	REJECTED
 EXP-019	2026-08-13	do other situation vars predict OUTCOME (845 rows)?	all	hat% + chrono	cascade 2-out 43.8% -14.6% stable; market/line-level UNSTABLE; line-moved-up 57.8% +8.7% but NOT pre-bet knowable and violates the speed rule	PROMISING (cascade only)
 EXP-020	2026-08-15	is the 2-out cascade penalty real?	845 clv rows	z + chrono thirds + within-market	gap -8.5pp z=-2.41 (Bonferroni needs 2.81); negative 3/3 thirds AND 3/3 markets	PRE-REGISTERED as PR-003
+EXP-021	2026-08-15	mechanism for the 2-out penalty?	845 clv rows	stratify on model inputs	survives proj (-8.1/-9.3pp) but clv carries almost no controls	INCONCLUSIVE -> EXP-022
+EXP-022	2026-08-15	is PR-003 redundant with PR-001?	836 rows w/ resolved out-minutes	stratify on vacated minutes	out-count IS vacated minutes (25.9/53.2/77.3); balanced stratum gap only -1.6pp z=-0.25	PR-003 WITHDRAWN

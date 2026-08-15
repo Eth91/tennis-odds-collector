@@ -87,7 +87,8 @@ lines continuously but the model only *acts* near tip. Testing this forward need
 T-12h/T-8h capture-and-evaluate path in the research twin. That is infrastructure, not a
 production change, and it does not touch v1.8.
 
-## PR-003 — the 2-out cascade penalty  (registered 2026-08-15, v1.8 untouched)
+## PR-003 — the 2-out cascade penalty  ❌ WITHDRAWN 2026-08-15 by EXP-022 (see REJECTED.md)
+## — text kept below for the record; it is NOT an open hypothesis and must not be graded —
 
 **CLAIM:** situations where exactly TWO players are out underperform both single-absence and
 3+-absence situations, and the effect is pre-bet knowable from the out list alone — no
