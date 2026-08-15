@@ -86,3 +86,72 @@ over-confident (the price has absorbed the information).
 lines continuously but the model only *acts* near tip. Testing this forward needs a
 T-12h/T-8h capture-and-evaluate path in the research twin. That is infrastructure, not a
 production change, and it does not touch v1.8.
+
+## PR-003 — the 2-out cascade penalty  (registered 2026-08-15, v1.8 untouched)
+
+**CLAIM:** situations where exactly TWO players are out underperform both single-absence and
+3+-absence situations, and the effect is pre-bet knowable from the out list alone — no
+probability variable involved.
+
+**RULE (frozen):** flag a situation as degraded when `count(out_player) == 2`. Nothing else
+changes. This is a *research* label; it gates nothing in production.
+
+**EVIDENCE (845 graded rows from wnba_clv, far wider than the 85 tracked bets):**
+
+| cut | 2-out | rest | gap |
+|---|---|---|---|
+| overall | 43.8% (n=340) | 52.3% (n=505) | **−8.5pp**, z = −2.41 |
+| chrono T1 | 48.9% | 51.3% | −2.3pp |
+| chrono T2 | 43.5% | 55.7% | −12.2pp |
+| chrono T3 | 32.9% | 49.5% | −16.5pp |
+| within points | 49.3% | 56.5% | −7.1pp |
+| within rebounds | 35.4% | 47.7% | −12.3pp |
+| within assists | 45.6% | 51.6% | −6.1pp |
+
+Negative in **3/3 chronological thirds and 3/3 markets**. Six same-sign cuts is stronger than
+z alone implies, but the cuts are not fully independent.
+
+**WHY IT COULD STILL BE FALSE:**
+1. **z = −2.41 does NOT clear the Bonferroni bar (~2.81) for ~10 variables screened on this
+   axis.** It is registered *because* it fell short, not despite it.
+2. **The pattern is NON-MONOTONE** — 1 out is fine (52.7%), 2 out is bad (43.8%), 3+ out is
+   neutral (51.1%). A genuine "more absence = more mispricing" story would be monotone. A
+   middle-bucket penalty is the shape a confound or a noise artifact takes.
+3. No mechanism is established. Until there is one, this is a pattern, not a finding.
+
+**PROMOTION BAR — all must hold on rows graded AFTER 2026-08-15** (the evidence above runs
+through 2026-08-14, so the cutoff must sit past it):
+- n >= 60 newly graded rows carrying an out-count
+- 2-out trails the rest by >= 5pp on the NEW rows alone
+- z <= −2.81 on the NEW rows alone
+- the sign holds in each half of the new window
+
+**FAILURE CONDITION:** gap >= 0, or sign flip, at n >= 60 → REJECTED.
+
+---
+
+## AXIS VERDICT — situation gate without p_adj (EXP-014..020)
+
+The question was whether a situation variable predicts realized market-relative error or
+future price movement, independently of p_adj. **Both halves are now answered:**
+
+**PRICE MOVEMENT — YES, robustly.** `corr(proj, clv) = +0.008`, so CLV is orthogonal to the
+projection. News recency then predicts it strongly: fresh (<=9h) +0.30 line movement vs stale
+(>24h) −0.27, z = 3.19 and 5.47 on independent chronological halves, and it is NOT the
+late-flag effect (it is *strongest* within the early-flag stratum, z = 6.69; corr(age, lead)
+= +0.301).
+
+**REALIZED OUTCOME — NO.** The same news-age variable does not predict whether the bet wins:
+gap +2.9pp, z = 0.57, and the sign FLIPS across halves (−7.2pp / +16.6pp). Market/line-level
+splits are chronologically unstable. Only the 2-out cascade survived structurally, and it
+misses the correction bar.
+
+**THE STANDING LESSON, SHARPENED:** being early on real information is *true and measurable* —
+the market does move toward us — and it still does not convert into profit in this population.
+CLV is not a sufficient proxy for edge here. Any future work that validates on CLV alone is
+measuring the wrong thing.
+
+**REJECTED ON THIS AXIS (do not re-test):** lead-to-tip vs CLV (corr −0.063, earlier is
+*worse*); line-movement-as-selector (57.8% vs 45.4%, z=1.98 — but only knowable after the fact
+and gating on the book having reacted violates the speed rule); market and line-level splits
+(chronologically unstable).
