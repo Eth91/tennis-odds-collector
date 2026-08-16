@@ -577,11 +577,68 @@ set. Both verified findings of this phase -- dispersion predictability and the w
 are REAL as measurements and NEITHER improves the model as a drop-in change. That is a coherent
 result, not a contradiction: the frozen model is at a local optimum in a coupled parameter space.
 
+## GM-014 — best-of-each, after re-tuning SPREAD at both rho values  ❌ 0.085 STILL LOSES
+
+GM-010 changed one coupled constant at a time, which I argued was the flaw. So SPREAD was re-tuned
+on 2024 separately at each rho, and the winners run head to head on 2025 -- tuning and testing in
+different years, because tuning on 2025 and testing on 2025 would be circular.
+
+    TUNE on 2024        SPREAD 1.15    1.30       1.45
+      rho 0.050          1.57468    1.57365*   1.57534
+      rho 0.085          1.57596    1.57418*   1.57488
+
+    HEAD TO HEAD on 2025, best config at each rho
+      rho 0.050  SPREAD 1.30    summed LL 1.56057
+      rho 0.085  SPREAD 1.30    summed LL 1.56154        delta +0.00097
+
+MY COUPLING HYPOTHESIS IS REFUTED. BOTH rho values pick the SAME SPREAD of 1.30, so the two
+constants are not trading off against each other the way I claimed -- the optimum does not move.
+And 0.085 loses anyway, best against best.
+
+Worth keeping from this: SPREAD=1.30 was tuned on 2025 in production, and tuning it independently
+on 2024 recovers 1.30 at both rho values. That constant is confirmed on a year it was not fitted on.
+
+## GM-015 — the "week effect" is mostly RATING ERROR  ⭐ RETRACTS GM-007's HEADLINE
+
+With coupling refuted the contradiction was still open: a correlation measured cleanly at +0.0954,
+replicated per year, placebo p=0.000 -- yet using it makes the model worse. The residual being
+correlated is (score - field mean - as-of rating), and it contains TWO things:
+
+    a genuine WEEK effect  -- the player is sharp or off THIS WEEK. This is what RHO models.
+    RATING ERROR           -- the rating is simply wrong for this player right now. This correlates
+                              ALL of that player's residuals, this week and every other week.
+
+A week effect cannot reach into a different week. Rating error can. So measure the reach, single
+rounds on both sides so the numbers are directly comparable:
+
+    WITHIN event   R1 vs R2, same event                    +0.0954   n=21,810   SE 0.0088
+    ACROSS events  R1 vs R1 of the NEXT event (7 days)     +0.0616   n=20,647   SE 0.0077
+    ACROSS events  R1 vs R1 two events later               +0.0254   n=19,606   SE 0.0081
+
+65% OF IT REACHES INTO THE NEXT WEEK. It is not a week effect. It is persistent player-level
+rating error that decays over a month or so -- and the simulator ALREADY prices that, through
+K_SHRINK and each player's sigma. Adding it again as RHO double-counts it, widening a 72-hole
+distribution that was already the right width, which is precisely the symptom GM-010 and GM-014
+found: every placement calibration slope pushed further above 1.0.
+
+    week-specific component ~ 0.0954 - 0.0616 = 0.034      shipped RHO = 0.050
+
+RHO=0.050 IS ALREADY RIGHT, and if anything slightly generous. GM-007's headline -- "the within-week
+effect is ~0.085, not 0.05" -- IS RETRACTED. The measurement was sound; the INTERPRETATION was
+wrong, because I attributed a persistent quantity to a transient cause and never checked its reach.
+
+INDEPENDENT CROSS-CHECK: the across-event decay found here (+0.0616 at one event, +0.0254 at two)
+matches the previously measured recent-form partials almost exactly (0.0646 flat, 0.0351 at a
+270-day half-life). That mechanism was already tested and rejected as "not convertible". Two
+separate routes arriving at the same numbers, and the same conclusion.
+
 ---
 
 # RESEARCH STATE
 
 ## VERIFIED
+- **SPREAD=1.30 confirmed on a year it was not fitted on** (GM-014): tuned independently on 2024
+  it recovers 1.30 at both rho values; production tuned it on 2025.
 - **birdie-making is 45% real skill** (GM-012): corr +0.518 across halves, and a shrunk overall
   player factor beats field-only out of sample (Poisson deviance .76765 -> .76123, n=18,135).
   Par-5 birdie skill is genuinely distinct (partial +0.215) but does NOT improve prediction.
@@ -589,11 +646,10 @@ result, not a contradiction: the frozen model is at a local optimum in a coupled
   +0.692 raw / +0.611 after field-knowledge, OOS MSE -49.8% / -45.1%, placebo 0/400. BUT the
   available lever is a +-6.6% sigma nudge, and GM-006 shows it does not improve probabilities
   (log-loss slightly worse, calibration slope slightly better). Real, and not worth acting on.
-- **the within-event week effect is ~0.09, not the shipped RHO=0.05** (GM-007/008): +0.0954 on
-  the clean no-selection sample, stable in all three years, placebo p=0.000, corroborated by the
-  two-round-average form, and five of six round pairs agree. BUT GM-010 shows substituting it
-  makes probabilities WORSE (every placement slope moves further above 1.0) -- rho and SPREAD=1.30
-  were fitted together. Verified as a measurement; NOT a drop-in improvement.
+- ~~the within-event week effect is ~0.09~~ **RETRACTED by GM-015.** The +0.0954 was real but
+  MISATTRIBUTED: 65% of it reaches into the NEXT event (+0.0616 at 7 days, +0.0254 two events
+  later), so it is persistent rating error, not a week effect. The week-specific part is ~0.034
+  and the shipped RHO=0.050 is already right. See GM-015.
 
 ## PROMISING
 - JOINT re-tune: SPREAD refitted on 2024 at rho=0.085, then (rho=0.085, SPREAD*) against
@@ -653,3 +709,7 @@ old value. The frozen model sits at a local optimum in a coupled parameter space
 - A CONSTANT IS NOT AN INDEPENDENT MEASUREMENT OF THE WORLD. rho and SPREAD push on the same
   quantity from opposite ends and were fitted together; substituting a better-measured rho alone
   made every calibration slope worse. Test coupled constants JOINTLY or not at all.
+- MEASURE THE REACH OF A CORRELATION BEFORE NAMING ITS CAUSE. A within-event correlation looks
+  like a week effect and may be a persistent rating error that happens to be visible inside a week.
+  The test is whether it survives into a DIFFERENT week; here 65% did, and the "week effect" was
+  mostly the rating being wrong. Naming a mechanism is a claim about reach, not just about size.
