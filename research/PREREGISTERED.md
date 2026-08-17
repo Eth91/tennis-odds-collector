@@ -240,3 +240,66 @@ requires an economic test at the observed entry price.
 - **and a positive economic result at the entry price actually available** — drift alone fails it
 
 **FAILURE CONDITION:** difference <= 0, or sign flip, at n >= 120 → REJECTED.
+
+## PR-004 VERDICT — 2026-08-15: the DRIFT is real, the STRATEGY is not. NOT EXECUTABLE.
+
+Tested per §29 at the actually-available entry price, on real settled outcomes.
+
+### TASK 1 — entry at OPEN vs entry at CLOSE, same selections
+
+| cohort | n | hit | at OPEN | at CLOSE | early-entry edge |
+|---|---|---|---|---|---|
+| all flagged | 204 | 44.6% | −25.67u, **−12.6%** | −30.06u, −14.7% | +2.1pp |
+| pre-market flagged | 101 | 49.5% | −3.08u, **−3.0%** | −5.51u, −5.5% | +2.4pp |
+| line existed first | 103 | 39.8% | −22.60u, −21.9% | −24.55u, −23.8% | +1.9pp |
+
+**The early-entry advantage is REAL and survivorship-immune** — it is a paired comparison on the
+identical 204 rows: open price minus close price = **+0.0281 decimal, t = +2.21**, worth +4.39u.
+PR-004's drift finding therefore stands as a *phenomenon*.
+
+**It is not a strategy.** Every cohort loses at both entry points. Entering earlier on a losing
+selection loses less; it does not win. +2.1pp cannot close a −12.6% gap. **REJECTED as executable.**
+
+⚠️ **This is NOT the production tracked record.** The 204 rungs are every rung the model flagged
+in `clv` — a far wider universe than the TOP-2 selections production actually bets (forward 13-10,
++11.1% ROI, n=22). This result says the BROAD flagged-rung universe loses; it does not contradict
+the narrow tracked selection, and must never be quoted as if it did.
+
+### TASK 2 — do pre-market flags carry information the opener lacks? NO POSITIVE SIGNAL
+
+Conditional on opening implied probability (the opener IS the market's probability estimate):
+
+| opener bin | flagged | non-flagged | gap | z |
+|---|---|---|---|---|
+| ≤0.495 | 39.2% (n=79) | 39.5% (n=924) | −0.3pp | −0.05 |
+| ≤0.664 | 47.1% (n=119) | 50.2% (n=806) | −3.2pp | −0.65 |
+| pre-market ≤0.495 | 47.6% (n=42) | 39.5% | +8.1pp | +1.05 |
+| pre-market ≤0.664 | 48.1% (n=54) | 50.2% | −2.1pp | −0.30 |
+
+Null, with the pre-market cohort flipping sign between bins.
+
+### 🚨 WHY THE NEGATIVE CANNOT BE CERTIFIED EITHER — the DNP-pricing confound
+
+`actual − opener` reads −6.30pp for flagged and **+3.05pp for non-flagged (t=+4.56)**. Taken at
+face value that means betting random non-flagged rungs beats their own opening price, which is
+absurd. The mechanism: **the opener prices in the chance the player does not play, and grading
+only retains players who DID play.** That silently removes priced DNP risk — and removes it
+unequally, because flagged rungs are **97.6% graded (204/209)** while non-flagged are **51.7%
+(4627/8948)**. Flagged players are beneficiaries who were always going to play, so they gain far
+less from the filter, and therefore look worse by construction.
+
+Restricting to `actual>0` does not fix it (that IS the filter). **Within-player matching does not
+fix it either** — the within-player difference is −10.87pp (t=−3.25), but a flagged day is by
+definition a day that player is certain to play, so the same asymmetry survives the match.
+
+⇒ **Correct verdict: NO POSITIVE INFORMATION DETECTED beyond the opener; the apparent
+ANTI-information is confounded and must not be reported as a finding.** Cleanly resolving this
+needs DNP-inclusive grading (scratched players graded as unders, which is what the bettor actually
+experiences), and the box-score archive does not currently retain the quoted-but-scratched set.
+Recorded as a DATA RISK, not a result.
+
+### WHAT SURVIVES FROM PHASE 3
+1. Flagged rungs drift toward the over after opening (+1.42pp, t=+4.34; trimmed t=+5.12).
+2. That drift is worth **+2.1 to +2.4pp of ROI** as a better entry, paired and survivorship-immune.
+3. It is **not enough to make the flagged universe profitable.**
+4. The flag carries **no detectable information beyond the opening price.**

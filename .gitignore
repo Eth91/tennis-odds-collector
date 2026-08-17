@@ -97,3 +97,4 @@ wnba_question_log.sqlite
 # regenerable from research/build_line_archive.py -- never commit the DB itself
 research/line_archive.sqlite*
 research/tick_archive.sqlite*
+research/rungs.sqlite*
