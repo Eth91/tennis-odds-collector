@@ -115,6 +115,47 @@ def box_actuals(date):
     return out
 
 
+def _norm_name(n):
+    """lowercase, accent-stripped, punctuation-free — so "A'ja Wilson", "Aja Wilson" and
+    "A\u2019ja Wilson" all collapse to one key."""
+    import unicodedata as _u
+    n = _u.normalize("NFKD", str(n))
+    n = "".join(ch for ch in n if not _u.combining(ch)).lower()
+    return " ".join("".join(ch if (ch.isalnum() or ch.isspace()) else " " for ch in n).split())
+
+
+def box_lookup(bx, player):
+    """Find `player` in a box dict, or None. Exact key first, then normalised, then a UNIQUE
+    substring match.
+
+    ⚠️ WHY THIS EXISTS. The caller treats "not found" as proof the player did not play, and voids
+    the bet. So a mere SPELLING mismatch was being reported as a confident DNP. Five rows were
+    voided this way for players who were in the box with full stat lines (Akoa Makani 11 pts on
+    07-19, Wheeler 12p/9a on 08-06) -- the same shape as every silent-zero bug here: an
+    unresolved lookup returned as a real answer.
+
+    ⚠️ AMBIGUITY MUST NOT RESOLVE SILENTLY. If two DIFFERENT players match, return None and let
+    the caller leave the row open. Guessing between two players is worse than not grading.
+    """
+    if not bx:
+        return None
+    hit = bx.get(player) or bx.get(str(player).lower().replace(".", ""))
+    if hit is not None:
+        return hit
+    tgt = _norm_name(player)
+    by = {}
+    for k, v in bx.items():
+        by.setdefault(_norm_name(k), v)
+    if tgt in by:
+        return by[tgt]
+    cand = [v for k, v in by.items() if tgt and (tgt in k or k in tgt)]
+    uniq = []
+    for v in cand:
+        if not any(v is u or v == u for u in uniq):
+            uniq.append(v)
+    return uniq[0] if len(uniq) == 1 else None
+
+
 def box_complete(date):
     """Did box_actuals(date) parse EVERY settled game on that date?
 
@@ -533,7 +574,7 @@ def grade():
                 # FALLBACK: the player game log lags/goes stale (Rae Burrell 7/15 -> log ended May 10) so a
                 # FINAL game silently never grades. The ESPN box score is fresh — grade from it, keyed by name.
                 bx = box_actuals(pred_date)
-                pa = bx.get(player) or bx.get(player.lower().replace(".", ""))
+                pa = box_lookup(bx, player)
                 if pa is not None:
                     actual = pa.get(stat)
             if actual is None:
@@ -551,7 +592,14 @@ def grade():
                     _age = (_dt.date.today() - _dt.date.fromisoformat(pred_date)).days
                     # FAIL CLOSED: only void on a COMPLETE box. "Not in the dict" means
                     # DNP only if every settled game that day actually parsed.
-                    if _age >= 2 and box_actuals(pred_date) and box_complete(pred_date):
+                    _bx = box_actuals(pred_date)
+                    # LAST LINE OF DEFENCE: never void as a DNP while the player is resolvable in
+                    # the box under ANY spelling. Absence must mean absence, not a failed match.
+                    if _bx and box_lookup(_bx, player) is not None:
+                        print(f"grade: NOT voiding {player} {stat} {pred_date} — present in the "
+                              f"box under a different spelling; leaving open to regrade")
+                        continue
+                    if _age >= 2 and _bx and box_complete(pred_date):
                         con.execute("UPDATE predictions SET result='void', graded=1 "
                                     "WHERE rowid=? AND graded=0", (rowid,))
                         graded += 1
