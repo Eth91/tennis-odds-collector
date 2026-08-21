@@ -98,3 +98,4 @@ wnba_question_log.sqlite
 research/line_archive.sqlite*
 research/tick_archive.sqlite*
 research/rungs.sqlite*
+research/live_odds.sqlite*
