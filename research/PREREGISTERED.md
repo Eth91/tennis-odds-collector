@@ -403,3 +403,60 @@ nothing has been re-tested to fit.
 **Separately recorded, NOT registered:** the +1.0 distance bucket is all-time +14.8% but forward
 −7.6%. It is the marginal case and it flipped sign across the freeze. Do not build a "take rungs
 within +1" rule on it.
+
+## PR-006 — relax the per-team cap from TOP-2 to TOP-3  (registered 2026-08-26, v1.8 untouched)
+
+**CLAIM:** the 3rd-best play on a team-game is profitable enough that taking it ADDS UNITS, even
+though it lowers ROI. Volume is the binding constraint (1.67 bets/day, +0.037u/day), so a
+positive-ROI addition is worth more than a higher percentage on fewer bets.
+
+**RULE (frozen, and the arm is named IN ADVANCE):**
+> Raise the per-team-game disjoint cap from 2 to **exactly 3**. Rank candidate players within a
+> team-game by `ev` descending, one entry per PLAYER (not per rung). Admit rank 3. **Do NOT admit
+> rank 4 or beyond.** Everything else unchanged.
+
+Evaluated on the **base-rung** universe (one rung per player-stat, nearest even money), which makes
+this **orthogonal to PR-005**: PR-005 acts WITHIN a player-stat, PR-006 acts ACROSS players. If both
+promote they compose; neither is evidence for the other.
+
+**EVIDENCE (base rungs, displaced plays ranked within their team-game):**
+
+| | record | hit% | units | ROI |
+|---|---|---|---|---|
+| rank 3 (what TOP-3 adds) | 13-9 | 59.1% | **+4.34u** | +19.7% |
+| rank 4 (NOT registered) | 0-4 | 0.0% | −4.00u | −100.0% |
+| current TOP-2 book | 53-29 | 64.6% | +23.06u | +28.1% |
+| **combined TOP-3 book** | 66-38 | 63.5% | **+27.40u** | +26.3% |
+
+Forward slice: rank 3 is 3-2, +0.94u (n=5). **Five bets — carries no weight; listed for
+completeness only.**
+
+**WHY IT COULD STILL BE FALSE:**
+1. Found by slicing existing data, n=22 all-time. +19.7% is not distinguishable from 0 at that size.
+2. **The within-team-game ranking shows NO measurable skill** — where a chosen and a displaced play
+   both graded, the chosen one returned more in only **7/21 (33%)**, z=−1.53. If the ranking cannot
+   order plays, "rank 3" is a near-arbitrary label and rank-3 results may not generalise.
+3. rank 4 at 0-4 is **n=4 and proves nothing** — it is the reason the rule stops at 3 by
+   construction, not by evidence.
+4. Adding bets adds variance and correlated exposure (a third bet on the same team-game shares
+   pace, officiating and game script with the first two).
+5. DNP-pricing confound applies in principle; both pools are model-flagged beneficiaries so scratch
+   risk should be similar, but this is NOT a paired comparison.
+
+**PROMOTION BAR — all must hold on rows graded AFTER 2026-08-26:**
+- n >= 25 newly graded rank-3 base rungs
+- rank-3 ROI >= +5% on the NEW rows alone
+- **clustered-by-slate t >= 2.5** on rank-3 ROI (PR-002 lesson: a bare ROI figure is satisfiable
+  by noise; the bar must name a significance threshold)
+- **TOP-3 book total units > TOP-2 book total units on the SAME slates** — the economic test, and
+  the one that can fail while ROI looks fine
+- **survives removing the 3 largest winners** (PR-002 lesson: 93%-of-profit-from-5-bets is not an
+  edge)
+
+**FAILURE CONDITION:** rank-3 ROI < 0, or TOP-3 units <= TOP-2 units, at n >= 25 → REJECTED.
+
+**SEASON NOTE:** at ~3 slates/week and a regular season ending in ~2 weeks, n>=25 will almost
+certainly NOT be reached in 2026. This bar is expected to carry into the NBA port. Do not lower it
+for convenience — a bar met early by shrinking it is not a bar.
+
+**NOT to be re-tested against pre-2026-08-26 data.**
