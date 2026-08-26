@@ -104,3 +104,38 @@ killed both experiments before they were written up.
 (each itself a 3-day window). One row per (date, player, stat, line, side) = last pre-game
 quote. This is the only WNBA line history that exists; the live DB cannot answer any question
 spanning more than 3 days. Research-only, imported by nothing in production.
+
+## PR-002 REJECTED — 2026-08-26 (931 graded rows, bar was n>=40)
+
+**It passed the LETTER of its bar and is still rejected. The bar was underspecified — that is my
+error, recorded below so the next pre-registration does not repeat it.**
+
+Letter-of-the-bar check: best bucket t10, ROI +10.83%, n=299, calibration gap −6.29pp → all three
+testable conditions PASS. Then the §40 audit:
+
+| audit | result |
+|---|---|
+| **the registered thesis** | **FALSIFIED.** PR-002 claimed MONOTONE decay — earlier is better, t12 > t10 > t8. Forward: **t12 +1.01%, t10 +8.54%, t8 +6.32%.** t12 is the WORST bucket, the reverse of the claim. |
+| **concentration** | **top 5 bets = 93% of all profit** (+23.70u of +25.52u). Remove them and it is **+1.82u, ROI +0.62%**. |
+| **significance** | clustered on slate: t = **+0.88**, 95% CI **[−13.3%, +34.9%]** — contains zero. Per-slate ROI: +100, +38, +29, +23, +9, +8, −3, −14, −37, −42. |
+| **selection** | I picked the best of 3 buckets post hoc. With 3 draws the max is biased up ~0.85·SE ≈ **10.4pp** — essentially the entire headline. |
+| what it actually bet | mean price **2.98**, hit **41.1%**, breakeven 33.6% — longshot alt rungs, not the main-line thesis. |
+
+**⚠️ TWO DEFECTS IN MY OWN BAR — fix these in every future pre-registration:**
+1. **No significance requirement.** "ROI >= +8%" can be met by noise at n=10 slates. Every future
+   bar must state a clustered t threshold, not a bare ROI number.
+2. **The lead bucket was never pre-specified.** "ROI at the chosen lead" let me choose the winner
+   after seeing all three. A bar must name the arm BEFORE the data exists, or test all arms jointly.
+Add: a bar should require the result to survive removing the top-N winners, since 93%-from-5-bets
+is not an edge.
+
+**The retrospective curve that motivated PR-002 does not replicate.** It showed monotone decay
+across 8 leads (t1440 +25.2% → tip −35.0%). Prospectively the ordering is gone. That retrospective
+curve was already flagged as carried by tiny 2025 cells; this confirms it.
+
+**Do not rebuild the "bet earlier in the window" thesis** without a mechanism and a bar that
+names its arm in advance. The shadow arm and its cron may keep running — capture is cheap and the
+data is reusable — but the hypothesis is closed.
+
+Related: this is the same shape as [[PR-004]] (real drift, no executable edge) and the WNBA house
+lesson that edge lives in PRICE, not in refining the thesis.

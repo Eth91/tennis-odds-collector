@@ -42,7 +42,8 @@ volume-recovery use is dead outright (high-vac suppressed = 39.0%, -26.8% ROI).
 Prior belief lowered. The promotion bar above is UNCHANGED -- it must still be met on rows
 graded after 2026-08-13, and this reversal is a reason to expect it will not be.
 
-## PR-002 — the 8–12h capture window  (registered 2026-08-13, v1.8 untouched)
+## PR-002 — the 8–12h capture window  ❌ REJECTED 2026-08-26 (see REJECTED.md)
+## — thesis falsified: decay is NOT monotone forward; 93% of profit from 5 longshots —
 
 **CLAIM:** stint-WOWY edge is monetizable at **T-8h to T-12h**, a window where book coverage is
 99.5–100% and the model is still *under*-confident, and it decays monotonically to strongly
