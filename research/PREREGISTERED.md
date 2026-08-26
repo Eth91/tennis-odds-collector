@@ -359,3 +359,46 @@ unfiltered book, at n >= 40 → REJECTED, recorded in REJECTED.md.
 
 **NOT to be re-tested against pre-2026-08-26 data.** That data found the hypothesis; it cannot
 also confirm it.
+
+### ⚠️ PR-005 AMENDMENT — 2026-08-26, before any forward row was graded
+
+**Requested: pre-register the min-gap rule separately. REFUSED — it is the same effect as PR-005,
+and registering it twice would repeat the PR-003/PR-001 collinearity error.**
+
+The min-gap-suppressed rungs went 11-6 (+29.9%), which looked like an independent finding pointing
+the OPPOSITE way to PR-005 (PR-005 removes extra rungs; relaxing min-gap adds them back). Both
+cannot be true as stated. Testing distance from the nearest-even line resolves it:
+
+| distance from base line | all-time | forward |
+|---|---|---|
+| **0.0** | 53-29, **+28.1%** | 20-11, **+26.3%** |
+| +1.0 | 13-8, +14.8% | 7-7, −7.6% |
+| +2.0 | 3-6, −21.5% | 1-4, −43.0% |
+
+Min-gap-suppressed rungs have **median distance 0.0** (mean 0.2, max 1.0); taken non-base rungs
+have median 1.0 (mean 1.7, max 4.0). So the suppressed rungs won *because they sit at the base*.
+`wnba_slip.py:735` claims "Base rung always kept", but the rule keeps the highest-EV rung, which is
+not always the one nearest even money — **min-gap sometimes drops the true base rung.** One effect,
+not two: value decays monotonically with distance from the base line.
+
+**THE DEFECT THIS EXPOSES IN PR-005 AS FROZEN.** The rule selects from `kept`, which is already
+post-min-gap. A rule that picks "the rung nearest even money" cannot do so if min-gap has already
+removed that rung. The rule was mis-specified, so the universe is corrected:
+
+> **AMENDED RULE:** apply the selection to the candidate set BEFORE min-gap suppression
+> (`kept + min-gap-dropped`). Group by `(pred_date, player, stat)`, keep the ONE rung minimising
+> `abs(odds - 2.00)`, ties to the lower line. Everything else in PR-005 is unchanged.
+
+**This is a specification fix, not tuning.** The justification is structural — the rule must be
+able to see the rung it is defined to pick. For full disclosure the amended universe also scores
+better (forward +26.3% vs +24.0%, +8.15u vs +7.43u), but the two produce **identical 20-11
+records**; they differ on 16 of 43 picks and grade the same, so the entire gap is PRICE, not
+selection. The amendment is worth ~0.7u forward and would not change a single win or loss.
+
+**THE PROMOTION BAR IS UNCHANGED** (n>=40 new base rungs, ROI>=+8%, base beats alt by >=15pp,
+filtered units >= unfiltered units, t>=2.9). Amended before any forward row was graded against it;
+nothing has been re-tested to fit.
+
+**Separately recorded, NOT registered:** the +1.0 distance bucket is all-time +14.8% but forward
+−7.6%. It is the marginal case and it flipped sign across the freeze. Do not build a "take rungs
+within +1" rule on it.
