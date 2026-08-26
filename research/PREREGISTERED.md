@@ -303,3 +303,59 @@ Recorded as a DATA RISK, not a result.
 2. That drift is worth **+2.1 to +2.4pp of ROI** as a better entry, paired and survivorship-immune.
 3. It is **not enough to make the flagged universe profitable.**
 4. The flag carries **no detectable information beyond the opening price.**
+
+## PR-005 — base-rung-only (collapse the alt ladder)  (registered 2026-08-26, v1.8 untouched)
+
+**CLAIM:** within a player-game-stat the model should take ONE bet — the rung nearest even money —
+and the additional ladder rungs it currently stacks on top are a net drag.
+
+**RULE (frozen, deterministic, outcome-independent):**
+> Group tracked overs by `(pred_date, player, stat)`. Keep exactly the ONE rung minimising
+> `abs(odds - 2.00)`. Drop every other rung in the group. Ties break to the LOWER line.
+> Nothing else changes — same flags, same gates, same TOP-2.
+
+**WHY THIS DEFINITION AND NOT THE OTHER ONE.** The obvious alternative is "keep rungs where the
+book posted both sides" (`odds_other > 1`). Rejected as unfreezable: `odds_other` is present on
+only **59% of forward rows** (83% pre-freeze — it was backfilled for rows logged before
+2026-07-13, so history overstates future coverage), and it would drop whole player-stats rather
+than collapse a ladder. It is also not a clean proxy for line position: one-sided rungs price as
+short as 1.80–1.93. The two definitions agree on only **22/26** forward groups, which is exactly
+why one had to be chosen BEFORE grading rather than after.
+
+**EVIDENCE (forward, since the 7/31 freeze, under the frozen Definition B):**
+
+| | record | hit% | units | ROI |
+|---|---|---|---|---|
+| **base rungs only** | **20-11** | 64.5% | **+7.43u** | **+24.0%** |
+| alt/ladder rungs only | 3-9 | 25.0% | −5.51u | −45.9% |
+| all rungs (status quo) | 23-20 | 53.5% | +1.92u | +4.5% |
+
+Cross-check under Definition A: base 16-10 / +16.1%, alts 7-10 / −13.3%. Same sign, weaker
+magnitude — so the honest range is **+16% to +24%**, not a point estimate.
+
+**WHY IT COULD STILL BE FALSE:**
+1. **Found by slicing the same forward sample it would be judged on.** This is the single reason it
+   is pre-registered rather than shipped.
+2. **The "alts lose" half is nearly all noise.** n=12 graded alt rungs forward. −45.9% on 12 bets
+   is not evidence of anything. The load-bearing half is "base rungs win", n=31.
+3. **Alts are SUPPOSED to hit less.** They are longshots (avg odds 2.55–2.77, breakeven 36–39%).
+   Judge on ROI, never hit% — a lower hit rate at a longer price can still be correct.
+4. **It cuts volume ~30–40%**, and volume is already the binding constraint on total units
+   (1.67 bets/day, +0.037u/day). A higher ROI on fewer bets can still mean FEWER UNITS.
+   That is why the bar below is written on units, not ROI alone.
+5. Related but separate: the min-gap-suppressed rungs went 11-6 (+29.9%). Do NOT fold that in —
+   it is a different rule and would be a second unregistered slice.
+
+**PROMOTION BAR — all must hold on rows graded AFTER 2026-08-26:**
+- n >= 40 newly graded base rungs
+- base-rung ROI >= +8% on the NEW rows alone
+- base rungs beat alt rungs by >= 15pp ROI on the NEW rows alone
+- **total units of the FILTERED book >= total units of the UNFILTERED book on the same slates**
+  (the volume-cut test — this is the one that can fail while ROI looks fine)
+- t >= 2.9 on the base-vs-alt ROI difference (Bonferroni for the ~6 slices already inspected)
+
+**FAILURE CONDITION:** base-rung ROI <= 0, or the filtered book returns fewer units than the
+unfiltered book, at n >= 40 → REJECTED, recorded in REJECTED.md.
+
+**NOT to be re-tested against pre-2026-08-26 data.** That data found the hypothesis; it cannot
+also confirm it.
