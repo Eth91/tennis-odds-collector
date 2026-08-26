@@ -460,3 +460,36 @@ certainly NOT be reached in 2026. This bar is expected to carry into the NBA por
 for convenience — a bar met early by shrinking it is not a bar.
 
 **NOT to be re-tested against pre-2026-08-26 data.**
+
+### ⚠️ PR-005 SECOND AMENDMENT — 2026-08-26: revert to the POST-min-gap universe, and PROMOTED EARLY
+
+**Two changes, both operator decisions, both recorded before any epoch row was graded.**
+
+**1. The universe reverts to POST-min-gap (i.e. the ORIGINAL frozen definition).** The first
+amendment moved selection to the pre-min-gap candidate set on the structural argument that a rule
+picking "the rung nearest even money" must be able to see every rung. The operator has decided to
+keep min-gap as-is, so production selects from the min-gap survivors — and **the registered rule
+must test what actually ships**, or the pre-registration validates something nobody is betting.
+Cost of the revert: ~0.7u forward (+24.0% vs +26.3%), and it changes no win or loss — the two
+universes produced identical 20-11 records. Live consequence on 2026-08-26: min-gap suppressed
+Burke 10.5 @ 2.04, so the selection takes 9.5 @ 1.87 instead.
+
+**2. SHIPPED EARLY at n=31, before the bar was met.** v1.9 (2026-08-26) applies the filter to the
+board, the alert and the record. **PR-005 REMAINS OPEN AND UNVALIDATED** — shipping it does not
+promote it. The promotion bar is unchanged and still runs on rows graded after 2026-08-26:
+n>=40, ROI>=+8%, base beats alt by >=15pp, filtered units >= unfiltered units, t>=2.9.
+
+**WHY SHIPPING EARLY IS DEFENSIBLE HERE, and where the risk sits:**
+- The evidence is unusually stable: base-rung hit% moved 64.7% -> 64.5% across the 7/31 freeze
+  while the headline number halved. Almost nothing else in this system held its rate.
+- The excluded rungs KEEP GRADING, so the counterfactual stays measurable — this is a trial with
+  a live control arm, not a deletion.
+- ⚠️ But n=31 is small, the ladder arm is n=22, and **PR-002 has just demonstrated that a
+  pre-registered result at this sample size can reverse outright.** If the epoch rows disagree
+  with the pre-epoch evidence, revert rather than rationalise.
+
+**REVIEW DUE 2026-09-02** (1 week). Compare, on epoch rows only: base rungs actually bet vs the
+ladder rungs excluded-but-graded. If the ladder outperforms, revert v1.9.
+
+**⚠️ RECORD EPOCH.** Rows from 2026-08-26 are selected under a different rule. Never pool them
+with earlier rows. History verified unchanged: all-time 60-40 / +20.39u, forward 23-20 / +1.92u.
