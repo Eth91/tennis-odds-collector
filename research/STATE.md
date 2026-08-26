@@ -67,6 +67,13 @@ can subsequent repricing be predicted from information available before the move
   Loop may verify it is *collecting*; it may not read its results.
 
 ## SETTLED — do not re-open
+- **The volume decline is STRUCTURAL, not a regression (EXP-043).** Same 16 distinct out-players
+  over 23 forward days vs 16 pre-freeze days; beneficiaries per injury 1.81 to 1.13; rungs per
+  beneficiary 4.0 to 2.4; slates/week 6 to 3 as the season ends. The n_elev floor rising 4.0 to 8.0
+  is players ACCUMULATING elevated games, not a gate tightening. Do not hunt for a broken gate.
+- **PR-002 REJECTED (EXP-042).** Passed the letter of its bar and failed the evidence. Two bar
+  defects never to repeat: no significance requirement, and the arm was not pre-specified.
+
 - **The situation carries no outcome signal (+0.1pp, z=0.04).** Any edge is on the PRICE side.
   This is what motivates Phase 3.
 - **CLV is not a sufficient proxy for edge.** News recency predicts CLV strongly (z=5.47) and
