@@ -26,6 +26,22 @@ sys.path.insert(0, str(ROOT))
 DB = HERE / "cascade_watch.sqlite"
 
 
+
+_DATES = {}
+
+
+def _played_dates(name, pl, W):
+    """Dates a player logged real minutes. Cached — the scan asks repeatedly."""
+    if name not in _DATES:
+        p = pl.get(name)
+        try:
+            lg = (W.game_log(p["id"]) or []) if p else []
+        except Exception:                                             # noqa: BLE001
+            lg = []
+        _DATES[name] = {str(g.get("date"))[:10] for g in lg if (g.get("min") or 0) > 0}
+    return _DATES[name]
+
+
 def main():
     import wnba_tonight as T
     import wnba_wowy as W
@@ -60,6 +76,13 @@ def main():
         if p.get("min", 0) >= 20 or p.get("pts", 0) >= 10:
             feed.setdefault(p["team"], set()).add(name)
 
+    def _n_without(ben, outs):
+        """Games the beneficiary played with NONE of `outs` available — production's n_without."""
+        s_ = set(_played_dates(ben, pl, W))
+        for o in outs:
+            s_ -= _played_dates(o, pl, W)
+        return len(s_)
+
     slate = dt.datetime.now(dt.timezone(dt.timedelta(hours=-4))).date().isoformat()
     led = sqlite3.connect(f"file:{ROOT/'wnba_ledger.sqlite'}?mode=ro", uri=True, timeout=30)
     ledger = {}
@@ -69,6 +92,14 @@ def main():
             ledger.setdefault(team, set()).update(
                 x.strip() for x in str(outs or "").split(",") if x.strip())
     led.close()
+
+    beneficiaries = {}
+    led2 = sqlite3.connect(f"file:{ROOT/'wnba_ledger.sqlite'}?mode=ro", uri=True, timeout=30)
+    for team, who in led2.execute(
+            "SELECT team, player FROM predictions WHERE pred_date=?", (slate,)):
+        if team:
+            beneficiaries.setdefault(team, set()).add(who)
+    led2.close()
 
     rows, drifts = [], 0
     for team, fouts in sorted(feed.items()):
@@ -83,16 +114,34 @@ def main():
         except Exception:                                             # noqa: BLE001
             hrs = None
         louts = ledger.get(team, set())
-        # DRIFT = the feed knows about an impact out the ledger's cascade never used, BEFORE tip.
-        # After tip a stale cascade is correct behaviour, not a fault — so only pre-tip counts.
-        missing = fouts - louts
+        # DRIFT = the feed knows an impact out the cascade never used, BEFORE tip, AND the
+        # beneficiary would STILL have a usable sample with it included.
+        #
+        # ⚠️ THE NAIVE VERSION (feed_outs - ledger_outs) IS WRONG AND CRIED WOLF IMMEDIATELY.
+        # wnba_alert.py:368 trims the cascade when `n_without < 2` — with six TOR outs on
+        # 2026-08-28, Isabelle Harrison had ZERO games without all six, so the model correctly
+        # shrank to three (n_without=4). That is the gate working, not a fault. A monitor that
+        # reports correct behaviour as a failure trains you to ignore it.
+        #
+        # So an out is only "missing" if adding it back keeps n_without >= 2. Anything the sample
+        # cannot support is EXPECTED TRIMMING and is recorded, not flagged.
+        missing = set()
+        for cand in (fouts - louts):
+            for ben in beneficiaries.get(team, ()):
+                if _n_without(ben, louts | {cand}) >= 2:
+                    missing.add(cand)
+                    break
+        # NOT a fault flag. n_without=2 merely PASSES the gate; the model appears to prefer a
+        # deeper sample over a deeper cascade (TOR 2026-08-28: it took 3 outs at n_without=4 when
+        # 4 outs at n_without=2 also qualified). Recorded as an open question about cascade DEPTH,
+        # never paged on — the gate is working either way.
         drift = 1 if (missing and louts and hrs is not None and hrs > 0) else 0
         drifts += drift
         rows.append((now, slate, team, round(hrs, 2) if hrs is not None else None,
                      ",".join(sorted(fouts)), ",".join(sorted(louts)), drift))
         if drift:
-            print(f"  ⚠️ DRIFT {team}: feed has {sorted(missing)} that the cascade never used, "
-                  f"{hrs:.2f}h BEFORE tip")
+            print(f"  SHALLOW {team}: cascade omits {sorted(missing)} though the sample supports it "
+                  f"({hrs:.2f}h before tip) — a DEPTH CHOICE, not a fault")
     con.executemany("INSERT OR IGNORE INTO watch VALUES(?,?,?,?,?,?,?)", rows)
     con.commit()
     n = con.execute("SELECT COUNT(*) FROM watch").fetchone()[0]
