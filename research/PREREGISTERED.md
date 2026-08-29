@@ -493,3 +493,65 @@ ladder rungs excluded-but-graded. If the ladder outperforms, revert v1.9.
 
 **⚠️ RECORD EPOCH.** Rows from 2026-08-26 are selected under a different rule. Never pool them
 with earlier rows. History verified unchanged: all-time 60-40 / +20.39u, forward 23-20 / +1.92u.
+
+## PR-007 — exclude `basis=volume`  (registered 2026-08-29, v1.10 untouched)
+
+**CLAIM:** `basis=volume` selections are a losing cohort and excluding them raises total units.
+`elevated` and `role_flip` are both ROLE-CHANGE theses — a player's role genuinely changes because
+someone is out. `volume` is a usage-shape argument, the arm least connected to the role-change
+story that is this system's only established edge.
+
+**RULE (frozen, arm named in advance):** drop a tracked bet when `basis == "volume"`. Nothing else
+changes. Applied on top of the v1.10 base-rung record.
+
+**EVIDENCE (forward, base-rung record):**
+
+| basis | record | hit% | units | ROI |
+|---|---|---|---|---|
+| elevated | 15-5 | 75.0% | +9.12u | +45.6% |
+| role_flip | 4-1 | 80.0% | +2.54u | +50.8% |
+| **volume** | **3-6** | **33.3%** | **−3.55u** | **−39.5%** |
+
+Excluding volume moves the forward book from **+8.11u to +11.66u (+3.55u)**.
+The in-sample/forward collapse is the tell: volume was **5-1 (+79.8%) pre-freeze** and **3-6
+forward** — a ~50pp drop against the system's overall 64.9% → 64.7%. Nearly all the overfit lived
+in this arm.
+
+**⚠️ "NON-POINTS GOES 7-1" IS NOT A SEPARATE FINDING — DO NOT REGISTER IT.**
+All 9 forward volume bets are `points` bets, so volume is FULLY NESTED inside points and the two
+look like independent signals while being one. The 2×2 settles it:
+
+| | volume | not volume |
+|---|---|---|
+| points | 3-6 (−39.5%) | 12-5 (+33.9%) |
+| non-points | *(empty cell)* | 7-1 (+73.8%) |
+
+Controlling for volume, non-points vs points is **+16.9pp, z=+0.92 — no residual market effect**.
+The market split is an artifact of the overlap. Registering both would repeat the PR-003/PR-001
+collinearity error.
+
+**WHY IT COULD STILL BE FALSE:**
+1. **n=9 forward, and it is not significant.** Within points, not-volume vs volume is +37.3pp at
+   **z=+1.83**; elevated-vs-volume across all markets is z=+2.14. Both sit under the ~2.8 needed
+   for the ~10 fields screened. This is registered BECAUSE it falls short.
+2. **Two volume bets are pending right now** (Burke 08-28, Harrison 08-29). If both win it is 5-6
+   and the case softens materially. The result is one slate from looking different.
+3. **The 2×2 has an EMPTY CELL** (non-points & volume). The design is unbalanced, so volume and
+   market can never be fully separated on this data — only a future non-points volume bet can.
+4. Two of the three wins are very recent (08-26, 08-28), so the arm may be improving, not decaying.
+
+**PROMOTION BAR — all must hold on rows graded AFTER 2026-08-29:**
+- n >= 25 newly graded `basis=volume` bets
+- volume-basis ROI <= 0 on the NEW rows alone
+- non-volume beats volume by >= 20pp ROI on the NEW rows alone
+- **clustered-by-slate t >= 2.5** (PR-002 lesson: a bare ROI figure is satisfiable by noise)
+- **total units of the FILTERED book > the UNFILTERED book on the same slates** — the economic
+  test; an exclusion cuts volume, and volume is the binding constraint
+- **survives removing the 3 largest volume winners** (PR-002 lesson)
+
+**FAILURE CONDITION:** volume ROI > 0, or filtered units <= unfiltered units, at n >= 25 → REJECTED.
+
+**SEASON NOTE:** ~9 volume bets accrued in two months, so n>=25 will NOT be reached in 2026. This
+carries into the NBA port. Do not lower the bar for convenience.
+
+**NOT to be re-tested against pre-2026-08-29 data.**
