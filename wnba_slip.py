@@ -762,7 +762,13 @@ def current_selection(rows, commit=False):
     # ⚠️ THE DROPPED RUNGS ARE NOT DELETED. They stay in `predictions` and keep grading, so the
     # ladder is still tracked in the background for comparison. Only the SELECTION excludes them.
     # This runs BEFORE the `forced` re-add, so a bet the user actually placed still bypasses it.
-    BASE_RUNG_EPOCH = "2026-08-26"
+    # 2026-08-29 operator decision: THE FORWARD RECORD IS BASE-RUNG ONLY. Moved from
+    # 2026-08-26 back to the 7/31 freeze so the whole forward window is counted on one
+    # rule. This SUPERSEDES the 2026-08-26 "new epoch, pooled history kept" choice: the
+    # forward window is now RESTATED, not split. Pre-freeze history is still untouched.
+    # Played-bet marks still bypass this (the filter runs before the `forced` re-add), so
+    # a ladder rung with real money on it keeps counting.
+    BASE_RUNG_EPOCH = "2026-07-31"
     _bygrp2 = defaultdict(list)
     for r in kept:
         _bygrp2[(r.get("pred_date"), r.get("player"), r["stat"])].append(r)

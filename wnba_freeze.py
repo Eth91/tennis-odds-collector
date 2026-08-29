@@ -25,9 +25,24 @@ FILES = ["wnba_alert.py", "wnba_slip.py", "wnba_tonight.py", "wnba_wowy.py",
          "wnba_fd_search.py", "wnba_ladder_guard.py",
          "wnba_premise_sweep.py", "wnba_availability.py"]
 MODULES = ("wnba_slip",)
-VERSION = "v1.9"
-FROZEN_ON = "2026-08-26"
+VERSION = "v1.10"
+FROZEN_ON = "2026-08-29"
 DECISION = (
+    "v1.10 (2026-08-29) — THE FORWARD RECORD IS BASE-RUNG ONLY. BASE_RUNG_EPOCH moved from "
+    "2026-08-26 back to the 7/31 freeze, so the ENTIRE forward window is counted on one "
+    "rule instead of being split. This SUPERSEDES the 2026-08-26 'new epoch, pooled "
+    "history kept' decision — the forward window is now RESTATED. "
+    "EFFECT: forward 25-21 / +2.60u / +5.6% becomes 22-12 / 64.7% / +8.11u / +23.8%. "
+    "13 ladder rungs leave the forward record; they still exist in `predictions` and still "
+    "grade, so the excluded arm stays measurable. "
+    "⚠️ PRE-FREEZE HISTORY IS UNTOUCHED (37-20 / +18.47u, verified identical). Only rows "
+    "on or after 2026-07-31 are affected. "
+    "⚠️ PLAYED BETS STILL COUNT. The filter runs before the `forced` re-add, so a ladder "
+    "rung with real money on it is never removed from the record (4 such rows). "
+    "⚠️ THIS IS STILL PR-005, WHICH REMAINS OPEN AND UNVALIDATED at n=34. Quoting the "
+    "restated number is an operator reporting decision, NOT evidence that the filter works. "
+    "— prior v1.9 / v1.8 decisions follow —"
+    "\n\n"
     "v1.9 (2026-08-26) — BASE-RUNG EPOCH. Operator-authorised 1-week trial. Within a "
     "(date, player, stat) group the selection now keeps ONLY the rung nearest even money; "
     "the extra ladder rungs come off the BOARD, the ALERT and the RECORD together, because "
