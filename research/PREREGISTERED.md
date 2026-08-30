@@ -555,3 +555,64 @@ collinearity error.
 carries into the NBA port. Do not lower the bar for convenience.
 
 **NOT to be re-tested against pre-2026-08-29 data.**
+
+## PR-008 — NBA port: POINTS-ONLY at margin ≥ 3.5 (registered 2026-08-30, pre-season)
+
+**CLAIM:** on REAL lines the NBA beneficiary premise survives only in `pts`. PRA — the stat the
+port was designed around — does not survive at any margin. The live config should flag points
+only, and gate off pra/reb/ast/fg3m.
+
+**RULE (frozen, single arm named in advance):**
+> Flag OVERS on `player_points` only, when `proj − real_main_line ≥ 3.5`.
+> `pra`, `reb`, `ast`, `fg3m` are GATED OFF. Real main line = the rung nearest even money, best
+> over price across US books. Nothing else changes.
+
+**WHY 3.5 AND NOT THE BEST-SCORING MARGIN.** 5.5 scored highest on the fit half (+3.19%) and 5.0
+best on the hold half (+8.29%). **I deliberately did NOT take either.** 3.5 is chosen on two
+outcome-independent grounds: it is the LOWER BOUNDARY of the contiguous positive band, and it
+carries the most volume (n_hold 382 vs 114 at 5.5) — and volume is the binding constraint on total
+units. Picking the max would be the best-of-N selection that killed PR-002.
+
+**EVIDENCE — re-derived on real lines (`nba_margin_refit.py`), chronological split at 2024-10-29:**
+
+| stat | shipped margin | fit ROI | hold ROI | verdict |
+|---|---|---|---|---|
+| **pts @ 3.5** | 3.0 | **+0.66%** | **+2.58%** | both halves positive |
+| pts @ 4.0 / 5.0 / 5.5 / 6.0 | — | +0.89 / +1.08 / +3.19 / +2.77 | +0.58 / +8.29 / +3.06 / +2.93 | contiguous band |
+| pts @ 3.0 (shipped) | 3.0 | −2.03% | −3.09% | the SHIPPED value loses |
+| **pra @ 5.0 (shipped)** | 5.0 | **−6.24%** | **+1.81%** | signs disagree; negative at every margin ≤4.0 |
+| reb @ 2.0 (shipped) | 2.0 | −0.94% | −4.07% | loses |
+| ast / fg3m | 2.0 / 0.8 | negative throughout | | already gated off — correctly |
+
+**THE BASE RATE THIS MUST BEAT:** betting every NBA points over on real lines returns **−8.47%**
+(113,465 graded quotes, `nba_realline_base.py`). At margin 0 the beneficiary pool returns
+−5.82%/−4.18%, so the selection beats blind betting by ~3-4pp on its own — real, but not enough to
+clear the vig until the margin rises.
+
+**WHY IT COULD STILL BE FALSE:**
+1. The whole positive band is **+0.6% to +3.2%** — small, and small edges are what this project has
+   repeatedly failed to confirm forward (PR-002, PR-004, volume-basis).
+2. **Two changes are bundled** (market selection AND threshold). If it fails I will not know which
+   half was wrong. Registered as one config deliberately, because splitting them doubles the
+   multiple-testing burden on a premise that is already marginal.
+3. The hold half is **n=382**, and the earlier fit/hold agreement at 3.5 is the weakest cell in the
+   band (+0.66% fit). A contiguous band is better evidence than any single cell, but it is still
+   one dataset.
+4. `reb @ 1.5` was +3.52%/+0.54% — NOT registered, but it is the first stat to revisit if points
+   validates. Do not add it opportunistically mid-season.
+5. **The 2025-26 holdout is unpulled** (the Odds API key is deactivated), so this has never been
+   tested on data outside 2023-10..2025-04.
+
+**PROMOTION BAR — all must hold on 2026-27 season rows graded live:**
+- n >= 150 newly graded points flags
+- ROI >= +2% on the NEW rows alone
+- beats the all-overs points base rate by >= 8pp on the NEW rows
+- **clustered-by-slate t >= 2.5** (PR-002 lesson: a bare ROI figure is satisfiable by noise)
+- **total units POSITIVE** — not just ROI; the margin cuts volume hard
+- **survives removing the 3 largest winners** (PR-002 lesson)
+
+**FAILURE CONDITION:** ROI <= 0, or negative total units, at n >= 150 → REJECTED. If points fails,
+**the NBA beneficiary premise is dead**, not merely mis-tuned — pra/reb/ast/fg3m already failed on
+real lines, so points is the last surviving stat.
+
+**NOT to be re-tested against 2023-2025 data.** That data derived the margin; it cannot confirm it.
