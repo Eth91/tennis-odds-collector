@@ -290,3 +290,78 @@ poisoning a column for weeks.
 
 VERIFIED AFTER: distinct market_type 1959 -> 25, non-enum rows -> 0, tour/best_of ATP-bo5 x51 and
 WTA-bo3 x49, start_time back to ISO timestamps, 553 ace rows banked.
+
+## TN-015 — is there a reason to believe the ace ladders are beatable?  ⚠️ INCONCLUSIVE, verdict retracted
+
+The ladder implies a survival curve; turning each rung into 1/odds gives P(>=k) INCLUDING vig, so
+FanDuel must sit ABOVE any unbiased estimate. Compared against a negative binomial (dispersion
+r=4.4 fitted on players with >=25 matches, so ace counts are genuinely overdispersed and a Poisson
+tail would understate the big-serving upside):
+
+    rung   3+      5+      7+      9+     11+     13+     15+     20+
+    gap  +.025   +.039   +.039   +.056   +.043   +.019   -.008   -.040
+    overall mean gap +0.0256 over 72 rungs
+
+⚠️ THE SCRIPT PRINTED "thin, worth pursuing" AND THAT VERDICT IS RETRACTED. The comparison curve
+was a crude negative binomial on each player's RAW historical ace mean times 1.45 for best-of-5.
+The per-player disagreements it produced are enormous - Safiullin FD 0.204 against model 0.406 at
+11+, Alcaraz FD 0.263 against model 0.173 - roughly +-0.20, an order of magnitude larger than the
++0.026 aggregate. The aggregate is therefore the average of my own large errors in both
+directions, not a measurement of FanDuel's margin. A uniform vig would also show a FLAT gap across
+rungs; this one rises to +0.056 at 9+ and turns negative by 20+, which is the shape of a wrong
+mean, not of a price.
+
+WHAT WOULD SETTLE IT: score the REAL model (TN-013/016) against live ladders and settle against
+actual ace counts. That needs the model wired to the live board plus an ace-RESULTS collector.
+Neither exists. Until they do there is no basis for a bet.
+
+## THE HONEST CASE ON ACES
+
+FOR
+  - Pinnacle does not price aces, so FanDuel has no sharp line to copy and must self-price.
+  - Ace rate is among the most stable player-level stats, so a model can be genuinely accurate.
+
+AGAINST, and this side is stronger
+  - The market is ONE-SIDED, overs only. That is the signature of a recreational product, and
+    such products are normally shaded toward the side punters like. There is no way to take the
+    other side of a shade.
+  - Every FanDuel-EXCLUSIVE market measured in TN-009 runs 6.5-22% hold, against 4.3% on the
+    markets both books price. No sharp competitor means no pressure on price, not opportunity.
+  - Model MAE is 2.93 aces while ladder rungs are spaced 2 apart: the typical error spans more
+    than one rung of the decision.
+  - Across this whole programme - golf and now tennis - the book has known every time.
+
+STATUS: a hypothesis with a plausible mechanism and a stronger counter-mechanism. Not a finding.
+
+## TN-016 — the year term is REJECTED; the fix is a SHORTER HALF-LIFE  ⭐
+
+v2 ran -0.10 low, negative on all three surfaces. A same-sign bias everywhere is a TIME problem,
+so a year term was the obvious fix. It was wrong twice over.
+
+THE SERIES IS U-SHAPED, not trending. Ace rate per service point fell to roughly 2020-2022 and has
+risen since (Clay .0576 -> .0465 -> .0528; Grass .1059 -> .0915 -> .0997). A ten-year straight
+line is dominated by the early decline and the COVID dip and extrapolates DOWNWARD into 2025,
+exactly when the truth was rising. Bias doubled: -0.2035 -> -0.4385.
+
+FOUR VARIANTS, SELECTED ON MEAN |bias| ACROSS THREE TRAIN YEARS (2022/23/24):
+
+    variant                              2022     2023     2024   mean|b|
+    A  no year term (540d)             -0.208   -0.408   -0.405    0.3404
+    B  linear over ALL train years     -0.489   -0.764   -0.745    0.6661
+    C  linear over LAST 3 train years  -1.093   -0.545   -0.231    0.6227
+    D  no year term, half-life 270d    -0.211   -0.364   -0.320    0.2984  <- robust pick
+
+Both year-term forms are the two WORST. D wins, and on the untouched 2025 holdout:
+
+    A  -0.1445   B  -0.3938   C  +1.2513   D  -0.0364  <- essentially unbiased
+    D by surface: Grass +0.117, Hard +0.018, Clay -0.221 - now straddling zero, not all negative
+    D MAE 2.9633 against A's 2.9263
+
+FULL ARC v1 -> v4: bias -0.4140 -> -0.0364, a 91% reduction, bought for +0.037 MAE. On an
+overs-only market that is the right trade, for the same reason as TN-013.
+
+⚠️ THE NEAR-MISS IS THE LESSON. A SINGLE-year selection (2024 alone, on |bias|) picked variant C -
+which then produced the WORST holdout of all four at +1.2513, three times any other. Same four
+candidates, same data; the only difference was selecting on three years instead of one. One
+selection year is one draw, and picking the max of a noisy criterion is how an overfit variant
+gets promoted.
