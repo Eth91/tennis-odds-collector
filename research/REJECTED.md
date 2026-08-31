@@ -180,3 +180,45 @@ on 48% of rows. **Valuation is already market-grade and cannot be improved by pr
 The residual is noise (bias/noise ratio 0.06–0.12), not correctable error. Edge must come from
 PRICE (line shopping +3.31pp, base rungs) or from finding where the BOOK's line is biased — not
 from out-projecting a market we already match.
+
+## "WHERE IS THE BOOK'S LINE WRONG?" — UNANSWERED, and why (2026-08-30)
+
+Four attempts, three real bugs found in my own analysis, no finding. Recording so the next attempt
+starts past these rather than repeating them.
+
+**The apparent result each time:** longshot rungs (implied < 0.24) hitting far above their price —
+peaking at **+195% ROI, t=+11.4**, broad across 93 players with no concentration (top player 3% of
+winners), surviving on players who actually played. Every property of a real finding.
+
+**It was data corruption, all four times.** The bugs, in the order they were found and fixed:
+
+1. **DNP-pricing confound.** Grading only players who appeared refunds scratch risk the price
+   charged for. Fixed by constructing the quoted-but-scratched set (tick_archive has every QUOTED
+   player-day; box_actuals says who PLAYED) and grading scratches as over-losses — which is what
+   the bettor experiences. This un-blocks a question memory had marked BLOCKED.
+2. **`tick_archive.d` is the COLLECTION date, not the GAME date.** Books post days ahead, so
+   quotes for a future game were graded against today's box and counted as scratches — **49.3%
+   scratched**, an impossible number. Fixed by requiring the player's TEAM to appear in that day's
+   box before a scratch can be inferred. Scratch rate fell to a plausible 10.8%.
+3. **Stale rungs.** Taking the last quote of the day admits rungs the book never refreshed.
+   Production applies `FRESH_MIN = 10`; the analysis did not. Dropped 1,009 rungs.
+4. **🚨 THE REAL ONE — 28.3% OF LADDER SNAPSHOTS ARE NON-MONOTONE.** A ladder must have longer
+   prices at higher lines. In 10,707 of 37,876 player-stat snapshots it does not:
+   `Hamby points 2.5@4.60 4.5@14.50 7.5@1.09 9.5@1.24` — the LOWEST rungs carry the LONGEST
+   prices. Those phantom rungs (a 13-point scorer priced at o4.5 @ 14.50) are exactly what
+   produced the fake edge.
+
+**PRODUCTION IS NOT AFFECTED — the guard exists and works.** `posted_props` calls `_drop_inverted`
+("strip arithmetically impossible rungs before ANY consumer sees them"). Verified: **0 of 16**
+ladders it currently returns are non-monotone, **0** tracked bets carry the corrupted signature
+(line<=5.5 at odds>=4.0), and every tracked bet's price is sane (points 1.57-3.50). The corruption
+lives in raw `fd_lines`; the model never sees it.
+
+🔑 **RULE FOR ALL FUTURE RESEARCH: `tick_archive` / `line_archive` / raw `fd_lines` are UNFILTERED.
+Any analysis reading them directly must re-apply the production guards — monotonicity, FRESH_MIN,
+and game-day matching — or it will measure the corruption and report it as an edge.** The research
+archives were built to preserve everything, which is right for storage and wrong for analysis.
+
+**The question itself remains open.** Nothing here says the book is or is not mispriced; it says
+this data cannot answer it until filtered. Related: [[reference_dnp_pricing_confound]],
+[[reference_silent_zero_failures]], [[feedback_real_lines_only]].
