@@ -434,3 +434,70 @@ carry a line, down from ~2,100.
     SET WINNERS   UNTESTED, and the most interesting of the three: at 4.7% hold it is the CHEAPEST
                   FanDuel tennis market, cheaper than its own moneyline. Pinnacle does not quote it
                   directly, but a sharp reference is derivable from its moneyline plus set total.
+
+## TN-021/023 — the three untested markets  ❌ NO EDGE IN ANY
+
+All references SHIN-devigged from the start, since TN-019 showed proportional de-vigging
+manufactures a longshot edge.
+
+    TOTAL GAMES     n=100  mean EV -0.0840   ZERO +EV quotes. Worse than FanDuel's own 6.5% hold,
+                    so FanDuel's totals are dearer than Pinnacle even net of margin.
+    GAME HANDICAP   n= 46  mean EV -0.1036   1 of 46 +EV, at +0.5%.
+    SET WINNERS     n=172  ZERO quotes below the sharp-implied interval.
+
+⚠️ A +45% "EDGE" WAS FOUND, DIAGNOSED AND RETRACTED. The first set-winner pass reported mean EV
++0.4497 with a max of +1.4751. No book is 45% wrong; that is a bug, and the rule from the golf
+phase applies - when an effect is impossibly large, audit before believing.
+
+The derivation used Pinnacle's spr_home as P(wins 2-0). It is provably not: Krueger's moneyline
+implies M=0.169 while spr_home reads 0.400, and no player wins 2-0 more often than they win the
+match. Spread values cluster at 0.4-0.6 on every match - a handicap line set near coin-flip. The
+tell was in the worked examples: the FAVOURITE's derived fair was plausible (EV -0.023) while the
+UNDERDOG's was nonsense (0.685 against M=0.294), which is the signature of a mis-assigned term.
+
+FIXED BY PARTIAL IDENTIFICATION, which is what the data actually supports. From the moneyline and
+set total alone, P(A wins set 1) = a + (1-S)/2 with a = P(A 2-0) NOT pinned down, only bounded:
+    max(0, M+S-1) <= a <= min(M, S)
+so the honest object is an INTERVAL. Same lesson as "top N and ties is not point-identified" in
+golf: a point estimate invents information the market never gave.
+    168 of 172 FanDuel quotes fall INSIDE the interval, 4 above, ZERO below.
+Since FanDuel's implied probability contains its vig it should sit above a fair number anyway, so
+inside or above proves nothing. Nothing generous exists.
+
+## TN-024 — IS THERE HEADROOM IN THE MONEYLINE MODEL?  ❌ NONE
+
+"Can our model beat Pinnacle" has been answered no for three phases, and it is the wrong question.
+A model can be strictly worse standalone and still improve a sharp price if its errors are
+uncorrelated. The right test is a blend in log-odds space with the weight fitted on train:
+
+    logit(p_blend) = (1-w) * logit(p_pinnacle) + w * logit(p_elo)
+
+Elo built chronologically from 29,385 match results (overall + surface, updated only AFTER each
+prediction), joined to 20,481 Shin-devigged Pinnacle prices. Train 2015-2023, test 2024-2025.
+
+    weight   0.00     0.02     0.05     0.10     0.15     0.20     0.30     0.50
+    train LL .58296  .58306   .58326   .58375   .58441   .58525   .58753   .59457
+
+    -> OPTIMAL WEIGHT 0.00, and log-loss rises MONOTONICALLY with any weight on the model.
+    held out: Pinnacle alone .59503 | blend at w=0 .59503 | Elo alone .62937
+    winner-picking accuracy: Pinnacle 0.673, Elo 0.629
+
+NOT "a little information" - ZERO. Every positive weight makes the forecast worse, which is a
+stronger result than a small optimal weight would have been: it means Pinnacle already contains
+everything a public-data Elo knows, with nothing left over.
+
+⚠️ SCOPE: this tests ELO, not every conceivable model. A genuinely different information source -
+point-by-point data, injury or fitness information, anything non-public - is untouched by this
+result. What is closed is the public-data ratings approach, and it is closed completely.
+
+## TENNIS: WHERE IT STANDS
+
+    MONEYLINE      NO EDGE. FanDuel mean EV -0.035 = its own hold; the longshot tail was a de-vig
+                   artifact (17 -> 5 quotes under Shin). And NO HEADROOM: optimal blend weight 0.00.
+    SET BETTING    NO EDGE. FanDuel prices sets at +0.1082 vs Pinnacle's +0.1116, at 10.6% hold.
+    TOTAL GAMES    NO EDGE. Mean EV -0.084, zero +EV quotes.
+    GAME HANDICAP  NO EDGE. Mean EV -0.104.
+    SET WINNERS    NO EDGE. Zero of 172 quotes below the sharp-implied interval.
+    ACES           UNRESOLVED, and the only thread left. No sharp reference exists, so it cannot be
+                   settled by comparison - only by settling the model against realised ace counts.
+                   The model is built and near-unbiased; the results collector is not.
