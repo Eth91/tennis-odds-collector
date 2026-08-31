@@ -132,3 +132,71 @@ is one-sided so it cannot even be priced without an independent model of ace cou
 What survives as a QUESTION, not a finding: ace ladders are one-sided and FanDuel must price them
 from something; the prior work already has a serve model and TML has ATP serve stats to 1968. That
 is the only remaining thread, and it needs an ace-count model plus settled results to grade.
+
+## TN-011 — FanDuel tennis collector, ALL markets  ✅ LIVE
+
+`tennis_fd_collect.py`, cron every 15 minutes on the VM, writing `tennis_fd.sqlite`.
+
+    board     content-managed-page?page=SPORT&eventTypeId=2      (Betfair taxonomy via Flutter)
+    markets   event-page?eventId=X&tab=popular                   (the ONLY tab with the deep board)
+    first pass  95 matches, 48 deep boards, 10,529 quotes, 0 errors
+
+GENERIC BY DESIGN. One row per (market, runner) with market_type carried as DATA - nothing about
+the 43 families is hardcoded, so a product FanDuel adds next month is captured the first time it
+appears rather than dropped by a schema that never heard of it.
+
+CHANGE-ONLY STORAGE. A full snapshot is ~10.5k rows; at every 15 minutes that is ~3 GB a month of
+mostly identical prices, on a box that already runs a disk guard and a dozen collectors. Rows are
+written only when a price MOVES (first sighting always writes), so the line-movement history - the
+thing CLV actually needs - is preserved at a fraction of the size. Verified: pass 1 wrote 10,529,
+pass 2 saw the same 10,529 quotes and wrote 0.
+
+TOUR + BEST_OF ARE STORED, NOT DERIVED. FanDuel does not label Slam boards ATP/WTA - they arrive
+as "Men's US Open 2026" / "Women's US Open 2026", and the first mapper tagged every row OTHER.
+best_of is stored because applying best-of-3 maths to Men's Slam matches already manufactured a
+convincing ATP/WTA split earlier in this phase that was pure format artifact.
+
+ITF is collected too, despite the ask naming ATP and WTA. Filtering at read time is free,
+un-collected data is gone forever, and ITF carried the LARGEST set-shape gap of any tier
+(+0.1238 against ATP's +0.0918).
+
+## TN-012 — ACE MODEL v1  ⭐ BEATS ITS BASELINES OUT OF SAMPLE
+
+Data: TML-Database 2015-2026, 58,927 PLAYER-MATCH rows, 1,111 players. Player-match rather than
+match-wise, because an ace is a SERVER quantity and storing w_ace/l_ace forces every downstream
+join to re-derive the opponent side and get it wrong half the time. (Sackmann is confirmed dead;
+TML is live. TML's 2026 file stops at 2026-01-17, so the holdout year is 2025.)
+
+    expected_aces = rate(server, returner, surface) x expected_service_points
+
+Splitting rate from workload is the whole design: a model predicting COUNTS without conditioning
+on service points is largely predicting match length wearing a serving costume. Rate is a log5
+combine on the surface baseline, both inputs empirical-Bayes shrunk toward it. Everything is
+accumulated in DATE ORDER with exponential decay and every prediction is made BEFORE the match is
+learned from. Shrinkage k=200 and half-life 540d were fitted on TRAIN ONLY, scored on 2024.
+
+CHRONOLOGICAL BACKTEST, train <= 2024, test 2025, 5,499 rows, actual mean 6.58 aces:
+
+    global mean (6.37)                 MAE 3.9023
+    player's own historical mean       MAE 3.3539     <- the honest baseline to beat
+    MODEL, rate x PREDICTED workload   MAE 2.9686
+    MODEL, rate x ACTUAL workload      MAE 2.5724
+    like-for-like on the 5,314 rows where both exist: 3.3539 -> 2.9639, MODEL BETTER by 11.6%
+
+    by surface: Grass actual 8.96 / pred 8.89 | Hard 7.15 / 6.95 | Clay 4.34 / 4.08
+
+WHERE THE ERROR LIVES. Handing the model TRUE service points cuts MAE from 2.9686 to 2.5724, so
+about 13% of total error is match-LENGTH uncertainty rather than serving. That is the largest
+single improvement available, and it is exactly what the moneyline knows - which links the model
+to the feed TN-011 now banks.
+
+⚠️ SYSTEMATIC UNDER-PREDICTION of roughly 2-5% on every surface. On a market that quotes ONLY
+overs, a low bias points the wrong way, and it must be corrected before any bet is priced.
+
+⚠️ ATP ONLY. TML has no WTA serve stats; the WTA ace model is blocked on DATA, not method. The
+collector banks WTA ace ladders regardless, so the gap is on the model side.
+
+⚠️ WHAT THIS IS NOT. Beating a player-mean baseline is NOT beating FanDuel. There are ZERO
+historical FanDuel ace odds - collection began 2026-08-31 - so the EDGE test is forward-only and
+cannot be backtested at all. Model quality is not market edge; that distinction is the single
+most expensive lesson of the PGA phase and it applies here unchanged.
