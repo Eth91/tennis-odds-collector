@@ -255,3 +255,38 @@ series by construction. A year term, or a shorter half-life, is the next thing t
 ⚠️ STILL FORWARD-ONLY FOR EDGE. Everything above is forecasting accuracy against baselines. There
 are still ZERO historical FanDuel ace odds, so whether any of this beats the PRICE cannot be
 backtested - only accrued. TN-011 has been banking ace ladders since 2026-08-31.
+
+## TN-014 — a silent column-order corruption, found and fixed within the hour
+
+The collector's first hours wrote a POISONED market_type column and nothing errored.
+
+CAUSE, and it was mine. fd_tennis was first created without best_of. Adding it with
+ALTER TABLE ADD COLUMN appends to the END of the table, but the patched INSERT supplies values in
+the DDL's order, where best_of sits sixth. Every value after position five shifted by one:
+
+    start_time  <- best_of
+    market_id   <- start_time
+    market_type <- market_id        which is why market_type held "736.183007715"
+
+SQLite accepted 14 values into 14 columns. They were simply the wrong 14. 1,934 of 1,959 distinct
+"market types" were market ids, and every downstream filter on market_type would have silently
+matched a third of the data.
+
+CAUGHT BY A SANITY CHECK, not by an error: "distinct market types = 1959" is impossible when the
+board has 28 families, and it exceeded the count of distinct market IDs. The rule that found it is
+the same one from the golf phase - when a number is impossible, audit the data before believing
+any analysis built on it.
+
+FIX: the table was rebuilt from the DDL so column order and INSERT order agree by construction
+rather than by an ALTER and a hope; ~30 minutes of data was discarded. fd_current had to be
+cleared too - a `sqlite3` CLI call to do it failed silently (the CLI is not installed), so the
+first rebuild pass wrote only 209 changed rows instead of a full baseline, leaving prices tracked
+in fd_current with no row in the table. Clearing it from Python and re-running restored a complete
+10,598-row baseline.
+
+GUARD ADDED: the collector now asserts market_type is an upper-case enum and fails the pass LOUDLY
+if more than 5% of rows are not, so a future reordering announces itself instead of quietly
+poisoning a column for weeks.
+
+VERIFIED AFTER: distinct market_type 1959 -> 25, non-enum rows -> 0, tour/best_of ATP-bo5 x51 and
+WTA-bo3 x49, start_time back to ISO timestamps, 553 ace rows banked.

@@ -202,6 +202,18 @@ def main():
         con.commit()
         time.sleep(0.18)
 
+    # SCHEMA GUARD. A column-order mismatch does not raise - SQLite accepts 14 values into 14
+    # columns whether or not they are the RIGHT 14. This asserts the shape of what we stored:
+    # a market_type is an upper-case enum, never a numeric market id.
+    bad = con.execute("SELECT COUNT(*) FROM fd_tennis WHERE market_type GLOB '*[0-9].[0-9]*' "
+                      "OR market_type != UPPER(market_type)").fetchone()[0]
+    tot_rows = con.execute("SELECT COUNT(*) FROM fd_tennis").fetchone()[0]
+    if tot_rows and bad > 0.05 * tot_rows:
+        print("ALERT: %d of %d rows have a market_type that is not an upper-case enum — the "
+              "column order has drifted from the INSERT order" % (bad, tot_rows))
+        con.close()
+        return 2
+
     tot = con.execute("SELECT COUNT(*) FROM fd_tennis").fetchone()[0]
     con.close()
 
