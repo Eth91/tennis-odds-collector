@@ -635,3 +635,60 @@ fake edge:
 DATA CONSTRAINT: TML's serve statistics stop 2026-01-17 while results run to 2026-08-30, so the
 point model is 225 days stale. It is computed and RECORDED on every row but does NOT price; the
 live model is the calibrated Elo, which can be kept fully current from results.
+
+## TN-030 — FOUR BUGS IN THE LIVE HARNESS, all of which INFLATED the record
+
+Three surfaced only because the user asked how the already-finished picks had done. Every one made
+a losing model look better, which is the direction that matters.
+
+1 IN-PLAY PRICES BANKED AS PRE-MATCH. The scan took MAX(collected_at) - the LATEST quote - which
+  for a match already underway is an in-play price that knows part of the result. Arnaldi was
+  logged at 2.60 having opened at 1.57; the drift existed precisely BECAUSE he was losing. Betting
+  a drifted price on a losing selection is where fake edges are manufactured.
+  This is the deadline-contamination class the golf phase named, repeated verbatim.
+  FIX: require collected_at <= start_time. No fallback - a match with no pre-match quote is
+  skipped, because the only quote available is the contaminated one.
+
+2 FANDUEL REWRITES start_time WHEN A MATCH GOES LIVE, and that is why the filter is subtle:
+      pre-match quotes carry the SCHEDULED time   (17:00)
+      in-play quotes carry the ACTUAL start       (16:43)
+  So the same match legitimately holds two start_times, and a ledger row can store either
+  depending on when it was written. The filter is still correct - it now returns Arnaldi 1.58 and
+  Duckworth 2.42 instead of the 2.60 in-play drift - but the ambiguity is worth knowing.
+
+3 BOTH SIDES OF THE SAME MATCH LOGGED. The ledger key was (event, pick, start_time). When FanDuel
+  moved a match from 16:43 to 17:00 it re-entered as a new row, and by then the model's edge had
+  flipped to the OPPONENT. The ledger held Arnaldi 2.60 AND Duckworth 2.42 on one match - an
+  implied 79.8% book, which no sportsbook offers. Two snapshots stitched together, reading as free
+  money. FIX: key is (event, pick), and a match that already carries a bet is skipped. First
+  opinion stands; the model changing its mind is not a second opportunity.
+
+4 SILENT 0.500 DEFAULT (found earlier). TML is ATP-only and the WTA fetch had timed out, so every
+  WTA player was unknown, defaulted to Elo 1500 and returned EXACTLY 0.500 - which against a 101.0
+  longshot reads as a 4,950% edge. 88 such bets were logged and purged.
+
+STANDING AUDIT, because this file has now been patched eight times and the next bug will not
+announce itself either. `audit_live.py` runs twice an hour and asserts nine invariants, each a
+MAGNITUDE rather than a truthiness:
+    every logged price existed pre-match | one bet per match | never both sides
+    no 0.500 defaults | edge == p*odds-1 | edges within [3%, 50%]
+    pick/opp distinct and both named in the match | odds plausible | probabilities inside (0,1)
+Current state: 52 bets, ALL NINE PASS.
+
+## FIRST RESULTS — 31 August, indicative
+
+Graded from in-play price collapse because official results post next morning and ESPN's
+scoreboard is 403 from this box. Only DECIDED rows counted: a side at <= 1.10, or its opponent
+at >= 8.0. Stake 1u = $100 at the PRE-MATCH price.
+
+    Virtanen   5.30  LOST   -100        Fearnley  3.20  LOST  -100
+    Vacherot   1.79  WON     +79        Baez      6.20  LOST  -100
+    Tsitsipas  5.40  WON    +440        Alcaraz   1.19  WON    +19
+
+    record 3-3 | P&L +239 | ROI +39.8% on 6 bets
+
+⚠️ THE ENTIRE PROFIT IS ONE BET. Tsitsipas at 5.40 returned +440 while the other five net -202.
+That is the defining property of a longshot book: one hit at 5.40 covers three losses and prints a
+fake 40% ROI. The portfolio is 71% underdogs at mean odds 3.85, so swings this size are routine in
+both directions. Nothing is readable before roughly 200 settled bets, and the prior recorded on
+every row before any result arrived says this is expected to LOSE.

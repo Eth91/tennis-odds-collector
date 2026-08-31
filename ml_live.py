@@ -174,9 +174,14 @@ def scan():
     print("state built | serve stats to %s (%d days stale) | results to %s"
           % (srv_max, (DT.fromisoformat(today) - DT.fromisoformat(srv_max)).days, res_max))
     fd = sqlite3.connect("file:%s?mode=ro" % FDB, uri=True, timeout=60)
+    # PRE-MATCH ONLY. MAX(collected_at) on a match already underway returns an IN-PLAY price,
+    # which knows part of the result: Arnaldi was logged at 2.20 having opened 1.57, the drift
+    # being precisely because he was losing. Requiring collected_at <= start_time is the same
+    # rule the golf collector needed after in-play quotes were banked as closes.
     rows = fd.execute("""SELECT event_name, tour, best_of, start_time, runner_name, odds,
                                 MAX(collected_at) FROM fd_tennis
                          WHERE market_type='MATCH_BETTING' AND start_time > ?
+                           AND collected_at <= start_time
                          GROUP BY event_name, runner_name""", (today,)).fetchall()
     fd.close()
     lg = sqlite3.connect(str(LDG), timeout=60)
@@ -185,7 +190,7 @@ def scan():
         logged_at TEXT, start_time TEXT, tour TEXT, event TEXT, pick TEXT, opp TEXT,
         best_of INT, odds REAL, p_model REAL, p_elo REAL, p_point REAL, thin INT,
         edge REAL, srv_stale_days INT, prior TEXT, result TEXT, pnl REAL,
-        PRIMARY KEY (event, pick, start_time))""")
+        PRIMARY KEY (event, pick))          -- NOT start_time: FanDuel reschedules""")
     lg.commit()
     skipped = defaultdict(int)
     byev = defaultdict(list)
@@ -226,13 +231,22 @@ def scan():
         print("%-38s %-20s %6.2f %7.3f %7.3f %+8.3f%s"
               % (str(ev)[:38], str(rn)[:20], od, sp, 1 / od, e, "  THIN" if thin else ""))
     stale = (DT.fromisoformat(today) - DT.fromisoformat(srv_max)).days
+    # one match, one side. A rescheduled match re-enters with a new start time and the model may
+    # by then favour the OPPONENT - logging both is a fake arbitrage, not two opportunities.
+    already = {r[0] for r in lg.execute("SELECT event FROM bets")}
     for e, ev, tour, bo, stt, rn, od, sp, pe, pp, thin, opp in cands:
         if e >= EDGE_MIN:
-            lg.execute("INSERT OR IGNORE INTO bets VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NULL,NULL)",
+            if ev in already:
+                continue
+            already.add(ev)
+            cur = lg.execute("INSERT OR IGNORE INTO bets VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NULL,NULL)",
                        (dt.datetime.utcnow().isoformat(timespec="seconds"), stt, tour, ev, rn,
                         opp, int(bo or 3), od, sp, pe, pp, 1 if thin else 0, e, stale,
                         "model calibrated LL .61992 vs market .60064 - EXPECTED TO LOSE"))
-            n_logged += 1
+            # count ACTUAL inserts. INSERT OR IGNORE silently drops a repeat of the same
+            # (event, pick, start_time), so counting attempts reported "40 new" on a scan that
+            # added nothing - a false statement in our own log.
+            n_logged += cur.rowcount if cur.rowcount and cur.rowcount > 0 else 0
     lg.commit()
     tot = lg.execute("SELECT COUNT(*) FROM bets").fetchone()[0]
     open_ = lg.execute("SELECT COUNT(*) FROM bets WHERE result IS NULL").fetchone()[0]
