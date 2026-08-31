@@ -68,3 +68,67 @@ no edge). Until that exists no bet is justified, and nothing here is evidence of
 
 This is the "does the instrument cover the claim" trap in its purest form: everything measurable
 has been measured, and the one unmeasured link carries the whole result.
+
+## TN-002 — does FanDuel actually price sets iid?  ❌ NO — THE EDGE IS DEAD
+
+FanDuel IS scrapable. `sbapi.ny.sportsbook.fanduel.com/api/content-managed-page?page=SPORT&
+eventTypeId=2` lists the board (tennis is eventTypeId 2, inherited from Betfair's taxonomy), and
+`event-page?eventId=X&tab=popular` returns the full market set. Same public `_ak` key the golf
+collector already uses. 93 head-to-head matches, 47 with deep boards.
+
+The default event page carries PLAYER_A/B_TO_WIN_AT_LEAST_1_SET, which IS the straight-sets market
+in disguise: P(A wins 0 sets) = 1 - P(A wins at least 1 set) is a sweep in either format, so
+P(straights) = 2 - pA - pB with no format assumption at all.
+
+    format   n     iid    FanDuel      gap
+    BO3     46  0.5665     0.6747   +0.1082
+    BO5     41  0.3268     0.4771   +0.1503
+    Pinnacle, same market (TN-001)          +0.1116
+
+FanDuel's best-of-3 gap of +0.1082 against Pinnacle's +0.1116 is the same number. FANDUEL PRICES
+SETS ABOUT AS SHARPLY AS PINNACLE AND DOES NOT USE iid. The Phase 4a premise is false at FanDuel,
+and that was the only live tennis mechanism on the books. TN-001 remains correct and is now merely
+a description of how both books price, not an exploitable gap.
+
+⚠️ MY OWN BUG, CAUGHT: the first pass applied the best-of-3 inversion to everything and produced
+a clean ATP-negative / WTA-positive split that looked like a finding. It was Men's Grand Slam
+matches being best-of-FIVE. The FanDuel side is format-agnostic; the iid side is not.
+
+## TN-009 — FanDuel tennis hold census (tab=popular)
+
+    MATCH_BETTING                    2 runners   4.3%   <- CHEAPER THAN PINNACLE (4.73%)
+    TO_WIN_1ST_SET, SET_2/3/4/5_WINNER  2        4.7%
+    MATCH_TOTAL_GAMES / >=1 SET / SET_X_MOST_ACES  2   6.5-6.6%
+    MAIN_SET_TOTAL_GAMES, MAIN_SET_GAME_HANDICAP   2   ~10%
+    SET_BETTING                      4 runners  10.6%   genuine, mutually exclusive
+    SET_X_SCORE_AFTER_Y_GAMES        5          11.8%
+    CORRECT_SCORE_1ST/2ND/3RD_SET   14          22.5%
+    ace ladders                      4-7        NOT MEASURABLE - see below
+
+FanDuel's tennis MONEYLINE is cheaper than Pinnacle's. The FD-exclusive markets are the expensive
+ones; the markets both books price are the cheap ones. That is the opposite of the "no sharp
+competitor means opportunity" hypothesis - no competitor also means no pressure on price.
+
+⚠️ RETRACTED WITHIN THIS EXPERIMENT: an earlier pass reported ace holds of 42-63%. The ace markets
+are ONE-SIDED NESTED THRESHOLD LADDERS - "5+, 7+, 9+, 11+, 13+, 15+, 20+" with no under quoted -
+so their implied probabilities are cumulative and overlapping and summing them is meaningless.
+This is exactly the ladder trap pga_market was built to prevent, and it nearly went into a report.
+With only one side quoted the vig CANNOT be extracted from the price at all; it needs a model or a
+competing quote.
+
+## GOTCHAS FOR THE SCRAPER
+- tennis is eventTypeId=2; `customPageId=tennis` 404s.
+- an UNKNOWN tab name does NOT error - it silently returns the 6-market default. Two passes here
+  concluded "no deep boards exist" because they asked for `tab=all`, which is not a real tab. The
+  working tab is `popular`; the layout block names the real ids [319, 109 Popular, 238, 317,
+  110 Set Markets, 112 Player Markets].
+- market depth is a function of TIMING: matches already underway are stripped to 1-9 markets,
+  upcoming marquee matches carry 33-43 including 9-13 ace markets.
+
+## WHERE THIS LEAVES TENNIS
+The moneyline was already at the public-data ceiling. The set-shape edge is now dead at FanDuel.
+The FD-exclusive surface is dearer than the shared markets, and its most interesting family (aces)
+is one-sided so it cannot even be priced without an independent model of ace counts.
+What survives as a QUESTION, not a finding: ace ladders are one-sided and FanDuel must price them
+from something; the prior work already has a serve model and TML has ATP serve stats to 1968. That
+is the only remaining thread, and it needs an ace-count model plus settled results to grade.
