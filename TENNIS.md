@@ -200,3 +200,58 @@ collector banks WTA ace ladders regardless, so the gap is on the model side.
 historical FanDuel ace odds - collection began 2026-08-31 - so the EDGE test is forward-only and
 cannot be backtested at all. Model quality is not market edge; that distinction is the single
 most expensive lesson of the PGA phase and it applies here unchanged.
+
+## TN-013 — ACE MODEL v2: moneyline workload + bias correction  ⭐ BOTH FIXES LAND
+
+v1 named its own two weaknesses. Both are now addressed and measured.
+
+ODDS SOURCE. TML has serve stats but no prices, so tennis-data.co.uk ATP files 2015-2025 were
+fetched and joined: 27,347 priced matches, 69.5% join rate onto ace_pm. The unmatched third is
+mostly Challenger/qualifying, which tennis-data does not cover - and which FanDuel does not price
+ace ladders on either, so the joined subset IS the relevant population rather than a biased slice.
+The join key is (surname, first initial) inside a +-4 day window, because tennis-data stamps the
+scheduled day and TML the tournament start; ambiguous and unmatched rows are counted, never
+silently dropped. Rank difference was available inside TML and would have avoided the join, but it
+is a PROXY - fitting on a proxy and deploying on a price is how a model stops meaning what it was
+measured to mean.
+
+WORKLOAD, redesigned as LENGTH x STYLE:
+    expected_service_points = expected_service_GAMES(moneyline, best_of) x points_per_service_game
+Service games belong to the MATCH, points per service game to the PLAYER. v1 averaged both
+players' historical service-point totals and thereby blended the two, letting a short match with a
+grinder look like a long match with a big server. The moneyline enters ONLY through expected games,
+fitted on train by (best_of, |M-0.5|) bucket, so it cannot smuggle in anything about aces:
+
+    bo3  11.7 (close) -> 9.7  (lopsided)      a 17% workload swing
+    bo5  18.8 (close) -> 15.4 (lopsided)
+
+    service-point MAE   21.35 -> 19.61   |   ace MAE on joined rows  2.9406 -> 2.8660
+
+BIAS, corrected on TRAIN ONLY (actual = -0.0065 + 1.0243 * pred, n=51,889), the same two numbers
+applied unchanged to test. Fitting it on test would guarantee zero bias and prove nothing.
+
+FULL CHRONOLOGICAL BACKTEST, train <= 2024, test 2025:
+
+    model                                    MAE       bias
+    v1  no moneyline, no correction       2.9688    -0.4140
+    v2  moneyline workload                2.9211    -0.2510
+    v2  + bias correction   <- SHIPPABLE  2.9329    -0.1035
+    ceiling: rate x ACTUAL svpt           2.5713    -0.2060
+
+    residual bias by surface: Grass -0.118, Hard -0.086, Clay -0.138
+
+THE CORRECTION COSTS MAE AND THAT IS THE RIGHT TRADE. MAE rises 2.9211 -> 2.9329 while bias falls
+59%. The market quotes ONLY overs, so a systematically low model is wrong in the SAME DIRECTION on
+every bet it ever makes, whereas a slightly wider spread of errors is not. Bias is the loss
+function for this market; MAE is not.
+
+Combined against v1: bias -0.4140 -> -0.1035, a 75% reduction, with MAE also slightly better.
+
+⚠️ RESIDUAL BIAS of -0.10 aces (1.6% of the 6.58 mean) survives a train-fitted linear correction,
+and it is negative on all three surfaces. The likely cause is a secular upward TREND in ace rates
+that a backward-looking decayed average cannot fully track - a 540-day half-life lags a rising
+series by construction. A year term, or a shorter half-life, is the next thing to try.
+
+⚠️ STILL FORWARD-ONLY FOR EDGE. Everything above is forecasting accuracy against baselines. There
+are still ZERO historical FanDuel ace odds, so whether any of this beats the PRICE cannot be
+backtested - only accrued. TN-011 has been banking ace ladders since 2026-08-31.
