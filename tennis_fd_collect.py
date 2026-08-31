@@ -24,6 +24,7 @@ golf_moves), and INSERT OR IGNORE on a natural key so re-running a pass is idemp
 import datetime as dt
 import json
 import os
+import re
 import sqlite3
 import sys
 import time
@@ -55,6 +56,8 @@ CREATE TABLE IF NOT EXISTS fd_tennis(
   runner_id    TEXT NOT NULL,
   runner_name  TEXT,
   handicap     REAL,
+  line         REAL,
+  side         TEXT,
   odds         REAL,
   PRIMARY KEY (collected_at, event_id, market_id, runner_id)
 );
@@ -74,6 +77,35 @@ CREATE TABLE IF NOT EXISTS fd_current(
 def get(u, timeout=30):
     r = urllib.request.Request(u, headers={"User-Agent": UA, "Accept": "application/json"})
     return json.load(urllib.request.urlopen(r, timeout=timeout))
+
+
+_TOTAL_RE = re.compile(r"^\s*(over|under)\s+([0-9]+(?:\.[0-9]+)?)\s*$", re.I)
+# A real handicap is " +2.5"; a SCORELINE is "6-0". Requiring whitespace before the
+# sign is what separates them - without it every correct-score runner parsed as a
+# negative handicap.
+_HCAP_RE = re.compile(r"\s([+-][0-9]+(?:\.[0-9]+)?)\s*$")
+
+
+def parse_line(runner_name, handicap, market_type=None):
+    """(line, side) from a FanDuel runner name. FanDuel leaves `handicap` 0.0 and puts the
+    number in the NAME - "Over 36.5", "Ben Shelton +2.5" - so the number must be parsed out or
+    every totals/handicap market is unjoinable."""
+    mt = str(market_type or "")
+    if "CORRECT_SCORE" in mt or "SCORE_AFTER" in mt or mt == "SET_BETTING":
+        return None, None          # runner names here are SCORES, not lines
+    n = str(runner_name or "").strip()
+    m = _TOTAL_RE.match(n)
+    if m:
+        return float(m.group(2)), m.group(1).lower()
+    m = _HCAP_RE.search(n)
+    if m:
+        return float(m.group(1)), "handicap"
+    if handicap not in (None, 0, 0.0):
+        try:
+            return float(handicap), None
+        except (TypeError, ValueError):
+            pass
+    return None, None
 
 
 def odds_of(runner):
@@ -142,6 +174,19 @@ def main():
         return 2
 
     con = open_db()
+    # COLUMN-ORDER ASSERTION. TN-014 was a silent corruption from ALTER TABLE appending a
+    # column while the INSERT followed the DDL. It happened a SECOND time adding line/side, so
+    # the durable defence is to check the live table rather than trust the DDL.
+    live = [r[1] for r in con.execute("PRAGMA table_info(fd_tennis)")]
+    want = ["collected_at", "event_id", "event_name", "competition", "tour", "best_of",
+            "start_time", "market_id", "market_type", "market_name", "runner_id", "runner_name",
+            "handicap", "line", "side", "odds"]
+    if live != want:
+        print("ALERT: fd_tennis column order is %s but the INSERT supplies %s — refusing to "
+              "write rather than corrupt the table" % (live, want))
+        con.close()
+        return 2
+
     rows = 0
     seen_now = 0
     deep = 0
@@ -176,6 +221,7 @@ def main():
                 if o is None:
                     continue
                 rid = str(r.get("selectionId") or r.get("runnerName"))
+                _ln, _sd = parse_line(r.get("runnerName"), r.get("handicap"), mtype)
                 touched.append((eid, str(mid), rid, float(o), r.get("handicap"), ts))
                 prev = cur.get((str(mid), rid))
                 # WRITE ONLY ON CHANGE. First sighting (prev is None) always writes, so the
@@ -185,11 +231,11 @@ def main():
                     continue
                 batch.append((ts, eid, str(v.get("name")), comp, tour, bo, str(v.get("openDate")),
                               str(mid), mtype, str(m.get("marketName")), rid,
-                              str(r.get("runnerName")), r.get("handicap"), float(o)))
+                              str(r.get("runnerName")), r.get("handicap"), _ln, _sd, float(o)))
                 per_type[mtype] += 1
             per_tour[tour] += 1
         if batch:
-            con.executemany("INSERT OR IGNORE INTO fd_tennis VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            con.executemany("INSERT OR IGNORE INTO fd_tennis VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                             batch)
             rows += len(batch)
         if touched:

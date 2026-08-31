@@ -365,3 +365,72 @@ which then produced the WORST holdout of all four at +1.2513, three times any ot
 candidates, same data; the only difference was selecting on three years instead of one. One
 selection year is one draw, and picking the max of a noisy criterion is how an overfit variant
 gets promoted.
+
+## TN-017/018/019 — FANDUEL vs PINNACLE on the shared markets  ❌ NO MONEYLINE EDGE
+
+Every earlier test asked whether OUR MODEL beats the book. This asks the question that actually
+matters for a soft book and needs no model at all: does FANDUEL's price differ from PINNACLE's?
+Pinnacle's de-vigged number is the best available estimate of truth, so a FanDuel price paying
+more than that is +EV by construction.
+
+Joined by normalised player pair and date, pairing each FanDuel quote with the Pinnacle quote
+CLOSEST IN TIME and discarding anything over 20 minutes apart - a non-simultaneous pair measures
+line movement, not disagreement. Median surviving gap 6.5 minutes, 166 quotes over 87 matches.
+
+    MONEYLINE, proportional de-vig:  mean EV -0.0347, and 17 of 166 quotes (10.2%) paid MORE than
+    sharp-fair, mean +6.0%, max +13.6% - every one a longshot (mean fair prob 0.173).
+
+THAT TAIL WAS A DE-VIG ARTIFACT. Proportional de-vigging splits the margin evenly across both
+sides; real books load it onto the longshot. So a longshot's proportional "fair" probability is too
+HIGH, and since EV = fair x odds - 1, an inflated fair manufactures positive EV out of nothing. A
+longshot-ONLY tail is exactly that signature. Re-run with Shin:
+
+                        mean EV     +EV quotes      mean +EV       max
+    proportional        -0.0347     17/166 (10.2%)   +0.0600     +0.1358
+    SHIN                -0.0519      5/166 ( 3.0%)   +0.0045     +0.0088
+
+    deep longshots <.15   proportional +0.0139  ->  Shin -0.1176      a 13-point swing
+    heavy favourites      proportional -0.0494  ->  Shin -0.0371
+
+The five survivors average +0.45%, inside noise and below any transaction cost. NO MONEYLINE EDGE.
+This is EXP-015's failure mode from the golf phase, carried forward and caught before it became a
+bet - the tail sat entirely in the band the de-vig distorts.
+
+⚠️ ALSO RETRACTED: a persistence test claimed "the tail PERSISTS" on a sample of ONE. Change-only
+storage means an unchanged price writes no new row, so only 6 quotes appeared at 2+ snapshots. The
+claim was meaningless and is withdrawn.
+
+## TN-020 — the FanDuel line was never in `handicap`, and the schema bug REPEATED
+
+FanDuel leaves `handicap` at 0.0 on every tennis market and puts the number in the RUNNER NAME:
+"Over 36.5", "Ben Shelton +2.5". Nothing was lost - the information was always in runner_name - but
+the TN-017 totals join found ZERO overlap purely because it compared against handicap=0. A parsed
+`line`/`side` column now makes totals and handicaps joinable: totals 13.5-60.5, game handicaps
+-14.5 to +13.5, set totals 8.5-10.5.
+
+⚠️ TN-014 REPEATED, and was caught only by the check TN-014 taught. ALTER TABLE appends, so adding
+line/side put them at the END while the patched INSERT followed the DDL and supplied them before
+`odds`. The next cron tick would have written odds into `line`. Recording the lesson did not
+prevent the second occurrence, because ALTER is the convenient path and the DDL is where you look.
+The durable fix is not a rebuild but an ASSERTION: the collector now compares the LIVE column order
+against the exact list it inserts and REFUSES TO WRITE on mismatch.
+
+⚠️ SECOND PARSE BUG: "Ben Shelton 6-0" matched the handicap pattern on its trailing "-0", so every
+CORRECT_SCORE market reported a line of -6.0 to 0.0. A handicap is written " +2.5" with a SPACE
+before the sign; a scoreline has a digit there. Requiring the space separates them, and
+correct-score markets are now excluded from parsing outright. Verified after: 0 correct-score rows
+carry a line, down from ~2,100.
+
+## ANSWER: IS THERE AN EDGE IN ANY OF THESE MARKETS?
+
+    MONEYLINE     NO. Mean EV -0.035 = FanDuel's own hold; the longshot tail collapses under Shin
+                  (17 -> 5 quotes, +6.0% -> +0.45%). And separately, our model trails de-vigged
+                  Pinnacle by 0.039 log-loss at the public-data ceiling.
+    SET BETTING   NO. TN-002: FanDuel prices sets at +0.1082 against Pinnacle's +0.1116 - the same
+                  number - at a 10.6% hold on a 4-runner book.
+    TOTAL GAMES   UNTESTED. Blocked until now by the handicap=0 issue; the line is parsed and the
+                  Pinnacle join is possible. FanDuel hold 6.5%.
+    SET SPREAD    UNTESTED. Lines now parsed (MAIN_SET_GAME_HANDICAP -3.5..3.5).
+    SET WINNERS   UNTESTED, and the most interesting of the three: at 4.7% hold it is the CHEAPEST
+                  FanDuel tennis market, cheaper than its own moneyline. Pinnacle does not quote it
+                  directly, but a sharp reference is derivable from its moneyline plus set total.
