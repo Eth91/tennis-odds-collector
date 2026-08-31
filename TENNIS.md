@@ -501,3 +501,71 @@ result. What is closed is the public-data ratings approach, and it is closed com
     ACES           UNRESOLVED, and the only thread left. No sharp reference exists, so it cannot be
                    settled by comparison - only by settling the model against realised ace counts.
                    The model is built and near-unbiased; the results collector is not.
+
+## TN-025/028 — DO FORM, SURFACE, FATIGUE, H2H OR RANK ADD ANYTHING OVER PINNACLE?  ❌ NO
+
+The honest benchmark is the PRICE, not our own model. Earlier work found these worth +0.005 AUC
+over Elo, but beating Elo is easy and irrelevant: if Pinnacle already prices a factor, knowing it
+is worth nothing however real the factor is.
+
+Design: orient each match by NAME-SORT (p1 = alphabetically first, y = 1 if p1 won), fit
+logit P = a + b*logit(p_pinnacle) + c*feature on 2015-2023, score on 2024-25. Sanity check that
+the orientation is unbiased: p1 win rate 0.506.
+
+    factor          n       coef      t     OOS delta LL
+    form_10      3478    -0.6271  -6.59       -0.00039
+    form_delta   3478    -0.2883  -3.31       +0.00044
+    surf_edge    3719    +0.0001  +0.47       +0.00031
+    h2h           805    -0.0784  -0.58       +0.00018
+    rank_gap     3716    -0.0515  -2.41       +0.00002
+    ht_gap       3716    +0.0020  +0.12       +0.00027
+    rest_days / load_14  see the leak below
+
+NOTHING HELPS. Recent form is the only factor with a signed, surviving coefficient, and it is worth
+0.0004 nats of log-loss - against a 4.3-4.7% hold, unexploitable by three orders of magnitude.
+SURFACE SPECIALISATION IS THE MOST STRIKING NULL: surf_edge, the "clay-courter on clay" claim, has
+t = +0.47 and makes out-of-sample prediction WORSE. Head-to-head is nothing. Rank adds nothing over
+the price, which is unsurprising since the price is built from it.
+
+⚠️ THREE FAILED DESIGNS BEFORE A VALID ONE, all mine, all worth recording:
+
+  1 WINNER-ORIENTED ONLY. Every row had y=1, so the logistic intercept ran to infinity and EVERY
+    feature "helped" by the entire log-loss (~0.60). Standard errors came back as 1311 and 1917,
+    which was the tell.
+  2 MIRRORED ROWS. Emitting (z, y=1) and (-z, y=0) ties the feature's SIGN to the LABEL by
+    construction, so any feature with a winner/loser asymmetry separates the classes perfectly.
+    rest_days returned t = -73 and a 0.14 log-loss "improvement" over a sharp closing price - a
+    gain that would be worth a fortune and cannot exist in a 4.7%-hold market.
+  3 WITHIN-TOURNAMENT ORDERING. TML stamps ONE tourney_date on every round, so "ORDER BY date"
+    leaves matches inside an event in arbitrary order and a final can be replayed before its own
+    first round. Any running-history feature then sees LATER ROUNDS of the same event - which a
+    player only reaches by WINNING. Direct look-ahead, and it explains both signs exactly:
+    load_14 positive (recent matches include rounds they had to win) and rest_days negative
+    (rest 0 means a same-event match was already processed, i.e. they advanced).
+
+    PROOF: re-sorting by (date, round) collapses it.
+        date only     rest t=-2.92  load t=+1.66      (and a DIFFERENT sort gave t=-52)
+        date + round  rest t=-1.96  load t=+1.08, NEITHER helps out of sample
+    The magnitude depended entirely on an arbitrary sort order, which is the definition of an
+    artifact.
+
+## WHY TENNIS IS HARD, AND WHERE AN EDGE COULD STILL LIVE
+
+Tennis is the easiest sport to MODEL and that is exactly why it is hard to BEAT. One-on-one, no
+team noise, point-level structure, enormous match volume - so every modeller converges on similar
+numbers and the price already contains them. The vig confirms it: Pinnacle 4.7%, FanDuel 4.3%,
+tighter than anything measured in golf. A tight market is a confident market.
+
+MEASURED AND CLOSED:
+    every market both books quote  - FanDuel is Pinnacle plus margin (TN-017/021)
+    the public-data ratings model  - optimal blend weight on Elo is 0.00 (TN-024)
+    every classic factor           - form, surface, fatigue, H2H, rank, height (TN-027)
+
+WHAT IS NOT CLOSED, in descending order of plausibility:
+    SPEED           FanDuel lags Pinnacle by minutes. That is a stale-line race, won with
+                    infrastructure and execution, not with a better model. Untested here.
+    NO-REFERENCE    markets nobody prices sharply - aces being the live example. Unresolved, and
+                    handicapped by being one-sided.
+    NON-PUBLIC      injury, fitness, travel, court-speed measurement. Nothing in this programme
+                    touches it, and it is the only class of information the price provably lacks.
+    IN-PLAY         untested here entirely.
