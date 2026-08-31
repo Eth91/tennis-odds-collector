@@ -569,3 +569,69 @@ WHAT IS NOT CLOSED, in descending order of plausibility:
     NON-PUBLIC      injury, fitness, travel, court-speed measurement. Nothing in this programme
                     touches it, and it is the only class of information the price provably lacks.
     IN-PLAY         untested here entirely.
+
+## TN-029 — BEST-EFFORT MONEYLINE MODEL + LIVE FORWARD TEST
+
+Built at the user's direction after they disagreed with the no-edge conclusion. Their objection was
+fair: the earlier result showed a CRUDE Elo failing against Pinnacle's CLOSE, which is the weakest
+model against the hardest bar.
+
+MODEL. Three components, tuned on 2015-2023, held out on 2024-25 (n=3,719):
+
+    Elo, tuned (K=32, surface blend 0.3)          log-loss 0.62875
+    POINT model (serve/return -> exact recursion)          0.82571
+    STACK (Elo + point)                                    0.62807
+    Pinnacle (Shin-devigged)                               0.59503
+
+The point model is a genuinely different object from Elo - it estimates serve strength and return
+strength separately (p_A = s_A + (S - o_B)) and runs the exact point -> game -> set -> match
+recursion, validated on symmetry: game_win(0.50)=0.5000, set_win(0.64,0.64)=0.5000, and best-of-5
+correctly amplifying the stronger player (0.8405 -> 0.8934).
+
+IT SCORED WORSE THAN A COIN FLIP (0.826 against 0.693) AND THE REASON IS STRUCTURAL. The recursion
+amplifies about tenfold - a 0.04 gap in point probability becomes a 0.69 match line - while a single
+match measures p only to +-0.09. Estimation error explodes into overconfidence. It earned a NEGATIVE
+weight (-0.109) in the fitted stack. This is not a tuning failure; it is the signal-to-noise of
+aggregate serve statistics meeting a highly non-linear map.
+
+DOES ANY OF IT ADD TO PINNACLE? weight on Pinnacle 1.0703, weight on our stack -0.1292, held-out
+delta -0.00058. The NEGATIVE weight is the finding: the blend improves by leaning AGAINST us, and
+most of the gain is Pinnacle's own log-odds being extremised (weight > 1), which needs no model.
+
+CALIBRATION, and the distinction that settles it:
+    logit(p_true) = 0.0050 + 0.9452 * logit(p_model)   fitted on 34,703 historical matches
+    2025+ held out: raw 0.62047 | calibrated 0.61992 | market 0.60064
+Calibration closes 2.8% of the gap. So the model is WELL CALIBRATED AGAINST OUTCOMES AND LESS
+INFORMATIVE THAN THE MARKET - different properties, and only the second one matters here. A
+well-calibrated but less-informative model sits nearer the base rate, so against a sharper price it
+will ALWAYS appear to find value on longshots. Every live scan confirmed it: all 40 flagged bets
+were underdogs at +27% to +48%, and damping the model made those edges LARGER, not smaller.
+
+## LIVE FORWARD TEST — running
+
+`ml_live.py scan` every 30 minutes; `ml_live_ingest.py` + `settle` daily at 06:20 UTC.
+Ledger `ml_ledger.sqlite`. PAPER ONLY - nothing places a bet.
+
+PRIOR RECORDED ON EVERY ROW, before any result arrives: "calibrated LL .61992 vs market .60064 -
+EXPECTED TO LOSE". A forward test is only worth running if its prior is written down first; if the
+ledger comes back profitable over a real sample that is evidence AGAINST every retrospective result
+here and worth more than any backtest, and if it comes back negative it confirms them. Either way
+it is decided by outcomes rather than by my judgement.
+
+⚠️ FOUR BUGS CAUGHT IN THE HARNESS BEFORE IT WAS TRUSTED, every one of which would have produced a
+fake edge:
+  1 SILENT DEFAULT. TML is ATP-ONLY and the WTA fetch had timed out, so every WTA player was
+    unknown, defaulted to Elo 1500, returned EXACTLY 0.500, and against a 101.0 longshot read as a
+    4,950% edge. 88 such bets were logged and purged. Now: refuse below 20 matches of history,
+    reject an exact-0.500 output as the default's fingerprint, cap edges at 50%.
+  2 ATP-ONLY ELO. Even after the gate, Elo was seeded from the ATP-only serve table. Rebuilt from
+    results_live: 57,386 matches, BOTH tours, 2015-2026.
+  3 NAME FORMAT. FanDuel writes "Yuliia Starodubtseva", tennis-data writes "Starodubtseva Y." - so
+    nothing joined and the gate correctly refused all 103 matches. One canonical (surname, initial)
+    key now spans both.
+  4 ORIENTATION. The market was stored winner-oriented while the label was name-sort oriented,
+    making Pinnacle score 0.80245 - worse than our Elo, which is impossible and was the tell.
+
+DATA CONSTRAINT: TML's serve statistics stop 2026-01-17 while results run to 2026-08-30, so the
+point model is 225 days stale. It is computed and RECORDED on every row but does NOT price; the
+live model is the calibrated Elo, which can be kept fully current from results.
