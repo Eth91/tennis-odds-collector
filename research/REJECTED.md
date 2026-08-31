@@ -139,3 +139,44 @@ data is reusable — but the hypothesis is closed.
 
 Related: this is the same shape as [[PR-004]] (real drift, no executable edge) and the WNBA house
 lesson that edge lives in PRICE, not in refining the thesis.
+
+## MINUTES DE-BIAS — PROPOSED AND REJECTED BEFORE REGISTRATION (2026-08-30)
+
+Proposed after the valuation audit found projections running **+0.64 points optimistic**
+(t=+3.26, stable across both chronological halves), with minutes over-projected at every band
+(+1.26 / +1.60 / +2.33). For an OVERS-ONLY system an upward bias is directionally harmful, so
+correcting it looked like the one fixable lever the error decomposition left open.
+
+**It is not. Two measurements killed it:**
+
+**1. The bias is in a cohort we do not bet.** Split by confidence tier, the entire effect is
+`bench` (+1.62, t=+6.31) and `projected`. `confirmed` is unbiased at −0.14.
+
+| cohort | points bias | t | n |
+|---|---|---|---|
+| confirmed + likely (what we bet) | **−0.09** | −0.32 | 429 |
+| rows that became actual ledger bets | **−0.31** | −0.50 | 103 |
+| bench + projected (NOT bet) | **+1.61** | +6.45 | 324 |
+
+The 2026-07-29 role gate already removed bench/projected from the bet path — the ledger's last
+`bench` row is 2026-07-29 and last `projected` is 2026-07-28, versus `confirmed`/`likely` on
+2026-08-30. **The gate fixed this a month ago.** The global +0.64 is an artifact of pooling a
+cohort that never reaches a bet.
+
+**2. ⚠️ CORRECTING MINUTES WOULD MAKE IT WORSE.** On the tiers we bet, minutes ARE still
+over-projected (+0.69, t=+2.52) — yet the resulting STAT projections are unbiased (points −0.09).
+The minutes error is being **offset by an under-projected rate**; the two cancel. Subtracting the
+minutes bias would break the offset and introduce a NEW negative bias into every stat projection,
+making an overs-only system systematically under-project and stop firing on good bets.
+
+🔑 **THE LESSON: a bias measured on the full projection log is not a bias on the BET population.**
+Always re-measure on the post-selection universe before correcting anything — and when two errors
+cancel, fixing one of them is strictly worse than fixing neither. Related:
+[[feedback_fit_on_post_selection_universe]].
+
+**WHAT THE AUDIT DID ESTABLISH (keep this):** our projection error and the book's line error are
+statistically identical — |proj err| 5.26 vs |line err| 5.21, paired t=+0.22, our projection closer
+on 48% of rows. **Valuation is already market-grade and cannot be improved by projecting harder.**
+The residual is noise (bias/noise ratio 0.06–0.12), not correctable error. Edge must come from
+PRICE (line shopping +3.31pp, base rungs) or from finding where the BOOK's line is biased — not
+from out-projecting a market we already match.
