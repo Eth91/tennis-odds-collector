@@ -85,6 +85,21 @@ def origin_board_age():
         return None, None
 
 
+def board_status():
+    """(status, age_min) from the Mac-published dk_board.json, or (None, None) if unreadable.
+
+    UNKNOWN IS NOT HEALTHY and is also not a fault: boards published before 2026-08-31 carry no
+    'status' key at all, so its absence must not page. It just means this backstop has nothing
+    to say and the slate-based checks below still apply."""
+    try:
+        import json
+        d = json.loads(BOARD.read_text())
+        ts = dt.datetime.fromisoformat(str(d.get("ts", "")).replace("Z", "+00:00"))
+        return d.get("status"), (dt.datetime.now(dt.timezone.utc) - ts).total_seconds() / 60.0
+    except Exception:                                                 # noqa: BLE001
+        return None, None
+
+
 def ping(msg):
     if STAMP.exists():
         age = (time.time() - STAMP.stat().st_mtime) / 3600.0
@@ -143,9 +158,32 @@ WATCH_WITHIN_H = 8.0          # only judge DK inside the run-up to a tip
 
 
 def main():
+    # ENDPOINT HEALTH IS CHECKED BEFORE THE SLATE GATE, DELIBERATELY.
+    #
+    # A/B'd this file 2026-08-31 by injecting a hard block into main() at each slate state:
+    #     ACTIVE slate (tip 2h out) + hard block -> PAGES        (the guard does work...)
+    #     no slate                 + hard block -> SILENT        (...but only inside the window)
+    #     next tip 408h out        + hard block -> SILENT
+    #     ACTIVE slate + healthy DK             -> silent        (no false positive)
+    # The two SILENT rows are the hole. Staleness is only observable when something fresh exists
+    # to be stale against, so during an off-week a total DK outage looks exactly like a quiet
+    # night. The WNBA went dark 2026-08-30 -> 2026-09-17: a block starting in that gap would have
+    # gone unreported for 17 days and surfaced at the first tip, when DK-vs-FD line shopping is
+    # worth +3.31pp of ROI. So a REFUSAL is judged on its own, never through its stale shadow.
+    st, bage = board_status()
+    if st in ("blocked", "error", "partial"):
+        log(f"BOARD STATUS={st} (board {bage:.0f}min old) — endpoint fault, slate is irrelevant")
+        ping(f"DK endpoint {st}: the Mac publisher reports DraftKings is refusing it. DK "
+             f"collection is DOWN regardless of slate — best-price line shopping is degraded to "
+             f"FanDuel-only until this clears.")
+        return
     h = hours_to_next_tip()
     if h is None:
-        log("no upcoming slate — DK staleness is expected (quiet hours); not judging")
+        # tip_times() returns {} for "no games today" AND for "ESPN did not answer" — it cannot
+        # tell them apart, so this line must not claim the first. It no longer matters much: the
+        # endpoint check above already ran, and it does not depend on knowing the slate.
+        log(f"no slate visible (no games, or ESPN unavailable) — not judging staleness "
+            f"[endpoint status={st or 'unknown'}]")
         return
     if h > WATCH_WITHIN_H:
         log(f"next tip {h:.1f}h away (> {WATCH_WITHIN_H}h) — outside the selection window; not judging")
