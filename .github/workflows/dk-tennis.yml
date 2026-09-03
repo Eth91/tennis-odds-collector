@@ -1,0 +1,108 @@
+name: dk-tennis
+# Collect DraftKings tennis moneylines from a GitHub runner and publish them for the VM.
+#
+# WHY: DK's Akamai edge 403s BOTH Oracle boxes (155.248.217.149, 140.238.143.104) whatever
+# the TLS fingerprint - that ASN is denied outright. Azure (AS8075, where GitHub runners
+# live) is NOT: plain curl still gets 403, but curl_cffi with chrome124 impersonation gets
+# 200 and a payload byte-identical to the Mac's residential connection (53,723 bytes,
+# verified on two independent runs). So the runner does what the VM cannot and the Mac
+# stops being a hard dependency.
+#
+# Publishes to the `dk-board` branch, never to main. The VM fetches that ref and ingests.
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dk-tennis
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dk-board
+          fetch-depth: 1
+      - run: python3 -m pip install --quiet curl_cffi
+      - name: fetch DraftKings tennis
+        run: |
+          python3 - <<'PY'
+          import json, datetime as dt, re, sys, pathlib
+          from curl_cffi import requests as cr
+          NAV = "https://sportsbook-nash.draftkings.com/api/sportscontent/navigation/dkusco/v1"
+          B = "https://sportsbook-nash.draftkings.com/api/sportscontent/dkusco/v1"
+          H = {"Referer": "https://sportsbook.draftkings.com/", "Accept": "application/json"}
+          SKIP = re.compile(r"doubles", re.I)
+
+          def get(u):
+              r = cr.get(u, impersonate="chrome124", timeout=40, headers=H)
+              r.raise_for_status()
+              return r.json()
+
+          seen, leagues = set(), []
+          def walk(o):
+              if isinstance(o, dict):
+                  i, nm = o.get("eventGroupId"), o.get("eventGroupName")
+                  if i and nm and i not in seen and not SKIP.search(str(nm)):
+                      seen.add(i); leagues.append((str(i), str(nm)))
+                  for v in o.values(): walk(v)
+              elif isinstance(o, list):
+                  for v in o: walk(v)
+          walk(get(NAV + "/nav/sports/6"))
+
+          now = dt.datetime.utcnow().isoformat(timespec="seconds")
+          rows = []
+          for lid, lname in leagues:
+              try:
+                  d = get("%s/leagues/%s" % (B, lid))
+              except Exception as e:
+                  print("  %-30s FAILED %s" % (lname[:30], str(e)[:50])); continue
+              ev = {str(e["id"]): e for e in (d.get("events") or [])}
+              mk = {str(m["id"]): m for m in (d.get("markets") or [])}
+              for s in (d.get("selections") or []):
+                  m = mk.get(str(s.get("marketId")))
+                  if not m or str(m.get("name")) != "Moneyline": continue
+                  e = ev.get(str(m.get("eventId")))
+                  if not e: continue
+                  try:
+                      dec = float(s["displayOdds"]["decimal"])
+                  except (KeyError, TypeError, ValueError):
+                      continue
+                  rows.append([lid, lname, str(e.get("name")), str(e.get("startEventDate")),
+                               str(s.get("label")), dec])
+          if not rows:
+              print("DKTENNIS no_lines across %d leagues - NOT writing an empty board" % len(leagues))
+              sys.exit(0)
+          board = {"ts": now, "source": "github-actions", "leagues": len(leagues),
+                   "cols": ["league_id","league","event_name","start_time","runner_name","odds"],
+                   "rows": sorted(rows)}
+          pathlib.Path("data").mkdir(exist_ok=True)
+          p = pathlib.Path("data/dk_tennis_board.json")
+          old = None
+          if p.exists():
+              try: old = json.loads(p.read_text()).get("rows")
+              except Exception: pass
+          if old == board["rows"]:
+              print("DKTENNIS ok - %d sides, UNCHANGED, not committing" % len(rows))
+              sys.exit(0)
+          p.write_text(json.dumps(board, separators=(",", ":")))
+          print("DKTENNIS ok - %d sides over %d leagues, board updated" % (len(rows), len(leagues)))
+          PY
+      - name: publish
+        run: |
+          if [ -n "$(git status --porcelain data/dk_tennis_board.json)" ]; then
+            git config user.name "dk-tennis-bot"
+            git config user.email "dk-tennis-bot@users.noreply.github.com"
+            git add data/dk_tennis_board.json
+            git commit -q -m "DK tennis board $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git push -q origin HEAD:dk-board
+            echo "published"
+          else
+            echo "no change; nothing published"
+          fi
