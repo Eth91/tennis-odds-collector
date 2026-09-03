@@ -13,6 +13,11 @@ on:
   schedule:
     - cron: '*/30 * * * *'
   workflow_dispatch:
+  # TEMPORARY: proves the pipeline end-to-end from a side branch. GitHub only fires
+  # schedule/workflow_dispatch for workflows on the DEFAULT branch, so this is the only
+  # way to exercise it before merge. Remove when this lands on main.
+  push:
+    branches: [dk-ip-probe]
 
 permissions:
   contents: write
