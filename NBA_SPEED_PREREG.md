@@ -96,3 +96,33 @@ even if re-flagged on game day, so the primary cell holds only news that broke o
 particular posts later), so more candidates have no line and the cell will fill more slowly. A day
 of market movement also means more noise per flag: the cell can show a larger move in either
 direction, and needs the same sample bar, not a smaller one.
+
+---
+
+# AMENDMENT 2 — a news layer ahead of the official report (2026-10-22, before any forward flag)
+
+Committed before the code that lets news trigger a flag runs, and before any shadow flag exists.
+The registration and amendment 1 are unchanged; this adds a second trigger source.
+
+**What changes.** Besides the official report, an Out can now be **originated by news**
+(`nba_news_watch.py`: RotoWire's wire and Bluesky search today; an X reader that stays benched until
+the user configures it). News is **add-only**: it can add an absence before the report lists it, it
+never clears an official Out, and an official report published after the news item that lists the
+player with any non-Out status for that game withdraws the news Out from then on. Every flag
+records `trigger_src` — `report`, or `news:<source>` when news came first — and `news_at` is the
+earliest time the absence was public to us.
+
+**The confirmation rule (what keeps parser errors out of the verdicts).** A news-originated
+opportunity counts in its horizon cell **only if an official report published before tip lists that
+player Out for that game.** Confirmed, it keeps its earlier flag time and price — that is the speed
+the layer exists to buy. Unconfirmed (the player played, or the item was misread), it goes to an
+`unconfirmed news` audit cell: reported, never pooled into any verdict. Report-originated
+opportunities are unaffected.
+
+**What is measured about the layer itself** (`nba_news_watch.py --journal`, information only): per
+source, the lead of each news Out over the league's first published Out for the same player-game,
+and the unconfirmed rate. Measured on day one, RotoWire's injury items cited the official report's
+PDF as their own source — downstream of it — so a lead is not assumed for any source.
+
+**Primary test**: unchanged — tier `priced`, horizon 0, same lines — now over report-originated and
+confirmed news-originated opportunities alike, i.e. the engine as it actually runs.
