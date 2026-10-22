@@ -89,3 +89,24 @@ if __name__ == "__main__":
     print("REAL:"); test_real()
     print("MUTANT (pulled rungs treated as live) — must fail:"); test_mutant_pulled_rungs_as_live()
     print("test_nba_clv: OK")
+
+
+def test_one_opportunity_per_game_earliest_flag_wins():
+    """A day-before flag (h1) and a game-day re-flag at a moved line are ONE opportunity."""
+    d = pathlib.Path(tempfile.mkdtemp())
+    sh = F._shadow(d / "s.sqlite")
+    q = sqlite3.connect(d / "q.sqlite")
+    q.executescript("CREATE TABLE quotes (seen_at TEXT, book TEXT, gid TEXT, tip_utc TEXT, pid INTEGER,"
+                    " player TEXT, stat TEXT, line REAL, side TEXT, odds REAL)")
+    for side in ("over", "under"):
+        q.execute("INSERT INTO quotes VALUES (?,?,?,?,?,?,?,?,?,?)",
+                  ("2026-01-09T12:00:00", "fd", "G", TIP, 9, "p9", "points", 11.5, side, 1.91))
+    for fid, at, line, h in (("early", "2026-01-08T21:00:00", 10.5, 1), ("late", "2026-01-09T18:00:00", 11.5, 0)):
+        sh.execute("INSERT INTO flags (flag_id, logged_at, game_date, tier, team, x, b, stat, line, odds, "
+                   "gid, gtime, pid, horizon) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                   (fid, at, "2026-01-09", "priced", "T", "X", "p9", "points", line, 1.91, "G", TIP + "Z", 9, h))
+    sh.commit(); q.commit()
+    V.SHADOW, V.LINES = d / "s.sqlite", d / "q.sqlite"
+    rows = V.collect()
+    assert len(rows) == 1 and rows[0]["flag_id"] == "early" and rows[0]["horizon"] == 1
+    assert rows[0]["beat"] and rows[0]["move"] == 1.0          # flagged 10.5 a day early, closed 11.5

@@ -70,6 +70,7 @@ ET = ZoneInfo("America/New_York")
 
 LIVE_TIERS = frozenset()               # tiers allowed to write PAPER bets. EMPTY — see above.
 MAX_ABSENCE_GAME = 2                   # trigger only on absence game 1-2 (the tested cell)
+HORIZONS = 2                           # flag tonight's games AND tomorrow's (h0, h1)
 REPORT_MAX_AGE_MIN = 45                # an official report older than this is a blind input
 STATS = ("pra", "pts", "reb")          # ast/fg3m gated off (48.5% Oct-Nov / 53.7%)
 MARGIN = {"pra": 5.0, "pts": 3.0, "reb": 2.0}          # wowy tier (measured negative)
@@ -82,7 +83,7 @@ SHADOW_DDL = """CREATE TABLE IF NOT EXISTS flags (
     flag_id TEXT PRIMARY KEY, logged_at TEXT, game_date TEXT, tier TEXT, team TEXT,
     x TEXT, b TEXT, stat TEXT, line REAL, odds REAL, proj REAL, margin REAL,
     gid TEXT, gtime TEXT, matchup TEXT, actual REAL, result TEXT, graded_at TEXT,
-    ev REAL, pid INTEGER, news_at TEXT, stale INTEGER)"""
+    ev REAL, pid INTEGER, news_at TEXT, stale INTEGER, horizon INTEGER)"""
 COMBO = {"pts_reb": ("points", "rebounds"), "pts_ast": ("points", "assists"),
          "reb_ast": ("rebounds", "assists")}
 
@@ -93,7 +94,7 @@ def _shadow(path):
     sh.execute(SHADOW_DDL)
     have = {r[1] for r in sh.execute("PRAGMA table_info(flags)")}
     for col, typ in (("ev", "REAL"), ("pid", "INTEGER"), ("news_at", "TEXT"),
-                     ("stale", "INTEGER")):
+                     ("stale", "INTEGER"), ("horizon", "INTEGER")):
         if col not in have:
             sh.execute(f"ALTER TABLE flags ADD COLUMN {col} {typ}")
     return sh
@@ -182,6 +183,15 @@ def board_ladders(now):
     return out
 
 
+def absence_index(last_app, team_game_dates, season, out_in_tonights_game=False):
+    """Which absence tonight's/tomorrow's game is for X: 1 = first game missed.
+    Counts the franchise's COMPLETED games after X's last appearance, in the CURRENT season only
+    (the streak resets at the season boundary), plus tonight's not-yet-final game when the target
+    is tomorrow and X is ruled Out for tonight too."""
+    missed = sum(1 for d in team_game_dates if d > last_app and C.season_of(d) == season)
+    return 1 + missed + (1 if out_in_tonights_game else 0)
+
+
 def _team_apps(apps, pid, tri):
     """The player's appearances FOR THIS TEAM — the cold-start test's played_by was
     team-scoped, so the live rotation must be too, or forward shadow is not comparable."""
@@ -193,9 +203,16 @@ def _mean_last10(ap):
     return sum(a[1] for a in last) / len(last)
 
 
-def flags(dry=False):
+def flags(dry=False, game_date=None):
+    """One flag pass for the games on `game_date` (ET; default today). Completed-game data
+    (appearances, rosters) is always as of NOW; everything about the game — slate, official
+    report, absence count, flag ids, card slots — is keyed to game_date. `horizon` = days
+    between now and the game: 0 = game day, 1 = a ruling for TOMORROW's game, flagged today
+    (NBA_SPEED_PREREG.md, amendment 1: its own cell, never pooled into the primary test)."""
     now = dt.datetime.now(dt.timezone.utc)
     today_et = now.astimezone(ET).date().isoformat()
+    gdate = game_date or today_et
+    horizon = (dt.date.fromisoformat(gdate) - dt.date.fromisoformat(today_et)).days
     blind, why = [], Counter()
 
     try:
@@ -207,7 +224,7 @@ def flags(dry=False):
         sys.exit(2)
     if n_failed:
         blind.append(f"{n_failed} final box score(s) failed to fetch (retried next run)")
-    games = slate(sched, today_et)
+    games = slate(sched, gdate)
     try:
         index, inote = R.player_index(today_et)
     except R.Blind as e:
@@ -222,11 +239,11 @@ def flags(dry=False):
 
     # ── WHO IS OUT TONIGHT: the official league report, already resolved to person ids ──
     try:
-        rep, rep_mark = I.current(today_et)
+        rep, rep_mark = I.current(gdate)
     except sqlite3.OperationalError:
         rep, rep_mark = {}, None
     if rep_mark is None:
-        blind.append("no official injury report stored for today (nba_injury_report.py)")
+        blind.append(f"no official injury report stored listing {gdate} (nba_injury_report.py)")
     else:
         age = (now - dt.datetime.fromisoformat(rep_mark).replace(tzinfo=ET)).total_seconds() / 60
         if age > REPORT_MAX_AGE_MIN:
@@ -244,14 +261,24 @@ def flags(dry=False):
     # last app 04-08, sat 04-10 and 04-12) — and every such first absence of the new season was
     # invisible as a trigger. The backtests carried that quirk (pooled franchise games); the
     # forward speed test (NBA_SPEED_PREREG.md) counts only THIS season's missed games.
-    season = C.season_of(today_et)
+    season = C.season_of(gdate)
+    # For a FUTURE game, tonight's game is not in the box scores yet: if X is also ruled Out for
+    # tonight and his team plays tonight, that is one more missed game before game_date.
+    tonight_out, tonight_teams = set(), set()
+    if horizon > 0:
+        try:
+            rt, _ = I.current(today_et)
+        except sqlite3.OperationalError:
+            rt = {}
+        tonight_out = {pid for pid, v in rt.items() if v[2] == "Out"}
+        tonight_teams = {t for g in sched if g["date_et"] == today_et and g["status"] != 3
+                         for t in (g["home"], g["away"])}
     for pid, (nm, tri, st, first) in rep.items():
         if st != "Out":
             continue
         xa = _team_apps(apps, pid, tri)
-        last = xa[-1][0] if xa else ""
-        missed = sum(1 for d in team_dates[tri] if d > last and C.season_of(d) == season)
-        if xa and 1 + missed > MAX_ABSENCE_GAME:
+        if xa and absence_index(xa[-1][0], team_dates[tri], season,
+                                pid in tonight_out and tri in tonight_teams) > MAX_ABSENCE_GAME:
             why["x_absence_game_gt2"] += 1
             continue
         out_pid[pid] = (nm, tri)
@@ -284,8 +311,8 @@ def flags(dry=False):
                           rates[stat] * (base_min[b_id] + d_min), MARGIN[stat], x_id))
 
     # ── cold tier: exactly the pre-registered rule, through the shared function ──
-    season = C.season_of(today_et)
-    today = dt.date.fromisoformat(today_et)
+    season = C.season_of(gdate)
+    today = dt.date.fromisoformat(gdate)              # "active" is judged against the game date
     for x_id, (xname, tri) in out_pid.items():
         if tri not in games:
             why["no_game_today"] += 1
@@ -348,7 +375,7 @@ def flags(dry=False):
             spots, _ = P.price(name.get(b_id, ""), log, P.wowy(b_in, b_out),
                                pos.get(b_id, ""), pos.get(x_id, ""), x_dates, lad)
             for sp in P.base_rung_overs(spots):
-                priced_rows.append({"pred_date": today_et, "team": tri, "player": name.get(b_id),
+                priced_rows.append({"pred_date": gdate, "team": tri, "player": name.get(b_id),
                                     "stat": sp["stat"], "line": sp["line"], "side": "over",
                                     "ev": sp["ev"], "odds": sp["dec"], "d_min": sp.get("d_min"),
                                     "n_elev": sp["n"], "_x": xname, "_elev": sp["elev_avg"],
@@ -363,7 +390,8 @@ def flags(dry=False):
                           "stat": r["stat"], "line": r["line"], "odds": r["odds"],
                           "proj": round(r["_elev"], 1), "margin": round(r["_elev"] - r["line"], 1),
                           "ev": round(r["ev"], 4), "gid": gid, "gtime": gtime, "matchup": mu,
-                          "pid": r["_pid"], "news_at": r["_news"], "stale": r["_stale"]})
+                          "pid": r["_pid"], "news_at": r["_news"], "stale": r["_stale"],
+                          "game_date": gdate, "horizon": horizon})
     for tier, tri, xname, b_id, stat, proj, margin, x_id in cands:
         lk = lines.get((b_id, LEDGER_STAT[stat]))
         if not lk:
@@ -376,24 +404,26 @@ def flags(dry=False):
         out_flags.append({"tier": tier, "team": tri, "x": xname, "b": name.get(b_id),
                           "stat": stat, "line": line, "odds": odds, "proj": round(proj, 1),
                           "margin": round(proj - line, 1), "gid": gid, "gtime": gtime,
-                          "matchup": mu, "pid": b_id, "news_at": news_at.get(x_id)})
+                          "matchup": mu, "pid": b_id, "news_at": news_at.get(x_id),
+                          "game_date": gdate, "horizon": horizon})
 
     new_shadow = new_paper = 0
     if not dry and out_flags:
         sh = _shadow(SHADOW)
         stamp = now.replace(microsecond=0, tzinfo=None).isoformat()
         for f in out_flags:
-            fid = f"{f['tier']}|{fold(f['b'])}|{f['stat']}|{f['line']}|{today_et}"
-            if f["tier"] == "priced" and not _priced_slot_open(sh, today_et, f, fid):
+            fid = f"{f['tier']}|{fold(f['b'])}|{f['stat']}|{f['line']}|{f['game_date']}"
+            if f["tier"] == "priced" and not _priced_slot_open(sh, f["game_date"], f, fid):
                 why["priced_slot_taken"] += 1
                 continue
             cur = sh.execute("INSERT OR IGNORE INTO flags (flag_id, logged_at, game_date, tier, "
                              "team, x, b, stat, line, odds, proj, margin, gid, gtime, matchup, ev, "
-                             "pid, news_at, stale) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                             (fid, stamp, today_et, f["tier"], f["team"], f["x"], f["b"],
+                             "pid, news_at, stale, horizon) "
+                             "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                             (fid, stamp, f["game_date"], f["tier"], f["team"], f["x"], f["b"],
                               f["stat"], f["line"], f["odds"], f["proj"], f["margin"],
                               f["gid"], f["gtime"], f["matchup"], f.get("ev"), f.get("pid"),
-                              f.get("news_at"), f.get("stale")))
+                              f.get("news_at"), f.get("stale"), f["horizon"]))
             new_shadow += cur.rowcount
         sh.commit()
         sh.close()
@@ -403,7 +433,7 @@ def flags(dry=False):
             led = sqlite3.connect(LEDGER)
             led.execute(BL.DDL)
             for f in paper:
-                bid = f"nba|{fold(f['b'])}|{f['stat']}|{f['line']}|over|{today_et}"
+                bid = f"nba|{fold(f['b'])}|{f['stat']}|{f['line']}|over|{f['game_date']}"
                 if led.execute("SELECT 1 FROM bets WHERE bet_id=?", (bid,)).fetchone():
                     continue
                 led.execute("INSERT INTO bets VALUES "
@@ -424,9 +454,9 @@ def flags(dry=False):
               + (f" · EV {f['ev']:+.2f}" if f.get("ev") is not None else "")
               + f" · {f['x']} OUT · {f['matchup']}")
     tiers = Counter(f["tier"] for f in out_flags)
-    print(f"nba flags: report {rep_mark or 'NONE'} · {len(out_all)} Out tonight, "
+    print(f"nba flags {gdate} (h{horizon}): report {rep_mark or 'NONE'} · {len(out_all)} Out, "
           f"{len(out_pid)} in absence game 1-2 · {len(games) // 2} "
-          f"game(s) left today · lines: {lstat} · "
+          f"game(s) not yet started · lines: {lstat} · "
           f"candidates {Counter(c[0] for c in cands)} -> flags {dict(tiers)} · "
           f"shadow +{new_shadow} · paper +{new_paper} (live tiers: "
           f"{', '.join(sorted(LIVE_TIERS)) or 'none'})" + (" · DRY-RUN" if dry else ""))
@@ -495,4 +525,9 @@ if __name__ == "__main__":
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--grade", action="store_true")
     a = ap.parse_args()
-    grade() if a.grade else flags(dry=a.dry_run)
+    if a.grade:
+        grade()
+    else:
+        today = dt.datetime.now(dt.timezone.utc).astimezone(ET).date()
+        for d in range(HORIZONS):                 # today, then tomorrow (amendment 1)
+            flags(dry=a.dry_run, game_date=(today + dt.timedelta(days=d)).isoformat())
