@@ -58,6 +58,7 @@ from zoneinfo import ZoneInfo
 
 import nba_coldstart as C
 import nba_injury_report as I
+import nba_news_watch as NW
 import nba_pricing as P
 import nba_rosters as R
 
@@ -83,7 +84,8 @@ SHADOW_DDL = """CREATE TABLE IF NOT EXISTS flags (
     flag_id TEXT PRIMARY KEY, logged_at TEXT, game_date TEXT, tier TEXT, team TEXT,
     x TEXT, b TEXT, stat TEXT, line REAL, odds REAL, proj REAL, margin REAL,
     gid TEXT, gtime TEXT, matchup TEXT, actual REAL, result TEXT, graded_at TEXT,
-    ev REAL, pid INTEGER, news_at TEXT, stale INTEGER, horizon INTEGER)"""
+    ev REAL, pid INTEGER, news_at TEXT, stale INTEGER, horizon INTEGER, x_pid INTEGER,
+    trigger_src TEXT)"""
 COMBO = {"pts_reb": ("points", "rebounds"), "pts_ast": ("points", "assists"),
          "reb_ast": ("rebounds", "assists")}
 
@@ -94,7 +96,8 @@ def _shadow(path):
     sh.execute(SHADOW_DDL)
     have = {r[1] for r in sh.execute("PRAGMA table_info(flags)")}
     for col, typ in (("ev", "REAL"), ("pid", "INTEGER"), ("news_at", "TEXT"),
-                     ("stale", "INTEGER"), ("horizon", "INTEGER")):
+                     ("stale", "INTEGER"), ("horizon", "INTEGER"), ("x_pid", "INTEGER"),
+                     ("trigger_src", "TEXT")):
         if col not in have:
             sh.execute(f"ALTER TABLE flags ADD COLUMN {col} {typ}")
     return sh
@@ -283,6 +286,28 @@ def flags(dry=False, game_date=None):
             continue
         out_pid[pid] = (nm, tri)
         news_at[pid] = first
+    trig_src = {pid: "report" for pid in out_pid}
+    # ── NEWS (amendment 2): add-only. An Out the report does not list yet is added; for one it
+    # already lists, the EARLIER of the two times is the news time, credited to whoever was first.
+    # news_outs() has already dropped any item a later official report contradicts.
+    try:
+        nws = NW.news_outs(gdate)
+    except sqlite3.OperationalError:
+        nws = {}
+    _t = lambda iso: dt.datetime.fromisoformat(iso)
+    for pid, (nm, tri, at, src) in nws.items():
+        if rep.get(pid, (None, None, None))[2] == "Out":
+            if pid in news_at and _t(at) < _t(news_at[pid]):
+                news_at[pid], trig_src[pid] = at, f"news:{src}"
+            continue
+        out_all.add(pid)
+        xa = _team_apps(apps, pid, tri)
+        if xa and absence_index(xa[-1][0], team_dates[tri], season,
+                                pid in tonight_out and tri in tonight_teams) > MAX_ABSENCE_GAME:
+            why["x_absence_game_gt2"] += 1
+            continue
+        out_pid[pid], news_at[pid], trig_src[pid] = (nm, tri), at, f"news:{src}"
+        why["x_from_news"] += 1
 
     con = sqlite3.connect(f"file:{WOWY}?mode=ro", uri=True)
     pairs = con.execute("SELECT x_id, b_id, b_name, n_out, d_min, rate_pts, rate_reb, "
@@ -379,7 +404,7 @@ def flags(dry=False, game_date=None):
                                     "stat": sp["stat"], "line": sp["line"], "side": "over",
                                     "ev": sp["ev"], "odds": sp["dec"], "d_min": sp.get("d_min"),
                                     "n_elev": sp["n"], "_x": xname, "_elev": sp["elev_avg"],
-                                    "_pid": b_id, "_news": news_at.get(x_id),
+                                    "_pid": b_id, "_news": news_at.get(x_id), "_x_id": x_id,
                                     "_stale": int(bool(sp.get("stale")))})
     priced, _ = P.select(priced_rows) if priced_rows else ([], [])
 
@@ -391,7 +416,8 @@ def flags(dry=False, game_date=None):
                           "proj": round(r["_elev"], 1), "margin": round(r["_elev"] - r["line"], 1),
                           "ev": round(r["ev"], 4), "gid": gid, "gtime": gtime, "matchup": mu,
                           "pid": r["_pid"], "news_at": r["_news"], "stale": r["_stale"],
-                          "game_date": gdate, "horizon": horizon})
+                          "game_date": gdate, "horizon": horizon, "x_pid": r["_x_id"],
+                          "trigger_src": trig_src.get(r["_x_id"])})
     for tier, tri, xname, b_id, stat, proj, margin, x_id in cands:
         lk = lines.get((b_id, LEDGER_STAT[stat]))
         if not lk:
@@ -405,7 +431,8 @@ def flags(dry=False, game_date=None):
                           "stat": stat, "line": line, "odds": odds, "proj": round(proj, 1),
                           "margin": round(proj - line, 1), "gid": gid, "gtime": gtime,
                           "matchup": mu, "pid": b_id, "news_at": news_at.get(x_id),
-                          "game_date": gdate, "horizon": horizon})
+                          "game_date": gdate, "horizon": horizon, "x_pid": x_id,
+                          "trigger_src": trig_src.get(x_id)})
 
     new_shadow = new_paper = 0
     if not dry and out_flags:
@@ -418,12 +445,13 @@ def flags(dry=False, game_date=None):
                 continue
             cur = sh.execute("INSERT OR IGNORE INTO flags (flag_id, logged_at, game_date, tier, "
                              "team, x, b, stat, line, odds, proj, margin, gid, gtime, matchup, ev, "
-                             "pid, news_at, stale, horizon) "
-                             "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                             "pid, news_at, stale, horizon, x_pid, trigger_src) "
+                             "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                              (fid, stamp, f["game_date"], f["tier"], f["team"], f["x"], f["b"],
                               f["stat"], f["line"], f["odds"], f["proj"], f["margin"],
                               f["gid"], f["gtime"], f["matchup"], f.get("ev"), f.get("pid"),
-                              f.get("news_at"), f.get("stale"), f["horizon"]))
+                              f.get("news_at"), f.get("stale"), f["horizon"], f.get("x_pid"),
+                              f.get("trigger_src")))
             new_shadow += cur.rowcount
         sh.commit()
         sh.close()
@@ -452,6 +480,7 @@ def flags(dry=False, game_date=None):
         print(f"  [NBA {f['tier']}] {f['b']} ({f['team']}) {f['stat'].upper()} O{f['line']:g} "
               f"@{f['odds']:.2f} · proj {f['proj']} (+{f['margin']})"
               + (f" · EV {f['ev']:+.2f}" if f.get("ev") is not None else "")
+              + (f" · via {f['trigger_src']}" if (f.get("trigger_src") or "report") != "report" else "")
               + f" · {f['x']} OUT · {f['matchup']}")
     tiers = Counter(f["tier"] for f in out_flags)
     print(f"nba flags {gdate} (h{horizon}): report {rep_mark or 'NONE'} · {len(out_all)} Out, "

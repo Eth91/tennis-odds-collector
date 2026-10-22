@@ -17,6 +17,9 @@ Run once a minute (cron). Each run:
      then run the flag pass for each affected game date — so each shadow flag's price is the
      price right after the news.
      Every trigger is logged in nba_news.sqlite `triggers` with its timings.
+  2b. NEWS (amendment 2). At most every NEWS_EVERY_S, poll the news layer (nba_news_watch). A news
+     Out for a game tonight/tomorrow that the official report does NOT already list as Out fires
+     the same action — lines + flag pass — before the report catches up. Add-only.
   3. CLOSE CAPTURE. Within HOT_LEAD_MIN of any tip, refresh lines every HOT_EVERY_MIN, so the
      closing price nba_clv rebuilds is minutes old, not up to ten.
 
@@ -45,6 +48,8 @@ LOCK = Path("/tmp/nba-cycle.lock")
 LOCK_WAIT_S = 50
 REPORT_POLL_S, REPORT_POLL_WINDOW_S = 3, 75
 HOT_LEAD_MIN, HOT_EVERY_MIN = 35, 2
+NEWS_EVERY_S = 55                                     # same self-throttle the WNBA news layer uses
+NEWS_STAMP = Path("/tmp/nba-news.last")
 TRIG_DDL = """CREATE TABLE IF NOT EXISTS triggers (
     mark TEXT, published_at TEXT, detected_at TEXT, fresh TEXT, lines_at TEXT,
     flags_at TEXT, n_flags INTEGER, note TEXT)"""
@@ -110,9 +115,38 @@ def _quiet(fn, *a, **k):
         return None, buf.getvalue(), f"{type(e).__name__}: {str(e)[:80]}"
 
 
+def _fire(con, label, published, fresh, log):
+    """The trigger action: refresh both books once, then a flag pass per affected game date.
+    fresh: [(pid, name, team, game_date)]."""
+    import nba_flags as F
+    import nba_lines as L
+    det = _now().isoformat()
+    _, lout, lerr = _quiet(L.cycle)
+    lines_at = _now().isoformat()
+    fl, fout, ferr = [], "", None
+    for gd in sorted({f[3] for f in fresh}):
+        r, o, e = _quiet(F.flags, dry=False, game_date=gd)
+        fl += r or []
+        fout += o
+        ferr = ferr or e
+    flags_at = _now().isoformat()
+    names = [f"{n} ({t}, {gd})" for _, n, t, gd in fresh]
+    con.execute("INSERT INTO triggers VALUES (?,?,?,?,?,?,?,?)",
+                (label, published, det, json.dumps(names), lines_at, flags_at, len(fl),
+                 "; ".join(x for x in (lerr, ferr) if x)))
+    con.commit()
+    log.append(f"TRIGGER {label} fresh Out {names} -> lines + flags ({len(fl)} flag(s)); "
+               f"published {published[11:19]} · flagged {flags_at[11:19]} UTC"
+               + (f" · {lerr or ''} {ferr or ''}" if lerr or ferr else ""))
+    for line in (fout or "").splitlines():
+        if line.startswith(("  [NBA", "nba flags")):
+            log.append("   " + line.strip())
+
+
 def once():
     import nba_flags as F
     import nba_lines as L
+    import nba_news_watch as NW
     import nba_rosters as R
     log = []
     with cycle_lock() as got:
@@ -144,31 +178,30 @@ def once():
                    for t in (g["home"], g["away"])}
         for s in sorted(new, key=lambda s: s["mark"]):
             fr = [f for f in fresh_outs(con, s["mark"]) if (f[3], f[2]) in playing]
-            if not fr:
-                continue
-            pub = con.execute("SELECT published_at FROM reports WHERE mark=?",
-                              (s["mark"],)).fetchone()[0]
-            det = _now().isoformat()
-            _, lout, lerr = _quiet(L.cycle)
-            lines_at = _now().isoformat()
-            fl, fout, ferr = [], "", None
-            for gd in sorted({f[3] for f in fr}):            # one pass per affected game date
-                r, o, e = _quiet(F.flags, dry=False, game_date=gd)
-                fl += r or []
-                fout += o
-                ferr = ferr or e
-            flags_at = _now().isoformat()
-            names = [f"{n} ({t}, {gd})" for _, n, t, gd in fr]
-            con.execute("INSERT INTO triggers VALUES (?,?,?,?,?,?,?,?)",
-                        (s["mark"], pub, det, json.dumps(names), lines_at, flags_at,
-                         len(fl or []), "; ".join(x for x in (lerr, ferr) if x)))
-            con.commit()
-            log.append(f"TRIGGER {s['mark']} fresh Out {names} -> lines + flags "
-                       f"({len(fl or [])} flag(s)); published {pub[11:19]} · flagged "
-                       f"{flags_at[11:19]} UTC" + (f" · {lerr or ''} {ferr or ''}" if lerr or ferr else ""))
-            for line in (fout or "").splitlines():
-                if line.startswith(("  [NBA", "nba flags")):
-                    log.append("   " + line.strip())
+            if fr:
+                pub = con.execute("SELECT published_at FROM reports WHERE mark=?",
+                                  (s["mark"],)).fetchone()[0]
+                _fire(con, s["mark"], pub, fr, log)
+        # 2b. NEWS — throttled; fires only on an Out the official report does not list yet
+        try:
+            last = NEWS_STAMP.stat().st_mtime
+        except FileNotFoundError:
+            last = 0
+        if time.time() - last >= NEWS_EVERY_S:
+            NEWS_STAMP.touch()
+            outs, errs = NW.poll(_now(), con=con)
+            for e in errs:
+                log.append(f"news source error: {e}")
+            by_src = {}
+            for src, pid, nm, tri, gd, at in outs:
+                if (gd, tri) not in playing:
+                    continue
+                cur, _ = I.current(gd, con)
+                if (cur.get(pid) or (None, None, None))[2] == "Out":
+                    continue                              # the report already has it
+                by_src.setdefault((src, at), []).append((pid, nm, tri, gd))
+            for (src, at), fr in by_src.items():
+                _fire(con, f"news:{src}", at, fr, log)
         # 3. CLOSE CAPTURE near tip
         soon = [g for g in sched if g["status"] == 1 and 0 <= (
             dt.datetime.fromisoformat(g["utc"].replace("Z", "+00:00")) - _now()

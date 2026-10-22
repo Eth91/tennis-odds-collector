@@ -110,3 +110,34 @@ def test_one_opportunity_per_game_earliest_flag_wins():
     rows = V.collect()
     assert len(rows) == 1 and rows[0]["flag_id"] == "early" and rows[0]["horizon"] == 1
     assert rows[0]["beat"] and rows[0]["move"] == 1.0          # flagged 10.5 a day early, closed 11.5
+
+
+def test_news_trigger_confirmed_vs_unconfirmed():
+    """Amendment 2: a news-originated flag counts only if the official report lists the absent
+    player Out for that game before tip; otherwise it is an unconfirmed audit row."""
+    d = pathlib.Path(tempfile.mkdtemp())
+    sh = F._shadow(d / "s.sqlite")
+    q = sqlite3.connect(d / "q.sqlite")
+    q.executescript("CREATE TABLE quotes (seen_at TEXT, book TEXT, gid TEXT, tip_utc TEXT, pid INTEGER,"
+                    " player TEXT, stat TEXT, line REAL, side TEXT, odds REAL)")
+    nw = sqlite3.connect(d / "n.sqlite")
+    nw.executescript("CREATE TABLE snapshots (mark TEXT, published_at TEXT, game_date TEXT, matchup TEXT,"
+                     " team TEXT, pid INTEGER, player TEXT, status TEXT, reason TEXT)")
+    for pid in (21, 22):
+        for side in ("over", "under"):
+            q.execute("INSERT INTO quotes VALUES (?,?,?,?,?,?,?,?,?,?)",
+                      ("2026-01-09T12:00:00", "fd", "G", TIP, pid, "p", "points", 9.5, side, 1.91))
+    # X=101's Out confirmed by the 18:00 report (before tip); X=102 never ruled Out
+    nw.execute("INSERT INTO snapshots VALUES (?,?,?,?,?,?,?,?,?)",
+               ("m", "2026-01-09T18:00:04+00:00", "2026-01-09", "A@B", "T", 101, "x1", "Out", ""))
+    nw.execute("INSERT INTO snapshots VALUES (?,?,?,?,?,?,?,?,?)",
+               ("m", "2026-01-09T18:00:04+00:00", "2026-01-09", "A@B", "T", 102, "x2", "Questionable", ""))
+    for fid, b, x in (("c", 21, 101), ("u", 22, 102)):
+        sh.execute("INSERT INTO flags (flag_id, logged_at, game_date, tier, team, x, b, stat, line, odds, "
+                   "gid, gtime, pid, horizon, x_pid, trigger_src) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                   (fid, "2026-01-09T17:30:00", "2026-01-09", "priced", "T", "X", f"p{b}", "points",
+                    9.5, 1.91, "G", TIP + "Z", b, 0, x, "news:rotowire"))
+    sh.commit(); q.commit(); nw.commit()
+    V.SHADOW, V.LINES, V.NEWS = d / "s.sqlite", d / "q.sqlite", d / "n.sqlite"
+    rows = {r["flag_id"]: r for r in V.collect()}
+    assert rows["c"]["confirmed"] is True and rows["u"]["confirmed"] is False
