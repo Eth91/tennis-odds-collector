@@ -70,7 +70,12 @@ def schedule():
             out.append({"gid": g["gameId"], "date_et": g["gameDateEst"][:10],
                         "utc": g["gameDateTimeUTC"], "status": g.get("gameStatus"),
                         "home": g["homeTeam"]["teamTricode"],
-                        "away": g["awayTeam"]["teamTricode"]})
+                        "away": g["awayTeam"]["teamTricode"],
+                        # nicknames ("Knicks", "Trail Blazers", "76ers") are the only part of a
+                        # team's name that FanDuel ("New York Knicks") and DraftKings ("NY Knicks")
+                        # spell the same way; nba_lines matches book events on them
+                        "home_nick": g["homeTeam"].get("teamName") or "",
+                        "away_nick": g["awayTeam"].get("teamName") or ""})
     return out
 
 
@@ -114,13 +119,74 @@ def season_boxes(sched):
     return boxes, failed
 
 
-def state(today_et, boxes):
+INDEX = ("https://stats.nba.com/stats/playerindex?LeagueID=00&Season={season}"
+         "&Historical=0&Active=1")
+INDEX_CACHE = HERE / "nba_player_index.json"
+INDEX_TTL_H, INDEX_STALE_OK_H = 6.0, 72.0
+STATS_H = {"Referer": "https://www.nba.com/", "Origin": "https://www.nba.com",
+           "Accept": "application/json", "x-nba-stats-origin": "stats",
+           "x-nba-stats-token": "true"}
+
+
+def player_index(today_et):
+    """({pid: (tricode, name, position)}, note) — the league's CURRENT active rosters.
+
+    WHY. "Current team" from a player's most recent appearance is wrong for every summer
+    move until that player plays: on 2026-10-22 it put DeRozan on SAC (he is on DEN),
+    Bagley on DAL (DEN), Watson on DEN (CLE), and could not place any rookie. The index
+    is authoritative and keyed by the same NBA person id as the game logs and box scores.
+    stats.nba.com is Mac-only. Cached INDEX_TTL_H; on a failed refresh a cache younger than
+    INDEX_STALE_OK_H is used and SAID so; older than that raises Blind.
+    """
+    from curl_cffi import requests as cr
+    now = dt.datetime.now(dt.timezone.utc)
+    try:
+        c = json.loads(INDEX_CACHE.read_text())
+        age_h = (now - dt.datetime.fromisoformat(c["fetched_at"])).total_seconds() / 3600
+    except (OSError, ValueError, KeyError):
+        c, age_h = None, None
+    if c and age_h < INDEX_TTL_H:
+        return {int(k): tuple(v) for k, v in c["players"].items()}, ""
+    y = int(today_et[:4]) if int(today_et[5:7]) >= 8 else int(today_et[:4]) - 1
+    season = f"{y}-{(y + 1) % 100:02d}"
+    try:
+        r = cr.get(INDEX.format(season=season), impersonate="chrome", timeout=60,
+                   headers=STATS_H)
+        if r.status_code != 200:
+            raise Blind(f"playerindex: HTTP {r.status_code}")
+        rs = r.json()["resultSets"][0]
+        ix = {h: i for i, h in enumerate(rs["headers"])}
+        players = {int(x[ix["PERSON_ID"]]): (x[ix["TEAM_ABBREVIATION"]],
+                                             f"{x[ix['PLAYER_FIRST_NAME']]} "
+                                             f"{x[ix['PLAYER_LAST_NAME']]}".strip(),
+                                             x[ix["POSITION"]] or "")
+                   for x in rs["rowSet"] if x[ix["TEAM_ABBREVIATION"]]}
+        if len(players) < 300:                       # a real league has ~500; a stub is a bad read
+            raise Blind(f"playerindex: only {len(players)} rostered players")
+    except Blind:
+        raise_ = not (c and age_h is not None and age_h < INDEX_STALE_OK_H)
+        if raise_:
+            raise
+        return ({int(k): tuple(v) for k, v in c["players"].items()},
+                f"player index refresh failed; using a {age_h:.0f}h-old cache")
+    except Exception as e:
+        if c and age_h is not None and age_h < INDEX_STALE_OK_H:
+            return ({int(k): tuple(v) for k, v in c["players"].items()},
+                    f"player index refresh failed ({type(e).__name__}); using a {age_h:.0f}h-old cache")
+        raise Blind(f"playerindex: {type(e).__name__}") from e
+    INDEX_CACHE.write_text(json.dumps({"fetched_at": now.isoformat(), "season": season,
+                                       "players": {str(k): v for k, v in players.items()}}))
+    return players, ""
+
+def state(today_et, boxes, index=None):
     """Everything the engine projects from, merged and ordered by date.
 
     apps:  {pid: [(date, min, {pts, reb, ast, fg3m, pra}, team), ...]} — last season's game
            logs inside the 400-day pool PLUS this season's box scores. `team` is the team the
            player appeared FOR, so callers can scope to a franchise as the backtest did.
-    team:  {pid: tricode of the player's most recent appearance} — CURRENT team.
+    team:  {pid: CURRENT tricode}. With `index` (player_index) the index is authoritative and a
+           player absent from it has NO current team; without it, the team of the most recent
+           appearance — wrong for every summer move until the player appears.
     name:  {pid: name}
     """
     cut = (dt.date.fromisoformat(today_et) - dt.timedelta(days=POOL_DAYS)).isoformat()
@@ -148,6 +214,10 @@ def state(today_et, boxes):
                 last[pid], team[pid] = bx["date"], q["team"]
     for pid in apps:
         apps[pid].sort(key=lambda a: a[0])
+    if index is not None:
+        team = {pid: tri for pid, (tri, _, _) in index.items()}
+        for pid, (_, nm, _) in index.items():
+            name.setdefault(pid, nm)
     return apps, team, name
 
 

@@ -8,7 +8,8 @@
        cold — B has NO such split. X's vacated minutes go to the [12, 32]-min rotation in
               proportion to minutes played (nba_coldstart.redistribute — the SAME function
               the real-line test ran); bet OVER at proj - line >= COLD_MARGIN.
-  3. Freshest NBA main lines in fanduel_props.sqlite (best over price across books).
+  3. Freshest NBA main lines from nba_lines.sqlite (FanDuel + DraftKings, collected on the
+     Mac by nba_lines.py), joined on person id; best over price across books.
   4. Pre-game only: the slate is games with status 1 (not started) on today's ET date.
 
 ⚠️ NOTHING HERE PLACES A BET. Both tiers failed on real lines on 2026-10-22:
@@ -48,7 +49,7 @@ import nba_rosters as R
 HERE = Path(__file__).resolve().parent
 INJ = HERE / "nba_injuries.json"
 WOWY = HERE / "nba_wowy.sqlite"
-LINES_DB = HERE / "fanduel_props.sqlite"
+LINES_DB = HERE / "nba_lines.sqlite"       # written by nba_lines.py (Mac)
 LEDGER = HERE / "bet_ledger.sqlite"
 SHADOW = HERE / "nba_shadow.sqlite"
 ET = ZoneInfo("America/New_York")
@@ -118,38 +119,40 @@ def slate(sched, today_et):
 
 
 def latest_lines(now):
-    """({(fold(player), stat): (line, best_over_dec, ts)}, status). status 'ok' or the
-    reason the engine is blind to prices."""
+    """({(pid, stat): (line, best_over_dec, collected_at)}, status) from nba_lines.board.
+
+    Every book's latest SUCCESSFUL board counts if it is no older than LINE_MAX_AGE_MIN, so
+    FanDuel and DraftKings shop against each other even though they are fetched seconds apart
+    (the old reader took MAX(collected_at) across all books, which would have kept ONE book).
+    Joined on NBA person id, resolved by nba_lines within the game's two rosters — never on a
+    name. Main line = the two-sided rung whose best over is nearest even money."""
     if not LINES_DB.exists():
-        return {}, f"no {LINES_DB.name}"
+        return {}, f"no {LINES_DB.name} — nba_lines.py has never run"
     con = sqlite3.connect(f"file:{LINES_DB}?mode=ro", uri=True)
-    ts = con.execute("SELECT MAX(collected_at) FROM fd_lines WHERE sport='nba'").fetchone()[0]
-    if not ts:
+    books = dict(con.execute("SELECT book, MAX(collected_at) FROM board GROUP BY book"))
+    cut = (now - dt.timedelta(minutes=LINE_MAX_AGE_MIN)).replace(tzinfo=None).isoformat()
+    fresh = sorted(b for b, ts in books.items() if ts >= cut)
+    if not fresh:
         con.close()
-        return {}, "no NBA rows in fd_lines — nothing collects NBA prop lines"
-    try:
-        age = (now.replace(tzinfo=None) - dt.datetime.fromisoformat(ts)).total_seconds() / 60
-    except ValueError:
-        age = 1e9
-    if age > LINE_MAX_AGE_MIN:
-        con.close()
-        return {}, f"newest NBA lines are {age:.0f} min old (> {LINE_MAX_AGE_MIN})"
-    rows = con.execute(
-        "SELECT player, stat, line, side, odds, COALESCE(book,'fd') FROM fd_lines "
-        "WHERE sport='nba' AND collected_at=?", (ts,)).fetchall()
+        return {}, ("nba_lines board is empty" if not books else
+                    f"every book's board is older than {LINE_MAX_AGE_MIN} min {books}")
+    rows = con.execute("SELECT pid, stat, line, side, odds, collected_at FROM board "
+                       f"WHERE pid IS NOT NULL AND book IN ({','.join('?' * len(fresh))})",
+                       fresh).fetchall()
     con.close()
     two = {}
-    for player, stat, line, side, odds, book in rows:
-        two.setdefault((fold(player), stat, line), {}).setdefault(side, []).append(odds)
+    for pid, stat, line, side, odds, ts in rows:
+        two.setdefault((pid, stat, line), {}).setdefault(side, []).append((odds, ts))
     out = {}
-    for (pf, stat, line), sides in two.items():
-        if "over" not in sides or "under" not in sides:      # alt X+ rungs are over-only
+    for (pid, stat, line), sides in two.items():
+        if "over" not in sides or "under" not in sides:      # milestone X+ rungs are over-only
             continue
-        best_over = max(sides["over"])
-        cur = out.get((pf, stat))
+        best_over, ts = max(sides["over"])
+        cur = out.get((pid, stat))
         if cur is None or abs(best_over - 1.9091) < abs(cur[1] - 1.9091):
-            out[(pf, stat)] = (line, best_over, ts)
-    return out, "ok"
+            out[(pid, stat)] = (line, best_over, ts)
+    stale = sorted(set(books) - set(fresh))
+    return out, ("ok" if not stale else f"stale book(s) excluded: {stale}")
 
 
 def _team_apps(apps, pid, tri):
@@ -187,7 +190,14 @@ def flags(dry=False):
     if n_failed:
         blind.append(f"{n_failed} final box score(s) failed to fetch (retried next run)")
     games = slate(sched, today_et)
-    apps, cur_team, name = R.state(today_et, boxes)
+    try:
+        index, inote = R.player_index(today_et)
+    except R.Blind as e:
+        print(f"nba flags: BLIND — no current rosters ({e}); nothing evaluated.")
+        sys.exit(2)
+    if inote:
+        blind.append(inote)
+    apps, cur_team, name = R.state(today_et, boxes, index=index)
     lines, lstat = latest_lines(now)
     if lstat != "ok":
         blind.append(lstat)
@@ -260,7 +270,7 @@ def flags(dry=False):
 
     out_flags = []
     for tier, tri, xname, b_id, stat, proj, margin in cands:
-        lk = lines.get((fold(name.get(b_id, "")), LEDGER_STAT[stat]))
+        lk = lines.get((b_id, LEDGER_STAT[stat]))
         if not lk:
             why["no_line"] += 1
             continue
@@ -315,7 +325,7 @@ def flags(dry=False):
               f"{f['matchup']}")
     tiers = Counter(f["tier"] for f in out_flags)
     print(f"nba flags: {len(outs)} fresh OUT ({len(out_pid)} resolved) · {len(games) // 2} "
-          f"game(s) left today · lines: {lstat if lstat == 'ok' else 'BLIND'} · "
+          f"game(s) left today · lines: {lstat} · "
           f"candidates {Counter(c[0] for c in cands)} -> flags {dict(tiers)} · "
           f"shadow +{new_shadow} · paper +{new_paper} (live tiers: "
           f"{', '.join(sorted(LIVE_TIERS)) or 'none'})" + (" · DRY-RUN" if dry else ""))

@@ -210,3 +210,42 @@ with the reason on a host that cannot reach them, so after merge the VM will log
 `nba_flags fail` to `~/loop_fail.log` every ~30 min. That is true, and loud on purpose; removing
 the line from `vm_loop.sh` is the operator's call. The blocker that remains on every host is #2:
 **until something collects NBA lines, the engine has nothing to price against.**
+
+---
+
+## 10. Addendum: the NBA line collector (blocker #2 closed)
+
+`nba_lines.py`, run on the Mac every 10 min by `nba_cycle.sh` (deployed to
+`~/cron-jobs/nba-cycle.sh`, cron `*/10`): injuries → lines → shadow flags → grade.
+
+**Both books answer from the Mac** (2026-10-22): FanDuel sbapi over `requests` (urllib has no CA
+certs here; NY and NJ regions returned identical NBA boards), DraftKings via `curl_cffi`. First
+cycle: FanDuel 2,351 rungs, DraftKings 2,994, every game in the next 24h covered, 0 unresolved
+players. The parsers are `fd_collect.extract` and `dk_collect.collect_league`, unchanged.
+
+**`nba_lines.sqlite`**, three tables:
+- `board` — current pre-game board per book, replaced only on a successful fetch. `nba_flags`
+  reads it, taking **every book's** latest board inside 90 min. The old reader took
+  `MAX(collected_at)` across books, which would have silently kept one book and killed line shopping.
+- `quotes` — append-only **change log**: a row when a rung first appears or its price moves.
+  The 2.0M-row history is tip snapshots only; this is the first NBA data that can measure CLV
+  and the news-window move. Starts 2026-10-22.
+- `cycles` — per-book status, row counts, event-match and name-resolution coverage.
+
+**Identity is a person id, resolved within the game's two rosters** (exact folded name → no
+suffix → first initial + surname, each only if unique; else NULL and counted). `nba_flags` now
+joins lines on that id. Current rosters come from `stats.nba.com/stats/playerindex`
+(`nba_rosters.player_index`, 519 active players): "team of last appearance" was wrong for every
+summer move (DeRozan read SAC, he is DEN; Watson read DEN, he is CLE) and placed no rookie.
+
+**Bugs found while building it, fixed before any data was relied on:**
+- *Fake price moves.* Books post one bet twice — the O/U over 14.5 and the "15+" milestone, at
+  slightly different prices (120 FanDuel / 131 DraftKings rungs). The board flipped between them
+  and every flip logged a move: cycle 2 "moved" 251 rungs in 90 s, and none had. The board now
+  keeps the best price per rung. The fake rows were purged and the log re-seeded from the
+  corrected board.
+- *`timeout` does not exist on macOS.* Under a bare cron environment every step would have
+  exited 127. The wrapper uses `perl -e 'alarm…'`; checked: a 10 s sleep dies at 2 s, rc 142.
+
+**What still limits it:** the Mac has to be awake. A sleeping laptop is a gap in `quotes`, and
+`cycles` shows where. The VM cannot take this job — every input is blocked there.
