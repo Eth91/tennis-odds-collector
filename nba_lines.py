@@ -210,10 +210,18 @@ def cycle(books=("fd", "dk")):
         events = {r[0] for r in rows}
         gm = {e: match_event(e, upcoming) for e in events}
         unmatched = sorted(e for e, g in gm.items() if g is None)
-        board, unresolved = [], set()
+        board, unresolved, team_rows = [], set(), 0
         for event, player, stat, line, side, odds in rows:
             g = gm.get(event)
             if g is None:
+                continue
+            # TEAM MARKETS ARE NOT PLAYER PROPS. FanDuel posts team totals in the same
+            # "{name} - Points" shape the shared parser reads as a player prop, so on 2026-10-22
+            # "Denver Nuggets" / "Cleveland Cavaliers" arrived as players with points lines. They
+            # never resolve to a person id (the engine ignored them), but they polluted the board
+            # and the quote log. Drop any row whose "player" is one of the two teams in the event.
+            if any(fold(player).endswith(fold(n)) for n in (g["home_nick"], g["away_nick"]) if n):
+                team_rows += 1
                 continue
             pid = resolve(player, g["home"], g["away"])
             if pid is None:
@@ -232,6 +240,8 @@ def cycle(books=("fd", "dk")):
                   "ok" if board else "no_lines")
         if unmatched:
             detail = (detail + "; " if detail else "") + f"unmatched events {unmatched[:3]}"
+        if team_rows:
+            detail = (detail + "; " if detail else "") + f"dropped {team_rows} team-market rows"
         con.execute("INSERT INTO cycles VALUES (?,?,?,?,?,?,?,?,?)",
                     (ts, book, status, len(board), len(events), len(events) - len(unmatched),
                      len(players) - len(unresolved), len(unresolved), detail))

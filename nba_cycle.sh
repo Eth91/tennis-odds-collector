@@ -16,11 +16,16 @@
 # Each step is logged with its own exit code; a non-zero code is a real alert
 # (the scripts exit 2 on a BLIND input instead of reporting a quiet night).
 # ─────────────────────────────────────────────────────────────────────────────
-# origin: ~/tennis-odds-collector/nba_cycle.sh (source of truth, in git).
-# deploy:  cp ~/tennis-odds-collector/nba_cycle.sh ~/cron-jobs/nba-cycle.sh
+# origin: ~/nba-engine/nba_cycle.sh (source of truth, branch nba-realline-arbiter).
+# deploy:  cp ~/nba-engine/nba_cycle.sh ~/cron-jobs/nba-cycle.sh
 # ─────────────────────────────────────────────────────────────────────────────
 set -uo pipefail
-REPO="$HOME/tennis-odds-collector"
+# ⚠️ ITS OWN WORKTREE, NOT ~/tennis-odds-collector. That tree is shared with tennis_publish.py
+# (cron */15), which runs `git checkout main` in it: on 2026-10-22 09:03 MT it switched the tree
+# off this branch, every NBA file vanished from disk, and this cycle failed every 10 min.
+# ~/nba-engine is a `git worktree` of branch nba-realline-arbiter; NBA-owned data lives here,
+# the shared game-log and odds-history DBs are symlinks into ~/tennis-odds-collector.
+REPO="$HOME/nba-engine"
 LOG="$HOME/cron-jobs/nba_cycle.log"
 LOCK="/tmp/nba-cycle.lock"
 PY=/usr/local/bin/python3
