@@ -323,3 +323,39 @@ day's NYK@BOS → 4 flags, all horizon 1, **9 s** from publication.
 
 **Not in it yet, by design:** any news source faster than the report (it would only make the
 engine faster), pings and paper bets (only on PROMOTE).
+
+---
+
+## 13. Addendum: a news layer ahead of the official report — built, and honestly measured
+
+Pre-registered as amendment 2 before any flag: news is add-only; every flag records `trigger_src`;
+a news-originated opportunity counts only if an official report before tip confirms the absence
+(else it is an audit row, never in a verdict).
+
+**What was found about the free sources (2026-10-22):**
+| source | verdict on day one |
+|---|---|
+| RotoWire NBA wire | the afternoon's injury items **linked to the official report's PDF as their own source** — downstream of it; beat-sourced items may still lead, so `provenance` is recorded per item |
+| Sleeper `/players/nba` | updated **5-20 min after** the report published the same rulings — slower; not used |
+| ESPN news | articles, not rulings; not used |
+| Bluesky search | mostly fantasy reposts and non-NBA "ruled out" posts; kept, matched only on an exact unique name on a team playing that day |
+| **X (@UnderdogNBA, team/beat accounts)** | where news breaks first — but free X reading is dead in 2026; the VM's working reader uses the user's burner session cookie. **Benched** (`NBA_X_LOG`) until the user decides how to run it |
+
+**Built:** `nba_news_watch.py` (sources → `news_items` with first-seen time, provenance and a
+seeded flag; `news_outs()` add-only with official contradiction; `--journal` = lead over the
+report per source). `nba_watch.py` polls it every ≥55 s and fires the same action as a report
+trigger on an Out the report does not list yet. `nba_flags.py` merges news Outs add-only and
+records `trigger_src` + the absent player's id. `nba_clv.py` applies the confirmation rule.
+
+**Bugs found while building it:**
+- RotoWire injury items carry a second CSS class (`news-update is-injured`); the first parser split
+  on the plain class and **skipped every injury item** while parsing stat lines fine. Fixed, with a
+  guard that refuses a page whose injury items were not all parsed — and the guard's first version
+  did NOT fire on the old bug (merged blocks hid it); rebuilt to count injury items independently of
+  the split, verified by restoring the old splitter.
+- The first live poll ran before backlog seeding existed: 44 items stored as "just seen", any of which
+  could have fired as fresh news. None did (every resolved Out was already official), and the rows
+  were retro-marked. A source's first poll now seeds its backlog and never triggers.
+
+Synthetic end to end: a news item ruling Brunson out for the next day's NYK@BOS, unknown to the
+report → 5 flags, all `news:…`, Brunson as the absent player, news time = the moment it was seen.

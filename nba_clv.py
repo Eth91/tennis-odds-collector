@@ -39,6 +39,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 SHADOW = HERE / "nba_shadow.sqlite"
 LINES = HERE / "nba_lines.sqlite"
+NEWS = HERE / "nba_news.sqlite"              # official reports: confirms news-originated triggers
 BOARD_STAT = {"pts": "points", "reb": "rebounds", "ast": "assists"}   # wowy/cold store short keys
 
 
@@ -74,6 +75,7 @@ def collect():
         return []
     sh = sqlite3.connect(f"file:{SHADOW}?mode=ro", uri=True)
     q = sqlite3.connect(f"file:{LINES}?mode=ro", uri=True)
+    nw = sqlite3.connect(f"file:{NEWS}?mode=ro", uri=True) if NEWS.exists() else None
     now = dt.datetime.now(dt.timezone.utc).replace(tzinfo=None).isoformat()
     cols = [r[1] for r in sh.execute("PRAGMA table_info(flags)")]
     out = []
@@ -89,6 +91,17 @@ def collect():
             lat = (dt.datetime.fromisoformat(r["logged_at"])
                    - dt.datetime.fromisoformat(_utc_naive(r["news_at"]))).total_seconds() / 60
         row = dict(r, tip=tip, close=c, latency_min=lat)
+        # AMENDMENT 2: a news-originated trigger counts only if an official report published
+        # before tip lists the absent player Out for that game; otherwise it is an audit row.
+        if (r.get("trigger_src") or "report").startswith("news"):
+            ok = False
+            if nw is not None and r.get("x_pid"):
+                for (pub,) in nw.execute("SELECT published_at FROM snapshots WHERE game_date=? "
+                                         "AND pid=? AND status='Out'", (r["game_date"], r["x_pid"])):
+                    if _utc_naive(pub) <= tip:
+                        ok = True
+                        break
+            row["confirmed"] = ok
         if c:
             cl, co, _nb = c
             row["move"] = cl - r["line"]
@@ -126,11 +139,15 @@ def _ci_rate(rows, n=4000, seed=7):
 def scoreboard(rows):
     by = defaultdict(list)
     for r in rows:
-        by[f"{r['tier']}/h{r.get('horizon') or 0}"].append(r)
+        cell = ("unconfirmed-news" if r.get("confirmed") is False
+                else f"h{r.get('horizon') or 0}")
+        by[f"{r['tier']}/{cell}"].append(r)
     print("one row per opportunity (earliest flag); h0 = flagged on game day (the PRIMARY test),\n"
           "h1 = a ruling for tomorrow's game, flagged the day before (amendment 1, its own cell).\n"
+          "unconfirmed-news = triggered by news the official report never confirmed before tip\n"
+          "(amendment 2: an audit cell, never in a verdict).\n"
           "beat-close CI resamples games (clustered); a CI needs >= 10 games\n"
-          f"{'tier':<10}{'closed':>7}{'w/close':>8}{'beat close':>18}{'line move':>10}"
+          f"{'cell':<24}{'closed':>7}{'w/close':>8}{'beat close':>18}{'line move':>10}"
           f"{'graded':>7}{'as flagged':>12}{'at close':>10}{'latency(min)':>13}")
     for tier, rs in sorted(by.items()):
         wc = [r for r in rs if r.get("close")]
@@ -140,7 +157,7 @@ def scoreboard(rows):
         lat = [r["latency_min"] for r in rs if r.get("latency_min") is not None]
         bt = (f"{100 * sum(beats) / len(beats):5.1f}%" if beats else "   - ") + \
              (f" [{100 * ci[0]:.0f},{100 * ci[1]:.0f}]" if ci else "")
-        print(f"{tier:<10}{len(rs):7d}{len(wc):8d}{bt:>18}"
+        print(f"{tier:<24}{len(rs):7d}{len(wc):8d}{bt:>18}"
               f"{(st.mean(r['move'] for r in wc) if wc else 0):+10.2f}{len(g):7d}"
               f"{(100 * sum(r['u_flag'] for r in g) / len(g) if g else 0):+11.1f}%"
               f"{(100 * sum(r['u_close'] for r in g) / len(g) if g else 0):+9.1f}%"
