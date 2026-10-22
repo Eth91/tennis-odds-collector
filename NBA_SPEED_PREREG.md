@@ -65,3 +65,34 @@ The WNBA reference point is 67% (n=42); nothing here is tuned to reach it.
   beats the close did so despite arriving after the fastest news. An earlier news layer could only
   make the engine faster.
 - Flag prices are each board's best over across FanDuel and DraftKings at that moment.
+
+---
+
+# AMENDMENT 1 — tomorrow's-game rulings (2026-10-22, before any forward flag exists)
+
+Committed before the code that produces these flags runs, and before any shadow flag of any kind
+exists. The registration above is unchanged; this adds a second cell and one counting rule.
+
+**What changes.** The trigger now also fires on a fresh Out for **tomorrow's** game. The league
+publishes the next day's rulings the afternoon before, which is news the book must price too, and
+the closing line is then a day away. Such flags carry `horizon = 1` (game-day flags `horizon = 0`).
+For a tomorrow game, a player also ruled Out for **tonight** (his team playing tonight) counts that
+game as a missed one: tonight's box is not final yet, so it is not in the appearance data.
+
+**The primary test is untouched**: tier `priced`, `horizon = 0`, with every line, metric and
+decision rule above. Horizon-1 flags are **never pooled into it**.
+
+**The horizon-1 cell** is decided separately, on the same metric (beat-the-close rate, CI resampling
+games), the same three verdicts (PROMOTE / EXTEND / KILL), and the same decision point (≥ 100 closed
+opportunities in ≥ 30 games, or the end of the regular season, whichever first).
+
+**One opportunity per (tier, player, stat, game) — its earliest flag.** This rule is new, and it
+applies to both cells identically. A day-before flag and a game-day re-flag of the same player-stat
+at a moved line are one piece of news, not two bets; counting both would double-count exactly the
+cases where the line moved. An opportunity first flagged at horizon 1 belongs to the horizon-1 cell
+even if re-flagged on game day, so the primary cell holds only news that broke on game day.
+
+**Known limits specific to horizon 1.** Fewer props are posted the day before (DraftKings in
+particular posts later), so more candidates have no line and the cell will fill more slowly. A day
+of market movement also means more noise per flag: the cell can show a larger move in either
+direction, and needs the same sample bar, not a smaller one.

@@ -313,6 +313,13 @@ and it can only be measured forward. Pre-registered in `NBA_SPEED_PREREG.md` bef
   vs at-close ROI, latency. `test_nba_clv.py` checks the rebuild with known answers and a mutant
   that treats pulled rungs as live (it fails, as it should).
 
-**Not in it yet, by design:** tomorrow's-game rulings (they publish the afternoon before — a
-separate extension), any news source faster than the report (which would only make the engine
-faster), pings and paper bets (only on PROMOTE).
+**Tomorrow's-game rulings — added the same day** (prereg amendment 1, committed before any flag).
+The league publishes the next day's rulings the afternoon before; the trigger now fires on those
+too. Flags carry `horizon` (0 = game day, 1 = the day before) and the two are separate cells,
+never pooled; the scoreboard counts one opportunity per (tier, player, stat, game) — its earliest
+flag. For a tomorrow game, a player also ruled Out tonight counts tonight as a missed game
+(`absence_index`, unit-tested with a mutant). Synthetic end to end: a Brunson ruling for the next
+day's NYK@BOS → 4 flags, all horizon 1, **9 s** from publication.
+
+**Not in it yet, by design:** any news source faster than the report (it would only make the
+engine faster), pings and paper bets (only on PROMOTE).

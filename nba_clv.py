@@ -15,6 +15,10 @@ This reads nba_shadow.sqlite (the flags, first-seen price and time) against nba_
   at the close ROI the same bets, bought over the closing line at the closing price
   latency          flag time minus the moment the league first published the Out
 
+ONE OPPORTUNITY per (tier, player, stat, game) — its earliest flag — scored by HORIZON: h0 =
+flagged on game day (the pre-registered primary test), h1 = flagged the day before on a ruling for
+tomorrow's game (amendment 1, its own cell).
+
 THE CLOSE is rebuilt from the change log: per (book, line, side) the last quote at or before
 tip; a rung whose last event before tip is a pull (odds NULL) was not offered. The closing main
 line is the two-sided rung whose best over is nearest even money — the engine's own rule.
@@ -93,7 +97,12 @@ def collect():
                 row["u_flag"] = (r["odds"] - 1) if r["actual"] > r["line"] else -1.0
                 row["u_close"] = (co - 1) if r["actual"] > cl else -1.0
         out.append(row)
-    return out
+    # ONE OPPORTUNITY PER (tier, player, stat, game): its EARLIEST flag. A day-before flag and a
+    # game-day re-flag at a moved line are the same news, not two bets (prereg amendment 1).
+    first = {}
+    for row in sorted(out, key=lambda r: r["logged_at"]):
+        first.setdefault((row["tier"], row["pid"], row["stat"], row["game_date"]), row)
+    return list(first.values())
 
 
 def _ci_rate(rows, n=4000, seed=7):
@@ -117,9 +126,11 @@ def _ci_rate(rows, n=4000, seed=7):
 def scoreboard(rows):
     by = defaultdict(list)
     for r in rows:
-        by[r["tier"]].append(r)
-    print("beat-close CI resamples games (clustered); a CI needs >= 10 games\n"
-          f"{'tier':<7}{'closed':>7}{'w/close':>8}{'beat close':>18}{'line move':>10}"
+        by[f"{r['tier']}/h{r.get('horizon') or 0}"].append(r)
+    print("one row per opportunity (earliest flag); h0 = flagged on game day (the PRIMARY test),\n"
+          "h1 = a ruling for tomorrow's game, flagged the day before (amendment 1, its own cell).\n"
+          "beat-close CI resamples games (clustered); a CI needs >= 10 games\n"
+          f"{'tier':<10}{'closed':>7}{'w/close':>8}{'beat close':>18}{'line move':>10}"
           f"{'graded':>7}{'as flagged':>12}{'at close':>10}{'latency(min)':>13}")
     for tier, rs in sorted(by.items()):
         wc = [r for r in rs if r.get("close")]
@@ -129,7 +140,7 @@ def scoreboard(rows):
         lat = [r["latency_min"] for r in rs if r.get("latency_min") is not None]
         bt = (f"{100 * sum(beats) / len(beats):5.1f}%" if beats else "   - ") + \
              (f" [{100 * ci[0]:.0f},{100 * ci[1]:.0f}]" if ci else "")
-        print(f"{tier:<7}{len(rs):7d}{len(wc):8d}{bt:>18}"
+        print(f"{tier:<10}{len(rs):7d}{len(wc):8d}{bt:>18}"
               f"{(st.mean(r['move'] for r in wc) if wc else 0):+10.2f}{len(g):7d}"
               f"{(100 * sum(r['u_flag'] for r in g) / len(g) if g else 0):+11.1f}%"
               f"{(100 * sum(r['u_close'] for r in g) / len(g) if g else 0):+9.1f}%"

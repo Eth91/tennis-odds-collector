@@ -9,10 +9,13 @@ Run once a minute (cron). Each run:
   1. REPORT. The league publishes a game-dated PDF ~4 s after every :00/:15/:30/:45 mark. In the
      first minute after a mark this polls until the new report exists (HEAD every 3 s), then
      ingests it (nba_injury_report.fetch_new). Otherwise one cheap HEAD catches up.
-  2. DIFF. A FRESH Out = a player listed Out for tonight in the new report who was not Out for
-     that game in the previous stored report. If any fresh Out is on a team that plays tonight
-     (pre-tip): refresh both books NOW (nba_lines.cycle), then run the flag pass
-     (nba_flags.flags) — so each shadow flag's price is the price right after the news.
+  2. DIFF. A FRESH Out = a player listed Out for a game in the new report who was not Out for
+     that game in the previous stored report. Games TONIGHT and TOMORROW both count — the league
+     publishes tomorrow's rulings the afternoon before, and that is news the book has to price
+     too (NBA_SPEED_PREREG.md, amendment 1; flags carry horizon 0/1 and are scored apart). If a
+     fresh Out's team plays that day (not started): refresh both books NOW (nba_lines.cycle),
+     then run the flag pass for each affected game date — so each shadow flag's price is the
+     price right after the news.
      Every trigger is logged in nba_news.sqlite `triggers` with its timings.
   3. CLOSE CAPTURE. Within HOT_LEAD_MIN of any tip, refresh lines every HOT_EVERY_MIN, so the
      closing price nba_clv rebuilds is minutes old, not up to ten.
@@ -135,11 +138,12 @@ def once():
                        + (f" !! TEAMS MISSING {s['missing_teams']}" if s["missing_teams"] else ""))
         # 2. DIFF -> trigger
         sched = R.schedule()
-        today = _now().astimezone(I.ET).date().isoformat()
-        playing = {t for g in sched if g["date_et"] == today and g["status"] == 1
+        d0 = _now().astimezone(I.ET).date()
+        dates = {(d0 + dt.timedelta(days=h)).isoformat() for h in range(F.HORIZONS)}
+        playing = {(g["date_et"], t) for g in sched if g["date_et"] in dates and g["status"] == 1
                    for t in (g["home"], g["away"])}
         for s in sorted(new, key=lambda s: s["mark"]):
-            fr = [f for f in fresh_outs(con, s["mark"]) if f[3] == today and f[2] in playing]
+            fr = [f for f in fresh_outs(con, s["mark"]) if (f[3], f[2]) in playing]
             if not fr:
                 continue
             pub = con.execute("SELECT published_at FROM reports WHERE mark=?",
@@ -147,9 +151,14 @@ def once():
             det = _now().isoformat()
             _, lout, lerr = _quiet(L.cycle)
             lines_at = _now().isoformat()
-            fl, fout, ferr = _quiet(F.flags, dry=False)
+            fl, fout, ferr = [], "", None
+            for gd in sorted({f[3] for f in fr}):            # one pass per affected game date
+                r, o, e = _quiet(F.flags, dry=False, game_date=gd)
+                fl += r or []
+                fout += o
+                ferr = ferr or e
             flags_at = _now().isoformat()
-            names = [f"{n} ({t})" for _, n, t, _ in fr]
+            names = [f"{n} ({t}, {gd})" for _, n, t, gd in fr]
             con.execute("INSERT INTO triggers VALUES (?,?,?,?,?,?,?,?)",
                         (s["mark"], pub, det, json.dumps(names), lines_at, flags_at,
                          len(fl or []), "; ".join(x for x in (lerr, ferr) if x)))
