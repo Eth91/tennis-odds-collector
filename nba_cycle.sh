@@ -1,6 +1,8 @@
 #!/bin/bash
 # ─────────────────────────────────────────────────────────────────────────────
-# NBA cycle (Mac): injuries -> lines -> SHADOW flags -> grade.   Every 10 min.
+# NBA cycle (Mac): official report -> lines -> SHADOW flags -> grade.
+# cron 3-59/10 — offset from the :00/:15/:30/:45 report marks so nba_watch (every minute)
+# holds the shared lock when a report publishes, not this job.
 #
 # WHY THE MAC. Every input the NBA engine needs is Mac-only (probed 2026-10-22):
 #   cdn.nba.com (slate, box scores)  403s the Oracle VM even with impersonation
@@ -53,7 +55,7 @@ run(){  # run <label> <args...>
   [ $rc -gt $worst ] && worst=$rc
   return 0
 }
-run inj    nba_injuries.py
+run report nba_injury_report.py
 run lines  nba_lines.py
 run flags  nba_flags.py
 run grade  nba_flags.py --grade

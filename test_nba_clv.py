@@ -1,0 +1,91 @@
+"""nba_clv: the closing line is rebuilt correctly from the change log, and the beat/at-close
+arithmetic is right. Includes a MUTANT (pulled rungs treated as live) that must fail."""
+import pathlib
+import sqlite3
+import sys
+import tempfile
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import nba_clv as V
+import nba_flags as F
+
+TIP = "2026-01-10T00:00:00"
+
+
+def build():
+    d = pathlib.Path(tempfile.mkdtemp())
+    sh = F._shadow(d / "s.sqlite")
+    q = sqlite3.connect(d / "q.sqlite")
+    q.executescript("CREATE TABLE quotes (seen_at TEXT, book TEXT, gid TEXT, tip_utc TEXT, pid INTEGER,"
+                    " player TEXT, stat TEXT, line REAL, side TEXT, odds REAL)")
+    def quote(t, book, pid, line, side, odds):
+        q.execute("INSERT INTO quotes VALUES (?,?,?,?,?,?,?,?,?,?)",
+                  (t, book, "G", TIP, pid, f"p{pid}", "points", line, side, odds))
+    def flag(pid, line, odds, actual):
+        sh.execute("INSERT INTO flags (flag_id, logged_at, game_date, tier, team, x, b, stat, line, "
+                   "odds, gid, gtime, pid, actual, news_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                   (f"f{pid}", "2026-01-09T20:00:00", "2026-01-09", "priced", "T", "X", f"p{pid}",
+                    "points", line, odds, "G", TIP + "Z", pid, actual, "2026-01-09T19:45:00+00:00"))
+    # 1: line moves 10.5 -> 11.5 by tip                       -> beat, move +1
+    quote("2026-01-09T20:00:00", "fd", 1, 10.5, "over", 1.91); quote("2026-01-09T20:00:00", "fd", 1, 10.5, "under", 1.91)
+    quote("2026-01-09T23:00:00", "fd", 1, 10.5, "over", None); quote("2026-01-09T23:00:00", "fd", 1, 10.5, "under", None)
+    quote("2026-01-09T23:00:00", "fd", 1, 11.5, "over", 1.91); quote("2026-01-09T23:00:00", "fd", 1, 11.5, "under", 1.91)
+    flag(1, 10.5, 1.91, 11)                                  # wins as flagged, LOSES over 11.5
+    # 2: same line, over shortens 1.91 -> 1.80                -> beat
+    quote("2026-01-09T20:00:00", "dk", 2, 20.5, "over", 1.91); quote("2026-01-09T20:00:00", "dk", 2, 20.5, "under", 1.91)
+    quote("2026-01-09T23:30:00", "dk", 2, 20.5, "over", 1.80); quote("2026-01-09T23:30:00", "dk", 2, 20.5, "under", 2.02)
+    flag(2, 20.5, 1.91, 25)
+    # 3: same line, over lengthens 1.91 -> 2.05; a quote AFTER tip must be ignored -> not beat
+    quote("2026-01-09T20:00:00", "fd", 3, 5.5, "over", 1.91); quote("2026-01-09T20:00:00", "fd", 3, 5.5, "under", 1.91)
+    quote("2026-01-09T23:50:00", "fd", 3, 5.5, "over", 2.05); quote("2026-01-09T23:50:00", "fd", 3, 5.5, "under", 1.78)
+    quote("2026-01-10T00:05:00", "fd", 3, 5.5, "over", 1.50)  # post-tip
+    flag(3, 5.5, 1.91, 4)
+    sh.commit(); q.commit()
+    V.SHADOW, V.LINES = d / "s.sqlite", d / "q.sqlite"
+    return {r["pid"]: r for r in V.collect()}
+
+
+def check(rows):
+    ok = True
+    def want(cond, label):
+        nonlocal ok
+        ok &= bool(cond)
+        print(f"   {'ok ' if cond else 'BAD'} {label}")
+    r1, r2, r3 = rows[1], rows[2], rows[3]
+    want(r1["close"][0] == 11.5 and r1["beat"] and r1["move"] == 1.0, "line moved up: close 11.5, beat, move +1")
+    want(r1["u_flag"] > 0 and r1["u_close"] == -1.0, "actual 11: wins over 10.5 as flagged, loses over 11.5 at close")
+    want(r2["close"][:2] == (20.5, 1.80) and r2["beat"], "same line, price shortened: beat")
+    want(r3["close"][:2] == (5.5, 2.05) and not r3["beat"], "price lengthened: not beat; post-tip quote ignored")
+    want(abs(r1["latency_min"] - 15.0) < 1e-6, "latency = flag time - news time = 15 min")
+    return ok
+
+
+def test_real():
+    assert check(build())
+
+
+def test_mutant_pulled_rungs_as_live():
+    orig = V.close_of
+    def mutant(qcon, gid, pid, stat, tip):                   # forget that NULL means pulled
+        rows = [(b, l, s, o) for b, l, s, o in qcon.execute(
+            "SELECT book, line, side, odds FROM quotes WHERE gid=? AND pid=? AND stat=? AND "
+            "seen_at <= ? AND odds IS NOT NULL ORDER BY seen_at", (gid, pid, stat, tip))]
+        st = {}
+        for b, l, s, o in rows:
+            st[(b, round(l, 1), s)] = o
+        best = None
+        for (b, l, s), o in st.items():
+            if s == "over" and (b, l, "under") in st and (best is None or abs(o - 1.9091) < abs(best[1] - 1.9091)):
+                best = (l, o, 1)
+        return best
+    V.close_of = mutant
+    try:
+        assert not check(build())
+    finally:
+        V.close_of = orig
+
+
+if __name__ == "__main__":
+    print("REAL:"); test_real()
+    print("MUTANT (pulled rungs treated as live) — must fail:"); test_mutant_pulled_rungs_as_live()
+    print("test_nba_clv: OK")

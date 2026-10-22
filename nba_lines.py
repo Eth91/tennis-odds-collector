@@ -14,7 +14,8 @@ and rosters come from cdn.nba.com, which 403s the VM.
 WHAT IT STORES — three tables, because they answer three different questions:
   board   the CURRENT pre-game board, one row per (book, player, stat, line, side), replaced
           per book on every SUCCESSFUL fetch. What nba_flags prices against.
-  quotes  an append-only CHANGE LOG: a row whenever a rung is first seen or its price moves.
+  quotes  an append-only CHANGE LOG: a row whenever a rung is first seen, its price moves, or it
+          is pulled (odds NULL — logged only on a fully successful fetch).
           The 2.0M-row history (basketball_nba_odds_hist.sqlite) is tip-snapshots only, so it
           cannot measure CLV or the news-window move. This can, from 2026-10-22 forward.
   cycles  one row per book per run: status, row counts, match/resolution coverage.
@@ -228,8 +229,10 @@ def cycle(books=("fd", "dk")):
                 unresolved.add(player)
             board.append((book, ts, g["gid"], g["utc"], event, g["home"], g["away"],
                           pid, player, stat, line, side, odds))
-        prev = {(r[0], r[1], r[2], r[3]): r[4] for r in con.execute(
-            "SELECT player, stat, line, side, odds FROM board WHERE book=?", (book,))}
+        prev_rows = {(r[0], r[1], r[2], r[3]): r for r in con.execute(
+            "SELECT player, stat, line, side, odds, gid, tip_utc, pid FROM board WHERE book=?",
+            (book,))}
+        prev = {k: r[4] for k, r in prev_rows.items()}
         changed = [(ts, b[0], b[2], b[3], b[7], b[8], b[9], b[10], b[11], b[12])
                    for b in board if prev.get((b[8], b[9], b[10], b[11])) != b[12]]
         con.execute("DELETE FROM board WHERE book=?", (book,))
@@ -238,6 +241,17 @@ def cycle(books=("fd", "dk")):
         players = {b[8] for b in board}
         status = ("partial" if detail.startswith(("partial", "failed")) else
                   "ok" if board else "no_lines")
+        # PULLED RUNGS. The change log must say when a rung STOPPED being offered, or the close
+        # cannot be reconstructed: a line taken down before tip would read as still open at its
+        # last price. A pulled rung is logged with odds NULL — but ONLY on a fully successful
+        # fetch: on a partial one, a missing rung may just be a failed sub-request.
+        if status == "ok":
+            now_keys = {(b[8], b[9], b[10], b[11]) for b in board}
+            gone = [(ts, book, r[5], r[6], r[7], k[0], k[1], k[2], k[3], None)
+                    for k, r in prev_rows.items() if k not in now_keys]
+            con.executemany("INSERT INTO quotes VALUES (?,?,?,?,?,?,?,?,?,?)", gone)
+        else:
+            gone = []
         if unmatched:
             detail = (detail + "; " if detail else "") + f"unmatched events {unmatched[:3]}"
         if team_rows:
@@ -247,7 +261,8 @@ def cycle(books=("fd", "dk")):
                      len(players) - len(unresolved), len(unresolved), detail))
         covered = {gm[e]["gid"] for e in events if gm[e]}
         report.append(
-            f"{book}={status} rows={len(board)} (+{len(changed)} quote changes) "
+            f"{book}={status} rows={len(board)} (+{len(changed)} quote changes, "
+            f"{len(gone)} pulled) "
             f"games={len(covered)} [{len({g['gid'] for g in soon} & covered)}/{len(soon)} of the "
             f"next 24h] players={len(players)} unresolved={len(unresolved)} "
             f"{time.time() - t0:.0f}s" + (f" · {detail}" if detail else ""))

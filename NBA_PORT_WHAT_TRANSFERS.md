@@ -283,3 +283,36 @@ byte-identical.
 **Where that leaves the port.** The WNBA's two halves have now both been measured on NBA real lines:
 the thesis (margin rule) and the pricing. Neither beats the close. What has not been measured is the
 WNBA's actual claim — speed. That is what the shadow + quote log now accrue, from 2026-10-22.
+
+---
+
+## 12. Addendum: the speed layer — replicating how the WNBA actually made money
+
+**Why.** The WNBA record (forward since 7/31: 32-17, +13.11u, +26.7%) beat the closing line on
+67% of its bets; at closing prices the same bets earn +11.5% instead of +20.2%. Every NBA test so
+far priced at the close. So the replication target is the WNBA's *timing*, not another model —
+and it can only be measured forward. Pre-registered in `NBA_SPEED_PREREG.md` before any flag.
+
+**What was built** (Mac, `~/nba-engine`):
+- `nba_injury_report.py` — the league's official report (every 15 min, ~4 s after the mark),
+  parsed with the WNBA's own parser plus NBA team names. Names are resolved within the team's
+  roster, because the PDF text splits multi-word surnames ("Lively II, Dereck" → "Dereck II" from
+  the bare parser — Lively was Out that day). Checked: 32 status words / 32 rows / 18 NOT YET
+  SUBMITTED blocks; six reports with every matchup's teams found and 0 unresolved. Stores every
+  report with its publish time (`nba_news.sqlite`) — the news clock.
+- `nba_flags.py` now takes Outs from the official report only (as the WNBA does — ESPN
+  over-reported Out on 4 of 22 audited rows), applies absence game ≤ 2 **within the current
+  season** (Mitchell's October opener read as absence game 3 because he sat April 10/12), excludes
+  every tonight-Out from beneficiaries, and records `news_at` and the person id on every flag.
+- `nba_watch.py` (cron every minute) — polls through each publication, diffs, and on a fresh Out
+  for tonight refreshes both books and runs the flag pass at once. Synthetic end-to-end test:
+  **10 s from publication to five shadow flags**, each with news time and person id. Within 35 min
+  of a tip it refreshes lines every 2 min so the close is fresh.
+- `nba_lines.py` logs **pulled** rungs (odds NULL, full fetches only) so the close can be rebuilt.
+- `nba_clv.py` — the scoreboard: beat-the-close rate (CI resampling games), line move, as-flagged
+  vs at-close ROI, latency. `test_nba_clv.py` checks the rebuild with known answers and a mutant
+  that treats pulled rungs as live (it fails, as it should).
+
+**Not in it yet, by design:** tomorrow's-game rulings (they publish the afternoon before — a
+separate extension), any news source faster than the report (which would only make the engine
+faster), pings and paper bets (only on PROMOTE).

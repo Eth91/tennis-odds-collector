@@ -1,7 +1,12 @@
 """NBA port · flag-time engine — injuries × (WOWY priors | cold-start) × live lines -> SHADOW.
 
-  1. nba_injuries.json (ESPN feed) -> OUT players whose report date is <= NEWS_DAYS old,
-     resolved to an NBA person id on their CURRENT team (nba_rosters.state).
+  1. The OFFICIAL league injury report (nba_injury_report; every 15 min, game-dated, names
+     resolved to person ids within the team's roster) -> who is Out TONIGHT. A trigger X is an
+     Out in absence game 1 or 2 of the CURRENT season (the backtests pooled across the summer,
+     which hid every October first-absence; see NBA_SPEED_PREREG.md) and carries the time the
+     league first published that Out (`news_at`), so flag latency and CLV can be measured.
+     nba_watch.py runs this pass the moment a report with a fresh Out publishes.
+     ESPN is no longer read here: the WNBA dropped it for over-reporting Out (4 of 22 rows).
   2. Three beneficiary tiers (wowy and cold are disjoint; priced re-prices the wowy population):
        wowy — B has a measured with/without split vs X (nba_wowy.sqlite pairs, n_out >= 2).
               proj = rate × (base_min + d_min); bet OVER at proj - line >= MARGIN[stat].
@@ -52,11 +57,11 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import nba_coldstart as C
+import nba_injury_report as I
 import nba_pricing as P
 import nba_rosters as R
 
 HERE = Path(__file__).resolve().parent
-INJ = HERE / "nba_injuries.json"
 WOWY = HERE / "nba_wowy.sqlite"
 LINES_DB = HERE / "nba_lines.sqlite"       # written by nba_lines.py (Mac)
 LEDGER = HERE / "bet_ledger.sqlite"
@@ -64,23 +69,20 @@ SHADOW = HERE / "nba_shadow.sqlite"
 ET = ZoneInfo("America/New_York")
 
 LIVE_TIERS = frozenset()               # tiers allowed to write PAPER bets. EMPTY — see above.
-NEWS_DAYS = 2                          # absence game 1-2 (news window)
-INJ_MAX_AGE_H = 3.0                    # an injury file older than this is a blind input
+MAX_ABSENCE_GAME = 2                   # trigger only on absence game 1-2 (the tested cell)
+REPORT_MAX_AGE_MIN = 45                # an official report older than this is a blind input
 STATS = ("pra", "pts", "reb")          # ast/fg3m gated off (48.5% Oct-Nov / 53.7%)
 MARGIN = {"pra": 5.0, "pts": 3.0, "reb": 2.0}          # wowy tier (measured negative)
 LEDGER_STAT = {"pra": "pra", "pts": "points", "reb": "rebounds"}   # fd_lines stat keys
 LINE_MAX_AGE_MIN = 90
 STAR_MIN, ACTIVE_DAYS, MIN_PRIOR_APPS = 28.0, 12, 5    # == nba_wowy / the cold-start test
 
-# ESPN team abbrevs (injury feed) -> NBA tricodes
-TEAM_FIX = {"GS": "GSW", "SA": "SAS", "NO": "NOP", "NY": "NYK", "UTAH": "UTA",
-            "WSH": "WAS", "PHX": "PHX", "CHA": "CHA"}
 
 SHADOW_DDL = """CREATE TABLE IF NOT EXISTS flags (
     flag_id TEXT PRIMARY KEY, logged_at TEXT, game_date TEXT, tier TEXT, team TEXT,
     x TEXT, b TEXT, stat TEXT, line REAL, odds REAL, proj REAL, margin REAL,
     gid TEXT, gtime TEXT, matchup TEXT, actual REAL, result TEXT, graded_at TEXT,
-    ev REAL)"""
+    ev REAL, pid INTEGER, news_at TEXT, stale INTEGER)"""
 COMBO = {"pts_reb": ("points", "rebounds"), "pts_ast": ("points", "assists"),
          "reb_ast": ("rebounds", "assists")}
 
@@ -89,8 +91,11 @@ def _shadow(path):
     """Open the shadow table, migrating a pre-`ev` table in place (idempotent)."""
     sh = sqlite3.connect(path)
     sh.execute(SHADOW_DDL)
-    if "ev" not in {r[1] for r in sh.execute("PRAGMA table_info(flags)")}:
-        sh.execute("ALTER TABLE flags ADD COLUMN ev REAL")
+    have = {r[1] for r in sh.execute("PRAGMA table_info(flags)")}
+    for col, typ in (("ev", "REAL"), ("pid", "INTEGER"), ("news_at", "TEXT"),
+                     ("stale", "INTEGER")):
+        if col not in have:
+            sh.execute(f"ALTER TABLE flags ADD COLUMN {col} {typ}")
     return sh
 
 
@@ -100,31 +105,6 @@ def fold(s):
     n = "".join(c for c in n if not unicodedata.combining(c))
     return " ".join(re.sub(r"[^a-z0-9 ]", "", n.lower()).split())
 
-
-def outs_in_window(now):
-    """({fold(name): (name, tricode)} for fresh OUTs, file age in hours or None)."""
-    if not INJ.exists():
-        return {}, None
-    try:
-        d = json.loads(INJ.read_text())
-    except (ValueError, OSError):
-        return {}, None
-    try:
-        age_h = (now - dt.datetime.fromisoformat(d["fetched_at"])).total_seconds() / 3600
-    except (KeyError, ValueError, TypeError):
-        age_h = None
-    out = {}
-    for name, v in (d.get("injuries") or {}).items():
-        if (v.get("status") or "").lower() != "out":
-            continue
-        try:
-            age = (now.astimezone(ET).date() - dt.date.fromisoformat(v.get("date") or "")).days
-        except ValueError:
-            continue
-        if 0 <= age <= NEWS_DAYS:
-            team = (v.get("team") or "").upper()
-            out[fold(name)] = (name, TEAM_FIX.get(team, team))
-    return out, age_h
 
 
 def slate(sched, today_et):
@@ -218,15 +198,6 @@ def flags(dry=False):
     today_et = now.astimezone(ET).date().isoformat()
     blind, why = [], Counter()
 
-    outs, inj_age = outs_in_window(now)
-    if inj_age is None:
-        blind.append(f"{INJ.name} unreadable")
-    elif inj_age > INJ_MAX_AGE_H:
-        blind.append(f"{INJ.name} is {inj_age:.1f}h old (> {INJ_MAX_AGE_H}h)")
-    blank = [n for n, (_, t) in outs.items() if not t]
-    if blank:
-        blind.append(f"{len(blank)} OUT player(s) have no tricode")
-
     try:
         sched = R.schedule()
         boxes, n_failed = R.season_boxes(sched)
@@ -249,17 +220,42 @@ def flags(dry=False):
     if lstat != "ok":
         blind.append(lstat)
 
-    # OUT name -> person id on the CURRENT team; ambiguous or unknown names are counted
-    by_fold = defaultdict(set)
-    for pid, nm in name.items():
-        by_fold[fold(nm)].add(pid)
-    out_pid = {}
-    for f, (nm, tri) in outs.items():
-        cands = [p for p in by_fold.get(f, ()) if cur_team.get(p) == tri]
-        if len(cands) != 1:
-            why["out_unresolved" if not cands else "out_ambiguous"] += 1
+    # ── WHO IS OUT TONIGHT: the official league report, already resolved to person ids ──
+    try:
+        rep, rep_mark = I.current(today_et)
+    except sqlite3.OperationalError:
+        rep, rep_mark = {}, None
+    if rep_mark is None:
+        blind.append("no official injury report stored for today (nba_injury_report.py)")
+    else:
+        age = (now - dt.datetime.fromisoformat(rep_mark).replace(tzinfo=ET)).total_seconds() / 60
+        if age > REPORT_MAX_AGE_MIN:
+            blind.append(f"newest official report is {age:.0f} min old (> {REPORT_MAX_AGE_MIN})")
+    # out_all: everyone ruled Out tonight — never a beneficiary. out_pid: the TRIGGERS, i.e. an
+    # Out in absence game <= 2 for this franchise, counted the way every backtest counted it.
+    team_dates = defaultdict(set)
+    for _p, _ap in apps.items():
+        for _a in _ap:
+            team_dates[_a[3]].add(_a[0])
+    out_all = {pid for pid, v in rep.items() if v[2] == "Out"}
+    out_pid, news_at = {}, {}
+    # ⚠️ THE STREAK RESETS AT THE SEASON BOUNDARY. Counted across the summer, a star who rested
+    # the last games of April reads as "absence game 3" in October's opener (Mitchell 2026-10-22:
+    # last app 04-08, sat 04-10 and 04-12) — and every such first absence of the new season was
+    # invisible as a trigger. The backtests carried that quirk (pooled franchise games); the
+    # forward speed test (NBA_SPEED_PREREG.md) counts only THIS season's missed games.
+    season = C.season_of(today_et)
+    for pid, (nm, tri, st, first) in rep.items():
+        if st != "Out":
             continue
-        out_pid[cands[0]] = (nm, tri)
+        xa = _team_apps(apps, pid, tri)
+        last = xa[-1][0] if xa else ""
+        missed = sum(1 for d in team_dates[tri] if d > last and C.season_of(d) == season)
+        if xa and 1 + missed > MAX_ABSENCE_GAME:
+            why["x_absence_game_gt2"] += 1
+            continue
+        out_pid[pid] = (nm, tri)
+        news_at[pid] = first
 
     con = sqlite3.connect(f"file:{WOWY}?mode=ro", uri=True)
     pairs = con.execute("SELECT x_id, b_id, b_name, n_out, d_min, rate_pts, rate_reb, "
@@ -280,12 +276,12 @@ def flags(dry=False):
         if tri not in games:
             why["no_game_today"] += 1
             continue
-        if b_id in out_pid or b_id not in base_min:
+        if b_id in out_all or b_id not in base_min:
             continue
         rates = {"pts": r_pts, "reb": r_reb, "pra": r_pra}
         for stat in STATS:
             cands.append(("wowy", tri, xname, b_id, stat,
-                          rates[stat] * (base_min[b_id] + d_min), MARGIN[stat]))
+                          rates[stat] * (base_min[b_id] + d_min), MARGIN[stat], x_id))
 
     # ── cold tier: exactly the pre-registered rule, through the shared function ──
     season = C.season_of(today_et)
@@ -307,13 +303,14 @@ def flags(dry=False):
                     and (today - dt.date.fromisoformat(pa[-1][0])).days <= ACTIVE_DAYS):
                 bm[p] = _mean_last10(pa)
         for b_id, pmin in C.redistribute(bm, x_id, _mean_last10(xa)).items():
-            if b_id in out_pid or (x_id, b_id) in has_prior:
+            if b_id in out_all or (x_id, b_id) in has_prior:
                 continue
             rate = C.per_min_rate(_team_apps(apps, b_id, tri), C.season_of, season)
             if not rate:
                 continue
             for stat in STATS:
-                cands.append(("cold", tri, xname, b_id, stat, rate[stat] * pmin, C.COLD_MARGIN))
+                cands.append(("cold", tri, xname, b_id, stat, rate[stat] * pmin, C.COLD_MARGIN,
+                              x_id))
 
     # ── priced tier: the WNBA pricing machinery via nba_pricing (same code the test ran) ──
     ladders = board_ladders(now)
@@ -331,7 +328,7 @@ def flags(dry=False):
             continue
         x_first, x_dates = xa[0][0], {a[0]: a[1] for a in xa}
         for b_id, t in cur_team.items():
-            if t != tri or b_id == x_id or b_id in out_pid:
+            if t != tri or b_id == x_id or b_id in out_all:
                 continue
             ba = _team_apps(apps, b_id, tri)
             if len(ba) < MIN_PRIOR_APPS:
@@ -354,7 +351,9 @@ def flags(dry=False):
                 priced_rows.append({"pred_date": today_et, "team": tri, "player": name.get(b_id),
                                     "stat": sp["stat"], "line": sp["line"], "side": "over",
                                     "ev": sp["ev"], "odds": sp["dec"], "d_min": sp.get("d_min"),
-                                    "n_elev": sp["n"], "_x": xname, "_elev": sp["elev_avg"]})
+                                    "n_elev": sp["n"], "_x": xname, "_elev": sp["elev_avg"],
+                                    "_pid": b_id, "_news": news_at.get(x_id),
+                                    "_stale": int(bool(sp.get("stale")))})
     priced, _ = P.select(priced_rows) if priced_rows else ([], [])
 
     out_flags = []
@@ -363,8 +362,9 @@ def flags(dry=False):
         out_flags.append({"tier": "priced", "team": r["team"], "x": r["_x"], "b": r["player"],
                           "stat": r["stat"], "line": r["line"], "odds": r["odds"],
                           "proj": round(r["_elev"], 1), "margin": round(r["_elev"] - r["line"], 1),
-                          "ev": round(r["ev"], 4), "gid": gid, "gtime": gtime, "matchup": mu})
-    for tier, tri, xname, b_id, stat, proj, margin in cands:
+                          "ev": round(r["ev"], 4), "gid": gid, "gtime": gtime, "matchup": mu,
+                          "pid": r["_pid"], "news_at": r["_news"], "stale": r["_stale"]})
+    for tier, tri, xname, b_id, stat, proj, margin, x_id in cands:
         lk = lines.get((b_id, LEDGER_STAT[stat]))
         if not lk:
             why["no_line"] += 1
@@ -376,7 +376,7 @@ def flags(dry=False):
         out_flags.append({"tier": tier, "team": tri, "x": xname, "b": name.get(b_id),
                           "stat": stat, "line": line, "odds": odds, "proj": round(proj, 1),
                           "margin": round(proj - line, 1), "gid": gid, "gtime": gtime,
-                          "matchup": mu})
+                          "matchup": mu, "pid": b_id, "news_at": news_at.get(x_id)})
 
     new_shadow = new_paper = 0
     if not dry and out_flags:
@@ -388,11 +388,12 @@ def flags(dry=False):
                 why["priced_slot_taken"] += 1
                 continue
             cur = sh.execute("INSERT OR IGNORE INTO flags (flag_id, logged_at, game_date, tier, "
-                             "team, x, b, stat, line, odds, proj, margin, gid, gtime, matchup, ev) "
-                             "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                             "team, x, b, stat, line, odds, proj, margin, gid, gtime, matchup, ev, "
+                             "pid, news_at, stale) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                              (fid, stamp, today_et, f["tier"], f["team"], f["x"], f["b"],
                               f["stat"], f["line"], f["odds"], f["proj"], f["margin"],
-                              f["gid"], f["gtime"], f["matchup"], f.get("ev")))
+                              f["gid"], f["gtime"], f["matchup"], f.get("ev"), f.get("pid"),
+                              f.get("news_at"), f.get("stale")))
             new_shadow += cur.rowcount
         sh.commit()
         sh.close()
@@ -423,7 +424,8 @@ def flags(dry=False):
               + (f" · EV {f['ev']:+.2f}" if f.get("ev") is not None else "")
               + f" · {f['x']} OUT · {f['matchup']}")
     tiers = Counter(f["tier"] for f in out_flags)
-    print(f"nba flags: {len(outs)} fresh OUT ({len(out_pid)} resolved) · {len(games) // 2} "
+    print(f"nba flags: report {rep_mark or 'NONE'} · {len(out_all)} Out tonight, "
+          f"{len(out_pid)} in absence game 1-2 · {len(games) // 2} "
           f"game(s) left today · lines: {lstat} · "
           f"candidates {Counter(c[0] for c in cands)} -> flags {dict(tiers)} · "
           f"shadow +{new_shadow} · paper +{new_paper} (live tiers: "
