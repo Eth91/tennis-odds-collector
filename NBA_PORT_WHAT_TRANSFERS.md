@@ -249,3 +249,37 @@ summer move (DeRozan read SAC, he is DEN; Watson read DEN, he is CLE) and placed
 
 **What still limits it:** the Mac has to be awake. A sleeping laptop is a gap in `quotes`, and
 `cycles` shows where. The VM cannot take this job — every input is blocked there.
+
+---
+
+## 11. Addendum: the WNBA pricing machinery, ported — and measured
+
+Done as §6 ordered it: pricing before features. Pre-registered in `NBA_PRICING_PREREG.md`, result
+appended there. **KILL at the close** (−3.46%, n=1,186), better than the margin rule and the null.
+
+**How it was ported: by calling, not copying.** `nba_pricing.py` binds NBA inputs to the WNBA's
+frozen functions — `wnba_tonight.prop_edges`, `wnba_alert.position_compat`,
+`wnba_slip.current_selection` — with the four pre-registered NBA departures as process-local
+overrides (`ROLE_FLOOR` 26.4; volume layer off; guard-rebound gate off; DvP off). The backtest and
+`nba_flags` tier `priced` both import it; refactoring the test onto it left the output
+byte-identical.
+
+**Prerequisites it forced:**
+- `nba_logs_full.py` — the 32-column game logs (FGA/FTA/FG3A) and positions, in new tables beside
+  `logs`. The conviction gate passes an over on minutes > 2 **or** FGA > 1 and treats a missing FGA
+  split as a fail, so without shot columns the machinery bets nothing. Verified row-for-row against
+  `logs` (one 2022-23 0-minute DNP row the league has since dropped; reported, not a failure).
+- `nba_rosters.state` now reads `logs_full`, so live appearances carry shot columns.
+
+**Live wiring checks:**
+- The live tier first priced a 15-minute Tomlin absence — outside the tested universe (≥28-min
+  absences only). Fixed to the same star rule; forward shadow must grade the population the test did.
+- Card slots are sticky like the WNBA card (an entered play stays; a newcomer needs an open,
+  P/R/A-disjoint slot). The first test of that was **vacuous** — a two-cycle replay that passed with
+  the rule switched off. Replaced by `test_nba_priced_slots.py`, which forces each case and includes
+  a mutant that must fail; it does.
+- Combo props (pts_reb/pts_ast/reb_ast) grade by summing components; checked against cdn box scores.
+
+**Where that leaves the port.** The WNBA's two halves have now both been measured on NBA real lines:
+the thesis (margin rule) and the pricing. Neither beats the close. What has not been measured is the
+WNBA's actual claim — speed. That is what the shadow + quote log now accrue, from 2026-10-22.

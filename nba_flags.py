@@ -2,12 +2,17 @@
 
   1. nba_injuries.json (ESPN feed) -> OUT players whose report date is <= NEWS_DAYS old,
      resolved to an NBA person id on their CURRENT team (nba_rosters.state).
-  2. Two disjoint beneficiary tiers:
+  2. Three beneficiary tiers (wowy and cold are disjoint; priced re-prices the wowy population):
        wowy — B has a measured with/without split vs X (nba_wowy.sqlite pairs, n_out >= 2).
               proj = rate × (base_min + d_min); bet OVER at proj - line >= MARGIN[stat].
        cold — B has NO such split. X's vacated minutes go to the [12, 32]-min rotation in
               proportion to minutes played (nba_coldstart.redistribute — the SAME function
               the real-line test ran); bet OVER at proj - line >= COLD_MARGIN.
+       priced — the wowy population, decided the WNBA way: wnba_tonight.prop_edges prices
+              every posted rung (elevated sample, minutes-honest rescale, hit rate shrunk toward
+              the book, EV >= 0.10, the WNBA's guards), base rung only, then
+              wnba_slip.current_selection. Sticky per team-game like the WNBA card: a play that
+              enters stays, newcomers only fill an open slot that is P/R/A-disjoint.
   3. Freshest NBA main lines from nba_lines.sqlite (FanDuel + DraftKings, collected on the
      Mac by nba_lines.py), joined on person id; best over price across books.
   4. Pre-game only: the slate is games with status 1 (not started) on today's ET date.
@@ -17,6 +22,9 @@
           every CI crosses zero; the always-over null is −6.56%.
    cold — NBA_COLDSTART_PREREG.md, executed by nba_coldstart_realline.py: PRA>=5 KILL
           (−8.61% pooled, −18.19% second half), PTS>=5 THIN (n=33).
+   priced — the WNBA pricing machinery (nba_pricing, the code NBA_PRICING_PREREG.md tested):
+          KILL at the close, −3.46% pooled over 1,186 bets, CI [−8.80, +1.99]; beats the margin
+          rule and the null, loses anyway; overconfident by 10-17 points of probability.
    So every flag goes to the SHADOW table nba_shadow.sqlite, graded by --grade, and only a
    tier listed in LIVE_TIERS may also write a PAPER bet to bet_ledger. Adding one requires a
    new pre-registered test that passes; see NBA_PORT_WHAT_TRANSFERS.md.
@@ -44,6 +52,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import nba_coldstart as C
+import nba_pricing as P
 import nba_rosters as R
 
 HERE = Path(__file__).resolve().parent
@@ -70,7 +79,19 @@ TEAM_FIX = {"GS": "GSW", "SA": "SAS", "NO": "NOP", "NY": "NYK", "UTAH": "UTA",
 SHADOW_DDL = """CREATE TABLE IF NOT EXISTS flags (
     flag_id TEXT PRIMARY KEY, logged_at TEXT, game_date TEXT, tier TEXT, team TEXT,
     x TEXT, b TEXT, stat TEXT, line REAL, odds REAL, proj REAL, margin REAL,
-    gid TEXT, gtime TEXT, matchup TEXT, actual REAL, result TEXT, graded_at TEXT)"""
+    gid TEXT, gtime TEXT, matchup TEXT, actual REAL, result TEXT, graded_at TEXT,
+    ev REAL)"""
+COMBO = {"pts_reb": ("points", "rebounds"), "pts_ast": ("points", "assists"),
+         "reb_ast": ("rebounds", "assists")}
+
+
+def _shadow(path):
+    """Open the shadow table, migrating a pre-`ev` table in place (idempotent)."""
+    sh = sqlite3.connect(path)
+    sh.execute(SHADOW_DDL)
+    if "ev" not in {r[1] for r in sh.execute("PRAGMA table_info(flags)")}:
+        sh.execute("ALTER TABLE flags ADD COLUMN ev REAL")
+    return sh
 
 
 def fold(s):
@@ -153,6 +174,32 @@ def latest_lines(now):
             out[(pid, stat)] = (line, best_over, ts)
     stale = sorted(set(books) - set(fresh))
     return out, ("ok" if not stale else f"stale book(s) excluded: {stale}")
+
+
+def board_ladders(now):
+    """{pid: {stat: {line: (best_over, best_under)}}} — every fresh two-sided rung, both books.
+    The shape wnba_tonight.prop_edges reads from posted_props()."""
+    if not LINES_DB.exists():
+        return {}
+    con = sqlite3.connect(f"file:{LINES_DB}?mode=ro", uri=True)
+    cut = (now - dt.timedelta(minutes=LINE_MAX_AGE_MIN)).replace(tzinfo=None).isoformat()
+    fresh = [b for b, ts in con.execute("SELECT book, MAX(collected_at) FROM board "
+                                        "GROUP BY book") if ts >= cut]
+    raw = defaultdict(lambda: [0.0, 0.0])
+    if fresh:
+        for pid, stat, line, side, odds in con.execute(
+                "SELECT pid, stat, line, side, odds FROM board WHERE pid IS NOT NULL AND "
+                f"book IN ({','.join('?' * len(fresh))})", fresh):
+            i = 0 if side == "over" else 1 if side == "under" else None
+            if i is not None:
+                k = (pid, stat, round(float(line), 1))
+                raw[k][i] = max(raw[k][i], float(odds))
+    con.close()
+    out = defaultdict(lambda: defaultdict(dict))
+    for (pid, stat, line), (o, u) in raw.items():
+        if o and u and stat in P.PROP_STATS:
+            out[pid][stat][line] = (o, u)
+    return out
 
 
 def _team_apps(apps, pid, tri):
@@ -268,7 +315,55 @@ def flags(dry=False):
             for stat in STATS:
                 cands.append(("cold", tri, xname, b_id, stat, rate[stat] * pmin, C.COLD_MARGIN))
 
+    # ── priced tier: the WNBA pricing machinery via nba_pricing (same code the test ran) ──
+    ladders = board_ladders(now)
+    pos = {pid: v[2] for pid, v in index.items()}
+    priced_rows = []
+    for x_id, (xname, tri) in out_pid.items():
+        if tri not in games:
+            continue
+        xa = _team_apps(apps, x_id, tri)
+        # SAME UNIVERSE AS THE TEST (NBA_PRICING_PREREG.md): X must be a >=28-min player with
+        # >=10 apps for this franchise. Without it, live priced a 15-min Tomlin absence the
+        # test never measured — forward shadow would grade a population the backtest did not.
+        if len(xa) < 10 or _mean_last10(xa) < STAR_MIN:
+            why["priced_x_not_a_star_here"] += 1
+            continue
+        x_first, x_dates = xa[0][0], {a[0]: a[1] for a in xa}
+        for b_id, t in cur_team.items():
+            if t != tri or b_id == x_id or b_id in out_pid:
+                continue
+            ba = _team_apps(apps, b_id, tri)
+            if len(ba) < MIN_PRIOR_APPS:
+                continue
+            since = [a for a in ba if a[0] >= x_first]
+            mk = lambda a: P.row(a[1], a[2]["pts"], a[2]["reb"], a[2]["ast"], a[2]["fga"],
+                                 a[2]["fta"], a[2]["fg3a"])
+            b_out = [mk(a) for a in since if a[0] not in x_dates]
+            b_in = [mk(a) for a in since if a[0] in x_dates]
+            if len(b_out) < C.MIN_WOWY or len(b_in) < 3:
+                continue
+            lad = ladders.get(b_id)
+            if not lad:
+                why["priced_no_line"] += 1
+                continue
+            log = [dict(mk(a), date=a[0], game_id="", matchup="") for a in reversed(ba)]
+            spots, _ = P.price(name.get(b_id, ""), log, P.wowy(b_in, b_out),
+                               pos.get(b_id, ""), pos.get(x_id, ""), x_dates, lad)
+            for sp in P.base_rung_overs(spots):
+                priced_rows.append({"pred_date": today_et, "team": tri, "player": name.get(b_id),
+                                    "stat": sp["stat"], "line": sp["line"], "side": "over",
+                                    "ev": sp["ev"], "odds": sp["dec"], "d_min": sp.get("d_min"),
+                                    "n_elev": sp["n"], "_x": xname, "_elev": sp["elev_avg"]})
+    priced, _ = P.select(priced_rows) if priced_rows else ([], [])
+
     out_flags = []
+    for r in priced:
+        gid, gtime, mu = games[r["team"]]
+        out_flags.append({"tier": "priced", "team": r["team"], "x": r["_x"], "b": r["player"],
+                          "stat": r["stat"], "line": r["line"], "odds": r["odds"],
+                          "proj": round(r["_elev"], 1), "margin": round(r["_elev"] - r["line"], 1),
+                          "ev": round(r["ev"], 4), "gid": gid, "gtime": gtime, "matchup": mu})
     for tier, tri, xname, b_id, stat, proj, margin in cands:
         lk = lines.get((b_id, LEDGER_STAT[stat]))
         if not lk:
@@ -285,16 +380,19 @@ def flags(dry=False):
 
     new_shadow = new_paper = 0
     if not dry and out_flags:
-        sh = sqlite3.connect(SHADOW)
-        sh.execute(SHADOW_DDL)
+        sh = _shadow(SHADOW)
         stamp = now.replace(microsecond=0, tzinfo=None).isoformat()
         for f in out_flags:
             fid = f"{f['tier']}|{fold(f['b'])}|{f['stat']}|{f['line']}|{today_et}"
-            cur = sh.execute("INSERT OR IGNORE INTO flags VALUES "
-                             "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NULL,NULL,NULL)",
+            if f["tier"] == "priced" and not _priced_slot_open(sh, today_et, f, fid):
+                why["priced_slot_taken"] += 1
+                continue
+            cur = sh.execute("INSERT OR IGNORE INTO flags (flag_id, logged_at, game_date, tier, "
+                             "team, x, b, stat, line, odds, proj, margin, gid, gtime, matchup, ev) "
+                             "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                              (fid, stamp, today_et, f["tier"], f["team"], f["x"], f["b"],
                               f["stat"], f["line"], f["odds"], f["proj"], f["margin"],
-                              f["gid"], f["gtime"], f["matchup"]))
+                              f["gid"], f["gtime"], f["matchup"], f.get("ev")))
             new_shadow += cur.rowcount
         sh.commit()
         sh.close()
@@ -321,8 +419,9 @@ def flags(dry=False):
         print(f"  !! BLIND: {b}")
     for f in out_flags:
         print(f"  [NBA {f['tier']}] {f['b']} ({f['team']}) {f['stat'].upper()} O{f['line']:g} "
-              f"@{f['odds']:.2f} · proj {f['proj']} (+{f['margin']}) · {f['x']} OUT · "
-              f"{f['matchup']}")
+              f"@{f['odds']:.2f} · proj {f['proj']} (+{f['margin']})"
+              + (f" · EV {f['ev']:+.2f}" if f.get("ev") is not None else "")
+              + f" · {f['x']} OUT · {f['matchup']}")
     tiers = Counter(f["tier"] for f in out_flags)
     print(f"nba flags: {len(outs)} fresh OUT ({len(out_pid)} resolved) · {len(games) // 2} "
           f"game(s) left today · lines: {lstat} · "
@@ -334,21 +433,45 @@ def flags(dry=False):
     return out_flags
 
 
+def _priced_slot_open(sh, game_date, f, fid):
+    """The WNBA card's sticky rule, applied across 10-minute cycles: a priced play that has
+    entered the shadow for this team-game STAYS; a newcomer gets a slot only while fewer than 2
+    are taken AND its P/R/A components are disjoint from the incumbent's. Without this, every
+    play that was ever top-2 in some cycle would be counted — more than a card can hold."""
+    import wnba_tonight as T
+    inc = sh.execute("SELECT flag_id, stat FROM flags WHERE tier='priced' AND game_date=? AND "
+                     "team=?", (game_date, f["team"])).fetchall()
+    if any(i == fid for i, _ in inc):
+        return True                                  # already in: INSERT OR IGNORE no-ops
+    if len(inc) >= 2:
+        return False
+    comps = T._STAT_COMPONENTS
+    return all(not (comps[f["stat"]] & comps[s]) for _, s in inc)
+
+
+def _settle(b, stat, gtime):
+    """Realized value; combos are summed from their components."""
+    import bet_ledger as BL
+    key = LEDGER_STAT.get(stat, stat)
+    if key in COMBO:
+        parts = [BL.settle_nba(b, k, gtime) for k in COMBO[key]]
+        return None if any(v is None for v in parts) else sum(parts)
+    return BL.settle_nba(b, key, gtime)
+
+
 def grade():
     """Settle shadow rows for past dates from ESPN box scores (bet_ledger.settle_nba).
     A row whose player is not found stays ungraded and is retried — never a void."""
     if not SHADOW.exists():
         print("nba shadow: no table yet")
         return
-    import bet_ledger as BL
     today_et = dt.datetime.now(dt.timezone.utc).astimezone(ET).date().isoformat()
-    sh = sqlite3.connect(SHADOW)
-    sh.execute(SHADOW_DDL)
+    sh = _shadow(SHADOW)
     todo = sh.execute("SELECT flag_id, b, stat, line, gtime FROM flags "
                       "WHERE result IS NULL AND game_date < ?", (today_et,)).fetchall()
     done = 0
     for fid, b, stat, line, gtime in todo:
-        actual = BL.settle_nba(b, LEDGER_STAT[stat], gtime)
+        actual = _settle(b, stat, gtime)
         if actual is None:
             continue
         sh.execute("UPDATE flags SET actual=?, result=?, graded_at=? WHERE flag_id=?",

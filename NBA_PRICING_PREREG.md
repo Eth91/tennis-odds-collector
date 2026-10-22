@@ -67,3 +67,44 @@ sensitivity (recomputing the shrink from the returned hit rate and n).
 - Positions are each player's index position applied historically; a player missing from the
   index defaults to `F`, as `position_compat` already does.
 - Props on a DNP void, so grading only players who played is approximately right, not exact.
+
+---
+
+# RESULT — appended after the run, 2026-10-22. Nothing above this line was edited.
+
+`nba_pricing_realline.py` (controls first: a role that expands against a soft line flags at EV
++0.510, matching hand arithmetic; a flat role is refused by the conviction gate; four same-team
+overs reduce to two). Universe: 19,912 WOWY-tier candidates, 6,430 with FD/DK lines → 1,967
+priced base-rung overs → **1,186 after `current_selection`**.
+
+| | n | dates | hit% | ROI | 95% CI |
+|---|---|---|---|---|---|
+| **Arm T, pooled** | 1,186 | 286 | 50.0% | **−3.46%** | [−8.80, +1.99] |
+| before 2024-10-29 | 552 | 140 | 49.6% | −4.41% | [−12.18, +3.06] |
+| from 2024-10-29 | 634 | 146 | 50.3% | −2.64% | [−10.24, +4.72] |
+| always-over null, same candidates | 35,353 | 303 | 48.4% | −6.97% | [−8.85, −5.14] |
+| shipped margin rule, same candidates | 1,565 | 271 | 50.1% | −4.85% | [−10.73, +1.14] |
+
+## Verdict: **KILL** (pooled ROI ≤ 0). The priced tier is shadow-only.
+
+The machinery is *more informative* than the margin rule (+1.4 pts) and the null (+3.5 pts) — and
+still loses at the close. The core `elevated` path is **−6.33%, CI [−12.45, −0.58]**: reliably
+negative, as bad as the null.
+
+### Secondary (pre-registered, information only)
+- **Overconfident by 10-17 points of probability.** EV 0.10-0.20: model 59.6% vs realized 49.4%;
+  0.20-0.35: 65.6% vs 48.3%; ≥0.35: 74.5% vs 55.8%. The WNBA's own known flaw (64% vs 51%),
+  larger here: elevated-role games flatter the hit rate, and EV selection adds a winner's curse.
+- **No EV bar rescues it.** Every bar loses on the first half; the first half's choice (0.45)
+  reads −11.07% on the second.
+- **A heavier shrink does not either.** k = 11 / 20 / 40 / 80 → −3.38 / −3.61 / −4.15 / −1.44%.
+
+### Noticed, NOT claimed (post-hoc subsets — each needs its own prereg and forward data)
+`role_flip` basis +10.58% (n=195, CI [−3.69, +25.90]); assists +6.81% (n=201). Both are cuts
+chosen after seeing the results.
+
+### What this test cannot see
+Prices are tip snapshots. The WNBA thesis is SPEED — bet the news before the book moves. A model
+that loses at the close can still win at the news, and only forward data can show it: the priced
+tier now logs to the shadow table, and `nba_lines.quotes` records every price move, so each shadow
+flag can be scored against the line it beat (or didn't) by tip.

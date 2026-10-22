@@ -178,12 +178,20 @@ def player_index(today_et):
                                        "players": {str(k): v for k, v in players.items()}}))
     return players, ""
 
+def _stats(p, r, a, t3, fga, fta, f3a):
+    return {"pts": p, "reb": r, "ast": a, "fg3m": t3, "fga": fga, "fta": fta, "fg3a": f3a,
+            "pra": p + r + a, "pts_reb": p + r, "pts_ast": p + a, "reb_ast": r + a}
+
+
 def state(today_et, boxes, index=None):
     """Everything the engine projects from, merged and ordered by date.
 
-    apps:  {pid: [(date, min, {pts, reb, ast, fg3m, pra}, team), ...]} — last season's game
-           logs inside the 400-day pool PLUS this season's box scores. `team` is the team the
-           player appeared FOR, so callers can scope to a franchise as the backtest did.
+    apps:  {pid: [(date, min, stats, team), ...]} — last season's game logs inside the 400-day
+           pool PLUS this season's box scores. `stats` carries pts, reb, ast, fg3m, fga, fta,
+           fg3a and the combos (pra, pts_reb, pts_ast, reb_ast) — the WNBA pricing machinery
+           needs the shot columns (its conviction gate reads the FGA split). `team` is the team
+           the player appeared FOR, so callers can scope to a franchise as the backtests did.
+           Reads logs_full (nba_logs_full.py), never the 5-column `logs`.
     team:  {pid: CURRENT tricode}. With `index` (player_index) the index is authoritative and a
            player absent from it has NO current team; without it, the team of the most recent
            appearance — wrong for every summer move until the player appears.
@@ -192,11 +200,13 @@ def state(today_et, boxes, index=None):
     cut = (dt.date.fromisoformat(today_et) - dt.timedelta(days=POOL_DAYS)).isoformat()
     apps, team, name, last = defaultdict(list), {}, {}, {}
     con = sqlite3.connect(f"file:{LOGS}?mode=ro", uri=True)
-    for date, tri, pid, nm, mn, p, r, a, t3 in con.execute(
-            "SELECT date, team, player_id, player, min, pts, reb, ast, fg3m FROM logs "
-            "WHERE date >= ? AND date < ? AND min > 0", (cut, today_et)):
-        apps[pid].append((date, float(mn), {"pts": p, "reb": r, "ast": a, "fg3m": t3,
-                                            "pra": p + r + a}, tri))
+    if not con.execute("SELECT 1 FROM sqlite_master WHERE name='logs_full'").fetchone():
+        con.close()
+        raise Blind("nba_gamelogs.sqlite has no logs_full — run nba_logs_full.py --fetch")
+    for date, tri, pid, nm, mn, p, r, a, t3, fga, fta, f3a in con.execute(
+            "SELECT date, team, player_id, player, min, pts, reb, ast, fg3m, fga, fta, fg3a "
+            "FROM logs_full WHERE date >= ? AND date < ? AND min > 0", (cut, today_et)):
+        apps[pid].append((date, float(mn), _stats(p, r, a, t3, fga, fta, f3a), tri))
         name[pid] = nm
         if date >= last.get(pid, ""):
             last[pid], team[pid] = date, tri
@@ -206,9 +216,9 @@ def state(today_et, boxes, index=None):
             continue
         for q in bx["players"]:
             pid = q["pid"]
-            apps[pid].append((bx["date"], q["min"], {
-                "pts": q["pts"], "reb": q["reb"], "ast": q["ast"], "fg3m": q["fg3m"],
-                "pra": q["pts"] + q["reb"] + q["ast"]}, q["team"]))
+            apps[pid].append((bx["date"], q["min"], _stats(
+                q["pts"], q["reb"], q["ast"], q["fg3m"], q["fga"], q["fta"], q["fg3a"]),
+                q["team"]))
             name[pid] = q["name"]
             if bx["date"] >= last.get(pid, ""):
                 last[pid], team[pid] = bx["date"], q["team"]
