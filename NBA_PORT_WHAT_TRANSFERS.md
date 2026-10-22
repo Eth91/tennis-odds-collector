@@ -183,3 +183,30 @@ Note this is also a *measurement* warning for §6 step 1. Any re-fit of the marg
 `basketball_nba_odds_hist.sqlite` is fitting the WOWY-tier population only. The cold-start tier
 is a different population with a different (lower) ceiling, and it is most of the live volume in
 October. Fit them separately or the blend will be wrong.
+
+---
+
+## 9. Addendum: the VM's NBA engine was blind four ways at once
+
+Checked read-only on the board VM, 2026-10-22. `vm_loop.sh` runs `nba_injuries.py` **and**
+`nba_flags.py` (not dry-run) every ~30 min with stdout to `/dev/null`. It has never logged an NBA
+bet (`bet_ledger`: 0 rows), and not because the nights were quiet:
+
+| # | blind input | evidence |
+|---|---|---|
+| 1 | every injury row had a blank tricode | VM `nba_injuries.json`: 71 of 71 blank |
+| 2 | **nothing collects NBA prop lines** | VM `wnba_lines.sqlite` has only `wnba`; Mac `fanduel_props.sqlite` has no `nba`; Actions runs `dk_collect.py --wnba` only, and its NBA/injury steps were deleted (the comments remain) |
+| 3 | no slate | `cdn.nba.com` 403s the Oracle VM even with browser impersonation, so `todays_games()` returned `{}` |
+| 4 | stale rosters | team-scoped WOWY lookup; 12 of 13 OUTs matched no pairs |
+
+Each failure was caught and turned into an empty result, and every combination printed the same
+`0 flags`. **Correction to an earlier commit message (52dacdc):** it says nothing ran the feed.
+The VM did run it, every 30 minutes; the Mac copy was stale only because the VM's copy is the one
+that gets committed. The Mac cron that commit's work added was a duplicate and has been removed.
+
+**Topology now:** slate, rosters and this season's box scores are **Mac-only** (`curl_cffi`
+impersonation from a residential IP), like `stats.nba.com` and DraftKings. `nba_flags.py` exits 2
+with the reason on a host that cannot reach them, so after merge the VM will log
+`nba_flags fail` to `~/loop_fail.log` every ~30 min. That is true, and loud on purpose; removing
+the line from `vm_loop.sh` is the operator's call. The blocker that remains on every host is #2:
+**until something collects NBA lines, the engine has nothing to price against.**

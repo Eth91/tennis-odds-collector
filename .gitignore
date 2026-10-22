@@ -93,3 +93,5 @@ walks_paper.sqlite
 wnba.sqlite
 wnba_props.sqlite
 wnba_question_log.sqlite
+nba_season_boxes.json
+nba_shadow.sqlite
