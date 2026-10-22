@@ -157,3 +157,29 @@ Mechanisms and line numbers: read from code today. Endpoint columns: probed live
 The real-line verdict: `nba_margin_refit.py` + `nba_margin_ci.py`, date-clustered bootstrap,
 every positive cell's 95% CI crosses zero. **Nothing here is a validated NBA edge** — it is a
 diagnosis of why the port has not been tested on its merits yet, and the order that would test it.
+
+---
+
+## 8. Addendum, same day: fixing the feed exposed the next blocker
+
+The injury feed was fixed (see below) and immediately revealed that **12 of 13 OUT players in
+the news window resolve to ZERO WOWY pairs.** All 26 ESPN abbreviations map to valid tricodes
+and all 30 teams are present in `pairs` — the mapping is fine. The problem is that
+`nba_wowy.sqlite` was built trailing-400d through **2026-04-12**, so it encodes *last season's*
+rosters, and the pair lookup is **team-scoped** (`pairs` PK = `(team, x_id, b_id)`).
+
+Every summer move therefore misses: Coby White is on CHA now and his pairs are filed under CHI;
+Porziņģis is on GSW and his are under his old team. Rookies (Boswell, Diop, Tomlin, Sorber,
+Bittle, Carlson) have no history at all.
+
+A rebuild does **not** fix this yet — WOWY derives roster membership from game logs, and there
+are only one or two days of 2026-27 games to fold in. The structural answer is the one already
+specified and validated: the **cold-start tier** (proportional minutes redistribution over the
+12-32 min rotation, margin ≥5 → 63.7%, ≥8 → 67.8% on 1,345 flags), listed in `project_nba_port`
+as *"TODO P2: add the same cold-start fallback to nba_flags.py"*. It is no longer a nice-to-have:
+**without it the engine is blind to ~92% of tonight's actual absences.**
+
+Note this is also a *measurement* warning for §6 step 1. Any re-fit of the margins on
+`basketball_nba_odds_hist.sqlite` is fitting the WOWY-tier population only. The cold-start tier
+is a different population with a different (lower) ceiling, and it is most of the live volume in
+October. Fit them separately or the blend will be wrong.
