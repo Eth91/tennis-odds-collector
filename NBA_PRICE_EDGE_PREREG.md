@@ -82,3 +82,12 @@ De-vig arithmetic; leave-one-out (a test that fails if *b*'s own price enters it
 no box score; ambiguous names dropped; the P2 control reproduces Arm T exactly.
 
 No result here authorises money.
+
+## Addendum — P2 definitions fixed before any outcome is examined (2026-10-23)
+Written after the code and its guards were built (all 16 mutations caught) but **before it was run.**
+P2 re-prices bets chosen by the existing harness, so its price table mirrors `load_lines()` exactly:
+in-play snapshots and ambiguous names are **kept** in P2 (they are dropped in P1), and a book's price is
+its **over** quote at that line even if its under is missing (the harness requires two sides only for
+the FD+DK line as a whole). "Best of four" therefore can never be worse than best of FD+DK. The
+control check: every Arm T bet's FD+DK price, rebuilt from this table, equals the harness price, with
+n = 1,186 / −41.09u, and the null reproduces n = 35,353 / −6.97%.
