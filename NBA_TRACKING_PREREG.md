@@ -58,3 +58,39 @@ This is a test **at the close**, like every NBA test before it. A pass would jus
 tier (`priced_trk`) in the forward speed test via its own amendment — never a change to the
 existing `priced` tier, whose forward record must stay what it was registered as. A pass does not
 authorise money.
+
+---
+
+# RESULT — appended after the run, 2026-10-23. Nothing above this line was edited.
+
+**Data:** 487 game dates, 147,417 rows, regular seasons 2022-23..2024-25. Integrity gate passed on all
+three: tracked 99.2-100% of player-games; assists and rebounds agree with the box score 100% where both
+exist; rows with no rebounding entry are 96-100% zero-rebound games (the feed omits players with no
+rebound chances). League conversion, 2022-23: 0.575 rebounds per chance, 0.556 assists per potential
+assist. Smoothed 831,727 prior rows; 43,340 kept real rebounds (no rebounding row); 5,388 had no
+tracking row.
+
+| | n | dates | hit% | ROI | 95% CI |
+|---|---|---|---|---|---|
+| Arm T (control — reproduced: n=1,186, −41.09u) | 1,186 | 286 | 50.0% | −3.46% | [−8.80, +1.99] |
+| **Arm S, pooled** | **1,279** | 285 | 49.7% | **−4.71%** | [−9.66, +0.47] |
+| before 2024-10-29 | 613 | 140 | 49.4% | −5.27% | |
+| from 2024-10-29 | 666 | 145 | 50.0% | −4.20% | |
+
+## Verdict: **KILL** — pooled ROI ≤ 0, both halves negative, and worse than Arm T.
+
+**Calibration (the defect targeted) did not improve.** Arm S states 0.600 / 0.664 / 0.752 by EV band and
+realises 0.493 / 0.473 / 0.557 — as overconfident as Arm T (0.597 / 0.656 / 0.745 vs 0.486 / 0.487 /
+0.567). Replacing conversion luck with opportunity did not remove it, which locates the overconfidence
+elsewhere: in the elevated-role sample regressing, not in the noise of the stat inputs.
+
+**Correction to the registration's secondary note.** It said "points-only bets are identical in both
+arms". The points *candidates* are; the points *bets* are not (395 vs 389), because `current_selection`
+lets markets compete for each team-game's two slots and the points-vs-combo preference, so a changed
+rebound or assist candidate can displace a points play. Per-stat results are therefore not clean
+attributions. They are recorded, as registered, as information only:
+points −4.80% → −7.32%, rebounds −8.12% → −3.60%, assists +6.81% → +0.95%, pts_ast +3.53% → +21.20%
+(n = 50). None is a claim; the rebound improvement in particular is a post-hoc cut.
+
+**Consequence:** no `priced_trk` tier. The tracking data stays (`nba_tracking.sqlite`), and is ready for a
+differently-designed test if one is pre-registered.
