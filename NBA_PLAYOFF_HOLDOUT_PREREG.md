@@ -64,3 +64,42 @@ seasons 2022-23, 2023-24, 2024-25 → `nba_postseason.sqlite`, table `logs_post`
 3. **Name match**: ≥ 95% of the postseason lines with ≥ 3 books find their player in that night's box.
 
 If any gate fails, nothing is graded and the failure is reported.
+
+---
+
+# RESULT — appended after the run, 2026-10-23. Nothing above this line was edited.
+
+**Gates — all passed.** (1) The same fetch code re-pulled the 2024-25 regular season: 26,306 rows,
+identical to `logs_full` on all 26,306. (2) All 124 postseason nights hold the same number of games as
+the odds history. (3) 2,957 of 2,988 lines' players were found in that night's box (99.0%).
+
+| | n | dates | hit% | ROI | 95% CI | claimed EV | consensus p vs realised |
+|---|---|---|---|---|---|---|---|
+| **Lead 1 — BetMGM is the outlier** | 104 | 55 | 45.2% | **−1.47%** | [−25.5, +23.1] | +5.84% | 0.477 vs 0.452 |
+| **Lead 2 — EV ≥ 6%** | 107 | 63 | 33.6% | **+1.50%** | [−29.3, +35.8] | +9.13% | 0.426 vs 0.336 |
+
+## Verdicts
+- **Lead 1: KILL** — holdout ROI ≤ 0. Dropped.
+- **Lead 2: NOT REFUTED** by the registered rule (ROI > 0, CI includes 0). The registered rule is
+  the verdict. But the detail leans against the lead: the +1.50% comes entirely from 16 bets in the 2023
+  postseason (+131%). The 2024 postseason lost 24.9% (n=53) and the 2025 postseason lost 16.3% (n=38).
+  The bets hit 33.6% against a consensus 42.6%, overconfident by 9 points. Big disagreements are where
+  the disagreeing book was most often right.
+
+## Information only (pre-stated above; no claims)
+**P1 itself, all books, EV ≥ 3%, on the playoffs: n = 671, +9.87%, CI [+1.01, +20.17]**, and positive in
+each postseason: 2023 +45.8% (n=87), 2024 +5.1% (n=399), 2025 +3.3% (n=185). Here the consensus
+*under*-stated the bets (0.459 vs 0.471 realised), the reverse of the regular season (0.485 vs 0.465).
+The same bets at the other books' average price: −1.76%. By book: FanDuel +9.4%, DraftKings +15.2%,
+Caesars +9.7%, BetMGM −1.5%. Unders +14.7%, overs +6.6%.
+
+This is the one strong number in the run, and it is **not a verdict**. P1 was registered on the
+regular season and KILLed there (+0.56%, the seasons split). The playoff figure was named only as
+information. Over half its units (+39.8 of +66.2) come from the 2023 postseason's 87 bets on 25
+nights; without them it is +4.5% (n=584). It is a hypothesis: **at the close, books may disagree
+more usefully in the playoffs than in the regular season.** That would need forward data from at
+least three books in the 2027 playoffs to test.
+
+**What this settles.** The BetMGM lead was an artifact of cutting the regular-season data. It is
+gone. The large-edge lead survives only on the letter of the rule. Price alone remains no edge in the
+NBA regular season at the close.

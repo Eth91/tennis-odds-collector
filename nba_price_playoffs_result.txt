@@ -1,0 +1,37 @@
+=== gates (all must pass before any grading) ===
+  PASS  gate 1 same source as logs_full: rows 26,306 vs stored 26,306; identical 26,306 (100.00%)
+  PASS  gate 2 postseason coverage: 124 of 124 nights match
+  PASS  gate 3 name match: 2,957 of 2,988 (99.0%)
+
+postseason nights 124; ambiguous names dropped: odds 20, box 0; {'lines_3plus_books': 17167, 'void_or_ungraded': 27}
+
+=== THE ONE LOOK ===
+Lead 1 — BetMGM is the outlier, EV >= 3%
+    holdout                          n=  104 dates=  55 hit= 45.2% units=   -1.53 ROI=  -1.47%  CI [-25.54%, +23.10%]
+      claimed EV +5.84%; p_fair 0.477 vs realised 0.452
+  VERDICT: KILL (holdout ROI <= 0) -> the lead is dropped
+
+Lead 2 — EV >= 6%, any book
+    holdout                          n=  107 dates=  63 hit= 33.6% units=   +1.60 ROI=  +1.50%  CI [-29.31%, +35.75%]
+      claimed EV +9.13%; p_fair 0.426 vs realised 0.336
+  VERDICT: NOT REFUTED (ROI > 0, CI includes 0) -> still only a lead
+
+--- information only ---
+  P1, EV >= 3%, all books            n=  671 dates= 113 hit= 47.1% units=  +66.24 ROI=  +9.87%  CI [ +1.01%, +20.17%]
+    control: same bets at the reference avg price n=  671 dates= 113 hit= 47.1% units=  -11.84 ROI=  -1.76%  CI [ -9.66%,  +7.32%]
+      p_fair 0.459 vs realised 0.471
+    2023 postseason                  n=   87 dates=  25 hit= 55.2% units=  +39.81 ROI= +45.76%  CI [+12.43%, +82.46%]
+      Lead 1                         n=    6 dates=   0 hit= 33.3% units=   -1.40 ROI= -23.33%  CI n/a
+      Lead 2                         n=   16 dates=  12 hit= 43.8% units=  +20.97 ROI=+131.06%  CI [-10.00%, +265.80%]
+    2024 postseason                  n=  399 dates=  46 hit= 45.4% units=  +20.41 ROI=  +5.12%  CI [ -6.00%, +16.75%]
+      Lead 1                         n=   29 dates=  18 hit= 48.3% units=   +2.20 ROI=  +7.59%  CI [-36.00%, +69.32%]
+      Lead 2                         n=   53 dates=  28 hit= 28.3% units=  -13.19 ROI= -24.89%  CI [-53.64%,  +3.75%]
+    2025 postseason                  n=  185 dates=  42 hit= 47.0% units=   +6.02 ROI=  +3.25%  CI [-12.10%, +19.91%]
+      Lead 1                         n=   69 dates=  31 hit= 44.9% units=   -2.33 ROI=  -3.38%  CI [-30.52%, +24.49%]
+      Lead 2                         n=   38 dates=  23 hit= 36.8% units=   -6.18 ROI= -16.26%  CI [-48.30%, +13.13%]
+    book bet: fanduel                n=  238 dates=  87 hit= 49.6% units=  +22.35 ROI=  +9.39%  CI [ -3.72%, +23.28%]
+    book bet: draftkings             n=  245 dates=  81 hit= 44.5% units=  +37.26 ROI= +15.21%  CI [ -2.63%, +33.89%]
+    book bet: betmgm                 n=  104 dates=  55 hit= 45.2% units=   -1.53 ROI=  -1.47%  CI [-25.54%, +23.10%]
+    book bet: williamhill_us         n=   84 dates=  49 hit= 50.0% units=   +8.16 ROI=  +9.71%  CI [-12.70%, +30.78%]
+    side: over                       n=  402 dates= 105 hit= 43.3% units=  +26.59 ROI=  +6.61%  CI [ -6.48%, +20.86%]
+    side: under                      n=  269 dates=  89 hit= 52.8% units=  +39.65 ROI= +14.74%  CI [ +1.25%, +29.03%]
