@@ -100,4 +100,5 @@ nba_player_index.json
 nba_news.sqlite
 nba_tracking.sqlite
 nba_profiles.sqlite
+nba_postseason.sqlite
 nba_features.sqlite

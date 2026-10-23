@@ -70,13 +70,14 @@ def load_quotes(path=R.ODDS, pre_tip_only=True, drop_ambiguous=True):
     return {k: v for k, v in quotes.items() if (k[0], k[1]) not in amb}, amb
 
 
-def load_box(path=R.LOGS):
-    """{(date, norm): box row} for the two graded regular seasons; ambiguous names dropped."""
+def load_box(path=R.LOGS, table="logs_full", seasons=SEASONS):
+    """{(date, norm): box row} for the graded seasons (default: the two regular seasons);
+    ambiguous names dropped. nba_price_playoffs reads its postseason table through this too."""
     con = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
     box, pids = {}, defaultdict(set)
     for d, pid, nm, mn, pts, reb, ast, fg3m, stl, blk in con.execute(
-            "SELECT date, player_id, player, min, pts, reb, ast, fg3m, stl, blk FROM logs_full "
-            f"WHERE season IN ({','.join('?' * len(SEASONS))})", SEASONS):
+            f"SELECT date, player_id, player, min, pts, reb, ast, fg3m, stl, blk FROM {table} "
+            f"WHERE season IN ({','.join('?' * len(seasons))})", seasons):
         k = (d, RF.norm(nm))
         pids[k].add(pid)
         box[k] = {"min": float(mn or 0), "pts": pts, "reb": reb, "ast": ast, "fg3m": fg3m,
