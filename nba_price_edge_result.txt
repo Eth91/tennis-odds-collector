@@ -1,0 +1,73 @@
+=== P1 — bet the book that disagrees with the others ===
+player-stat-lines 434,034; ambiguous names dropped: odds 20, box 0; {'lines_3plus_books': 190536, 'void_or_ungraded': 4275}
+  P1 pooled, EV >= 3%                n= 7797 dates= 322 hit= 46.5% units=  +43.42 ROI=  +0.56%  CI [ -1.98%,  +2.97%]
+    2023-24                          n= 3559 dates= 159 hit= 45.8% units=  -24.55 ROI=  -0.69%  CI [ -4.74%,  +3.43%]
+    2024-25                          n= 4238 dates= 163 hit= 47.1% units=  +67.97 ROI=  +1.60%  CI [ -1.41%,  +4.68%]
+  control: same bets at the reference avg price n= 7797 dates= 322 hit= 46.5% units= -813.01 ROI= -10.43%  CI [-12.67%,  -8.27%]
+  mean EV claimed +4.95%; mean p_fair 0.485 vs realised 0.465
+
+VERDICT P1: KILL (the two seasons disagree in sign)
+
+--- information only ---
+  EV 0-2%                            n=20820 dates= 323 hit= 47.1% units= -800.83 ROI=  -3.85%  CI [ -5.26%,  -2.40%]
+      p_fair 0.494 vs realised 0.471
+  EV 2-4%                            n= 8859 dates= 323 hit= 47.0% units= -135.52 ROI=  -1.53%  CI [ -3.97%,  +0.82%]
+      p_fair 0.490 vs realised 0.470
+  EV 4-6%                            n= 2881 dates= 315 hit= 46.2% units=  +12.31 ROI=  +0.43%  CI [ -3.55%,  +4.60%]
+      p_fair 0.485 vs realised 0.462
+  EV 6-10%                           n= 1350 dates= 285 hit= 47.0% units=  +69.53 ROI=  +5.15%  CI [ -0.37%, +10.74%]
+      p_fair 0.477 vs realised 0.470
+  EV >= 10%                          n=  252 dates= 138 hit= 48.0% units=  +25.51 ROI= +10.12%  CI [ -5.57%, +25.87%]
+      p_fair 0.483 vs realised 0.480
+  book bet: fanduel                  n= 3760 dates= 315 hit= 46.8% units=  +15.85 ROI=  +0.42%  CI [ -2.76%,  +3.71%]
+  book bet: draftkings               n= 1658 dates= 300 hit= 45.8% units=  +20.10 ROI=  +1.21%  CI [ -4.02%,  +6.49%]
+  book bet: betmgm                   n= 1258 dates= 263 hit= 50.8% units= +114.37 ROI=  +9.09%  CI [ +2.65%, +15.68%]
+  book bet: williamhill_us           n= 1121 dates= 245 hit= 41.7% units= -106.90 ROI=  -9.54%  CI [-16.86%,  -2.29%]
+  at FanDuel or DraftKings           n= 5418 dates= 321 hit= 46.5% units=  +35.95 ROI=  +0.66%  CI [ -2.22%,  +3.44%]
+  side: over                         n= 4567 dates= 320 hit= 44.9% units=  -82.31 ROI=  -1.80%  CI [ -5.12%,  +1.45%]
+  side: under                        n= 3230 dates= 319 hit= 48.8% units= +125.73 ROI=  +3.89%  CI [ -0.12%,  +7.76%]
+  market: points                     n=  729 dates= 269 hit= 51.0% units=  +29.22 ROI=  +4.01%  CI [ -3.16%, +11.26%]
+  market: rebounds                   n= 1882 dates= 297 hit= 46.5% units=  -47.92 ROI=  -2.55%  CI [ -7.41%,  +2.35%]
+  market: assists                    n= 1295 dates= 291 hit= 49.0% units=  +63.06 ROI=  +4.87%  CI [ -1.40%, +10.90%]
+  market: threes                     n= 1204 dates= 292 hit= 42.9% units=   -7.38 ROI=  -0.61%  CI [ -7.17%,  +6.39%]
+  market: steals                     n=  567 dates= 196 hit= 43.4% units=  +27.70 ROI=  +4.89%  CI [ -5.47%, +15.58%]
+  market: blocks                     n=  405 dates= 189 hit= 39.0% units=   +6.37 ROI=  +1.57%  CI [-11.31%, +16.03%]
+  market: pra                        n=  229 dates= 143 hit= 48.0% units=   -2.52 ROI=  -1.10%  CI [-15.22%, +14.06%]
+  market: pts_reb                    n=  359 dates= 193 hit= 48.5% units=   -1.92 ROI=  -0.53%  CI [-10.48%,  +9.97%]
+  market: pts_ast                    n=  316 dates= 159 hit= 46.8% units=  -12.85 ROI=  -4.07%  CI [-15.98%,  +8.37%]
+  market: reb_ast                    n=  811 dates= 254 hit= 48.2% units=  -10.34 ROI=  -1.27%  CI [ -8.08%,  +5.70%]
+
+=== P2 — what shopping adds (execution only) ===
+real two-sided rungs (FD+DK) for 36,893 player-dates
+
+null (always over, main rung):
+  CONTROL best FD+DK re-priced from the 4-book table: n=35353 (harness 35353, registered 35353), price mismatches 0 -> REPRODUCED
+    best FD+DK (control)             n=35353 dates= 303 hit= 48.4% units=-2464.13 ROI=  -6.97%  CI [ -8.85%,  -5.14%]
+    FanDuel only                     n=22485 dates= 300 hit= 49.2% units=-1303.94 ROI=  -5.80%  CI [ -7.83%,  -3.75%]
+    DraftKings only                  n=29919 dates= 302 hit= 48.6% units=-2444.63 ROI=  -8.17%  CI [-10.02%,  -6.30%]
+    best of four                     n=35353 dates= 303 hit= 48.4% units=-2242.68 ROI=  -6.34%  CI [ -8.24%,  -4.50%]
+  on the 17051 with both FD and DK at the line:
+      FanDuel only                   n=17051 dates= 298 hit= 49.7% units= -885.97 ROI=  -5.20%  CI [ -7.42%,  -2.96%]
+      DraftKings only                n=17051 dates= 298 hit= 49.7% units=-1124.35 ROI=  -6.59%  CI [ -8.82%,  -4.40%]
+      best FD+DK                     n=17051 dates= 298 hit= 49.7% units= -725.88 ROI=  -4.26%  CI [ -6.51%,  -2.00%]
+      best of four                   n=17051 dates= 298 hit= 49.7% units= -643.66 ROI=  -3.77%  CI [ -6.05%,  -1.52%]
+
+Arm T selections:
+  CONTROL best FD+DK re-priced from the 4-book table: n=1186 (harness 1186, registered 1186), price mismatches 0 -> REPRODUCED
+    best FD+DK (control)             n= 1186 dates= 286 hit= 50.0% units=  -41.09 ROI=  -3.46%  CI [ -8.80%,  +1.99%]
+    FanDuel only                     n=  808 dates= 270 hit= 50.0% units=  -29.66 ROI=  -3.67%  CI [-10.33%,  +3.02%]
+    DraftKings only                  n= 1029 dates= 273 hit= 49.8% units=  -57.35 ROI=  -5.57%  CI [-11.22%,  +0.27%]
+    best of four                     n= 1186 dates= 286 hit= 50.0% units=  -35.11 ROI=  -2.96%  CI [ -8.34%,  +2.51%]
+  on the 651 with both FD and DK at the line:
+      FanDuel only                   n=  651 dates= 241 hit= 49.6% units=  -30.68 ROI=  -4.71%  CI [-12.24%,  +2.47%]
+      DraftKings only                n=  651 dates= 241 hit= 49.6% units=  -38.86 ROI=  -5.97%  CI [-13.50%,  +1.12%]
+      best FD+DK                     n=  651 dates= 241 hit= 49.6% units=  -23.62 ROI=  -3.63%  CI [-11.24%,  +3.62%]
+      best of four                   n=  651 dates= 241 hit= 49.6% units=  -20.33 ROI=  -3.12%  CI [-10.78%,  +4.09%]
+
+line shopping (null universe):
+    main rung, best of four          n=35353 dates= 303 hit= 48.4% units=-2242.68 ROI=  -6.34%  CI [ -8.24%,  -4.50%]
+    lowest line any book posts       n=35353 dates= 303 hit= 50.2% units=-1803.03 ROI=  -5.10%  CI [ -6.96%,  -3.26%]
+      of which a lower line than the main rung n= 8379 dates= 297 hit= 53.6% units= -292.31 ROI=  -3.49%  CI [ -6.19%,  -0.70%]
+
+P1 restricted to WOWY-tier candidates (injury spots):
+    P1 bets, WOWY tier               n= 1795 dates= 281 hit= 47.6% units=  +37.75 ROI=  +2.10%  CI [ -3.48%,  +7.28%]
