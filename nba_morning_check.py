@@ -13,6 +13,7 @@ human can tell a clean night from a broken one). Sections:
             names, matchups whose missing team came WITH unresolved rows (possible misattribution).
   FLAGS     shadow flags by game, tier and trigger; voided flags.
   SCORE     the speed scoreboard (nba_clv) — the canonical query of NBA_SPEED_PREREG.md.
+  REACTION  progress of the FanDuel reaction-time measurement (amendment 5, nba_reaction.py).
   NEWS      each news Out seen in the window, its source, and its lead over the official report.
 
     python nba_morning_check.py            # last 24 h
@@ -159,7 +160,17 @@ def main(hours):
         V.scoreboard(V.collect())
     print("SCORE    " + "\n         ".join(l for l in buf.getvalue().splitlines()
                                         if not l.startswith(("one row", "h1 =", "unconfirmed-news",
-                                                             "(amendment", "beat-close CI"))))
+                                                             "(amendment", "beat-close CI", "FD = ",
+                                                             "FD+DK = "))))
+
+    # ── REACTION (amendment 5) — progress only; it is read once, at its registered count ──
+    try:
+        import nba_reaction as RX
+        st_, det = RX.reading(RX.run())
+        print(f"REACTION FanDuel reaction to the news (amendment 5): {st_} — {det}")
+    except Exception as e:                                           # noqa: BLE001
+        print(f"REACTION unavailable: {type(e).__name__}: {e}")
+        attention.append("reaction measurement failed to run")
 
     # ── NEWS ─────────────────────────────────────────────────────────────────────
     try:
