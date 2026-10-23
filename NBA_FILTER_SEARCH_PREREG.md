@@ -117,3 +117,39 @@ matching the pricing test's null to the cent) but **before any feature was compa
    the higher VALIDATE total units. The HOLDOUT cannot influence it.
 3. **The date requirement (≥ 40 dates)** is applied to every rule considered for the top of the ranking,
    in the real search and identically in each of the 100 noise searches.
+
+---
+
+# RESULT — appended after the run, 2026-10-23. Nothing above this line was edited.
+
+**Factor research (TRAIN 2023-24, universe −9.32%, information only).** Most factors moved the way
+basketball predicts, by a few points: soft defense (points allowed, high third) −6.4% vs stingy −13.4%;
+defense vs B's position, high −6.6% vs low −11.3%; line at/below B's average −6.6% vs above −12.6%;
+back-to-back −13.3% vs −8.2%; X with a high shot share −6.7% vs low −10.2%; pick-and-roll handlers
+against weak pick-and-roll defense −6.2% vs −10.7%. **Every one of the ~150 cells was negative**; the best
+single condition reached about −5.5%. Real, small, and not bettable alone.
+
+**The search.** 159 conditions, every 1-3 condition rule on 17,210 TRAIN rows. Best TRAIN rule **+147.6u**
+(n=1,687, +8.8%). **Noise benchmark** (100 searches on within-date shuffled outcomes): median +80.4u,
+**95th percentile +106.3u**; 38 real rules above it.
+
+**VALIDATE** (top 20): several looked strong — opponent rarely fouls AND B a high-frequency transition
+player against weak transition defense: +11.0% (n=990); a three-condition variant +10.5% (n=984);
+mid-range-soft defense AND weak off-screen defense AND low B free-throw style: +25.1% (n=393).
+Final set by the addendum's rule: the **union of the top three** (more VALIDATE units than the single best).
+
+**HOLDOUT** (Feb-Apr 2025, one look): **n = 1,730, −59.4u, ROI −3.43%, date-clustered 95% CI [−10.35, +3.80].**
+
+## Verdict: **KILL** — HOLDOUT ROI ≤ 0. Nothing ships.
+
+**What the benchmark got wrong (stated against my own design).** It shuffled outcomes between individual
+bets. A player's points, PRA and points+rebounds overs win or lose together, so real noise is clustered and
+its best rule looks better than shuffled noise's best — the benchmark was too lenient, and the 38 TRAIN
+"beats" were weaker evidence than they appeared. Any future search must shuffle whole candidates (all of
+one player-game's rows together). The HOLDOUT verdict does not depend on this.
+
+**What this settles.** Seventy-six basketball features and every combination of up to three found
+patterns that beat one season, survived the next season's first half, and lost on the games after. The
+book prices what box scores, shot zones and play types describe. Selection criteria built from them do
+not produce an edge at the close; whatever edge exists is in timing and price, which is what the forward
+speed test and line shopping measure.
