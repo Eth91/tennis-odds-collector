@@ -161,12 +161,15 @@ def ingest(mark, url, pub, index, con):
             unresolved.append(f"{r['player']} ({r['team']})")
         out.append((mark, pub, r["game_date"], r["matchup"], r["team"], pid,
                     name or r["player"], r["status"], r["reason"]))
-    # every matchup's two teams must have been recognised as team headers in the PDF, or
-    # their players were attributed to whichever team came before — a silent mis-assignment
+    # A matchup's team missing from the PDF is a MIS-ASSIGNMENT RISK only if that matchup also has
+    # rows we could not resolve: an unrecognised team header leaves its players under the previous
+    # team's name, where the roster match fails. A team with nobody to list is simply OMITTED by the
+    # league (MIL, 2026-10-23) — benign, and not recorded as missing.
+    unres_mu = {(r["game_date"], r["matchup"]) for r, o in zip(rows, out) if o[5] is None}
     missing = []
     for gdate, mu in sorted(matchups):
         for tri in mu.split("@"):
-            if f"{gdate}|{tri}" not in submitted:
+            if f"{gdate}|{tri}" not in submitted and (gdate, mu) in unres_mu:
                 missing.append(f"{gdate} {tri}")
     con.execute("DELETE FROM snapshots WHERE mark=?", (mark,))
     con.execute("DELETE FROM not_submitted WHERE mark=?", (mark,))

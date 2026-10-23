@@ -171,10 +171,8 @@ def once():
                        + (f", unresolved {s['unresolved'][:3]}" if s["unresolved"] else "")
                        # a team with nobody to list is OMITTED from the PDF (MIL 2026-10-23) —
                        # that alone is not a fault; misattributed players would be UNRESOLVED
-                       + ((f" !! TEAMS MISSING {s['missing_teams']} WITH unresolved rows — possible "
-                           f"misattribution" if s["unresolved"] else
-                           f" (no players listed: {', '.join(s['missing_teams'])})")
-                          if s["missing_teams"] else ""))
+                       + (f" !! TEAMS MISSING {s['missing_teams']} WITH unresolved rows in the same "
+                          f"matchup — possible misattribution" if s["missing_teams"] else ""))
         # 2. DIFF -> trigger
         sched = R.schedule()
         d0 = _now().astimezone(I.ET).date()
