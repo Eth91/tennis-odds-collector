@@ -22,6 +22,9 @@ Run once a minute (cron). Each run:
      the same action — lines + flag pass — before the report catches up. Add-only.
   3. CLOSE CAPTURE. Within HOT_LEAD_MIN of any tip, refresh lines every HOT_EVERY_MIN, so the
      closing price nba_clv rebuilds is minutes old, not up to ten.
+  4. REACTION FOLLOW (amendment 5). For FOLLOW_MIN after any trigger, refresh FanDuel every minute,
+     so the change log times the book's reaction to the news at ~1-minute resolution
+     (nba_reaction.py). Data only: flags and the speed test's yardstick are untouched.
 
 It shares nba_cycle.sh's lock (/tmp/nba-cycle.lock), waiting up to LOCK_WAIT_S for it, so the
 two never write the same databases at once. NOTHING HERE BETS: nba_flags.LIVE_TIERS is empty.
@@ -49,6 +52,7 @@ LOCK_WAIT_S = 50
 REPORT_POLL_S, REPORT_POLL_WINDOW_S = 3, 75
 HOT_LEAD_MIN, HOT_EVERY_MIN = 35, 2
 NEWS_EVERY_S = 55                                     # same self-throttle the WNBA news layer uses
+FOLLOW_MIN = 20                                       # amendment 5: per-minute FanDuel after a trigger
 NEWS_STAMP = Path("/tmp/nba-news.last")
 TRIG_DDL = """CREATE TABLE IF NOT EXISTS triggers (
     mark TEXT, published_at TEXT, detected_at TEXT, fresh TEXT, lines_at TEXT,
@@ -57,6 +61,17 @@ TRIG_DDL = """CREATE TABLE IF NOT EXISTS triggers (
 
 def _now():
     return dt.datetime.now(dt.timezone.utc)
+
+
+def follow_due(con, now):
+    """True while a trigger fired less than FOLLOW_MIN ago (amendment 5)."""
+    last = con.execute("SELECT MAX(detected_at) FROM triggers").fetchone()[0]
+    if not last:
+        return False
+    t = dt.datetime.fromisoformat(last)
+    if t.tzinfo is None:
+        t = t.replace(tzinfo=dt.timezone.utc)
+    return 0 <= (now - t).total_seconds() / 60 < FOLLOW_MIN
 
 
 @contextlib.contextmanager
@@ -179,12 +194,14 @@ def once():
         dates = {(d0 + dt.timedelta(days=h)).isoformat() for h in range(F.HORIZONS)}
         playing = {(g["date_et"], t) for g in sched if g["date_et"] in dates and g["status"] == 1
                    for t in (g["home"], g["away"])}
+        refreshed = False                                 # did this run already fetch FanDuel?
         for s in sorted(new, key=lambda s: s["mark"]):
             fr = [f for f in fresh_outs(con, s["mark"]) if (f[3], f[2]) in playing]
             if fr:
                 pub = con.execute("SELECT published_at FROM reports WHERE mark=?",
                                   (s["mark"],)).fetchone()[0]
                 _fire(con, s["mark"], pub, fr, log)
+                refreshed = True
         # 2b. NEWS — throttled; fires only on an Out the official report does not list yet
         try:
             last = NEWS_STAMP.stat().st_mtime
@@ -205,13 +222,16 @@ def once():
                 by_src.setdefault((src, at), []).append((pid, nm, tri, gd))
             for (src, at), fr in by_src.items():
                 _fire(con, f"news:{src}", at, fr, log)
+                refreshed = True
         # 3. CLOSE CAPTURE near tip
         soon = [g for g in sched if g["status"] == 1 and 0 <= (
             dt.datetime.fromisoformat(g["utc"].replace("Z", "+00:00")) - _now()
         ).total_seconds() / 60 <= HOT_LEAD_MIN]
         if soon:
             lc = sqlite3.connect(f"file:{L.DB}?mode=ro", uri=True)
-            last = lc.execute("SELECT MAX(ts) FROM cycles").fetchone()[0]
+            # FanDuel's own last fetch: since amendment 4 a DraftKings snapshot row carries ITS
+            # fetch time, so the newest row of any book no longer says when FanDuel was polled
+            last = lc.execute("SELECT MAX(ts) FROM cycles WHERE book='fd'").fetchone()[0]
             lc.close()
             age = ((_now().replace(tzinfo=None) - dt.datetime.fromisoformat(last))
                    .total_seconds() / 60) if last else 1e9
@@ -219,6 +239,11 @@ def once():
                 _, lout, lerr = _quiet(L.cycle)
                 log.append(f"close capture: {len(soon)} game(s) tip within {HOT_LEAD_MIN} min -> "
                            f"lines refreshed" + (f" ({lerr})" if lerr else ""))
+                refreshed = True
+        # 4. REACTION FOLLOW — per-minute FanDuel for FOLLOW_MIN after a trigger (amendment 5)
+        if not refreshed and follow_due(con, _now()):
+            _, lout, lerr = _quiet(L.cycle, ("fd",))
+            log.append("reaction follow: FanDuel refreshed" + (f" ({lerr})" if lerr else ""))
         con.close()
     for line in log:
         print(f"[{_now():%H:%M:%S}] {line}")
