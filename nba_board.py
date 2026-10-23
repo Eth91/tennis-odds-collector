@@ -170,7 +170,7 @@ CSS = """<style>
 
 def _row(r):
     e = H.escape
-    move = ""
+    move = '<div class="nn">FD —</div>' if r["state"] == "upcoming" else ""   # line pulled / not posted
     if r["fd"]:
         d = r["fd"]["line"] - r["line"]
         cls = "up" if d > 0 else "dn" if d < 0 else ""
@@ -199,9 +199,9 @@ def html(b):
     if rec:
         n = rec["closed"]
         beat = f'{rec["beat"]}/{n}' if n else "—"
-        parts.append(f'<div class="nrec"><span>FD BEAT CLOSE <b>{beat}</b></span>'
-                     f'<span>AS FLAGGED <b>{rec["units"]:+.1f}u</b> · {rec["graded"]}</span>'
-                     f'<span><b>{n}</b>/{rec["decision_n"]} TO DECISION</span></div>')
+        units = f'<b>{rec["units"]:+.1f}u</b> · {rec["graded"]} GRADED' if rec["graded"] else "<b>—</b>"
+        parts.append(f'<div class="nrec"><span><b>{n}</b>/{rec["decision_n"]} SCORED</span>'
+                     f'<span>FD BEAT CLOSE <b>{beat}</b></span><span>FLAT {units}</span></div>')
     if not b["slates"]:
         parts.append('<div class="nnone">NO SHADOW FLAGS ON THIS SLATE</div>')
     for s in b["slates"]:
