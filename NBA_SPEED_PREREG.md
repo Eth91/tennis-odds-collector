@@ -198,3 +198,55 @@ nba-watch stopped at **09:30 UTC**. Live data was copied with SQLite's backup AP
 them void, and 137,624 quotes. The VM's cron took over at **09:34:43 UTC**. Every flag has `logged_at`
 before 09:30 (Mac) or after 09:34 (VM). The Mac now runs only `nba_dk_push.sh` (DraftKings snapshot,
 every 3 min). No game tipped during the gap.
+
+---
+
+# AMENDMENT 5 — how fast FanDuel reacts to the news (2026-10-23, information only, before any reaction data is examined)
+
+Committed before any reaction time has been computed or looked at. The change log has existed since
+2026-10-22 at 10-minute resolution. Nobody has analysed it for this question.
+
+**Why.** The speed test asks whether a flag's price beats the close. It takes ~100 closed flags to
+decide. A more direct question answers sooner: **after the news, how long does FanDuel take to move the
+affected players' lines?**
+- Within a minute or two: no manual bettor can catch it, and a speed edge would need automation.
+- Ten minutes or more: there is a window.
+
+**The apparatus change (data only).** For FOLLOW_MIN = 20 minutes after every trigger (official report
+or news), `nba_watch` refreshes FanDuel every minute. The 10-minute cycle is too coarse to time a
+reaction. Flags, tiers, books and the speed test's yardstick are unchanged. The near-tip close capture
+now times its 2-minute refresh from FanDuel's own last fetch.
+
+**What is measured** (`nba_reaction.py`):
+- **Unit:** (trigger, player, stat) for every player on the absent player's team in that game. Team
+  comes from the season player index. The player must have a FanDuel two-sided main rung at the news
+  time T0.
+- **T0:** the official report's `published_at` for report triggers; the news item's time for news
+  triggers.
+- **Reaction:** the first change in FanDuel's main rung after T0, rebuilt from the change log exactly as
+  nba_clv rebuilds a close.
+  - LINE (primary): the main line number changes.
+  - PRICE: the over price on the same line moves by ≥ 0.03 decimal.
+  - Reported as minutes after T0, with the gap since the previous FanDuel poll (the resolution).
+- **Window:** T0 to the earlier of T0 + 60 min and tip. No line move in it = held.
+- **Pre-moved:** the main line at T0 differs from the main line 30 min before T0. The book had the news
+  before the official report.
+- **Control:** at the same T0, players in games with no trigger within ±60 min. This is the background
+  rate of line moves.
+- The **flagged opportunities** (shadow flags created by that trigger) are reported as their own cell.
+
+**Reading rules, fixed now.** Read once at ≥ 20 triggers that each have at least one measured player-stat.
+1. **FAST:** among affected lines that moved within 60 min, at least half moved within 2 min, AND the
+   affected 60-min move rate is ≥ 2× the control's. The book reacts faster than a person can bet;
+   any speed edge needs automation.
+2. **WINDOW:** the median first move among affected movers is ≥ 10 min, and the affected rate is ≥ 2×
+   the control's. A minutes-long window exists.
+3. **NO REACTION:** the affected rate is < 2× the control's. Lines do not respond to this news
+   beyond background churn, so the flag thesis has no market reaction to beat.
+4. Otherwise, **a window of a few minutes.**
+
+Separately: if ≥ 50% of affected lines were **pre-moved**, the official report is too slow a news clock,
+and earlier sources (X) carry whatever speed edge exists.
+
+**None of this changes the speed test's verdict lines** (the amendment 4 yardstick and the original
+PROMOTE / EXTEND / KILL). It is information about the mechanism. Nothing bets.
