@@ -86,8 +86,13 @@ def load_lines():
 
 
 
-def collect(ev_floor=None):
-    """Walk the WOWY-tier universe; return (selection rows, null rows, margin rows, counts)."""
+def collect(ev_floor=None, transform=None):
+    """Walk the WOWY-tier universe; return (selection rows, null rows, margin rows, counts).
+
+    transform(B, game_date, row, as_of) -> row: an optional rewrite of the beneficiary's PRIOR game
+    rows before pricing (NBA_TRACKING_PREREG.md, Arm S). It feeds only the pricing inputs — the log
+    and the with/without split; the null and margin baselines and the graded outcome always use the
+    real rows, so both arms are compared against the same yardstick. None = Arm T, unchanged."""
     if ev_floor is not None:
         T.OVER_EV_MIN = ev_floor
     tg, names, pos = load_games()
@@ -145,9 +150,18 @@ def collect(ev_floor=None):
                     cnt["no_real_line"] += 1
                     continue
                 cnt["with_lines"] += 1
-                log = [dict(row, date=d, game_id=g, matchup="")
-                       for d, g, row in reversed(played_by[B])]          # NEWEST-first, as WNBA
-                w = P.wowy(b_in, b_out)
+                if transform is None:
+                    log = [dict(row, date=d, game_id=g, matchup="")
+                           for d, g, row in reversed(played_by[B])]      # NEWEST-first, as WNBA
+                    w = P.wowy(b_in, b_out)
+                else:
+                    tf = lambda d, row, _B=B, _asof=date: transform(_B, d, row, _asof)
+                    log = [dict(tf(d, row), date=d, game_id=g, matchup="")
+                           for d, g, row in reversed(played_by[B])]
+                    w = P.wowy([tf(pd, pb[B]) for pd, pg, pb in prior
+                                if pd >= x_first and X in pb and B in pb],
+                               [tf(pd, pb[B]) for pd, pg, pb in prior
+                                if pd >= x_first and X not in pb and B in pb])
                 spots, proj = P.price(nm, log, w, pos.get(B, ""), pos.get(X, ""), x_dates, best)
                 # baselines on the SAME candidate and SAME two books: the main (base) rung
                 for stat, ladder in best.items():
