@@ -91,3 +91,60 @@ its **over** quote at that line even if its under is missing (the harness requir
 the FD+DK line as a whole). "Best of four" therefore can never be worse than best of FD+DK. The
 control check: every Arm T bet's FD+DK price, rebuilt from this table, equals the harness price, with
 n = 1,186 / −41.09u, and the null reproduces n = 35,353 / −6.97%.
+
+---
+
+# RESULT — appended after the run, 2026-10-23. Nothing above this line was edited.
+
+**Universe.** 434,034 player-stat-lines in the pre-tip snapshot; 190,536 with three or four books
+two-sided at the same number; 4,275 void (player did not play) or outside the graded seasons; 20 names
+dropped as ambiguous.
+
+## P1 — bet the book that disagrees, EV ≥ 3%
+
+| | n | dates | hit% | ROI | 95% CI |
+|---|---|---|---|---|---|
+| **pooled** | **7,797** | 322 | 46.5% | **+0.56%** | [−1.98, +2.97] |
+| 2023-24 | 3,559 | 159 | 45.8% | −0.69% | |
+| 2024-25 | 4,238 | 163 | 47.1% | +1.60% | |
+| control: same bets at the other books' average price | 7,797 | | | −10.43% | |
+
+## Verdict P1: **KILL** — the two seasons disagree in sign. Pooled is break-even.
+
+**Why it breaks even.** The outlier price is real money: the same bets at the other books' average
+price lose 10.43%, so the disagreeing book pays about 11 points more. But the disagreeing book is
+**partly right**. The bets claimed an average EV of +4.95% (a 48.5% chance by the consensus) and hit
+46.5%. That shortfall of about 2 points appears in **every EV band** (0.494 vs 0.471 at 0–2%, 0.477 vs
+0.470 at 6–10%): when one book's price differs, it has usually moved on something the others had not.
+
+**Information only — leads, not claims** (cut after seeing outcomes; many cuts were made):
+- By EV band the ROI rises steadily: −3.85% (0–2%), −1.53%, +0.43%, **+5.15% (6–10%, n=1,350)**,
+  **+10.12% (≥ 10%, n=252)**. Neither band's CI excludes 0.
+- By the book bet: **BetMGM +9.09%, CI [+2.65, +15.68] (n=1,258)**; Caesars −9.54% [−16.86, −2.29];
+  FanDuel +0.42%; DraftKings +1.21%. When BetMGM is the odd one out, BetMGM tends to be wrong. When
+  Caesars is, Caesars tends to be right. At FanDuel or DraftKings only: +0.66%.
+- Unders +3.89% [−0.12, +7.76] vs overs −1.80%. At WOWY-tier injury spots: +2.10% (n=1,795).
+
+## P2 — what shopping adds (selection unchanged; both controls reproduced exactly)
+
+| price paid | null (n=35,353) | Arm T (n=1,186) |
+|---|---|---|
+| best FD+DK (control) | −6.97% | −3.46% |
+| best of four books | −6.34% | −2.96% |
+| **gain from adding BetMGM + Caesars** | **+0.63 pts** | **+0.50 pts** |
+
+Where both FanDuel and DraftKings post the line (null, n=17,051): FanDuel only −5.20%, DraftKings only
+−6.59%, best of the two −4.26%, best of four −3.77%. Shopping the two books is worth about 1–2 points
+over either one alone. Line shopping (the lowest line any book posts, null universe): −5.10% vs −6.34%,
++1.24 pts. **Nothing turns positive.** The WNBA's +3.31-point shopping gain does not appear at the
+NBA close.
+
+**Disclosed fix during the run.** The first run's Arm T control failed (n = 1,967 vs 1,186) because the
+code took `collect()`'s rows without `current_selection`. The guard stopped P2 there, as designed. The
+fix applies `nba_pricing.select`, which is what "Arm T's selected bets" means. P1's output was
+byte-identical between the two runs.
+
+**What this settles.** At the close, price alone is not an edge: a book that disagrees with the others
+is right about as often as its better price pays for. Shopping trims 0.5 to 2 points of vig and does not
+rescue any strategy tested. The two leads above (BetMGM as the outlier; EV ≥ 6%) were found by
+cutting this data. They need a sample no test has touched.

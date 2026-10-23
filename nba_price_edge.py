@@ -17,6 +17,7 @@ import sys
 from collections import defaultdict
 
 import nba_margin_refit as RF
+import nba_pricing as P
 import nba_pricing_realline as R
 import wnba_tonight as T
 
@@ -317,7 +318,8 @@ def main():
                 low.append({"date": c["date"], "price": ll[1], "won": 1 if actual > ll[0] else 0,
                             "moved": ll[0] < ml})
     sel, _n, _m, _c = R.collect()
-    arm = [dict(r, key=(r["date"], RF.norm(r["player"]), r["stat"], r["line"])) for r in sel]
+    kept, _dropped = P.select(sel)                    # Arm T = collect() + current_selection
+    arm = [dict(r, key=(r["date"], RF.norm(r["player"]), r["stat"], r["line"])) for r in kept]
 
     for label, rows_, want in (("null (always over, main rung)", null, NULL), ("Arm T selections", arm, ARM_T)):
         print(f"\n{label}:")
