@@ -104,3 +104,16 @@ pricing tests reported pooled ROI over 2023-25, including a 2024-10-29+ half). N
 any factor above, so the HOLDOUT is fresh **for this question** — but it is not virgin data, and a
 pass here is weaker evidence than a pass on games no test has touched. The forward shadow record
 (2026-27) is the only fully clean test; any rule that passes here must also face it.
+
+## Addendum — two definitions fixed before any outcome is examined (2026-10-23)
+Written after the feature table was built and checked (look-ahead, profile season, universe ROI
+matching the pricing test's null to the cent) but **before any feature was compared with any outcome.**
+1. **A missing play-type frequency means 0.** Synergy lists a player under a play type only above a
+   possession minimum (post-ups cover 46% of TRAIN rows), so absence means he rarely runs it. Play-type
+   matchup terms are rebuilt from the filled values. Other missing features stay missing: a row with a
+   missing feature satisfies neither of that feature's conditions.
+2. **"The final rule set" is fully determined by VALIDATE.** The text above left a choice between the
+   single best VALIDATE survivor and the union of the top three. Resolved now: whichever of those two has
+   the higher VALIDATE total units. The HOLDOUT cannot influence it.
+3. **The date requirement (≥ 40 dates)** is applied to every rule considered for the top of the ranking,
+   in the real search and identically in each of the 100 noise searches.

@@ -86,20 +86,10 @@ def load_lines():
 
 
 
-def collect(ev_floor=None, transform=None):
-    """Walk the WOWY-tier universe; return (selection rows, null rows, margin rows, counts).
-
-    transform(B, game_date, row, as_of) -> row: an optional rewrite of the beneficiary's PRIOR game
-    rows before pricing (NBA_TRACKING_PREREG.md, Arm S). It feeds only the pricing inputs — the log
-    and the with/without split; the null and margin baselines and the graded outcome always use the
-    real rows, so both arms are compared against the same yardstick. None = Arm T, unchanged."""
-    if ev_floor is not None:
-        T.OVER_EV_MIN = ev_floor
-    tg, names, pos = load_games()
-    lines = load_lines()
-    print(f"real two-sided rungs (FD+DK) for {len(lines):,} player-dates")
-    sel_rows, null_rows, margin_rows = [], [], []
-    cnt = defaultdict(int)
+def walk(tg, names, lines, cnt):
+    """THE universe — one definition for every test on it. Yields one context per WOWY-tier
+    candidate (absence game 1-2, X >= 28 min trailing-10, B with >= 2 games without X and >= 3
+    with) that has real FanDuel/DraftKings lines that night. `cnt` collects the counts."""
     for team, games in tg.items():
         first_app = {}
         for i, (date, gid, box) in enumerate(games):
@@ -150,49 +140,73 @@ def collect(ev_floor=None, transform=None):
                     cnt["no_real_line"] += 1
                     continue
                 cnt["with_lines"] += 1
-                if transform is None:
-                    log = [dict(row, date=d, game_id=g, matchup="")
-                           for d, g, row in reversed(played_by[B])]      # NEWEST-first, as WNBA
-                    w = P.wowy(b_in, b_out)
-                else:
-                    tf = lambda d, row, _B=B, _asof=date: transform(_B, d, row, _asof)
-                    log = [dict(tf(d, row), date=d, game_id=g, matchup="")
-                           for d, g, row in reversed(played_by[B])]
-                    w = P.wowy([tf(pd, pb[B]) for pd, pg, pb in prior
-                                if pd >= x_first and X in pb and B in pb],
-                               [tf(pd, pb[B]) for pd, pg, pb in prior
-                                if pd >= x_first and X not in pb and B in pb])
-                spots, proj = P.price(nm, log, w, pos.get(B, ""), pos.get(X, ""), x_dates, best)
-                # baselines on the SAME candidate and SAME two books: the main (base) rung
-                for stat, ladder in best.items():
-                    ml = T._main_line(ladder)
-                    if ml is None:
-                        continue
-                    ov = ladder[ml][0]
-                    won = 1 if brow[T.PROP_STATS[stat]] > ml else 0
-                    null_rows.append({"date": date, "stat": stat, "price": ov, "won": won})
-                    if stat in NBA_MARGIN:
-                        base_min = sum(a[2]["min"] for a in played_by[B][-10:]) / min(10, len(played_by[B]))
-                        min_out = sum(r["min"] for r in b_out)
-                        d_min = (min_out / len(b_out) - sum(r["min"] for r in b_in) / len(b_in))
-                        d_min *= len(b_out) / (len(b_out) + N.K_DMIN)
-                        key = T.PROP_STATS[stat]
-                        tot_out = sum(r[key] for r in b_out)
-                        b10 = played_by[B][-10:]
-                        base_rate = sum(a[2][key] for a in b10) / max(1e-9, sum(a[2]["min"] for a in b10))
-                        rate = (tot_out + base_rate * N.K_MIN) / (min_out + N.K_MIN)
-                        if rate * (base_min + d_min) - ml >= NBA_MARGIN[stat]:
-                            margin_rows.append({"date": date, "stat": stat, "price": ov, "won": won})
-                for s in P.base_rung_overs(spots):
-                    key = T.PROP_STATS[s["stat"]]
-                    sel_rows.append({"pred_date": date, "team": team, "player": nm,
-                                     "stat": s["stat"], "line": s["line"], "side": "over",
-                                     "ev": s["ev"], "odds": s["dec"], "d_min": s.get("d_min"),
-                                     "n_elev": s["n"], "hit": s["hit"], "basis": s.get("basis"),
-                                     "date": date, "price": s["dec"],
-                                     "won": 1 if brow[key] > s["line"] else 0,
-                                     "elev": s.get("elev_avg"), "season_avg": s.get("season_avg"),
-                                     "actual": brow[key]})
+                yield {"date": date, "team": team, "gid": gid, "box": box, "X": X, "B": B,
+                       "brow": brow, "aidx": aidx, "prior": prior, "played_by": played_by,
+                       "out_g": out_g, "in_g": in_g, "b_out": b_out, "b_in": b_in,
+                       "x_first": x_first, "x_dates": x_dates, "best": best, "nm": nm}
+
+
+def collect(ev_floor=None, transform=None):
+    """Walk the WOWY-tier universe; return (selection rows, null rows, margin rows, counts).
+
+    transform(B, game_date, row, as_of) -> row: an optional rewrite of the beneficiary's PRIOR game
+    rows before pricing (NBA_TRACKING_PREREG.md, Arm S). It feeds only the pricing inputs — the log
+    and the with/without split; the null and margin baselines and the graded outcome always use the
+    real rows, so both arms are compared against the same yardstick. None = Arm T, unchanged."""
+    if ev_floor is not None:
+        T.OVER_EV_MIN = ev_floor
+    tg, names, pos = load_games()
+    lines = load_lines()
+    print(f"real two-sided rungs (FD+DK) for {len(lines):,} player-dates")
+    sel_rows, null_rows, margin_rows = [], [], []
+    cnt = defaultdict(int)
+    for c in walk(tg, names, lines, cnt):
+        date, team, X, B, brow = c["date"], c["team"], c["X"], c["B"], c["brow"]
+        prior, played_by, x_first, x_dates = c["prior"], c["played_by"], c["x_first"], c["x_dates"]
+        b_out, b_in, best, nm = c["b_out"], c["b_in"], c["best"], c["nm"]
+        if transform is None:
+            log = [dict(row, date=d, game_id=g, matchup="")
+                   for d, g, row in reversed(played_by[B])]      # NEWEST-first, as WNBA
+            w = P.wowy(b_in, b_out)
+        else:
+            tf = lambda d, row, _B=B, _asof=date: transform(_B, d, row, _asof)
+            log = [dict(tf(d, row), date=d, game_id=g, matchup="")
+                   for d, g, row in reversed(played_by[B])]
+            w = P.wowy([tf(pd, pb[B]) for pd, pg, pb in prior
+                        if pd >= x_first and X in pb and B in pb],
+                       [tf(pd, pb[B]) for pd, pg, pb in prior
+                        if pd >= x_first and X not in pb and B in pb])
+        spots, proj = P.price(nm, log, w, pos.get(B, ""), pos.get(X, ""), x_dates, best)
+        # baselines on the SAME candidate and SAME two books: the main (base) rung
+        for stat, ladder in best.items():
+            ml = T._main_line(ladder)
+            if ml is None:
+                continue
+            ov = ladder[ml][0]
+            won = 1 if brow[T.PROP_STATS[stat]] > ml else 0
+            null_rows.append({"date": date, "stat": stat, "price": ov, "won": won})
+            if stat in NBA_MARGIN:
+                base_min = sum(a[2]["min"] for a in played_by[B][-10:]) / min(10, len(played_by[B]))
+                min_out = sum(r["min"] for r in b_out)
+                d_min = (min_out / len(b_out) - sum(r["min"] for r in b_in) / len(b_in))
+                d_min *= len(b_out) / (len(b_out) + N.K_DMIN)
+                key = T.PROP_STATS[stat]
+                tot_out = sum(r[key] for r in b_out)
+                b10 = played_by[B][-10:]
+                base_rate = sum(a[2][key] for a in b10) / max(1e-9, sum(a[2]["min"] for a in b10))
+                rate = (tot_out + base_rate * N.K_MIN) / (min_out + N.K_MIN)
+                if rate * (base_min + d_min) - ml >= NBA_MARGIN[stat]:
+                    margin_rows.append({"date": date, "stat": stat, "price": ov, "won": won})
+        for s in P.base_rung_overs(spots):
+            key = T.PROP_STATS[s["stat"]]
+            sel_rows.append({"pred_date": date, "team": team, "player": nm,
+                             "stat": s["stat"], "line": s["line"], "side": "over",
+                             "ev": s["ev"], "odds": s["dec"], "d_min": s.get("d_min"),
+                             "n_elev": s["n"], "hit": s["hit"], "basis": s.get("basis"),
+                             "date": date, "price": s["dec"],
+                             "won": 1 if brow[key] > s["line"] else 0,
+                             "elev": s.get("elev_avg"), "season_avg": s.get("season_avg"),
+                             "actual": brow[key]})
     return sel_rows, null_rows, margin_rows, dict(cnt)
 
 
