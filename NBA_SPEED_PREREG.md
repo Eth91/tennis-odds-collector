@@ -191,3 +191,10 @@ of whatever books it holds at that moment. Only the yardstick changes.
 
 **Flags logged before the cutover** (on the Mac) move to the VM with the shadow DB, keep their records,
 and are scored the same way.
+
+**Operational note — the cutover (not a rule change).** Amendment 4 was committed at 09:17:46 UTC on
+2026-10-23 (commit 54909539d7; the "09:2x" in its first line was an estimate). The Mac's nba-cycle and
+nba-watch stopped at **09:30 UTC**. Live data was copied with SQLite's backup API: 21 shadow flags, 7 of
+them void, and 137,624 quotes. The VM's cron took over at **09:34:43 UTC**. Every flag has `logged_at`
+before 09:30 (Mac) or after 09:34 (VM). The Mac now runs only `nba_dk_push.sh` (DraftKings snapshot,
+every 3 min). No game tipped during the gap.
