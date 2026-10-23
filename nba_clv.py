@@ -42,6 +42,7 @@ LINES = HERE / "nba_lines.sqlite"
 NEWS = HERE / "nba_news.sqlite"              # official reports: confirms news-originated triggers
 VOIDED = 0
 BOARD_STAT = {"pts": "points", "reb": "rebounds", "ast": "assists"}   # wowy/cold store short keys
+PRIMARY_BOOKS = ("fd",)                     # AMENDMENT 4: the primary yardstick is FanDuel alone
 
 
 def _utc_naive(iso):
@@ -51,12 +52,17 @@ def _utc_naive(iso):
     return t.replace(microsecond=0).isoformat()
 
 
-def close_of(qcon, gid, pid, stat, tip):
-    """(close_line, best_over, n_books) at tip, or None if nothing two-sided was offered."""
+def close_of(qcon, gid, pid, stat, tip, books=None):
+    """(main_line, best_over, n_books) as the board stood at `tip` — any moment: the tip for the
+    close, the flag's logged_at for amendment 4's flag-time FanDuel rung — or None if nothing
+    two-sided was offered. `books` restricts the board to those books."""
     st_ = {}
-    for book, line, side, odds in qcon.execute(
-            "SELECT book, line, side, odds FROM quotes WHERE gid=? AND pid=? AND stat=? "
-            "AND seen_at <= ? ORDER BY seen_at", (gid, pid, stat, tip)):
+    q, args = ("SELECT book, line, side, odds FROM quotes WHERE gid=? AND pid=? AND stat=? "
+               "AND seen_at <= ?"), [gid, pid, stat, tip]
+    if books:
+        q += f" AND book IN ({','.join('?' * len(books))})"
+        args += list(books)
+    for book, line, side, odds in qcon.execute(q + " ORDER BY seen_at", args):
         st_[(book, round(line, 1), side)] = odds
     live = {k: v for k, v in st_.items() if v is not None}
     lines = defaultdict(lambda: {"over": [], "under": []})
@@ -91,12 +97,15 @@ def collect():
         tip = _utc_naive(r["gtime"])
         if tip > now:
             continue                                   # not closed yet
-        c = close_of(q, r["gid"], r["pid"], BOARD_STAT.get(r["stat"], r["stat"]), tip)
+        stat = BOARD_STAT.get(r["stat"], r["stat"])
+        c = close_of(q, r["gid"], r["pid"], stat, tip)
+        f0 = close_of(q, r["gid"], r["pid"], stat, _utc_naive(r["logged_at"]), books=PRIMARY_BOOKS)
+        f1 = close_of(q, r["gid"], r["pid"], stat, tip, books=PRIMARY_BOOKS)
         lat = None
         if r.get("news_at"):
             lat = (dt.datetime.fromisoformat(r["logged_at"])
                    - dt.datetime.fromisoformat(_utc_naive(r["news_at"]))).total_seconds() / 60
-        row = dict(r, tip=tip, close=c, latency_min=lat)
+        row = dict(r, tip=tip, close=c, fd_flag=f0, fd_close=f1, latency_min=lat)
         # AMENDMENT 2: a news-originated trigger counts only if an official report published
         # before tip lists the absent player Out for that game; otherwise it is an audit row.
         if (r.get("trigger_src") or "report").startswith("news"):
@@ -108,6 +117,12 @@ def collect():
                         ok = True
                         break
             row["confirmed"] = ok
+        if f0 and f1:                                  # AMENDMENT 4 primary: FanDuel at flag vs tip
+            row["fd_move"] = f1[0] - f0[0]
+            row["fd_beat"] = f1[0] > f0[0] or (f1[0] == f0[0] and f1[1] < f0[1])
+            if r.get("actual") is not None:
+                row["fd_u_flag"] = (f0[1] - 1) if r["actual"] > f0[0] else -1.0
+                row["fd_u_close"] = (f1[1] - 1) if r["actual"] > f1[0] else -1.0
         if c:
             cl, co, _nb = c
             row["move"] = cl - r["line"]
@@ -142,18 +157,37 @@ def _ci_rate(rows, n=4000, seed=7):
     return m[int(.025 * n)], m[int(.975 * n)]
 
 
+def view(r, yardstick):
+    """One row under a yardstick. 'FD' (amendment 4, PRIMARY): FanDuel's main rung at the flag's
+    logged_at vs at tip. 'FD+DK' (the registered two-book measure, now secondary): the flag's own
+    line/price vs the best-over close."""
+    if yardstick == "FD":
+        ok = bool(r.get("fd_flag") and r.get("fd_close"))
+        v = {"close": r["fd_close"] if ok else None, "beat": r.get("fd_beat"), "move": r.get("fd_move")}
+        if "fd_u_flag" in r:
+            v.update(u_flag=r["fd_u_flag"], u_close=r["fd_u_close"])
+    else:
+        v = {"close": r.get("close"), "beat": r.get("beat"), "move": r.get("move")}
+        if "u_flag" in r:
+            v.update(u_flag=r["u_flag"], u_close=r["u_close"])
+    return dict(v, gid=r["gid"], latency_min=r.get("latency_min"))
+
+
 def scoreboard(rows):
     by = defaultdict(list)
     for r in rows:
         cell = ("unconfirmed-news" if r.get("confirmed") is False
                 else f"h{r.get('horizon') or 0}")
-        by[f"{r['tier']}/{cell}"].append(r)
+        for ys in ("FD", "FD+DK"):
+            by[f"{r['tier']}/{cell} {ys}"].append(view(r, ys))
     print("one row per opportunity (earliest flag); h0 = flagged on game day (the PRIMARY test),\n"
           "h1 = a ruling for tomorrow's game, flagged the day before (amendment 1, its own cell).\n"
           "unconfirmed-news = triggered by news the official report never confirmed before tip\n"
           "(amendment 2: an audit cell, never in a verdict).\n"
+          "FD = FanDuel at flag time vs FanDuel at tip (amendment 4, the PRIMARY yardstick);\n"
+          "FD+DK = the flag's best-of-two price vs the best-of-two close (secondary).\n"
           "beat-close CI resamples games (clustered); a CI needs >= 10 games\n"
-          f"{'cell':<24}{'closed':>7}{'w/close':>8}{'beat close':>18}{'line move':>10}"
+          f"{'cell':<30}{'closed':>7}{'w/close':>8}{'beat close':>18}{'line move':>10}"
           f"{'graded':>7}{'as flagged':>12}{'at close':>10}{'latency(min)':>13}")
     for tier, rs in sorted(by.items()):
         wc = [r for r in rs if r.get("close")]
@@ -163,7 +197,7 @@ def scoreboard(rows):
         lat = [r["latency_min"] for r in rs if r.get("latency_min") is not None]
         bt = (f"{100 * sum(beats) / len(beats):5.1f}%" if beats else "   - ") + \
              (f" [{100 * ci[0]:.0f},{100 * ci[1]:.0f}]" if ci else "")
-        print(f"{tier:<24}{len(rs):7d}{len(wc):8d}{bt:>18}"
+        print(f"{tier:<30}{len(rs):7d}{len(wc):8d}{bt:>18}"
               f"{(st.mean(r['move'] for r in wc) if wc else 0):+10.2f}{len(g):7d}"
               f"{(100 * sum(r['u_flag'] for r in g) / len(g) if g else 0):+11.1f}%"
               f"{(100 * sum(r['u_close'] for r in g) / len(g) if g else 0):+9.1f}%"

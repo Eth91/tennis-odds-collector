@@ -147,3 +147,54 @@ games at season's end (rest) still reset; a longer streak continues into the new
 **Flags already logged.** Each of the 19 is re-checked under the corrected rule; a flag whose trigger
 fails it gets `void_reason = 'amend3: …'` and is excluded from every cell (reported as a count). The
 corrected rule is applied identically to every flag before and after this amendment.
+
+---
+
+# AMENDMENT 4 — the apparatus moves to the always-on VM; FanDuel becomes the primary book (2026-10-23, before any flag closed)
+
+Committed at 09:2x UTC on 2026-10-23. Shadow flags exist for that night's games, but **none has
+closed, been graded, or had an outcome**. The first tip is 23:00 UTC, so no result could have
+informed this.
+
+**Why.** The registration's first known limit, "the Mac must be awake", turned out to be the binding
+one. Night one captured 1 of 2 closes, with a median capture lag of 348 s, because the Mac slept. On
+2026-10-23 every input was probed from the Oracle VM, 3× each with a played game's file:
+- reachable with curl_cffi Chrome impersonation: the official injury PDF, cdn.nba.com (schedule,
+  scoreboard, box scores), stats.nba.com, FanDuel, ESPN;
+- blocked by IP: **DraftKings only.**
+
+The note that cdn.nba.com blocked the VM was a misreading. cdn.nba.com answers 403 for a game file that
+does not exist, the same as a block.
+
+**The change.**
+1. **Apparatus:** the report poller, the per-minute trigger, the FanDuel collector, the flag pass, close
+   capture and grading run on the VM. The X news layer is already there. DraftKings is collected
+   wherever it can be reached (a GitHub Actions runner, which DraftKings serves; or the Mac when awake)
+   and fed to the VM's quote log. The cutover time is recorded below as an operational note.
+2. **Primary metric is FanDuel-only.**
+   - The flagged line and price are FanDuel's main rung at the flag's `logged_at`: the two-sided rung
+     whose over is nearest even money, rebuilt from the change log exactly as the close is.
+   - The close is FanDuel's main rung at tip.
+   - Beat-the-close, line move, as-flagged ROI vs at-close ROI and latency are computed on those, with
+     the **same decision lines, thresholds and minimum counts** (≥ 100 closed flags in ≥ 30 games),
+     counted on flags where FanDuel was two-sided at both moments.
+3. **The registered two-book measure** (best over of FanDuel and DraftKings) is kept and reported as a
+   **secondary cell**. It no longer decides. When DraftKings was not collected, it reduces to FanDuel.
+
+**Why FanDuel and not both.** A primary that depends on DraftKings depends on whether a second machine
+happened to be reachable. One book captured every night is a cleaner yardstick than two books captured
+on some nights. FanDuel is also the book the WNBA record was graded on.
+
+**Unchanged:** the universe, tiers, triggers (amendments 1–3), one opportunity per (tier, player,
+stat, game), clustering by game, and the WNBA reference point. The flag engine still prices on the best
+of whatever books it holds at that moment. Only the yardstick changes.
+
+**Flags logged before the cutover** (on the Mac) move to the VM with the shadow DB, keep their records,
+and are scored the same way.
+
+**Operational note — the cutover (not a rule change).** Amendment 4 was committed at 09:17:46 UTC on
+2026-10-23 (commit 54909539d7; the "09:2x" in its first line was an estimate). The Mac's nba-cycle and
+nba-watch stopped at **09:30 UTC**. Live data was copied with SQLite's backup API: 21 shadow flags, 7 of
+them void, and 137,624 quotes. The VM's cron took over at **09:34:43 UTC**. Every flag has `logged_at`
+before 09:30 (Mac) or after 09:34 (VM). The Mac now runs only `nba_dk_push.sh` (DraftKings snapshot,
+every 3 min). No game tipped during the gap.

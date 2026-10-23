@@ -40,6 +40,19 @@ def build():
     quote("2026-01-09T23:50:00", "fd", 3, 5.5, "over", 2.05); quote("2026-01-09T23:50:00", "fd", 3, 5.5, "under", 1.78)
     quote("2026-01-10T00:05:00", "fd", 3, 5.5, "over", 1.50)  # post-tip
     flag(3, 5.5, 1.91, 4)
+    # 4 (AMENDMENT 4): the two yardsticks disagree. Flag time: FD 11.5, DK 10.5 (the flag took DK's
+    # 10.5). By tip FD's over shortened 1.91 -> 1.80 (FD: beat), DK's lengthened 1.91 -> 1.95, and the
+    # two-book close is DK's 10.5 @1.95 (nearer even money) (FD+DK: not beat). An FD move AFTER the
+    # flag but before tip must not leak into the flag-time rung.
+    for t, bk, ln, o, u in (("2026-01-09T19:59:00", "fd", 11.5, 1.91, 1.91), ("2026-01-09T19:59:00", "dk", 10.5, 1.91, 1.91),
+                            ("2026-01-09T21:00:00", "fd", 11.5, 1.85, 1.97),
+                            ("2026-01-09T23:40:00", "fd", 11.5, 1.80, 2.02), ("2026-01-09T23:40:00", "dk", 10.5, 1.95, 1.87)):
+        quote(t, bk, 4, ln, "over", o); quote(t, bk, 4, ln, "under", u)
+    flag(4, 10.5, 1.91, 11)
+    # 5 (AMENDMENT 4): FanDuel posts only AFTER the flag -> no flag-time FD rung -> not in the primary
+    quote("2026-01-09T19:59:00", "dk", 5, 7.5, "over", 1.91); quote("2026-01-09T19:59:00", "dk", 5, 7.5, "under", 1.91)
+    quote("2026-01-09T22:00:00", "fd", 5, 7.5, "over", 1.91); quote("2026-01-09T22:00:00", "fd", 5, 7.5, "under", 1.91)
+    flag(5, 7.5, 1.91, 9)
     sh.commit(); q.commit()
     V.SHADOW, V.LINES = d / "s.sqlite", d / "q.sqlite"
     return {r["pid"]: r for r in V.collect()}
@@ -57,6 +70,20 @@ def check(rows):
     want(r2["close"][:2] == (20.5, 1.80) and r2["beat"], "same line, price shortened: beat")
     want(r3["close"][:2] == (5.5, 2.05) and not r3["beat"], "price lengthened: not beat; post-tip quote ignored")
     want(abs(r1["latency_min"] - 15.0) < 1e-6, "latency = flag time - news time = 15 min")
+    r4 = rows[4]
+    want(r4["fd_flag"] == (11.5, 1.91, 1) and r4["fd_close"] == (11.5, 1.80, 1),
+         "amend4: FD-only rung at flag time (11.5 @1.91, not DK's 10.5; later FD move excluded) and at tip")
+    want(r4["fd_beat"] and r4["fd_move"] == 0.0 and r4["close"][:2] == (10.5, 1.95) and not r4["beat"],
+         "amend4: FD yardstick beat (price shortened) while the two-book yardstick did not")
+    want(r4["fd_u_flag"] == -1.0 and abs(r4["u_flag"] - 0.91) < 1e-9,
+         "amend4: actual 11 loses FD's 11.5, wins the flagged 10.5")
+    want(r1["fd_flag"][0] == 10.5 and r1["fd_close"][0] == 11.5 and r1["fd_beat"] and r1["fd_move"] == 1.0,
+         "amend4: FD line moved 10.5 -> 11.5: beat, move +1")
+    want(r2.get("fd_flag") is None and V.view(r2, "FD")["close"] is None,
+         "amend4: a DK-only flag has no FD yardstick (not counted in the primary)")
+    r5 = rows[5]
+    want(r5["fd_flag"] is None and r5["fd_close"] is not None and V.view(r5, "FD")["close"] is None,
+         "amend4: FD posted only after the flag -> no FD yardstick")
     return ok
 
 
@@ -66,10 +93,11 @@ def test_real():
 
 def test_mutant_pulled_rungs_as_live():
     orig = V.close_of
-    def mutant(qcon, gid, pid, stat, tip):                   # forget that NULL means pulled
+    def mutant(qcon, gid, pid, stat, tip, books=None):       # forget that NULL means pulled
         rows = [(b, l, s, o) for b, l, s, o in qcon.execute(
             "SELECT book, line, side, odds FROM quotes WHERE gid=? AND pid=? AND stat=? AND "
-            "seen_at <= ? AND odds IS NOT NULL ORDER BY seen_at", (gid, pid, stat, tip))]
+            "seen_at <= ? AND odds IS NOT NULL ORDER BY seen_at", (gid, pid, stat, tip))
+            if not books or b in books]
         st = {}
         for b, l, s, o in rows:
             st[(b, round(l, 1), s)] = o
@@ -85,8 +113,18 @@ def test_mutant_pulled_rungs_as_live():
         V.close_of = orig
 
 
+def test_mutant_fd_yardstick_reads_every_book():
+    orig = V.PRIMARY_BOOKS
+    V.PRIMARY_BOOKS = None                                     # forget amendment 4's book filter
+    try:
+        assert not check(build())
+    finally:
+        V.PRIMARY_BOOKS = orig
+
+
 if __name__ == "__main__":
     print("REAL:"); test_real()
+    print("MUTANT (FD yardstick reads every book) — must fail:"); test_mutant_fd_yardstick_reads_every_book()
     print("MUTANT (pulled rungs treated as live) — must fail:"); test_mutant_pulled_rungs_as_live()
     print("test_nba_clv: OK")
 

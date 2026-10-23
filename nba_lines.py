@@ -29,13 +29,25 @@ is UNIQUE within the two rosters. Anything else stays pid=NULL and is counted, n
 A book whose fetch FAILS leaves its board untouched (the engine's freshness check ages it
 out) and makes this exit 2. A partial FanDuel fetch is counted, not hidden.
 
-    python nba_lines.py            # collect both books
+    python nba_lines.py            # collect both books (NBA_BOOKS overrides the default set)
     python nba_lines.py --status   # print the last cycles, write nothing
+    python nba_lines.py --snapshot dk PATH   # fetch DraftKings only and write a snapshot file
+
+WHERE IT RUNS SINCE 2026-10-23 (NBA_SPEED_PREREG.md amendment 4). The engine runs on the always-on
+Oracle VM, which reaches FanDuel and cdn.nba.com (with curl_cffi impersonation) but NOT DraftKings.
+DraftKings reaches the VM as a SNAPSHOT FILE: the Mac (or any host DraftKings serves) runs
+`--snapshot dk`, ships the file, and the VM ingests it through this same cycle when
+NBA_DK_SNAPSHOT names it. The snapshot keeps its own fetch time, so the board and the change log
+date DraftKings' prices to when DraftKings showed them, not when they arrived. A snapshot older
+than DK_SNAPSHOT_MAX_AGE_S is STALE: the board is left untouched (nba_flags ages it out), it is
+logged, and it is NOT a failure, because DraftKings is the secondary book.
 """
 from __future__ import annotations
 
 import argparse
 import datetime as dt
+import json
+import os
 import re
 import sqlite3
 import sys
@@ -123,7 +135,40 @@ def fetch_dk():
     return [(r[1], r[2], r[3], float(r[4]), r[5], float(r[6])) for r in raw], detail
 
 
-BOOKS = {"fd": fetch_fd, "dk": fetch_dk}
+class Stale(Exception):
+    """A book's snapshot is too old to use: logged, board untouched, not a failure."""
+
+
+DK_SNAPSHOT = os.environ.get("NBA_DK_SNAPSHOT")
+DK_SNAPSHOT_MAX_AGE_S = 600
+
+
+def fetch_dk_snapshot():
+    """DraftKings from a pushed snapshot file -> (rows, detail, fetched_at)."""
+    p = Path(DK_SNAPSHOT)
+    if not p.exists():
+        raise Stale(f"no snapshot at {p}")
+    snap = json.loads(p.read_text())
+    at = snap["fetched_at"]
+    age = (dt.datetime.now(dt.timezone.utc).replace(tzinfo=None)
+           - dt.datetime.fromisoformat(at)).total_seconds()
+    if age > DK_SNAPSHOT_MAX_AGE_S:
+        raise Stale(f"snapshot {age / 60:.0f} min old (fetched {at}; sender asleep?)")
+    return [tuple(r) for r in snap["rows"]], snap.get("detail", ""), at
+
+
+def write_snapshot(book, path):
+    """Fetch one book here and write {fetched_at, rows, detail} atomically (the sender side)."""
+    at = dt.datetime.now(dt.timezone.utc).replace(microsecond=0, tzinfo=None).isoformat()
+    rows, detail = BOOKS[book]()
+    tmp = Path(str(path) + ".tmp")
+    tmp.write_text(json.dumps({"book": book, "fetched_at": at, "rows": rows, "detail": detail}))
+    tmp.replace(path)
+    print(f"[{at}] {book} snapshot -> {path}: {len(rows)} rows" + (f" · {detail}" if detail else ""))
+
+
+BOOKS = {"fd": fetch_fd, "dk": fetch_dk_snapshot if DK_SNAPSHOT else fetch_dk}
+DEFAULT_BOOKS = tuple(b for b in os.environ.get("NBA_BOOKS", "fd,dk").split(",") if b)
 
 
 # ── matching ─────────────────────────────────────────────────────────────────────
@@ -169,7 +214,8 @@ class Resolver:
 
 # ── one cycle ────────────────────────────────────────────────────────────────────
 
-def cycle(books=("fd", "dk")):
+def cycle(books=None):
+    books = books or DEFAULT_BOOKS
     now = dt.datetime.now(dt.timezone.utc)
     ts = now.replace(microsecond=0, tzinfo=None).isoformat()
     sched = R.schedule()                                  # raises R.Blind — caller handles
@@ -189,7 +235,14 @@ def cycle(books=("fd", "dk")):
     for book in books:
         t0 = time.time()
         try:
-            rows, detail = BOOKS[book]()
+            got = BOOKS[book]()
+            rows, detail = got[0], got[1]
+            bts = got[2] if len(got) > 2 else ts          # a snapshot keeps its own fetch time
+        except Stale as e:
+            con.execute("INSERT INTO cycles VALUES (?,?,?,?,?,?,?,?,?)",
+                        (ts, book, "stale", 0, 0, 0, 0, 0, str(e)[:200]))
+            report.append(f"{book}=stale ({e}) — board left untouched")
+            continue
         except Exception as e:
             failed.append(book)
             msg = f"{type(e).__name__}: {str(e)[:90]}"
@@ -208,6 +261,10 @@ def cycle(books=("fd", "dk")):
             if k not in best or r[5] > best[k][5]:
                 best[k] = r
         rows = list(best.values())
+        last = con.execute("SELECT MAX(collected_at) FROM board WHERE book=?", (book,)).fetchone()[0]
+        if bts != ts and last and bts <= last:
+            report.append(f"{book}=unchanged (snapshot {bts} already ingested)")
+            continue
         events = {r[0] for r in rows}
         gm = {e: match_event(e, upcoming) for e in events}
         unmatched = sorted(e for e, g in gm.items() if g is None)
@@ -227,13 +284,13 @@ def cycle(books=("fd", "dk")):
             pid = resolve(player, g["home"], g["away"])
             if pid is None:
                 unresolved.add(player)
-            board.append((book, ts, g["gid"], g["utc"], event, g["home"], g["away"],
+            board.append((book, bts, g["gid"], g["utc"], event, g["home"], g["away"],
                           pid, player, stat, line, side, odds))
         prev_rows = {(r[0], r[1], r[2], r[3]): r for r in con.execute(
             "SELECT player, stat, line, side, odds, gid, tip_utc, pid FROM board WHERE book=?",
             (book,))}
         prev = {k: r[4] for k, r in prev_rows.items()}
-        changed = [(ts, b[0], b[2], b[3], b[7], b[8], b[9], b[10], b[11], b[12])
+        changed = [(bts, b[0], b[2], b[3], b[7], b[8], b[9], b[10], b[11], b[12])
                    for b in board if prev.get((b[8], b[9], b[10], b[11])) != b[12]]
         con.execute("DELETE FROM board WHERE book=?", (book,))
         con.executemany("INSERT OR REPLACE INTO board VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", board)
@@ -247,7 +304,7 @@ def cycle(books=("fd", "dk")):
         # fetch: on a partial one, a missing rung may just be a failed sub-request.
         if status == "ok":
             now_keys = {(b[8], b[9], b[10], b[11]) for b in board}
-            gone = [(ts, book, r[5], r[6], r[7], k[0], k[1], k[2], k[3], None)
+            gone = [(bts, book, r[5], r[6], r[7], k[0], k[1], k[2], k[3], None)
                     for k, r in prev_rows.items() if k not in now_keys]
             con.executemany("INSERT INTO quotes VALUES (?,?,?,?,?,?,?,?,?,?)", gone)
         else:
@@ -257,7 +314,7 @@ def cycle(books=("fd", "dk")):
         if team_rows:
             detail = (detail + "; " if detail else "") + f"dropped {team_rows} team-market rows"
         con.execute("INSERT INTO cycles VALUES (?,?,?,?,?,?,?,?,?)",
-                    (ts, book, status, len(board), len(events), len(events) - len(unmatched),
+                    (bts, book, status, len(board), len(events), len(events) - len(unmatched),
                      len(players) - len(unresolved), len(unresolved), detail))
         covered = {gm[e]["gid"] for e in events if gm[e]}
         report.append(
@@ -292,12 +349,16 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--status", action="store_true")
     ap.add_argument("--book", choices=sorted(BOOKS), action="append")
+    ap.add_argument("--snapshot", nargs=2, metavar=("BOOK", "PATH"))
     a = ap.parse_args()
+    if a.snapshot:
+        write_snapshot(a.snapshot[0], a.snapshot[1])
+        sys.exit(0)
     if a.status:
         status()
         sys.exit(0)
     try:
-        bad = cycle(tuple(a.book) if a.book else tuple(BOOKS))
+        bad = cycle(tuple(a.book) if a.book else None)
     except R.Blind as e:
         print(f"nba lines: BLIND — cdn.nba.com unreachable ({e}); cannot match events to games")
         sys.exit(2)
