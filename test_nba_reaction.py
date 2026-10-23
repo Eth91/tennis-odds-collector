@@ -144,6 +144,8 @@ def test_reading_rules():
         return [{"units": {"affected": aff, "control": ctl, "flagged": []}} for _ in range(n)]
     held = [unit(None)] * 9
     assert RX.reading(results([unit(1)], [unit(5)] + held, n=RX.READ_AT - 1))[0] == "NOT YET"
+    early = [{"detected": "2020-01-01T00:00:00", "units": {"affected": [unit(1)], "control": [unit(5)], "flagged": []}}]
+    assert RX.reading(early * RX.READ_AT)[0] == "NOT YET"            # coarse triggers never count
     assert RX.reading(results([unit(1), unit(1.5), unit(30)], [unit(5)] + held))[0] == "FAST"
     assert RX.reading(results([unit(12), unit(15), unit(30)], [unit(5)] + held))[0] == "WINDOW"
     assert RX.reading(results([unit(4), unit(5), unit(6)], [unit(5)] + held))[0] == "A FEW MINUTES"

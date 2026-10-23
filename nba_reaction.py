@@ -41,6 +41,7 @@ CUTS = (2, 5, 10, 20, 60)
 CONTROL_AHEAD_H = 36                     # control games: tipping within this long after T0
 ET = ZoneInfo("America/New_York")
 READ_AT = 20
+FOLLOW_LIVE = "2026-10-23T20:13:30"         # per-minute follow polling live on the VM (amendment 5 clarification)
 STAT = {"pts": "points", "reb": "rebounds", "ast": "assists"}
 FRESH = re.compile(r"^(.*) \(([A-Z]{2,4}), (\d{4}-\d{2}-\d{2})\)$")
 
@@ -235,7 +236,7 @@ def summary(units):
 
 def reading(results):
     """The registered reading rules (amendment 5). Returns (status, detail)."""
-    q = [r for r in results if r["units"]["affected"]]
+    q = [r for r in results if r["units"]["affected"] and r.get("detected", FOLLOW_LIVE) >= FOLLOW_LIVE]
     if len(q) < READ_AT:
         return "NOT YET", f"{len(q)} of {READ_AT} triggers with a measured player-stat"
     a = summary([u for r in q for u in r["units"]["affected"]])
@@ -266,12 +267,13 @@ if __name__ == "__main__":
     print("FanDuel reaction to the news — NBA_SPEED_PREREG.md amendment 5 (information only)\n")
     for r in res:
         a = summary(r["units"]["affected"])
-        print(f"{r['t0'][:16]} {r['src']:<6} {', '.join(x['name'] + ' (' + x['team'] + ')' for x in r['xs'])[:60]}")
+        coarse = "  [coarse: before per-minute polling, not counted]" if r["detected"] < FOLLOW_LIVE else ""
+        print(f"{r['t0'][:16]} {r['src']:<6} {', '.join(x['name'] + ' (' + x['team'] + ')' for x in r['xs'])[:60]}{coarse}")
         print(f"   affected {_fmt(a)}")
         if r["units"]["flagged"]:
             print(f"   flagged  {_fmt(summary(r['units']['flagged']))}")
-    allu = lambda k: [u for r in res for u in r["units"][k]]
-    print("\nALL TRIGGERS")
+    allu = lambda k: [u for r in res if r["detected"] >= FOLLOW_LIVE for u in r["units"][k]]
+    print(f"\nALL TRIGGERS SINCE PER-MINUTE POLLING ({FOLLOW_LIVE} UTC)")
     for k in ("affected", "flagged", "control"):
         print(f"  {k:<9}{_fmt(summary(allu(k)))}")
     s = summary(allu("affected"))

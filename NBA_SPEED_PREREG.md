@@ -250,3 +250,8 @@ and earlier sources (X) carry whatever speed edge exists.
 
 **None of this changes the speed test's verdict lines** (the amendment 4 yardstick and the original
 PROMOTE / EXTEND / KILL). It is information about the mechanism. Nothing bets.
+
+**Amendment 5, clarification (2026-10-23, before any reaction time was computed).** Per-minute follow
+polling went live on the VM at **2026-10-23T20:13:30 UTC**. Earlier triggers were seen only through the 10-minute
+cycle, which cannot see a move inside 2 minutes. So **only triggers detected at or after 2026-10-23T20:13:30 count
+toward the 20 and the reading rules.** Earlier ones are listed, marked coarse, and excluded.
