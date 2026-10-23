@@ -190,7 +190,9 @@ def collect(ev_floor=None, transform=None):
                                      "ev": s["ev"], "odds": s["dec"], "d_min": s.get("d_min"),
                                      "n_elev": s["n"], "hit": s["hit"], "basis": s.get("basis"),
                                      "date": date, "price": s["dec"],
-                                     "won": 1 if brow[key] > s["line"] else 0})
+                                     "won": 1 if brow[key] > s["line"] else 0,
+                                     "elev": s.get("elev_avg"), "season_avg": s.get("season_avg"),
+                                     "actual": brow[key]})
     return sel_rows, null_rows, margin_rows, dict(cnt)
 
 
