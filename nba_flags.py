@@ -85,7 +85,7 @@ SHADOW_DDL = """CREATE TABLE IF NOT EXISTS flags (
     x TEXT, b TEXT, stat TEXT, line REAL, odds REAL, proj REAL, margin REAL,
     gid TEXT, gtime TEXT, matchup TEXT, actual REAL, result TEXT, graded_at TEXT,
     ev REAL, pid INTEGER, news_at TEXT, stale INTEGER, horizon INTEGER, x_pid INTEGER,
-    trigger_src TEXT)"""
+    trigger_src TEXT, void_reason TEXT)"""
 COMBO = {"pts_reb": ("points", "rebounds"), "pts_ast": ("points", "assists"),
          "reb_ast": ("rebounds", "assists")}
 
@@ -97,7 +97,7 @@ def _shadow(path):
     have = {r[1] for r in sh.execute("PRAGMA table_info(flags)")}
     for col, typ in (("ev", "REAL"), ("pid", "INTEGER"), ("news_at", "TEXT"),
                      ("stale", "INTEGER"), ("horizon", "INTEGER"), ("x_pid", "INTEGER"),
-                     ("trigger_src", "TEXT")):
+                     ("trigger_src", "TEXT"), ("void_reason", "TEXT")):
         if col not in have:
             sh.execute(f"ALTER TABLE flags ADD COLUMN {col} {typ}")
     return sh
@@ -188,11 +188,17 @@ def board_ladders(now):
 
 def absence_index(last_app, team_game_dates, season, out_in_tonights_game=False):
     """Which absence tonight's/tomorrow's game is for X: 1 = first game missed.
-    Counts the franchise's COMPLETED games after X's last appearance, in the CURRENT season only
-    (the streak resets at the season boundary), plus tonight's not-yet-final game when the target
-    is tomorrow and X is ruled Out for tonight too."""
-    missed = sum(1 for d in team_game_dates if d > last_app and C.season_of(d) == season)
-    return 1 + missed + (1 if out_in_tonights_game else 0)
+
+    Counts the franchise's COMPLETED games after X's last appearance, plus tonight's not-yet-final
+    game when the target is tomorrow and X is ruled Out for tonight too. Across the SEASON
+    BOUNDARY (amendment 3): games missed at the end of last season are carried over only when
+    they are a real streak (> MAX_ABSENCE_GAME). A star who rested the last 1-2 games of April
+    starts October fresh (Mitchell 2026-10-22); a player out since February does not — the
+    first version reset everyone, and on 2026-10-23 it called all 51 Outs fresh."""
+    this = sum(1 for d in team_game_dates if d > last_app and C.season_of(d) == season)
+    prev = sum(1 for d in team_game_dates if d > last_app and C.season_of(d) < season)
+    carried = prev if prev > MAX_ABSENCE_GAME else 0
+    return 1 + carried + this + (1 if out_in_tonights_game else 0)
 
 
 def _team_apps(apps, pid, tri):

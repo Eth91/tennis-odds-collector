@@ -40,6 +40,7 @@ HERE = Path(__file__).resolve().parent
 SHADOW = HERE / "nba_shadow.sqlite"
 LINES = HERE / "nba_lines.sqlite"
 NEWS = HERE / "nba_news.sqlite"              # official reports: confirms news-originated triggers
+VOIDED = 0
 BOARD_STAT = {"pts": "points", "reb": "rebounds", "ast": "assists"}   # wowy/cold store short keys
 
 
@@ -79,7 +80,12 @@ def collect():
     now = dt.datetime.now(dt.timezone.utc).replace(tzinfo=None).isoformat()
     cols = [r[1] for r in sh.execute("PRAGMA table_info(flags)")]
     out = []
+    global VOIDED
+    VOIDED = 0
     for r in (dict(zip(cols, x)) for x in sh.execute("SELECT * FROM flags")):
+        if r.get("void_reason"):                        # amendment 3 (and any later voiding rule)
+            VOIDED += 1
+            continue
         if not r.get("pid") or not r.get("gtime"):
             continue
         tip = _utc_naive(r["gtime"])
@@ -164,6 +170,8 @@ def scoreboard(rows):
               f"{(st.median(lat) if lat else float('nan')):13.1f}")
     if not rows:
         print("  (no closed shadow flags yet)")
+    if VOIDED:
+        print(f"  voided flags excluded from every cell: {VOIDED} (see NBA_SPEED_PREREG.md amendments)")
 
 
 if __name__ == "__main__":

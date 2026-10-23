@@ -15,6 +15,8 @@ CASES = [  # (label, last_app, team dates completed so far, out tonight & playin
     ("h1: missed one AND Out tonight -> absence 3 (excluded)", "2026-10-21", TEAM[:5], True, 3),
     ("season boundary: sat Apr 10/12, no game yet this season -> 1", "2026-04-08", TEAM[:3], False, 1),
     ("season boundary: sat April, missed this season's opener -> 2", "2026-04-08", TEAM[:4], False, 2),
+    ("long-term: out since February (25 games) -> carried, excluded", "2026-02-01",
+     [f"2026-02-{d:02d}" for d in range(3, 28)] + ["2026-10-21"], False, 27),
 ]
 
 
@@ -39,3 +41,10 @@ if __name__ == "__main__":
     print("REAL:"); test_real()
     print("MUTANT (ignores tonight's Out) — must fail:"); test_mutant_ignores_tonights_out()
     print("test_nba_absence: OK")
+
+
+def test_mutant_full_season_reset_fails():
+    """The first rule reset EVERY streak at the boundary, calling a February injury fresh."""
+    def full_reset(last, dates, season, tonight):
+        return 1 + sum(1 for d in dates if d > last and F.C.season_of(d) == season) + (1 if tonight else 0)
+    assert not run(full_reset)

@@ -51,7 +51,9 @@ run(){  # run <label> <args...>
   local out rc
   # macOS has no `timeout` (GNU coreutils); perl alarm is the stock equivalent — SIGALRM kills a hung step
   out=$(/usr/bin/perl -e 'alarm shift; exec @ARGV' 300 "$PY" "$@" 2>&1); rc=$?
-  printf '%s %-6s rc=%s %s\n' "$(stamp)" "$label" "$rc" "$(echo "$out" | tr '\n' ' ' | cut -c1-900)" >>"$LOG"
+  # keep the END of the output: summaries, BLIND reasons and errors print last, and the first
+  # version kept the head, so a step's flag lines hid its own exit reason (2026-10-23)
+  printf '%s %-6s rc=%s %s\n' "$(stamp)" "$label" "$rc" "$(echo "$out" | tr '\n' ' ' | tail -c 1200)" >>"$LOG"
   [ $rc -gt $worst ] && worst=$rc
   return 0
 }

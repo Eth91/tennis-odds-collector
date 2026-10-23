@@ -103,6 +103,9 @@ def parse(pdf_bytes):
     return rows, submitted, matchups
 
 
+SFX = {"jr", "sr", "ii", "iii", "iv", "v"}
+
+
 class Resolver:
     """Parsed 'First LastWord' -> NBA person id, within one team's current roster."""
 
@@ -124,6 +127,15 @@ class Resolver:
                if c.split()[:1] == [first] and c.split()[-1:] == [lastw]]
         if len(hit) == 1:
             return hit[0]
+        # SUFFIX AFTER THE COMMA: the league writes "Udeh, Jr., Ernest", which parses as
+        # "Jr., Ernest Udeh" (2026-10-22). Drop suffix words on both sides and match first + last.
+        ns = [t for t in f if t not in SFX]
+        if len(ns) >= 2:
+            hit = [(p, n) for p, n, c in pool
+                   if [t for t in c.split() if t not in SFX][:1] == ns[:1]
+                   and [t for t in c.split() if t not in SFX][-1:] == ns[-1:]]
+            if len(hit) == 1:
+                return hit[0]
         return None, None
 
 
