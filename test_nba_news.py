@@ -89,3 +89,55 @@ def test_first_poll_of_a_source_seeds_and_never_triggers():
     assert outs1 == []                                    # the backlog never fires
     assert len(outs2) == 1                                # a genuinely new item does
     assert con.execute("select seeded from news_items where item_id='1'").fetchone()[0] == 1
+
+
+def test_underdog_phrasings():
+    cases = [("Anthony Black (ankle) listed out for Friday.", "out"),
+             ("Keefe: AJ Dybantsa (ankle) ruled out for Friday; remains day-to-day.", "out"),
+             ("Jewell Loyd (leg) listed out Wednesday.", "out"),
+             ("Jewell Loyd (leg) downgraded to doubtful for Wednesday.", "other"),
+             ("Josh Giddey (wrist) listed probable for Friday.", "other"),
+             ("Aaron Nesmith (hamstring) listed questionable for Friday.", "other"),
+             ("Jarrett Allen (knee) plans to play Thursday, per @realDCunningham.", "other"),
+             ("Status alert: Allisha Gray (hand) a game-time decision Friday.", "other")]
+    for txt, want in cases:
+        assert N.status_of("", txt) == want, txt
+
+
+def test_empty_first_poll_does_not_swallow_the_first_real_item():
+    """The X log was empty right after the switch to @UnderdogNBA. Seeding keyed on 'no rows yet'
+    would have treated the first REAL ruling as backlog; it is keyed on 'first poll'."""
+    d = pathlib.Path(tempfile.mkdtemp()) / "n.sqlite"
+    con = sqlite3.connect(d)
+    con.executescript(N.I.DDL)
+    item = {"item_id": "9", "player": "Jalen Brunson", "team_name": "New York Knicks",
+            "headline": "Ruled out for Friday", "body": "", "provenance": "x"}
+    saved = N.SOURCES
+    try:
+        N.SOURCES = {"fake": lambda: []}
+        o1, _ = N.poll(now=dt.datetime(2026, 10, 22, 20, 0, tzinfo=dt.timezone.utc), con=con)
+        N.SOURCES = {"fake": lambda: [item]}
+        o2, _ = N.poll(now=dt.datetime(2026, 10, 22, 20, 1, tzinfo=dt.timezone.utc), con=con)
+    finally:
+        N.SOURCES = saved
+    assert o1 == [] and len(o2) == 1
+
+
+def test_x_reader_uses_the_vms_first_seen_time_and_skips_lineups(monkeypatch=None):
+    import json, os
+    d = pathlib.Path(tempfile.mkdtemp()) / "x.jsonl"
+    d.write_text("\n".join(json.dumps(r) for r in (
+        {"t": "2026-10-22T16:17:05+00:00", "id": "1", "text": "Keefe: AJ Dybantsa (ankle) ruled out for Friday.", "st": "out"},
+        {"t": "2026-10-22T18:00:00+00:00", "id": "2", "text": "Lineup alert: Knicks will start ...", "st": "lineup"})))
+    saved = {k: os.environ.get(k) for k in ("NBA_X_SSH", "NBA_X_LOG")}
+    os.environ.pop("NBA_X_SSH", None)
+    os.environ["NBA_X_LOG"] = str(d)
+    try:
+        items = N.src_x()
+    finally:
+        for k, v in saved.items():
+            os.environ.pop(k, None)
+            if v is not None:
+                os.environ[k] = v
+    assert [i["item_id"] for i in items] == ["1"]
+    assert items[0]["seen_at"] == "2026-10-22T16:17:05+00:00" and items[0]["provenance"] == "x:underdog"

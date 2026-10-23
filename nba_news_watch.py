@@ -12,10 +12,11 @@ SOURCES (no credentials):
             it. Its beat-sourced items may still lead; `provenance` records which is which.
   bsky      Bluesky post search (unauthenticated). Noisy — fantasy accounts repost; kept for the
             journal, and only an exact, unique name on a team playing that day can match.
-  x         a JSONL log of X posts (shape of the VM's underdog_log.jsonl: {t, id, text}), read from
-            the path in $NBA_X_LOG. BENCHED until set. X is where team/beat/Underdog news breaks
-            first, but free X reading is dead (2026) and the only working reader uses the user's
-            session cookie — which is the user's to place, never this code's to move.
+  x         @UnderdogNBA via the VM's underdog-watch.service (repointed 2026-10-22; the burner
+            cookie stays on the VM), pulled over ssh ($NBA_X_SSH). Measured on day one: its
+            "listed out" posts RELAY the official report ~10 s after it publishes (no lead), but its
+            coach/beat posts lead it by HOURS — "Keefe: AJ Dybantsa (ankle) ruled out for Friday"
+            at 16:16 UTC; the league listed him at 20:45 (+4 h 28 min).
 
 ADD-ONLY. A news Out can add an absence before the official report lists it; it never clears an
 official one. If an official report published AFTER the news item lists the player for that game
@@ -54,11 +55,13 @@ DDL = """CREATE TABLE IF NOT EXISTS news_items (
 
 def _migrate(con):
     con.execute(DDL)
+    con.execute("CREATE TABLE IF NOT EXISTS news_sources (source TEXT PRIMARY KEY, "
+                "first_polled_at TEXT)")
     if "seeded" not in {r[1] for r in con.execute("PRAGMA table_info(news_items)")}:
         con.execute("ALTER TABLE news_items ADD COLUMN seeded INTEGER DEFAULT 0")
 
 # OUT-class phrasing only. "Doubtful"/"questionable" are not absences and never trigger.
-OUT_RE = re.compile(r"\b(ruled out|won'?t (?:play|suit up|be available|dress)|will not "
+OUT_RE = re.compile(r"\b(ruled out|listed out|won'?t (?:play|suit up|be available|dress)|will not "
                     r"(?:play|suit up|be available|dress)|will miss|out for|inactive for|"
                     r"sidelined for|not (?:playing|available)|remains out|listed as out)\b", re.I)
 # A HEDGE means the item is not an absence. Kept narrow on purpose: generic words like
@@ -163,18 +166,56 @@ def src_bsky():
     return out
 
 
+X_STALE_MIN = 10                               # VM watcher silent this long = a dead source
+
+
 def src_x():
-    path = os.environ.get("NBA_X_LOG")
-    if not path or not Path(path).exists():
-        return None                                   # BENCHED — see the docstring
+    """@UnderdogNBA, read by the VM's underdog-watch.service (it holds the burner cookie; the
+    cookie never leaves the VM) into underdog_nba_log.jsonl. Configured by
+    NBA_X_SSH="user@host:/path/to/underdog_nba_log.jsonl" (+ NBA_X_KEY, the ssh key); or a local
+    copy via NBA_X_LOG. BENCHED when neither is set.
+
+    The VM logs only status tweets (out/q/in/lineup), each with ITS first-seen time `t` (<= ~20 s
+    after posting) — that, not our pull time, is the item's news time. A heartbeat rides along:
+    the watcher prints a line every poll, so a silent journal means the source is dead, and that
+    RAISES (a dead X source must not read as a quiet news day)."""
+    import subprocess
+    remote, local = os.environ.get("NBA_X_SSH"), os.environ.get("NBA_X_LOG")
+    if remote:
+        host, path = remote.split(":", 1)
+        key = os.path.expanduser(os.environ.get("NBA_X_KEY", "~/.ssh/oracle_vm"))
+        cmd = (f"tail -n 300 {path} 2>/dev/null; echo '@@HB'; systemctl is-active underdog-watch; "
+               "journalctl -u underdog-watch -n 1 -o short-unix --no-pager | tail -1")
+        r = subprocess.run(["ssh", "-i", key, "-o", "ConnectTimeout=10", "-o", "BatchMode=yes",
+                            host, cmd], capture_output=True, text=True, timeout=40)
+        if r.returncode != 0 or "@@HB" not in r.stdout:
+            raise RuntimeError(f"ssh to the X watcher failed (rc {r.returncode})")
+        body, hb = r.stdout.split("@@HB", 1)
+        hb = hb.split()
+        if not hb or hb[0] != "active":
+            raise RuntimeError(f"VM underdog-watch is {hb[0] if hb else 'unknown'}")
+        try:
+            age = (dt.datetime.now(dt.timezone.utc).timestamp() - float(hb[1])) / 60
+        except (IndexError, ValueError):
+            age = 1e9
+        if age > X_STALE_MIN:
+            raise RuntimeError(f"VM underdog-watch silent for {age:.0f} min")
+        lines = body.splitlines()
+    elif local and Path(local).exists():
+        lines = Path(local).read_text().splitlines()[-300:]
+    else:
+        return None                                   # BENCHED
     out = []
-    for line in Path(path).read_text().splitlines()[-200:]:
+    for line in lines:
         try:
             j = json.loads(line)
         except ValueError:
             continue
+        if j.get("st") == "lineup":
+            continue
         out.append({"item_id": str(j.get("id")), "player": None, "team_name": None,
-                    "headline": "", "body": (j.get("text") or "")[:400], "provenance": "x"})
+                    "headline": "", "body": (j.get("text") or "")[:400],
+                    "provenance": "x:underdog", "seen_at": j.get("t")})
     return out
 
 
@@ -225,14 +266,18 @@ def poll(now=None, sources=None, con=None):
         try:
             items = SOURCES[name]()
         except Exception as e:                        # one dead source must not stop the rest
-            errors.append(f"{name}: {type(e).__name__}")
+            errors.append(f"{name}: {type(e).__name__}: {str(e)[:100]}")
             continue
         if items is None:
             continue                                  # benched
         # FIRST POLL OF A SOURCE = SEED. Everything already on the page predates us: its "first
         # seen" is just "first polled", and an old Out the report never listed would fire as fresh
         # news. Seeded rows are stored for the record but never trigger and never enter the journal.
-        seed = not con.execute("SELECT 1 FROM news_items WHERE source=? LIMIT 1", (name,)).fetchone()
+        # keyed on "first time POLLED", not "no rows yet": a source whose first poll is empty (the
+        # X log right after the switch to @UnderdogNBA) would otherwise swallow its first REAL item
+        seed = not con.execute("SELECT 1 FROM news_sources WHERE source=?", (name,)).fetchone()
+        if seed:
+            con.execute("INSERT INTO news_sources VALUES (?,?)", (name, now.isoformat()))
         for it in items:
             if con.execute("SELECT 1 FROM news_items WHERE source=? AND item_id=?",
                            (name, it["item_id"])).fetchone():
@@ -240,11 +285,12 @@ def poll(now=None, sources=None, con=None):
             st = status_of(it["headline"], it["body"])
             hit = resolve(it, index, playing, now_et)
             pid, pname, tri, gdate = hit if hit else (None, it.get("player"), None, None)
+            seen_at = it.get("seen_at") or now.isoformat()
             con.execute("INSERT INTO news_items VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-                        (name, it["item_id"], now.isoformat(), pname, pid, tri, gdate, st,
+                        (name, it["item_id"], seen_at, pname, pid, tri, gdate, st,
                          it["headline"], it["body"], it["provenance"], int(seed)))
             if st == "out" and pid and not seed:
-                new_outs.append((name, pid, pname, tri, gdate, now.isoformat()))
+                new_outs.append((name, pid, pname, tri, gdate, seen_at))
     con.commit()
     if own:
         con.close()

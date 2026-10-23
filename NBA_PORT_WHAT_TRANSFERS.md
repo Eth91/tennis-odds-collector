@@ -359,3 +359,18 @@ records `trigger_src` + the absent player's id. `nba_clv.py` applies the confirm
 
 Synthetic end to end: a news item ruling Brunson out for the next day's NYK@BOS, unknown to the
 report → 5 flags, all `news:…`, Brunson as the absent player, news time = the moment it was seen.
+
+**X — switched on the same day (user decision).** The VM's `underdog-watch.service` (which holds
+the burner cookie) now reads **@UnderdogNBA**, via a systemd drop-in
+(`/etc/systemd/system/underdog-watch.service.d/nba.conf` → `/home/ubuntu/underdog-nba.env`, no
+secrets). `underdog_watch.py` on the VM gained three env switches with unchanged defaults: its own
+log (`underdog_nba_log.jsonl`), its own seen-file, and **no WNBA fullscan kick** — every hit used to
+start a ~52 s WNBA scan. Backup: `underdog_watch.py.bak-20261022-nba`. **Revert:** delete the
+drop-in, `sudo systemctl daemon-reload && sudo systemctl restart underdog-watch`. Injury-tweet pings
+were already off (user, 2026-07-24); its health alerts (expired cookie, changed endpoint) stay on.
+The Mac pulls that log over ssh every ≤55 s with a heartbeat (a silent or inactive watcher raises).
+
+**First measurement of X:** @UnderdogNBA's "listed out" posts *relay* the official report ~10-16 s
+after it publishes — no lead. Its coach/beat posts lead it by **hours**: "Keefe: AJ Dybantsa (ankle)
+ruled out for Friday" at **16:16 UTC**; the league listed him at **20:45 UTC (+4 h 28 min)**.
+That is the speed this layer exists to buy, and the journal now measures it per item.
