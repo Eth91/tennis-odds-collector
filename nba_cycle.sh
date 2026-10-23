@@ -1,36 +1,33 @@
 #!/bin/bash
 # ─────────────────────────────────────────────────────────────────────────────
-# NBA cycle (Mac): official report -> lines -> SHADOW flags -> grade.
+# NBA cycle: official report -> lines -> SHADOW flags -> grade.
 # cron 3-59/10 — offset from the :00/:15/:30/:45 report marks so nba_watch (every minute)
 # holds the shared lock when a report publishes, not this job.
 #
-# WHY THE MAC. Every input the NBA engine needs is Mac-only (probed 2026-10-22):
-#   cdn.nba.com (slate, box scores)  403s the Oracle VM even with impersonation
-#   stats.nba.com (player index)     blocks datacenter IPs
-#   DraftKings                       Akamai-blocks the VM by design
-# The VM's own copy of nba_flags (vm_loop.sh) cannot see any of them.
+# WHERE (NBA_SPEED_PREREG.md amendment 4, 2026-10-23): the always-on Oracle VM, ~/nba-engine.
+# It reaches every input except DraftKings (verified 2026-10-23 — the earlier "cdn.nba.com 403s
+# the VM" was a 403 on a game file that did not exist yet). DraftKings arrives as a snapshot the
+# Mac pushes (nba_dk_push.sh); NBA_DK_SNAPSHOT names it. The Mac ran this until the cutover.
 #
-# NOTHING HERE BETS. nba_flags.LIVE_TIERS is empty: both tiers failed on real lines
-# (nba_margin_refit.py; NBA_COLDSTART_PREREG.md). Flags go to nba_shadow.sqlite.
+# HOST CONFIG: ~/.nba-engine.env, if present, overrides PY / LOG_DIR and exports NBA_BOOKS,
+# NBA_DK_SNAPSHOT, NBA_X_LOG. No file = the Mac defaults below.
 #
-# INTERPRETER: /usr/local/bin/python3 — has Full Disk Access, requests and curl_cffi.
-# Do NOT use /usr/bin/python3 (no FDA under cron's TCC context; no curl_cffi).
+# NOTHING HERE BETS. nba_flags.LIVE_TIERS is empty. Flags go to nba_shadow.sqlite.
+#
+# INTERPRETER (Mac): /usr/local/bin/python3 — has Full Disk Access, requests and curl_cffi.
+# Do NOT use /usr/bin/python3 there (no FDA under cron's TCC context; no curl_cffi).
 # Each step is logged with its own exit code; a non-zero code is a real alert
 # (the scripts exit 2 on a BLIND input instead of reporting a quiet night).
 # ─────────────────────────────────────────────────────────────────────────────
-# origin: ~/nba-engine/nba_cycle.sh (source of truth, branch nba-realline-arbiter).
-# deploy:  cp ~/nba-engine/nba_cycle.sh ~/cron-jobs/nba-cycle.sh
+# origin: ~/nba-engine/nba_cycle.sh (source of truth, in git). The VM runs it in place.
 # ─────────────────────────────────────────────────────────────────────────────
 set -uo pipefail
-# ⚠️ ITS OWN WORKTREE, NOT ~/tennis-odds-collector. That tree is shared with tennis_publish.py
-# (cron */15), which runs `git checkout main` in it: on 2026-10-22 09:03 MT it switched the tree
-# off this branch, every NBA file vanished from disk, and this cycle failed every 10 min.
-# ~/nba-engine is a `git worktree` of branch nba-realline-arbiter; NBA-owned data lives here,
-# the shared game-log and odds-history DBs are symlinks into ~/tennis-odds-collector.
 REPO="$HOME/nba-engine"
-LOG="$HOME/cron-jobs/nba_cycle.log"
-LOCK="/tmp/nba-cycle.lock"
+LOG_DIR="$HOME/cron-jobs"
 PY=/usr/local/bin/python3
+[ -f "$HOME/.nba-engine.env" ] && . "$HOME/.nba-engine.env"
+LOG="$LOG_DIR/nba_cycle.log"
+LOCK="/tmp/nba-cycle.lock"
 stamp(){ date -u +%FT%TZ; }
 
 # one cycle at a time; a lock older than 30 min is a crashed run, not a live one

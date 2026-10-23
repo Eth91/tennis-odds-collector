@@ -48,6 +48,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import os
 import re
 import sqlite3
 import sys
@@ -77,6 +78,21 @@ STATS = ("pra", "pts", "reb")          # ast/fg3m gated off (48.5% Oct-Nov / 53.
 MARGIN = {"pra": 5.0, "pts": 3.0, "reb": 2.0}          # wowy tier (measured negative)
 LEDGER_STAT = {"pra": "pra", "pts": "points", "reb": "rebounds"}   # fd_lines stat keys
 LINE_MAX_AGE_MIN = 90
+# A book fed by a pushed SNAPSHOT (DraftKings on the VM, NBA_SPEED_PREREG.md amendment 4) refreshes
+# only while its sender is awake, so 90 min would let a stale price into a flag. Its limit is the
+# snapshot cadence plus slack. Books collected on this host keep LINE_MAX_AGE_MIN.
+BOOK_MAX_AGE_MIN = {"dk": 12} if os.environ.get("NBA_DK_SNAPSHOT") else {}
+
+
+def _fresh_books(con, now):
+    """{book: latest collected_at} for books whose board is within that book's age limit."""
+    out = {}
+    for b, ts in con.execute("SELECT book, MAX(collected_at) FROM board GROUP BY book"):
+        cut = (now - dt.timedelta(minutes=BOOK_MAX_AGE_MIN.get(b, LINE_MAX_AGE_MIN))
+               ).replace(tzinfo=None).isoformat()
+        if ts >= cut:
+            out[b] = ts
+    return out
 STAR_MIN, ACTIVE_DAYS, MIN_PRIOR_APPS = 28.0, 12, 5    # == nba_wowy / the cold-start test
 
 
@@ -135,8 +151,7 @@ def latest_lines(now):
         return {}, f"no {LINES_DB.name} — nba_lines.py has never run"
     con = sqlite3.connect(f"file:{LINES_DB}?mode=ro", uri=True)
     books = dict(con.execute("SELECT book, MAX(collected_at) FROM board GROUP BY book"))
-    cut = (now - dt.timedelta(minutes=LINE_MAX_AGE_MIN)).replace(tzinfo=None).isoformat()
-    fresh = sorted(b for b, ts in books.items() if ts >= cut)
+    fresh = sorted(_fresh_books(con, now))
     if not fresh:
         con.close()
         return {}, ("nba_lines board is empty" if not books else
@@ -166,9 +181,7 @@ def board_ladders(now):
     if not LINES_DB.exists():
         return {}
     con = sqlite3.connect(f"file:{LINES_DB}?mode=ro", uri=True)
-    cut = (now - dt.timedelta(minutes=LINE_MAX_AGE_MIN)).replace(tzinfo=None).isoformat()
-    fresh = [b for b, ts in con.execute("SELECT book, MAX(collected_at) FROM board "
-                                        "GROUP BY book") if ts >= cut]
+    fresh = sorted(_fresh_books(con, now))
     raw = defaultdict(lambda: [0.0, 0.0])
     if fresh:
         for pid, stat, line, side, odds in con.execute(

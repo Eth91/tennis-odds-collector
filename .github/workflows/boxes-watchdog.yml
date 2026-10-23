@@ -49,8 +49,10 @@ jobs:
           # (commit-message marker, human name, stale threshold in minutes)
           # Thresholds are generous multiples of the real cadence: the main VM pushes ~every 60s and
           # worker-2 publishes every 3 min, so these fire only on a genuine stall, not on jitter.
-          WATCH = [("vm loop data", "Main VM (WNBA + PGA)", 60),
-                   ("tt board",     "worker-2 (TT)",        45)]
+          # "vm loop data" (Main VM WNBA + PGA) retired 2026-10-23 with the WNBA/golf/tennis collectors;
+          # watching it would page every run. The NBA engine on the main VM cannot push to GitHub, so
+          # its health is the daily morning check (nba_morning_check.py), not this.
+          WATCH = [("tt board",     "worker-2 (TT)",        45)]
 
           def ntfy(title, body, prio="urgent"):
               if not topic:
@@ -92,8 +94,7 @@ jobs:
 
           if bad:
               ntfy("Betting boxes not publishing", "\n".join(bad) +
-                   "\n\nBoth on-box watchdogs may also be down. Check wnba-loop on the main VM and "
-                   "tt-loop on worker-2.")
+                   "\n\nThe on-box watchdog may also be down. Check tt-loop on worker-2.")
               print("ALERTED")
           PY
 

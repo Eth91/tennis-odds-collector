@@ -123,21 +123,45 @@ def test_empty_first_poll_does_not_swallow_the_first_real_item():
     assert o1 == [] and len(o2) == 1
 
 
+def _local_x(path, hb_cmd):
+    """src_x in local mode (the VM, amendment 4) with a stand-in for the watcher heartbeat."""
+    import os
+    saved = {k: os.environ.get(k) for k in ("NBA_X_SSH", "NBA_X_LOG")}
+    saved_cmd = N.X_LOCAL_HB_CMD
+    os.environ.pop("NBA_X_SSH", None)
+    os.environ["NBA_X_LOG"] = str(path)
+    N.X_LOCAL_HB_CMD = hb_cmd
+    try:
+        return N.src_x()
+    finally:
+        N.X_LOCAL_HB_CMD = saved_cmd
+        for k, v in saved.items():
+            os.environ.pop(k, None)
+            if v is not None:
+                os.environ[k] = v
+
+
+def test_x_local_mode_raises_on_a_dead_or_silent_watcher():
+    """On the VM the X log is read locally; a stopped watcher, or one whose journal went quiet,
+    must RAISE — not read as a quiet news day."""
+    d = pathlib.Path(tempfile.mkdtemp()) / "x.jsonl"
+    d.write_text("")
+    old = dt.datetime.now(dt.timezone.utc).timestamp() - 3600
+    for cmd, why in (("echo inactive", "stopped"), (f"echo active; echo {old:.0f}", "silent an hour"),
+                     ("true", "no heartbeat at all")):
+        try:
+            _local_x(d, cmd)
+        except RuntimeError:
+            continue
+        raise AssertionError(f"local X mode did not raise for a watcher that is {why}")
+
+
 def test_x_reader_uses_the_vms_first_seen_time_and_skips_lineups(monkeypatch=None):
     import json, os
     d = pathlib.Path(tempfile.mkdtemp()) / "x.jsonl"
     d.write_text("\n".join(json.dumps(r) for r in (
         {"t": "2026-10-22T16:17:05+00:00", "id": "1", "text": "Keefe: AJ Dybantsa (ankle) ruled out for Friday.", "st": "out"},
         {"t": "2026-10-22T18:00:00+00:00", "id": "2", "text": "Lineup alert: Knicks will start ...", "st": "lineup"})))
-    saved = {k: os.environ.get(k) for k in ("NBA_X_SSH", "NBA_X_LOG")}
-    os.environ.pop("NBA_X_SSH", None)
-    os.environ["NBA_X_LOG"] = str(d)
-    try:
-        items = N.src_x()
-    finally:
-        for k, v in saved.items():
-            os.environ.pop(k, None)
-            if v is not None:
-                os.environ[k] = v
+    items = _local_x(d, f"echo active; echo {dt.datetime.now(dt.timezone.utc).timestamp():.0f}")
     assert [i["item_id"] for i in items] == ["1"]
     assert items[0]["seen_at"] == "2026-10-22T16:17:05+00:00" and items[0]["provenance"] == "x:underdog"

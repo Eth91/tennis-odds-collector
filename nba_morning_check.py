@@ -24,6 +24,7 @@ import argparse
 import contextlib
 import datetime as dt
 import io
+import os
 import re
 import sqlite3
 import subprocess
@@ -32,7 +33,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-CRON = Path.home() / "cron-jobs"
+CRON = Path(os.environ.get("NBA_LOG_DIR") or Path.home() / "cron-jobs")   # VM: ~/nba-logs (amend. 4)
 CYCLE_LOG, WATCH_LOG = CRON / "nba_cycle.log", CRON / "nba_watch.log"
 LINES, NEWS, SHADOW = HERE / "nba_lines.sqlite", HERE / "nba_news.sqlite", HERE / "nba_shadow.sqlite"
 TIP_WINDOW_MIN, GAP_MIN = 10, 30
@@ -97,11 +98,14 @@ def main(hours):
     for step, msg in last_msg.items():
         print(f"         last {step}: {msg}")
     print(f"         news-source errors in the watch log: {dict(src_err) or 'none'}")
-    hb = subprocess.run(["ssh", "-i", str(Path.home() / ".ssh/oracle_vm"), "-o", "ConnectTimeout=10",
-                         "-o", "BatchMode=yes", "ubuntu@155.248.217.149",
-                         "systemctl is-active underdog-watch; journalctl -u underdog-watch -n 1 "
-                         "-o short-unix --no-pager | tail -1"], capture_output=True, text=True,
-                        timeout=40)
+    hb_cmd = ("systemctl is-active underdog-watch; journalctl -u underdog-watch -n 1 "
+              "-o short-unix --no-pager | tail -1")
+    if os.environ.get("NBA_X_LOG"):                   # running ON the VM (amendment 4): ask locally
+        hb = subprocess.run(["sh", "-c", hb_cmd], capture_output=True, text=True, timeout=40)
+    else:
+        hb = subprocess.run(["ssh", "-i", str(Path.home() / ".ssh/oracle_vm"), "-o", "ConnectTimeout=10",
+                             "-o", "BatchMode=yes", "ubuntu@155.248.217.149", hb_cmd],
+                            capture_output=True, text=True, timeout=40)
     parts = hb.stdout.split()
     try:
         age = (dt.datetime.now(dt.timezone.utc).timestamp() - float(parts[1])) / 60

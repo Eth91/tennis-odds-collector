@@ -169,6 +169,22 @@ def src_bsky():
 X_STALE_MIN = 10                               # VM watcher silent this long = a dead source
 
 
+X_LOCAL_HB_CMD = ("systemctl is-active underdog-watch; "
+                  "journalctl -u underdog-watch -n 1 -o short-unix --no-pager | tail -1")
+
+
+def _x_heartbeat(hb):
+    """hb = ['active', '<unix ts of the watcher's last journal line>', ...] or it raises."""
+    if not hb or hb[0] != "active":
+        raise RuntimeError(f"VM underdog-watch is {hb[0] if hb else 'unknown'}")
+    try:
+        age = (dt.datetime.now(dt.timezone.utc).timestamp() - float(hb[1])) / 60
+    except (IndexError, ValueError):
+        age = 1e9
+    if age > X_STALE_MIN:
+        raise RuntimeError(f"VM underdog-watch silent for {age:.0f} min")
+
+
 def src_x():
     """@UnderdogNBA, read by the VM's underdog-watch.service (it holds the burner cookie; the
     cookie never leaves the VM) into underdog_nba_log.jsonl. Configured by
@@ -191,17 +207,14 @@ def src_x():
         if r.returncode != 0 or "@@HB" not in r.stdout:
             raise RuntimeError(f"ssh to the X watcher failed (rc {r.returncode})")
         body, hb = r.stdout.split("@@HB", 1)
-        hb = hb.split()
-        if not hb or hb[0] != "active":
-            raise RuntimeError(f"VM underdog-watch is {hb[0] if hb else 'unknown'}")
-        try:
-            age = (dt.datetime.now(dt.timezone.utc).timestamp() - float(hb[1])) / 60
-        except (IndexError, ValueError):
-            age = 1e9
-        if age > X_STALE_MIN:
-            raise RuntimeError(f"VM underdog-watch silent for {age:.0f} min")
+        _x_heartbeat(hb.split())
         lines = body.splitlines()
     elif local and Path(local).exists():
+        # ON THE VM (amendment 4): the same heartbeat, read locally — a dead watcher must raise
+        # here too, not read as a quiet news day
+        hb = subprocess.run(["sh", "-c", X_LOCAL_HB_CMD], capture_output=True, text=True,
+                            timeout=20).stdout
+        _x_heartbeat(hb.split())
         lines = Path(local).read_text().splitlines()[-300:]
     else:
         return None                                   # BENCHED
