@@ -126,3 +126,24 @@ PDF as their own source — downstream of it — so a lead is not assumed for an
 
 **Primary test**: unchanged — tier `priced`, horizon 0, same lines — now over report-originated and
 confirmed news-originated opportunities alike, i.e. the engine as it actually runs.
+
+---
+
+# AMENDMENT 3 — the absence count across the season boundary (2026-10-23, before any flag closed)
+
+Committed after 19 shadow flags existed for 2026-10-23's games but **before any of them closed,
+was graded, or had an outcome** — so no result could have informed it.
+
+**The defect.** The registration reset the absence streak at the season boundary, to stop stars who
+rested the last games of April (Mitchell: last app 04-08, sat 04-10 and 04-12) reading as
+"absence game 3" in October. It reset **every** streak: on 2026-10-23 all 51 players ruled Out
+counted as absence game 1-2, including players out since February whom the book priced long ago.
+
+**The corrected rule** (`nba_flags.absence_index`): games missed at the end of the previous season
+carry over only when they are a real streak — more than `MAX_ABSENCE_GAME` (2). One or two missed
+games at season's end (rest) still reset; a longer streak continues into the new season. Effect on
+2026-10-23: 11 of the 51 Outs are long-term absences and are no longer triggers.
+
+**Flags already logged.** Each of the 19 is re-checked under the corrected rule; a flag whose trigger
+fails it gets `void_reason = 'amend3: …'` and is excluded from every cell (reported as a count). The
+corrected rule is applied identically to every flag before and after this amendment.
