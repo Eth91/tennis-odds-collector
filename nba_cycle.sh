@@ -50,7 +50,7 @@ run(){  # run <label> <args...>
   out=$(/usr/bin/perl -e 'alarm shift; exec @ARGV' 300 "$PY" "$@" 2>&1); rc=$?
   # keep the END of the output: summaries, BLIND reasons and errors print last, and the first
   # version kept the head, so a step's flag lines hid its own exit reason (2026-10-23)
-  printf '%s %-6s rc=%s %s\n' "$(stamp)" "$label" "$rc" "$(echo "$out" | tr '\n' ' ' | tail -c 1200)" >>"$LOG"
+  printf '%s %-6s rc=%s %s\n' "$(stamp)" "$label" "$rc" "$(echo "$out" | tr '\n' ' ' | tail -c 1200 | iconv -c -f UTF-8 -t UTF-8 2>/dev/null)" >>"$LOG"
   [ $rc -gt $worst ] && worst=$rc
   return 0
 }
