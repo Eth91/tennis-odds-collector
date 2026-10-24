@@ -47,6 +47,10 @@ def check(mod_f, mod_v):
     t = trk(20.0, 10.0)
     del t[("2026-01-05", 1)]
     want(mod_f.opp_cell(t, 1, OUT, IN, "rebounds") == ("THIN", None), "only 1 tracked game without X = THIN")
+    t = trk(11.0, 10.0)
+    t[("2026-01-01", 1)]["reb_chances"] = None          # feed omitted him: 0 chances that game
+    want(mod_f.opp_cell(t, 1, OUT, IN, "rebounds") == ("CONFIRMED", round(11 / (20 / 3), 3)),
+         "a tracked game with blank rebound chances counts as 0 (the feed omits zero-chance players)")
     # scoreboard: forward only from AMEND9_CUTOVER
     d = pathlib.Path(tempfile.mkdtemp())
     sh = mod_f._shadow(d / "s.sqlite")
@@ -76,6 +80,8 @@ def test_mutants():
             ("nba_flags", F, "threshold exclusive", "return (\"CONFIRMED\" if ratio >= OPP_CONFIRM", "return (\"CONFIRMED\" if ratio > OPP_CONFIRM"),
             ("nba_flags", F, "PRA = rebounds only", '"pra": ("reb_chances", "potential_ast"),', '"pra": ("reb_chances",),'),
             ("nba_flags", F, "thin rule off", "if len(vo) < C.MIN_WOWY or len(vi) < 3 or sum(vi) <= 0:", "if sum(vi) <= 0:"),
+            ("nba_flags", F, "blank skipped, not 0", "return [sum(row.get(k) or 0.0 for k in keys)\n                for row in (trk.get((a[0], b_id)) for a in apps) if row]",
+             "return [sum(row.get(k) for k in keys)\n                for row in (trk.get((a[0], b_id)) for a in apps) if row and all(row.get(k) is not None for k in keys)]"),
             ("nba_clv", V, "not forward-only", 'if r["logged_at"] >= AMEND9_CUTOVER:', "if True:")):
         src = pathlib.Path(mod.__file__).read_text()
         assert src.count(a) == 1, name

@@ -427,3 +427,8 @@ gate as the tracking test.
 **Expectation, stated now:** probably no separation, given the tracking test. If it separates,
 CONFIRMED beats the close more often than NOT CONFIRMED. Reported exactly as amendment 8's cells (all
 tiers and priced alone, FanDuel yardstick, game-clustered CI). Same candidate rule. Never a verdict.
+
+**Amendment 9, clarification (before its cutover; no flag scored yet).** "A game with a tracking row" counts
+any game where B has a row. A blank component in that row counts as **0**: the Rebounding feed omits
+players with no rebound chances, and per the tracking test's integrity gate 96–100% of those are
+zero-rebound games. Skipping them would inflate the per-game mean.

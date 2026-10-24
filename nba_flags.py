@@ -268,12 +268,10 @@ def opp_cell(trk, b_id, b_out, b_in, stat):
         return "NO DATA", None
 
     def per_game(apps):
-        out = []
-        for a in apps:
-            row = trk.get((a[0], b_id))
-            if row and all(row.get(k) is not None for k in keys):
-                out.append(sum(row[k] for k in keys))
-        return out
+        # a game counts when it has a tracking row; a blank component is 0 — the Rebounding feed
+        # OMITS players with no rebound chances (nba_tracking.verify: 96-100% zero-rebound games)
+        return [sum(row.get(k) or 0.0 for k in keys)
+                for row in (trk.get((a[0], b_id)) for a in apps) if row]
     vo, vi = per_game(b_out), per_game(b_in)
     if len(vo) < C.MIN_WOWY or len(vi) < 3 or sum(vi) <= 0:
         return "THIN", None
