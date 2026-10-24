@@ -78,6 +78,12 @@ HORIZONS = 2                           # flag tonight's games AND tomorrow's (h0
 REPORT_MAX_AGE_MIN = 45                # an official report older than this is a blind input
 STATS = ("pra", "pts", "reb")          # ast/fg3m gated off (48.5% Oct-Nov / 53.7%)
 K_DMIN, K_MIN = 3.0, 60.0              # == nba_wowy / the margin test: shrink pseudo-games / -minutes
+TRACKING = HERE / "nba_tracking.sqlite"  # amendment 9: rebound chances / potential assists per game
+OPP_KEYS = {"rebounds": ("reb_chances",), "reb": ("reb_chances",), "assists": ("potential_ast",),
+            "ast": ("potential_ast",), "pra": ("reb_chances", "potential_ast"),
+            "pts_reb": ("reb_chances",), "pts_ast": ("potential_ast",),
+            "reb_ast": ("reb_chances", "potential_ast")}
+OPP_CONFIRM = 1.10
 MARGIN = {"pra": 5.0, "pts": 3.0, "reb": 2.0}          # wowy tier (measured negative)
 LEDGER_STAT = {"pra": "pra", "pts": "points", "reb": "rebounds"}   # fd_lines stat keys
 LINE_MAX_AGE_MIN = 90
@@ -104,7 +110,7 @@ SHADOW_DDL = """CREATE TABLE IF NOT EXISTS flags (
     x TEXT, b TEXT, stat TEXT, line REAL, odds REAL, proj REAL, margin REAL,
     gid TEXT, gtime TEXT, matchup TEXT, actual REAL, result TEXT, graded_at TEXT,
     ev REAL, pid INTEGER, news_at TEXT, stale INTEGER, horizon INTEGER, x_pid INTEGER,
-    trigger_src TEXT, void_reason TEXT, d_min REAL)"""
+    trigger_src TEXT, void_reason TEXT, d_min REAL, opp_cell TEXT, opp_ratio REAL)"""
 COMBO = {"pts_reb": ("points", "rebounds"), "pts_ast": ("points", "assists"),
          "reb_ast": ("rebounds", "assists")}
 
@@ -116,7 +122,8 @@ def _shadow(path):
     have = {r[1] for r in sh.execute("PRAGMA table_info(flags)")}
     for col, typ in (("ev", "REAL"), ("pid", "INTEGER"), ("news_at", "TEXT"),
                      ("stale", "INTEGER"), ("horizon", "INTEGER"), ("x_pid", "INTEGER"),
-                     ("trigger_src", "TEXT"), ("void_reason", "TEXT"), ("d_min", "REAL")):
+                     ("trigger_src", "TEXT"), ("void_reason", "TEXT"), ("d_min", "REAL"),
+                     ("opp_cell", "TEXT"), ("opp_ratio", "REAL")):
         if col not in have:
             sh.execute(f"ALTER TABLE flags ADD COLUMN {col} {typ}")
     return sh
@@ -237,6 +244,41 @@ def split(apps, b_id, x_id, tri):
     x_first, x_dates = xa[0][0], {a[0] for a in xa}
     since = [a for a in _team_apps(apps, b_id, tri) if a[0] >= x_first]
     return [a for a in since if a[0] not in x_dates], [a for a in since if a[0] in x_dates]
+
+
+def load_tracking(pids):
+    """{(date, pid): {reb_chances, potential_ast}} for these players, or None if there is no data."""
+    if not pids or not TRACKING.exists():
+        return None
+    con = sqlite3.connect(f"file:{TRACKING}?mode=ro", uri=True)
+    out = {(d, p): {"reb_chances": rc, "potential_ast": pa} for d, p, rc, pa in con.execute(
+        f"SELECT date, player_id, reb_chances, potential_ast FROM tracking WHERE player_id IN "
+        f"({','.join('?' * len(pids))})", sorted(pids))}
+    con.close()
+    return out
+
+
+def opp_cell(trk, b_id, b_out, b_in, stat):
+    """AMENDMENT 9: does B's role bump show up in OPPORTUNITIES (rebound chances / potential assists
+    per game), not just in makes? (label, ratio). b_out / b_in are the split's PRIOR games."""
+    keys = OPP_KEYS.get(stat)
+    if not keys:
+        return "n/a", None
+    if trk is None:
+        return "NO DATA", None
+
+    def per_game(apps):
+        out = []
+        for a in apps:
+            row = trk.get((a[0], b_id))
+            if row and all(row.get(k) is not None for k in keys):
+                out.append(sum(row[k] for k in keys))
+        return out
+    vo, vi = per_game(b_out), per_game(b_in)
+    if len(vo) < C.MIN_WOWY or len(vi) < 3 or sum(vi) <= 0:
+        return "THIN", None
+    ratio = (sum(vo) / len(vo)) / (sum(vi) / len(vi))
+    return ("CONFIRMED" if ratio >= OPP_CONFIRM else "NOT CONFIRMED"), round(ratio, 3)
 
 
 def wowy_live(apps, out_pid, cur_team, games, out_all, why):
@@ -514,6 +556,15 @@ def flags(dry=False, game_date=None):
                           "game_date": gdate, "horizon": horizon, "x_pid": x_id,
                           "trigger_src": trig_src.get(x_id), "d_min": d_min})
 
+    # AMENDMENT 9: OPPORTUNITY-CONFIRMED, at flag time, from the same prior split wowy uses
+    trk = load_tracking({f["pid"] for f in out_flags if f.get("pid")})
+    for f in out_flags:
+        if f["tier"] in ("wowy", "priced") and f.get("pid") and f.get("x_pid"):
+            b_out, b_in = split(apps, f["pid"], f["x_pid"], f["team"])
+            f["opp_cell"], f["opp_ratio"] = opp_cell(trk, f["pid"], b_out, b_in, f["stat"])
+        else:
+            f["opp_cell"], f["opp_ratio"] = "n/a", None
+
     new_shadow = new_paper = 0
     if not dry and out_flags:
         sh = _shadow(SHADOW)
@@ -525,13 +576,14 @@ def flags(dry=False, game_date=None):
                 continue
             cur = sh.execute("INSERT OR IGNORE INTO flags (flag_id, logged_at, game_date, tier, "
                              "team, x, b, stat, line, odds, proj, margin, gid, gtime, matchup, ev, "
-                             "pid, news_at, stale, horizon, x_pid, trigger_src, d_min) "
-                             "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                             "pid, news_at, stale, horizon, x_pid, trigger_src, d_min, opp_cell, opp_ratio) "
+                             "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                              (fid, stamp, f["game_date"], f["tier"], f["team"], f["x"], f["b"],
                               f["stat"], f["line"], f["odds"], f["proj"], f["margin"],
                               f["gid"], f["gtime"], f["matchup"], f.get("ev"), f.get("pid"),
                               f.get("news_at"), f.get("stale"), f["horizon"], f.get("x_pid"),
-                              f.get("trigger_src"), f.get("d_min")))
+                              f.get("trigger_src"), f.get("d_min"), f.get("opp_cell"),
+                              f.get("opp_ratio")))
             new_shadow += cur.rowcount
         sh.commit()
         sh.close()
