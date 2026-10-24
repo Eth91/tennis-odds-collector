@@ -45,7 +45,7 @@ BOARD_STAT = {"pts": "points", "reb": "rebounds", "ast": "assists"}   # wowy/col
 PRIMARY_BOOKS = ("fd",)                     # AMENDMENT 4: the primary yardstick is FanDuel alone
 # AMENDMENT 8 — tracked filter cells, information only, scored on flags logged at/after the cutover
 AMEND8_CUTOVER = "2026-10-24T07:43:00"      # deployment time (NBA_SPEED_PREREG.md amendment 8)
-AMEND9_CUTOVER = "2099-01-01T00:00:00"      # OPPORTUNITY cell; set to the deployment time (amendment 9)
+AMEND9_CUTOVER = "2026-10-24T08:03:00"      # OPPORTUNITY cell: deployment time after the VM backfill (amendment 9)
 PRICE_EPS = 0.03                            # a "move" on an unchanged line (== amendment 5)
 WOWY_MARGIN = {"pts": 3.0, "reb": 2.0, "pra": 5.0}
 COLD_MARGIN, PRICED_EV_FLOOR = 5.0, 0.10

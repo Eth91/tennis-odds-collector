@@ -432,3 +432,9 @@ tiers and priced alone, FanDuel yardstick, game-clustered CI). Same candidate ru
 any game where B has a row. A blank component in that row counts as **0**: the Rebounding feed omits
 players with no rebound chances, and per the tracking test's integrity gate 96–100% of those are
 zero-rebound games. Skipping them would inflate the per-game mean.
+
+**Amendment 9 applied 2026-10-24.** The VM's tracking backfill finished: 2025-10-21 → 2026-10-22, 27,013
+player-games. The integrity gate passed for 2025-26: tracked 100.0%, AST and REB agree 100.00%, and all
+2,857 missing rebounding rows are zero-rebound games. A fetch bug was fixed before the cutover: a date
+returning 0 rows (not yet published) was being marked done. **The OPPORTUNITY cell scores flags logged at or
+after 2026-10-24T08:03:00 UTC** (`nba_clv.AMEND9_CUTOVER`).
