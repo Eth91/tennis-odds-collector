@@ -354,3 +354,47 @@ only.
 2026-10-24T07:31:40 UTC**. All 29 wowy rows logged before it were relabelled `wowy_v0` (0 wowy rows left).
 Every flag in tier `wowy` from here on is computed live. A dry run on 2026-10-24's slate produced 36 live
 wowy candidates and 3 flags, with the cold tier at 27 candidates.
+
+---
+
+# AMENDMENT 8 — three tracked filter cells (2026-10-24, information only, forward only)
+
+Registered before any of these cells has been computed on any flag. The ideas came from looking at
+2026-10-23's 14 scored plays, which is exactly why they are scored **only on flags logged after this
+amendment's cutover** (recorded below), never on that night. None changes what is flagged, the tiers, or
+this test's verdict lines.
+
+**Cell 1 — STALE LINE (the speed thesis made precise).** T_news is the flag's `news_at`. FanDuel's main
+rung M(t) is `nba_clv.close_of(..., books=("fd",))` at time t.
+- **STALE:** FanDuel had a two-sided main rung for that player-stat at T_news, and at the flag's
+  `logged_at` it was unmoved: same line, over price within 0.03 decimal. The book posted the line before
+  the news and had not reacted when we flagged.
+- **LATE:** FanDuel had the rung at T_news but moved it (line, or price ≥ 0.03) before our flag.
+- **POSTED-AFTER:** no FanDuel rung at T_news. The line was set with the news already known.
+- **UNKNOWN:** no `news_at`.
+
+Expectation, stated now: if a speed edge exists, STALE beats the close more often than POSTED-AFTER.
+
+**Cell 2 — GAP SIZE (big disagreements are usually wrong).** LARGE means:
+- wowy: proj − line > 2× the tier's margin (points > 6, rebounds > 4, PRA > 10);
+- cold: proj − line > 2 × COLD_MARGIN (> 10);
+- priced: EV > 0.20 (2× its 0.10 floor).
+
+Otherwise NORMAL. Expectation, stated now: LARGE beats the close *less* often than NORMAL. The price
+test found that the side disagreeing most with the market is usually the informed one.
+
+**Cell 3 — MINUTES BAND (the WNBA's d_min band, re-tested in the NBA).** `d_min` is the projected minutes
+bump with X out, as each tier computes it. It is stored on every flag from this amendment on. Bands use
+the WNBA's edges: < 0, 0–3, **3–8**, > 8. Cold has no d_min and is shown as n/a.
+
+No direction is predicted. The WNBA's best band was 3–8. The July NBA proxy backtest found 8+ best
+(65.3%), and the priced tier inherits the WNBA's drop of d_min outside 0–8. This cell measures it.
+
+**Reporting.** Every scoreboard prints these cells, pooled across tiers and for priced alone, on the
+amendment-4 FanDuel yardstick: closed flags, beat-close rate with its game-clustered CI, and as-flagged vs
+at-close ROI. They are read at the speed test's decision point. A cell whose beat-close CI lower bound
+exceeds 50% at ≥ 100 closed flags in ≥ 30 games becomes a **candidate** for its own pre-registered tier,
+through a new amendment and a new forward test. It is never a verdict here.
+
+**Amendment 8 applied 2026-10-24.** `d_min` is stored on every flag from this deployment on. **The cells
+score flags logged at or after 2026-10-24T07:43:00 UTC** (`nba_clv.AMEND8_CUTOVER`), and no earlier flag ever enters them.
