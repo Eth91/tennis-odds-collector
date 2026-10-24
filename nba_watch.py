@@ -130,6 +130,62 @@ def _quiet(fn, *a, **k):
         return None, buf.getvalue(), f"{type(e).__name__}: {str(e)[:80]}"
 
 
+def resolve_choices(con, sched, log, fire=None, box_get=None):
+    """AMENDMENT 14: settle pending choices ("plays only one of A / B"). Once game A has started and
+    the live box score shows him PLAYED, he is inferred Out for B: an `inferred` news item is written
+    for B and the trigger fires (lines, flags, ping), before any report lists B. Returns True if fired."""
+    import nba_news_watch as NW
+    import nba_rosters as R
+    fire = fire or _fire
+    box_get = box_get or (lambda gid: R._get(R.BOX.format(gid))["game"])
+    con.execute(NW.CHOICES_DDL)
+    now = _now()
+    today = now.astimezone(I.ET).date().isoformat()
+    fired = False
+    for pid, name, tri, a, b, prov in con.execute(
+            "SELECT pid, player, team, date_a, date_b, provenance FROM choices WHERE state='pending'"
+            ).fetchall():
+        def done(state, note):
+            con.execute("UPDATE choices SET state=?, resolved_at=?, note=? WHERE pid=? AND date_a=? "
+                        "AND date_b=?", (state, now.isoformat(), note, pid, a, b))
+            con.commit()
+            log.append(f"choice {name} {a} / {b}: {state} — {note}")
+        if b < today:
+            done("expired", "both games passed")
+            continue
+        if ((I.current(a, con)[0].get(pid) or (None, None, None))[2]) == "Out":
+            done("plays_b", f"official report lists him Out for {a}")
+            continue
+        if ((I.current(b, con)[0].get(pid) or (None, None, None))[2]) == "Out":
+            done("out_b_report", f"official report already lists him Out for {b}")
+            continue
+        g = next((x for x in sched if x["date_et"] == a and tri in (x["home"], x["away"])), None)
+        if not g:
+            continue
+        tip = dt.datetime.fromisoformat(g["utc"].replace("Z", "+00:00"))
+        if now < tip - dt.timedelta(minutes=30):
+            continue                                   # no box score before the inactive list
+        try:
+            box = box_get(g["gid"])
+        except Exception:                              # noqa: BLE001 — not posted yet; next minute
+            continue
+        side = box["homeTeam"] if box["homeTeam"].get("teamTricode") == tri else box["awayTeam"]
+        p = next((x for x in side.get("players", []) if x.get("personId") == pid), None)
+        if p and p.get("played") == "1":
+            con.execute("INSERT OR IGNORE INTO news_items VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                        ("inferred", f"choice:{pid}:{b}", now.isoformat(), name, pid, tri, b, "out", "",
+                         f"{name} played {a}; he said he plays only one of {a} / {b}",
+                         f"inferred:{prov}", 0))
+            con.commit()
+            done("inferred_out_b", f"played {a} (live box score) -> Out {b}")
+            fire(con, "news:inferred", now.isoformat(), [(pid, name, tri, b)], log)
+            fired = True
+        elif (p and p.get("status") == "INACTIVE") or (
+                box.get("gameStatus") == 3 and not (p and p.get("played") == "1")):
+            done("plays_b", f"did not play {a}")
+    return fired
+
+
 def trigger_gids(fresh):
     """The not-started games of the fresh Outs: {gid} for each (team, ET date)."""
     import nba_rosters as R
@@ -290,6 +346,8 @@ def once():
         if time.time() - last >= NEWS_EVERY_S:
             NEWS_STAMP.touch()
             refreshed = news_step(con, playing, log) or refreshed
+        # 2c. CHOICES (amendment 14): "plays only one of A / B" -> he played A -> Out for B, now
+        refreshed = resolve_choices(con, sched, log) or refreshed
         # 3. CLOSE CAPTURE near tip
         soon = [g for g in sched if g["status"] == 1 and 0 <= (
             dt.datetime.fromisoformat(g["utc"].replace("Z", "+00:00")) - _now()
