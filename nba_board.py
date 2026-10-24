@@ -127,7 +127,7 @@ def board(now=None):
                "fd": {"line": fd[0], "odds": fd[1]} if fd else None,
                "b_status": st.get(f["pid"]), "result": f.get("result"), "actual": f.get("actual"),
                "state": ("final" if f.get("result") else "live" if started else "upcoming"),
-               "x_status": st.get(f.get("x_pid")) or f.get("x_status") or "Out",
+               "x_status": st.get(f.get("x_pid")) or f.get("x_status") or "Out", "pid": f.get("pid"),
                "news_only": ((f.get("trigger_src") or "").startswith("news")
                              and st.get(f.get("x_pid")) not in B_OFF)}
         if why:
@@ -159,7 +159,6 @@ def board(now=None):
 
 
 CSS = """<style>
-#nba{--ncol:62px}
 #nba .nst{display:grid;grid-template-columns:repeat(3,1fr);gap:0 12px;margin:2px 0 4px;padding:12px 0 14px;
   border-bottom:1px solid var(--cu-sep);font-variant-numeric:tabular-nums}
 #nba .nst b{display:block;font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--cu-lbl);line-height:1.1}
@@ -170,25 +169,37 @@ CSS = """<style>
 #nba .nday{display:flex;justify-content:space-between;align-items:baseline;margin:26px 0 0;font-size:11px;
   font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--cu-lbl)}
 #nba .nday span{font-weight:700;color:var(--cu-lbl3);font-variant-numeric:tabular-nums;text-transform:none}
-#nba .ng,#nba .nr{display:grid;grid-template-columns:1fr var(--ncol) var(--ncol);gap:0 10px;align-items:baseline}
-#nba .ng{padding:16px 0 7px;border-bottom:1px solid var(--cu-sep);font-size:12px;font-weight:700;
+#nba .ng{display:flex;align-items:center;gap:7px;padding:18px 2px 9px;font-size:13px;font-weight:700;
   color:var(--cu-lbl2);letter-spacing:.02em}
-#nba .ng .t{color:var(--cu-lbl3);font-weight:600;margin-left:6px;font-variant-numeric:tabular-nums}
-#nba .ng .k{text-align:right;font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--cu-lbl3)}
-#nba .nr{padding:12px 0 11px;border-bottom:1px solid var(--hair)}
-#nba .np{font-size:16px;font-weight:600;color:var(--cu-lbl);letter-spacing:-.01em;line-height:1.25}
-#nba .nm{margin-top:3px;font-size:12.5px;color:var(--cu-lbl2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#nba .nm b{font-weight:700;color:var(--cu-lbl);letter-spacing:.02em}
-#nba .nm .s{font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--cu-lbl3)}
-#nba .nt{margin-top:3px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
-  color:var(--cu-lbl3)}
-#nba .nt .w{color:var(--cu-org)}
-#nba .pl{display:inline-block;margin-left:6px;padding:1px 5px 0;border-radius:4px;font-size:10px;font-weight:800;
-  letter-spacing:.04em;vertical-align:2px;background:rgba(255,214,10,.16);color:var(--cu-yel)}
-#nba .nc{text-align:right;font-variant-numeric:tabular-nums}
-#nba .nc .l{font-size:16px;font-weight:700;color:var(--cu-lbl)}
-#nba .nc .o{margin-top:2px;font-size:12px;font-weight:600;color:var(--cu-lbl3)}
-#nba .nc.dim .l{color:var(--cu-lbl3);font-weight:600}
+#nba .ng img{width:20px;height:20px}
+#nba .ng .t{margin-left:auto;font-weight:600;color:var(--cu-lbl3);font-variant-numeric:tabular-nums}
+#nba .ng .t.lv{color:var(--cu-red);font-weight:800;letter-spacing:.06em}
+#nba .nk{background:var(--cu-grp);border-radius:16px;padding:14px 14px 12px;margin:0 0 10px}
+#nba .nk-top{display:flex;align-items:center;gap:12px}
+#nba .nk-av{position:relative;flex:none;width:54px;height:54px;border-radius:50%;background:var(--cu-grp2);overflow:visible}
+#nba .nk-av .hs{width:54px;height:54px;border-radius:50%;object-fit:cover;object-position:50% 12%}
+#nba .nk-av .lg{position:absolute;right:-5px;bottom:-4px;width:24px;height:24px;padding:2px;border-radius:50%;
+  background:#000;box-sizing:border-box}
+#nba .nk-id{min-width:0;flex:1}
+#nba .nk-nm{font-size:18px;font-weight:700;color:var(--cu-lbl);letter-spacing:-.01em;line-height:1.2;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#nba .nk-sub{margin-top:3px;font-size:12.5px;font-weight:600;color:var(--cu-lbl2);font-variant-numeric:tabular-nums}
+#nba .nk-tg{flex:none;align-self:flex-start;text-align:right;line-height:1.7;font-size:10px;font-weight:800;
+  letter-spacing:.07em;color:var(--cu-lbl3)}
+#nba .nk-tg .w{display:block;color:var(--cu-org)}
+#nba .pl{display:inline-block;margin-left:7px;padding:2px 6px 1px;border-radius:5px;font-size:10.5px;font-weight:800;
+  letter-spacing:.04em;vertical-align:3px;background:rgba(255,214,10,.16);color:var(--cu-yel)}
+#nba .nk-st{margin:14px 0 6px;font-size:11px;font-weight:800;letter-spacing:.09em;color:var(--cu-lbl2)}
+#nba .nk-bt{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:12px;
+  background:var(--cu-grp2);font-variant-numeric:tabular-nums}
+#nba .nk-ln{font-size:26px;font-weight:800;letter-spacing:-.02em;color:var(--cu-lbl);line-height:1}
+#nba .nk-ln i{font-style:normal;font-size:15px;font-weight:700;color:var(--cu-lbl2);margin-right:5px}
+#nba .nk-od{font-size:18px;font-weight:700;color:var(--cu-lbl)}
+#nba .nk-rs{font-size:22px;font-weight:800}
+#nba .nk-ft{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 10px;margin-top:10px;font-size:12px;
+  font-weight:600;color:var(--cu-lbl3);font-variant-numeric:tabular-nums}
+#nba .nk-ft b{font-weight:700;color:var(--cu-lbl)}
+#nba .nk-ft .k{font-size:10px;font-weight:800;letter-spacing:.07em}
 #nba .up{color:var(--cu-grn)!important} #nba .dn{color:var(--cu-red)!important}
 #nba .win{color:var(--cu-grn)!important} #nba .loss{color:var(--cu-red)!important}
 #nba details.nlast{margin-top:26px}
@@ -204,6 +215,21 @@ CSS = """<style>
   color:var(--cu-lbl3)}
 </style>"""
 TIER = {"priced": "PRICED", "wowy": "WOWY", "wowy_v0": "WOWY", "cold": "COLD"}
+STAT_NAME = {"PTS": "POINTS", "REB": "REBOUNDS", "AST": "ASSISTS", "PRA": "PTS + REB + AST",
+             "P+R": "PTS + REB", "P+A": "PTS + AST", "R+A": "REB + AST", "3PM": "3-POINTERS MADE"}
+# NBA team ids (cdn.nba.com scheduleLeagueV2, checked 2026-10-24) for the logo + headshot CDN
+TEAM_ID = {"ATL": 1610612737, "BKN": 1610612751, "BOS": 1610612738, "CHA": 1610612766, "CHI": 1610612741,
+           "CLE": 1610612739, "DAL": 1610612742, "DEN": 1610612743, "DET": 1610612765, "GSW": 1610612744,
+           "HOU": 1610612745, "IND": 1610612754, "LAC": 1610612746, "LAL": 1610612747, "MEM": 1610612763,
+           "MIA": 1610612748, "MIL": 1610612749, "MIN": 1610612750, "NOP": 1610612740, "NYK": 1610612752,
+           "OKC": 1610612760, "ORL": 1610612753, "PHI": 1610612755, "PHX": 1610612756, "POR": 1610612757,
+           "SAC": 1610612758, "SAS": 1610612759, "TOR": 1610612761, "UTA": 1610612762, "WAS": 1610612764}
+
+
+def _logo(tri, cls="lg"):
+    tid = TEAM_ID.get(tri)
+    return (f'<img class="{cls}" src="https://cdn.nba.com/logos/nba/{tid}/global/D/logo.svg" alt="" loading="lazy">'
+            if tid else "")
 
 
 def _units(rows):
@@ -213,33 +239,43 @@ def _units(rows):
     return w, len(g) - w, sum((r["odds"] - 1) if r["result"] == "win" else -1.0 for r in g)
 
 
-def _row(r):
+def _card(r, matchup, tip):
     e = H.escape
+    away, _, home = matchup.partition(" @ ")
+    opp = f"vs {away}" if r["team"] == home else f"@ {home}" if home else matchup
     q = '<span class="pl">Q</span>' if r["b_status"] == "Questionable" else ""
-    xs = "DBT" if r["x_status"] == "Doubtful" else "OUT"
     xn = r["x"].split(" ", 1)
-    xn = f"{xn[0][0]}. {xn[1]}" if len(xn) == 2 else r["x"]           # "C. Johnson": one line on a phone
+    xn = f"{xn[0][0]}. {xn[1]}" if len(xn) == 2 else r["x"]
+    xs = "DBT" if r["x_status"] == "Doubtful" else "OUT"
     tiers = " · ".join(dict.fromkeys(TIER.get(t, t.upper()) for t in r["tiers"]))
-    news = ' · <span class="w">NEWS ONLY</span>' if r["news_only"] and r["state"] == "upcoming" else ""
-    flag = (f'<div class="nc"><div class="l">O{r["line"]:g}</div>'
-            f'<div class="o">{american(r["odds"])}</div></div>')
+    head = (f'<img class="hs" src="https://cdn.nba.com/headshots/nba/latest/260x190/{int(r["pid"])}.png" alt="" '
+            f'loading="lazy" onerror="this.remove()">' if r.get("pid") else "")
     if r["result"]:
         cls = "win" if r["result"] == "win" else "loss"
-        tip = f'TIP O{r["fd"]["line"]:g}' if r["fd"] else "&nbsp;"
-        right = (f'<div class="nc"><div class="l {cls}">{r["actual"]:g} {"W" if cls == "win" else "L"}</div>'
-                 f'<div class="o">{tip}</div></div>')
+        right = f'<span class="nk-rs {cls}">{r["actual"]:g} {"W" if cls == "win" else "L"}</span>'
+    else:
+        right = f'<span class="nk-od">{american(r["odds"])}</span>'
+    if r["result"] or r["state"] == "live":
+        now = (f'<span><span class="k">TIP</span> <b>O{r["fd"]["line"]:g}</b> {american(r["fd"]["odds"])}</span>'
+               if r["fd"] else '<span><span class="k">TIP</span> —</span>')
     elif r["fd"]:
         d = r["fd"]["line"] - r["line"]
         cls = "up" if d > 0 else "dn" if d < 0 else ""
         dp = r["fd"]["odds"] - r["odds"]                 # same line: a shorter over price = moved our way
         pcls = "" if d or abs(dp) < .02 else "up" if dp < 0 else "dn"
-        right = (f'<div class="nc"><div class="l {cls}">O{r["fd"]["line"]:g}</div>'
-                 f'<div class="o {pcls}">{american(r["fd"]["odds"])}</div></div>')
+        now = (f'<span><span class="k">FD NOW</span> <b class="{cls}">O{r["fd"]["line"]:g}</b> '
+               f'<span class="{pcls}">{american(r["fd"]["odds"])}</span></span>')
     else:
-        right = '<div class="nc dim"><div class="l">—</div><div class="o">PULLED</div></div>'
-    return (f'<div class="nr"><div><div class="np">{e(r["b"])}{q}</div>'
-            f'<div class="nm"><b>{e(r["stat"])}</b> · {e(r["team"])} · {e(xn)} <span class="s">{xs}</span></div>'
-            f'<div class="nt">{e(tiers)} · {e(r["flagged_mt"])}{news}</div></div>{flag}{right}</div>')
+        now = '<span><span class="k">FD NOW</span> PULLED</span>'
+    news = '<span class="w">NEWS ONLY</span>' if r["news_only"] and r["state"] == "upcoming" else ""
+    return (f'<div class="nk"><div class="nk-top"><div class="nk-av">{head}{_logo(r["team"])}</div>'
+            f'<div class="nk-id"><div class="nk-nm">{e(r["b"])}{q}</div>'
+            f'<div class="nk-sub">{e(r["team"])} {e(opp)} · {e(tip)}</div></div>'
+            f'<div class="nk-tg">{e(tiers)}{news}</div></div>'
+            f'<div class="nk-st">{e(STAT_NAME.get(r["stat"], r["stat"]))}</div>'
+            f'<div class="nk-bt"><span class="nk-ln"><i>OVER</i>{r["line"]:g}</span>{right}</div>'
+            f'<div class="nk-ft">{now}<span>{e(xn)} <span class="k">{xs}</span> · {e(r["flagged_mt"])}</span></div>'
+            f'</div>')
 
 
 def _games(s):
@@ -247,11 +283,13 @@ def _games(s):
     for g in s["games"]:
         live = any(r["state"] == "live" for r in g["rows"])
         done = all(r["state"] == "final" for r in g["rows"])
-        k2 = "FINAL" if done else "TIP" if live else "NOW"
-        t = "LIVE" if live else "" if done else f'{g["tip_mt"]}'
-        out.append(f'<div class="ng"><span>{H.escape(g["matchup"])}<span class="t">{H.escape(t)}</span></span>'
-                   f'<span class="k">FLAG</span><span class="k">{k2}</span></div>')
-        out.extend(_row(r) for r in g["rows"])
+        away, _, home = g["matchup"].partition(" @ ")
+        t = ('<span class="t lv">LIVE</span>' if live else '<span class="t">FINAL</span>' if done
+             else f'<span class="t">{H.escape(g["tip_mt"])}</span>')
+        logos = (f'{_logo(away, "gl")}{H.escape(away)} @ {H.escape(home)}{_logo(home, "gl")}'
+                 if home else H.escape(g["matchup"]))
+        out.append(f'<div class="ng">{logos}{t}</div>')
+        out.extend(_card(r, g["matchup"], "LIVE" if live else "FINAL" if done else g["tip_mt"]) for r in g["rows"])
     return out
 
 
