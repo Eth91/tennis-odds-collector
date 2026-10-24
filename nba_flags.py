@@ -314,6 +314,19 @@ def wowy_live(apps, out_pid, cur_team, games, out_all, why):
     return cands
 
 
+def void_pass(now=None):
+    """⚠ VOID pings for pinged plays the board now retracts (nba_board's rule). Never raises."""
+    try:
+        import nba_board as BRD
+        import nba_ping as PING
+        sh = _shadow(SHADOW)
+        for body, ok in PING.ping_voids(sh, BRD.board(now)["retracted"], now=now):
+            print(f"  PING {'sent' if ok else 'NOT SENT'}: {body}")
+        sh.close()
+    except Exception as e:                                           # noqa: BLE001
+        print(f"  !! void-ping error: {type(e).__name__}: {e}")
+
+
 def amend6_reason(tier, team, x_pid, pid, pair_teams):
     """The amendment-6 void reason for a logged flag, or None. pair_teams: {(x_id, b_id): {team}}."""
     if tier != "wowy" or not x_pid or not pid:
@@ -564,6 +577,7 @@ def flags(dry=False, game_date=None):
             f["opp_cell"], f["opp_ratio"] = "n/a", None
 
     new_shadow = new_paper = 0
+    inserted = []
     if not dry and out_flags:
         sh = _shadow(SHADOW)
         stamp = now.replace(microsecond=0, tzinfo=None).isoformat()
@@ -583,7 +597,17 @@ def flags(dry=False, game_date=None):
                               f.get("trigger_src"), f.get("d_min"), f.get("opp_cell"),
                               f.get("opp_ratio")))
             new_shadow += cur.rowcount
+            if cur.rowcount:
+                inserted.append(dict(f, flag_id=fid))
         sh.commit()
+        # PINGS (user 2026-10-24: "0 latency"): one push per NEW play, in-process, right after the
+        # commit; then a VOID for any pinged play whose premise died. Never breaks the pass.
+        try:
+            import nba_ping as PING
+            for body, ok in PING.ping_plays(sh, inserted, now=now):
+                print(f"  PING {'sent' if ok else 'NOT SENT'}: {body}")
+        except Exception as e:                                       # noqa: BLE001
+            print(f"  !! ping error: {type(e).__name__}: {e}")
         sh.close()
         paper = [f for f in out_flags if f["tier"] in LIVE_TIERS]
         if paper:
@@ -604,6 +628,8 @@ def flags(dry=False, game_date=None):
             led.commit()
             led.close()
 
+    if not dry:
+        void_pass(now)                         # every real pass, new flags or not
     for b in blind:
         print(f"  !! BLIND: {b}")
     for f in out_flags:

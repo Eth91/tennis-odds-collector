@@ -6,7 +6,7 @@ shootaround downgrade. This reads them through X SEARCH. One request covers ~25 
 (`from:a OR from:b ...`, Latest tab), and the daemon rotates through the account chunks. X's per-account
 timeline budget is 50 requests / 15 min, and @UnderdogNBA alone uses ~45 of it, so polling each writer's
 timeline would get the burner account limited. Search has its own budget (187 / 15 min, measured
-2026-10-24); one search every 20 s across 3 chunks uses 45 of it and refreshes each account every minute.
+2026-10-24); one search every 10 s across 3 chunks uses 90 of it and refreshes each account every 30 s.
 
 Every post in a recognisable injury status (out / doubtful / questionable / available) is appended to
 the SAME log the @UnderdogNBA watcher writes (NBA_X_LOG), tagged with its author. nba_news_watch then
@@ -20,7 +20,7 @@ underdog_watch.py, so nothing about the session is copied here.
 
     python3 nba_x_beats.py --validate     # resolve every handle; print who it really is
     python3 nba_x_beats.py --test         # one search per chunk; print the latest posts
-    python3 nba_x_beats.py --loop 20      # daemon: one search every 20 s, rotating chunks
+    python3 nba_x_beats.py --loop 10      # daemon: one search every 10 s, rotating chunks
 """
 from __future__ import annotations
 
@@ -325,6 +325,6 @@ if __name__ == "__main__":
         run(test=True)
     elif "--loop" in sys.argv:
         i = sys.argv.index("--loop")
-        run(loop_s=max(20, int(sys.argv[i + 1])) if len(sys.argv) > i + 1 else 30)
+        run(loop_s=max(10, int(sys.argv[i + 1])) if len(sys.argv) > i + 1 else 30)
     else:
         run()

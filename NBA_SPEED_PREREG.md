@@ -472,3 +472,32 @@ if it does: news caught before the book moves is exactly a STALE spot.
 **Amendment 10 applied 2026-10-24.** `nba-x-beats.service` started at 08:46 UTC on the VM. Its first pass
 marked the 64-post backlog seen without logging it, and it has been **live since 08:47 UTC**: 62 accounts,
 3 chunks, one search every 20 s, rate budget 187 / 15 min (183 remaining after the first pass).
+
+---
+
+# AMENDMENT 11 — pings on, and a fast X path (2026-10-24, apparatus only, at the user's request)
+
+The user asked for an ntfy push "immediately once a play is flagged, 0 latency and extreme speed". The
+registration said pings would come only with PROMOTE, so this records the change.
+
+**Pings.** `nba_ping.py` pushes one ping per play (game, player, stat) the moment its first flag row
+commits, inside the flag pass:
+- format: `🚨 {TEAM} {Name} {STAT} o{line} {odds} {tier} shadow`;
+- a `⚠ VOID` (urgent) when a pinged play's premise dies before tip, by the board's retraction rule;
+- plays that existed at go-live are seeded as already pinged.
+
+Every tier is still **shadow**; nothing is a bet, and the ping says so.
+
+**Fast X path.** `nba_watch.py --x-fast` (`nba-x-fast.service`) watches the X log every 2 s. When it grows,
+it runs the news step for X only (fire, lines, flags, ping). On 2026-10-24 the minute cron plus the 55 s
+news throttle had cost 59 s between Cooper Flagg's X post and the trigger. RotoWire and Bluesky stay on
+the throttled path. The beat-writer search goes from every 20 s to every 10 s (each account every ~30 s,
+90 of its 187 / 15 min budget).
+
+**Unchanged:** what a flag is, how it is priced (the engine's logged price, never anyone's fill), the
+tiers, the yardsticks, every verdict line. The cutover is recorded below.
+
+**Amendment 11 applied 2026-10-24 21:10 UTC (3:10 PM MT).** NTFY_TOPIC was copied, on the VM, into
+`~/.nba-ping.env`, which the engine's cron env and the fast service both read. 22 existing plays were seeded
+as already pinged. `nba-x-fast.service` is active, and `nba-x-beats` was restarted at a 10 s cadence. Pings
+fire from the next new play on.
