@@ -104,7 +104,7 @@ SHADOW_DDL = """CREATE TABLE IF NOT EXISTS flags (
     x TEXT, b TEXT, stat TEXT, line REAL, odds REAL, proj REAL, margin REAL,
     gid TEXT, gtime TEXT, matchup TEXT, actual REAL, result TEXT, graded_at TEXT,
     ev REAL, pid INTEGER, news_at TEXT, stale INTEGER, horizon INTEGER, x_pid INTEGER,
-    trigger_src TEXT, void_reason TEXT)"""
+    trigger_src TEXT, void_reason TEXT, d_min REAL)"""
 COMBO = {"pts_reb": ("points", "rebounds"), "pts_ast": ("points", "assists"),
          "reb_ast": ("rebounds", "assists")}
 
@@ -116,7 +116,7 @@ def _shadow(path):
     have = {r[1] for r in sh.execute("PRAGMA table_info(flags)")}
     for col, typ in (("ev", "REAL"), ("pid", "INTEGER"), ("news_at", "TEXT"),
                      ("stale", "INTEGER"), ("horizon", "INTEGER"), ("x_pid", "INTEGER"),
-                     ("trigger_src", "TEXT"), ("void_reason", "TEXT")):
+                     ("trigger_src", "TEXT"), ("void_reason", "TEXT"), ("d_min", "REAL")):
         if col not in have:
             sh.execute(f"ALTER TABLE flags ADD COLUMN {col} {typ}")
     return sh
@@ -270,7 +270,7 @@ def wowy_live(apps, out_pid, cur_team, games, out_all, why):
                 base_rate = sum(a[2][stat] for a in b10) / max(1e-9, m10)
                 rate = (sum(a[2][stat] for a in b_out) + base_rate * K_MIN) / (min_out + K_MIN)
                 cands.append(("wowy", tri, xname, b_id, stat, rate * (base_min + d_min),
-                              MARGIN[stat], x_id))
+                              MARGIN[stat], x_id, d_min))
     return cands
 
 
@@ -442,7 +442,7 @@ def flags(dry=False, game_date=None):
                 continue
             for stat in STATS:
                 cands.append(("cold", tri, xname, b_id, stat, rate[stat] * pmin, C.COLD_MARGIN,
-                              x_id))
+                              x_id, None))
 
     # ── priced tier: the WNBA pricing machinery via nba_pricing (same code the test ran) ──
     ladders = board_ladders(now)
@@ -497,8 +497,8 @@ def flags(dry=False, game_date=None):
                           "ev": round(r["ev"], 4), "gid": gid, "gtime": gtime, "matchup": mu,
                           "pid": r["_pid"], "news_at": r["_news"], "stale": r["_stale"],
                           "game_date": gdate, "horizon": horizon, "x_pid": r["_x_id"],
-                          "trigger_src": trig_src.get(r["_x_id"])})
-    for tier, tri, xname, b_id, stat, proj, margin, x_id in cands:
+                          "trigger_src": trig_src.get(r["_x_id"]), "d_min": r.get("d_min")})
+    for tier, tri, xname, b_id, stat, proj, margin, x_id, d_min in cands:
         lk = lines.get((b_id, LEDGER_STAT[stat]))
         if not lk:
             why["no_line"] += 1
@@ -512,7 +512,7 @@ def flags(dry=False, game_date=None):
                           "margin": round(proj - line, 1), "gid": gid, "gtime": gtime,
                           "matchup": mu, "pid": b_id, "news_at": news_at.get(x_id),
                           "game_date": gdate, "horizon": horizon, "x_pid": x_id,
-                          "trigger_src": trig_src.get(x_id)})
+                          "trigger_src": trig_src.get(x_id), "d_min": d_min})
 
     new_shadow = new_paper = 0
     if not dry and out_flags:
@@ -525,13 +525,13 @@ def flags(dry=False, game_date=None):
                 continue
             cur = sh.execute("INSERT OR IGNORE INTO flags (flag_id, logged_at, game_date, tier, "
                              "team, x, b, stat, line, odds, proj, margin, gid, gtime, matchup, ev, "
-                             "pid, news_at, stale, horizon, x_pid, trigger_src) "
-                             "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                             "pid, news_at, stale, horizon, x_pid, trigger_src, d_min) "
+                             "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                              (fid, stamp, f["game_date"], f["tier"], f["team"], f["x"], f["b"],
                               f["stat"], f["line"], f["odds"], f["proj"], f["margin"],
                               f["gid"], f["gtime"], f["matchup"], f.get("ev"), f.get("pid"),
                               f.get("news_at"), f.get("stale"), f["horizon"], f.get("x_pid"),
-                              f.get("trigger_src")))
+                              f.get("trigger_src"), f.get("d_min")))
             new_shadow += cur.rowcount
         sh.commit()
         sh.close()

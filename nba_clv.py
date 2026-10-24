@@ -43,6 +43,45 @@ NEWS = HERE / "nba_news.sqlite"              # official reports: confirms news-o
 VOIDED = 0
 BOARD_STAT = {"pts": "points", "reb": "rebounds", "ast": "assists"}   # wowy/cold store short keys
 PRIMARY_BOOKS = ("fd",)                     # AMENDMENT 4: the primary yardstick is FanDuel alone
+# AMENDMENT 8 — tracked filter cells, information only, scored on flags logged at/after the cutover
+AMEND8_CUTOVER = "2099-01-01T00:00:00"      # set to the deployment time (NBA_SPEED_PREREG.md)
+PRICE_EPS = 0.03                            # a "move" on an unchanged line (== amendment 5)
+WOWY_MARGIN = {"pts": 3.0, "reb": 2.0, "pra": 5.0}
+COLD_MARGIN, PRICED_EV_FLOOR = 5.0, 0.10
+
+
+def cell_stale(q, r):
+    """STALE / LATE / POSTED-AFTER / UNKNOWN: did FanDuel have this line BEFORE the news, unmoved
+    when we flagged?"""
+    if not r.get("news_at") or not r.get("pid"):
+        return "UNKNOWN"
+    stat = BOARD_STAT.get(r["stat"], r["stat"])
+    m0 = close_of(q, r["gid"], r["pid"], stat, _utc_naive(r["news_at"]), books=PRIMARY_BOOKS)
+    if not m0:
+        return "POSTED-AFTER"
+    m1 = close_of(q, r["gid"], r["pid"], stat, _utc_naive(r["logged_at"]), books=PRIMARY_BOOKS)
+    if m1 and m1[0] == m0[0] and abs(m1[1] - m0[1]) < PRICE_EPS:
+        return "STALE"
+    return "LATE"
+
+
+def cell_gap(r):
+    """LARGE when the disagreement is more than twice the tier's own entry bar."""
+    if r["tier"] == "priced":
+        return "LARGE" if (r.get("ev") or 0) > 2 * PRICED_EV_FLOOR else "NORMAL"
+    m = r.get("margin")
+    thr = WOWY_MARGIN.get(r["stat"]) if r["tier"].startswith("wowy") else COLD_MARGIN
+    if m is None or thr is None:
+        return "n/a"
+    return "LARGE" if m > 2 * thr else "NORMAL"
+
+
+def cell_band(r):
+    """The WNBA's minutes-bump band edges: <0, 0-3, 3-8 (inclusive), >8."""
+    d = r.get("d_min")
+    if d is None:
+        return "n/a"
+    return "<0" if d < 0 else "0-3" if d < 3 else "3-8" if d <= 8 else ">8"
 
 
 def _utc_naive(iso):
@@ -106,6 +145,9 @@ def collect():
             lat = (dt.datetime.fromisoformat(r["logged_at"])
                    - dt.datetime.fromisoformat(_utc_naive(r["news_at"]))).total_seconds() / 60
         row = dict(r, tip=tip, close=c, fd_flag=f0, fd_close=f1, latency_min=lat)
+        if r["logged_at"] >= AMEND8_CUTOVER:                  # forward only (amendment 8)
+            row["cells"] = {"STALE LINE": cell_stale(q, r), "GAP": cell_gap(r),
+                            "MINUTES BAND": cell_band(r)}
         # AMENDMENT 2: a news-originated trigger counts only if an official report published
         # before tip lists the absent player Out for that game; otherwise it is an audit row.
         if (r.get("trigger_src") or "report").startswith("news"):
@@ -170,7 +212,8 @@ def view(r, yardstick):
         v = {"close": r.get("close"), "beat": r.get("beat"), "move": r.get("move")}
         if "u_flag" in r:
             v.update(u_flag=r["u_flag"], u_close=r["u_close"])
-    return dict(v, gid=r["gid"], latency_min=r.get("latency_min"))
+    return dict(v, gid=r["gid"], latency_min=r.get("latency_min"), tier=r["tier"],
+                cells=r.get("cells"))
 
 
 def scoreboard(rows):
@@ -204,8 +247,36 @@ def scoreboard(rows):
               f"{(st.median(lat) if lat else float('nan')):13.1f}")
     if not rows:
         print("  (no closed shadow flags yet)")
+    cells_report(rows)
     if VOIDED:
         print(f"  voided flags excluded from every cell: {VOIDED} (see NBA_SPEED_PREREG.md amendments)")
+
+
+def cells_report(rows):
+    """AMENDMENT 8: the tracked cells on the FanDuel yardstick, pooled across tiers and for priced
+    alone. Information only; never a verdict."""
+    vs = [view(r, "FD") for r in rows if r.get("cells")]
+    print(f"\ntracked cells (amendment 8, information only; flags since {AMEND8_CUTOVER} UTC), FD yardstick")
+    if not vs:
+        print("  (no closed flags since the cutover yet)")
+        return
+    order = {"STALE LINE": ("STALE", "LATE", "POSTED-AFTER", "UNKNOWN"), "GAP": ("NORMAL", "LARGE", "n/a"),
+             "MINUTES BAND": ("<0", "0-3", "3-8", ">8", "n/a")}
+    for cell, values in order.items():
+        for scope, pick in (("all tiers", lambda v: True), ("priced", lambda v: v["tier"] == "priced")):
+            for val in values:
+                g = [v for v in vs if pick(v) and v["cells"][cell] == val]
+                wc = [v for v in g if v.get("close")]
+                if not g:
+                    continue
+                beats = [1.0 if v["beat"] else 0.0 for v in wc]
+                ci = _ci_rate(wc)
+                gr = [v for v in wc if "u_flag" in v]
+                bt = (f"{100 * sum(beats) / len(beats):5.1f}%" if beats else "   - ") + \
+                     (f" [{100 * ci[0]:.0f},{100 * ci[1]:.0f}]" if ci else "")
+                print(f"  {cell + ' · ' + val + ' · ' + scope:<38}{len(g):5d}{len(wc):6d}{bt:>18}"
+                      f"{len(gr):6d}{(100 * sum(v['u_flag'] for v in gr) / len(gr) if gr else 0):+10.1f}%"
+                      f"{(100 * sum(v['u_close'] for v in gr) / len(gr) if gr else 0):+9.1f}%")
 
 
 if __name__ == "__main__":
