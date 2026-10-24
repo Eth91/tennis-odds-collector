@@ -695,3 +695,13 @@ Also (apparatus): the cycle lock is a directory. A plain file at its path (left 
 and the cycle script.
 
 **Unchanged:** tiers, thresholds, yardsticks, verdicts.
+
+**Amendment 17 applied (2026-10-24T22:11Z).** Deployed; `nba-x-fast` restarted. Preview before the
+one-off: today's unresolved posts yield 10 per-player absences. 9 match the official report exactly
+(Veesaar, Horford ×2, Draymond Green ×2 Doubtful, Duren, Ighodaro ×3); Jalen Green (RotoBaller, Doubtful)
+is the one the report does not list. `reread_lists()` under the cycle lock stored all 10. Only Jalen Green
+fired (the rest were already on the report): news time 21:37:38Z, flagged 22:11:56Z, so 34 min late
+because of the resolver gap. New wowy flags: PHX Dillon Brooks PTS o16.5 @1.96 and PHX Collin Gillespie
+PTS o8.5 @1.80 (x_status Doubtful, x_min 25.6, so `doubtful` cell). All 5 new pings delivered.
+The stray lock file was removed at 22:07Z. Watcher blind 21:46-22:07Z: cycles at 21:53 and 22:03 were
+skipped, and the 18:00 ET report was processed 7 min late.
