@@ -571,3 +571,10 @@ re-labelled `choice` and registered as pending (A = 2026-10-24, B = 2026-10-25).
 triggered stay logged, scored under amendment 2's confirmation rule.
 
 **Unchanged:** flags, tiers, yardsticks, verdicts.
+
+**Amendment 14 applied (2026-10-24T21:46Z, before MIL@PHI tip 23:30Z).** Code deployed to the VM;
+`nba-x-fast` restarted. `reclassify_choices()` run under the cycle lock relabelled exactly one
+stored item (`x` 2113480511347945915, Embiid, x:underdog) and registered one pending choice:
+Joel Embiid (PHI), A = 2026-10-24 (0022600106 MIL@PHI), B = 2026-10-25 (0022600117 DET@PHI).
+Dry run on a copy of the news store (nothing written, no ping): with the inferred Out for B, the
+2026-10-25 pass yields one flag, wowy PHI VJ Edgecombe PTS o13.5 at 1.88, trigger `news:inferred`.
