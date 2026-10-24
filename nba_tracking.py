@@ -122,8 +122,12 @@ def fetch(seasons, current=False):
             con.execute(f"UPDATE tracking SET {', '.join(f'{v}=?' for v in cols.values())} "
                         "WHERE date=? AND player_id=?",
                         (*[r[ix[c]] for c in cols], d, int(r[ix["PLAYER_ID"]])))
-        con.execute("INSERT OR REPLACE INTO fetched VALUES (?,?,?,?)",
-                    (d, measure, len(rs["rowSet"]), dt.datetime.now(dt.timezone.utc).isoformat()))
+        # A game date ALWAYS has rows once published. Zero rows = the league has not posted that
+        # night's tracking yet (2026-10-24: the 10-23 games, fetched at 08:00 UTC). Marking it done
+        # would skip it forever; leave it pending so the next run retries.
+        if rs["rowSet"]:
+            con.execute("INSERT OR REPLACE INTO fetched VALUES (?,?,?,?)",
+                        (d, measure, len(rs["rowSet"]), dt.datetime.now(dt.timezone.utc).isoformat()))
         con.commit()
         if i % 25 == 0 or i == len(todo):
             rate = (time.time() - t0) / i
