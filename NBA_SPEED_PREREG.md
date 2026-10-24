@@ -746,3 +746,12 @@ MARGIN, 2023-10-26 to 2025-04-13). "Best" was fixed before looking as excess = (
    then excess, so the board shows only the card. Pings already sent are not recalled.
 
 **Unchanged:** every tier, threshold, yardstick, verdict and the decision count.
+
+**Amendment 18 applied (2026-10-24T22:24Z).** Deployed; `nba-x-fast` restarted; `card` column added.
+The backfill preview on a copy of the shadow store found one gap first: tonight's older flags carry
+tier `wowy_v0` (amendment 7's relabel), and the backfill skipped them, so they would have stayed shown
+and blocked their players. Fixed before running it: `wowy_v0` shares wowy's card slots. `card_backfill`
+for 2026-10-24 and 2026-10-25, under the cycle lock: 3 of 12 wowy-family plays carded, priced rows
+all carded, no NULL left. Tonight's card: PHI Edgecombe PTS o12.5 (wowy_v0); DAL Christie PTS o11.5 and
+Washington R+A o8.5 (priced); DEN Murray PTS o22.5 and Gordon R+A o9.5 (priced); PHX Gillespie PTS o8.5;
+GSW Santos PRA o21.5. Logged only: Santos PTS/REB, Brooks PTS, Murray wowy PRA/PTS, Edgecombe's others.
