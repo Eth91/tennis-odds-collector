@@ -761,3 +761,41 @@ table in the shadow store holds (game date, player, reason). The board moves a v
 OFF strip with its reason, never hides it, and a pinged play gets a VOID through the same path. The
 record is untouched: Edgecombe's 2026-10-24 flags stay logged and are scored under amendment 2 (they
 count only if an official report lists Embiid Out before tip).
+
+---
+
+# AMENDMENT 19 — singles first on the card, and a forward combo cell (2026-10-24, selection layer)
+
+**Why.** User, 2026-10-24: "what about the wnba selection rule about combo plays being worse than single
+stats" ... "yes wire it in". The WNBA's own registered combo cell (wnba_slip, 2026-08-04) never reached its
+n = 20 decision. Forward it went combos 6-0 (+5.62u) vs straights 23-17 (+4.55u), against the hypothesis.
+So the WNBA did not establish the rule.
+
+**The NBA check, run before this text** (wowy real lines, bar 24, live stats PTS/REB/PRA, 2023-10-26 to
+2025-04-13). FOUND BY SLICING, so this is a hypothesis, not a result:
+- All flags: PRA n = 821, −2.3% vs PTS + REB n = 1,562, −1.8%. No difference.
+- On the amendment-18 card (best excess per player): PRA picks n = 94, −20.0% (CI −39.4% to +0.8%;
+  halves −29.3% / −13.1%) vs single picks n = 833, +1.6% (halves +0.8% / +2.3%). PRA does badly
+  exactly when its excess beats the player's singles, i.e. a big elevation stacked over three stats.
+  That is the WNBA's proposed mechanism.
+- A card that takes the best SINGLE first (PRA only when the player has no single): n = 947, +0.3% (halves
+  −0.2% / +0.7%) vs the live card n = 927, −0.6% (−1.9% / +0.6%). No worse in either half; not significant.
+- NBA forward so far: combos 2-1 (+0.77u), singles 9-2 (+5.80u). Too small to count.
+
+**Rule.**
+1. **The record does not change** (every flag logged and scored as registered).
+2. Card ranking for wowy/cold, per pass: each player's LEAD is their best single stat by excess, or their
+   best combo if they have no single. Leads are carded in excess order under amendment 18's rules (one
+   per player, ≤ 2 per tier per team-game, no shared P/R/A component). A player's other plays in that pass
+   are logged only. priced keeps its own selection. Sticky as before; forward only. Tonight's carded plays
+   stand (Santos PRA was pinged at 22:11Z).
+3. **Forward combo cell, decision fixed now.** Population: wowy/cold flags logged from this cutover, one
+   per play (date, player, stat), graded at the flagged line and price, ON or OFF the card. Combo = PRA,
+   P+R, P+A, R+A. Information line: STAT TYPE · COMBO / SINGLE.
+   **Decision at n ≥ 60 graded combo plays:** combo units ≤ 0 → combos are never carded (logged only).
+   Combo units > 0 → the card reverts to best excess (amendment 18 ranking).
+   Operating characteristics (binomial, price 1.87, break-even 53.5%; exclude iff wins ≤ 32 of 60):
+   P(exclude) by true hit rate: 45% → 92%, 50% → 74%, 53.5% → 54%, 55% → 45%, 60% → 18%, 65% → 4%.
+   Accepted as the WNBA did: a losing cell costs more than a missed one.
+
+**Unchanged:** tiers, thresholds, yardsticks, verdicts, the decision count.
