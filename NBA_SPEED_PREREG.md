@@ -616,3 +616,11 @@ hours behind the news, which the STALE LINE cell and their latency show, and the
 `doubtful` cell anyway.
 
 **Unchanged:** tiers, thresholds, yardsticks, the decision lines, every Out-triggered verdict.
+
+**Amendment 15 applied (2026-10-24T21:58Z).** Deployed to the VM; `nba-x-fast` restarted; the
+`x_status` column added by migration. Dry run first, from a staged copy against the live stores
+(nothing written, no ping): Draymond Green (GSW) and Kyrie Irving (DAL), both Doubtful on the 17:45 ET
+report, are now triggers, and neither yields a flag. Each is under wowy's 28-minute star bar (last-10
+mean 27.7 and 24.3), so the registered rule, not this amendment, decides tonight. The prompting item,
+RotoBaller's "Jalen Green doubtful" (x 2114108943777562818), named two players and so never resolved.
+The official report never listed Jalen Green; the Doubtful Green is Draymond.
