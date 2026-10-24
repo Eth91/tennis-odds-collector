@@ -624,3 +624,36 @@ report, are now triggers, and neither yields a flag. Each is under wowy's 28-min
 mean 27.7 and 24.3), so the registered rule, not this amendment, decides tonight. The prompting item,
 RotoBaller's "Jalen Green doubtful" (x 2114108943777562818), named two players and so never resolved.
 The official report never listed Jalen Green; the Doubtful Green is Draymond.
+
+---
+
+# AMENDMENT 16 — the 24-28 minute band for wowy (2026-10-24, its own cell)
+
+**Why.** User, 2026-10-24: "why not look at changing that to like 24+ mins." Tonight two Doubtful
+starters were triggers but not "stars here": Draymond Green (last-10 mean 27.7 min) and Kyrie Irving
+(24.3). The 28-minute bar is inherited from the Phase-0 backtest. It was never tuned.
+
+**The check, run before this text.** The wowy real-line backtest (nba_margin_refit's population and
+formulas, the shipped wowy MARGIN, best US over price at the main line, 2023-10-26 to 2025-04-13), with
+the bar at 24 and each row tagged by X's trailing-10 minutes:
+
+| X minutes | flags | dates | hit | ROI | 95% CI (date-clustered) |
+|---|---|---|---|---|---|
+| 28+ (today) | 2,585 | 282 | 51.7% | −3.83% | −8.6% to +1.1% |
+| 24-28 | 820 | 169 | 52.3% | −2.33% | −11.4% to +6.5% |
+
+The 24-28 band is no worse than 28+. Both lose a little at the historical (late) lines, which is
+why speed is the open thesis. Beneficiaries gain less (median d_min +0.90 vs +1.30), so expect smaller
+line moves. REB in the band (n = 57, +21.6%) is noise and is not acted on.
+
+**Rule.**
+1. wowy only: X qualifies at a last-10 mean of 24 minutes for this franchise (`WOWY_STAR_MIN`). priced
+   and cold keep 28, because their own tests were not re-run.
+2. Every flag stores `x_min` (X's last-10 mean at flag time).
+3. **Its own cell, never in the decision.** wowy flags with x_min < 28 are scored in an `x24-28` cell,
+   excluded from h0/h1 and from the board's decision count, like amendment 15's `doubtful` cell. A flag
+   that is both goes to `doubtful`. They are flagged, shown and pinged as usual.
+
+**Cutover.** Forward only, from this deploy.
+
+**Unchanged:** priced, cold, margins, yardsticks, decision lines, every 28+ verdict.
