@@ -663,3 +663,35 @@ column added by migration. Dry run first, from a staged copy against the live st
 pass goes from 4 to 7 flags. The 3 new ones are all wowy GSW Gui Santos (PRA o21.5, PTS o12.5, REB
 o5.5), triggered by Stephen Curry Out (last-10 mean 27.3 min), so they belong to the `x24-28` cell.
 Draymond Green (27.7) and Kyrie Irving (24.3) now qualify as X, but no teammate clears the margin.
+
+---
+
+# AMENDMENT 17 — list posts are read player by player (2026-10-24, news layer, apparatus only)
+
+**Why.** User, 2026-10-24: "if a tweet from one of those accounts says doubtful treat them as out, do not
+wait for the official report, we need speed, so treat jalen green as out due to that report. If
+rotoballer, underdog nba or the official reports lists an injury status then that is what we trust."
+RotoBaller (21:37:38Z): "Jalen Green doubtful, Oso Ighodaro out for Warriors vs. Suns on Saturday". It
+names two players, so the one-player resolver dropped it, and Jalen Green never triggered. (The official
+report has not listed him; the user has decided to act on RotoBaller's word.)
+
+**Rule.**
+1. When an item's text names two or more players (full names, teams playing on the item's date), it is
+   read clause by clause. Clauses are split on line breaks, commas, semicolons, "and", "&" and sentence
+   ends. A line of the form "Doubtful: A, B" gives every named player that line's label.
+2. A clause naming exactly one player gets its own status from the same classifier (amendments 13 and
+   15). Each `out` / `doubtful` clause is stored as its own news item, id `{item}#{pid}`, with the parent
+   item's detection time and provenance, and triggers like any news item. Clauses whose status is not
+   an absence are not stored.
+3. A one-player item is read as before. Surname-only mentions still never resolve ("Green doubtful"
+   stays unresolved).
+4. Scoring is unchanged: amendment 2 still scores a news-originated flag only if an official report lists
+   the player Out or Doubtful before tip. Acting is immediate; the confirmation rule only decides the cell.
+5. One-off: today's unresolved items are re-read under this rule, and any resolved absence fires once.
+   Its news time is the time we first saw the parent item.
+
+Also (apparatus): the cycle lock is a directory. A plain file at its path (left by an ad-hoc script on
+2026-10-24 21:46Z, which blinded the watcher until 22:07Z) is now removed as stray, by both the watcher
+and the cycle script.
+
+**Unchanged:** tiers, thresholds, yardsticks, verdicts.
