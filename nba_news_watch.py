@@ -338,6 +338,68 @@ def resolve(item, index, playing_by_date, now_et):
     return pid, name, index[pid][0], gdate
 
 
+# AMENDMENT 17: a post naming several players ("Jalen Green doubtful, Oso Ighodaro out for Warriors vs.
+# Suns on Saturday") is read clause by clause, and each clause naming exactly one player gets its own
+# status. "Doubtful: A, B" lines give every named player the label. Bare "out" counts only as a short
+# clause's last word or before a time/game phrase ("Al Horford also out"), never "worked out at ...".
+LABEL_LINE_RE = re.compile(r"^\W*(out|doubtful|questionable|probable|available|game-time decision|gtd)"
+                           r"\s*:\s*(.+)$", re.I)
+CLAUSE_SPLIT_RE = re.compile(r"[,;&\n]|\band\b|(?<=[a-z0-9)])\.\s+(?=[A-Z])")
+BARE_OUT_RE = re.compile(r"\bout(?:\s+(?:tonight|today|for\b.*|vs\b.*|against\b.*|on\b.*|" + "|".join(
+    ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]) + r"))?\W*$", re.I)
+
+
+def _named(text, index, teams):
+    ft = f" {fold(text)} "
+    return [(p, n) for p, (t, n, _) in index.items()
+            if t in teams and len(fold(n).split()) >= 2 and f" {fold(n)} " in ft]
+
+
+def clause_status(clause):
+    st = status_of("", clause)
+    if (st == "other" and len(clause.split()) <= 8 and BARE_OUT_RE.search(clause)
+            and not NOT_OUT_RE.search(clause) and not CHOICE_RE.search(clause)):
+        st = "out"
+    return st
+
+
+def split_list(item, index, playing_by_date, now_et):
+    """AMENDMENT 17: [(pid, name, team, game_date, status)] for each player of a MULTI-player post whose
+    own clause (or labelled line) reads out / doubtful. [] for a one-player post or no playing date."""
+    text = f"{item['headline']}\n{item['body']}"
+    gdate = game_date_of(item["headline"], item["body"], now_et)
+    if not gdate or gdate not in playing_by_date or item.get("team_name"):
+        return []
+    teams = playing_by_date[gdate]
+    if len(_named(text, index, teams)) < 2:
+        return []
+    found = {}
+    for line in text.splitlines():
+        m = LABEL_LINE_RE.match(line)
+        if m:
+            st = {"out": "out", "doubtful": "doubtful"}.get(m.group(1).lower())
+            for p, n in (_named(m.group(2), index, teams) if st else []):
+                found.setdefault(p, (n, st))
+            continue
+        for clause in CLAUSE_SPLIT_RE.split(line):
+            named = _named(clause, index, teams)
+            if len(named) == 1 and clause_status(clause) in ("out", "doubtful"):
+                found.setdefault(named[0][0], (named[0][1], clause_status(clause)))
+    return [(p, n, index[p][0], gdate, st) for p, (n, st) in found.items()]
+
+
+def store_list(con, name, it, subs, seen_at):
+    """Store each split absence as its own item `{item}#{pid}`; returns the NEW ones as poll outs."""
+    new = []
+    for pid, pname, tri, gdate, st in subs:
+        cur = con.execute("INSERT OR IGNORE INTO news_items VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                          (name, f"{it['item_id']}#{pid}", seen_at, pname, pid, tri, gdate, st,
+                           it["headline"], it["body"], it["provenance"], 0))
+        if cur.rowcount:
+            new.append((name, pid, pname, tri, gdate, seen_at))
+    return new
+
+
 def poll(now=None, sources=None, con=None):
     """Poll enabled sources; store every NEW item (Out-class or not, for the journal).
     Returns [(source, pid, name, team, game_date, detected_at)] for new OUT items."""
@@ -388,12 +450,41 @@ def poll(now=None, sources=None, con=None):
                          it["headline"], it["body"], it["provenance"], int(seed)))
             if st in ("out", "doubtful") and pid and not seed:
                 new_outs.append((name, pid, pname, tri, gdate, seen_at))
+            if not hit and not seed:                  # amendment 17: a list post, player by player
+                new_outs += store_list(con, name, it, split_list(it, index, playing, now_et), seen_at)
             if st == "choice" and not seed:
                 register_choice(con, it, index, team_games, now_et, now)
     con.commit()
     if own:
         con.close()
     return new_outs, errors
+
+
+def reread_lists(now=None, con=None):
+    """One-off (amendment 17): today's stored, unresolved, unseeded items re-read player by player.
+    Each item's day words are read from the time it was first seen. Returns the new absences as poll
+    outs [(source, pid, name, team, game_date, detected_at)]."""
+    now = now or dt.datetime.now(dt.timezone.utc)
+    own = con is None
+    con = con or sqlite3.connect(DB, timeout=60)
+    _migrate(con)
+    index, _ = R.player_index(now.astimezone(ET).date().isoformat())
+    playing = {}
+    for g in R.schedule():
+        if g["status"] == 1:
+            playing.setdefault(g["date_et"], set()).update((g["home"], g["away"]))
+    day0 = (now - dt.timedelta(hours=24)).isoformat()
+    new = []
+    for src, iid, at, hl, body, prov in con.execute(
+            "SELECT source, item_id, detected_at, headline, body, provenance FROM news_items WHERE pid IS NULL "
+            "AND COALESCE(seeded,0)=0 AND detected_at >= ? AND item_id NOT LIKE '%#%'", (day0,)).fetchall():
+        it = {"item_id": iid, "headline": hl or "", "body": body or "", "provenance": prov}
+        seen_et = dt.datetime.fromisoformat(at).astimezone(ET)
+        new += store_list(con, src, it, split_list(it, index, playing, seen_et), at)
+    con.commit()
+    if own:
+        con.close()
+    return new
 
 
 def reclassify_choices(now=None, con=None):

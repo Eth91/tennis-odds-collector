@@ -82,6 +82,9 @@ def cycle_lock():
             LOCK.mkdir()
             break
         except FileExistsError:
+            if not LOCK.is_dir():                    # a stray FILE at the lock path (amendment 17)
+                LOCK.unlink(missing_ok=True)
+                continue
             if time.time() - LOCK.stat().st_mtime > 1800:      # a crashed run, not a live one
                 LOCK.rmdir()
                 continue
