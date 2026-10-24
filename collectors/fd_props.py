@@ -46,6 +46,9 @@ H = {"User-Agent": UA, "Accept": "application/json"}
 TIMEOUT, PACE = 20, 0.7
 DBS = {"nfl": Path.home() / "tennis-odds-collector" / "nfl_prekick_prices.sqlite",
        "ncaaf": Path.home() / "tennis-odds-collector" / "collectors" / "ncaaf_fd_prices.sqlite"}
+# The VM pre-kick collector must not write into that host's divergent checkout.
+if os.environ.get("FD_DB_DIR"):
+    DBS = {k: Path(os.environ["FD_DB_DIR"]) / v.name for k, v in DBS.items()}
 PAGE = {"nfl": "nfl", "ncaaf": "ncaaf"}
 BANDS = [("t180", 150, 210), ("t105", 95, 125), ("t075", 60, 90),
          ("t025", 15, 40), ("t005", 1, 14)]
@@ -207,7 +210,7 @@ def _done(con, eid, band):
                        "AND state IN ('ok','empty') LIMIT 1", (eid, band)).fetchone() is not None
 
 
-def poll(league, hours, sweep_min, limit, verbose):
+def poll(league, hours, sweep_min, limit, verbose, ladder_only=False):
     con, stats = _con(league), {"req": 0}
     now = dt.datetime.now(dt.timezone.utc)
     stamp = now.isoformat(timespec="seconds")
@@ -234,8 +237,8 @@ def poll(league, hours, sweep_min, limit, verbose):
         return 1
     last = con.execute("SELECT MAX(fetched_at) FROM fd_runs WHERE league=? AND kind='sweep'",
                        (league,)).fetchone()[0]
-    sweep_due = (last is None or
-                 (now - dt.datetime.fromisoformat(last)).total_seconds() >= sweep_min * 60)
+    sweep_due = not ladder_only and (
+        last is None or (now - dt.datetime.fromisoformat(last)).total_seconds() >= sweep_min * 60)
     cut = now + dt.timedelta(hours=hours)
     todo = []
     for eid, v in sorted(real, key=lambda kv: kv[1]["openDate"]):
@@ -344,8 +347,10 @@ if __name__ == "__main__":
     ap.add_argument("--sweep-min", type=float, default=30)
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--quiet", action="store_true")
+    ap.add_argument("--ladder-only", action="store_true",
+                    help="only the 1-210 min pre-kick ladder; never a full-catalog sweep")
     a = ap.parse_args()
     if a.cmd == "status":
         status(a.league)
     else:
-        sys.exit(poll(a.league, a.hours, a.sweep_min, a.limit, not a.quiet))
+        sys.exit(poll(a.league, a.hours, a.sweep_min, a.limit, not a.quiet, a.ladder_only))
