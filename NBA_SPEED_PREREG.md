@@ -296,3 +296,12 @@ model's favour, so the scoreboard is recorded here before and after.
   +49.7% vs at close +39.4% (12 graded).
 - FD+DK yardstick: beat 28.6% (4/14), as flagged +28.6%.
 - Priced and cold are unaffected.
+
+**Applied 2026-10-24 07:22 UTC** (`nba_flags.py --amend6`, under the cycle lock). It voided exactly the 7 Horford
+flag rows: 3 opportunities and their re-flags. A second run voided 0, so it is idempotent. **After**, wowy/h0:
+- FD yardstick: 11 closed, 10 with an FD close, beat close 30.0% (3/10), as flagged +63.7% vs at close
+  +49.1%.
+- FD+DK yardstick: beat 36.4% (4/11), as flagged +49.3%.
+
+Priced and cold are unchanged. Voided flags excluded from every cell: 14 (7 under amendment 3, 7 under
+amendment 6). The decision tier (priced) is untouched by this amendment, and one night decides nothing.
