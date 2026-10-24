@@ -87,6 +87,8 @@ OPP_CONFIRM = 1.10
 MARGIN = {"pra": 5.0, "pts": 3.0, "reb": 2.0}          # wowy tier (measured negative)
 LEDGER_STAT = {"pra": "pra", "pts": "points", "reb": "rebounds"}   # fd_lines stat keys
 # AMENDMENT 18: P/R/A production pools, for the card's "no shared component" rule (wowy/cold keys)
+# AMENDMENT 19: combo props (two or more stats summed); the card takes a player's best SINGLE first
+COMBO_STATS = frozenset({"pra", "pts_reb", "pts_ast", "reb_ast"})
 CARD_COMPONENTS = {"pts": frozenset("p"), "reb": frozenset("r"), "ast": frozenset("a"),
                    "pra": frozenset("pra"), "threes": frozenset("p"), "fg3m": frozenset("p")}
 LINE_MAX_AGE_MIN = 90
@@ -673,9 +675,24 @@ def _card_rule(sh, gd, pid, team, tier, stat):
     return 0 if any(comp & CARD_COMPONENTS.get(s, frozenset(s)) for _, s in mates) else 1
 
 
-def _card(sh, f):
+def _leads(flags):
+    """AMENDMENT 19: {(game_date, pid): id(flag)} — each player's LEAD among wowy/cold flags: the best
+    SINGLE stat by excess, or the best combo if the player has no single."""
+    best = {}
+    for f in flags:
+        if f["tier"] == "priced":
+            continue
+        k = (f["game_date"], f.get("pid"))
+        key = (f["stat"] in COMBO_STATS, -_excess(f))
+        if k not in best or key < best[k][0]:
+            best[k] = (key, id(f))
+    return {k: v[1] for k, v in best.items()}
+
+
+def _card(sh, f, lead=True):
     """priced keeps its own selection (card 1). A re-flag of a known play (same date, player, stat,
-    tier; any line) inherits that play's card value — sticky, never un-carded or re-pinged."""
+    tier; any line) inherits that play's card value — sticky, never un-carded or re-pinged. A NEW
+    wowy/cold play that is not its player's lead in this pass is logged only (amendment 19)."""
     if f["tier"] == "priced":
         return 1
     prev = sh.execute("SELECT card FROM flags WHERE game_date=? AND pid=? AND stat=? AND tier=? AND "
@@ -683,21 +700,26 @@ def _card(sh, f):
                       (f["game_date"], f.get("pid"), f["stat"], f["tier"])).fetchone()
     if prev:
         return prev[0]
+    if not lead:
+        return 0
     return _card_rule(sh, f["game_date"], f.get("pid"), f["team"], f["tier"], f["stat"])
 
 
 def _log_flags(sh, out_flags, stamp, why):
     """Write one pass's flags to the shadow table; returns (new rows, the NEW CARDED flags to ping).
-    AMENDMENT 18: priced first, then wowy/cold by excess, so the card takes the best play first."""
+    AMENDMENT 18: priced first, then wowy/cold by excess, so the card takes the best play first.
+    AMENDMENT 19: each player's lead (best single, else best combo) goes before their other plays."""
     new_shadow, inserted = 0, []
-    order = sorted(out_flags, key=lambda f: (f["tier"] != "priced",
+    leads = _leads(out_flags)
+    is_lead = lambda f: f["tier"] == "priced" or leads.get((f["game_date"], f.get("pid"))) == id(f)
+    order = sorted(out_flags, key=lambda f: (f["tier"] != "priced", not is_lead(f),
                                              0.0 if f["tier"] == "priced" else -_excess(f)))
     for f in order:
         fid = f"{f['tier']}|{fold(f['b'])}|{f['stat']}|{f['line']}|{f['game_date']}"
         if f["tier"] == "priced" and not _priced_slot_open(sh, f["game_date"], f, fid):
             why["priced_slot_taken"] += 1
             continue
-        card = _card(sh, f)
+        card = _card(sh, f, lead=is_lead(f))
         cur = sh.execute("INSERT OR IGNORE INTO flags (flag_id, logged_at, game_date, tier, "
                          "team, x, b, stat, line, odds, proj, margin, gid, gtime, matchup, ev, "
                          "pid, news_at, stale, horizon, x_pid, trigger_src, d_min, opp_cell, opp_ratio, x_status, x_min, "
@@ -730,10 +752,16 @@ def card_backfill(game_dates, path=None):
     sh.execute(f"UPDATE flags SET card=0 WHERE card IS NULL AND tier IN ('wowy','wowy_v0','cold') AND "
                f"game_date IN ({marks})",
                tuple(game_dates))
-    plays = sorted(rows, key=lambda r: (r[5], -_excess({"tier": r[3], "stat": r[4], "margin": r[6]})))
+    plays = [{"game_date": r[0], "pid": r[1], "team": r[2], "tier": r[3], "stat": r[4], "at": r[5],
+              "margin": r[6]} for r in rows]
+    leads = set()
+    for at in {p["at"] for p in plays}:                # leads per logged pass, as the live card (amendment 19)
+        leads |= set(_leads([p for p in plays if p["at"] == at]).values())
+    plays.sort(key=lambda p: (p["at"], id(p) not in leads, -_excess(p)))
     out = []
-    for gd, pid, team, tier, stat, _at, _m in plays:
-        v = _card_rule(sh, gd, pid, team, tier, stat)
+    for p in plays:
+        gd, pid, team, tier, stat = p["game_date"], p["pid"], p["team"], p["tier"], p["stat"]
+        v = _card_rule(sh, gd, pid, team, tier, stat) if id(p) in leads else 0
         sh.execute("UPDATE flags SET card=? WHERE game_date=? AND pid=? AND tier=? AND stat=? AND card=0",
                    (v, gd, pid, tier, stat))
         out.append((gd, pid, team, tier, stat, v))
