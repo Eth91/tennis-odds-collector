@@ -45,6 +45,7 @@ BOARD_STAT = {"pts": "points", "reb": "rebounds", "ast": "assists"}   # wowy/col
 PRIMARY_BOOKS = ("fd",)                     # AMENDMENT 4: the primary yardstick is FanDuel alone
 # AMENDMENT 8 — tracked filter cells, information only, scored on flags logged at/after the cutover
 AMEND8_CUTOVER = "2026-10-24T07:43:00"      # deployment time (NBA_SPEED_PREREG.md amendment 8)
+AMEND9_CUTOVER = "2026-10-24T08:03:00"      # OPPORTUNITY cell: deployment time after the VM backfill (amendment 9)
 PRICE_EPS = 0.03                            # a "move" on an unchanged line (== amendment 5)
 WOWY_MARGIN = {"pts": 3.0, "reb": 2.0, "pra": 5.0}
 COLD_MARGIN, PRICED_EV_FLOOR = 5.0, 0.10
@@ -148,6 +149,8 @@ def collect():
         if r["logged_at"] >= AMEND8_CUTOVER:                  # forward only (amendment 8)
             row["cells"] = {"STALE LINE": cell_stale(q, r), "GAP": cell_gap(r),
                             "MINUTES BAND": cell_band(r)}
+            if r["logged_at"] >= AMEND9_CUTOVER:             # stored at flag time (amendment 9)
+                row["cells"]["OPPORTUNITY"] = r.get("opp_cell") or "n/a"
         # AMENDMENT 2: a news-originated trigger counts only if an official report published
         # before tip lists the absent player Out for that game; otherwise it is an audit row.
         if (r.get("trigger_src") or "report").startswith("news"):
@@ -256,16 +259,18 @@ def cells_report(rows):
     """AMENDMENT 8: the tracked cells on the FanDuel yardstick, pooled across tiers and for priced
     alone. Information only; never a verdict."""
     vs = [view(r, "FD") for r in rows if r.get("cells")]
-    print(f"\ntracked cells (amendment 8, information only; flags since {AMEND8_CUTOVER} UTC), FD yardstick")
+    print(f"\ntracked cells (amendments 8-9, information only; flags since {AMEND8_CUTOVER} UTC, "
+          f"OPPORTUNITY since {AMEND9_CUTOVER} UTC), FD yardstick")
     if not vs:
         print("  (no closed flags since the cutover yet)")
         return
     order = {"STALE LINE": ("STALE", "LATE", "POSTED-AFTER", "UNKNOWN"), "GAP": ("NORMAL", "LARGE", "n/a"),
-             "MINUTES BAND": ("<0", "0-3", "3-8", ">8", "n/a")}
+             "MINUTES BAND": ("<0", "0-3", "3-8", ">8", "n/a"),
+             "OPPORTUNITY": ("CONFIRMED", "NOT CONFIRMED", "THIN", "NO DATA", "n/a")}
     for cell, values in order.items():
         for scope, pick in (("all tiers", lambda v: True), ("priced", lambda v: v["tier"] == "priced")):
             for val in values:
-                g = [v for v in vs if pick(v) and v["cells"][cell] == val]
+                g = [v for v in vs if pick(v) and v["cells"].get(cell) == val]
                 wc = [v for v in g if v.get("close")]
                 if not g:
                     continue

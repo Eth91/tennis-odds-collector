@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""NBA player-tracking stats per game — rebound chances, potential assists, touches. MAC-ONLY.
+"""NBA player-tracking stats per game — rebound chances, potential assists, touches.
 
 For NBA_TRACKING_PREREG.md. The league's tracking box score (boxscoreplayertrackv3) carries
 rebound chances but NOT potential assists; the season endpoint `leaguedashptstats` carries both,
@@ -17,7 +17,13 @@ score's (nba_gamelogs.sqlite logs_full) on >= 99% of joined player-games, and ev
 with minutes should have a tracking row. Exit 1 if not.
 
     python nba_tracking.py --fetch --seasons 2022-23 2023-24 2024-25
+    python nba_tracking.py --fetch --seasons 2025-26 --current    # + this season's played dates
     python nba_tracking.py --verify
+
+WHERE. stats.nba.com answers the Oracle VM with curl_cffi impersonation (verified 2026-10-23), so the
+NBA engine's copy on the VM keeps its own nba_tracking.sqlite: 2025-26 backfilled, the current season
+fetched daily (`--current`: game dates from nba_season_boxes.json, before today ET). That feeds the
+OPPORTUNITY-CONFIRMED tracked cell (NBA_SPEED_PREREG.md amendment 9).
 """
 from __future__ import annotations
 
@@ -76,10 +82,29 @@ def game_dates(seasons):
     return out
 
 
-def fetch(seasons):
+def season_of(d):
+    """'2026-10-23' -> '2026-27' (the NBA season a date belongs to)."""
+    y = int(d[:4])
+    return f"{y}-{(y + 1) % 100:02d}" if int(d[5:7]) >= 8 else f"{y - 1}-{y % 100:02d}"
+
+
+def current_dates(today_et=None):
+    """This season's played dates from nba_rosters' box-score cache, strictly before today (ET)."""
+    import json
+    from zoneinfo import ZoneInfo
+    today_et = today_et or dt.datetime.now(dt.timezone.utc).astimezone(ZoneInfo("America/New_York")).date().isoformat()
+    cache = HERE / "nba_season_boxes.json"
+    if not cache.exists():
+        return []
+    dates = {g["date"] for g in json.loads(cache.read_text()).values() if g.get("date")}
+    return sorted((d, season_of(d)) for d in dates if d < today_et)
+
+
+def fetch(seasons, current=False):
     con = sqlite3.connect(DB)
     con.executescript(DDL)
-    todo = [(d, s, m) for d, s in game_dates(seasons) for m in COLS
+    dates = (game_dates(seasons) if seasons else []) + (current_dates() if current else [])
+    todo = [(d, s, m) for d, s in sorted(set(dates)) for m in COLS
             if not con.execute("SELECT 1 FROM fetched WHERE date=? AND measure=?", (d, m)).fetchone()]
     print(f"{len(todo)} (date, measure) calls to make", flush=True)
     t0 = time.time()
@@ -97,8 +122,12 @@ def fetch(seasons):
             con.execute(f"UPDATE tracking SET {', '.join(f'{v}=?' for v in cols.values())} "
                         "WHERE date=? AND player_id=?",
                         (*[r[ix[c]] for c in cols], d, int(r[ix["PLAYER_ID"]])))
-        con.execute("INSERT OR REPLACE INTO fetched VALUES (?,?,?,?)",
-                    (d, measure, len(rs["rowSet"]), dt.datetime.now(dt.timezone.utc).isoformat()))
+        # A game date ALWAYS has rows once published. Zero rows = the league has not posted that
+        # night's tracking yet (2026-10-24: the 10-23 games, fetched at 08:00 UTC). Marking it done
+        # would skip it forever; leave it pending so the next run retries.
+        if rs["rowSet"]:
+            con.execute("INSERT OR REPLACE INTO fetched VALUES (?,?,?,?)",
+                        (d, measure, len(rs["rowSet"]), dt.datetime.now(dt.timezone.utc).isoformat()))
         con.commit()
         if i % 25 == 0 or i == len(todo):
             rate = (time.time() - t0) / i
@@ -141,10 +170,12 @@ def verify():
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--fetch", action="store_true")
-    ap.add_argument("--seasons", nargs="+", default=["2022-23", "2023-24", "2024-25"])
+    ap.add_argument("--seasons", nargs="+", default=None)
+    ap.add_argument("--current", action="store_true", help="also this season's played dates (daily on the VM)")
     ap.add_argument("--verify", action="store_true")
     a = ap.parse_args()
     if a.fetch:
-        fetch(a.seasons)
+        seasons = a.seasons if a.seasons is not None else ([] if a.current else ["2022-23", "2023-24", "2024-25"])
+        fetch(seasons, current=a.current)
     if a.verify:
         sys.exit(0 if verify() else 1)
