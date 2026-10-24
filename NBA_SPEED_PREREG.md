@@ -496,3 +496,8 @@ the throttled path. The beat-writer search goes from every 20 s to every 10 s (e
 
 **Unchanged:** what a flag is, how it is priced (the engine's logged price, never anyone's fill), the
 tiers, the yardsticks, every verdict line. The cutover is recorded below.
+
+**Amendment 11 applied 2026-10-24 21:10 UTC (3:10 PM MT).** NTFY_TOPIC was copied, on the VM, into
+`~/.nba-ping.env`, which the engine's cron env and the fast service both read. 22 existing plays were seeded
+as already pinged. `nba-x-fast.service` is active, and `nba-x-beats` was restarted at a 10 s cadence. Pings
+fire from the next new play on.
