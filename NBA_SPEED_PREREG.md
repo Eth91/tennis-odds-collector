@@ -349,3 +349,8 @@ split" as ≥ 2 without and ≥ 3 with. The cold-start registration (`nba_coldst
 defines it as **B appeared in ≥ 2 of X's missed games since X's first franchise game**, with no with-X
 minimum. That registered definition is the one implemented. The ≥ 3-with requirement belongs to wowy
 only.
+
+**Applied 2026-10-24** under the VM cycle lock: the new code was deployed at 07:31:36, and **cutover was
+2026-10-24T07:31:40 UTC**. All 29 wowy rows logged before it were relabelled `wowy_v0` (0 wowy rows left).
+Every flag in tier `wowy` from here on is computed live. A dry run on 2026-10-24's slate produced 36 live
+wowy candidates and 3 flags, with the cold tier at 27 candidates.
