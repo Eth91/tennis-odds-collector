@@ -705,3 +705,44 @@ because of the resolver gap. New wowy flags: PHX Dillon Brooks PTS o16.5 @1.96 a
 PTS o8.5 @1.80 (x_status Doubtful, x_min 25.6, so `doubtful` cell). All 5 new pings delivered.
 The stray lock file was removed at 22:07Z. Watcher blind 21:46-22:07Z: cycles at 21:53 and 22:03 were
 skipped, and the 18:00 ET report was processed 7 min late.
+
+---
+
+# AMENDMENT 18 — the card: what is pinged and shown (2026-10-24, selection layer, record unchanged)
+
+**Why.** User, 2026-10-24: "is there a rule regarding picking the best one play from a player instead of
+playing multiple different prop types... also only picking one player's points instead of playing o
+Gillespie o Brooks points." The priced tier already has the WNBA card rules (nba_pricing.select and the
+sticky top-2 disjoint slot). wowy and cold had none: tonight that meant Gui Santos PRA + PTS + REB and
+PHX Brooks PTS + Gillespie PTS.
+
+**The check, run before this text.** wowy on real lines (bar 24, live stats PTS / REB / PRA, shipped
+MARGIN, 2023-10-26 to 2025-04-13). "Best" was fixed before looking as excess = (proj − line) / MARGIN.
+- Win/loss correlation: same player, two props r = +0.61 (1,065 pairs); two teammates both PTS
+  r = +0.002 (696); two teammates, any props r = −0.003 (2,688). A player's props are nearly one bet;
+  teammates are independent, not negatively correlated.
+- | rule | n | ROI | fit | hold | sd of a night's units |
+  |---|---|---|---|---|---|
+  | all (wowy today) | 2,383 | −1.9% | −3.0% | −1.0% | 3.46 |
+  | one per player | 1,460 | −1.6% | −2.6% | −0.7% | 2.24 |
+  | one per player + top-2 disjoint per team-game | 927 | −0.6% | −1.9% | +0.6% | 1.82 |
+  All CIs overlap (top-2 disjoint: −7.5% to +6.1%). The case is variance, which halves, with ROI no
+  worse. It is not a proven edge.
+
+**Rule.**
+1. **The record does not change.** Every flag is still logged and scored as registered (all tiers,
+   cells, verdicts). The card only decides what is PINGED and SHOWN on the board.
+2. Each flag stores `card` (1 on the card, 0 logged only; NULL before this amendment = shown).
+3. priced: unchanged (its own selection and sticky slots). Every inserted priced flag has card = 1.
+4. wowy and cold, in one pass: priced first, then the rest by excess, highest first. A flag is
+   carded unless (a) its player already has a carded play for that game date (any tier: one per
+   player), (b) its tier already has 2 carded plays in that team-game, or (c) it shares a P/R/A
+   component with a carded play of its tier in that team-game.
+5. Sticky, like priced: a carded play stays carded, and a re-flag of the same play (same date,
+   player, stat, any line) inherits its card value. Nothing is ever un-carded or re-pinged.
+6. Tracked cell (information only): CARD · ON / OFF on the FD yardstick, from the cutover, so the
+   forward record shows whether the card beats the rest.
+7. One-off: tonight's wowy/cold flags (2026-10-24) get card values by the same rule, in logged order
+   then excess, so the board shows only the card. Pings already sent are not recalled.
+
+**Unchanged:** every tier, threshold, yardstick, verdict and the decision count.
