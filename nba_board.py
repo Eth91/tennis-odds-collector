@@ -126,7 +126,10 @@ def board(now=None):
                .astimezone(MT).strftime("%-I:%M %p"),
                "fd": {"line": fd[0], "odds": fd[1]} if fd else None,
                "b_status": st.get(f["pid"]), "result": f.get("result"), "actual": f.get("actual"),
-               "state": ("final" if f.get("result") else "live" if started else "upcoming")}
+               "state": ("final" if f.get("result") else "live" if started else "upcoming"),
+               "x_status": st.get(f.get("x_pid")) or f.get("x_status") or "Out",
+               "news_only": ((f.get("trigger_src") or "").startswith("news")
+                             and st.get(f.get("x_pid")) not in B_OFF)}
         if why:
             out["retracted"].append(dict(row, why=why, matchup=f.get("matchup") or f["team"],
                                          game_date=gd, pid=f.get("pid"), raw_stat=stat,
@@ -156,54 +159,100 @@ def board(now=None):
 
 
 CSS = """<style>
-#nba .nrec{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:11px;font-weight:700;letter-spacing:.06em;
-  text-transform:uppercase;color:var(--cu-lbl3);margin:0 0 6px;font-variant-numeric:tabular-nums}
-#nba .nrec b{color:var(--cu-lbl);font-weight:700}
+#nba{--ncol:62px}
+#nba .nst{display:grid;grid-template-columns:repeat(3,1fr);gap:0 12px;margin:2px 0 4px;padding:12px 0 14px;
+  border-bottom:1px solid var(--cu-sep);font-variant-numeric:tabular-nums}
+#nba .nst b{display:block;font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--cu-lbl);line-height:1.1}
+#nba .nst b i{font-style:normal;font-size:13px;font-weight:600;color:var(--cu-lbl3)}
+#nba .nst span{display:block;margin-top:3px;font-size:10px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--cu-lbl3)}
 #nba .nsh{color:var(--cu-org)}
-#nba .nday{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#5c6572;
-  margin:22px 0 0}
-#nba .ng{display:flex;justify-content:space-between;align-items:baseline;padding:12px 0 8px;
-  border-bottom:1px solid var(--cu-sep);font-size:13px;font-weight:700;color:var(--cu-lbl2)}
-#nba .ng .t{font-weight:600;color:var(--cu-lbl3);font-variant-numeric:tabular-nums}
-#nba .nr{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:11px 0;border-bottom:1px solid var(--hair)}
-#nba .np{font-size:15.5px;font-weight:600;color:var(--cu-lbl);letter-spacing:-.01em}
-#nba .nm{font-size:12px;color:var(--cu-lbl2);margin-top:2px}
-#nba .nm .k{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--cu-lbl3)}
-#nba .nx{text-align:right;font-variant-numeric:tabular-nums}
-#nba .nl{font-size:15.5px;font-weight:700;color:var(--cu-lbl)}
-#nba .nl .o{font-weight:600;color:var(--cu-lbl2);margin-left:6px}
-#nba .nn{font-size:12px;color:var(--cu-lbl3);margin-top:2px}
-#nba .up{color:var(--cu-grn)} #nba .dn{color:var(--cu-red)} #nba .q{color:var(--cu-yel)}
-#nba .nw{font-weight:700} #nba .nw.win{color:var(--cu-grn)} #nba .nw.loss{color:var(--cu-red)}
-#nba .noff{margin-top:22px;font-size:12px;color:var(--cu-lbl3);line-height:1.7}
+#nba .nday{display:flex;justify-content:space-between;align-items:baseline;margin:26px 0 0;font-size:11px;
+  font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--cu-lbl)}
+#nba .nday span{font-weight:700;color:var(--cu-lbl3);font-variant-numeric:tabular-nums;text-transform:none}
+#nba .ng,#nba .nr{display:grid;grid-template-columns:1fr var(--ncol) var(--ncol);gap:0 10px;align-items:baseline}
+#nba .ng{padding:16px 0 7px;border-bottom:1px solid var(--cu-sep);font-size:12px;font-weight:700;
+  color:var(--cu-lbl2);letter-spacing:.02em}
+#nba .ng .t{color:var(--cu-lbl3);font-weight:600;margin-left:6px;font-variant-numeric:tabular-nums}
+#nba .ng .k{text-align:right;font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--cu-lbl3)}
+#nba .nr{padding:12px 0 11px;border-bottom:1px solid var(--hair)}
+#nba .np{font-size:16px;font-weight:600;color:var(--cu-lbl);letter-spacing:-.01em;line-height:1.25}
+#nba .nm{margin-top:3px;font-size:12.5px;color:var(--cu-lbl2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#nba .nm b{font-weight:700;color:var(--cu-lbl);letter-spacing:.02em}
+#nba .nm .s{font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--cu-lbl3)}
+#nba .nt{margin-top:3px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--cu-lbl3)}
+#nba .nt .w{color:var(--cu-org)}
+#nba .pl{display:inline-block;margin-left:6px;padding:1px 5px 0;border-radius:4px;font-size:10px;font-weight:800;
+  letter-spacing:.04em;vertical-align:2px;background:rgba(255,214,10,.16);color:var(--cu-yel)}
+#nba .nc{text-align:right;font-variant-numeric:tabular-nums}
+#nba .nc .l{font-size:16px;font-weight:700;color:var(--cu-lbl)}
+#nba .nc .o{margin-top:2px;font-size:12px;font-weight:600;color:var(--cu-lbl3)}
+#nba .nc.dim .l{color:var(--cu-lbl3);font-weight:600}
+#nba .up{color:var(--cu-grn)!important} #nba .dn{color:var(--cu-red)!important}
+#nba .win{color:var(--cu-grn)!important} #nba .loss{color:var(--cu-red)!important}
+#nba details.nlast{margin-top:26px}
+#nba details.nlast summary{list-style:none;cursor:pointer}
+#nba details.nlast summary::-webkit-details-marker{display:none}
+#nba details.nlast summary .nday{margin:0}
+#nba details.nlast summary .nday span:after{content:"  +";white-space:pre}
+#nba details.nlast[open] summary .nday span:after{content:"  −"}
+#nba .noff{margin-top:26px}
+#nba .noff div{padding:9px 0;border-bottom:1px solid var(--hair);font-size:12.5px;color:var(--cu-lbl3)}
 #nba .noff b{color:var(--cu-lbl2);font-weight:600}
 #nba .nnone{padding:28px 0;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
   color:var(--cu-lbl3)}
 </style>"""
+TIER = {"priced": "PRICED", "wowy": "WOWY", "wowy_v0": "WOWY", "cold": "COLD"}
+
+
+def _units(rows):
+    """(wins, losses, flat units at the flagged price) over graded rows."""
+    g = [r for r in rows if r["result"] in ("win", "loss")]
+    w = sum(1 for r in g if r["result"] == "win")
+    return w, len(g) - w, sum((r["odds"] - 1) if r["result"] == "win" else -1.0 for r in g)
 
 
 def _row(r):
     e = H.escape
-    move = '<div class="nn">FD —</div>' if r["state"] == "upcoming" else ""   # line pulled / not posted
-    if r["fd"]:
+    q = '<span class="pl">Q</span>' if r["b_status"] == "Questionable" else ""
+    xs = "DBT" if r["x_status"] == "Doubtful" else "OUT"
+    xn = r["x"].split(" ", 1)
+    xn = f"{xn[0][0]}. {xn[1]}" if len(xn) == 2 else r["x"]           # "C. Johnson": one line on a phone
+    tiers = " · ".join(dict.fromkeys(TIER.get(t, t.upper()) for t in r["tiers"]))
+    news = ' · <span class="w">NEWS ONLY</span>' if r["news_only"] and r["state"] == "upcoming" else ""
+    flag = (f'<div class="nc"><div class="l">O{r["line"]:g}</div>'
+            f'<div class="o">{american(r["odds"])}</div></div>')
+    if r["result"]:
+        cls = "win" if r["result"] == "win" else "loss"
+        tip = f'TIP O{r["fd"]["line"]:g}' if r["fd"] else "&nbsp;"
+        right = (f'<div class="nc"><div class="l {cls}">{r["actual"]:g} {"W" if cls == "win" else "L"}</div>'
+                 f'<div class="o">{tip}</div></div>')
+    elif r["fd"]:
         d = r["fd"]["line"] - r["line"]
         cls = "up" if d > 0 else "dn" if d < 0 else ""
-        tag = "TIP" if r["state"] != "upcoming" else "NOW"
-        move = (f'<div class="nn">FD {tag} <span class="{cls}">O{r["fd"]["line"]:g}</span>'
-                f' {american(r["fd"]["odds"])}</div>')
-    res = ""
-    if r["result"]:
-        res = (f'<div class="nn"><span class="nw {e(r["result"])}">{"W" if r["result"] == "win" else "L"}'
-               f'</span> · {r["actual"]:g}</div>')
-    elif r["state"] == "live":
-        res = '<div class="nn">LIVE</div>'
-    q = ' · <span class="q">Q</span>' if r["b_status"] == "Questionable" else ""
-    h1 = ' · <span class="k">DAY BEFORE</span>' if r["horizon"] else ""
-    return (f'<div class="nr"><div><div class="np">{e(r["b"])}</div>'
-            f'<div class="nm"><span class="k">{e(r["stat"])}</span> · {e(r["x"])} out{q} · '
-            f'<span class="k">{" · ".join(e(t) for t in r["tiers"])}</span> · {e(r["flagged_mt"])}{h1}</div></div>'
-            f'<div class="nx"><div class="nl">O{r["line"]:g}<span class="o">{american(r["odds"])}</span></div>'
-            f'{move}{res}</div></div>')
+        dp = r["fd"]["odds"] - r["odds"]                 # same line: a shorter over price = moved our way
+        pcls = "" if d or abs(dp) < .02 else "up" if dp < 0 else "dn"
+        right = (f'<div class="nc"><div class="l {cls}">O{r["fd"]["line"]:g}</div>'
+                 f'<div class="o {pcls}">{american(r["fd"]["odds"])}</div></div>')
+    else:
+        right = '<div class="nc dim"><div class="l">—</div><div class="o">PULLED</div></div>'
+    return (f'<div class="nr"><div><div class="np">{e(r["b"])}{q}</div>'
+            f'<div class="nm"><b>{e(r["stat"])}</b> · {e(r["team"])} · {e(xn)} <span class="s">{xs}</span></div>'
+            f'<div class="nt">{e(tiers)} · {e(r["flagged_mt"])}{news}</div></div>{flag}{right}</div>')
+
+
+def _games(s):
+    out = []
+    for g in s["games"]:
+        live = any(r["state"] == "live" for r in g["rows"])
+        done = all(r["state"] == "final" for r in g["rows"])
+        k2 = "FINAL" if done else "TIP" if live else "NOW"
+        t = "LIVE" if live else "" if done else f'{g["tip_mt"]}'
+        out.append(f'<div class="ng"><span>{H.escape(g["matchup"])}<span class="t">{H.escape(t)}</span></span>'
+                   f'<span class="k">FLAG</span><span class="k">{k2}</span></div>')
+        out.extend(_row(r) for r in g["rows"])
+    return out
 
 
 def html(b):
@@ -212,21 +261,33 @@ def html(b):
     parts = [CSS, '<h2>NBA · <span class="nsh">SHADOW · NOT BETS</span></h2>']
     if rec:
         n = rec["closed"]
-        beat = f'{rec["beat"]}/{n}' if n else "—"
-        units = f'<b>{rec["units"]:+.1f}u</b> · {rec["graded"]} GRADED' if rec["graded"] else "<b>—</b>"
-        parts.append(f'<div class="nrec"><span><b>{n}</b>/{rec["decision_n"]} SCORED</span>'
-                     f'<span>FD BEAT CLOSE <b>{beat}</b></span><span>FLAT {units}</span></div>')
+        units = (f'<b class="{"up" if rec["units"] > 0 else "dn" if rec["units"] < 0 else ""}">'
+                 f'{rec["units"]:+.1f}u</b><span>{rec["graded"]} GRADED</span>') if rec["graded"] else \
+            '<b>—</b><span>FLAT</span>'
+        parts.append(f'<div class="nst"><div><b>{n}<i>/{rec["decision_n"]}</i></b><span>SCORED</span></div>'
+                     f'<div><b>{rec["beat"]}<i>/{n}</i></b><span>BEAT FD CLOSE</span></div>'
+                     f'<div>{units}</div></div>')
     if not b["slates"]:
         parts.append('<div class="nnone">NO SHADOW FLAGS ON THIS SLATE</div>')
     for s in b["slates"]:
-        parts.append(f'<div class="nday">{e(s["label"])}</div>')
-        for g in s["games"]:
-            parts.append(f'<div class="ng"><span>{e(g["matchup"])}</span><span class="t">{e(g["tip_mt"])} MT</span></div>')
-            parts.extend(_row(r) for r in g["rows"])
+        rows = [r for g in s["games"] for r in g["rows"]]
+        if s["label"] == "LAST NIGHT":
+            w, l, u = _units(rows)
+            tally = f'{w}–{l} · {u:+.1f}u' if w + l else f'{len(rows)}'
+            parts.append(f'<details class="nlast"><summary><div class="nday">{e(s["label"])}'
+                         f'<span>{e(tally)}</span></div></summary>')
+            parts.extend(_games(s))
+            parts.append('</details>')
+        else:
+            parts.append(f'<div class="nday">{e(s["label"])}<span>{len(rows)}</span></div>')
+            parts.extend(_games(s))
     if b["retracted"]:
-        off = " · ".join(f'<b>{e(r["b"])}</b> {e(r["stat"])} O{r["line"]:g} — {e(r["why"])}'
-                         for r in b["retracted"])
-        parts.append(f'<div class="noff"><span class="nday" style="margin:0">OFF</span><br>{off}</div>')
+        parts.append('<div class="noff"><div class="nday" style="margin:0 0 2px">OFF'
+                     f'<span>{len(b["retracted"])}</span></div>')
+        for r in b["retracted"]:
+            why = r["why"][len(r["b"]):].strip() if r["why"].startswith(r["b"]) else r["why"]
+            parts.append(f'<div><b>{e(r["b"])}</b> {e(r["stat"])} O{r["line"]:g} · {e(why)}</div>')
+        parts.append('</div>')
     return "".join(parts)
 
 
