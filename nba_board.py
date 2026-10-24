@@ -117,7 +117,9 @@ def board(now=None):
                "b_status": st.get(f["pid"]), "result": f.get("result"), "actual": f.get("actual"),
                "state": ("final" if f.get("result") else "live" if started else "upcoming")}
         if why:
-            out["retracted"].append(dict(row, why=why, matchup=f.get("matchup") or f["team"]))
+            out["retracted"].append(dict(row, why=why, matchup=f.get("matchup") or f["team"],
+                                         game_date=gd, pid=f.get("pid"), raw_stat=stat,
+                                         gtime=f.get("gtime")))
         else:
             games[(gd, tip or "", f.get("matchup") or f["team"])].append(row)
     order = ["TONIGHT", "TOMORROW", "LAST NIGHT"]

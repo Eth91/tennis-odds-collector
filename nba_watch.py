@@ -158,10 +158,71 @@ def _fire(con, label, published, fresh, log):
             log.append("   " + line.strip())
 
 
+def news_step(con, playing, log, sources=None):
+    """Poll the news layer (all sources, or `sources`) and fire on each Out the official report does
+    not list yet. Returns True if anything fired (the books were refreshed)."""
+    import nba_news_watch as NW
+    outs, errs = NW.poll(_now(), con=con, sources=sources)
+    for e in errs:
+        log.append(f"news source error: {e}")
+    by_src = {}
+    for src, pid, nm, tri, gd, at in outs:
+        if (gd, tri) not in playing:
+            continue
+        cur, _ = I.current(gd, con)
+        if (cur.get(pid) or (None, None, None))[2] == "Out":
+            continue                                      # the report already has it
+        by_src.setdefault((src, at), []).append((pid, nm, tri, gd))
+    for (src, at), fr in by_src.items():
+        _fire(con, f"news:{src}", at, fr, log)
+    return bool(by_src)
+
+
+def playing_now():
+    """{(ET date, team)} for teams with a not-started game today or tomorrow."""
+    import nba_flags as F
+    import nba_rosters as R
+    sched = R.schedule()
+    d0 = _now().astimezone(I.ET).date()
+    dates = {(d0 + dt.timedelta(days=h)).isoformat() for h in range(F.HORIZONS)}
+    return sched, {(g["date_et"], t) for g in sched if g["date_et"] in dates and g["status"] == 1
+                   for t in (g["home"], g["away"])}
+
+
+def x_fast(interval=2.0):
+    """FAST X PATH (user 2026-10-24: "0 latency"): a daemon that watches the X log the two X watchers
+    write (@UnderdogNBA + 62 beat writers). The moment it grows, it takes the cycle lock and runs the
+    news step for the X source only: fire -> lines -> flags -> ping. The minute cron + 55 s news
+    throttle had cost 59 s on Cooper Flagg (2026-10-24). RotoWire/bsky stay on the throttled path."""
+    path = Path(os.environ.get("NBA_X_LOG", ""))
+    size = path.stat().st_size if path.is_file() else 0
+    print(f"x_fast: watching {path} every {interval}s", flush=True)
+    while True:
+        try:
+            now_size = path.stat().st_size if path.is_file() else 0
+            if now_size != size:
+                size = now_size
+                log = []
+                with cycle_lock() as got:
+                    if got:
+                        con = sqlite3.connect(I.DB, timeout=60)
+                        con.executescript(I.DDL)
+                        con.execute(TRIG_DDL)
+                        _sched, playing = playing_now()
+                        news_step(con, playing, log, sources=["x"])
+                        con.close()
+                    else:
+                        log.append("lock busy — the next growth or the minute run will catch it")
+                for line in log:
+                    print(f"[{_now():%H:%M:%S}] x_fast {line}", flush=True)
+        except Exception as e:                                       # noqa: BLE001
+            print(f"[{_now():%H:%M:%S}] x_fast error: {type(e).__name__}: {e}", flush=True)
+        time.sleep(interval)
+
+
 def once():
     import nba_flags as F
     import nba_lines as L
-    import nba_news_watch as NW
     import nba_rosters as R
     log = []
     with cycle_lock() as got:
@@ -202,6 +263,8 @@ def once():
                                   (s["mark"],)).fetchone()[0]
                 _fire(con, s["mark"], pub, fr, log)
                 refreshed = True
+        if new:
+            F.void_pass()                      # a new report can retract a pinged play: VOID now
         # 2b. NEWS — throttled; fires only on an Out the official report does not list yet
         try:
             last = NEWS_STAMP.stat().st_mtime
@@ -209,20 +272,7 @@ def once():
             last = 0
         if time.time() - last >= NEWS_EVERY_S:
             NEWS_STAMP.touch()
-            outs, errs = NW.poll(_now(), con=con)
-            for e in errs:
-                log.append(f"news source error: {e}")
-            by_src = {}
-            for src, pid, nm, tri, gd, at in outs:
-                if (gd, tri) not in playing:
-                    continue
-                cur, _ = I.current(gd, con)
-                if (cur.get(pid) or (None, None, None))[2] == "Out":
-                    continue                              # the report already has it
-                by_src.setdefault((src, at), []).append((pid, nm, tri, gd))
-            for (src, at), fr in by_src.items():
-                _fire(con, f"news:{src}", at, fr, log)
-                refreshed = True
+            refreshed = news_step(con, playing, log) or refreshed
         # 3. CLOSE CAPTURE near tip
         soon = [g for g in sched if g["status"] == 1 and 0 <= (
             dt.datetime.fromisoformat(g["utc"].replace("Z", "+00:00")) - _now()
@@ -252,6 +302,12 @@ def once():
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--once", action="store_true", required=True)
-    ap.parse_args()
-    sys.exit(once())
+    ap.add_argument("--once", action="store_true")
+    ap.add_argument("--x-fast", action="store_true", help="daemon: fire the moment the X log grows")
+    a = ap.parse_args()
+    if a.x_fast:
+        x_fast()
+    elif a.once:
+        sys.exit(once())
+    else:
+        ap.error("--once or --x-fast")
