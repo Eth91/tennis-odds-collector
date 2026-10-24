@@ -578,3 +578,41 @@ stored item (`x` 2113480511347945915, Embiid, x:underdog) and registered one pen
 Joel Embiid (PHI), A = 2026-10-24 (0022600106 MIL@PHI), B = 2026-10-25 (0022600117 DET@PHI).
 Dry run on a copy of the news store (nothing written, no ping): with the inferred Out for B, the
 2026-10-25 pass yields one flag, wowy PHI VJ Edgecombe PTS o13.5 at 1.88, trigger `news:inferred`.
+
+---
+
+# AMENDMENT 15 — Doubtful is an absence (2026-10-24, trigger definition, its own cell)
+
+**Why.** User, 2026-10-24: "if a player is doubtful treat them as out." The league's Doubtful means
+he is unlikely to play, and in practice a Doubtful player almost always sits. Until now only Out
+triggered, so a star listed Doubtful (Draymond Green and Kyrie Irving tonight) produced nothing.
+
+**Rule, written before any Doubtful-triggered flag exists.**
+1. ABSENT = {Out, Doubtful}, defined once (`nba_injury_report.ABSENT`). Wherever the trigger or the
+   speed layer asked "is he Out?", it now asks "is he absent?": the flag pass (triggers, the
+   never-a-beneficiary set, tonight's-game count for a tomorrow flag), the report watcher's fresh Outs
+   (absent now and not absent on the previous report for that date, so Doubtful -> Out is not a second
+   trigger), the news layer's "report already has it", and choice resolution (amendment 14).
+2. News: an item that says a player is doubtful, with no other hedge, is stored `doubtful` and
+   triggers like `out`. "Upgraded from doubtful", "no longer doubtful" and a doubtful item that also
+   says questionable / probable / game-time decision stay `other`. A news Out or Doubtful is
+   contradicted only by a later report status outside ABSENT.
+3. Amendment 2's confirmation reads ABSENT: a news-originated flag counts if an official report before
+   tip lists the player Out or Doubtful.
+4. Each flag stores `x_status` = the absent player's strongest status at flag time (Out if the report
+   or a news item says Out, else Doubtful).
+5. **Its own cell, never in the decision.** Flags with `x_status` Doubtful are scored in a separate
+   `doubtful` cell. They are flagged, shown on the board and pinged like any other flag, but they are
+   excluded from the h0/h1 cells and from the board's decision count (DECISION_N). The registered
+   speed test was built on Out triggers, so folding Doubtful in needs a later amendment with its own
+   numbers.
+6. Take-back: the board retracts a flag (and a pinged play gets a VOID) when the absent player's
+   newest report status is Questionable, Probable or Available. Questionable joins the list because a
+   Doubtful -> Questionable upgrade breaks the premise. That applies to Out triggers too.
+
+**Cutover.** Forward only. Flags logged before this deploy keep x_status NULL, read as Out. Doubtful
+players already on tonight's report become triggers on the first pass after deploy. Those flags are
+hours behind the news, which the STALE LINE cell and their latency show, and they are in the
+`doubtful` cell anyway.
+
+**Unchanged:** tiers, thresholds, yardsticks, the decision lines, every Out-triggered verdict.
