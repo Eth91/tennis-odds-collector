@@ -657,3 +657,9 @@ line moves. REB in the band (n = 57, +21.6%) is noise and is not acted on.
 **Cutover.** Forward only, from this deploy.
 
 **Unchanged:** priced, cold, margins, yardsticks, decision lines, every 28+ verdict.
+
+**Amendment 16 applied (2026-10-24T22:03Z).** Deployed to the VM; `nba-x-fast` restarted; the `x_min`
+column added by migration. Dry run first, from a staged copy against the live stores: the 2026-10-24
+pass goes from 4 to 7 flags. The 3 new ones are all wowy GSW Gui Santos (PRA o21.5, PTS o12.5, REB
+o5.5), triggered by Stephen Curry Out (last-10 mean 27.3 min), so they belong to the `x24-28` cell.
+Draymond Green (27.7) and Kyrie Irving (24.3) now qualify as X, but no teammate clears the margin.
