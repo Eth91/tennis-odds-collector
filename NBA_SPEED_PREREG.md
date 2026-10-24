@@ -501,3 +501,19 @@ tiers, the yardsticks, every verdict line. The cutover is recorded below.
 `~/.nba-ping.env`, which the engine's cron env and the fast service both read. 22 existing plays were seeded
 as already pinged. `nba-x-fast.service` is active, and `nba-x-beats` was restarted at a 10 s cadence. Pings
 fire from the next new play on.
+
+---
+
+# AMENDMENT 12 — per-game FanDuel refresh at trigger time (2026-10-24, apparatus only)
+
+**What changes.** A trigger refreshes FanDuel only for the fresh Outs' games before the flag pass
+(`nba_lines.cycle(only_gids=...)`). The board replace, the change log and pulled rungs are all scoped to
+those games, so no other game's rows or quotes are touched. The cycle row is logged as `game`, so the
+near-tip close capture never mistakes it for a full refresh. If it raises, or FanDuel's fetch fails, the
+trigger falls back to the full refresh. DraftKings (the snapshot) is ingested in full, as before.
+
+**Measured on the VM, 2026-10-24 21:4x UTC:** full FanDuel board 3.8 s (8 games left on the slate; 11–13 s
+on the morning's 12-game board), one game 2.6 s, of which about 1.5 s is fixed setup.
+
+**Unchanged:** the price a flag records is still FanDuel's (with any fresh DraftKings snapshot) at the
+moment of the flag. Everything about flags, tiers, yardsticks and verdicts is unchanged.
