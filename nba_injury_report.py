@@ -49,6 +49,9 @@ import wnba_injury_report as W
 HERE = Path(__file__).resolve().parent
 DB = HERE / "nba_news.sqlite"
 ET = ZoneInfo("America/New_York")
+# AMENDMENT 15: Doubtful is an absence. Every trigger and speed-layer check reads this, not "Out".
+ABSENT = ("Out", "Doubtful")
+ABSENT_SQL = "status IN ('Out', 'Doubtful')"
 URL = "https://ak-static.cms.nba.com/referee/injury/Injury-Report_{d}_{h:02d}_{m:02d}{ap}.pdf"
 TEAMS = {
     "Atlanta Hawks": "ATL", "Boston Celtics": "BOS", "Brooklyn Nets": "BKN",

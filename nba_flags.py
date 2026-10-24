@@ -103,6 +103,7 @@ def _fresh_books(con, now):
             out[b] = ts
     return out
 STAR_MIN, ACTIVE_DAYS, MIN_PRIOR_APPS = 28.0, 12, 5    # == nba_wowy / the cold-start test
+WOWY_STAR_MIN = 24.0    # AMENDMENT 16: wowy only; flags with X under STAR_MIN score in their own cell
 
 
 SHADOW_DDL = """CREATE TABLE IF NOT EXISTS flags (
@@ -110,7 +111,8 @@ SHADOW_DDL = """CREATE TABLE IF NOT EXISTS flags (
     x TEXT, b TEXT, stat TEXT, line REAL, odds REAL, proj REAL, margin REAL,
     gid TEXT, gtime TEXT, matchup TEXT, actual REAL, result TEXT, graded_at TEXT,
     ev REAL, pid INTEGER, news_at TEXT, stale INTEGER, horizon INTEGER, x_pid INTEGER,
-    trigger_src TEXT, void_reason TEXT, d_min REAL, opp_cell TEXT, opp_ratio REAL)"""
+    trigger_src TEXT, void_reason TEXT, d_min REAL, opp_cell TEXT, opp_ratio REAL, x_status TEXT,
+    x_min REAL)"""
 COMBO = {"pts_reb": ("points", "rebounds"), "pts_ast": ("points", "assists"),
          "reb_ast": ("rebounds", "assists")}
 
@@ -123,7 +125,8 @@ def _shadow(path):
     for col, typ in (("ev", "REAL"), ("pid", "INTEGER"), ("news_at", "TEXT"),
                      ("stale", "INTEGER"), ("horizon", "INTEGER"), ("x_pid", "INTEGER"),
                      ("trigger_src", "TEXT"), ("void_reason", "TEXT"), ("d_min", "REAL"),
-                     ("opp_cell", "TEXT"), ("opp_ratio", "REAL")):
+                     ("opp_cell", "TEXT"), ("opp_ratio", "REAL"), ("x_status", "TEXT"),
+                     ("x_min", "REAL")):
         if col not in have:
             sh.execute(f"ALTER TABLE flags ADD COLUMN {col} {typ}")
     return sh
@@ -288,7 +291,7 @@ def wowy_live(apps, out_pid, cur_team, games, out_all, why):
         if tri not in games:
             continue
         xa = _team_apps(apps, x_id, tri)
-        if len(xa) < 10 or _mean_last10(xa) < STAR_MIN:
+        if len(xa) < 10 or _mean_last10(xa) < WOWY_STAR_MIN:
             why["wowy_x_not_a_star_here"] += 1
             continue
         for b_id, t in cur_team.items():
@@ -411,8 +414,9 @@ def flags(dry=False, game_date=None):
     for _p, _ap in apps.items():
         for _a in _ap:
             team_dates[_a[3]].add(_a[0])
-    out_all = {pid for pid, v in rep.items() if v[2] == "Out"}
-    out_pid, news_at = {}, {}
+    # AMENDMENT 15: "Out" here means ABSENT (Out or Doubtful); x_status keeps which, for its own cell.
+    out_all = {pid for pid, v in rep.items() if v[2] in I.ABSENT}
+    out_pid, news_at, x_status = {}, {}, {}
     # ⚠️ THE STREAK RESETS AT THE SEASON BOUNDARY. Counted across the summer, a star who rested
     # the last games of April reads as "absence game 3" in October's opener (Mitchell 2026-10-22:
     # last app 04-08, sat 04-10 and 04-12) — and every such first absence of the new season was
@@ -427,11 +431,11 @@ def flags(dry=False, game_date=None):
             rt, _ = I.current(today_et)
         except sqlite3.OperationalError:
             rt = {}
-        tonight_out = {pid for pid, v in rt.items() if v[2] == "Out"}
+        tonight_out = {pid for pid, v in rt.items() if v[2] in I.ABSENT}
         tonight_teams = {t for g in sched if g["date_et"] == today_et and g["status"] != 3
                          for t in (g["home"], g["away"])}
     for pid, (nm, tri, st, first) in rep.items():
-        if st != "Out":
+        if st not in I.ABSENT:
             continue
         xa = _team_apps(apps, pid, tri)
         if xa and absence_index(xa[-1][0], team_dates[tri], season,
@@ -439,7 +443,7 @@ def flags(dry=False, game_date=None):
             why["x_absence_game_gt2"] += 1
             continue
         out_pid[pid] = (nm, tri)
-        news_at[pid] = first
+        news_at[pid], x_status[pid] = first, st
     trig_src = {pid: "report" for pid in out_pid}
     # ── NEWS (amendment 2): add-only. An Out the report does not list yet is added; for one it
     # already lists, the EARLIER of the two times is the news time, credited to whoever was first.
@@ -449,10 +453,12 @@ def flags(dry=False, game_date=None):
     except sqlite3.OperationalError:
         nws = {}
     _t = lambda iso: dt.datetime.fromisoformat(iso)
-    for pid, (nm, tri, at, src) in nws.items():
-        if rep.get(pid, (None, None, None))[2] == "Out":
+    for pid, (nm, tri, at, src, nst) in nws.items():
+        if rep.get(pid, (None, None, None))[2] in I.ABSENT:
             if pid in news_at and _t(at) < _t(news_at[pid]):
                 news_at[pid], trig_src[pid] = at, f"news:{src}"
+            if pid in x_status and nst == "Out":
+                x_status[pid] = "Out"                  # the strongest word at flag time
             continue
         out_all.add(pid)
         xa = _team_apps(apps, pid, tri)
@@ -460,9 +466,14 @@ def flags(dry=False, game_date=None):
                                 pid in tonight_out and tri in tonight_teams) > MAX_ABSENCE_GAME:
             why["x_absence_game_gt2"] += 1
             continue
-        out_pid[pid], news_at[pid], trig_src[pid] = (nm, tri), at, f"news:{src}"
+        out_pid[pid], news_at[pid], trig_src[pid], x_status[pid] = (nm, tri), at, f"news:{src}", nst
         why["x_from_news"] += 1
 
+    # AMENDMENT 16: every flag carries X's last-10 minutes for this franchise (the 24-28 cell).
+    x_min = {}
+    for _x, (_n, _t) in out_pid.items():
+        _xa = _team_apps(apps, _x, _t)
+        x_min[_x] = _mean_last10(_xa) if _xa else None
     # wowy: computed live (amendment 7). nba_wowy.sqlite is no longer read by the flag pass.
     cands = wowy_live(apps, out_pid, cur_team, games, out_all, why)
 
@@ -550,7 +561,8 @@ def flags(dry=False, game_date=None):
                           "ev": round(r["ev"], 4), "gid": gid, "gtime": gtime, "matchup": mu,
                           "pid": r["_pid"], "news_at": r["_news"], "stale": r["_stale"],
                           "game_date": gdate, "horizon": horizon, "x_pid": r["_x_id"],
-                          "trigger_src": trig_src.get(r["_x_id"]), "d_min": r.get("d_min")})
+                          "trigger_src": trig_src.get(r["_x_id"]), "d_min": r.get("d_min"),
+                          "x_status": x_status.get(r["_x_id"]), "x_min": x_min.get(r["_x_id"])})
     for tier, tri, xname, b_id, stat, proj, margin, x_id, d_min in cands:
         lk = lines.get((b_id, LEDGER_STAT[stat]))
         if not lk:
@@ -565,7 +577,8 @@ def flags(dry=False, game_date=None):
                           "margin": round(proj - line, 1), "gid": gid, "gtime": gtime,
                           "matchup": mu, "pid": b_id, "news_at": news_at.get(x_id),
                           "game_date": gdate, "horizon": horizon, "x_pid": x_id,
-                          "trigger_src": trig_src.get(x_id), "d_min": d_min})
+                          "trigger_src": trig_src.get(x_id), "d_min": d_min,
+                          "x_status": x_status.get(x_id), "x_min": x_min.get(x_id)})
 
     # AMENDMENT 9: OPPORTUNITY-CONFIRMED, at flag time, from the same prior split wowy uses
     trk = load_tracking({f["pid"] for f in out_flags if f.get("pid")})
@@ -588,14 +601,14 @@ def flags(dry=False, game_date=None):
                 continue
             cur = sh.execute("INSERT OR IGNORE INTO flags (flag_id, logged_at, game_date, tier, "
                              "team, x, b, stat, line, odds, proj, margin, gid, gtime, matchup, ev, "
-                             "pid, news_at, stale, horizon, x_pid, trigger_src, d_min, opp_cell, opp_ratio) "
-                             "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                             "pid, news_at, stale, horizon, x_pid, trigger_src, d_min, opp_cell, opp_ratio, x_status, x_min) "
+                             "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                              (fid, stamp, f["game_date"], f["tier"], f["team"], f["x"], f["b"],
                               f["stat"], f["line"], f["odds"], f["proj"], f["margin"],
                               f["gid"], f["gtime"], f["matchup"], f.get("ev"), f.get("pid"),
                               f.get("news_at"), f.get("stale"), f["horizon"], f.get("x_pid"),
                               f.get("trigger_src"), f.get("d_min"), f.get("opp_cell"),
-                              f.get("opp_ratio")))
+                              f.get("opp_ratio"), f.get("x_status"), f.get("x_min")))
             new_shadow += cur.rowcount
             if cur.rowcount:
                 inserted.append(dict(f, flag_id=fid))

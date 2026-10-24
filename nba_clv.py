@@ -152,12 +152,13 @@ def collect():
             if r["logged_at"] >= AMEND9_CUTOVER:             # stored at flag time (amendment 9)
                 row["cells"]["OPPORTUNITY"] = r.get("opp_cell") or "n/a"
         # AMENDMENT 2: a news-originated trigger counts only if an official report published
-        # before tip lists the absent player Out for that game; otherwise it is an audit row.
+        # before tip lists the absent player Out (or Doubtful, amendment 15) for that game;
+        # otherwise it is an audit row.
         if (r.get("trigger_src") or "report").startswith("news"):
             ok = False
             if nw is not None and r.get("x_pid"):
                 for (pub,) in nw.execute("SELECT published_at FROM snapshots WHERE game_date=? "
-                                         "AND pid=? AND status='Out'", (r["game_date"], r["x_pid"])):
+                                         "AND pid=? AND status IN ('Out', 'Doubtful')", (r["game_date"], r["x_pid"])):
                     if _utc_naive(pub) <= tip:
                         ok = True
                         break
@@ -216,13 +217,15 @@ def view(r, yardstick):
         if "u_flag" in r:
             v.update(u_flag=r["u_flag"], u_close=r["u_close"])
     return dict(v, gid=r["gid"], latency_min=r.get("latency_min"), tier=r["tier"],
-                cells=r.get("cells"))
+                cells=r.get("cells"), x_status=r.get("x_status"), x_min=r.get("x_min"))
 
 
 def scoreboard(rows):
     by = defaultdict(list)
     for r in rows:
         cell = ("unconfirmed-news" if r.get("confirmed") is False
+                else "doubtful" if r.get("x_status") == "Doubtful"
+                else "x24-28" if r.get("x_min") is not None and r["x_min"] < 28
                 else f"h{r.get('horizon') or 0}")
         for ys in ("FD", "FD+DK"):
             by[f"{r['tier']}/{cell} {ys}"].append(view(r, ys))
@@ -230,6 +233,10 @@ def scoreboard(rows):
           "h1 = a ruling for tomorrow's game, flagged the day before (amendment 1, its own cell).\n"
           "unconfirmed-news = triggered by news the official report never confirmed before tip\n"
           "(amendment 2: an audit cell, never in a verdict).\n"
+          "doubtful = the absent player was Doubtful, not Out, at flag time (amendment 15: its own\n"
+          "cell, never in the decision).\n"
+          "x24-28 = wowy with the absent player at 24-28 min (amendment 16: its own cell, never in\n"
+          "the decision).\n"
           "FD = FanDuel at flag time vs FanDuel at tip (amendment 4, the PRIMARY yardstick);\n"
           "FD+DK = the flag's best-of-two price vs the best-of-two close (secondary).\n"
           "beat-close CI resamples games (clustered); a CI needs >= 10 games\n"

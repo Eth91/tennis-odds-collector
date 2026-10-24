@@ -31,6 +31,8 @@ LOCK="/tmp/nba-cycle.lock"
 stamp(){ date -u +%FT%TZ; }
 
 # one cycle at a time; a lock older than 30 min is a crashed run, not a live one
+# a plain FILE at the lock path is stray (amendment 17): the lock is a directory
+[ -e "$LOCK" ] && [ ! -d "$LOCK" ] && rm -f "$LOCK"
 if ! mkdir "$LOCK" 2>/dev/null; then
   if [ -n "$(find "$LOCK" -maxdepth 0 -mmin +30 2>/dev/null)" ]; then
     rm -rf "$LOCK"; mkdir "$LOCK" || exit 0

@@ -111,13 +111,14 @@ def _migrate(con):
     if "seeded" not in {r[1] for r in con.execute("PRAGMA table_info(news_items)")}:
         con.execute("ALTER TABLE news_items ADD COLUMN seeded INTEGER DEFAULT 0")
 
-# OUT-class phrasing only. "Doubtful"/"questionable" are not absences and never trigger.
+# OUT-class phrasing. "Questionable" is not an absence and never triggers. "Doubtful" is (amendment
+# 15): it is stored `doubtful` and triggers like `out`.
 OUT_RE = re.compile(r"\b(ruled out|listed out|won'?t (?:play|suit up|be available|dress)|will not "
                     r"(?:play|suit up|be available|dress)|will miss|out for|inactive for|"
                     r"sidelined for|not (?:playing|available)|remains out|listed as out)\b", re.I)
 # A HEDGE means the item is not an absence. Kept narrow on purpose: generic words like
 # "return" appear in real Out items ("...will look to return Saturday") and must not cancel them.
-NOT_OUT_RE = re.compile(r"\b(questionable|doubtful|probable|game-time decision|"
+NOT_OUT_RE = re.compile(r"\b(questionable|probable|game-time decision|"
                         r"(?:will|expected to|set to) play|cleared to play|"
                         r"upgraded to (?:available|probable|questionable))\b", re.I)
 # A CHOICE is not a ruling (2026-10-24): "Embiid said he won't play in both legs of the back-to-back
@@ -130,6 +131,10 @@ CHOICE_RE = re.compile(r"\b(?:won'?t|will not|not) (?:play|suit up|be available|
                        r"(?:in )?(?:only )?(?:one|either) of\b|"
                        r"\bone of (?:them|the two|those|these|the (?:two |back-to-back )?(?:games|nights|legs))\b|"
                        r"\beither (?:game|night|leg|end)\b|\bonly one of\b", re.I)
+# AMENDMENT 15: "doubtful" with no other hedge is an absence. Not "upgraded from doubtful", "no longer
+# doubtful", or a doubtful that also says questionable / probable / game-time decision.
+DOUBTFUL_RE = re.compile(r"\bdoubtful\b", re.I)
+NOT_DOUBTFUL_RE = re.compile(r"\b(?:no longer|not|upgraded? from|removed? from|off)\b[\w\s]{0,12}?\bdoubtful\b", re.I)
 SIT_CHOICE_RE = re.compile(r"\b(?:sit|sitting|rest|resting|miss|missing)(?: out)? (?:one|either)\b", re.I)
 DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
@@ -153,6 +158,9 @@ def status_of(headline, body=""):
             return "choice" if CHOICE_RE.search(t) else "out"
         if CHOICE_RE.search(t) and SIT_CHOICE_RE.search(t) and not NOT_OUT_RE.search(t):
             return "choice"                    # "will sit one of the two games" carries no Out verb
+        if DOUBTFUL_RE.search(t):
+            hedged = NOT_OUT_RE.search(t) or NOT_DOUBTFUL_RE.search(t) or CHOICE_RE.search(t)
+            return "other" if hedged else "doubtful"
         if NOT_OUT_RE.search(t or ""):
             return "other"
     return "other"
@@ -330,6 +338,68 @@ def resolve(item, index, playing_by_date, now_et):
     return pid, name, index[pid][0], gdate
 
 
+# AMENDMENT 17: a post naming several players ("Jalen Green doubtful, Oso Ighodaro out for Warriors vs.
+# Suns on Saturday") is read clause by clause, and each clause naming exactly one player gets its own
+# status. "Doubtful: A, B" lines give every named player the label. Bare "out" counts only as a short
+# clause's last word or before a time/game phrase ("Al Horford also out"), never "worked out at ...".
+LABEL_LINE_RE = re.compile(r"^\W*(out|doubtful|questionable|probable|available|game-time decision|gtd)"
+                           r"\s*:\s*(.+)$", re.I)
+CLAUSE_SPLIT_RE = re.compile(r"[,;&\n]|\band\b|(?<=[a-z0-9)])\.\s+(?=[A-Z])")
+BARE_OUT_RE = re.compile(r"\bout(?:\s+(?:tonight|today|for\b.*|vs\b.*|against\b.*|on\b.*|" + "|".join(
+    ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]) + r"))?\W*$", re.I)
+
+
+def _named(text, index, teams):
+    ft = f" {fold(text)} "
+    return [(p, n) for p, (t, n, _) in index.items()
+            if t in teams and len(fold(n).split()) >= 2 and f" {fold(n)} " in ft]
+
+
+def clause_status(clause):
+    st = status_of("", clause)
+    if (st == "other" and len(clause.split()) <= 8 and BARE_OUT_RE.search(clause)
+            and not NOT_OUT_RE.search(clause) and not CHOICE_RE.search(clause)):
+        st = "out"
+    return st
+
+
+def split_list(item, index, playing_by_date, now_et):
+    """AMENDMENT 17: [(pid, name, team, game_date, status)] for each player of a MULTI-player post whose
+    own clause (or labelled line) reads out / doubtful. [] for a one-player post or no playing date."""
+    text = f"{item['headline']}\n{item['body']}"
+    gdate = game_date_of(item["headline"], item["body"], now_et)
+    if not gdate or gdate not in playing_by_date or item.get("team_name"):
+        return []
+    teams = playing_by_date[gdate]
+    if len(_named(text, index, teams)) < 2:
+        return []
+    found = {}
+    for line in text.splitlines():
+        m = LABEL_LINE_RE.match(line)
+        if m:
+            st = {"out": "out", "doubtful": "doubtful"}.get(m.group(1).lower())
+            for p, n in (_named(m.group(2), index, teams) if st else []):
+                found.setdefault(p, (n, st))
+            continue
+        for clause in CLAUSE_SPLIT_RE.split(line):
+            named = _named(clause, index, teams)
+            if len(named) == 1 and clause_status(clause) in ("out", "doubtful"):
+                found.setdefault(named[0][0], (named[0][1], clause_status(clause)))
+    return [(p, n, index[p][0], gdate, st) for p, (n, st) in found.items()]
+
+
+def store_list(con, name, it, subs, seen_at):
+    """Store each split absence as its own item `{item}#{pid}`; returns the NEW ones as poll outs."""
+    new = []
+    for pid, pname, tri, gdate, st in subs:
+        cur = con.execute("INSERT OR IGNORE INTO news_items VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                          (name, f"{it['item_id']}#{pid}", seen_at, pname, pid, tri, gdate, st,
+                           it["headline"], it["body"], it["provenance"], 0))
+        if cur.rowcount:
+            new.append((name, pid, pname, tri, gdate, seen_at))
+    return new
+
+
 def poll(now=None, sources=None, con=None):
     """Poll enabled sources; store every NEW item (Out-class or not, for the journal).
     Returns [(source, pid, name, team, game_date, detected_at)] for new OUT items."""
@@ -378,14 +448,43 @@ def poll(now=None, sources=None, con=None):
             con.execute("INSERT INTO news_items VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
                         (name, it["item_id"], seen_at, pname, pid, tri, gdate, st,
                          it["headline"], it["body"], it["provenance"], int(seed)))
-            if st == "out" and pid and not seed:
+            if st in ("out", "doubtful") and pid and not seed:
                 new_outs.append((name, pid, pname, tri, gdate, seen_at))
+            if not hit and not seed:                  # amendment 17: a list post, player by player
+                new_outs += store_list(con, name, it, split_list(it, index, playing, now_et), seen_at)
             if st == "choice" and not seed:
                 register_choice(con, it, index, team_games, now_et, now)
     con.commit()
     if own:
         con.close()
     return new_outs, errors
+
+
+def reread_lists(now=None, con=None):
+    """One-off (amendment 17): today's stored, unresolved, unseeded items re-read player by player.
+    Each item's day words are read from the time it was first seen. Returns the new absences as poll
+    outs [(source, pid, name, team, game_date, detected_at)]."""
+    now = now or dt.datetime.now(dt.timezone.utc)
+    own = con is None
+    con = con or sqlite3.connect(DB, timeout=60)
+    _migrate(con)
+    index, _ = R.player_index(now.astimezone(ET).date().isoformat())
+    playing = {}
+    for g in R.schedule():
+        if g["status"] == 1:
+            playing.setdefault(g["date_et"], set()).update((g["home"], g["away"]))
+    day0 = (now - dt.timedelta(hours=24)).isoformat()
+    new = []
+    for src, iid, at, hl, body, prov in con.execute(
+            "SELECT source, item_id, detected_at, headline, body, provenance FROM news_items WHERE pid IS NULL "
+            "AND COALESCE(seeded,0)=0 AND detected_at >= ? AND item_id NOT LIKE '%#%'", (day0,)).fetchall():
+        it = {"item_id": iid, "headline": hl or "", "body": body or "", "provenance": prov}
+        seen_et = dt.datetime.fromisoformat(at).astimezone(ET)
+        new += store_list(con, src, it, split_list(it, index, playing, seen_et), at)
+    con.commit()
+    if own:
+        con.close()
+    return new
 
 
 def reclassify_choices(now=None, con=None):
@@ -418,23 +517,26 @@ def reclassify_choices(now=None, con=None):
 
 
 def news_outs(game_date, con=None):
-    """{pid: (name, team, earliest_detected_at, source)} — news Outs for game_date that NO later
-    official report contradicts (a non-Out status for that player-game published after the item)."""
+    """{pid: (name, team, earliest_detected_at, source, status)} — news Outs and Doubtfuls (amendment
+    15) for game_date that NO later official report contradicts (a status outside I.ABSENT for that
+    player-game published after the item). status is "Out" if any item says out, else "Doubtful"."""
     own = con is None
     con = con or sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
     try:
         rows = con.execute("SELECT pid, player, team, MIN(detected_at), source FROM news_items "
-                           "WHERE game_date=? AND status='out' AND pid IS NOT NULL "
+                           "WHERE game_date=? AND status IN ('out', 'doubtful') AND pid IS NOT NULL "
                            "AND COALESCE(seeded,0)=0 GROUP BY pid", (game_date,)).fetchall()
+        said_out = {p for (p,) in con.execute("SELECT DISTINCT pid FROM news_items WHERE game_date=? "
+                                              "AND status='out' AND COALESCE(seeded,0)=0", (game_date,))}
     except sqlite3.OperationalError:
-        rows = []
+        rows, said_out = [], set()
     out = {}
     for pid, name, team, first, src in rows:
         contra = con.execute(
-            "SELECT 1 FROM snapshots WHERE game_date=? AND pid=? AND status!='Out' AND "
+            f"SELECT 1 FROM snapshots WHERE game_date=? AND pid=? AND NOT {I.ABSENT_SQL} AND "
             "published_at > ? LIMIT 1", (game_date, pid, first)).fetchone()
         if not contra:
-            out[pid] = (name, team, first, src)
+            out[pid] = (name, team, first, src, "Out" if pid in said_out else "Doubtful")
     if own:
         con.close()
     return out
@@ -446,8 +548,8 @@ def journal():
     rows = con.execute("""
         SELECT n.source, n.provenance, n.player, n.game_date, MIN(n.detected_at),
                (SELECT MIN(s.published_at) FROM snapshots s
-                 WHERE s.pid = n.pid AND s.game_date = n.game_date AND s.status = 'Out')
-        FROM news_items n WHERE n.status='out' AND n.pid IS NOT NULL AND COALESCE(n.seeded,0)=0
+                 WHERE s.pid = n.pid AND s.game_date = n.game_date AND s.status IN ('Out', 'Doubtful'))
+        FROM news_items n WHERE n.status IN ('out', 'doubtful') AND n.pid IS NOT NULL AND COALESCE(n.seeded,0)=0
         GROUP BY n.source, n.pid, n.game_date ORDER BY 5""").fetchall()
     if not rows:
         print("news journal: no resolved news Outs yet")

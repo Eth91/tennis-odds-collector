@@ -578,3 +578,130 @@ stored item (`x` 2113480511347945915, Embiid, x:underdog) and registered one pen
 Joel Embiid (PHI), A = 2026-10-24 (0022600106 MIL@PHI), B = 2026-10-25 (0022600117 DET@PHI).
 Dry run on a copy of the news store (nothing written, no ping): with the inferred Out for B, the
 2026-10-25 pass yields one flag, wowy PHI VJ Edgecombe PTS o13.5 at 1.88, trigger `news:inferred`.
+
+---
+
+# AMENDMENT 15 — Doubtful is an absence (2026-10-24, trigger definition, its own cell)
+
+**Why.** User, 2026-10-24: "if a player is doubtful treat them as out." The league's Doubtful means
+he is unlikely to play, and in practice a Doubtful player almost always sits. Until now only Out
+triggered, so a star listed Doubtful (Draymond Green and Kyrie Irving tonight) produced nothing.
+
+**Rule, written before any Doubtful-triggered flag exists.**
+1. ABSENT = {Out, Doubtful}, defined once (`nba_injury_report.ABSENT`). Wherever the trigger or the
+   speed layer asked "is he Out?", it now asks "is he absent?": the flag pass (triggers, the
+   never-a-beneficiary set, tonight's-game count for a tomorrow flag), the report watcher's fresh Outs
+   (absent now and not absent on the previous report for that date, so Doubtful -> Out is not a second
+   trigger), the news layer's "report already has it", and choice resolution (amendment 14).
+2. News: an item that says a player is doubtful, with no other hedge, is stored `doubtful` and
+   triggers like `out`. "Upgraded from doubtful", "no longer doubtful" and a doubtful item that also
+   says questionable / probable / game-time decision stay `other`. A news Out or Doubtful is
+   contradicted only by a later report status outside ABSENT.
+3. Amendment 2's confirmation reads ABSENT: a news-originated flag counts if an official report before
+   tip lists the player Out or Doubtful.
+4. Each flag stores `x_status` = the absent player's strongest status at flag time (Out if the report
+   or a news item says Out, else Doubtful).
+5. **Its own cell, never in the decision.** Flags with `x_status` Doubtful are scored in a separate
+   `doubtful` cell. They are flagged, shown on the board and pinged like any other flag, but they are
+   excluded from the h0/h1 cells and from the board's decision count (DECISION_N). The registered
+   speed test was built on Out triggers, so folding Doubtful in needs a later amendment with its own
+   numbers.
+6. Take-back: the board retracts a flag (and a pinged play gets a VOID) when the absent player's
+   newest report status is Questionable, Probable or Available. Questionable joins the list because a
+   Doubtful -> Questionable upgrade breaks the premise. That applies to Out triggers too.
+
+**Cutover.** Forward only. Flags logged before this deploy keep x_status NULL, read as Out. Doubtful
+players already on tonight's report become triggers on the first pass after deploy. Those flags are
+hours behind the news, which the STALE LINE cell and their latency show, and they are in the
+`doubtful` cell anyway.
+
+**Unchanged:** tiers, thresholds, yardsticks, the decision lines, every Out-triggered verdict.
+
+**Amendment 15 applied (2026-10-24T21:58Z).** Deployed to the VM; `nba-x-fast` restarted; the
+`x_status` column added by migration. Dry run first, from a staged copy against the live stores
+(nothing written, no ping): Draymond Green (GSW) and Kyrie Irving (DAL), both Doubtful on the 17:45 ET
+report, are now triggers, and neither yields a flag. Each is under wowy's 28-minute star bar (last-10
+mean 27.7 and 24.3), so the registered rule, not this amendment, decides tonight. The prompting item,
+RotoBaller's "Jalen Green doubtful" (x 2114108943777562818), named two players and so never resolved.
+The official report never listed Jalen Green; the Doubtful Green is Draymond.
+
+---
+
+# AMENDMENT 16 — the 24-28 minute band for wowy (2026-10-24, its own cell)
+
+**Why.** User, 2026-10-24: "why not look at changing that to like 24+ mins." Tonight two Doubtful
+starters were triggers but not "stars here": Draymond Green (last-10 mean 27.7 min) and Kyrie Irving
+(24.3). The 28-minute bar is inherited from the Phase-0 backtest. It was never tuned.
+
+**The check, run before this text.** The wowy real-line backtest (nba_margin_refit's population and
+formulas, the shipped wowy MARGIN, best US over price at the main line, 2023-10-26 to 2025-04-13), with
+the bar at 24 and each row tagged by X's trailing-10 minutes:
+
+| X minutes | flags | dates | hit | ROI | 95% CI (date-clustered) |
+|---|---|---|---|---|---|
+| 28+ (today) | 2,585 | 282 | 51.7% | −3.83% | −8.6% to +1.1% |
+| 24-28 | 820 | 169 | 52.3% | −2.33% | −11.4% to +6.5% |
+
+The 24-28 band is no worse than 28+. Both lose a little at the historical (late) lines, which is
+why speed is the open thesis. Beneficiaries gain less (median d_min +0.90 vs +1.30), so expect smaller
+line moves. REB in the band (n = 57, +21.6%) is noise and is not acted on.
+
+**Rule.**
+1. wowy only: X qualifies at a last-10 mean of 24 minutes for this franchise (`WOWY_STAR_MIN`). priced
+   and cold keep 28, because their own tests were not re-run.
+2. Every flag stores `x_min` (X's last-10 mean at flag time).
+3. **Its own cell, never in the decision.** wowy flags with x_min < 28 are scored in an `x24-28` cell,
+   excluded from h0/h1 and from the board's decision count, like amendment 15's `doubtful` cell. A flag
+   that is both goes to `doubtful`. They are flagged, shown and pinged as usual.
+
+**Cutover.** Forward only, from this deploy.
+
+**Unchanged:** priced, cold, margins, yardsticks, decision lines, every 28+ verdict.
+
+**Amendment 16 applied (2026-10-24T22:03Z).** Deployed to the VM; `nba-x-fast` restarted; the `x_min`
+column added by migration. Dry run first, from a staged copy against the live stores: the 2026-10-24
+pass goes from 4 to 7 flags. The 3 new ones are all wowy GSW Gui Santos (PRA o21.5, PTS o12.5, REB
+o5.5), triggered by Stephen Curry Out (last-10 mean 27.3 min), so they belong to the `x24-28` cell.
+Draymond Green (27.7) and Kyrie Irving (24.3) now qualify as X, but no teammate clears the margin.
+
+---
+
+# AMENDMENT 17 — list posts are read player by player (2026-10-24, news layer, apparatus only)
+
+**Why.** User, 2026-10-24: "if a tweet from one of those accounts says doubtful treat them as out, do not
+wait for the official report, we need speed, so treat jalen green as out due to that report. If
+rotoballer, underdog nba or the official reports lists an injury status then that is what we trust."
+RotoBaller (21:37:38Z): "Jalen Green doubtful, Oso Ighodaro out for Warriors vs. Suns on Saturday". It
+names two players, so the one-player resolver dropped it, and Jalen Green never triggered. (The official
+report has not listed him; the user has decided to act on RotoBaller's word.)
+
+**Rule.**
+1. When an item's text names two or more players (full names, teams playing on the item's date), it is
+   read clause by clause. Clauses are split on line breaks, commas, semicolons, "and", "&" and sentence
+   ends. A line of the form "Doubtful: A, B" gives every named player that line's label.
+2. A clause naming exactly one player gets its own status from the same classifier (amendments 13 and
+   15). Each `out` / `doubtful` clause is stored as its own news item, id `{item}#{pid}`, with the parent
+   item's detection time and provenance, and triggers like any news item. Clauses whose status is not
+   an absence are not stored.
+3. A one-player item is read as before. Surname-only mentions still never resolve ("Green doubtful"
+   stays unresolved).
+4. Scoring is unchanged: amendment 2 still scores a news-originated flag only if an official report lists
+   the player Out or Doubtful before tip. Acting is immediate; the confirmation rule only decides the cell.
+5. One-off: today's unresolved items are re-read under this rule, and any resolved absence fires once.
+   Its news time is the time we first saw the parent item.
+
+Also (apparatus): the cycle lock is a directory. A plain file at its path (left by an ad-hoc script on
+2026-10-24 21:46Z, which blinded the watcher until 22:07Z) is now removed as stray, by both the watcher
+and the cycle script.
+
+**Unchanged:** tiers, thresholds, yardsticks, verdicts.
+
+**Amendment 17 applied (2026-10-24T22:11Z).** Deployed; `nba-x-fast` restarted. Preview before the
+one-off: today's unresolved posts yield 10 per-player absences. 9 match the official report exactly
+(Veesaar, Horford ×2, Draymond Green ×2 Doubtful, Duren, Ighodaro ×3); Jalen Green (RotoBaller, Doubtful)
+is the one the report does not list. `reread_lists()` under the cycle lock stored all 10. Only Jalen Green
+fired (the rest were already on the report): news time 21:37:38Z, flagged 22:11:56Z, so 34 min late
+because of the resolver gap. New wowy flags: PHX Dillon Brooks PTS o16.5 @1.96 and PHX Collin Gillespie
+PTS o8.5 @1.80 (x_status Doubtful, x_min 25.6, so `doubtful` cell). All 5 new pings delivered.
+The stray lock file was removed at 22:07Z. Watcher blind 21:46-22:07Z: cycles at 21:53 and 22:03 were
+skipped, and the 18:00 ET report was processed 7 min late.
