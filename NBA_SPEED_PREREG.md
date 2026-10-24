@@ -799,3 +799,6 @@ So the WNBA did not establish the rule.
    Accepted as the WNBA did: a losing cell costs more than a missed one.
 
 **Unchanged:** tiers, thresholds, yardsticks, verdicts, the decision count.
+
+**Amendment 19 applied (2026-10-24T23:29Z).** Deployed; `nba-x-fast` restarted. AMEND19_CUTOVER =
+2026-10-24T23:30:00Z; the combo readout shows 0/60 at deploy. Tonight's carded plays stand (sticky).
