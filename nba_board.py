@@ -14,7 +14,7 @@ ONE ROW PER OPPORTUNITY — (game, player, stat), using the EARLIEST flag, the o
 
 RETRACTED (display only; the shadow record still scores every flag as registered). This happens when
 the newest official report for that game lists the flagged player Out or Doubtful, or the absent star
-Available or Probable. A retracted row moves to a compact strip and never vanishes
+Questionable, Available or Probable (Questionable since amendment 15). A retracted row moves to a compact strip and never vanishes
 (feedback_ping_board_coherence). Voided flags (a pre-registered exclusion) are not plays and are not
 shown.
 
@@ -37,7 +37,8 @@ ET, MT = ZoneInfo("America/New_York"), ZoneInfo("America/Denver")
 STAT = {"pts": "points", "reb": "rebounds", "ast": "assists"}          # wowy/cold short keys
 LABEL = {"points": "PTS", "rebounds": "REB", "assists": "AST", "pra": "PRA", "pts_reb": "P+R",
          "pts_ast": "P+A", "reb_ast": "R+A", "threes": "3PM"}
-B_OFF, X_BACK = ("Out", "Doubtful"), ("Available", "Probable")
+# X_BACK: amendment 15 adds Questionable (a Doubtful -> Questionable upgrade breaks the premise).
+B_OFF, X_BACK = ("Out", "Doubtful"), ("Questionable", "Available", "Probable")
 DECISION_N = 100
 
 
@@ -131,7 +132,7 @@ def board(now=None):
         if gs:
             out["slates"].append({"date": gd, "label": label, "games": gs})
     rows = V.collect()
-    fd_rows = [V.view(r, "FD") for r in rows]
+    fd_rows = [V.view(r, "FD") for r in rows if r.get("x_status") != "Doubtful"]   # amendment 15
     closed = [v for v in fd_rows if v["close"]]
     graded = [v for v in closed if "u_flag" in v]
     out["record"] = {"closed": len(closed), "beat": sum(1 for v in closed if v["beat"]),

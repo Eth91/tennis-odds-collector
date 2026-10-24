@@ -14,7 +14,7 @@ THU = dt.datetime(2026, 10, 22, 16, 30, tzinfo=N.ET)
 
 def test_classifier():
     cases = [("Ruled out for Friday", "", "out"), ("Won't suit up Friday", "", "out"),
-             ("Doubtful for Friday", "", "other"), ("Remains out for Friday", "", "out"),
+             ("Doubtful for Friday", "", "doubtful"), ("Remains out for Friday", "", "out"),
              ("Missing second straight game", "Martin (thumb) won't play Friday.", "out"),
              ("Won't play Friday", "He'll look to return Saturday.", "out"),
              ("Questionable for Friday", "", "other"), ("Iffy for Friday", "", "other"),
@@ -110,7 +110,7 @@ def test_underdog_phrasings():
     cases = [("Anthony Black (ankle) listed out for Friday.", "out"),
              ("Keefe: AJ Dybantsa (ankle) ruled out for Friday; remains day-to-day.", "out"),
              ("Jewell Loyd (leg) listed out Wednesday.", "out"),
-             ("Jewell Loyd (leg) downgraded to doubtful for Wednesday.", "other"),
+             ("Jewell Loyd (leg) downgraded to doubtful for Wednesday.", "doubtful"),
              ("Josh Giddey (wrist) listed probable for Friday.", "other"),
              ("Aaron Nesmith (hamstring) listed questionable for Friday.", "other"),
              ("Jarrett Allen (knee) plans to play Thursday, per @realDCunningham.", "other"),

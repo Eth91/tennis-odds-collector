@@ -99,19 +99,19 @@ def cycle_lock():
 
 
 def fresh_outs(con, mark):
-    """[(pid, name, team, game_date)] Out in `mark` but not Out in the previous report that
-    listed the same game date."""
+    """[(pid, name, team, game_date)] absent (Out or Doubtful, amendment 15) in `mark` but not absent
+    in the previous report that listed the same game date: Doubtful -> Out is not a second trigger."""
     out = []
     for gdate in [g for (g,) in con.execute(
             "SELECT DISTINCT game_date FROM snapshots WHERE mark=?", (mark,))]:
         prev = con.execute("SELECT MAX(mark) FROM snapshots WHERE game_date=? AND mark<?",
                            (gdate, mark)).fetchone()[0]
         was = {p for (p,) in con.execute(
-            "SELECT pid FROM snapshots WHERE mark=? AND game_date=? AND status='Out'",
+            f"SELECT pid FROM snapshots WHERE mark=? AND game_date=? AND {I.ABSENT_SQL}",
             (prev, gdate))} if prev else set()
         for pid, name, team in con.execute(
-                "SELECT pid, player, team FROM snapshots WHERE mark=? AND game_date=? AND "
-                "status='Out' AND pid IS NOT NULL", (mark, gdate)):
+                f"SELECT pid, player, team FROM snapshots WHERE mark=? AND game_date=? AND "
+                f"{I.ABSENT_SQL} AND pid IS NOT NULL", (mark, gdate)):
             if pid not in was:
                 out.append((pid, name, team, gdate))
     return out
@@ -153,10 +153,10 @@ def resolve_choices(con, sched, log, fire=None, box_get=None):
         if b < today:
             done("expired", "both games passed")
             continue
-        if ((I.current(a, con)[0].get(pid) or (None, None, None))[2]) == "Out":
+        if ((I.current(a, con)[0].get(pid) or (None, None, None))[2]) in I.ABSENT:
             done("plays_b", f"official report lists him Out for {a}")
             continue
-        if ((I.current(b, con)[0].get(pid) or (None, None, None))[2]) == "Out":
+        if ((I.current(b, con)[0].get(pid) or (None, None, None))[2]) in I.ABSENT:
             done("out_b_report", f"official report already lists him Out for {b}")
             continue
         g = next((x for x in sched if x["date_et"] == a and tri in (x["home"], x["away"])), None)
@@ -243,7 +243,7 @@ def news_step(con, playing, log, sources=None):
         if (gd, tri) not in playing:
             continue
         cur, _ = I.current(gd, con)
-        if (cur.get(pid) or (None, None, None))[2] == "Out":
+        if (cur.get(pid) or (None, None, None))[2] in I.ABSENT:
             continue                                      # the report already has it
         by_src.setdefault((src, at), []).append((pid, nm, tri, gd))
     for (src, at), fr in by_src.items():

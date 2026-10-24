@@ -99,7 +99,7 @@ def ping_plays(sh, flags, now=None, sender=send):
 
 def ping_voids(sh, retracted, now=None, sender=send):
     """A ⚠ VOID once for every PINGED play the board has retracted (nba_board's own rule:
-    the player Out/Doubtful, or the absent star Available/Probable, on the newest report)."""
+    the player Out/Doubtful, or the absent star Questionable/Available/Probable, on the newest report)."""
     now = now or dt.datetime.now(dt.timezone.utc)
     sh.execute(PINGS_DDL)
     sent = []
