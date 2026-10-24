@@ -97,11 +97,11 @@ def _nick_key(s):
 
 # ── fetchers — each returns (rows, detail) or raises ─────────────────────────────
 
-def fetch_fd():
+def fetch_fd(event_filter=None):
     """FanDuel via fd_collect's parser (the NBA branch shares WNBA's market naming), with a
     requests-based getter because urllib has no CA certs on this Mac. Every failed GET is
     COUNTED: collect_page swallows per-event failures, which would otherwise read as a
-    smaller slate."""
+    smaller slate. `event_filter(name)` limits the fetch to some events (the per-game refresh)."""
     import requests
     import fd_collect as FD
     s = requests.Session()
@@ -117,7 +117,8 @@ def fetch_fd():
             fails["event" if "event-page" in url else "page"] += 1
             raise
     FD.get = get
-    raw = FD.collect_page("nba", "nba", lambda n: "@" in n)
+    raw = FD.collect_page("nba", "nba",
+                          lambda n: "@" in n and (event_filter is None or event_filter(n)))
     rows = [(r[1], r[2], r[3], float(r[4]), r[5], float(r[6])) for r in raw]
     return rows, (f"failed GETs {dict(fails)}" if fails else "")
 
@@ -214,7 +215,12 @@ class Resolver:
 
 # ── one cycle ────────────────────────────────────────────────────────────────────
 
-def cycle(books=None):
+def cycle(books=None, only_gids=None):
+    """One refresh. `only_gids` (amendment 12): FanDuel is fetched and written for THOSE games only.
+    That covers the event list plus one event's tabs, ~2 s instead of the ~12 s full board, for the
+    trigger path. Every write is scoped to those games (board replace, change log, pulled rungs), so
+    the other games' rows and quotes are untouched, and the cycle is logged as status 'game' so it
+    never reads as a full FanDuel refresh. Other books run as usual."""
     books = books or DEFAULT_BOOKS
     now = dt.datetime.now(dt.timezone.utc)
     ts = now.replace(microsecond=0, tzinfo=None).isoformat()
@@ -234,8 +240,14 @@ def cycle(books=None):
     report, failed = [], []
     for book in books:
         t0 = time.time()
+        scope = set(only_gids) if (only_gids and book == "fd") else None
         try:
-            got = BOOKS[book]()
+            if scope:
+                keys = {(_nick_key(g["away_nick"]), _nick_key(g["home_nick"]))
+                        for g in upcoming if g["gid"] in scope}
+                got = fetch_fd(lambda n: tuple(_nick_key(x) for x in n.split("@", 1)) in keys)
+            else:
+                got = BOOKS[book]()
             rows, detail = got[0], got[1]
             bts = got[2] if len(got) > 2 else ts          # a snapshot keeps its own fetch time
         except Stale as e:
@@ -286,13 +298,23 @@ def cycle(books=None):
                 unresolved.add(player)
             board.append((book, bts, g["gid"], g["utc"], event, g["home"], g["away"],
                           pid, player, stat, line, side, odds))
-        prev_rows = {(r[0], r[1], r[2], r[3]): r for r in con.execute(
-            "SELECT player, stat, line, side, odds, gid, tip_utc, pid FROM board WHERE book=?",
-            (book,))}
+        if scope:                                      # per-game refresh: only these games
+            board = [b for b in board if b[2] in scope]
+            qmarks = ",".join("?" * len(scope))
+            prev_rows = {(r[0], r[1], r[2], r[3]): r for r in con.execute(
+                "SELECT player, stat, line, side, odds, gid, tip_utc, pid FROM board WHERE book=? "
+                f"AND gid IN ({qmarks})", (book, *sorted(scope)))}
+        else:
+            prev_rows = {(r[0], r[1], r[2], r[3]): r for r in con.execute(
+                "SELECT player, stat, line, side, odds, gid, tip_utc, pid FROM board WHERE book=?",
+                (book,))}
         prev = {k: r[4] for k, r in prev_rows.items()}
         changed = [(bts, b[0], b[2], b[3], b[7], b[8], b[9], b[10], b[11], b[12])
                    for b in board if prev.get((b[8], b[9], b[10], b[11])) != b[12]]
-        con.execute("DELETE FROM board WHERE book=?", (book,))
+        if scope:
+            con.execute(f"DELETE FROM board WHERE book=? AND gid IN ({qmarks})", (book, *sorted(scope)))
+        else:
+            con.execute("DELETE FROM board WHERE book=?", (book,))
         con.executemany("INSERT OR REPLACE INTO board VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", board)
         con.executemany("INSERT INTO quotes VALUES (?,?,?,?,?,?,?,?,?,?)", changed)
         players = {b[8] for b in board}
@@ -314,7 +336,8 @@ def cycle(books=None):
         if team_rows:
             detail = (detail + "; " if detail else "") + f"dropped {team_rows} team-market rows"
         con.execute("INSERT INTO cycles VALUES (?,?,?,?,?,?,?,?,?)",
-                    (bts, book, status, len(board), len(events), len(events) - len(unmatched),
+                    (bts, book, "game" if scope else status, len(board), len(events),
+                     len(events) - len(unmatched),
                      len(players) - len(unresolved), len(unresolved), detail))
         covered = {gm[e]["gid"] for e in events if gm[e]}
         report.append(

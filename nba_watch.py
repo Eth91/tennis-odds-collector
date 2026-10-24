@@ -130,13 +130,30 @@ def _quiet(fn, *a, **k):
         return None, buf.getvalue(), f"{type(e).__name__}: {str(e)[:80]}"
 
 
+def trigger_gids(fresh):
+    """The not-started games of the fresh Outs: {gid} for each (team, ET date)."""
+    import nba_rosters as R
+    try:
+        sched = R.schedule()
+    except Exception:                                        # noqa: BLE001 — caller falls back
+        return set()
+    want = {(t, gd) for _pid, _nm, t, gd in fresh}
+    return {g["gid"] for g in sched if g["status"] == 1
+            and ((g["home"], g["date_et"]) in want or (g["away"], g["date_et"]) in want)}
+
+
 def _fire(con, label, published, fresh, log):
     """The trigger action: refresh both books once, then a flag pass per affected game date.
     fresh: [(pid, name, team, game_date)]."""
     import nba_flags as F
     import nba_lines as L
     det = _now().isoformat()
-    _, lout, lerr = _quiet(L.cycle)
+    # PER-GAME REFRESH (amendment 12): only the games of the fresh Outs (~2 s, not the ~12 s board).
+    # Any failure falls back to the full refresh, so a trigger is never priced off a stale board.
+    gids = trigger_gids(fresh)
+    res, lout, lerr = _quiet(L.cycle, None, only_gids=gids) if gids else (None, "", "no game found")
+    if lerr or (res and "fd" in res):                    # raised, or FanDuel's fetch failed inside
+        _, lout, lerr = _quiet(L.cycle)
     lines_at = _now().isoformat()
     fl, fout, ferr = [], "", None
     for gd in sorted({f[3] for f in fresh}):
@@ -281,7 +298,8 @@ def once():
             lc = sqlite3.connect(f"file:{L.DB}?mode=ro", uri=True)
             # FanDuel's own last fetch: since amendment 4 a DraftKings snapshot row carries ITS
             # fetch time, so the newest row of any book no longer says when FanDuel was polled
-            last = lc.execute("SELECT MAX(ts) FROM cycles WHERE book='fd'").fetchone()[0]
+            last = lc.execute("SELECT MAX(ts) FROM cycles WHERE book='fd' AND status != 'game'"
+                              ).fetchone()[0]                # a per-game refresh is not a full one
             lc.close()
             age = ((_now().replace(tzinfo=None) - dt.datetime.fromisoformat(last))
                    .total_seconds() / 60) if last else 1e9
