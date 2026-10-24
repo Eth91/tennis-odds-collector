@@ -438,3 +438,33 @@ player-games. The integrity gate passed for 2025-26: tracked 100.0%, AST and REB
 2,857 missing rebounding rows are zero-rebound games. A fetch bug was fixed before the cutover: a date
 returning 0 rows (not yet published) was being marked done. **The OPPORTUNITY cell scores flags logged at or
 after 2026-10-24T08:03:00 UTC** (`nba_clv.AMEND9_CUTOVER`).
+
+---
+
+# AMENDMENT 10 — more X news sources: 62 beat writers and news accounts (2026-10-24, apparatus only)
+
+**What changes.** The news layer (amendment 2) read one X account, @UnderdogNBA. `nba_x_beats.py`, a
+second daemon on the VM (`nba-x-beats.service`), adds 62 accounts, validated by profile lookup on
+2026-10-24:
+- national insiders (Charania, Haynes, Stein, Fischer);
+- injury and fantasy news (RotoBaller NBA, FantasyLabs NBA, Jeff Stotts);
+- one to three beat writers per team.
+
+Eight candidates were dropped: four did not resolve, and four resolved to accounts that did not look
+like the reporter. The daemon reads them through X search, one request every 20 s rotating 3 chunks, so
+each account is refreshed about every minute, on a separate budget from @UnderdogNBA's timeline. Posts in
+an injury status are appended to the same X log, tagged with their author. Provenance is recorded as
+`x:<handle>`.
+
+**What does not change.** The rules for what a news item can trigger:
+- the full name of exactly one player whose team plays on the stated date;
+- the news layer's own Out classifier, add-only;
+- a news-originated flag counts in a verdict only if the official report lists that player Out before
+  tip. Otherwise it is an unconfirmed audit row (amendment 2).
+
+The tiers, the yardsticks and the decision lines are unchanged.
+
+**Why it is registered.** More sources mean more and earlier news-triggered flags. That changes the mix of
+flags the test scores (more `trigger_src = news:x`, earlier `news_at`). The cutover is recorded below so
+flags before and after it can be told apart. The STALE LINE cell (amendment 8) is where this pays off,
+if it does: news caught before the book moves is exactly a STALE spot.

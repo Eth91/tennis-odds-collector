@@ -117,6 +117,25 @@ def main(hours):
         hb_txt = f"unreachable (rc {hb.returncode})"
         attention.append("X watcher unreachable")
     print(f"         X watcher (@UnderdogNBA on the VM): {hb_txt}")
+    # amendment 10: the beat-writer search daemon has its own heartbeat
+    bcmd = ("systemctl is-active nba-x-beats; journalctl -u nba-x-beats -n 1 -o short-unix "
+            "--no-pager | tail -1")
+    if os.environ.get("NBA_X_LOG"):
+        bh = subprocess.run(["sh", "-c", bcmd], capture_output=True, text=True, timeout=40)
+    else:
+        bh = subprocess.run(["ssh", "-i", str(Path.home() / ".ssh/oracle_vm"), "-o", "ConnectTimeout=10",
+                             "-o", "BatchMode=yes", "ubuntu@155.248.217.149", bcmd],
+                            capture_output=True, text=True, timeout=40)
+    bp = bh.stdout.split()
+    try:
+        bage = (dt.datetime.now(dt.timezone.utc).timestamp() - float(bp[1])) / 60
+        b_txt = f"{bp[0]}, last search {bage:.0f} min ago"
+        if bp[0] != "active" or bage > 10:
+            attention.append(f"X beat-writer watcher {b_txt}")
+    except (IndexError, ValueError):
+        b_txt = f"unreachable (rc {bh.returncode})"
+        attention.append("X beat-writer watcher unreachable")
+    print(f"         X beat writers (62 accounts on the VM): {b_txt}")
     if sum(fails.values()) > 6:
         attention.append(f"{sum(fails.values())} failed cycle steps")
 
