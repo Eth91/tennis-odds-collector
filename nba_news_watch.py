@@ -69,6 +69,16 @@ OUT_RE = re.compile(r"\b(ruled out|listed out|won'?t (?:play|suit up|be availabl
 NOT_OUT_RE = re.compile(r"\b(questionable|doubtful|probable|game-time decision|"
                         r"(?:will|expected to|set to) play|cleared to play|"
                         r"upgraded to (?:available|probable|questionable))\b", re.I)
+# A CHOICE is not a ruling (2026-10-24): "Embiid said he won't play in both legs of the back-to-back
+# ... I'm playing in one of them" read as "Embiid out Saturday" and flagged Edgecombe. He will sit ONE
+# of two games and has not said which. Narrow on purpose, like the hedge list: only wording that picks
+# one game out of several. "Will miss one game" (no "of") stays an Out, and so does a specific night
+# ("won't play Sunday, the second night of the back-to-back").
+CHOICE_RE = re.compile(r"\b(?:won'?t|will not|not) (?:play|suit up|be available|dress) (?:in )?both\b|"
+                       r"\b(?:play|playing|suit up|sit|sitting|rest|resting|miss|missing) (?:out )?"
+                       r"(?:in )?(?:only )?(?:one|either) of\b|"
+                       r"\bone of (?:them|the two|those|these|the (?:two |back-to-back )?(?:games|nights|legs))\b|"
+                       r"\beither (?:game|night|leg|end)\b|\bonly one of\b", re.I)
 DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
 
@@ -84,7 +94,7 @@ def status_of(headline, body=""):
     only when the headline is silent, because bodies narrate other games too."""
     for t in (headline, body):
         if OUT_RE.search(t or ""):
-            return "other" if NOT_OUT_RE.search(t or "") else "out"
+            return "other" if (NOT_OUT_RE.search(t or "") or CHOICE_RE.search(t or "")) else "out"
         if NOT_OUT_RE.search(t or ""):
             return "other"
     return "other"
