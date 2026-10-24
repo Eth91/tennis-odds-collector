@@ -650,11 +650,13 @@ def flags(dry=False, game_date=None):
 
 def _excess(f):
     """How far a wowy/cold flag clears its own threshold: (proj - line) / margin (amendment 18)."""
-    thr = MARGIN.get(f["stat"]) if f["tier"] == "wowy" else C.COLD_MARGIN
+    thr = MARGIN.get(f["stat"]) if f["tier"].startswith("wowy") else C.COLD_MARGIN
     return (f.get("margin") or 0.0) / thr if thr else 0.0
 
 
 CARD_ON = "COALESCE(card, 1) = 1 AND void_reason IS NULL"   # NULL = before amendment 18 = shown
+# wowy_v0 (amendment 7's relabel of the frozen-prior wowy flags) shares wowy's card slots
+CARD_FAMILY = {"wowy": ("wowy", "wowy_v0"), "wowy_v0": ("wowy", "wowy_v0"), "cold": ("cold", "cold")}
 
 
 def _card_rule(sh, gd, pid, team, tier, stat):
@@ -663,8 +665,8 @@ def _card_rule(sh, gd, pid, team, tier, stat):
     plays in the team-game, or if it shares a P/R/A component with one of them."""
     if sh.execute(f"SELECT 1 FROM flags WHERE game_date=? AND pid=? AND {CARD_ON} LIMIT 1", (gd, pid)).fetchone():
         return 0
-    mates = sh.execute(f"SELECT DISTINCT pid, stat FROM flags WHERE game_date=? AND team=? AND tier=? AND "
-                       f"{CARD_ON}", (gd, team, tier)).fetchall()
+    mates = sh.execute(f"SELECT DISTINCT pid, stat FROM flags WHERE game_date=? AND team=? AND tier IN (?, ?) "
+                       f"AND {CARD_ON}", (gd, team, *CARD_FAMILY[tier])).fetchall()
     if len(mates) >= 2:
         return 0
     comp = CARD_COMPONENTS.get(stat, frozenset(stat))
@@ -723,9 +725,10 @@ def card_backfill(game_dates, path=None):
     sh.execute(f"UPDATE flags SET card=1 WHERE card IS NULL AND tier='priced' AND game_date IN ({marks})",
                tuple(game_dates))
     rows = sh.execute(f"SELECT game_date, pid, team, tier, stat, MIN(logged_at), MAX(margin) FROM flags "
-                      f"WHERE card IS NULL AND void_reason IS NULL AND tier IN ('wowy','cold') AND "
+                      f"WHERE card IS NULL AND void_reason IS NULL AND tier IN ('wowy','wowy_v0','cold') AND "
                       f"game_date IN ({marks}) GROUP BY game_date, pid, team, tier, stat", tuple(game_dates)).fetchall()
-    sh.execute(f"UPDATE flags SET card=0 WHERE card IS NULL AND tier IN ('wowy','cold') AND game_date IN ({marks})",
+    sh.execute(f"UPDATE flags SET card=0 WHERE card IS NULL AND tier IN ('wowy','wowy_v0','cold') AND "
+               f"game_date IN ({marks})",
                tuple(game_dates))
     plays = sorted(rows, key=lambda r: (r[5], -_excess({"tier": r[3], "stat": r[4], "margin": r[6]})))
     out = []

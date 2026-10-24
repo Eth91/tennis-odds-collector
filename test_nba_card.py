@@ -87,6 +87,21 @@ def test_backfill_matches_live():
     assert on == [("Collin Gillespie", "pts"), ("Gui Santos", "pra"), ("Jamal Murray", "pts_ast")], on
 
 
+def test_backfill_wowy_v0_shares_wowy_slots():
+    d = pathlib.Path(tempfile.mkdtemp())
+    sh = F._shadow(d / "s.sqlite")
+    for fid, at, tier, b, pid, stat, line, m in (
+            ("a", "2026-10-24T03:00:00", "wowy_v0", "VJ Edgecombe", 1, "pts", 12.5, 4.3),
+            ("b", "2026-10-24T03:00:00", "wowy_v0", "VJ Edgecombe", 1, "pra", 21.5, 5.0),
+            ("c", "2026-10-24T20:00:00", "wowy", "VJ Edgecombe", 1, "pts", 13.5, 3.7)):
+        sh.execute("INSERT INTO flags (flag_id, logged_at, game_date, tier, team, b, stat, line, margin, pid) "
+                   "VALUES (?,?,?,?,?,?,?,?,?,?)", (fid, at, GD, tier, "PHI", b, stat, line, m, pid))
+    sh.commit()
+    F.card_backfill([GD], path=d / "s.sqlite")
+    got = dict(F._shadow(d / "s.sqlite").execute("SELECT flag_id, card FROM flags"))
+    assert got == {"a": 1, "b": 0, "c": 0}, got     # earliest first, then excess; no NULL left
+
+
 def test_board_shows_only_the_card():
     src = pathlib.Path(F.__file__).with_name("nba_board.py").read_text()
     assert "void_reason IS NULL AND COALESCE(card, 1) = 1" in src
