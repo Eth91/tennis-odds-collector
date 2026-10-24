@@ -53,8 +53,59 @@ DDL = """CREATE TABLE IF NOT EXISTS news_items (
     seeded INTEGER DEFAULT 0, PRIMARY KEY (source, item_id))"""
 
 
+CHOICES_DDL = """CREATE TABLE IF NOT EXISTS choices (pid INTEGER, player TEXT, team TEXT,
+    date_a TEXT, date_b TEXT, item TEXT, provenance TEXT, created_at TEXT, state TEXT,
+    resolved_at TEXT, note TEXT, PRIMARY KEY (pid, date_a, date_b))"""
+B2B_RE = re.compile(r"back-to-back|both (?:legs|games|nights|ends)", re.I)
+
+
+def choice_dates(text, now_et, team_dates):
+    """The two games a choice is between (amendment 14): the NAMED days on which the team plays, or,
+    for 'both legs / both games of the back-to-back' without named days, the team's next two games
+    on consecutive dates. Exactly two dates, or None."""
+    t = (text or "").lower()
+    named = set()
+    if re.search(r"\b(tonight|today)\b", t):
+        named.add(now_et.date().isoformat())
+    if re.search(r"\btomorrow\b", t):
+        named.add((now_et.date() + dt.timedelta(days=1)).isoformat())
+    for i in range(7):
+        d = now_et.date() + dt.timedelta(days=i)
+        if re.search(rf"\b{DAYS[d.weekday()]}\b", t):
+            named.add(d.isoformat())
+    dates = sorted(d for d in named if d in team_dates)
+    if len(dates) == 2:
+        return dates
+    if len(dates) < 2 and B2B_RE.search(t):
+        ahead = sorted(d for d in team_dates if d >= now_et.date().isoformat())
+        for a, b in zip(ahead, ahead[1:]):
+            if (dt.date.fromisoformat(b) - dt.date.fromisoformat(a)).days == 1:
+                return [a, b]
+    return None
+
+
+def register_choice(con, it, index, team_games, now_et, now):
+    """A `choice` item -> a pending choice, when its player and its two games are unambiguous."""
+    text = f"{it.get('headline') or ''} {it.get('body') or ''}"
+    ft = f" {fold(text)} "
+    cands = [(p, n, t) for p, (t, n, _) in index.items()
+             if t in team_games and len(fold(n).split()) >= 2 and f" {fold(n)} " in ft]
+    if len(cands) != 1:
+        return None
+    pid, name, tri = cands[0]
+    dates = choice_dates(text, now_et, team_games[tri])
+    if not dates:
+        return None
+    con.execute(CHOICES_DDL)
+    con.execute("INSERT OR IGNORE INTO choices VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                (pid, name, tri, dates[0], dates[1], str(it.get("item_id")), it.get("provenance"),
+                 now.isoformat(), "pending", None, None))
+    return pid, name, tri, dates
+
+
 def _migrate(con):
     con.execute(DDL)
+    con.execute(CHOICES_DDL)
     con.execute("CREATE TABLE IF NOT EXISTS news_sources (source TEXT PRIMARY KEY, "
                 "first_polled_at TEXT)")
     if "seeded" not in {r[1] for r in con.execute("PRAGMA table_info(news_items)")}:
@@ -79,6 +130,7 @@ CHOICE_RE = re.compile(r"\b(?:won'?t|will not|not) (?:play|suit up|be available|
                        r"(?:in )?(?:only )?(?:one|either) of\b|"
                        r"\bone of (?:them|the two|those|these|the (?:two |back-to-back )?(?:games|nights|legs))\b|"
                        r"\beither (?:game|night|leg|end)\b|\bonly one of\b", re.I)
+SIT_CHOICE_RE = re.compile(r"\b(?:sit|sitting|rest|resting|miss|missing)(?: out)? (?:one|either)\b", re.I)
 DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
 
@@ -93,8 +145,14 @@ def status_of(headline, body=""):
     says anything (RotoWire's: "Ruled out for Friday" / "Doubtful for Friday"); the body is used
     only when the headline is silent, because bodies narrate other games too."""
     for t in (headline, body):
-        if OUT_RE.search(t or ""):
-            return "other" if (NOT_OUT_RE.search(t or "") or CHOICE_RE.search(t or "")) else "out"
+        t = t or ""
+        if OUT_RE.search(t):
+            if NOT_OUT_RE.search(t):
+                return "other"
+            # a CHOICE between games is not a ruling (amendment 13) but is news (amendment 14)
+            return "choice" if CHOICE_RE.search(t) else "out"
+        if CHOICE_RE.search(t) and SIT_CHOICE_RE.search(t) and not NOT_OUT_RE.search(t):
+            return "choice"                    # "will sit one of the two games" carries no Out verb
         if NOT_OUT_RE.search(t or ""):
             return "other"
     return "other"
@@ -286,6 +344,12 @@ def poll(now=None, sources=None, con=None):
     for g in sched:
         if g["status"] == 1:
             playing.setdefault(g["date_et"], set()).update((g["home"], g["away"]))
+    horizon = (now_et.date() + dt.timedelta(days=3)).isoformat()
+    team_games = {}                                   # team -> its game dates in the next 3 days
+    for g in sched:
+        if now_et.date().isoformat() <= g["date_et"] <= horizon:
+            for t in (g["home"], g["away"]):
+                team_games.setdefault(t, set()).add(g["date_et"])
     new_outs, errors = [], []
     for name in (sources or SOURCES):
         try:
@@ -316,10 +380,41 @@ def poll(now=None, sources=None, con=None):
                          it["headline"], it["body"], it["provenance"], int(seed)))
             if st == "out" and pid and not seed:
                 new_outs.append((name, pid, pname, tri, gdate, seen_at))
+            if st == "choice" and not seed:
+                register_choice(con, it, index, team_games, now_et, now)
     con.commit()
     if own:
         con.close()
     return new_outs, errors
+
+
+def reclassify_choices(now=None, con=None):
+    """One-off (amendment 14): stored items the corrected classifier reads as a choice are relabelled
+    `choice` and registered as pending choices. Returns [(item_id, registered)]."""
+    now = now or dt.datetime.now(dt.timezone.utc)
+    now_et = now.astimezone(ET)
+    own = con is None
+    con = con or sqlite3.connect(DB, timeout=60)
+    _migrate(con)
+    index, _ = R.player_index(now_et.date().isoformat())
+    horizon = (now_et.date() + dt.timedelta(days=3)).isoformat()
+    team_games = {}
+    for g in R.schedule():
+        if now_et.date().isoformat() <= g["date_et"] <= horizon:
+            for t in (g["home"], g["away"]):
+                team_games.setdefault(t, set()).add(g["date_et"])
+    out = []
+    for src, iid, h, b, prov, st in con.execute(
+            "SELECT source, item_id, headline, body, provenance, status FROM news_items").fetchall():
+        if st != "choice" and status_of(h or "", b or "") == "choice":
+            con.execute("UPDATE news_items SET status='choice' WHERE source=? AND item_id=?", (src, iid))
+            reg = register_choice(con, {"item_id": iid, "headline": h, "body": b, "provenance": prov},
+                                  index, team_games, now_et, now)
+            out.append((iid, reg))
+    con.commit()
+    if own:
+        con.close()
+    return out
 
 
 def news_outs(game_date, con=None):
