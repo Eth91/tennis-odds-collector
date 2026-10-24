@@ -255,3 +255,53 @@ PROMOTE / EXTEND / KILL). It is information about the mechanism. Nothing bets.
 polling went live on the VM at **2026-10-23T20:13:30 UTC**. Earlier triggers were seen only through the 10-minute
 cycle, which cannot see a move inside 2 minutes. So **only triggers detected at or after 2026-10-23T20:13:30 count
 toward the 20 and the reading rules.** Earlier ones are listed, marked coarse, and excluded.
+
+---
+
+# AMENDMENT 6 — a with/without split must come from the beneficiary's current team (2026-10-24)
+
+**The defect.** The wowy tier reads `nba_wowy.pairs` by (absent player, beneficiary) only. It checks
+that the beneficiary is on the absent player's team tonight, but not that the split was **measured on
+that team**. On 2026-10-23, Al Horford was flagged at Golden State from a split measured in 2 Boston
+games without Kristaps Porziņģis. Both have since moved to Golden State, so that is a different
+rotation and a different role.
+
+The registered universe is `nba_pricing_realline.walk()`, which every backtest used. It measures splits
+inside one franchise's games, so these flags were never of the registered type. The **priced** tier
+(the decision tier) already measures its split live on the current franchise and is unaffected.
+
+**The fix.**
+- wowy uses only pairs whose `team` is the current team.
+- For the cold tier, "has a prior split" (the rule that keeps a beneficiary out of the cold tier) also
+  means a split on the current team. A beneficiary whose only split is from a former team is
+  cold-eligible, as the cold-start registration defines.
+
+**Flags already logged.** Every wowy flag is re-checked under the corrected rule, past and future. A flag
+whose split came from another team gets `void_reason = 'amend6: …'` and is excluded from every cell,
+counted as void. This is the same mechanism as amendment 3.
+
+**Disclosure — unlike amendment 3, outcomes are known.** The defect was identified in writing *before*
+tip on 2026-10-23: the pre-game review listed Horford's Boston split as a weak spot. But it is codified
+here after those games were graded. The affected opportunities are all Horford, 2026-10-23:
+- PRA o13.5 — loss
+- PTS o6.5 — loss
+- REB o3.5 — win
+- FD beat the close on none of the three.
+
+The void is mechanical and applies the same rule to every flag. But it moves that night's numbers in the
+model's favour, so the scoreboard is recorded here before and after.
+
+**Before** (2026-10-24 06:39 UTC), wowy/h0:
+- FD yardstick: 14 opportunities closed, 12 with an FD close, beat close 25.0% (3/12), as flagged
+  +49.7% vs at close +39.4% (12 graded).
+- FD+DK yardstick: beat 28.6% (4/14), as flagged +28.6%.
+- Priced and cold are unaffected.
+
+**Applied 2026-10-24 07:22 UTC** (`nba_flags.py --amend6`, under the cycle lock). It voided exactly the 7 Horford
+flag rows: 3 opportunities and their re-flags. A second run voided 0, so it is idempotent. **After**, wowy/h0:
+- FD yardstick: 11 closed, 10 with an FD close, beat close 30.0% (3/10), as flagged +63.7% vs at close
+  +49.1%.
+- FD+DK yardstick: beat 36.4% (4/11), as flagged +49.3%.
+
+Priced and cold are unchanged. Voided flags excluded from every cell: 14 (7 under amendment 3, 7 under
+amendment 6). The decision tier (priced) is untouched by this amendment, and one night decides nothing.

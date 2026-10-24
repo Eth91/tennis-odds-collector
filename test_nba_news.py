@@ -71,6 +71,19 @@ if __name__ == "__main__":
     print("test_nba_news: OK")
 
 
+# The poll reads the LIVE schedule for which teams play tonight/tomorrow. These two tests are pinned
+# to 2026-10-22/23, so they need that slate as it was, not as it is now: once NYK's 10-23 game
+# finished (status 3) they failed for a reason that had nothing to do with the code (2026-10-24).
+FIXED_SLATE = [{"date_et": "2026-10-23", "status": 1, "home": "NYK", "away": "MIA",
+                "gid": "0022600099", "utc": "2026-10-23T23:30:00Z"}]
+
+
+def _pinned_schedule():
+    saved = N.R.schedule
+    N.R.schedule = lambda: FIXED_SLATE
+    return saved
+
+
 def test_first_poll_of_a_source_seeds_and_never_triggers():
     d = pathlib.Path(tempfile.mkdtemp()) / "n.sqlite"
     con = sqlite3.connect(d)
@@ -78,6 +91,7 @@ def test_first_poll_of_a_source_seeds_and_never_triggers():
     item = {"item_id": "1", "player": "Jalen Brunson", "team_name": "New York Knicks",
             "headline": "Ruled out for Friday", "body": "", "provenance": "x"}
     saved = N.SOURCES
+    saved_sched = _pinned_schedule()
     N.SOURCES = {"fake": lambda: [item]}
     try:
         outs1, _ = N.poll(now=dt.datetime(2026, 10, 22, 20, 0, tzinfo=dt.timezone.utc), con=con)
@@ -86,6 +100,7 @@ def test_first_poll_of_a_source_seeds_and_never_triggers():
         outs2, _ = N.poll(now=dt.datetime(2026, 10, 22, 20, 1, tzinfo=dt.timezone.utc), con=con)
     finally:
         N.SOURCES = saved
+        N.R.schedule = saved_sched
     assert outs1 == []                                    # the backlog never fires
     assert len(outs2) == 1                                # a genuinely new item does
     assert con.execute("select seeded from news_items where item_id='1'").fetchone()[0] == 1
@@ -113,6 +128,7 @@ def test_empty_first_poll_does_not_swallow_the_first_real_item():
     item = {"item_id": "9", "player": "Jalen Brunson", "team_name": "New York Knicks",
             "headline": "Ruled out for Friday", "body": "", "provenance": "x"}
     saved = N.SOURCES
+    saved_sched = _pinned_schedule()
     try:
         N.SOURCES = {"fake": lambda: []}
         o1, _ = N.poll(now=dt.datetime(2026, 10, 22, 20, 0, tzinfo=dt.timezone.utc), con=con)
@@ -120,6 +136,7 @@ def test_empty_first_poll_does_not_swallow_the_first_real_item():
         o2, _ = N.poll(now=dt.datetime(2026, 10, 22, 20, 1, tzinfo=dt.timezone.utc), con=con)
     finally:
         N.SOURCES = saved
+        N.R.schedule = saved_sched
     assert o1 == [] and len(o2) == 1
 
 
