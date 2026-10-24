@@ -343,3 +343,9 @@ frozen numbers. Outcomes are already known for 2026-10-23 (9-2 after amendment 6
 them, they are **relabelled tier `wowy_v0`**: their own reported cell, never pooled with wowy. The
 original label is kept in `void_reason`-free form; only `tier` changes. The main wowy cell starts empty
 at the cutover, recorded below. The decision tier (priced) is unaffected.
+
+**Amendment 7, correction (before any code was deployed).** The text above gives the cold tier's "has a
+split" as ≥ 2 without and ≥ 3 with. The cold-start registration (`nba_coldstart_realline`) actually
+defines it as **B appeared in ≥ 2 of X's missed games since X's first franchise game**, with no with-X
+minimum. That registered definition is the one implemented. The ≥ 3-with requirement belongs to wowy
+only.
