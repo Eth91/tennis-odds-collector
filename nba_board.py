@@ -39,6 +39,7 @@ LABEL = {"points": "PTS", "rebounds": "REB", "assists": "AST", "pra": "PRA", "pt
          "pts_ast": "P+A", "reb_ast": "R+A", "threes": "3PM"}
 # X_BACK: amendment 15 adds Questionable (a Doubtful -> Questionable upgrade breaks the premise).
 B_OFF, X_BACK = ("Out", "Doubtful"), ("Questionable", "Available", "Probable")
+PING_CANON = {"pts": "points", "reb": "rebounds", "ast": "assists"}     # == nba_ping.CANON (its play key)
 # USER VETO (2026-10-24, display only): a player-game the user takes off the card. It moves to the OFF
 # strip with its reason (a pinged play gets a VOID through the same path). The record is untouched.
 VETO_DDL = """CREATE TABLE IF NOT EXISTS vetoes (game_date TEXT, pid INTEGER, player TEXT, reason TEXT,
@@ -87,7 +88,7 @@ def board(now=None):
             (today + dt.timedelta(days=1)).isoformat(): "TOMORROW"}
     sh, news, q = _ro(SHADOW), _ro(NEWS), _ro(LINES)
     V = _clv()
-    out = {"generated_at": now_n, "slates": [], "retracted": [], "record": None}
+    out = {"generated_at": now_n, "slates": [], "retracted": [], "offcard": [], "record": None}
     if sh is None:
         return out
     sh.row_factory = sqlite3.Row
@@ -106,6 +107,25 @@ def board(now=None):
         vetoed = {(gd, pid): why for gd, pid, why in sh.execute("SELECT game_date, pid, reason FROM vetoes")}
     except sqlite3.OperationalError:
         vetoed = {}
+    # PINGED · OFF CARD (feedback_ping_board_coherence: if it pinged, it is on the board). A play pinged
+    # before the card took it off (amendments 18-19) is listed, never hidden. Not a retraction: no VOID.
+    try:
+        pinged = {k for (k,) in sh.execute("SELECT key FROM pings WHERE kind='play' AND ok=1")}
+    except sqlite3.OperationalError:
+        pinged = set()
+    carded = {(f["game_date"], f["pid"]) for f in flags}
+    seen_off = set()
+    for f in (dict(r) for r in sh.execute(
+            f"SELECT * FROM flags WHERE void_reason IS NULL AND card = 0 "
+            f"AND game_date IN ({','.join('?' * len(days))}) ORDER BY logged_at", tuple(days))):
+        k = f"play|{f['game_date']}|{f['pid'] or f['b']}|{PING_CANON.get(f['stat'], f['stat'])}"
+        tip = V._utc_naive(f["gtime"]) if f.get("gtime") else None
+        if k not in pinged or k in seen_off or (tip and tip <= now_n) or (f["game_date"], f["pid"]) in vetoed:
+            continue
+        seen_off.add(k)
+        st_ = STAT.get(f["stat"], f["stat"])
+        out["offcard"].append({"b": f["b"], "stat": LABEL.get(st_, st_.upper()), "line": f["line"],
+                               "why": "1 PER PLAYER" if (f["game_date"], f["pid"]) in carded else "TEAM SLOT"})
     games = defaultdict(list)
     for (gd, gid, _p, stat), f in opp.items():
         tip = V._utc_naive(f["gtime"]) if f.get("gtime") else None
@@ -307,8 +327,15 @@ def html(b):
                      f'<div>{units}</div></div>')
     if not b["slates"]:
         parts.append('<div class="nnone">NO SHADOW FLAGS ON THIS SLATE</div>')
+    off = b.get("offcard") or []
+    strip = ([f'<div class="noff"><div class="nday" style="margin:0 0 2px">PINGED · OFF CARD<span>{len(off)}</span></div>']
+             + [f'<div><b>{e(r["b"])}</b> {e(r["stat"])} O{r["line"]:g} · {e(r["why"])}</div>' for r in off]
+             + ['</div>']) if off else []
     for s in b["slates"]:
         rows = [r for g in s["games"] for r in g["rows"]]
+        if s["label"] == "LAST NIGHT" and strip:
+            parts.extend(strip)
+            strip = []
         if s["label"] == "LAST NIGHT":
             w, l, u = _units(rows)
             tally = f'{w}–{l} · {u:+.1f}u' if w + l else f'{len(rows)}'
@@ -319,6 +346,7 @@ def html(b):
         else:
             parts.append(f'<div class="nday">{e(s["label"])}<span>{len(rows)}</span></div>')
             parts.extend(_games(s))
+    parts.extend(strip)
     if b["retracted"]:
         parts.append('<div class="noff"><div class="nday" style="margin:0 0 2px">OFF'
                      f'<span>{len(b["retracted"])}</span></div>')

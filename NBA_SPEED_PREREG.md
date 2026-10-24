@@ -802,3 +802,10 @@ So the WNBA did not establish the rule.
 
 **Amendment 19 applied (2026-10-24T23:29Z).** Deployed; `nba-x-fast` restarted. AMEND19_CUTOVER =
 2026-10-24T23:30:00Z; the combo readout shows 0/60 at deploy. Tonight's carded plays stand (sticky).
+
+**User re-card of 2026-10-24 (display and ping layer only).** User: "Update the board to represent the
+new flagged plays." Tonight's wowy-family card values are recomputed under amendment 19 (an exception to
+"carded plays stand", by the user). Santos PTS replaces Santos PRA; nothing else changes. Coherence
+(feedback_ping_board_coherence): a play that was pinged but is off the card is listed in a PINGED · OFF
+CARD strip with its reason (1 PER PLAYER or TEAM SLOT) until its game starts. It is never a retraction,
+so it never sends a VOID. The record is untouched.
