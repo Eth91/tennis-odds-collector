@@ -395,3 +395,6 @@ amendment-4 FanDuel yardstick: closed flags, beat-close rate with its game-clust
 at-close ROI. They are read at the speed test's decision point. A cell whose beat-close CI lower bound
 exceeds 50% at ≥ 100 closed flags in ≥ 30 games becomes a **candidate** for its own pre-registered tier,
 through a new amendment and a new forward test. It is never a verdict here.
+
+**Amendment 8 applied 2026-10-24.** `d_min` is stored on every flag from this deployment on. **The cells
+score flags logged at or after 2026-10-24T07:43:00 UTC** (`nba_clv.AMEND8_CUTOVER`), and no earlier flag ever enters them.
