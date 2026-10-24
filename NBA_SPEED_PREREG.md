@@ -540,3 +540,34 @@ Re-run over all 441 stored Out items, exactly one changes: this one.
 in a verdict only if the official report lists the player Out before tip. If the league lists Embiid Out
 on 2026-10-24, the Edgecombe flags count, because the premise held. Otherwise they stay unconfirmed audit
 rows.
+
+---
+
+# AMENDMENT 14 — inferred absences from a choice (2026-10-24, news layer, apparatus only)
+
+**Why.** A player who says he will play only one of two games has, by playing the first, told us he
+will miss the second. Embiid, 2026-10-22: "won't play in both legs... I'm playing in one of them." The
+moment he takes the floor in game A, he is out of game B. That can come hours before the team lists
+him for B, and before the books move.
+
+**Rule.**
+1. A news item whose Out phrasing is cancelled by a choice (amendment 13) is stored with status
+   `choice`, not `other`. Its player and its two games are recorded as a pending choice. The player is
+   the full name of exactly one player whose team plays in the next 3 days. The two dates are the named
+   days on which his team plays, or, for "both legs / both games of the back-to-back" without named days,
+   his team's next two games on consecutive dates. Anything else is not recorded.
+2. Resolution, checked every minute by `nba_watch`:
+   - official report lists him **Out for A** → he plays B → resolved, no trigger;
+   - official report lists him **Out for B** → the normal path already has it → resolved;
+   - **game A has started and the live box score shows him played** → he is **inferred Out for B**.
+     A news item `source = inferred` is written for B, and the trigger fires: lines, flags, ping.
+   - box score shows him **INACTIVE**, or game A finishes without him playing → he plays B → resolved.
+3. An inferred Out is a **news-originated trigger**. As amendment 2 requires, its flags count in a
+   verdict only if the official report lists him Out for B before B's tip. If a later report lists him
+   with any non-Out status for B, it is contradicted and dropped (`news_outs`).
+
+**Stored data corrected.** The 2026-10-22 Embiid item was stored as `out` before amendment 13. It is
+re-labelled `choice` and registered as pending (A = 2026-10-24, B = 2026-10-25). The Edgecombe flags it
+triggered stay logged, scored under amendment 2's confirmation rule.
+
+**Unchanged:** flags, tiers, yardsticks, verdicts.
