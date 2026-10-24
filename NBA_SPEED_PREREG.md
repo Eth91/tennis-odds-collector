@@ -305,3 +305,41 @@ flag rows: 3 opportunities and their re-flags. A second run voided 0, so it is i
 
 Priced and cold are unchanged. Voided flags excluded from every cell: 14 (7 under amendment 3, 7 under
 amendment 6). The decision tier (priced) is untouched by this amendment, and one night decides nothing.
+
+---
+
+# AMENDMENT 7 — the wowy tier is computed live, with the backtest's formula (2026-10-24)
+
+**The defect.** The wowy tier read its numbers from `nba_wowy.sqlite`, built at the end of last season,
+and nothing rebuilt it:
+- `baselines.last_date` ≤ 2026-04-12, and 0 of 614 rows contain a 2026-27 game;
+- on 2026-10-24, 130 of 334 players' stored minutes were ≥ 6 off this season's, 50 were ≥ 10 off, and
+  107 had changed teams;
+- flagged examples: Jrue Holiday projected on 31.4 min (this season 20.6, 26.5); Toumani Camara on 33.3
+  (22.6, 27.3).
+
+The registered wowy rule is the margin rule (`nba_pricing_realline.collect`'s margin rows, the code the
+margin test ran). It recomputes from each player's games up to the bet date, so the live tier was not the
+registered tier. Priced and cold already compute live and are unaffected.
+
+**The fix — wowy computed live from `apps`.** `apps` is the same 400-day pool plus this season's box
+scores that priced and cold use. The backtest's formulas are applied exactly, team-scoped:
+- X: ≥ 10 appearances for this franchise and ≥ 28 min trailing-10 (as priced). B: on X's team tonight,
+  not Out, ≥ 5 appearances for this franchise.
+- Since X's first appearance for the franchise in the pool:
+  - b_out = B's games X missed, b_in = B's games with X;
+  - require ≥ 2 and ≥ 3.
+- base_min = B's mean minutes over his last 10 franchise games.
+- d_min = (mean min without X − mean min with X) × n_out / (n_out + 3).
+- rate = (stat without X + base_rate × 60) / (min without X + 60), with base_rate = B's stat per minute
+  over those last 10 games.
+- proj = rate × (base_min + d_min). Flag the over when proj − main line ≥ 3 points / 2 rebounds / 5 PRA
+  (unchanged).
+- **cold**: "has a split" means exactly this live split (≥ 2 without, ≥ 3 with), as the cold-start
+  registration defines it. `nba_wowy.sqlite` is no longer read by the flag pass.
+
+**Flags already logged — not voided, not pooled.** Every wowy flag logged before this fix used the
+frozen numbers. Outcomes are already known for 2026-10-23 (9-2 after amendment 6). So instead of voiding
+them, they are **relabelled tier `wowy_v0`**: their own reported cell, never pooled with wowy. The
+original label is kept in `void_reason`-free form; only `tier` changes. The main wowy cell starts empty
+at the cutover, recorded below. The decision tier (priced) is unaffected.
