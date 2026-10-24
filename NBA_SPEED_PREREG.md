@@ -755,3 +755,9 @@ for 2026-10-24 and 2026-10-25, under the cycle lock: 3 of 12 wowy-family plays c
 all carded, no NULL left. Tonight's card: PHI Edgecombe PTS o12.5 (wowy_v0); DAL Christie PTS o11.5 and
 Washington R+A o8.5 (priced); DEN Murray PTS o22.5 and Gordon R+A o9.5 (priced); PHX Gillespie PTS o8.5;
 GSW Santos PRA o21.5. Logged only: Santos PTS/REB, Brooks PTS, Murray wowy PRA/PTS, Edgecombe's others.
+
+**User veto (2026-10-24, display only).** User: "take edgecombe off as hes no longer a flag." A `vetoes`
+table in the shadow store holds (game date, player, reason). The board moves a vetoed player-game to the
+OFF strip with its reason, never hides it, and a pinged play gets a VOID through the same path. The
+record is untouched: Edgecombe's 2026-10-24 flags stay logged and are scored under amendment 2 (they
+count only if an official report lists Embiid Out before tip).

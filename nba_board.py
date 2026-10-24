@@ -39,6 +39,10 @@ LABEL = {"points": "PTS", "rebounds": "REB", "assists": "AST", "pra": "PRA", "pt
          "pts_ast": "P+A", "reb_ast": "R+A", "threes": "3PM"}
 # X_BACK: amendment 15 adds Questionable (a Doubtful -> Questionable upgrade breaks the premise).
 B_OFF, X_BACK = ("Out", "Doubtful"), ("Questionable", "Available", "Probable")
+# USER VETO (2026-10-24, display only): a player-game the user takes off the card. It moves to the OFF
+# strip with its reason (a pinged play gets a VOID through the same path). The record is untouched.
+VETO_DDL = """CREATE TABLE IF NOT EXISTS vetoes (game_date TEXT, pid INTEGER, player TEXT, reason TEXT,
+    at TEXT, PRIMARY KEY (game_date, pid))"""
 DECISION_N = 100
 
 
@@ -98,6 +102,10 @@ def board(now=None):
         else:
             opp[k]["tiers"].add(f["tier"])
     status = _status_by_date(news, {k[0] for k in opp})
+    try:
+        vetoed = {(gd, pid): why for gd, pid, why in sh.execute("SELECT game_date, pid, reason FROM vetoes")}
+    except sqlite3.OperationalError:
+        vetoed = {}
     games = defaultdict(list)
     for (gd, gid, _p, stat), f in opp.items():
         tip = V._utc_naive(f["gtime"]) if f.get("gtime") else None
@@ -106,7 +114,9 @@ def board(now=None):
               if q is not None and f.get("pid") else None)
         st = status.get(gd, {})
         why = None
-        if not started and st.get(f["pid"]) in B_OFF:
+        if (gd, f["pid"]) in vetoed:
+            why = f"{f['b']} VETOED: {vetoed[(gd, f['pid'])]}"
+        elif not started and st.get(f["pid"]) in B_OFF:
             why = f"{f['b']} {st[f['pid']].upper()}"
         elif not started and f.get("x_pid") and st.get(f["x_pid"]) in X_BACK:
             why = f"{f['x']} {st[f['x_pid']].upper()}"
@@ -220,5 +230,24 @@ def html(b):
     return "".join(parts)
 
 
+def veto(game_date, pid, reason, path=None):
+    """Take a player-game off the card (display + VOID ping only; every flag stays in the record)."""
+    sh = sqlite3.connect(path or SHADOW)
+    sh.execute(VETO_DDL)
+    name = (sh.execute("SELECT b FROM flags WHERE game_date=? AND pid=? LIMIT 1", (game_date, pid)).fetchone()
+            or (None,))[0]
+    if not name:
+        raise SystemExit(f"no flag for pid {pid} on {game_date}")
+    sh.execute("INSERT OR REPLACE INTO vetoes VALUES (?,?,?,?,?)", (game_date, pid, name, reason,
+               dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat()))
+    sh.commit()
+    sh.close()
+    return name
+
+
 if __name__ == "__main__":
-    print(json.dumps(board(), indent=1, default=str))
+    import sys
+    if sys.argv[1:2] == ["--veto"]:                  # --veto GAME_DATE PID "reason"
+        print(f"vetoed {veto(sys.argv[2], int(sys.argv[3]), sys.argv[4])} on {sys.argv[2]}")
+    else:
+        print(json.dumps(board(), indent=1, default=str))

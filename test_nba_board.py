@@ -96,6 +96,48 @@ def test_board():
     assert check(B)
 
 
+def check_veto(mod):
+    d = pathlib.Path(tempfile.mkdtemp())
+    sh = F._shadow(d / "s.sqlite")
+    for fid, b, pid in (("v", "VJ Edgecombe", 7), ("k", "Kelly Oubre Jr.", 8)):
+        sh.execute("INSERT INTO flags (flag_id, logged_at, game_date, tier, team, x, b, stat, line, odds, gid, gtime, "
+                   "matchup, pid, x_pid, horizon) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,0)",
+                   (fid, "2026-01-09T18:00:00", "2026-01-09", "wowy", "PHI", "Joel Embiid", b, "pts", 12.5, 1.83,
+                    "G1", TIP_LATE, "MIL @ PHI", pid, 203954))
+    sh.commit()
+    n = sqlite3.connect(d / "n.sqlite")
+    n.execute("CREATE TABLE snapshots (mark TEXT, published_at TEXT, game_date TEXT, matchup TEXT, team TEXT,"
+              " pid INTEGER, player TEXT, status TEXT, reason TEXT)")
+    n.commit()
+    sqlite3.connect(d / "q.sqlite").execute("CREATE TABLE quotes (seen_at TEXT, book TEXT, gid TEXT, tip_utc TEXT, "
+                                            "pid INTEGER, player TEXT, stat TEXT, line REAL, side TEXT, odds REAL)")
+    mod.SHADOW, mod.NEWS, mod.LINES = d / "s.sqlite", d / "n.sqlite", d / "q.sqlite"
+    assert mod.veto("2026-01-09", 7, "Embiid not out (a choice, not a ruling)") == "VJ Edgecombe"
+    b = mod.board(NOW)
+    shown = [r["b"] for s in b["slates"] for g in s["games"] for r in g["rows"]]
+    off = {r["b"]: r["why"] for r in b["retracted"]}
+    return shown == ["Kelly Oubre Jr."] and "VETOED" in off.get("VJ Edgecombe", "")
+
+
+def test_veto_moves_play_to_off_strip():
+    assert check_veto(B)
+
+
+def test_veto_mutant_fails():
+    src = pathlib.Path(B.__file__).read_text()
+    a = '        if (gd, f["pid"]) in vetoed:\n'
+    assert src.count(a) == 1
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "nba_board_mutv.py").write_text(src.replace(a, '        if False:\n'))
+    (d / "nba_clv.py").write_text((pathlib.Path(B.__file__).parent / "nba_clv.py").read_text())
+    sys.path.insert(0, str(d))
+    try:
+        assert not check_veto(importlib.import_module("nba_board_mutv"))
+    finally:
+        sys.path.remove(str(d))
+        sys.modules.pop("nba_board_mutv", None)
+
+
 def test_mutants():
     src = pathlib.Path(B.__file__).read_text()
     for name, a, b in (
