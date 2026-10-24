@@ -398,3 +398,32 @@ through a new amendment and a new forward test. It is never a verdict here.
 
 **Amendment 8 applied 2026-10-24.** `d_min` is stored on every flag from this deployment on. **The cells
 score flags logged at or after 2026-10-24T07:43:00 UTC** (`nba_clv.AMEND8_CUTOVER`), and no earlier flag ever enters them.
+
+---
+
+# AMENDMENT 9 — tracked cell 4: OPPORTUNITY-CONFIRMED (2026-10-24, information only, forward only)
+
+Registered before this cell has been computed on any flag. **The tracking-stats test** (NBA_TRACKING_PREREG.md)
+replaced rebounds and assists with opportunity × conversion. It lost (−4.71% vs −3.46%) and did not
+improve calibration. **This cell uses the same data differently**: as a *check* that a role bump shows up
+in opportunities, not as a replacement input.
+
+**Definition, computed at flag time and stored on the flag** (`opp_cell`, `opp_ratio`):
+- Opportunity per game O:
+  - rebound chances for a stat containing rebounds;
+  - potential assists for a stat containing assists;
+  - their sum for PRA and reb_ast.
+  - Points-only flags are `n/a`.
+- From B's split: the same team-scoped games since X's first franchise game that wowy uses, prior games
+  only, restricted to games with a tracking row. Fewer than 2 games without X or 3 with X = `THIN`.
+- ratio = mean O without X ÷ mean O with X.
+- **CONFIRMED** if ratio ≥ 1.10, else **NOT CONFIRMED**.
+- Cold flags have no split: `n/a`. No tracking data reachable at flag time: `NO DATA`.
+
+**Data.** `nba_tracking.py` on the VM fetches `leaguedashptstats` per game date (Passing + Rebounding):
+2025-26 backfilled for the 400-day pool, then the current season daily. Same endpoint and integrity
+gate as the tracking test.
+
+**Expectation, stated now:** probably no separation, given the tracking test. If it separates,
+CONFIRMED beats the close more often than NOT CONFIRMED. Reported exactly as amendment 8's cells (all
+tiers and priced alone, FanDuel yardstick, game-clustered CI). Same candidate rule. Never a verdict.
