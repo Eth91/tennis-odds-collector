@@ -101,7 +101,7 @@ def test_mutants():
     for name, a, b in (
             ("retraction off", "if not started and st.get(f[\"pid\"]) in B_OFF:", "if False:"),
             ("latest flag wins", "if k not in opp:", "if True:"),
-            ("voids shown", "WHERE void_reason IS NULL AND game_date", "WHERE 1 AND game_date"),
+            ("voids shown", "WHERE void_reason IS NULL AND COALESCE(card, 1) = 1", "WHERE 1 AND COALESCE(card, 1) = 1"),
             ("no stat canonicalisation", "STAT.get(f[\"stat\"], f[\"stat\"]))\n", "f[\"stat\"])\n"),
             ("oldest report", "SELECT MAX(mark) FROM snapshots", "SELECT MIN(mark) FROM snapshots"),
             ("star-back ignored", "and st.get(f[\"x_pid\"]) in X_BACK", "and False"),

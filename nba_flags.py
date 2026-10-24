@@ -86,6 +86,9 @@ OPP_KEYS = {"rebounds": ("reb_chances",), "reb": ("reb_chances",), "assists": ("
 OPP_CONFIRM = 1.10
 MARGIN = {"pra": 5.0, "pts": 3.0, "reb": 2.0}          # wowy tier (measured negative)
 LEDGER_STAT = {"pra": "pra", "pts": "points", "reb": "rebounds"}   # fd_lines stat keys
+# AMENDMENT 18: P/R/A production pools, for the card's "no shared component" rule (wowy/cold keys)
+CARD_COMPONENTS = {"pts": frozenset("p"), "reb": frozenset("r"), "ast": frozenset("a"),
+                   "pra": frozenset("pra"), "threes": frozenset("p"), "fg3m": frozenset("p")}
 LINE_MAX_AGE_MIN = 90
 # A book fed by a pushed SNAPSHOT (DraftKings on the VM, NBA_SPEED_PREREG.md amendment 4) refreshes
 # only while its sender is awake, so 90 min would let a stale price into a flag. Its limit is the
@@ -112,7 +115,7 @@ SHADOW_DDL = """CREATE TABLE IF NOT EXISTS flags (
     gid TEXT, gtime TEXT, matchup TEXT, actual REAL, result TEXT, graded_at TEXT,
     ev REAL, pid INTEGER, news_at TEXT, stale INTEGER, horizon INTEGER, x_pid INTEGER,
     trigger_src TEXT, void_reason TEXT, d_min REAL, opp_cell TEXT, opp_ratio REAL, x_status TEXT,
-    x_min REAL)"""
+    x_min REAL, card INTEGER)"""
 COMBO = {"pts_reb": ("points", "rebounds"), "pts_ast": ("points", "assists"),
          "reb_ast": ("rebounds", "assists")}
 
@@ -126,7 +129,7 @@ def _shadow(path):
                      ("stale", "INTEGER"), ("horizon", "INTEGER"), ("x_pid", "INTEGER"),
                      ("trigger_src", "TEXT"), ("void_reason", "TEXT"), ("d_min", "REAL"),
                      ("opp_cell", "TEXT"), ("opp_ratio", "REAL"), ("x_status", "TEXT"),
-                     ("x_min", "REAL")):
+                     ("x_min", "REAL"), ("card", "INTEGER")):
         if col not in have:
             sh.execute(f"ALTER TABLE flags ADD COLUMN {col} {typ}")
     return sh
@@ -594,25 +597,7 @@ def flags(dry=False, game_date=None):
     if not dry and out_flags:
         sh = _shadow(SHADOW)
         stamp = now.replace(microsecond=0, tzinfo=None).isoformat()
-        for f in out_flags:
-            fid = f"{f['tier']}|{fold(f['b'])}|{f['stat']}|{f['line']}|{f['game_date']}"
-            if f["tier"] == "priced" and not _priced_slot_open(sh, f["game_date"], f, fid):
-                why["priced_slot_taken"] += 1
-                continue
-            cur = sh.execute("INSERT OR IGNORE INTO flags (flag_id, logged_at, game_date, tier, "
-                             "team, x, b, stat, line, odds, proj, margin, gid, gtime, matchup, ev, "
-                             "pid, news_at, stale, horizon, x_pid, trigger_src, d_min, opp_cell, opp_ratio, x_status, x_min) "
-                             "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                             (fid, stamp, f["game_date"], f["tier"], f["team"], f["x"], f["b"],
-                              f["stat"], f["line"], f["odds"], f["proj"], f["margin"],
-                              f["gid"], f["gtime"], f["matchup"], f.get("ev"), f.get("pid"),
-                              f.get("news_at"), f.get("stale"), f["horizon"], f.get("x_pid"),
-                              f.get("trigger_src"), f.get("d_min"), f.get("opp_cell"),
-                              f.get("opp_ratio"), f.get("x_status"), f.get("x_min")))
-            new_shadow += cur.rowcount
-            if cur.rowcount:
-                inserted.append(dict(f, flag_id=fid))
-        sh.commit()
+        new_shadow, inserted = _log_flags(sh, out_flags, stamp, why)
         # PINGS (user 2026-10-24: "0 latency"): one push per NEW play, in-process, right after the
         # commit; then a VOID for any pinged play whose premise died. Never breaks the pass.
         try:
@@ -661,6 +646,97 @@ def flags(dry=False, game_date=None):
     if why:
         print(f"  skipped: {dict(why)}")
     return out_flags
+
+
+def _excess(f):
+    """How far a wowy/cold flag clears its own threshold: (proj - line) / margin (amendment 18)."""
+    thr = MARGIN.get(f["stat"]) if f["tier"] == "wowy" else C.COLD_MARGIN
+    return (f.get("margin") or 0.0) / thr if thr else 0.0
+
+
+CARD_ON = "COALESCE(card, 1) = 1 AND void_reason IS NULL"   # NULL = before amendment 18 = shown
+
+
+def _card_rule(sh, gd, pid, team, tier, stat):
+    """AMENDMENT 18, for a NEW wowy/cold play: 1 = on the card (pinged + shown), 0 = logged only.
+    Off if the player already has a carded play that date (any tier), if the tier already has 2 carded
+    plays in the team-game, or if it shares a P/R/A component with one of them."""
+    if sh.execute(f"SELECT 1 FROM flags WHERE game_date=? AND pid=? AND {CARD_ON} LIMIT 1", (gd, pid)).fetchone():
+        return 0
+    mates = sh.execute(f"SELECT DISTINCT pid, stat FROM flags WHERE game_date=? AND team=? AND tier=? AND "
+                       f"{CARD_ON}", (gd, team, tier)).fetchall()
+    if len(mates) >= 2:
+        return 0
+    comp = CARD_COMPONENTS.get(stat, frozenset(stat))
+    return 0 if any(comp & CARD_COMPONENTS.get(s, frozenset(s)) for _, s in mates) else 1
+
+
+def _card(sh, f):
+    """priced keeps its own selection (card 1). A re-flag of a known play (same date, player, stat,
+    tier; any line) inherits that play's card value — sticky, never un-carded or re-pinged."""
+    if f["tier"] == "priced":
+        return 1
+    prev = sh.execute("SELECT card FROM flags WHERE game_date=? AND pid=? AND stat=? AND tier=? AND "
+                      "card IS NOT NULL ORDER BY logged_at LIMIT 1",
+                      (f["game_date"], f.get("pid"), f["stat"], f["tier"])).fetchone()
+    if prev:
+        return prev[0]
+    return _card_rule(sh, f["game_date"], f.get("pid"), f["team"], f["tier"], f["stat"])
+
+
+def _log_flags(sh, out_flags, stamp, why):
+    """Write one pass's flags to the shadow table; returns (new rows, the NEW CARDED flags to ping).
+    AMENDMENT 18: priced first, then wowy/cold by excess, so the card takes the best play first."""
+    new_shadow, inserted = 0, []
+    order = sorted(out_flags, key=lambda f: (f["tier"] != "priced",
+                                             0.0 if f["tier"] == "priced" else -_excess(f)))
+    for f in order:
+        fid = f"{f['tier']}|{fold(f['b'])}|{f['stat']}|{f['line']}|{f['game_date']}"
+        if f["tier"] == "priced" and not _priced_slot_open(sh, f["game_date"], f, fid):
+            why["priced_slot_taken"] += 1
+            continue
+        card = _card(sh, f)
+        cur = sh.execute("INSERT OR IGNORE INTO flags (flag_id, logged_at, game_date, tier, "
+                         "team, x, b, stat, line, odds, proj, margin, gid, gtime, matchup, ev, "
+                         "pid, news_at, stale, horizon, x_pid, trigger_src, d_min, opp_cell, opp_ratio, x_status, x_min, "
+                         "card) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                         (fid, stamp, f["game_date"], f["tier"], f["team"], f["x"], f["b"],
+                          f["stat"], f["line"], f["odds"], f["proj"], f["margin"],
+                          f["gid"], f["gtime"], f["matchup"], f.get("ev"), f.get("pid"),
+                          f.get("news_at"), f.get("stale"), f["horizon"], f.get("x_pid"),
+                          f.get("trigger_src"), f.get("d_min"), f.get("opp_cell"),
+                          f.get("opp_ratio"), f.get("x_status"), f.get("x_min"), card))
+        new_shadow += cur.rowcount
+        if cur.rowcount and not card:
+            why["card_off_logged_only"] += 1
+        if cur.rowcount and card:
+            inserted.append(dict(f, flag_id=fid))
+    sh.commit()
+    return new_shadow, inserted
+
+
+def card_backfill(game_dates, path=None):
+    """One-off (amendment 18): card values for flags logged before the card existed, by the same rule,
+    play by play in logged order then excess. priced rows -> 1. Pings already sent are not recalled."""
+    sh = _shadow(path or SHADOW)
+    marks = ",".join("?" * len(game_dates))
+    sh.execute(f"UPDATE flags SET card=1 WHERE card IS NULL AND tier='priced' AND game_date IN ({marks})",
+               tuple(game_dates))
+    rows = sh.execute(f"SELECT game_date, pid, team, tier, stat, MIN(logged_at), MAX(margin) FROM flags "
+                      f"WHERE card IS NULL AND void_reason IS NULL AND tier IN ('wowy','cold') AND "
+                      f"game_date IN ({marks}) GROUP BY game_date, pid, team, tier, stat", tuple(game_dates)).fetchall()
+    sh.execute(f"UPDATE flags SET card=0 WHERE card IS NULL AND tier IN ('wowy','cold') AND game_date IN ({marks})",
+               tuple(game_dates))
+    plays = sorted(rows, key=lambda r: (r[5], -_excess({"tier": r[3], "stat": r[4], "margin": r[6]})))
+    out = []
+    for gd, pid, team, tier, stat, _at, _m in plays:
+        v = _card_rule(sh, gd, pid, team, tier, stat)
+        sh.execute("UPDATE flags SET card=? WHERE game_date=? AND pid=? AND tier=? AND stat=? AND card=0",
+                   (v, gd, pid, tier, stat))
+        out.append((gd, pid, team, tier, stat, v))
+    sh.commit()
+    sh.close()
+    return out
 
 
 def _priced_slot_open(sh, game_date, f, fid):

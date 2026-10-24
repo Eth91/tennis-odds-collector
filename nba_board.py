@@ -88,8 +88,8 @@ def board(now=None):
         return out
     sh.row_factory = sqlite3.Row
     flags = [dict(r) for r in sh.execute(
-        f"SELECT * FROM flags WHERE void_reason IS NULL AND game_date IN ({','.join('?' * len(days))}) "
-        "ORDER BY logged_at", tuple(days))]
+        f"SELECT * FROM flags WHERE void_reason IS NULL AND COALESCE(card, 1) = 1 "   # amendment 18: the card
+        f"AND game_date IN ({','.join('?' * len(days))}) ORDER BY logged_at", tuple(days))]
     opp = {}
     for f in flags:
         k = (f["game_date"], f["gid"], f["pid"] or f["b"], STAT.get(f["stat"], f["stat"]))
