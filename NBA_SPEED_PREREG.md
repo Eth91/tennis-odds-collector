@@ -468,3 +468,7 @@ The tiers, the yardsticks and the decision lines are unchanged.
 flags the test scores (more `trigger_src = news:x`, earlier `news_at`). The cutover is recorded below so
 flags before and after it can be told apart. The STALE LINE cell (amendment 8) is where this pays off,
 if it does: news caught before the book moves is exactly a STALE spot.
+
+**Amendment 10 applied 2026-10-24.** `nba-x-beats.service` started at 08:46 UTC on the VM. Its first pass
+marked the 64-post backlog seen without logging it, and it has been **live since 08:47 UTC**: 62 accounts,
+3 chunks, one search every 20 s, rate budget 187 / 15 min (183 remaining after the first pass).
