@@ -8,7 +8,9 @@
      nba_watch.py runs this pass the moment a report with a fresh Out publishes.
      ESPN is no longer read here: the WNBA dropped it for over-reporting Out (4 of 22 rows).
   2. Three beneficiary tiers (wowy and cold are disjoint; priced re-prices the wowy population):
-       wowy — B has a measured with/without split vs X (nba_wowy.sqlite pairs, n_out >= 2).
+       wowy — B has a with/without split vs X ON THIS TEAM (>= 2 games without, >= 3 with),
+              computed live from `apps` with the margin test's formulas (amendment 7; it used to
+              read nba_wowy.sqlite, frozen at last season's end).
               proj = rate × (base_min + d_min); bet OVER at proj - line >= MARGIN[stat].
        cold — B has NO such split. X's vacated minutes go to the [12, 32]-min rotation in
               proportion to minutes played (nba_coldstart.redistribute — the SAME function
@@ -75,6 +77,7 @@ MAX_ABSENCE_GAME = 2                   # trigger only on absence game 1-2 (the t
 HORIZONS = 2                           # flag tonight's games AND tomorrow's (h0, h1)
 REPORT_MAX_AGE_MIN = 45                # an official report older than this is a blind input
 STATS = ("pra", "pts", "reb")          # ast/fg3m gated off (48.5% Oct-Nov / 53.7%)
+K_DMIN, K_MIN = 3.0, 60.0              # == nba_wowy / the margin test: shrink pseudo-games / -minutes
 MARGIN = {"pra": 5.0, "pts": 3.0, "reb": 2.0}          # wowy tier (measured negative)
 LEDGER_STAT = {"pra": "pra", "pts": "points", "reb": "rebounds"}   # fd_lines stat keys
 LINE_MAX_AGE_MIN = 90
@@ -225,30 +228,49 @@ def _mean_last10(ap):
     return sum(a[1] for a in last) / len(last)
 
 
-def wowy_candidates(pairs, out_pid, cur_team, games, out_all, base_min, why):
-    """wowy tier: id join; B must be on X's CURRENT team (fixes summer moves), and the split must
-    have been MEASURED on that team (NBA_SPEED_PREREG.md amendment 6: Horford was flagged at GSW on
-    2026-10-23 from 2 Boston games without Porziņģis)."""
+def split(apps, b_id, x_id, tri):
+    """B's franchise games since X's first franchise game in the pool: (without X, with X).
+    The backtest's out_g / in_g, team-scoped (nba_pricing_realline.walk)."""
+    xa = _team_apps(apps, x_id, tri)
+    if not xa:
+        return [], []
+    x_first, x_dates = xa[0][0], {a[0] for a in xa}
+    since = [a for a in _team_apps(apps, b_id, tri) if a[0] >= x_first]
+    return [a for a in since if a[0] not in x_dates], [a for a in since if a[0] in x_dates]
+
+
+def wowy_live(apps, out_pid, cur_team, games, out_all, why):
+    """wowy tier, computed LIVE (NBA_SPEED_PREREG.md amendment 7): the margin test's formulas on the
+    same `apps` priced and cold use (400-day pool + this season's box scores). It replaced a lookup
+    into nba_wowy.sqlite, frozen at 2026-04-12: Holiday projected on 31.4 min while playing 21 and 27."""
     cands = []
-    for x_id, b_id, b_name, n_out, d_min, r_pts, r_reb, r_pra, p_team in pairs:
-        if x_id not in out_pid:
-            continue
-        xname, tri = out_pid[x_id]
-        if cur_team.get(b_id) != tri:
-            why["wowy_b_not_on_team"] += 1
-            continue
-        if p_team != tri:
-            why["wowy_split_other_team"] += 1
-            continue
+    for x_id, (xname, tri) in out_pid.items():
         if tri not in games:
-            why["no_game_today"] += 1
             continue
-        if b_id in out_all or b_id not in base_min:
+        xa = _team_apps(apps, x_id, tri)
+        if len(xa) < 10 or _mean_last10(xa) < STAR_MIN:
+            why["wowy_x_not_a_star_here"] += 1
             continue
-        rates = {"pts": r_pts, "reb": r_reb, "pra": r_pra}
-        for stat in STATS:
-            cands.append(("wowy", tri, xname, b_id, stat,
-                          rates[stat] * (base_min[b_id] + d_min), MARGIN[stat], x_id))
+        for b_id, t in cur_team.items():
+            if t != tri or b_id == x_id or b_id in out_all:
+                continue
+            ba = _team_apps(apps, b_id, tri)
+            if len(ba) < MIN_PRIOR_APPS:
+                continue
+            b_out, b_in = split(apps, b_id, x_id, tri)
+            if len(b_out) < C.MIN_WOWY or len(b_in) < 3:
+                continue
+            b10 = ba[-10:]
+            base_min = sum(a[1] for a in b10) / len(b10)
+            m10 = sum(a[1] for a in b10)
+            min_out = sum(a[1] for a in b_out)
+            d_min = (min_out / len(b_out) - sum(a[1] for a in b_in) / len(b_in))
+            d_min *= len(b_out) / (len(b_out) + K_DMIN)
+            for stat in STATS:
+                base_rate = sum(a[2][stat] for a in b10) / max(1e-9, m10)
+                rate = (sum(a[2][stat] for a in b_out) + base_rate * K_MIN) / (min_out + K_MIN)
+                cands.append(("wowy", tri, xname, b_id, stat, rate * (base_min + d_min),
+                              MARGIN[stat], x_id))
     return cands
 
 
@@ -388,15 +410,8 @@ def flags(dry=False, game_date=None):
         out_pid[pid], news_at[pid], trig_src[pid] = (nm, tri), at, f"news:{src}"
         why["x_from_news"] += 1
 
-    con = sqlite3.connect(f"file:{WOWY}?mode=ro", uri=True)
-    pairs = con.execute("SELECT x_id, b_id, b_name, n_out, d_min, rate_pts, rate_reb, "
-                        "rate_pra, team FROM pairs").fetchall()
-    base_min = {r[0]: r[1] for r in con.execute("SELECT b_id, base_min FROM baselines")}
-    con.close()
-    # a prior split counts only ON THE TEAM IT WAS MEASURED ON (amendment 6)
-    has_prior = {(x, b, team) for x, b, *_, team in pairs}
-
-    cands = wowy_candidates(pairs, out_pid, cur_team, games, out_all, base_min, why)
+    # wowy: computed live (amendment 7). nba_wowy.sqlite is no longer read by the flag pass.
+    cands = wowy_live(apps, out_pid, cur_team, games, out_all, why)
 
     # ── cold tier: exactly the pre-registered rule, through the shared function ──
     season = C.season_of(gdate)
@@ -418,7 +433,9 @@ def flags(dry=False, game_date=None):
                     and (today - dt.date.fromisoformat(pa[-1][0])).days <= ACTIVE_DAYS):
                 bm[p] = _mean_last10(pa)
         for b_id, pmin in C.redistribute(bm, x_id, _mean_last10(xa)).items():
-            if b_id in out_all or (x_id, b_id, tri) in has_prior:
+            # has a WOWY prior -> not cold-start: B played >= MIN_WOWY of X's missed games
+            # (the cold-start registration's own rule, computed live; amendment 7)
+            if b_id in out_all or len(split(apps, b_id, x_id, tri)[0]) >= C.MIN_WOWY:
                 continue
             rate = C.per_min_rate(_team_apps(apps, b_id, tri), C.season_of, season)
             if not rate:
