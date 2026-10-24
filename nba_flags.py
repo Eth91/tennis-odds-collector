@@ -603,13 +603,29 @@ def grade():
                     dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(), fid))
         done += 1
     sh.commit()
-    for tier, n, w, u in sh.execute(
-            "SELECT tier, COUNT(*), SUM(result='win'), "
-            "SUM(CASE WHEN result='win' THEN odds-1 ELSE -1 END) FROM flags "
-            "WHERE result IS NOT NULL GROUP BY tier"):
+    for tier, (w, n, u) in sorted(shadow_record(sh).items()):
         print(f"  shadow {tier}: {w}-{n - w}  {u:+.2f}u  ROI {100 * u / n:+.1f}%  (n={n})")
     print(f"nba shadow: graded {done} of {len(todo)} pending")
     sh.close()
+
+
+def shadow_record(sh):
+    """{tier: (wins, n, units)} counted the way the speed test counts (nba_clv): voided flags
+    excluded, ONE opportunity per (tier, player, stat, game), its EARLIEST flag. Counting every
+    graded row, re-flags at moved lines and voids included, printed wowy as 13-12 -5.6% on
+    2026-10-24 while the registered count was 9-2 +49.3%."""
+    first = {}
+    for tier, key, stat, gid, at, result, odds in sh.execute(
+            "SELECT tier, COALESCE(pid, b), stat, gid, logged_at, result, odds FROM flags "
+            "WHERE result IS NOT NULL AND void_reason IS NULL ORDER BY logged_at"):
+        first.setdefault((tier, key, stat, gid), (result, odds))
+    rec = defaultdict(lambda: [0, 0, 0.0])
+    for (tier, *_), (result, odds) in first.items():
+        r = rec[tier]
+        r[0] += result == "win"
+        r[1] += 1
+        r[2] += (odds - 1) if result == "win" else -1.0
+    return {t: tuple(v) for t, v in rec.items()}
 
 
 if __name__ == "__main__":
