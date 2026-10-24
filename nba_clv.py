@@ -217,7 +217,7 @@ def view(r, yardstick):
         if "u_flag" in r:
             v.update(u_flag=r["u_flag"], u_close=r["u_close"])
     return dict(v, gid=r["gid"], latency_min=r.get("latency_min"), tier=r["tier"],
-                cells=r.get("cells"), x_status=r.get("x_status"))
+                cells=r.get("cells"), x_status=r.get("x_status"), x_min=r.get("x_min"))
 
 
 def scoreboard(rows):
@@ -225,6 +225,7 @@ def scoreboard(rows):
     for r in rows:
         cell = ("unconfirmed-news" if r.get("confirmed") is False
                 else "doubtful" if r.get("x_status") == "Doubtful"
+                else "x24-28" if r.get("x_min") is not None and r["x_min"] < 28
                 else f"h{r.get('horizon') or 0}")
         for ys in ("FD", "FD+DK"):
             by[f"{r['tier']}/{cell} {ys}"].append(view(r, ys))
@@ -234,6 +235,8 @@ def scoreboard(rows):
           "(amendment 2: an audit cell, never in a verdict).\n"
           "doubtful = the absent player was Doubtful, not Out, at flag time (amendment 15: its own\n"
           "cell, never in the decision).\n"
+          "x24-28 = wowy with the absent player at 24-28 min (amendment 16: its own cell, never in\n"
+          "the decision).\n"
           "FD = FanDuel at flag time vs FanDuel at tip (amendment 4, the PRIMARY yardstick);\n"
           "FD+DK = the flag's best-of-two price vs the best-of-two close (secondary).\n"
           "beat-close CI resamples games (clustered); a CI needs >= 10 games\n"

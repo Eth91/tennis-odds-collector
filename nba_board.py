@@ -132,7 +132,8 @@ def board(now=None):
         if gs:
             out["slates"].append({"date": gd, "label": label, "games": gs})
     rows = V.collect()
-    fd_rows = [V.view(r, "FD") for r in rows if r.get("x_status") != "Doubtful"]   # amendment 15
+    fd_rows = [V.view(r, "FD") for r in rows if r.get("x_status") != "Doubtful"   # amendment 15
+               and not (r.get("x_min") is not None and r["x_min"] < 28)]      # amendment 16
     closed = [v for v in fd_rows if v["close"]]
     graded = [v for v in closed if "u_flag" in v]
     out["record"] = {"closed": len(closed), "beat": sum(1 for v in closed if v["beat"]),
