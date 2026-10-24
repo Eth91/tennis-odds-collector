@@ -225,6 +225,66 @@ def _mean_last10(ap):
     return sum(a[1] for a in last) / len(last)
 
 
+def wowy_candidates(pairs, out_pid, cur_team, games, out_all, base_min, why):
+    """wowy tier: id join; B must be on X's CURRENT team (fixes summer moves), and the split must
+    have been MEASURED on that team (NBA_SPEED_PREREG.md amendment 6: Horford was flagged at GSW on
+    2026-10-23 from 2 Boston games without Porziņģis)."""
+    cands = []
+    for x_id, b_id, b_name, n_out, d_min, r_pts, r_reb, r_pra, p_team in pairs:
+        if x_id not in out_pid:
+            continue
+        xname, tri = out_pid[x_id]
+        if cur_team.get(b_id) != tri:
+            why["wowy_b_not_on_team"] += 1
+            continue
+        if p_team != tri:
+            why["wowy_split_other_team"] += 1
+            continue
+        if tri not in games:
+            why["no_game_today"] += 1
+            continue
+        if b_id in out_all or b_id not in base_min:
+            continue
+        rates = {"pts": r_pts, "reb": r_reb, "pra": r_pra}
+        for stat in STATS:
+            cands.append(("wowy", tri, xname, b_id, stat,
+                          rates[stat] * (base_min[b_id] + d_min), MARGIN[stat], x_id))
+    return cands
+
+
+def amend6_reason(tier, team, x_pid, pid, pair_teams):
+    """The amendment-6 void reason for a logged flag, or None. pair_teams: {(x_id, b_id): {team}}."""
+    if tier != "wowy" or not x_pid or not pid:
+        return None
+    teams = pair_teams.get((x_pid, pid), set())
+    if not teams or team in teams:
+        return None
+    return f"amend6: with/without split measured on another team ({'/'.join(sorted(teams))})"
+
+
+def amend6(dry=False):
+    """Apply amendment 6 to every logged flag (idempotent; never touches an already-void flag)."""
+    con = sqlite3.connect(f"file:{WOWY}?mode=ro", uri=True)
+    pair_teams = defaultdict(set)
+    for x, b, t in con.execute("SELECT x_id, b_id, team FROM pairs"):
+        pair_teams[(x, b)].add(t)
+    con.close()
+    sh = _shadow(SHADOW)
+    hits = []
+    for fid, tier, team, x_pid, pid, b, stat, line, gd in sh.execute(
+            "SELECT flag_id, tier, team, x_pid, pid, b, stat, line, game_date FROM flags "
+            "WHERE void_reason IS NULL"):
+        why = amend6_reason(tier, team, x_pid, pid, pair_teams)
+        if why:
+            hits.append((fid, why, f"{gd} {b} {stat} o{line:g} ({team})"))
+    for fid, why, desc in hits:
+        print(f"  void {desc}: {why}")
+        if not dry:
+            sh.execute("UPDATE flags SET void_reason=? WHERE flag_id=? AND void_reason IS NULL", (why, fid))
+    sh.commit()
+    print(f"amendment 6: {len(hits)} flag(s) {'would be ' if dry else ''}voided")
+
+
 def flags(dry=False, game_date=None):
     """One flag pass for the games on `game_date` (ET; default today). Completed-game data
     (appearances, rosters) is always as of NOW; everything about the game — slate, official
@@ -330,29 +390,13 @@ def flags(dry=False, game_date=None):
 
     con = sqlite3.connect(f"file:{WOWY}?mode=ro", uri=True)
     pairs = con.execute("SELECT x_id, b_id, b_name, n_out, d_min, rate_pts, rate_reb, "
-                        "rate_pra FROM pairs").fetchall()
+                        "rate_pra, team FROM pairs").fetchall()
     base_min = {r[0]: r[1] for r in con.execute("SELECT b_id, base_min FROM baselines")}
     con.close()
-    has_prior = {(x, b) for x, b, *_ in pairs}
+    # a prior split counts only ON THE TEAM IT WAS MEASURED ON (amendment 6)
+    has_prior = {(x, b, team) for x, b, *_, team in pairs}
 
-    cands = []
-    # ── wowy tier: id join, and B must be on X's CURRENT team (fixes summer moves) ──
-    for x_id, b_id, b_name, n_out, d_min, r_pts, r_reb, r_pra in pairs:
-        if x_id not in out_pid:
-            continue
-        xname, tri = out_pid[x_id]
-        if cur_team.get(b_id) != tri:
-            why["wowy_b_not_on_team"] += 1
-            continue
-        if tri not in games:
-            why["no_game_today"] += 1
-            continue
-        if b_id in out_all or b_id not in base_min:
-            continue
-        rates = {"pts": r_pts, "reb": r_reb, "pra": r_pra}
-        for stat in STATS:
-            cands.append(("wowy", tri, xname, b_id, stat,
-                          rates[stat] * (base_min[b_id] + d_min), MARGIN[stat], x_id))
+    cands = wowy_candidates(pairs, out_pid, cur_team, games, out_all, base_min, why)
 
     # ── cold tier: exactly the pre-registered rule, through the shared function ──
     season = C.season_of(gdate)
@@ -374,7 +418,7 @@ def flags(dry=False, game_date=None):
                     and (today - dt.date.fromisoformat(pa[-1][0])).days <= ACTIVE_DAYS):
                 bm[p] = _mean_last10(pa)
         for b_id, pmin in C.redistribute(bm, x_id, _mean_last10(xa)).items():
-            if b_id in out_all or (x_id, b_id) in has_prior:
+            if b_id in out_all or (x_id, b_id, tri) in has_prior:
                 continue
             rate = C.per_min_rate(_team_apps(apps, b_id, tri), C.season_of, season)
             if not rate:
@@ -572,8 +616,11 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--grade", action="store_true")
+    ap.add_argument("--amend6", action="store_true", help="apply amendment 6 to logged flags (idempotent)")
     a = ap.parse_args()
-    if a.grade:
+    if a.amend6:
+        amend6(dry=a.dry_run)
+    elif a.grade:
         grade()
     else:
         today = dt.datetime.now(dt.timezone.utc).astimezone(ET).date()
