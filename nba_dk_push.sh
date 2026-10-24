@@ -26,6 +26,6 @@ if [ $rc -eq 0 ]; then
   out="$out · VM: $recv"
   [ $rc -ne 0 ] && out="$out · ship to VM failed rc=$rc"
 fi
-printf '%s rc=%s %s\n' "$(date -u +%FT%TZ)" "$rc" "$(echo "$out" | tr '\n' ' ' | tail -c 300)" >>"$LOG"
+printf '%s rc=%s %s\n' "$(date -u +%FT%TZ)" "$rc" "$(echo "$out" | tr '\n' ' ' | tail -c 300 | iconv -c -f UTF-8 -t UTF-8 2>/dev/null)" >>"$LOG"
 [ -f "$LOG" ] && tail -n 4000 "$LOG" > "$LOG.tmp" && mv "$LOG.tmp" "$LOG"
 exit $rc

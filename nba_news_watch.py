@@ -228,7 +228,9 @@ def src_x():
             continue
         out.append({"item_id": str(j.get("id")), "player": None, "team_name": None,
                     "headline": "", "body": (j.get("text") or "")[:400],
-                    "provenance": "x:underdog", "seen_at": j.get("t")})
+                    # beat writers (nba_x_beats, amendment 10) write to the same log with an author
+                    "provenance": f"x:{j['author']}" if j.get("author") else "x:underdog",
+                    "seen_at": j.get("t")})
     return out
 
 
