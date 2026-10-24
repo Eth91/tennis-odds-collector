@@ -119,6 +119,20 @@ def test_underdog_phrasings():
         assert N.status_of("", txt) == want, txt
 
 
+def test_a_choice_is_not_a_ruling():
+    """2026-10-24: Embiid's 'won't play in both ... playing in one of them' was read as Out Saturday."""
+    cases = [("Joel Embiid said he won't play in both legs of Sixers' back-to-back set on Saturday and "
+              "Sunday. \"I'm playing in one of them.\"", "other"),
+             ("Sixers say Embiid will sit one of the two games this weekend.", "other"),
+             ("Embiid won't play both games of the back-to-back, Nurse said.", "other"),
+             ("LeBron will rest either game of the back-to-back; no decision yet.", "other"),
+             ("Embiid won't play Sunday, the second night of the back-to-back.", "out"),
+             ("Jalen Brunson will miss one game with an ankle sprain, the Knicks said.", "out"),
+             ("Trae Young (knee) won't play Friday; unclear when he returns.", "out")]
+    for txt, want in cases:
+        assert N.status_of("", txt) == want, txt
+
+
 def test_empty_first_poll_does_not_swallow_the_first_real_item():
     """The X log was empty right after the switch to @UnderdogNBA. Seeding keyed on 'no rows yet'
     would have treated the first REAL ruling as backlog; it is keyed on 'first poll'."""

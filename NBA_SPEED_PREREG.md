@@ -517,3 +517,26 @@ on the morning's 12-game board), one game 2.6 s, of which about 1.5 s is fixed s
 
 **Unchanged:** the price a flag records is still FanDuel's (with any fresh DraftKings snapshot) at the
 moment of the flag. Everything about flags, tiers, yardsticks and verdicts is unchanged.
+
+---
+
+# AMENDMENT 13 — a choice is not a ruling (news classifier correction, 2026-10-24)
+
+**The defect.** On 2026-10-22 at 9:59 PM MT, @UnderdogNBA posted: "Joel Embiid said he won't play in both
+legs of Sixers' back-to-back set on Saturday and Sunday. 'I'm playing in one of them.'" The news classifier
+saw "won't play" plus "Saturday" and recorded *Embiid Out 2026-10-24*. That triggered VJ Edgecombe flags.
+Embiid will sit one of the two games and did not say which.
+
+**The fix.** `nba_news_watch.status_of` treats choice wording as not an absence, the same way it treats
+a hedge: "won't play (in) both", "one of them / the two / the games", "sit/rest/miss one of / either of",
+"either game", "only one of". It is kept narrow:
+- "will miss one game" stays an Out;
+- a named night ("won't play Sunday, the second night of the back-to-back") stays an Out;
+- "unclear when he returns" stays an Out.
+
+Re-run over all 441 stored Out items, exactly one changes: this one.
+
+**Flags already logged.** No retroactive change is needed. Under amendment 2, a news-triggered flag counts
+in a verdict only if the official report lists the player Out before tip. If the league lists Embiid Out
+on 2026-10-24, the Edgecombe flags count, because the premise held. Otherwise they stay unconfirmed audit
+rows.
