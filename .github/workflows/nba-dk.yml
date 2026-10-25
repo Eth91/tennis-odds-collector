@@ -12,7 +12,8 @@ name: nba-dk
 #
 # CADENCE. GitHub drops and delays frequent schedule ticks, so ONE long-lived job loops (up to 5.5 h)
 # and re-dispatches itself while the window is open. The three daily seeds only restart the chain if
-# it broke. The concurrency group keeps it to a single chain: one running, at most one pending.
+# it broke (morning seeds every ~30 min from 15:13Z, amendment 25). The concurrency group keeps it to
+# a single chain: one running, at most one pending.
 # Window 15:00-06:00 UTC (9 AM to midnight MT): news, triggers and every close, late West-coast
 # tips included. Outside it nothing runs. The Mac's nba_dk_push.sh still sends whenever the Mac is
 # awake, and the receiver keeps whichever snapshot is newest.
@@ -20,6 +21,15 @@ name: nba-dk
 on:
   schedule:
     - cron: "5 15 * * *"
+    # AMENDMENT 25: morning seeds at off-peak minutes. On 10/24 and 10/25 the 15:05 seed ran 3 h late
+    # and DraftKings was dark 9 AM to ~12:20 PM MT, the news window. Extra seeds queue behind a
+    # running chain (concurrency: one running, one pending), so they never start a second chain.
+    - cron: "13 15 * * *"
+    - cron: "41 15 * * *"
+    - cron: "13 16 * * *"
+    - cron: "41 16 * * *"
+    - cron: "13 17 * * *"
+    - cron: "41 17 * * *"
     - cron: "35 18 * * *"
     - cron: "5 22 * * *"
   workflow_dispatch:

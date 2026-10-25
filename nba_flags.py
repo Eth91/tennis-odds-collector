@@ -131,10 +131,16 @@ COMBO = {"pts_reb": ("points", "rebounds"), "pts_ast": ("points", "assists"),
          "reb_ast": ("rebounds", "assists")}
 
 
+CANDS_DDL = """CREATE TABLE IF NOT EXISTS cands (game_date TEXT, x_pid INTEGER, pid INTEGER, stat TEXT,
+    logged_at TEXT, tier TEXT, team TEXT, gid TEXT, x TEXT, b TEXT, proj REAL, thr REAL, d_min REAL,
+    line REAL, odds REAL, trigger_src TEXT, news_at TEXT, PRIMARY KEY (game_date, x_pid, pid, stat))"""
+
+
 def _shadow(path):
     """Open the shadow table, migrating a pre-`ev` table in place (idempotent)."""
     sh = sqlite3.connect(path)
     sh.execute(SHADOW_DDL)
+    sh.execute(CANDS_DDL)
     have = {r[1] for r in sh.execute("PRAGMA table_info(flags)")}
     for col, typ in (("ev", "REAL"), ("pid", "INTEGER"), ("news_at", "TEXT"),
                      ("stale", "INTEGER"), ("horizon", "INTEGER"), ("x_pid", "INTEGER"),
@@ -581,6 +587,19 @@ def flags(dry=False, game_date=None):
                           "game_date": gdate, "horizon": horizon, "x_pid": r["_x_id"],
                           "trigger_src": trig_src.get(r["_x_id"]), "d_min": r.get("d_min"),
                           "x_status": x_status.get(r["_x_id"]), "x_min": x_min.get(r["_x_id"])})
+    if not dry and cands:                     # AMENDMENT 25: the lab sees the model's whole view
+        try:
+            csh = _shadow(SHADOW)
+            stamp_c = now.replace(microsecond=0, tzinfo=None).isoformat()
+            for tier, tri, xname, b_id, stat, proj, margin, x_id, d_min in cands:
+                lk = lines.get((games[tri][0], b_id, LEDGER_STAT[stat])) or (None, None, None)
+                csh.execute("INSERT OR IGNORE INTO cands VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                            (gdate, x_id, b_id, stat, stamp_c, tier, tri, games[tri][0], xname, name.get(b_id),
+                             round(proj, 2), margin, d_min, lk[0], lk[1], trig_src.get(x_id), news_at.get(x_id)))
+            csh.commit()
+            csh.close()
+        except sqlite3.Error as e:
+            print(f"  !! cands log error: {type(e).__name__}: {e}")
     for tier, tri, xname, b_id, stat, proj, margin, x_id, d_min in cands:
         lk = lines.get((games[tri][0], b_id, LEDGER_STAT[stat]))   # this game's line only
         if not lk:
