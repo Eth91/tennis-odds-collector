@@ -30,10 +30,10 @@ def check(pm):
     want(p and p["line"] == 24.5 and p["stat"] == "points" and p["game_date"] == "2026-10-24"
          and (p["away"], p["home"], p["team"]) == ("BKN", "CLE", "CLE") and p["bid"] == 0.31,
          "parse: 25+ points = over 24.5, BKN @ CLE, his team CLE, 2026-10-24, bid 0.31")
-    sched = [{"date_et": "2026-10-24", "away": "BKN", "home": "CLE", "utc": "2026-10-24T23:30:00Z"}]
+    sched = [{"date_et": "2026-10-24", "away": "BKN", "home": "CLE", "utc": "2026-10-24T23:30:00Z", "gid": "G"}]
     late = dict(M, occurrence_datetime="2026-10-25T02:30:00Z")          # Kalshi's: ~tip + 3 h
     wt = pm.with_tips([dict(pm.parse_market(late), tip=late["occurrence_datetime"]), dict(p, home="NYK")], sched)
-    want(len(wt) == 1 and wt[0]["tip"] == "2026-10-24T23:30:00Z",
+    want(len(wt) == 1 and wt[0]["tip"] == "2026-10-24T23:30:00Z" and wt[0]["gid"] == "G",
          "tip from the NBA schedule, not Kalshi's occurrence time; a game not on the schedule is dropped")
     p = wt[0]
     want(pm.parse_market(dict(M, strike_type="less")) is None and pm.parse_market(dict(M, ticker="KXNBAGAME-X")) is None,
@@ -56,17 +56,17 @@ def check(pm):
     for side, o in (("over", 1.80), ("under", 2.00)):
         q.execute("INSERT INTO quotes VALUES ('2026-10-24T21:59:00','fd','G','',1628386,'','points',24.5,?,?)", (side, o))
     q.execute("INSERT INTO quotes VALUES ('2026-10-24T21:59:00','fd','G','',1628386,'','points',29.5,'over',4.0)")
-    f1 = pm.fd_fair(q, 1628386, "points", 24.5, "2026-10-24T22:00:00")
-    f2 = pm.fd_fair(q, 1628386, "points", 29.5, "2026-10-24T22:00:00")
+    f1 = pm.fd_fair(q, "G", 1628386, "points", 24.5, "2026-10-24T22:00:00")
+    f2 = pm.fd_fair(q, "G", 1628386, "points", 29.5, "2026-10-24T22:00:00")
     want(f1 and abs(f1[0] - (1 / 1.8) / (1 / 1.8 + 1 / 2.0)) < 1e-9 and f1[1] == "DEVIG",
          f"FD fair: de-vigged when both sides exist ({f1[0]:.4f} = 0.5263)" if f1 else "FD fair missing")
     want(f2 == (0.25, "RAW"), "FD fair: raw 1/odds for an over-only ladder rung")
     path = pathlib.Path(tempfile.mkdtemp()) / "pm.sqlite"
     con = pm._db(path)
     for i, (vol, bid, ask) in enumerate(((1000, .30, .34), (1100, .30, .34), (4100, .38, .42), (4150, .38, .42))):
-        con.execute("INSERT INTO pm_quotes VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        con.execute("INSERT INTO pm_quotes VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                     (f"2026-10-24T21:5{i}:00", "kalshi", M["ticker"], "", "2026-10-24", "CLE", 1628386, "Jarrett Allen",
-                     "points", 24.5, bid, ask, 0, vol, 0, "2026-10-24T23:30:00"))
+                     "points", 24.5, bid, ask, 0, vol, 0, "2026-10-24T23:30:00", "G"))
     con.commit()
     mo = pm.money(30, path=path, now=NOW)
     want(mo and mo[0]["dvol"] == 3000 and abs(mo[0]["dk"] - 0.08) < 1e-9,
@@ -84,7 +84,7 @@ def test_mutants():
             ("line from the title (25) not floor_strike", '"line": float(m["floor_strike"])', '"line": float(m["floor_strike"]) + 0.5'),
             ("store every poll", "        if last.get(p[\"ticker\"]) == key:\n            continue\n", ""),
             ("store after tip", "if not tip or tip <= now or", "if not tip or"),
-            ("tip from Kalshi", "out.append(dict(p, tip=t))", "out.append(dict(p, tip=p[\"tip\"] or t))"),
+            ("tip from Kalshi", "out.append(dict(p, tip=t, gid=gid))", "out.append(dict(p, tip=p[\"tip\"] or t, gid=gid))"),
             ("no de-vig", "        return (1 / o) / ((1 / o) + (1 / u)), \"DEVIG\"", "        return 1 / o, \"DEVIG\""),
             ("surname match", "if t in teams and key(n) == want and \" \" in want]", "if t in teams and want in key(n)]")):
         assert src.count(a) == 1, tag

@@ -42,7 +42,7 @@ HORIZON_H = 36
 MAX_SPREAD = 0.10                     # a fair price needs a real two-sided market (amendment 20)
 DDL = """CREATE TABLE IF NOT EXISTS pm_quotes (seen_at TEXT, venue TEXT, ticker TEXT, event TEXT,
     game_date TEXT, team TEXT, pid INTEGER, player TEXT, stat TEXT, line REAL, bid REAL, ask REAL,
-    last REAL, volume REAL, oi REAL, tip_utc TEXT);
+    last REAL, volume REAL, oi REAL, tip_utc TEXT, gid TEXT);
 CREATE INDEX IF NOT EXISTS pm_q_ticker ON pm_quotes (ticker, seen_at);
 CREATE INDEX IF NOT EXISTS pm_q_seen ON pm_quotes (seen_at)"""
 
@@ -77,12 +77,12 @@ def parse_market(m):
 def with_tips(parsed, sched):
     """Tip times from the NBA schedule, keyed by (ET date, away, home). A market whose game is not on the
     schedule is dropped: without a tip we cannot tell pre-game from in-game."""
-    tips = {(g["date_et"], g["away"], g["home"]): g["utc"] for g in sched}
+    tips = {(g["date_et"], g["away"], g["home"]): (g["utc"], g.get("gid")) for g in sched}
     out = []
     for p in parsed:
-        t = tips.get((p["game_date"], p["away"], p["home"]))
+        t, gid = tips.get((p["game_date"], p["away"], p["home"]), (None, None))
         if t:
-            out.append(dict(p, tip=t))
+            out.append(dict(p, tip=t, gid=gid))
     return out
 
 
@@ -117,6 +117,8 @@ def fetch(series):
 def _db(path=None):
     con = sqlite3.connect(path or DB, timeout=60)
     con.executescript(DDL)
+    if "gid" not in {r[1] for r in con.execute("PRAGMA table_info(pm_quotes)")}:
+        con.execute("ALTER TABLE pm_quotes ADD COLUMN gid TEXT")       # the FD quotes index leads with gid
     return con
 
 
@@ -133,10 +135,10 @@ def store(con, parsed, now, last):
         if last.get(p["ticker"]) == key:
             continue
         last[p["ticker"]] = key
-        con.execute("INSERT INTO pm_quotes VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        con.execute("INSERT INTO pm_quotes VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                     (stamp, "kalshi", p["ticker"], p["event"], p["game_date"], p["team"], p.get("pid"),
                      p["player"], p["stat"], p["line"], p["bid"], p["ask"], p["last"], p["volume"], p["oi"],
-                     tip.replace(tzinfo=None).isoformat()))
+                     tip.replace(tzinfo=None).isoformat(), p.get("gid")))
         n += 1
     con.commit()
     return n
@@ -176,12 +178,12 @@ def loop(interval=60):
         time.sleep(max(5.0, interval - (time.time() - t0)))
 
 
-def fd_fair(q, pid, stat, line, at):
+def fd_fair(q, gid, pid, stat, line, at):
     """FanDuel's over probability at `line`, at time `at`: de-vigged if FD posts both sides, else raw.
     -> (p, 'DEVIG'|'RAW') or None."""
     sides = {}
-    for side, odds in q.execute("SELECT side, odds FROM quotes WHERE book='fd' AND pid=? AND stat=? AND line=? "
-                                "AND seen_at <= ? ORDER BY seen_at", (pid, stat, line, at)):
+    for side, odds in q.execute("SELECT side, odds FROM quotes WHERE gid=? AND pid=? AND stat=? AND line=? "
+                                "AND book='fd' AND seen_at <= ? ORDER BY seen_at", (gid, pid, stat, line, at)):
         sides[side] = odds                                   # the latest quote per side wins
     o, u = sides.get("over"), sides.get("under")
     if not o:
@@ -200,10 +202,10 @@ def gaps(min_gap=0.05, limit=25, path=None, lines=None, now=None):
                        "GROUP BY ticker) l ON p.ticker = l.ticker AND p.seen_at = l.m "
                        "WHERE p.tip_utc > ? AND p.pid IS NOT NULL", (now,)).fetchall()
     out = []
-    for (seen, _v, tk, _e, gd, team, pid, player, stat, line, bid, ask, _l, vol, _oi, tip) in rows:
+    for (seen, _v, tk, _e, gd, team, pid, player, stat, line, bid, ask, _l, vol, _oi, tip, gid) in rows:
         if ask <= 0 or ask - bid > MAX_SPREAD:
             continue
-        fd = fd_fair(q, pid, stat, line, now)
+        fd = fd_fair(q, gid, pid, stat, line, now)
         if not fd:
             continue
         k = (bid + ask) / 2
