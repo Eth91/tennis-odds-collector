@@ -38,7 +38,7 @@ def expected():
     for stat, with_x, without in (("pts", 10, 18), ("reb", 4, 6), ("pra", 16, 27)):
         base_rate = (8 * with_x + 2 * without) / m10
         rate = (2 * without + base_rate * 60.0) / (min_out + 60.0)
-        out[stat] = rate * (base_min + d_min)
+        out[stat] = rate * (base_min + 0.980 + 0.356 * d_min)     # amendment 23: recalibrated minutes
     return out
 
 
@@ -81,6 +81,7 @@ def test_mutants():
              "since = [a for a in apps.get(b_id, []) if a[0] >= x_first]"),
             ("base_min over all games", "base_min = sum(a[1] for a in b10) / len(b10)",
              "base_min = sum(a[1] for a in ba) / len(ba)"),
+            ("minutes not recalibrated", "rate * (base_min + MIN_A + MIN_K * d_min)", "rate * (base_min + d_min)"),
             ("no rate shrink", "rate = (sum(a[2][stat] for a in b_out) + base_rate * K_MIN) / (min_out + K_MIN)",
              "rate = sum(a[2][stat] for a in b_out) / min_out")):
         assert src.count(a) == 1, name

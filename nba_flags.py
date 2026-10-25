@@ -84,7 +84,11 @@ OPP_KEYS = {"rebounds": ("reb_chances",), "reb": ("reb_chances",), "assists": ("
             "pts_reb": ("reb_chances",), "pts_ast": ("potential_ast",),
             "reb_ast": ("reb_chances", "potential_ast")}
 OPP_CONFIRM = 1.10
-MARGIN = {"pra": 5.0, "pts": 3.0, "reb": 2.0}          # wowy tier (measured negative)
+# AMENDMENT 23 (fit on 2023-10..2024-10, judged once on 2024-10..2025-04): projected minutes are
+# base + MIN_A + MIN_K * d_min (d_min overstated the change ~3x), with margins re-derived for that
+# projection. Hold half: gated +6.83% (n 283) vs +0.60% before; ungated +0.04% (n 995) vs -0.78%.
+MIN_A, MIN_K = 0.980, 0.356
+MARGIN = {"pra": 6.5, "pts": 5.0, "reb": 1.0}          # wowy tier (amendment 23; was pra 5 / pts 3 / reb 2)
 LEDGER_STAT = {"pra": "pra", "pts": "points", "reb": "rebounds"}   # fd_lines stat keys
 # AMENDMENT 18: P/R/A production pools, for the card's "no shared component" rule (wowy/cold keys)
 # AMENDMENT 19: combo props (two or more stats summed); the card takes a player's best SINGLE first
@@ -318,7 +322,7 @@ def wowy_live(apps, out_pid, cur_team, games, out_all, why):
             for stat in STATS:
                 base_rate = sum(a[2][stat] for a in b10) / max(1e-9, m10)
                 rate = (sum(a[2][stat] for a in b_out) + base_rate * K_MIN) / (min_out + K_MIN)
-                cands.append(("wowy", tri, xname, b_id, stat, rate * (base_min + d_min),
+                cands.append(("wowy", tri, xname, b_id, stat, rate * (base_min + MIN_A + MIN_K * d_min),
                               MARGIN[stat], x_id, d_min))
     return cands
 
