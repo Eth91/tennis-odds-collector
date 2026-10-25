@@ -944,3 +944,12 @@ Findings (forward: 33 graded, 9 games; history: 2023-10..2025-04 real lines):
 in ≥ 15 games, if ON does not beat FD's close more often than OFF, the stale-line card is reviewed.
 
 **Unchanged:** tiers, thresholds, yardsticks, verdicts, the decision count, the per-minute rate model.
+
+**Amendment 22 applied (2026-10-25T09:58Z).** Deployed (the deploy guard first refused it falsely: the VM
+ran the squash-merged amendment-21 branch, and this branch edits the same lines; the guard now also accepts
+a VM change that reverse-applies onto origin/main when HEAD is built on main, and a real rollback is still
+refused). `nba-x-fast` restarted. Preview at 10:01Z: tonight's four logged flags (Bane AST, Wagner REB
+priced; Reed PRA/PTS wowy) are all POSTED-AFTER, and Reed is also out of band (d_min 12.6), so all four are
+logged only. Replay of 10/23-10/24 (33 graded) through amendments 18-22: STALE 5, LATE 2, POSTED-AFTER 26.
+The replayed card has 3 plays, 1-2, −1.12u, beating FD's close 1/2. POSTED-AFTER went 17-9 +5.73u but beat
+FD's close only 8/25. Two nights decide nothing; the CARD cell's decision line does.
