@@ -161,6 +161,8 @@ def collect():
                 row["cells"]["STAT TYPE"] = "COMBO" if r["stat"] in COMBO_STATS else "SINGLE"
             if r.get("card") is not None:                    # amendment 18: on the card or logged only
                 row["cells"]["CARD"] = "ON" if r["card"] else "OFF"
+            if r.get("card") == 1:                           # amendment 26: the rebounds-tilt watch
+                row["cells"]["CARD STAT"] = BOARD_STAT.get(r["stat"], r["stat"])
         # AMENDMENT 2: a news-originated trigger counts only if an official report published
         # before tip lists the absent player Out (or Doubtful, amendment 15) for that game;
         # otherwise it is an audit row.
@@ -307,7 +309,8 @@ def cells_report(rows):
     order = {"STALE LINE": ("STALE", "LATE", "POSTED-AFTER", "UNKNOWN"), "GAP": ("NORMAL", "LARGE", "n/a"),
              "MINUTES BAND": ("<0", "0-3", "3-8", ">8", "n/a"),
              "OPPORTUNITY": ("CONFIRMED", "NOT CONFIRMED", "THIN", "NO DATA", "n/a"),
-             "CARD": ("ON", "OFF"), "STAT TYPE": ("COMBO", "SINGLE")}
+             "CARD": ("ON", "OFF"), "STAT TYPE": ("COMBO", "SINGLE"),
+             "CARD STAT": ("points", "rebounds", "assists", "threes", "pra", "pts_reb", "pts_ast", "reb_ast")}
     for cell, values in order.items():
         for scope, pick in (("all tiers", lambda v: True), ("priced", lambda v: v["tier"] == "priced")):
             for val in values:

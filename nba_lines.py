@@ -72,6 +72,9 @@ CREATE TABLE IF NOT EXISTS quotes (
     seen_at TEXT, book TEXT, gid TEXT, tip_utc TEXT, pid INTEGER, player TEXT,
     stat TEXT, line REAL, side TEXT, odds REAL);
 CREATE INDEX IF NOT EXISTS quotes_key ON quotes (gid, pid, stat, line, side, seen_at);
+CREATE TABLE IF NOT EXISTS game_lines (
+    seen_at TEXT, book TEXT, gid TEXT, tip_utc TEXT, market TEXT, side TEXT, line REAL, odds REAL);
+CREATE INDEX IF NOT EXISTS game_lines_key ON game_lines (gid, market, side, seen_at);
 CREATE TABLE IF NOT EXISTS cycles (
     ts TEXT, book TEXT, status TEXT, rows INTEGER, events INTEGER, matched_events INTEGER,
     resolved INTEGER, unresolved INTEGER, detail TEXT);
@@ -97,6 +100,51 @@ def _nick_key(s):
 
 # ── fetchers — each returns (rows, detail) or raises ─────────────────────────────
 
+LAST_FD_PAGE = {}     # the league page fetch_fd downloaded last (amendment 25: its game markets)
+GAME_MARKETS = {"MONEY_LINE": "moneyline", "MATCH_HANDICAP_(2-WAY)": "spread", "TOTAL_POINTS_(OVER/UNDER)": "total"}
+
+
+def fd_game_lines(page):
+    """[(event, market, runner, line, decimal)] — FanDuel's main game markets (moneyline, spread,
+    total) from the league page's attachments. Open markets only."""
+    att = page.get("attachments", {})
+    events = att.get("events", {})
+    out = []
+    for m in att.get("markets", {}).values():
+        kind = GAME_MARKETS.get(m.get("marketType"))
+        name = (events.get(str(m.get("eventId"))) or {}).get("name") or ""
+        if not kind or m.get("marketStatus") != "OPEN" or "@" not in name:
+            continue
+        for r in m.get("runners", []):
+            am = ((r.get("winRunnerOdds") or {}).get("americanDisplayOdds") or {}).get("americanOddsInt")
+            if am is None:
+                continue
+            out.append((name, kind, r.get("runnerName") or "", r.get("handicap"),
+                        round(1 + (am / 100 if am > 0 else 100 / -am), 4)))
+    return out
+
+
+def store_game_lines(con, page, upcoming, ts, book="fd"):
+    """Write the page's game lines that CHANGED, for games not yet started (match_event only knows
+    those). Sides: home / away (spread, moneyline), over / under (total). Returns rows written."""
+    n = 0
+    for event, kind, runner, line, odds in fd_game_lines(page):
+        g = match_event(event, upcoming)
+        if g is None:
+            continue
+        rk = _nick_key(runner)
+        side = ("home" if rk == _nick_key(g["home_nick"]) else "away" if rk == _nick_key(g["away_nick"])
+                else fold(runner))
+        last = con.execute("SELECT line, odds FROM game_lines WHERE gid=? AND book=? AND market=? AND side=? "
+                           "ORDER BY seen_at DESC LIMIT 1", (g["gid"], book, kind, side)).fetchone()
+        if last == (line, odds):
+            continue
+        con.execute("INSERT INTO game_lines VALUES (?,?,?,?,?,?,?,?)",
+                    (ts, book, g["gid"], g["utc"], kind, side, line, odds))
+        n += 1
+    return n
+
+
 def fetch_fd(event_filter=None):
     """FanDuel via fd_collect's parser (the NBA branch shares WNBA's market naming), with a
     requests-based getter because urllib has no CA certs on this Mac. Every failed GET is
@@ -112,7 +160,10 @@ def fetch_fd(event_filter=None):
         try:
             r = s.get(url, timeout=25)
             r.raise_for_status()
-            return r.json()
+            j = r.json()
+            if "content-managed-page" in url:
+                LAST_FD_PAGE["page"] = j
+            return j
         except Exception:
             fails["event" if "event-page" in url else "page"] += 1
             raise
@@ -250,6 +301,11 @@ def cycle(books=None, only_gids=None):
                 got = BOOKS[book]()
             rows, detail = got[0], got[1]
             bts = got[2] if len(got) > 2 else ts          # a snapshot keeps its own fetch time
+            if book == "fd" and LAST_FD_PAGE.get("page"):  # amendment 25: game lines, never fatal
+                try:
+                    store_game_lines(con, LAST_FD_PAGE.pop("page"), upcoming, ts)
+                except Exception as e:                                   # noqa: BLE001
+                    report.append(f"game lines: {type(e).__name__}")
         except Stale as e:
             con.execute("INSERT INTO cycles VALUES (?,?,?,?,?,?,?,?,?)",
                         (ts, book, "stale", 0, 0, 0, 0, 0, str(e)[:200]))

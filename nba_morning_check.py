@@ -223,6 +223,18 @@ def main(hours):
         print(f"         {src}: ahead of the report on {len(ahead)}/{len(ls)}"
               + (f", median lead when ahead {sorted(ahead)[len(ahead) // 2]:.0f} min" if ahead else ""))
 
+    # AMENDMENT 26: did yesterday's news-originated absences hold (the player really sat)?
+    try:
+        import nba_rosters as R
+        import nba_stale_lab as LAB
+        from zoneinfo import ZoneInfo
+        yday = (now.astimezone(ZoneInfo("America/New_York")) - dt.timedelta(days=1)).date().isoformat()
+        evs = LAB.premise_events(yday, R.schedule())
+        print(f"PREMISE  news absences {yday}: {LAB.premise_line(evs)}")
+        if any(not e["held"] and e["source"] != "aggregator only" for e in evs):
+            attention.append("a trusted-source news absence did not hold (premise watch)")
+    except Exception as e:                                               # noqa: BLE001
+        print(f"PREMISE  unavailable: {type(e).__name__}: {e}")
     print("\nATTENTION: " + ("; ".join(attention) if attention else "nothing — clean night"))
     return 1 if attention else 0
 
