@@ -123,6 +123,35 @@ def test_veto_moves_play_to_off_strip():
     assert check_veto(B)
 
 
+def test_pinged_off_card_strip():
+    d = pathlib.Path(tempfile.mkdtemp())
+    sh = F._shadow(d / "s.sqlite")
+    for fid, b, pid, stat, card in (("a", "Gui Santos", 1, "pts", 1), ("b", "Gui Santos", 1, "pra", 0),
+                                    ("c", "Dillon Brooks", 2, "pts", 0), ("d", "Not Pinged", 3, "reb", 0)):
+        sh.execute("INSERT INTO flags (flag_id, logged_at, game_date, tier, team, x, b, stat, line, odds, gid, gtime, "
+                   "matchup, pid, x_pid, horizon, card) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,0,?)",
+                   (fid, "2026-01-09T18:00:00", "2026-01-09", "wowy", "GSW", "X", b, stat, 20.5, 1.87, "G1",
+                    TIP_LATE, "GSW @ PHX", pid, 9, card))
+    import nba_ping as P
+    sh.execute(P.PINGS_DDL)
+    for k in ("play|2026-01-09|1|points", "play|2026-01-09|1|pra", "play|2026-01-09|2|points"):
+        sh.execute("INSERT INTO pings (key, kind, sent_at, ok) VALUES (?, 'play', '2026-01-09T18:00:00', 1)", (k,))
+    sh.commit()
+    n = sqlite3.connect(d / "n.sqlite")
+    n.execute("CREATE TABLE snapshots (mark TEXT, published_at TEXT, game_date TEXT, matchup TEXT, team TEXT,"
+              " pid INTEGER, player TEXT, status TEXT, reason TEXT)")
+    n.commit()
+    sqlite3.connect(d / "q.sqlite").execute("CREATE TABLE quotes (seen_at TEXT, book TEXT, gid TEXT, tip_utc TEXT, "
+                                            "pid INTEGER, player TEXT, stat TEXT, line REAL, side TEXT, odds REAL)")
+    B.SHADOW, B.NEWS, B.LINES = d / "s.sqlite", d / "n.sqlite", d / "q.sqlite"
+    b = B.board(NOW)
+    off = {(r["b"], r["stat"]): r["why"] for r in b["offcard"]}
+    assert off == {("Gui Santos", "PRA"): "1 PER PLAYER", ("Dillon Brooks", "PTS"): "TEAM SLOT"}, off
+    assert not b["retracted"]                       # never a retraction, so never a VOID ping
+    shown = [r["b"] for s in b["slates"] for g in s["games"] for r in g["rows"]]
+    assert shown == ["Gui Santos"] and "PINGED · OFF CARD" in B.html(b)
+
+
 def test_veto_mutant_fails():
     src = pathlib.Path(B.__file__).read_text()
     a = '        if (gd, f["pid"]) in vetoed:\n'
