@@ -982,3 +982,16 @@ fields; GAP and other cells read the new margins. Forward only.
 
 **Scope.** wowy only. priced (WNBA machinery, its own elevation) and cold (redistribution) were not measured
 here; that is noted as open, not changed.
+
+**Amendment 23 result and adoption (run 2026-10-25T10:0xZ, exactly as registered).** Split at 2024-10-28
+(25,454 rows). Fit-half minutes model (3,954 player-games): actual change = +0.980 + 0.356·d_min. Fit-half
+margins: pts 5.0 (n 153, +6.3u), reb 1.0 (n 635, +14.6u), pra 6.5 (n 146, −4.0u: the best PRA margin with
+n ≥ 100 still lost on the fit half). Hold half, evaluated once:
+| | current | recalibrated |
+|---|---|---|
+| ungated | n 1,248, 51.8%, −0.78% | n 995, 52.5%, +0.04% |
+| 3-8 gated | n 594, 52.7%, +0.60% | n 283, 56.5%, **+6.83%** |
+The rule (recalibrated ≥ current in both, n ≥ 150) is met: **ADOPTED.** Not significant on its own (283
+bets: roughly ±11% at 95%). Deployed 10:10Z; AMEND23_CUTOVER = 10:12Z. Preview on the live slate: Paul
+Reed's PRA/PTS no longer clear the new margins (+12.6 d_min now ~+5.5 projected minutes), and Jalen Suggs
+REB o3.5 appears (POSTED-AFTER, out of band: logged only).
