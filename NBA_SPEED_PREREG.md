@@ -1067,3 +1067,37 @@ pass looks up the candidate's own game (test + 2 mutants; staged dry run on the 
 **Void:** that flag, reason "line from another game (lines keyed without the game)". Its line never existed for
 its game, so grading it would score a number nobody could bet. The Embiid inference itself was right: he was
 first listed Out for 10/25 at 17:00Z, 17 h 18 min after the inference.
+
+---
+
+# AMENDMENT 25 — the stale-prop lab, game lines, DraftKings morning seeds (2026-10-25, measurement only)
+
+**Why.** The 2026-10-25 audit. The card fills on ~8% of wowy flags (3 of 38 were STALE), so its 40-play
+decision is a year away. Meanwhile the broad test (every teammate prop FanDuel had posted when an absence
+broke; over at the news-time main line; 15 final games) found: news-first props beat FD's close on 86% of
+moved lines (62/72) vs 40% for report-triggered (256/644) and 40% for control (620/1,550). But 3 of the 4
+news events had false premises (over hit 29%, −43%). DraftKings was dark 9 AM to ~12:20 PM MT on both
+days: the chain ends at 06:00Z and the single 15:05Z seed was delayed 3 h+. No game spreads or totals are
+stored, so blowout and pace cannot be tested. User: "yes do 1, 3 and 4 then after do 2 and 5."
+
+**1. The stale-prop lab (`nba_stale_lab.py`, information only).** Unit: every teammate prop with a FanDuel
+main line at a trigger's T0 (nba_reaction's affected set), earliest trigger per (game, player, stat). Taken:
+the OVER at FD's main line and price at T0. Graded: FD's main line at tip (beat close, as amendment 4),
+the box score (won, flat units; DNP void), and the PREMISE (did the absent player play that game?).
+Joined: the model's view at first sighting. The flag pass now logs every wowy and cold candidate it
+computes, before any margin, in nba_shadow.sqlite `cands` (first sighting per game date, absent player,
+player, stat: projection, threshold, d_min, line, price, trigger, news time). That gives the excess
+(proj − line) / threshold. Fixed slices: source (news / report) × premise (sat / played); stat; excess
+band (no projection, < 0, 0-1, ≥ 1). Each slice reports beat-close (of moved lines), over hit, ROI, and
+a game-clustered 95% CI. **Decision:** none here. At ≥ 300 graded news-first, premise-confirmed props, a
+later amendment may redefine the card from the lab with a fit/hold split, registered before it is run.
+
+**2. Game lines.** Every FanDuel fetch already downloads the league page, which carries each game's
+moneyline, spread and total. They are now stored in nba_lines.sqlite `game_lines` (change log; pre-game
+games only, matched to the NBA game id like the props). For a later, registered blowout/pace test.
+
+**3. DraftKings morning seeds.** Extra schedule seeds at off-peak minutes from 15:13 to 17:41Z, so the
+daily chain restarts within the news window even when GitHub delays a tick. The concurrency group already
+keeps it to one running chain.
+
+**Unchanged:** every tier, rule, card, ping and verdict.
