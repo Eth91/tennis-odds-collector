@@ -1259,3 +1259,12 @@ FanDuel's close. Reported beside the tip-card decision. The scoreboard is unchan
 **3. More beat writers (no rule change).** About one more account per team for nba_x_beats. Each candidate is
 resolved with the validation call first (display name and bio must match the reporter and outlet); only those
 are added, then the live list is re-validated. The news journal measures every source's lead over the report.
+
+**Amendment 29 — applied (2026-10-25).** AMEND29_CUTOVER = 2026-10-26 00:30 UTC (deployed before it).
+- *Beat writers:* 40 candidates resolved on the VM; the validation call returned display names but no bios (X's
+  response no longer carries `legacy.description`), so acceptance was on the display name matching a current team
+  beat reporter. 18 added (ATL, BOS, CHI ×2, CLE ×2, DAL, DET ×2, GSW ×3, LAC, MEM, NOP, SAC, TOR, UTA): 80
+  accounts, 4 search chunks, each refreshed about every 40 s (90 searches / 15 min of the 187 budget). CHA, ORL and
+  WAS still have one writer each. The rejected handles and why are listed beside HANDLES in nba_x_beats.py.
+- *STARS OUT* is computed by `stars_out_by_team` from the flag pass's absent set (report Out/Doubtful plus trusted
+  news), stored per flag; NULL (unknown) is not filtered.
