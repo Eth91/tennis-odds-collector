@@ -89,6 +89,7 @@ LEDGER_STAT = {"pra": "pra", "pts": "points", "reb": "rebounds"}   # fd_lines st
 # AMENDMENT 18: P/R/A production pools, for the card's "no shared component" rule (wowy/cold keys)
 # AMENDMENT 19: combo props (two or more stats summed); the card takes a player's best SINGLE first
 COMBO_STATS = frozenset({"pra", "pts_reb", "pts_ast", "reb_ast"})
+DMIN_BAND = (3.0, 8.0)       # AMENDMENT 22: wowy's carded band (history: 3-8 +0.9%, 8+ -7.9%, <3 negative)
 CARD_COMPONENTS = {"pts": frozenset("p"), "reb": frozenset("r"), "ast": frozenset("a"),
                    "pra": frozenset("pra"), "threes": frozenset("p"), "fg3m": frozenset("p")}
 LINE_MAX_AGE_MIN = 90
@@ -689,18 +690,37 @@ def _leads(flags):
     return {k: v[1] for k, v in best.items()}
 
 
-def _card(sh, f, lead=True):
-    """priced keeps its own selection (card 1). A re-flag of a known play (same date, player, stat,
-    tier; any line) inherits that play's card value — sticky, never un-carded or re-pinged. A NEW
-    wowy/cold play that is not its player's lead in this pass is logged only (amendment 19)."""
-    if f["tier"] == "priced":
-        return 1
+def _stale_of(f, stamp):
+    """AMENDMENT 22: the flag's STALE LINE value at flag time (nba_clv.cell_stale: did FanDuel quote this
+    player and stat before the news, unmoved now?)."""
+    import nba_clv as V
+    try:
+        q = sqlite3.connect(f"file:{V.LINES}?mode=ro", uri=True)
+        try:
+            return V.cell_stale(q, dict(f, logged_at=stamp))
+        finally:
+            q.close()
+    except sqlite3.Error:
+        return "UNKNOWN"
+
+
+def _card(sh, f, lead=True, stale="STALE"):
+    """A re-flag of a known play (same date, player, stat, tier; any line) inherits that play's card
+    value — sticky, never un-carded or re-pinged. A NEW play is carded only on a STALE line (amendment
+    22); priced then keeps its own selection; a wowy/cold play must be its player's lead in this pass
+    (amendment 19), a wowy play must have 3 <= d_min <= 8 (amendment 22), then amendment 18's rules."""
     prev = sh.execute("SELECT card FROM flags WHERE game_date=? AND pid=? AND stat=? AND tier=? AND "
                       "card IS NOT NULL ORDER BY logged_at LIMIT 1",
                       (f["game_date"], f.get("pid"), f["stat"], f["tier"])).fetchone()
     if prev:
         return prev[0]
+    if stale != "STALE":
+        return 0
+    if f["tier"] == "priced":
+        return 1
     if not lead:
+        return 0
+    if f["tier"] == "wowy" and not (f.get("d_min") is not None and DMIN_BAND[0] <= f["d_min"] <= DMIN_BAND[1]):
         return 0
     return _card_rule(sh, f["game_date"], f.get("pid"), f["team"], f["tier"], f["stat"])
 
@@ -719,7 +739,7 @@ def _log_flags(sh, out_flags, stamp, why):
         if f["tier"] == "priced" and not _priced_slot_open(sh, f["game_date"], f, fid):
             why["priced_slot_taken"] += 1
             continue
-        card = _card(sh, f, lead=is_lead(f))
+        card = _card(sh, f, lead=is_lead(f), stale=_stale_of(f, stamp))
         cur = sh.execute("INSERT OR IGNORE INTO flags (flag_id, logged_at, game_date, tier, "
                          "team, x, b, stat, line, odds, proj, margin, gid, gtime, matchup, ev, "
                          "pid, news_at, stale, horizon, x_pid, trigger_src, d_min, opp_cell, opp_ratio, x_status, x_min, "

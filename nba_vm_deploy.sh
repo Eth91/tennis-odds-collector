@@ -27,7 +27,17 @@ if [ "${FORCE:-0}" != 1 ]; then
     CODE=('*.py' nba_cycle.sh nba_watch.sh)
     MB=$(git -C "$SRC" merge-base "$LAST" HEAD 2>/dev/null || true)
     PATCH=$( [ -n "$MB" ] && git -C "$SRC" diff "$MB" "$LAST" -- "${CODE[@]}" 2>/dev/null || echo MISSING)
-    if [ "$PATCH" = MISSING ] || { [ -n "$PATCH" ] && ! printf '%s\n' "$PATCH" | git -C "$SRC" apply --check -R - 2>/dev/null; }; then
+    # ...or they sit in origin/main (a squash merge) and this HEAD is built on origin/main: later commits
+    # may have edited the same lines, so the reverse-apply is checked against main's tree, in a temp index.
+    in_main() {
+      git -C "$SRC" fetch -q origin 2>/dev/null || true
+      git -C "$SRC" merge-base --is-ancestor origin/main HEAD 2>/dev/null || return 1
+      local idx; idx=$(mktemp); rm -f "$idx"
+      GIT_INDEX_FILE="$idx" git -C "$SRC" read-tree origin/main || return 1
+      printf '%s\n' "$PATCH" | GIT_INDEX_FILE="$idx" git -C "$SRC" apply --cached --check -R - 2>/dev/null
+      local rc=$?; rm -f "$idx"; return $rc
+    }
+    if [ "$PATCH" = MISSING ] || { [ -n "$PATCH" ] && ! printf '%s\n' "$PATCH" | git -C "$SRC" apply --check -R - 2>/dev/null && ! in_main; }; then
       echo "REFUSED: the VM runs ${LAST:0:10}, whose code is not in this HEAD (${HEAD_C:0:10})."
       echo "         Merge or rebase onto it first, or FORCE=1 to roll the VM back on purpose."; exit 1
     fi

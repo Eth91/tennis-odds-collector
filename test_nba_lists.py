@@ -57,7 +57,20 @@ def test_store_list_once():
     new = NW.store_list(con, "x", it, subs, "2026-10-24T21:37:38+00:00")
     again = NW.store_list(con, "x", it, subs, "2026-10-24T21:37:38+00:00")
     assert sorted(n[1] for n in new) == [1630224, 1631367] and again == []
-    assert NW.news_outs("2026-10-24", con=con)[1630224][4] == "Doubtful"
+    # amendment 22: RotoBaller is an aggregator, so its word alone does not trigger...
+    assert 1630224 not in NW.news_outs("2026-10-24", con=con)
+    # ...until a trusted source has him; the news time stays RotoBaller's (the earliest).
+    con.execute("INSERT INTO news_items (source, item_id, detected_at, player, pid, team, game_date, status, "
+                "headline, body, provenance) VALUES ('x','ud1','2026-10-24T21:50:00+00:00','Jalen Green',1630224,"
+                "'PHX','2026-10-24','doubtful','','','x:underdog')")
+    got = NW.news_outs("2026-10-24", con=con)[1630224]
+    assert got[2] == "2026-10-24T21:37:38+00:00" and got[4] == "Doubtful", got
+
+
+def test_aggregator_classes():
+    agg = ["bsky:rotowirenba.bsky.social", "x:RotoBallerNBA", "x:FantasyLabsNBA", "unsourced", "x", ""]
+    trusted = ["x:underdog", "x:anthonyVslater", "x:ShamsCharania", "official_report", "inferred:x:underdog"]
+    assert all(NW.aggregator(p) for p in agg) and not any(NW.aggregator(p) for p in trusted)
 
 
 def test_stray_lock_file_is_cleared():

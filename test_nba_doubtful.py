@@ -36,7 +36,7 @@ def news_db():
 
 def item(con, iid, at, status, pid=7):
     con.execute("INSERT INTO news_items (source, item_id, detected_at, player, pid, team, game_date, status, "
-                "headline, body, provenance) VALUES ('x',?,?,'P',?,'NYK','2026-10-23',?,'','','x')",
+                "headline, body, provenance) VALUES ('x',?,?,'P',?,'NYK','2026-10-23',?,'','','x:underdog')",
                 (iid, at, pid, status))
 
 

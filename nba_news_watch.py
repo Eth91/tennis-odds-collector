@@ -516,6 +516,29 @@ def reclassify_choices(now=None, con=None):
     return out
 
 
+# AMENDMENT 22: AGGREGATORS need confirmation. History: RotoBaller 1 of 5 absences never on the report
+# (Jalen Green, 10/24), Bluesky 1 of 22; Underdog 0 of 26, X beat writers 0 of 10.
+AGG_X = frozenset({"rotoballernba", "fantasylabsnba"})
+
+
+def aggregator(provenance):
+    """True for a source whose word alone does not trigger: every Bluesky account, RotoBaller and
+    FantasyLabs on X, RotoWire items not citing the official report."""
+    p = (provenance or "").lower()
+    if p.startswith("inferred") or p == "official_report":
+        return False
+    if p.startswith("bsky:") or p in ("", "unsourced", "x"):
+        return True
+    return p.startswith("x:") and p[2:] in AGG_X
+
+
+def corroborated(con, pid, game_date):
+    """A trusted (non-aggregator) out/doubtful item exists for this player-game."""
+    return any(not aggregator(prov) for (prov,) in con.execute(
+        "SELECT provenance FROM news_items WHERE pid=? AND game_date=? AND status IN ('out', 'doubtful') "
+        "AND COALESCE(seeded,0)=0", (pid, game_date)))
+
+
 def news_outs(game_date, con=None):
     """{pid: (name, team, earliest_detected_at, source, status)} — news Outs and Doubtfuls (amendment
     15) for game_date that NO later official report contradicts (a status outside I.ABSENT for that
@@ -533,6 +556,8 @@ def news_outs(game_date, con=None):
     import nba_silence as SIL
     out = {}
     for pid, name, team, first, src in rows:
+        if not corroborated(con, pid, game_date):      # amendment 22: aggregators alone do not trigger
+            continue
         # AMENDMENT 21: a news absence the game-day report keeps omitting is contradicted by silence.
         # Inferred absences (amendment 14) are exempt: a deduction the team may list only on game day.
         if src != "inferred" and SIL.silenced(con, pid, team, game_date, first):

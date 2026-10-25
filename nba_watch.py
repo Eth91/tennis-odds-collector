@@ -245,6 +245,8 @@ def news_step(con, playing, log, sources=None):
     for src, pid, nm, tri, gd, at in outs:
         if (gd, tri) not in playing:
             continue
+        if not NW.corroborated(con, pid, gd):             # amendment 22: an aggregator alone waits
+            continue
         cur, _ = I.current(gd, con)
         if (cur.get(pid) or (None, None, None))[2] in I.ABSENT:
             continue                                      # the report already has it
