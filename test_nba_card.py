@@ -41,7 +41,8 @@ def cards(sh):
 
 def check(mod):
     ok = True
-    saved = (mod.MARGIN, mod._stale_of)
+    saved = (mod.MARGIN, mod._stale_of, mod.OFF_CARD_TIERS)
+    mod.OFF_CARD_TIERS = frozenset()
 
     def want(cond, label):
         nonlocal ok
@@ -76,7 +77,7 @@ def check(mod):
          "lead or nothing: Reaves' PTS lead is blocked by LeBron's PTS, and his REB does not stand in")
     want(sorted(f["b"] for f in pinged2) == ["Collin Gillespie", "Devin Booker", "LeBron James"],
          "pass 2 pings Booker (new) and the Gillespie re-flag (deduped downstream by nba_ping)")
-    mod.MARGIN, mod._stale_of = saved
+    mod.MARGIN, mod._stale_of, mod.OFF_CARD_TIERS = saved
     return ok
 
 
@@ -86,7 +87,8 @@ def test_card():
 
 def check22(mod):
     ok = True
-    saved = (mod.MARGIN, mod._stale_of)
+    saved = (mod.MARGIN, mod._stale_of, mod.OFF_CARD_TIERS)
+    mod.OFF_CARD_TIERS = frozenset()
 
     def want(cond, label):
         nonlocal ok
@@ -113,7 +115,7 @@ def check22(mod):
     _, again = mod._log_flags(sh, [dict(flags[4], line=9.5, _stale="STALE")], "2026-10-24T23:00:00", Counter())
     want(not again and cards(sh)[("Gary Payton II", "pts", 9.5)] == 0,
          "sticky: a later STALE re-flag of an off-card play stays off (and is not pinged)")
-    mod.MARGIN, mod._stale_of = saved
+    mod.MARGIN, mod._stale_of, mod.OFF_CARD_TIERS = saved
     return ok
 
 
@@ -130,10 +132,11 @@ def test_backfill_matches_live():
                                                     f["stat"], f["line"], f["margin"], f["pid"]))
     sh.commit()
     saved, F.MARGIN = F.MARGIN, {"pra": 5.0, "pts": 3.0, "reb": 2.0}
+    saved_off, F.OFF_CARD_TIERS = F.OFF_CARD_TIERS, frozenset()
     try:
         F.card_backfill([GD], path=d / "s.sqlite")
     finally:
-        F.MARGIN = saved
+        F.MARGIN, F.OFF_CARD_TIERS = saved, saved_off
     on = sorted((b, s) for b, s in F._shadow(d / "s.sqlite").execute("SELECT b, stat FROM flags WHERE card=1"))
     assert on == [("Collin Gillespie", "pts"), ("Gui Santos", "pts"), ("Jamal Murray", "pts_ast")], on
 
@@ -149,10 +152,11 @@ def test_backfill_wowy_v0_shares_wowy_slots():
                    "VALUES (?,?,?,?,?,?,?,?,?,?)", (fid, at, GD, tier, "PHI", b, stat, line, m, pid))
     sh.commit()
     saved, F.MARGIN = F.MARGIN, {"pra": 5.0, "pts": 3.0, "reb": 2.0}
+    saved_off, F.OFF_CARD_TIERS = F.OFF_CARD_TIERS, frozenset()
     try:
         F.card_backfill([GD], path=d / "s.sqlite")
     finally:
-        F.MARGIN = saved
+        F.MARGIN, F.OFF_CARD_TIERS = saved, saved_off
     got = dict(F._shadow(d / "s.sqlite").execute("SELECT flag_id, card FROM flags"))
     assert got == {"a": 1, "b": 0, "c": 0}, got     # earliest pass first, its single lead; no NULL left
 
@@ -193,12 +197,45 @@ if __name__ == "__main__":
     print("test_nba_card: OK")
 
 
+def check24(mod):
+    sh = mod._shadow(pathlib.Path(tempfile.mkdtemp()) / "s.sqlite")
+    saved = mod._stale_of
+    mod._stale_of = lambda f, stamp: "STALE"
+    try:
+        flags = [fl("priced", "DAL", "Max Christie", 1, "points", 11.5, 1.9), fl("cold", "CHA", "Brandon Miller", 2, "pra", 33.5, 5.8),
+                 fl("wowy", "PHX", "Collin Gillespie", 3, "pts", 8.5, 5.4, d_min=4.0)]
+        _, pinged = mod._log_flags(sh, flags, "2026-10-25T12:00:00", Counter())
+    finally:
+        mod._stale_of = saved
+    c = cards(sh)
+    ok = (c[("Max Christie", "points", 11.5)] == 0 and c[("Brandon Miller", "pra", 33.5)] == 0
+          and c[("Collin Gillespie", "pts", 8.5)] == 1 and [f["b"] for f in pinged] == ["Collin Gillespie"])
+    print(f"   {'ok ' if ok else 'BAD'} amendment 24: priced and cold logged only on a STALE line; wowy carded and pinged")
+    return ok
+
+
+def test_off_card_tiers():
+    assert check24(F)
+    src = pathlib.Path(F.__file__).read_text()
+    a = "    if f[\"tier\"] in OFF_CARD_TIERS:\n        return 0\n"
+    assert src.count(a) == 1
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "nba_flags_mut24.py").write_text(src.replace(a, ""))
+    sys.path.insert(0, str(d))
+    try:
+        print("MUTANT (priced/cold still carded) — must fail:")
+        assert not check24(importlib.import_module("nba_flags_mut24"))
+    finally:
+        sys.path.remove(str(d))
+        sys.modules.pop("nba_flags_mut24", None)
+
+
 def test_mutants_22():
     src = pathlib.Path(F.__file__).read_text()
     for tag, a, b in (
             ("any line carded", "    if stale != \"STALE\":\n        return 0\n", ""),
             ("no minutes gate", "    if f[\"tier\"] == \"wowy\" and not (f.get(\"d_min\") is not None and DMIN_BAND[0] <= f[\"d_min\"] <= DMIN_BAND[1]):\n        return 0\n", ""),
-            ("priced not sticky", "    if prev:\n        return prev[0]\n    if stale", "    if False:\n        return prev[0]\n    if stale")):
+            ("not sticky", "    if prev:\n        return prev[0]\n    if f[\"tier\"] in OFF_CARD_TIERS", "    if False:\n        return prev[0]\n    if f[\"tier\"] in OFF_CARD_TIERS")):
         assert src.count(a) == 1, tag
         d = pathlib.Path(tempfile.mkdtemp())
         (d / "nba_flags_mut22.py").write_text(src.replace(a, b))
