@@ -866,3 +866,9 @@ the whole quotes table; it now uses the index. First look at 00:25Z, before any 
 two-sided (de-vigged) lines, Kalshi vs FanDuel median |gap| 0.014, none ≥ 0.05, mean −0.013. On over-only
 ladder rungs (RAW) the mean gap is −0.057: FanDuel's margin, not disagreement. `--gaps` therefore shows
 de-vigged lines by default. The definitions above are unchanged.
+**Deploy regression, 2026-10-25 00:16Z–01:23Z (apparatus).** Deploying amendment 20 from a branch cut before
+amendment 19 merged reverted 19 on the VM: no singles-first card, no STAT TYPE cell, no PINGED · OFF CARD
+strip. No flag and no ping was logged in that window (checked), so no card value was set under the old
+rule. Only the off-card strip was missing from the board. Fixed by merging 19 into the branch and
+redeploying at 01:23Z. `nba_vm_deploy.sh` now refuses a deploy whose HEAD does not contain the commit the
+VM runs (tested by recording a commit HEAD lacks: REFUSED).
