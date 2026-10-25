@@ -1033,3 +1033,11 @@ number; the hold half judged once).**
   1,033, −3.78%. **Fails (< 0). priced stays logged only.**
 Neither constant set is adopted. The card is wowy only (recalibrated, 3-8 gated, stale-line), plus inferred
 plays already carded. Off-card rule deployed 10:17Z.
+
+**User re-card of 2026-10-25 under the current rules (display and ping layer only).** User: "yes re-card
+tonight." The verification audit found tonight's four carded plays (Reed PTS, Bane AST, Wagner REB, Edgecombe
+PTS) were carded and pinged on Saturday night under the old rules; none passes amendments 22-24. `recard()`
+replays each logged pass in order through the current card rules (stale-line judged at each flag's own
+time). Pending rows are marked −1, because CARD_ON reads NULL as carded for pre-card flags. Pings are not
+touched, so nothing is re-sent and no VOID is sent. Every card decision now stores its reason (`card_why`);
+the board's PINGED · OFF CARD strip shows it. The record is untouched.
