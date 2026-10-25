@@ -1191,3 +1191,43 @@ stale check uses STALE_PRICE_EPS; the STALE LINE tracked cell keeps 0.03 (compar
 - *Live check on a copy of the VM's shadow store, pings stubbed (21:42 UTC):* IND @ BKN (18 min to tip) decided:
   3 wowy flags (Siakam PTS, Toppin PTS, Nembhard REB), all off: MINUTES OUT OF BAND (Kobe Brown out, d_min < 2).
   6 new MIN flags from DiVincenzo's absence game 3 (aidx 3), logged off the speed card (lines posted after the news).
+
+---
+
+# AMENDMENT 28 — four card filters from the backtest breakdown (2026-10-25)
+
+**Why.** A breakdown of the amendment-27 card at the archive's tip lines (621 plays, 2023-24 + 2024-25):
+the projection is backwards at the top (excess 1-1.5: +7 to +9% ROI; excess ≥ 2: −3%); rebounds are 82% of
+plays at +0.9% while points are 90 plays at +29.7%; absences of 32+ min players earn 0%; over prices
+shorter than 1.80 (−125) lose 4.7%. No rebound threshold is stable (each edge band flips sign between
+seasons), so the rebound fix is "off the card". The user was offered a clean test (pull 2025-26 lines, ≈ 37k
+Odds API credits; the key is deactivated) and chose to build now: "just do 1 and 2 3 and 4".
+**These filters were chosen on data already seen. The backtest numbers below are in-sample and overstate
+what forward results will be.**
+
+**Rules (both cards: the speed card and the tip card; wowy only).** A wowy play is OFF the card (logged
+only, with its reason) when any of:
+1. EDGE TOO BIG — excess (proj − line) / margin ≥ 2.0.
+2. REBOUNDS OFF CARD — stat is rebounds.
+3. STAR 32+ MIN — the absent player's last-10 minutes for the team ≥ 32.0 (unknown → not filtered).
+4. PRICE −125 OR SHORTER — the over's decimal price < 1.80.
+The player's lead (singles first) is chosen among the plays that pass, so a filtered rebound lead does not
+block his points play. Everything else is unchanged (minutes band 3-8, 1 per player, 2 per team-game,
+stale line for the speed card, the tip window, priced/cold off, absence games 1-4).
+
+**Backtest at tip lines, filters applied before the card (in-sample):**
+- amendment 27 card: 2023-24 286 bets +5.4% (+$1,534 at $100) · 2024-25 335 bets +5.3% (+$1,785)
+- all four filters: 2023-24 49 bets +20.8% (+$1,019) [−1, +42] · 2024-25 53 bets +26.7% (+$1,416) [−0, +50]
+- volume ≈ 0.3 plays a night at tip lines (about 2 a week), from ≈ 1.9.
+
+**Judged forward, decision fixed now:** wowy plays carded (either card) from the deployment of this
+amendment, one per (date, player, stat), graded flat at the flagged line and price, first 60 graded in
+logged order: units < 0 → the four filters come off automatically (the card returns to amendment 27's
+rules). The plays the filters take off are logged with their reason and reported beside it (FILTER cell),
+graded the same way. Amendment 27's tip-card decision is unchanged (its first 60 graded tip-card plays,
+under whatever rules carded them).
+
+**Amendment 28 — applied (2026-10-25).** Deployed 22:40 UTC (a15933d753); AMEND28_CUTOVER = 23:30 UTC, so
+flags logged in between are not counted in the forward decision (no flag before the deployment can be).
+Each flag stores the rule's verdict in `flags.filt` (NULL = passes). The lead rule is applied as registered:
+filtered plays are skipped when choosing a player's lead, on both cards.

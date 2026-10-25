@@ -48,6 +48,9 @@ AMEND8_CUTOVER = "2026-10-24T07:43:00"      # deployment time (NBA_SPEED_PREREG.
 AMEND19_CUTOVER = "2026-10-24T23:30:00"     # STAT TYPE cell + combo decision (amendment 19)
 COMBO_N_DECIDE = 60
 TIP_N_DECIDE = 60                           # AMENDMENT 27: the tip card's forward decision
+AMEND28_CUTOVER = "2026-10-25T23:30:00"     # AMENDMENT 28: the four card filters (deployed before this)
+FILTER_N_DECIDE = 60
+FILTER_CELL = ("PASS", "EDGE TOO BIG", "REBOUNDS OFF CARD", "STAR 32+ MIN", "PRICE -125 OR SHORTER")
 COMBO_STATS = frozenset({"pra", "pts_reb", "pts_ast", "reb_ast"})
 AMEND9_CUTOVER = "2026-10-24T08:03:00"      # OPPORTUNITY cell: deployment time after the VM backfill (amendment 9)
 PRICE_EPS = 0.03                            # a "move" on an unchanged line (== amendment 5)
@@ -165,6 +168,8 @@ def collect():
                 row["cells"]["CARD"] = "ON" if r["card"] else "OFF"
             if r.get("card") == 1:                           # amendment 26: the rebounds-tilt watch
                 row["cells"]["CARD STAT"] = BOARD_STAT.get(r["stat"], r["stat"])
+            if r["logged_at"] >= AMEND28_CUTOVER and r["tier"] == "wowy":   # amendment 28, stored at flag time
+                row["cells"]["FILTER (28)"] = r.get("filt") or "PASS"
         # AMENDMENT 2: a news-originated trigger counts only if an official report published
         # before tip lists the absent player Out (or Doubtful, amendment 15) for that game;
         # otherwise it is an audit row.
@@ -328,6 +333,29 @@ def tip_decision(sh, reps=2000):
     return {"n": len(rs), "units": round(units, 2), "ci": ci, "verdict": verdict}
 
 
+def filter_decision(sh):
+    """AMENDMENT 28's fixed rule: wowy plays carded (either card) from AMEND28_CUTOVER, one per (date, player, stat)
+    (its earliest carded row), first FILTER_N_DECIDE graded in logged order, flat at the flagged line and price (a
+    tip-card play at its decided price). units < 0 -> OFF: the four filters come off; else ON."""
+    try:
+        rs = sh.execute("SELECT f.game_date, f.pid, f.stat, f.line, COALESCE(t.odds, f.odds), f.actual FROM flags f "
+                        "LEFT JOIN tipcard t ON t.flag_id = f.flag_id AND t.card = 1 WHERE f.tier = 'wowy' AND f.card = 1 "
+                        "AND f.void_reason IS NULL AND f.actual IS NOT NULL AND f.logged_at >= ? ORDER BY f.logged_at",
+                        (AMEND28_CUTOVER,)).fetchall()
+    except sqlite3.OperationalError:
+        rs = []
+    seen, units, n = set(), 0.0, 0
+    for gd, pid, stat, line, odds, a in rs:
+        if (gd, pid, stat) in seen or n >= FILTER_N_DECIDE:
+            continue
+        seen.add((gd, pid, stat))
+        n += 1
+        units += (odds - 1.0) if a > line else 0.0 if a == line else -1.0
+    verdict = (f"accumulating ({n}/{FILTER_N_DECIDE})" if n < FILTER_N_DECIDE
+               else "OFF: the four filters come off" if units < 0 else "ON: the filters stay")
+    return {"n": n, "units": round(units, 2), "verdict": verdict}
+
+
 def cells_report(rows):
     """AMENDMENT 8: the tracked cells on the FanDuel yardstick, pooled across tiers and for priced
     alone. Information only; never a verdict."""
@@ -341,6 +369,11 @@ def cells_report(rows):
         sh.close()
         ci = f" [{td['ci'][0]:+.1f}, {td['ci'][1]:+.1f}]% ROI" if td["ci"] else ""
         print(f"TIP CARD DECISION (amendment 27): {td['n']} graded · {td['units']:+.2f}u{ci} · {td['verdict']}")
+        sh = sqlite3.connect(f"file:{SHADOW}?mode=ro", uri=True)
+        fd_ = filter_decision(sh)
+        sh.close()
+        print(f"FILTER DECISION (amendment 28, since {AMEND28_CUTOVER} UTC): {fd_['n']} graded · {fd_['units']:+.2f}u · "
+              f"{fd_['verdict']}")
     print(f"\ntracked cells (amendments 8-9, information only; flags since {AMEND8_CUTOVER} UTC, "
           f"OPPORTUNITY since {AMEND9_CUTOVER} UTC), FD yardstick")
     if not vs:
@@ -350,7 +383,8 @@ def cells_report(rows):
              "MINUTES BAND": ("<0", "0-3", "3-8", ">8", "n/a"),
              "OPPORTUNITY": ("CONFIRMED", "NOT CONFIRMED", "THIN", "NO DATA", "n/a"),
              "CARD": ("ON", "OFF"), "STAT TYPE": ("COMBO", "SINGLE"),
-             "CARD STAT": ("points", "rebounds", "assists", "threes", "pra", "pts_reb", "pts_ast", "reb_ast")}
+             "CARD STAT": ("points", "rebounds", "assists", "threes", "pra", "pts_reb", "pts_ast", "reb_ast"),
+             "FILTER (28)": FILTER_CELL}
     for cell, values in order.items():
         for scope, pick in (("all tiers", lambda v: True), ("priced", lambda v: v["tier"] == "priced")):
             for val in values:

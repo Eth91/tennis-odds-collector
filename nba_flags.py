@@ -104,6 +104,10 @@ STALE_PRICE_EPS = 0.0662
 # AMENDMENT 27 — THE TIP CARD: once per game, at the first pass with 5 < minutes to tip <= 30, on lines no
 # older than TIP_FRESH_MIN. Judged at TIP_N_DECIDE graded plays (nba_clv.tip_decision).
 TIP_WINDOW_MIN, TIP_FRESH_MIN, TIP_SLOTS = (5.0, 30.0), 10.0, 2
+# AMENDMENT 28: four card filters for wowy (both cards), chosen IN-SAMPLE from the tip-line backtest. They come
+# off automatically if the forward reading says so (nba_clv.filter_decision, read at the start of each pass).
+FILTER_EXCESS_MAX, FILTER_STAR_MAX, FILTER_PRICE_MIN = 2.0, 32.0, 1.80
+FILTERS_ON = True
 TIPCARD_DDL = """CREATE TABLE IF NOT EXISTS tipcard (game_date TEXT, gid TEXT, flag_id TEXT, pid INTEGER, b TEXT,
     team TEXT, tier TEXT, stat TEXT, line REAL, odds REAL, excess REAL, d_min REAL, decided_at TEXT, card INTEGER,
     why TEXT, PRIMARY KEY (gid, pid, stat))"""
@@ -136,7 +140,7 @@ SHADOW_DDL = """CREATE TABLE IF NOT EXISTS flags (
     gid TEXT, gtime TEXT, matchup TEXT, actual REAL, result TEXT, graded_at TEXT,
     ev REAL, pid INTEGER, news_at TEXT, stale INTEGER, horizon INTEGER, x_pid INTEGER,
     trigger_src TEXT, void_reason TEXT, d_min REAL, opp_cell TEXT, opp_ratio REAL, x_status TEXT,
-    x_min REAL, card INTEGER, card_why TEXT, aidx INTEGER)"""
+    x_min REAL, card INTEGER, card_why TEXT, aidx INTEGER, filt TEXT)"""
 COMBO = {"pts_reb": ("points", "rebounds"), "pts_ast": ("points", "assists"),
          "reb_ast": ("rebounds", "assists")}
 
@@ -158,7 +162,8 @@ def _shadow(path):
                      ("stale", "INTEGER"), ("horizon", "INTEGER"), ("x_pid", "INTEGER"),
                      ("trigger_src", "TEXT"), ("void_reason", "TEXT"), ("d_min", "REAL"),
                      ("opp_cell", "TEXT"), ("opp_ratio", "REAL"), ("x_status", "TEXT"),
-                     ("x_min", "REAL"), ("card", "INTEGER"), ("card_why", "TEXT"), ("aidx", "INTEGER")):
+                     ("x_min", "REAL"), ("card", "INTEGER"), ("card_why", "TEXT"), ("aidx", "INTEGER"),
+                     ("filt", "TEXT")):
         if col not in have:
             sh.execute(f"ALTER TABLE flags ADD COLUMN {col} {typ}")
     return sh
@@ -410,6 +415,8 @@ def flags(dry=False, game_date=None):
     gdate = game_date or today_et
     horizon = (dt.date.fromisoformat(gdate) - dt.date.fromisoformat(today_et)).days
     blind, why = [], Counter()
+    global FILTERS_ON
+    FILTERS_ON = _filters_on(SHADOW)              # AMENDMENT 28's forward decision, read every pass
 
     try:
         sched = R.schedule()
@@ -703,6 +710,39 @@ def _excess(f):
     return (f.get("margin") or 0.0) / thr if thr else 0.0
 
 
+def _filter_reason(f):
+    """AMENDMENT 28: why a wowy play fails the four card filters, or None. The rule alone (stored on every
+    flag for the FILTER cell); _filtered() applies it only while FILTERS_ON."""
+    if f["tier"] != "wowy":
+        return None
+    if _excess(f) >= FILTER_EXCESS_MAX:
+        return "EDGE TOO BIG"
+    if f["stat"] in ("reb", "rebounds"):
+        return "REBOUNDS OFF CARD"
+    if f.get("x_min") is not None and f["x_min"] >= FILTER_STAR_MAX:
+        return "STAR 32+ MIN"
+    if f.get("odds") is not None and f["odds"] < FILTER_PRICE_MIN:
+        return "PRICE -125 OR SHORTER"
+    return None
+
+
+def _filters_on(path):
+    """AMENDMENT 28: False once the forward decision reads OFF; True before that (or with no shadow store)."""
+    import nba_clv as V
+    try:
+        sh = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+    except sqlite3.Error:
+        return True
+    try:
+        return not V.filter_decision(sh)["verdict"].startswith("OFF")
+    finally:
+        sh.close()
+
+
+def _filtered(f):
+    return _filter_reason(f) if FILTERS_ON else None
+
+
 CARD_ON = "COALESCE(card, 1) = 1 AND void_reason IS NULL"   # NULL = before amendment 18 = shown
 # wowy_v0 (amendment 7's relabel of the frozen-prior wowy flags) shares wowy's card slots
 CARD_FAMILY = {"wowy": ("wowy", "wowy_v0"), "wowy_v0": ("wowy", "wowy_v0"), "cold": ("cold", "cold")}
@@ -724,7 +764,7 @@ def _leads(flags):
     SINGLE stat by excess, or the best combo if the player has no single."""
     best = {}
     for f in flags:
-        if f["tier"] == "priced":
+        if f["tier"] == "priced" or _filtered(f):       # amendment 28: the lead is chosen among plays that pass
             continue
         k = (f["game_date"], f.get("pid"))
         key = (f["stat"] in COMBO_STATS, -_excess(f))
@@ -749,8 +789,8 @@ def _stale_of(f, stamp):
 
 def _card(sh, f, lead=True, stale="STALE"):
     """A re-flag of a known play (same date, player, stat, tier; any line) inherits that play's card
-    value — sticky, never un-carded or re-pinged. A NEW play is carded only on a STALE line (amendment
-    22); priced then keeps its own selection; a wowy/cold play must be its player's lead in this pass
+    value — sticky, never un-carded or re-pinged. A NEW wowy play must pass amendment 28's filters; it is
+    carded only on a STALE line (amendment 22); priced then keeps its own selection; a wowy/cold play must be its player's lead in this pass
     (amendment 19), a wowy play must have 3 <= d_min <= 8 (amendment 22), then amendment 18's rules."""
     prev = sh.execute("SELECT card, card_why FROM flags WHERE game_date=? AND pid=? AND stat=? AND tier=? AND "
                       "card IN (0, 1) ORDER BY logged_at LIMIT 1",
@@ -759,6 +799,9 @@ def _card(sh, f, lead=True, stale="STALE"):
         return prev[0], prev[1]
     if f["tier"] in OFF_CARD_TIERS:
         return 0, f"{f['tier'].upper()} OFF CARD"
+    filt = _filtered(f)                                 # amendment 28
+    if filt:
+        return 0, filt
     if stale != "STALE":
         return 0, STALE_WHY.get(stale, "LINE NOT STALE")
     if f["tier"] == "priced":
@@ -794,13 +837,14 @@ def _log_flags(sh, out_flags, stamp, why):
         cur = sh.execute("INSERT OR IGNORE INTO flags (flag_id, logged_at, game_date, tier, "
                          "team, x, b, stat, line, odds, proj, margin, gid, gtime, matchup, ev, "
                          "pid, news_at, stale, horizon, x_pid, trigger_src, d_min, opp_cell, opp_ratio, x_status, x_min, "
-                         "card, card_why, aidx) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                         "card, card_why, aidx, filt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                          (fid, stamp, f["game_date"], f["tier"], f["team"], f["x"], f["b"],
                           f["stat"], f["line"], f["odds"], f["proj"], f["margin"],
                           f["gid"], f["gtime"], f["matchup"], f.get("ev"), f.get("pid"),
                           f.get("news_at"), f.get("stale"), f["horizon"], f.get("x_pid"),
                           f.get("trigger_src"), f.get("d_min"), f.get("opp_cell"),
-                          f.get("opp_ratio"), f.get("x_status"), f.get("x_min"), card, card_why, f.get("aidx")))
+                          f.get("opp_ratio"), f.get("x_status"), f.get("x_min"), card, card_why, f.get("aidx"),
+                          _filter_reason(f)))
         new_shadow += cur.rowcount
         if cur.rowcount and not card:
             why["card_off_logged_only"] += 1
@@ -854,7 +898,9 @@ def _tip_card(sh, out_flags, games, lines, now, stamp, why, gdate):
         slots, n_card = Counter(), 0
         for f in sorted(fs, key=lambda f: (not is_lead(f), -_excess(f))):
             fid = _fid(f)
-            if not is_lead(f):
+            if _filtered(f):                                # amendment 28
+                v, w = 0, _filtered(f)
+            elif not is_lead(f):
                 v, w = 0, "1 PER PLAYER"
             elif not (f.get("d_min") is not None and DMIN_BAND[0] <= f["d_min"] <= DMIN_BAND[1]):
                 v, w = 0, "MINUTES OUT OF BAND"
