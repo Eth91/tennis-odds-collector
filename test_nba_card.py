@@ -13,10 +13,10 @@ import nba_flags as F
 GD = "2026-10-24"
 
 
-def fl(tier, team, b, pid, stat, line, margin):
+def fl(tier, team, b, pid, stat, line, margin, d_min=5.0):
     return {"tier": tier, "team": team, "x": "X", "b": b, "pid": pid, "stat": stat, "line": line, "odds": 1.9,
             "proj": line + margin, "margin": margin, "gid": f"G{team}", "gtime": "2026-10-25T02:00:00Z",
-            "matchup": team, "game_date": GD, "horizon": 0, "x_pid": 9}
+            "matchup": team, "game_date": GD, "horizon": 0, "x_pid": 9, "d_min": d_min}
 
 
 PASS1 = [fl("wowy", "GSW", "Gui Santos", 1, "reb", 5.5, 2.7), fl("wowy", "GSW", "Gui Santos", 1, "pts", 13.5, 6.8),
@@ -47,6 +47,7 @@ def check(mod):
         ok &= bool(cond)
         print(f"   {'ok ' if cond else 'BAD'} {label}")
     sh = mod._shadow(pathlib.Path(tempfile.mkdtemp()) / "s.sqlite")
+    mod._stale_of = lambda f, stamp: f.get("_stale", "STALE")          # amendment 22 is tested separately
     why = Counter()
     _, pinged1 = mod._log_flags(sh, PASS1, "2026-10-24T22:11:52", why)
     c = cards(sh)
@@ -78,6 +79,40 @@ def check(mod):
 
 def test_card():
     assert check(F)
+
+
+def check22(mod):
+    ok = True
+
+    def want(cond, label):
+        nonlocal ok
+        ok &= bool(cond)
+        print(f"   {'ok ' if cond else 'BAD'} {label}")
+    sh = mod._shadow(pathlib.Path(tempfile.mkdtemp()) / "s.sqlite")
+    mod._stale_of = lambda f, stamp: f["_stale"]
+    flags = [dict(fl("priced", "DAL", "Max Christie", 1, "points", 11.5, 1.9), _stale="STALE"),
+             dict(fl("priced", "DEN", "Aaron Gordon", 2, "reb_ast", 9.5, 1.1), _stale="POSTED-AFTER"),
+             dict(fl("wowy", "PHX", "Collin Gillespie", 3, "pts", 8.5, 3.4, d_min=4.0), _stale="STALE"),
+             dict(fl("wowy", "GSW", "Gui Santos", 4, "pts", 13.5, 6.8, d_min=13.1), _stale="STALE"),
+             dict(fl("wowy", "GSW", "Gary Payton II", 5, "pts", 8.5, 4.5, d_min=5.1), _stale="LATE"),
+             dict(fl("wowy", "DEN", "Jamal Murray", 6, "pts", 23.5, 6.0, d_min=2.4), _stale="STALE")]
+    _, pinged = mod._log_flags(sh, flags, "2026-10-24T22:11:52", Counter())
+    c = cards(sh)
+    want(c[("Max Christie", "points", 11.5)] == 1 and c[("Aaron Gordon", "reb_ast", 9.5)] == 0,
+         "stale-line card: priced on a STALE line carded, on a line posted after the news logged only")
+    want(c[("Collin Gillespie", "pts", 8.5)] == 1 and c[("Gary Payton II", "pts", 8.5)] == 0,
+         "stale-line card: wowy STALE carded, LATE (FD already moved) logged only")
+    want(c[("Gui Santos", "pts", 13.5)] == 0 and c[("Jamal Murray", "pts", 23.5)] == 0,
+         "minutes gate: wowy d_min 13.1 and 2.4 logged only (band 3-8)")
+    want(sorted(f["b"] for f in pinged) == ["Collin Gillespie", "Max Christie"], "only the two carded are pinged")
+    _, again = mod._log_flags(sh, [dict(flags[4], line=9.5, _stale="STALE")], "2026-10-24T23:00:00", Counter())
+    want(not again and cards(sh)[("Gary Payton II", "pts", 9.5)] == 0,
+         "sticky: a later STALE re-flag of an off-card play stays off (and is not pinged)")
+    return ok
+
+
+def test_card_22():
+    assert check22(F)
 
 
 def test_backfill_matches_live():
@@ -142,6 +177,24 @@ def test_mutants():
 if __name__ == "__main__":
     test_card(); test_backfill_matches_live(); test_board_shows_only_the_card(); test_mutants()
     print("test_nba_card: OK")
+
+
+def test_mutants_22():
+    src = pathlib.Path(F.__file__).read_text()
+    for tag, a, b in (
+            ("any line carded", "    if stale != \"STALE\":\n        return 0\n", ""),
+            ("no minutes gate", "    if f[\"tier\"] == \"wowy\" and not (f.get(\"d_min\") is not None and DMIN_BAND[0] <= f[\"d_min\"] <= DMIN_BAND[1]):\n        return 0\n", ""),
+            ("priced not sticky", "    if prev:\n        return prev[0]\n    if stale", "    if False:\n        return prev[0]\n    if stale")):
+        assert src.count(a) == 1, tag
+        d = pathlib.Path(tempfile.mkdtemp())
+        (d / "nba_flags_mut22.py").write_text(src.replace(a, b))
+        sys.path.insert(0, str(d))
+        try:
+            print(f"MUTANT ({tag}) — must fail:")
+            assert not check22(importlib.import_module("nba_flags_mut22")), tag
+        finally:
+            sys.path.remove(str(d))
+            sys.modules.pop("nba_flags_mut22", None)
 
 
 def test_combo_decision():

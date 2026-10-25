@@ -36,8 +36,8 @@ def news_db(path=":memory:"):
     for iid, pid, team, src, status in (("rb", GREEN, "PHX", "x", "doubtful"), ("ok", BOOKER, "PHX", "x", "out"),
                                         ("inf", 1642845, "PHI", "inferred", "out")):
         con.execute("INSERT INTO news_items (source, item_id, detected_at, player, pid, team, game_date, status, "
-                    "headline, body, provenance) VALUES (?,?,?,?,?,?,?,?,'','','x')",
-                    (src, iid, SEEN, "P", pid, team, GD, status))
+                    "headline, body, provenance) VALUES (?,?,?,?,?,?,?,?,'','',?)",
+                    (src, iid, SEEN, "P", pid, team, GD, status, "inferred:x:underdog" if src == "inferred" else "x:underdog"))
     # next-day case: the 10/24 18:45 report also lists PHX for 10/25, without Green. Not game day for 10/25.
     con.execute("INSERT INTO snapshots VALUES ('2026-10-24T18:45','2026-10-24T22:45:04+00:00','2026-10-25','','PHX',?,"
                 "'','Out','')", (IGHO,))

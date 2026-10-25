@@ -38,7 +38,7 @@ def _db(official_status, official_after_news):
     con.execute("INSERT INTO news_items (source, item_id, detected_at, player, pid, team, game_date, "
                 "status, headline, body, provenance) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
                 ("rotowire", "1", "2026-10-22T19:00:00+00:00", "P", 7, "NYK", "2026-10-23", "out",
-                 "Ruled out for Friday", "", "x"))
+                 "Ruled out for Friday", "", "x:underdog"))
     pub = "2026-10-22T19:15:04+00:00" if official_after_news else "2026-10-22T18:45:04+00:00"
     con.execute("INSERT INTO snapshots VALUES (?,?,?,?,?,?,?,?,?)",
                 ("m", pub, "2026-10-23", "NYK@BOS", "NYK", 7, "P", official_status, ""))
