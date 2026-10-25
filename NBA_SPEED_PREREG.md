@@ -808,3 +808,13 @@ Outcomes: FD follows within 30 min (as T2), and the prop's result at the FD line
 (flat units). Decision as T2 at ≥ 50 events.
 
 **Unchanged:** every tier, flag, card, ping, verdict.
+
+**Amendment 20 applied (2026-10-25T00:19Z).** `nba-pm` service installed and enabled on the VM (poll every
+60 s, ~1,460 markets, ~115 change per minute; 100% of stored markets resolved to an NBA person id).
+Two bugs found on the first live poll and fixed before the service started: (1) Kalshi's
+occurrence_datetime is ~tip + 3 h, so markets for games in progress were stored. Tip times now come from
+the NBA schedule, which also supplies the game id. (2) The FanDuel lookup did not pass gid, so it scanned
+the whole quotes table; it now uses the index. First look at 00:25Z, before any test counts: on
+two-sided (de-vigged) lines, Kalshi vs FanDuel median |gap| 0.014, none ≥ 0.05, mean −0.013. On over-only
+ladder rungs (RAW) the mean gap is −0.057: FanDuel's margin, not disagreement. `--gaps` therefore shows
+de-vigged lines by default. The definitions above are unchanged.

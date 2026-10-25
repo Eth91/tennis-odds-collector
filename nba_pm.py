@@ -193,8 +193,10 @@ def fd_fair(q, gid, pid, stat, line, at):
     return 1 / o, "RAW"
 
 
-def gaps(min_gap=0.05, limit=25, path=None, lines=None, now=None):
-    """Upcoming games: the latest Kalshi fair vs FanDuel fair at the same player, stat and line."""
+def gaps(min_gap=0.05, limit=25, path=None, lines=None, now=None, devig_only=True):
+    """Upcoming games: the latest Kalshi fair vs FanDuel fair at the same player, stat and line.
+    devig_only: FanDuel's over-only ladder rungs carry their margin in the raw price (first night: RAW
+    gaps averaged -0.057 vs -0.013 de-vigged), so by default only two-sided lines are compared."""
     now = (now or dt.datetime.now(dt.timezone.utc)).replace(tzinfo=None, microsecond=0).isoformat()
     con = sqlite3.connect(f"file:{path or DB}?mode=ro", uri=True)
     q = sqlite3.connect(f"file:{lines or LINES}?mode=ro", uri=True)
@@ -206,7 +208,7 @@ def gaps(min_gap=0.05, limit=25, path=None, lines=None, now=None):
         if ask <= 0 or ask - bid > MAX_SPREAD:
             continue
         fd = fd_fair(q, gid, pid, stat, line, now)
-        if not fd:
+        if not fd or (devig_only and fd[1] != "DEVIG"):
             continue
         k = (bid + ask) / 2
         out.append({"player": player, "team": team, "stat": stat, "line": line, "k": k, "fd": fd[0], "how": fd[1],
