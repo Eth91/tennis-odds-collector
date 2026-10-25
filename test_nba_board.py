@@ -159,6 +159,7 @@ def test_veto_mutant_fails():
     d = pathlib.Path(tempfile.mkdtemp())
     (d / "nba_board_mutv.py").write_text(src.replace(a, '        if False:\n'))
     (d / "nba_clv.py").write_text((pathlib.Path(B.__file__).parent / "nba_clv.py").read_text())
+    (d / "nba_silence.py").write_text((pathlib.Path(B.__file__).parent / "nba_silence.py").read_text())
     sys.path.insert(0, str(d))
     try:
         assert not check_veto(importlib.import_module("nba_board_mutv"))

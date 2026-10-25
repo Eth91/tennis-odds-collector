@@ -530,8 +530,13 @@ def news_outs(game_date, con=None):
                                               "AND status='out' AND COALESCE(seeded,0)=0", (game_date,))}
     except sqlite3.OperationalError:
         rows, said_out = [], set()
+    import nba_silence as SIL
     out = {}
     for pid, name, team, first, src in rows:
+        # AMENDMENT 21: a news absence the game-day report keeps omitting is contradicted by silence.
+        # Inferred absences (amendment 14) are exempt: a deduction the team may list only on game day.
+        if src != "inferred" and SIL.silenced(con, pid, team, game_date, first):
+            continue
         contra = con.execute(
             f"SELECT 1 FROM snapshots WHERE game_date=? AND pid=? AND NOT {I.ABSENT_SQL} AND "
             "published_at > ? LIMIT 1", (game_date, pid, first)).fetchone()
