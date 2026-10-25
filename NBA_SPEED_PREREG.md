@@ -1056,3 +1056,14 @@ The backtestable part only (no stale-line rule, no source rules: historical line
 Hold-half card by month: +15.6u of its +22.2u came in 2025-03; without March, +4.5%. About 1.8 bets per
 slate night; worst drawdown 6.2u. The first wowy version positive in both halves (every earlier version and
 tier was negative: −1.9%, −4.7%, −5.7%), but not significant: every CI includes 0.
+
+**Apparatus bug and one void (2026-10-25T20:1xZ).** `latest_lines` and `board_ladders` keyed lines by player
+and stat, not by game (the board's own key also lacks the game). A back-to-back player's flag for tomorrow
+could take tonight's line. Found while checking tonight: the 10/25 VJ Edgecombe PTS flag (inferred from
+Embiid, 2026-10-24T23:42Z) records o13.5 at 1.85, which is the 10/24 board row. Neither book had a 10/25 line
+for him then; FanDuel first posted it at 11:03Z on 10/25, at 14.5. Audit of all 64 flags: 63 used their own
+game's line; this is the only one that did not. Fix: both are keyed by (game, player[, stat]), and the flag
+pass looks up the candidate's own game (test + 2 mutants; staged dry run on the live slate finds every line).
+**Void:** that flag, reason "line from another game (lines keyed without the game)". Its line never existed for
+its game, so grading it would score a number nobody could bet. The Embiid inference itself was right: he was
+first listed Out for 10/25 at 17:00Z, 17 h 18 min after the inference.
