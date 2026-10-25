@@ -953,3 +953,32 @@ priced; Reed PRA/PTS wowy) are all POSTED-AFTER, and Reed is also out of band (d
 logged only. Replay of 10/23-10/24 (33 graded) through amendments 18-22: STALE 5, LATE 2, POSTED-AFTER 26.
 The replayed card has 3 plays, 1-2, −1.12u, beating FD's close 1/2. POSTED-AFTER went 17-9 +5.73u but beat
 FD's close only 8/25. Two nights decide nothing; the CARD cell's decision line does.
+
+---
+
+# AMENDMENT 23 — recalibrated wowy minutes: procedure and acceptance rule, fixed BEFORE fitting (2026-10-25)
+
+**Why.** The 2026-10-25 audit: wowy projects proj = rate × (base_min + d_min), and d_min overstates the
+minute change about 3× (slope 0.34 on all 2023-25 data). Every margin decision runs on that inflated
+projection. User: "yes fix the minutes." An earlier quick check (out_rate × (base + 0.34·d_min): hold
++3.1%, fit −2.0%) leaked: its slope was fitted on all data, the hold half included. This amendment fixes
+the procedure first.
+
+**Procedure (history: nba_margin_refit's population and real main lines, bar 24, absence game 1-2,
+stats PTS / REB / PRA; chronological split at the median date, 2024-10-28).**
+1. **Minutes model, fit half only.** One row per player-game: OLS of (actual min − base_min) on d_min
+   gives intercept a and slope k. New projected minutes = base_min + a + k·d_min. (d_min itself, its
+   shrinkage and the band gate of amendment 22 are unchanged; the gate stays on raw d_min.)
+2. **Margins, fit half only.** For each stat, the margin m ∈ {0.0, 0.5, …, 10.0} with the most fit-half
+   units, among those with ≥ 100 fit-half flags. The rate (X-out shrunk rate) is unchanged.
+3. **Evaluate on the hold half, once.** Recalibrated (a, k, new margins) vs current (d_min as is, MARGIN
+   pts 3 / reb 2 / pra 5), each on its own flags, with and without the 3-8 gate.
+4. **Adopt iff** the recalibrated projection's hold-half ROI ≥ the current projection's hold-half ROI,
+   with ≥ 150 hold-half flags, in BOTH the ungated and the 3-8-gated versions. Otherwise nothing changes,
+   and the result is recorded here.
+
+**If adopted:** wowy_live projects with base_min + a + k·d_min and the new margins; flags store the same
+fields; GAP and other cells read the new margins. Forward only.
+
+**Scope.** wowy only. priced (WNBA machinery, its own elevation) and cold (redistribution) were not measured
+here; that is noted as open, not changed.
