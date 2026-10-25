@@ -995,3 +995,29 @@ The rule (recalibrated ≥ current in both, n ≥ 150) is met: **ADOPTED.** Not 
 bets: roughly ±11% at 95%). Deployed 10:10Z; AMEND23_CUTOVER = 10:12Z. Preview on the live slate: Paul
 Reed's PRA/PTS no longer clear the new margins (+12.6 d_min now ~+5.5 projected minutes), and Jalen Suggs
 REB o3.5 appears (POSTED-AFTER, out of band: logged only).
+
+---
+
+# AMENDMENT 24 — priced and cold off the card; their minutes recalibration, registered (2026-10-25)
+
+**Why.** Audit of the other tiers' projected minutes on their own real-line backtests (2023-25):
+- **cold** (3,414 player-games): actual change = +3.11 − 0.18 × projected change. The proportional
+  redistribution has no signal: projected +7.6 → actual +2.2; projected +1.8 → +3.3. Cold flags −5.7% (172).
+- **priced** (6,430 candidate player-games): slope 0.67, but on the 2,092 it priced: projected +3.0,
+  actual +1.0. Selections −4.7% (1,967); its own registered verdict (2026-10-22) was KILL, −3.46%.
+User: "yes do option 3" (off the card now, recalibrate, put back what passes).
+
+**Rule now.** priced and cold are not carded (logged only, never pinged) from this deploy. The record is
+unchanged; re-flags of plays already carded keep their value (sticky). wowy's card is unchanged.
+
+**Recalibration procedures (history; chronological split 2024-10-28; fit half only for every fitted
+number; the hold half judged once).**
+- **cold.** Projected minutes = base + a + k·(redistributed − base), by OLS on fit-half player-games.
+  Margins per stat (PTS / REB / PRA) from {0.0, 0.5, …, 10.0}: the most fit-half units with ≥ 50 fit-half
+  flags. Back on the card iff hold-half ROI ≥ 0 with ≥ 100 hold-half flags.
+- **priced.** The minutes passed to prop_edges become with_min + a + k·(proj − with_min), where proj is the
+  current final projection (split, position-compat, recent-5 floor). OLS on fit-half candidate
+  player-games. Everything else in the WNBA machinery is unchanged (EV bar, shrink, guards, selection);
+  the candidate gate keeps using the uncalibrated projection. Back on the card iff hold-half ROI of base-rung
+  overs ≥ 0 with ≥ 150 hold-half bets.
+- A tier that passes returns to the card by a later note in this file; one that fails stays logged only.
