@@ -953,3 +953,45 @@ priced; Reed PRA/PTS wowy) are all POSTED-AFTER, and Reed is also out of band (d
 logged only. Replay of 10/23-10/24 (33 graded) through amendments 18-22: STALE 5, LATE 2, POSTED-AFTER 26.
 The replayed card has 3 plays, 1-2, −1.12u, beating FD's close 1/2. POSTED-AFTER went 17-9 +5.73u but beat
 FD's close only 8/25. Two nights decide nothing; the CARD cell's decision line does.
+
+---
+
+# AMENDMENT 23 — recalibrated wowy minutes: procedure and acceptance rule, fixed BEFORE fitting (2026-10-25)
+
+**Why.** The 2026-10-25 audit: wowy projects proj = rate × (base_min + d_min), and d_min overstates the
+minute change about 3× (slope 0.34 on all 2023-25 data). Every margin decision runs on that inflated
+projection. User: "yes fix the minutes." An earlier quick check (out_rate × (base + 0.34·d_min): hold
++3.1%, fit −2.0%) leaked: its slope was fitted on all data, the hold half included. This amendment fixes
+the procedure first.
+
+**Procedure (history: nba_margin_refit's population and real main lines, bar 24, absence game 1-2,
+stats PTS / REB / PRA; chronological split at the median date, 2024-10-28).**
+1. **Minutes model, fit half only.** One row per player-game: OLS of (actual min − base_min) on d_min
+   gives intercept a and slope k. New projected minutes = base_min + a + k·d_min. (d_min itself, its
+   shrinkage and the band gate of amendment 22 are unchanged; the gate stays on raw d_min.)
+2. **Margins, fit half only.** For each stat, the margin m ∈ {0.0, 0.5, …, 10.0} with the most fit-half
+   units, among those with ≥ 100 fit-half flags. The rate (X-out shrunk rate) is unchanged.
+3. **Evaluate on the hold half, once.** Recalibrated (a, k, new margins) vs current (d_min as is, MARGIN
+   pts 3 / reb 2 / pra 5), each on its own flags, with and without the 3-8 gate.
+4. **Adopt iff** the recalibrated projection's hold-half ROI ≥ the current projection's hold-half ROI,
+   with ≥ 150 hold-half flags, in BOTH the ungated and the 3-8-gated versions. Otherwise nothing changes,
+   and the result is recorded here.
+
+**If adopted:** wowy_live projects with base_min + a + k·d_min and the new margins; flags store the same
+fields; GAP and other cells read the new margins. Forward only.
+
+**Scope.** wowy only. priced (WNBA machinery, its own elevation) and cold (redistribution) were not measured
+here; that is noted as open, not changed.
+
+**Amendment 23 result and adoption (run 2026-10-25T10:0xZ, exactly as registered).** Split at 2024-10-28
+(25,454 rows). Fit-half minutes model (3,954 player-games): actual change = +0.980 + 0.356·d_min. Fit-half
+margins: pts 5.0 (n 153, +6.3u), reb 1.0 (n 635, +14.6u), pra 6.5 (n 146, −4.0u: the best PRA margin with
+n ≥ 100 still lost on the fit half). Hold half, evaluated once:
+| | current | recalibrated |
+|---|---|---|
+| ungated | n 1,248, 51.8%, −0.78% | n 995, 52.5%, +0.04% |
+| 3-8 gated | n 594, 52.7%, +0.60% | n 283, 56.5%, **+6.83%** |
+The rule (recalibrated ≥ current in both, n ≥ 150) is met: **ADOPTED.** Not significant on its own (283
+bets: roughly ±11% at 95%). Deployed 10:10Z; AMEND23_CUTOVER = 10:12Z. Preview on the live slate: Paul
+Reed's PRA/PTS no longer clear the new margins (+12.6 d_min now ~+5.5 projected minutes), and Jalen Suggs
+REB o3.5 appears (POSTED-AFTER, out of band: logged only).

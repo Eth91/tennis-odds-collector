@@ -41,6 +41,7 @@ def cards(sh):
 
 def check(mod):
     ok = True
+    saved = (mod.MARGIN, mod._stale_of)
 
     def want(cond, label):
         nonlocal ok
@@ -48,6 +49,7 @@ def check(mod):
         print(f"   {'ok ' if cond else 'BAD'} {label}")
     sh = mod._shadow(pathlib.Path(tempfile.mkdtemp()) / "s.sqlite")
     mod._stale_of = lambda f, stamp: f.get("_stale", "STALE")          # amendment 22 is tested separately
+    mod.MARGIN = {"pra": 5.0, "pts": 3.0, "reb": 2.0}                  # the card logic, on fixed margins
     why = Counter()
     _, pinged1 = mod._log_flags(sh, PASS1, "2026-10-24T22:11:52", why)
     c = cards(sh)
@@ -74,6 +76,7 @@ def check(mod):
          "lead or nothing: Reaves' PTS lead is blocked by LeBron's PTS, and his REB does not stand in")
     want(sorted(f["b"] for f in pinged2) == ["Collin Gillespie", "Devin Booker", "LeBron James"],
          "pass 2 pings Booker (new) and the Gillespie re-flag (deduped downstream by nba_ping)")
+    mod.MARGIN, mod._stale_of = saved
     return ok
 
 
@@ -83,6 +86,7 @@ def test_card():
 
 def check22(mod):
     ok = True
+    saved = (mod.MARGIN, mod._stale_of)
 
     def want(cond, label):
         nonlocal ok
@@ -90,6 +94,7 @@ def check22(mod):
         print(f"   {'ok ' if cond else 'BAD'} {label}")
     sh = mod._shadow(pathlib.Path(tempfile.mkdtemp()) / "s.sqlite")
     mod._stale_of = lambda f, stamp: f["_stale"]
+    mod.MARGIN = {"pra": 5.0, "pts": 3.0, "reb": 2.0}                  # the card logic, on fixed margins
     flags = [dict(fl("priced", "DAL", "Max Christie", 1, "points", 11.5, 1.9), _stale="STALE"),
              dict(fl("priced", "DEN", "Aaron Gordon", 2, "reb_ast", 9.5, 1.1), _stale="POSTED-AFTER"),
              dict(fl("wowy", "PHX", "Collin Gillespie", 3, "pts", 8.5, 3.4, d_min=4.0), _stale="STALE"),
@@ -108,6 +113,7 @@ def check22(mod):
     _, again = mod._log_flags(sh, [dict(flags[4], line=9.5, _stale="STALE")], "2026-10-24T23:00:00", Counter())
     want(not again and cards(sh)[("Gary Payton II", "pts", 9.5)] == 0,
          "sticky: a later STALE re-flag of an off-card play stays off (and is not pinged)")
+    mod.MARGIN, mod._stale_of = saved
     return ok
 
 
@@ -123,7 +129,11 @@ def test_backfill_matches_live():
                    "VALUES (?,?,?,?,?,?,?,?,?,?)", (f"f{i}", "2026-10-24T22:11:52", GD, f["tier"], f["team"], f["b"],
                                                     f["stat"], f["line"], f["margin"], f["pid"]))
     sh.commit()
-    F.card_backfill([GD], path=d / "s.sqlite")
+    saved, F.MARGIN = F.MARGIN, {"pra": 5.0, "pts": 3.0, "reb": 2.0}
+    try:
+        F.card_backfill([GD], path=d / "s.sqlite")
+    finally:
+        F.MARGIN = saved
     on = sorted((b, s) for b, s in F._shadow(d / "s.sqlite").execute("SELECT b, stat FROM flags WHERE card=1"))
     assert on == [("Collin Gillespie", "pts"), ("Gui Santos", "pts"), ("Jamal Murray", "pts_ast")], on
 
@@ -138,7 +148,11 @@ def test_backfill_wowy_v0_shares_wowy_slots():
         sh.execute("INSERT INTO flags (flag_id, logged_at, game_date, tier, team, b, stat, line, margin, pid) "
                    "VALUES (?,?,?,?,?,?,?,?,?,?)", (fid, at, GD, tier, "PHI", b, stat, line, m, pid))
     sh.commit()
-    F.card_backfill([GD], path=d / "s.sqlite")
+    saved, F.MARGIN = F.MARGIN, {"pra": 5.0, "pts": 3.0, "reb": 2.0}
+    try:
+        F.card_backfill([GD], path=d / "s.sqlite")
+    finally:
+        F.MARGIN = saved
     got = dict(F._shadow(d / "s.sqlite").execute("SELECT flag_id, card FROM flags"))
     assert got == {"a": 1, "b": 0, "c": 0}, got     # earliest pass first, its single lead; no NULL left
 

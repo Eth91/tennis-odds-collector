@@ -51,6 +51,8 @@ COMBO_STATS = frozenset({"pra", "pts_reb", "pts_ast", "reb_ast"})
 AMEND9_CUTOVER = "2026-10-24T08:03:00"      # OPPORTUNITY cell: deployment time after the VM backfill (amendment 9)
 PRICE_EPS = 0.03                            # a "move" on an unchanged line (== amendment 5)
 WOWY_MARGIN = {"pts": 3.0, "reb": 2.0, "pra": 5.0}
+AMEND23_CUTOVER = "2026-10-25T10:12:00"     # wowy margins re-derived with recalibrated minutes (amendment 23)
+WOWY_MARGIN_23 = {"pts": 5.0, "reb": 1.0, "pra": 6.5}
 COLD_MARGIN, PRICED_EV_FLOOR = 5.0, 0.10
 
 
@@ -74,7 +76,8 @@ def cell_gap(r):
     if r["tier"] == "priced":
         return "LARGE" if (r.get("ev") or 0) > 2 * PRICED_EV_FLOOR else "NORMAL"
     m = r.get("margin")
-    thr = WOWY_MARGIN.get(r["stat"]) if r["tier"].startswith("wowy") else COLD_MARGIN
+    wm = WOWY_MARGIN_23 if (r.get("logged_at") or "") >= AMEND23_CUTOVER else WOWY_MARGIN
+    thr = wm.get(r["stat"]) if r["tier"].startswith("wowy") else COLD_MARGIN
     if m is None or thr is None:
         return "n/a"
     return "LARGE" if m > 2 * thr else "NORMAL"
