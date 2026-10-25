@@ -907,3 +907,40 @@ game-day reports with G = 60, it silences Jalen Green at 22:45Z and no real item
 **Amendment 21 applied (2026-10-25T09:42Z).** Deployed through the guarded script; `nba-x-fast` restarted.
 Dry run first, on a staged copy against the live stores: no 2026-10-25/26 news absence is silenced (Embiid
 inferred: exempt; Duren DET and Edey MEM: kept), and the board is unchanged.
+
+---
+
+# AMENDMENT 22 — the audit's fixes: stale-line card, minutes gate, aggregator confirmation (2026-10-25)
+
+**Why.** The 2026-10-25 audit, then the user: "do all 4 and then run an audit again after that."
+Findings (forward: 33 graded, 9 games; history: 2023-10..2025-04 real lines):
+- **Timing.** 26 of 33 forward flags were on FanDuel props first posted AFTER the news (FD posts ~20 h
+  before tip; the report usually precedes it), so no speed edge was possible. Those beat FD's close
+  8/25. The 7 with a line before the news beat it 4/6. Report-triggered flags beat the close 7/24.
+  The projection alone does not beat late lines: wowy −1.9% on 2,383 historical flags.
+- **Minutes.** Historical slope of actual minute change on d_min = 0.34 (8+ band: predicted +9.8,
+  actual +5.3). ROI by d_min: < 0 −8.7%, 0-3 −2.5%, **3-8 +0.9% (fit +1.2% / hold +0.6%)**, 8+ −7.9%
+  (hold −13.6%). The WNBA's band gate was never ported to the NBA wowy tier.
+- **Sources.** Resolved absences: Underdog 26, 8 first, 0 never on the report; X beat writers 10, 4
+  first, 0 never; Bluesky 22, 1 never; RotoBaller 5, 1 never (Jalen Green, 10/24).
+- **Per-minute rate.** Actual +2.8% pts / −0.1% reb over baseline; the X-out rate predicts no better
+  than baseline. **No change (deliberate):** revisit after this amendment has data.
+
+**Rules (the record is unchanged: every flag is still logged and scored as registered).**
+1. **Stale-line card.** A flag goes on the card (pinged, shown) only if, at flag time, its STALE LINE
+   value (amendment 8's definition, nba_clv.cell_stale) is STALE: FanDuel quoted this player and stat
+   before the news time, and its main line and price are unmoved at flag time. POSTED-AFTER, LATE and
+   UNKNOWN are logged only. All tiers, priced included (priced keeps its own slots).
+2. **Minutes gate.** A wowy flag goes on the card only if 3 ≤ d_min ≤ 8. Logged either way; the MINUTES
+   BAND cell keeps tracking all bands.
+3. **Aggregator confirmation.** Aggregator sources: every Bluesky account, x:RotoBallerNBA,
+   x:FantasyLabsNBA, and RotoWire items not citing the official report. An absence reported ONLY by
+   aggregators does not trigger (news_outs, news_step) until a trusted source (Underdog, the X beat
+   writers, RotoWire citing the report, an inferred absence) or the official report has it. The news
+   time stays the earliest item, so the stale-line rule judges from first public word.
+4. The card rules of amendments 18-19 still apply after 1-2. Sticky as before; forward only.
+
+**Decision readout.** CARD · ON vs OFF (amendment 18's cell) is the measure: at ≥ 40 closed carded flags
+in ≥ 15 games, if ON does not beat FD's close more often than OFF, the stale-line card is reviewed.
+
+**Unchanged:** tiers, thresholds, yardsticks, verdicts, the decision count, the per-minute rate model.
