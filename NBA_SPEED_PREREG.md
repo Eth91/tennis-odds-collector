@@ -1226,3 +1226,8 @@ logged order: units < 0 → the four filters come off automatically (the card re
 rules). The plays the filters take off are logged with their reason and reported beside it (FILTER cell),
 graded the same way. Amendment 27's tip-card decision is unchanged (its first 60 graded tip-card plays,
 under whatever rules carded them).
+
+**Amendment 28 — applied (2026-10-25).** Deployed 22:40 UTC (a15933d753); AMEND28_CUTOVER = 23:30 UTC, so
+flags logged in between are not counted in the forward decision (no flag before the deployment can be).
+Each flag stores the rule's verdict in `flags.filt` (NULL = passes). The lead rule is applied as registered:
+filtered plays are skipped when choosing a player's lead, on both cards.
