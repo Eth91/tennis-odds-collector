@@ -46,8 +46,8 @@ def cards(sh):
 
 def check(mod):
     ok = True
-    saved = (mod.MARGIN, mod._stale_of, mod.OFF_CARD_TIERS)
-    mod.OFF_CARD_TIERS = frozenset()
+    saved = (mod.MARGIN, mod._stale_of, mod.OFF_CARD_TIERS, mod.FILTERS_ON)
+    mod.OFF_CARD_TIERS, mod.FILTERS_ON = frozenset(), False          # amendment 28 is tested in test_nba_filters
 
     def want(cond, label):
         nonlocal ok
@@ -87,7 +87,7 @@ def check(mod):
     want(sorted(f["b"] for f in pinged2) == ["Andrew Wiggins", "Austin Reaves", "Bam Adebayo", "Collin Gillespie",
                                              "LeBron James"],
          "pass 2 pings the new card plays and the Gillespie re-flag (deduped downstream by nba_ping)")
-    mod.MARGIN, mod._stale_of, mod.OFF_CARD_TIERS = saved
+    mod.MARGIN, mod._stale_of, mod.OFF_CARD_TIERS, mod.FILTERS_ON = saved
     return ok
 
 
@@ -97,8 +97,8 @@ def test_card():
 
 def check22(mod):
     ok = True
-    saved = (mod.MARGIN, mod._stale_of, mod.OFF_CARD_TIERS)
-    mod.OFF_CARD_TIERS = frozenset()
+    saved = (mod.MARGIN, mod._stale_of, mod.OFF_CARD_TIERS, mod.FILTERS_ON)
+    mod.OFF_CARD_TIERS, mod.FILTERS_ON = frozenset(), False          # amendment 28 is tested in test_nba_filters
 
     def want(cond, label):
         nonlocal ok
@@ -125,7 +125,7 @@ def check22(mod):
     _, again = mod._log_flags(sh, [dict(flags[4], line=9.5, _stale="STALE")], "2026-10-24T23:00:00", Counter())
     want(not again and cards(sh)[("Gary Payton II", "pts", 9.5)] == 0,
          "sticky: a later STALE re-flag of an off-card play stays off (and is not pinged)")
-    mod.MARGIN, mod._stale_of, mod.OFF_CARD_TIERS = saved
+    mod.MARGIN, mod._stale_of, mod.OFF_CARD_TIERS, mod.FILTERS_ON = saved
     return ok
 
 
@@ -143,10 +143,11 @@ def test_backfill_matches_live():
     sh.commit()
     saved, F.MARGIN = F.MARGIN, {"pra": 5.0, "pts": 3.0, "reb": 2.0}
     saved_off, F.OFF_CARD_TIERS = F.OFF_CARD_TIERS, frozenset()
+    saved_f, F.FILTERS_ON = F.FILTERS_ON, False
     try:
         F.card_backfill([GD], path=d / "s.sqlite")
     finally:
-        F.MARGIN, F.OFF_CARD_TIERS = saved, saved_off
+        F.MARGIN, F.OFF_CARD_TIERS, F.FILTERS_ON = saved, saved_off, saved_f
     on = sorted((b, s) for b, s in F._shadow(d / "s.sqlite").execute("SELECT b, stat FROM flags WHERE card=1"))
     assert on == [("Collin Gillespie", "pts"), ("Dillon Brooks", "pts"), ("Gui Santos", "pts"), ("Jamal Murray", "pts_ast")], on
 
@@ -163,10 +164,11 @@ def test_backfill_wowy_v0_shares_wowy_slots():
     sh.commit()
     saved, F.MARGIN = F.MARGIN, {"pra": 5.0, "pts": 3.0, "reb": 2.0}
     saved_off, F.OFF_CARD_TIERS = F.OFF_CARD_TIERS, frozenset()
+    saved_f, F.FILTERS_ON = F.FILTERS_ON, False
     try:
         F.card_backfill([GD], path=d / "s.sqlite")
     finally:
-        F.MARGIN, F.OFF_CARD_TIERS = saved, saved_off
+        F.MARGIN, F.OFF_CARD_TIERS, F.FILTERS_ON = saved, saved_off, saved_f
     got = dict(F._shadow(d / "s.sqlite").execute("SELECT flag_id, card FROM flags"))
     assert got == {"a": 1, "b": 0, "c": 0}, got     # earliest pass first, its single lead; no NULL left
 
