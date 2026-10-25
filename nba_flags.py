@@ -93,6 +93,9 @@ LEDGER_STAT = {"pra": "pra", "pts": "points", "reb": "rebounds"}   # fd_lines st
 # AMENDMENT 18: P/R/A production pools, for the card's "no shared component" rule (wowy/cold keys)
 # AMENDMENT 19: combo props (two or more stats summed); the card takes a player's best SINGLE first
 COMBO_STATS = frozenset({"pra", "pts_reb", "pts_ast", "reb_ast"})
+# AMENDMENT 24: tiers that are logged but never carded or pinged (their own real-line tests lose:
+# priced -4.7% / KILL, cold -5.7%) until a registered recalibration passes.
+OFF_CARD_TIERS = frozenset({"priced", "cold"})
 DMIN_BAND = (3.0, 8.0)       # AMENDMENT 22: wowy's carded band (history: 3-8 +0.9%, 8+ -7.9%, <3 negative)
 CARD_COMPONENTS = {"pts": frozenset("p"), "reb": frozenset("r"), "ast": frozenset("a"),
                    "pra": frozenset("pra"), "threes": frozenset("p"), "fg3m": frozenset("p")}
@@ -718,6 +721,8 @@ def _card(sh, f, lead=True, stale="STALE"):
                       (f["game_date"], f.get("pid"), f["stat"], f["tier"])).fetchone()
     if prev:
         return prev[0]
+    if f["tier"] in OFF_CARD_TIERS:
+        return 0
     if stale != "STALE":
         return 0
     if f["tier"] == "priced":
