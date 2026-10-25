@@ -1174,3 +1174,20 @@ is the same and the over price changed: STALE_PRICE_EPS = the 95th percentile of
 stale check uses STALE_PRICE_EPS; the STALE LINE tracked cell keeps 0.03 (comparable with its history).
 
 **Unchanged:** tiers, thresholds, yardsticks, verdicts, the decision count, priced/cold off the card.
+
+**Amendment 27 — applied (2026-10-25, before deployment).**
+- *Measured price tolerance* (nba_reaction.py --jitter, `price_jitter`, run on the VM's live store at 21:40 UTC):
+  63 triggers, 25,394 control units, 743,994 poll pairs 5-15 min apart with the main line unchanged and the price
+  changed. |Δ decimal|: p50 0.020 · p75 0.036 · p90 0.052 · **p95 0.0662** · p99 0.132; 68% are under the old 0.03.
+  STALE_PRICE_EPS = 0.0662. (Toppin's −122 → −115 = 0.050: stale under the new tolerance.)
+- *Tip card details fixed by the code:* a game is decided at the first pass in the window whose lines for that game
+  are ≤ 10 min old (otherwise on a later pass in the window; never decided if none is). The watcher (step 3b) runs
+  that pass: it refreshes the game's lines (unless already refreshed that minute) and runs the flag pass. The
+  decision reads the first 60 graded tip-card plays in decided order (fixed once reached), and when it reads OFF
+  the tip card logs only, automatically ("TIP CARD OFF (DECISION)"). A voided flag is not carded.
+- *Absence games 3-4* are also kept out of amendment 19's combo decision and the board's speed record, so every
+  earlier decision keeps the population it was registered on.
+- *Board:* a tip-card play shows "WOWY · TIP CARD" with its decided price and time.
+- *Live check on a copy of the VM's shadow store, pings stubbed (21:42 UTC):* IND @ BKN (18 min to tip) decided:
+  3 wowy flags (Siakam PTS, Toppin PTS, Nembhard REB), all off: MINUTES OUT OF BAND (Kobe Brown out, d_min < 2).
+  6 new MIN flags from DiVincenzo's absence game 3 (aidx 3), logged off the speed card (lines posted after the news).

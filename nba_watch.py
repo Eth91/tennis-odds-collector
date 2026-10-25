@@ -22,6 +22,8 @@ Run once a minute (cron). Each run:
      the same action — lines + flag pass — before the report catches up. Add-only.
   3. CLOSE CAPTURE. Within HOT_LEAD_MIN of any tip, refresh lines every HOT_EVERY_MIN, so the
      closing price nba_clv rebuilds is minutes old, not up to ten.
+  3b. TIP CARD (amendment 27). The first run with a game 5-30 min from tip (and its tip card not yet
+     decided) refreshes lines and runs the flag pass, which decides that game's tip card.
   4. REACTION FOLLOW (amendment 5). For FOLLOW_MIN after any trigger, refresh FanDuel every minute,
      so the change log times the book's reaction to the news at ~1-minute resolution
      (nba_reaction.py). Data only: flags and the speed test's yardstick are untouched.
@@ -371,6 +373,16 @@ def once():
                 log.append(f"close capture: {len(soon)} game(s) tip within {HOT_LEAD_MIN} min -> "
                            f"lines refreshed" + (f" ({lerr})" if lerr else ""))
                 refreshed = True
+        # 3b. TIP CARD (amendment 27): a game entering its tip window gets a flag pass on fresh lines
+        due = F.tip_due(sched, _now())
+        if due:
+            if not refreshed:
+                _, lout, lerr = _quiet(L.cycle, None, only_gids=set(due))
+                refreshed = True
+            for gd in sorted(set(due.values())):
+                r, o, e = _quiet(F.flags, dry=False, game_date=gd)
+                log.append(f"tip card: {len(due)} game(s) in the window -> flag pass {gd}" + (f" ({e})" if e else ""))
+                log.extend("   " + x.strip() for x in (o or "").splitlines() if x.startswith(("  [NBA", "nba flags")))
         # 4. REACTION FOLLOW — per-minute FanDuel for FOLLOW_MIN after a trigger (amendment 5)
         if not refreshed and follow_due(con, _now()):
             _, lout, lerr = _quiet(L.cycle, ("fd",))

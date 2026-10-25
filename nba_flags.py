@@ -73,7 +73,8 @@ SHADOW = HERE / "nba_shadow.sqlite"
 ET = ZoneInfo("America/New_York")
 
 LIVE_TIERS = frozenset()               # tiers allowed to write PAPER bets. EMPTY — see above.
-MAX_ABSENCE_GAME = 2                   # trigger only on absence game 1-2 (the tested cell)
+MAX_ABSENCE_GAME = 2                   # the tested cell (speed test) and the season-boundary carry rule
+TRIGGER_MAX_ABSENCE = 4                # AMENDMENT 27: trigger on absence game 1-4; 3-4 score in their own cell
 HORIZONS = 2                           # flag tonight's games AND tomorrow's (h0, h1)
 REPORT_MAX_AGE_MIN = 45                # an official report older than this is a blind input
 STATS = ("pra", "pts", "reb")          # ast/fg3m gated off (48.5% Oct-Nov / 53.7%)
@@ -90,16 +91,25 @@ OPP_CONFIRM = 1.10
 MIN_A, MIN_K = 0.980, 0.356
 MARGIN = {"pra": 6.5, "pts": 5.0, "reb": 1.0}          # wowy tier (amendment 23; was pra 5 / pts 3 / reb 2)
 LEDGER_STAT = {"pra": "pra", "pts": "points", "reb": "rebounds"}   # fd_lines stat keys
-# AMENDMENT 18: P/R/A production pools, for the card's "no shared component" rule (wowy/cold keys)
 # AMENDMENT 19: combo props (two or more stats summed); the card takes a player's best SINGLE first
 COMBO_STATS = frozenset({"pra", "pts_reb", "pts_ast", "reb_ast"})
 # AMENDMENT 24: tiers that are logged but never carded or pinged (their own real-line tests lose:
 # priced -4.7% / KILL, cold -5.7%) until a registered recalibration passes.
 OFF_CARD_TIERS = frozenset({"priced", "cold"})
 DMIN_BAND = (3.0, 8.0)
+# AMENDMENT 27: FanDuel's background price jitter on an unchanged line — the 95th percentile of |change in
+# decimal odds| on control props, polls 5-15 min apart (nba_reaction.price_jitter, 2026-10-25: n 743,994,
+# p50 .020, p95 .0662). The card's stale check uses it; the STALE LINE tracked cell keeps 0.03.
+STALE_PRICE_EPS = 0.0662
+# AMENDMENT 27 — THE TIP CARD: once per game, at the first pass with 5 < minutes to tip <= 30, on lines no
+# older than TIP_FRESH_MIN. Judged at TIP_N_DECIDE graded plays (nba_clv.tip_decision).
+TIP_WINDOW_MIN, TIP_FRESH_MIN, TIP_SLOTS = (5.0, 30.0), 10.0, 2
+TIPCARD_DDL = """CREATE TABLE IF NOT EXISTS tipcard (game_date TEXT, gid TEXT, flag_id TEXT, pid INTEGER, b TEXT,
+    team TEXT, tier TEXT, stat TEXT, line REAL, odds REAL, excess REAL, d_min REAL, decided_at TEXT, card INTEGER,
+    why TEXT, PRIMARY KEY (gid, pid, stat))"""
+TIPGAMES_DDL = """CREATE TABLE IF NOT EXISTS tipcard_games (gid TEXT PRIMARY KEY, game_date TEXT, decided_at TEXT,
+    considered INTEGER, carded INTEGER)"""
 STALE_WHY = {"POSTED-AFTER": "LINE POSTED AFTER NEWS", "LATE": "LINE ALREADY MOVED", "UNKNOWN": "NO NEWS TIME"}       # AMENDMENT 22: wowy's carded band (history: 3-8 +0.9%, 8+ -7.9%, <3 negative)
-CARD_COMPONENTS = {"pts": frozenset("p"), "reb": frozenset("r"), "ast": frozenset("a"),
-                   "pra": frozenset("pra"), "threes": frozenset("p"), "fg3m": frozenset("p")}
 LINE_MAX_AGE_MIN = 90
 # A book fed by a pushed SNAPSHOT (DraftKings on the VM, NBA_SPEED_PREREG.md amendment 4) refreshes
 # only while its sender is awake, so 90 min would let a stale price into a flag. Its limit is the
@@ -126,7 +136,7 @@ SHADOW_DDL = """CREATE TABLE IF NOT EXISTS flags (
     gid TEXT, gtime TEXT, matchup TEXT, actual REAL, result TEXT, graded_at TEXT,
     ev REAL, pid INTEGER, news_at TEXT, stale INTEGER, horizon INTEGER, x_pid INTEGER,
     trigger_src TEXT, void_reason TEXT, d_min REAL, opp_cell TEXT, opp_ratio REAL, x_status TEXT,
-    x_min REAL, card INTEGER, card_why TEXT)"""
+    x_min REAL, card INTEGER, card_why TEXT, aidx INTEGER)"""
 COMBO = {"pts_reb": ("points", "rebounds"), "pts_ast": ("points", "assists"),
          "reb_ast": ("rebounds", "assists")}
 
@@ -141,12 +151,14 @@ def _shadow(path):
     sh = sqlite3.connect(path)
     sh.execute(SHADOW_DDL)
     sh.execute(CANDS_DDL)
+    sh.execute(TIPCARD_DDL)
+    sh.execute(TIPGAMES_DDL)
     have = {r[1] for r in sh.execute("PRAGMA table_info(flags)")}
     for col, typ in (("ev", "REAL"), ("pid", "INTEGER"), ("news_at", "TEXT"),
                      ("stale", "INTEGER"), ("horizon", "INTEGER"), ("x_pid", "INTEGER"),
                      ("trigger_src", "TEXT"), ("void_reason", "TEXT"), ("d_min", "REAL"),
                      ("opp_cell", "TEXT"), ("opp_ratio", "REAL"), ("x_status", "TEXT"),
-                     ("x_min", "REAL"), ("card", "INTEGER"), ("card_why", "TEXT")):
+                     ("x_min", "REAL"), ("card", "INTEGER"), ("card_why", "TEXT"), ("aidx", "INTEGER")):
         if col not in have:
             sh.execute(f"ALTER TABLE flags ADD COLUMN {col} {typ}")
     return sh
@@ -440,7 +452,7 @@ def flags(dry=False, game_date=None):
             team_dates[_a[3]].add(_a[0])
     # AMENDMENT 15: "Out" here means ABSENT (Out or Doubtful); x_status keeps which, for its own cell.
     out_all = {pid for pid, v in rep.items() if v[2] in I.ABSENT}
-    out_pid, news_at, x_status = {}, {}, {}
+    out_pid, news_at, x_status, aidx = {}, {}, {}, {}
     # ⚠️ THE STREAK RESETS AT THE SEASON BOUNDARY. Counted across the summer, a star who rested
     # the last games of April reads as "absence game 3" in October's opener (Mitchell 2026-10-22:
     # last app 04-08, sat 04-10 and 04-12) — and every such first absence of the new season was
@@ -462,12 +474,12 @@ def flags(dry=False, game_date=None):
         if st not in I.ABSENT:
             continue
         xa = _team_apps(apps, pid, tri)
-        if xa and absence_index(xa[-1][0], team_dates[tri], season,
-                                pid in tonight_out and tri in tonight_teams) > MAX_ABSENCE_GAME:
-            why["x_absence_game_gt2"] += 1
+        ai = absence_index(xa[-1][0], team_dates[tri], season, pid in tonight_out and tri in tonight_teams) if xa else None
+        if ai is not None and ai > TRIGGER_MAX_ABSENCE:
+            why["x_absence_game_gt4"] += 1
             continue
         out_pid[pid] = (nm, tri)
-        news_at[pid], x_status[pid] = first, st
+        news_at[pid], x_status[pid], aidx[pid] = first, st, ai
     trig_src = {pid: "report" for pid in out_pid}
     # ── NEWS (amendment 2): add-only. An Out the report does not list yet is added; for one it
     # already lists, the EARLIER of the two times is the news time, credited to whoever was first.
@@ -486,11 +498,12 @@ def flags(dry=False, game_date=None):
             continue
         out_all.add(pid)
         xa = _team_apps(apps, pid, tri)
-        if xa and absence_index(xa[-1][0], team_dates[tri], season,
-                                pid in tonight_out and tri in tonight_teams) > MAX_ABSENCE_GAME:
-            why["x_absence_game_gt2"] += 1
+        ai = absence_index(xa[-1][0], team_dates[tri], season, pid in tonight_out and tri in tonight_teams) if xa else None
+        if ai is not None and ai > TRIGGER_MAX_ABSENCE:
+            why["x_absence_game_gt4"] += 1
             continue
         out_pid[pid], news_at[pid], trig_src[pid], x_status[pid] = (nm, tri), at, f"news:{src}", nst
+        aidx[pid] = ai
         why["x_from_news"] += 1
 
     # AMENDMENT 16: every flag carries X's last-10 minutes for this franchise (the 24-28 cell).
@@ -586,7 +599,8 @@ def flags(dry=False, game_date=None):
                           "pid": r["_pid"], "news_at": r["_news"], "stale": r["_stale"],
                           "game_date": gdate, "horizon": horizon, "x_pid": r["_x_id"],
                           "trigger_src": trig_src.get(r["_x_id"]), "d_min": r.get("d_min"),
-                          "x_status": x_status.get(r["_x_id"]), "x_min": x_min.get(r["_x_id"])})
+                          "x_status": x_status.get(r["_x_id"]), "x_min": x_min.get(r["_x_id"]),
+                          "aidx": aidx.get(r["_x_id"])})
     if not dry and cands:                     # AMENDMENT 25: the lab sees the model's whole view
         try:
             csh = _shadow(SHADOW)
@@ -615,7 +629,7 @@ def flags(dry=False, game_date=None):
                           "matchup": mu, "pid": b_id, "news_at": news_at.get(x_id),
                           "game_date": gdate, "horizon": horizon, "x_pid": x_id,
                           "trigger_src": trig_src.get(x_id), "d_min": d_min,
-                          "x_status": x_status.get(x_id), "x_min": x_min.get(x_id)})
+                          "x_status": x_status.get(x_id), "x_min": x_min.get(x_id), "aidx": aidx.get(x_id)})
 
     # AMENDMENT 9: OPPORTUNITY-CONFIRMED, at flag time, from the same prior split wowy uses
     trk = load_tracking({f["pid"] for f in out_flags if f.get("pid")})
@@ -632,6 +646,7 @@ def flags(dry=False, game_date=None):
         sh = _shadow(SHADOW)
         stamp = now.replace(microsecond=0, tzinfo=None).isoformat()
         new_shadow, inserted = _log_flags(sh, out_flags, stamp, why)
+        inserted += _tip_card(sh, out_flags, games, lines, now, stamp, why, gdate)   # AMENDMENT 27
         # PINGS (user 2026-10-24: "0 latency"): one push per NEW play, in-process, right after the
         # commit; then a VOID for any pinged play whose premise died. Never breaks the pass.
         try:
@@ -672,7 +687,7 @@ def flags(dry=False, game_date=None):
               + f" · {f['x']} OUT · {f['matchup']}")
     tiers = Counter(f["tier"] for f in out_flags)
     print(f"nba flags {gdate} (h{horizon}): report {rep_mark or 'NONE'} · {len(out_all)} Out, "
-          f"{len(out_pid)} in absence game 1-2 · {len(games) // 2} "
+          f"{len(out_pid)} in absence game 1-{TRIGGER_MAX_ABSENCE} · {len(games) // 2} "
           f"game(s) not yet started · lines: {lstat} · "
           f"candidates {Counter(c[0] for c in cands)} -> flags {dict(tiers)} · "
           f"shadow +{new_shadow} · paper +{new_paper} (live tiers: "
@@ -695,16 +710,13 @@ CARD_FAMILY = {"wowy": ("wowy", "wowy_v0"), "wowy_v0": ("wowy", "wowy_v0"), "col
 
 def _card_rule(sh, gd, pid, team, tier, stat):
     """AMENDMENT 18, for a NEW wowy/cold play: 1 = on the card (pinged + shown), 0 = logged only.
-    Off if the player already has a carded play that date (any tier), if the tier already has 2 carded
-    plays in the team-game, or if it shares a P/R/A component with one of them."""
+    Off if the player already has a carded play that date (any tier), or if the tier already has 2 carded
+    plays in the team-game. AMENDMENT 27: two plays may share a P/R/A component (was "SHARED STAT")."""
     if sh.execute(f"SELECT 1 FROM flags WHERE game_date=? AND pid=? AND {CARD_ON} LIMIT 1", (gd, pid)).fetchone():
         return 0, "1 PER PLAYER"
     mates = sh.execute(f"SELECT DISTINCT pid, stat FROM flags WHERE game_date=? AND team=? AND tier IN (?, ?) "
                        f"AND {CARD_ON}", (gd, team, *CARD_FAMILY[tier])).fetchall()
-    if len(mates) >= 2:
-        return 0, "TEAM SLOT"
-    comp = CARD_COMPONENTS.get(stat, frozenset(stat))
-    return (0, "SHARED STAT") if any(comp & CARD_COMPONENTS.get(s, frozenset(s)) for _, s in mates) else (1, None)
+    return (0, "TEAM SLOT") if len(mates) >= 2 else (1, None)
 
 
 def _leads(flags):
@@ -728,7 +740,7 @@ def _stale_of(f, stamp):
     try:
         q = sqlite3.connect(f"file:{V.LINES}?mode=ro", uri=True)
         try:
-            return V.cell_stale(q, dict(f, logged_at=stamp))
+            return V.cell_stale(q, dict(f, logged_at=stamp), eps=STALE_PRICE_EPS)   # amendment 27
         finally:
             q.close()
     except sqlite3.Error:
@@ -774,7 +786,7 @@ def _log_flags(sh, out_flags, stamp, why):
     new_shadow, inserted = 0, []
     order, is_lead = _pass_order(out_flags)
     for f in order:
-        fid = f"{f['tier']}|{fold(f['b'])}|{f['stat']}|{f['line']}|{f['game_date']}"
+        fid = _fid(f)
         if f["tier"] == "priced" and not _priced_slot_open(sh, f["game_date"], f, fid):
             why["priced_slot_taken"] += 1
             continue
@@ -782,13 +794,13 @@ def _log_flags(sh, out_flags, stamp, why):
         cur = sh.execute("INSERT OR IGNORE INTO flags (flag_id, logged_at, game_date, tier, "
                          "team, x, b, stat, line, odds, proj, margin, gid, gtime, matchup, ev, "
                          "pid, news_at, stale, horizon, x_pid, trigger_src, d_min, opp_cell, opp_ratio, x_status, x_min, "
-                         "card, card_why) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                         "card, card_why, aidx) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                          (fid, stamp, f["game_date"], f["tier"], f["team"], f["x"], f["b"],
                           f["stat"], f["line"], f["odds"], f["proj"], f["margin"],
                           f["gid"], f["gtime"], f["matchup"], f.get("ev"), f.get("pid"),
                           f.get("news_at"), f.get("stale"), f["horizon"], f.get("x_pid"),
                           f.get("trigger_src"), f.get("d_min"), f.get("opp_cell"),
-                          f.get("opp_ratio"), f.get("x_status"), f.get("x_min"), card, card_why))
+                          f.get("opp_ratio"), f.get("x_status"), f.get("x_min"), card, card_why, f.get("aidx")))
         new_shadow += cur.rowcount
         if cur.rowcount and not card:
             why["card_off_logged_only"] += 1
@@ -796,6 +808,80 @@ def _log_flags(sh, out_flags, stamp, why):
             inserted.append(dict(f, flag_id=fid))
     sh.commit()
     return new_shadow, inserted
+
+
+def _fid(f):
+    return f"{f['tier']}|{fold(f['b'])}|{f['stat']}|{f['line']}|{f['game_date']}"
+
+
+def tip_due(sched, now, path=None):
+    """AMENDMENT 27: {gid: game date} of games not started, 5 < minutes to tip <= 30, tip card not decided."""
+    win = {g["gid"]: g["date_et"] for g in sched if g["status"] == 1 and TIP_WINDOW_MIN[0] < (
+        dt.datetime.fromisoformat(g["utc"].replace("Z", "+00:00")) - now).total_seconds() / 60 <= TIP_WINDOW_MIN[1]}
+    if not win:
+        return {}
+    sh = _shadow(path or SHADOW)
+    done = {g for (g,) in sh.execute("SELECT gid FROM tipcard_games")}
+    sh.close()
+    return {g: d for g, d in win.items() if g not in done}
+
+
+def _tip_card(sh, out_flags, games, lines, now, stamp, why, gdate):
+    """AMENDMENT 27 — THE TIP CARD, a second card at near-close lines (where the backtest measured the card).
+    For each game at its first pass with 5 < minutes to tip <= 30 whose lines are fresh: among THIS pass's
+    wowy flags for the game, each player's lead (best single, else best combo) in excess order is carded
+    unless out of the minutes band, already on the speed card that night, or the team-game has TIP_SLOTS
+    tip-card plays. Every considered play is logged in `tipcard`; the game in `tipcard_games` (decided once).
+    A carded play's flag row -> card 1, card_why 'TIP CARD'. Returns the carded flags to ping."""
+    import nba_clv as V
+    decided = {g for (g,) in sh.execute("SELECT gid FROM tipcard_games")}
+    seen_at = defaultdict(str)
+    for (g, _p, _s), (_l, _o, ts) in lines.items():
+        seen_at[g] = max(seen_at[g], ts or "")
+    cut = (now - dt.timedelta(minutes=TIP_FRESH_MIN)).replace(tzinfo=None).isoformat()
+    on = not V.tip_decision(sh)["verdict"].startswith("OFF")
+    out = []
+    for gid, utc in sorted({(v[0], v[1]) for v in games.values()}):
+        mins = (dt.datetime.fromisoformat(utc.replace("Z", "+00:00")) - now).total_seconds() / 60
+        if gid in decided or not TIP_WINDOW_MIN[0] < mins <= TIP_WINDOW_MIN[1]:
+            continue
+        if seen_at[gid] < cut:
+            why["tip_lines_stale"] += 1
+            continue                                       # decided on a later pass, on fresh lines
+        fs = [f for f in out_flags if f["gid"] == gid and f["tier"] == "wowy"]
+        leads = _leads(fs)
+        is_lead = lambda f: leads.get((f["game_date"], f.get("pid"))) == id(f)
+        slots, n_card = Counter(), 0
+        for f in sorted(fs, key=lambda f: (not is_lead(f), -_excess(f))):
+            fid = _fid(f)
+            if not is_lead(f):
+                v, w = 0, "1 PER PLAYER"
+            elif not (f.get("d_min") is not None and DMIN_BAND[0] <= f["d_min"] <= DMIN_BAND[1]):
+                v, w = 0, "MINUTES OUT OF BAND"
+            elif sh.execute(f"SELECT 1 FROM flags WHERE game_date=? AND pid=? AND {CARD_ON} AND "
+                            f"COALESCE(card_why, '') != 'TIP CARD' LIMIT 1", (f["game_date"], f.get("pid"))).fetchone():
+                v, w = 0, "ON SPEED CARD"
+            elif slots[f["team"]] >= TIP_SLOTS:
+                v, w = 0, "TEAM SLOT"
+            elif not on:
+                v, w = 0, "TIP CARD OFF (DECISION)"
+            elif not sh.execute("SELECT 1 FROM flags WHERE flag_id=? AND void_reason IS NULL", (fid,)).fetchone():
+                v, w = 0, "VOIDED"
+            else:
+                v, w = 1, None
+            sh.execute("INSERT OR IGNORE INTO tipcard VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                       (f["game_date"], gid, fid, f.get("pid"), f["b"], f["team"], f["tier"], f["stat"], f["line"],
+                        f["odds"], round(_excess(f), 3), f.get("d_min"), stamp, v, w))
+            if v:
+                slots[f["team"]] += 1
+                n_card += 1
+                sh.execute("UPDATE flags SET card=1, card_why='TIP CARD' WHERE flag_id=?", (fid,))
+                out.append(dict(f, flag_id=fid, tier=f"{f['tier']} tip"))
+        sh.execute("INSERT OR IGNORE INTO tipcard_games VALUES (?,?,?,?,?)",
+                   (gid, gdate, stamp, len(fs), n_card))
+        why["tip_card_plays"] += n_card
+    sh.commit()
+    return out
 
 
 def card_backfill(game_dates, path=None):

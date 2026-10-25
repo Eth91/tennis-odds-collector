@@ -252,6 +252,35 @@ def reading(results):
     return "A FEW MINUTES" + pre, f"median first move {a['median_min']:.1f} min; {ratio:.1f}x control"
 
 
+def price_jitter(results, q, lo=5, hi=15):
+    """AMENDMENT 27: FanDuel's background price jitter. On CONTROL props, for every pair of FanDuel polls
+    lo-hi min apart inside the control window where the main line is the same and the over price changed:
+    |change in decimal odds|, sorted. STALE_PRICE_EPS = its 95th percentile."""
+    polls = [r[0] for r in q.execute("SELECT ts FROM cycles WHERE book='fd' AND status IN ('ok','partial') "
+                                     "ORDER BY ts")]
+    tips = {g: _utc(t) for g, t in q.execute("SELECT DISTINCT gid, tip_utc FROM quotes WHERE book='fd'")}
+    seen, out, tls = set(), [], {}
+    for r in results:
+        for u in r["units"]["control"]:
+            k = (u["gid"], u["pid"], u["stat"])
+            if k not in tls:
+                tls[k] = timeline(q.execute("SELECT seen_at, line, side, odds FROM quotes WHERE book='fd' AND gid=? "
+                                            "AND pid=? AND stat=?", k).fetchall())
+            end = min(_add(r["t0"], WINDOW_MIN), tips[u["gid"]])
+            ps = polls[bisect.bisect_left(polls, r["t0"]):bisect.bisect_right(polls, end)]
+            ms = [(t, main_at(tls[k], t)) for t in ps]
+            for i, (ta, ma) in enumerate(ms):
+                for tb, mb in ms[i + 1:]:
+                    gap = _mins(ta, tb)
+                    if gap > hi:
+                        break
+                    if (gap >= lo and ma and mb and ma[0] == mb[0] and abs(mb[1] - ma[1]) > 1e-9
+                            and (k, ta, tb) not in seen):
+                        seen.add((k, ta, tb))
+                        out.append(abs(mb[1] - ma[1]))
+    return sorted(out)
+
+
 def _fmt(s):
     if not s:
         return "n=0"
@@ -263,7 +292,15 @@ def _fmt(s):
 
 
 if __name__ == "__main__":
+    import sys
     res = run()
+    if "--jitter" in sys.argv:                       # amendment 27's measurement
+        q = sqlite3.connect(f"file:{LINES}?mode=ro", uri=True)
+        d = price_jitter(res, q)
+        print(f"price changes on an unchanged FanDuel main line, control props, polls 5-15 min apart: n={len(d)}")
+        for p in (50, 75, 90, 95, 99):
+            print(f"  p{p}: {d[min(len(d) - 1, int(p / 100 * len(d)))]:.4f}" if d else "  none")
+        sys.exit(0)
     print("FanDuel reaction to the news — NBA_SPEED_PREREG.md amendment 5 (information only)\n")
     for r in res:
         a = summary(r["units"]["affected"])
