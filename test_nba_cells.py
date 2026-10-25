@@ -85,7 +85,7 @@ def test_cells():
 def test_mutants():
     src = pathlib.Path(V.__file__).read_text()
     for name, a, b in (
-            ("any price change still STALE", "if m1 and m1[0] == m0[0] and abs(m1[1] - m0[1]) < PRICE_EPS:",
+            ("any price change still STALE", "if m1 and m1[0] == m0[0] and abs(m1[1] - m0[1]) < eps:",
              "if m1 and m1[0] == m0[0]:"),
             ("not forward-only", 'if r["logged_at"] >= AMEND8_CUTOVER:', "if True:"),
             ("gap at 1x", 'return "LARGE" if m > 2 * thr else "NORMAL"', 'return "LARGE" if m > thr else "NORMAL"'),

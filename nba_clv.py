@@ -47,6 +47,7 @@ PRIMARY_BOOKS = ("fd",)                     # AMENDMENT 4: the primary yardstick
 AMEND8_CUTOVER = "2026-10-24T07:43:00"      # deployment time (NBA_SPEED_PREREG.md amendment 8)
 AMEND19_CUTOVER = "2026-10-24T23:30:00"     # STAT TYPE cell + combo decision (amendment 19)
 COMBO_N_DECIDE = 60
+TIP_N_DECIDE = 60                           # AMENDMENT 27: the tip card's forward decision
 COMBO_STATS = frozenset({"pra", "pts_reb", "pts_ast", "reb_ast"})
 AMEND9_CUTOVER = "2026-10-24T08:03:00"      # OPPORTUNITY cell: deployment time after the VM backfill (amendment 9)
 PRICE_EPS = 0.03                            # a "move" on an unchanged line (== amendment 5)
@@ -56,9 +57,10 @@ WOWY_MARGIN_23 = {"pts": 5.0, "reb": 1.0, "pra": 6.5}
 COLD_MARGIN, PRICED_EV_FLOOR = 5.0, 0.10
 
 
-def cell_stale(q, r):
+def cell_stale(q, r, eps=PRICE_EPS):
     """STALE / LATE / POSTED-AFTER / UNKNOWN: did FanDuel have this line BEFORE the news, unmoved
-    when we flagged?"""
+    when we flagged? `eps`: a smaller price change is not a move (the card passes amendment 27's
+    measured jitter; the tracked cell keeps PRICE_EPS)."""
     if not r.get("news_at") or not r.get("pid"):
         return "UNKNOWN"
     stat = BOARD_STAT.get(r["stat"], r["stat"])
@@ -66,7 +68,7 @@ def cell_stale(q, r):
     if not m0:
         return "POSTED-AFTER"
     m1 = close_of(q, r["gid"], r["pid"], stat, _utc_naive(r["logged_at"]), books=PRIMARY_BOOKS)
-    if m1 and m1[0] == m0[0] and abs(m1[1] - m0[1]) < PRICE_EPS:
+    if m1 and m1[0] == m0[0] and abs(m1[1] - m0[1]) < eps:
         return "STALE"
     return "LATE"
 
@@ -236,6 +238,7 @@ def scoreboard(rows):
     by = defaultdict(list)
     for r in rows:
         cell = ("unconfirmed-news" if r.get("confirmed") is False
+                else "absence3-4" if (r.get("aidx") or 0) > 2
                 else "doubtful" if r.get("x_status") == "Doubtful"
                 else "x24-28" if r.get("x_min") is not None and r["x_min"] < 28
                 else f"h{r.get('horizon') or 0}")
@@ -245,6 +248,8 @@ def scoreboard(rows):
           "h1 = a ruling for tomorrow's game, flagged the day before (amendment 1, its own cell).\n"
           "unconfirmed-news = triggered by news the official report never confirmed before tip\n"
           "(amendment 2: an audit cell, never in a verdict).\n"
+          "absence3-4 = the absent player's 3rd or 4th straight missed game (amendment 27: its own\n"
+          "cell, never in the decision).\n"
           "doubtful = the absent player was Doubtful, not Out, at flag time (amendment 15: its own\n"
           "cell, never in the decision).\n"
           "x24-28 = wowy with the absent player at 24-28 min (amendment 16: its own cell, never in\n"
@@ -281,7 +286,8 @@ def combo_decision(rows):
     seen, units, n = set(), 0.0, 0
     for r in sorted(rows, key=lambda r: r.get("logged_at") or ""):
         if (r.get("tier") not in ("wowy", "cold") or r.get("stat") not in COMBO_STATS
-                or (r.get("logged_at") or "") < AMEND19_CUTOVER or r.get("actual") is None):
+                or (r.get("logged_at") or "") < AMEND19_CUTOVER or r.get("actual") is None
+                or (r.get("aidx") or 0) > 2):                  # amendment 27: 3-4 stay outside it
             continue
         k = (r.get("game_date"), r.get("pid"), r["stat"])
         if k in seen:
@@ -294,6 +300,34 @@ def combo_decision(rows):
     return {"n": n, "units": round(units, 2), "verdict": verdict}
 
 
+def tip_decision(sh, reps=2000):
+    """AMENDMENT 27's fixed rule for the TIP CARD: its first TIP_N_DECIDE graded plays (decided order), flat
+    units at the decided line and price. units < 0 -> OFF (the tip card goes back to logged only); else ON.
+    `sh` = the shadow store (tipcard + flags). CI resamples games."""
+    try:
+        rs = sh.execute("SELECT t.gid, t.line, t.odds, f.actual FROM tipcard t JOIN flags f ON f.flag_id = t.flag_id "
+                        "WHERE t.card = 1 AND f.void_reason IS NULL AND f.actual IS NOT NULL "
+                        "ORDER BY t.decided_at, t.excess DESC LIMIT ?", (TIP_N_DECIDE,)).fetchall()
+    except sqlite3.OperationalError:
+        rs = []
+    u = lambda line, odds, a: (odds - 1.0) if a > line else 0.0 if a == line else -1.0
+    units = sum(u(*r[1:]) for r in rs)
+    by = defaultdict(list)
+    for g, *x in rs:
+        by[g].append(u(*x))
+    ci = None
+    if len(by) >= 10:
+        gs, rnd, res = list(by.values()), random.Random(7), []
+        for _ in range(reps):
+            pick = [x for _ in gs for x in rnd.choice(gs)]
+            res.append(100 * sum(pick) / len(pick))
+        res.sort()
+        ci = (res[int(.025 * reps)], res[int(.975 * reps)])
+    verdict = (f"accumulating ({len(rs)}/{TIP_N_DECIDE})" if len(rs) < TIP_N_DECIDE
+               else "OFF: the tip card goes back to logged only" if units < 0 else "ON: the tip card stays")
+    return {"n": len(rs), "units": round(units, 2), "ci": ci, "verdict": verdict}
+
+
 def cells_report(rows):
     """AMENDMENT 8: the tracked cells on the FanDuel yardstick, pooled across tiers and for priced
     alone. Information only; never a verdict."""
@@ -301,6 +335,12 @@ def cells_report(rows):
     cd = combo_decision(rows)
     print(f"\nCOMBO DECISION (amendment 19, wowy/cold since {AMEND19_CUTOVER} UTC): {cd['n']} graded · "
           f"{cd['units']:+.2f}u · {cd['verdict']}")
+    if SHADOW.exists():
+        sh = sqlite3.connect(f"file:{SHADOW}?mode=ro", uri=True)
+        td = tip_decision(sh)
+        sh.close()
+        ci = f" [{td['ci'][0]:+.1f}, {td['ci'][1]:+.1f}]% ROI" if td["ci"] else ""
+        print(f"TIP CARD DECISION (amendment 27): {td['n']} graded · {td['units']:+.2f}u{ci} · {td['verdict']}")
     print(f"\ntracked cells (amendments 8-9, information only; flags since {AMEND8_CUTOVER} UTC, "
           f"OPPORTUNITY since {AMEND9_CUTOVER} UTC), FD yardstick")
     if not vs:

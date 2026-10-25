@@ -1132,3 +1132,62 @@ he did not play. Classed by the strongest source that reported him: inferred, un
 card's stat ranking (excess with REB margin 1.0) is reviewed by amendment.
 
 **Unchanged:** every rule, card, ping and verdict. These are watches with pre-set review lines, not rules.
+
+---
+
+# AMENDMENT 27 — volume: the tip card, absence games 3-4, shared stats, the stale price tolerance (2026-10-25)
+
+**Why.** Volume audit (2026-10-25). Every line in the historical archive is a TIP snapshot (≈ 30 min before
+tip; `props.snap_kind = 'tip'`), so the recalibrated card's backtest (+11.3% hold) was measured at near-close
+lines with no speed. The stale-line rule (amendment 22) keeps only ≈ 8% of flags: ≈ 0.1 card plays a night
+live vs 1.12 a night for the same card at tip lines. Lines on POSTED-AFTER plays moved against the flag
+(FD beat close 8/25), so for non-stale plays tip time is the better price as well as the tested one.
+Levers at tip lines (317 nights with archive lines; the hold half has been looked at several times today, so
+these are judged FORWARD, not on that half again):
+- current card rules, no stale rule: 1.12/night · fit +2.3% · hold +11.3%
+- + absence game ≤ 4: 1.75/night · fit +2.1% · hold +8.5%
+- + 2 per team-game with shared stats allowed: 1.25/night · fit +5.9% · hold +8.8%
+- Not adopted, because first-half results are flat or negative: star bar 20, absence game ≤ 3 alone,
+  minutes band widened.
+User: "yes register and build 1-4."
+
+**1. The TIP CARD (a second card; the speed card is unchanged except 2-4).** Once per game, at the first
+watcher pass with 5 < minutes to tip ≤ 30: refresh that game's lines, run the flag pass, and decide among
+that game's wowy flags with 3 ≤ d_min ≤ 8 (no stale requirement): each player's lead (best single, else
+best combo) in excess order; off if the player is already on the speed card that night, or the team-game
+already has 2 tip-card plays. priced and cold stay off. Decisions are logged in nba_shadow.sqlite
+`tipcard` (one row per considered play, with the reason when off). A carded play's flag row gets card = 1,
+card_why = 'TIP CARD', and is pinged (tier label "<tier> tip").
+**Judged forward, decision fixed now:** at ≥ 60 graded tip-card plays (flat units at the decided price),
+units < 0 → the tip card goes back to logged only. Otherwise it stays. Reported with a game-clustered CI.
+
+**2. Absence games 3-4.** Triggers now include X in absence game ≤ 4 (TRIGGER_MAX_ABSENCE = 4). Each flag
+stores `aidx`; flags with aidx > 2 score in their own `absence3-4` cell, outside h0/h1 and the decision
+count (MAX_ABSENCE_GAME = 2 keeps its meaning for the speed test and the season-boundary carry rule).
+
+**3. Shared stats.** The card's per-tier team-game cap stays 2, but two plays may now share a P/R/A
+component (both cards). One play per player is unchanged.
+
+**4. The stale price tolerance, measured before it is set.** On CONTROL props (nba_reaction's control set:
+no trigger for the game within 60 min), for every pair of FanDuel polls 5-15 min apart where the main line
+is the same and the over price changed: STALE_PRICE_EPS = the 95th percentile of |Δ decimal|. The card's
+stale check uses STALE_PRICE_EPS; the STALE LINE tracked cell keeps 0.03 (comparable with its history).
+
+**Unchanged:** tiers, thresholds, yardsticks, verdicts, the decision count, priced/cold off the card.
+
+**Amendment 27 — applied (2026-10-25, before deployment).**
+- *Measured price tolerance* (nba_reaction.py --jitter, `price_jitter`, run on the VM's live store at 21:40 UTC):
+  63 triggers, 25,394 control units, 743,994 poll pairs 5-15 min apart with the main line unchanged and the price
+  changed. |Δ decimal|: p50 0.020 · p75 0.036 · p90 0.052 · **p95 0.0662** · p99 0.132; 68% are under the old 0.03.
+  STALE_PRICE_EPS = 0.0662. (Toppin's −122 → −115 = 0.050: stale under the new tolerance.)
+- *Tip card details fixed by the code:* a game is decided at the first pass in the window whose lines for that game
+  are ≤ 10 min old (otherwise on a later pass in the window; never decided if none is). The watcher (step 3b) runs
+  that pass: it refreshes the game's lines (unless already refreshed that minute) and runs the flag pass. The
+  decision reads the first 60 graded tip-card plays in decided order (fixed once reached), and when it reads OFF
+  the tip card logs only, automatically ("TIP CARD OFF (DECISION)"). A voided flag is not carded.
+- *Absence games 3-4* are also kept out of amendment 19's combo decision and the board's speed record, so every
+  earlier decision keeps the population it was registered on.
+- *Board:* a tip-card play shows "WOWY · TIP CARD" with its decided price and time.
+- *Live check on a copy of the VM's shadow store, pings stubbed (21:42 UTC):* IND @ BKN (18 min to tip) decided:
+  3 wowy flags (Siakam PTS, Toppin PTS, Nembhard REB), all off: MINUTES OUT OF BAND (Kobe Brown out, d_min < 2).
+  6 new MIN flags from DiVincenzo's absence game 3 (aidx 3), logged off the speed card (lines posted after the news).

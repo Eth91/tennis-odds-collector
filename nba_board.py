@@ -103,9 +103,17 @@ def board(now=None):
     flags = [dict(r) for r in sh.execute(
         f"SELECT * FROM flags WHERE void_reason IS NULL AND COALESCE(card, 1) = 1 "   # amendment 18: the card
         f"AND game_date IN ({','.join('?' * len(days))}) ORDER BY logged_at", tuple(days))]
+    try:                                   # AMENDMENT 27: a tip-card play shows its decided price and time
+        tipc = {fid: (odds, at) for fid, odds, at in sh.execute("SELECT flag_id, odds, decided_at FROM tipcard "
+                                                               "WHERE card = 1")}
+    except sqlite3.OperationalError:
+        tipc = {}
     opp = {}
     for f in flags:
         k = (f["game_date"], f["gid"], f["pid"] or f["b"], STAT.get(f["stat"], f["stat"]))
+        if f.get("card_why") == "TIP CARD":
+            f["odds"], f["logged_at"] = tipc.get(f["flag_id"], (f["odds"], f["logged_at"]))
+            f["tier"] += " tip"
         if k not in opp:
             opp[k] = dict(f, tiers={f["tier"]})
         else:
@@ -179,7 +187,8 @@ def board(now=None):
             out["slates"].append({"date": gd, "label": label, "games": gs})
     rows = V.collect()
     fd_rows = [V.view(r, "FD") for r in rows if r.get("x_status") != "Doubtful"   # amendment 15
-               and not (r.get("x_min") is not None and r["x_min"] < 28)]      # amendment 16
+               and not (r.get("x_min") is not None and r["x_min"] < 28)       # amendment 16
+               and not (r.get("aidx") or 0) > 2]                               # amendment 27
     closed = [v for v in fd_rows if v["close"]]
     graded = [v for v in closed if "u_flag" in v]
     out["record"] = {"closed": len(closed), "beat": sum(1 for v in closed if v["beat"]),
@@ -247,7 +256,7 @@ CSS = """<style>
 #nba .nnone{padding:28px 0;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
   color:var(--cu-lbl3)}
 </style>"""
-TIER = {"priced": "PRICED", "wowy": "WOWY", "wowy_v0": "WOWY", "cold": "COLD"}
+TIER = {"priced": "PRICED", "wowy": "WOWY", "wowy_v0": "WOWY", "cold": "COLD", "wowy tip": "WOWY · TIP CARD"}
 STAT_NAME = {"PTS": "POINTS", "REB": "REBOUNDS", "AST": "ASSISTS", "PRA": "PTS + REB + AST",
              "P+R": "PTS + REB", "P+A": "PTS + AST", "R+A": "REB + AST", "3PM": "3-POINTERS MADE"}
 # NBA team ids (cdn.nba.com scheduleLeagueV2, checked 2026-10-24) for the logo + headshot CDN

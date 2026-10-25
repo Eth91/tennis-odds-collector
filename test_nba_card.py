@@ -1,6 +1,6 @@
 """Amendments 18-19: the card (singles first since 19). Tonight's cases (Santos PRA/PTS/REB, Brooks + Gillespie PTS, Murray priced +
-wowy): one per player, top-2 disjoint per team-game per tier, sticky re-flags, pings only for the card,
-the board shows only the card, and the backfill. MUTANTS in test_mutants()."""
+wowy): one per player, top-2 per team-game per tier (shared stats allowed since amendment 27), sticky re-flags,
+pings only for the card, the board shows only the card, and the backfill. MUTANTS in test_mutants()."""
 import importlib
 import pathlib
 import sys
@@ -32,7 +32,12 @@ PASS2 = [fl("wowy", "PHX", "Collin Gillespie", 3, "pts", 9.5, 3.1),      # re-fl
          fl("wowy", "PHX", "Ryan Dunn", 8, "ast", 2.5, 3.0),             # AST shares nothing: only the cap stops it
          fl("wowy", "LAL", "LeBron James", 10, "pts", 24.5, 9.0),        # LAL lead, excess 3.0: carded
          fl("wowy", "LAL", "Austin Reaves", 11, "pts", 17.5, 6.0),       # his lead (2.0): blocked, shares P
-         fl("wowy", "LAL", "Austin Reaves", 11, "reb", 4.5, 2.0)]        # non-lead: logged only, no fallback
+         fl("wowy", "LAL", "Austin Reaves", 11, "reb", 4.5, 2.0),        # non-lead: logged only, no fallback
+         fl("wowy", "MIA", "Tyler Herro", 12, "pts", 20.5, 3.3),         # MIA: 3 leads for 2 slots, worst first
+         fl("wowy", "MIA", "Bam Adebayo", 13, "reb", 9.5, 2.4),          # excess 1.2
+         fl("wowy", "MIA", "Andrew Wiggins", 14, "pts", 14.5, 4.5),      # excess 1.5
+         dict(fl("wowy", "BOS", "Jaylen Brown", 15, "pts", 25.5, 6.0), _stale="LATE"),   # his lead, line moved
+         fl("wowy", "BOS", "Jaylen Brown", 15, "reb", 5.5, 2.2)]         # stale non-lead: does not stand in
 
 
 def cards(sh):
@@ -56,27 +61,32 @@ def check(mod):
     c = cards(sh)
     want(c[("Gui Santos", "pts", 13.5)] == 1 and c[("Gui Santos", "pra", 21.5)] == 0 and c[("Gui Santos", "reb", 5.5)] == 0,
          "singles first: Santos PTS (2.27) carded over his PRA (2.38, a combo); REB (1.35) logged only")
-    want(c[("Collin Gillespie", "pts", 8.5)] == 1 and c[("Dillon Brooks", "pts", 16.5)] == 0,
-         "no shared component: Gillespie PTS (1.13) carded, Brooks PTS (1.07) logged only")
+    want(c[("Collin Gillespie", "pts", 8.5)] == 1 and c[("Dillon Brooks", "pts", 16.5)] == 1,
+         "shared stats allowed (amendment 27): Gillespie PTS (1.13) and Brooks PTS (1.07) both carded")
     want(c[("Jamal Murray", "pts_ast", 31.5)] == 1 and c[("Jamal Murray", "pra", 35.5)] == 0
          and c[("Jamal Murray", "pts", 23.5)] == 0, "priced first: Murray's priced P+A carded, his wowy plays not")
     want(sorted((f["b"], f["stat"]) for f in pinged1) ==
-         [("Collin Gillespie", "pts"), ("Gui Santos", "pts"), ("Jamal Murray", "pts_ast")],
+         [("Collin Gillespie", "pts"), ("Dillon Brooks", "pts"), ("Gui Santos", "pts"), ("Jamal Murray", "pts_ast")],
          "only the card is pinged")
     want(len(list(sh.execute("SELECT 1 FROM flags"))) == 8, "the record still logs every flag (8 of 8)")
     _, pinged2 = mod._log_flags(sh, PASS2, "2026-10-24T22:21:52", why)
     c = cards(sh)
     want(c[("Collin Gillespie", "pts", 9.5)] == 1 and c[("Gui Santos", "reb", 6.5)] == 0,
          "sticky: re-flags inherit their play's card value (on stays on, off stays off)")
-    want(c[("Devin Booker", "reb", 4.5)] == 1 and c[("Grayson Allen", "reb", 3.5)] == 0,
-         "best first + no shared component: Booker REB (2.0) takes PHX's 2nd slot, Allen REB (1.25) does not")
+    want(c[("Devin Booker", "reb", 4.5)] == 0 and c[("Grayson Allen", "reb", 3.5)] == 0,
+         "cap 2: PHX's wowy slots are full (Gillespie, Brooks): Booker REB (2.0) and Allen REB logged only")
     want(c[("Royce O'Neale", "pra", 9.5)] == 0 and c[("Ryan Dunn", "ast", 2.5)] == 0,
          "top-2: O'Neale PRA (his lead: no single) and Dunn AST (disjoint) find PHX's 2 wowy slots full")
-    want(c[("LeBron James", "pts", 24.5)] == 1 and c[("Austin Reaves", "pts", 17.5)] == 0
+    want(c[("LeBron James", "pts", 24.5)] == 1 and c[("Austin Reaves", "pts", 17.5)] == 1
          and c[("Austin Reaves", "reb", 4.5)] == 0,
-         "lead or nothing: Reaves' PTS lead is blocked by LeBron's PTS, and his REB does not stand in")
-    want(sorted(f["b"] for f in pinged2) == ["Collin Gillespie", "Devin Booker", "LeBron James"],
-         "pass 2 pings Booker (new) and the Gillespie re-flag (deduped downstream by nba_ping)")
+         "LeBron PTS and Reaves' PTS lead both carded (shared P allowed); Reaves' non-lead REB not")
+    want(c[("Andrew Wiggins", "pts", 14.5)] == 1 and c[("Bam Adebayo", "reb", 9.5)] == 1
+         and c[("Tyler Herro", "pts", 20.5)] == 0, "best first: MIA's 2 slots go to Wiggins (1.5) and Adebayo (1.2), not Herro (1.1)")
+    want(c[("Jaylen Brown", "pts", 25.5)] == 0 and c[("Jaylen Brown", "reb", 5.5)] == 0,
+         "lead or nothing: Brown's PTS lead is off (line moved) and his stale REB does not stand in")
+    want(sorted(f["b"] for f in pinged2) == ["Andrew Wiggins", "Austin Reaves", "Bam Adebayo", "Collin Gillespie",
+                                             "LeBron James"],
+         "pass 2 pings the new card plays and the Gillespie re-flag (deduped downstream by nba_ping)")
     mod.MARGIN, mod._stale_of, mod.OFF_CARD_TIERS = saved
     return ok
 
@@ -138,7 +148,7 @@ def test_backfill_matches_live():
     finally:
         F.MARGIN, F.OFF_CARD_TIERS = saved, saved_off
     on = sorted((b, s) for b, s in F._shadow(d / "s.sqlite").execute("SELECT b, stat FROM flags WHERE card=1"))
-    assert on == [("Collin Gillespie", "pts"), ("Gui Santos", "pts"), ("Jamal Murray", "pts_ast")], on
+    assert on == [("Collin Gillespie", "pts"), ("Dillon Brooks", "pts"), ("Gui Santos", "pts"), ("Jamal Murray", "pts_ast")], on
 
 
 def test_backfill_wowy_v0_shares_wowy_slots():
@@ -171,9 +181,9 @@ def test_mutants():
     for tag, a, b in (
             ("no one-per-player", 'if sh.execute(f"SELECT 1 FROM flags WHERE game_date=? AND pid=? AND {CARD_ON} LIMIT 1", (gd, pid)).fetchone():\n        return 0',
              'if False:\n        return 0'),
-            ("3 slots", "    if len(mates) >= 2:\n        return 0", "    if len(mates) >= 3:\n        return 0"),
-            ("shared components allowed", "return (0, \"SHARED STAT\") if any(comp & CARD_COMPONENTS.get(s, frozenset(s)) for _, s in mates) else (1, None)",
-             "return 1, None"),
+            ("3 slots", "if len(mates) >= 2 else (1, None)", "if len(mates) >= 3 else (1, None)"),
+            ("shared stats blocked", "if len(mates) >= 2 else (1, None)",
+             "if len(mates) >= 2 else (0, \"SHARED STAT\") if any(s == stat for _, s in mates) else (1, None)"),
             ("not sticky", "    if prev:\n        return prev[0], prev[1]\n", ""),
             ("pings every flag", "        if cur.rowcount and card:\n", "        if cur.rowcount:\n"),
             ("excess order ignored", "0.0 if f[\"tier\"] == \"priced\" else -_excess(f))), is_lead", "0.0)), is_lead"),
