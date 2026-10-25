@@ -45,6 +45,9 @@ BOARD_STAT = {"pts": "points", "reb": "rebounds", "ast": "assists"}   # wowy/col
 PRIMARY_BOOKS = ("fd",)                     # AMENDMENT 4: the primary yardstick is FanDuel alone
 # AMENDMENT 8 — tracked filter cells, information only, scored on flags logged at/after the cutover
 AMEND8_CUTOVER = "2026-10-24T07:43:00"      # deployment time (NBA_SPEED_PREREG.md amendment 8)
+AMEND19_CUTOVER = "2026-10-24T23:30:00"     # STAT TYPE cell + combo decision (amendment 19)
+COMBO_N_DECIDE = 60
+COMBO_STATS = frozenset({"pra", "pts_reb", "pts_ast", "reb_ast"})
 AMEND9_CUTOVER = "2026-10-24T08:03:00"      # OPPORTUNITY cell: deployment time after the VM backfill (amendment 9)
 PRICE_EPS = 0.03                            # a "move" on an unchanged line (== amendment 5)
 WOWY_MARGIN = {"pts": 3.0, "reb": 2.0, "pra": 5.0}
@@ -151,6 +154,8 @@ def collect():
                             "MINUTES BAND": cell_band(r)}
             if r["logged_at"] >= AMEND9_CUTOVER:             # stored at flag time (amendment 9)
                 row["cells"]["OPPORTUNITY"] = r.get("opp_cell") or "n/a"
+            if r["logged_at"] >= AMEND19_CUTOVER and r["tier"] in ("wowy", "cold"):   # amendment 19
+                row["cells"]["STAT TYPE"] = "COMBO" if r["stat"] in COMBO_STATS else "SINGLE"
             if r.get("card") is not None:                    # amendment 18: on the card or logged only
                 row["cells"]["CARD"] = "ON" if r["card"] else "OFF"
         # AMENDMENT 2: a news-originated trigger counts only if an official report published
@@ -264,10 +269,33 @@ def scoreboard(rows):
         print(f"  voided flags excluded from every cell: {VOIDED} (see NBA_SPEED_PREREG.md amendments)")
 
 
+def combo_decision(rows):
+    """AMENDMENT 19's pre-registered decision: wowy/cold combo plays logged from AMEND19_CUTOVER, one per
+    (date, player, stat), graded at the flagged line and price, ON or OFF the card. At n >= 60:
+    units <= 0 -> combos never carded; units > 0 -> the card reverts to best excess."""
+    seen, units, n = set(), 0.0, 0
+    for r in sorted(rows, key=lambda r: r.get("logged_at") or ""):
+        if (r.get("tier") not in ("wowy", "cold") or r.get("stat") not in COMBO_STATS
+                or (r.get("logged_at") or "") < AMEND19_CUTOVER or r.get("actual") is None):
+            continue
+        k = (r.get("game_date"), r.get("pid"), r["stat"])
+        if k in seen:
+            continue
+        seen.add(k)
+        n += 1
+        units += (r["odds"] - 1.0) if r["actual"] > r["line"] else 0.0 if r["actual"] == r["line"] else -1.0
+    verdict = (f"accumulating ({n}/{COMBO_N_DECIDE})" if n < COMBO_N_DECIDE
+               else "EXCLUDE combos from the card" if units <= 0 else "REVERT the card to best excess")
+    return {"n": n, "units": round(units, 2), "verdict": verdict}
+
+
 def cells_report(rows):
     """AMENDMENT 8: the tracked cells on the FanDuel yardstick, pooled across tiers and for priced
     alone. Information only; never a verdict."""
     vs = [view(r, "FD") for r in rows if r.get("cells")]
+    cd = combo_decision(rows)
+    print(f"\nCOMBO DECISION (amendment 19, wowy/cold since {AMEND19_CUTOVER} UTC): {cd['n']} graded · "
+          f"{cd['units']:+.2f}u · {cd['verdict']}")
     print(f"\ntracked cells (amendments 8-9, information only; flags since {AMEND8_CUTOVER} UTC, "
           f"OPPORTUNITY since {AMEND9_CUTOVER} UTC), FD yardstick")
     if not vs:
@@ -276,7 +304,7 @@ def cells_report(rows):
     order = {"STALE LINE": ("STALE", "LATE", "POSTED-AFTER", "UNKNOWN"), "GAP": ("NORMAL", "LARGE", "n/a"),
              "MINUTES BAND": ("<0", "0-3", "3-8", ">8", "n/a"),
              "OPPORTUNITY": ("CONFIRMED", "NOT CONFIRMED", "THIN", "NO DATA", "n/a"),
-             "CARD": ("ON", "OFF")}
+             "CARD": ("ON", "OFF"), "STAT TYPE": ("COMBO", "SINGLE")}
     for cell, values in order.items():
         for scope, pick in (("all tiers", lambda v: True), ("priced", lambda v: v["tier"] == "priced")):
             for val in values:
