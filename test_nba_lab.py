@@ -126,13 +126,13 @@ if __name__ == "__main__":
 
 
 def test_mutant_unit_per_prop():
+    global LAB
     src = pathlib.Path(LAB.__file__).read_text()
     a = '            k = (x_name, u["gid"], u["pid"], u["stat"])    # one absence x one prop (earliest trigger)'
     assert src.count(a) == 1
     d = pathlib.Path(tempfile.mkdtemp())
     (d / "nba_stale_lab_mutu.py").write_text(src.replace(a, '            k = (None, u["gid"], u["pid"], u["stat"])'))
     sys.path.insert(0, str(d))
-    global LAB
     keep = LAB
     try:
         LAB = importlib.import_module("nba_stale_lab_mutu")
