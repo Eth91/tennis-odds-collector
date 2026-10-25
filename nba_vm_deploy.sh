@@ -21,8 +21,16 @@ if [ "${FORCE:-0}" != 1 ]; then
   fi
   LAST=$(ssh -i "$KEY" -o ConnectTimeout=20 "$VM" 'cat nba-engine/.deployed_commit 2>/dev/null || true')
   if [ -n "$LAST" ] && ! git -C "$SRC" merge-base --is-ancestor "$LAST" HEAD 2>/dev/null; then
-    echo "REFUSED: the VM runs ${LAST:0:10}, which this HEAD (${HEAD_C:0:10}) does not contain."
-    echo "         Merge or rebase onto it first, or FORCE=1 to roll the VM back on purpose."; exit 1
+    # A squash merge makes a new commit, so ancestry fails although the code is all there. The test
+    # that matters: do the VM's code changes since the common base already sit in this tree? (They
+    # reverse-apply cleanly onto it.) If not, deploying would roll them back.
+    CODE=('*.py' nba_cycle.sh nba_watch.sh)
+    MB=$(git -C "$SRC" merge-base "$LAST" HEAD 2>/dev/null || true)
+    PATCH=$( [ -n "$MB" ] && git -C "$SRC" diff "$MB" "$LAST" -- "${CODE[@]}" 2>/dev/null || echo MISSING)
+    if [ "$PATCH" = MISSING ] || { [ -n "$PATCH" ] && ! printf '%s\n' "$PATCH" | git -C "$SRC" apply --check -R - 2>/dev/null; }; then
+      echo "REFUSED: the VM runs ${LAST:0:10}, whose code is not in this HEAD (${HEAD_C:0:10})."
+      echo "         Merge or rebase onto it first, or FORCE=1 to roll the VM back on purpose."; exit 1
+    fi
   fi
 fi
 rsync -a --itemize-changes -e "ssh -i $KEY -o ConnectTimeout=20" \
