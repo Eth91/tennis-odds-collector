@@ -904,6 +904,6 @@ game-day reports with G = 60, it silences Jalen Green at 22:45Z and no real item
 
 **Unchanged:** tiers, thresholds, yardsticks, verdicts, the card.
 
-**Amendment 21 applied (2026-10-25T09:5xZ).** Deployed through the guarded script; `nba-x-fast` restarted.
+**Amendment 21 applied (2026-10-25T09:42Z).** Deployed through the guarded script; `nba-x-fast` restarted.
 Dry run first, on a staged copy against the live stores: no 2026-10-25/26 news absence is silenced (Embiid
 inferred: exempt; Duren DET and Edey MEM: kept), and the board is unchanged.
