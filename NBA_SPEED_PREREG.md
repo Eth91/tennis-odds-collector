@@ -1021,3 +1021,15 @@ number; the hold half judged once).**
   the candidate gate keeps using the uncalibrated projection. Back on the card iff hold-half ROI of base-rung
   overs ≥ 0 with ≥ 150 hold-half bets.
 - A tier that passes returns to the card by a later note in this file; one that fails stays logged only.
+
+**Amendment 24 results (run 2026-10-25T10:2xZ, exactly as registered; split 2024-10-28; hold judged once).**
+- **cold.** Fit-half minutes (1,897 player-games): actual change = +3.271 − 0.212 × projected change (the
+  proportional split has no signal even in-sample: rotation players gain ~+3 min regardless). Fit-half
+  margins: pts 2.0, reb 1.0, pra 3.0. Hold: current n 78, −19.09%; recalibrated n 161, −11.11%.
+  **Fails (< 0). cold stays logged only.**
+- **priced.** Fit-half minutes (3,036 candidates): actual − with = −0.272 + 0.880 × (proj − with). Relative to
+  the with-X baseline the minutes are nearly honest, so priced's loss is not mainly minutes (its registered
+  verdict: overconfident by 10-17 points of probability). Hold: current n 1,073, −4.66%; recalibrated n
+  1,033, −3.78%. **Fails (< 0). priced stays logged only.**
+Neither constant set is adopted. The card is wowy only (recalibrated, 3-8 gated, stale-line), plus inferred
+plays already carded. Off-card rule deployed 10:17Z.
