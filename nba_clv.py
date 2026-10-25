@@ -50,6 +50,8 @@ COMBO_N_DECIDE = 60
 TIP_N_DECIDE = 60                           # AMENDMENT 27: the tip card's forward decision
 AMEND28_CUTOVER = "2026-10-25T23:30:00"     # AMENDMENT 28: the four card filters (deployed before this)
 FILTER_N_DECIDE = 60
+AMEND29_CUTOVER = "2026-10-26T00:30:00"     # AMENDMENT 29: 2+ STARS OUT (deployed before this)
+STARS_N_DECIDE = 40
 FILTER_CELL = ("PASS", "EDGE TOO BIG", "REBOUNDS OFF CARD", "STAR 32+ MIN", "PRICE -125 OR SHORTER")
 COMBO_STATS = frozenset({"pra", "pts_reb", "pts_ast", "reb_ast"})
 AMEND9_CUTOVER = "2026-10-24T08:03:00"      # OPPORTUNITY cell: deployment time after the VM backfill (amendment 9)
@@ -170,6 +172,8 @@ def collect():
                 row["cells"]["CARD STAT"] = BOARD_STAT.get(r["stat"], r["stat"])
             if r["logged_at"] >= AMEND28_CUTOVER and r["tier"] == "wowy":   # amendment 28, stored at flag time
                 row["cells"]["FILTER (28)"] = r.get("filt") or "PASS"
+            if r["logged_at"] >= AMEND29_CUTOVER and r["tier"] == "wowy":   # amendment 29, stored at flag time
+                row["cells"]["STARS OUT (29)"] = "2+" if (r.get("stars_out") or 0) >= 2 else "1"
         # AMENDMENT 2: a news-originated trigger counts only if an official report published
         # before tip lists the absent player Out (or Doubtful, amendment 15) for that game;
         # otherwise it is an audit row.
@@ -356,6 +360,56 @@ def filter_decision(sh):
     return {"n": n, "units": round(units, 2), "verdict": verdict}
 
 
+def stars_decision(sh):
+    """AMENDMENT 29's forward check: wowy flags from AMEND29_CUTOVER with STARS OUT >= 2, in the 3-8 band, passing
+    amendment 28's filters (filt NULL), one per (date, player, stat), earliest, graded flat at the flagged line and
+    price. At >= STARS_N_DECIDE graded: units > 0 -> OFF (the rule comes off); else ON."""
+    try:
+        rs = sh.execute("SELECT game_date, pid, stat, line, odds, actual FROM flags WHERE tier = 'wowy' AND stars_out >= 2 "
+                        "AND d_min BETWEEN 3 AND 8 AND filt IS NULL AND void_reason IS NULL AND actual IS NOT NULL "
+                        "AND logged_at >= ? ORDER BY logged_at", (AMEND29_CUTOVER,)).fetchall()
+    except sqlite3.OperationalError:
+        rs = []
+    seen, units = set(), 0.0
+    for gd, pid, stat, line, odds, a in rs:
+        if (gd, pid, stat) in seen:
+            continue
+        seen.add((gd, pid, stat))
+        units += (odds - 1.0) if a > line else 0.0 if a == line else -1.0
+    n = len(seen)
+    verdict = (f"accumulating ({n}/{STARS_N_DECIDE})" if n < STARS_N_DECIDE
+               else "OFF: the rule comes off" if units > 0 else "ON: the rule stays")
+    return {"n": n, "units": round(units, 2), "verdict": verdict}
+
+
+def tip_clv(sh, q, now=None):
+    """AMENDMENT 29 (information only): carded tip-card plays whose game has tipped. FanDuel's main rung at the
+    decision vs at tip (amendment 4's yardstick), and the decided line/price vs FanDuel's close."""
+    now = now or dt.datetime.now(dt.timezone.utc).replace(tzinfo=None).isoformat()
+    out = {"n": 0, "fd_n": 0, "fd_beat": 0, "moved": 0.0, "dec_n": 0, "dec_beat": 0}
+    try:
+        rs = sh.execute("SELECT t.gid, t.pid, t.stat, t.line, t.odds, t.decided_at, f.gtime FROM tipcard t "
+                        "JOIN flags f ON f.flag_id = t.flag_id WHERE t.card = 1 AND f.void_reason IS NULL").fetchall()
+    except sqlite3.OperationalError:
+        return out
+    for gid, pid, stat, line, odds, at, gtime in rs:
+        tip = _utc_naive(gtime) if gtime else None
+        if not tip or tip > now:
+            continue
+        out["n"] += 1
+        st_ = BOARD_STAT.get(stat, stat)
+        f0 = close_of(q, gid, pid, st_, at, books=PRIMARY_BOOKS)
+        f1 = close_of(q, gid, pid, st_, tip, books=PRIMARY_BOOKS)
+        if f1:
+            out["dec_n"] += 1
+            out["dec_beat"] += f1[0] > line or (f1[0] == line and f1[1] < odds)
+        if f0 and f1:
+            out["fd_n"] += 1
+            out["fd_beat"] += f1[0] > f0[0] or (f1[0] == f0[0] and f1[1] < f0[1])
+            out["moved"] += f1[0] - f0[0]
+    return out
+
+
 def cells_report(rows):
     """AMENDMENT 8: the tracked cells on the FanDuel yardstick, pooled across tiers and for priced
     alone. Information only; never a verdict."""
@@ -374,6 +428,19 @@ def cells_report(rows):
         sh.close()
         print(f"FILTER DECISION (amendment 28, since {AMEND28_CUTOVER} UTC): {fd_['n']} graded · {fd_['units']:+.2f}u · "
               f"{fd_['verdict']}")
+        sh = sqlite3.connect(f"file:{SHADOW}?mode=ro", uri=True)
+        sd = stars_decision(sh)
+        q = sqlite3.connect(f"file:{LINES}?mode=ro", uri=True) if LINES.exists() else None
+        tc = tip_clv(sh, q) if q is not None else None
+        sh.close()
+        if q is not None:
+            q.close()
+        print(f"2+ STARS OUT CHECK (amendment 29, since {AMEND29_CUTOVER} UTC): {sd['n']} graded · {sd['units']:+.2f}u · "
+              f"{sd['verdict']}")
+        if tc:
+            print(f"TIP CARD CLV (amendment 29, information only): {tc['n']} tipped · FD at decision -> FD at tip: beat "
+                  f"{tc['fd_beat']}/{tc['fd_n']} (mean line move {tc['moved'] / max(1, tc['fd_n']):+.2f}) · decided price "
+                  f"vs FD close: beat {tc['dec_beat']}/{tc['dec_n']}")
     print(f"\ntracked cells (amendments 8-9, information only; flags since {AMEND8_CUTOVER} UTC, "
           f"OPPORTUNITY since {AMEND9_CUTOVER} UTC), FD yardstick")
     if not vs:
@@ -384,7 +451,7 @@ def cells_report(rows):
              "OPPORTUNITY": ("CONFIRMED", "NOT CONFIRMED", "THIN", "NO DATA", "n/a"),
              "CARD": ("ON", "OFF"), "STAT TYPE": ("COMBO", "SINGLE"),
              "CARD STAT": ("points", "rebounds", "assists", "threes", "pra", "pts_reb", "pts_ast", "reb_ast"),
-             "FILTER (28)": FILTER_CELL}
+             "FILTER (28)": FILTER_CELL, "STARS OUT (29)": ("1", "2+")}
     for cell, values in order.items():
         for scope, pick in (("all tiers", lambda v: True), ("priced", lambda v: v["tier"] == "priced")):
             for val in values:

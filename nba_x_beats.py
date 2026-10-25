@@ -64,6 +64,16 @@ HANDLES = [
     ("CHold", "POR"), ("jwquick", "POR"), ("James_HamNBA", "SAC"),
     ("JMcDonald_SAEN", "SAS"), ("tom_orsborn", "SAS"), ("JLew1050", "TOR"),
     ("MichaelGrange", "TOR"), ("tribjazz", "UTA"), ("andyblarsen", "UTA"), ("JoshuaBRobbins", "WAS"),
+    # AMENDMENT 29 (2026-10-25): a second writer for thin teams, each resolved first (display name = the reporter).
+    # Not added: unresolved (gwashNBA, ScottFowlerObs, MarkGiannotto, ChrisHineStrib, JasonBeedeOS, chase_hughes,
+    # QuinnOnDC, SBondyNYPost, SamAmicoNBA, JamesHamNBA, Brian_Windhorst, IanLevyNBA); a wrong name (SeanHighkin ->
+    # "1.0"); not an injury source or not a current beat (wojespn, ZachLowe_NBA, ChrisMannixYS, BobbyMarks42,
+    # ChrisKirschner, ANTHONYPUCCIO, Ky_Carlin, JoshRobbins); UnderdogNBA has its own watcher.
+    ("williamslaurenl", "ATL"), ("Jared_Weiss", "BOS"), ("byjuliapoe", "CHI"), ("DarnellMayberry", "CHI"),
+    ("joevardon", "CLE"), ("AmNotEvan", "CLE"), ("DwainPrice", "DAL"), ("keithlanglois", "DET"),
+    ("HunterPatterson", "DET"), ("kendra__andrews", "GSW"), ("NickFriedell", "GSW"), ("ThompsonScribe", "GSW"),
+    ("TomerAzarly", "LAC"), ("DrewHill_DM", "MEM"), ("Rod_Walker", "NOP"), ("SeanCunningham", "SAC"),
+    ("WolstatSun", "TOR"), ("Tjonesonthenba", "UTA"),
 ]
 VALIDATED = HERE / "x_beats_handles.json"      # written by --validate: the handles that resolved
 

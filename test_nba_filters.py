@@ -144,9 +144,9 @@ def test_mutants():
             ("rebounds carded", "    if f[\"stat\"] in (\"reb\", \"rebounds\"):\n        return \"REBOUNDS OFF CARD\"\n", ""),
             ("stars carded", "f[\"x_min\"] >= FILTER_STAR_MAX:", "f[\"x_min\"] > FILTER_STAR_MAX + 9:"),
             ("short prices carded", "f[\"odds\"] < FILTER_PRICE_MIN:", "f[\"odds\"] < 1.0:"),
-            ("lead among all plays", "        if f[\"tier\"] == \"priced\" or _filtered(f):", "        if f[\"tier\"] == \"priced\":"),
-            ("speed card unfiltered", "    filt = _filtered(f)                                 # amendment 28\n    if filt:\n        return 0, filt\n", ""),
-            ("tip card unfiltered", "            if _filtered(f):                                # amendment 28\n                v, w = 0, _filtered(f)\n            elif",
+            ("lead among all plays", "        if f[\"tier\"] == \"priced\" or _off_card(f):", "        if f[\"tier\"] == \"priced\":"),
+            ("speed card unfiltered", "    off = _off_card(f)                                  # amendments 28-29\n    if off:\n        return 0, off\n", ""),
+            ("tip card unfiltered", "            if _off_card(f):                                # amendments 28-29\n                v, w = 0, _off_card(f)\n            elif",
              "            if False:\n                pass\n            elif"),
             ("switch ignored", "def _filtered(f):\n    return _filter_reason(f) if FILTERS_ON else None",
              "def _filtered(f):\n    return _filter_reason(f)")):

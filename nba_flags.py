@@ -108,6 +108,9 @@ TIP_WINDOW_MIN, TIP_FRESH_MIN, TIP_SLOTS = (5.0, 30.0), 10.0, 2
 # off automatically if the forward reading says so (nba_clv.filter_decision, read at the start of each pass).
 FILTER_EXCESS_MAX, FILTER_STAR_MAX, FILTER_PRICE_MIN = 2.0, 32.0, 1.80
 FILTERS_ON = True
+# AMENDMENT 29: a wowy play is off the card when its team has 2+ star absences tonight (the projection splits
+# by ONE absent player). Off automatically if its forward check says so (nba_clv.stars_decision).
+STARS_RULE_ON = True
 TIPCARD_DDL = """CREATE TABLE IF NOT EXISTS tipcard (game_date TEXT, gid TEXT, flag_id TEXT, pid INTEGER, b TEXT,
     team TEXT, tier TEXT, stat TEXT, line REAL, odds REAL, excess REAL, d_min REAL, decided_at TEXT, card INTEGER,
     why TEXT, PRIMARY KEY (gid, pid, stat))"""
@@ -140,7 +143,7 @@ SHADOW_DDL = """CREATE TABLE IF NOT EXISTS flags (
     gid TEXT, gtime TEXT, matchup TEXT, actual REAL, result TEXT, graded_at TEXT,
     ev REAL, pid INTEGER, news_at TEXT, stale INTEGER, horizon INTEGER, x_pid INTEGER,
     trigger_src TEXT, void_reason TEXT, d_min REAL, opp_cell TEXT, opp_ratio REAL, x_status TEXT,
-    x_min REAL, card INTEGER, card_why TEXT, aidx INTEGER, filt TEXT)"""
+    x_min REAL, card INTEGER, card_why TEXT, aidx INTEGER, filt TEXT, stars_out INTEGER)"""
 COMBO = {"pts_reb": ("points", "rebounds"), "pts_ast": ("points", "assists"),
          "reb_ast": ("rebounds", "assists")}
 
@@ -163,7 +166,7 @@ def _shadow(path):
                      ("trigger_src", "TEXT"), ("void_reason", "TEXT"), ("d_min", "REAL"),
                      ("opp_cell", "TEXT"), ("opp_ratio", "REAL"), ("x_status", "TEXT"),
                      ("x_min", "REAL"), ("card", "INTEGER"), ("card_why", "TEXT"), ("aidx", "INTEGER"),
-                     ("filt", "TEXT")):
+                     ("filt", "TEXT"), ("stars_out", "INTEGER")):
         if col not in have:
             sh.execute(f"ALTER TABLE flags ADD COLUMN {col} {typ}")
     return sh
@@ -266,6 +269,18 @@ def absence_index(last_app, team_game_dates, season, out_in_tonights_game=False)
     prev = sum(1 for d in team_game_dates if d > last_app and C.season_of(d) < season)
     carried = prev if prev > MAX_ABSENCE_GAME else 0
     return 1 + carried + this + (1 if out_in_tonights_game else 0)
+
+
+def stars_out_by_team(absent_team, apps, gdate):
+    """AMENDMENT 29: {team: STARS OUT} — players absent tonight ({pid: team}) with >= 10 franchise appearances,
+    last-10 minutes >= WOWY_STAR_MIN, and a last appearance <= ACTIVE_DAYS before the game. The trigger counts."""
+    gday, out = dt.date.fromisoformat(gdate), Counter()
+    for pid, tri in absent_team.items():
+        xa = _team_apps(apps, pid, tri)
+        if (len(xa) >= 10 and _mean_last10(xa) >= WOWY_STAR_MIN
+                and (gday - dt.date.fromisoformat(xa[-1][0])).days <= ACTIVE_DAYS):
+            out[tri] += 1
+    return out
 
 
 def _team_apps(apps, pid, tri):
@@ -415,8 +430,9 @@ def flags(dry=False, game_date=None):
     gdate = game_date or today_et
     horizon = (dt.date.fromisoformat(gdate) - dt.date.fromisoformat(today_et)).days
     blind, why = [], Counter()
-    global FILTERS_ON
+    global FILTERS_ON, STARS_RULE_ON
     FILTERS_ON = _filters_on(SHADOW)              # AMENDMENT 28's forward decision, read every pass
+    STARS_RULE_ON = _stars_rule_on(SHADOW)        # AMENDMENT 29's forward check, read every pass
 
     try:
         sched = R.schedule()
@@ -459,6 +475,7 @@ def flags(dry=False, game_date=None):
             team_dates[_a[3]].add(_a[0])
     # AMENDMENT 15: "Out" here means ABSENT (Out or Doubtful); x_status keeps which, for its own cell.
     out_all = {pid for pid, v in rep.items() if v[2] in I.ABSENT}
+    absent_team = {pid: v[1] for pid, v in rep.items() if v[2] in I.ABSENT}   # amendment 29's STARS OUT
     out_pid, news_at, x_status, aidx = {}, {}, {}, {}
     # ⚠️ THE STREAK RESETS AT THE SEASON BOUNDARY. Counted across the summer, a star who rested
     # the last games of April reads as "absence game 3" in October's opener (Mitchell 2026-10-22:
@@ -504,6 +521,7 @@ def flags(dry=False, game_date=None):
                 x_status[pid] = "Out"                  # the strongest word at flag time
             continue
         out_all.add(pid)
+        absent_team[pid] = tri
         xa = _team_apps(apps, pid, tri)
         ai = absence_index(xa[-1][0], team_dates[tri], season, pid in tonight_out and tri in tonight_teams) if xa else None
         if ai is not None and ai > TRIGGER_MAX_ABSENCE:
@@ -518,6 +536,7 @@ def flags(dry=False, game_date=None):
     for _x, (_n, _t) in out_pid.items():
         _xa = _team_apps(apps, _x, _t)
         x_min[_x] = _mean_last10(_xa) if _xa else None
+    stars_out = stars_out_by_team(absent_team, apps, gdate)          # AMENDMENT 29
     # wowy: computed live (amendment 7). nba_wowy.sqlite is no longer read by the flag pass.
     cands = wowy_live(apps, out_pid, cur_team, games, out_all, why)
 
@@ -607,7 +626,7 @@ def flags(dry=False, game_date=None):
                           "game_date": gdate, "horizon": horizon, "x_pid": r["_x_id"],
                           "trigger_src": trig_src.get(r["_x_id"]), "d_min": r.get("d_min"),
                           "x_status": x_status.get(r["_x_id"]), "x_min": x_min.get(r["_x_id"]),
-                          "aidx": aidx.get(r["_x_id"])})
+                          "aidx": aidx.get(r["_x_id"]), "stars_out": stars_out.get(r["team"], 0)})
     if not dry and cands:                     # AMENDMENT 25: the lab sees the model's whole view
         try:
             csh = _shadow(SHADOW)
@@ -636,7 +655,8 @@ def flags(dry=False, game_date=None):
                           "matchup": mu, "pid": b_id, "news_at": news_at.get(x_id),
                           "game_date": gdate, "horizon": horizon, "x_pid": x_id,
                           "trigger_src": trig_src.get(x_id), "d_min": d_min,
-                          "x_status": x_status.get(x_id), "x_min": x_min.get(x_id), "aidx": aidx.get(x_id)})
+                          "x_status": x_status.get(x_id), "x_min": x_min.get(x_id), "aidx": aidx.get(x_id),
+                          "stars_out": stars_out.get(tri, 0)})
 
     # AMENDMENT 9: OPPORTUNITY-CONFIRMED, at flag time, from the same prior split wowy uses
     trk = load_tracking({f["pid"] for f in out_flags if f.get("pid")})
@@ -743,6 +763,29 @@ def _filtered(f):
     return _filter_reason(f) if FILTERS_ON else None
 
 
+def _stars_rule_on(path):
+    """AMENDMENT 29: False once its forward check reads OFF; True before that (or with no shadow store)."""
+    import nba_clv as V
+    try:
+        sh = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+    except sqlite3.Error:
+        return True
+    try:
+        return not V.stars_decision(sh)["verdict"].startswith("OFF")
+    finally:
+        sh.close()
+
+
+def _off_card(f):
+    """Why a wowy play is off both cards before any slot rule: amendment 28's filters, then amendment 29's
+    2+ STARS OUT (each while its switch is on); None when it passes."""
+    if _filtered(f):
+        return _filtered(f)
+    if STARS_RULE_ON and f["tier"] == "wowy" and (f.get("stars_out") or 0) >= 2:
+        return "2+ STARS OUT"
+    return None
+
+
 CARD_ON = "COALESCE(card, 1) = 1 AND void_reason IS NULL"   # NULL = before amendment 18 = shown
 # wowy_v0 (amendment 7's relabel of the frozen-prior wowy flags) shares wowy's card slots
 CARD_FAMILY = {"wowy": ("wowy", "wowy_v0"), "wowy_v0": ("wowy", "wowy_v0"), "cold": ("cold", "cold")}
@@ -764,7 +807,7 @@ def _leads(flags):
     SINGLE stat by excess, or the best combo if the player has no single."""
     best = {}
     for f in flags:
-        if f["tier"] == "priced" or _filtered(f):       # amendment 28: the lead is chosen among plays that pass
+        if f["tier"] == "priced" or _off_card(f):       # amendments 28-29: the lead is chosen among plays that pass
             continue
         k = (f["game_date"], f.get("pid"))
         key = (f["stat"] in COMBO_STATS, -_excess(f))
@@ -799,9 +842,9 @@ def _card(sh, f, lead=True, stale="STALE"):
         return prev[0], prev[1]
     if f["tier"] in OFF_CARD_TIERS:
         return 0, f"{f['tier'].upper()} OFF CARD"
-    filt = _filtered(f)                                 # amendment 28
-    if filt:
-        return 0, filt
+    off = _off_card(f)                                  # amendments 28-29
+    if off:
+        return 0, off
     if stale != "STALE":
         return 0, STALE_WHY.get(stale, "LINE NOT STALE")
     if f["tier"] == "priced":
@@ -837,14 +880,14 @@ def _log_flags(sh, out_flags, stamp, why):
         cur = sh.execute("INSERT OR IGNORE INTO flags (flag_id, logged_at, game_date, tier, "
                          "team, x, b, stat, line, odds, proj, margin, gid, gtime, matchup, ev, "
                          "pid, news_at, stale, horizon, x_pid, trigger_src, d_min, opp_cell, opp_ratio, x_status, x_min, "
-                         "card, card_why, aidx, filt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                         "card, card_why, aidx, filt, stars_out) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                          (fid, stamp, f["game_date"], f["tier"], f["team"], f["x"], f["b"],
                           f["stat"], f["line"], f["odds"], f["proj"], f["margin"],
                           f["gid"], f["gtime"], f["matchup"], f.get("ev"), f.get("pid"),
                           f.get("news_at"), f.get("stale"), f["horizon"], f.get("x_pid"),
                           f.get("trigger_src"), f.get("d_min"), f.get("opp_cell"),
                           f.get("opp_ratio"), f.get("x_status"), f.get("x_min"), card, card_why, f.get("aidx"),
-                          _filter_reason(f)))
+                          _filter_reason(f), f.get("stars_out")))
         new_shadow += cur.rowcount
         if cur.rowcount and not card:
             why["card_off_logged_only"] += 1
@@ -898,8 +941,8 @@ def _tip_card(sh, out_flags, games, lines, now, stamp, why, gdate):
         slots, n_card = Counter(), 0
         for f in sorted(fs, key=lambda f: (not is_lead(f), -_excess(f))):
             fid = _fid(f)
-            if _filtered(f):                                # amendment 28
-                v, w = 0, _filtered(f)
+            if _off_card(f):                                # amendments 28-29
+                v, w = 0, _off_card(f)
             elif not is_lead(f):
                 v, w = 0, "1 PER PLAYER"
             elif not (f.get("d_min") is not None and DMIN_BAND[0] <= f["d_min"] <= DMIN_BAND[1]):

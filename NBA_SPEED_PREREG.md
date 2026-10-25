@@ -1231,3 +1231,40 @@ under whatever rules carded them).
 flags logged in between are not counted in the forward decision (no flag before the deployment can be).
 Each flag stores the rule's verdict in `flags.filt` (NULL = passes). The lead rule is applied as registered:
 filtered plays are skipped when choosing a player's lead, on both cards.
+
+---
+
+# AMENDMENT 29 — 2+ stars out off the card; tip-card CLV from the decision; more beat writers (2026-10-25)
+
+**Why.** Audit 2026-10-25 (tip-line backtest, the current card: amendment 28 filters, FD+DK prices, every
+absent star as its own trigger). With two or more 24+ min players out for the team the card lost in both
+seasons (2023-24: 19 bets −10.6%; 2024-25: 20 bets −4.8%), against one star out +20.7% (35) and +40.4% (38).
+The projection splits B's games by ONE absent player, so a second absence is not in it. This dimension had not
+been looked at before this audit, but it was looked at on both seasons at once: small n, judged forward.
+User: "yes do 1 2 and 3, make 1 a rule".
+
+**1. 2+ STARS OUT (rule, both cards, wowy only).** For each team tonight, STARS OUT = the number of its
+players absent tonight (Out or Doubtful, by the report or trusted news: the flag pass's absent set) with ≥ 10
+appearances for the franchise, last-10 minutes ≥ 24.0, and a last appearance ≤ 12 days (ACTIVE_DAYS) before the
+game. It counts the trigger player himself. A wowy play with STARS OUT ≥ 2 is off the card ("2+ STARS OUT"),
+after amendment 28's filters; the player's lead is chosen among plays that pass. Stored per flag (`stars_out`).
+**Forward check, fixed now:** wowy flags with STARS OUT ≥ 2 that are in the 3-8 band and pass amendment 28's
+filters, one per (date, player, stat), earliest, graded flat at the flagged line and price: at ≥ 40 graded,
+units > 0 → the rule comes off automatically.
+
+**2. Tip-card CLV from the decision (information only).** For each carded tip-card play: FanDuel's main rung at
+the decision time vs FanDuel's main rung at tip (amendment 4's yardstick), and the decided line and price vs
+FanDuel's close. Reported beside the tip-card decision. The scoreboard is unchanged.
+
+**3. More beat writers (no rule change).** About one more account per team for nba_x_beats. Each candidate is
+resolved with the validation call first (display name and bio must match the reporter and outlet); only those
+are added, then the live list is re-validated. The news journal measures every source's lead over the report.
+
+**Amendment 29 — applied (2026-10-25).** AMEND29_CUTOVER = 2026-10-26 00:30 UTC (deployed before it).
+- *Beat writers:* 40 candidates resolved on the VM; the validation call returned display names but no bios (X's
+  response no longer carries `legacy.description`), so acceptance was on the display name matching a current team
+  beat reporter. 18 added (ATL, BOS, CHI ×2, CLE ×2, DAL, DET ×2, GSW ×3, LAC, MEM, NOP, SAC, TOR, UTA): 80
+  accounts, 4 search chunks, each refreshed about every 40 s (90 searches / 15 min of the 187 budget). CHA, ORL and
+  WAS still have one writer each. The rejected handles and why are listed beside HANDLES in nba_x_beats.py.
+- *STARS OUT* is computed by `stars_out_by_team` from the flag pass's absent set (report Out/Doubtful plus trusted
+  news), stored per flag; NULL (unknown) is not filtered.
