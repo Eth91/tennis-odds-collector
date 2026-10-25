@@ -809,3 +809,66 @@ new flagged plays." Tonight's wowy-family card values are recomputed under amend
 (feedback_ping_board_coherence): a play that was pinged but is off the card is listed in a PINGED · OFF
 CARD strip with its reason (1 PER PLAYER or TEAM SLOT) until its game starts. It is never a retraction,
 so it never sends a VOID. The record is untouched.
+
+---
+
+# AMENDMENT 20 — prediction markets (Kalshi): a shadow collector and three registered tests (2026-10-24)
+
+**Why.** User, 2026-10-24: "Can we incorporate prediction markets into this model as well like looking for
+big money being put on the markets on certain props or big discrepancies between the prediction markets
+and FanDuel."
+
+**What exists (checked live, 2026-10-25 00:10Z).** Kalshi lists NBA player props as threshold contracts
+("Jarrett Allen: 25+ points", floor_strike 24.5), which map one-to-one onto a FanDuel over at the same
+line. Series: KXNBAPTS, KXNBAREB, KXNBAAST, KXNBA3PT, KXNBAPRA. Tonight, 8 games: points 339 markets,
+880k contracts, median spread 4¢; rebounds 356, 284k, 5¢; assists 295, 459k, 5¢; threes 394, 229k, 5¢;
+PRA 135, 25k, 24¢ (thin). Much of that volume is in-game. The public REST API needs no key. Polymarket's
+NBA game events carry ~$1k-14k each in total volume, so it is not collected (revisit if that grows).
+
+**Collector (apparatus, information only).** `nba_pm.py --loop 60` (service `nba-pm`): every minute, every
+open Kalshi NBA prop market whose game has not tipped and tips within 36 h. A row is stored in
+nba_pm.sqlite `pm_quotes` only when bid, ask or volume changed. Fields: ticker, game date, player
+(resolved to the NBA person id within the two teams, never a surname guess), stat, line = floor_strike,
+bid, ask, last, cumulative volume, OI, tip. Kalshi is not a book anyone bets here: nothing is flagged,
+pinged or carded from it until a later amendment wires a test that passed.
+
+**Definitions.** Kalshi fair k = (bid + ask) / 2, used only when ask − bid ≤ 0.10. FanDuel fair at the
+same line: the over's implied probability de-vigged against the under when FD posts both sides,
+otherwise raw 1/odds (marked RAW). Gap = k − FD fair. Pre-game only: quotes at or after tip are ignored.
+
+**T1 — agreement as a filter (tracked cell).** For each closed flag logged from this cutover, Kalshi at
+the flag's player, stat and line: the latest quote at or before logged_at, no older than 15 min. Cell
+KALSHI · AGREES (gap ≥ +0.03), DISAGREES (≤ −0.03), NEUTRAL, NO MARKET; FD yardstick. Decision at
+≥ 60 closed flags in each of AGREES and DISAGREES: if AGREES beats the FD close at least 10 points more
+often than DISAGREES, with a game-clustered 95% CI of the difference excluding 0, a later amendment may
+make it a card filter. Otherwise it stays information.
+
+**T2 — Kalshi leads FanDuel (the speed thesis, applied to markets).** Event: a Kalshi market's fair
+moves ≥ 0.08 within ≤ 10 min (spread ≤ 0.06 at both ends) while FD's quote for the same player, stat and
+line is unchanged over that window. Outcome: FD moves the same way within 30 min (line ≥ 0.5, or the
+over's implied probability ≥ 2 points). Control: windows on the same markets with |Δk| < 0.02. Decision
+at ≥ 50 events: follow rate − control rate ≥ 15 points with a game-clustered CI excluding 0 → a later
+amendment may make it a trigger. Otherwise information.
+
+**T3 — big money.** Event: a pre-game minute with Δvolume ≥ 2,000 contracts on one market, or ≥ 500 and
+≥ 10× its trailing 30-min average per minute; direction = sign of Δk over that minute (0 → not an event).
+Outcomes: FD follows within 30 min (as T2), and the prop's result at the FD line and price at that minute
+(flat units). Decision as T2 at ≥ 50 events.
+
+**Unchanged:** every tier, flag, card, ping, verdict.
+
+**Amendment 20 applied (2026-10-25T00:19Z).** `nba-pm` service installed and enabled on the VM (poll every
+60 s, ~1,460 markets, ~115 change per minute; 100% of stored markets resolved to an NBA person id).
+Two bugs found on the first live poll and fixed before the service started: (1) Kalshi's
+occurrence_datetime is ~tip + 3 h, so markets for games in progress were stored. Tip times now come from
+the NBA schedule, which also supplies the game id. (2) The FanDuel lookup did not pass gid, so it scanned
+the whole quotes table; it now uses the index. First look at 00:25Z, before any test counts: on
+two-sided (de-vigged) lines, Kalshi vs FanDuel median |gap| 0.014, none ≥ 0.05, mean −0.013. On over-only
+ladder rungs (RAW) the mean gap is −0.057: FanDuel's margin, not disagreement. `--gaps` therefore shows
+de-vigged lines by default. The definitions above are unchanged.
+**Deploy regression, 2026-10-25 00:16Z–01:23Z (apparatus).** Deploying amendment 20 from a branch cut before
+amendment 19 merged reverted 19 on the VM: no singles-first card, no STAT TYPE cell, no PINGED · OFF CARD
+strip. No flag and no ping was logged in that window (checked), so no card value was set under the old
+rule. Only the off-card strip was missing from the board. Fixed by merging 19 into the branch and
+redeploying at 01:23Z. `nba_vm_deploy.sh` now refuses a deploy whose HEAD does not contain the commit the
+VM runs (tested by recording a commit HEAD lacks: REFUSED).
