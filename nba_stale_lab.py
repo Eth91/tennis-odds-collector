@@ -130,6 +130,59 @@ def rows(now=None, box_get=None, results=None, lines=None, shadow=None, cache=No
     return list(out.values())
 
 
+def source_class(provenances):
+    """The strongest source that reported the absence (amendment 26)."""
+    from nba_news_watch import aggregator
+    ps = [(p or "").lower() for p in provenances]
+    if any(p.startswith("inferred") for p in ps):
+        return "inferred"
+    if any("underdog" in p for p in ps):
+        return "underdog"
+    if any(not aggregator(p) for p in ps):
+        return "beat writer"
+    return "aggregator only"
+
+
+def premise_events(game_date, sched, news=None, box_get=None, cache=None):
+    """AMENDMENT 26: every news-originated absence (out/doubtful item) for game_date, once his game is
+    final: [{player, team, source, held, on_report}]. HELD = he did not play."""
+    con = sqlite3.connect(f"file:{news or (HERE / 'nba_news.sqlite')}?mode=ro", uri=True)
+    gid_of = {t: g["gid"] for g in sched if g["date_et"] == game_date for t in (g["home"], g["away"])}
+    by = defaultdict(lambda: {"provs": set()})
+    for pid, player, team, prov in con.execute(
+            "SELECT pid, player, team, provenance FROM news_items WHERE game_date=? AND status IN ('out', "
+            "'doubtful') AND pid IS NOT NULL AND COALESCE(seeded,0)=0", (game_date,)):
+        e = by[pid]
+        e.update(player=player, team=team)
+        e["provs"].add(prov)
+    out = []
+    for pid, e in by.items():
+        gid = gid_of.get(e["team"])
+        bx = final_box(gid, box_get, cache=cache) if gid else None
+        if bx is None:
+            continue                                   # not final yet (or no game); {} is a final box
+        p = bx.get(pid)
+        on_rep = con.execute("SELECT 1 FROM snapshots WHERE game_date=? AND pid=? AND status IN ('Out', 'Doubtful') "
+                             "LIMIT 1", (game_date, pid)).fetchone() is not None
+        out.append({"player": e["player"], "team": e["team"], "source": source_class(e["provs"]),
+                    "held": not (p and p.get("played") == "1"), "on_report": on_rep})
+    con.close()
+    return out
+
+
+def premise_line(events):
+    """One morning-check line: held / total by source, and the misses."""
+    if not events:
+        return "no final news-originated absences"
+    by = defaultdict(list)
+    for e in events:
+        by[e["source"]].append(e)
+    parts = [f"{k} {sum(x['held'] for x in v)}/{len(v)}" for k, v in sorted(by.items())]
+    miss = [f"{e['player']} ({e['source']})" for e in events if not e["held"]]
+    return f"{sum(e['held'] for e in events)}/{len(events)} held · " + " · ".join(parts) + (
+        f" · FALSE: {', '.join(miss)}" if miss else "")
+
+
 def slice_line(label, v, reps=2000):
     if not v:
         return f"  {label:<36} none"

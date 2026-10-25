@@ -85,6 +85,39 @@ def test_unit_is_absence_x_prop():
     assert got == [("news", "played"), ("report", "sat")], got
 
 
+def test_premise_events():
+    """AMENDMENT 26: per news absence, did the player really sit, classed by the strongest source."""
+    import nba_injury_report as I
+    import nba_news_watch as NW
+    d = pathlib.Path(tempfile.mkdtemp())
+    n = sqlite3.connect(d / "n.sqlite")
+    n.executescript(I.DDL)
+    NW._migrate(n)
+    for iid, pid, pl, team, prov in (("a", 6, "Jalen Green", "PHX", "x:RotoBallerNBA"),
+                                     ("b", 7, "Cooper Flagg", "DAL", "x:underdog"),
+                                     ("c", 8, "Joel Embiid", "PHI", "inferred:x:underdog"),
+                                     ("d", 9, "Not Final", "NYK", "x:anthonyVslater")):
+        n.execute("INSERT INTO news_items (source, item_id, detected_at, player, pid, team, game_date, status, headline, "
+                  "body, provenance) VALUES ('x',?,'2026-10-24T20:00:00+00:00',?,?,?,'2026-10-24','out','','',?)",
+                  (iid, pl, pid, team, prov))
+    n.execute("INSERT INTO snapshots VALUES ('m','2026-10-24T17:00:00+00:00','2026-10-24','','DAL',7,'','Out','')")
+    n.commit()
+    sched = [{"date_et": "2026-10-24", "gid": g, "home": h, "away": a}
+             for g, h, a in (("G1", "PHX", "GSW"), ("G2", "DAL", "SAS"), ("G3", "PHI", "MIL"), ("G4", "NYK", "ORL"))]
+    boxes = {"G1": {"gameStatus": 3, "homeTeam": {"teamTricode": "PHX", "players": [{"personId": 6, "played": "1"}]},
+                    "awayTeam": {"teamTricode": "GSW", "players": []}},
+             "G2": {"gameStatus": 3, "homeTeam": {"teamTricode": "DAL", "players": []}, "awayTeam": {"teamTricode": "SAS", "players": []}},
+             "G3": {"gameStatus": 3, "homeTeam": {"teamTricode": "PHI", "players": [{"personId": 8, "played": "0"}]},
+                    "awayTeam": {"teamTricode": "MIL", "players": []}},
+             "G4": {"gameStatus": 2, "homeTeam": {"teamTricode": "NYK", "players": []}, "awayTeam": {"teamTricode": "ORL", "players": []}}}
+    evs = LAB.premise_events("2026-10-24", sched, news=d / "n.sqlite", box_get=lambda g: boxes[g], cache=d / "c.sqlite")
+    got = sorted((e["player"], e["source"], e["held"], e["on_report"]) for e in evs)
+    assert got == [("Cooper Flagg", "underdog", True, True), ("Jalen Green", "aggregator only", False, False),
+                   ("Joel Embiid", "inferred", True, False)], got
+    line = LAB.premise_line(evs)
+    assert line.startswith("2/3 held") and "FALSE: Jalen Green (aggregator only)" in line, line
+
+
 def test_box_cache():
     d = pathlib.Path(tempfile.mkdtemp())
     calls = []
@@ -147,3 +180,28 @@ def test_mutant_unit_per_prop():
         LAB = keep
         sys.path.remove(str(d))
         sys.modules.pop("nba_stale_lab_mutu", None)
+
+
+def test_mutants_premise():
+    global LAB
+    src = pathlib.Path(LAB.__file__).read_text()
+    for tag, a, b in (("held inverted", '"held": not (p and p.get("played") == "1")', '"held": bool(p and p.get("played") == "1")'),
+                      ("underdog not ranked", '    if any("underdog" in p for p in ps):\n        return "underdog"\n', "")):
+        assert src.count(a) == 1, tag
+        d = pathlib.Path(tempfile.mkdtemp())
+        (d / "nba_stale_lab_mutp.py").write_text(src.replace(a, b))
+        sys.path.insert(0, str(d))
+        keep = LAB
+        try:
+            LAB = importlib.import_module("nba_stale_lab_mutp")
+            print(f"MUTANT ({tag}) — must fail:")
+            try:
+                test_premise_events()
+                survived = True
+            except AssertionError:
+                survived = False
+            assert not survived, tag
+        finally:
+            LAB = keep
+            sys.path.remove(str(d))
+            sys.modules.pop("nba_stale_lab_mutp", None)
