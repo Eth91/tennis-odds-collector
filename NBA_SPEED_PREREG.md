@@ -1101,3 +1101,13 @@ daily chain restarts within the news window even when GitHub delays a tick. The 
 keeps it to one running chain.
 
 **Unchanged:** every tier, rule, card, ping and verdict.
+
+**Amendment 25 — correction (2026-10-25T20:4xZ, before any lab decision).** (1) The lab's unit is one
+ABSENCE × one prop: the earliest trigger for that absent player, per teammate prop. The text above said
+"earliest trigger per (game, player, stat)", which folds a later absence into an earlier trigger for
+another player. The first run did exactly that: the 10/24 RotoBaller "Jalen Green" news (premise false)
+disappeared under an earlier report trigger on the same PHX props. Regression test + mutant. (2) **A false
+statement in the "Why" above:** "3 of the 4 news events had false premises" is wrong. Per news event with
+affected props: Spencer Jones (DEN 10/22), Podziemski, Flagg, Patrick Williams, Essengue and Smart all sat;
+only Jalen Green played; Embiid's choice news had no affected props. The news-first slice's −43% (over hit
+29%) was those games going against the overs, not false premises. The 86% beat-close figure stands.

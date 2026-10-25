@@ -8,6 +8,10 @@ earliest trigger per game-player-stat). Taken: the OVER at FanDuel's main line a
 PREMISE (did the absent player actually sit?). Joined: the model's view at first sighting (flag-pass
 `cands`): excess = (proj - line) / threshold.
 
+UNIT = one ABSENCE x one prop (corrected 2026-10-25, before any decision): the earliest trigger for that
+absent player, per teammate prop. Deduping per prop alone folded a later absence into an earlier trigger
+for another player, which hid RotoBaller's false "Jalen Green" news under an earlier report trigger.
+
     python3 nba_stale_lab.py            # the registered slices
 """
 from __future__ import annotations
@@ -79,15 +83,16 @@ def premise(bx, team, x_name):
     return "sat" if x_name else None            # not in the box at all: did not dress
 
 
-def rows(now=None, box_get=None):
+def rows(now=None, box_get=None, results=None, lines=None, shadow=None, cache=None):
     import nba_clv as V
     import nba_reaction as RX
-    results = RX.run(now)
-    q = sqlite3.connect(f"file:{LINES}?mode=ro", uri=True)
+    results = RX.run(now) if results is None else results
+    q = sqlite3.connect(f"file:{lines or LINES}?mode=ro", uri=True)
     tips = {g: t for g, t in q.execute("SELECT DISTINCT gid, tip_utc FROM quotes WHERE book='fd'")}
     cands = {}
-    if SHADOW.exists():
-        sh = sqlite3.connect(f"file:{SHADOW}?mode=ro", uri=True)
+    shadow = Path(shadow or SHADOW)
+    if shadow.exists():
+        sh = sqlite3.connect(f"file:{shadow}?mode=ro", uri=True)
         try:
             for gd, pid, stat, proj, thr in sh.execute(
                     "SELECT game_date, pid, stat, proj, thr FROM cands ORDER BY logged_at"):
@@ -99,15 +104,18 @@ def rows(now=None, box_get=None):
     for r in results:
         x_by_team = {x["team"]: x["name"] for x in r["xs"]}
         for u in r["units"]["affected"]:
-            k = (u["gid"], u["pid"], u["stat"])
-            if k in out or u["stat"] not in BOXKEY or u["gid"] not in tips:
+            if u["stat"] not in BOXKEY or u["gid"] not in tips:
                 continue
-            bx = final_box(u["gid"], box_get)
+            bx = final_box(u["gid"], box_get, cache=cache)
             p = (bx or {}).get(u["pid"])
             if not p or p.get("played") != "1":
                 continue                                   # not final yet, or a DNP (void)
+            x_name = x_by_team.get(p["_team"])
+            k = (x_name, u["gid"], u["pid"], u["stat"])    # one absence x one prop (earliest trigger)
+            if k in out:
+                continue
             tl = RX.timeline(q.execute("SELECT seen_at, line, side, odds FROM quotes WHERE book='fd' AND gid=? "
-                                       "AND pid=? AND stat=?", k).fetchall())
+                                       "AND pid=? AND stat=?", k[1:]).fetchall())
             m0 = RX.main_at(tl, r["t0"])
             close = V.close_of(q, u["gid"], u["pid"], u["stat"], tips[u["gid"]].replace("Z", ""), books=("fd",))
             if not m0 or not close:
@@ -116,7 +124,7 @@ def rows(now=None, box_get=None):
             beat, same, won, units = grade(m0[0], m0[1], close, actual)
             c = cands.get((RX._et_date(tips[u["gid"]].replace("Z", "")), u["pid"], u["stat"]))   # py3.10: no "Z"
             out[k] = {"gid": u["gid"], "stat": u["stat"], "src": r["src"], "beat": beat, "same": same,
-                      "won": won, "units": units, "premise": premise(bx, p["_team"], x_by_team.get(p["_team"])),
+                      "won": won, "units": units, "premise": premise(bx, p["_team"], x_name),
                       "band": band((c[0] - m0[0]) / c[1] if c and c[1] else None)}
     q.close()
     return list(out.values())

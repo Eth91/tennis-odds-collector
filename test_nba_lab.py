@@ -60,6 +60,31 @@ def test_lab():
     assert check(LAB, L)
 
 
+def test_unit_is_absence_x_prop():
+    """An earlier report trigger (X1) and a later news trigger (X2, false premise) on the same prop: two
+    events, each with its own premise. Deduping per prop alone hid the second (the Jalen Green case)."""
+    d = pathlib.Path(tempfile.mkdtemp())
+    q = sqlite3.connect(d / "l.sqlite")
+    q.executescript(L.DDL)
+    for t, line, o in (("2026-10-24T20:00:00", 16.5, 1.91), ("2026-10-24T21:50:00", 17.5, 1.91)):
+        for side, oo in (("over", o), ("under", 1.91)):
+            q.execute("INSERT INTO quotes VALUES (?,?,?,?,?,?,?,?,?,?)", (t, "fd", "G", "2026-10-25T02:00:00Z", 5, "B",
+                                                                          "points", line, side, oo))
+    q.commit()
+    box = {"gameStatus": 3, "homeTeam": {"teamTricode": "PHX", "players": [
+        {"personId": 5, "name": "Dillon Brooks", "played": "1", "statistics": {"points": 15}},
+        {"personId": 6, "name": "Jalen Green", "played": "1", "statistics": {}}]},
+        "awayTeam": {"teamTricode": "GSW", "players": []}}
+    unit = {"gid": "G", "pid": 5, "stat": "points"}
+    results = [{"t0": "2026-10-24T20:30:00", "src": "report", "xs": [{"name": "Oso Ighodaro", "team": "PHX", "date": "2026-10-24"}],
+                "units": {"affected": [unit]}},
+               {"t0": "2026-10-24T21:40:00", "src": "news", "xs": [{"name": "Jalen Green", "team": "PHX", "date": "2026-10-24"}],
+                "units": {"affected": [unit]}}]
+    rs = LAB.rows(results=results, lines=d / "l.sqlite", shadow=d / "none.sqlite", cache=d / "c.sqlite", box_get=lambda g: box)
+    got = sorted((r["src"], r["premise"]) for r in rs)
+    assert got == [("news", "played"), ("report", "sat")], got
+
+
 def test_box_cache():
     d = pathlib.Path(tempfile.mkdtemp())
     calls = []
@@ -98,3 +123,27 @@ def test_mutants():
 if __name__ == "__main__":
     test_lab(); test_box_cache(); test_mutants()
     print("test_nba_lab: OK")
+
+
+def test_mutant_unit_per_prop():
+    src = pathlib.Path(LAB.__file__).read_text()
+    a = '            k = (x_name, u["gid"], u["pid"], u["stat"])    # one absence x one prop (earliest trigger)'
+    assert src.count(a) == 1
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "nba_stale_lab_mutu.py").write_text(src.replace(a, '            k = (None, u["gid"], u["pid"], u["stat"])'))
+    sys.path.insert(0, str(d))
+    global LAB
+    keep = LAB
+    try:
+        LAB = importlib.import_module("nba_stale_lab_mutu")
+        print("MUTANT (unit per prop) — must fail:")
+        try:
+            test_unit_is_absence_x_prop()
+            survived = True
+        except AssertionError:
+            survived = False
+        assert not survived
+    finally:
+        LAB = keep
+        sys.path.remove(str(d))
+        sys.modules.pop("nba_stale_lab_mutu", None)
