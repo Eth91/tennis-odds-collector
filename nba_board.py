@@ -57,6 +57,14 @@ def _clv():
     return m
 
 
+def _silence():
+    """nba_silence loaded by PATH (amendment 21), like _clv: the dashboard's sys.path is never touched."""
+    spec = importlib.util.spec_from_file_location("_nba_silence_for_board", HERE / "nba_silence.py")
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+
+
 def _ro(p):
     return sqlite3.connect(f"file:{p}?mode=ro", uri=True, timeout=10) if p.exists() else None
 
@@ -87,7 +95,7 @@ def board(now=None):
     days = {(today - dt.timedelta(days=1)).isoformat(): "LAST NIGHT", today.isoformat(): "TONIGHT",
             (today + dt.timedelta(days=1)).isoformat(): "TOMORROW"}
     sh, news, q = _ro(SHADOW), _ro(NEWS), _ro(LINES)
-    V = _clv()
+    V, SIL = _clv(), _silence()
     out = {"generated_at": now_n, "slates": [], "retracted": [], "offcard": [], "record": None}
     if sh is None:
         return out
@@ -140,6 +148,10 @@ def board(now=None):
             why = f"{f['b']} {st[f['pid']].upper()}"
         elif not started and f.get("x_pid") and st.get(f["x_pid"]) in X_BACK:
             why = f"{f['x']} {st[f['x_pid']].upper()}"
+        elif (not started and news is not None and f.get("x_pid") and st.get(f["x_pid"]) not in B_OFF
+              and (f.get("trigger_src") or "").startswith("news") and f.get("trigger_src") != "news:inferred"
+              and SIL.silenced(news, f["x_pid"], f["team"], gd, f.get("news_at"))):
+            why = f"{f['x']} NOT ON REPORT"                   # amendment 21: the silence check
         row = {"b": f["b"], "team": f["team"], "stat": LABEL.get(stat, stat.upper()), "line": f["line"],
                "odds": f["odds"], "tiers": sorted(f["tiers"]), "x": f["x"], "horizon": f.get("horizon") or 0,
                "flagged_mt": dt.datetime.fromisoformat(f["logged_at"]).replace(tzinfo=dt.timezone.utc)
