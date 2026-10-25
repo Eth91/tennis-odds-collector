@@ -71,7 +71,19 @@ def parse_market(m):
             "home": ev[10:13], "team": who[:3], "player": name, "stat": SERIES[series],
             "line": float(m["floor_strike"]), "bid": _f(m, "yes_bid_dollars"), "ask": _f(m, "yes_ask_dollars"),
             "last": _f(m, "last_price_dollars"), "volume": _f(m, "volume_fp"), "oi": _f(m, "open_interest_fp"),
-            "tip": m.get("occurrence_datetime")}
+            "tip": None}               # set from the NBA schedule: Kalshi's occurrence_datetime is ~tip + 3 h
+
+
+def with_tips(parsed, sched):
+    """Tip times from the NBA schedule, keyed by (ET date, away, home). A market whose game is not on the
+    schedule is dropped: without a tip we cannot tell pre-game from in-game."""
+    tips = {(g["date_et"], g["away"], g["home"]): g["utc"] for g in sched}
+    out = []
+    for p in parsed:
+        t = tips.get((p["game_date"], p["away"], p["home"]))
+        if t:
+            out.append(dict(p, tip=t))
+    return out
 
 
 def resolve(p, index):
@@ -130,7 +142,7 @@ def store(con, parsed, now, last):
     return n
 
 
-def poll(con, last, index, now=None):
+def poll(con, last, index, sched, now=None):
     now = now or dt.datetime.now(dt.timezone.utc)
     parsed, errs = [], []
     for s in SERIES:
@@ -138,6 +150,7 @@ def poll(con, last, index, now=None):
             parsed += [p for p in (parse_market(m) for m in fetch(s)) if p]
         except Exception as e:                                           # noqa: BLE001
             errs.append(f"{s}: {type(e).__name__}")
+    parsed = with_tips(parsed, sched)
     for p in parsed:
         p["pid"] = resolve(p, index)
     return store(con, parsed, now, last), len(parsed), errs
@@ -145,7 +158,7 @@ def poll(con, last, index, now=None):
 
 def loop(interval=60):
     import nba_rosters as R
-    con, last, index, day = _db(), {}, {}, None
+    con, last, index, day, sched, sched_at = _db(), {}, {}, None, [], 0.0
     while True:
         t0 = time.time()
         today = dt.datetime.now(ET).date().isoformat()           # the slate day, as player_index expects
@@ -153,7 +166,9 @@ def loop(interval=60):
             if today != day:                                 # rosters change; refresh once a day
                 index, _ = R.player_index(today)
                 day = today
-            n, seen, errs = poll(con, last, index)
+            if time.time() - sched_at > 1800:                # tip times: refresh every 30 min
+                sched, sched_at = R.schedule(), time.time()
+            n, seen, errs = poll(con, last, index, sched)
             print(f"[{dt.datetime.now(dt.timezone.utc):%H:%M:%S}] nba_pm: {seen} markets, {n} changed"
                   + (f" · errors {errs}" if errs else ""), flush=True)
         except Exception as e:                                           # noqa: BLE001
@@ -228,7 +243,7 @@ if __name__ == "__main__":
     elif a.once:
         import nba_rosters as R
         idx, _ = R.player_index(dt.datetime.now(ET).date().isoformat())
-        print(poll(_db(), {}, idx))
+        print(poll(_db(), {}, idx, R.schedule()))
     elif a.gaps:
         for r in gaps():
             print(f"  {r['team']} {r['player']:<24} {r['stat']:<8} o{r['line']:<5} Kalshi {r['k']:.2f} · FD {r['fd']:.2f}"

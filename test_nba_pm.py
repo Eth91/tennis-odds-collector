@@ -30,6 +30,12 @@ def check(pm):
     want(p and p["line"] == 24.5 and p["stat"] == "points" and p["game_date"] == "2026-10-24"
          and (p["away"], p["home"], p["team"]) == ("BKN", "CLE", "CLE") and p["bid"] == 0.31,
          "parse: 25+ points = over 24.5, BKN @ CLE, his team CLE, 2026-10-24, bid 0.31")
+    sched = [{"date_et": "2026-10-24", "away": "BKN", "home": "CLE", "utc": "2026-10-24T23:30:00Z"}]
+    late = dict(M, occurrence_datetime="2026-10-25T02:30:00Z")          # Kalshi's: ~tip + 3 h
+    wt = pm.with_tips([dict(pm.parse_market(late), tip=late["occurrence_datetime"]), dict(p, home="NYK")], sched)
+    want(len(wt) == 1 and wt[0]["tip"] == "2026-10-24T23:30:00Z",
+         "tip from the NBA schedule, not Kalshi's occurrence time; a game not on the schedule is dropped")
+    p = wt[0]
     want(pm.parse_market(dict(M, strike_type="less")) is None and pm.parse_market(dict(M, ticker="KXNBAGAME-X")) is None,
          "only player threshold contracts are read")
     want(pm.resolve(p, INDEX) == 1628386, "resolve: exact full name within his team (not Grayson Allen)")
@@ -78,6 +84,7 @@ def test_mutants():
             ("line from the title (25) not floor_strike", '"line": float(m["floor_strike"])', '"line": float(m["floor_strike"]) + 0.5'),
             ("store every poll", "        if last.get(p[\"ticker\"]) == key:\n            continue\n", ""),
             ("store after tip", "if not tip or tip <= now or", "if not tip or"),
+            ("tip from Kalshi", "out.append(dict(p, tip=t))", "out.append(dict(p, tip=p[\"tip\"] or t))"),
             ("no de-vig", "        return (1 / o) / ((1 / o) + (1 / u)), \"DEVIG\"", "        return 1 / o, \"DEVIG\""),
             ("surname match", "if t in teams and key(n) == want and \" \" in want]", "if t in teams and want in key(n)]")):
         assert src.count(a) == 1, tag
