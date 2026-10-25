@@ -872,3 +872,34 @@ strip. No flag and no ping was logged in that window (checked), so no card value
 rule. Only the off-card strip was missing from the board. Fixed by merging 19 into the branch and
 redeploying at 01:23Z. `nba_vm_deploy.sh` now refuses a deploy whose HEAD does not contain the commit the
 VM runs (tested by recording a commit HEAD lacks: REFUSED).
+
+---
+
+# AMENDMENT 21 — the silence check: a news absence the report keeps omitting is contradicted (2026-10-25)
+
+**Why.** 2026-10-24: RotoBaller's "Jalen Green doubtful" (21:37Z) was wrong. Jalen Green played 26 min;
+the doubtful Green was Draymond. Read under amendment 17, it fired two PHX flags (Gillespie, Brooks) that
+stayed on the board until tip, although every official report from 21:45Z on listed PHX without him.
+User: "yes add the silence check."
+
+**The check, on data, before this text.** 38 news absences (out/doubtful, resolved, not seeded, not
+inferred). The report listed the player first 28 times; the news came first 8 times (to the first report
+listing: median 28 min, then 28, 29, 37 for same-day items; 279 and 859 min for items about later
+games); 2 were never listed (Jalen Green 10/24 RotoBaller; Cooper Flagg 10/30 bsky:globalnews3).
+Simulated: judge silence on the first report published ≥ G minutes after the news that lists the team
+for that game. For every G from 15 to 120 min, it silences Jalen Green and no real item. Restricted to
+game-day reports with G = 60, it silences Jalen Green at 22:45Z and no real item.
+
+**Rule.**
+1. A news absence for player P (team T, game date D, first seen t) is SILENCED when the first official
+   report that is (a) published on D (ET, by its mark), (b) published ≥ 60 min after t, and (c) lists at
+   least one player of T for D, has no row for P. Implemented once in `nba_silence.py` (no dependencies).
+2. A silenced item is dropped by `news_outs` (it no longer triggers), exactly like a contradicting status.
+3. The board takes back a flag whose absence is news-only (the newest report does not list X as Out or
+   Doubtful) and silenced: "{X} NOT ON REPORT". A pinged play gets a VOID (the existing path).
+4. Exempt: `inferred` items (amendment 14). That is a deduction from the player's own words and the box
+   score, which the team often lists only on game day.
+5. A report that later lists P Out or Doubtful brings P back as a report-originated trigger (unchanged).
+6. Scoring is unchanged (amendment 2 already scores such flags as unconfirmed audit rows).
+
+**Unchanged:** tiers, thresholds, yardsticks, verdicts, the card.
