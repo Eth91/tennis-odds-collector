@@ -114,7 +114,7 @@ def rows(now=None, box_get=None):
                 continue
             actual = sum(p["statistics"].get(s, 0) for s in BOXKEY[u["stat"]])
             beat, same, won, units = grade(m0[0], m0[1], close, actual)
-            c = cands.get((RX._et_date(tips[u["gid"]]), u["pid"], u["stat"]))
+            c = cands.get((RX._et_date(tips[u["gid"]].replace("Z", "")), u["pid"], u["stat"]))   # py3.10: no "Z"
             out[k] = {"gid": u["gid"], "stat": u["stat"], "src": r["src"], "beat": beat, "same": same,
                       "won": won, "units": units, "premise": premise(bx, p["_team"], x_by_team.get(p["_team"])),
                       "band": band((c[0] - m0[0]) / c[1] if c and c[1] else None)}
