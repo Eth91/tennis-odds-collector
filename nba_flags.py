@@ -167,7 +167,11 @@ def slate(sched, today_et):
 
 
 def latest_lines(now):
-    """({(pid, stat): (line, best_over_dec, collected_at)}, status) from nba_lines.board.
+    """({(gid, pid, stat): (line, best_over_dec, collected_at)}, status) from nba_lines.board.
+
+    KEYED BY GAME (2026-10-25): keyed by (pid, stat) alone, a back-to-back player's flag for
+    TOMORROW took TONIGHT's line (Edgecombe, flagged o13.5 for 10/25 from the 10/24 board row; FanDuel
+    first posted his 10/25 line 11 h later, at 14.5).
 
     Every book's latest SUCCESSFUL board counts if it is no older than LINE_MAX_AGE_MIN, so
     FanDuel and DraftKings shop against each other even though they are fetched seconds apart
@@ -183,46 +187,46 @@ def latest_lines(now):
         con.close()
         return {}, ("nba_lines board is empty" if not books else
                     f"every book's board is older than {LINE_MAX_AGE_MIN} min {books}")
-    rows = con.execute("SELECT pid, stat, line, side, odds, collected_at FROM board "
+    rows = con.execute("SELECT gid, pid, stat, line, side, odds, collected_at FROM board "
                        f"WHERE pid IS NOT NULL AND book IN ({','.join('?' * len(fresh))})",
                        fresh).fetchall()
     con.close()
     two = {}
-    for pid, stat, line, side, odds, ts in rows:
-        two.setdefault((pid, stat, line), {}).setdefault(side, []).append((odds, ts))
+    for gid, pid, stat, line, side, odds, ts in rows:
+        two.setdefault((gid, pid, stat, line), {}).setdefault(side, []).append((odds, ts))
     out = {}
-    for (pid, stat, line), sides in two.items():
+    for (gid, pid, stat, line), sides in two.items():
         if "over" not in sides or "under" not in sides:      # milestone X+ rungs are over-only
             continue
         best_over, ts = max(sides["over"])
-        cur = out.get((pid, stat))
+        cur = out.get((gid, pid, stat))
         if cur is None or abs(best_over - 1.9091) < abs(cur[1] - 1.9091):
-            out[(pid, stat)] = (line, best_over, ts)
+            out[(gid, pid, stat)] = (line, best_over, ts)
     stale = sorted(set(books) - set(fresh))
     return out, ("ok" if not stale else f"stale book(s) excluded: {stale}")
 
 
 def board_ladders(now):
-    """{pid: {stat: {line: (best_over, best_under)}}} — every fresh two-sided rung, both books.
-    The shape wnba_tonight.prop_edges reads from posted_props()."""
+    """{(gid, pid): {stat: {line: (best_over, best_under)}}} — every fresh two-sided rung, both books,
+    per GAME (see latest_lines). The inner shape is what wnba_tonight.prop_edges reads from posted_props()."""
     if not LINES_DB.exists():
         return {}
     con = sqlite3.connect(f"file:{LINES_DB}?mode=ro", uri=True)
     fresh = sorted(_fresh_books(con, now))
     raw = defaultdict(lambda: [0.0, 0.0])
     if fresh:
-        for pid, stat, line, side, odds in con.execute(
-                "SELECT pid, stat, line, side, odds FROM board WHERE pid IS NOT NULL AND "
+        for gid, pid, stat, line, side, odds in con.execute(
+                "SELECT gid, pid, stat, line, side, odds FROM board WHERE pid IS NOT NULL AND "
                 f"book IN ({','.join('?' * len(fresh))})", fresh):
             i = 0 if side == "over" else 1 if side == "under" else None
             if i is not None:
-                k = (pid, stat, round(float(line), 1))
+                k = (gid, pid, stat, round(float(line), 1))
                 raw[k][i] = max(raw[k][i], float(odds))
     con.close()
     out = defaultdict(lambda: defaultdict(dict))
-    for (pid, stat, line), (o, u) in raw.items():
+    for (gid, pid, stat, line), (o, u) in raw.items():
         if o and u and stat in P.PROP_STATS:
-            out[pid][stat][line] = (o, u)
+            out[(gid, pid)][stat][line] = (o, u)
     return out
 
 
@@ -550,7 +554,7 @@ def flags(dry=False, game_date=None):
             b_in = [mk(a) for a in since if a[0] in x_dates]
             if len(b_out) < C.MIN_WOWY or len(b_in) < 3:
                 continue
-            lad = ladders.get(b_id)
+            lad = ladders.get((games[tri][0], b_id))            # this game's ladder only
             if not lad:
                 why["priced_no_line"] += 1
                 continue
@@ -578,7 +582,7 @@ def flags(dry=False, game_date=None):
                           "trigger_src": trig_src.get(r["_x_id"]), "d_min": r.get("d_min"),
                           "x_status": x_status.get(r["_x_id"]), "x_min": x_min.get(r["_x_id"])})
     for tier, tri, xname, b_id, stat, proj, margin, x_id, d_min in cands:
-        lk = lines.get((b_id, LEDGER_STAT[stat]))
+        lk = lines.get((games[tri][0], b_id, LEDGER_STAT[stat]))   # this game's line only
         if not lk:
             why["no_line"] += 1
             continue

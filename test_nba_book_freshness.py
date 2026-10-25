@@ -40,7 +40,7 @@ def run(mod_name, snapshot, ages):
     F.LINES_DB = d / "l.sqlite"
     lines, status = F.latest_lines(NOW)
     ladders = F.board_ladders(NOW)
-    return lines.get((7, "points")), status, ladders.get(7, {}).get("points", {}).get(20.5)
+    return lines.get(("G", 7, "points")), status, ladders.get(("G", 7), {}).get("points", {}).get(20.5)
 
 
 def check(mod_name):
@@ -81,6 +81,57 @@ def test_mutant_per_book_limit_ignored():
     finally:
         sys.path.remove(str(d))
         sys.modules.pop("nba_flags_mut", None)
+
+
+def check_by_game(F):
+    """A back-to-back player has rungs on the board for two games: each game sees only its own."""
+    d = pathlib.Path(tempfile.mkdtemp())
+    c = sqlite3.connect(d / "l.sqlite")
+    c.execute("CREATE TABLE board (book TEXT, collected_at TEXT, gid TEXT, tip_utc TEXT, event TEXT, "
+              "home TEXT, away TEXT, pid INTEGER, player TEXT, stat TEXT, line REAL, side TEXT, odds REAL)")
+    at = (NOW - dt.timedelta(minutes=5)).replace(tzinfo=None).isoformat()
+    for gid, line in (("SAT", 13.5), ("SUN", 14.5)):
+        for side in ("over", "under"):
+            c.execute("INSERT INTO board VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                      ("fd", at, gid, "", "", "", "", 7, "p", "points", line, side, 1.91))
+    c.commit()
+    F.LINES_DB = d / "l.sqlite"
+    lines, _ = F.latest_lines(NOW)
+    lad = F.board_ladders(NOW)
+    return (lines.get(("SAT", 7, "points"), (None,))[0] == 13.5 and lines.get(("SUN", 7, "points"), (None,))[0] == 14.5
+            and list(lad[("SUN", 7)]["points"]) == [14.5])
+
+
+def test_lines_by_game():
+    import nba_flags as F
+    saved = F.LINES_DB
+    try:
+        assert check_by_game(F)
+    finally:
+        F.LINES_DB = saved
+
+
+def test_mutants_by_game():
+    here = pathlib.Path(__file__).resolve().parent
+    src = (here / "nba_flags.py").read_text()
+    for tag, a, b in (("lines keyed without the game", "two.setdefault((gid, pid, stat, line), {})",
+                       "two.setdefault((\"G\", pid, stat, line), {})"),
+                      ("ladders keyed without the game", "k = (gid, pid, stat, round(float(line), 1))",
+                       "k = (\"G\", pid, stat, round(float(line), 1))")):
+        assert src.count(a) == 1, tag
+        d = pathlib.Path(tempfile.mkdtemp())
+        (d / "nba_flags_mutg.py").write_text(src.replace(a, b))
+        sys.path.insert(0, str(d))
+        try:
+            print(f"MUTANT ({tag}) — must fail:")
+            try:
+                survived = check_by_game(importlib.import_module("nba_flags_mutg"))
+            except (KeyError, TypeError):
+                survived = False
+            assert not survived, tag
+        finally:
+            sys.path.remove(str(d))
+            sys.modules.pop("nba_flags_mutg", None)
 
 
 if __name__ == "__main__":
