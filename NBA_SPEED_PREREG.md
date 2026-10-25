@@ -1111,3 +1111,24 @@ statement in the "Why" above:** "3 of the 4 news events had false premises" is w
 affected props: Spencer Jones (DEN 10/22), Podziemski, Flagg, Patrick Williams, Essengue and Smart all sat;
 only Jalen Green played; Embiid's choice news had no affected props. The news-first slice's −43% (over hit
 29%) was those games going against the overs, not false premises. The 86% beat-close figure stands.
+
+---
+
+# AMENDMENT 26 — premise watch and rebounds-tilt watch (2026-10-25, measurement with registered review lines)
+
+**Why.** The audit's items 2 and 5. User: "then after do 2 and 5." Early news is where the CLV is (lab:
+news-first, premise held, beat FD's close 68%), and a false premise turns that CLV into a loss. The
+historical card is ~80% rebounds, yet rebounds react least to news (lab: 36% beat close).
+
+**Premise watch (`nba_stale_lab.premise_events`, in the morning check).** Event = one news-originated
+absence (out/doubtful item, resolved, not seeded) per player-game, after the game is final. Premise HELD if
+he did not play. Classed by the strongest source that reported him: inferred, underdog, beat writer
+(trusted X), aggregator-only. Also: whether an official report ever listed him Out/Doubtful.
+**Review line:** over any rolling 14 days with ≥ 10 trusted-source (non-aggregator) events, if fewer than
+90% held, a new premise guard is proposed by amendment, sized on the failures.
+
+**Rebounds-tilt watch (nba_clv tracked cell CARD STAT).** Carded flags by stat on the FD yardstick.
+**Review line:** at ≥ 20 closed carded flags, if rebounds are > 60% of them and beat FD's close < 45%, the
+card's stat ranking (excess with REB margin 1.0) is reviewed by amendment.
+
+**Unchanged:** every rule, card, ping and verdict. These are watches with pre-set review lines, not rules.
