@@ -172,14 +172,14 @@ def test_mutants():
             ("no one-per-player", 'if sh.execute(f"SELECT 1 FROM flags WHERE game_date=? AND pid=? AND {CARD_ON} LIMIT 1", (gd, pid)).fetchone():\n        return 0',
              'if False:\n        return 0'),
             ("3 slots", "    if len(mates) >= 2:\n        return 0", "    if len(mates) >= 3:\n        return 0"),
-            ("shared components allowed", "return 0 if any(comp & CARD_COMPONENTS.get(s, frozenset(s)) for _, s in mates) else 1",
-             "return 1"),
-            ("not sticky", "    if prev:\n        return prev[0]\n", ""),
+            ("shared components allowed", "return (0, \"SHARED STAT\") if any(comp & CARD_COMPONENTS.get(s, frozenset(s)) for _, s in mates) else (1, None)",
+             "return 1, None"),
+            ("not sticky", "    if prev:\n        return prev[0], prev[1]\n", ""),
             ("pings every flag", "        if cur.rowcount and card:\n", "        if cur.rowcount:\n"),
-            ("excess order ignored", "0.0 if f[\"tier\"] == \"priced\" else -_excess(f)))", "0.0))"),
+            ("excess order ignored", "0.0 if f[\"tier\"] == \"priced\" else -_excess(f))), is_lead", "0.0)), is_lead"),
             ("best excess, not singles first", "key = (f[\"stat\"] in COMBO_STATS, -_excess(f))",
              "key = (False, -_excess(f))"),
-            ("non-leads carded", "    if not lead:\n        return 0\n", "")):
+            ("non-leads carded", "    if not lead:\n        return 0, \"1 PER PLAYER\"\n", "")):
         assert src.count(a) == 1, tag
         d = pathlib.Path(tempfile.mkdtemp())
         (d / "nba_flags_mut18.py").write_text(src.replace(a, b))
@@ -217,7 +217,7 @@ def check24(mod):
 def test_off_card_tiers():
     assert check24(F)
     src = pathlib.Path(F.__file__).read_text()
-    a = "    if f[\"tier\"] in OFF_CARD_TIERS:\n        return 0\n"
+    a = "    if f[\"tier\"] in OFF_CARD_TIERS:\n        return 0, f\"{f['tier'].upper()} OFF CARD\"\n"
     assert src.count(a) == 1
     d = pathlib.Path(tempfile.mkdtemp())
     (d / "nba_flags_mut24.py").write_text(src.replace(a, ""))
@@ -233,9 +233,9 @@ def test_off_card_tiers():
 def test_mutants_22():
     src = pathlib.Path(F.__file__).read_text()
     for tag, a, b in (
-            ("any line carded", "    if stale != \"STALE\":\n        return 0\n", ""),
-            ("no minutes gate", "    if f[\"tier\"] == \"wowy\" and not (f.get(\"d_min\") is not None and DMIN_BAND[0] <= f[\"d_min\"] <= DMIN_BAND[1]):\n        return 0\n", ""),
-            ("not sticky", "    if prev:\n        return prev[0]\n    if f[\"tier\"] in OFF_CARD_TIERS", "    if False:\n        return prev[0]\n    if f[\"tier\"] in OFF_CARD_TIERS")):
+            ("any line carded", "    if stale != \"STALE\":\n        return 0, STALE_WHY.get(stale, \"LINE NOT STALE\")\n", ""),
+            ("no minutes gate", "    if f[\"tier\"] == \"wowy\" and not (f.get(\"d_min\") is not None and DMIN_BAND[0] <= f[\"d_min\"] <= DMIN_BAND[1]):\n        return 0, \"MINUTES OUT OF BAND\"\n", ""),
+            ("not sticky", "    if prev:\n        return prev[0], prev[1]\n", "    if False:\n        return prev[0], prev[1]\n")):
         assert src.count(a) == 1, tag
         d = pathlib.Path(tempfile.mkdtemp())
         (d / "nba_flags_mut22.py").write_text(src.replace(a, b))
@@ -261,3 +261,25 @@ def test_combo_decision():
              + rows(60, 0, tier="priced"))
     assert V.combo_decision(noise + rows(60, 33))["n"] == 60
     assert V.combo_decision(rows(60, 33) + rows(60, 33))["n"] == 60                 # one per play
+
+
+def test_recard_tonight_shape():
+    """recard() recomputes old-rule cards under the current rules, with the reason stored."""
+    d = pathlib.Path(tempfile.mkdtemp())
+    sh = F._shadow(d / "s.sqlite")
+    for fid, at, tier, b, pid, stat, line, m, dmin, card in (
+            ("reed", "2026-10-25T04:13:10", "wowy", "Paul Reed", 1, "pts", 12.5, 6.8, 12.6, 1),
+            ("bane", "2026-10-25T05:13:10", "priced", "Desmond Bane", 2, "assists", 3.5, 0.6, None, 1),
+            ("ok", "2026-10-25T06:00:00", "wowy", "Good Play", 3, "pts", 10.5, 6.0, 5.0, 0)):
+        sh.execute("INSERT INTO flags (flag_id, logged_at, game_date, tier, team, b, stat, line, margin, pid, d_min, gid, "
+                   "card, news_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                   (fid, at, "2026-10-25", tier, "DET" if pid != 2 else "ORL", b, stat, line, m, pid, dmin, "G", card,
+                    "2026-10-24T20:00:00+00:00"))
+    sh.commit()
+    saved = (F._stale_of, F.MARGIN)
+    F._stale_of = lambda f, stamp: {"reed": "POSTED-AFTER", "bane": "POSTED-AFTER", "ok": "STALE"}[f["flag_id"]]
+    try:
+        out = {fid: (card, why) for fid, _b, _s, _l, card, why in F.recard(["2026-10-25"], path=d / "s.sqlite")}
+    finally:
+        F._stale_of, F.MARGIN = saved
+    assert out == {"reed": (0, "LINE POSTED AFTER NEWS"), "bane": (0, "PRICED OFF CARD"), "ok": (1, None)}, out

@@ -133,7 +133,8 @@ def board(now=None):
         seen_off.add(k)
         st_ = STAT.get(f["stat"], f["stat"])
         out["offcard"].append({"b": f["b"], "stat": LABEL.get(st_, st_.upper()), "line": f["line"],
-                               "why": "1 PER PLAYER" if (f["game_date"], f["pid"]) in carded else "TEAM SLOT"})
+                               "why": f.get("card_why") or ("1 PER PLAYER" if (f["game_date"], f["pid"]) in carded
+                                                            else "TEAM SLOT")})
     games = defaultdict(list)
     for (gd, gid, _p, stat), f in opp.items():
         tip = V._utc_naive(f["gtime"]) if f.get("gtime") else None

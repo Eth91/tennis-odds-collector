@@ -1033,3 +1033,26 @@ number; the hold half judged once).**
   1,033, −3.78%. **Fails (< 0). priced stays logged only.**
 Neither constant set is adopted. The card is wowy only (recalibrated, 3-8 gated, stale-line), plus inferred
 plays already carded. Off-card rule deployed 10:17Z.
+
+**User re-card of 2026-10-25 under the current rules (display and ping layer only).** User: "yes re-card
+tonight." The verification audit found tonight's four carded plays (Reed PTS, Bane AST, Wagner REB, Edgecombe
+PTS) were carded and pinged on Saturday night under the old rules; none passes amendments 22-24. `recard()`
+replays each logged pass in order through the current card rules (stale-line judged at each flag's own
+time). Pending rows are marked −1, because CARD_ON reads NULL as carded for pre-card flags. Pings are not
+touched, so nothing is re-sent and no VOID is sent. Every card decision now stores its reason (`card_why`);
+the board's PINGED · OFF CARD strip shows it. The record is untouched.
+
+**Re-card applied (2026-10-25T10:4xZ, under the cycle lock).** 8 flags for 2026-10-25 recomputed: 0 on the card
+(Edgecombe and Reed: LINE POSTED AFTER NEWS; Bane and Wagner: PRICED OFF CARD); the four pinged ones are in
+the PINGED · OFF CARD strip. No ping or VOID sent.
+
+**Backtest of the current card (information, not a decision; user: "does the new model backtest well?").**
+The backtestable part only (no stale-line rule, no source rules: historical lines are late), on real lines
+2023-10..2025-04: wowy bar 24, absence game 1-2, amendment-23 minutes and margins, 3-8 gate.
+| | fit half (constants fit here) | hold half |
+|---|---|---|
+| all gated flags | 263 bets, 57.0%, +6.84% | 283 bets, 56.5%, +6.83% (CI −5.2% to +18.1%) |
+| the card (singles-first, 1/player, top-2 disjoint) | 159 bets, 54.7%, +2.34% | 196 bets, 59.2%, +11.33% (CI −0.5% to +22.5%) |
+Hold-half card by month: +15.6u of its +22.2u came in 2025-03; without March, +4.5%. About 1.8 bets per
+slate night; worst drawdown 6.2u. The first wowy version positive in both halves (every earlier version and
+tier was negative: −1.9%, −4.7%, −5.7%), but not significant: every CI includes 0.
