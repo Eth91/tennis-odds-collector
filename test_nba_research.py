@@ -3,6 +3,7 @@ built from synthetic stores (books + alternate rungs, logs, official report vs n
 and postponed games, stale books, engine flags), the page's JS against the Python, and the page's script syntax."""
 import datetime as dt
 import json
+import math
 import pathlib
 import random
 import shutil
@@ -229,6 +230,9 @@ out.fr = [C.filterLogs(inp.logs, {ranges: {min: [35, 39]}}).length, C.filterLogs
           C.filterLogs(inp.logs, {ranges: {fga: [20, 24]}, result: 'L', home: true}).length,
           C.filterLogs(inp.logs, {ranges: {margin: [-5, -5]}}).length,
           C.filterLogs(inp.logs, {oppSets: [{'2026-27': ['UTA']}]}).length, C.filterLogs(inp.logs, {oppSets: [{'2025-26': ['UTA']}]}).length];
+out.px = inp.props.map(p => [C.fairAt(p, p.main), C.valueAt(p, p.main, 'over'), C.valueAt(p, p.main, 'under')]);
+out.z = [C.zscore(7, 10, 0.5), C.zscore(0, 0, 0.5), C.zscore(3, 3, null)];
+out.sv = C.sortProps(props, 'value', 'desc', () => [], 'over').map(p => p.id);
 console.log(JSON.stringify(out));
 """)
     inp = {"cases": cases, "lines": lines, "logs": logs, "props": payload["props"],
@@ -265,6 +269,16 @@ console.log(JSON.stringify(out));
     assert set(out["su"][2:]) == {"G1|2|points"}                                       # no logs: last
     assert out["bp"][0] == {"book": "fd", "odds": 1.95} and out["bp"][1] == {"book": "dk", "odds": 1.95}
     assert out["bp"][2] is None                                                        # the over-only alt has no under
+    for (fair, vo, vu), pr in zip(out["px"], payload["props"]):                      # fair price + value: JS = Python
+        f, n = RS.fair_at(pr["books"], pr["main"])
+        assert (fair["p"] is None and f is None) or (fair["p"] == pytest.approx(f) and fair["n"] == n)
+        for js, side in ((vo, "over"), (vu, "under")):
+            py = RS.value_at(pr["books"], pr["main"], side)
+            assert (js is None and py is None) or (js["ev"] == pytest.approx(py["ev"]) and js["book"] == py["book"])
+    assert out["z"][0] == pytest.approx(RS.zscore(7, 10, .5)) and out["z"][1] is None and out["z"][2] is None
+    evs = {pr["id"]: (RS.value_at(pr["books"], pr["main"], "over") or {}).get("ev") for pr in payload["props"]}
+    have = [i for i in out["sv"] if evs[i] is not None]
+    assert have == sorted(have, key=lambda i: -evs[i]) and out["sv"][len(have):] == [i for i in out["sv"] if evs[i] is None]
     exp = [sum(1 for l in logs if 35 <= l["min"] <= 39), sum(1 for l in logs if (l["margin"] or 0) > 0),
            sum(1 for l in logs if l["rest"] == 0), sum(1 for l in logs if l["rest"] is not None and l["rest"] >= 2),
            sum(1 for l in logs if 20 <= l["fga"] <= 24 and (l["margin"] or 0) < 0 and l["home"] == 1),
@@ -297,6 +311,8 @@ def test_page_controls_work_on_iphone():
     assert ".animate([" in html and "setTimeout(done" in html and "fonts.googleapis" not in html
     # every range chip but Margin draws its stat on the chart as white outline boxes (Margin can be negative: filter only)
     assert 'const OVL = {min: "min", fga: "FGA", fg3a: "3PTA", fta: "FTA", usg: "usage %"}' in html and "l[ov]" in html
+    # research+: fair price / VALUE, honest hit-rate boxes, Trends + Injuries tabs, line history, books that disagree
+    assert all(k in html for k in ("fairAt(", "<i>VALUE</i>", "hbox(", 'injury: "Injuries"', "histChart(", "freshOut(", 'class="df"'))
 
 
 def test_board_links_the_page():
@@ -309,3 +325,105 @@ def test_write_is_atomic(payload):
     RS.write(d, payload)
     assert json.loads((d / "nba_props.json").read_text())["props"] and (d / "nba_props.html").read_text().startswith("<!doctype")
     assert not list(d.glob(".*.tmp"))
+
+
+# ── prices, the change log, blended ranks, fresh absences (research+ 2026-10-26) ──────────────────────────────
+def test_replay_carries_the_board_forward():
+    # quotes is a CHANGE log: t2 writes only the over that moved, t3 pulls the 20.5 rung (odds NULL)
+    rows = [("t1", "fd", "G", 7, "points", 20.5, "over", 1.9), ("t1", "fd", "G", 7, "points", 20.5, "under", 1.9),
+            ("t1", "fd", "G", 7, "points", 21.5, "over", 2.2), ("t1", "fd", "G", 7, "points", 21.5, "under", 1.65),
+            ("t2", "fd", "G", 7, "points", 20.5, "over", 2.05),
+            ("t3", "fd", "G", 7, "points", 20.5, "over", None), ("t3", "fd", "G", 7, "points", 20.5, "under", None)]
+    mains = [(t, RS.main_of(st[("G", 7, "points", "fd")])) for t, st in RS.replay(iter(rows))]
+    assert mains == [("t1", (20.5, 1.9, 1.9)), ("t2", (20.5, 2.05, 1.9)), ("t3", (21.5, 2.2, 1.65))]
+    d = pathlib.Path(tempfile.mkdtemp())
+    q = sqlite3.connect(d / "l.sqlite")
+    q.execute("CREATE TABLE quotes (seen_at TEXT, book TEXT, gid TEXT, tip_utc TEXT, pid INTEGER, player TEXT, stat TEXT, "
+              "line REAL, side TEXT, odds REAL)")
+    q.executemany("INSERT INTO quotes VALUES (?,?,?,'',?,'',?,?,?,?)", [(t.replace("t", "2026-10-26T0") + ":00:00", *r)
+                                                                        for t, *r in rows])
+    h = RS.line_history(q, ["G"])[("G", 7, "points")]["fd"]
+    assert [x[1:] for x in h] == [[20.5, 1.9, 1.9], [20.5, 2.05, 1.9], [21.5, 2.2, 1.65]]
+
+
+def test_fair_value_and_z():
+    books = {"fd": {"rungs": [[20.5, 1.9, 1.9], [24.5, 3.0, None]]}, "dk": {"rungs": [[20.5, 2.0, 1.8]]}}
+    nv_dk = (1 / 2.0) / (1 / 2.0 + 1 / 1.8)
+    f, n = RS.fair_at(books, 20.5)
+    assert n == 2 and f == pytest.approx((0.5 + nv_dk) / 2)
+    v = RS.value_at(books, 20.5, "over")
+    assert v["book"] == "dk" and v["ev"] == pytest.approx(2.0 * f - 1)              # the best over, against fair
+    assert RS.value_at(books, 20.5, "under")["ev"] == pytest.approx(1.9 * (1 - f) - 1)
+    assert RS.fair_at(books, 24.5) == (None, 0) and RS.value_at(books, 24.5, "over") is None   # one-sided: no fair
+    assert RS.zscore(7, 10, .5) == pytest.approx(2 / math.sqrt(2.5)) and RS.zscore(3, 3, None) is None
+
+
+class _FakeSeason:
+    """The slice of nba_matchup.Season that rank_tables_blend reads. rate = what a team allowed per possession."""
+    def __init__(self, rates, n, lg=1.0):
+        self.rates, self.nn, self.lg = rates, n, lg
+        self.by_team = {t: [] for t in rates}
+        self.games, self.poss = {}, {}
+
+    def _team_before(self, t, d):
+        n = self.nn.get(t, 0)
+        return n, 100.0 * n, {("G", "pts"): self.rates[t] * 100.0 * n}
+
+    def _league_before(self, d):
+        return 1, 100.0, {("G", "pts"): self.lg}
+
+    def group_factors(self, t, d, g, lg=None):
+        return {"pts": self.rates[t] / self.lg}
+
+
+def test_rank_tables_blend_moves_from_last_season_to_this_one():
+    m = sqlite3.connect(":memory:")
+    m.execute("CREATE TABLE games (gid TEXT, home_pts REAL, away_pts REAL)")
+    prev = _FakeSeason({"A": 0.9, "B": 1.0, "C": 1.1}, {})          # last season: A the toughest, C the softest
+    cur_rates = {"A": 1.2, "B": 1.0, "C": 0.8}                      # this season the other way round
+    early = RS.rank_tables_blend(_FakeSeason(cur_rates, {"A": 2, "B": 2, "C": 2}), prev, m, "2026-10-26")
+    late = RS.rank_tables_blend(_FakeSeason(cur_rates, {"A": 60, "B": 60, "C": 60}), prev, m, "2027-03-01")
+    assert early["dvp"]["G"]["points"] == {"A": 1, "B": 2, "C": 3} and early["n"]["A"] == 2       # 2 games: last season
+    assert late["dvp"]["G"]["points"] == {"A": 3, "B": 2, "C": 1}                                  # 60 games: this one
+    assert early["teams"] == 3
+
+
+def test_absences_mark_fresh_news():
+    official = {(GD, 3): {"status": "Out", "team": "PHX"}, (GD, 4): {"status": "Out", "team": "PHX"}}
+    rows = lambda gids: [("2026-09-%02d" % (i + 1), g, "PHX", "UTA", 1, 1, 30.0) + (None,) * 9 for i, g in enumerate(gids)]
+    by_team = {3: {"PHX": rows([f"g{i}" for i in range(12)])},                   # played the team's last game
+               4: {"PHX": rows([f"x{i}" for i in range(12)])}}                   # long gone: none of the last 2
+    out = RS.absences(official, by_team, [GD], {"PHX": ["g10", "g11"]})[(GD, "PHX")]
+    assert {a["pid"]: a["fresh"] for a in out} == {3: True, 4: False} and out[0]["mpg"] == 30.0
+
+
+def test_mutants_research_plus():
+    """Each guard above must fail on the bug it exists for."""
+    import importlib
+    src = pathlib.Path(RS.__file__).read_text()
+    cases = (
+        ("snapshot reading of the change log (the 2026-10-26 audit bug)",
+         "        k = (gid, pid, stat, book)\n", "        k = (gid, pid, stat, book)\n        state[k] = {} if k not in dirty else state[k]\n",
+         test_replay_carries_the_board_forward),
+        ("no blend: this season's 2 games decide", "f[st_] = (n * r + k * pf * lg_r) / (n + k) / lg_r",
+         "f[st_] = r / lg_r", test_rank_tables_blend_moves_from_last_season_to_this_one),
+        ("every absence is fresh", '"fresh": any(g in played for g in (team_last or {}).get(team, []))',
+         '"fresh": True', test_absences_mark_fresh_news))
+    for tag, a, b, test in cases:
+        assert src.count(a) == 1, tag
+        d = pathlib.Path(tempfile.mkdtemp())
+        (d / "nba_research.py").write_text(src.replace(a, b))
+        sys.path.insert(0, str(d))
+        saved = sys.modules.pop("nba_research")
+        try:
+            mut = importlib.import_module("nba_research")
+            globals()["RS"] = mut
+            try:
+                test()
+            except AssertionError:
+                continue                                  # caught
+            raise AssertionError(f"MUTANT survived: {tag}")
+        finally:
+            globals()["RS"] = saved
+            sys.modules["nba_research"] = saved
+            sys.path.remove(str(d))
