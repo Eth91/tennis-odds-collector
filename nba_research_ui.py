@@ -94,6 +94,27 @@ letter-spacing:.04em;vertical-align:1.5px}
 .tf{background:rgba(255,159,10,.18);color:var(--org)} .tn{background:var(--g3);color:var(--l2)}
 .lhd{display:flex;justify-content:space-between;padding:12px 15.3px 8px;font-size:11.5px;color:#8e8e8e;border-bottom:1px solid #343434}
 .empty{padding:56px 24px;text-align:center;color:var(--l2);font-size:15px;line-height:1.4}
+/* the Injuries view: each team's report, a row per rotation player, the teammates who took his minutes / starts */
+.ijg{display:flex;justify-content:space-between;gap:12px;padding:16px 15.3px 6px;font-size:11.5px;letter-spacing:.3px;color:#8e8e8e;text-transform:uppercase}
+.ijt{display:flex;align-items:center;gap:8px;height:44px;padding:0 15.3px;border-bottom:1px solid #343434;font-size:16px}
+.ijt img{width:22px;height:22px}
+.ijt span{margin-left:auto;font-size:12.5px;color:#8e8e8e}
+.ijr{position:relative;min-height:66px;padding:10px 15.3px 11px 69.5px;border-bottom:1px solid #343434}
+.ijr .av{top:10px}
+.ijs{margin-top:2px;font-size:13px;color:#b0b0b0}
+.ijs small,.ijm small{font-size:11px;font-weight:500;color:#8e8e8e}
+.ijw{margin-top:1px;font-size:12px;color:#8e8e8e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ijx{margin:6px 0 0 -54.2px}
+.ijk{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px}
+.ijk>span{flex:none;margin-right:2px;font-size:10.5px;font-weight:700;letter-spacing:.3px;color:#8e8e8e;text-transform:uppercase}
+.ijk>span small{margin-left:4px;font-size:10.5px;font-weight:500;letter-spacing:0;color:#6e6e6e}
+.ijm{display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 9px;border:1px solid #333;border-radius:14px;background:#181818;
+color:#fff;font-size:12.8px;font-weight:600;white-space:nowrap}
+.ijm:disabled{color:#c8c8c8;opacity:1}
+.ijm:active{background:#2e2e2e}
+.ijo{padding:10px 15.3px;border-bottom:1px solid #343434;font-size:13px;color:#b0b0b0;line-height:1.6}
+.ijo>b{margin-right:8px;font-size:10.5px;letter-spacing:.3px;color:#8e8e8e;text-transform:uppercase}
+.ijo .tg{margin-left:3px}
 .empty b{display:block;margin-bottom:6px;color:var(--l1);font-size:18px}
 .empty button{margin-top:16px}
 .btn{height:44px;padding:0 20px;border:0;border-radius:12px;background:var(--g2);font-size:16px;font-weight:600}
@@ -680,7 +701,7 @@ let D = null, ERR = null, LOADING = true, CUR = null;
 // on a touchscreen, moving focus by script only draws a ring (and focusing a <select> can pop its picker)
 const TOUCH = matchMedia("(pointer: coarse)").matches;
 const ST = {date: null, gid: "all", market: "points", side: "over", q: "", sort: "hit10", dir: "desc", team: "all",
-            book: "all", lmin: "", lmax: "", omin: "", omax: "", view: "props"};
+            book: "all", lmin: "", lmax: "", omin: "", omax: "", watch: "", view: "props"};
 const DT = {line: null, win: "l10", home: null, starter: null, result: null, rest: null, ranges: {}, without: {},
             dvp: false, def: false, open: {}, more: false, fresh: null, ovs: []};
 const RANGES = [["min", "Minutes", "Minutes"], ["fga", "Field goal attempts", "FGA"], ["fg3a", "3-point attempts", "3PTA"],
@@ -726,6 +747,8 @@ function hashState() {
 function readHash() {
   const h = new URLSearchParams(location.hash.slice(1));
   Object.keys(ST).forEach(k => { if (h.has(k)) ST[k] = h.get(k); });
+  if (ST.view === "watch") Object.assign(ST, {view: "props", watch: "1"});    // the old Watchlist tab, now a filter
+  if (["props", "markets", "injuries"].indexOf(ST.view) < 0) ST.view = "props";
   return h.get("p");
 }
 const save = () => history.replaceState(history.state, "", hashState());
@@ -747,7 +770,7 @@ const MKT_TABS = ["trends", "injury", "points", "assists", "rebounds", "threes",
 const ALL_TABS = ["trends", "injury"];          // tabs that span every market
 // Trends (nba_research_score.trend_side): the L10 and L20 hit rates both 1+ SD from what the price implies, the same
 // way, 8+ games each. A plain 70% L10 put a third of the slate in Trends and ignored the price.
-const VIEWS = [["props", "Props"], ["markets", "Markets"], ["watch", "Watchlist"]];
+const VIEWS = [["props", "Props"], ["markets", "Markets"], ["injuries", "Injuries"]];
 const unit = m => (D.markets || {})[m] || m;
 // long names shorten to an initial, as on the reference ("M. Diabaté")
 const nameOf = n => n.length > 13 && n.indexOf(" ") > 0 ? n[0] + ". " + n.slice(n.indexOf(" ") + 1) : n;
@@ -819,11 +842,11 @@ function availMarkets() {
   D.props.forEach(p => { const g = gameOf(p.gid); if (g && g.date === ST.date) m[p.market] = 1; });
   return ORDER.filter(k => m[k]);
 }
-function filtersOn() { return ["team", "book"].filter(k => ST[k] !== "all").length + ["lmin", "lmax", "omin", "omax"].filter(k => ST[k] !== "").length + (ST.side === "under" ? 1 : 0); }
+function filtersOn() { return ["team", "book"].filter(k => ST[k] !== "all").length + ["lmin", "lmax", "omin", "omax", "watch"].filter(k => ST[k] !== "").length + (ST.side === "under" ? 1 : 0); }
 function listProps() {
-  const st = Object.assign({}, ST, {market: ALL_TABS.indexOf(ST.market) >= 0 || ST.view === "watch" ? "all" : ST.market});
+  const st = Object.assign({}, ST, {market: ALL_TABS.indexOf(ST.market) >= 0 ? "all" : ST.market});
   let list = filterProps(D.props, st, gameOf, logsOf);
-  if (ST.view === "watch") { const f = favs(); return sortProps(list.filter(p => f.indexOf(p.pid) >= 0 && (ALL_TABS.indexOf(ST.market) >= 0 || p.market === ST.market)), ST.sort, ST.dir, logsOf, ST.side, D.season); }
+  if (ST.watch) { const f = favs(); list = list.filter(p => f.indexOf(p.pid) >= 0); }
   // Trends: strongest first. Injuries: the without-teammate split furthest from the price first (thin samples last)
   if (ST.market === "trends") return list.map(p => [p, trend(p)]).filter(x => x[1] && x[1].side === ST.side).sort((a, b) => b[1].z - a[1].z).map(x => x[0]);
   if (ST.market === "injury") return list.filter(p => p.main !== null && freshOut(p).length).map(p => [p, woSplit(p, freshOut(p)[0], ST.side).z])
@@ -917,12 +940,15 @@ function render() {
   tabbar();
 }
 function renderList() {
-  const lst = $("#lst"), onDate = D.props.filter(p => (gameOf(p.gid) || {}).date === ST.date), list = listProps();
+  const lst = $("#lst"), ml = $(".ml");
+  if (ml) ml.style.display = ST.view === "injuries" ? "none" : "";
+  if (ST.view === "injuries") { lst.innerHTML = injView(); return; }
+  const onDate = D.props.filter(p => (gameOf(p.gid) || {}).date === ST.date), list = listProps();
   let body = null;
   if (!D.games.some(g => g.date === ST.date)) body = '<div class="empty"><b>No games</b></div>';
   else if (!onDate.length) body = '<div class="empty"><b>No props yet</b></div>';
   else if (ST.gid !== "all" && !onDate.some(p => p.gid === ST.gid)) body = '<div class="empty"><b>No props for this game yet</b></div>';
-  else if (!list.length) body = ST.view === "watch" ? '<div class="empty"><b>Watchlist empty</b></div>'
+  else if (!list.length) body = ST.watch ? '<div class="empty"><b>Watchlist empty</b><button class="btn" id="reset2">Reset filters</button></div>'
     : ST.market === "trends" ? '<div class="empty"><b>No trends</b></div>'
     : ST.market === "injury" ? '<div class="empty"><b>No new absences</b></div>'
     : '<div class="empty"><b>No matches</b><button class="btn" id="reset2">Reset filters</button></div>';
@@ -948,6 +974,53 @@ function renderList() {
   });
   lst.replaceChildren(frag);
 }
+// ── injuries: each slate team's latest official report. From the games a player missed for his team (this season and
+// last), the teammates who gained 2+ minutes a game and, for a starter, who started in his place (or, with no such
+// games, the bench player at his position with the most minutes: "by position") — nba_research.injury_report
+const INJ_C = {Out: "to", Doubtful: "to", Questionable: "tq", Probable: "tp"};
+const INJ_S = {Out: "OUT", Doubtful: "DOUBT", Questionable: "Q", Probable: "PROB"};
+const injReason = r => String(r || "").replace(/^Injury\/Illness\s*-\s*/i, "").replace(/^G League\s*-\s*/i, "G League · ");
+const injRot = e => e.mpg !== null && e.mpg >= 10;
+function injProp(pid) {                          // tonight's prop for a teammate named in a read, points first
+  return D.props.filter(p => p.pid === pid && (gameOf(p.gid) || {}).date === ST.date)
+    .sort((a, b) => ORDER.indexOf(a.market) - ORDER.indexOf(b.market))[0] || null;
+}
+function injMate(m, tail) {
+  const p = injProp(m.pid);
+  return `<button class="ijm"${p ? ` data-id="${esc(p.id)}"` : " disabled"}>${esc(nameOf(m.name))}${tail}</button>`;
+}
+function injRow(e) {
+  const meta = [esc(e.pos), e.mpg === null ? "No games" : `${e.mpg.toFixed(1)} MPG${e.season && e.season !== D.season ? ` <small>${esc(e.season.slice(2))}</small>` : ""}`,
+                e.starter ? "Starter" : ""].filter(Boolean).join(" · ");
+  const rd = [];
+  if (e.starts) rd.push(`<div class="ijk"><span>Starts</span>${injMate(e.starts, e.starts.how === "games" ? ` <small>${e.starts.k}/${e.starts.n}</small>` : " <small>by position</small>")}</div>`);
+  if (e.minutes.length) rd.push(`<div class="ijk"><span>Minutes<small>${e.missed} g w/o</small></span>${e.minutes.map(m => injMate(m, ` <b class="up">+${m.gain.toFixed(1)}</b>`)).join("")}</div>`);
+  return `<div class="ijr"><span class="av">${head(e.pid)}</span><div class="nm">${esc(e.name)}<span class="tg ${INJ_C[e.status] || "tn"}">${INJ_S[e.status] || esc(e.status)}</span></div>
+    <div class="ijs">${meta}</div>${e.reason ? `<div class="ijw">${esc(injReason(e.reason))}</div>` : ""}${rd.length ? `<div class="ijx">${rd.join("")}</div>` : ""}</div>`;
+}
+function injTeam(t, g) {
+  const r = (D.inj_report || {})[g.date + "|" + t], q = ST.q.trim().toLowerCase();
+  let ps = r ? r.players : [];
+  if (q && t.toLowerCase() !== q) {
+    ps = ps.filter(e => [e.name].concat(e.minutes.map(m => m.name), e.starts ? [e.starts.name] : []).some(n => n.toLowerCase().indexOf(q) >= 0));
+    if (!ps.length) return "";
+  }
+  const main = ps.filter(injRot), rest = ps.filter(e => !injRot(e));
+  const st = !r || !r.listed ? "Not on report" : !r.players.length ? "No injuries" : `${r.players.length} listed`;
+  return `<div class="ijt">${logo(t, "")}<b>${esc(t)}</b><span>${st}</span></div>${main.map(injRow).join("")}` +
+    (rest.length ? `<div class="ijo"><b>Also</b>${rest.map(e => `${esc(nameOf(e.name))}<span class="tg ${INJ_C[e.status] || "tn"}">${INJ_S[e.status] || esc(e.status)}</span>`).join(", ")}</div>` : "");
+}
+function injView() {
+  const gs = D.games.filter(g => g.date === ST.date && (ST.gid === "all" || g.gid === ST.gid));
+  if (!gs.length) return '<div class="empty"><b>No games</b></div>';
+  const rep = (D.sources.report || {})[ST.date];
+  const html = gs.map(g => {
+    const body = [g.away, g.home].filter(t => ST.team === "all" || t === ST.team).map(t => injTeam(t, g)).join("");
+    return body ? `<div class="ijg"><span>${esc(g.away)} @ ${esc(g.home)}</span><span>${when(g)}</span></div>${body}` : "";
+  }).join("");
+  return `<div class="lhd"><span>${rep ? "Official report · " + esc(mt(rep.published, true)) : "No official report yet"}</span></div>` +
+    (html || '<div class="empty"><b>No matches</b></div>');
+}
 function tabbar() {
   const tb = $("#tb"), fo = filtersOn();
   if (!$(".tbc", tb)) tb.innerHTML = `<div class="tbc glass" role="group" aria-label="Views" data-pw="72"><span class="pill2"></span>${VIEWS.map(([k, l]) => `<button data-view="${k}" aria-pressed="${ST.view === k}">${ICON[k]}<span>${l}</span></button>`).join("")}</div><button class="tbf glass" id="filtb" aria-haspopup="dialog" aria-label="Sort and filter"></button>`;
@@ -971,7 +1044,7 @@ function bindHead() {
   $$("[data-gid]").forEach(b => b.onclick = () => { ST.gid = ST.gid === b.dataset.gid ? "all" : b.dataset.gid; save(); press("[data-gid]", x => x.dataset.gid === ST.gid); renderList(); });
   $("#dayb").onclick = daySheet;
 }
-function resetFilters() { Object.assign(ST, {team: "all", book: "all", lmin: "", lmax: "", omin: "", omax: "", q: "", gid: "all"}); const q = $("#q"); if (q) { q.value = ""; q.closest(".sx").classList.remove("has"); $("#qx").hidden = true; } save(); render(); }
+function resetFilters() { Object.assign(ST, {team: "all", book: "all", lmin: "", lmax: "", omin: "", omax: "", watch: "", q: "", gid: "all"}); const q = $("#q"); if (q) { q.value = ""; q.closest(".sx").classList.remove("has"); $("#qx").hidden = true; } save(); render(); }
 // ── sheets ──
 let SHEET_FOCUS = null, SHEET_T = null, SHEET_N = 0;
 function openSheet(html, bind) {
@@ -1037,6 +1110,7 @@ function filterSheet() {
   const opt = (v, lab, cur) => `<option value="${v}"${v === cur ? " selected" : ""}>${esc(lab)}</option>`;
   openSheet(`<h2 id="sht">Sort &amp; filter</h2>
     <div class="sg"><span>Side</span><div class="seg" role="group" aria-label="Side"><button data-sd="over" aria-pressed="${dr.side === "over"}">Over</button><button data-sd="under" aria-pressed="${dr.side === "under"}">Under</button></div></div>
+    <div class="sg"><span>Show</span><div class="seg" role="group" aria-label="Show"><button data-wl="" aria-pressed="${!dr.watch}">All</button><button data-wl="1" aria-pressed="${!!dr.watch}">${ICON.star}Watchlist</button></div></div>
     <div class="sg"><span>Sort by</span><div class="chips">${SORTS.map(([k, lab]) => `<button class="chip" data-sort="${k}" aria-pressed="${k === dr.sort}">${lab.replace(" hit rate", "").replace("Head-to-head", "H2H")}<span class="ar">${k === dr.sort ? (dr.dir === "desc" ? " ↓" : " ↑") : ""}</span></button>`).join("")}</div></div>
     <label class="fl"><span>Team</span><select id="f-team">${opt("all", "All teams", dr.team)}${Object.keys(teams).sort().map(t => opt(t, t, dr.team)).join("")}</select></label>
     <label class="fl"><span>Sportsbook</span><select id="f-book">${opt("all", "FanDuel and DraftKings", dr.book)}${opt("fd", "FanDuel", dr.book)}${opt("dk", "DraftKings", dr.book)}</select></label>
@@ -1046,15 +1120,16 @@ function filterSheet() {
     <label class="fl"><span>Odds to</span><input id="f-omax" type="number" inputmode="numeric" placeholder="+150" value="${esc(dr.omax)}"></label></div>
     <div class="acts"><button class="btn" id="f-reset">Reset</button><button class="btn pri" id="f-ok"></button></div>`, s => {
     const read = () => { dr.team = $("#f-team", s).value; dr.book = $("#f-book", s).value; ["lmin", "lmax", "omin", "omax"].forEach(k => dr[k] = $("#f-" + k, s).value); };
-    const upd = () => { read(); const n = sortProps(filterProps(D.props, Object.assign({}, dr, {market: dr.market === "trends" ? "all" : dr.market}), gameOf, logsOf), dr.sort, dr.dir, logsOf, dr.side, D.season).length; $("#f-ok", s).textContent = ST.market === "trends" ? "Apply" : `Show ${n} prop${n === 1 ? "" : "s"}`; };
+    const upd = () => { read(); const f = favs(), n = sortProps(filterProps(D.props, Object.assign({}, dr, {market: dr.market === "trends" ? "all" : dr.market}), gameOf, logsOf).filter(p => !dr.watch || f.indexOf(p.pid) >= 0), dr.sort, dr.dir, logsOf, dr.side, D.season).length; $("#f-ok", s).textContent = ST.market === "trends" ? "Apply" : `Show ${n} prop${n === 1 ? "" : "s"}`; };
     $$("[data-sd]", s).forEach(b => b.onclick = () => { dr.side = b.dataset.sd; press("[data-sd]", x => x === b, s); upd(); });
+    $$("[data-wl]", s).forEach(b => b.onclick = () => { dr.watch = b.dataset.wl; press("[data-wl]", x => x === b, s); upd(); });
     $$("[data-sort]", s).forEach(b => b.onclick = () => {
       const k = b.dataset.sort;
       if (k === dr.sort) dr.dir = dr.dir === "desc" ? "asc" : "desc"; else { dr.sort = k; dr.dir = k === "player" || k === "line" ? "asc" : "desc"; }
       press("[data-sort]", x => x.dataset.sort === dr.sort, s); $$("[data-sort] .ar", s).forEach(a => a.textContent = a.parentNode.dataset.sort === dr.sort ? (dr.dir === "desc" ? " ↓" : " ↑") : "");
     });
     $$("select,input", s).forEach(e => e.onchange = e.oninput = upd);
-    $("#f-ok", s).onclick = () => { read(); Object.assign(ST, {side: dr.side, sort: dr.sort, dir: dr.dir, team: dr.team, book: dr.book, lmin: dr.lmin, lmax: dr.lmax, omin: dr.omin, omax: dr.omax}); save(); closeSheet(); renderList(); tabbar(); };
+    $("#f-ok", s).onclick = () => { read(); Object.assign(ST, {side: dr.side, sort: dr.sort, dir: dr.dir, team: dr.team, book: dr.book, lmin: dr.lmin, lmax: dr.lmax, omin: dr.omin, omax: dr.omax, watch: dr.watch}); save(); closeSheet(); renderList(); tabbar(); };
     $("#f-reset", s).onclick = () => { Object.assign(ST, {side: "over", sort: "hit10", dir: "desc"}); closeSheet(); resetFilters(); };
     upd();
   });
@@ -1185,7 +1260,7 @@ const ICON = {
   search: '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="7.5" cy="7.5" r="5.5"/><path d="m12 12 4.5 4.5"/></svg>',
   props: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8.5 5.5H21M8.5 12H21M8.5 18.5H21"/><circle cx="3.6" cy="5.5" r=".6" fill="currentColor"/><circle cx="3.6" cy="12" r=".6" fill="currentColor"/><circle cx="3.6" cy="18.5" r=".6" fill="currentColor"/></svg>',
   markets: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2.5v19h19"/><path d="m5.5 16 4-6.5 4.5 4 6-7.5"/><circle cx="9.5" cy="9.5" r="1.3" fill="currentColor"/><circle cx="14" cy="13.5" r="1.3" fill="currentColor"/><circle cx="20" cy="6" r="1.3" fill="currentColor"/></svg>',
-  watch: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="m12 2.5 2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9L12 2.5Z"/></svg>',
+  injuries: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.5" y="2.5" width="19" height="19" rx="5"/><path d="M10 6.5h4V10h3.5v4H14v3.5h-4V14H6.5v-4H10z"/></svg>',
   down: '<svg viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m2 2 4 4 4-4"/></svg>'};
 const favs = () => { try { return JSON.parse(localStorage.getItem("pickz_fav") || "[]"); } catch (e) { return []; } };
 function toggleFav(pid) {
@@ -1439,7 +1514,7 @@ function renderProp(mode) {
   clearTimeout(PX && PX.lazy);
   PX = {p: p, g: g, logs: logs, c: c, without: without, wins: wins, stat: stat, statDone: false};
   $("#pg .bk").onclick = () => history.back();
-  $("#fav", pg).onclick = () => { toggleFav(p.pid); const f = $("#fav", pg), on = favs().indexOf(p.pid) >= 0; f.classList.toggle("fav", on); f.setAttribute("aria-pressed", on); f.classList.remove("pop"); void f.offsetWidth; f.classList.add("pop"); if (ST.view === "watch") renderList(); };
+  $("#fav", pg).onclick = () => { toggleFav(p.pid); const f = $("#fav", pg), on = favs().indexOf(p.pid) >= 0; f.classList.toggle("fav", on); f.setAttribute("aria-pressed", on); f.classList.remove("pop"); void f.offsetWidth; f.classList.add("pop"); if (ST.watch && ST.view !== "injuries") renderList(); };
   $("#shr", pg).onclick = () => {
     const url = location.href, title = `${p.player} ${NAME[p.market]} ${DT.line}`;
     if (navigator.share) navigator.share({title: title, url: url}).catch(() => {});
@@ -1749,11 +1824,11 @@ document.addEventListener("keydown", e => { if (e.key === "Escape") { if (!$("#s
 document.addEventListener("DOMContentLoaded", () => {
   $("#scrim").onclick = closeSheet;
   sheetDrag();
-  $("#app").addEventListener("click", e => { const b = e.target.closest(".pr[data-id],.mrw[data-id]"); if (b) openProp(b.dataset.id); });
+  $("#app").addEventListener("click", e => { const b = e.target.closest(".pr[data-id],.mrw[data-id],.ijm[data-id]"); if (b) openProp(b.dataset.id); });
   // the big headshot starts loading and decoding the moment a finger lands on a row, so it is ready when the page slides in
   const warm = new Set();
   $("#app").addEventListener("pointerdown", e => {
-    const b = e.target.closest(".pr[data-id],.mrw[data-id]"), pid = b && b.dataset.id.split("|")[1];
+    const b = e.target.closest(".pr[data-id],.mrw[data-id],.ijm[data-id]"), pid = b && b.dataset.id.split("|")[1];
     if (!pid || warm.has(pid)) return;
     warm.add(pid); const im = new Image(); im.src = heroSrc(pid); if (im.decode) im.decode().catch(() => {});
   }, {passive: true});
