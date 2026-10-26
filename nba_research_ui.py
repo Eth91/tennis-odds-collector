@@ -1297,10 +1297,10 @@ function projCard(p, line, side) {
     .map(([k, lab]) => `<div class="kv"><span>${lab}</span><b>${(+pl[k].mean).toFixed(1)} <small>(${pl[k].q10}–${pl[k].q90})</small></b></div>`).join("") : "";
   // the input breakdown: μ = minutes x per-minute rate x opponent x pace x home (x back-to-back), per component
   const I = pl && pl.inputs, f2 = x => (+x).toFixed(2), GRPN_ = {G: "guards", F: "forwards", C: "centers"};
-  const xf = (lab, v) => Math.abs(v - 1) < .005 ? "" : ` × ${lab} ${f2(v)}`;
-  const brk = !I ? "" : `<div class="note pjb">Inputs (μ = minutes × per-minute rate × opponent × pace × home; the distribution is then built from similar past games around μ, so its mean can differ a little):<br>
-    Minutes: ${(+I.min).toFixed(1)} recent, pulled toward his 60-game level${xf("home", I.min_f.home)}${xf("back-to-back", I.min_f.b2b)} → μ ${(+I.mu.min).toFixed(1)}<br>
-    ${(MARKET_PARTS[p.market] || []).filter(k => I[k]).map(k => `${esc(STATN[k] || k)}: ${(+I.min).toFixed(1)} min × ${(+I[k][0]).toFixed(3)} per min (his rate, pooled with ${GRPN_[I.group] || "his position"})${xf("opponent", I[k][1])}${xf("pace", I[k][2])}${xf("home", I[k][3])}${xf("back-to-back", I[k][4])} → μ ${(+I.mu[k]).toFixed(1)}`).join("<br>")}</div>`;
+  const xf = (lab, v) => Math.abs(v - 1) < .005 ? "" : ` × ${lab} ${f2(v)}`, ha = p.home === false ? "away" : "home";
+  const brk = !I ? "" : `<div class="note pjb">Inputs (μ = minutes × per-minute rate × opponent × pace × home/away). The distribution then comes from what actually happened after similar past projections, rescaled to μ. Where projections like this one ran low or high, the mean shown above moves off μ:<br>
+    Minutes: ${(+I.min).toFixed(1)} recent, pulled toward his 60-game level${xf(ha, I.min_f.home)}${xf("back-to-back", I.min_f.b2b)} → μ ${(+I.mu.min).toFixed(1)}<br>
+    ${(MARKET_PARTS[p.market] || []).filter(k => I[k]).map(k => `${esc(STATN[k] || k)}: ${(+I.min).toFixed(1)} min × ${(+I[k][0]).toFixed(3)} per min (his rate, pooled with ${GRPN_[I.group] || "his position"})${xf("opponent", I[k][1])}${xf("pace", I[k][2])}${xf(ha, I[k][3])}${xf("back-to-back", I[k][4])} → μ ${(+I.mu[k]).toFixed(1)}`).join("<br>")}</div>`;
   const inj = (D.injuries[gameOf(p.gid).date + "|" + p.pid] || {}).official, av = inj && M.availability && M.availability[inj.status];
   const avail = inj ? `<div class="kv"><span>Plays tonight?</span><b>${esc(inj.status)}${av && av[1] ? ` · ${Math.round((av[0] + 1) / (av[1] + 2) * 100)}% <small>(${av[0]}/${av[1]} listed so since 10/22)</small>` : ""}</b></div>` : "";
   return head + `<div class="box0 pj">
