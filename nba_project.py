@@ -170,7 +170,7 @@ def walk(rows, cfg, targets=None, consts=None, keep=None):
             return (n * fc + BLEND_K) / (n + BLEND_K), (n * pc + BLEND_K) / (n + BLEND_K)
         return (n * fc + BLEND_K * fp) / (n + BLEND_K), (n * pc + BLEND_K * pp) / (n + BLEND_K)
 
-    def predict(t):
+    def predict(t, parts=False):
         pid, season, grp = t["pid"], t["season"], t["group"] or "F"
         p = player(pid)
         prior = group_prior(season, grp)
@@ -208,14 +208,21 @@ def walk(rows, cfg, targets=None, consts=None, keep=None):
         f_opp, pace = opp_factor(season, t["opp"], grp)
         own_pace = opp_factor(season, t["team"], grp)[1]
         ctx = np.ones(NS)
-        ctx[1:] *= np.power(np.clip(f_opp[1:], .3, 3.0), cfg["a_opp"])
-        ctx[1:] *= ((pace + own_pace) / 2.0) ** cfg["a_pace"]
-        if cfg["home"] and t.get("home") in (0, 1):
-            ctx *= home_f[t["home"]]
-        if cfg["b2b"] and rest == 1:
+        f_o = np.power(np.clip(f_opp[1:], .3, 3.0), cfg["a_opp"])
+        f_p = ((pace + own_pace) / 2.0) ** cfg["a_pace"]
+        ctx[1:] *= f_o
+        ctx[1:] *= f_p
+        f_h = home_f[t["home"]] if cfg["home"] and t.get("home") in (0, 1) else np.ones(NS)
+        ctx *= f_h
+        b2b = bool(cfg["b2b"] and rest == 1)
+        if b2b:
             ctx *= b2b_f
         m1 = np.concatenate([[m1_min * ctx[0]], rate * m1_min * ctx[1:]])
-        return {"b1": b1, "b2": b2, "m1": m1, "n_hist": p["n"], "rest": min(rest, 30)}
+        o = {"b1": b1, "b2": b2, "m1": m1, "n_hist": p["n"], "rest": min(rest, 30)}
+        if parts:              # the input breakdown the page shows: m1 = minutes x rate x opponent x pace x home (x b2b)
+            o["parts"] = {"group": grp, "min": float(m1_min), "rate": rate.astype(float), "opp": f_o.astype(float),
+                          "pace": float(f_p), "home": np.asarray(f_h, float), "b2b": b2b_f.astype(float) if b2b else None}
+        return o
 
     def update(rs):
         by_game = defaultdict(list)
@@ -271,7 +278,7 @@ def walk(rows, cfg, targets=None, consts=None, keep=None):
             if keep is None or i in keep:
                 out[i] = predict(rows[i])
         for j in t_by_date.get(d, []):
-            out_t[j] = predict(targets[j])
+            out_t[j] = predict(targets[j], parts=True)
         update([rows[i] for i in by_date.get(d, [])])
     return out, out_t
 
@@ -573,6 +580,7 @@ def refresh(targets, gamelogs=None, matchup=None, profiles=None, cache=None, for
                     else np.full(NS, np.nan) for t in slate])
     obj = {"key": key, "at": {k: j for j, k in enumerate(keys)}, "vals": d.vals.astype(np.float32), "mu": d.mu,
            "n_hist": [o["n_hist"] for o in ot], "rest": [o["rest"] for o in ot], "through": max(r["date"] for r in rows),
+           "parts": [o["parts"] for o in ot],
            "pool": ps["pool"], "no_group": no_group, "last10": l10, "made_at": __import__("datetime").datetime.now(
                __import__("datetime").timezone.utc).isoformat(timespec="seconds"),
            "availability": availability_table(news, matchup, lines_db) if news is not None else None}
@@ -626,6 +634,7 @@ def for_payload(props, games, now, log_db=None, cache=None, gamelogs=None, match
                 players[str(p["pid"])] = {m: {k: v for k, v in summarize(d, j, m).items() if k != "pmf"}
                                           for m in ("points", "rebounds", "assists", "threes", "steals", "blocks", "turnovers")}
                 players[str(p["pid"])]["min"] = {k: v for k, v in summarize(d, j, "min", 70).items() if k != "pmf"}
+                players[str(p["pid"])]["inputs"] = inputs_of(hit, j)
         meta["coverage"] = {"props": len(props), "projected": len(by_prop),
                             "thin_history": sum(1 for v in by_prop.values() if v["n_hist"] < 10),
                             "players": len(players), "unknown_position": hit.get("no_group", 0)}
@@ -658,6 +667,25 @@ def for_payload(props, games, now, log_db=None, cache=None, gamelogs=None, match
     except Exception as e:                                                   # noqa: BLE001
         meta["error"] = f"projection failed ({type(e).__name__}: {str(e)[:120]})"
         return {}, {}, meta
+
+
+def inputs_of(hit, j):
+    """The projection's input breakdown for the page: per stat [minutes, per-minute rate, opponent, pace, home,
+    back-to-back] whose product is μ (the mean the distribution is built around); None for an older cache."""
+    parts = hit.get("parts")
+    if not parts or parts[j] is None:
+        return None
+    q = parts[j]
+    b2b = q["b2b"] if q["b2b"] is not None else np.ones(NS)
+    r4 = lambda x: round(float(x), 4)
+    out = {"group": q["group"], "min": r4(q["min"]), "mu": {}}
+    for k, st in enumerate(STATS):
+        if k == 0:
+            out["min_f"] = {"home": r4(q["home"][0]), "b2b": r4(b2b[0])}
+        else:
+            out[st] = [r4(q["rate"][k - 1]), r4(q["opp"][k - 1]), r4(q["pace"]), r4(q["home"][k]), r4(b2b[k])]
+        out["mu"][st] = round(float(hit["mu"][j][k]), 2)
+    return out
 
 
 RESULTS = PD.HERE / "PROJECTION_RESULTS.json"

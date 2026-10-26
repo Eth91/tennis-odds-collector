@@ -407,7 +407,7 @@ svg.pjh text{fill:#8e8e8e;font-size:10px}
 .pjo{margin:10px 0 0;font-size:11px;color:#8e8e8e;text-transform:uppercase;letter-spacing:.04em}
 .pji summary{margin-top:8px;font-size:12px;color:#9a9a9a;list-style:none}
 .pji summary::-webkit-details-marker{display:none}
-.pjm{color:#9a9a9a;font-size:11px;margin-left:6px}
+.pjm{color:#9a9a9a;font-size:11px;margin-left:6px} .pjb{margin-top:6px;line-height:1.5}
 .hl{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12.5px;color:#bdbdbd;line-height:1.35}
 .hl i{flex:none;width:8px;height:8px;border-radius:50%}
 .hl b{color:#fff;font-weight:600}
@@ -1280,6 +1280,7 @@ function ladder(p, win, side, cur, winLab) {
     <div class="note">MODEL = the projection's own chance of the ${side} at each rung (model alone, which runs overconfident against book lines; the Model Projection card shows it blended with the price at the selected line). Fair only where a book prices both sides. On one-sided rungs (alt ladders) the HIT color compares with the price's own implied chance, margin included.</div>`;
 }
 // the projection engine's card: a model estimate, kept apart from the book prices and never a pick
+const STATN = {pts: "Points", reb: "Rebounds", ast: "Assists", fg3m: "3-pointers"};
 function projCard(p, line, side) {
   const M = D.proj_meta || {}, pr = p.proj, unit_ = esc(short(p.market));
   const head = `<h3>Model Projection <span class="tg tf" style="margin-left:6px">MODEL ESTIMATE · NOT A BET</span></h3>`;
@@ -1294,6 +1295,12 @@ function projCard(p, line, side) {
   const pl = D.proj_players && D.proj_players[String(p.pid)];
   const other = pl ? [["min", "Minutes"], ["steals", "Steals"], ["blocks", "Blocks"], ["turnovers", "Turnovers"]].filter(([k]) => pl[k])
     .map(([k, lab]) => `<div class="kv"><span>${lab}</span><b>${(+pl[k].mean).toFixed(1)} <small>(${pl[k].q10}–${pl[k].q90})</small></b></div>`).join("") : "";
+  // the input breakdown: μ = minutes x per-minute rate x opponent x pace x home (x back-to-back), per component
+  const I = pl && pl.inputs, f2 = x => (+x).toFixed(2), GRPN_ = {G: "guards", F: "forwards", C: "centers"};
+  const xf = (lab, v) => Math.abs(v - 1) < .005 ? "" : ` × ${lab} ${f2(v)}`;
+  const brk = !I ? "" : `<div class="note pjb">Inputs (μ = minutes × per-minute rate × opponent × pace × home; the distribution is then built from similar past games around μ, so its mean can differ a little):<br>
+    Minutes: ${(+I.min).toFixed(1)} recent, pulled toward his 60-game level${xf("home", I.min_f.home)}${xf("back-to-back", I.min_f.b2b)} → μ ${(+I.mu.min).toFixed(1)}<br>
+    ${(MARKET_PARTS[p.market] || []).filter(k => I[k]).map(k => `${esc(STATN[k] || k)}: ${(+I.min).toFixed(1)} min × ${(+I[k][0]).toFixed(3)} per min (his rate, pooled with ${GRPN_[I.group] || "his position"})${xf("opponent", I[k][1])}${xf("pace", I[k][2])}${xf("home", I[k][3])}${xf("back-to-back", I[k][4])} → μ ${(+I.mu[k]).toFixed(1)}`).join("<br>")}</div>`;
   const inj = (D.injuries[gameOf(p.gid).date + "|" + p.pid] || {}).official, av = inj && M.availability && M.availability[inj.status];
   const avail = inj ? `<div class="kv"><span>Plays tonight?</span><b>${esc(inj.status)}${av && av[1] ? ` · ${Math.round((av[0] + 1) / (av[1] + 2) * 100)}% <small>(${av[0]}/${av[1]} listed so since 10/22)</small>` : ""}</b></div>` : "";
   return head + `<div class="box0 pj">
@@ -1307,7 +1314,7 @@ function projCard(p, line, side) {
       <div class="note">${esc(M.target || "")}. Uses: ${esc((M.inputs_used || []).join("; "))}. Not used: ${esc((M.inputs_missing || []).join("; "))}.
       ${pr.n_hist < 10 ? `Only ${pr.n_hist} past games: wide range. ` : ""}Cutoff: ${esc(M.cutoff || "")}. Box scores through ${esc(M.logs_through || "?")}${M.stale ? " (" + esc(M.stale_reason || "stale") + ")" : ""}.
       Model ${esc(M.version || "")} (${esc(M.config || "")}), tuned on ${esc(M.tuned_on || "?")}; as of ${esc(mt(M.generated_at, true))}.
-      Its stat projections beat the baselines on two held-out seasons (CRPS, all 8 stats).</div></details>
+      Its stat projections beat the baselines on two held-out seasons (CRPS, all 8 stats).</div>${brk}</details>
     <button class="lk" id="pjsc" style="padding:12px 16px 6px 0;font-size:13px">Model scorecard ›</button></div>`;
 }
 // the projection engine's record: the pre-registered held-out test (proj_meta.backtest) and the forward record

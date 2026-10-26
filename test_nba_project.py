@@ -69,11 +69,11 @@ def test_no_future_data_reaches_a_prediction():
 def test_mutant_update_before_predict_is_caught():
     src = pathlib.Path(NP.__file__).read_text()
     a = ("        for i in by_date.get(d, []):\n            if keep is None or i in keep:\n                out[i] = predict(rows[i])\n"
-         "        for j in t_by_date.get(d, []):\n            out_t[j] = predict(targets[j])\n"
+         "        for j in t_by_date.get(d, []):\n            out_t[j] = predict(targets[j], parts=True)\n"
          "        update([rows[i] for i in by_date.get(d, [])])\n")
     b = ("        update([rows[i] for i in by_date.get(d, [])])\n        for i in by_date.get(d, []):\n"
          "            if keep is None or i in keep:\n                out[i] = predict(rows[i])\n"
-         "        for j in t_by_date.get(d, []):\n            out_t[j] = predict(targets[j])\n")
+         "        for j in t_by_date.get(d, []):\n            out_t[j] = predict(targets[j], parts=True)\n")
     assert src.count(a) == 1
     d = pathlib.Path(tempfile.mkdtemp())
     (d / "nba_project.py").write_text(src.replace(a, b))
@@ -96,6 +96,21 @@ def test_live_targets_match_the_walk():
     _, ot = NP.walk(rows, CFG, targets=tgt)
     _, ot2 = NP.walk(rows + [dict(rows[-1], date="2099-01-02", gid="Z")], CFG, targets=tgt)
     assert np.allclose(ot[0]["m1"], ot2[0]["m1"]) and ot[0]["n_hist"] > 0 and last < "2099-01-01"
+
+
+def test_input_breakdown_multiplies_to_the_projection():
+    """The page's breakdown (minutes x rate x opponent x pace x home x b2b) must be the projection, not a story."""
+    rows = synth()
+    tgt = [{"season": "2023-24", "date": "2099-01-01", "pid": 102, "team": "AAA", "opp": "BBB", "home": h, "group": "C"}
+           for h in (0, 1)]
+    _, ot = NP.walk(rows, CFG, targets=tgt)
+    for o in ot:
+        hit = {"parts": [o["parts"]], "mu": [o["m1"]]}
+        b = NP.inputs_of(hit, 0)
+        assert b["min"] * b["min_f"]["home"] * b["min_f"]["b2b"] == pytest.approx(o["m1"][0], rel=1e-3)
+        for k, st in enumerate(NP.STATS[1:], 1):
+            assert b["min"] * np.prod(b[st]) == pytest.approx(o["m1"][k], rel=2e-3, abs=1e-3), st
+    assert NP.inputs_of({"mu": [ot[0]["m1"]]}, 0) is None                    # an older cache: no breakdown, no guess
 
 
 def test_traded_player_keeps_his_history_and_faces_tonights_opponent():
@@ -291,6 +306,7 @@ def test_refresh_then_payload_and_stale(monkeypatch):
     assert meta["error"] is None and s["q10"] <= s["q50"] <= s["q90"] and sum(s["pmf"][1]) == pytest.approx(1, abs=2e-3)
     assert "G|999|points" not in by and meta["coverage"] == {"props": 2, "projected": 1, "thin_history": 0, "players": 1,
                                                              "unknown_position": 0}
+    assert pl["102"]["inputs"]["mu"]["pts"] == pytest.approx(NP.load_cache(d / "c.pkl")["mu"][0][1], abs=.01)
     assert set(pl["102"]) >= {"min", "steals", "blocks", "turnovers"} and meta["logged"] == 1 and meta["drift"]["pts"] is not None
     assert meta["stale"] is False and not meta.get("refresh_pending") and meta["availability"] == {"Out": [0, 3]}
     os.utime(d / "mu.sqlite", (1, 2))                                        # new box scores since the refresh
