@@ -27,8 +27,11 @@ button{cursor:pointer}
 .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .num{font-variant-numeric:tabular-nums}
 /* ── top bar ── */
+.top{padding:calc(var(--st) + 6px) 16px 0}
 .bar{position:sticky;top:0;z-index:20;padding:calc(var(--st) + 6px) 16px 8px;background:rgba(0,0,0,.82);
 -webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px)}
+.bar.pin{padding-top:calc(var(--st) + 4px);margin-top:2px}
+.bar.pin .chips:first-child{margin-top:0}
 .bar-r{display:flex;align-items:center;justify-content:space-between;min-height:34px}
 .bk{display:inline-flex;align-items:center;gap:2px;padding:6px 8px 6px 0;color:var(--blue);font-size:17px;text-decoration:none;
 background:none;border:0}
@@ -436,14 +439,14 @@ function header() {
   const games = D.games.filter(g => g.date === ST.date).map(g =>
     `<button class="chip" data-gid="${g.gid}" aria-pressed="${g.gid === ST.gid}">${logo(g.away, "")}${esc(g.away)} @ ${esc(g.home)}${logo(g.home, "")} <span class="t">${g.state === "live" ? '<span class="lv">LIVE</span>' : g.state === "final" ? "Final" : g.state === "postponed" ? "PPD" : mt(g.tip)}</span></button>`).join("");
   const fo = filtersOn();
-  return `<div class="bar"><div class="bar-r"><a class="bk" href="index.html">${CHEV}Pickz</a><span class="upd" id="upd">Updated ${ago(D.generated_at)}</span></div>
+  return `<div class="top"><div class="bar-r"><a class="bk" href="index.html">${CHEV}Pickz</a><span class="upd" id="upd">Updated ${ago(D.generated_at)}</span></div>
     <h1>NBA Props</h1>
     <label class="srch"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="5"/><path d="m11 11 3.5 3.5" stroke-linecap="round"/></svg>
       <span class="sr">Search players</span><input id="q" type="search" placeholder="Search players or team" autocomplete="off" autocorrect="off" value="${esc(ST.q)}">
       ${ST.q ? '<button class="clr" id="qx" aria-label="Clear search">×</button>' : ""}</label>
     <div class="seg" role="group" aria-label="Day">${days}</div>
-    <nav class="chips" aria-label="Markets">${mk}</nav>
-    <nav class="chips" aria-label="Games"><button class="chip" data-gid="all" aria-pressed="${ST.gid === "all"}">All games</button>${games}</nav>
+    <nav class="chips" aria-label="Games"><button class="chip" data-gid="all" aria-pressed="${ST.gid === "all"}">All games</button>${games}</nav></div>
+    <div class="bar pin"><nav class="chips" aria-label="Markets">${mk}</nav>
     <div class="tools"><div class="seg" role="group" aria-label="Side"><button data-side="over" aria-pressed="${ST.side === "over"}">Over</button><button data-side="under" aria-pressed="${ST.side === "under"}">Under</button></div>
       <span class="sp"></span>
       <button class="pill" id="sortb" aria-haspopup="dialog"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 2v10M1.5 9.5 4 12l2.5-2.5M10 12V2M7.5 4.5 10 2l2.5 2.5"/></svg>${esc((SORTS.find(s => s[0] === ST.sort) || SORTS[0])[1].replace(" hit rate", ""))}</button>
@@ -474,8 +477,8 @@ function banners() {
 function render() {
   const app = $("#app");
   if (!D) {
-    app.innerHTML = LOADING ? '<div class="bar"><div class="bar-r"><a class="bk" href="index.html">' + CHEV + 'Pickz</a></div><h1>NBA Props</h1></div><main aria-busy="true">' + '<div class="sk"></div>'.repeat(6) + "</main>"
-      : '<div class="bar"><div class="bar-r"><a class="bk" href="index.html">' + CHEV + 'Pickz</a></div><h1>NBA Props</h1></div><div class="empty" role="alert"><b>Couldn\'t load props</b>' + esc(ERR) + '<br><button class="btn pri" id="retry">Try again</button></div>';
+    app.innerHTML = LOADING ? '<div class="top"><div class="bar-r"><a class="bk" href="index.html">' + CHEV + 'Pickz</a></div><h1>NBA Props</h1></div><main aria-busy="true">' + '<div class="sk"></div>'.repeat(6) + "</main>"
+      : '<div class="top"><div class="bar-r"><a class="bk" href="index.html">' + CHEV + 'Pickz</a></div><h1>NBA Props</h1></div><div class="empty" role="alert"><b>Couldn\'t load props</b>' + esc(ERR) + '<br><button class="btn pri" id="retry">Try again</button></div>';
     const r = $("#retry"); if (r) r.onclick = load;
     return;
   }
@@ -590,9 +593,9 @@ function chart(logs, market, line) {
   if (!n) return '<div class="empty" style="padding:30px 0"><b>No games</b>Nothing matches this window and these filters.</div>';
   const vals = logs.map(l => statValue(l, market));
   const vmax = Math.max(line * 1.3, Math.max(...vals.filter(v => v !== null), 1));
-  const avail = Math.max(300, Math.min(window.innerWidth, 500) - 60);
+  const avail = Math.max(250, Math.min(window.innerWidth, 500) - 110);   // the card's inner width less the label room
   const bw = Math.max(22, Math.min(44, avail / n)), gap = Math.round(bw * .22);
-  const W = Math.max(avail, n * bw + 4), H = 230, top = 22, bot = 182;
+  const W = Math.max(avail, n * bw + 4) + 50, H = 230, top = 22, bot = 182;   // + room for the line label
   const y = v => bot - v / vmax * (bot - top);
   const out = [`<svg class="ch" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="group" aria-label="${esc(NAME[market])} by game, ${n} games, line ${line}">`,
     '<defs><pattern id="hz" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#ff453a"/><line x1="0" y1="0" x2="0" y2="6" stroke="#b32a22" stroke-width="3"/></pattern></defs>'];
@@ -646,8 +649,8 @@ function renderProp() {
   const rk = (r, n, goodHigh) => r ? `<span class="rk ${n ? (r <= Math.ceil(n / 3) ? (goodHigh ? "g" : "r") : r > n - Math.ceil(n / 3) ? (goodHigh ? "r" : "g") : "n") : "n"}">${ord(r)}</span>` : "";
   const mrows = [];
   if (c.opp_games) {
-    mrows.push(`<div class="kv"><span>${esc(p.opp)} defense vs ${gp || "position"}</span><b>${c.def_rank ? `${ord(c.def_rank)}-most ${esc(short(p.market))} allowed` : p.market === "threes" ? "n/a for threes" : "—"}${c.def_rank ? rk(c.def_rank, c.teams, side === "over") : ""}</b></div>`);
-    mrows.push(`<div class="kv"><span>${esc(p.opp)} pace</span><b>${c.pace_rank ? ord(c.pace_rank) + " fastest" : "—"}${rk(c.pace_rank, c.teams, side === "over")}</b></div>`);
+    mrows.push(`<div class="kv"><span>${esc(short(p.market))} allowed to ${gp || "his position"}</span><b>${c.def_rank ? rk(c.def_rank, c.teams, side === "over") : p.market === "threes" ? "n/a for threes" : "—"}</b></div>`);
+    mrows.push(`<div class="kv"><span>${esc(p.opp)} pace</span><b>${c.pace_rank ? rk(c.pace_rank, c.teams, side === "over") : "—"}</b></div>`);
   } else mrows.push(`<div class="kv"><span>Opponent</span><b>No ${esc(p.opp || "")} games yet this season</b></div>`);
   if (g.lines) mrows.push(`<div class="kv"><span>Game</span><b>${g.lines.total ? "Total " + g.lines.total : ""}${g.lines.spread_home !== undefined ? " · " + esc(g.home) + " " + (g.lines.spread_home > 0 ? "+" : "") + g.lines.spread_home : ""}</b></div>`);
   const l10g = logs.slice(-10), m5 = logs.slice(-5);
@@ -686,7 +689,7 @@ function renderProp() {
       <div class="fch" role="group" aria-label="Filter games">${chips}</div>
       ${s.n && s.n < 5 ? '<div class="note" style="color:var(--org)">Small sample: ' + s.n + " game" + (s.n === 1 ? "" : "s") + ".</div>" : ""}
       <div class="note">Past results only, every team he played for. Green = over the line, striped red = under, grey = push.</div></div>
-    <div class="box"><h3>Matchup</h3>${mrows.join("")}<div class="note">Ranks among ${c.teams || "the"} teams that have played, season to date (1st = most allowed / fastest).</div></div>
+    <div class="box"><h3>Matchup</h3>${mrows.join("")}<div class="note">${esc(p.opp || "Opponent")}'s rank among ${c.teams || "the"} teams this season: 1st = allows the most / plays fastest. Green = helps the ${side}.</div></div>
     <div class="box"><h3>Availability</h3>${arows.join("")}<div class="note">Official = the NBA injury report. News is third-party.</div></div>
     ${rel ? `<div class="box"><h3>Related props</h3><div class="rel">${rel}</div><div class="note">How closely the two stats moved together in past games (r from −1 to +1). History, not a prediction.</div></div>` : ""}
     ${p.flag ? `<div class="box"><h3>Engine</h3><span class="tg tf" style="margin:0 6px 0 0">SHADOW · NOT A BET</span>${esc(p.flag.tier)} at ${p.flag.line} · ${p.flag.card === 1 ? "on the card" : "logged only" + (p.flag.why ? " (" + esc(p.flag.why.toLowerCase()) + ")" : "")}</div>` : ""}
