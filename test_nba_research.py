@@ -135,8 +135,14 @@ def live_box(gid):
 def payload():
     d = pathlib.Path(tempfile.mkdtemp())
     stores(d)
+    tr = sqlite3.connect(d / "tracking.sqlite")
+    tr.execute("CREATE TABLE tracking (date TEXT, player_id INTEGER, potential_ast REAL, ast_trk REAL, passes REAL, "
+               "secondary_ast REAL, ft_ast REAL, reb_chances REAL, oreb_chances REAL, dreb_chances REAL, reb_trk REAL)")
+    tr.execute("INSERT INTO tracking (date, player_id, potential_ast, reb_chances) VALUES ('2026-09-01', 1, 14, 9)")
+    tr.execute("INSERT INTO tracking (date, player_id, potential_ast, reb_chances) VALUES ('2026-09-02', 1, 11, NULL)")
+    tr.commit(); tr.close()
     return RS.build(now=NOW, sched=SCHED, lines=d / "lines.sqlite", news=d / "news.sqlite", shadow=d / "shadow.sqlite",
-                    matchup=d / "matchup.sqlite", index=d / "index.json", box_get=live_box)
+                    matchup=d / "matchup.sqlite", index=d / "index.json", box_get=live_box, tracking=d / "tracking.sqlite")
 
 
 def test_payload_props_and_books(payload):
@@ -153,6 +159,8 @@ def test_payload_props_and_books(payload):
     # usage %: (15 FGA + .44 * 4 FTA + 3 TOV) of PHX's (90 + .44 * 20 + 12), over his 30 of the team's 84 minutes / 5
     assert lg[0]["usg"] == round(100 * (15 + .44 * 4 + 3) * (84 / 5) / (30 * (90 + .44 * 20 + 12)), 1) == 10.0
     assert RS.usage(0.5, 1, 0, 0, 90, 20, 12, 240) is None and RS.usage(30, 15, 4, 3, None, 20, 12, 240) is None
+    # tracking: potential assists / rebound chances; a tracked game with no rebounding row is 0 chances; none untracked
+    assert [(l["pot_ast"], l["reb_ch"]) for l in lg[:3]] == [(14, 9), (11, 0), (None, None)]
     s = b["summary"]["l10"]                                                    # last 10 PHX games: 20..29 pts
     assert s["n"] == 10 and s["over"] == 5 and s["under"] == 5
     assert payload["sources"]["books"]["dk"]["stale"] is True and payload["sources"]["books"]["fd"]["stale"] is False
@@ -310,7 +318,17 @@ def test_page_controls_work_on_iphone():
     # motion runs as Web Animations with a timer fallback, and nothing is fetched from a font CDN
     assert ".animate([" in html and "setTimeout(done" in html and "fonts.googleapis" not in html
     # every range chip but Margin draws its stat on the chart as white outline boxes (Margin can be negative: filter only)
-    assert 'const OVL = {min: "min", fga: "FGA", fg3a: "3PTA", fta: "FTA", usg: "usage %"}' in html and "l[ov]" in html
+    assert ('const OVL = {min: "min", fga: "FGA", fg3a: "3PTA", fta: "FTA", usg: "usage %", pot_ast: "potential assists", '
+            'reb_ch: "rebound chances"}') in html and "l[ov]" in html
+    # the adjustable filters come first; potential assists / rebound chances only on the props they bear on
+    assert '["min", "fga", "fg3a", "fta", "usg", "pot_ast", "reb_ch"].forEach(rchip)' in html
+    assert html.index('.forEach(rchip);') < html.index("if (c.dvp_rank) chips.push(") and 'const MORE_R = ["margin"];' in html
+    assert 'pot_ast: ["assists", "pra", "pts_ast", "reb_ast"], reb_ch: ["rebounds", "pra", "pts_reb", "reb_ast"]' in html
+    # no explanatory prose: notes are status only, empty states are titles only
+    import re
+    notes = re.findall(r'class="note"[^>]*>([^<$]*)', html)
+    assert all(n.strip() in ("Loading…", "") or n.startswith("Couldn") for n in notes), notes
+    assert not re.search(r'<div class="empty"><b>[^<]+</b>[A-Za-z]', html)
     # research+: fair price / VALUE, honest hit-rate boxes, Trends + Injuries tabs, line history, books that disagree
     assert all(k in html for k in ("fairAt(", "<i>VALUE</i>", "hbox(", 'injury: "Injuries"', "histChart(", "freshOut(", 'class="df"'))
     # 6-7: the alt-line ladder (one-sided rungs colored against their own implied chance) and the scorecard sheet
