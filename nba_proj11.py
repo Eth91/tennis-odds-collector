@@ -112,19 +112,36 @@ def holm(pvals, alpha=0.05):
 
 
 def score_season(arm, data, season, w_blend=None):
-    """Per-row normalized CRPS, per-stat CRPS and log score, and the FanDuel-line arrays for one season."""
-    idx = np.where(arm.season == season)[0]
-    d = arm.dist(idx)
-    crps = E.crps_by_stat(arm, idx, d)
-    ncrps = np.mean([crps[s] / arm.sd[j] for j, s in enumerate(NP.STATS)], 0)
-    out = {"idx": idx, "ncrps": ncrps, "crps": {s: float(crps[s].mean()) for s in NP.STATS},
-           "mae": {s: float(np.abs(d.mean(s) - arm.Y[idx, j]).mean()) for j, s in enumerate(NP.STATS)}}
-    joined = E.fd_join(arm, data["hist"], set(idx.tolist()))
-    if joined:
-        mp = E.market_probs(arm, d, idx, joined)
-        ok = ~mp["push"]
-        out["fd"] = {k: v[ok] for k, v in mp.items()}
-    del d
+    """Per-row normalized CRPS, per-stat CRPS and MAE, and the FanDuel-line arrays for one season. Built one
+    calendar month at a time (Run.dist builds each month from its own earlier pool anyway), so only a month of
+    draws is in memory."""
+    idx_all = np.where(arm.season == season)[0]
+    lines = E.fd_join(arm, data["hist"], set(idx_all.tolist()))
+    by_row = {}
+    for i, ln in lines:
+        by_row.setdefault(i, []).append((i, ln))
+    crps_rows, ae, fd_parts, order = {s: [] for s in NP.STATS}, {s: [] for s in NP.STATS}, [], []
+    for m in sorted({d[:7] for d in arm.date[idx_all]}):
+        idx = idx_all[np.char.startswith(arm.date[idx_all].astype(str), m)]
+        d = arm.dist(idx)
+        c = E.crps_by_stat(arm, idx, d)
+        for j, s in enumerate(NP.STATS):
+            crps_rows[s].append(c[s])
+            ae[s].append(np.abs(d.mean(s) - arm.Y[idx, j]))
+        joined = [x for i in idx for x in by_row.get(i, [])]
+        if joined:
+            mp = E.market_probs(arm, d, idx, joined)
+            ok = ~mp["push"]
+            fd_parts.append({k: v[ok] for k, v in mp.items()})
+        order.append(idx)
+        del d
+    idx = np.concatenate(order)
+    crps = {s: np.concatenate(v) for s, v in crps_rows.items()}
+    out = {"idx": idx, "ncrps": np.mean([crps[s] / arm.sd[j] for j, s in enumerate(NP.STATS)], 0),
+           "crps": {s: float(crps[s].mean()) for s in NP.STATS},
+           "mae": {s: float(np.concatenate(ae[s]).mean()) for s in NP.STATS}}
+    if fd_parts:
+        out["fd"] = {k: np.concatenate([f[k] for f in fd_parts]) for k in fd_parts[0]}
     return out
 
 
