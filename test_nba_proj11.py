@@ -126,3 +126,24 @@ def test_boot_is_date_clustered():
     d = np.array(["x"] * 50 + ["y"] * 50)
     b = P.boot(np.r_[np.full(50, -1.0), np.full(50, 1.0)], d, reps=500)
     assert b["mean"] == pytest.approx(0) and b["lo"] < 0 < b["hi"]
+
+
+def test_lineup_poll_stores_only_changes():
+    import sqlite3, tempfile, pathlib, datetime as dt
+    import nba_lineups_poll as L
+
+    class R:
+        def __init__(self, j):
+            self.status_code, self._j = 200, j
+
+        def json(self):
+            return self._j
+    con = sqlite3.connect(pathlib.Path(tempfile.mkdtemp()) / "l.sqlite")
+    con.execute(L.DDL)
+    t = dt.datetime(2026, 10, 26, 22, 0, tzinfo=dt.timezone.utc)
+    j1, j2 = {"games": [{"gameId": "G", "x": 1}]}, {"games": [{"gameId": "G", "x": 2}]}
+    assert L.poll_once(con, lambda u: R(j1), t) == "stored"
+    assert L.poll_once(con, lambda u: R(j1), t + dt.timedelta(minutes=5)) == "same"
+    assert L.poll_once(con, lambda u: R(j2), t + dt.timedelta(minutes=10)) == "stored"
+    assert L.poll_once(con, lambda u: R(j2), t + dt.timedelta(minutes=80)) == "stored"      # hourly heartbeat
+    assert L.et_date(dt.datetime(2026, 10, 27, 2, 0, tzinfo=dt.timezone.utc)) == "2026-10-26"

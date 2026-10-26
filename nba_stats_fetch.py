@@ -75,6 +75,14 @@ KINDS = {
     "pt_PostTouch": (_pt("PostTouch"), "PLAYER_ID"),
     "pt_PaintTouch": (_pt("PaintTouch"), "PLAYER_ID"),
 }
+# Families with a season game-log endpoint: one call returns every player-game (or team-game) of a season,
+# the same per-game values as the one-date queries. load() splits them by GAME_DATE.
+LOG = ("&LeagueID=00&PerMode=Totals&DateFrom=&DateTo=&GameSegment=&LastNGames=0&Location=&Month=0&OpponentTeamID=0"
+       "&Outcome=&PORound=0&Period=0&SeasonSegment=&ShotClockRange=&TeamID=&VsConference=&VsDivision=")
+SEASON_LOGS = {"adv": ("playergamelogs", "Advanced"), "usage": ("playergamelogs", "Usage"),
+               "scoring": ("playergamelogs", "Scoring"), "misc": ("playergamelogs", "Misc"),
+               "team_adv": ("teamgamelogs", "Advanced"), "team_opp": ("teamgamelogs", "Opponent")}
+SEASONS = ("2022-23", "2023-24", "2024-25", "2025-26", "2026-27")
 PAUSE, TRIES, MAX_FAIL = 0.8, 5, 12
 
 DDL = """CREATE TABLE IF NOT EXISTS raw (kind TEXT, key TEXT, season TEXT, url TEXT, fetched_at TEXT,
@@ -88,6 +96,9 @@ def season_of(d):
 
 
 def url_for(kind, d):
+    if kind.endswith("@season"):
+        ep, mt = SEASON_LOGS[kind[:-7]]
+        return S + f"{ep}?Season={d}&SeasonType=Regular%20Season&MeasureType={mt}" + LOG + ("&PlayerID=" if ep == "playergamelogs" else "")
     if kind == "lineups":
         return f"https://stats.nba.com/js/data/leaders/00_daily_lineups_{d.replace('-', '')}.json"
     return (KINDS[kind][0] + f"&Season={season_of(d)}&SeasonType=Regular%20Season&DateFrom={d}&DateTo={d}")
@@ -95,7 +106,7 @@ def url_for(kind, d):
 
 def rows_of(kind, j):
     """Row count after the schema check; raises ValueError when the response is not the expected shape."""
-    need = KINDS[kind][1]
+    need = KINDS[kind.replace("@season", "")][1]
     if kind == "lineups":
         if "games" not in j:
             raise ValueError("no games key")
@@ -142,7 +153,8 @@ def run(kinds, workers=2, get=None):
     con.execute(DDL)
     lock = threading.Lock()
     have = {(k, key) for k, key in con.execute("SELECT kind, key FROM raw WHERE status IN (200, 404)")}
-    todo = [(k, d) for k in kinds for d in dates() if (k, d) not in have]
+    todo = [(k + "@season", s) for k in kinds if k in SEASON_LOGS for s in SEASONS if (k + "@season", s) not in have]
+    todo += [(k, d) for k in kinds if k not in SEASON_LOGS for d in dates() if (k, d) not in have]
     print(f"nba_stats_fetch: {len(todo)} requests to make ({len(have)} already stored)", flush=True)
     fails = [0]
     done = [0]
@@ -191,16 +203,29 @@ def status():
     con.execute(DDL)
     n_dates = len(dates())
     for kind in KINDS:
-        n, rows = con.execute("SELECT COUNT(*), COALESCE(SUM(n), 0) FROM raw WHERE kind = ? AND status = 200",
-                              (kind,)).fetchone()
-        print(f"{kind:18s} {n:4d}/{n_dates} dates  {rows:8d} rows")
+        k = kind + "@season" if kind in SEASON_LOGS else kind
+        n, rows = con.execute("SELECT COUNT(*), COALESCE(SUM(n), 0) FROM raw WHERE kind = ? AND status IN (200, 404)",
+                              (k,)).fetchone()
+        tot = len(SEASONS) if kind in SEASON_LOGS else n_dates
+        print(f"{kind:18s} {n:4d}/{tot} {'seasons' if kind in SEASON_LOGS else 'dates'}  {rows:8d} rows")
 
 
 def load(kind, con=None):
-    """{date: parsed JSON} for a stored kind."""
+    """{date: parsed JSON} for a stored kind. Season-log kinds are split by GAME_DATE into one response per
+    date with the same headers, so callers see the same shape as a one-date query."""
     con = con or sqlite3.connect(f"file:{RAW}?mode=ro", uri=True)
-    return {key: json.loads(zlib.decompress(b)) for key, b in
-            con.execute("SELECT key, body FROM raw WHERE kind = ? AND status = 200", (kind,))}
+    out = {key: json.loads(zlib.decompress(b)) for key, b in
+           con.execute("SELECT key, body FROM raw WHERE kind = ? AND status = 200", (kind,))}
+    if kind in SEASON_LOGS:
+        for (b,) in con.execute("SELECT body FROM raw WHERE kind = ? AND status = 200", (kind + "@season",)):
+            rs = json.loads(zlib.decompress(b))["resultSets"][0]
+            k = rs["headers"].index("GAME_DATE")
+            by = {}
+            for r in rs["rowSet"]:
+                by.setdefault(r[k][:10], []).append(r)
+            for d, rr in by.items():
+                out.setdefault(d, {"resultSets": [{"headers": rs["headers"], "rowSet": rr}]})
+    return out
 
 
 def main():

@@ -3,6 +3,7 @@
 proj-1.1 (NBA_PROJ11_PREREG.md). The historical files only hold the final state; this keeps every change
 with the time it was seen, so a lineup is used at tip − 30 min only if it was visible by then.
     python3 nba_lineups_poll.py --until 2026-10-27T03:30 --every 180 [--db PATH]
+    python3 nba_lineups_poll.py --once --db ~/nba-engine/nba_lineups.sqlite       # one poll (cron)
 Stores a snapshot only when the content changed (plus one per hour as a heartbeat).
 """
 import argparse
@@ -43,7 +44,8 @@ def poll_once(con, get, now=None):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--until", required=True, help="UTC, e.g. 2026-10-27T03:30")
+    ap.add_argument("--until", help="UTC, e.g. 2026-10-27T03:30")
+    ap.add_argument("--once", action="store_true")
     ap.add_argument("--every", type=int, default=180)
     ap.add_argument("--db", default=str(DB))
     a = ap.parse_args()
@@ -51,6 +53,9 @@ def main():
     get = lambda u: cr.get(u, impersonate="chrome", timeout=30, headers=H)
     con = sqlite3.connect(a.db)
     con.execute(DDL)
+    if a.once:
+        print(datetime.now(timezone.utc).isoformat(timespec="seconds"), poll_once(con, get), flush=True)
+        return
     end = datetime.fromisoformat(a.until).replace(tzinfo=timezone.utc)
     while datetime.now(timezone.utc) < end:
         try:
