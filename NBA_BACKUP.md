@@ -15,7 +15,7 @@
 
 ## Where the copies are
 
-- **VM** `ubuntu@155.248.217.149:~/backups/nba/`, written 09:45 UTC (log `~/nba-logs/backup.log`).
+- **VM** `ubuntu@155.248.217.149:~/backups/nba/`, written 09:48 UTC (log `~/nba-logs/backup.log`).
 - **worker-2** `ubuntu@140.238.143.104:~/backups/nba-board/`, pulled 10:05 UTC (log `~/nba_backup_pull.log`).
   From the Mac: `ssh -i ~/.ssh/oracle_vm ubuntu@140.238.143.104`.
 

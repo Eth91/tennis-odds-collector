@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Pull the board VM's NBA backup (nba_backup.py) to worker-2, so the NBA stores live on two machines.
 
-Runs ON worker-2 (cron 10:05 UTC, after the VM's 09:45 run) from ~/nba-backup/, beside a copy of
+Runs ON worker-2 (cron 10:05 UTC, after the VM's 09:48 run) from ~/nba-backup/, beside a copy of
 nba_backup.py whose checks and retention it reuses. nba_vm_deploy.sh deploys the board VM only; this box is
 installed by hand (NBA_BACKUP.md).
 
