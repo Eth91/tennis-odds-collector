@@ -2,6 +2,7 @@
 built from synthetic stores (books + alternate rungs, logs, official report vs news, absences, related props, live
 and postponed games, stale books, engine flags), the page's JS against the Python, and the page's script syntax."""
 import datetime as dt
+import inspect
 import json
 import math
 import pathlib
@@ -87,7 +88,7 @@ def stores(d):
     new = ("2026-10-26T17:30", "2026-10-26T21:30:04+00:00")
     n.executemany("INSERT INTO snapshots VALUES (?,?,?,?,?,?,?,?,?)", [
         (*old, GD, "SAC@PHX", "PHX", 2, "Grayson Allen", "Questionable", "Injury/Illness - Ankle"),
-        (*new, GD, "SAC@PHX", "PHX", 3, "Jusuf Nurkic", "Out", "Injury/Illness - Knee"),     # Allen dropped off: cleared
+        (*new, GD, "SAC@PHX", "PHX", 3, "Jusuf Nurkic", "Out", "Injury/Illness - Knee 07:30 (ET)"),  # parser's time column     # Allen dropped off: cleared
         (*new, GD, "SAC@PHX", "PHX", 8, "Former Sun", "Out", "Rest")])                      # traded: SAC logs only
     n.execute("INSERT INTO news_items VALUES ('x','i1','2026-10-26T20:00:00+00:00','Devin Booker',1,'PHX',?, 'q',"
               "'Booker questionable (ankle)','','x:underdog',0)", (GD,))
@@ -181,6 +182,9 @@ def test_payload_availability(payload):
     assert inj[f"{GD}|1"]["news"][0]["source"] == "x @underdog" and inj[f"{GD}|1"]["official"] is None
     ab = payload["absences"][f"{GD}|PHX"]
     assert [a["pid"] for a in ab] == [3] and ab[0]["name"] == "Jusuf Nurkic" and len(ab[0]["played"]) == 20  # not the traded 8
+    ir = payload["inj_report"][f"{GD}|PHX"]                # the Injuries view: the traded-in 8 has no PHX game to read
+    assert ir["listed"] and [(e["pid"], e["missed"], e["starter"]) for e in ir["players"]] == [(8, 0, True), (3, 10, True)]
+    assert ir["players"][1]["reason"] == "Injury/Illness - Knee" and not ir["players"][1]["fresh"]   # out the last 10
 
 
 def test_payload_related_and_flags(payload):
@@ -313,8 +317,14 @@ def test_page_controls_work_on_iphone():
     assert 'type="range"' not in html and "dualRange(" in html and "touch-action:pan-y" in html
     # chart bars show their game on tap (a <title> only appears on hover); the book prices switch Over / Under
     assert "barTip(" in html and "data-ps=" in html
-    # the reference layout: Trends tab, game cards, a floating Props / Markets / Watchlist bar, a books table
-    assert all(k in html for k in ('trends: "Trends"', 'class="gc"', 'data-view="', '["watch", "Watchlist"]', 'id="pbk"'))
+    # the reference layout: Trends tab, game cards, a floating Props / Markets / Injuries bar, a books table
+    assert all(k in html for k in ('trends: "Trends"', 'class="gc"', 'data-view="', '["injuries", "Injuries"]', 'id="pbk"'))
+    # the Watchlist is a filter now (an old #view=watch link lands on it); a teammate named in an injury read opens his prop
+    assert '["watch", "Watchlist"]' not in html and 'Object.assign(ST, {view: "props", watch: "1"})' in html and "data-wl=" in html
+    assert ".ijb[data-id]" in html and "function injView(" in html and 'ST.view === "injuries"' in html
+    # the Injuries view is one list, most relevant first (minutes x the chance he sits); no Injuries tab among the Props tabs
+    assert "injList().sort" not in html and "return out.sort((a, b) => injImpact(b) - injImpact(a));" in html
+    assert 'const ALL_TABS = ["trends"];' in html and 'injury: "Injuries"' not in html and '"injury"' not in html
     # motion runs as Web Animations with a timer fallback, and nothing is fetched from a font CDN
     assert ".animate([" in html and "setTimeout(done" in html and "fonts.googleapis" not in html
     # every range chip but Margin draws its stat on the chart as white outline boxes (Margin can be negative: filter only)
@@ -330,7 +340,7 @@ def test_page_controls_work_on_iphone():
     assert all(n.strip() in ("Loading…", "") or n.startswith("Couldn") for n in notes), notes
     assert not re.search(r'<div class="empty"><b>[^<]+</b>[A-Za-z]', html)
     # research+: fair price / VALUE, honest hit-rate boxes, Trends + Injuries tabs, line history, books that disagree
-    assert all(k in html for k in ("fairAt(", "<i>VALUE</i>", "hbox(", 'injury: "Injuries"', "histChart(", "freshOut(", 'class="df"'))
+    assert all(k in html for k in ("fairAt(", "<i>VALUE</i>", "hbox(", "histChart(", "freshOut(", 'class="df"'))
     # 6-7: the alt-line ladder (one-sided rungs colored against their own implied chance) and the scorecard sheet
     assert all(k in html for k in ("function ladder(", "chanceSide(", "data-ll=", "nba_research_score.json", "scoreSheet"))
     # 6: the alt-line ladder (tap a rung to use it); 7: the scorecard sheet reads the nightly replay's JSON
@@ -437,6 +447,101 @@ def test_absences_mark_fresh_news():
                4: {"PHX": rows([f"x{i}" for i in range(12)])}}                   # long gone: none of the last 2
     out = RS.absences(official, by_team, [GD], {"PHX": ["g10", "g11"]})[(GD, "PHX")]
     assert {a["pid"]: a["fresh"] for a in out} == {3: True, 4: False} and out[0]["mpg"] == 30.0
+
+
+def _injury_fixture():
+    m = MU.connect(pathlib.Path(tempfile.mkdtemp()) / "m.sqlite")
+    PG = "INSERT INTO player_games (gid, team, pid, pos, starter, min) VALUES (?,?,?,?,?,?)"
+    games = [(f"a{i}", "2025-26", f"2026-03-{i + 1:02d}") for i in range(10)] + [(f"b{i}", "2026-27", f"2026-10-2{i + 1}") for i in range(2)]
+    for gid, s, d in games:
+        m.execute("INSERT INTO games (gid, season, date, home, away, home_pts, away_pts) VALUES (?,?,?,?,?,100,90)", (gid, s, d, "PHX", "UTA"))
+        i, last = int(gid[1:]), s == "2025-26"
+        out = not last or i >= 6                               # X (10) hurt after game a5, still out this season
+        if not out:
+            m.execute(PG, (gid, "PHX", 10, "C", 1, 30))
+        m.execute(PG, (gid, "PHX", 11, "G", 1, 32))                                   # A: starts either way
+        m.execute(PG, (gid, "PHX", 12, "C" if out else "", int(out), 28 if out else 12))   # B: starts in X's place
+        m.execute(PG, (gid, "PHX", 13, "", 0, 20 if out else 15))                     # C: +5 a game without X
+        if last and i in (2, 3):
+            m.execute(PG, (gid, "PHX", 15, "", 0, 12))         # Z: a bench player in 2 of the 8 games since his first
+        if last and i >= 6:
+            m.execute(PG, (gid, "PHX", 14, "", 0, 5))          # T: a two-way, 5 minutes
+        if not last:
+            m.execute(PG, (gid, "PHX", 16, "G", 1, 24))        # N: new this season, starts; never played beside X
+        m.execute(PG, (gid, "UTA", 20, "G", 1, 34))            # Y: a starter who never missed a game
+        m.execute(PG, (gid, "UTA", 21, "", 0, 18))             # W: the bench guard with the most minutes
+        m.execute(PG, (gid, "UTA", 22, "", 0, 10))
+        m.execute(PG, (gid, "UTA", 23, "", 0, 25))             # U: more minutes, but a forward
+        if last:
+            m.execute(PG, (gid, "SAC", 30, "F", 1, 31))        # K: all of last season for SAC, on PHX now
+    m.commit()
+    roster = {"10": ["PHX", "X Ten", "C"], "11": ["PHX", "A Eleven", "G"], "12": ["PHX", "B Twelve", "C"],
+              "13": ["PHX", "C Thirteen", "F"], "14": ["PHX", "T Fourteen", "G"], "15": ["PHX", "Z Fifteen", "G"],
+              "20": ["UTA", "Y Twenty", "G"], "21": ["UTA", "W TwentyOne", "G"], "22": ["UTA", "V TwentyTwo", "G"],
+              "23": ["UTA", "U TwentyThree", "F"], "30": ["PHX", "K Thirty", "F"], "16": ["PHX", "N Sixteen", "G"]}
+    d = "2026-10-26"
+    official = {(d, 10): {"status": "Out", "team": "PHX", "reason": "Injury/Illness - Knee"},
+                (d, 15): {"status": "Questionable", "team": "PHX", "reason": ""},
+                (d, 11): {"status": "Questionable", "team": "PHX", "reason": ""},
+                (d, 14): {"status": "Out", "team": "PHX", "reason": "G League - Two-Way"},
+                (d, 30): {"status": "Out", "team": "PHX", "reason": ""},
+                (d, 20): {"status": "Doubtful", "team": "UTA", "reason": ""},
+                (d, 99): {"status": "Out", "team": "PHX", "reason": "", "player": "Not Indexed"}}
+    args = (official, {(d, "PHX"): True, (d, "UTA"): True}, {d: {"published": "2026-10-26T21:30:00+00:00"}},
+            [{"date_et": d, "home": "PHX", "away": "UTA"}], roster, ("2025-26", "2026-27"))
+    return m, args
+
+
+def test_injury_report_reads_who_took_the_minutes():
+    m, args = _injury_fixture()
+    out = RS.injury_report(m, *args)
+    phx, uta = out["2026-10-26|PHX"], out["2026-10-26|UTA"]
+    assert phx["listed"] and phx["published"].startswith("2026-10-26T21:30")
+    assert [e["pid"] for e in phx["players"]] == [30, 10, 14, 99, 11, 15]      # Out by minutes, then Questionable
+    # NEW: played in one of the team's last 2 games (A did; X has sat since last season)
+    assert {e["pid"]: e["fresh"] for e in phx["players"]} == {30: False, 10: False, 14: False, 99: False, 11: True, 15: False}
+    x = next(e for e in phx["players"] if e["pid"] == 10)
+    # 4 games after he got hurt last season + this season's 2 (still on the team): 6 missed beside 6 played
+    assert x["starter"] and x["missed"] == 6 and x["mpg"] == 30.0 and x["season"] == "2025-26"
+    assert x["starts"] == {"pid": 12, "name": "B Twelve", "k": 6, "n": 6, "how": "games"}
+    assert [(g["pid"], g["gain"], g["n"]) for g in x["minutes"]] == [(12, 16.0, 6), (13, 5.0, 6)]   # not A (+0)
+    k = next(e for e in phx["players"] if e["pid"] == 30)                      # last season was SAC's: no PHX games
+    assert k["missed"] == 0 and k["starts"] is None and k["minutes"] == [] and k["mpg"] == 31.0
+    t = next(e for e in phx["players"] if e["pid"] == 14)                      # under 10 a game: listed, no read
+    assert t["mpg"] == 5.0 and t["minutes"] == [] and t["starts"] is None
+    z = next(e for e in phx["players"] if e["pid"] == 15)                      # in 2 of 8: the games he played are odd
+    assert z["missed"] > 2 and z["minutes"] == [] and z["status"] == "Questionable"
+    assert next(e for e in phx["players"] if e["pid"] == 99)["name"] == "Not Indexed"
+    y = uta["players"][0]                                                      # never missed: the bench guard
+    assert y["missed"] == 0 and y["starts"] == {"pid": 21, "name": "W TwentyOne", "k": None, "n": None, "how": "position"}
+
+
+def test_mutants_injury_report():
+    m, args = _injury_fixture()
+    player = lambda out, pid: next(e for e in out["2026-10-26|PHX"]["players"] if e["pid"] == pid)
+
+    def mutant(old, new):
+        src = inspect.getsource(RS.injury_report)
+        assert src.count(old) == 1, old
+        ns = {}
+        exec(compile(src.replace(old, new), "mutant", "exec"), RS.__dict__, ns)
+        return ns["injury_report"](m, *args)
+    # 1. his window stops at his last game (a sitting player's later games not counted as missed)
+    real = RS.depth_read
+    RS.depth_read = lambda boxes, x, mates, stays: real(boxes, x, mates, {})
+    try:
+        assert player(RS.injury_report(m, *args), 10)["missed"] != 6
+    finally:
+        RS.depth_read = real
+    # 2. a bench player out more often than in still gets a read: teammates "gain" in the games he sat
+    assert player(mutant("elif not starter and played < missed:", "elif False:"), 15)["minutes"]
+    # 3. the starts read without a with-him baseline: N, who never played beside X, takes his spot
+    assert player(mutant("and nw >= MIN_WITHOUT and so / no >= .5 and sw / nw < .5",
+                         "and so / no >= .5 and (not nw or sw / nw < .5)"), 10)["starts"]["pid"] == 16
+    # 4. a player with no game for the team gets the by-position guess anyway
+    assert player(mutant("if starter and played:", "if starter:"), 30)["starts"] is not None
+    # 5. NEW from every game he ever played, not the team's last 2: X, out since last season, reads as news
+    assert player(mutant("if b[1] < d][-FRESH_GAMES:]", "if b[1] < d]"), 10)["fresh"] is True
 
 
 def test_mutants_research_plus():
