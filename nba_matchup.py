@@ -289,6 +289,7 @@ if __name__ == "__main__":
     for s in a.fetch or []:
         print(s, "stored %d, not final or failed %d" % fetch(regular_season_gids(s), con))
     if a.current:
-        today = dt.date.today().isoformat()
-        print(season_of(today), "stored %d, not final or failed %d" % fetch(regular_season_gids(season_of(today)), con))
+        import nba_rosters as R
+        finals = [g["gid"] for g in R.schedule() if g["status"] == 3]      # this season's finished games only
+        print(season_of(dt.date.today().isoformat()), "stored %d, not final or failed %d" % fetch(finals, con))
         print("play-type rows:", snapshot_playtypes(con))
