@@ -60,6 +60,18 @@ before the slate), coverage (props projected, thin-history count), the availabil
 `error` (on any failure the page shows no projection, never a stand-in number), and the number of
 forecasts logged. Nightly: realized log loss for the model, the blend and the close, CLV, and n.
 
+## Deploy (VM)
+1. Code: `nba_vm_deploy.sh` from a checkout whose HEAD contains the VM's deployed commit (*.py only).
+2. One time: copy `nba_profiles.sqlite` (positions, home/away) to `~/nba-engine/`. The deploy never
+   copies data. Without it, `--refresh` fails and the page shows "projections not computed yet".
+3. Crons (in the VM crontab): `7,37 * * * *` `flock -n /tmp/nba-proj-refresh.lock nice python3
+   nba_project.py --refresh` → `~/nba-logs/proj_refresh.log`; `15 11 * * *` `nice python3 nba_proj_eval.py
+   --prospective …/docs/nba_proj_score.json` → `~/nba-logs/proj_score.log`.
+4. Check: `python3 nba_project.py --refresh` prints "cache current" (or "projected N players"), and
+   `proj_meta.error` in `docs/nba_props.json` is null with `coverage.projected == coverage.props`.
+5. Roll back: remove the two cron lines; the page build keeps working, and with no cache it shows
+   no projections and says so.
+
 ## Known limits
 Historical minutes are whole numbers. Positions are static. The historical market (−29 min) knows the
 injuries and lineups the historical model does not. Steals and blocks have historical lines only.
