@@ -147,3 +147,5 @@ def test_lineup_poll_stores_only_changes():
     assert L.poll_once(con, lambda u: R(j2), t + dt.timedelta(minutes=10)) == "stored"
     assert L.poll_once(con, lambda u: R(j2), t + dt.timedelta(minutes=80)) == "stored"      # hourly heartbeat
     assert L.et_date(dt.datetime(2026, 10, 27, 2, 0, tzinfo=dt.timezone.utc)) == "2026-10-26"
+    assert L.et_date(dt.datetime(2026, 11, 3, 4, 30, tzinfo=dt.timezone.utc)) == "2026-11-02"   # EST: UTC-5
+    assert L.et_date(dt.datetime(2027, 3, 8, 3, 30, tzinfo=dt.timezone.utc)) == "2027-03-07"

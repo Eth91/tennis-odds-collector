@@ -22,7 +22,9 @@ DDL = "CREATE TABLE IF NOT EXISTS snaps (fetched_at TEXT, date_et TEXT, sha TEXT
 
 
 def et_date(now):
-    return (now - timedelta(hours=4 if 3 <= now.month <= 10 else 5)).date().isoformat()
+    """The NBA's date (US Eastern) for a UTC moment: a 01:00 UTC poll belongs to the previous evening's slate."""
+    from zoneinfo import ZoneInfo
+    return now.astimezone(ZoneInfo("America/New_York")).date().isoformat()
 
 
 def poll_once(con, get, now=None):
