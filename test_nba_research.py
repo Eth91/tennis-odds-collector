@@ -282,6 +282,14 @@ def test_page_scripts_parse():
     assert "__" not in html.split("<style>")[0] and "__TEAM_ID__" not in html and "1610612756" in html
 
 
+def test_page_controls_work_on_iphone():
+    html = UI.page()
+    # iOS Safari can't drag the thumb of a range input stacked under another, so the dual sliders are pointer-event widgets
+    assert 'type="range"' not in html and "dualRange(" in html and "touch-action:pan-y" in html
+    # chart bars show their game on tap (a <title> only appears on hover); the odds pills switch Over / Under
+    assert "barTip(" in html and "data-ps=" in html
+
+
 def test_board_links_the_page():
     import nba_board as B
     assert 'href="nba_props.html"' in B.html({"record": None, "slates": [], "retracted": [], "offcard": []})

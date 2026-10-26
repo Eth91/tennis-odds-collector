@@ -114,6 +114,7 @@ background-size:200% 100%;animation:sk 1.1s infinite}
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;max-height:86vh;overflow-y:auto;padding:8px 16px calc(var(--sb) + 16px);
 border-radius:14px 14px 0 0;background:var(--g1);transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.9,.3,1)}
 .sheet.on{transform:none}
+.sheet:focus{outline:none}
 .grab{width:36px;height:5px;margin:0 auto 10px;border-radius:3px;background:var(--g3)}
 .sheet h2{margin:0 0 10px;font-size:20px;font-weight:700}
 .opt{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:48px;padding:0 4px;border:0;
@@ -152,6 +153,8 @@ border-bottom:.5px solid var(--sep);font-size:15px}
 .bkr .ln2{color:var(--l2);font-size:12px}
 .bkr .od{min-width:62px;padding:6px 0;border-radius:8px;background:var(--g2);text-align:center;font-weight:700}
 .bkr .od.best{background:rgba(48,209,88,.18);color:var(--grn)}
+.bkr button.od{border:0;cursor:pointer}
+.bkr .od[aria-pressed="true"]{box-shadow:inset 0 0 0 1px #5a5a5a}
 .bkr .od.na{color:var(--l3);font-weight:500;font-size:12px}
 .note{margin-top:8px;font-size:12px;line-height:1.35;color:var(--l3)}
 .wins{display:flex;gap:8px;overflow-x:auto;margin:14px 0 0;padding:0 16px;scrollbar-width:none}
@@ -174,7 +177,7 @@ svg.ch text{fill:var(--l3);font-size:10px;font-weight:600}
 svg.ch .vl{fill:var(--l1);font-size:12px;font-weight:800}
 svg.ch .dt{font-size:9px;letter-spacing:-.03em}
 svg.ch .ll{fill:#000;font-size:11px;font-weight:800}
-svg.ch g.br:focus{outline:none} svg.ch g.br:focus rect{stroke:var(--blue);stroke-width:2}
+svg.ch g.br:focus{outline:none} svg.ch g.br:focus-visible rect{stroke:var(--blue);stroke-width:2}
 .fch{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .fch .pill{height:32px;background:var(--blue);font-size:13px}
 .fch .pill b{background:#fff;color:var(--blue)}
@@ -184,16 +187,13 @@ background:rgba(10,132,255,.2);color:#64b0ff;font-size:13px;font-weight:600}
 .rg{margin:16px 0 0}
 .rg-h{display:flex;justify-content:space-between;align-items:baseline;font-size:15px}
 .rg-h b{font-variant-numeric:tabular-nums}
+.dual,.dual2{touch-action:pan-y;-webkit-user-select:none;user-select:none;cursor:pointer}
 .dual{position:relative;height:36px;margin:2px 4px 0}
 .dual .trk,.dual .fil{position:absolute;top:16px;height:4px;border-radius:2px}
 .dual .trk{left:0;right:0;background:var(--g3)}
 .dual .fil{background:var(--blue)}
-.dual input{position:absolute;left:-14px;width:calc(100% + 28px);top:0;height:36px;margin:0;background:none;pointer-events:none;
--webkit-appearance:none;appearance:none}
-.dual input::-webkit-slider-runnable-track{height:36px;background:none}
-.dual input::-webkit-slider-thumb{pointer-events:auto;-webkit-appearance:none;width:28px;height:28px;margin-top:4px;border-radius:50%;
-background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.45)}
-.dual input::-moz-range-thumb{pointer-events:auto;width:28px;height:28px;border:0;border-radius:50%;background:#fff}
+.dual .th{position:absolute;top:4px;width:28px;height:28px;margin-left:-14px;border-radius:50%;background:#fff;
+box-shadow:0 2px 8px rgba(0,0,0,.45)}
 .sg{margin:16px 0 0}
 .sg>span{display:block;margin:0 0 6px;font-size:15px}
 .sg .seg{margin:0}
@@ -266,7 +266,11 @@ justify-content:center;text-align:center;line-height:1.15;text-shadow:0 1px 6px 
 .muc{position:absolute;right:15.3px;top:13.1px;display:flex;flex-direction:column;align-items:center;justify-content:center;
 width:94.4px;height:79.5px;padding:0;border:1px solid #2a2a2a;border-radius:13px;background:#131313;color:#fff;font-size:11.6px}
 .muc svg{margin:-4px 0 -2px}
-.c2w{margin-top:11px;padding:0 15.3px;overflow-x:auto;scrollbar-width:none}
+.c2w{position:relative;margin-top:11px;padding:0 15.3px;overflow-x:auto;scrollbar-width:none}
+.c2w .tip{position:absolute;z-index:2;padding:5px 9px;border-radius:9px;background:#2c2c2e;box-shadow:0 4px 14px rgba(0,0,0,.5);
+font-size:12px;line-height:15px;white-space:nowrap;pointer-events:none}
+.c2w .tip b{display:block;font-weight:600}
+svg.c2.pick g.br:not(.sel){opacity:.4}
 .c2w::-webkit-scrollbar{display:none}
 svg.c2{display:block}
 svg.c2 .ax{fill:#9a9a9a;font-size:11.3px}
@@ -275,7 +279,7 @@ svg.c2 .mn{fill:#fff;font-size:13.3px;font-weight:400}
 svg.c2 .vv{fill:#0b0b0b;font-size:13.3px;font-weight:400}
 svg.c2 .vw{fill:#fff;font-size:13.3px;font-weight:400}
 svg.c2 .xl{fill:#9a9a9a;font-size:9.9px}
-svg.c2 g.br:focus{outline:none} svg.c2 g.br:focus rect{stroke:var(--blue);stroke-width:2}
+svg.c2 g.br:focus{outline:none} svg.c2 g.br:focus-visible rect{stroke:var(--blue);stroke-width:2}
 .wrow{display:flex;align-items:center;gap:9.6px;margin:17.5px 15.3px 0}
 .wcap{flex:1;display:flex;height:42.4px;padding:0 3.5px;align-items:center;border:1px solid #2a2a2a;border-radius:21.2px;
 background:#161616;overflow-x:auto;scrollbar-width:none}
@@ -303,14 +307,8 @@ background:#171717;font-size:12.2px;color:#fff}
 .rp-h span{font-size:13.2px;font-weight:600}
 .rp-h b{font-size:12px;font-weight:500;color:#9a9a9a;font-variant-numeric:tabular-nums}
 .dual2{position:relative;height:35px;margin-top:13.5px;border:1px solid #2a2a2a;border-radius:17.5px;background:#141414}
-.dual2 .trk{display:none}
 .dual2 .fil{position:absolute;top:4px;height:25px;border-radius:12.5px;background:linear-gradient(#3d3d3d,#333)}
-.dual2 input{position:absolute;left:0;width:100%;top:0;height:33px;margin:0;background:none;pointer-events:none;
--webkit-appearance:none;appearance:none}
-.dual2 input::-webkit-slider-runnable-track{height:33px;background:none}
-.dual2 input::-webkit-slider-thumb{pointer-events:auto;-webkit-appearance:none;width:26px;height:26px;margin-top:3.5px;border-radius:50%;
-background:transparent;box-shadow:none}
-.dual2 input::-moz-range-thumb{pointer-events:auto;width:26px;height:26px;border:0;background:transparent}
+.dual2 .th{position:absolute;top:3.5px;width:26px;height:26px;margin-left:-13px;border-radius:50%}
 .rp-b{display:flex;justify-content:space-between;margin:2px 10px 0 13px;font-size:15px;line-height:17px;font-variant-numeric:tabular-nums}
 .sec2{margin:28px 15.3px 0}
 .sec2 h3{margin:0 0 10px;font-size:13.1px;font-weight:600}
@@ -503,6 +501,8 @@ const SORTS = [["hit10", "L10 hit rate"], ["hit5", "L5 hit rate"], ["hit20", "L2
                ["szn", "Season hit rate"], ["avgdiff", "L10 average vs line"], ["line", "Line"], ["odds", "Best price"],
                ["player", "Player name"]];
 let D = null, ERR = null, LOADING = true, CUR = null;
+// on a touchscreen, moving focus by script only draws a ring (and focusing a <select> can pop its picker)
+const TOUCH = matchMedia("(pointer: coarse)").matches;
 const ST = {date: null, gid: "all", market: "points", side: "over", q: "", sort: "hit10", dir: "desc", team: "all",
             book: "all", lmin: "", lmax: "", omin: "", omax: ""};
 const DT = {line: null, win: "l10", home: null, starter: null, result: null, rest: null, ranges: {}, without: {},
@@ -653,15 +653,16 @@ function openSheet(html, bind) {
   const s = $("#sheet"), sc = $("#scrim");
   s.innerHTML = '<div class="grab"></div>' + html;
   s.hidden = sc.hidden = false;
-  requestAnimationFrame(() => { s.classList.add("on"); sc.classList.add("on"); });
+  void s.offsetWidth;                       // a forced layout starts the transition; no animation frame needed
+  s.classList.add("on"); sc.classList.add("on");
   bind(s);
-  const f = s.querySelector("button, select, input"); if (f) f.focus();
+  const f = TOUCH ? s : s.querySelector("button, select, input, [tabindex]"); if (f) f.focus({preventScroll: true});
 }
 function closeSheet() {
   const s = $("#sheet"), sc = $("#scrim");
   s.classList.remove("on"); sc.classList.remove("on");
   setTimeout(() => { s.hidden = sc.hidden = true; s.innerHTML = ""; }, 280);
-  if (SHEET_FOCUS && document.body.contains(SHEET_FOCUS)) SHEET_FOCUS.focus();
+  if (!TOUCH && SHEET_FOCUS && document.body.contains(SHEET_FOCUS)) SHEET_FOCUS.focus({preventScroll: true});
 }
 function sortSheet() {
   openSheet('<h2 id="sht">Sort by</h2>' + SORTS.map(([k, lab]) => `<button class="opt" data-sort="${k}">${lab}<span class="ck">${k === ST.sort ? (ST.dir === "desc" ? "↓" : "↑") : ""}</span></button>`).join("") +
@@ -713,10 +714,10 @@ function openProp(id, push) {
   const pg = $("#pg");
   pg.hidden = false;
   document.body.classList.add("lock");
-  requestAnimationFrame(() => pg.classList.add("on"));
+  void pg.offsetWidth;                      // (an animation frame never comes while the page is in the background)
+  pg.classList.add("on");
   if (fresh) pg.scrollTop = 0;
-  // move focus into the page for keyboard and screen-reader users; on a touchscreen it only draws a ring
-  if (!matchMedia("(pointer: coarse)").matches) setTimeout(() => { const b = $("#pg .bk"); if (b) b.focus({preventScroll: true}); }, 50);
+  if (!TOUCH) setTimeout(() => { const b = $("#pg .bk"); if (b) b.focus({preventScroll: true}); }, 50);
 }
 function closeProp() {
   const pg = $("#pg");
@@ -724,7 +725,7 @@ function closeProp() {
   document.body.classList.remove("lock");
   setTimeout(() => { if (!pg.classList.contains("on")) pg.hidden = true; }, 330);
   const id = CUR; CUR = null;
-  const b = id && document.querySelector(`.pr[data-id="${CSS.escape(id)}"]`); if (b) b.focus({preventScroll: true});
+  const b = !TOUCH && id && document.querySelector(`.pr[data-id="${CSS.escape(id)}"]`); if (b) b.focus({preventScroll: true});
 }
 function chart(logs, market, line) {
   const n = logs.length;
@@ -822,7 +823,8 @@ function chart2(logs, market, line) {
     const fill = res === "over" ? "var(--grn)" : res === "under" ? "var(--red)" : "#8e8e93";
     const d = iso(l.date + "T12:00:00Z").toLocaleDateString("en-US", {month: "numeric", day: "numeric", timeZone: "UTC"});
     const desc = `${d} ${l.home ? "vs" : "at"} ${l.opp}: ${v === null ? "no value" : v} ${short(market)} in ${m} minutes, ${res} ${line}`;
-    let g = `<g class="br" tabindex="0" role="img" aria-label="${esc(desc)}"><title>${esc(desc)}</title>`;
+    const tip = `${d} ${l.home ? "vs " : "@"}${l.opp}|${v === null ? "—" : v} ${short(market)} · ${m === null || m === undefined ? "—" : Math.round(m * 10) / 10} min`;
+    let g = `<g class="br" tabindex="0" role="img" aria-label="${esc(desc)}" data-tip="${esc(tip)}"><title>${esc(desc)}</title>`;
     if (v !== null && v > 0) g += `<rect x="${x}" y="${y(v)}" width="${w}" height="${B - y(v)}" fill="${fill}"/>`;
     if (m) g += `<rect x="${x + .65}" y="${y(m) + .65}" width="${w - 1.3}" height="${B - y(m) - .65}" fill="none" stroke="#fff" stroke-width="1.1"/>` +
       `<text class="mn" x="${cx}" y="${y(m) + 18}" text-anchor="middle">${Math.round(m * 10) / 10}</text>`;
@@ -834,6 +836,21 @@ function chart2(logs, market, line) {
   o.push(`<line x1="0" x2="${W}" y1="${y(line)}" y2="${y(line)}" stroke="#fff" stroke-width=".9"/>`);
   o.push(`<text class="lx" x="0" y="${y(line) - 2.6}">${line}</text></svg>`);
   return o.join("");
+}
+// a bar's <title> only shows on hover, so a tap pins its game above the bar (tap it again, or the chart, to clear)
+function barTip(cw, gb) {
+  const svg = $("svg.c2", cw), old = $(".tip", cw), was = $("g.br.sel", cw);
+  if (old) old.remove();
+  if (was) was.classList.remove("sel");
+  if (svg) svg.classList.toggle("pick", !!gb && gb !== was);
+  if (!gb || gb === was) return;
+  gb.classList.add("sel");
+  const [a, b] = gb.dataset.tip.split("|"), t = document.createElement("div");
+  t.className = "tip"; t.innerHTML = `<b>${esc(a)}</b>${esc(b)}`; cw.appendChild(t);
+  const r = gb.getBoundingClientRect(), c = cw.getBoundingClientRect();
+  const x = r.left - c.left + cw.scrollLeft + r.width / 2, w = t.offsetWidth;
+  t.style.left = Math.max(cw.scrollLeft + 4, Math.min(cw.scrollLeft + cw.clientWidth - w - 4, x - w / 2)) + "px";
+  t.style.top = Math.max(0, r.top - c.top - t.offsetHeight - 6) + "px";
 }
 function renderProp() {
   const p = D.props.find(x => x.id === CUR), pg = $("#pg");
@@ -886,9 +903,7 @@ function renderProp() {
     const b = bounds(logs, k); if (!b || b[0] === b[1]) return "";
     const cur = DT.ranges[k] || b;
     return `<div class="rp" data-rk="${k}" data-lo="${b[0]}" data-hi="${b[1]}"><div class="rp-h"><span>${k === "min" ? "Minutes" : lab}</span><b class="rv"${DT.ranges[k] ? "" : " hidden"}>${cur[0]} – ${cur[1]}</b></div>
-      <div class="dual2"><div class="trk"></div><div class="fil"></div>
-      <input type="range" class="a" min="${b[0]}" max="${b[1]}" step="1" value="${cur[0]}" aria-label="${lab} minimum">
-      <input type="range" class="b" min="${b[0]}" max="${b[1]}" step="1" value="${cur[1]}" aria-label="${lab} maximum"></div>
+      <div class="dual2"><div class="fil"></div>${thumbs(lab, b)}</div>
       <div class="rp-b"><span>${b[0]}</span><span>${b[1]}</span></div></div>`;
   }).join("");
   const anyF = DT.dvp || DT.def || DT.home !== null || DT.starter !== null || DT.result !== null || DT.rest !== null || Object.keys(DT.ranges).length || Object.keys(DT.without).some(k => DT.without[k]);
@@ -898,8 +913,8 @@ function renderProp() {
     const q = p.books[b];
     if (!q) return `<div class="bkr"><img src="${img}" alt=""><span>${name}</span><span class="od na" style="grid-column:span 2">no prop posted</span></div>`;
     const r = rungAt(q, line);
-    const ov = r && r[1] ? `<span class="od${bestNow && bestNow.book === b && side === "over" ? " best" : ""}">O ${american(r[1])}</span>` : '<span class="od na">—</span>';
-    const un = r && r[2] ? `<span class="od${bestNow && bestNow.book === b && side === "under" ? " best" : ""}">U ${american(r[2])}</span>` : '<span class="od na">—</span>';
+    const px = (sd, i, L) => r && r[i] ? `<button class="od${bestNow && bestNow.book === b && side === sd ? " best" : ""}" data-ps="${sd}" aria-pressed="${side === sd}" aria-label="${sd === "over" ? "Over" : "Under"} ${line}, ${name} ${american(r[i])}">${L} ${american(r[i])}</button>` : '<span class="od na">—</span>';
+    const ov = px("over", 1, "O"), un = px("under", 2, "U");
     return `<div class="bkr"><img src="${img}" alt=""><span>${name}${D.sources.books[b] && D.sources.books[b].stale ? ' <span class="tg tq">STALE</span>' : ""}<br><span class="ln2">${q.main === line ? "main line" : r ? "alt line" : "main " + (q.main === null ? "—" : q.main)} · ${mt(q.updated)}</span></span>${r ? ov + un : `<span class="od na" style="grid-column:span 2">not at ${line}</span>`}</div>`;
   }).join("");
   // availability
@@ -944,9 +959,14 @@ function renderProp() {
     ${p.flag ? `<div class="sec2"><h3>Engine</h3><div class="box0"><span class="tg tf" style="margin:0 6px 0 0">SHADOW · NOT A BET</span>${esc(p.flag.tier)} at ${p.flag.line} · ${p.flag.card === 1 ? "on the card" : "logged only" + (p.flag.why ? " (" + esc(p.flag.why.toLowerCase()) + ")" : "")}</div></div>` : ""}
     <div class="sec2"><details class="log"><summary>Game Log · ${win.length}</summary><table><thead><tr><th>Date</th><th>Opp</th><th class="r">Min</th><th class="r">FGA</th><th class="r">${esc(short(p.market))}</th><th class="r">${line}</th></tr></thead><tbody>${logRows || '<tr><td colspan="6">No games.</td></tr>'}</tbody></table></details></div>
     <div class="end"></div>`;
-  const cw = $("#chw"); if (cw) cw.scrollLeft = cw.scrollWidth;
+  const cw = $("#chw");
+  if (cw) {
+    cw.scrollLeft = cw.scrollWidth;
+    $$("g.br", cw).forEach(gb => gb.onclick = e => { e.stopPropagation(); barTip(cw, gb); });
+    cw.onclick = () => barTip(cw, null);
+  }
   $("#pg .bk").onclick = () => history.back();
-  const keep = sel => { const e = $(sel, pg); if (e) e.focus({preventScroll: true}); };
+  const keep = sel => { const e = !TOUCH && $(sel, pg); if (e) e.focus({preventScroll: true}); };
   $("#fav", pg).onclick = () => { toggleFav(p.pid); renderProp(); keep("#fav"); };
   $("#shr", pg).onclick = () => {
     const url = location.href, title = `${p.player} ${NAME[p.market]} ${line}`;
@@ -960,6 +980,7 @@ function renderProp() {
   $$("[data-k]", pg).forEach(b => b.onclick = () => { const k = b.dataset.k, raw = b.dataset.v, v = raw === "true" ? true : raw === "false" ? false : raw; DT[k] = DT[k] === v ? null : v; renderProp(); keep(`[data-k="${k}"][data-v="${raw}"]`); });
   $$("[data-wo]", pg).forEach(b => b.onclick = () => { const k = b.dataset.wo; DT.without[k] = !DT.without[k]; renderProp(); keep(`[data-wo="${k}"]`); });
   $$("[data-rel]", pg).forEach(b => b.onclick = () => openProp(b.dataset.rel));
+  $$("[data-ps]", pg).forEach(b => b.onclick = () => { if (ST.side === b.dataset.ps) return; ST.side = b.dataset.ps; save(); render(); renderProp(); keep(`[data-ps="${ST.side}"]`); });
   const clr = $("#clr", pg); if (clr) clr.onclick = () => { Object.assign(DT, {home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, dvp: false, def: false, open: {min: true}}); renderProp(); };
   $("#more", pg).onclick = () => { DT.more = !(DT.more || $("#more", pg).getAttribute("aria-expanded") === "true"); renderProp(); keep("#more"); };
   $("#pf", pg).onclick = () => playerFilters(p, logs, without);
@@ -969,14 +990,54 @@ function renderProp() {
     : "Not enough games to rank him yet."}</div><div class="acts"><button class="btn pri" id="ok1">Done</button></div>`, s2 => { $("#ok1", s2).onclick = closeSheet; });
   $("#mub", pg).onclick = () => matchupSheet(p, side);
   $$(".rp", pg).forEach(gp => {
-    const k = gp.dataset.rk, lo = +gp.dataset.lo, hi = +gp.dataset.hi, a = $(".a", gp), b = $(".b", gp), fil = $(".fil", gp), rv = $(".rv", gp);
-    // a WebKit range thumb's centre runs from half a thumb (15px) in from each end
-    const paint = () => { let x = +a.value, yv = +b.value; if (x > yv) [x, yv] = [yv, x];
-      fil.style.left = `calc(4px + (100% - 26px) * ${(x - lo) / (hi - lo)})`; fil.style.right = `calc(4px + (100% - 26px) * ${(hi - yv) / (hi - lo)})`;
-      rv.textContent = `${x} – ${yv}`; rv.hidden = x === lo && yv === hi; return [x, yv]; };
-    a.oninput = b.oninput = paint; paint();
-    a.onchange = b.onchange = () => { const [x, yv] = paint(); if (x === lo && yv === hi) delete DT.ranges[k]; else DT.ranges[k] = [x, yv]; DT.open[k] = true; renderProp(); };
+    const k = gp.dataset.rk, lo = +gp.dataset.lo, hi = +gp.dataset.hi, fil = $(".fil", gp), rv = $(".rv", gp);
+    dualRange($(".dual2", gp), lo, hi, DT.ranges[k] || [lo, hi], 13, (v, fl, fr) => {
+      fil.style.left = `calc(4px + (100% - 26px) * ${fl})`; fil.style.right = `calc(4px + (100% - 26px) * ${fr})`;
+      rv.textContent = `${v[0]} – ${v[1]}`; rv.hidden = v[0] === lo && v[1] === hi;
+    }, (v, i) => {
+      if (v[0] === lo && v[1] === hi) delete DT.ranges[k]; else DT.ranges[k] = v.slice();
+      DT.open[k] = true; renderProp(); keep(`.rp[data-rk="${k}"] .th.${i ? "b" : "a"}`);
+    });
   });
+}
+// two thumbs (role=slider) for a dual-range control
+const thumbs = (lab, b) => ["a", "b"].map((c, i) => `<span class="th ${c}" role="slider" tabindex="0" aria-label="${lab} ${i ? "maximum" : "minimum"}" aria-valuemin="${b[0]}" aria-valuemax="${b[1]}"></span>`).join("");
+// Dual range on pointer events. Two stacked <input type=range> can't be dragged in iOS Safari (it ignores pointer-events on the
+// thumb), so the track takes the touch and moves the nearer thumb: a sideways drag or a tap moves it, a vertical swipe still
+// scrolls (touch-action: pan-y; the browser then cancels the pointer and the values stay). inset = px from each end to a
+// thumb's centre at lo / hi. paint(v, leftFrac, rightFrac) runs on every move; done(v, thumb) once per drag, tap or key press.
+function dualRange(el, lo, hi, cur, inset, paint, done) {
+  const v = cur.slice(), th = $$(".th", el), span = hi - lo;
+  const show = () => { th.forEach((t, i) => { t.style.left = `calc(${inset}px + (100% - ${2 * inset}px) * ${(v[i] - lo) / span})`; t.setAttribute("aria-valuenow", v[i]); });
+                       paint(v, (v[0] - lo) / span, (hi - v[1]) / span); };
+  const set = (i, x) => { x = Math.max(lo, Math.min(hi, x)); v[i] = i ? Math.max(x, v[0]) : Math.min(x, v[1]); show(); };
+  const at = cx => { const r = el.getBoundingClientRect(), f = (cx - r.left - el.clientLeft - inset) / (el.clientWidth - 2 * inset);
+                     return lo + Math.round(Math.max(0, Math.min(1, f)) * span); };
+  // when the thumbs sit together the drag direction decides which one moves
+  const pick = x => x < v[0] ? 0 : x > v[1] ? 1 : v[0] === v[1] ? -1 : x - v[0] <= v[1] - x ? 0 : 1;
+  let drag = null, was = null, x0 = 0, moved = false;
+  el.onpointerdown = e => { drag = pick(at(e.clientX)); was = v.slice(); x0 = e.clientX; moved = false; };
+  el.onpointermove = e => {
+    if (drag === null || (!moved && Math.abs(e.clientX - x0) < 4)) return;
+    if (!moved) { moved = true; try { el.setPointerCapture(e.pointerId); } catch (_) {} }
+    const x = at(e.clientX);
+    if (drag < 0) { if (x === v[0]) return; drag = x < v[0] ? 0 : 1; }
+    set(drag, x);
+  };
+  el.onpointerup = e => {
+    if (drag === null) return;
+    if (!moved && drag >= 0) set(drag, at(e.clientX));             // a tap moves the nearer thumb there
+    const i = drag; drag = null;
+    if (v.join() !== was.join()) done(v, i);
+  };
+  el.onpointercancel = () => { if (drag === null) return; drag = null; v[0] = was[0]; v[1] = was[1]; show(); };
+  th.forEach((t, i) => t.onkeydown = e => {
+    const d = {ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1, PageDown: -5, PageUp: 5}[e.key];
+    const x = e.key === "Home" ? lo : e.key === "End" ? hi : d ? v[i] + d : null;
+    if (x === null) return;
+    e.preventDefault(); set(i, x); done(v, i);
+  });
+  show();
 }
 const MU_GROUP = pos => ({PG: "G", SG: "G", G: "G", SF: "F", PF: "F", F: "F", C: "C"})[pos] || ({G: "G", F: "F", C: "C"})[(pos || "")[0]];
 function lineSheet(p) {
@@ -1032,9 +1093,7 @@ function playerFilters(p, logs, without) {
     if (!b || b[0] === b[1]) return "";
     const cur = dr.ranges[k] || b;
     return `<div class="rg" data-rk="${k}" data-lo="${b[0]}" data-hi="${b[1]}"><div class="rg-h"><span>${lab}</span><b class="rv">${cur[0]} – ${cur[1]}</b></div>
-      <div class="dual"><div class="trk"></div><div class="fil"></div>
-      <input type="range" class="a" min="${b[0]}" max="${b[1]}" step="1" value="${cur[0]}" aria-label="${lab} minimum">
-      <input type="range" class="b" min="${b[0]}" max="${b[1]}" step="1" value="${cur[1]}" aria-label="${lab} maximum"></div></div>`;
+      <div class="dual"><div class="trk"></div><div class="fil"></div>${thumbs(lab, b)}</div></div>`;
   }).join("");
   const segs = SEGS.map(([k, lab, opts]) => `<div class="sg"><span>${lab}</span><div class="seg" role="group" aria-label="${lab}">${opts.map(([v, t]) =>
     `<button data-sk="${k}" data-sv="${v === null ? "" : v}" aria-pressed="${dr[k] === v}">${t}</button>`).join("")}</div></div>`).join("");
@@ -1045,16 +1104,13 @@ function playerFilters(p, logs, without) {
     <div class="acts"><button class="btn" id="pf-reset">Reset</button><button class="btn pri" id="pf-ok"></button></div>`, s => {
     const upd = () => { const n = count(); $("#pf-ok", s).textContent = `Show ${n} game${n === 1 ? "" : "s"}`; };
     $$(".rg", s).forEach(g => {
-      const k = g.dataset.rk, lo = +g.dataset.lo, hi = +g.dataset.hi, a = $(".a", g), b = $(".b", g), fil = $(".fil", g), rv = $(".rv", g);
-      const paint = () => {
-        let x = +a.value, y = +b.value;
-        if (x > y) { [x, y] = [y, x]; }
-        fil.style.left = (100 * (x - lo) / (hi - lo)) + "%"; fil.style.right = (100 * (hi - y) / (hi - lo)) + "%";
-        rv.textContent = `${x} – ${y}`;
-        if (x === lo && y === hi) delete dr.ranges[k]; else dr.ranges[k] = [x, y];
+      const k = g.dataset.rk, lo = +g.dataset.lo, hi = +g.dataset.hi, fil = $(".fil", g), rv = $(".rv", g);
+      dualRange($(".dual", g), lo, hi, dr.ranges[k] || [lo, hi], 0, (v, fl, fr) => {
+        fil.style.left = (100 * fl) + "%"; fil.style.right = (100 * fr) + "%";
+        rv.textContent = `${v[0]} – ${v[1]}`;
+        if (v[0] === lo && v[1] === hi) delete dr.ranges[k]; else dr.ranges[k] = v.slice();
         upd();
-      };
-      a.oninput = b.oninput = paint; paint();
+      }, () => {});
     });
     $$("[data-sk]", s).forEach(b => b.onclick = () => {
       const k = b.dataset.sk, raw = b.dataset.sv, v = raw === "" ? null : raw === "true" ? true : raw === "false" ? false : raw;
@@ -1113,7 +1169,7 @@ PAGE = r"""<!doctype html>
 <div id="app"></div>
 <div id="pg" class="pg" role="dialog" aria-modal="true" aria-label="Prop details" hidden></div>
 <div id="scrim" class="scrim" hidden></div>
-<div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="sht" hidden></div>
+<div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="sht" tabindex="-1" hidden></div>
 <div id="live" class="sr" role="status" aria-live="polite"></div>
 <script>__CORE__</script>
 <script>__APP__</script>
