@@ -472,6 +472,7 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
     pcodes = positions(mcon, list(pids), (prev_season(season), season), pos)
     pr_cur = pos_ranks(mcon, season, pos) if mcon is not None else {}
     pr_prev = pos_ranks(mcon, prev_season(season), pos) if mcon is not None else {}
+    paces = {}                                           # date -> {team: pace factor}; pace does not depend on B
     for p in props:
         g = gmap[p["gid"]]
         ctx = {"group": None, "pace": None, "def": None, "opp_games": 0, "pace_rank": None, "dvp_rank": None,
@@ -486,8 +487,9 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
             rt = ranks.get(g["date_et"]) or {}
             if n_opp and rt.get("teams"):
                 ctx["teams"] = rt["teams"]
-                paces = {t: S.factors(t, g["date_et"], p["pid"])[0] for t in rt["def"]}
-                ctx["pace_rank"] = 1 + sum(1 for t, v in paces.items() if v > pace)        # 1 = the fastest
+                if g["date_et"] not in paces:
+                    paces[g["date_et"]] = {t: S.factors(t, g["date_et"], p["pid"])[0] for t in rt["def"]}
+                ctx["pace_rank"] = 1 + sum(1 for t, v in paces[g["date_et"]].items() if v > pace)   # 1 = the fastest
                 ctx["def_rank"] = rt["def"].get(p["opp"])                                 # 1 = the toughest
                 if grp and p["market"] in MATCHUP_KEY:
                     ctx["dvp_rank"] = rt["dvp"][grp][p["market"]].get(p["opp"])
