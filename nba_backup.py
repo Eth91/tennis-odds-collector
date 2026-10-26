@@ -35,7 +35,8 @@ and leaves offbox.json in OUT. A run that finds the off-box copy more than OFFBO
 FAIL LOUD. Cron has no NTFY_TOPIC in its environment, so it is also read from ~/.nba-ping.env directly
 (an env-only alert would be a silent no-op, the wnba_backup lesson).
 
-    python3 nba_backup.py                    # the nightly run (cron 09:45 UTC)
+    python3 nba_backup.py                    # the nightly run (cron 09:48 UTC: after the :43 cycle's lines step
+                                             # and the :45 report trigger, done before :53; clear of 10:30-11:20)
     python3 nba_backup.py --verify           # restore-test the newest good snapshot of every store
     python3 nba_backup.py --accept nba_news  # accept a shrink you have explained
 """
