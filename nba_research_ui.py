@@ -79,6 +79,14 @@ background:none;text-align:left;color:#fff;transition:background-color .25s}
 .bx6>div{height:41.5px;border-radius:5px;background:#222;text-align:center;padding-top:5.6px}
 .bx6 i{display:block;font-style:normal;font-size:9.6px;line-height:12px;color:#fff}
 .bx6 b{display:block;margin-top:1.6px;font-size:13.4px;line-height:16px;font-weight:600;color:#fff}
+.bx6 b.sm{color:#8e8e8e;font-weight:500}
+.lin{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mv{margin-left:6px;font-size:11px;color:#a8a8a8;vertical-align:1px}
+.pl{display:inline-block;margin-left:7px;padding:1px 5px 0;border-radius:4px;background:rgba(255,255,255,.09);color:#d2d2d2;
+font-size:10px;line-height:14px;font-weight:600;letter-spacing:.01em;vertical-align:2px;white-space:nowrap}
+.pl.up{background:rgba(40,218,142,.15);color:var(--grn)} .pl.dn{background:rgba(255,69,58,.16);color:#ff6a60}
+.oc i.df{color:var(--yel)}
+.mu{color:#8e8e8e!important}
 .tg{display:inline-block;margin-left:5px;padding:1px 5px 0;border-radius:4px;font-size:9.5px;font-weight:800;
 letter-spacing:.04em;vertical-align:1.5px}
 .tq{background:rgba(255,214,10,.18);color:var(--yel)} .to{background:rgba(255,69,58,.2);color:var(--red)}
@@ -362,6 +370,16 @@ box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
 font-variant-numeric:normal}
 .bkr2 .bl{padding-left:4.8px}
 .bkr2 .best{color:var(--grn)}
+.bkr2.fr{color:#8e8e8e;font-weight:400;font-size:14px}
+.bkr2.fr small{font-size:10px;color:#6e6e6e;margin-left:4px}
+.bkr2.fr .bl{padding-left:4.8px;color:#8e8e8e}
+svg.hc{display:block;margin-top:2px;font-family:system-ui,-apple-system,sans-serif;font-stretch:66%}
+svg.hc text{fill:#8e8e8e;font-size:11px}
+.hl{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12.5px;color:#bdbdbd;line-height:1.35}
+.hl i{flex:none;width:8px;height:8px;border-radius:50%}
+.hl b{color:#fff;font-weight:600}
+.cells b.sm{color:#9a9a9a}
+.wc b.sm{color:#9a9a9a;font-weight:600}
 .bkr2.alt .bl,.bkr2 .na{color:#5f5f5f}
 /* capsule pills that slide to the pressed button */
 .pill2{position:absolute;left:0;top:0;z-index:0;border-radius:999px;background:#313131;pointer-events:none;opacity:0;
@@ -498,6 +516,31 @@ function bestPrice(prop, line, book, side) {
   return best;
 }
 function bestOver(prop, line, book) { return bestPrice(prop, line, book, "over"); }
+// the over's no-vig probability from decimal over / under prices
+function noVig(o, u) {
+  if (!o || !u || o <= 1 || u <= 1) return null;
+  var a = 1 / o, b = 1 / u;
+  return a / (a + b);
+}
+// {p: the over's fair probability at the line (the mean no-vig of every book pricing both sides), n: books}
+function fairAt(prop, line) {
+  var ps = [];
+  ["fd", "dk"].forEach(function (b) { var r = rungAt(prop.books[b], line), p = r ? noVig(r[1], r[2]) : null; if (p !== null) ps.push(p); });
+  return ps.length ? {p: ps.reduce(function (a, b) { return a + b; }, 0) / ps.length, n: ps.length} : {p: null, n: 0};
+}
+// the best price on a side against the fair probability: {ev (per $1), book, price, fair} or null
+function valueAt(prop, line, side) {
+  var f = fairAt(prop, line).p;
+  if (f === null) return null;
+  var k = side === "under" ? 2 : 1, pr = side === "under" ? 1 - f : f, best = null;
+  ["fd", "dk"].forEach(function (b) { var r = rungAt(prop.books[b], line); if (r && r[k] && (!best || r[k] > best.price)) best = {book: b, price: r[k]}; });
+  return best ? {ev: best.price * pr - 1, book: best.book, price: best.price, fair: pr} : null;
+}
+// how unusual `hits` in `n` games are if each hits with probability p (the price's); |z| >= 1 is what gets colored
+function zscore(hits, n, p) {
+  if (!n || p === null || p === undefined || !(p > 0 && p < 1)) return null;
+  return (hits - n * p) / Math.sqrt(n * p * (1 - p));
+}
 function propRates(prop, logs, side, season) {
   var out = {};
   if (prop.main === null || prop.main === undefined) return out;
@@ -535,7 +578,7 @@ function filterProps(props, st, gameOf, logsOf) {
   });
 }
 // keys: hit5 / hit10 / hit20 / h2h / szn (the side's hit rate), avgdiff (L10 average minus the line, signed by side),
-// line, odds (the side's best price), player; avg10 kept for old links
+// line, odds (the side's best price), value (that price against the books' fair price), player; avg10 kept for old links
 function sortProps(list, key, dir, logsOf, side, season) {
   var sgn = dir === "asc" ? 1 : -1;
   side = side || "over";
@@ -544,6 +587,7 @@ function sortProps(list, key, dir, logsOf, side, season) {
     if (key === "player") return p.player.toLowerCase();
     if (key === "line") return p.main;
     if (key === "odds") { var b = p.main === null ? null : bestPrice(p, p.main, "all", side); return b ? b.odds : null; }
+    if (key === "value") { var v = p.main === null ? null : valueAt(p, p.main, side); return v ? v.ev : null; }
     if (W[key]) { var r = propRates(p, logsOf(p), side, season)[W[key]]; return r && r.rate !== null ? r.rate : null; }
     var s = l10(p, logsOf);
     if (!s || !s.n) return null;
@@ -563,6 +607,7 @@ function sortProps(list, key, dir, logsOf, side, season) {
 if (typeof module !== "undefined") module.exports = {statValue: statValue, hitSummary: hitSummary, seasonOf: seasonOf,
   rowsToLogs: rowsToLogs, windowed: windowed, filterLogs: filterLogs, splitRows: splitRows, sideRate: sideRate,
   american: american, decimalOf: decimalOf, bestOver: bestOver, bestPrice: bestPrice, propRates: propRates,
+  noVig: noVig, fairAt: fairAt, valueAt: valueAt, zscore: zscore,
   filterProps: filterProps, sortProps: sortProps};
 """
 
@@ -572,7 +617,7 @@ const TEAM_ID = __TEAM_ID__;
 const ORDER = ["points", "rebounds", "assists", "threes", "pra", "pts_reb", "pts_ast", "reb_ast"];
 const NAME = {points: "Points", rebounds: "Rebounds", assists: "Assists", threes: "3-Pointers", pra: "Pts+Reb+Ast",
               pts_reb: "Pts+Reb", pts_ast: "Pts+Ast", reb_ast: "Reb+Ast"};
-const SORTS = [["hit10", "L10 hit rate"], ["hit5", "L5 hit rate"], ["hit20", "L20 hit rate"], ["h2h", "Head-to-head hit rate"],
+const SORTS = [["value", "Value (price vs fair)"], ["hit10", "L10 hit rate"], ["hit5", "L5 hit rate"], ["hit20", "L20 hit rate"], ["h2h", "Head-to-head hit rate"],
                ["szn", "Season hit rate"], ["avgdiff", "L10 average vs line"], ["line", "Line"], ["odds", "Best price"],
                ["player", "Player name"]];
 let D = null, ERR = null, LOADING = true, CUR = null;
@@ -638,18 +683,55 @@ function when(g) {
 }
 const vs = p => p.team ? (p.home ? "vs " : "@ ") + p.opp : "";
 // ── list ──
-const MKT_TABS = ["trends", "points", "assists", "rebounds", "threes", "pra", "pts_reb", "pts_ast", "reb_ast"];
-const TREND_MIN = .7;                 // Trends: the chosen side hit in 70%+ of the last 10 (5+ games)
+const MKT_TABS = ["trends", "injury", "points", "assists", "rebounds", "threes", "pra", "pts_reb", "pts_ast", "reb_ast"];
+const ALL_TABS = ["trends", "injury"];          // tabs that span every market
+// Trends (nba_research_score.trend_side): the L10 and L20 hit rates both 1+ SD from what the price implies, the same
+// way, 8+ games each. A plain 70% L10 put a third of the slate in Trends and ignored the price.
 const VIEWS = [["props", "Props"], ["markets", "Markets"], ["watch", "Watchlist"]];
 const unit = m => (D.markets || {})[m] || m;
 // long names shorten to an initial, as on the reference ("M. Diabaté")
 const nameOf = n => n.length > 13 && n.indexOf(" ") > 0 ? n[0] + ". " + n.slice(n.indexOf(" ") + 1) : n;
 const r1 = v => Math.round(v * 10) / 10;
 let RATES = new Map(), ROWS = new Map();
-function rates(p) {
-  const k = p.id + "|" + ST.side;
-  if (!RATES.has(k)) RATES.set(k, propRates(p, logsOf(p), ST.side, D.season));
+function rates(p, side) {
+  side = side || ST.side;
+  const k = p.id + "|" + side;
+  if (!RATES.has(k)) RATES.set(k, propRates(p, logsOf(p), side, D.season));
   return RATES.get(k);
+}
+// the probability the price gives `side` at `line` (the books' no-vig), or null when no book prices both sides
+function fairSide(p, line, side) { const f = line === null ? null : fairAt(p, line).p; return f === null ? null : side === "under" ? 1 - f : f; }
+const hitsOf = x => x && x.n ? Math.round(x.rate * x.n) : 0;
+// every hit-rate box: under 5 games a plain count; otherwise the rate, colored only when it sits 1+ SD from what
+// the price implies (fs; a coin flip without a price) — a 3-for-3 or a -300 favorite going 7-for-10 stays white
+function hbox(x, fs) {
+  if (!x || !x.n) return {t: "–", c: ""};
+  const h = hitsOf(x);
+  if (x.n < 5) return {t: h + "/" + x.n, c: "sm"};
+  const z = zscore(h, x.n, fs === null || fs === undefined ? .5 : fs);
+  return {t: pct(x.rate), c: z >= 1 ? "up" : z <= -1 ? "dn" : ""};
+}
+function trend(p) {                              // {side, z} or null — mirrors nba_research_score.trend_side
+  if (p.main === null) return null;
+  const f = fairAt(p, p.main).p, r = rates(p, "over");
+  const z = k => r[k] && r[k].n >= 8 ? zscore(hitsOf(r[k]), r[k].n, f === null ? .5 : f) : null;
+  const a = z("l10"), b = z("l20");
+  if (a === null || b === null) return null;
+  return a >= 1 && b >= 1 ? {side: "over", z: a + b} : a <= -1 && b <= -1 ? {side: "under", z: -a - b} : null;
+}
+// teammates out tonight whose absence is news (they played in one of the team's last 2 games), most minutes first
+function freshOut(p) { const g = gameOf(p.gid); return p.team ? (D.absences[g.date + "|" + p.team] || []).filter(a => a.fresh && a.pid !== p.pid) : []; }
+function woSplit(p, a, side) {
+  const sub = filterLogs(logsOf(p), {without: [{played: a.played, since: a.since, team: p.team}]});
+  const s = hitSummary(sub.map(l => statValue(l, p.market)), p.main), hits = side === "under" ? s.under : s.over;
+  const fs = fairSide(p, p.main, side);
+  return {hits: hits, n: s.n, z: s.n >= 5 ? zscore(hits, s.n, fs === null ? .5 : fs) : null};
+}
+const lastName = n => { const w = String(n || "").split(" ").filter(x => !/^(jr\.?|sr\.?|ii|iii|iv)$/i.test(x)); return w[w.length - 1] || ""; };
+function moveOf(p) {                              // the main line's move since the book opened it (FanDuel, else DK)
+  const bk = p.books.fd && p.books.fd.main !== null ? "fd" : "dk", h = (p.hist || {})[bk];
+  if (!h || !h.length || !p.books[bk] || p.books[bk].main === null) return 0;
+  return Math.round((p.books[bk].main - h[0][1]) * 2) / 2;
 }
 function availMarkets() {
   const m = {};
@@ -658,26 +740,32 @@ function availMarkets() {
 }
 function filtersOn() { return ["team", "book"].filter(k => ST[k] !== "all").length + ["lmin", "lmax", "omin", "omax"].filter(k => ST[k] !== "").length + (ST.side === "under" ? 1 : 0); }
 function listProps() {
-  const st = Object.assign({}, ST, {market: ST.market === "trends" || ST.view === "watch" ? "all" : ST.market});
+  const st = Object.assign({}, ST, {market: ALL_TABS.indexOf(ST.market) >= 0 || ST.view === "watch" ? "all" : ST.market});
   let list = filterProps(D.props, st, gameOf, logsOf);
-  if (ST.view === "watch") { const f = favs(); list = list.filter(p => f.indexOf(p.pid) >= 0 && (ST.market === "trends" || p.market === ST.market)); }
-  else if (ST.market === "trends") list = list.filter(p => { const r = rates(p).l10; return r && r.n >= 5 && r.rate !== null && r.rate >= TREND_MIN; });
+  if (ST.view === "watch") { const f = favs(); return sortProps(list.filter(p => f.indexOf(p.pid) >= 0 && (ALL_TABS.indexOf(ST.market) >= 0 || p.market === ST.market)), ST.sort, ST.dir, logsOf, ST.side, D.season); }
+  // Trends: strongest first. Injuries: the without-teammate split furthest from the price first (thin samples last)
+  if (ST.market === "trends") return list.map(p => [p, trend(p)]).filter(x => x[1] && x[1].side === ST.side).sort((a, b) => b[1].z - a[1].z).map(x => x[0]);
+  if (ST.market === "injury") return list.filter(p => p.main !== null && freshOut(p).length).map(p => [p, woSplit(p, freshOut(p)[0], ST.side).z])
+    .sort((a, b) => (b[1] === null ? -99 : b[1]) - (a[1] === null ? -99 : a[1])).map(x => x[0]);
   return sortProps(list, ST.sort, ST.dir, logsOf, ST.side, D.season);
 }
 function row(p) {
   const g = gameOf(p.gid), r = rates(p), c = p.ctx || {}, side = ST.side;
-  const best = p.main === null ? null : bestPrice(p, p.main, ST.book, side);
-  const hc = x => !x || !x.n || x.rate === null ? "" : x.rate > .5 ? "up" : x.rate < .5 ? "dn" : "";
-  const cell = (lab, k) => { const x = r[k]; return `<div><i>${lab}</i><b class="${hc(x)}">${x && x.n ? pct(x.rate) : "–"}</b></div>`; };
+  const best = p.main === null ? null : bestPrice(p, p.main, ST.book, side), fs = fairSide(p, p.main, side);
+  const cell = (lab, k) => { const h = hbox(r[k], fs); return `<div><i>${lab}</i><b class="${h.c}">${h.t}</b></div>`; };
   const dv = c.dvp_rank ? `<b class="${{good: "up", bad: "dn", mid: "md"}[rankCls(c.dvp_rank, c.teams, side)]}">${ord(c.dvp_rank)}</b>` : "<b>–</b>";
-  const a = r.l10 && r.l10.n ? r.l10.avg : null;
-  const ac = a === null || p.main === null || a === p.main ? "" : (a > p.main) === (side !== "under") ? "up" : "dn";
+  // VALUE: the price shown against the books' fair price for that side (positive only when one book beats the other)
+  const ev = best && fs !== null ? best.odds * fs - 1 : null;
   const live = p.live && g.state !== "pregame" ? `<span class="tg ${g.state === "live" ? "tl" : "tn"}">${g.state === "live" ? "LIVE" : "FINAL"} ${p.live.value}</span>` : "";
+  const mv = moveOf(p), out = p.main === null ? null : freshOut(p)[0];
+  const wo = out ? woSplit(p, out, side) : null;
+  const fd = p.books.fd, dk = p.books.dk;
+  const differ = fd && dk && fd.main !== null && dk.main !== null && fd.main !== dk.main ? `DK ${dk.main}` : null;
   return `<button class="pr" data-id="${esc(p.id)}"><span class="av">${head(p.pid)}</span>
-    <div class="who"><div class="nm">${esc(nameOf(p.player))}<span class="cd">${esc(p.team || "")}</span>${injTag(p)}${live}</div>
-    <div class="lin num">${p.main === null ? "alt lines" : p.main + " " + esc(unit(p.market))}</div></div>
-    <div class="oc o"><i>ODDS</i><b class="num">${best ? american(best.odds) : "–"}</b></div>
-    <div class="oc e"><i>AVG</i><b class="num ${ac}">${a === null ? "–" : r1(a)}</b></div>
+    <div class="who"><div class="nm">${esc(nameOf(p.player))}<span class="cd">${esc(p.team || "")}</span>${injTag(p)}${live}${p.flag ? '<span class="tg tf">ENGINE</span>' : ""}</div>
+    <div class="lin num">${p.main === null ? "alt lines" : p.main + " " + esc(unit(p.market))}${mv ? `<span class="mv" aria-label="line ${mv > 0 ? "up" : "down"} ${Math.abs(mv)} since open">${mv > 0 ? "▲" : "▼"}${Math.abs(mv)}</span>` : ""}${wo ? `<span class="pl ${wo.z === null ? "" : wo.z >= 1 ? "up" : wo.z <= -1 ? "dn" : ""}" title="${esc(out.name || "")} is ${esc(out.status)}: his ${side} hit rate without him">W/O ${esc(lastName(out.name).slice(0, 10))}${wo.n ? " " + wo.hits + "/" + wo.n : ""}</span>` : ""}</div></div>
+    <div class="oc o"><i${differ ? ' class="df" title="the books post different main lines"' : ""}>${differ || "ODDS"}</i><b class="num">${best ? american(best.odds) : "–"}</b></div>
+    <div class="oc e"><i>VALUE</i><b class="num ${ev === null ? "" : ev > 0 ? "up" : "mu"}">${ev === null ? "–" : (ev > 0 ? "+" : "") + (ev * 100).toFixed(1) + "%"}</b></div>
     <div class="bx6 num" aria-label="Hit rates">${cell(D.season.slice(0, 4), "season")}${cell("H2H", "h2h")}<div><i>DvP</i>${dv}</div>${cell("L5", "l5")}${cell("L10", "l10")}${cell("L20", "l20")}</div></button>`;
 }
 function mrow(p) {
@@ -733,13 +821,13 @@ function render() {
   }
   if (!ST.date || D.dates.indexOf(ST.date) < 0) ST.date = D.dates.find(d => D.props.some(p => (gameOf(p.gid) || {}).date === d)) || D.dates[0];
   const mks = availMarkets();
-  if (ST.market !== "trends" && mks.length && mks.indexOf(ST.market) < 0) ST.market = mks[0];
+  if (ALL_TABS.indexOf(ST.market) < 0 && mks.length && mks.indexOf(ST.market) < 0) ST.market = mks[0];
   if (!$("#lt")) {
     app.innerHTML = `<header class="lh"><div id="lt">${topRow()}</div><nav class="mt ml" aria-label="Markets"><div class="mt-in" id="mtl"></div></nav>
       <nav class="gcs" id="gcs" aria-label="Games"></nav><div class="ldv"></div></header><div id="ban"></div><main class="lst" id="lst"></main>`;
     bindTop();
   }
-  $("#mtl").innerHTML = '<span class="pill2"></span>' + MKT_TABS.filter(m => m === "trends" || mks.indexOf(m) >= 0).map(m => `<button data-market="${m}" aria-pressed="${m === ST.market}">${TAB[m]}</button>`).join("");
+  $("#mtl").innerHTML = '<span class="pill2"></span>' + MKT_TABS.filter(m => ALL_TABS.indexOf(m) >= 0 || mks.indexOf(m) >= 0).map(m => `<button data-market="${m}" aria-pressed="${m === ST.market}">${TAB[m]}</button>`).join("");
   $("#gcs").innerHTML = cards();
   $("#ban").innerHTML = banners();
   bindHead();
@@ -754,7 +842,8 @@ function renderList() {
   else if (!onDate.length) body = '<div class="empty"><b>No props yet</b>The books usually post player props on game day.</div>';
   else if (ST.gid !== "all" && !onDate.some(p => p.gid === ST.gid)) body = '<div class="empty"><b>No props for this game yet</b>Check back closer to tip.</div>';
   else if (!list.length) body = ST.view === "watch" ? '<div class="empty"><b>Nothing on your watchlist</b>Tap ☆ on a player\'s page to follow him here.</div>'
-    : ST.market === "trends" ? `<div class="empty"><b>No hot trends</b>No ${ST.side} hit in ${TREND_MIN * 100}%+ of the last 10 games with these filters.</div>`
+    : ST.market === "trends" ? `<div class="empty"><b>No trends</b>No ${ST.side} whose last 10 and last 20 both beat what the price implies, with these filters.</div>`
+    : ST.market === "injury" ? '<div class="empty"><b>No new absences</b>No rotation player who played in his team\'s last 2 games is Out or Doubtful tonight.</div>'
     : '<div class="empty"><b>No matches</b>Nothing fits these filters.<br><button class="btn" id="reset2">Reset filters</button></div>';
   if (body) { lst.innerHTML = body; const r2 = $("#reset2"); if (r2) r2.onclick = resetFilters; return; }
   if (ST.view === "markets") {
@@ -976,7 +1065,7 @@ const TEAMS = {ATL: ["Atlanta Hawks", "#C8102E"], BOS: ["Boston Celtics", "#007A
 const POSN = {PG: "Point Guard", SG: "Shooting Guard", SF: "Small Forward", PF: "Power Forward", C: "Center", G: "Guard",
   F: "Forward", "G-F": "Guard-Forward", "F-G": "Forward-Guard", "F-C": "Forward-Center", "C-F": "Center-Forward"};
 const TAB_ORDER = ["points", "assists", "rebounds", "threes", "pts_ast", "pts_reb", "reb_ast", "pra"];
-const TAB = {trends: "Trends", points: "Points", rebounds: "Rebs", assists: "Assists", threes: "3PTM", pra: "PRA", pts_reb: "P+R", pts_ast: "P+A", reb_ast: "R+A"};
+const TAB = {trends: "Trends", injury: "Injuries", points: "Points", rebounds: "Rebs", assists: "Assists", threes: "3PTM", pra: "PRA", pts_reb: "P+R", pts_ast: "P+A", reb_ast: "R+A"};
 const GRPN = {G: "guards", F: "forwards", C: "centers"};
 const ICON = {
   back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
@@ -1074,6 +1163,34 @@ function chart2(logs, market, line, ov, grow) {
   o.push(`<text class="lx" x="0" y="${y(line) - 5.2}">${line}</text></svg>`);
   return o.join("");
 }
+// each book's main line over time (a step per change), its open and its price now
+function histChart(p) {
+  const H = p.hist || {}, books = [["fd", "FanDuel", "#2d9bff"], ["dk", "DraftKings", "#62d26f"]].filter(([b]) => (H[b] || []).length);
+  if (!books.length) return '<div class="note" style="margin:0">No price history yet.</div>';
+  const ms = t => iso(t).getTime(), end = Math.max(Date.now() - 60000, ...books.map(([b]) => ms(H[b][H[b].length - 1][0])));
+  const t0 = Math.min(...books.map(([b]) => ms(H[b][0][0])));
+  const vals = books.flatMap(([b]) => H[b].map(x => x[1]));
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  if (hi - lo < 1) { lo -= .5; hi += .5; }
+  const W = Math.min(window.innerWidth, 520) - 30.6, Hh = 92, AX = 30, x = t => AX + (W - AX - 6) * (ms(t) - t0) / Math.max(1, end - t0);
+  const y = v => 10 + (Hh - 22) * (hi - v) / (hi - lo);
+  const o = [`<svg class="hc" width="${W}" height="${Hh}" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Main line over time">`];
+  [hi, lo].forEach(v => o.push(`<text x="0" y="${y(v) + 4}">${v}</text><line x1="${AX}" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="#262626"/>`));
+  books.forEach(([b, , col]) => {
+    const h = H[b];
+    let d = `M${x(h[0][0])} ${y(h[0][1])}`;
+    h.slice(1).forEach(pt => { d += ` H${x(pt[0])} V${y(pt[1])}`; });
+    d += ` H${AX + (W - AX - 6)}`;
+    o.push(`<path d="${d}" fill="none" stroke="${col}" stroke-width="2"/>`);
+    h.forEach((pt, i) => { if (!i || pt[1] !== h[i - 1][1]) o.push(`<circle cx="${x(pt[0])}" cy="${y(pt[1])}" r="2.6" fill="${col}"/>`); });
+  });
+  o.push(`<text x="${AX}" y="${Hh - 1}">${esc(mt(new Date(t0).toISOString(), true))}</text><text x="${W}" y="${Hh - 1}" text-anchor="end">now</text></svg>`);
+  const sum = books.map(([b, name, col]) => {
+    const h = H[b], a = h[0], z = h[h.length - 1], lines = h.filter((pt, i) => !i || pt[1] !== h[i - 1][1]).length - 1;
+    return `<div class="hl"><i style="background:${col}"></i><b>${name}</b> opened ${a[1]} (${american(a[2])}) → ${z[1]} (${american(z[2])}) now · ${lines ? lines + " line move" + (lines > 1 ? "s" : "") : "line unchanged"}, ${h.length - 1 - lines} price change${h.length - 1 - lines === 1 ? "" : "s"}</div>`;
+  }).join("");
+  return o.join("") + sum + '<div class="note">In replays of past games, following a move has not beaten the closing price. It is here so you know the price you are getting.</div>';
+}
 // a bar's <title> only shows on hover, so a tap pins its game above the bar (tap it again, or the chart, to clear)
 function barTip(cw, gb) {
   const svg = $("svg.c2", cw), old = $(".tip", cw), was = $("g.br.sel", cw);
@@ -1097,7 +1214,7 @@ function renderProp(mode) {
   if (!p) { PX = null; pg.innerHTML = `<div class="ph"><button class="cb bk" aria-label="Back">${ICON.back}</button></div><div class="empty"><b>No longer posted</b>The books have taken this prop down.</div>`; $("#pg .bk").onclick = () => history.back(); return; }
   const g = gameOf(p.gid), logs = logsOf(p), c = p.ctx || {};
   const team = TEAMS[p.team] || [p.team || "", "#333"];
-  const without = (D.absences[g.date + "|" + p.team] || []).map(a => ({key: String(a.pid), name: a.name || "teammate", played: a.played, since: a.since, team: p.team, status: a.status}));
+  const without = (D.absences[g.date + "|" + p.team] || []).map(a => ({key: String(a.pid), name: a.name || "teammate", played: a.played, since: a.since, team: p.team, status: a.status, fresh: a.fresh}));
   const mkts = TAB_ORDER.filter(m => D.props.some(x => x.gid === p.gid && x.pid === p.pid && x.market === m));
   const fav = favs().indexOf(p.pid) >= 0;
   const wins = [["season", D.season.slice(0, 4)], ["h2h", "H2H"], ["l5", "L5"], ["l10", "L10"], ["l20", "L20"]];
@@ -1168,6 +1285,7 @@ function updateProp(mode) {
   const rate = sideRate(s, side);
   const winLab = (wins.find(w => w[0] === DT.win) || ["", "L10"])[1];
   const tri = up => `<span class="tri ${up ? "up" : "dn"}">${up ? "▲" : "▼"}</span>`;
+  const fs = fairSide(p, line, side), hr = hbox({n: s.n, rate: rate}, fs);
   const gr = grade(p, side);
   const opp = `<span class="vs">${p.home ? "vs" : "@"}</span>${esc(p.opp || "")}\u200a·\u200a${g.state === "pregame" ? mt(g.tip).replace(" ", "") : esc(g.state === "live" ? "LIVE" : g.state === "final" ? "Final" : g.label || "")}`;
   const ovOn = k => !!(DT.open[k] || DT.ranges[k]);
@@ -1177,7 +1295,7 @@ function updateProp(mode) {
       <div><i>${esc(winLab)} AVG</i><b>${s.avg === null ? "–" : tri(s.avg > line) + r1(s.avg)}</b></div>
       <button id="lnb"><i>LINE</i><b>${line}<span class="cv">›</span></b></button>
       <div><i>PROP</i><b>${esc(NAME[p.market])}</b></div>
-      <div><i>HIT RATE</i><b>${rate === null ? "–" : tri(rate >= .5) + Math.round(rate * 100) + "%"}</b></div>
+      <div><i>HIT RATE</i><b class="${hr.c === "sm" ? "sm" : ""}">${hr.c === "up" ? tri(true) : hr.c === "dn" ? tri(false) : ""}${hr.t}</b></div>
       <button id="psb"><i>POS RANK</i><b>${c.pos_rank ? ord(c.pos_rank) : "–"}<span class="cv">›</span></b></button>
       <div><i>OPPONENT</i><b>${opp}</b></div></div>
       <button class="muc" id="mub">${gauge(gr)}<span>Matchup <span class="cv">›</span></span></button>`;
@@ -1189,9 +1307,9 @@ function updateProp(mode) {
   // window capsule
   wins.forEach(([k]) => {
     const w = windowed(base, k, D.season, p.opp), ss = hitSummary(w.map(l => statValue(l, p.market)), line), r = sideRate(ss, side);
-    const b = $(`[data-win="${k}"]`, pg), v = $("b", b);
+    const b = $(`[data-win="${k}"]`, pg), v = $("b", b), h = hbox({n: ss.n, rate: r}, fs);
     b.setAttribute("aria-pressed", k === DT.win); b.disabled = !w.length;
-    v.textContent = pct(r); v.className = r === null ? "" : r >= .5 ? "up" : "dn";
+    v.textContent = h.t; v.className = h.c;
   });
   slide($("#wcap"), first);
   $("#psr").textContent = `${side === "under" ? "Under" : "Over"} ${line}: ${rate === null ? "no games" : Math.round(rate * 100) + "% of " + s.n + " games"}.${ov ? " White boxes = " + OVL[ov] + "." : ""}`;
@@ -1206,12 +1324,14 @@ function updateProp(mode) {
   const rchip = k => { const b = bounds(logs, k), abbr = RANGES.find(r => r[0] === k)[2]; if (b && b[0] !== b[1]) chips.push(chip(`data-r="${k}"`, `${OVL[k] ? ICON.bars : ICON.pm}${abbr}`, rangeOn(k) || DT.open[k])); };
   const tchip = (k, v, lab) => chips.push(chip(`data-k="${k}" data-v="${v}"`, lab, on(k, v)));
   rchip("min");
-  const extra = DT.home !== null || DT.result !== null || DT.rest !== null || MORE_R.some(k => rangeOn(k) || DT.open[k]) || Object.keys(DT.without).some(k => DT.without[k]);
+  const wchip = w => chips.push(chip(`data-wo="${w.key}"`, (w.fresh ? "W/O " : "Without ") + esc(lastName(w.name)), DT.without[w.key]));
+  without.filter(w => w.fresh).forEach(wchip);                 // tonight's news: up front
+  const extra = DT.home !== null || DT.result !== null || DT.rest !== null || MORE_R.some(k => rangeOn(k) || DT.open[k]) || without.some(w => !w.fresh && DT.without[w.key]);
   const more = DT.more || extra;
   if (more) {
     rchip("fga"); tchip("home", true, "Home"); tchip("home", false, "Away"); rchip("fg3a"); rchip("fta"); rchip("usg"); rchip("margin");
     tchip("result", "W", "Win"); tchip("result", "L", "Loss"); tchip("rest", "b2b", "B2B");
-    without.forEach(w => chips.push(chip(`data-wo="${w.key}"`, "Without " + esc(w.name.split(" ").slice(-1)[0]), DT.without[w.key])));
+    without.filter(w => !w.fresh).forEach(wchip);
   }
   chips.push(`<button class="fc" id="more" aria-expanded="${more}">${more ? "Less" : "More"}</button>`);
   const panels = RANGES.filter(([k]) => DT.open[k] || rangeOn(k)).map(([k, lab]) => {
@@ -1229,16 +1349,19 @@ function updateProp(mode) {
   if (opening) { PX.lazy = setTimeout(() => { if (PX && PX.p === p) updateProp("rest"); }, 470); bindLive(p, logs, without); return; }
   if (!PX.statDone) { $("#pstat").innerHTML = PX.stat; PX.statDone = true; $$("[data-rel]", pg).forEach(b => b.onclick = () => openProp(b.dataset.rel)); }
   // books
-  const bestNow = bestPrice(p, line, "all", side);
+  const fair = fairAt(p, line);
+  const beats = (sd, price) => fair.p !== null && price * (sd === "over" ? fair.p : 1 - fair.p) > 1;
   const bk = [["fd", "FanDuel"], ["dk", "DraftKings"]].map(([b, name]) => {
     const q = p.books[b];
     if (!q) return `<div class="bkr2"><span>${name}</span><span class="na">—</span><span class="na">—</span><span class="na">—</span></div>`;
     const here = rungAt(q, line), r = here || rungAt(q, q.main), l = here ? line : q.main;
-    const px = (sd, i) => r && r[i] ? `<button class="${here && bestNow && bestNow.book === b && side === sd ? "best" : ""}" data-ps="${sd}" data-pl="${l}" aria-pressed="${!!here && side === sd}" aria-label="${sd === "over" ? "Over" : "Under"} ${l}, ${name} ${american(r[i])}">${american(r[i])}</button>` : '<span class="na">—</span>';
+    const px = (sd, i) => r && r[i] ? `<button class="${here && beats(sd, r[i]) ? "best" : ""}" data-ps="${sd}" data-pl="${l}" aria-pressed="${!!here && side === sd}" aria-label="${sd === "over" ? "Over" : "Under"} ${l}, ${name} ${american(r[i])}">${american(r[i])}</button>` : '<span class="na">—</span>';
     return `<div class="bkr2${here ? "" : " alt"}"><span>${name}${D.sources.books[b] && D.sources.books[b].stale ? ' <span class="tg tq">STALE</span>' : ""}</span><button class="bl" data-pl="${l}" aria-label="Use line ${l}">${l === null ? "—" : l}</button>${px("over", 1)}${px("under", 2)}</div>`;
   }).join("");
-  $("#pbk").innerHTML = `<div class="bkh"><span>BOOKS</span><button class="lnp" id="lnp" aria-haspopup="dialog" aria-label="Line ${line}">LINE${ICON.down}</button><span>OVER</span><span>UNDER</span></div>${bk}
-    ${p.open ? `<div class="note" style="margin:8px 15.3px 0">FanDuel opened ${p.open[0]} (${american(p.open[1])}) ${mt(p.open[2], true)}.</div>` : ""}`;
+  const fr = fair.p === null ? "" : `<div class="bkr2 fr"><span>Fair${fair.n === 1 ? " <small>1 book</small>" : ""}</span><span class="bl">${line}</span><span>${american(1 / fair.p)}</span><span>${american(1 / (1 - fair.p))}</span></div>`;
+  $("#pbk").innerHTML = `<div class="bkh"><span>BOOKS</span><button class="lnp" id="lnp" aria-haspopup="dialog" aria-label="Line ${line}">LINE${ICON.down}</button><span>OVER</span><span>UNDER</span></div>${bk}${fr}
+    <div class="note" style="margin:8px 15.3px 0">Fair = the books' prices with their margin removed${fair.n === 2 ? " (both books)" : ""}. Green = a price better than fair.</div>
+    <div class="sec2"><h3>Line Movement</h3>${histChart(p)}</div>`;
   // game log
   const logRows = win.slice().reverse().map(l => {
     const v = statValue(l, p.market), r = v === null ? "–" : v > line ? '<span class="ov">O</span>' : v < line ? '<span class="un">U</span>' : '<span class="pu">P</span>';
@@ -1350,7 +1473,7 @@ function matchupSheet(p, side) {
   rows.push(row("Def Rank · points allowed", c.def_rank, c.teams, ""));
   rows.push(`<div class="kv"><span>Pace</span><b>${c.pace_rank ? ord(c.pace_rank) + " fastest" : "—"}</b></div>`);
   if (g.lines) rows.push(`<div class="kv"><span>Game</span><b>${g.lines.total ? "Total " + g.lines.total : ""}${g.lines.spread_home !== undefined ? " · " + esc(g.home) + " " + (g.lines.spread_home > 0 ? "+" : "") + g.lines.spread_home : ""}</b></div>`);
-  openSheet(`<h2 id="sht">Matchup vs ${esc(p.opp || "")}</h2><div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">${gauge(gr)}<div class="note" style="margin:0;font-size:14px">Grade for the ${side}: A = one of the softest matchups, F = one of the toughest. From ${esc(p.opp || "")}'s rank among ${c.teams || 0} teams this season (1st = toughest defense).</div></div>${rows.join("")}
+  openSheet(`<h2 id="sht">Matchup vs ${esc(p.opp || "")}</h2><div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">${gauge(gr)}<div class="note" style="margin:0;font-size:14px">Grade for the ${side}: A = one of the softest matchups, F = one of the toughest. From ${esc(p.opp || "")}'s rank among ${c.teams || 0} teams (1st = toughest defense): last season's, blended with this season's ${c.rank_n || 0} game${c.rank_n === 1 ? "" : "s"} — this season counts for more as games are played.</div></div>${rows.join("")}
     <div class="acts"><button class="btn pri" id="mu-ok">Done</button></div>`, s => { $("#mu-ok", s).onclick = closeSheet; });
 }
 // ── player filters ──
