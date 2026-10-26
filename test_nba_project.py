@@ -222,3 +222,140 @@ def test_analog_pool_is_strictly_earlier():
     finally:
         E.NP.neighbors = orig
     assert seen and all(n > 0 for n in seen)
+
+
+# ── the live path: payload contract, JS = Python, the prospective record ───────────────────────────────────
+NODE = __import__("shutil").which("node")
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_js_projection_probabilities_match_python():
+    import json
+    import subprocess
+    import nba_research_ui as UI
+    rnd = np.random.default_rng(3)
+    v = np.zeros((1, 300, NP.NS))
+    v[0, :, 1] = rnd.gamma(4, 4, 300)                          # points
+    d = _dist(v)
+    pm = NP.compact_pmf(d.pmf("points", 160)[0])
+    lines = [9.5, 14.5, 15.0, 20.0, 27.5]
+    tmp = pathlib.Path(tempfile.mkdtemp())
+    (tmp / "core.js").write_text(UI.JS_CORE)
+    (tmp / "t.js").write_text("const C=require('./core.js');const a=JSON.parse(process.argv[2]);"
+                              "console.log(JSON.stringify(a.lines.map(l=>C.projProbs(a.pm,l))));")
+    js = json.loads(subprocess.run([NODE, str(tmp / "t.js"), json.dumps({"pm": pm, "lines": lines})], capture_output=True,
+                                   text=True, check=True, cwd=tmp).stdout)
+    for L, r in zip(lines, js):
+        o, u, p = d.probs("points", [L])
+        assert r["over"] == pytest.approx(o[0], abs=2e-3) and r["push"] == pytest.approx(p[0], abs=2e-3)
+    assert js[3]["push"] > 0 and js[0]["push"] == 0                       # a whole line can push, a half cannot
+
+
+def test_payload_never_invents_a_projection(monkeypatch):
+    import datetime as dt_
+    now = dt_.datetime(2026, 10, 26, 18, 0, tzinfo=dt_.timezone.utc)
+    props = [{"id": "G|7|points", "gid": "G", "pid": 7, "market": "points", "team": "AAA", "opp": "BBB", "home": True, "books": {}}]
+    games = [{"gid": "G", "date_et": "2026-10-26", "utc": "2026-10-27T00:00:00Z"}]
+    monkeypatch.setattr(NP, "TUNED_ON", None)
+    by, pl, meta = NP.for_payload(props, games, now)
+    assert by == {} and meta["error"]                                     # not frozen: no numbers
+    monkeypatch.setattr(NP, "TUNED_ON", "2023-24")
+    monkeypatch.setattr(NP, "PROJ_BLEND_W", .7)
+    d = pathlib.Path(tempfile.mkdtemp())
+    by, pl, meta = NP.for_payload(props, games, now, gamelogs=d / "x.sqlite", matchup=d / "y.sqlite", profiles=d / "z.sqlite",
+                                  cache=d / "c.pkl")
+    assert by == {} and meta["error"] == "no box scores"
+
+
+def test_payload_projects_and_flags_stale(monkeypatch):
+    import datetime as dt_
+    rows = synth()
+    monkeypatch.setattr(NP, "TUNED_ON", "2023-24")
+    monkeypatch.setattr(NP, "PROJ_BLEND_W", .7)
+    monkeypatch.setattr(NP.PD, "load_box", lambda *a, **k: (rows, [], {}))
+    d = pathlib.Path(tempfile.mkdtemp())
+    for f in ("gl.sqlite", "mu.sqlite"):
+        (d / f).write_text("x")
+    props = [{"id": "G|102|points", "gid": "G", "pid": 102, "market": "points", "team": "AAA", "opp": "BBB", "home": True,
+              "books": {"fd": {"main": 9.5, "rungs": [[9.5, 1.9, 1.9]]}}}]
+    games = [{"gid": "G", "date_et": "2024-02-01", "utc": "2024-02-02T00:00:00Z"}]
+    now = dt_.datetime(2024, 2, 1, 18, 0, tzinfo=dt_.timezone.utc)
+    by, pl, meta = NP.for_payload(props, games, now, gamelogs=d / "gl.sqlite", matchup=d / "mu.sqlite", cache=d / "c.pkl",
+                                  log_db=d / "log.sqlite")
+    s = by["G|102|points"]
+    assert meta["error"] is None and s["q10"] <= s["q50"] <= s["q90"] and sum(s["pmf"][1]) == pytest.approx(1, abs=2e-3)
+    assert set(pl["102"]) >= {"min", "steals", "blocks", "turnovers"} and meta["coverage"]["projected"] == 1
+    assert meta["stale"] is False and meta["logged"] == 1
+    games2 = [{"gid": "G", "date_et": "2024-06-01", "utc": "2024-06-02T00:00:00Z"}]
+    _, _, meta2 = NP.for_payload(props, games2, now, gamelogs=d / "gl.sqlite", matchup=d / "mu.sqlite", cache=d / "c.pkl")
+    assert meta2["stale"] is True and "days before the slate" in meta2["stale_reason"]
+
+
+def test_forecast_log_keeps_first_and_last_before_cutoff():
+    import datetime as dt_
+    db = pathlib.Path(tempfile.mkdtemp()) / "f.sqlite"
+    it = lambda p: {"gid": "G", "pid": 7, "market": "points", "tip": "2026-10-27T00:00:00Z", "line": 20.5, "book": "fd",
+                    "over": 1.9, "under": 1.9, "p_over": p, "p_push": 0.0, "p_blend": p, "mean": 21.0}
+    for h, m, p in ((18, 0, .55), (23, 20, .60), (23, 40, .99)):              # the 23:40 build is past tip - 30
+        NP.log_forecasts(db, [it(p)], dt_.datetime(2026, 10, 26, h, m, tzinfo=dt_.timezone.utc))
+    rows = dict(sqlite3.connect(db).execute("SELECT kind, p_over FROM forecasts").fetchall())
+    assert rows == {"first": .55, "cutoff": .60}
+
+
+def test_prospective_grading_voids_and_clv_sign():
+    import json
+    import nba_proj_eval as E
+    d = pathlib.Path(tempfile.mkdtemp())
+    lg = sqlite3.connect(d / "log.sqlite")
+    lg.execute("CREATE TABLE forecasts (kind TEXT, logged_at TEXT, gid TEXT, pid INTEGER, market TEXT, tip TEXT, line REAL, "
+               "book TEXT, over REAL, under REAL, p_over REAL, p_push REAL, p_blend REAL, mean REAL, version TEXT)")
+    tip = "2026-10-27T00:00:00Z"
+    for kind, pid, line, o, u, p in (("first", 1, 20.5, 1.9, 1.9, .60), ("cutoff", 1, 20.5, 1.8, 2.0, .62),
+                                     ("cutoff", 2, 9.5, 1.9, 1.9, .40), ("cutoff", 3, 6.0, 1.9, 1.9, .50)):
+        lg.execute("INSERT INTO forecasts VALUES (?, 't', 'G', ?, 'points', ?, ?, 'fd', ?, ?, ?, 0, ?, 0, ?)",
+                   (kind, pid, tip, line, o, u, p, p, NP.VERSION))
+    lg.commit()
+    q = sqlite3.connect(d / "lines.sqlite")
+    q.execute("CREATE TABLE quotes (seen_at TEXT, book TEXT, gid TEXT, tip_utc TEXT, pid INTEGER, player TEXT, stat TEXT, "
+              "line REAL, side TEXT, odds REAL)")
+    for side, odds in (("over", 1.7), ("under", 2.15)):                    # the close moved toward the over
+        q.execute("INSERT INTO quotes VALUES ('2026-10-26T23:50:00','fd','G',?,1,'','points',20.5,?,?)", (tip, side, odds))
+    q.commit()
+    m = sqlite3.connect(d / "mu.sqlite")
+    m.execute("CREATE TABLE games (gid TEXT, season TEXT, date TEXT, home TEXT, away TEXT, home_pts REAL, away_pts REAL)")
+    m.execute("CREATE TABLE player_games (gid TEXT, team TEXT, pid INTEGER, pos TEXT, starter INTEGER, min REAL, pts REAL, "
+              "reb REAL, ast REAL, fg3m REAL, stl REAL, blk REAL, tov REAL, fga REAL, fg3a REAL, fta REAL)")
+    m.execute("INSERT INTO games VALUES ('G','2026-27','2026-10-26','AAA','BBB',100,99)")
+    m.execute("INSERT INTO player_games VALUES ('G','AAA',1,'G',1,34,25,1,1,1,0,0,1,0,0,0)")    # over
+    m.execute("INSERT INTO player_games VALUES ('G','AAA',2,'G',1,0,0,0,0,0,0,0,0,0,0,0)")      # DNP: void
+    m.execute("INSERT INTO player_games VALUES ('G','AAA',3,'G',1,20,6,0,0,0,0,0,0,0,0,0)")     # 6 on 6.0: push, void
+    m.commit()
+    out = E.prospective(d / "log.sqlite", d / "lines.sqlite", d / "mu.sqlite", d / "o.json")
+    assert out["graded"] == 1 and out["with_close"] == 1
+    p_then, p_close = NP.no_vig(1.9, 1.9), NP.no_vig(1.7, 2.15)
+    assert out["clv"]["n"] == 1 and out["clv"]["mean"] == pytest.approx(p_close - p_then) and out["clv"]["mean"] > 0
+    assert json.loads((d / "o.json").read_text())["graded"] == 1
+
+
+def test_verdicts_follow_the_prereg_lines():
+    import nba_proj_eval as E
+    rel_ok = [[300, .5, .51]] * 3
+    good = {"norm_crps_m1_minus_b2": [-.01, -.02, -.005], "norm_crps_m1_minus_b1": [-.01, -.02, -.005],
+            "stats": {"pts": {"pit_deciles": [.1] * 10}},
+            "market": {"n": 5000, "blend_minus_market_ll": [-.002, -.003, -.001], "m1_minus_market_ll": [-.002, -.003, -.001],
+                       "reliability_m1": rel_ok, "reliability_blend": rel_ok}}
+    P = {E.TEST_A: good, E.TEST_B: good, E.TEST_C: dict(good, label="replay")}
+    v = E.verdicts(P)                                           # no prospective record: C is not established
+    assert "YES" in v[0] and "YES" in v[1] and "YES" in v[2]
+    assert "NOT ESTABLISHED" in v[4] and "(C has 0 graded props" in v[4] and v[5].endswith("NO.")
+    pro = {"with_close": 2500, "blend_minus_close": [-.001, -.002, -.0005], "model_minus_close": [-.001, -.002, -.0004]}
+    v = E.verdicts(P, prospective=pro)
+    assert "YES" in v[4] and v[5].endswith("YES.")
+    touches = dict(good, norm_crps_m1_minus_b2=[-.01, -.02, .001])           # CI reaching 0: not a win
+    assert "NO" in E.verdicts({E.TEST_A: touches, E.TEST_B: good})[0]
+
+
+def test_verdicts_never_pass_on_missing_data():
+    import nba_proj_eval as E
+    v = E.verdicts({})
+    assert all(("NO" in x or "NOT ESTABLISHED" in x) for x in v) and "fails" in v[2]

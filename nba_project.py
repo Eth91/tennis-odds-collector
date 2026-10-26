@@ -44,15 +44,17 @@ COLD_MIN = 12.0                    # minutes for a player with no appearance at 
 
 # the frozen configuration — chosen on 2023-24 only (nba_proj_eval.py --tune) and committed before any held-out
 # period was scored. TUNED_ON records where it came from.
-PROJ_CONFIG = {"h_m": 6, "k_m": 3.0, "h_r": 25, "k_pts": 150.0, "k_reb": 150.0, "k_ast": 150.0, "k_fg3m": 150.0,
-               "k_stl": 150.0, "k_blk": 150.0, "k_tov": 150.0, "a_opp": 0.5, "a_pace": 0.5, "home": 1, "b2b": 1,
-               "K": 200, "w_n": 1.0, "w_rest": 0.5}
-TUNED_ON = None
+PROJ_CONFIG = {"h_m": 3, "k_m": 1.0, "h_r": 25, "k_pts": 50.0, "k_reb": 50.0, "k_ast": 50.0, "k_fg3m": 50.0,
+               "k_stl": 400.0, "k_blk": 50.0, "k_tov": 50.0, "a_opp": 0.5, "a_pace": 0.5, "home": 1, "b2b": 0,
+               "K": 400, "w_n": 1.0, "w_rest": 0.5}
+TUNED_ON = "2023-24"     # nba_proj_eval.py --tune, 3 coordinate-descent passes, objective 0.37834 (normalized CRPS)
 # frozen with the config: home / away / back-to-back multipliers measured on 2022-23, and the kNN feature scale
 # (2022-23 standard deviations under PROJ_CONFIG) — so the VM and the backtest use the same numbers
-PROJ_CONSTS = None
-PROJ_SCALE = None
-PROJ_BLEND_W = None            # the M1+mkt logit weight on FanDuel's no-vig, chosen on 2023-24
+PROJ_CONSTS = {"home": [0.9995, 1.01091, 1.01041, 1.01193, 1.0196, 1.00533, 1.01226, 0.99304],
+               "away": [1.0005, 0.98909, 0.98959, 0.98807, 0.9804, 0.99467, 0.98774, 1.00696],
+               "b2b": [1.06062, 1.00095, 0.9884, 0.97775, 1.02267, 0.95851, 0.94326, 0.97247]}
+PROJ_SCALE = [0.49732, 0.58354, 0.4682, 0.49653, 0.39258, 0.19721, 0.23693, 0.33297, 0.97175, 0.27158]
+PROJ_BLEND_W = 0.85            # the M1+mkt logit weight on FanDuel's no-vig, chosen on 2023-24 (log loss 0.68662)
 GRID = {"h_m": [3, 6, 12], "k_m": [1.0, 3.0, 8.0], "h_r": [10, 25, 60],
         "k_pts": [50.0, 150.0, 400.0], "k_reb": [50.0, 150.0, 400.0], "k_ast": [50.0, 150.0, 400.0],
         "k_fg3m": [50.0, 150.0, 400.0], "k_stl": [50.0, 150.0, 400.0], "k_blk": [50.0, 150.0, 400.0],
@@ -426,7 +428,8 @@ def project(rows, slate, cfg=None, consts=None, scale=None):
     sc = np.asarray(scale if scale is not None else (PROJ_SCALE or pf.std(0)), float)
     sc = np.where(sc > 0, sc, 1.0)
     nb = neighbors(tf, pf, cfg["K"], sc)
-    return Dist(tmu, pmu, py, nb), ot, {"pool": len(pool), "through": max((rows[i]["date"] for i in pool), default=None)}
+    return Dist(tmu, pmu, py, nb), ot, {"pool": len(pool), "through": max((rows[i]["date"] for i in pool), default=None),
+                                        "pool_mean": [round(float(x), 2) for x in pmu.mean(0)] if len(pmu) else None}
 
 
 def compact_pmf(pm, eps=5e-5):
@@ -551,10 +554,14 @@ def for_payload(props, games, now, news=None, log_db=None, gamelogs=None, matchu
                 grp[r["pid"]] = r["group"]
             keys = sorted(want)
             slate = [dict(want[k], season=PD.season_of(want[k]["date"]),
-                          group=grp.get(want[k]["pid"]) or PD.group_of(pos.get(want[k]["pid"])) or "F") for k in keys]
+                          group=grp.get(want[k]["pid"]) or PD.group_of(pos.get(want[k]["pid"]))) for k in keys]
+            no_group = sum(1 for t in slate if not t["group"])
+            for t in slate:
+                t["group"] = t["group"] or "F"                     # unknown position: forwards' league rates (counted)
             d, ot, ps = project(rows, slate)
             hit = {"key": key, "keys": keys, "vals": d.vals.astype(np.float32), "mu": d.mu, "n_hist": [o["n_hist"] for o in ot],
-                   "rest": [o["rest"] for o in ot], "through": max(r["date"] for r in rows), "pool": ps["pool"]}
+                   "rest": [o["rest"] for o in ot], "through": max(r["date"] for r in rows), "pool": ps["pool"],
+                   "no_group": no_group, "pool_mean": ps.get("pool_mean")}
             tmp = Path(str(cache) + ".tmp")
             tmp.write_bytes(pickle.dumps(hit))
             os.replace(tmp, cache)
@@ -580,8 +587,14 @@ def for_payload(props, games, now, news=None, log_db=None, gamelogs=None, matchu
                 players[str(p["pid"])] = {m: {k: v for k, v in summarize(d, j, m).items() if k != "pmf"}
                                           for m in ("points", "rebounds", "assists", "threes", "steals", "blocks", "turnovers")}
                 players[str(p["pid"])]["min"] = {k: v for k, v in summarize(d, j, "min", 70).items() if k != "pmf"}
+        meta["backtest"] = backtest_summary()
         meta["coverage"] = {"props": len(props), "projected": len(by_prop),
-                            "thin_history": sum(1 for v in by_prop.values() if v["n_hist"] < 10)}
+                            "thin_history": sum(1 for v in by_prop.values() if v["n_hist"] < 10),
+                            "players": len(hit["keys"]), "unknown_position": hit.get("no_group", 0)}
+        # drift: tonight's projected means against the analog pool's (the last two seasons' walk-forward means)
+        mu_now = np.asarray(hit["mu"], float).mean(0)
+        meta["drift"] = {"slate_mean": dict(zip(STATS, [round(float(x), 2) for x in mu_now])),
+                         "pool_mean": dict(zip(STATS, hit.get("pool_mean") or [None] * NS))}
         if news is not None:
             meta["availability"] = availability_table(news, matchup)
         if log_db is not None:
@@ -606,3 +619,28 @@ def for_payload(props, games, now, news=None, log_db=None, gamelogs=None, matchu
     except Exception as e:                                                   # noqa: BLE001
         meta["error"] = f"projection failed ({type(e).__name__}: {str(e)[:120]})"
         return {}, {}, meta
+
+
+RESULTS = PD.HERE / "PROJECTION_RESULTS.json"
+
+
+def backtest_summary(path=None):
+    """The headline numbers of the pre-registered evaluation (PROJECTION_RESULTS.json), for the page."""
+    try:
+        r = json.loads(Path(path or RESULTS).read_text())
+    except (OSError, ValueError):
+        return None
+    out = {"version": r.get("version"), "generated_at": r.get("generated_at"), "periods": {}}
+    for season, p in (r.get("periods") or {}).items():
+        if not p:
+            continue
+        row = {"n": p.get("n"), "dates": p.get("dates"), "crps_vs_b2": p.get("norm_crps_m1_minus_b2"), "label": p.get("label"),
+               "cover80": {s: round(v.get("cover80", 0), 3) for s, v in (p.get("stats") or {}).items()}}
+        mk = p.get("market")
+        if mk:
+            row["market"] = {"n": mk["n"], "model_ll": mk["m1"]["logloss"], "blend_ll": mk["m1+mkt"]["logloss"],
+                             "close_ll": mk["market"]["logloss"], "model_minus_close": mk["m1_minus_market_ll"],
+                             "blend_minus_close": mk["blend_minus_market_ll"], "sim": mk.get("sim")}
+        out["periods"][season] = row
+    out["verdicts"] = r.get("verdicts")
+    return out
