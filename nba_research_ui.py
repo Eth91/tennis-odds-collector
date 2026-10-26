@@ -225,6 +225,85 @@ th.r,td.r{text-align:right}
 .ov{color:var(--grn);font-weight:800} .un{color:var(--red);font-weight:800} .pu{color:var(--l2);font-weight:800}
 .live{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:700}
 .end{height:calc(var(--sb) + 30px)}
+/* ── player page (prop-research layout) ── */
+.ph{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;padding:calc(var(--st) + 8px) 16px 8px;
+background:linear-gradient(#000 70%,rgba(0,0,0,0))}
+.cb{flex:none;display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:50%;
+border:1px solid #2c2c2e;background:rgba(28,28,30,.92);color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.5)}
+.cb svg{width:24px;height:24px}
+.cb.fav{color:var(--yel)} .cb.fav svg{fill:var(--yel)}
+.ph-t{flex:1;min-width:0;text-align:center;line-height:1.2}
+.ph-t b{display:block;font-size:17px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph-t span{display:block;font-size:14px;color:var(--l2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mt{margin:4px 16px 0;border:1px solid #2c2c2e;border-radius:28px;background:#121214;overflow:hidden}
+.mt-in{display:flex;gap:2px;overflow-x:auto;padding:5px;scrollbar-width:none}
+.mt-in::-webkit-scrollbar{display:none}
+.mt button{flex:none;height:44px;padding:0 18px;border:0;border-radius:22px;background:none;color:var(--l2);font-size:17px;font-weight:500}
+.mt button[aria-pressed="true"]{background:#2c2c2e;color:#fff}
+.hro{position:relative;display:flex;min-height:230px;margin-top:14px;padding:0 16px;border-bottom:1px solid #2c2c2e;overflow:hidden}
+.hro-l{position:relative;z-index:1;padding-top:8px;max-width:58%}
+.hro-l h2{margin:0 0 6px;font-size:32px;font-weight:700;letter-spacing:-.01em;line-height:1.1}
+.hro-s{font-size:18px;color:var(--l2);line-height:1.45}
+.tlg{display:flex;align-items:center;justify-content:center;width:68px;height:68px;margin:22px 0 18px;border-radius:50%}
+.tlg img{width:48px;height:48px}
+.hro-i{position:absolute;right:-24px;bottom:0;height:226px;width:auto;object-fit:contain;object-position:bottom}
+.sg2{display:flex;align-items:center;gap:10px;padding:16px 16px 6px}
+.cells{flex:1;display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:16px 10px}
+.cells>div,.cells>button{min-width:0;padding:0;border:0;background:none;text-align:left}
+.cells i{display:block;font-style:normal;font-size:15px;color:var(--l2);font-stretch:condensed;letter-spacing:-.01em;white-space:nowrap}
+.cells b{display:flex;align-items:center;gap:4px;margin-top:4px;font-size:21px;font-weight:500;font-stretch:condensed;
+letter-spacing:-.02em;white-space:nowrap;font-variant-numeric:tabular-nums}
+.cv{margin-left:6px;color:var(--l2);font-size:22px;font-weight:300}
+.tri{font-size:16px} .tri.up{color:#2ed68f} .tri.dn{color:#ff2d2d}
+.muc{flex:none;display:flex;flex-direction:column;align-items:center;width:112px;padding:10px 0 12px;border:1px solid #2c2c2e;
+border-radius:14px;background:#121214;color:#fff;font-size:16px}
+.c2w{margin:14px 0 0;padding:0 16px;overflow-x:auto;scrollbar-width:none}
+.c2w::-webkit-scrollbar{display:none}
+svg.c2{display:block}
+svg.c2 text{font-family:inherit}
+svg.c2 .ax{fill:var(--l2);font-size:17px}
+svg.c2 .lx{fill:#fff;font-size:17px}
+svg.c2 .mn{fill:#fff;font-size:16px;font-weight:600}
+svg.c2 .vv{fill:#111;font-size:16px;font-weight:600}
+svg.c2 .vw{fill:#fff;font-size:15px;font-weight:600}
+svg.c2 .xl{fill:var(--l2);font-size:13px}
+svg.c2 g.br:focus{outline:none} svg.c2 g.br:focus rect{stroke:var(--blue);stroke-width:2.5}
+.wrow{display:flex;align-items:center;gap:10px;margin:18px 16px 0}
+.wcap{flex:1;display:flex;padding:6px;border:1px solid #2c2c2e;border-radius:34px;background:#121214;overflow-x:auto;scrollbar-width:none}
+.wcap::-webkit-scrollbar{display:none}
+.wc{flex:1;min-width:58px;padding:7px 4px 6px;border:0;border-radius:26px;background:none;text-align:center}
+.wc i{display:block;font-style:normal;font-size:14px;color:#fff}
+.wc b{display:block;font-size:18px;font-weight:600}
+.wc b.up{color:#2ed68f} .wc b.dn{color:#ff2d2d}
+.wc[aria-pressed="true"]{background:#2c2c2e}
+.wc:disabled{opacity:.35}
+.fb{width:60px;height:60px}
+.cf{margin:22px 16px 0}
+.cf-h{display:flex;align-items:center;gap:14px}
+.cf-h h3,.sec2 h3{margin:0;font-size:22px;font-weight:600}
+.ca{height:34px;padding:0 14px;border:1px solid #3a3a3c;border-radius:17px;background:#121214;font-size:14px}
+.fcs{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.fc{display:inline-flex;align-items:center;gap:8px;height:46px;padding:0 18px;border:1px solid #3a3a3c;border-radius:23px;
+background:#121214;font-size:17px;color:#fff}
+.fc svg{width:20px;height:16px}
+.fc em{font-style:normal;font-weight:600} .fc em.good{color:#2ed68f} .fc em.bad{color:#ff2d2d} .fc em.mid{color:var(--yel)}
+.fc.on{border-color:#fff;background:#2c2c2e}
+.rp{margin:18px 0 0}
+.rp-h{display:flex;justify-content:space-between;align-items:baseline;font-size:20px;font-weight:500}
+.rp-h b{font-size:16px;font-weight:600;color:var(--l2);font-variant-numeric:tabular-nums}
+.dual2{position:relative;height:56px;margin-top:12px;border:1px solid #2c2c2e;border-radius:28px;background:#121214}
+.dual2 .trk{position:absolute;left:12px;right:12px;top:13px;height:28px;border-radius:14px;background:#1c1c1e}
+.dual2 .fil{position:absolute;top:13px;height:28px;border-radius:14px;background:#3a3a3c}
+.dual2 input{position:absolute;left:0;width:100%;top:0;height:56px;margin:0;background:none;pointer-events:none;
+-webkit-appearance:none;appearance:none}
+.dual2 input::-webkit-slider-runnable-track{height:56px;background:none}
+.dual2 input::-webkit-slider-thumb{pointer-events:auto;-webkit-appearance:none;width:30px;height:30px;margin-top:13px;border-radius:50%;
+background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.5)}
+.dual2 input::-moz-range-thumb{pointer-events:auto;width:30px;height:30px;border:0;border-radius:50%;background:#fff}
+.rp-b{display:flex;justify-content:space-between;margin:8px 8px 0;font-size:20px;font-variant-numeric:tabular-nums}
+.sec2{margin:28px 16px 0}
+.sec2 h3{margin-bottom:12px}
+.box0{padding:14px;border:1px solid #2c2c2e;border-radius:16px;background:#121214}
 """
 
 JS_CORE = r"""
@@ -267,6 +346,7 @@ function windowed(logs, win, season, opp) {
   return logs.slice();
 }
 // player-page filters: home / starter = true, false or null (any); result = "W" / "L"; rest = "b2b" / "1" / "2+";
+// oppSets = [{season: [teams]}] (the opponent must be in each);
 // ranges = {min|fga|fg3a|fta|margin: [lo, hi]} inclusive (a game missing that stat is out); without = [{played, since, team}]
 function filterLogs(logs, f) {
   f = f || {};
@@ -280,6 +360,10 @@ function filterLogs(logs, f) {
     if (f.rest === "b2b" && l.rest !== 0) return false;
     if (f.rest === "1" && l.rest !== 1) return false;
     if (f.rest === "2+" && !(l.rest >= 2)) return false;
+    for (var j = 0; j < (f.oppSets || []).length; j++) {       // {season: [opponents]}: the tier chips
+      var ss = f.oppSets[j][seasonOf(l.date)];
+      if (!ss || ss.indexOf(l.opp) < 0) return false;
+    }
     for (var k in (f.ranges || {})) {
       var v = l[k], r = f.ranges[k];
       if (v === null || v === undefined || v < r[0] || v > r[1]) return false;
@@ -408,7 +492,8 @@ const SORTS = [["hit10", "L10 hit rate"], ["hit5", "L5 hit rate"], ["hit20", "L2
 let D = null, ERR = null, LOADING = true, CUR = null;
 const ST = {date: null, gid: "all", market: "points", side: "over", q: "", sort: "hit10", dir: "desc", team: "all",
             book: "all", lmin: "", lmax: "", omin: "", omax: ""};
-const DT = {line: null, win: "l10", home: null, starter: null, result: null, rest: null, ranges: {}, without: {}};
+const DT = {line: null, win: "l10", home: null, starter: null, result: null, rest: null, ranges: {}, without: {},
+            dvp: false, def: false, open: {}};
 const RANGES = [["min", "Minutes", "Min"], ["fga", "Field goal attempts", "FGA"], ["fg3a", "3-point attempts", "3PA"],
                 ["fta", "Free throw attempts", "FTA"], ["margin", "Team margin", "Margin"]];
 const SEGS = [["home", "Location", [[null, "Any"], [true, "Home"], [false, "Away"]]],
@@ -609,7 +694,7 @@ function openProp(id, push) {
   const fresh = CUR !== id;
   CUR = id;
   if (fresh) Object.assign(DT, {line: p.main !== null ? p.main : allLines(p)[0], win: "l10", home: null, starter: null,
-                                 result: null, rest: null, ranges: {}, without: {}});
+                                 result: null, rest: null, ranges: {}, without: {}, dvp: false, def: false, open: {}});
   if (push !== false) history.pushState({p: id}, "", hashState());
   renderProp();
   const pg = $("#pg");
@@ -654,25 +739,140 @@ function chart(logs, market, line) {
   out.push(`<rect x="${W - 46}" y="${ly - 9}" width="44" height="18" rx="9" fill="#fff"/><text class="ll" x="${W - 24}" y="${ly + 4}" text-anchor="middle">${line}</text></svg>`);
   return out.join("");
 }
+const TEAMS = {ATL: ["Atlanta Hawks", "#C8102E"], BOS: ["Boston Celtics", "#007A33"], BKN: ["Brooklyn Nets", "#2a2a2a"],
+  CHA: ["Charlotte Hornets", "#00788C"], CHI: ["Chicago Bulls", "#CE1141"], CLE: ["Cleveland Cavaliers", "#860038"],
+  DAL: ["Dallas Mavericks", "#00538C"], DEN: ["Denver Nuggets", "#0E2240"], DET: ["Detroit Pistons", "#C8102E"],
+  GSW: ["Golden State Warriors", "#1D428A"], HOU: ["Houston Rockets", "#CE1141"], IND: ["Indiana Pacers", "#002D62"],
+  LAC: ["LA Clippers", "#1D428A"], LAL: ["Los Angeles Lakers", "#552583"], MEM: ["Memphis Grizzlies", "#5D76A9"],
+  MIA: ["Miami Heat", "#98002E"], MIL: ["Milwaukee Bucks", "#00471B"], MIN: ["Minnesota Timberwolves", "#0C2340"],
+  NOP: ["New Orleans Pelicans", "#0C2340"], NYK: ["New York Knicks", "#006BB6"], OKC: ["Oklahoma City Thunder", "#007AC1"],
+  ORL: ["Orlando Magic", "#0077C0"], PHI: ["Philadelphia 76ers", "#006BB6"], PHX: ["Phoenix Suns", "#1D1160"],
+  POR: ["Portland Trail Blazers", "#E03A3E"], SAC: ["Sacramento Kings", "#5A2D81"], SAS: ["San Antonio Spurs", "#2b2b2b"],
+  TOR: ["Toronto Raptors", "#CE1141"], UTA: ["Utah Jazz", "#4B2C82"], WAS: ["Washington Wizards", "#002B5C"]};
+const POSN = {PG: "Point Guard", SG: "Shooting Guard", SF: "Small Forward", PF: "Power Forward", C: "Center", G: "Guard",
+  F: "Forward", "G-F": "Guard-Forward", "F-G": "Forward-Guard", "F-C": "Forward-Center", "C-F": "Center-Forward"};
+const TAB_ORDER = ["points", "assists", "rebounds", "threes", "pts_ast", "pts_reb", "reb_ast", "pra"];
+const TAB = {points: "Points", rebounds: "Rebs", assists: "Assists", threes: "3PTM", pra: "PRA", pts_reb: "P+R", pts_ast: "P+A", reb_ast: "R+A"};
+const GRPN = {G: "guards", F: "forwards", C: "centers"};
+const ICON = {
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
+  share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M21 3 3 10.5l7 2.5 2.5 7L21 3Z"/><path d="m10 13 4.5-4.5"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/></svg>',
+  bars: '<svg viewBox="0 0 20 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 14h16M5 11V7M9 11V3M13 11V6M17 11V9"/></svg>',
+  menu: '<svg viewBox="0 0 22 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 3h18M5 8h12M8 13h6"/></svg>'};
+const favs = () => { try { return JSON.parse(localStorage.getItem("pickz_fav") || "[]"); } catch (e) { return []; } };
+function toggleFav(pid) {
+  try { const f = favs(), i = f.indexOf(pid); if (i >= 0) f.splice(i, 1); else f.push(pid); localStorage.setItem("pickz_fav", JSON.stringify(f)); } catch (e) {}
+}
+// tier of a rank among n teams: thirds (1 = the toughest defense)
+const tierOf = (r, n) => !r || !n ? null : r <= Math.ceil(n / 3) ? "tough" : r > n - Math.ceil(n / 3) ? "soft" : "mid";
+function rankCls(r, n, side) {
+  const t = tierOf(r, n);
+  if (!t || t === "mid") return "mid";
+  return (t === "soft") === (side !== "under") ? "good" : "bad";
+}
+function oppSet(table, tier, n) {
+  const out = [];
+  Object.keys(table || {}).forEach(t => { if (tierOf(table[t], n) === tier) out.push(t); });
+  return out;
+}
+function grade(p, side) {
+  const c = p.ctx || {}, r = c.dvp_rank || c.def_rank, n = c.teams;
+  if (!r || !n || n < 2) return null;
+  let q = (r - 1) / (n - 1);                       // 0 = the toughest, 1 = the softest
+  if (side === "under") q = 1 - q;
+  return {q: q, g: q >= .8 ? "A" : q >= .6 ? "B" : q >= .4 ? "C" : q >= .2 ? "D" : "F"};
+}
+function gauge(gr) {
+  const R = 30, C = 2 * Math.PI * R, arc = C * .75, col = !gr ? "#48484a" : gr.q >= .6 ? "#2ed68f" : gr.q >= .4 ? "#ffd60a" : "#ff3b30";
+  const fill = gr ? arc * Math.max(.06, gr.q) : 0;
+  return `<svg viewBox="0 0 80 80" width="74" height="74" aria-hidden="true"><g transform="rotate(135 40 40)">` +
+    `<circle cx="40" cy="40" r="${R}" fill="none" stroke="#2c2c2e" stroke-width="7" stroke-linecap="round" stroke-dasharray="${arc} ${C}"/>` +
+    `<circle cx="40" cy="40" r="${R}" fill="none" stroke="${col}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${fill} ${C}"/></g>` +
+    `<text x="40" y="49" text-anchor="middle" font-size="26" font-weight="700" fill="${col}">${gr ? gr.g : "–"}</text></svg>`;
+}
+function chart2(logs, market, line) {
+  const n = logs.length;
+  if (!n) return '<div class="empty" style="padding:40px 0"><b>No games</b>Nothing matches this window and these filters.</div>';
+  const vals = logs.map(l => statValue(l, market)), mins = logs.map(l => l.min);
+  const top = Math.max(line, ...vals.filter(v => v !== null), ...mins.filter(v => v !== null), 1);
+  const W0 = Math.min(window.innerWidth, 520) - 32, AX = 46;
+  const slot = Math.max(38, (W0 - AX) / n), W = Math.max(W0, AX + n * slot), H = 400, T = 14, B = 330;
+  const y = v => B - v / (top * 1.04) * (B - T);
+  const o = [`<svg class="c2" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="group" aria-label="${esc(NAME[market])} and minutes by game, ${n} games, line ${line}">`];
+  o.push(`<text class="ax" x="0" y="${y(top) + 6}">${Math.round(top * 10) / 10}</text><text class="ax" x="0" y="${B}">0</text>`);
+  logs.forEach((l, i) => {
+    const v = vals[i], m = l.min, x = AX + i * slot + 3, w = slot - 6, cx = x + w / 2;
+    const res = v === null ? "none" : v > line ? "over" : v < line ? "under" : "push";
+    const fill = res === "over" ? "#2ed68f" : res === "under" ? "#ff2d2d" : "#8e8e93";
+    const d = iso(l.date + "T12:00:00Z").toLocaleDateString("en-US", {month: "numeric", day: "numeric", timeZone: "UTC"});
+    const desc = `${d} ${l.home ? "vs" : "at"} ${l.opp}: ${v === null ? "no value" : v} ${short(market)} in ${m} minutes, ${res} ${line}`;
+    let g = `<g class="br" tabindex="0" role="img" aria-label="${esc(desc)}"><title>${esc(desc)}</title>`;
+    if (v !== null && v > 0) g += `<rect x="${x}" y="${y(v)}" width="${w}" height="${B - y(v)}" fill="${fill}"/>`;
+    if (m) g += `<rect x="${x}" y="${y(m)}" width="${w}" height="${B - y(m)}" fill="none" stroke="#e5e5ea" stroke-width="1.6"/>` +
+      `<text class="mn" x="${cx}" y="${y(m) + 24}" text-anchor="middle">${Math.round(m * 10) / 10}</text>`;
+    if (v !== null) g += B - y(v) >= 26 ? `<text class="vv" x="${cx}" y="${B - 9}" text-anchor="middle">${v}</text>`
+      : `<text class="vw" x="${cx}" y="${y(v) - 6}" text-anchor="middle">${v}</text>`;
+    g += `<text class="xl" x="${cx}" y="${B + 24}" text-anchor="middle">${d}</text><text class="xl" x="${cx}" y="${B + 46}" text-anchor="middle">${l.home ? "" : "@"}${esc(l.opp)}</text></g>`;
+    o.push(g);
+  });
+  o.push(`<line x1="${AX - 2}" x2="${W}" y1="${y(line)}" y2="${y(line)}" stroke="#fff" stroke-width="1.6"/>`);
+  o.push(`<text class="lx" x="0" y="${y(line) - 6}">${line}</text></svg>`);
+  return o.join("");
+}
 function renderProp() {
   const p = D.props.find(x => x.id === CUR), pg = $("#pg");
-  if (!p) { pg.innerHTML = `<div class="bar"><div class="bar-r"><button class="bk">${CHEV}Props</button></div></div><div class="empty"><b>No longer posted</b>The books have taken this prop down.</div>`; $("#pg .bk").onclick = () => history.back(); return; }
-  const g = gameOf(p.gid), line = DT.line, side = ST.side, logs = logsOf(p);
+  if (!p) { pg.innerHTML = `<div class="ph"><button class="cb bk" aria-label="Back">${ICON.back}</button></div><div class="empty"><b>No longer posted</b>The books have taken this prop down.</div>`; $("#pg .bk").onclick = () => history.back(); return; }
+  const g = gameOf(p.gid), line = DT.line, side = ST.side, logs = logsOf(p), c = p.ctx || {};
+  const team = TEAMS[p.team] || [p.team || "", "#333"];
   const without = (D.absences[g.date + "|" + p.team] || []).map(a => ({key: String(a.pid), name: a.name || "teammate", played: a.played, since: a.since, team: p.team, status: a.status}));
-  const f = {home: DT.home, starter: DT.starter, result: DT.result, rest: DT.rest, ranges: DT.ranges,
+  const prevS = (+D.season.slice(0, 4) - 1) + "-" + D.season.slice(2, 4);
+  const rkCur = (D.ranks || {})[g.date] || {}, rkPrev = (D.ranks || {})[prevS] || {};
+  const dvpT = c.group && rkCur.dvp ? tierOf(c.dvp_rank, c.teams) : null, defT = tierOf(c.def_rank, c.teams);
+  const oppSets = [];
+  if (DT.dvp && dvpT) { const s = {}; s[D.season] = oppSet(rkCur.dvp[c.group][p.market], dvpT, rkCur.teams);
+    if (rkPrev.dvp && rkPrev.teams) s[prevS] = oppSet(rkPrev.dvp[c.group][p.market], dvpT, rkPrev.teams); oppSets.push(s); }
+  if (DT.def && defT) { const s = {}; s[D.season] = oppSet(rkCur.def, defT, rkCur.teams);
+    if (rkPrev.def && rkPrev.teams) s[prevS] = oppSet(rkPrev.def, defT, rkPrev.teams); oppSets.push(s); }
+  const f = {home: DT.home, starter: DT.starter, result: DT.result, rest: DT.rest, ranges: DT.ranges, oppSets: oppSets,
              without: without.filter(w => DT.without[w.key])};
   const base = filterLogs(logs, f);
-  const wins = [["l5", "L5"], ["l10", "L10"], ["l20", "L20"], ["h2h", "H2H"], ["season", D.season], ["last", "Last szn"]];
-  const winHtml = wins.map(([k, lab]) => {
-    const w = windowed(base, k, D.season, p.opp), s = hitSummary(w.map(l => statValue(l, p.market)), line);
-    return `<button class="win" data-win="${k}" aria-pressed="${k === DT.win}"${w.length ? "" : " disabled"}><i>${esc(lab)}</i><b>${pct(sideRate(s, side))}</b></button>`;
-  }).join("");
+  const wins = [["season", D.season.slice(0, 4)], ["h2h", "H2H"], ["l5", "L5"], ["l10", "L10"], ["l20", "L20"]];
   const win = windowed(base, DT.win, D.season, p.opp);
   const s = hitSummary(win.map(l => statValue(l, p.market)), line);
-  const hits = side === "under" ? s.under : s.over;
-  const mkts = ORDER.filter(m => D.props.some(x => x.gid === p.gid && x.pid === p.pid && x.market === m));
-  const inj = D.injuries[g.date + "|" + p.pid] || {};
-  // books
+  const rate = sideRate(s, side);
+  const winLab = (wins.find(w => w[0] === DT.win) || ["", "L10"])[1];
+  const tri = up => `<span class="tri ${up ? "up" : "dn"}">${up ? "▲" : "▼"}</span>`;
+  const mkts = TAB_ORDER.filter(m => D.props.some(x => x.gid === p.gid && x.pid === p.pid && x.market === m));
+  const fav = favs().indexOf(p.pid) >= 0;
+  const gr = grade(p, side);
+  const opp = `${p.home ? "vs" : "@"} ${esc(p.opp || "")} · ${g.state === "pregame" ? mt(g.tip).replace(" ", "") : esc(g.state === "live" ? "LIVE" : g.state === "final" ? "Final" : g.label || "")}`;
+  const capsule = wins.map(([k, lab]) => {
+    const w = windowed(base, k, D.season, p.opp), ss = hitSummary(w.map(l => statValue(l, p.market)), line), r = sideRate(ss, side);
+    return `<button class="wc" data-win="${k}" aria-pressed="${k === DT.win}"${w.length ? "" : " disabled"}><i>${lab}</i><b class="${r === null ? "" : r >= .5 ? "up" : "dn"}">${pct(r)}</b></button>`;
+  }).join("");
+  // chart filter chips
+  const on = (k, v) => DT[k] === v;
+  const chip = (attrs, lab, active) => `<button class="fc${active ? " on" : ""}" ${attrs} aria-pressed="${!!active}">${lab}</button>`;
+  const rangeOn = k => !!DT.ranges[k];
+  const chips = [];
+  if (c.dvp_rank) chips.push(chip('data-t="dvp"', `DvP <em class="${rankCls(c.dvp_rank, c.teams, side)}">${ord(c.dvp_rank)}</em>`, DT.dvp));
+  if (c.def_rank) chips.push(chip('data-t="def"', `Def Rank <em class="${rankCls(c.def_rank, c.teams, side)}">${ord(c.def_rank)}</em>`, DT.def));
+  RANGES.forEach(([k, , abbr]) => { const b = bounds(logs, k); if (b && b[0] !== b[1]) chips.push(chip(`data-r="${k}"`, `${ICON.bars}${k === "min" ? "Minutes" : abbr}`, rangeOn(k) || DT.open[k])); });
+  [["home", true, "Home"], ["home", false, "Away"], ["result", "W", "Win"], ["result", "L", "Loss"], ["rest", "b2b", "B2B"]].forEach(([k, v, lab]) =>
+    chips.push(chip(`data-k="${k}" data-v="${v}"`, lab, on(k, v))));
+  without.forEach(w => chips.push(chip(`data-wo="${w.key}"`, "Without " + esc(w.name.split(" ").slice(-1)[0]), DT.without[w.key])));
+  const panels = RANGES.filter(([k]) => DT.open[k] || rangeOn(k)).map(([k, lab]) => {
+    const b = bounds(logs, k); if (!b || b[0] === b[1]) return "";
+    const cur = DT.ranges[k] || b;
+    return `<div class="rp" data-rk="${k}" data-lo="${b[0]}" data-hi="${b[1]}"><div class="rp-h"><span>${k === "min" ? "Minutes" : lab}</span><b class="rv">${cur[0]} – ${cur[1]}</b></div>
+      <div class="dual2"><div class="trk"></div><div class="fil"></div>
+      <input type="range" class="a" min="${b[0]}" max="${b[1]}" step="1" value="${cur[0]}" aria-label="${lab} minimum">
+      <input type="range" class="b" min="${b[0]}" max="${b[1]}" step="1" value="${cur[1]}" aria-label="${lab} maximum"></div>
+      <div class="rp-b"><span>${b[0]}</span><span>${b[1]}</span></div></div>`;
+  }).join("");
+  const anyF = DT.dvp || DT.def || DT.home !== null || DT.starter !== null || DT.result !== null || DT.rest !== null || Object.keys(DT.ranges).length || Object.keys(DT.without).some(k => DT.without[k]);
+  // odds
   const bestNow = bestPrice(p, line, "all", side);
   const bk = [["fd", "FanDuel", "book-fd.png"], ["dk", "DraftKings", "book-dk.png"]].map(([b, name, img]) => {
     const q = p.books[b];
@@ -680,71 +880,109 @@ function renderProp() {
     const r = rungAt(q, line);
     const ov = r && r[1] ? `<span class="od${bestNow && bestNow.book === b && side === "over" ? " best" : ""}">O ${american(r[1])}</span>` : '<span class="od na">—</span>';
     const un = r && r[2] ? `<span class="od${bestNow && bestNow.book === b && side === "under" ? " best" : ""}">U ${american(r[2])}</span>` : '<span class="od na">—</span>';
-    const other = !r ? `<span class="od na" style="grid-column:span 2">not at ${line} · main ${q.main === null ? "—" : q.main}</span>` : ov + un;
-    return `<div class="bkr"><img src="${img}" alt=""><span>${name}${D.sources.books[b] && D.sources.books[b].stale ? ' <span class="tg tq">STALE</span>' : ""}<br><span class="ln2">${q.main === line ? "main line" : r ? "alt line" : "other line"} · ${mt(q.updated)}</span></span>${other}</div>`;
+    return `<div class="bkr"><img src="${img}" alt=""><span>${name}${D.sources.books[b] && D.sources.books[b].stale ? ' <span class="tg tq">STALE</span>' : ""}<br><span class="ln2">${q.main === line ? "main line" : r ? "alt line" : "main " + (q.main === null ? "—" : q.main)} · ${mt(q.updated)}</span></span>${r ? ov + un : `<span class="od na" style="grid-column:span 2">not at ${line}</span>`}</div>`;
   }).join("");
-  const opened = p.open ? `<div class="note">FanDuel opened ${p.open[0]} (${american(p.open[1])}) ${mt(p.open[2], true)}.</div>` : "";
-  // matchup
-  const c = p.ctx || {}, gp = {G: "guards", F: "forwards", C: "centers"}[c.group];
-  const rk = (r, n, goodHigh) => r ? `<span class="rk ${n ? (r <= Math.ceil(n / 3) ? (goodHigh ? "g" : "r") : r > n - Math.ceil(n / 3) ? (goodHigh ? "r" : "g") : "n") : "n"}">${ord(r)}</span>` : "";
-  const mrows = [];
-  if (c.opp_games) {
-    mrows.push(`<div class="kv"><span>${esc(short(p.market))} allowed to ${gp || "his position"}</span><b>${c.def_rank ? rk(c.def_rank, c.teams, side === "over") : p.market === "threes" ? "n/a for threes" : "—"}</b></div>`);
-    mrows.push(`<div class="kv"><span>${esc(p.opp)} pace</span><b>${c.pace_rank ? rk(c.pace_rank, c.teams, side === "over") : "—"}</b></div>`);
-  } else mrows.push(`<div class="kv"><span>Opponent</span><b>No ${esc(p.opp || "")} games yet this season</b></div>`);
-  if (g.lines) mrows.push(`<div class="kv"><span>Game</span><b>${g.lines.total ? "Total " + g.lines.total : ""}${g.lines.spread_home !== undefined ? " · " + esc(g.home) + " " + (g.lines.spread_home > 0 ? "+" : "") + g.lines.spread_home : ""}</b></div>`);
-  const l10g = logs.slice(-10), m5 = logs.slice(-5);
-  const avgm = a => a.length ? (Math.round(a.reduce((t, l) => t + l.min, 0) / a.length * 10) / 10) : "—";
-  if (l10g.length) mrows.push(`<div class="kv"><span>Role</span><b>${l10g.filter(l => l.starter === 1).length}/${l10g.length} starts · ${avgm(m5)} min L5</b></div>`);
   // availability
-  const rep = D.sources.report[g.date];
-  const arows = [];
-  arows.push(`<div class="kv"><span>Official report</span><b>${inj.official ? esc(inj.official.status) + (inj.official.reason ? " · " + esc(inj.official.reason.replace("Injury/Illness - ", "")) : "") : rep ? (inj.listed_team ? "Not listed" : "Team not listed yet") : "Not out yet"}</b></div>`);
+  const inj = D.injuries[g.date + "|" + p.pid] || {}, rep = D.sources.report[g.date];
+  const arows = [`<div class="kv"><span>Official report</span><b>${inj.official ? esc(inj.official.status) + (inj.official.reason ? " · " + esc(inj.official.reason.replace("Injury/Illness - ", "")) : "") : rep ? (inj.listed_team ? "Not listed" : "Team not listed yet") : "Not out yet"}</b></div>`];
   if (rep) arows.push(`<div class="kv"><span>Report time</span><b>${mt((inj.official || {}).published || rep.published, true)}</b></div>`);
   (inj.news || []).forEach(n => arows.push(`<div class="kv"><span>News · ${esc(n.source)}</span><b>${esc(n.headline || n.status || "")} · ${mt(n.detected)}</b></div>`));
   if (without.length) arows.push(`<div class="kv"><span>Teammates out</span><b>${without.map(w => esc(w.name) + " (" + esc(w.status) + ")").join(", ")}</b></div>`);
-  // related
   const rel = (D.related[p.id] || []).map(r => {
     const o = D.props.find(x => x.id === r.id); if (!o) return "";
     return `<button class="rc" data-rel="${esc(o.id)}"><div class="nm">${esc(o.player.split(" ").slice(-1)[0])} ${esc(short(o.market))}</div><div class="sub">${o.main === null ? "alt lines" : "O/U " + o.main}</div><div class="rr">r ${r.r > 0 ? "+" : ""}${r.r} · ${r.n} games</div></button>`;
   }).join("");
-  const live = p.live && g.state !== "pregame" ? `<div class="box" role="status"><div class="live"><span class="tg ${g.state === "live" ? "tl" : "tn"}">${g.state === "live" ? "LIVE" : "FINAL"}</span>${p.live.value} ${esc(short(p.market))} in ${p.live.min} min</div><div class="note">${esc(g.label || "")}${g.score ? " · " + esc(g.away) + " " + g.score[0] + " – " + esc(g.home) + " " + g.score[1] : ""} · box score ${ago(g.updated)}. ${p.live.value > line ? "Over" : p.live.value < line ? "Under" : "At"} ${line} so far.</div></div>` : "";
+  const live = p.live && g.state !== "pregame" ? `<div class="box" role="status"><div class="live"><span class="tg ${g.state === "live" ? "tl" : "tn"}">${g.state === "live" ? "LIVE" : "FINAL"}</span>${p.live.value} ${esc(short(p.market))} in ${p.live.min} min</div><div class="note">${esc(g.label || "")}${g.score ? " · " + esc(g.away) + " " + g.score[0] + " – " + esc(g.home) + " " + g.score[1] : ""} · box score ${ago(g.updated)}</div></div>` : "";
   const logRows = win.slice().reverse().map(l => {
     const v = statValue(l, p.market), r = v === null ? "–" : v > line ? '<span class="ov">O</span>' : v < line ? '<span class="un">U</span>' : '<span class="pu">P</span>';
-    return `<tr><td>${esc(l.date.slice(5).replace("-", "/"))}</td><td>${l.home ? "" : "@"}${esc(l.opp)}${l.team !== p.team ? " <span style='color:var(--l3)'>(" + esc(l.team) + ")</span>" : ""}</td><td class="r">${l.min}</td><td class="r"><b>${v === null ? "–" : v}</b></td><td class="r">${r}</td></tr>`;
+    return `<tr><td>${esc(l.date.slice(5).replace("-", "/"))}</td><td>${l.home ? "" : "@"}${esc(l.opp)}${l.team !== p.team ? " <span style='color:var(--l3)'>(" + esc(l.team) + ")</span>" : ""}</td><td class="r">${l.min}</td><td class="r">${l.fga ?? "–"}</td><td class="r"><b>${v === null ? "–" : v}</b></td><td class="r">${r}</td></tr>`;
   }).join("");
-  const act = activeFilters(without);
-  const chips = `<button class="pill" id="pf" aria-haspopup="dialog">Filters${act.length ? `<b>${act.length}</b>` : ""}</button>` +
-    act.map(a => `<button class="x" data-clear="${a.key}" aria-label="Remove filter ${esc(a.label)}">${esc(a.label)}<span aria-hidden="true">×</span></button>`).join("") +
-    without.filter(w => !DT.without[w.key]).map(w => `<button class="chip" data-wo="${w.key}" aria-pressed="false">Without ${esc(w.name.split(" ").slice(-1)[0])}</button>`).join("");
-  pg.innerHTML = `<div class="bar"><div class="bar-r"><button class="bk">${CHEV}Props</button><span class="upd">${esc(NAME[p.market])}</span></div></div>
-    <div class="hero"><div class="av">${head(p.pid)}${logo(p.team)}</div><div><h2>${esc(p.player)}</h2><div class="sub">${esc(p.team || "")} ${esc(vs(p))} · ${when(g)} ${injTag(p)}</div></div></div>
-    <nav class="chips" aria-label="Markets" style="margin:14px 0 0">${mkts.map(m => `<button class="chip" data-mk="${m}" aria-pressed="${m === p.market}">${esc(NAME[m])}</button>`).join("")}</nav>
+  pg.innerHTML = `<div class="ph"><button class="cb bk" aria-label="Back">${ICON.back}</button>
+      <div class="ph-t"><b>${esc(p.player)}</b><span>${esc(team[0])}</span></div>
+      <button class="cb" id="shr" aria-label="Share">${ICON.share}</button><button class="cb${fav ? " fav" : ""}" id="fav" aria-label="Favorite" aria-pressed="${fav}">${ICON.star}</button></div>
+    <nav class="mt" aria-label="Markets"><div class="mt-in">${mkts.map(m => `<button data-mk="${m}" aria-pressed="${m === p.market}">${TAB[m]}</button>`).join("")}</div></nav>
+    <div class="hro"><div class="hro-l"><h2>${esc(p.player)}</h2><div class="hro-s">${esc(team[0])}</div><div class="hro-s">${esc(POSN[c.pos] || c.pos || "")}</div>
+      <div class="tlg" style="background:${team[1]}">${logo(p.team, "")}</div></div>
+      <img class="hro-i" alt="" src="https://cdn.nba.com/headshots/nba/latest/1040x760/${p.pid}.png" onerror="this.style.visibility='hidden'"></div>
+    <div class="sg2"><div class="cells">
+      <div><i>${esc(winLab)} AVG</i><b>${s.avg === null ? "–" : tri(s.avg > line) + s.avg}</b></div>
+      <button id="lnb"><i>LINE</i><b>${line}<span class="cv">›</span></b></button>
+      <div><i>PROP</i><b>${esc(NAME[p.market])}</b></div>
+      <div><i>HIT RATE</i><b>${rate === null ? "–" : tri(rate >= .5) + Math.round(rate * 100) + "%"}</b></div>
+      <button id="psb"><i>POS RANK</i><b>${c.pos_rank ? ord(c.pos_rank) : "–"}<span class="cv">›</span></b></button>
+      <div><i>OPPONENT</i><b>${opp}</b></div></div>
+      <button class="muc" id="mub">${gauge(gr)}<span>Matchup <span class="cv">›</span></span></button></div>
     ${live}
-    <div class="box"><div class="lc"><div class="big num"><i>${side === "under" ? "UNDER" : "OVER"}</i>${line}</div>
-      <div class="stp"><button data-step="-0.5" aria-label="Lower the line by half a point">−</button><button data-step="0.5" aria-label="Raise the line by half a point">+</button></div></div>
-      <div class="bks">${bk}</div>${line !== p.main && p.main !== null ? `<div class="note">The main line is ${p.main}. Prices are shown at ${line} where a book offers it.</div>` : ""}${opened}</div>
-    <div class="wins" role="group" aria-label="Games window">${winHtml}</div>
-    <div class="box"><div class="sum"><div class="r num">${hits}/${s.n}<small>${side} ${line}</small></div><div class="a num">Avg <b>${s.avg === null ? "–" : s.avg}</b><br>Median <b>${s.med === null ? "–" : s.med}</b></div></div>
-      <div class="chw" id="chw">${chart(win, p.market, line)}</div>
-      <div class="fch" role="group" aria-label="Filter games">${chips}</div>
-      ${s.n && s.n < 5 ? '<div class="note" style="color:var(--org)">Small sample: ' + s.n + " game" + (s.n === 1 ? "" : "s") + ".</div>" : ""}
-      <div class="note">Past results only, every team he played for. Green = over the line, striped red = under, grey = push.</div></div>
-    <div class="box"><h3>Matchup</h3>${mrows.join("")}<div class="note">${esc(p.opp || "Opponent")}'s rank among ${c.teams || "the"} teams this season: 1st = allows the most / plays fastest. Green = helps the ${side}.</div></div>
-    <div class="box"><h3>Availability</h3>${arows.join("")}<div class="note">Official = the NBA injury report. News is third-party.</div></div>
-    ${rel ? `<div class="box"><h3>Related props</h3><div class="rel">${rel}</div><div class="note">How closely the two stats moved together in past games (r from −1 to +1). History, not a prediction.</div></div>` : ""}
-    ${p.flag ? `<div class="box"><h3>Engine</h3><span class="tg tf" style="margin:0 6px 0 0">SHADOW · NOT A BET</span>${esc(p.flag.tier)} at ${p.flag.line} · ${p.flag.card === 1 ? "on the card" : "logged only" + (p.flag.why ? " (" + esc(p.flag.why.toLowerCase()) + ")" : "")}</div>` : ""}
-    <div class="box"><details class="log"><summary>Game log · ${win.length}</summary><table><thead><tr><th>Date</th><th>Opp</th><th class="r">Min</th><th class="r">${esc(short(p.market))}</th><th class="r">${line}</th></tr></thead><tbody>${logRows || '<tr><td colspan="5">No games.</td></tr>'}</tbody></table></details></div>
+    <div class="c2w" id="chw">${chart2(win, p.market, line)}</div>
+    <div class="wrow"><div class="wcap" role="group" aria-label="Games window">${capsule}</div><button class="cb fb" id="pf" aria-label="All filters">${ICON.menu}</button></div>
+    <div class="note" style="margin:8px 16px 0">${side === "under" ? "Under" : "Over"} ${line} · ${s.n} game${s.n === 1 ? "" : "s"}${s.n && s.n < 5 ? " — small sample" : ""} · white box = minutes played, fill = ${esc(short(p.market))}</div>
+    <div class="cf"><div class="cf-h"><h3>Chart Filters</h3>${anyF ? '<button class="ca" id="clr">Clear All</button>' : ""}</div>
+      <div class="fcs">${chips.join("")}</div>${panels}</div>
+    <div class="sec2"><h3>Odds</h3><div class="box0"><div class="bks" style="margin:0;border:0">${bk}</div>${p.open ? `<div class="note">FanDuel opened ${p.open[0]} (${american(p.open[1])}) ${mt(p.open[2], true)}.</div>` : ""}</div></div>
+    <div class="sec2"><h3>Availability</h3><div class="box0">${arows.join("")}<div class="note">Official = the NBA injury report. News is third-party.</div></div></div>
+    ${rel ? `<div class="sec2"><h3>Related Props</h3><div class="rel" style="margin:0;padding:0">${rel}</div><div class="note">How closely the two stats moved together in past games (r from −1 to +1). History, not a prediction.</div></div>` : ""}
+    ${p.flag ? `<div class="sec2"><h3>Engine</h3><div class="box0"><span class="tg tf" style="margin:0 6px 0 0">SHADOW · NOT A BET</span>${esc(p.flag.tier)} at ${p.flag.line} · ${p.flag.card === 1 ? "on the card" : "logged only" + (p.flag.why ? " (" + esc(p.flag.why.toLowerCase()) + ")" : "")}</div></div>` : ""}
+    <div class="sec2"><details class="log"><summary>Game Log · ${win.length}</summary><table><thead><tr><th>Date</th><th>Opp</th><th class="r">Min</th><th class="r">FGA</th><th class="r">${esc(short(p.market))}</th><th class="r">${line}</th></tr></thead><tbody>${logRows || '<tr><td colspan="6">No games.</td></tr>'}</tbody></table></details></div>
     <div class="end"></div>`;
   const cw = $("#chw"); if (cw) cw.scrollLeft = cw.scrollWidth;
   $("#pg .bk").onclick = () => history.back();
-  $$("[data-step]", pg).forEach(b => b.onclick = () => { DT.line = Math.max(0.5, Math.round((DT.line + +b.dataset.step) * 2) / 2); renderProp(); $(`[data-step="${b.dataset.step}"]`, pg).focus({preventScroll: true}); });
-  $$("[data-win]", pg).forEach(b => b.onclick = () => { DT.win = b.dataset.win; renderProp(); $(`[data-win="${DT.win}"]`, pg).focus({preventScroll: true}); });
-  $$("[data-wo]", pg).forEach(b => b.onclick = () => { DT.without[b.dataset.wo] = true; renderProp(); const f = $("#pf", pg); if (f) f.focus({preventScroll: true}); });
-  $$("[data-clear]", pg).forEach(b => b.onclick = () => { clearFilter(b.dataset.clear); renderProp(); const f = $("#pf", pg); if (f) f.focus({preventScroll: true}); });
-  $("#pf", pg).onclick = () => playerFilters(p, logs, without);
+  const keep = sel => { const e = $(sel, pg); if (e) e.focus({preventScroll: true}); };
+  $("#fav", pg).onclick = () => { toggleFav(p.pid); renderProp(); keep("#fav"); };
+  $("#shr", pg).onclick = () => {
+    const url = location.href, title = `${p.player} ${NAME[p.market]} ${line}`;
+    if (navigator.share) navigator.share({title: title, url: url}).catch(() => {});
+    else if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => { $("#live").textContent = "Link copied"; });
+  };
+  $$("[data-win]", pg).forEach(b => b.onclick = () => { DT.win = b.dataset.win; renderProp(); keep(`[data-win="${DT.win}"]`); });
   $$("[data-mk]", pg).forEach(b => b.onclick = () => { const id = p.gid + "|" + p.pid + "|" + b.dataset.mk; if (id !== p.id) { openProp(id, false); history.replaceState({p: id}, "", hashState()); } });
+  $$("[data-t]", pg).forEach(b => b.onclick = () => { const k = b.dataset.t; DT[k] = !DT[k]; renderProp(); keep(`[data-t="${k}"]`); });
+  $$("[data-r]", pg).forEach(b => b.onclick = () => { const k = b.dataset.r; if (DT.ranges[k]) { delete DT.ranges[k]; DT.open[k] = false; } else DT.open[k] = !DT.open[k]; renderProp(); keep(`[data-r="${k}"]`); });
+  $$("[data-k]", pg).forEach(b => b.onclick = () => { const k = b.dataset.k, raw = b.dataset.v, v = raw === "true" ? true : raw === "false" ? false : raw; DT[k] = DT[k] === v ? null : v; renderProp(); keep(`[data-k="${k}"][data-v="${raw}"]`); });
+  $$("[data-wo]", pg).forEach(b => b.onclick = () => { const k = b.dataset.wo; DT.without[k] = !DT.without[k]; renderProp(); keep(`[data-wo="${k}"]`); });
   $$("[data-rel]", pg).forEach(b => b.onclick = () => openProp(b.dataset.rel));
+  const clr = $("#clr", pg); if (clr) clr.onclick = () => { Object.assign(DT, {home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, dvp: false, def: false, open: {}}); renderProp(); };
+  $("#pf", pg).onclick = () => playerFilters(p, logs, without);
+  $("#lnb", pg).onclick = () => lineSheet(p);
+  $("#psb", pg).onclick = () => openSheet(`<h2 id="sht">Position rank</h2><div class="note" style="font-size:15px;color:var(--l2)">${c.pos_rank
+    ? `${esc(p.player)} is <b style="color:#fff">${ord(c.pos_rank)}</b> of ${c.pos_n} ${GRPN[MU_GROUP(c.pos)] || "players at his position"} in ${esc(NAME[p.market].toLowerCase())} per game (${esc(c.pos_season || "")}, 3+ games).`
+    : "Not enough games to rank him yet."}</div><div class="acts"><button class="btn pri" id="ok1">Done</button></div>`, s2 => { $("#ok1", s2).onclick = closeSheet; });
+  $("#mub", pg).onclick = () => matchupSheet(p, side);
+  $$(".rp", pg).forEach(gp => {
+    const k = gp.dataset.rk, lo = +gp.dataset.lo, hi = +gp.dataset.hi, a = $(".a", gp), b = $(".b", gp), fil = $(".fil", gp), rv = $(".rv", gp);
+    // a WebKit range thumb's centre runs from half a thumb (15px) in from each end
+    const paint = () => { let x = +a.value, yv = +b.value; if (x > yv) [x, yv] = [yv, x];
+      fil.style.left = `calc(3px + (100% - 30px) * ${(x - lo) / (hi - lo)})`; fil.style.right = `calc(3px + (100% - 30px) * ${(hi - yv) / (hi - lo)})`;
+      rv.textContent = `${x} – ${yv}`; return [x, yv]; };
+    a.oninput = b.oninput = paint; paint();
+    a.onchange = b.onchange = () => { const [x, yv] = paint(); if (x === lo && yv === hi) delete DT.ranges[k]; else DT.ranges[k] = [x, yv]; DT.open[k] = true; renderProp(); };
+  });
+}
+const MU_GROUP = pos => ({PG: "G", SG: "G", G: "G", SF: "F", PF: "F", F: "F", C: "C"})[pos] || ({G: "G", F: "F", C: "C"})[(pos || "")[0]];
+function lineSheet(p) {
+  const lines = allLines(p);
+  const rows = lines.map(l => {
+    const f = rungAt(p.books.fd, l), k = rungAt(p.books.dk, l);
+    const pr = (r, i) => r && r[i] ? american(r[i]) : "—";
+    return `<button class="opt" data-l="${l}"><span>${l}${l === p.main ? ' <span class="tg tn">MAIN</span>' : ""}</span><span class="num" style="color:var(--l2);font-size:14px">FD ${pr(f, 1)}/${pr(f, 2)} · DK ${pr(k, 1)}/${pr(k, 2)}</span></button>`;
+  }).join("");
+  openSheet(`<h2 id="sht">Line</h2><div class="lc" style="margin-bottom:8px"><div class="big num" id="ls-v">${DT.line}</div><div class="stp"><button id="ls-m" aria-label="Lower the line by half a point">−</button><button id="ls-p" aria-label="Raise the line by half a point">+</button></div></div>
+    <div class="note" style="margin-bottom:6px">Posted lines (over / under prices):</div>${rows}
+    <div class="acts"><button class="btn pri" id="ls-ok">Done</button></div>`, s => {
+    const set = v => { DT.line = Math.max(0.5, Math.round(v * 2) / 2); $("#ls-v", s).textContent = DT.line; };
+    $("#ls-m", s).onclick = () => set(DT.line - .5); $("#ls-p", s).onclick = () => set(DT.line + .5);
+    $$("[data-l]", s).forEach(b => b.onclick = () => { set(+b.dataset.l); closeSheet(); renderProp(); });
+    $("#ls-ok", s).onclick = () => { closeSheet(); renderProp(); };
+  });
+}
+function matchupSheet(p, side) {
+  const c = p.ctx || {}, g = gameOf(p.gid), gr = grade(p, side), rows = [];
+  const row = (lab, r, n, note) => `<div class="kv"><span>${lab}</span><b>${r ? `<span class="rk ${rankCls(r, n, side) === "good" ? "g" : rankCls(r, n, side) === "bad" ? "r" : "n"}">${ord(r)}</span>` : "—"}</b></div>${note ? `<div class="note" style="margin:-4px 0 6px">${note}</div>` : ""}`;
+  rows.push(row(`DvP · ${esc(short(p.market))} to ${GRPN[c.group] || "his position"}`, c.dvp_rank, c.teams, c.dvp_rank ? `${esc(p.opp)} allows the ${ord(c.teams - c.dvp_rank + 1)}-most ${esc(short(p.market))} to ${GRPN[c.group]} per possession.` : (p.market === "threes" ? "Not computed for threes." : "")));
+  rows.push(row("Def Rank · points allowed", c.def_rank, c.teams, ""));
+  rows.push(`<div class="kv"><span>Pace</span><b>${c.pace_rank ? ord(c.pace_rank) + " fastest" : "—"}</b></div>`);
+  if (g.lines) rows.push(`<div class="kv"><span>Game</span><b>${g.lines.total ? "Total " + g.lines.total : ""}${g.lines.spread_home !== undefined ? " · " + esc(g.home) + " " + (g.lines.spread_home > 0 ? "+" : "") + g.lines.spread_home : ""}</b></div>`);
+  openSheet(`<h2 id="sht">Matchup vs ${esc(p.opp || "")}</h2><div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">${gauge(gr)}<div class="note" style="margin:0;font-size:14px">Grade for the ${side}: A = one of the softest matchups, F = one of the toughest. From ${esc(p.opp || "")}'s rank among ${c.teams || 0} teams this season (1st = toughest defense).</div></div>${rows.join("")}
+    <div class="acts"><button class="btn pri" id="mu-ok">Done</button></div>`, s => { $("#mu-ok", s).onclick = closeSheet; });
 }
 // ── player filters ──
 function activeFilters(without) {
@@ -802,7 +1040,7 @@ function playerFilters(p, logs, without) {
       dr[k] = v; $$(`[data-sk="${k}"]`, s).forEach(x => x.setAttribute("aria-pressed", x === b)); upd();
     });
     $$("[data-wk]", s).forEach(b => b.onclick = () => { const k = b.dataset.wk; dr.without[k] = !dr.without[k]; $(".ck", b).textContent = dr.without[k] ? "✓" : ""; upd(); });
-    $("#pf-reset", s).onclick = () => { Object.assign(DT, {home: null, starter: null, result: null, rest: null, ranges: {}, without: {}}); closeSheet(); renderProp(); };
+    $("#pf-reset", s).onclick = () => { Object.assign(DT, {home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, dvp: false, def: false, open: {}}); closeSheet(); renderProp(); };
     $("#pf-ok", s).onclick = () => { Object.assign(DT, {home: dr.home, starter: dr.starter, result: dr.result, rest: dr.rest, ranges: dr.ranges, without: dr.without}); closeSheet(); renderProp(); };
     upd();
   });

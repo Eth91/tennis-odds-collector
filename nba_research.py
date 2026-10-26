@@ -308,6 +308,79 @@ def absences(official, logs_by_team, game_dates):
     return out
 
 
+def rank_tables(S, mcon, date):
+    """Point-in-time ranks before `date` among the teams that have played: {"dvp": {group: {market: {team: rank}}},
+    "def": {team: rank}, "teams": n}. rank 1 = the TOUGHEST defense (fewest allowed); the last = the softest. dvp = the
+    stat allowed to a position group per possession (nba_matchup's factor); def = points allowed per possession."""
+    teams = [t for t in S.by_team if S._team_before(t, date)[0]]
+    out = {"dvp": {}, "def": {}, "teams": len(teams)}
+    if not teams:
+        return out
+    lg = S._league_before(date)
+    for g in ("G", "F", "C"):
+        fac = {t: S.group_factors(t, date, g, lg) for t in teams}
+        out["dvp"][g] = {m: _ranks({t: fac[t].get(k, 1.0) for t in teams}) for m, k in MATCHUP_KEY.items()}
+    allowed, poss = defaultdict(float), defaultdict(float)
+    for gid, d, home, away, hp, ap in mcon.execute("SELECT gid, date, home, away, home_pts, away_pts FROM games"):
+        if d >= date or hp is None or gid not in S.games:
+            continue
+        for team, opp_pts in ((home, ap), (away, hp)):
+            if (gid, team) in S.poss:
+                allowed[team] += opp_pts
+                poss[team] += S.poss[(gid, team)]
+    out["def"] = _ranks({t: allowed[t] / poss[t] for t in teams if poss[t]})
+    return out
+
+
+def _ranks(vals):
+    """{team: value} -> {team: rank}, 1 = the smallest value (fewest allowed)."""
+    order = sorted(vals, key=lambda t: (vals[t], t))
+    return {t: i + 1 for i, t in enumerate(order)}
+
+
+def positions(mcon, pids, seasons, idx_pos):
+    """{pid: position code} — his most frequent starting position (box scores), else the index's ("F", "G-F")."""
+    out = {}
+    if mcon is not None and pids:
+        marks = ",".join("?" * len(pids))
+        for pid, pos, n in mcon.execute(
+                f"SELECT p.pid, p.pos, COUNT(*) FROM player_games p JOIN games g ON g.gid = p.gid WHERE p.starter = 1 "
+                f"AND p.pos != '' AND p.pid IN ({marks}) AND g.season IN ({','.join('?' * len(seasons))}) "
+                f"GROUP BY p.pid, p.pos ORDER BY 3 DESC", list(pids) + list(seasons)):
+            out.setdefault(pid, pos)
+    for pid in pids:
+        out.setdefault(pid, idx_pos.get(pid) or "")
+    return out
+
+
+def pos_ranks(mcon, season, idx_pos, min_games=3):
+    """{group: {market: [(per-game avg, pid)] best first}} for one season: every player with >= min_games, grouped
+    by his most frequent starting position (else the index's). The page ranks a player within his group."""
+    import nba_matchup as MU
+    tot, n, starts = defaultdict(lambda: defaultdict(float)), defaultdict(int), defaultdict(lambda: defaultdict(int))
+    for pid, pos, st_, pts, reb, ast, fg3m in mcon.execute(
+            "SELECT p.pid, p.pos, p.starter, p.pts, p.reb, p.ast, p.fg3m FROM player_games p JOIN games g ON g.gid = p.gid "
+            "WHERE g.season = ?", (season,)):
+        n[pid] += 1
+        for k, v in (("pts", pts), ("reb", reb), ("ast", ast), ("fg3m", fg3m)):
+            tot[pid][k] += v or 0
+        if st_ and MU.GROUP.get(pos):
+            starts[pid][MU.GROUP[pos]] += 1
+    out = defaultdict(lambda: defaultdict(list))
+    for pid, games in n.items():
+        if games < min_games:
+            continue
+        grp = max(starts[pid], key=starts[pid].get) if starts[pid] else MU.GROUP.get((idx_pos.get(pid) or "")[:1])
+        if not grp:
+            continue
+        for m, (_, parts) in MARKETS.items():
+            out[grp][m].append((round(sum(tot[pid][k] for k in parts) / games, 2), pid))
+    for g in out.values():
+        for m in g:
+            g[m].sort(key=lambda x: (-x[0], x[1]))
+    return out
+
+
 def correlations(props, logs):
     """For each prop: the other props posted for the same game, ranked by |Pearson r| of the two stats over the
     games both players played for the same team (same player: every game). Historical association only."""
@@ -389,30 +462,42 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
     live = live_state(games, get=box_get, now=now)
     # matchup context: point-in-time factors for this season (nba_matchup), per prop
     S = MU.Season(mcon, season, index_pos=pos) if mcon is not None else None
-    league = {}                                          # (date, group) -> {team: (pace, {stat: factor})}
-
-    def league_of(date, pid, group):
-        k = (date, group)
-        if k not in league:
-            league[k] = {t: S.factors(t, date, pid) for t in S.by_team if S._team_before(t, date)[0]}
-        return league[k]
+    S_prev = MU.Season(mcon, prev_season(season), index_pos=pos) if mcon is not None else None
+    # rank tables: this season as of each slate date; last season as it finished (for filtering past games by tier)
+    ranks = {}
+    if S is not None:
+        for d in dates:
+            ranks[d] = rank_tables(S, mcon, d)
+        ranks[prev_season(season)] = rank_tables(S_prev, mcon, "9999-12-31")
+    pcodes = positions(mcon, list(pids), (prev_season(season), season), pos)
+    pr_cur = pos_ranks(mcon, season, pos) if mcon is not None else {}
+    pr_prev = pos_ranks(mcon, prev_season(season), pos) if mcon is not None else {}
     for p in props:
         g = gmap[p["gid"]]
-        ctx = {"group": None, "pace": None, "def": None, "opp_games": 0, "pace_rank": None, "def_rank": None,
-               "teams": 0}
+        ctx = {"group": None, "pace": None, "def": None, "opp_games": 0, "pace_rank": None, "dvp_rank": None,
+               "def_rank": None, "teams": 0, "pos": pcodes.get(p["pid"], ""), "pos_rank": None, "pos_n": 0,
+               "pos_season": None}
         if S is not None and p["opp"]:
             pace, mf = S.factors(p["opp"], g["date_et"], p["pid"])
             n_opp = S._team_before(p["opp"], g["date_et"])[0] if p["opp"] in S.by_team else 0
             grp = S.group(p["pid"], g["date_et"])
             ctx.update(group=grp, pace=round(pace, 3), opp_games=n_opp,
                        **({"def": round(mf.get(MATCHUP_KEY[p["market"]], 1.0), 3)} if p["market"] in MATCHUP_KEY else {}))
-            if n_opp:                                    # rank 1 = the most possessions / the most allowed
-                lg = league_of(g["date_et"], p["pid"], grp)
-                ctx["teams"] = len(lg)
-                ctx["pace_rank"] = 1 + sum(1 for t, (pc, _) in lg.items() if pc > pace)
+            rt = ranks.get(g["date_et"]) or {}
+            if n_opp and rt.get("teams"):
+                ctx["teams"] = rt["teams"]
+                paces = {t: S.factors(t, g["date_et"], p["pid"])[0] for t in rt["def"]}
+                ctx["pace_rank"] = 1 + sum(1 for t, v in paces.items() if v > pace)        # 1 = the fastest
+                ctx["def_rank"] = rt["def"].get(p["opp"])                                 # 1 = the toughest
                 if grp and p["market"] in MATCHUP_KEY:
-                    k = MATCHUP_KEY[p["market"]]
-                    ctx["def_rank"] = 1 + sum(1 for t, (_, f) in lg.items() if f.get(k, 1.0) > mf.get(k, 1.0))
+                    ctx["dvp_rank"] = rt["dvp"][grp][p["market"]].get(p["opp"])
+        grp_b = MU.GROUP.get(ctx["pos"]) or MU.GROUP.get((ctx["pos"] or "")[:1])
+        for label, table in ((season, pr_cur), (prev_season(season), pr_prev)):        # his rank among his position
+            lst = (table.get(grp_b) or {}).get(p["market"]) or []
+            at = next((i for i, (_, pid_) in enumerate(lst) if pid_ == p["pid"]), None)
+            if at is not None:
+                ctx.update(pos_rank=at + 1, pos_n=len(lst), pos_season=label)
+                break
         p["ctx"] = ctx
         p["flag"] = flags.get((p["gid"], p["pid"], p["market"]))
         lv = live.get(p["gid"], {})
@@ -468,6 +553,9 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
                                        or (idx.get(str(a["pid"])) or [None, None])[1]) for a in v]
                      for (d, t), v in absent.items()},
         "related": corr,
+        # past games are filtered by the tier their opponent sits in (DvP / Def Rank chips): this season's ranks
+        # as of the slate date, last season's as it finished
+        "ranks": {k: v for k, v in ranks.items()},
     }
     for c in (q, ncon, sh, mcon):
         if c is not None:

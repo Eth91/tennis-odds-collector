@@ -180,6 +180,12 @@ def test_payload_related_and_flags(payload):
     b = next(p for p in payload["props"] if p["id"] == "G1|1|points")
     assert b["ctx"]["group"] == "G" and b["ctx"]["opp_games"] == 0                 # SAC has no cached games
     assert b["ctx"]["def_rank"] is None and b["ctx"]["pace_rank"] is None           # no rank without opponent games
+    assert b["ctx"]["pos"] == "SG" and allen["ctx"]["pos"] == "G"                    # his starts; else the index
+    assert (b["ctx"]["pos_rank"], b["ctx"]["pos_n"]) == (1, 2) and allen["ctx"]["pos_rank"] == 2   # PPG among guards
+    rt = payload["ranks"][GD]
+    assert rt["teams"] == 2 and sorted(rt["def"].values()) == [1, 2] and set(rt["dvp"]) == {"G", "F", "C"}
+    assert sorted(rt["dvp"]["G"]["points"].values()) == [1, 2]
+    assert payload["ranks"]["2025-26"]["teams"] == 0                                  # no cached games last season
 
 
 @pytest.mark.skipif(NODE is None, reason="node not installed")
@@ -218,7 +224,8 @@ out.bp = [C.bestPrice(book, 24.5, 'all', 'under'), C.bestPrice(book, 25.5, 'all'
 out.fr = [C.filterLogs(inp.logs, {ranges: {min: [35, 39]}}).length, C.filterLogs(inp.logs, {result: 'W'}).length,
           C.filterLogs(inp.logs, {rest: 'b2b'}).length, C.filterLogs(inp.logs, {rest: '2+'}).length,
           C.filterLogs(inp.logs, {ranges: {fga: [20, 24]}, result: 'L', home: true}).length,
-          C.filterLogs(inp.logs, {ranges: {margin: [-5, -5]}}).length];
+          C.filterLogs(inp.logs, {ranges: {margin: [-5, -5]}}).length,
+          C.filterLogs(inp.logs, {oppSets: [{'2026-27': ['UTA']}]}).length, C.filterLogs(inp.logs, {oppSets: [{'2025-26': ['UTA']}]}).length];
 console.log(JSON.stringify(out));
 """)
     inp = {"cases": cases, "lines": lines, "logs": logs, "props": payload["props"],
@@ -259,6 +266,7 @@ console.log(JSON.stringify(out));
            sum(1 for l in logs if l["rest"] == 0), sum(1 for l in logs if l["rest"] is not None and l["rest"] >= 2),
            sum(1 for l in logs if 20 <= l["fga"] <= 24 and (l["margin"] or 0) < 0 and l["home"] == 1),
            sum(1 for l in logs if l["margin"] == -5)]
+    exp += [30, 0]                                                                  # all vs UTA this season; none last
     assert out["fr"] == exp and exp[1] == 15 and exp[5] == 15 and exp[2] == 10 and 0 < exp[4] < 15, (out["fr"], exp)
 
 

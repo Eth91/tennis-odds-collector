@@ -239,13 +239,26 @@ class Season:
         pace = (n * (poss / n) + K_SHRINK * lg_poss) / (n + K_SHRINK) / lg_poss
         gr = self.group(pid, date)
         if gr:
-            for s, parts in STATS.items():
-                lg_r = sum(lg_rate.get((gr, p), 0.0) for p in parts)
-                if lg_r <= 0:
-                    continue
-                r = sum(tot.get((gr, p), 0.0) for p in parts) / poss
-                out[s] = (n * r + K_SHRINK * lg_r) / (n + K_SHRINK) / lg_r
+            out = self.group_factors(opp, date, gr, lg)
         return pace, out
+
+    def group_factors(self, team, date, group, league=None):
+        """{stat: factor}: what `team` allowed to `group` per possession before `date`, shrunk, / the league."""
+        lg = league or self._league_before(date)
+        out = {s: 1.0 for s in STATS}
+        if not lg or team not in self.by_team or not group:
+            return out
+        lg_rate = lg[2]
+        n, poss, tot = self._team_before(team, date)
+        if not n:
+            return out
+        for s, parts in STATS.items():
+            lg_r = sum(lg_rate.get((group, p), 0.0) for p in parts)
+            if lg_r <= 0:
+                continue
+            r = sum(tot.get((group, p), 0.0) for p in parts) / poss
+            out[s] = (n * r + K_SHRINK * lg_r) / (n + K_SHRINK) / lg_r
+        return out
 
 
 def snapshot_playtypes(con=None, season=None, get=None, snap=None):
