@@ -1084,7 +1084,7 @@ function leagueSheet() {
     <div class="kv"><span>FanDuel prices</span><b>${bk("fd")}</b></div><div class="kv"><span>DraftKings prices</span><b>${bk("dk")}</b></div>
     <button class="opt" id="lg-sc">Scorecard: what has predicted anything<span class="ck">›</span></button>
     ${(() => { const M = D.proj_meta || {}, c = M.coverage || {};
-      return `<div class="kv"><span>Projection model</span><b>${M.error ? esc(M.error) : `${esc(M.version || "")} · ${c.projected || 0}/${c.props || 0} props${M.stale ? ' · <span class="tg tq">STALE</span>' : ""}`}</b></div>
+      return `<div class="kv"><span>Projection model</span><b>${M.error ? esc(M.error) : `${esc(M.version || "")} · ${c.projected || 0}/${c.props || 0} props${M.stale ? ' · <span class="tg tq">STALE</span>' : ""}${M.refresh_pending ? " · updating" : ""}`}</b></div>
         <div class="kv"><span>Box scores through</span><b>${esc(M.logs_through || "—")}</b></div>
         <button class="opt" id="lg-pj">Model scorecard: held-out test and forward record<span class="ck">›</span></button>`; })()}
     <div class="note">Research only — history, matchups and prices. Nothing here is a pick or a bet.</div>
@@ -1284,7 +1284,7 @@ const STATN = {pts: "Points", reb: "Rebounds", ast: "Assists", fg3m: "3-pointers
 function projCard(p, line, side) {
   const M = D.proj_meta || {}, pr = p.proj, unit_ = esc(short(p.market));
   const head = `<h3>Model Projection <span class="tg tf" style="margin-left:6px">MODEL ESTIMATE · NOT A BET</span></h3>`;
-  if (M.error || !pr) return head + `<div class="box0 pj"><div class="note" style="margin:0">${esc(M.error || "No projection for this player yet (no team or game match).")}</div></div>`;
+  if (M.error || !pr) return head + `<div class="box0 pj"><div class="note" style="margin:0">${esc(M.error || "Not projected yet. The projection job runs every 30 minutes and adds new board players.")}</div></div>`;
   const at = projAt(p, line, side), sd = side === "under" ? "Under" : "Over";
   // the pmf as bars, the selected line marked
   const vals = pr.pmf[1], start = pr.pmf[0], mx = Math.max(...vals), W = Math.min(window.innerWidth, 520) - 56, H = 54;
@@ -1312,7 +1312,7 @@ function projCard(p, line, side) {
     ${avail}${other ? `<div class="pjo">Other stats (no book line collected)</div>${other}` : ""}
     <details class="pji"><summary>How this is made${M.stale ? ' · <span class="tg tq">STALE</span>' : ""}</summary>
       <div class="note">${esc(M.target || "")}. Uses: ${esc((M.inputs_used || []).join("; "))}. Not used: ${esc((M.inputs_missing || []).join("; "))}.
-      ${pr.n_hist < 10 ? `Only ${pr.n_hist} past games: wide range. ` : ""}Cutoff: ${esc(M.cutoff || "")}. Box scores through ${esc(M.logs_through || "?")}${M.stale ? " (" + esc(M.stale_reason || "stale") + ")" : ""}.
+      ${pr.n_hist < 10 ? `Only ${pr.n_hist} past games: wide range. ` : ""}Cutoff: ${esc(M.cutoff || "")}. Box scores through ${esc(M.logs_through || "?")}${M.stale ? " (" + esc(M.stale_reason || "stale") + ")" : ""}${M.refresh_pending ? " (newer box scores are in; the projection job will pick them up within 30 min)" : ""}.
       Model ${esc(M.version || "")} (${esc(M.config || "")}), tuned on ${esc(M.tuned_on || "?")}; as of ${esc(mt(M.generated_at, true))}.
       Its stat projections beat the baselines on two held-out seasons (CRPS, all 8 stats).</div>${brk}</details>
     <button class="lk" id="pjsc" style="padding:12px 16px 6px 0;font-size:13px">Model scorecard ›</button></div>`;
@@ -1336,7 +1336,9 @@ function projScoreSheet() {
     const fwd = j && j.graded ? `<div class="kv"><span>graded since ${esc(j.from || "")}</span><b>${j.graded} props</b></div>
       <div class="kv"><span>log loss</span><b>model ${f4(j.model_logloss)} · blend ${f4(j.blend_logloss)}${j.close_logloss != null ? " · close " + f4(j.close_logloss) : ""}</b></div>
       ${j.blend_minus_close ? `<div class="kv"><span>blend − close</span><b>${ci(j.blend_minus_close)}</b></div>` : ""}
-      ${j.clv ? `<div class="kv"><span>CLV (close moved toward the model)</span><b>${pc(j.clv.mean)} · ${pc(j.clv.share_positive)} of ${j.clv.n}</b></div>` : ""}`
+      ${j.clv ? `<div class="kv"><span>CLV (close moved toward the model)</span><b>${pc(j.clv.mean)} · ${pc(j.clv.share_positive)} of ${j.clv.n}</b></div>` : ""}
+      ${[["reliability_model", "model"], ["reliability_blend", "blend"], ["reliability_close", "close"]].filter(([k]) => j[k]).map(([k, lab]) =>
+        `<div class="note" style="margin:4px 0 0">Calibration, ${lab} (n: forecast → happened): ${j[k].filter(b => b[0]).map(b => `${b[0]}: ${pc(b[1])} → ${pc(b[2])}`).join(" · ")}</div>`).join("")}`
       : '<div class="note" style="margin:0">No graded forecasts yet: the forward record starts with this version.</div>';
     fill(`<div class="note" style="font-size:14px;color:var(--l2)">Every number is walk-forward: each prediction uses only games before that date. The config was tuned on ${esc(M.tuned_on || "2023-24")}; the later seasons were held out and run once (NBA_PROJECTION_PREREG.md). Lower log loss / CRPS is better; a difference whose range stays below 0 is a real improvement.</div>
       <div class="sg"><span>Backtest</span></div>${per || '<div class="note">No results yet.</div>'}

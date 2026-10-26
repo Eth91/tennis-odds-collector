@@ -58,7 +58,11 @@ tip). Travel, referees, play types (not validated).
 Version and config hash, tuned-on season, box scores "through" date and **stale** (more than 3 days
 before the slate), coverage (props projected, thin-history count), the availability table with its n,
 `error` (on any failure the page shows no projection, never a stand-in number), and the number of
-forecasts logged. Nightly: realized log loss for the model, the blend and the close, CLV, and n.
+forecasts logged, `refresh_pending` (newer box scores than the cache), and `drift` (median projected μ minus the
+same players' last-10 average, per stat; near 0 when the inputs are sane). Nightly (`nba_proj_score.json`, on
+the scorecard sheet): realized log loss for the model, the blend and the close; realized calibration (10
+buckets each); CLV; n. A postponed game is graded only once it is final, against the close before the tip
+its forecast was made for.
 
 ## Deploy (VM)
 1. Code: `nba_vm_deploy.sh` from a checkout whose HEAD contains the VM's deployed commit (*.py only).

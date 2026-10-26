@@ -358,6 +358,7 @@ def test_prospective_grading_voids_and_clv_sign():
     p_then, p_close = NP.no_vig(1.9, 1.9), NP.no_vig(1.7, 2.15)
     assert out["clv"]["n"] == 1 and out["clv"]["mean"] == pytest.approx(p_close - p_then) and out["clv"]["mean"] > 0
     assert json.loads((d / "o.json").read_text())["graded"] == 1
+    assert out["reliability_model"][6] == [1, pytest.approx(.62), 1.0] and sum(n for n, _, _ in out["reliability_close"]) == 1
 
 
 def test_prospective_close_follows_a_rescheduled_tip():

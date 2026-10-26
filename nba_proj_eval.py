@@ -205,6 +205,13 @@ def tune(data, passes=3, every=3):
     return cfg, best
 
 
+def reliability(p, y):
+    """[[n, mean forecast, observed rate]] for 10 equal-width buckets of p (None where a bucket is empty)."""
+    bins = np.clip((p * 10).astype(int), 0, 9)
+    return [[int((bins == b).sum()), float(p[bins == b].mean()) if (bins == b).any() else None,
+             float(y[bins == b].mean()) if (bins == b).any() else None] for b in range(10)]
+
+
 # ── the final, pre-registered evaluation ───────────────────────────────────────────────────────────────────
 def segment(name, groups, items):
     return {"segment": name, **{g: v for g, v in zip(groups, items)}}
@@ -293,16 +300,9 @@ def evaluate_period(run, data, season, nb_disp, w_blend, live=False, nb_disp1=No
                                      "market_ll": float(logloss(pmk[sel], y[sel]).mean()),
                                      "blend_ll": float(logloss(pbl[sel], y[sel]).mean()),
                                      "m1_minus_market": list(boot_ci(logloss(pm1[sel], y[sel]) - logloss(pmk[sel], y[sel]), ddates[sel], reps=1000))}
-        # reliability: 10 buckets of p_m1, per all markets
-        bins = np.clip((pm1 * 10).astype(int), 0, 9)
-        mres["reliability_m1"] = [[int((bins == b).sum()), float(pm1[bins == b].mean()) if (bins == b).any() else None,
-                                   float(y[bins == b].mean()) if (bins == b).any() else None] for b in range(10)]
-        bins = np.clip((pbl * 10).astype(int), 0, 9)
-        mres["reliability_blend"] = [[int((bins == b).sum()), float(pbl[bins == b].mean()) if (bins == b).any() else None,
-                                      float(y[bins == b].mean()) if (bins == b).any() else None] for b in range(10)]
-        bins = np.clip((pmk * 10).astype(int), 0, 9)
-        mres["reliability_market"] = [[int((bins == b).sum()), float(pmk[bins == b].mean()) if (bins == b).any() else None,
-                                       float(y[bins == b].mean()) if (bins == b).any() else None] for b in range(10)]
+        # reliability: 10 buckets of each forecast, all markets
+        mres["reliability_m1"], mres["reliability_blend"], mres["reliability_market"] = (reliability(pm1, y),
+                                                                                       reliability(pbl, y), reliability(pmk, y))
         # line as a point forecast vs the model mean (MAE), on these props
         act = np.array([sum(run.Y[i, NP.STATS.index(s)] for s in PD.MARKET_PARTS[m]) for i, m in zip(mp["row"][ok], mkt)])
         mres["mae_line"] = float(np.abs(mp["line"][ok] - act).mean())
@@ -590,11 +590,15 @@ def prospective(log_db, lines_db, matchup_db, out_json):
         y = np.array([r["y"] for r in recs])
         out["model_logloss"] = float(logloss(np.array([r["p"] for r in recs]), y).mean())
         out["blend_logloss"] = float(logloss(np.array([r["pb"] for r in recs]), y).mean())
+        # realized calibration of the forward record (monitoring; the prereg's lines are judged on n >= 2,000)
+        out["reliability_model"] = reliability(np.array([r["p"] for r in recs]), y)
+        out["reliability_blend"] = reliability(np.array([r["pb"] for r in recs]), y)
         wc = [r for r in recs if r["pc"] is not None]
         if wc:
             yc = np.array([r["y"] for r in wc])
             out["with_close"] = len(wc)
             out["close_logloss"] = float(logloss(np.array([r["pc"] for r in wc]), yc).mean())
+            out["reliability_close"] = reliability(np.array([r["pc"] for r in wc]), yc)
             out["model_minus_close"] = list(boot_ci(logloss(np.array([r["p"] for r in wc]), yc) - logloss(np.array([r["pc"] for r in wc]), yc),
                                                     [r["date"] for r in wc], reps=1000))
             out["blend_minus_close"] = list(boot_ci(logloss(np.array([r["pb"] for r in wc]), yc) - logloss(np.array([r["pc"] for r in wc]), yc),
