@@ -366,3 +366,12 @@ def test_verdicts_never_pass_on_missing_data():
     import nba_proj_eval as E
     v = E.verdicts({})
     assert all(("NO" in x or "NOT ESTABLISHED" in x) for x in v) and "fails" in v[2]
+
+
+def test_cli_guard_comes_after_every_definition():
+    """The nightly grader once died with NameError: main() ran before prospective() was defined."""
+    import ast
+    for f in ("nba_project.py", "nba_proj_eval.py", "nba_proj_data.py"):
+        body = ast.parse((pathlib.Path(__file__).parent / f).read_text()).body
+        guards = [i for i, n in enumerate(body) if isinstance(n, ast.If) and "__main__" in ast.dump(n.test)]
+        assert all(i == len(body) - 1 for i in guards), f

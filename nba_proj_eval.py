@@ -521,10 +521,6 @@ def verdicts(P, prospective=None):
     return out
 
 
-if __name__ == "__main__":
-    main()
-
-
 # ── prospective test C (VM, nightly): the logged forecasts against results and the close ──────────────────
 def prospective(log_db, lines_db, matchup_db, out_json):
     """Grade every 'cutoff' forecast (the last one made before tip − 30 min) whose game is final:
@@ -604,3 +600,7 @@ def prospective(log_db, lines_db, matchup_db, out_json):
     import os
     os.replace(tmp, out_json)
     return out
+
+
+if __name__ == "__main__":
+    main()
