@@ -49,7 +49,9 @@ def _pt(measure):
 
 # kind -> (url template without Season/SeasonType/DateFrom/DateTo, id column the schema check needs)
 KINDS = {
-    "lineups": (None, "games"),
+    "lineups": (None, "games"),                    # the daily lineups file: 2023-24 on (404 before)
+    "starters": (S + "leaguedashplayerstats?MeasureType=Base&PerMode=Totals"
+                 + FILTERS.replace("&StarterBench=", "&StarterBench=Starters"), "PLAYER_ID"),
     "adv": (_dash("Advanced"), "PLAYER_ID"),
     "pt_Possessions": (_pt("Possessions"), "PLAYER_ID"),
     "usage": (_dash("Usage"), "PLAYER_ID"),
@@ -122,6 +124,8 @@ def fetch_one(get, kind, d):
     for k in range(TRIES):
         try:
             r = get(url)
+            if r.status_code == 404:
+                return url, 404, 0, None                               # not published for this date: final
             if r.status_code == 200:
                 j = r.json()
                 n = rows_of(kind, j)
@@ -137,7 +141,7 @@ def run(kinds, workers=2, get=None):
     con = sqlite3.connect(RAW, check_same_thread=False)
     con.execute(DDL)
     lock = threading.Lock()
-    have = {(k, key) for k, key in con.execute("SELECT kind, key FROM raw WHERE status = 200")}
+    have = {(k, key) for k, key in con.execute("SELECT kind, key FROM raw WHERE status IN (200, 404)")}
     todo = [(k, d) for k in kinds for d in dates() if (k, d) not in have]
     print(f"nba_stats_fetch: {len(todo)} requests to make ({len(have)} already stored)", flush=True)
     fails = [0]
