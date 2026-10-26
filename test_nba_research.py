@@ -88,7 +88,7 @@ def stores(d):
     new = ("2026-10-26T17:30", "2026-10-26T21:30:04+00:00")
     n.executemany("INSERT INTO snapshots VALUES (?,?,?,?,?,?,?,?,?)", [
         (*old, GD, "SAC@PHX", "PHX", 2, "Grayson Allen", "Questionable", "Injury/Illness - Ankle"),
-        (*new, GD, "SAC@PHX", "PHX", 3, "Jusuf Nurkic", "Out", "Injury/Illness - Knee"),     # Allen dropped off: cleared
+        (*new, GD, "SAC@PHX", "PHX", 3, "Jusuf Nurkic", "Out", "Injury/Illness - Knee 07:30 (ET)"),  # parser's time column     # Allen dropped off: cleared
         (*new, GD, "SAC@PHX", "PHX", 8, "Former Sun", "Out", "Rest")])                      # traded: SAC logs only
     n.execute("INSERT INTO news_items VALUES ('x','i1','2026-10-26T20:00:00+00:00','Devin Booker',1,'PHX',?, 'q',"
               "'Booker questionable (ankle)','','x:underdog',0)", (GD,))
@@ -184,6 +184,7 @@ def test_payload_availability(payload):
     assert [a["pid"] for a in ab] == [3] and ab[0]["name"] == "Jusuf Nurkic" and len(ab[0]["played"]) == 20  # not the traded 8
     ir = payload["inj_report"][f"{GD}|PHX"]                # the Injuries view: the traded-in 8 has no PHX game to read
     assert ir["listed"] and [(e["pid"], e["missed"], e["starter"]) for e in ir["players"]] == [(8, 0, True), (3, 10, True)]
+    assert ir["players"][1]["reason"] == "Injury/Illness - Knee" and not ir["players"][1]["fresh"]   # out the last 10
 
 
 def test_payload_related_and_flags(payload):
@@ -320,7 +321,10 @@ def test_page_controls_work_on_iphone():
     assert all(k in html for k in ('trends: "Trends"', 'class="gc"', 'data-view="', '["injuries", "Injuries"]', 'id="pbk"'))
     # the Watchlist is a filter now (an old #view=watch link lands on it); a teammate named in an injury read opens his prop
     assert '["watch", "Watchlist"]' not in html and 'Object.assign(ST, {view: "props", watch: "1"})' in html and "data-wl=" in html
-    assert ".ijm[data-id]" in html and "function injView(" in html and 'ST.view === "injuries"' in html
+    assert ".ijb[data-id]" in html and "function injView(" in html and 'ST.view === "injuries"' in html
+    # the Injuries view is one list, most relevant first (minutes x the chance he sits); no Injuries tab among the Props tabs
+    assert "injList().sort" not in html and "return out.sort((a, b) => injImpact(b) - injImpact(a));" in html
+    assert 'const ALL_TABS = ["trends"];' in html and 'injury: "Injuries"' not in html and '"injury"' not in html
     # motion runs as Web Animations with a timer fallback, and nothing is fetched from a font CDN
     assert ".animate([" in html and "setTimeout(done" in html and "fonts.googleapis" not in html
     # every range chip but Margin draws its stat on the chart as white outline boxes (Margin can be negative: filter only)
@@ -336,7 +340,7 @@ def test_page_controls_work_on_iphone():
     assert all(n.strip() in ("Loading…", "") or n.startswith("Couldn") for n in notes), notes
     assert not re.search(r'<div class="empty"><b>[^<]+</b>[A-Za-z]', html)
     # research+: fair price / VALUE, honest hit-rate boxes, Trends + Injuries tabs, line history, books that disagree
-    assert all(k in html for k in ("fairAt(", "<i>VALUE</i>", "hbox(", 'injury: "Injuries"', "histChart(", "freshOut(", 'class="df"'))
+    assert all(k in html for k in ("fairAt(", "<i>VALUE</i>", "hbox(", "histChart(", "freshOut(", 'class="df"'))
     # 6-7: the alt-line ladder (one-sided rungs colored against their own implied chance) and the scorecard sheet
     assert all(k in html for k in ("function ladder(", "chanceSide(", "data-ll=", "nba_research_score.json", "scoreSheet"))
     # 6: the alt-line ladder (tap a rung to use it); 7: the scorecard sheet reads the nightly replay's JSON
@@ -478,6 +482,7 @@ def _injury_fixture():
     d = "2026-10-26"
     official = {(d, 10): {"status": "Out", "team": "PHX", "reason": "Injury/Illness - Knee"},
                 (d, 15): {"status": "Questionable", "team": "PHX", "reason": ""},
+                (d, 11): {"status": "Questionable", "team": "PHX", "reason": ""},
                 (d, 14): {"status": "Out", "team": "PHX", "reason": "G League - Two-Way"},
                 (d, 30): {"status": "Out", "team": "PHX", "reason": ""},
                 (d, 20): {"status": "Doubtful", "team": "UTA", "reason": ""},
@@ -492,7 +497,9 @@ def test_injury_report_reads_who_took_the_minutes():
     out = RS.injury_report(m, *args)
     phx, uta = out["2026-10-26|PHX"], out["2026-10-26|UTA"]
     assert phx["listed"] and phx["published"].startswith("2026-10-26T21:30")
-    assert [e["pid"] for e in phx["players"]] == [30, 10, 14, 99, 15]          # Out by minutes, then Questionable
+    assert [e["pid"] for e in phx["players"]] == [30, 10, 14, 99, 11, 15]      # Out by minutes, then Questionable
+    # NEW: played in one of the team's last 2 games (A did; X has sat since last season)
+    assert {e["pid"]: e["fresh"] for e in phx["players"]} == {30: False, 10: False, 14: False, 99: False, 11: True, 15: False}
     x = next(e for e in phx["players"] if e["pid"] == 10)
     # 4 games after he got hurt last season + this season's 2 (still on the team): 6 missed beside 6 played
     assert x["starter"] and x["missed"] == 6 and x["mpg"] == 30.0 and x["season"] == "2025-26"
@@ -533,6 +540,8 @@ def test_mutants_injury_report():
                          "and so / no >= .5 and (not nw or sw / nw < .5)"), 10)["starts"]["pid"] == 16
     # 4. a player with no game for the team gets the by-position guess anyway
     assert player(mutant("if starter and played:", "if starter:"), 30)["starts"] is not None
+    # 5. NEW from every game he ever played, not the team's last 2: X, out since last season, reads as news
+    assert player(mutant("if b[1] < d][-FRESH_GAMES:]", "if b[1] < d]"), 10)["fresh"] is True
 
 
 def test_mutants_research_plus():
