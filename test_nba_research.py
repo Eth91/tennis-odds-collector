@@ -313,6 +313,8 @@ def test_page_controls_work_on_iphone():
     assert 'const OVL = {min: "min", fga: "FGA", fg3a: "3PTA", fta: "FTA", usg: "usage %"}' in html and "l[ov]" in html
     # research+: fair price / VALUE, honest hit-rate boxes, Trends + Injuries tabs, line history, books that disagree
     assert all(k in html for k in ("fairAt(", "<i>VALUE</i>", "hbox(", 'injury: "Injuries"', "histChart(", "freshOut(", 'class="df"'))
+    # 6: the alt-line ladder (tap a rung to use it); 7: the scorecard sheet reads the nightly replay's JSON
+    assert "function ladder(" in html and "data-ll=" in html and "nba_research_score.json" in html and "function scoreSheet(" in html
 
 
 def test_board_links_the_page():
