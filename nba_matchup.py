@@ -33,11 +33,13 @@ GROUP = {"PG": "G", "SG": "G", "G": "G", "SF": "F", "PF": "F", "F": "F", "C": "C
 PLAY_TYPES = ("PRBallHandler", "PRRollman", "Isolation", "Spotup", "Postup", "Handoff", "OffScreen", "Transition",
               "Cut", "Putback")
 DDL = """
-CREATE TABLE IF NOT EXISTS games (gid TEXT PRIMARY KEY, season TEXT, date TEXT, home TEXT, away TEXT);
+CREATE TABLE IF NOT EXISTS games (gid TEXT PRIMARY KEY, season TEXT, date TEXT, home TEXT, away TEXT, home_pts REAL,
+    away_pts REAL);
 CREATE TABLE IF NOT EXISTS team_games (gid TEXT, team TEXT, opp TEXT, fga REAL, fta REAL, oreb REAL, tov REAL,
     PRIMARY KEY (gid, team));
 CREATE TABLE IF NOT EXISTS player_games (gid TEXT, team TEXT, pid INTEGER, pos TEXT, starter INTEGER, min REAL,
-    pts REAL, reb REAL, ast REAL, fg3m REAL, stl REAL, blk REAL, tov REAL, PRIMARY KEY (gid, pid));
+    pts REAL, reb REAL, ast REAL, fg3m REAL, stl REAL, blk REAL, tov REAL, fga REAL, fg3a REAL, fta REAL,
+    PRIMARY KEY (gid, pid));
 CREATE TABLE IF NOT EXISTS playtypes (snap TEXT, season TEXT, side TEXT, grouping TEXT, id INTEGER, abbr TEXT,
     play_type TEXT, poss_pct REAL, ppp REAL, pctile REAL, poss REAL, PRIMARY KEY (snap, side, grouping, id, play_type));
 """
@@ -46,10 +48,13 @@ CREATE TABLE IF NOT EXISTS playtypes (snap TEXT, season TEXT, side TEXT, groupin
 def connect(path=None):
     con = sqlite3.connect(path or DB, timeout=60)
     con.executescript(DDL)
-    have = {r[1] for r in con.execute("PRAGMA table_info(player_games)")}
-    for col in ("fg3m", "stl", "blk", "tov"):          # added for the prop research page (threes, etc.)
-        if col not in have:
-            con.execute(f"ALTER TABLE player_games ADD COLUMN {col} REAL")
+    # added for the prop research page (threes; the attempt and game-result filters)
+    for table, cols in (("player_games", ("fg3m", "stl", "blk", "tov", "fga", "fg3a", "fta")),
+                        ("games", ("home_pts", "away_pts"))):
+        have = {r[1] for r in con.execute(f"PRAGMA table_info({table})")}
+        for col in cols:
+            if col not in have:
+                con.execute(f"ALTER TABLE {table} ADD COLUMN {col} REAL")
     return con
 
 
@@ -85,7 +90,7 @@ def parse_box(b):
     from zoneinfo import ZoneInfo
     date = utc.astimezone(ZoneInfo("America/New_York")).date().isoformat()
     h, a = b["homeTeam"], b["awayTeam"]
-    game = (b["gameId"], season_of(date), date, h["teamTricode"], a["teamTricode"])
+    game = (b["gameId"], season_of(date), date, h["teamTricode"], a["teamTricode"], h.get("score"), a.get("score"))
     teams, players = [], []
     for side, other in ((h, a), (a, h)):
         st = side.get("statistics") or {}
@@ -99,7 +104,8 @@ def parse_box(b):
             players.append((b["gameId"], side["teamTricode"], int(p["personId"]), p.get("position") or "",
                             int(str(p.get("starter")) == "1"), round(mn, 2), s.get("points", 0),
                             s.get("reboundsTotal", 0), s.get("assists", 0), s.get("threePointersMade", 0),
-                            s.get("steals", 0), s.get("blocks", 0), s.get("turnovers", 0)))
+                            s.get("steals", 0), s.get("blocks", 0), s.get("turnovers", 0), s.get("fieldGoalsAttempted", 0),
+                            s.get("threePointersAttempted", 0), s.get("freeThrowsAttempted", 0)))
     return game, teams, players
 
 
@@ -107,8 +113,8 @@ def fetch(gids, con=None, get=None, workers=8):
     """Cache the box scores of `gids` not cached yet. Returns (stored, not final / failed)."""
     con = con or connect()
     # a game cached before fg3m/stl/blk/tov were kept is fetched again
-    have = {g for (g,) in con.execute("SELECT gid FROM games WHERE gid NOT IN "
-                                      "(SELECT DISTINCT gid FROM player_games WHERE fg3m IS NULL)")}
+    have = {g for (g,) in con.execute("SELECT gid FROM games WHERE home_pts IS NOT NULL AND gid NOT IN "
+                                      "(SELECT DISTINCT gid FROM player_games WHERE fg3m IS NULL OR fga IS NULL)")}
     todo = [g for g in gids if g not in have]
     if get is None:
         import nba_rosters as R
@@ -126,10 +132,11 @@ def fetch(gids, con=None, get=None, workers=8):
                 missed += 1
                 continue
             game, teams, players = res
-            con.execute("INSERT OR REPLACE INTO games VALUES (?,?,?,?,?)", game)
+            con.execute("INSERT OR REPLACE INTO games (gid, season, date, home, away, home_pts, away_pts) "
+                        "VALUES (?,?,?,?,?,?,?)", game)
             con.executemany("INSERT OR REPLACE INTO team_games VALUES (?,?,?,?,?,?,?)", teams)
             con.executemany("INSERT OR REPLACE INTO player_games (gid, team, pid, pos, starter, min, pts, reb, ast, "
-                            "fg3m, stl, blk, tov) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", players)
+                            "fg3m, stl, blk, tov, fga, fg3a, fta) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", players)
             stored += 1
     con.commit()
     return stored, missed

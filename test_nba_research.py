@@ -98,22 +98,25 @@ def stores(d):
     sh.commit(); sh.close()
     m = MU.connect(d / "matchup.sqlite")
     rnd = random.Random(3)
+    PG = "INSERT INTO player_games (gid, team, pid, pos, starter, min, pts, reb, ast, fg3m, stl, blk, tov, fga, fg3a, fta) " \
+         "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+    day = dt.date(2026, 9, 1)
     for i in range(30):                                  # 30 PHX games this season; Nurkic sits in games 20-29
-        gid, date = f"0022600{i:03d}", (dt.date(2026, 9, 1) + dt.timedelta(days=i)).isoformat()
-        m.execute("INSERT INTO games VALUES (?,?,?,?,?)", (gid, "2026-27", date, "PHX" if i % 2 else "UTA",
-                                                         "UTA" if i % 2 else "PHX"))
+        gid, date = f"0022600{i:03d}", day.isoformat()
+        day += dt.timedelta(days=1 + i % 3)              # rest 0, 1, 2 days in turn (0 = back-to-back)
+        home = "PHX" if i % 2 else "UTA"                 # PHX wins the even games by 8, loses the odd ones by 5
+        phx, uta = (110, 102) if i % 2 == 0 else (100, 105)
+        m.execute("INSERT INTO games (gid, season, date, home, away, home_pts, away_pts) VALUES (?,?,?,?,?,?,?)",
+                  (gid, "2026-27", date, home, "UTA" if home == "PHX" else "PHX", phx if home == "PHX" else uta,
+                   uta if home == "PHX" else phx))
         for t in ("PHX", "UTA"):
             m.execute("INSERT INTO team_games VALUES (?,?,?,90,20,10,12)", (gid, t, "UTA" if t == "PHX" else "PHX"))
         b_pts = 20 + i % 10
-        m.execute("INSERT INTO player_games VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                  (gid, "PHX", 1, "SG", 1, 34, b_pts, 4, 6 + (i % 3), 3, 1, 0, 3))
-        m.execute("INSERT INTO player_games VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                  (gid, "PHX", 2, "", 0, 26, 10 + rnd.randint(-3, 3), 3, 2, 2, 1, 0, 1))
+        m.execute(PG, (gid, "PHX", 1, "SG", 1, 30 + i % 10, b_pts, 4, 6 + (i % 3), 3, 1, 0, 3, 15 + i % 10, 6 + i % 4, 4 + i % 5))
+        m.execute(PG, (gid, "PHX", 2, "", 0, 26, 10 + rnd.randint(-3, 3), 3, 2, 2, 1, 0, 1, 9, 4, 2))
         if i < 20:
-            m.execute("INSERT INTO player_games VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                      (gid, "PHX", 3, "C", 1, 28, 12, 10, 3, 0, 1, 1, 2))
-            m.execute("INSERT INTO player_games VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                      (gid, "SAC", 8, "PF", 1, 30, 15, 6, 2, 1, 1, 0, 1))   # a SAC history: not PHX's absence
+            m.execute(PG, (gid, "PHX", 3, "C", 1, 28, 12, 10, 3, 0, 1, 1, 2, 10, 0, 4))
+            m.execute(PG, (gid, "SAC", 8, "PF", 1, 30, 15, 6, 2, 1, 1, 0, 1, 12, 3, 3))   # a SAC history: not PHX's absence
     m.commit(); m.close()
     (d / "index.json").write_text(json.dumps({"players": {"1": ["PHX", "Devin Booker", "G"], "2": ["PHX", "Grayson Allen", "G"],
                                                            "3": ["PHX", "Jusuf Nurkic", "C"], "8": ["PHX", "Former Sun", "F"]}}))
@@ -143,6 +146,9 @@ def test_payload_props_and_books(payload):
     assert [29.5, 3.2, None] in b["books"]["fd"]["rungs"]                       # the over-only alt is kept, as such
     assert (b["team"], b["opp"], b["home"]) == ("PHX", "SAC", True)
     assert b["open"] == [23.5, 1.9, "2026-10-26T15:00:00"]
+    lg = [dict(zip(RS.LOG_COLS, r)) for r in payload["players"]["1"]["logs"]]
+    assert [l["rest"] for l in lg[:5]] == [None, 0, 1, 2, 0]                     # days off; none before his first game
+    assert [l["margin"] for l in lg[:2]] == [8, -5] and lg[0]["fga"] == 15 and lg[0]["fta"] == 4
     s = b["summary"]["l10"]                                                    # last 10 PHX games: 20..29 pts
     assert s["n"] == 10 and s["over"] == 5 and s["under"] == 5
     assert payload["sources"]["books"]["dk"]["stale"] is True and payload["sources"]["books"]["fd"]["stale"] is False
@@ -209,6 +215,10 @@ out.rates = C.propRates(book, inp.logs, 'under', '2026-27');
 const logsOf = p => p.pid === 1 ? inp.logs : [];
 out.su = C.sortProps(props, 'hit10', 'desc', logsOf, 'under', '2026-27').map(p => p.id);
 out.bp = [C.bestPrice(book, 24.5, 'all', 'under'), C.bestPrice(book, 25.5, 'all', 'over'), C.bestPrice(book, 29.5, 'all', 'under')];
+out.fr = [C.filterLogs(inp.logs, {ranges: {min: [35, 39]}}).length, C.filterLogs(inp.logs, {result: 'W'}).length,
+          C.filterLogs(inp.logs, {rest: 'b2b'}).length, C.filterLogs(inp.logs, {rest: '2+'}).length,
+          C.filterLogs(inp.logs, {ranges: {fga: [20, 24]}, result: 'L', home: true}).length,
+          C.filterLogs(inp.logs, {ranges: {margin: [-5, -5]}}).length];
 console.log(JSON.stringify(out));
 """)
     inp = {"cases": cases, "lines": lines, "logs": logs, "props": payload["props"],
@@ -245,6 +255,11 @@ console.log(JSON.stringify(out));
     assert set(out["su"][2:]) == {"G1|2|points"}                                       # no logs: last
     assert out["bp"][0] == {"book": "fd", "odds": 1.95} and out["bp"][1] == {"book": "dk", "odds": 1.95}
     assert out["bp"][2] is None                                                        # the over-only alt has no under
+    exp = [sum(1 for l in logs if 35 <= l["min"] <= 39), sum(1 for l in logs if (l["margin"] or 0) > 0),
+           sum(1 for l in logs if l["rest"] == 0), sum(1 for l in logs if l["rest"] is not None and l["rest"] >= 2),
+           sum(1 for l in logs if 20 <= l["fga"] <= 24 and (l["margin"] or 0) < 0 and l["home"] == 1),
+           sum(1 for l in logs if l["margin"] == -5)]
+    assert out["fr"] == exp and exp[1] == 15 and exp[5] == 15 and exp[2] == 10 and 0 < exp[4] < 15, (out["fr"], exp)
 
 
 @pytest.mark.skipif(NODE is None, reason="node not installed")

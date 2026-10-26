@@ -176,6 +176,27 @@ svg.ch .dt{font-size:9px;letter-spacing:-.03em}
 svg.ch .ll{fill:#000;font-size:11px;font-weight:800}
 svg.ch g.br:focus{outline:none} svg.ch g.br:focus rect{stroke:var(--blue);stroke-width:2}
 .fch{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.fch .pill{height:32px;background:var(--blue);font-size:13px}
+.fch .pill b{background:#fff;color:var(--blue)}
+.fch .x{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 10px 0 12px;border:0;border-radius:16px;
+background:rgba(10,132,255,.2);color:#64b0ff;font-size:13px;font-weight:600}
+.fch .x span{font-size:15px;opacity:.8}
+.rg{margin:16px 0 0}
+.rg-h{display:flex;justify-content:space-between;align-items:baseline;font-size:15px}
+.rg-h b{font-variant-numeric:tabular-nums}
+.dual{position:relative;height:36px;margin:2px 4px 0}
+.dual .trk,.dual .fil{position:absolute;top:16px;height:4px;border-radius:2px}
+.dual .trk{left:0;right:0;background:var(--g3)}
+.dual .fil{background:var(--blue)}
+.dual input{position:absolute;left:-14px;width:calc(100% + 28px);top:0;height:36px;margin:0;background:none;pointer-events:none;
+-webkit-appearance:none;appearance:none}
+.dual input::-webkit-slider-runnable-track{height:36px;background:none}
+.dual input::-webkit-slider-thumb{pointer-events:auto;-webkit-appearance:none;width:28px;height:28px;margin-top:4px;border-radius:50%;
+background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.45)}
+.dual input::-moz-range-thumb{pointer-events:auto;width:28px;height:28px;border:0;border-radius:50%;background:#fff}
+.sg{margin:16px 0 0}
+.sg>span{display:block;margin:0 0 6px;font-size:15px}
+.sg .seg{margin:0}
 .fch .chip{height:32px;font-size:13px;background:var(--g2)}
 .fch .chip[aria-pressed="true"]{background:var(--blue);color:#fff}
 .kv{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:44px;border-bottom:.5px solid var(--sep);
@@ -245,7 +266,8 @@ function windowed(logs, win, season, opp) {
   if (win === "last") return logs.filter(function (l) { return seasonOf(l.date) !== season; });
   return logs.slice();
 }
-// chip filters on the player page: home / starter = true, false or null (any); without = [{played, since, team}]
+// player-page filters: home / starter = true, false or null (any); result = "W" / "L"; rest = "b2b" / "1" / "2+";
+// ranges = {min|fga|fg3a|fta|margin: [lo, hi]} inclusive (a game missing that stat is out); without = [{played, since, team}]
 function filterLogs(logs, f) {
   f = f || {};
   return logs.filter(function (l) {
@@ -253,6 +275,15 @@ function filterLogs(logs, f) {
     if (f.home === false && l.home !== 0) return false;
     if (f.starter === true && l.starter !== 1) return false;
     if (f.starter === false && l.starter !== 0) return false;
+    if (f.result === "W" && !(l.margin > 0)) return false;
+    if (f.result === "L" && !(l.margin < 0)) return false;
+    if (f.rest === "b2b" && l.rest !== 0) return false;
+    if (f.rest === "1" && l.rest !== 1) return false;
+    if (f.rest === "2+" && !(l.rest >= 2)) return false;
+    for (var k in (f.ranges || {})) {
+      var v = l[k], r = f.ranges[k];
+      if (v === null || v === undefined || v < r[0] || v > r[1]) return false;
+    }
     for (var i = 0; i < (f.without || []).length; i++) {
       var w = f.without[i];
       if (l.team !== w.team || l.date < w.since || w.played.indexOf(l.gid) >= 0) return false;
@@ -377,7 +408,13 @@ const SORTS = [["hit10", "L10 hit rate"], ["hit5", "L5 hit rate"], ["hit20", "L2
 let D = null, ERR = null, LOADING = true, CUR = null;
 const ST = {date: null, gid: "all", market: "points", side: "over", q: "", sort: "hit10", dir: "desc", team: "all",
             book: "all", lmin: "", lmax: "", omin: "", omax: ""};
-const DT = {line: null, win: "l10", home: null, starter: null, without: {}};
+const DT = {line: null, win: "l10", home: null, starter: null, result: null, rest: null, ranges: {}, without: {}};
+const RANGES = [["min", "Minutes", "Min"], ["fga", "Field goal attempts", "FGA"], ["fg3a", "3-point attempts", "3PA"],
+                ["fta", "Free throw attempts", "FTA"], ["margin", "Team margin", "Margin"]];
+const SEGS = [["home", "Location", [[null, "Any"], [true, "Home"], [false, "Away"]]],
+              ["starter", "Role", [[null, "Any"], [true, "Starter"], [false, "Bench"]]],
+              ["result", "Result", [[null, "Any"], ["W", "Win"], ["L", "Loss"]]],
+              ["rest", "Rest", [[null, "Any"], ["b2b", "B2B"], ["1", "1 day"], ["2+", "2+ days"]]]];
 const $ = (s, r) => (r || document).querySelector(s);
 const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
@@ -571,7 +608,8 @@ function openProp(id, push) {
   if (!p) return;
   const fresh = CUR !== id;
   CUR = id;
-  if (fresh) Object.assign(DT, {line: p.main !== null ? p.main : allLines(p)[0], win: "l10", home: null, starter: null, without: {}});
+  if (fresh) Object.assign(DT, {line: p.main !== null ? p.main : allLines(p)[0], win: "l10", home: null, starter: null,
+                                 result: null, rest: null, ranges: {}, without: {}});
   if (push !== false) history.pushState({p: id}, "", hashState());
   renderProp();
   const pg = $("#pg");
@@ -621,7 +659,8 @@ function renderProp() {
   if (!p) { pg.innerHTML = `<div class="bar"><div class="bar-r"><button class="bk">${CHEV}Props</button></div></div><div class="empty"><b>No longer posted</b>The books have taken this prop down.</div>`; $("#pg .bk").onclick = () => history.back(); return; }
   const g = gameOf(p.gid), line = DT.line, side = ST.side, logs = logsOf(p);
   const without = (D.absences[g.date + "|" + p.team] || []).map(a => ({key: String(a.pid), name: a.name || "teammate", played: a.played, since: a.since, team: p.team, status: a.status}));
-  const f = {home: DT.home, starter: DT.starter, without: without.filter(w => DT.without[w.key])};
+  const f = {home: DT.home, starter: DT.starter, result: DT.result, rest: DT.rest, ranges: DT.ranges,
+             without: without.filter(w => DT.without[w.key])};
   const base = filterLogs(logs, f);
   const wins = [["l5", "L5"], ["l10", "L10"], ["l20", "L20"], ["h2h", "H2H"], ["season", D.season], ["last", "Last szn"]];
   const winHtml = wins.map(([k, lab]) => {
@@ -674,9 +713,10 @@ function renderProp() {
     const v = statValue(l, p.market), r = v === null ? "–" : v > line ? '<span class="ov">O</span>' : v < line ? '<span class="un">U</span>' : '<span class="pu">P</span>';
     return `<tr><td>${esc(l.date.slice(5).replace("-", "/"))}</td><td>${l.home ? "" : "@"}${esc(l.opp)}${l.team !== p.team ? " <span style='color:var(--l3)'>(" + esc(l.team) + ")</span>" : ""}</td><td class="r">${l.min}</td><td class="r"><b>${v === null ? "–" : v}</b></td><td class="r">${r}</td></tr>`;
   }).join("");
-  const chips = [["home", true, "Home"], ["home", false, "Away"], ["starter", true, "Starter"], ["starter", false, "Bench"]].map(([k, v, lab]) =>
-    `<button class="chip" data-f="${k}" data-v="${v}" aria-pressed="${DT[k] === v}">${lab}</button>`).join("") +
-    without.map(w => `<button class="chip" data-wo="${w.key}" aria-pressed="${!!DT.without[w.key]}">Without ${esc(w.name.split(" ").slice(-1)[0])}</button>`).join("");
+  const act = activeFilters(without);
+  const chips = `<button class="pill" id="pf" aria-haspopup="dialog">Filters${act.length ? `<b>${act.length}</b>` : ""}</button>` +
+    act.map(a => `<button class="x" data-clear="${a.key}" aria-label="Remove filter ${esc(a.label)}">${esc(a.label)}<span aria-hidden="true">×</span></button>`).join("") +
+    without.filter(w => !DT.without[w.key]).map(w => `<button class="chip" data-wo="${w.key}" aria-pressed="false">Without ${esc(w.name.split(" ").slice(-1)[0])}</button>`).join("");
   pg.innerHTML = `<div class="bar"><div class="bar-r"><button class="bk">${CHEV}Props</button><span class="upd">${esc(NAME[p.market])}</span></div></div>
     <div class="hero"><div class="av">${head(p.pid)}${logo(p.team)}</div><div><h2>${esc(p.player)}</h2><div class="sub">${esc(p.team || "")} ${esc(vs(p))} · ${when(g)} ${injTag(p)}</div></div></div>
     <nav class="chips" aria-label="Markets" style="margin:14px 0 0">${mkts.map(m => `<button class="chip" data-mk="${m}" aria-pressed="${m === p.market}">${esc(NAME[m])}</button>`).join("")}</nav>
@@ -700,10 +740,72 @@ function renderProp() {
   $("#pg .bk").onclick = () => history.back();
   $$("[data-step]", pg).forEach(b => b.onclick = () => { DT.line = Math.max(0.5, Math.round((DT.line + +b.dataset.step) * 2) / 2); renderProp(); $(`[data-step="${b.dataset.step}"]`, pg).focus({preventScroll: true}); });
   $$("[data-win]", pg).forEach(b => b.onclick = () => { DT.win = b.dataset.win; renderProp(); $(`[data-win="${DT.win}"]`, pg).focus({preventScroll: true}); });
-  $$("[data-f]", pg).forEach(b => b.onclick = () => { const k = b.dataset.f, v = b.dataset.v === "true"; DT[k] = DT[k] === v ? null : v; renderProp(); $(`[data-f="${k}"][data-v="${b.dataset.v}"]`, pg).focus({preventScroll: true}); });
-  $$("[data-wo]", pg).forEach(b => b.onclick = () => { const k = b.dataset.wo; DT.without[k] = !DT.without[k]; renderProp(); $(`[data-wo="${k}"]`, pg).focus({preventScroll: true}); });
+  $$("[data-wo]", pg).forEach(b => b.onclick = () => { DT.without[b.dataset.wo] = true; renderProp(); const f = $("#pf", pg); if (f) f.focus({preventScroll: true}); });
+  $$("[data-clear]", pg).forEach(b => b.onclick = () => { clearFilter(b.dataset.clear); renderProp(); const f = $("#pf", pg); if (f) f.focus({preventScroll: true}); });
+  $("#pf", pg).onclick = () => playerFilters(p, logs, without);
   $$("[data-mk]", pg).forEach(b => b.onclick = () => { const id = p.gid + "|" + p.pid + "|" + b.dataset.mk; if (id !== p.id) { openProp(id, false); history.replaceState({p: id}, "", hashState()); } });
   $$("[data-rel]", pg).forEach(b => b.onclick = () => openProp(b.dataset.rel));
+}
+// ── player filters ──
+function activeFilters(without) {
+  const out = [];
+  SEGS.forEach(([k, , opts]) => { if (DT[k] !== null) out.push({key: k, label: opts.find(o => o[0] === DT[k])[1] + (k === "rest" ? " rest" : "")}); });
+  RANGES.forEach(([k, , abbr]) => { const r = DT.ranges[k]; if (r) out.push({key: "r:" + k, label: `${abbr} ${r[0]}–${r[1]}`}); });
+  without.forEach(w => { if (DT.without[w.key]) out.push({key: "w:" + w.key, label: "Without " + w.name.split(" ").slice(-1)[0]}); });
+  return out;
+}
+function clearFilter(k) {
+  if (k.startsWith("r:")) delete DT.ranges[k.slice(2)];
+  else if (k.startsWith("w:")) delete DT.without[k.slice(2)];
+  else DT[k] = null;
+}
+function bounds(logs, k) {
+  const v = logs.map(l => l[k]).filter(x => x !== null && x !== undefined);
+  return v.length ? [Math.floor(Math.min(...v)), Math.ceil(Math.max(...v))] : null;
+}
+function playerFilters(p, logs, without) {
+  const dr = {home: DT.home, starter: DT.starter, result: DT.result, rest: DT.rest, ranges: Object.assign({}, DT.ranges),
+              without: Object.assign({}, DT.without)};
+  const count = () => windowed(filterLogs(logs, {home: dr.home, starter: dr.starter, result: dr.result, rest: dr.rest,
+    ranges: dr.ranges, without: without.filter(w => dr.without[w.key])}), DT.win, D.season, p.opp).length;
+  const rng = RANGES.map(([k, lab]) => {
+    const b = bounds(logs, k);
+    if (!b || b[0] === b[1]) return "";
+    const cur = dr.ranges[k] || b;
+    return `<div class="rg" data-rk="${k}" data-lo="${b[0]}" data-hi="${b[1]}"><div class="rg-h"><span>${lab}</span><b class="rv">${cur[0]} – ${cur[1]}</b></div>
+      <div class="dual"><div class="trk"></div><div class="fil"></div>
+      <input type="range" class="a" min="${b[0]}" max="${b[1]}" step="1" value="${cur[0]}" aria-label="${lab} minimum">
+      <input type="range" class="b" min="${b[0]}" max="${b[1]}" step="1" value="${cur[1]}" aria-label="${lab} maximum"></div></div>`;
+  }).join("");
+  const segs = SEGS.map(([k, lab, opts]) => `<div class="sg"><span>${lab}</span><div class="seg" role="group" aria-label="${lab}">${opts.map(([v, t]) =>
+    `<button data-sk="${k}" data-sv="${v === null ? "" : v}" aria-pressed="${dr[k] === v}">${t}</button>`).join("")}</div></div>`).join("");
+  const wo = without.length ? `<div class="sg"><span>Teammates out tonight</span>${without.map(w =>
+    `<button class="opt" data-wk="${w.key}">Without ${esc(w.name)}<span class="ck">${dr.without[w.key] ? "✓" : ""}</span></button>`).join("")}</div>` : "";
+  openSheet(`<h2 id="sht">Filter ${esc(p.player.split(" ").slice(-1)[0])}'s games</h2>${rng}${segs}${wo}
+    <div class="note">Every number on this page uses only the games that pass. L5 / L10 / L20 = the last games that pass.</div>
+    <div class="acts"><button class="btn" id="pf-reset">Reset</button><button class="btn pri" id="pf-ok"></button></div>`, s => {
+    const upd = () => { const n = count(); $("#pf-ok", s).textContent = `Show ${n} game${n === 1 ? "" : "s"}`; };
+    $$(".rg", s).forEach(g => {
+      const k = g.dataset.rk, lo = +g.dataset.lo, hi = +g.dataset.hi, a = $(".a", g), b = $(".b", g), fil = $(".fil", g), rv = $(".rv", g);
+      const paint = () => {
+        let x = +a.value, y = +b.value;
+        if (x > y) { [x, y] = [y, x]; }
+        fil.style.left = (100 * (x - lo) / (hi - lo)) + "%"; fil.style.right = (100 * (hi - y) / (hi - lo)) + "%";
+        rv.textContent = `${x} – ${y}`;
+        if (x === lo && y === hi) delete dr.ranges[k]; else dr.ranges[k] = [x, y];
+        upd();
+      };
+      a.oninput = b.oninput = paint; paint();
+    });
+    $$("[data-sk]", s).forEach(b => b.onclick = () => {
+      const k = b.dataset.sk, raw = b.dataset.sv, v = raw === "" ? null : raw === "true" ? true : raw === "false" ? false : raw;
+      dr[k] = v; $$(`[data-sk="${k}"]`, s).forEach(x => x.setAttribute("aria-pressed", x === b)); upd();
+    });
+    $$("[data-wk]", s).forEach(b => b.onclick = () => { const k = b.dataset.wk; dr.without[k] = !dr.without[k]; $(".ck", b).textContent = dr.without[k] ? "✓" : ""; upd(); });
+    $("#pf-reset", s).onclick = () => { Object.assign(DT, {home: null, starter: null, result: null, rest: null, ranges: {}, without: {}}); closeSheet(); renderProp(); };
+    $("#pf-ok", s).onclick = () => { Object.assign(DT, {home: dr.home, starter: dr.starter, result: dr.result, rest: dr.rest, ranges: dr.ranges, without: dr.without}); closeSheet(); renderProp(); };
+    upd();
+  });
 }
 // ── data ──
 function load() {
