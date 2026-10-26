@@ -94,27 +94,17 @@ letter-spacing:.04em;vertical-align:1.5px}
 .tf{background:rgba(255,159,10,.18);color:var(--org)} .tn{background:var(--g3);color:var(--l2)}
 .lhd{display:flex;justify-content:space-between;padding:12px 15.3px 8px;font-size:11.5px;color:#8e8e8e;border-bottom:1px solid #343434}
 .empty{padding:56px 24px;text-align:center;color:var(--l2);font-size:15px;line-height:1.4}
-/* the Injuries view: each team's report, a row per rotation player, the teammates who took his minutes / starts */
-.ijg{display:flex;justify-content:space-between;gap:12px;padding:16px 15.3px 6px;font-size:11.5px;letter-spacing:.3px;color:#8e8e8e;text-transform:uppercase}
-.ijt{display:flex;align-items:center;gap:8px;height:44px;padding:0 15.3px;border-bottom:1px solid #343434;font-size:16px}
-.ijt img{width:22px;height:22px}
-.ijt span{margin-left:auto;font-size:12.5px;color:#8e8e8e}
-.ijr{position:relative;min-height:66px;padding:10px 15.3px 11px 69.5px;border-bottom:1px solid #343434}
-.ijr .av{top:10px}
-.ijs{margin-top:2px;font-size:13px;color:#b0b0b0}
-.ijs small,.ijm small{font-size:11px;font-weight:500;color:#8e8e8e}
-.ijw{margin-top:1px;font-size:12px;color:#8e8e8e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ijx{margin:6px 0 0 -54.2px}
-.ijk{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px}
-.ijk>span{flex:none;margin-right:2px;font-size:10.5px;font-weight:700;letter-spacing:.3px;color:#8e8e8e;text-transform:uppercase}
-.ijk>span small{margin-left:4px;font-size:10.5px;font-weight:500;letter-spacing:0;color:#6e6e6e}
-.ijm{display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 9px;border:1px solid #333;border-radius:14px;background:#181818;
-color:#fff;font-size:12.8px;font-weight:600;white-space:nowrap}
-.ijm:disabled{color:#c8c8c8;opacity:1}
-.ijm:active{background:#2e2e2e}
-.ijo{padding:10px 15.3px;border-bottom:1px solid #343434;font-size:13px;color:#b0b0b0;line-height:1.6}
-.ijo>b{margin-right:8px;font-size:10.5px;letter-spacing:.3px;color:#8e8e8e;text-transform:uppercase}
-.ijo .tg{margin-left:3px}
+/* the Injuries view: prop-row look; the boxes are the teammates who took his start / minutes */
+.ir .lin{font-size:13.6px;color:#b0b0b0}
+.bx4{position:absolute;left:15.3px;right:15.3px;top:61.3px;display:grid;grid-template-columns:repeat(4,1fr);gap:6.1px}
+.ijb{display:block;width:100%;min-width:0;height:41.5px;padding:5.6px 4px 0;border:0;border-radius:5px;background:#222;color:#fff;text-align:center}
+button.ijb:active{background:#333}
+.ijb i{display:block;font-family:system-ui,-apple-system,"Roboto Condensed",sans-serif;font-stretch:66%;font-style:normal;font-size:10.4px;
+line-height:12px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ijb b{display:block;margin-top:1.6px;font-size:13.4px;line-height:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ijb b.sm{color:#8e8e8e;font-weight:500}
+.ijb small{font-size:11px;font-weight:500;color:#9a9a9a}
+.pr.ir0{height:62px;contain-intrinsic-size:auto 62px}
 .empty b{display:block;margin-bottom:6px;color:var(--l1);font-size:18px}
 .empty button{margin-top:16px}
 .btn{height:44px;padding:0 20px;border:0;border-radius:12px;background:var(--g2);font-size:16px;font-weight:600}
@@ -766,8 +756,8 @@ function when(g) {
 }
 const vs = p => p.team ? (p.home ? "vs " : "@ ") + p.opp : "";
 // ── list ──
-const MKT_TABS = ["trends", "injury", "points", "assists", "rebounds", "threes", "pra", "pts_reb", "pts_ast", "reb_ast"];
-const ALL_TABS = ["trends", "injury"];          // tabs that span every market
+const MKT_TABS = ["trends", "points", "assists", "rebounds", "threes", "pra", "pts_reb", "pts_ast", "reb_ast"];
+const ALL_TABS = ["trends"];                    // tabs that span every market
 // Trends (nba_research_score.trend_side): the L10 and L20 hit rates both 1+ SD from what the price implies, the same
 // way, 8+ games each. A plain 70% L10 put a third of the slate in Trends and ignored the price.
 const VIEWS = [["props", "Props"], ["markets", "Markets"], ["injuries", "Injuries"]];
@@ -847,10 +837,8 @@ function listProps() {
   const st = Object.assign({}, ST, {market: ALL_TABS.indexOf(ST.market) >= 0 ? "all" : ST.market});
   let list = filterProps(D.props, st, gameOf, logsOf);
   if (ST.watch) { const f = favs(); list = list.filter(p => f.indexOf(p.pid) >= 0); }
-  // Trends: strongest first. Injuries: the without-teammate split furthest from the price first (thin samples last)
+  // Trends: strongest first
   if (ST.market === "trends") return list.map(p => [p, trend(p)]).filter(x => x[1] && x[1].side === ST.side).sort((a, b) => b[1].z - a[1].z).map(x => x[0]);
-  if (ST.market === "injury") return list.filter(p => p.main !== null && freshOut(p).length).map(p => [p, woSplit(p, freshOut(p)[0], ST.side).z])
-    .sort((a, b) => (b[1] === null ? -99 : b[1]) - (a[1] === null ? -99 : a[1])).map(x => x[0]);
   return sortProps(list, ST.sort, ST.dir, logsOf, ST.side, D.season);
 }
 function row(p) {
@@ -950,7 +938,6 @@ function renderList() {
   else if (ST.gid !== "all" && !onDate.some(p => p.gid === ST.gid)) body = '<div class="empty"><b>No props for this game yet</b></div>';
   else if (!list.length) body = ST.watch ? '<div class="empty"><b>Watchlist empty</b><button class="btn" id="reset2">Reset filters</button></div>'
     : ST.market === "trends" ? '<div class="empty"><b>No trends</b></div>'
-    : ST.market === "injury" ? '<div class="empty"><b>No new absences</b></div>'
     : '<div class="empty"><b>No matches</b><button class="btn" id="reset2">Reset filters</button></div>';
   if (body) { lst.innerHTML = body; const r2 = $("#reset2"); if (r2) r2.onclick = resetFilters; return; }
   if (ST.view === "markets") {
@@ -974,52 +961,61 @@ function renderList() {
   });
   lst.replaceChildren(frag);
 }
-// ── injuries: each slate team's latest official report. From the games a player missed for his team (this season and
-// last), the teammates who gained 2+ minutes a game and, for a starter, who started in his place (or, with no such
-// games, the bench player at his position with the most minutes: "by position") — nba_research.injury_report
-const INJ_C = {Out: "to", Doubtful: "to", Questionable: "tq", Probable: "tp"};
-const INJ_S = {Out: "OUT", Doubtful: "DOUBT", Questionable: "Q", Probable: "PROB"};
-const injReason = r => String(r || "").replace(/^Injury\/Illness\s*-\s*/i, "").replace(/^G League\s*-\s*/i, "G League · ");
+// ── injuries: the slate's listed rotation players (10+ minutes a game; Out, Doubtful, Questionable), most relevant
+// first. Boxes, from the games he missed for his team (nba_research.injury_report): for a starter, who started in his
+// place (or by position, with no such games); then the teammates who gained the most minutes a game without him.
+const INJ_C = {Out: "to", Doubtful: "to", Questionable: "tq"};
+const INJ_S = {Out: "OUT", Doubtful: "DOUBT", Questionable: "Q"};
+const INJ_P = {Out: 1, Doubtful: .9, Questionable: .4};          // the chance he sits, until the report has a record
+const injReason = r => String(r || "").replace(/^Injury\/Illness\s*-\s*/i, "").replace(/^G League\s*-\s*/i, "G League · ").replace(/;\s*/g, " ");
 const injRot = e => e.mpg !== null && e.mpg >= 10;
-function injProp(pid) {                          // tonight's prop for a teammate named in a read, points first
+function injSits(status) {                       // how often players listed so have sat since 10/22 (proj_meta.availability)
+  const a = ((D.proj_meta || {}).availability || {})[status];
+  return status === "Out" ? 1 : a && a[1] >= 10 ? 1 - (a[0] + 1) / (a[1] + 2) : INJ_P[status] || 0;
+}
+// relevance: minutes a game x the chance he sits, halved when he has no game this season (the team is used to it)
+const injImpact = e => (e.mpg || 0) * injSits(e.status) * (e.season === D.season ? 1 : .5);
+function injList() {
+  const q = ST.q.trim().toLowerCase(), out = [];
+  D.games.filter(g => g.date === ST.date && (ST.gid === "all" || g.gid === ST.gid)).forEach(g => [g.away, g.home].forEach(t => {
+    if (ST.team !== "all" && t !== ST.team) return;
+    (((D.inj_report || {})[g.date + "|" + t] || {}).players || []).forEach(e => {
+      if (!injRot(e) || !INJ_P[e.status]) return;
+      const names = [e.name].concat(e.minutes.map(m => m.name), e.starts ? [e.starts.name] : []);
+      if (q && t.toLowerCase() !== q && !names.some(n => n.toLowerCase().indexOf(q) >= 0)) return;
+      out.push(Object.assign({team: t}, e));
+    });
+  }));
+  return out.sort((a, b) => injImpact(b) - injImpact(a));
+}
+function injProp(pid) {                          // tonight's prop for a teammate in a box, points first
   return D.props.filter(p => p.pid === pid && (gameOf(p.gid) || {}).date === ST.date)
     .sort((a, b) => ORDER.indexOf(a.market) - ORDER.indexOf(b.market))[0] || null;
 }
-function injMate(m, tail) {
-  const p = injProp(m.pid);
-  return `<button class="ijm"${p ? ` data-id="${esc(p.id)}"` : " disabled"}>${esc(nameOf(m.name))}${tail}</button>`;
+// a box: the teammate on top, what he took below (a start, from k of n games or "?" by position; or minutes a game)
+function injBox(m, val, cls) {
+  const p = injProp(m.pid), tag = p ? "button" : "div";
+  return `<${tag} class="ijb"${p ? ` data-id="${esc(p.id)}"` : ""}><i>${esc(m.name)}</i><b class="${cls}">${val}</b></${tag}>`;
 }
 function injRow(e) {
-  const meta = [esc(e.pos), e.mpg === null ? "No games" : `${e.mpg.toFixed(1)} MPG${e.season && e.season !== D.season ? ` <small>${esc(e.season.slice(2))}</small>` : ""}`,
-                e.starter ? "Starter" : ""].filter(Boolean).join(" · ");
-  const rd = [];
-  if (e.starts) rd.push(`<div class="ijk"><span>Starts</span>${injMate(e.starts, e.starts.how === "games" ? ` <small>${e.starts.k}/${e.starts.n}</small>` : " <small>by position</small>")}</div>`);
-  if (e.minutes.length) rd.push(`<div class="ijk"><span>Minutes<small>${e.missed} g w/o</small></span>${e.minutes.map(m => injMate(m, ` <b class="up">+${m.gain.toFixed(1)}</b>`)).join("")}</div>`);
-  return `<div class="ijr"><span class="av">${head(e.pid)}</span><div class="nm">${esc(e.name)}<span class="tg ${INJ_C[e.status] || "tn"}">${INJ_S[e.status] || esc(e.status)}</span></div>
-    <div class="ijs">${meta}</div>${e.reason ? `<div class="ijw">${esc(injReason(e.reason))}</div>` : ""}${rd.length ? `<div class="ijx">${rd.join("")}</div>` : ""}</div>`;
-}
-function injTeam(t, g) {
-  const r = (D.inj_report || {})[g.date + "|" + t], q = ST.q.trim().toLowerCase();
-  let ps = r ? r.players : [];
-  if (q && t.toLowerCase() !== q) {
-    ps = ps.filter(e => [e.name].concat(e.minutes.map(m => m.name), e.starts ? [e.starts.name] : []).some(n => n.toLowerCase().indexOf(q) >= 0));
-    if (!ps.length) return "";
-  }
-  const main = ps.filter(injRot), rest = ps.filter(e => !injRot(e));
-  const st = !r || !r.listed ? "Not on report" : !r.players.length ? "No injuries" : `${r.players.length} listed`;
-  return `<div class="ijt">${logo(t, "")}<b>${esc(t)}</b><span>${st}</span></div>${main.map(injRow).join("")}` +
-    (rest.length ? `<div class="ijo"><b>Also</b>${rest.map(e => `${esc(nameOf(e.name))}<span class="tg ${INJ_C[e.status] || "tn"}">${INJ_S[e.status] || esc(e.status)}</span>`).join(", ")}</div>` : "");
+  const bx = [], s = e.starts;
+  if (s) bx.push(injBox(s, s.how === "games" ? `Starts <small>${s.k}/${s.n}</small>` : "Starts?", s.how === "games" ? "" : "sm"));
+  e.minutes.filter(m => !s || m.pid !== s.pid).forEach(m => bx.push(injBox(m, "+" + m.gain.toFixed(1), "up")));   // one box a player
+  const tags = `<span class="tg ${INJ_C[e.status]}">${INJ_S[e.status]}</span>${e.fresh ? '<span class="tg tf">NEW</span>' : ""}`;
+  return `<div class="pr ir${bx.length ? "" : " ir0"}"><span class="av">${head(e.pid)}</span>
+    <div class="who"><div class="nm">${esc(nameOf(e.name))}<span class="cd">${esc(e.team)}</span>${tags}</div>
+    <div class="lin">${e.starter ? "Starter" : "Bench"}${e.reason ? " · " + esc(injReason(e.reason)) : ""}</div></div>
+    <div class="oc o"><i>${e.season && e.season !== D.season ? "MPG " + esc(e.season.slice(2)) : "MPG"}</i><b class="num">${e.mpg.toFixed(1)}</b></div>
+    <div class="oc e"><i>MISSED</i><b class="num">${e.missed}</b></div>
+    ${bx.length ? `<div class="bx4">${bx.slice(0, 4).join("")}</div>` : ""}</div>`;
 }
 function injView() {
-  const gs = D.games.filter(g => g.date === ST.date && (ST.gid === "all" || g.gid === ST.gid));
-  if (!gs.length) return '<div class="empty"><b>No games</b></div>';
+  if (!D.games.some(g => g.date === ST.date)) return '<div class="empty"><b>No games</b></div>';
   const rep = (D.sources.report || {})[ST.date];
-  const html = gs.map(g => {
-    const body = [g.away, g.home].filter(t => ST.team === "all" || t === ST.team).map(t => injTeam(t, g)).join("");
-    return body ? `<div class="ijg"><span>${esc(g.away)} @ ${esc(g.home)}</span><span>${when(g)}</span></div>${body}` : "";
-  }).join("");
-  return `<div class="lhd"><span>${rep ? "Official report · " + esc(mt(rep.published, true)) : "No official report yet"}</span></div>` +
-    (html || '<div class="empty"><b>No matches</b></div>');
+  if (!rep) return '<div class="empty"><b>No injury report yet</b></div>';
+  const list = injList();
+  return `<div class="lhd"><span>${list.length} players</span><span>Report ${esc(mt(rep.published, true))}</span></div>` +
+    (list.length ? list.map(injRow).join("") : '<div class="empty"><b>No injuries</b></div>');
 }
 function tabbar() {
   const tb = $("#tb"), fo = filtersOn();
@@ -1248,7 +1244,7 @@ const TEAMS = {ATL: ["Atlanta Hawks", "#C8102E"], BOS: ["Boston Celtics", "#007A
 const POSN = {PG: "Point Guard", SG: "Shooting Guard", SF: "Small Forward", PF: "Power Forward", C: "Center", G: "Guard",
   F: "Forward", "G-F": "Guard-Forward", "F-G": "Forward-Guard", "F-C": "Forward-Center", "C-F": "Center-Forward"};
 const TAB_ORDER = ["points", "assists", "rebounds", "threes", "pts_ast", "pts_reb", "reb_ast", "pra"];
-const TAB = {trends: "Trends", injury: "Injuries", points: "Points", rebounds: "Rebs", assists: "Assists", threes: "3PTM", pra: "PRA", pts_reb: "P+R", pts_ast: "P+A", reb_ast: "R+A"};
+const TAB = {trends: "Trends", points: "Points", rebounds: "Rebs", assists: "Assists", threes: "3PTM", pra: "PRA", pts_reb: "P+R", pts_ast: "P+A", reb_ast: "R+A"};
 const GRPN = {G: "guards", F: "forwards", C: "centers"};
 const ICON = {
   back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
@@ -1824,11 +1820,11 @@ document.addEventListener("keydown", e => { if (e.key === "Escape") { if (!$("#s
 document.addEventListener("DOMContentLoaded", () => {
   $("#scrim").onclick = closeSheet;
   sheetDrag();
-  $("#app").addEventListener("click", e => { const b = e.target.closest(".pr[data-id],.mrw[data-id],.ijm[data-id]"); if (b) openProp(b.dataset.id); });
+  $("#app").addEventListener("click", e => { const b = e.target.closest(".pr[data-id],.mrw[data-id],.ijb[data-id]"); if (b) openProp(b.dataset.id); });
   // the big headshot starts loading and decoding the moment a finger lands on a row, so it is ready when the page slides in
   const warm = new Set();
   $("#app").addEventListener("pointerdown", e => {
-    const b = e.target.closest(".pr[data-id],.mrw[data-id],.ijm[data-id]"), pid = b && b.dataset.id.split("|")[1];
+    const b = e.target.closest(".pr[data-id],.mrw[data-id],.ijb[data-id]"), pid = b && b.dataset.id.split("|")[1];
     if (!pid || warm.has(pid)) return;
     warm.add(pid); const im = new Image(); im.src = heroSrc(pid); if (im.decode) im.decode().catch(() => {});
   }, {passive: true});

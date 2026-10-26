@@ -32,6 +32,7 @@ import datetime as dt
 import json
 import math
 import os
+import re
 import sqlite3
 import statistics as st
 from collections import defaultdict
@@ -324,7 +325,8 @@ def official_status(ncon, game_dates):
                 "SELECT team, pid, player, status, reason FROM snapshots WHERE game_date=? AND mark=?", (d, mark)):
             teams[(d, team)] = True
             if pid is not None:
-                status[(d, int(pid))] = {"status": st_, "reason": (reason or "")[:80], "published": pub, "team": team,
+                reason = re.sub(r"\s*\d{1,2}:\d{2}\s*\(ET\)\s*$", "", reason or "")   # the parser's game-time column
+                status[(d, int(pid))] = {"status": st_, "reason": reason[:80], "published": pub, "team": team,
                                          "player": player}
     return status, teams, meta
 
@@ -531,7 +533,7 @@ def _pos_set(pos):
 def injury_report(mcon, official, teams_listed, report_meta, games, roster, seasons):
     """{"date|team": {"listed", "published", "players": [...]}} — every player on each slate team's latest official
     report (not Available), worst status then most minutes first: his minutes a game (this season, else last), whether
-    he starts, and from the games he missed for the team (this season and last), the teammates who gained 2+ minutes a
+    he starts, fresh (he played in one of the team's last FRESH_GAMES games: news), and from the games he missed for the team (this season and last), the teammates who gained 2+ minutes a
     game and, for a starter, who started in his place. With no such games, the bench player at his position with the
     most minutes is named for the start (how = "position"). No read for a player without a game for the team (it has
     played without him all along) or a bench player who has missed more of its games than he played (the games he
@@ -561,12 +563,14 @@ def injury_report(mcon, official, teams_listed, report_meta, games, roster, seas
     for d, team in slate:
         sick = {pid for pid, s in listed.get((d, team), []) if s["status"] in ("Out", "Doubtful")}
         mates = {int(k): v for k, v in roster.items() if v[0] == team and int(k) not in sick}
+        last = [b for b in boxes.get(team, []) if b[1] < d][-FRESH_GAMES:]       # the team's last games before tonight
         players = []
         for pid, s in listed.get((d, team), []):
             mpg, gp, ssn, starter = form(pid, team)
             e = {"pid": pid, "name": name(pid, s), "pos": (roster.get(str(pid)) or ["", "", ""])[2] or "",
                  "status": s["status"], "reason": s.get("reason") or "", "mpg": mpg, "gp": gp, "season": ssn,
-                 "starter": bool(starter), "missed": 0, "starts": None, "minutes": []}
+                 "starter": bool(starter), "missed": 0, "starts": None, "minutes": [],
+                 "fresh": any(pid in b[3] for b in last)}
             if mpg is not None and mpg >= ROTATION_MPG:
                 rows = apps.get(pid, [])
                 stays = {}
