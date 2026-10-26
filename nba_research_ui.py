@@ -172,6 +172,7 @@ border-bottom:.5px solid var(--sep);font-size:15px}
 svg.ch{display:block}
 svg.ch text{fill:var(--l3);font-size:10px;font-weight:600}
 svg.ch .vl{fill:var(--l1);font-size:12px;font-weight:800}
+svg.ch .dt{font-size:9px;letter-spacing:-.03em}
 svg.ch .ll{fill:#000;font-size:11px;font-weight:800}
 svg.ch g.br:focus{outline:none} svg.ch g.br:focus rect{stroke:var(--blue);stroke-width:2}
 .fch{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
@@ -594,7 +595,7 @@ function chart(logs, market, line) {
   const vals = logs.map(l => statValue(l, market));
   const vmax = Math.max(line * 1.3, Math.max(...vals.filter(v => v !== null), 1));
   const avail = Math.max(250, Math.min(window.innerWidth, 500) - 110);   // the card's inner width less the label room
-  const bw = Math.max(22, Math.min(44, avail / n)), gap = Math.round(bw * .22);
+  const bw = Math.max(28, Math.min(44, avail / n)), gap = Math.round(bw * .22);
   const W = Math.max(avail, n * bw + 4) + 50, H = 230, top = 22, bot = 182;   // + room for the line label
   const y = v => bot - v / vmax * (bot - top);
   const out = [`<svg class="ch" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="group" aria-label="${esc(NAME[market])} by game, ${n} games, line ${line}">`,
@@ -608,7 +609,7 @@ function chart(logs, market, line) {
     out.push(`<g class="br" tabindex="0" role="img" aria-label="${esc(desc)}"><title>${esc(desc)}</title>` +
       `<rect x="${x}" y="${bot - h}" width="${w}" height="${h}" rx="5" fill="${fill}"/>` +
       (v !== null ? `<text class="vl" x="${x + w / 2}" y="${bot - h - 5}" text-anchor="middle">${v}</text>` : "") +
-      `<text x="${x + w / 2}" y="${bot + 15}" text-anchor="middle">${esc(l.opp)}</text><text x="${x + w / 2}" y="${bot + 28}" text-anchor="middle">${d}</text></g>`);
+      `<text x="${x + w / 2}" y="${bot + 15}" text-anchor="middle">${esc(l.opp)}</text><text class="dt" x="${x + w / 2}" y="${bot + 28}" text-anchor="middle">${d}</text></g>`);
   });
   const ly = y(line);
   out.push(`<line x1="0" x2="${W}" y1="${ly}" y2="${ly}" stroke="#fff" stroke-width="1.5" stroke-dasharray="6 5" opacity=".9"/>`);
