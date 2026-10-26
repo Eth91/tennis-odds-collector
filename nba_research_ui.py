@@ -809,12 +809,12 @@ function projAt(p, line, side) {
   const pick = x => x === null ? null : side === "under" ? 1 - x : x;
   return {model: pick(cond), blend: pick(bo), push: q.push, raw: q};
 }
-// every hit-rate box: under 5 games a plain count; otherwise the rate, colored only when it sits 1+ SD from what
-// the price implies (fs; a coin flip without a price) — a 3-for-3 or a -300 favorite going 7-for-10 stays white
+// every hit-rate box: the rate; under 5 games grey (too few to color), otherwise colored only when it sits 1+ SD
+// from what the price implies (fs; a coin flip without a price) — a -300 favorite going 7-for-10 stays white
 function hbox(x, fs) {
   if (!x || !x.n) return {t: "–", c: ""};
   const h = hitsOf(x);
-  if (x.n < 5) return {t: h + "/" + x.n, c: "sm"};
+  if (x.n < 5) return {t: pct(x.rate), c: "sm"};
   const z = zscore(h, x.n, fs === null || fs === undefined ? .5 : fs);
   return {t: pct(x.rate), c: z >= 1 ? "up" : z <= -1 ? "dn" : ""};
 }
@@ -1213,7 +1213,8 @@ function openProp(id, push) {
   if (!p) return;
   const fresh = CUR !== id, was = !!CUR;
   CUR = id;
-  if (fresh) Object.assign(DT, {line: p.main !== null ? p.main : allLines(p)[0], win: "l10", home: null, starter: null,
+  if (fresh) Object.assign(DT, {line: p.main !== null ? p.main : allLines(p)[0],
+                                 win: windowed(logsOf(p), "season", D.season).length ? "season" : "l10", home: null, starter: null,
                                  result: null, rest: null, ranges: {}, without: {}, with: {}, dvp: false, def: false, open: {}, more: false, fresh: null, ovs: []});
   if (push !== false) history.pushState({p: id}, "", hashState());
   const pg = $("#pg");
@@ -1609,6 +1610,7 @@ function updateProp(mode) {
   const rchip = k => { if (!forMarket(k, p.market)) return; const b = bounds(logs, k), abbr = RANGES.find(r => r[0] === k)[2]; if (b && b[0] !== b[1]) chips.push(chip(`data-r="${k}"`, `${OVL[k] ? ICON.bars : ICON.pm}${abbr}`, rangeOn(k) || DT.open[k])); };
   const tchip = (k, v, lab) => chips.push(chip(`data-k="${k}" data-v="${v}"`, lab, on(k, v)));
   ["min", "fga", "fg3a", "fta", "usg", "pot_ast", "reb_ch"].forEach(rchip);   // the adjustable filters first
+  if (logs.some(l => l.starter === 1)) tchip("starter", true, "Starter");     // only the games he started
   if (c.dvp_rank) chips.push(chip('data-t="dvp"', `DvP <em class="${rankCls(c.dvp_rank, c.teams, side)}">${ord(c.dvp_rank)}</em>`, DT.dvp));
   if (c.def_rank) chips.push(chip('data-t="def"', `Def Rank <em class="${rankCls(c.def_rank, c.teams, side)}">${ord(c.def_rank)}</em>`, DT.def));
   const wchip = w => chips.push(chip(`data-wo="${w.key}"`, (w.fresh ? "W/O " : "Without ") + esc(lastName(w.name)), DT.without[w.key]));
