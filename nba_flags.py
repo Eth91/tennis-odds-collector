@@ -143,7 +143,8 @@ SHADOW_DDL = """CREATE TABLE IF NOT EXISTS flags (
     gid TEXT, gtime TEXT, matchup TEXT, actual REAL, result TEXT, graded_at TEXT,
     ev REAL, pid INTEGER, news_at TEXT, stale INTEGER, horizon INTEGER, x_pid INTEGER,
     trigger_src TEXT, void_reason TEXT, d_min REAL, opp_cell TEXT, opp_ratio REAL, x_status TEXT,
-    x_min REAL, card INTEGER, card_why TEXT, aidx INTEGER, filt TEXT, stars_out INTEGER)"""
+    x_min REAL, card INTEGER, card_why TEXT, aidx INTEGER, filt TEXT, stars_out INTEGER, pace_f REAL, match_f REAL,
+    play_type TEXT, scheme TEXT, g_total REAL, total_cell TEXT, g_spread REAL)"""
 COMBO = {"pts_reb": ("points", "rebounds"), "pts_ast": ("points", "assists"),
          "reb_ast": ("rebounds", "assists")}
 
@@ -166,7 +167,9 @@ def _shadow(path):
                      ("trigger_src", "TEXT"), ("void_reason", "TEXT"), ("d_min", "REAL"),
                      ("opp_cell", "TEXT"), ("opp_ratio", "REAL"), ("x_status", "TEXT"),
                      ("x_min", "REAL"), ("card", "INTEGER"), ("card_why", "TEXT"), ("aidx", "INTEGER"),
-                     ("filt", "TEXT"), ("stars_out", "INTEGER")):
+                     ("filt", "TEXT"), ("stars_out", "INTEGER"), ("pace_f", "REAL"), ("match_f", "REAL"),
+                     ("play_type", "TEXT"), ("scheme", "TEXT"), ("g_total", "REAL"), ("total_cell", "TEXT"),
+                     ("g_spread", "REAL")):
         if col not in have:
             sh.execute(f"ALTER TABLE flags ADD COLUMN {col} {typ}")
     return sh
@@ -667,6 +670,11 @@ def flags(dry=False, game_date=None):
         else:
             f["opp_cell"], f["opp_ratio"] = "n/a", None
 
+    try:                                       # AMENDMENT 30: information only, never breaks the pass
+        annotate30(out_flags, gdate, index, now, {g["gid"] for g in sched if g["date_et"] == gdate})
+    except Exception as e:                                           # noqa: BLE001
+        print(f"  !! amendment 30 annotate error: {type(e).__name__}: {e}")
+
     new_shadow = new_paper = 0
     inserted = []
     if not dry and out_flags:
@@ -722,6 +730,46 @@ def flags(dry=False, game_date=None):
     if why:
         print(f"  skipped: {dict(why)}")
     return out_flags
+
+
+def annotate30(out_flags, gdate, index, now, slate_gids, mdb=None, lines_db=None):
+    """AMENDMENT 30 (information only): on every wowy flag, the opponent's PACE and MATCHUP factors (point-in-time,
+    nba_matchup), B's main play type and the opponent's defense on it (SCHEME), and the game's total (TOTAL: vs the
+    slate median) and B's spread at flag time. Changes no projection, threshold or card."""
+    import nba_matchup as MU
+    wf = [f for f in out_flags if f["tier"] == "wowy"]
+    if not wf:
+        return
+    con = MU.connect(mdb)
+    try:
+        S = MU.Season(con, MU.season_of(gdate), index_pos={pid: v[2] for pid, v in index.items()})
+        for f in wf:
+            away, _, home = (f.get("matchup") or "").partition(" @ ")
+            opp = away if f["team"] == home else home
+            pace, mf = S.factors(opp, gdate, f.get("pid"))
+            f["pace_f"], f["match_f"] = round(pace, 3), round(mf.get(f["stat"], 1.0), 3)
+            f["play_type"], f["scheme"] = MU.scheme_cell(con, f.get("pid"), opp, gdate)
+    finally:
+        con.close()
+    q = sqlite3.connect(f"file:{lines_db or LINES_DB}?mode=ro", uri=True)
+    try:
+        at = now.astimezone(dt.timezone.utc).replace(tzinfo=None, microsecond=0).isoformat()
+        last = lambda gid, market, side: (q.execute(
+            "SELECT line FROM game_lines WHERE gid=? AND market=? AND side=? AND seen_at <= ? ORDER BY seen_at DESC "
+            "LIMIT 1", (gid, market, side, at)).fetchone() or (None,))[0]
+        totals = {g: last(g, "total", "over") for g in slate_gids}
+        known = sorted(t for t in totals.values() if t is not None)
+        med = known[len(known) // 2] if known else None
+        for f in wf:
+            away, _, home = (f.get("matchup") or "").partition(" @ ")
+            t = totals.get(f["gid"])
+            f["g_total"] = t
+            f["total_cell"] = None if t is None or med is None else "HIGH" if t >= med else "LOW"
+            f["g_spread"] = last(f["gid"], "spread", "home" if f["team"] == home else "away")
+    except sqlite3.OperationalError:
+        pass                                    # no game_lines table yet
+    finally:
+        q.close()
 
 
 def _excess(f):
@@ -880,14 +928,16 @@ def _log_flags(sh, out_flags, stamp, why):
         cur = sh.execute("INSERT OR IGNORE INTO flags (flag_id, logged_at, game_date, tier, "
                          "team, x, b, stat, line, odds, proj, margin, gid, gtime, matchup, ev, "
                          "pid, news_at, stale, horizon, x_pid, trigger_src, d_min, opp_cell, opp_ratio, x_status, x_min, "
-                         "card, card_why, aidx, filt, stars_out) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                         "card, card_why, aidx, filt, stars_out, pace_f, match_f, play_type, scheme, g_total, total_cell, "
+                         "g_spread) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                          (fid, stamp, f["game_date"], f["tier"], f["team"], f["x"], f["b"],
                           f["stat"], f["line"], f["odds"], f["proj"], f["margin"],
                           f["gid"], f["gtime"], f["matchup"], f.get("ev"), f.get("pid"),
                           f.get("news_at"), f.get("stale"), f["horizon"], f.get("x_pid"),
                           f.get("trigger_src"), f.get("d_min"), f.get("opp_cell"),
                           f.get("opp_ratio"), f.get("x_status"), f.get("x_min"), card, card_why, f.get("aidx"),
-                          _filter_reason(f), f.get("stars_out")))
+                          _filter_reason(f), f.get("stars_out"), f.get("pace_f"), f.get("match_f"), f.get("play_type"),
+                          f.get("scheme"), f.get("g_total"), f.get("total_cell"), f.get("g_spread")))
         new_shadow += cur.rowcount
         if cur.rowcount and not card:
             why["card_off_logged_only"] += 1

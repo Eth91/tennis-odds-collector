@@ -1268,3 +1268,53 @@ are added, then the live list is re-validated. The news journal measures every s
   WAS still have one writer each. The rejected handles and why are listed beside HANDLES in nba_x_beats.py.
 - *STARS OUT* is computed by `stars_out_by_team` from the flag pass's absent set (report Out/Doubtful plus trusted
   news), stored per flag; NULL (unknown) is not filtered.
+
+---
+
+# AMENDMENT 30 — pace, matchup (defense vs position), and defensive play types (2026-10-25)
+
+**Why.** User: "add matchup and pace data to the model. aswell as defensive schemes or coverages." The projection
+(with/without splits × recalibrated minutes) ignores the opponent. Feasibility checked before this amendment (no
+outcomes looked at): cdn.nba.com box scores for 2023-24 and 2024-25 carry team FGA/FTA/OREB/TOV and starters'
+positions (bench players have none); stats.nba.com's play-type (Synergy) defense is reachable from the VM but
+returns SEASON totals only (DateFrom/DateTo are ignored), so it cannot be used point-in-time in a backtest.
+Coverage labels (drop / switch / blitz / zone) are not public.
+
+**Features, point-in-time (only games BEFORE the game date, same season; shrunk to the league with k = 10 games):**
+- *Possessions* per team-game = ½ × [(FGA + 0.44·FTA − OREB + TOV)_team + (same)_opponent].
+- *PACE FACTOR* = opponent's possessions per game (shrunk) ÷ league mean. (B's own rates already carry his team's
+  pace; the opponent is what changes.)
+- *POSITION* of B = his most frequent starting position this season before the game (PG/SG → G, SF/PF → F, C → C);
+  no start → the current player index's position; none → no matchup adjustment.
+- *MATCHUP FACTOR* (per stat, per position group) = the opponent's allowed stat per possession to that group
+  (starters of that group plus bench players whose group is known), shrunk, ÷ league mean. PRA = the sum of its parts.
+- *proj_adj = proj × PACE FACTOR × MATCHUP FACTOR.* Exponents fixed at 1 — nothing is fit.
+
+**The test, decision fixed now.** The current card (amendment 28 filters, amendment 29 rule, minutes band 3-8, FD+DK
+prices, every absent star, tip lines, margins unchanged) built once with proj and once with proj_adj, per season.
+ADOPT proj_adj into both cards only if the card's units with proj_adj are ≥ the card's units with proj in BOTH
+2023-24 and 2024-25. Otherwise the projection is unchanged and the factors are information only. Either way every
+wowy flag stores pace_factor and matchup_factor from deployment, with a MATCHUP cell (< 0.95 / 0.95-1.05 / > 1.05).
+
+**Defensive play types (forward only, information).** Daily on the VM: stats.nba.com Synergy team DEFENSIVE play
+types (PRBallHandler, PRRollman, Isolation, Spotup, Postup, Handoff, OffScreen, Transition, Cut, Putback) and player
+OFFENSIVE play types, season to date, stored by snapshot date (nba_matchup.sqlite). Each wowy flag records B's main
+play type (largest possession share) and the opponent's defensive PPP percentile on it, as a SCHEME cell
+(tough = percentile ≥ 0.67 / neutral / soft ≤ 0.33; percentile as stats.nba.com reports it). No rule until a later
+registered amendment with ≥ 100 graded flags.
+
+**Game lines (forward only, information).** From nba_lines.game_lines (collected since 2026-10-25): the game total
+and the spread for B's team at flag time, as TOTAL (vs the slate median) and SPREAD (|spread| ≥ 10 = blowout risk)
+cells.
+
+**Amendment 30 — the registered test, run (2026-10-26 ~04:00 UTC).** nba_matchup.py cached 2,459 of 2,460 regular-
+season box scores (2023-24: 1,229; 2024-25: 1,230). The current card at tip lines (FD+DK, every absent star, band
+3-8, amendments 28-29), margins unchanged:
+- proj (current): 2023-24 35 bets +20.7% (+$725 at $100) · 2024-25 38 bets +40.4% (+$1,535)
+- proj_adj (× pace × matchup): 2023-24 37 bets +18.1% (+$668) · 2024-25 30 bets +7.9% (+$236)
+**Decision (as registered): KEEP proj.** proj_adj is worse in both seasons. The factors are information only.
+(Information, not a rule: the current card's plays by pace × matchup — < 0.95: 6 / 10 bets at +31.5% / +52.3%;
+0.95-1.05: 26 / 24 at +17.5% / +43.3%; > 1.05: 3 / 4 at +26.7% / −7.0%. The line already prices the matchup.)
+Applied: every wowy flag from AMEND30_CUTOVER (2026-10-26 06:00 UTC) stores pace_f, match_f, play_type, scheme,
+g_total, total_cell, g_spread (annotate30, inside a guard: it cannot break the pass); cells MATCHUP / SCHEME /
+TOTAL / SPREAD (30). The VM runs `nba_matchup.py --current` daily (this season's finals + a play-type snapshot).

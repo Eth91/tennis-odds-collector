@@ -52,6 +52,7 @@ AMEND28_CUTOVER = "2026-10-25T23:30:00"     # AMENDMENT 28: the four card filter
 FILTER_N_DECIDE = 60
 AMEND29_CUTOVER = "2026-10-26T00:30:00"     # AMENDMENT 29: 2+ STARS OUT (deployed before this)
 STARS_N_DECIDE = 40
+AMEND30_CUTOVER = "2026-10-26T06:00:00"     # AMENDMENT 30: pace / matchup / scheme / game-line cells (information)
 FILTER_CELL = ("PASS", "EDGE TOO BIG", "REBOUNDS OFF CARD", "STAR 32+ MIN", "PRICE -125 OR SHORTER")
 COMBO_STATS = frozenset({"pra", "pts_reb", "pts_ast", "reb_ast"})
 AMEND9_CUTOVER = "2026-10-24T08:03:00"      # OPPORTUNITY cell: deployment time after the VM backfill (amendment 9)
@@ -174,6 +175,14 @@ def collect():
                 row["cells"]["FILTER (28)"] = r.get("filt") or "PASS"
             if r["logged_at"] >= AMEND29_CUTOVER and r["tier"] == "wowy":   # amendment 29, stored at flag time
                 row["cells"]["STARS OUT (29)"] = "2+" if (r.get("stars_out") or 0) >= 2 else "1"
+            if r["logged_at"] >= AMEND30_CUTOVER and r["tier"] == "wowy":   # amendment 30, stored at flag time
+                pm = (r["pace_f"] * r["match_f"]) if r.get("pace_f") is not None and r.get("match_f") is not None else None
+                row["cells"]["MATCHUP (30)"] = ("n/a" if pm is None else "<0.95" if pm < 0.95 else ">1.05" if pm > 1.05
+                                                else "0.95-1.05")
+                row["cells"]["SCHEME (30)"] = r.get("scheme") or "n/a"
+                row["cells"]["TOTAL (30)"] = r.get("total_cell") or "n/a"
+                row["cells"]["SPREAD (30)"] = ("n/a" if r.get("g_spread") is None
+                                               else "BLOWOUT RISK" if abs(r["g_spread"]) >= 10 else "CLOSE")
         # AMENDMENT 2: a news-originated trigger counts only if an official report published
         # before tip lists the absent player Out (or Doubtful, amendment 15) for that game;
         # otherwise it is an audit row.
@@ -451,7 +460,9 @@ def cells_report(rows):
              "OPPORTUNITY": ("CONFIRMED", "NOT CONFIRMED", "THIN", "NO DATA", "n/a"),
              "CARD": ("ON", "OFF"), "STAT TYPE": ("COMBO", "SINGLE"),
              "CARD STAT": ("points", "rebounds", "assists", "threes", "pra", "pts_reb", "pts_ast", "reb_ast"),
-             "FILTER (28)": FILTER_CELL, "STARS OUT (29)": ("1", "2+")}
+             "FILTER (28)": FILTER_CELL, "STARS OUT (29)": ("1", "2+"),
+             "MATCHUP (30)": ("<0.95", "0.95-1.05", ">1.05", "n/a"), "SCHEME (30)": ("tough", "neutral", "soft", "n/a"),
+             "TOTAL (30)": ("HIGH", "LOW", "n/a"), "SPREAD (30)": ("CLOSE", "BLOWOUT RISK", "n/a")}
     for cell, values in order.items():
         for scope, pick in (("all tiers", lambda v: True), ("priced", lambda v: v["tier"] == "priced")):
             for val in values:
