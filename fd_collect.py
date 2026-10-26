@@ -203,6 +203,7 @@ def collect_page(customPageId, sport, is_match):
     evs = page.get("attachments", {}).get("events", {})
     out, seen = [], set()
     now = dt.datetime.now(dt.timezone.utc)
+    _skipped_nodate, _skipped_baddate = [], []
     for eid, e in evs.items():
         nm = e.get("name") or ""
         if not is_match(nm):
@@ -217,13 +218,26 @@ def collect_page(customPageId, sport, is_match):
         # prices banked at all, so we skip the event again the moment openDate passes.
         # posted_props() keeps its live=0 filter as a guard on rows already banked.
         is_live = 0
+        # ⚠️ NOT KNOWING WHEN TIP IS, IS NOT PERMISSION TO COLLECT. This guard used to fall
+        # THROUGH on both failure paths — a missing openDate skipped the check entirely, and an
+        # unparseable one was swallowed by `except ValueError: pass` — so an event whose start
+        # time FanDuel did not give us had its IN-PLAY prices banked with live=0, which then
+        # sails through posted_props()' `COALESCE(live,0)=0` filter as if it were a pre-game
+        # price. Probed 2026-08-13: FD currently supplies openDate on 6/6 WNBA events, so this
+        # was latent rather than active — but it fails in the direction that produces a WRONG
+        # BET, while failing closed only produces FEWER bets, which is visible in volume.
+        # Loud, never silent: a payload change must show up as a printed count, not as a
+        # quietly halved slate (see the silent-zero class).
         od = e.get("openDate")
-        if od:
-            try:
-                if dt.datetime.fromisoformat(od.replace("Z", "+00:00")) <= now:
-                    continue
-            except ValueError:
-                pass
+        if not od:
+            _skipped_nodate.append(nm)
+            continue
+        try:
+            if dt.datetime.fromisoformat(od.replace("Z", "+00:00")) <= now:
+                continue
+        except ValueError:
+            _skipped_baddate.append((nm, str(od)[:32]))
+            continue
         try:
             ev = get(f"{BASE}/event-page?eventId={eid}&_ak={AK}&timezone=America%2FNew_York")
         except Exception:
@@ -255,6 +269,11 @@ def collect_page(customPageId, sport, is_match):
                                 str(eid) if eid is not None else None,
                                 str(mid) if mid is not None else None,
                                 str(sel) if sel is not None else None))
+    if _skipped_nodate or _skipped_baddate:
+        print("fd_collect: SKIPPED %d event(s) with no openDate and %d with an "
+              "unparseable one — cannot prove they are pre-tip, so nothing was banked: %s"
+              % (len(_skipped_nodate), len(_skipped_baddate),
+                 ", ".join((_skipped_nodate + [n for n, _ in _skipped_baddate])[:4])))
     return out
 
 

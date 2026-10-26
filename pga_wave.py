@@ -21,6 +21,7 @@ and flagged assumed=True rather than quietly shipping a number nobody measured.
 import datetime as dt
 import json
 import math
+import re
 import sqlite3
 import statistics as st
 import time
@@ -47,6 +48,59 @@ DDL = """CREATE TABLE IF NOT EXISTS tee_sheet(
 
 TEE_Q = ('query T(%st: ID!) {teeTimes(id: %st) {timezone rounds {roundInt groups '
          '{teeTime startTee players {firstName lastName}}}}}' % (D, D))
+
+
+# ---------------------------------------------------------------- tour coverage
+# Which tours does the orchestrator actually carry? Probed 2026-08-14:
+#   R PGA Tour / S PGA TOUR Champions / H Korn Ferry  -> schedule AND teeTimes both answer.
+#   Y PGA TOUR Americas and U (a stale 2024-25 women's-majors stub) list tournaments but
+#     return an EMPTY teeTimes payload, so harvesting them would store zero rows.
+#   Every other code tried (DPW, EUR, LPGA, LET, LIV, ...) makes `schedule` error outright.
+# DP World Tour / LPGA / LIV tee sheets are therefore UNAVAILABLE from this source. Do not
+# add them here and do not silently substitute another feed: an unresolved deadline must
+# stay unresolved rather than become a guessed one.
+TOUR_CODES = ("R", "S", "H")
+
+SCHED_Q = ('{schedule(tourCode: "%s"%s) {completed {tournaments {id tournamentName}} '
+           'upcoming {tournaments {id tournamentName}}}}')
+
+
+def _short_tname(n, tid=None):
+    """Drop the sponsor tail.
+
+    pga_tee_gate._event_key matches an event by SUBSTRING containment of the normalised
+    names. FanDuel posts 'KFT - Albertsons Boise Open 2026'; the orchestrator says
+    'Albertsons Boise Open presented by Chevron'. Neither string contains the other, so the
+    full name can never match and the sheet would be harvested but never used. The trimmed
+    stem does match.
+
+    The season year is then appended back, because trimming ALONE collapses 2024/2025/2026
+    onto one key and _event_key short-circuits on a single name match instead of running its
+    nearest-in-time tiebreak -- which resolved the 2026 Boise Open to its 2024 first tee.
+    _norm_ev strips 4-digit years before comparing, so the suffix cannot affect matching.
+    """
+    s_ = re.split(r"\s+presented by\b|\s+pres\.|\s+supporting\b", str(n or ""),
+                  flags=re.I)[0]
+    s_ = s_.strip() or str(n or "").strip()
+    yr = str(tid or "")[1:5]
+    if yr.isdigit() and yr not in s_:
+        s_ = "%s %s" % (s_, yr)
+    return s_
+
+
+def tour_tournaments(tour, year=None):
+    """[(tid, short_tname)] for one tour code and season -- completed and upcoming."""
+    d = B.gql(SCHED_Q % (tour, (', year: "%d"' % int(year)) if year else ""))
+    sd = (d.get("data") or {}).get("schedule") or {}
+    pref = ("%s%d" % (tour, int(year))) if year else tour
+    out = []
+    for key in ("completed", "upcoming"):
+        for grp in sd.get(key) or []:
+            for t in grp.get("tournaments") or []:
+                tid = str(t.get("id") or "")
+                if tid.startswith(pref):
+                    out.append((tid, _short_tname(t.get("tournamentName"), tid)))
+    return out
 
 
 # --------------------------------------------------------------------- harvest
@@ -77,19 +131,26 @@ def harvest_tees(tids=None, years=(2024, 2025, 2026), verbose=True):
     con.execute(DDL)
     con.commit()
     have = {r[0] for r in con.execute("SELECT DISTINCT tid FROM tee_sheet").fetchall()}
+    # pga_e3 harvests a live event under the BOOK's event name, which is the name the gate
+    # already resolves. A schedule-driven sweep must not overwrite it with the orchestrator
+    # name, or a live board can lose its deadlines mid-event.
+    kept = {r[0]: r[1] for r in con.execute(
+        "SELECT tid, tname FROM tee_sheet WHERE tname IS NOT NULL AND tname <> ''")}
     if tids is None:
-        tids = []
-        for yr in years:
-            for tid, tname in B.completed_tournaments(year=yr):
-                tids.append((tid, tname))
-        for tid, tname in B.upcoming_tournaments():
-            tids.append((tid, tname))
+        tids, seen = [], set()
+        for tour in TOUR_CODES:
+            for yr in list(years) + [None]:
+                for tid, tname in tour_tournaments(tour, year=yr):
+                    if tid not in seen:
+                        seen.add(tid)
+                        tids.append((tid, tname))
     else:
         tids = [(t, "") if isinstance(t, str) else t for t in tids]
     new = 0
     for tid, tname in tids:
-        if tid in have and not str(tid).startswith("R2026"):
-            continue                                  # past sheets never change; 2026 can
+        cur = str(dt.datetime.now(dt.timezone.utc).year)
+        if tid in have and str(tid)[1:5] != cur:
+            continue        # past sheets never change; the CURRENT season can, on any tour
         try:
             rows, tz = fetch_sheet(tid)
         except Exception as e:                                      # noqa: BLE001
@@ -98,6 +159,7 @@ def harvest_tees(tids=None, years=(2024, 2025, 2026), verbose=True):
             continue
         if not rows:
             continue
+        tname = kept.get(tid) or tname
         payload = [(tid, tname, rnd, nm, ms, stee, tz) for rnd, nm, ms, stee in rows]
         for attempt in range(6):
             try:

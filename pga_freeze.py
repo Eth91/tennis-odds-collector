@@ -63,6 +63,7 @@ def snapshot():
     wave = W.fit_wave(verbose=False) or {}
     bridge = C._birdie_bridge() or {}
     return {
+        "wiring": _wiring(),
         "git_sha": _sha(),
         "purpose": "frozen for the 2026 Rocket Classic G2 read (event unplayed at freeze time)",
         # discovered, not listed: a new pricing parameter must not be able to hide
@@ -98,8 +99,65 @@ def _flat(d, pre=""):
     return out
 
 
-def freeze():
+def _wiring():
+    """Which optional corrections are actually CALLED in pga_ruler.simulate().
+
+    A constant snapshot cannot see this: RANK_OFFSETS stayed defined when _recal_rank was
+    unwired, so the freeze reported INTACT across a change worth 0.016 summed log-loss.
+    """
+    try:
+        src = (Path(__file__).resolve().parent / "pga_ruler.py").read_text()
+    except OSError:
+        return {}
+    body = src[src.index("def simulate("):] if "def simulate(" in src else src
+    live = [ln for ln in body.split("\n") if not ln.lstrip().startswith("#")]
+    live = "\n".join(live)
+    return {"recal_rank_called": "_recal_rank(out," in live,
+            "recal_shape_called": "_recal_shape(out," in live,
+            "inplay_shape_called": "IN_PLAY_SHAPE_SLOPE" in live}
+
+
+def freeze(note=None):
+    """Re-stamp. REQUIRES a note, and records what it is overwriting.
+
+    A re-stamp restarts the counted out-of-sample record, so the manifest has to say what moved
+    and why. Without `superseded` a later reader cannot tell a deliberate model change from
+    constants that drifted unnoticed and were absorbed by the next freeze.
+    """
+    if not note:
+        sys.exit("REFUSING to re-stamp without a note.\n"
+                 "  A freeze re-stamp restarts the counted out-of-sample record. Say what "
+                 "changed and why:\n"
+                 "  python3 pga_freeze.py --freeze --note \"...\"")
     snap = snapshot()
+    prior = None
+    try:
+        prior = json.loads(MANIFEST.read_text())
+    except Exception:                                               # noqa: BLE001
+        prior = None
+    moved = []
+    if prior:
+        a, b = _flat(prior), _flat(snap)
+        for k in sorted(set(a) | set(b)):
+            # Skip freeze METADATA in the re-stamp diff too, not just in verify(),
+            # or a re-stamp reports its own `superseded` block as a moved value and
+            # buries the real change under a copy of the previous record.
+            if k in ("git_sha", "purpose", "decision") or k.startswith("superseded"):
+                continue
+            x, y = a.get(k), b.get(k)
+            same = (x == y)
+            if not same and isinstance(x, (int, float)) and isinstance(y, (int, float)):
+                same = abs(float(x) - float(y)) <= 1e-9 * max(1.0, abs(float(x)))
+            if not same:
+                moved.append({"key": k, "was": x, "now": y})
+    snap["decision"] = note
+    snap["superseded"] = {"frozen_at_git": (prior or {}).get("git_sha"),
+                          "values_moved": moved}
+    if moved:
+        print("RE-STAMPING OVER %d MOVED VALUE(S) — recorded in `superseded`:" % len(moved))
+        for m in moved:
+            print("   %-34s was=%s  now=%s" % (m["key"], m["was"], m["now"]))
+        print()
     MANIFEST.write_text(json.dumps(snap, indent=2, sort_keys=True))
     try:
         COPY.write_text(json.dumps(snap, indent=2, sort_keys=True))
@@ -123,7 +181,11 @@ def verify(verbose=True):
     drift = []
     for k in sorted(set(a) | set(b)):
         x, y = a.get(k), b.get(k)
-        if k in ("git_sha", "purpose"):
+        # `decision`/`superseded` are freeze METADATA, not model values. They exist only
+        # in the manifest, so counting them as drift makes every verify after a
+        # documented re-stamp cry wolf -- and an alarm that always fires is ignored,
+        # which is how 14 constants drifted unnoticed before this.
+        if k in ("git_sha", "purpose", "decision") or k.startswith("superseded"):
             continue
         same = (x == y)
         if not same and isinstance(x, (int, float)) and isinstance(y, (int, float)):
@@ -149,6 +211,10 @@ def verify(verbose=True):
 
 if __name__ == "__main__":
     if "--freeze" in sys.argv:
-        freeze()
+        _n = None
+        if "--note" in sys.argv:
+            _i = sys.argv.index("--note")
+            _n = sys.argv[_i + 1] if _i + 1 < len(sys.argv) else None
+        freeze(_n)
     else:
         sys.exit(0 if verify() else 1)

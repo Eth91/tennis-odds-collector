@@ -51,6 +51,41 @@ STAT_MAP = {
 LEAGUES = {"mlb": "84240", "wnba": "94682",
            "nba": "42648"}   # NBA port P1: idles until Oct; STAT_MAP already covers bball
 
+# ENDPOINT HEALTH (2026-08-31). A zero-row cycle had FIVE causes that all printed the same
+# "dk wnba: 0 lines", and only two of them are faults. Downstream staleness cannot tell them
+# apart either — during an off-week there is nothing fresh to be stale relative to — so the
+# status is decided HERE, at the request, and printed as a machine-readable DKSTATUS line:
+#   ok          200; player-prop subcategories present; rows collected
+#   no_markets  200, but DK offers no player-prop subcategory yet. NORMAL well before a slate:
+#               measured 2026-08-31, WNBA (next game +17d) and NBA (+50d) both sat here with 0
+#               mapped subcategories while MLB, in season, returned 3,640 rows through this same
+#               code path. Benign — do not page.
+#   no_lines    200 and subcategories mapped, but every selection was filtered out. Suspicious.
+#   partial     200 root, but >=1 subcategory fetch failed. These used to be swallowed whole.
+#   blocked     403/401 — Akamai refusing this IP. THE fault worth paging for. The Oracle VM has
+#               been permanently in this state since 2026-07-16 (every impersonate target, not
+#               fingerprint drift), which is why collection lives on this Mac at all.
+#   error       any other transport failure (timeout, DNS, 5xx)
+LAST = {}
+
+
+def _classify_exc(e):
+    """blocked (a refusal, page-worthy) vs error (transport noise)."""
+    code = getattr(getattr(e, "response", None), "status_code", None)
+    return "blocked" if code in (401, 403) else "error"
+
+
+def probe(lg):
+    """ONE league-root GET -> status. Cheap enough to run every cycle including quiet hours,
+    which is the point: a block that starts at 02:00 must not stay invisible until 06:00."""
+    try:
+        root = _get(f"{B}/leagues/{lg}")
+    except Exception as e:                                            # noqa: BLE001
+        return _classify_exc(e)
+    mapped = [s for s in root.get("subcategories", [])
+              if _stat_key(s["name"]) and s.get("categoryId") is not None]
+    return "ok" if mapped else "no_markets"
+
 
 # DK milestone rung label: "15+", "8+". Anchored so a player name or an "Over 14.5" can
 # never match, which is what keeps the 1206 handicap market out of the points ladder.
@@ -103,14 +138,17 @@ def collect_league(sport, lg):
                 pass
         events[e["id"]] = e.get("name", "")
     rows, seen = [], set()          # seen = (marketId, side) — dedupe repeated subcats
+    mapped = subfail = 0
     for sid, (sname, cat) in subs.items():
         key = _stat_key(sname)
         if not key or cat is None:
             continue
+        mapped += 1
         try:
             j = _get(f"{B}/leagues/{lg}/categories/{cat}/subcategories/{sid}")
         except Exception:
-            continue
+            subfail += 1        # COUNTED, not silent. A 403 here used to be indistinguishable
+            continue            # from "DK posts no such market" — both yielded 0 rows.
         emkt = {m["id"]: m.get("eventId") for m in j.get("markets", [])}
         for sel in j.get("selections", []):
             raw = (sel.get("label") or "").strip()
@@ -144,6 +182,7 @@ def collect_league(sport, lg):
                 continue
             seen.add(k)
             rows.append((sport, events[eid], player, key, float(pts), side, dec))
+    LAST[sport] = {"mapped": mapped, "subfail": subfail}
     return rows
 
 
@@ -151,7 +190,14 @@ def main():
     import argparse
     ap = argparse.ArgumentParser()
     ap.add_argument("--wnba", action="store_true", help="WNBA only (skip MLB) — for the resilient loop")
-    leagues = {"wnba": LEAGUES["wnba"]} if ap.parse_args().wnba else LEAGUES
+    ap.add_argument("--probe", action="store_true",
+                    help="health only: one root GET per league, print DKSTATUS, write nothing")
+    a = ap.parse_args()
+    leagues = {"wnba": LEAGUES["wnba"]} if a.wnba else LEAGUES
+    if a.probe:
+        for sport, lg in leagues.items():
+            print(f"DKSTATUS {sport}={probe(lg)}")
+        return
     ts = dt.datetime.now(dt.timezone.utc).replace(microsecond=0, tzinfo=None).isoformat()
     con = sqlite3.connect(DB)
     con.execute("""CREATE TABLE IF NOT EXISTS fd_lines (
@@ -166,6 +212,7 @@ def main():
             rows = collect_league(sport, lg)
         except Exception as e:
             print(f"dk {sport}: skipped ({str(e)[:60]})")
+            print(f"DKSTATUS {sport}={_classify_exc(e)}")
             continue
         con.executemany("INSERT INTO fd_lines (collected_at,sport,event,player,stat,line,"
                         "side,odds,book) VALUES (?,?,?,?,?,?,?,?,'dk')",
@@ -173,6 +220,12 @@ def main():
         con.commit()
         total += len(rows)
         print(f"dk {sport}: {len(rows)} lines")
+        d = LAST.get(sport, {})
+        status = ("partial" if d.get("subfail") else
+                  "no_markets" if not d.get("mapped") else
+                  "ok" if rows else "no_lines")
+        print(f"DKSTATUS {sport}={status} mapped={d.get('mapped', 0)} "
+              f"subfail={d.get('subfail', 0)} rows={len(rows)}")
     con.close()
     print(f"[{ts}] DraftKings {total} lines -> {DB}")
 

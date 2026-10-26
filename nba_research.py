@@ -1,0 +1,784 @@
+#!/usr/bin/env python3
+"""NBA prop research for Pickz: the data behind docs/nba_props.html (the page itself is nba_research_ui.py).
+
+From the slate to one prop: every player prop FanDuel and DraftKings post (nba_lines.board, with alternate rungs),
+the player's game logs (this season and last, nba_matchup.sqlite box scores), the official injury report and the
+news items the engine stores (kept apart, each with its time), matchup context (nba_matchup's point-in-time pace
+and defense-vs-position factors; FanDuel's spread and total), historical association with the other props posted
+for the same game, each book's line history (rebuilt from the quotes change log), the fair price (the books' no-vig
+consensus) and how far the best price beats it, the engine's own shadow flags, and live box scores for games in
+progress. Everything is descriptive or a market estimate. Nothing here is a projection or a bet. Which of it has
+predicted anything is graded nightly by nba_research_score.py.
+
+Read-only over the engine's stores; the output is one JSON file the page fetches.
+
+LIMITS (shown on the page where they apply):
+  books     FanDuel and DraftKings only (nba_lines). Markets: points, rebounds, assists, threes, PRA, P+R, P+A, R+A —
+            what those feeds carry. No steals / blocks / turnovers props are collected, so none are listed.
+  freshness each book's board refreshes about every 10 min (every 2 near tip); older than BOOK_STALE_MIN = "stale".
+            The page is rebuilt every 2 min on the VM (cron); live box scores are fetched at each rebuild.
+  logs      regular-season box scores, this season and last (nba_matchup.sqlite). No playoff games.
+  matchup   ranks blend this season with last (rank_tables_blend, BLEND_K games); pace is this season only; no
+            defense-vs-position factor for threes.
+  injuries  the official report as stored by nba_injury_report; news items are third-party, labeled as such.
+  related   Pearson r over shared games: a description of the past, not a correlation model or a prediction.
+
+    python3 nba_research.py --out /home/ubuntu/tennis-odds-collector/docs    # writes nba_props.json + .html
+"""
+from __future__ import annotations
+
+import argparse
+import datetime as dt
+import json
+import math
+import os
+import sqlite3
+import statistics as st
+from collections import defaultdict
+from pathlib import Path
+from zoneinfo import ZoneInfo
+
+HERE = Path(__file__).resolve().parent
+LINES, NEWS, SHADOW = HERE / "nba_lines.sqlite", HERE / "nba_news.sqlite", HERE / "nba_shadow.sqlite"
+INDEX = HERE / "nba_player_index.json"
+PROJ_LOG = HERE / "nba_proj_log.sqlite"          # the projection engine's prospective record (prereg test C)
+ET, MT = ZoneInfo("America/New_York"), ZoneInfo("America/Denver")
+# market -> (label, box-score parts). Only the markets the books' feeds carry (nba_lines.STAT_MAP).
+MARKETS = {"points": ("PTS", ("pts",)), "rebounds": ("REB", ("reb",)), "assists": ("AST", ("ast",)),
+           "threes": ("3PM", ("fg3m",)), "pra": ("PRA", ("pts", "reb", "ast")), "pts_reb": ("P+R", ("pts", "reb")),
+           "pts_ast": ("P+A", ("pts", "ast")), "reb_ast": ("R+A", ("reb", "ast"))}
+MATCHUP_KEY = {"points": "pts", "rebounds": "reb", "assists": "ast", "pra": "pra", "pts_reb": "pts_reb",
+               "pts_ast": "pts_ast", "reb_ast": "reb_ast"}           # threes: no matchup factor is computed
+LOG_COLS = ("date", "gid", "team", "opp", "home", "starter", "min", "pts", "reb", "ast", "fg3m", "fga", "fg3a", "fta",
+            "margin", "rest", "usg")   # margin = his team's final margin; rest = days off before the game (0 = back-to-back);
+                                       # usg = usage % (the share of his team's possessions he used while on the floor)
+
+
+def usage(mn, fga, fta, tov, t_fga, t_fta, t_tov, t_min):
+    """Usage % (Basketball-Reference): 100 * (FGA + .44 FTA + TOV) * (team minutes / 5) / (MP * (team FGA + .44 FTA + TOV)).
+    None under a minute or without the team's totals."""
+    if None in (fga, fta, tov, t_fga, t_fta, t_tov, t_min) or not mn or mn < 1:
+        return None
+    den = mn * (t_fga + .44 * t_fta + t_tov)
+    return round(100 * (fga + .44 * fta + tov) * (t_min / 5) / den, 1) if den else None
+BOOK_STALE_MIN = 20          # a book's board older than this is shown as stale (it refreshes every ~10 min)
+CORR_MIN_N, CORR_TOP = 15, 4
+EVEN = 1.9091
+
+
+def _naive_utc(t):
+    t = dt.datetime.fromisoformat(str(t).replace("Z", "+00:00"))
+    return (t.astimezone(dt.timezone.utc) if t.tzinfo else t).replace(tzinfo=None, microsecond=0)
+
+
+def season_of(date):
+    y = int(date[:4]) if int(date[5:7]) >= 8 else int(date[:4]) - 1
+    return f"{y}-{str(y + 1)[2:]}"
+
+
+def prev_season(season):
+    return f"{int(season[:4]) - 1}-{season[2:4]}"
+
+
+# ── derived statistics (the page's JS mirrors these; test_nba_research checks both agree) ──────────────────
+def stat_value(log, market):
+    """A market's value in one game log (dict keyed by LOG_COLS), or None when a part is missing."""
+    parts = MARKETS[market][1]
+    vals = [log.get(p) for p in parts]
+    return None if any(v is None for v in vals) else float(sum(vals))
+
+
+def hit_summary(values, line):
+    """Over / under / push counts at `line` over the games with a value; avg and median of those values."""
+    vals = [v for v in values if v is not None]
+    if not vals:
+        return {"n": 0, "over": 0, "under": 0, "push": 0, "avg": None, "med": None}
+    over = sum(1 for v in vals if v > line)
+    under = sum(1 for v in vals if v < line)
+    return {"n": len(vals), "over": over, "under": under, "push": len(vals) - over - under,
+            "avg": round(st.mean(vals), 2), "med": float(st.median(vals))}
+
+
+def pearson(xs, ys):
+    """Pearson r over aligned pairs (both present), or None with < 3 pairs or no variance."""
+    pairs = [(x, y) for x, y in zip(xs, ys) if x is not None and y is not None]
+    if len(pairs) < 3:
+        return None
+    mx = sum(x for x, _ in pairs) / len(pairs)
+    my = sum(y for _, y in pairs) / len(pairs)
+    sxy = sum((x - mx) * (y - my) for x, y in pairs)
+    sxx = sum((x - mx) ** 2 for x, _ in pairs)
+    syy = sum((y - my) ** 2 for _, y in pairs)
+    if sxx <= 0 or syy <= 0:
+        return None
+    return sxy / math.sqrt(sxx * syy)
+
+
+# ── prices ──────────────────────────────────────────────────────────────────────────────────────────────
+def no_vig(o, u):
+    """The over's no-vig probability from decimal over / under prices, or None."""
+    if not o or not u or o <= 1 or u <= 1:
+        return None
+    a, b = 1 / o, 1 / u
+    return a / (a + b)
+
+
+def rung(bookq, line):
+    return next((r for r in bookq["rungs"] if r[0] == line), None) if bookq else None
+
+
+def fair_at(books, line):
+    """(the over's fair probability at `line`, books used): the mean no-vig of every book pricing both sides of
+    that rung. (None, 0) when no book does. A market estimate, not a projection."""
+    ps = [p for p in (no_vig(*(rung(books.get(b), line) or (None, None, None))[1:]) for b in ("fd", "dk")) if p is not None]
+    return (sum(ps) / len(ps), len(ps)) if ps else (None, 0)
+
+
+def value_at(books, line, side):
+    """The best price on `side` at `line` against the fair probability: {"ev" (per $1), "book", "price", "fair"},
+    or None. EV is positive only when one book's price beats the books' consensus."""
+    fair, _ = fair_at(books, line)
+    if fair is None:
+        return None
+    k, pr = (1, fair) if side == "over" else (2, 1 - fair)
+    best = None
+    for b in ("fd", "dk"):
+        r = rung(books.get(b), line)
+        if r and r[k] and (best is None or r[k] > best[1]):
+            best = (b, r[k])
+    return None if best is None else {"ev": best[1] * pr - 1, "book": best[0], "price": best[1], "fair": pr}
+
+
+def zscore(hits, n, p):
+    """How unusual `hits` in `n` games are if each game hits with probability `p` (the price's): (hits - np) /
+    sqrt(np(1-p)). None without games or a price. |z| >= 1 is what the page colors."""
+    if not n or p is None or not 0 < p < 1:
+        return None
+    return (hits - n * p) / math.sqrt(n * p * (1 - p))
+
+
+# ── the price change log ─────────────────────────────────────────────────────────────────────────────────
+def replay(rows):
+    """rows = (seen_at, book, gid, pid, stat, line, side, odds) from nba_lines.quotes in time order. quotes is a
+    CHANGE log: a cycle writes only the rungs whose price changed, and a rung taken down as odds NULL. So each
+    book's board is carried forward. Yields (seen_at, {(gid, pid, stat, book): {(line, side): odds}}) with the
+    full current state of every key that changed at that time."""
+    state = defaultdict(dict)
+    t0, dirty = None, set()
+    for t, book, gid, pid, stat, line, side, odds in rows:
+        if t != t0 and dirty:
+            yield t0, {k: state[k] for k in dirty}
+            dirty = set()
+        t0 = t
+        k = (gid, pid, stat, book)
+        if odds is None:
+            state[k].pop((round(float(line), 1), side), None)
+        else:
+            state[k][(round(float(line), 1), side)] = odds
+        dirty.add(k)
+    if dirty:
+        yield t0, {k: state[k] for k in dirty}
+
+
+def rungs_of(state):
+    lines = sorted({ln for ln, _ in state})
+    return [[ln, state.get((ln, "over")), state.get((ln, "under"))] for ln in lines]
+
+
+def main_of(state):
+    """(line, over, under) of the main rung of a board state, or None."""
+    rr = rungs_of(state)
+    ml = main_line(rr)
+    return None if ml is None else tuple(next(r for r in rr if r[0] == ml))
+
+
+HIST_MAX = 40
+
+
+def line_history(q, gids):
+    """{(gid, pid, stat): {book: [[seen_at, line, over, under], ...]}} — each book's main rung every time it changed
+    (the first entry = the open), from the change log. Long histories keep the first, the last and an even sample."""
+    out = defaultdict(dict)
+    if q is None or not gids:
+        return out
+    rows = q.execute(f"SELECT seen_at, book, gid, pid, stat, line, side, odds FROM quotes WHERE gid IN "
+                     f"({','.join('?' * len(gids))}) AND pid IS NOT NULL ORDER BY seen_at", list(gids))
+    tl = defaultdict(list)
+    for t, changed in replay(r for r in rows if r[4] in MARKETS):
+        for k, st_ in changed.items():
+            m = main_of(st_)
+            if m is None:
+                continue
+            m = [t, m[0], round(m[1], 4) if m[1] else None, round(m[2], 4) if m[2] else None]
+            if not tl[k] or tl[k][-1][1:] != m[1:]:
+                tl[k].append(m)
+    for (gid, pid, stat, book), pts in tl.items():
+        if len(pts) > HIST_MAX:
+            step = (len(pts) - 1) / (HIST_MAX - 1)
+            pts = [pts[round(i * step)] for i in range(HIST_MAX)]
+        out[(gid, pid, stat)][book] = pts
+    return out
+
+
+def main_line(rungs):
+    """The book's main rung: two-sided, over price nearest even money (the engine's rule). rungs: [[line, o, u]]."""
+    two = [r for r in rungs if r[1] and r[2]]
+    return min(two, key=lambda r: abs(r[1] - EVEN))[0] if two else None
+
+
+# ── sources ──────────────────────────────────────────────────────────────────────────────────────────────
+def _ro(path):
+    path = Path(path)
+    return sqlite3.connect(f"file:{path}?mode=ro", uri=True) if path.exists() else None
+
+
+def book_quotes(q, gids):
+    """{(gid, pid, market): {book: {"updated", "rungs": [[line, over, under]], "main"}}}, {(gid, pid): name},
+    {book: newest collected_at}. nba_lines.board holds each book's latest board."""
+    out = defaultdict(dict)
+    names, newest = {}, {}
+    if q is None or not gids:
+        return out, names, newest
+    marks = ",".join("?" * len(gids))
+    raw = defaultdict(lambda: defaultdict(lambda: [None, None]))
+    upd = {}
+    for book, at, gid, pid, player, stat, line, side, odds in q.execute(
+            f"SELECT book, collected_at, gid, pid, player, stat, line, side, odds FROM board WHERE gid IN ({marks}) "
+            f"AND pid IS NOT NULL", list(gids)):
+        if stat not in MARKETS or odds is None:
+            continue
+        k = (gid, int(pid), stat, book)
+        raw[k][round(float(line), 1)][0 if side == "over" else 1] = round(float(odds), 4)
+        upd[k] = max(upd.get(k, ""), at or "")
+        names[(gid, int(pid))] = player
+        newest[book] = max(newest.get(book, ""), at or "")
+    for (gid, pid, stat, book), rungs in raw.items():
+        rr = sorted([[ln, o, u] for ln, (o, u) in rungs.items()], key=lambda r: r[0])
+        out[(gid, pid, stat)][book] = {"updated": upd[(gid, pid, stat, book)], "rungs": rr, "main": main_line(rr)}
+    return out, names, newest
+
+
+REST = LOG_COLS.index("rest")
+
+
+def game_logs(mcon, pids, seasons):
+    """{pid: [log rows in LOG_COLS order]} from the cached box scores, oldest first."""
+    out = defaultdict(list)
+    if mcon is None or not pids:
+        return out
+    pids = list(pids)
+    for i in range(0, len(pids), 400):
+        chunk = pids[i:i + 400]
+        q = ("SELECT p.pid, g.date, p.gid, p.team, CASE WHEN p.team = g.home THEN g.away ELSE g.home END, "
+             "CASE WHEN p.team = g.home THEN 1 ELSE 0 END, p.starter, p.min, p.pts, p.reb, p.ast, p.fg3m, p.fga, p.fg3a, "
+             "p.fta, CASE WHEN p.team = g.home THEN g.home_pts - g.away_pts ELSE g.away_pts - g.home_pts END, "
+             "p.tov, t.fga, t.fta, t.tov, (SELECT SUM(x.min) FROM player_games x WHERE x.gid = p.gid AND x.team = p.team) "
+             "FROM player_games p JOIN games g ON g.gid = p.gid LEFT JOIN team_games t ON t.gid = p.gid AND t.team = p.team "
+             f"WHERE p.pid IN ({','.join('?' * len(chunk))}) "
+             f"AND g.season IN ({','.join('?' * len(seasons))}) ORDER BY g.date, p.gid")
+        for r in mcon.execute(q, chunk + list(seasons)):
+            row = list(r[1:16]) + [None, usage(r[7], r[12], r[14], *r[16:])]
+            row[6] = round(row[6] or 0, 1)
+            out[r[0]].append(row)
+    for rows in out.values():                       # rest: days off since his previous game; none across the summer
+        for prev, row in zip([None] + rows[:-1], rows):
+            if prev is not None:
+                gap = (dt.date.fromisoformat(row[0]) - dt.date.fromisoformat(prev[0])).days - 1
+                row[REST] = gap if gap <= 30 else None
+    return out
+
+
+def official_status(ncon, game_dates):
+    """The latest official report listing each game date: ({(date, pid): {...}}, {(date, team): True},
+    {date: {"mark", "published"}}). A team on the report without the player = not on the report."""
+    status, teams, meta = {}, {}, {}
+    if ncon is None:
+        return status, teams, meta
+    for d in game_dates:
+        row = ncon.execute("SELECT mark, published_at FROM snapshots WHERE game_date=? ORDER BY published_at DESC "
+                           "LIMIT 1", (d,)).fetchone()
+        if not row:
+            continue
+        mark, pub = row
+        meta[d] = {"mark": mark, "published": pub}
+        for team, pid, player, st_, reason in ncon.execute(
+                "SELECT team, pid, player, status, reason FROM snapshots WHERE game_date=? AND mark=?", (d, mark)):
+            teams[(d, team)] = True
+            if pid is not None:
+                status[(d, int(pid))] = {"status": st_, "reason": (reason or "")[:80], "published": pub, "team": team}
+    return status, teams, meta
+
+
+def news_items(ncon, game_dates):
+    """{(date, pid): [{source, status, detected, headline}]} — third-party items the engine stored, newest first."""
+    out = defaultdict(list)
+    if ncon is None:
+        return out
+    marks = ",".join("?" * len(game_dates))
+    for src, det, pid, d, status, head, prov in ncon.execute(
+            f"SELECT source, detected_at, pid, game_date, status, headline, provenance FROM news_items "
+            f"WHERE game_date IN ({marks}) AND pid IS NOT NULL AND COALESCE(seeded, 0) = 0 ORDER BY detected_at DESC",
+            list(game_dates)):
+        k = (d, int(pid))
+        if len(out[k]) < 3:
+            author = (prov or "").split(":")[-1] if src == "x" else ""
+            out[k].append({"source": src + (f" @{author}" if author and author != "x" else ""), "status": status,
+                           "detected": det, "headline": (head or "")[:140]})
+    return out
+
+
+def game_lines(q, gids):
+    """{gid: {"spread_home", "spread_away", "total", "updated"}} — FanDuel's latest game lines."""
+    out = {}
+    if q is None:
+        return out
+    for gid in gids:
+        g = {}
+        try:
+            for market, side, key in (("spread", "home", "spread_home"), ("spread", "away", "spread_away"),
+                                      ("total", "over", "total")):
+                r = q.execute("SELECT line, seen_at FROM game_lines WHERE gid=? AND market=? AND side=? "
+                              "ORDER BY seen_at DESC LIMIT 1", (gid, market, side)).fetchone()
+                if r:
+                    g[key] = r[0]
+                    g["updated"] = max(g.get("updated", ""), r[1])
+        except sqlite3.OperationalError:
+            return out
+        if g:
+            out[gid] = g
+    return out
+
+
+def engine_flags(sh, game_dates):
+    """{(gid, pid, market): {tier, card, why, line}} — the engine's SHADOW flags (never bets), one per play."""
+    out = {}
+    if sh is None:
+        return out
+    stat_of = {"pts": "points", "reb": "rebounds", "ast": "assists"}
+    marks = ",".join("?" * len(game_dates))
+    for gid, pid, stat, tier, card, why, line in sh.execute(
+            f"SELECT gid, pid, stat, tier, card, card_why, line FROM flags WHERE game_date IN ({marks}) AND "
+            f"void_reason IS NULL AND pid IS NOT NULL ORDER BY logged_at", list(game_dates)):
+        k = (gid, int(pid), stat_of.get(stat, stat))
+        cur = out.get(k)
+        if cur is None or (card == 1 and cur["card"] != 1):
+            out[k] = {"tier": tier, "card": card, "why": why, "line": line}
+    return out
+
+
+def live_state(sched_games, get=None, now=None):
+    """{gid: {"state", "label", "score", "stats": {pid: {...}}, "updated"}} for the slate. Box scores are fetched
+    only for games in progress or finished today; a fetch failure leaves the state from the schedule."""
+    if get is None:
+        import nba_rosters as R
+        get = lambda g: R._get(R.BOX.format(g))["game"]
+    now = now or dt.datetime.now(dt.timezone.utc)
+    out = {}
+    for g in sched_games:
+        ppd = "ppd" in (g.get("status_text") or "").lower() or "postpon" in (g.get("status_text") or "").lower()
+        state = "postponed" if ppd else {1: "pregame", 2: "live", 3: "final"}.get(g.get("status"), "unknown")
+        rec = {"state": state, "label": g.get("status_text") or "", "score": None, "stats": {}, "updated": None}
+        if state in ("live", "final"):
+            try:
+                b = get(g["gid"])
+                rec["label"] = b.get("gameStatusText") or rec["label"]
+                rec["score"] = [b["awayTeam"].get("score"), b["homeTeam"].get("score")]
+                rec["updated"] = now.astimezone(dt.timezone.utc).replace(microsecond=0).isoformat()
+                if b.get("gameStatus") == 3:
+                    rec["state"] = "final"
+                for side in ("homeTeam", "awayTeam"):
+                    for p in side_players(b[side]):
+                        rec["stats"][p[0]] = p[1]
+            except Exception as e:                                           # noqa: BLE001
+                rec["error"] = f"live box unavailable ({type(e).__name__})"
+        out[g["gid"]] = rec
+    return out
+
+
+def side_players(team):
+    import nba_matchup as MU
+    for p in team.get("players", []):
+        s = p.get("statistics") or {}
+        if str(p.get("played")) != "1":
+            continue
+        yield int(p["personId"]), {"min": round(MU._minutes(s.get("minutes")), 1), "pts": s.get("points", 0),
+                                   "reb": s.get("reboundsTotal", 0), "ast": s.get("assists", 0),
+                                   "fg3m": s.get("threePointersMade", 0)}
+
+
+FRESH_GAMES = 2      # an absence is news while the player was in one of the team's last 2 games
+
+
+def absences(official, logs_by_team, game_dates, team_last=None):
+    """{(date, team): [{pid, name, status, played: [gids], since, mpg, fresh}]} — tonight's Out/Doubtful players with
+    >= 10 games and >= 20 minutes a game for the team in the cached logs (the 'without' split). fresh = he played in
+    one of the team's last FRESH_GAMES games (team_last: {team: [gids]}): news the recent logs don't reflect yet."""
+    out = defaultdict(list)
+    for (d, pid), s in official.items():
+        if s["status"] not in ("Out", "Doubtful"):
+            continue
+        for team, rows in logs_by_team.get(pid, {}).items():
+            if team != s.get("team"):
+                continue                                   # the team the report lists him on, not a former one
+            if len(rows) >= 10 and sum(r[6] for r in rows) / len(rows) >= 20:
+                played = [r[1] for r in rows]
+                out[(d, team)].append({"pid": pid, "status": s["status"], "played": played,
+                                       "since": rows[0][0], "mpg": round(sum(r[6] for r in rows) / len(rows), 1),
+                                       "fresh": any(g in played for g in (team_last or {}).get(team, []))})
+    for v in out.values():
+        v.sort(key=lambda a: -a["mpg"])                    # the biggest minutes first: the one the list names
+    return out
+
+
+def rank_tables(S, mcon, date):
+    """Point-in-time ranks before `date` among the teams that have played: {"dvp": {group: {market: {team: rank}}},
+    "def": {team: rank}, "teams": n}. rank 1 = the TOUGHEST defense (fewest allowed); the last = the softest. dvp = the
+    stat allowed to a position group per possession (nba_matchup's factor); def = points allowed per possession."""
+    teams = [t for t in S.by_team if S._team_before(t, date)[0]]
+    out = {"dvp": {}, "def": {}, "teams": len(teams)}
+    if not teams:
+        return out
+    lg = S._league_before(date)
+    for g in ("G", "F", "C"):
+        fac = {t: S.group_factors(t, date, g, lg) for t in teams}
+        out["dvp"][g] = {m: _ranks({t: fac[t].get(k, 1.0) for t in teams}) for m, k in MATCHUP_KEY.items()}
+    allowed, poss = defaultdict(float), defaultdict(float)
+    for gid, d, home, away, hp, ap in mcon.execute("SELECT gid, date, home, away, home_pts, away_pts FROM games"):
+        if d >= date or hp is None or gid not in S.games:
+            continue
+        for team, opp_pts in ((home, ap), (away, hp)):
+            if (gid, team) in S.poss:
+                allowed[team] += opp_pts
+                poss[team] += S.poss[(gid, team)]
+    out["def"] = _ranks({t: allowed[t] / poss[t] for t in teams if poss[t]})
+    return out
+
+
+BLEND_K = 15     # games: this season's defense counts as much as last season's after BLEND_K games
+
+
+def rank_tables_blend(S, S_prev, mcon, date, k=BLEND_K):
+    """rank_tables, with each team's this-season rate pulled toward ITS OWN last-season factor (not the league's)
+    by k games: (n * rate + k * last-season factor * league rate) / (n + k). Early in a season the ranks are last
+    season's; they turn into this season's as games are played. The audit (2026-10-26) found this season's ranks
+    on 1-2 games carried no signal and last season's did. {"dvp", "def", "teams", "n": {team: games}}."""
+    out = {"dvp": {}, "def": {}, "teams": 0, "n": {}}
+    if S is None or S_prev is None:
+        return out
+    teams = sorted(set(S.by_team) | set(S_prev.by_team))
+    out["teams"] = len(teams)
+    lg, lg_p = S._league_before(date), S_prev._league_before("9999-12-31")
+    n_of = {t: (S._team_before(t, date)[0] if t in S.by_team else 0) for t in teams}
+    out["n"] = n_of
+    for g in ("G", "F", "C"):
+        prev = {t: S_prev.group_factors(t, "9999-12-31", g, lg_p) for t in teams}
+        cur = {}
+        for t in teams:
+            n, poss, tot = S._team_before(t, date) if t in S.by_team else (0, 0, {})
+            f = {}
+            for st_, parts in MU_STATS().items():
+                lg_r = sum((lg[2] if lg else {}).get((g, p_), 0.0) for p_ in parts) if lg else 0.0
+                pf = prev[t].get(st_, 1.0)
+                if n and poss and lg_r > 0:
+                    r = sum(tot.get((g, p_), 0.0) for p_ in parts) / poss
+                    f[st_] = (n * r + k * pf * lg_r) / (n + k) / lg_r
+                else:
+                    f[st_] = pf
+            cur[t] = f
+        out["dvp"][g] = {m: _ranks({t: cur[t].get(key, 1.0) for t in teams}) for m, key in MATCHUP_KEY.items()}
+    scores = {gid: (hp, ap) for gid, hp, ap in mcon.execute("SELECT gid, home_pts, away_pts FROM games")}
+
+    def ppp(Sx, d):                                    # points allowed per possession / the league's, before d
+        a, p_ = defaultdict(float), defaultdict(float)
+        for gid, (gd, home, away) in Sx.games.items():
+            hp, ap = scores.get(gid, (None, None))
+            if gd >= d or hp is None:
+                continue
+            for team, opp_pts in ((home, ap), (away, hp)):
+                if (gid, team) in Sx.poss:
+                    a[team] += opp_pts
+                    p_[team] += Sx.poss[(gid, team)]
+        lgv = sum(a.values()) / sum(p_.values()) if sum(p_.values()) else None
+        return {t: a[t] / p_[t] / lgv for t in a if p_[t] and lgv}, a, p_
+    cur_r, prev_r = ppp(S, date)[0], ppp(S_prev, "9999-12-31")[0]
+    out["def"] = _ranks({t: (n_of[t] * cur_r.get(t, 1.0) + k * prev_r.get(t, 1.0)) / (n_of[t] + k) for t in teams})
+    return out
+
+
+def MU_STATS():
+    import nba_matchup as MU
+    return MU.STATS
+
+
+def _ranks(vals):
+    """{team: value} -> {team: rank}, 1 = the smallest value (fewest allowed)."""
+    order = sorted(vals, key=lambda t: (vals[t], t))
+    return {t: i + 1 for i, t in enumerate(order)}
+
+
+def positions(mcon, pids, seasons, idx_pos):
+    """{pid: position code} — his most frequent starting position (box scores), else the index's ("F", "G-F")."""
+    out = {}
+    if mcon is not None and pids:
+        marks = ",".join("?" * len(pids))
+        for pid, pos, n in mcon.execute(
+                f"SELECT p.pid, p.pos, COUNT(*) FROM player_games p JOIN games g ON g.gid = p.gid WHERE p.starter = 1 "
+                f"AND p.pos != '' AND p.pid IN ({marks}) AND g.season IN ({','.join('?' * len(seasons))}) "
+                f"GROUP BY p.pid, p.pos ORDER BY 3 DESC", list(pids) + list(seasons)):
+            out.setdefault(pid, pos)
+    for pid in pids:
+        out.setdefault(pid, idx_pos.get(pid) or "")
+    return out
+
+
+def pos_ranks(mcon, season, idx_pos, min_games=3):
+    """{group: {market: [(per-game avg, pid)] best first}} for one season: every player with >= min_games, grouped
+    by his most frequent starting position (else the index's). The page ranks a player within his group."""
+    import nba_matchup as MU
+    tot, n, starts = defaultdict(lambda: defaultdict(float)), defaultdict(int), defaultdict(lambda: defaultdict(int))
+    for pid, pos, st_, pts, reb, ast, fg3m in mcon.execute(
+            "SELECT p.pid, p.pos, p.starter, p.pts, p.reb, p.ast, p.fg3m FROM player_games p JOIN games g ON g.gid = p.gid "
+            "WHERE g.season = ?", (season,)):
+        n[pid] += 1
+        for k, v in (("pts", pts), ("reb", reb), ("ast", ast), ("fg3m", fg3m)):
+            tot[pid][k] += v or 0
+        if st_ and MU.GROUP.get(pos):
+            starts[pid][MU.GROUP[pos]] += 1
+    out = defaultdict(lambda: defaultdict(list))
+    for pid, games in n.items():
+        if games < min_games:
+            continue
+        grp = max(starts[pid], key=starts[pid].get) if starts[pid] else MU.GROUP.get((idx_pos.get(pid) or "")[:1])
+        if not grp:
+            continue
+        for m, (_, parts) in MARKETS.items():
+            out[grp][m].append((round(sum(tot[pid][k] for k in parts) / games, 2), pid))
+    for g in out.values():
+        for m in g:
+            g[m].sort(key=lambda x: (-x[0], x[1]))
+    return out
+
+
+def correlations(props, logs):
+    """For each prop: the other props posted for the same game, ranked by |Pearson r| of the two stats over the
+    games both players played for the same team (same player: every game). Historical association only."""
+    series = {}                                       # prop id -> {gid: (team, value)}, computed once per prop
+    for p in props:
+        series[p["id"]] = {r[1]: (r[2], stat_value(dict(zip(LOG_COLS, r)), p["market"])) for r in logs.get(p["pid"], [])}
+    by_game = defaultdict(list)
+    for p in props:
+        by_game[p["gid"]].append(p)
+    out = {}
+    for p in props:
+        mine = series[p["id"]]
+        res = []
+        for o in by_game[p["gid"]]:
+            if o["id"] == p["id"] or (o["pid"] == p["pid"] and o["market"] == p["market"]):
+                continue
+            if o["pid"] != p["pid"] and o["team"] != p["team"]:
+                continue                                   # same team only: shared games mean the same games
+            theirs = series[o["id"]]
+            shared = [g for g in mine.keys() & theirs.keys() if mine[g][0] == theirs[g][0] == p["team"]]
+            if len(shared) < CORR_MIN_N:
+                continue
+            r = pearson([mine[g][1] for g in shared], [theirs[g][1] for g in shared])
+            if r is not None:
+                res.append({"id": o["id"], "r": round(r, 2), "n": len(shared)})
+        out[p["id"]] = sorted(res, key=lambda x: (-abs(x["r"]), x["id"]))[:CORR_TOP]
+    return out
+
+
+# ── the payload ──────────────────────────────────────────────────────────────────────────────────────────
+def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None, index=None, box_get=None):
+    import nba_matchup as MU
+    now = now or dt.datetime.now(dt.timezone.utc)
+    if sched is None:
+        import nba_rosters as R
+        sched = R.schedule()
+    today = now.astimezone(ET).date()
+    dates = [(today + dt.timedelta(days=k)).isoformat() for k in (0, 1)]
+    games = [g for g in sched if g["date_et"] in dates]
+    gids = [g["gid"] for g in games]
+    q, ncon, sh = _ro(lines or LINES), _ro(news or NEWS), _ro(shadow or SHADOW)
+    mpath = Path(matchup or MU.DB)
+    mcon = MU.connect(mpath) if mpath.exists() else None
+    try:
+        idx = json.loads(Path(index or INDEX).read_text()).get("players", {})
+    except (OSError, ValueError):
+        idx = {}
+    pos = {int(k): v[2] for k, v in idx.items()}
+    team_of = {int(k): v[0] for k, v in idx.items()}
+
+    quotes, names, newest = book_quotes(q, gids)
+    hist = line_history(q, gids)
+    gmap = {g["gid"]: g for g in games}
+    props = []
+    for (gid, pid, market), books in sorted(quotes.items()):
+        g = gmap[gid]
+        team = team_of.get(pid)
+        if team not in (g["home"], g["away"]):
+            team = None
+        props.append({"id": f"{gid}|{pid}|{market}", "gid": gid, "pid": pid, "market": market,
+                      "player": names.get((gid, pid), ""), "team": team,
+                      "opp": (g["away"] if team == g["home"] else g["home"]) if team else None,
+                      "home": team == g["home"] if team else None, "books": books,
+                      "main": (books.get("fd") or {}).get("main") or (books.get("dk") or {}).get("main")})
+    season = season_of(dates[0])
+    pids = {p["pid"] for p in props}
+    logs = game_logs(mcon, pids, (prev_season(season), season))
+    for p in props:                                     # a player with no index entry: his latest box team
+        if p["team"] is None and logs.get(p["pid"]):
+            t = logs[p["pid"]][-1][2]
+            g = gmap[p["gid"]]
+            if t in (g["home"], g["away"]):
+                p.update(team=t, opp=g["away"] if t == g["home"] else g["home"], home=t == g["home"])
+    official, teams_listed, report_meta = official_status(ncon, dates)
+    news_by = news_items(ncon, dates)
+    flags = engine_flags(sh, dates)
+    glines = game_lines(q, gids)
+    live = live_state(games, get=box_get, now=now)
+    # matchup context: point-in-time factors for this season (nba_matchup), per prop
+    S = MU.Season(mcon, season, index_pos=pos) if mcon is not None else None
+    S_prev = MU.Season(mcon, prev_season(season), index_pos=pos) if mcon is not None else None
+    # rank tables: this season as of each slate date, blended with last season (rank_tables_blend); last season as
+    # it finished (for filtering last season's games by the tier their opponent was in)
+    ranks = {}
+    if S is not None:
+        for d in dates:
+            ranks[d] = rank_tables_blend(S, S_prev, mcon, d)
+        ranks[prev_season(season)] = rank_tables(S_prev, mcon, "9999-12-31")
+    pcodes = positions(mcon, list(pids), (prev_season(season), season), pos)
+    pr_cur = pos_ranks(mcon, season, pos) if mcon is not None else {}
+    pr_prev = pos_ranks(mcon, prev_season(season), pos) if mcon is not None else {}
+    paces = {}                                           # date -> {team: pace factor}; pace does not depend on B
+    for p in props:
+        g = gmap[p["gid"]]
+        ctx = {"group": None, "pace": None, "def": None, "opp_games": 0, "pace_rank": None, "dvp_rank": None,
+               "def_rank": None, "teams": 0, "pos": pcodes.get(p["pid"], ""), "pos_rank": None, "pos_n": 0,
+               "pos_season": None}
+        if S is not None and p["opp"]:
+            pace, mf = S.factors(p["opp"], g["date_et"], p["pid"])
+            n_opp = S._team_before(p["opp"], g["date_et"])[0] if p["opp"] in S.by_team else 0
+            grp = S.group(p["pid"], g["date_et"])
+            ctx.update(group=grp, pace=round(pace, 3), opp_games=n_opp,
+                       **({"def": round(mf.get(MATCHUP_KEY[p["market"]], 1.0), 3)} if p["market"] in MATCHUP_KEY else {}))
+            rt = ranks.get(g["date_et"]) or {}
+            if rt.get("teams"):
+                ctx["teams"] = rt["teams"]
+                ctx["rank_n"] = (rt.get("n") or {}).get(p["opp"], n_opp)          # this season's games in the blend
+                if g["date_et"] not in paces:                  # this season only (pace has no blend yet)
+                    paces[g["date_et"]] = {t: S.factors(t, g["date_et"], p["pid"])[0] for t in rt["def"] if t in S.by_team}
+                ctx["pace_rank"] = 1 + sum(1 for t, v in paces[g["date_et"]].items() if v > pace) if n_opp else None
+                ctx["def_rank"] = rt["def"].get(p["opp"])                                 # 1 = the toughest
+                if grp and p["market"] in MATCHUP_KEY:
+                    ctx["dvp_rank"] = rt["dvp"][grp][p["market"]].get(p["opp"])
+        grp_b = MU.GROUP.get(ctx["pos"]) or MU.GROUP.get((ctx["pos"] or "")[:1])
+        for label, table in ((season, pr_cur), (prev_season(season), pr_prev)):        # his rank among his position
+            lst = (table.get(grp_b) or {}).get(p["market"]) or []
+            at = next((i for i, (_, pid_) in enumerate(lst) if pid_ == p["pid"]), None)
+            if at is not None:
+                ctx.update(pos_rank=at + 1, pos_n=len(lst), pos_season=label)
+                break
+        p["ctx"] = ctx
+        p["flag"] = flags.get((p["gid"], p["pid"], p["market"]))
+        lv = live.get(p["gid"], {})
+        if lv.get("state") in ("live", "final") and p["pid"] in lv.get("stats", {}):
+            s_ = lv["stats"][p["pid"]]
+            p["live"] = {"value": stat_value(s_, p["market"]), "min": s_["min"]}
+        main = p["main"]
+        mylogs = [dict(zip(LOG_COLS, r)) for r in logs.get(p["pid"], [])]   # every game, any team (as the page)
+        vals = [stat_value(r, p["market"]) for r in mylogs]
+        cur = [stat_value(r, p["market"]) for r in mylogs if season_of(r["date"]) == season]
+        p["summary"] = None if main is None else {
+            "l5": hit_summary(vals[-5:], main), "l10": hit_summary(vals[-10:], main),
+            "l20": hit_summary(vals[-20:], main), "season": hit_summary(cur, main)}
+        h = hist.get((p["gid"], p["pid"], p["market"]), {})
+        p["hist"] = h                                    # {book: [[seen_at, line, over, under], ...]} main-rung changes
+        fd0 = (h.get("fd") or [None])[0]
+        p["open"] = [fd0[1], fd0[2], fd0[0]] if fd0 else None
+    # 'without' splits: every team's absences for its game date
+    by_team = defaultdict(lambda: defaultdict(list))
+    absent_pids = {pid for (d, pid), s in official.items() if s["status"] in ("Out", "Doubtful")}
+    for pid, rows in game_logs(mcon, absent_pids, (prev_season(season), season)).items():
+        for r in rows:
+            by_team[pid][r[2]].append(r)
+    team_last = defaultdict(list)                       # each team's last FRESH_GAMES finals before the slate
+    if mcon is not None:
+        for gid, d, h, a in mcon.execute("SELECT gid, date, home, away FROM games WHERE home_pts IS NOT NULL AND date < ? "
+                                         "ORDER BY date", (dates[0],)):
+            for t in (h, a):
+                team_last[t] = (team_last[t] + [gid])[-FRESH_GAMES:]
+    absent = absences(official, by_team, dates, team_last)
+    corr = correlations(props, logs)
+    players = {}
+    for pid in pids:
+        players[pid] = {"name": next((p["player"] for p in props if p["pid"] == pid), ""), "pos": pos.get(pid) or "",
+                        "logs": logs.get(pid, [])}
+    injuries = {}
+    for p in props:
+        d = gmap[p["gid"]]["date_et"]
+        o = official.get((d, p["pid"]))
+        injuries[f"{d}|{p['pid']}"] = {
+            "official": o, "listed_team": bool(teams_listed.get((d, p["team"]))) if p["team"] else False,
+            "news": news_by.get((d, p["pid"]), [])}
+    # the projection engine (nba_project, NBA_PROJECTION_PREREG.md): model estimates beside the book prices,
+    # never a pick; on any failure the props carry no projection and proj_meta says why
+    try:
+        import nba_project as NPJ
+        proj, proj_players, proj_meta = NPJ.for_payload(props, games, now,
+                                                         log_db=PROJ_LOG if q is not None and lines is None else None)
+    except Exception as e:                                                   # noqa: BLE001
+        proj, proj_players, proj_meta = {}, {}, {"error": f"projection unavailable ({type(e).__name__})"}
+    for p in props:
+        p["proj"] = proj.get(p["id"])
+    stamp = now.astimezone(dt.timezone.utc).replace(microsecond=0).isoformat()
+    fresh = {}
+    for b, at in newest.items():
+        age = (now.astimezone(dt.timezone.utc).replace(tzinfo=None) - _naive_utc(at)).total_seconds() / 60
+        fresh[b] = {"updated": at, "age_min": round(age, 1), "stale": age > BOOK_STALE_MIN}
+    out = {
+        "generated_at": stamp, "season": season, "dates": dates, "log_cols": list(LOG_COLS),
+        "markets": {k: v[0] for k, v in MARKETS.items()},
+        "sources": {"books": fresh, "report": report_meta,
+                    "logs": {"through": max((r[0] for v in logs.values() for r in v), default=None),
+                             "seasons": [prev_season(season), season]},
+                    "matchup": {"available": S is not None},
+                    "game_lines": {"games": len(glines)}},
+        "games": [{"gid": g["gid"], "date": g["date_et"], "tip": g["utc"], "away": g["away"], "home": g["home"],
+                   "lines": glines.get(g["gid"]), **{k: v for k, v in live.get(g["gid"], {}).items() if k != "stats"}}
+                  for g in sorted(games, key=lambda g: g["utc"])],
+        "props": props, "players": {str(k): v for k, v in players.items()}, "injuries": injuries,
+        "absences": {f"{d}|{t}": [dict(a, name=next((n for (gg, pp), n in names.items() if pp == a["pid"]), None)
+                                       or (idx.get(str(a["pid"])) or [None, None])[1]) for a in v]
+                     for (d, t), v in absent.items()},
+        "related": corr,
+        # past games are filtered by the tier their opponent sits in (DvP / Def Rank chips): this season's ranks
+        # as of the slate date, last season's as it finished
+        "ranks": {k: v for k, v in ranks.items()},
+        "proj_players": proj_players, "proj_meta": proj_meta,
+    }
+    for c in (q, ncon, sh, mcon):
+        if c is not None:
+            c.close()
+    return out
+
+
+def write(out_dir, payload):
+    """Atomic writes of nba_props.json and nba_props.html (the board server serves docs/ as is)."""
+    import nba_research_ui as UI
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    for name, body in (("nba_props.json", json.dumps(payload, separators=(",", ":"), default=str)),
+                       ("nba_props.html", UI.page())):
+        tmp = out_dir / f".{name}.tmp"
+        tmp.write_text(body)
+        os.replace(tmp, out_dir / name)
+
+
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--out", default=os.environ.get("NBA_RESEARCH_OUT", str(HERE / "docs")))
+    a = ap.parse_args()
+    pl = build()
+    write(a.out, pl)
+    print(f"nba_research: {len(pl['props'])} props · {len(pl['games'])} games · {len(pl['players'])} players -> {a.out}")

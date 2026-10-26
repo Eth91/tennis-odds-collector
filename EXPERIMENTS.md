@@ -207,6 +207,206 @@ VERDICT: 2nd Round Leader OFF. Not "no edge found" — no edge is REACHABLE at t
 Round-leader hold falls hard by round: 1RL 32.1%, 2RL 26.7%, 3RL 16.0%. Only 3RL is close to
 a price where model skill could ever show up, and it is BLOCKED until R3 completes.
 
+## EXP-013 — HOLD CENSUS  ⭐ THE SCREEN THAT SHOULD HAVE COME FIRST
+
+Model-free: reads prices, nothing else. After EXP-012 showed a model agreeing with the book at
+corr +0.989 still losing 6% on its best selection, the obvious question is which markets can be
+beaten IN PRINCIPLE. 607 priced books, holds per family (ladders split per line — a pooled ladder
+overround is meaningless):
+
+    PLAYER_ROUND_SCORE        5.2%   (295 books, best 4.3%)
+    ROUND_MATCHBETS_IMG       5.3%   ( 75)
+    TOURNAMENT_MATCHBETS_IMG  5.3%   ( 24)
+    PLAYER_BIRDIES_OR_BETTER  5.7%   (199)
+    ---- everything field-wide ----
+    TOP_20 / TOP_10 / TOP_5 (dead heat)   11.2% / 13.1% / 17.5%
+    ROUND_LEADER              26.7%  (1st 32.1%, 2nd 26.7%, 3rd 16.0%)
+    WIN_ONLY                  28.0%
+    TOP_20 / TOP_10 / TOP_5 (incl. ties)  30.4% / 32.9% / 35.9%
+
+NOT ONE FAMILY IS UNDER 5%. And the four tightest are precisely the four already tested — round
+score (EXP-010/011, a conditions effect), matchbets (OFF, failed the placebo), birdies
+(EXP-004/006, the edge is the BOOK's). The reachable universe has already been swept, and it came
+back empty. Everything still untested is untested because it is unbeatable, not because it is
+unexplored.
+
+This also reprioritises the BLOCKED work. Top-N was the top blocked experiment; the census says
+TOP_5/10/20 hold 11-36%, so when St Jude finishes it will be measuring a market no model reaches.
+It is worth grading for calibration (Lane A), not as a candidate for money.
+
+⚠️ SCOPE. Proportional devigging, so per-runner vig is constant by construction; real books load
+longshots harder, and a power/Shin devig would move vig off the favourites. The favourite end of
+a big field is therefore better than its book average suggests — EXP-012's best runner sat at
+-6.0% against a 26.7% book average. That does not rescue any family here, but it means "hold" is
+an average, not a floor.
+
+BLIND SPOT FOUND: 17,257 rows in families with ZERO closes — never priced, which is not the same
+as no edge. Two causes. (a) market-group labels in the event column ('3 Balls', '2 Balls', 'Hole
+Match Betting', 'Top Region'), ALREADY FIXED — every such row stops at 2026-08-14T09:30:06, the
+moment the golf_collect guard landed, and clean names run to the present. (b) pga_tee_gate had no
+branch for ball markets and fed the whole market string to a player lookup ('2 Ball (Round 3) -
+Thorbjorn' is not a player). Fixed in EXP-014.
+
+## EXP-014 — 2-BALLS: a family we had never once priced
+
+Unblocked by two patches, each measured before shipping.
+
+pga_tee_gate: a ball market closes at the EARLIEST tee in the group (same rule as a matchbet —
+once any player is away the price is in-play). Participants parsed from the market string, matched
+exact -> unique surname -> surname + first initial, FAILING CLOSED on any ambiguity. Also folded
+the Latin letters NFKD cannot decompose: 'ø' was being DELETED, so 'Højgaard' -> 'hjgaard', and
+the tee sheet already held 'rasmus hjgaard' AND 'rasmus hojgaard' as two separate keys.
+    regression check over all 2598 (event, market) pairs: NEW 70, CHANGED 0, LOST 0
+    (68 ball markets + 2 Højgaard matchbets — the fold fixed a non-ball market too)
+
+pga_market: ball markets are exhaustive over their own runners, so they normalise to 1.0. Ties are
+a PUSH, so this is P(win | no tie) and ties MUST be excluded at grading rather than scored as
+losses — the two conventions travel together. Self-tests extended, ALL PASS.
+
+Closes were reconstructed straight from golf_lines (last price before the resolved deadline)
+rather than waiting on the moves backfill.
+
+    HOLD  67 books, median 5.26%, min 3.08%, max 7.35%
+          -> marginal, the same band as round score 5.2% / matchbets 5.3% / birdies 5.7%.
+          NOT the reachable family hoped for.
+
+    BOOK  n=59 (3 ties pushed)  mean p .4956  realised .4915  gap -.0041
+          book log-loss .66469 against .6931 for a coin flip — the book has real information
+
+    MODEL n=59  log-loss .67376 vs book .66469   +0.91 pts   BOOK BETTER
+          corr(model, book) +0.873   mean |model-book| .0247
+          corr(model-book disagreement, outcome) = -0.110   ANTI-predictive
+          EV>=2% n=11 -10.9% ROI | EV>=3% n=11 -10.9% | EV>=5% n=6 -4.2%
+
+VERDICT: 2-balls OFF. Same conclusion as matchbets, reached independently on a market the model
+had never seen. Disagreement is anti-predictive here (-0.110) exactly as in birdies (-0.032).
+n=59 over 2 event-rounds is small and the clustered SE is meaningless at 2 clusters — this is one
+observation, and it points the same way as all the others.
+
+The infrastructure win is permanent regardless: ~24k ball price rows per week now resolve and will
+keep accruing, and DP World events remain unreachable only because the tee sheet is PGA-only.
+
+## EXP-015 — does EXP-013's strike-off survive a different devig? Testing my own claim
+
+EXP-013 struck every field-wide market off the programme using its HOLD. That verdict inherited an
+assumption: pga_market devigs PROPORTIONALLY, which makes per-runner vig constant by construction,
+so every runner in a 26.7% book reads as a 26.7% loser. Real books load longshots far harder. If
+so, the favourite end could be much cheaper than the book average and the strike-off would be an
+artifact of my own devig.
+
+Proportional vs power vs Shin (z = implied insider fraction), per-runner vig at each end:
+
+    favourites (5 shortest)   proportional +38.3%   shin  +25.7%   power +31.1%
+    longshots  (5 longest)    proportional +38.3%   shin +180.6%   power +66.6%
+
+THE BIAS IS REAL AND LARGE. Proportional devigging misallocates badly: it charges favourites ~12
+points more than Shin implies and longshots ~142 points less. Any "edge" found on a longshot under
+proportional devigging is the devig, not the market.
+
+Cheapest products once the vig is allocated (Shin, favourite end):
+    Top 20 (dead heat)   +9.4%      Top 10 (dead heat)  +10.5%
+    3rd Round Leader     +13.0%     Top 5  (dead heat)  +14.2%
+    2nd Round Leader     +22.2%     Win Only            +24.9%
+DEAD-HEAT top-N is 3-4x cheaper than the same market "incl. ties" (Top 20: 11.2% vs ~30% hold).
+
+VERDICT: STANDS. The cheapest favourite-end vig under the most generous devig is +9.4%, and every
+disagreement correlation measured anywhere in this programme is NEGATIVE (birdies -0.032, 2-balls
+-0.110, in-play +0.044 at 0.4 SE). Nothing here reaches 9.4%.
+
+BUT THE ORDERING IS REFINED, and it matters for the blocked work: Top 20 dead-heat, not Top 5 or
+the leader markets, is the cheapest field-wide product. When St Jude finishes, that is the one to
+grade.
+
+⚠️ This is a SENSITIVITY analysis and is labelled as one. Proving which devig is correct needs
+realised frequencies across the price range; the only field-market outcomes in hand are two single
+winners (1RL, 2RL). It shows the verdict is robust to the assumption, not that Shin is true.
+
+CAUGHT IN FLIGHT: the first run reported top-N vig of +40000%. Per-runner vig is implied/fair - 1
+and BOTH sides must be on one scale; rebuilding implied from the odds re-applied the target and
+put top-N out by N^2. Field-win markets hid it completely because their target is 1.
+
+## Infrastructure — golf_lines was still in DELETE journal mode
+
+The EXP-014 backfill died with 'database is locked' mid-read. Same class as the golf_moves
+deadlock, second database, never fixed there: golf_lines is 467 MB and written by golf_collect
+every 30 minutes, and in DELETE mode a writer blocks EVERY reader for the whole transaction. The
+writer was the least patient party in the system -- golf_collect opened it with no timeout
+argument at all, i.e. the 5-second default.
+
+Fixed on both sides, busy_timeout BEFORE the WAL switch (flipping journal_mode is itself
+lock-taking, which is the ordering that broke this the first time): golf_collect now opens with
+timeout=60 + PRAGMA busy_timeout=60000 + WAL, and golf_moves' three LINES connections route
+through a single _open_lines(). The file itself is now WAL, so readers no longer block on the
+writer at all.
+
+## EXP-016 — is the BOOK internally coherent? (model-free)  ⭐ CLEAN NEGATIVE
+
+Every test so far has been our number against theirs, and the book has won every time. This asks
+something the book cannot win by being smarter: do its own prices contradict each other? Three
+orderings are forced by logic alone for the same player in the same event.
+
+  A DOMINANCE  "Top 20 (Incl. Ties)" pays whenever "Top 20" (dead heat) pays and MORE -- a
+               five-way tie for 18th pays in full on one and a fraction on the other. So
+               odds_ties <= odds_dh always. EXP-015 made this worth asking: the same nominal
+               market holds 11.2% as dead-heat and ~30% incl.-ties, and a 19-point spread on two
+               products over one event is where a contradiction would hide.
+  B NESTING    top5 within top10 within top20 -> odds non-increasing, within each flavour.
+  C WIN        winning is a subset of top 5.
+
+Tested at RAW OFFERED ODDS, never on devigged probabilities: a devigged violation can be
+manufactured by the devig itself (EXP-015 moved the longshot end 142 points between methods),
+whereas a raw-odds violation is a statement about two prices actually on offer.
+
+    A dominance   0 violations / 207 pairs
+    B nesting     0 violations / 554 pairs (138 dead heat, 416 incl. ties)
+    C win vs top5 0 violations / 138 pairs
+
+FanDuel is internally coherent on every axis available. The 11.2% vs 30% hold gap is not an
+inconsistency -- it is the book pricing the tie probability and charging more vig on the product
+that wins more often. Both are coherent; one is simply dearer.
+
+VERDICT: no model-free inconsistency to exploit. This closes the last avenue that did not depend
+on out-predicting the book.
+
+## EXP-017 — 3rd Round Leader (54-hole) vs close  ⭐ THE CHEAPEST FIELD MARKET, STILL NEGATIVE
+
+Pre-registered and blocked until St Jude R3 completed (66 of 68 posted). Top-N still needs R4.
+
+WHY THIS MARKET WAS THE ONE TO WAIT FOR. EXP-013/015 priced the vig on every family. Round-leader
+hold falls hard by round -- 32.1% at R1, 26.7% at R2, 16.0% at R3 -- and under a Shin devig the
+favourite-end charge at R3 is +13.0% against +34.2% at R1. Of every field-wide market we hold, this
+is the cheapest, so it is where model skill had the best chance of ever showing.
+
+SETTLEMENT resolved from the book's own prices before grading, as in EXP-012: corr(devigged prob,
+36-hole total) = -0.406, so the price knows the 36-hole board and this is the 54-HOLE leader, not
+the low R3 score. The two readings had DIFFERENT winners here -- Fleetwood and Hovland tied for
+the low R3 at 55, Hovland alone led at 187 over 54 holes -- so getting the rule wrong would have
+graded a different event.
+
+Model draws only R3 on top of the known 36-hole totals; an unconditional sim would discard the two
+rounds the market is entirely about.
+
+    corr(model, book)                     +0.999
+    model LL 0.06014   book LL 0.05737    +0.28 pts, BOOK BETTER
+    winner rank        model 2nd, book 2nd of 67
+    p(winner)          model .0800  book .0764
+    MAX EV anywhere in the field          -0.009   (frozen)
+                                          -0.003   (rho=0.085, the GM-007 measured value)
+    EV >= 3% flags                        0
+
+THE MOST INTERESTING NUMBER IS -0.009. The book average hold is 16.0%, yet the best selection in
+the field is only 0.9% negative. That is EXP-015's favourite-longshot result landing exactly where
+predicted: proportional devigging says every runner pays 16%, and the favourite end actually pays
+almost nothing. The tightest corner of the tightest field market is nearly break-even -- and the
+model still cannot cross it, because it agrees with the book at +0.999.
+
+Reported at both rho values because GM-007/008 measured the within-week effect at ~0.085 against a
+shipped 0.050. The research value moves max EV the right way (-0.009 -> -0.003) and log-loss
+marginally the wrong way. Not tuned on: this is a pre-registered grading.
+
+VERDICT: 3rd Round Leader OFF. Round-leader markets are now graded at R1 (EXP-001), R2 (EXP-012)
+and R3, and the book has won all three.
+
 # REJECTED — do not rediscover
 
 | hypothesis | why | evidence |
@@ -225,6 +425,12 @@ a price where model skill could ever show up, and it is BLOCKED until R3 complet
 | in-play birdie edge | no round shows significant disagreement-predicts-outcome | R3/R4 corr +0.044 (0.4 SE) |
 
 | rho form update on R1 residual | costs log-loss on the only market it was tried on | LL .06179 -> .06607, winner rank 10 -> 14 |
+
+| 2-balls as a tight market | 5.26% median hold, same band as everything else; model loses | LL .674 vs book .665, disagreement corr -0.110 |
+
+| cross-market incoherence | book is coherent on every available axis | 0 violations in 207 dominance + 554 nesting + 138 win/top5 pairs |
+
+| 3rd Round Leader | model agrees at +0.999; best selection in the field is -0.9% EV | 16.0% hold, 0 flags, book LL better by 0.28pts |
 
 # METHOD RULES EARNED THE HARD WAY
 - A cheap proxy metric has pointed OPPOSITE to tournament probabilities 4 times in one day.
@@ -252,3 +458,29 @@ a price where model skill could ever show up, and it is BLOCKED until R3 complet
 - A DUPLICATE EVENT NAME IS A DUPLICATE SNAPSHOT. Two name variants each carried 69 closes at
   timestamps 2.5h apart; a dict built by iteration silently mixes them. Take the latest before the
   resolved deadline, and diff the earlier one as a free contamination control.
+- SCREEN BY VIG BEFORE MODELLING. Do the hold census first. Not one PGA family prices under a 5%
+  hold, and the four tightest are the four already tested and rejected. Markets left untested are
+  untested because they are unbeatable, not because they are unexplored.
+- ZERO CLOSES IS NOT ZERO EDGE. 17,257 rows sat unpriced because a gate could not resolve a
+  deadline. Fail-closed is right, but a permanently silent refusal is indistinguishable from a
+  market that does not exist. Count and report refusals by reason.
+- A GLOBAL NAME-NORMALISATION CHANGE SHIPS ONLY WITH A BEFORE/AFTER DIFF over every pair, split
+  into NEW / CHANGED / LOST. NEW is the point; CHANGED or LOST is a regression that would silently
+  re-date closes already graded against.
+- NFKD DOES NOT FOLD EVERY LATIN LETTER. ø, đ, ł, æ, ß have no decomposition and get DELETED by an
+  ASCII pass, so 'Højgaard' and 'Hojgaard' never match and the index silently splits in two.
+- REPORT WHY A PRICING LAYER REFUSED. 67 refused books read as an empty hold table because the
+  loop skipped them silently — the same silent-zero class, self-inflicted inside an experiment.
+- PROPORTIONAL DEVIGGING MAKES PER-RUNNER VIG CONSTANT BY CONSTRUCTION. It is an assumption, not
+  a measurement. Shin puts the favourite end 12 points cheaper and the longshot end 142 points
+  dearer on the same books. Any edge found on a longshot under a proportional devig is the devig.
+- DEAD-HEAT AND INCL.-TIES ARE DIFFERENT MARKETS AT DIFFERENT PRICES, not two labels for one
+  product: Top 20 dead heat holds 11.2%, Top 20 incl. ties ~30%. Never pool them.
+- WHEN A VERDICT RESTS ON A METHOD CHOICE, RE-RUN IT UNDER THE ALTERNATIVES BEFORE BANKING IT.
+  EXP-013's strike-off survived; it might not have, and it was my own assumption that put it at
+  risk.
+- TWO DATABASES MEANS TWO LOCK FIXES. golf_moves was put into WAL after it deadlocked; golf_lines
+  was left in DELETE mode and deadlocked the same way months later. Fix the class across every
+  file it applies to, not the file that happened to fail.
+- TEST COHERENCE ON RAW ODDS, NOT DEVIGGED PROBABILITIES. A devigged "violation" can be an
+  artifact of the normaliser; a raw-price ordering violation is a fact about two live offers.

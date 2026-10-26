@@ -1,0 +1,44 @@
+name: dk-ip-probe
+# One-shot probe: does DraftKings' Akamai edge serve a GitHub Actions runner?
+# Both Oracle boxes get 403 (AkamaiGHost); the Mac's residential IP gets 200.
+# Runs on push to this branch only. Delete the branch when the question is answered.
+on:
+  push:
+    branches: [dk-ip-probe]
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: egress IP and ASN
+        run: |
+          IP=$(curl -s --max-time 20 https://api.ipify.org)
+          echo "egress IP: $IP"
+          curl -s --max-time 20 "https://ipinfo.io/$IP/json" || true
+      - name: plain curl to DraftKings
+        run: |
+          code=$(curl -s -o /tmp/dk.txt -w '%{http_code}' --max-time 30 \
+            -H 'Accept: application/json' \
+            -H 'Referer: https://sportsbook.draftkings.com/' \
+            -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36' \
+            'https://sportsbook-nash.draftkings.com/api/sportscontent/dkusco/v1/leagues/72778')
+          echo "plain curl -> HTTP $code  ($(wc -c < /tmp/dk.txt) bytes)"
+          head -c 200 /tmp/dk.txt; echo
+      - name: curl_cffi with browser impersonation
+        run: |
+          python3 -m pip install --quiet curl_cffi
+          python3 - <<'PY'
+          from curl_cffi import requests as cr
+          H = {"Referer": "https://sportsbook.draftkings.com/", "Accept": "application/json"}
+          U = "https://sportsbook-nash.draftkings.com/api/sportscontent/dkusco/v1/leagues/72778"
+          r = cr.get(U, headers=H, impersonate="chrome124", timeout=30)
+          print("curl_cffi -> HTTP %s (%d bytes) server=%s" % (r.status_code, len(r.text), r.headers.get("server")))
+          if r.status_code == 200:
+              d = r.json()
+              print("VERDICT: REACHABLE - events=%d markets=%d selections=%d"
+                    % (len(d.get("events") or []), len(d.get("markets") or []), len(d.get("selections") or [])))
+          else:
+              print("VERDICT: BLOCKED")
+              print(r.text[:200])
+          PY

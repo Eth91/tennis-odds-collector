@@ -1,0 +1,495 @@
+#!/usr/bin/env python3
+"""NBA speed scoreboard — did the shadow flags beat the CLOSE? The canonical query for
+NBA_SPEED_PREREG.md.
+
+The WNBA record's edge is partly timing: its bets beat the closing line 67% of the time, and
+bought at the close the same bets earned +11.5% instead of +20.2% (2026-10-22, from
+wnba_clv.sqlite). Every NBA backtest so far priced bets AT the close, which cannot see that.
+This reads nba_shadow.sqlite (the flags, first-seen price and time) against nba_lines.quotes
+(every price move and pull) and answers, per tier:
+
+  beat the close   the closing main line rose above the flagged line, or stayed and its best
+                   over price shortened
+  line move        closing line minus flagged line (positive = the market moved toward the bet)
+  as flagged ROI   graded result at the flagged price
+  at the close ROI the same bets, bought over the closing line at the closing price
+  latency          flag time minus the moment the league first published the Out
+
+ONE OPPORTUNITY per (tier, player, stat, game) — its earliest flag — scored by HORIZON: h0 =
+flagged on game day (the pre-registered primary test), h1 = flagged the day before on a ruling for
+tomorrow's game (amendment 1, its own cell).
+
+THE CLOSE is rebuilt from the change log: per (book, line, side) the last quote at or before
+tip; a rung whose last event before tip is a pull (odds NULL) was not offered. The closing main
+line is the two-sided rung whose best over is nearest even money — the engine's own rule.
+
+    python nba_clv.py            # the scoreboard
+    python nba_clv.py --rows     # one line per flag
+"""
+from __future__ import annotations
+
+import argparse
+import datetime as dt
+import random
+import sqlite3
+import statistics as st
+from collections import defaultdict
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+SHADOW = HERE / "nba_shadow.sqlite"
+LINES = HERE / "nba_lines.sqlite"
+NEWS = HERE / "nba_news.sqlite"              # official reports: confirms news-originated triggers
+VOIDED = 0
+BOARD_STAT = {"pts": "points", "reb": "rebounds", "ast": "assists"}   # wowy/cold store short keys
+PRIMARY_BOOKS = ("fd",)                     # AMENDMENT 4: the primary yardstick is FanDuel alone
+# AMENDMENT 8 — tracked filter cells, information only, scored on flags logged at/after the cutover
+AMEND8_CUTOVER = "2026-10-24T07:43:00"      # deployment time (NBA_SPEED_PREREG.md amendment 8)
+AMEND19_CUTOVER = "2026-10-24T23:30:00"     # STAT TYPE cell + combo decision (amendment 19)
+COMBO_N_DECIDE = 60
+TIP_N_DECIDE = 60                           # AMENDMENT 27: the tip card's forward decision
+AMEND28_CUTOVER = "2026-10-25T23:30:00"     # AMENDMENT 28: the four card filters (deployed before this)
+FILTER_N_DECIDE = 60
+AMEND29_CUTOVER = "2026-10-26T00:30:00"     # AMENDMENT 29: 2+ STARS OUT (deployed before this)
+STARS_N_DECIDE = 40
+AMEND30_CUTOVER = "2026-10-26T06:00:00"     # AMENDMENT 30: pace / matchup / scheme / game-line cells (information)
+FILTER_CELL = ("PASS", "EDGE TOO BIG", "REBOUNDS OFF CARD", "STAR 32+ MIN", "PRICE -125 OR SHORTER")
+COMBO_STATS = frozenset({"pra", "pts_reb", "pts_ast", "reb_ast"})
+AMEND9_CUTOVER = "2026-10-24T08:03:00"      # OPPORTUNITY cell: deployment time after the VM backfill (amendment 9)
+PRICE_EPS = 0.03                            # a "move" on an unchanged line (== amendment 5)
+WOWY_MARGIN = {"pts": 3.0, "reb": 2.0, "pra": 5.0}
+AMEND23_CUTOVER = "2026-10-25T10:12:00"     # wowy margins re-derived with recalibrated minutes (amendment 23)
+WOWY_MARGIN_23 = {"pts": 5.0, "reb": 1.0, "pra": 6.5}
+COLD_MARGIN, PRICED_EV_FLOOR = 5.0, 0.10
+
+
+def cell_stale(q, r, eps=PRICE_EPS):
+    """STALE / LATE / POSTED-AFTER / UNKNOWN: did FanDuel have this line BEFORE the news, unmoved
+    when we flagged? `eps`: a smaller price change is not a move (the card passes amendment 27's
+    measured jitter; the tracked cell keeps PRICE_EPS)."""
+    if not r.get("news_at") or not r.get("pid"):
+        return "UNKNOWN"
+    stat = BOARD_STAT.get(r["stat"], r["stat"])
+    m0 = close_of(q, r["gid"], r["pid"], stat, _utc_naive(r["news_at"]), books=PRIMARY_BOOKS)
+    if not m0:
+        return "POSTED-AFTER"
+    m1 = close_of(q, r["gid"], r["pid"], stat, _utc_naive(r["logged_at"]), books=PRIMARY_BOOKS)
+    if m1 and m1[0] == m0[0] and abs(m1[1] - m0[1]) < eps:
+        return "STALE"
+    return "LATE"
+
+
+def cell_gap(r):
+    """LARGE when the disagreement is more than twice the tier's own entry bar."""
+    if r["tier"] == "priced":
+        return "LARGE" if (r.get("ev") or 0) > 2 * PRICED_EV_FLOOR else "NORMAL"
+    m = r.get("margin")
+    wm = WOWY_MARGIN_23 if (r.get("logged_at") or "") >= AMEND23_CUTOVER else WOWY_MARGIN
+    thr = wm.get(r["stat"]) if r["tier"].startswith("wowy") else COLD_MARGIN
+    if m is None or thr is None:
+        return "n/a"
+    return "LARGE" if m > 2 * thr else "NORMAL"
+
+
+def cell_band(r):
+    """The WNBA's minutes-bump band edges: <0, 0-3, 3-8 (inclusive), >8."""
+    d = r.get("d_min")
+    if d is None:
+        return "n/a"
+    return "<0" if d < 0 else "0-3" if d < 3 else "3-8" if d <= 8 else ">8"
+
+
+def _utc_naive(iso):
+    t = dt.datetime.fromisoformat(str(iso).replace("Z", "+00:00"))
+    if t.tzinfo:
+        t = t.astimezone(dt.timezone.utc).replace(tzinfo=None)
+    return t.replace(microsecond=0).isoformat()
+
+
+def close_of(qcon, gid, pid, stat, tip, books=None):
+    """(main_line, best_over, n_books) as the board stood at `tip` — any moment: the tip for the
+    close, the flag's logged_at for amendment 4's flag-time FanDuel rung — or None if nothing
+    two-sided was offered. `books` restricts the board to those books."""
+    st_ = {}
+    q, args = ("SELECT book, line, side, odds FROM quotes WHERE gid=? AND pid=? AND stat=? "
+               "AND seen_at <= ?"), [gid, pid, stat, tip]
+    if books:
+        q += f" AND book IN ({','.join('?' * len(books))})"
+        args += list(books)
+    for book, line, side, odds in qcon.execute(q + " ORDER BY seen_at", args):
+        st_[(book, round(line, 1), side)] = odds
+    live = {k: v for k, v in st_.items() if v is not None}
+    lines = defaultdict(lambda: {"over": [], "under": []})
+    for (book, line, side), odds in live.items():
+        lines[line][side].append(odds)
+    best = None
+    for line, sides in lines.items():
+        if sides["over"] and sides["under"]:
+            o = max(sides["over"])
+            if best is None or abs(o - 1.9091) < abs(best[1] - 1.9091):
+                best = (line, o, len({b for (b, l, _s) in live if l == line}))
+    return best
+
+
+def collect():
+    if not SHADOW.exists():
+        return []
+    sh = sqlite3.connect(f"file:{SHADOW}?mode=ro", uri=True)
+    q = sqlite3.connect(f"file:{LINES}?mode=ro", uri=True)
+    nw = sqlite3.connect(f"file:{NEWS}?mode=ro", uri=True) if NEWS.exists() else None
+    now = dt.datetime.now(dt.timezone.utc).replace(tzinfo=None).isoformat()
+    cols = [r[1] for r in sh.execute("PRAGMA table_info(flags)")]
+    out = []
+    global VOIDED
+    VOIDED = 0
+    for r in (dict(zip(cols, x)) for x in sh.execute("SELECT * FROM flags")):
+        if r.get("void_reason"):                        # amendment 3 (and any later voiding rule)
+            VOIDED += 1
+            continue
+        if not r.get("pid") or not r.get("gtime"):
+            continue
+        tip = _utc_naive(r["gtime"])
+        if tip > now:
+            continue                                   # not closed yet
+        stat = BOARD_STAT.get(r["stat"], r["stat"])
+        c = close_of(q, r["gid"], r["pid"], stat, tip)
+        f0 = close_of(q, r["gid"], r["pid"], stat, _utc_naive(r["logged_at"]), books=PRIMARY_BOOKS)
+        f1 = close_of(q, r["gid"], r["pid"], stat, tip, books=PRIMARY_BOOKS)
+        lat = None
+        if r.get("news_at"):
+            lat = (dt.datetime.fromisoformat(r["logged_at"])
+                   - dt.datetime.fromisoformat(_utc_naive(r["news_at"]))).total_seconds() / 60
+        row = dict(r, tip=tip, close=c, fd_flag=f0, fd_close=f1, latency_min=lat)
+        if r["logged_at"] >= AMEND8_CUTOVER:                  # forward only (amendment 8)
+            row["cells"] = {"STALE LINE": cell_stale(q, r), "GAP": cell_gap(r),
+                            "MINUTES BAND": cell_band(r)}
+            if r["logged_at"] >= AMEND9_CUTOVER:             # stored at flag time (amendment 9)
+                row["cells"]["OPPORTUNITY"] = r.get("opp_cell") or "n/a"
+            if r["logged_at"] >= AMEND19_CUTOVER and r["tier"] in ("wowy", "cold"):   # amendment 19
+                row["cells"]["STAT TYPE"] = "COMBO" if r["stat"] in COMBO_STATS else "SINGLE"
+            if r.get("card") is not None:                    # amendment 18: on the card or logged only
+                row["cells"]["CARD"] = "ON" if r["card"] else "OFF"
+            if r.get("card") == 1:                           # amendment 26: the rebounds-tilt watch
+                row["cells"]["CARD STAT"] = BOARD_STAT.get(r["stat"], r["stat"])
+            if r["logged_at"] >= AMEND28_CUTOVER and r["tier"] == "wowy":   # amendment 28, stored at flag time
+                row["cells"]["FILTER (28)"] = r.get("filt") or "PASS"
+            if r["logged_at"] >= AMEND29_CUTOVER and r["tier"] == "wowy":   # amendment 29, stored at flag time
+                row["cells"]["STARS OUT (29)"] = "2+" if (r.get("stars_out") or 0) >= 2 else "1"
+            if r["logged_at"] >= AMEND30_CUTOVER and r["tier"] == "wowy":   # amendment 30, stored at flag time
+                pm = (r["pace_f"] * r["match_f"]) if r.get("pace_f") is not None and r.get("match_f") is not None else None
+                row["cells"]["MATCHUP (30)"] = ("n/a" if pm is None else "<0.95" if pm < 0.95 else ">1.05" if pm > 1.05
+                                                else "0.95-1.05")
+                row["cells"]["SCHEME (30)"] = r.get("scheme") or "n/a"
+                row["cells"]["TOTAL (30)"] = r.get("total_cell") or "n/a"
+                row["cells"]["SPREAD (30)"] = ("n/a" if r.get("g_spread") is None
+                                               else "BLOWOUT RISK" if abs(r["g_spread"]) >= 10 else "CLOSE")
+        # AMENDMENT 2: a news-originated trigger counts only if an official report published
+        # before tip lists the absent player Out (or Doubtful, amendment 15) for that game;
+        # otherwise it is an audit row.
+        if (r.get("trigger_src") or "report").startswith("news"):
+            ok = False
+            if nw is not None and r.get("x_pid"):
+                for (pub,) in nw.execute("SELECT published_at FROM snapshots WHERE game_date=? "
+                                         "AND pid=? AND status IN ('Out', 'Doubtful')", (r["game_date"], r["x_pid"])):
+                    if _utc_naive(pub) <= tip:
+                        ok = True
+                        break
+            row["confirmed"] = ok
+        if f0 and f1:                                  # AMENDMENT 4 primary: FanDuel at flag vs tip
+            row["fd_move"] = f1[0] - f0[0]
+            row["fd_beat"] = f1[0] > f0[0] or (f1[0] == f0[0] and f1[1] < f0[1])
+            if r.get("actual") is not None:
+                row["fd_u_flag"] = (f0[1] - 1) if r["actual"] > f0[0] else -1.0
+                row["fd_u_close"] = (f1[1] - 1) if r["actual"] > f1[0] else -1.0
+        if c:
+            cl, co, _nb = c
+            row["move"] = cl - r["line"]
+            row["beat"] = cl > r["line"] or (cl == r["line"] and co < r["odds"])
+            if r.get("actual") is not None:
+                row["u_flag"] = (r["odds"] - 1) if r["actual"] > r["line"] else -1.0
+                row["u_close"] = (co - 1) if r["actual"] > cl else -1.0
+        out.append(row)
+    # ONE OPPORTUNITY PER (tier, player, stat, game): its EARLIEST flag. A day-before flag and a
+    # game-day re-flag at a moved line are the same news, not two bets (prereg amendment 1).
+    first = {}
+    for row in sorted(out, key=lambda r: r["logged_at"]):
+        first.setdefault((row["tier"], row["pid"], row["stat"], row["game_date"]), row)
+    return list(first.values())
+
+
+def _ci_rate(rows, n=4000, seed=7):
+    """95% CI of the beat-close rate, resampling GAMES: flags from one game share one piece of
+    news and one market, so they are not independent (NBA_SPEED_PREREG.md)."""
+    by = defaultdict(list)
+    for r in rows:
+        by[r["gid"]].append(1.0 if r["beat"] else 0.0)
+    gs = list(by.values())
+    if len(gs) < 10:
+        return None
+    rnd = random.Random(seed)
+    m = []
+    for _ in range(n):
+        pick = [x for _ in gs for x in rnd.choice(gs)]
+        m.append(sum(pick) / len(pick))
+    m.sort()
+    return m[int(.025 * n)], m[int(.975 * n)]
+
+
+def view(r, yardstick):
+    """One row under a yardstick. 'FD' (amendment 4, PRIMARY): FanDuel's main rung at the flag's
+    logged_at vs at tip. 'FD+DK' (the registered two-book measure, now secondary): the flag's own
+    line/price vs the best-over close."""
+    if yardstick == "FD":
+        ok = bool(r.get("fd_flag") and r.get("fd_close"))
+        v = {"close": r["fd_close"] if ok else None, "beat": r.get("fd_beat"), "move": r.get("fd_move")}
+        if "fd_u_flag" in r:
+            v.update(u_flag=r["fd_u_flag"], u_close=r["fd_u_close"])
+    else:
+        v = {"close": r.get("close"), "beat": r.get("beat"), "move": r.get("move")}
+        if "u_flag" in r:
+            v.update(u_flag=r["u_flag"], u_close=r["u_close"])
+    return dict(v, gid=r["gid"], latency_min=r.get("latency_min"), tier=r["tier"],
+                cells=r.get("cells"), x_status=r.get("x_status"), x_min=r.get("x_min"))
+
+
+def scoreboard(rows):
+    by = defaultdict(list)
+    for r in rows:
+        cell = ("unconfirmed-news" if r.get("confirmed") is False
+                else "absence3-4" if (r.get("aidx") or 0) > 2
+                else "doubtful" if r.get("x_status") == "Doubtful"
+                else "x24-28" if r.get("x_min") is not None and r["x_min"] < 28
+                else f"h{r.get('horizon') or 0}")
+        for ys in ("FD", "FD+DK"):
+            by[f"{r['tier']}/{cell} {ys}"].append(view(r, ys))
+    print("one row per opportunity (earliest flag); h0 = flagged on game day (the PRIMARY test),\n"
+          "h1 = a ruling for tomorrow's game, flagged the day before (amendment 1, its own cell).\n"
+          "unconfirmed-news = triggered by news the official report never confirmed before tip\n"
+          "(amendment 2: an audit cell, never in a verdict).\n"
+          "absence3-4 = the absent player's 3rd or 4th straight missed game (amendment 27: its own\n"
+          "cell, never in the decision).\n"
+          "doubtful = the absent player was Doubtful, not Out, at flag time (amendment 15: its own\n"
+          "cell, never in the decision).\n"
+          "x24-28 = wowy with the absent player at 24-28 min (amendment 16: its own cell, never in\n"
+          "the decision).\n"
+          "FD = FanDuel at flag time vs FanDuel at tip (amendment 4, the PRIMARY yardstick);\n"
+          "FD+DK = the flag's best-of-two price vs the best-of-two close (secondary).\n"
+          "beat-close CI resamples games (clustered); a CI needs >= 10 games\n"
+          f"{'cell':<30}{'closed':>7}{'w/close':>8}{'beat close':>18}{'line move':>10}"
+          f"{'graded':>7}{'as flagged':>12}{'at close':>10}{'latency(min)':>13}")
+    for tier, rs in sorted(by.items()):
+        wc = [r for r in rs if r.get("close")]
+        beats = [1.0 if r["beat"] else 0.0 for r in wc]
+        ci = _ci_rate(wc)
+        g = [r for r in wc if "u_flag" in r]
+        lat = [r["latency_min"] for r in rs if r.get("latency_min") is not None]
+        bt = (f"{100 * sum(beats) / len(beats):5.1f}%" if beats else "   - ") + \
+             (f" [{100 * ci[0]:.0f},{100 * ci[1]:.0f}]" if ci else "")
+        print(f"{tier:<30}{len(rs):7d}{len(wc):8d}{bt:>18}"
+              f"{(st.mean(r['move'] for r in wc) if wc else 0):+10.2f}{len(g):7d}"
+              f"{(100 * sum(r['u_flag'] for r in g) / len(g) if g else 0):+11.1f}%"
+              f"{(100 * sum(r['u_close'] for r in g) / len(g) if g else 0):+9.1f}%"
+              f"{(st.median(lat) if lat else float('nan')):13.1f}")
+    if not rows:
+        print("  (no closed shadow flags yet)")
+    cells_report(rows)
+    if VOIDED:
+        print(f"  voided flags excluded from every cell: {VOIDED} (see NBA_SPEED_PREREG.md amendments)")
+
+
+def combo_decision(rows):
+    """AMENDMENT 19's pre-registered decision: wowy/cold combo plays logged from AMEND19_CUTOVER, one per
+    (date, player, stat), graded at the flagged line and price, ON or OFF the card. At n >= 60:
+    units <= 0 -> combos never carded; units > 0 -> the card reverts to best excess."""
+    seen, units, n = set(), 0.0, 0
+    for r in sorted(rows, key=lambda r: r.get("logged_at") or ""):
+        if (r.get("tier") not in ("wowy", "cold") or r.get("stat") not in COMBO_STATS
+                or (r.get("logged_at") or "") < AMEND19_CUTOVER or r.get("actual") is None
+                or (r.get("aidx") or 0) > 2):                  # amendment 27: 3-4 stay outside it
+            continue
+        k = (r.get("game_date"), r.get("pid"), r["stat"])
+        if k in seen:
+            continue
+        seen.add(k)
+        n += 1
+        units += (r["odds"] - 1.0) if r["actual"] > r["line"] else 0.0 if r["actual"] == r["line"] else -1.0
+    verdict = (f"accumulating ({n}/{COMBO_N_DECIDE})" if n < COMBO_N_DECIDE
+               else "EXCLUDE combos from the card" if units <= 0 else "REVERT the card to best excess")
+    return {"n": n, "units": round(units, 2), "verdict": verdict}
+
+
+def tip_decision(sh, reps=2000):
+    """AMENDMENT 27's fixed rule for the TIP CARD: its first TIP_N_DECIDE graded plays (decided order), flat
+    units at the decided line and price. units < 0 -> OFF (the tip card goes back to logged only); else ON.
+    `sh` = the shadow store (tipcard + flags). CI resamples games."""
+    try:
+        rs = sh.execute("SELECT t.gid, t.line, t.odds, f.actual FROM tipcard t JOIN flags f ON f.flag_id = t.flag_id "
+                        "WHERE t.card = 1 AND f.void_reason IS NULL AND f.actual IS NOT NULL "
+                        "ORDER BY t.decided_at, t.excess DESC LIMIT ?", (TIP_N_DECIDE,)).fetchall()
+    except sqlite3.OperationalError:
+        rs = []
+    u = lambda line, odds, a: (odds - 1.0) if a > line else 0.0 if a == line else -1.0
+    units = sum(u(*r[1:]) for r in rs)
+    by = defaultdict(list)
+    for g, *x in rs:
+        by[g].append(u(*x))
+    ci = None
+    if len(by) >= 10:
+        gs, rnd, res = list(by.values()), random.Random(7), []
+        for _ in range(reps):
+            pick = [x for _ in gs for x in rnd.choice(gs)]
+            res.append(100 * sum(pick) / len(pick))
+        res.sort()
+        ci = (res[int(.025 * reps)], res[int(.975 * reps)])
+    verdict = (f"accumulating ({len(rs)}/{TIP_N_DECIDE})" if len(rs) < TIP_N_DECIDE
+               else "OFF: the tip card goes back to logged only" if units < 0 else "ON: the tip card stays")
+    return {"n": len(rs), "units": round(units, 2), "ci": ci, "verdict": verdict}
+
+
+def filter_decision(sh):
+    """AMENDMENT 28's fixed rule: wowy plays carded (either card) from AMEND28_CUTOVER, one per (date, player, stat)
+    (its earliest carded row), first FILTER_N_DECIDE graded in logged order, flat at the flagged line and price (a
+    tip-card play at its decided price). units < 0 -> OFF: the four filters come off; else ON."""
+    try:
+        rs = sh.execute("SELECT f.game_date, f.pid, f.stat, f.line, COALESCE(t.odds, f.odds), f.actual FROM flags f "
+                        "LEFT JOIN tipcard t ON t.flag_id = f.flag_id AND t.card = 1 WHERE f.tier = 'wowy' AND f.card = 1 "
+                        "AND f.void_reason IS NULL AND f.actual IS NOT NULL AND f.logged_at >= ? ORDER BY f.logged_at",
+                        (AMEND28_CUTOVER,)).fetchall()
+    except sqlite3.OperationalError:
+        rs = []
+    seen, units, n = set(), 0.0, 0
+    for gd, pid, stat, line, odds, a in rs:
+        if (gd, pid, stat) in seen or n >= FILTER_N_DECIDE:
+            continue
+        seen.add((gd, pid, stat))
+        n += 1
+        units += (odds - 1.0) if a > line else 0.0 if a == line else -1.0
+    verdict = (f"accumulating ({n}/{FILTER_N_DECIDE})" if n < FILTER_N_DECIDE
+               else "OFF: the four filters come off" if units < 0 else "ON: the filters stay")
+    return {"n": n, "units": round(units, 2), "verdict": verdict}
+
+
+def stars_decision(sh):
+    """AMENDMENT 29's forward check: wowy flags from AMEND29_CUTOVER with STARS OUT >= 2, in the 3-8 band, passing
+    amendment 28's filters (filt NULL), one per (date, player, stat), earliest, graded flat at the flagged line and
+    price. At >= STARS_N_DECIDE graded: units > 0 -> OFF (the rule comes off); else ON."""
+    try:
+        rs = sh.execute("SELECT game_date, pid, stat, line, odds, actual FROM flags WHERE tier = 'wowy' AND stars_out >= 2 "
+                        "AND d_min BETWEEN 3 AND 8 AND filt IS NULL AND void_reason IS NULL AND actual IS NOT NULL "
+                        "AND logged_at >= ? ORDER BY logged_at", (AMEND29_CUTOVER,)).fetchall()
+    except sqlite3.OperationalError:
+        rs = []
+    seen, units = set(), 0.0
+    for gd, pid, stat, line, odds, a in rs:
+        if (gd, pid, stat) in seen:
+            continue
+        seen.add((gd, pid, stat))
+        units += (odds - 1.0) if a > line else 0.0 if a == line else -1.0
+    n = len(seen)
+    verdict = (f"accumulating ({n}/{STARS_N_DECIDE})" if n < STARS_N_DECIDE
+               else "OFF: the rule comes off" if units > 0 else "ON: the rule stays")
+    return {"n": n, "units": round(units, 2), "verdict": verdict}
+
+
+def tip_clv(sh, q, now=None):
+    """AMENDMENT 29 (information only): carded tip-card plays whose game has tipped. FanDuel's main rung at the
+    decision vs at tip (amendment 4's yardstick), and the decided line/price vs FanDuel's close."""
+    now = now or dt.datetime.now(dt.timezone.utc).replace(tzinfo=None).isoformat()
+    out = {"n": 0, "fd_n": 0, "fd_beat": 0, "moved": 0.0, "dec_n": 0, "dec_beat": 0}
+    try:
+        rs = sh.execute("SELECT t.gid, t.pid, t.stat, t.line, t.odds, t.decided_at, f.gtime FROM tipcard t "
+                        "JOIN flags f ON f.flag_id = t.flag_id WHERE t.card = 1 AND f.void_reason IS NULL").fetchall()
+    except sqlite3.OperationalError:
+        return out
+    for gid, pid, stat, line, odds, at, gtime in rs:
+        tip = _utc_naive(gtime) if gtime else None
+        if not tip or tip > now:
+            continue
+        out["n"] += 1
+        st_ = BOARD_STAT.get(stat, stat)
+        f0 = close_of(q, gid, pid, st_, at, books=PRIMARY_BOOKS)
+        f1 = close_of(q, gid, pid, st_, tip, books=PRIMARY_BOOKS)
+        if f1:
+            out["dec_n"] += 1
+            out["dec_beat"] += f1[0] > line or (f1[0] == line and f1[1] < odds)
+        if f0 and f1:
+            out["fd_n"] += 1
+            out["fd_beat"] += f1[0] > f0[0] or (f1[0] == f0[0] and f1[1] < f0[1])
+            out["moved"] += f1[0] - f0[0]
+    return out
+
+
+def cells_report(rows):
+    """AMENDMENT 8: the tracked cells on the FanDuel yardstick, pooled across tiers and for priced
+    alone. Information only; never a verdict."""
+    vs = [view(r, "FD") for r in rows if r.get("cells")]
+    cd = combo_decision(rows)
+    print(f"\nCOMBO DECISION (amendment 19, wowy/cold since {AMEND19_CUTOVER} UTC): {cd['n']} graded · "
+          f"{cd['units']:+.2f}u · {cd['verdict']}")
+    if SHADOW.exists():
+        sh = sqlite3.connect(f"file:{SHADOW}?mode=ro", uri=True)
+        td = tip_decision(sh)
+        sh.close()
+        ci = f" [{td['ci'][0]:+.1f}, {td['ci'][1]:+.1f}]% ROI" if td["ci"] else ""
+        print(f"TIP CARD DECISION (amendment 27): {td['n']} graded · {td['units']:+.2f}u{ci} · {td['verdict']}")
+        sh = sqlite3.connect(f"file:{SHADOW}?mode=ro", uri=True)
+        fd_ = filter_decision(sh)
+        sh.close()
+        print(f"FILTER DECISION (amendment 28, since {AMEND28_CUTOVER} UTC): {fd_['n']} graded · {fd_['units']:+.2f}u · "
+              f"{fd_['verdict']}")
+        sh = sqlite3.connect(f"file:{SHADOW}?mode=ro", uri=True)
+        sd = stars_decision(sh)
+        q = sqlite3.connect(f"file:{LINES}?mode=ro", uri=True) if LINES.exists() else None
+        tc = tip_clv(sh, q) if q is not None else None
+        sh.close()
+        if q is not None:
+            q.close()
+        print(f"2+ STARS OUT CHECK (amendment 29, since {AMEND29_CUTOVER} UTC): {sd['n']} graded · {sd['units']:+.2f}u · "
+              f"{sd['verdict']}")
+        if tc:
+            print(f"TIP CARD CLV (amendment 29, information only): {tc['n']} tipped · FD at decision -> FD at tip: beat "
+                  f"{tc['fd_beat']}/{tc['fd_n']} (mean line move {tc['moved'] / max(1, tc['fd_n']):+.2f}) · decided price "
+                  f"vs FD close: beat {tc['dec_beat']}/{tc['dec_n']}")
+    print(f"\ntracked cells (amendments 8-9, information only; flags since {AMEND8_CUTOVER} UTC, "
+          f"OPPORTUNITY since {AMEND9_CUTOVER} UTC), FD yardstick")
+    if not vs:
+        print("  (no closed flags since the cutover yet)")
+        return
+    order = {"STALE LINE": ("STALE", "LATE", "POSTED-AFTER", "UNKNOWN"), "GAP": ("NORMAL", "LARGE", "n/a"),
+             "MINUTES BAND": ("<0", "0-3", "3-8", ">8", "n/a"),
+             "OPPORTUNITY": ("CONFIRMED", "NOT CONFIRMED", "THIN", "NO DATA", "n/a"),
+             "CARD": ("ON", "OFF"), "STAT TYPE": ("COMBO", "SINGLE"),
+             "CARD STAT": ("points", "rebounds", "assists", "threes", "pra", "pts_reb", "pts_ast", "reb_ast"),
+             "FILTER (28)": FILTER_CELL, "STARS OUT (29)": ("1", "2+"),
+             "MATCHUP (30)": ("<0.95", "0.95-1.05", ">1.05", "n/a"), "SCHEME (30)": ("tough", "neutral", "soft", "n/a"),
+             "TOTAL (30)": ("HIGH", "LOW", "n/a"), "SPREAD (30)": ("CLOSE", "BLOWOUT RISK", "n/a")}
+    for cell, values in order.items():
+        for scope, pick in (("all tiers", lambda v: True), ("priced", lambda v: v["tier"] == "priced")):
+            for val in values:
+                g = [v for v in vs if pick(v) and v["cells"].get(cell) == val]
+                wc = [v for v in g if v.get("close")]
+                if not g:
+                    continue
+                beats = [1.0 if v["beat"] else 0.0 for v in wc]
+                ci = _ci_rate(wc)
+                gr = [v for v in wc if "u_flag" in v]
+                bt = (f"{100 * sum(beats) / len(beats):5.1f}%" if beats else "   - ") + \
+                     (f" [{100 * ci[0]:.0f},{100 * ci[1]:.0f}]" if ci else "")
+                print(f"  {cell + ' · ' + val + ' · ' + scope:<38}{len(g):5d}{len(wc):6d}{bt:>18}"
+                      f"{len(gr):6d}{(100 * sum(v['u_flag'] for v in gr) / len(gr) if gr else 0):+10.1f}%"
+                      f"{(100 * sum(v['u_close'] for v in gr) / len(gr) if gr else 0):+9.1f}%")
+
+
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--rows", action="store_true")
+    a = ap.parse_args()
+    rows = collect()
+    scoreboard(rows)
+    if a.rows:
+        for r in sorted(rows, key=lambda r: r["logged_at"]):
+            c = r.get("close")
+            print(f"  {r['logged_at'][:16]} {r['tier']:<6} {r['b'][:20]:<20} {r['stat']:<8} "
+                  f"O{r['line']:<5} @{r['odds']:.2f} -> close "
+                  + (f"{c[0]} @{c[1]:.2f} ({'BEAT' if r['beat'] else 'worse'})" if c else "n/a")
+                  + (f" · actual {r['actual']:g}" if r.get("actual") is not None else ""))

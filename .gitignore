@@ -100,3 +100,17 @@ research/tick_archive.sqlite*
 research/rungs.sqlite*
 research/live_odds.sqlite*
 research/cascade_watch.sqlite*
+nba_season_boxes.json
+nba_shadow.sqlite
+nba_lines.sqlite
+nba_player_index.json
+nba_news.sqlite
+nba_tracking.sqlite
+nba_profiles.sqlite
+nba_postseason.sqlite
+nba_features.sqlite
+nba_matchup.sqlite
+.projdata/
+nba_proj_cache.pkl
+nba_proj_cache.pkl.tmp
+nba_proj_log.sqlite

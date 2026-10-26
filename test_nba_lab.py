@@ -1,0 +1,207 @@
+"""Amendment 25: the stale-prop lab's grading (beat close, won, DNP), premise, excess bands, the box cache;
+FanDuel game lines parsed from the league page and stored change-only, sides mapped to home / away /
+over / under. MUTANTS in test_mutants()."""
+import importlib
+import pathlib
+import sqlite3
+import sys
+import tempfile
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import nba_lines as L
+import nba_stale_lab as LAB
+
+PAGE = {"attachments": {
+    "events": {"1": {"name": "Detroit Pistons @ Philadelphia 76ers"}, "2": {"name": "NBA Futures"}},
+    "markets": {
+        "a": {"eventId": 1, "marketType": "MATCH_HANDICAP_(2-WAY)", "marketStatus": "OPEN", "runners": [
+            {"runnerName": "Detroit Pistons", "handicap": 1.5, "winRunnerOdds": {"americanDisplayOdds": {"americanOddsInt": -118}}},
+            {"runnerName": "Philadelphia 76ers", "handicap": -1.5, "winRunnerOdds": {"americanDisplayOdds": {"americanOddsInt": -104}}}]},
+        "b": {"eventId": 1, "marketType": "TOTAL_POINTS_(OVER/UNDER)", "marketStatus": "OPEN", "runners": [
+            {"runnerName": "Over", "handicap": 224.5, "winRunnerOdds": {"americanDisplayOdds": {"americanOddsInt": -105}}},
+            {"runnerName": "Under", "handicap": 224.5, "winRunnerOdds": {"americanDisplayOdds": {"americanOddsInt": -115}}}]},
+        "c": {"eventId": 1, "marketType": "MONEY_LINE", "marketStatus": "SUSPENDED", "runners": []},
+        "d": {"eventId": 2, "marketType": "NBA_SEED_O/U", "marketStatus": "OPEN", "runners": []}}}}
+UPCOMING = [{"gid": "0022600117", "utc": "2026-10-25T23:30:00Z", "away_nick": "Pistons", "home_nick": "76ers"}]
+
+
+def check(lab, lines):
+    ok = True
+
+    def want(cond, label):
+        nonlocal ok
+        ok &= bool(cond)
+        print(f"   {'ok ' if cond else 'BAD'} {label}")
+    g = lab.grade(13.5, 1.85, (14.5, 2.00), 17)
+    want(g[:3] == (True, False, True) and abs(g[3] - 0.85) < 1e-9,
+         "over 13.5 -118, close 14.5: beat the close; 17 points: won +0.85u")
+    want(lab.grade(13.5, 1.85, (13.5, 1.91), 12)[:3] == (False, False, False),
+         "same line, longer over price at the close: did not beat it; 12: lost")
+    want(lab.grade(13.5, 1.85, (13.5, 1.85), 13.5)[1:] == (True, False, 0.0), "unchanged close; exactly the line: a push")
+    want([lab.band(x) for x in (None, -0.2, 0.4, 1.0)] == ["no projection", "< 0", "0-1", ">= 1"], "excess bands")
+    bx = {1: {"name": "Joel Embiid", "_team": "PHI", "played": "1"}, 2: {"name": "Jalen Green", "_team": "PHX", "played": "0"}}
+    want(lab.premise(bx, "PHI", "Joel Embiid") == "played" and lab.premise(bx, "PHX", "Jalen Green") == "sat"
+         and lab.premise(bx, "DET", "Jalen Duren") == "sat", "premise: played / did not play / not in the box = sat")
+    rows = lines.fd_game_lines(PAGE)
+    want(sorted((r[1], r[2], r[3]) for r in rows) == [("spread", "Detroit Pistons", 1.5), ("spread", "Philadelphia 76ers", -1.5),
+                                                     ("total", "Over", 224.5), ("total", "Under", 224.5)],
+         "game lines: spread and total parsed; suspended and futures markets skipped")
+    con = sqlite3.connect(":memory:")
+    con.executescript(lines.DDL)
+    a = lines.store_game_lines(con, PAGE, UPCOMING, "2026-10-25T20:00:00")
+    b = lines.store_game_lines(con, PAGE, UPCOMING, "2026-10-25T20:10:00")
+    sides = sorted(r[0] for r in con.execute("SELECT side FROM game_lines"))
+    want((a, b) == (4, 0) and sides == ["away", "home", "over", "under"],
+         f"stored change-only ({a}, {b}), sides home/away/over/under")
+    return ok
+
+
+def test_lab():
+    assert check(LAB, L)
+
+
+def test_unit_is_absence_x_prop():
+    """An earlier report trigger (X1) and a later news trigger (X2, false premise) on the same prop: two
+    events, each with its own premise. Deduping per prop alone hid the second (the Jalen Green case)."""
+    d = pathlib.Path(tempfile.mkdtemp())
+    q = sqlite3.connect(d / "l.sqlite")
+    q.executescript(L.DDL)
+    for t, line, o in (("2026-10-24T20:00:00", 16.5, 1.91), ("2026-10-24T21:50:00", 17.5, 1.91)):
+        for side, oo in (("over", o), ("under", 1.91)):
+            q.execute("INSERT INTO quotes VALUES (?,?,?,?,?,?,?,?,?,?)", (t, "fd", "G", "2026-10-25T02:00:00Z", 5, "B",
+                                                                          "points", line, side, oo))
+    q.commit()
+    box = {"gameStatus": 3, "homeTeam": {"teamTricode": "PHX", "players": [
+        {"personId": 5, "name": "Dillon Brooks", "played": "1", "statistics": {"points": 15}},
+        {"personId": 6, "name": "Jalen Green", "played": "1", "statistics": {}}]},
+        "awayTeam": {"teamTricode": "GSW", "players": []}}
+    unit = {"gid": "G", "pid": 5, "stat": "points"}
+    results = [{"t0": "2026-10-24T20:30:00", "src": "report", "xs": [{"name": "Oso Ighodaro", "team": "PHX", "date": "2026-10-24"}],
+                "units": {"affected": [unit]}},
+               {"t0": "2026-10-24T21:40:00", "src": "news", "xs": [{"name": "Jalen Green", "team": "PHX", "date": "2026-10-24"}],
+                "units": {"affected": [unit]}}]
+    rs = LAB.rows(results=results, lines=d / "l.sqlite", shadow=d / "none.sqlite", cache=d / "c.sqlite", box_get=lambda g: box)
+    got = sorted((r["src"], r["premise"]) for r in rs)
+    assert got == [("news", "played"), ("report", "sat")], got
+
+
+def test_premise_events():
+    """AMENDMENT 26: per news absence, did the player really sit, classed by the strongest source."""
+    import nba_injury_report as I
+    import nba_news_watch as NW
+    d = pathlib.Path(tempfile.mkdtemp())
+    n = sqlite3.connect(d / "n.sqlite")
+    n.executescript(I.DDL)
+    NW._migrate(n)
+    for iid, pid, pl, team, prov in (("a", 6, "Jalen Green", "PHX", "x:RotoBallerNBA"),
+                                     ("b", 7, "Cooper Flagg", "DAL", "x:underdog"),
+                                     ("c", 8, "Joel Embiid", "PHI", "inferred:x:underdog"),
+                                     ("d", 9, "Not Final", "NYK", "x:anthonyVslater")):
+        n.execute("INSERT INTO news_items (source, item_id, detected_at, player, pid, team, game_date, status, headline, "
+                  "body, provenance) VALUES ('x',?,'2026-10-24T20:00:00+00:00',?,?,?,'2026-10-24','out','','',?)",
+                  (iid, pl, pid, team, prov))
+    n.execute("INSERT INTO snapshots VALUES ('m','2026-10-24T17:00:00+00:00','2026-10-24','','DAL',7,'','Out','')")
+    n.commit()
+    sched = [{"date_et": "2026-10-24", "gid": g, "home": h, "away": a}
+             for g, h, a in (("G1", "PHX", "GSW"), ("G2", "DAL", "SAS"), ("G3", "PHI", "MIL"), ("G4", "NYK", "ORL"))]
+    boxes = {"G1": {"gameStatus": 3, "homeTeam": {"teamTricode": "PHX", "players": [{"personId": 6, "played": "1"}]},
+                    "awayTeam": {"teamTricode": "GSW", "players": []}},
+             "G2": {"gameStatus": 3, "homeTeam": {"teamTricode": "DAL", "players": []}, "awayTeam": {"teamTricode": "SAS", "players": []}},
+             "G3": {"gameStatus": 3, "homeTeam": {"teamTricode": "PHI", "players": [{"personId": 8, "played": "0"}]},
+                    "awayTeam": {"teamTricode": "MIL", "players": []}},
+             "G4": {"gameStatus": 2, "homeTeam": {"teamTricode": "NYK", "players": []}, "awayTeam": {"teamTricode": "ORL", "players": []}}}
+    evs = LAB.premise_events("2026-10-24", sched, news=d / "n.sqlite", box_get=lambda g: boxes[g], cache=d / "c.sqlite")
+    got = sorted((e["player"], e["source"], e["held"], e["on_report"]) for e in evs)
+    assert got == [("Cooper Flagg", "underdog", True, True), ("Jalen Green", "aggregator only", False, False),
+                   ("Joel Embiid", "inferred", True, False)], got
+    line = LAB.premise_line(evs)
+    assert line.startswith("2/3 held") and "FALSE: Jalen Green (aggregator only)" in line, line
+
+
+def test_box_cache():
+    d = pathlib.Path(tempfile.mkdtemp())
+    calls = []
+    game = {"gameStatus": 3, "homeTeam": {"teamTricode": "PHI", "players": [{"personId": 7, "name": "A"}]},
+            "awayTeam": {"teamTricode": "DET", "players": []}}
+    get = lambda g: calls.append(g) or game
+    first = LAB.final_box("G", get, cache=d / "c.sqlite")
+    again = LAB.final_box("G", get, cache=d / "c.sqlite")
+    assert first[7]["_team"] == "PHI" and again == first and calls == ["G"]
+    live = dict(game, gameStatus=2)
+    assert LAB.final_box("H", lambda g: live, cache=d / "c.sqlite") is None      # not final: not cached
+
+
+def test_mutants():
+    for mod, tag, a, b in (
+            (LAB, "beat direction", "beat = close[0] > line0 or", "beat = close[0] < line0 or"),
+            (LAB, "premise inverted", 'return "played" if p.get("played") == "1" else "sat"',
+             'return "sat" if p.get("played") == "1" else "played"'),
+            (L, "game lines every cycle", "        if last == (line, odds):\n            continue\n", ""),
+            (L, "sides unmapped", 'side = ("home" if rk == _nick_key(g["home_nick"])', 'side = ("x" if False')):
+        src = pathlib.Path(mod.__file__).read_text()
+        assert src.count(a) == 1, tag
+        d = pathlib.Path(tempfile.mkdtemp())
+        name = pathlib.Path(mod.__file__).stem + "_mut25"
+        (d / f"{name}.py").write_text(src.replace(a, b))
+        sys.path.insert(0, str(d))
+        try:
+            print(f"MUTANT ({tag}) — must fail:")
+            m = importlib.import_module(name)
+            assert not check(m if mod is LAB else LAB, m if mod is L else L), tag
+        finally:
+            sys.path.remove(str(d))
+            sys.modules.pop(name, None)
+
+
+if __name__ == "__main__":
+    test_lab(); test_box_cache(); test_mutants()
+    print("test_nba_lab: OK")
+
+
+def test_mutant_unit_per_prop():
+    global LAB
+    src = pathlib.Path(LAB.__file__).read_text()
+    a = '            k = (x_name, u["gid"], u["pid"], u["stat"])    # one absence x one prop (earliest trigger)'
+    assert src.count(a) == 1
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "nba_stale_lab_mutu.py").write_text(src.replace(a, '            k = (None, u["gid"], u["pid"], u["stat"])'))
+    sys.path.insert(0, str(d))
+    keep = LAB
+    try:
+        LAB = importlib.import_module("nba_stale_lab_mutu")
+        print("MUTANT (unit per prop) — must fail:")
+        try:
+            test_unit_is_absence_x_prop()
+            survived = True
+        except AssertionError:
+            survived = False
+        assert not survived
+    finally:
+        LAB = keep
+        sys.path.remove(str(d))
+        sys.modules.pop("nba_stale_lab_mutu", None)
+
+
+def test_mutants_premise():
+    global LAB
+    src = pathlib.Path(LAB.__file__).read_text()
+    for tag, a, b in (("held inverted", '"held": not (p and p.get("played") == "1")', '"held": bool(p and p.get("played") == "1")'),
+                      ("underdog not ranked", '    if any("underdog" in p for p in ps):\n        return "underdog"\n', "")):
+        assert src.count(a) == 1, tag
+        d = pathlib.Path(tempfile.mkdtemp())
+        (d / "nba_stale_lab_mutp.py").write_text(src.replace(a, b))
+        sys.path.insert(0, str(d))
+        keep = LAB
+        try:
+            LAB = importlib.import_module("nba_stale_lab_mutp")
+            print(f"MUTANT ({tag}) — must fail:")
+            try:
+                test_premise_events()
+                survived = True
+            except AssertionError:
+                survived = False
+            assert not survived, tag
+        finally:
+            LAB = keep
+            sys.path.remove(str(d))
+            sys.modules.pop("nba_stale_lab_mutp", None)

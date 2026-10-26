@@ -18,7 +18,7 @@ MODEL. r_i = recency-weighted mean of (score_i - field_mean_event_round), shrunk
 global sd. A round is simulated as r_i + week_i + eps, where week_i ~ N(0, RHO*sig^2) is a
 player-week form effect shared across the event's rounds (the plan's round-to-round
 dependence) and eps ~ N(0, (1-RHO)*sig^2). Tournament outcomes come from Monte Carlo with a
-top-65-and-ties-proxy cut after R2.
+top-65-and-ties cut after R2 (see CUT_N).
 """
 import datetime as dt
 import json
@@ -87,6 +87,49 @@ MIN_ROUNDS = 20         # user 2026-07-29: '20 rounds or less is a good rule'. B
                         # this a rating is HALVED toward field-average and sigma widens
                         # — it still prices (Koivun at 46 rounds is genuinely good and
                         # unaffected), it just stops speaking with unearned confidence.
+
+# ── CUT RULE (2026-08-13) ───────────────────────────────────────────────────────────────────
+CUT_N = 65              # MEASURED over the 242 warehouse events that cut after R2 (2023-2026).
+                        # "top N and ties" is NOT point-identified from results: ties make every
+                        # N in (count(tot<S), count(tot<=S)] produce the SAME advancing set, so a
+                        # best-fit scan just returns the smallest consistent N and the answer
+                        # looks like noise spread over 40-70. The identified object is the RANGE,
+                        # and the test is whether a candidate falls inside it. Share of events
+                        # whose range contains the candidate: top-65 .909 · top-70 .628 ·
+                        # top-60 .566 · top-50 .112. The old code used min(69, k-1) -- a top-70
+                        # proxy, the PRE-2024 tour rule -- which is the worse answer in EVERY
+                        # season present (2023 .676, 2024 .636, 2025 .569, 2026 .628).
+
+# ⚠️ FIELD SIZE CANNOT SUBSTITUTE FOR THIS TABLE. Genesis/Arnold Palmer/Memorial cut at 50 with
+# 69-73 starters, while Heritage/Travelers/St Jude do NOT cut at 69-72. Same size, opposite rule.
+# ⚠️ AND `cut_n=None` IS NOT A COSMETIC RENAME OF THE OLD BEHAVIOUR. On a field of <=70,
+# min(69, k-1) selects the LARGEST score, so everyone "made the cut" -- which is precisely why a
+# wrong constant looked healthy on every playoff event. Moving to 65 without a no-cut branch
+# would START eliminating players from St Jude, the BMW and the TOUR Championship.
+_NO_CUT = ("fedex st jude", "st jude championship", "bmw championship", "tour championship",
+           "hero world challenge", "the sentry", "sentry tournament of champions",
+           "dp world tour championship", "nedbank golf challenge", "dubai invitational",
+           "zozo championship", "baycurrent classic", "cadillac championship",
+           "korea championship", "isps handa championship", "q school", "qschool")
+# 2024 is when the tour created the signature format. Before it these were ordinary full-field
+# events on the standard rule, so the era boundary is part of the rule, not a detail.
+# (pattern, first season the event stopped cutting). Pebble Beach is 2025, not 2024: in
+# 2023-24 it was still a 54-hole-cut pro-am, so a single shared boundary gets it wrong.
+_NO_CUT_SINCE = (("rbc heritage", "2024"), ("travelers championship", "2024"),
+                 ("truist championship", "2024"), ("wells fargo", "2024"),
+                 ("abu dhabi hsbc", "2024"), ("pebble beach", "2025"))
+_CUT_50 = (("masters tournament", None), ("genesis invitational", "2024"),
+           ("arnold palmer", "2024"), ("memorial tournament", "2024"))
+# EXACT normalised match only: "BMW PGA Championship" and "BMW Australian PGA Championship" are
+# ordinary 65 events, and "Genesis Scottish Open" must not match "the open".
+_CUT_70 = ("pga championship", "the open")
+# ⚠️ TWO DIFFERENT EVENTS, ONE NORMALISED NAME. "ISPS Handa Championship" (2023, 72
+# players, no cut) and "ISPS HANDA - CHAMPIONSHIP" (2024, 155 players, cuts) collapse to
+# the same string, so no name table can separate them -- only the field size can. The
+# guard is deliberately scoped to this one pattern: a general "no-cut events are small"
+# rule is FALSE, because Q-School is a genuine 170-player no-cut event.
+_NO_CUT_AMBIGUOUS = ("isps handa championship",)
+NO_CUT_MAX_FIELD = 100
 
 
 def _get(url):
@@ -275,6 +318,169 @@ def resolve(name, candidates):
     return hits.pop() if len(hits) == 1 else None
 
 
+def _evnorm(s):
+    return " ".join("".join(c if c.isalnum() else " "
+                            for c in _deaccent(str(s or "")).lower()).split())
+
+
+def cut_rule(event, date=None, n_field=None):
+    """Cut size for `event` as of `date`: 65 (standard), 50, 70, or None for a no-cut event.
+
+    Unrecognised names get the default 65. That is the right prior -- 242 of the 296 warehouse
+    events cut after R2 and 90.9% of those are consistent with 65 -- and an unknown name is far
+    likelier to be an ordinary full-field stop than a playoff.
+
+    ⚠️ THE COST OF BEING WRONG IS ASYMMETRIC. Calling a no-cut event a cutting one ELIMINATES
+    players who never faced a cut and zeroes their top-N and win probabilities outright; the
+    reverse merely leaves a few extra players in the last two rounds. Every no-cut family on
+    tour is enumerated above for that reason, and the default leans the safe way only because
+    a full-field event is the overwhelming base case.
+
+    `date=None` means "now", so the era-dependent entries resolve to their CURRENT rule.
+    """
+    n = _evnorm(event)
+    if not n:
+        return CUT_N
+    yr = str(date)[:4] if date else None
+
+    def _guard(pat):
+        # Only for the known-colliding name; everything else is trusted as written.
+        if pat in _NO_CUT_AMBIGUOUS and n_field and int(n_field) > NO_CUT_MAX_FIELD:
+            return CUT_N
+        return None
+    for pat in _CUT_70:
+        if n == pat or n == pat + " championship":
+            return 70
+    for pat in _NO_CUT:
+        if pat in n:
+            return _guard(pat)
+    for pat, since in _NO_CUT_SINCE:
+        if pat in n and (yr is None or yr >= since):
+            return None
+    for pat, since in _CUT_50:
+        if pat in n and (since is None or yr is None or yr >= since):
+            return 50
+    return CUT_N
+
+
+# Fitted 2026-08-13 on 166 walk-forward events (<2026), holdout 2026 untouched, via the LL-optimal
+# stretch through _recal_shape itself -- the same estimand 1.30 was chosen by. Holdout: beats 1.30
+# on 8/8 markets. Majors are deliberately absent: their fitted values LOSE to 1.30 out of sample.
+SHAPE_SLOPE_STD = {"win": 1.21, "win_ties": 1.02,
+                   "top5": 1.03, "top5_ties": 1.03,
+                   "top10": 1.00, "top10_ties": 1.00,
+                   "top20": 1.00, "top20_ties": 1.01}
+
+# IN-PLAY STRETCH. Fitted 2026-08-14 on inplay_calib.npz, 215 events x stages 1-3 (after R1/R2/
+# R3) x {win, top5, top10, top20}; train = events before 2026, holdout = 2026 untouched. Same
+# sum-preserving estimand as SHAPE_SLOPE, fitted through _recal_shape itself.
+#
+# Train argmin is 1.125 but the LL surface is FLAT: everything in [1.050, 1.225] sits within 2e-4
+# of the minimum, so the argmin is NOT identified and must not be shipped as though it were. 1.10
+# is interior to that region and is also the holdout argmin -- the one value both splits pick.
+#
+# Holdout mean LL 0.138938 (s=1.00, what shipped before) -> ~0.13874; event-clustered bootstrap
+# at 1.10 gives dLL -0.000360, 95% CI [-0.000596, -0.000127]. Real, and tiny: ~0.2-0.3%. A
+# sharpness fix, NOT an edge -- do not size anything differently because of it.
+#
+# Per-stage (holdout -0.000199) and per-stage-per-market (-0.000223) tables were both fitted and
+# both scored WORSE out of sample than this single constant. Do not add parameters here.
+IN_PLAY_SHAPE_SLOPE = 1.10
+
+# EXACT normalised match only -- "BMW PGA Championship" is NOT a major, and neither is
+# "Genesis Scottish Open". Same collision class as the cut-rule table above.
+_MAJOR_NAMES = ("masters tournament", "pga championship", "us open", "u s open",
+                "the open", "the open championship", "us open championship")
+
+
+def is_major(event):
+    """True only for the four majors. Deliberately strict: a false positive here silently
+    applies the 1.30 majors stretch to an ordinary event, which is the defect being fixed."""
+    n = _evnorm(event)
+    if not n:
+        return False
+    for tok in ("pga tour", "dp world", "korn ferry", "lpga", "bmw", "australian", "senior"):
+        if tok in n and "masters tournament" not in n:
+            if tok in ("bmw", "australian", "senior", "lpga"):
+                return False
+    return any(n == m or n.endswith(" " + m) or n.startswith(m + " ") or
+               (" %s " % m) in (" %s " % n) for m in _MAJOR_NAMES)
+
+
+def shape_slopes(event, date=None):
+    """Per-market stretch for `event`: the fitted non-major table, or None to mean 'use
+    SHAPE_SLOPE for everything' (majors). Returning None rather than a dict of 1.30s keeps the
+    majors path byte-identical to what shipped before this change."""
+    return None if is_major(event) else dict(SHAPE_SLOPE_STD)
+
+
+# ⚠️ DISABLED 2026-08-14 — kept for the record, NOT wired into simulate().
+# Fitted on a checkpoint built with a uniform cut_n=65, which the per-event cut
+# rule invalidated hours later. On the current model they cost +0.0162 summed
+# LL on 2026 and a correct refit is worth -0.0001. See EXP-008/009.
+# ── RANK-CONDITIONAL PLACEMENT OFFSETS (2026-08-14) ────────────────────────────────────────
+# Logit offsets by the model's OWN win-rank bucket, fitted 2023-25 and validated on the 2026
+# holdout. Buckets: rank 1 | 2-5 | 6-15 | 16-40 | 41+. Positive lifts, negative shrinks.
+# The shape is stable across all six markets, which is what says structure rather than noise.
+RANK_EDGES = (1, 2, 6, 16, 41)
+RANK_OFFSETS = {
+    "top5":       (+0.710, +0.270, +0.260, -0.040, -0.260),
+    "top10":      (+0.700, +0.320, +0.350, +0.050, -0.220),
+    "top20":      (+0.670, +0.360, +0.290, +0.040, -0.180),
+    "top5_ties":  (+0.690, +0.270, +0.270, +0.010, -0.240),
+    "top10_ties": (+0.720, +0.310, +0.340, +0.030, -0.200),
+    "top20_ties": (+0.690, +0.310, +0.240, +0.010, -0.200),
+}
+# win / win_ties are DELIBERATELY ABSENT: the same offsets make the win holdout worse.
+
+
+def _rank_bucket(rank):
+    b = 0
+    for i, e in enumerate(RANK_EDGES):
+        if rank >= e:
+            b = i
+    return b
+
+
+def _recal_rank(out, keys):
+    """Apply the win-rank offsets, re-solving one intercept per key so the FIELD TOTAL holds.
+
+    Same sum-preserving contract as _recal_shape: shape changes, coherence does not. Without it
+    the placement probabilities stop summing to 5/10/20 and every downstream devig is wrong.
+    """
+    if not out:
+        return out
+    players = list(out)
+    ranked = sorted(players, key=lambda p: -((out[p] or {}).get("win") or 0.0))
+    bucket = {p: _rank_bucket(i + 1) for i, p in enumerate(ranked)}
+    for key in keys:
+        offs = RANK_OFFSETS.get(key)
+        if not offs:
+            continue                      # win / win_ties fall through untouched, by design
+        vals = [(p, (out[p] or {}).get(key)) for p in players]
+        vals = [(p, v) for p, v in vals if v is not None]
+        if len(vals) < 10:
+            continue
+        target = sum(v for _p, v in vals)
+        if target <= 0:
+            continue
+        lg = []
+        for p, v in vals:
+            q = min(max(v, 1e-9), 1 - 1e-9)
+            lg.append((p, math.log(q / (1 - q)) + offs[bucket[p]]))
+        lo, hi = -40.0, 40.0
+        for _ in range(60):
+            c = (lo + hi) / 2.0
+            if sum(1.0 / (1.0 + math.exp(-(l + c))) for _p, l in lg) > target:
+                hi = c
+            else:
+                lo = c
+        c = (lo + hi) / 2.0
+        for p, l in lg:
+            out[p][key] = 1.0 / (1.0 + math.exp(-(l + c)))
+    return out
+
+
 def _phi(z):
     return 0.5 * (1.0 + math.erf(z / math.sqrt(2)))
 
@@ -308,9 +514,15 @@ def _recal_shape(out, keys, slope=None):
     sum. Shape changes; coherence does not.
     """
     sl = SHAPE_SLOPE if slope is None else slope
-    if not out or abs(sl - 1.0) < 1e-9:
+    if not out:
+        return out
+    # `slope` may be a per-market dict (regime split) or a single float (legacy / majors).
+    if not isinstance(sl, dict) and abs(sl - 1.0) < 1e-9:
         return out
     for key in keys:
+        s_key = sl.get(key, SHAPE_SLOPE) if isinstance(sl, dict) else sl
+        if abs(s_key - 1.0) < 1e-9:
+            continue
         ps = [(out[p_] or {}).get(key) for p_ in out]
         ps = [v for v in ps if v is not None]
         if len(ps) < 10:
@@ -326,7 +538,7 @@ def _recal_shape(out, keys, slope=None):
         lo, hi = -40.0, 40.0
         for _ in range(200):
             c = (lo + hi) / 2.0
-            tot = sum(1.0 / (1.0 + math.exp(-(sl * l + c))) for l in lg if l is not None)
+            tot = sum(1.0 / (1.0 + math.exp(-(s_key * l + c))) for l in lg if l is not None)
             if tot > target:
                 hi = c
             else:
@@ -334,12 +546,13 @@ def _recal_shape(out, keys, slope=None):
         c = (lo + hi) / 2.0
         for p_, l in zip(list(out), lg):
             if l is not None:
-                out[p_][key] = 1.0 / (1.0 + math.exp(-(sl * l + c)))
+                out[p_][key] = 1.0 / (1.0 + math.exp(-(s_key * l + c)))
     return out
 
 
 def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
-             wave_shift=0.0, progress=None, partial=None, reps=1):
+             wave_shift=0.0, progress=None, partial=None, reps=1, cut_n=CUT_N,
+             shape_slope=None):
     """reps>1 averages independent runs to cut Monte Carlo noise at CONSTANT peak memory.
     Measured across five seeds at 8000 sims, worst-case seed-to-seed sd was 0.70 points on
     top-20 and 1.00 on make-cut — 14-20% of the 5-point edge threshold, so a flagged 5.0%
@@ -350,7 +563,8 @@ def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
         for i in range(int(reps)):
             one = simulate(R, field, n_sims=n_sims, seed=seed + 1000 * i,
                            course_fit=course_fit, wave=wave, wave_shift=wave_shift,
-                           progress=progress, partial=partial, reps=1)
+                           progress=progress, partial=partial, reps=1, cut_n=cut_n,
+                           shape_slope=shape_slope)
             if not one:
                 return {}
             for pl, v in one.items():
@@ -358,7 +572,7 @@ def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
                 for k_, val in v.items():
                     a[k_] = a.get(k_, 0.0) + val / float(reps)
         return acc
-    """Win/top5/10/20/make-cut probs via MC: 4 rounds, player-week effect, top-70 cut."""
+    """Win/top5/10/20/make-cut probs via MC: 4 rounds, player-week effect, `cut_n` cut."""
     import numpy as np
     rng = np.random.default_rng(seed)
     names = [p for p in field if (norm(p) in R or p in R)]
@@ -453,8 +667,15 @@ def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
     # BOTH rank distributions from one pass.
     tot2 = np.rint(tot2)
     rest = np.rint(rest)
-    cutline = np.sort(tot2, axis=1)[:, min(69, k - 1)][:, None]
-    made = tot2 <= cutline
+    # NO-CUT EVENTS AND SHORT FIELDS: `cut_n=None` is a playoff/limited-field event, and
+    # k <= cut_n means top-N-and-ties admits the whole field anyway. Both must short-circuit
+    # BEFORE the index, or a 50-man TOUR Championship reads tot2[:, 64] and dies.
+    if cut_n is None or k <= int(cut_n):
+        made = np.ones(tot2.shape, dtype=bool)
+    else:
+        # 'and ties': the line is the cut_n-th best 36-hole total and <= admits every tie.
+        cutline = np.sort(tot2, axis=1)[:, int(cut_n) - 1][:, None]
+        made = tot2 <= cutline
     if forced is not None and forced.any():
         made = made | forced[None, :]
     if gone is not None and gone.any():
@@ -480,8 +701,37 @@ def simulate(R, field, n_sims=8000, seed=7, course_fit=None, wave=None,
     # sims, and once posted scores condition the distribution it is already sharp — stretching it
     # would distort a number that is no longer a forecast of 4 unknown rounds.
     if progress is None and partial is None:
+        # ⚠️ RANK OFFSETS ARE DISABLED (2026-08-14, EXP-008/009). They were fitted on
+        # shape_sims.npz, generated with the DEFAULT cut_n=65 for every event — before the
+        # per-event cut rule shipped the same day. Measured on the CURRENT model, 2026 summed
+        # LL over the six placement markets: base 1.66917, refitted 1.66907 (nothing),
+        # SHIPPED 1.68538 (+0.0162, actively harmful). A correct refit is worth -0.0001 and
+        # has the opposite sign at rank 1, so there is no rank bias left once the cut rule is
+        # right. Re-enable ONLY if a refit on current-model probabilities earns its keep.
+        # _recal_rank(out, ("top5", "top10", "top20",
+        #                   "top5_ties", "top10_ties", "top20_ties"))
         _recal_shape(out, ("win", "top5", "top10", "top20",
-                           "win_ties", "top5_ties", "top10_ties", "top20_ties"))
+                           "win_ties", "top5_ties", "top10_ties", "top20_ties"),
+                     slope=shape_slope)
+    elif progress is not None:
+        # IN-PLAY (measured 2026-08-14; see IN_PLAY_SHAPE_SLOPE). Skipping the recal here was
+        # never "no opinion" -- it was s = 1.00, which no measurement ever chose. The stretch is
+        # far gentler than the pre-tournament one because posted scores have already sharpened
+        # the distribution.
+        #
+        # `shape_slope` is deliberately IGNORED on this branch: it is a pre-tournament constant
+        # and means nothing once rounds are on the board.
+        #
+        # _recal_rank stays OFF here on purpose: RANK_OFFSETS were fitted on pre-tournament
+        # probabilities and have never been measured in-play. Turning it on would stack an
+        # unmeasured correction under a measured one.
+        #
+        # The remaining case -- progress None, partial not None -- deliberately falls through
+        # with NO recal, exactly as before. simulate() ignores `partial` unless `progress` is
+        # set, so that is a pre-tournament sim and nothing here was measured on it.
+        _recal_shape(out, ("win", "top5", "top10", "top20",
+                           "win_ties", "top5_ties", "top10_ties", "top20_ties"),
+                     slope=IN_PLAY_SHAPE_SLOPE)
     return out
 
 
@@ -653,6 +903,40 @@ def noise_floor(verbose=True):
     return out
 
 
+_TEE_CACHE = {}
+
+
+def _tee_deadline(evn, mkt):
+    """Actual tee-time deadline for a matchbet market, or None if it cannot be resolved.
+
+    ⚠️ A DATE IS NOT A DEADLINE. g2_gate used to cut on `str(ts)[:10] > event_date`, which
+    admits EVERY price stamped on the round's own day -- and the round tees off in the middle
+    of that day. On 2026-08-13 the Kitayama/Fowler R1 matchbet sat flat at 1.9091/1.8333 until
+    the 14:25 tee, then drifted 1.53 -> 1.13 -> 1.0033 as Kitayama played, and the gate scored
+    the 18:00 price of 1.002/26.0 as a "close". The book was not sharp; it was watching golf.
+    That single class of row took G2 from book LL .6782 (PASS, +1.8pts) to .6296 (FAIL, +6.7pts)
+    on four rows out of 51 -- their book log-loss was 0.058 against a ruler at 0.704.
+
+    This is the SAME defect the docstring already claims to have fixed ("it used to be
+    MAX(collected_at), which during a live event is an IN-PLAY price"). The fix went to date
+    granularity and stopped there, so it still fires on any round being played today.
+    """
+    key = (evn, mkt)
+    if key in _TEE_CACHE:
+        return _TEE_CACHE[key]
+    out = None
+    try:
+        import pga_tee_gate as _TG
+        d = _TG.deadline(evn, mkt)
+        d = d[0] if isinstance(d, tuple) else d      # deadline() returns (dt, reason)
+        if isinstance(d, dt.datetime):
+            out = d
+    except Exception:                                                  # noqa: BLE001
+        out = None
+    _TEE_CACHE[key] = out
+    return out
+
+
 def _same_edition_event(conr, odds_event, any_ts):
     """Resolve an odds-book event name to the results event for the SAME EDITION.
 
@@ -725,6 +1009,7 @@ def g2_gate(verbose=True):
         by_m[(str(evn).strip(), mkt)].append((run, od, ts))
     conr = sqlite3.connect(DB, timeout=60)
     ll_book, ll_ruler, n_used = [], [], 0
+    ll_flat, edge_ruler, ev_used = [], [], set()
     fits = {}
     n_fam = defaultdict(int)
     dropped = defaultdict(int)
@@ -743,10 +1028,23 @@ def g2_gate(verbose=True):
         except ValueError:
             dropped["bad event date"] += 1
             continue
+        # TEE-TIME CUTOFF (2026-08-13). Prefer the resolved tee; fall back to the DATE only
+        # for rows stamped strictly BEFORE the round's day. When the tee is unknown a same-day
+        # row is refused outright -- not knowing when the round started is not permission to
+        # treat a price from that day as a close.
+        _dl = _tee_deadline(evn, mkt)
         best = {}
         for run, od, ts in quotes:
-            if str(ts)[:10] > cutoff.isoformat():
-                continue                 # in-play or post-round: not a close
+            if _dl is not None:
+                try:
+                    _t = dt.datetime.fromisoformat(str(ts).replace("Z", ""))
+                except ValueError:
+                    dropped["unparseable timestamp"] += 1
+                    continue
+                if _t >= _dl:
+                    continue             # in-play or post-round: not a close
+            elif str(ts)[:10] >= cutoff.isoformat():
+                continue                 # tee unknown: refuse the round's own day entirely
             cur = best.get(run)
             if cur is None or str(ts) > str(cur[1]):
                 best[run] = (od, ts)
@@ -784,6 +1082,11 @@ def g2_gate(verbose=True):
         p_rul = min(max(p_rul, 1e-6), 1 - 1e-6)
         ll_book.append(-(y * math.log(p_book) + (1 - y) * math.log(1 - p_book)))
         ll_ruler.append(-(y * math.log(p_rul) + (1 - y) * math.log(1 - p_rul)))
+        # PLACEBO: a model with NO information. If the ruler cannot beat this, "within 2 pts of
+        # the book" is being achieved by having no opinion rather than by being right.
+        ll_flat.append(math.log(2.0))
+        edge_ruler.append(abs(p_rul - 0.5))
+        ev_used.add(eid)
         n_used += 1
         n_fam["R%d" % rn if rn else "72H"] += 1
     conr.close()
@@ -799,10 +1102,25 @@ def g2_gate(verbose=True):
                   f"collector only has history from the day it started.")
         else:
             lb, lr = st.mean(ll_book), st.mean(ll_ruler)
+            lf = st.mean(ll_flat)
             gap = (lr - lb) * 100
-            verdict = "PASS" if gap <= 2.0 else "FAIL"
-            print(f"G2 on {n_used} real FD closes: book logloss {lb:.4f}, ruler {lr:.4f} "
-                  f"(gap {gap:+.1f}pts) -> {verdict}")
+            plac = (lf - lr) * 100          # >0 means the ruler beats a coin flip
+            # TWO conditions now. The ceiling (near the book) was always necessary; the FLOOR
+            # (better than no information) is what was missing, and it is the one the model fails.
+            verdict = "PASS" if (gap <= 2.0 and plac >= 0.0) else "FAIL"
+            _sp = st.mean(edge_ruler) if edge_ruler else 0.0
+            print(f"G2 on {n_used} real FD closes from {len(ev_used)} EVENTS: "
+                  f"book {lb:.4f}, ruler {lr:.4f}, coin-flip {lf:.4f} "
+                  f"(vs book {gap:+.1f}pts, vs placebo {plac:+.1f}pts) -> {verdict}")
+            if plac < 0.0:
+                print(f"     ❌ THE RULER IS WORSE THAN A COIN FLIP ({-plac:.1f}pts). Its mean "
+                      f"|p-0.5| is {_sp:.4f} against a ~6% hold — it is functionally a constant, "
+                      f"so 'within 2pts of the book' is being cleared by having NO OPINION. "
+                      f"A near-book log-loss earned this way is not evidence of anything.")
+            if len(ev_used) < 30:
+                print(f"     ⚠️ n={n_used} closes but only {len(ev_used)} EVENTS. Closes inside "
+                      f"one tournament share weather, course and field, so the sample size is "
+                      f"the EVENT count. Every SE here is optimistic; do not arm on this.")
             # POWER-CHECKED 2026-07-30 against real out-of-sample matchup probabilities:
             # this gate fails a book 4+ pts sharper 100% of the time even at n=15, and passes
             # a book within 1 pt 100% of the time. n=15 is adequate; it was NOT a smoke test.
