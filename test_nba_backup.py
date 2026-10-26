@@ -74,6 +74,9 @@ def check(b, p=P):
     def pull(day):
         sent.clear()
         return p.pull(LocalRemote(out), w2, D0 + dt.timedelta(day), notify=sent.append)
+    # the host's free disk must not decide the test: with the Mac at 2.7 GB free, under the 3 GB floor, every
+    # night was REFUSED and latest.json never written. Only the low-disk case at the end raises the floor.
+    floor, b.FREE_FLOOR = b.FREE_FLOOR, 0
     try:
         want(night(0) == 0 and not sent, "night 0: three stores backed up, no alert")
         r = root / "r.sqlite"
@@ -126,14 +129,12 @@ def check(b, p=P):
         want(b.verify(stores, out, notify=sent.append) == 0 and not sent, "--verify passes on every good snapshot")
 
         want(pull(20) == 1 and any("8 days old" in m for m in sent), "the pull reports a VM backup 8 days old")
-        floor, b.FREE_FLOOR = b.FREE_FLOOR, 1e18
+        b.FREE_FLOOR = 1e18
         before = sorted(x.name for x in out.iterdir())
-        try:
-            want(night(13) == 1 and any("REFUSED" in m for m in sent) and sorted(x.name for x in out.iterdir()) == before,
-                 "low disk: refused, nothing written or pruned")
-        finally:
-            b.FREE_FLOOR = floor
+        want(night(13) == 1 and any("REFUSED" in m for m in sent) and sorted(x.name for x in out.iterdir()) == before,
+             "low disk: refused, nothing written or pruned")
     finally:
+        b.FREE_FLOOR = floor
         shutil.rmtree(root, ignore_errors=True)
     return ok
 
