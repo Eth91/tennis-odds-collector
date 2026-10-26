@@ -384,31 +384,29 @@ def pos_ranks(mcon, season, idx_pos, min_games=3):
 def correlations(props, logs):
     """For each prop: the other props posted for the same game, ranked by |Pearson r| of the two stats over the
     games both players played for the same team (same player: every game). Historical association only."""
-    idx = {}
+    series = {}                                       # prop id -> {gid: (team, value)}, computed once per prop
     for p in props:
-        lg = {r[1]: dict(zip(LOG_COLS, r)) for r in logs.get(p["pid"], [])}
-        idx[p["id"]] = lg
+        series[p["id"]] = {r[1]: (r[2], stat_value(dict(zip(LOG_COLS, r)), p["market"])) for r in logs.get(p["pid"], [])}
     by_game = defaultdict(list)
     for p in props:
         by_game[p["gid"]].append(p)
     out = {}
     for p in props:
-        mine = idx[p["id"]]
+        mine = series[p["id"]]
         res = []
         for o in by_game[p["gid"]]:
             if o["id"] == p["id"] or (o["pid"] == p["pid"] and o["market"] == p["market"]):
                 continue
             if o["pid"] != p["pid"] and o["team"] != p["team"]:
                 continue                                   # same team only: shared games mean the same games
-            theirs = idx[o["id"]]
-            shared = [g for g in mine if g in theirs and mine[g]["team"] == theirs[g]["team"] == p["team"]]
+            theirs = series[o["id"]]
+            shared = [g for g in mine.keys() & theirs.keys() if mine[g][0] == theirs[g][0] == p["team"]]
             if len(shared) < CORR_MIN_N:
                 continue
-            r = pearson([stat_value(mine[g], p["market"]) for g in shared],
-                        [stat_value(theirs[g], o["market"]) for g in shared])
+            r = pearson([mine[g][1] for g in shared], [theirs[g][1] for g in shared])
             if r is not None:
                 res.append({"id": o["id"], "r": round(r, 2), "n": len(shared)})
-        out[p["id"]] = sorted(res, key=lambda x: -abs(x["r"]))[:CORR_TOP]
+        out[p["id"]] = sorted(res, key=lambda x: (-abs(x["r"]), x["id"]))[:CORR_TOP]
     return out
 
 
