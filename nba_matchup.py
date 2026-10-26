@@ -27,7 +27,8 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 DB = HERE / "nba_matchup.sqlite"
 K_SHRINK = 10
-STATS = {"pts": ("pts",), "reb": ("reb",), "ast": ("ast",), "pra": ("pts", "reb", "ast")}
+STATS = {"pts": ("pts",), "reb": ("reb",), "ast": ("ast",), "pra": ("pts", "reb", "ast"),
+         "pts_reb": ("pts", "reb"), "pts_ast": ("pts", "ast"), "reb_ast": ("reb", "ast")}
 GROUP = {"PG": "G", "SG": "G", "G": "G", "SF": "F", "PF": "F", "F": "F", "C": "C"}
 PLAY_TYPES = ("PRBallHandler", "PRRollman", "Isolation", "Spotup", "Postup", "Handoff", "OffScreen", "Transition",
               "Cut", "Putback")
@@ -36,7 +37,7 @@ CREATE TABLE IF NOT EXISTS games (gid TEXT PRIMARY KEY, season TEXT, date TEXT, 
 CREATE TABLE IF NOT EXISTS team_games (gid TEXT, team TEXT, opp TEXT, fga REAL, fta REAL, oreb REAL, tov REAL,
     PRIMARY KEY (gid, team));
 CREATE TABLE IF NOT EXISTS player_games (gid TEXT, team TEXT, pid INTEGER, pos TEXT, starter INTEGER, min REAL,
-    pts REAL, reb REAL, ast REAL, PRIMARY KEY (gid, pid));
+    pts REAL, reb REAL, ast REAL, fg3m REAL, stl REAL, blk REAL, tov REAL, PRIMARY KEY (gid, pid));
 CREATE TABLE IF NOT EXISTS playtypes (snap TEXT, season TEXT, side TEXT, grouping TEXT, id INTEGER, abbr TEXT,
     play_type TEXT, poss_pct REAL, ppp REAL, pctile REAL, poss REAL, PRIMARY KEY (snap, side, grouping, id, play_type));
 """
@@ -45,6 +46,10 @@ CREATE TABLE IF NOT EXISTS playtypes (snap TEXT, season TEXT, side TEXT, groupin
 def connect(path=None):
     con = sqlite3.connect(path or DB, timeout=60)
     con.executescript(DDL)
+    have = {r[1] for r in con.execute("PRAGMA table_info(player_games)")}
+    for col in ("fg3m", "stl", "blk", "tov"):          # added for the prop research page (threes, etc.)
+        if col not in have:
+            con.execute(f"ALTER TABLE player_games ADD COLUMN {col} REAL")
     return con
 
 
@@ -93,14 +98,17 @@ def parse_box(b):
                 continue
             players.append((b["gameId"], side["teamTricode"], int(p["personId"]), p.get("position") or "",
                             int(str(p.get("starter")) == "1"), round(mn, 2), s.get("points", 0),
-                            s.get("reboundsTotal", 0), s.get("assists", 0)))
+                            s.get("reboundsTotal", 0), s.get("assists", 0), s.get("threePointersMade", 0),
+                            s.get("steals", 0), s.get("blocks", 0), s.get("turnovers", 0)))
     return game, teams, players
 
 
 def fetch(gids, con=None, get=None, workers=8):
     """Cache the box scores of `gids` not cached yet. Returns (stored, not final / failed)."""
     con = con or connect()
-    have = {g for (g,) in con.execute("SELECT gid FROM games")}
+    # a game cached before fg3m/stl/blk/tov were kept is fetched again
+    have = {g for (g,) in con.execute("SELECT gid FROM games WHERE gid NOT IN "
+                                      "(SELECT DISTINCT gid FROM player_games WHERE fg3m IS NULL)")}
     todo = [g for g in gids if g not in have]
     if get is None:
         import nba_rosters as R
@@ -120,7 +128,8 @@ def fetch(gids, con=None, get=None, workers=8):
             game, teams, players = res
             con.execute("INSERT OR REPLACE INTO games VALUES (?,?,?,?,?)", game)
             con.executemany("INSERT OR REPLACE INTO team_games VALUES (?,?,?,?,?,?,?)", teams)
-            con.executemany("INSERT OR REPLACE INTO player_games VALUES (?,?,?,?,?,?,?,?,?)", players)
+            con.executemany("INSERT OR REPLACE INTO player_games (gid, team, pid, pos, starter, min, pts, reb, ast, "
+                            "fg3m, stl, blk, tov) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", players)
             stored += 1
     con.commit()
     return stored, missed
@@ -284,6 +293,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--fetch", nargs="*", help="seasons to cache, e.g. 2023-24 2024-25")
     ap.add_argument("--current", action="store_true", help="this season's finals + a play-type snapshot")
+    ap.add_argument("--last", action="store_true", help="also cache last season (the research page's game logs)")
     a = ap.parse_args()
     con = connect()
     for s in a.fetch or []:
@@ -292,4 +302,8 @@ if __name__ == "__main__":
         import nba_rosters as R
         finals = [g["gid"] for g in R.schedule() if g["status"] == 3]      # this season's finished games only
         print(season_of(dt.date.today().isoformat()), "stored %d, not final or failed %d" % fetch(finals, con))
+        if a.last:
+            cur = season_of(dt.date.today().isoformat())
+            prev = f"{int(cur[:4]) - 1}-{cur[2:4]}"
+            print(prev, "stored %d, not final or failed %d" % fetch(regular_season_gids(prev), con))
         print("play-type rows:", snapshot_playtypes(con))

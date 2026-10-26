@@ -69,6 +69,7 @@ def schedule():
                 continue
             out.append({"gid": g["gameId"], "date_et": g["gameDateEst"][:10],
                         "utc": g["gameDateTimeUTC"], "status": g.get("gameStatus"),
+                        "status_text": g.get("gameStatusText") or "",   # "PPD" marks a postponement
                         "home": g["homeTeam"]["teamTricode"],
                         "away": g["awayTeam"]["teamTricode"],
                         # nicknames ("Knicks", "Trail Blazers", "76ers") are the only part of a
