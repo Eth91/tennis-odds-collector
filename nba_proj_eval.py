@@ -551,6 +551,12 @@ def prospective(log_db, lines_db, matchup_db, out_json):
     if gids:
         tips = {g: t for g, t in q.execute(f"SELECT gid, MIN(tip_utc) FROM quotes WHERE gid IN ({','.join('?' * len(gids))}) "
                                            f"GROUP BY gid", gids)}
+        # the close is the board before the tip the forecast was made against: a postponed game that was
+        # rescheduled keeps its gid, and the quotes' earliest tip would be the original date
+        for (g, _, _), kinds in fc.items():
+            t = (kinds.get("cutoff") or {}).get("tip")
+            if t:
+                tips[g] = t
         rows = q.execute(f"SELECT seen_at, book, gid, pid, stat, line, side, odds FROM quotes WHERE gid IN "
                          f"({','.join('?' * len(gids))}) AND pid IS NOT NULL ORDER BY seen_at", gids)
         for t, changed in R.replay(r for r in rows if r[4] in PD.MARKET_PARTS):

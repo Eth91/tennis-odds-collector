@@ -360,6 +360,36 @@ def test_prospective_grading_voids_and_clv_sign():
     assert json.loads((d / "o.json").read_text())["graded"] == 1
 
 
+def test_prospective_close_follows_a_rescheduled_tip():
+    """A postponed game keeps its gid; the close is the board before the new tip, not the original date's."""
+    import nba_proj_eval as E
+    d = pathlib.Path(tempfile.mkdtemp())
+    lg = sqlite3.connect(d / "log.sqlite")
+    lg.execute("CREATE TABLE forecasts (kind TEXT, logged_at TEXT, gid TEXT, pid INTEGER, market TEXT, tip TEXT, line REAL, "
+               "book TEXT, over REAL, under REAL, p_over REAL, p_push REAL, p_blend REAL, mean REAL, version TEXT)")
+    old, new = "2026-10-26T00:00:00Z", "2026-10-28T00:00:00Z"
+    for kind in ("first", "cutoff"):
+        lg.execute("INSERT INTO forecasts VALUES (?, 't', 'G', 1, 'points', ?, 20.5, 'fd', 1.9, 1.9, .6, 0, .6, 0, ?)",
+                   (kind, new, NP.VERSION))
+    lg.commit()
+    q = sqlite3.connect(d / "lines.sqlite")
+    q.execute("CREATE TABLE quotes (seen_at TEXT, book TEXT, gid TEXT, tip_utc TEXT, pid INTEGER, player TEXT, stat TEXT, "
+              "line REAL, side TEXT, odds REAL)")
+    for seen, tip, o, u in (("2026-10-25T23:00:00", old, 1.9, 1.9), ("2026-10-27T23:50:00", new, 1.7, 2.15)):
+        for side, odds in (("over", o), ("under", u)):
+            q.execute("INSERT INTO quotes VALUES (?,'fd','G',?,1,'','points',20.5,?,?)", (seen, tip, side, odds))
+    q.commit()
+    m = sqlite3.connect(d / "mu.sqlite")
+    m.execute("CREATE TABLE games (gid TEXT, season TEXT, date TEXT, home TEXT, away TEXT, home_pts REAL, away_pts REAL)")
+    m.execute("CREATE TABLE player_games (gid TEXT, team TEXT, pid INTEGER, pos TEXT, starter INTEGER, min REAL, pts REAL, "
+              "reb REAL, ast REAL, fg3m REAL, stl REAL, blk REAL, tov REAL, fga REAL, fg3a REAL, fta REAL)")
+    m.execute("INSERT INTO games VALUES ('G','2026-27','2026-10-27','AAA','BBB',100,99)")
+    m.execute("INSERT INTO player_games VALUES ('G','AAA',1,'G',1,34,25,1,1,1,0,0,1,0,0,0)")
+    m.commit()
+    out = E.prospective(d / "log.sqlite", d / "lines.sqlite", d / "mu.sqlite", d / "o.json")
+    assert out["clv"]["mean"] == pytest.approx(NP.no_vig(1.7, 2.15) - NP.no_vig(1.9, 1.9))
+
+
 def test_verdicts_follow_the_prereg_lines():
     import nba_proj_eval as E
     rel_ok = [[300, .5, .51]] * 3
