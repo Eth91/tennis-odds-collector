@@ -26,93 +26,124 @@ button{cursor:pointer}
 :focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .num{font-variant-numeric:tabular-nums}
-/* ── top bar ── */
-.top{padding:calc(var(--st) + 6px) 16px 0}
-.bar{position:sticky;top:0;z-index:20;padding:calc(var(--st) + 6px) 16px 8px;background:rgba(0,0,0,.82);
--webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px)}
-.bar.pin{padding-top:calc(var(--st) + 4px);margin-top:2px}
-.bar.pin .chips:first-child{margin-top:0}
-.bar-r{display:flex;align-items:center;justify-content:space-between;min-height:34px}
-.bk{display:inline-flex;align-items:center;gap:2px;padding:6px 8px 6px 0;color:var(--blue);font-size:17px;text-decoration:none;
-background:none;border:0}
-.bk svg{width:12px;height:20px}
-.upd{font-size:12px;color:var(--l3)}
-h1{margin:2px 0 10px;font-size:34px;font-weight:800;letter-spacing:-.02em}
-.srch{display:flex;align-items:center;gap:8px;height:38px;padding:0 10px;border-radius:11px;background:var(--g1)}
-.srch svg{flex:none;width:16px;height:16px;color:var(--l3)}
-.srch input{flex:1;min-width:0;height:100%;border:0;background:none;font-size:17px;outline:none}
-.srch input::placeholder{color:var(--l3)}
-.srch .clr{border:0;background:var(--g3);width:18px;height:18px;border-radius:50%;font-size:12px;line-height:18px;padding:0;
-color:var(--bg)}
-.seg{display:flex;padding:2px;border-radius:9px;background:var(--g1);margin-top:10px}
-.seg button{flex:1;height:30px;border:0;border-radius:7px;background:none;font-size:13px;font-weight:600;color:var(--l1)}
-.seg button[aria-pressed="true"]{background:var(--g3);box-shadow:0 3px 8px rgba(0,0,0,.25)}
-.chips{display:flex;gap:8px;overflow-x:auto;margin:10px -16px 0;padding:0 16px;scrollbar-width:none;
--webkit-overflow-scrolling:touch}
-.chips::-webkit-scrollbar{display:none}
-.chip{flex:none;display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;border-radius:17px;border:0;
-background:var(--g1);color:var(--l1);font-size:14px;font-weight:600;white-space:nowrap}
-.chip[aria-pressed="true"]{background:var(--l1);color:#000}
-.chip img{width:20px;height:20px}
-.chip .t{color:var(--l3);font-weight:500}
-.chip[aria-pressed="true"] .t{color:rgba(0,0,0,.55)}
-.chip .lv{color:var(--red);font-weight:800}
-.tools{display:flex;align-items:center;gap:8px;margin-top:10px}
-.tools .seg{margin:0;flex:0 0 150px}
-.pill{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:17px;border:0;
-background:var(--g1);font-size:14px;font-weight:600}
-.pill b{display:inline-block;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--blue);font-size:12px;
-line-height:18px;text-align:center}
-.pill svg{width:14px;height:14px}
-.sp{flex:1}
-/* ── list ── */
-main{padding:6px 16px calc(var(--sb) + 30px)}
-.hd{display:flex;justify-content:space-between;align-items:baseline;margin:14px 2px 8px;font-size:13px;font-weight:600;
-color:var(--l2);text-transform:uppercase;letter-spacing:.03em}
-.hd span{text-transform:none;letter-spacing:0;color:var(--l3)}
-.pr{display:block;width:100%;margin:0 0 10px;padding:12px 12px 10px;border:0;border-radius:18px;background:var(--g1);
-text-align:left;transition:transform .12s ease}
-.pr:active{transform:scale(.985);background:#232325}
-.pr-t{display:flex;align-items:center;gap:12px}
-.av{position:relative;flex:none;width:52px;height:52px;border-radius:50%;background:var(--g2)}
-.av .hs{width:52px;height:52px;border-radius:50%;object-fit:cover;object-position:50% 14%}
-.av .lg{position:absolute;right:-4px;bottom:-3px;width:22px;height:22px;padding:2px;border-radius:50%;background:#000}
-.who{flex:1;min-width:0}
-.nm{font-size:17px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sub{margin-top:2px;font-size:13px;color:var(--l2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ln{flex:none;text-align:right}
-.ln .v{font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.05}
-.ln .v i{font-style:normal;font-size:13px;font-weight:700;color:var(--l2);margin-right:2px}
-.ln .o{font-size:12px;font-weight:600;color:var(--l3)}
-.hits{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}
-.hit{border-radius:9px;padding:5px 0 4px;text-align:center;background:var(--g2)}
-.hit i{display:block;font-style:normal;font-size:10px;font-weight:700;letter-spacing:.04em;color:rgba(255,255,255,.7)}
-.hit b{display:block;font-size:14px;font-weight:800}
-.h5{background:var(--hit5);color:#000}.h5 i{color:rgba(0,0,0,.6)}
-.h4{background:var(--hit4)} .h3{background:var(--hit3)} .h2{background:var(--hit2)}
-.h1{background:var(--hit1)} .h0 b{color:var(--l3)}
-.tg{display:inline-block;margin-left:6px;padding:2px 6px 1px;border-radius:5px;font-size:10px;font-weight:800;
-letter-spacing:.04em;vertical-align:2px}
+/* ── list page: measured from the user's reference (iPhone 16 Pro, 402 pt wide; 1 pt = 2.29 px) ── */
+body{background:#0f0f0f;--red:#ff090c;--grn:#28da8e}
+@supports (color:color(display-p3 1 0 0)){body{--red:color(display-p3 1 .035 .047);--grn:color(display-p3 .157 .855 .557)}}
+/* the reference's numbers are Apple's condensed system face (SF Pro at ~66% width), which Safari reaches through font-stretch */
+.cd,.oc,.mhd,.bkh,.cells,svg.c2{font-family:system-ui,-apple-system,"Roboto Condensed",sans-serif;font-stretch:66%}
+.lh-r{display:flex;align-items:center;gap:8.3px;height:calc(var(--st) + 42.8px);padding:var(--st) 15.3px 0}
+.cb.tx{font-size:13.2px;font-weight:400}
+.mt.ml{margin-top:9px}
+.sx{position:relative;flex:1;min-width:0;display:flex;align-items:center;height:42.8px;padding:0 16px;border-radius:21.4px;
+border:1px solid rgba(255,255,255,.1);background:#101010;box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+.sx svg{flex:none;width:17px;height:17px;color:var(--grn)}
+.sx input{position:absolute;inset:0;width:100%;height:100%;padding:0 34px 0 44px;border:0;border-radius:21.4px;background:none;
+font-size:16px;outline:none;color:#fff;-webkit-appearance:none;appearance:none}
+.sx input::-webkit-search-cancel-button{display:none}
+.sx .ph3{flex:1;text-align:center;font-size:14.7px;color:#8e8e8e;pointer-events:none;white-space:nowrap}
+.sx .ph3 b{color:#fff;font-weight:600}
+.sx.has .ph3,.sx:focus-within .ph3{visibility:hidden}
+.sx .clr{position:absolute;right:9px;top:11.4px;z-index:1;width:20px;height:20px;padding:0;border:0;border-radius:50%;
+background:#3a3a3c;color:#000;font-size:13px;line-height:20px}
+.gcs{display:flex;gap:8.7px;overflow-x:auto;margin-top:8.8px;padding:0 15.3px;scrollbar-width:none}
+.gcs::-webkit-scrollbar{display:none}
+.gc0,.gc{flex:none;height:46.4px;border:1px solid #333;border-radius:9.6px;background:#181818;color:#fff;padding:0;
+box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.gc0{display:flex;flex-direction:column;align-items:center;justify-content:center;width:63.4px;background:#161616;color:#9a9a9a;
+font-size:8.5px;line-height:11px}
+.gc0 i{font-style:normal}
+.gc{display:flex;align-items:center;justify-content:space-between;width:115px;padding:0 7px 0 7px}
+.gt{display:flex;flex-direction:column;gap:2px;padding-top:2px}
+.gt span{display:flex;align-items:center;gap:6px;font-size:13.4px;line-height:16.5px}
+.gt img{width:13px;height:13px}
+.gc em{font-style:normal;font-size:8.4px;color:#9a9a9a;white-space:nowrap;padding-top:2px}
+.gc em .lv{color:var(--red);font-weight:700}
+.gc[aria-pressed="true"],.gc0[aria-pressed="true"]{background:#2e2e2e;border-color:#555}
+.ldv{height:1px;margin-top:8.9px;background:#363636}
+.lst{padding-bottom:calc(var(--sb) + 110px)}
+.pr{position:relative;display:block;width:100%;height:113px;padding:0 15.3px;border:0;border-bottom:1px solid #343434;
+background:none;text-align:left;color:#fff;transition:background-color .25s}
+.pr:active{background:#161616;transition:none}
+.av{position:absolute;left:15.3px;top:8px;width:45.4px;height:45.4px;border-radius:50%;background:#343434;overflow:hidden}
+.av .hs{position:absolute;left:-9px;top:1px;width:63px;height:auto}
+.who{position:absolute;left:69.5px;top:9px;right:120px}
+.nm{font-size:15.4px;line-height:19px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nm .cd{margin-left:3px;font-size:12.6px;font-weight:400;color:#9a9a9a}
+.lin{margin-top:.5px;font-size:15.4px;line-height:19px;font-weight:400}
+.oc{position:absolute;top:11px;width:60px;text-align:center}
+.oc i{display:block;font-style:normal;font-size:12.6px;line-height:19px;color:#9a9a9a}
+.oc b{display:block;margin-top:1px;font-size:15.6px;line-height:19px;font-weight:400}
+.oc.o{left:265.8px} .oc.e{left:329px}
+.up{color:var(--grn)!important} .dn{color:var(--red)!important} .md{color:var(--yel)!important}
+.bx6{position:absolute;left:15.3px;right:15.3px;top:61.3px;display:grid;grid-template-columns:repeat(6,1fr);gap:6.1px}
+.bx6>div{height:41.5px;border-radius:5px;background:#222;text-align:center;padding-top:5.6px}
+.bx6 i{display:block;font-style:normal;font-size:9.6px;line-height:12px;color:#fff}
+.bx6 b{display:block;margin-top:1.6px;font-size:13.4px;line-height:16px;font-weight:600;color:#fff}
+.tg{display:inline-block;margin-left:5px;padding:1px 5px 0;border-radius:4px;font-size:9.5px;font-weight:800;
+letter-spacing:.04em;vertical-align:1.5px}
 .tq{background:rgba(255,214,10,.18);color:var(--yel)} .to{background:rgba(255,69,58,.2);color:var(--red)}
 .tp{background:rgba(48,209,88,.16);color:var(--grn)} .tl{background:var(--red);color:#fff}
 .tf{background:rgba(255,159,10,.18);color:var(--org)} .tn{background:var(--g3);color:var(--l2)}
+.lhd{display:flex;justify-content:space-between;padding:12px 15.3px 8px;font-size:11.5px;color:#8e8e8e;border-bottom:1px solid #343434}
 .empty{padding:56px 24px;text-align:center;color:var(--l2);font-size:15px;line-height:1.4}
 .empty b{display:block;margin-bottom:6px;color:var(--l1);font-size:18px}
 .empty button{margin-top:16px}
 .btn{height:44px;padding:0 20px;border:0;border-radius:12px;background:var(--g2);font-size:16px;font-weight:600}
 .btn.pri{background:var(--blue)}
-.ban{margin:10px 16px 0;padding:10px 12px;border-radius:12px;background:rgba(255,159,10,.14);color:var(--org);font-size:13px;
+.ban{margin:10px 15.3px 0;padding:10px 12px;border-radius:12px;background:rgba(255,159,10,.14);color:var(--org);font-size:13px;
 font-weight:600}
 .ban.err{background:rgba(255,69,58,.15);color:var(--red)}
-.sk{height:118px;margin:0 0 10px;border-radius:18px;background:linear-gradient(90deg,var(--g1),#252527,var(--g1));
+.sk{height:113px;border-bottom:1px solid #343434;background:linear-gradient(90deg,#141414,#1d1d1d,#141414);
 background-size:200% 100%;animation:sk 1.1s infinite}
 @keyframes sk{to{background-position:-200% 0}}
-@media (prefers-reduced-motion:reduce){.sk{animation:none}.pr{transition:none}}
+@media (prefers-reduced-motion:reduce){.sk{animation:none}}
+/* markets view */
+.mhd,.mrw{display:grid;grid-template-columns:1fr 84px 84px;align-items:center;padding:0 15.3px;column-gap:8px}
+.mhd{height:34px;border-bottom:1px solid #343434;font-size:12.6px;color:#9a9a9a}
+.mhd span:not(:first-child){text-align:center}
+.mrw{width:100%;min-height:62px;border:0;border-bottom:1px solid #343434;background:none;color:#fff;text-align:left}
+.mrw:active{background:#161616}
+.mrw .nm{font-size:14px}
+.mrw .lin{margin-top:2px;font-size:12.6px;color:#9a9a9a}
+.mp{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:13.5px;font-variant-numeric:tabular-nums}
+.mp span{display:block;min-width:70px;padding:2px 0;border-radius:6px;text-align:center}
+.mp .best{background:rgba(40,218,142,.14);color:var(--grn)}
+.mp .na{color:#5a5a5a}
+/* floating tab bar */
+.tb{position:fixed;left:15.3px;right:15.3px;bottom:max(var(--sb),10px);z-index:25;display:flex;align-items:center;
+justify-content:space-between;pointer-events:none;transition:transform .35s cubic-bezier(.32,.72,0,1),opacity .25s}
+.tb>*{pointer-events:auto}
+.tb.away{transform:translateY(140%);opacity:0}
+.glass{border:1px solid rgba(255,255,255,.2);background:rgba(36,36,36,.38);
+-webkit-backdrop-filter:blur(7px) saturate(150%);backdrop-filter:blur(7px) saturate(150%);
+box-shadow:0 10px 30px rgba(0,0,0,.5),inset 0 1px 1px rgba(255,255,255,.12),inset 0 -1px 1px rgba(255,255,255,.05)}
+.tbc{display:flex;align-items:center;width:249.8px;height:62px;padding:0;border-radius:31px}
+.tbc button{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:53px;
+padding:0 0 1px;border:0;border-radius:26.5px;background:none;color:#fff;font-size:10.4px;transition:background-color .2s}
+.tbc button svg{width:22px;height:22px;margin-bottom:-1.5px}
+.tbc button[aria-pressed="true"]{background:rgba(255,255,255,.12)}
+.tbf{position:relative;width:62.9px;height:62.9px;padding:0;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center}
+.tbf svg{width:22px;height:17px}
+.tbf b{position:absolute;right:6px;top:6px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--blue);
+font-size:11px;line-height:17px;text-align:center}
+/* DvP table */
+.dvt{display:grid;grid-template-columns:44px 1fr auto;align-items:center;min-height:42px;border-bottom:.5px solid var(--sep);font-size:15px}
+.dvt img{width:22px;height:22px;vertical-align:-6px;margin-right:8px}
+.dvt b{font-weight:600;font-variant-numeric:tabular-nums}
+.dvt span:last-child{color:var(--l2);font-size:13px}
+.seg{display:flex;padding:2px;border-radius:9px;background:var(--g2);margin-top:10px}
+.seg button{flex:1;height:30px;border:0;border-radius:7px;background:none;font-size:13px;font-weight:600;color:var(--l1)}
+.seg button[aria-pressed="true"]{background:#5a5a5e;box-shadow:0 3px 8px rgba(0,0,0,.25)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{display:inline-flex;align-items:center;height:32px;padding:0 13px;border-radius:16px;border:0;background:var(--g2);
+color:var(--l1);font-size:13px;font-weight:600}
+.chip[aria-pressed="true"]{background:var(--l1);color:#000}
 /* ── bottom sheet ── */
-.scrim{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.45);opacity:0;transition:opacity .2s}
+.scrim{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.5);opacity:0;transition:opacity .34s ease;pointer-events:none}
+.scrim.on{pointer-events:auto}
 .scrim.on{opacity:1}
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;max-height:86vh;overflow-y:auto;padding:8px 16px calc(var(--sb) + 16px);
-border-radius:14px 14px 0 0;background:var(--g1);transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.9,.3,1)}
+border-radius:16px 16px 0 0;background:#1c1c1e;transform:translateY(100%);overscroll-behavior:contain}
 .sheet.on{transform:none}
 .sheet:focus{outline:none}
 .grab{width:36px;height:5px;margin:0 auto 10px;border-radius:3px;background:var(--g3)}
@@ -128,7 +159,7 @@ border-bottom:.5px solid var(--sep);background:none;font-size:17px;text-align:le
 .sheet .acts .btn{flex:1}
 /* ── player page ── */
 .pg{position:fixed;inset:0;z-index:30;overflow-y:auto;background:var(--bg);transform:translateX(100%);
-transition:transform .32s cubic-bezier(.2,.9,.3,1);-webkit-overflow-scrolling:touch}
+-webkit-overflow-scrolling:touch;overscroll-behavior:contain;box-shadow:-12px 0 32px rgba(0,0,0,.45)}
 .pg.on{transform:none}
 @media (prefers-reduced-motion:reduce){.pg,.sheet{transition:none}}
 .pg .bar{padding-bottom:6px}
@@ -228,7 +259,6 @@ th.r,td.r{text-align:right}
 /* ── player page: measured from the user's reference (iPhone 16 Pro, 402 pt wide; 1 pt = 2.29 px) ── */
 .pg{background:#0f0f0f;--red:#ff090c;--grn:#28da8e}
 @supports (color:color(display-p3 1 0 0)){.pg{--red:color(display-p3 1 .035 .047);--grn:color(display-p3 .157 .855 .557)}}
-.rc2,.pg .c2,.cells{font-family:"Roboto Condensed","Arial Narrow",sans-serif}
 .ph{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8.3px;height:calc(var(--st) + 42.8px);
 padding:var(--st) 15.3px 0;pointer-events:none}
 .ph>*{pointer-events:auto}
@@ -242,27 +272,30 @@ justify-content:center;text-align:center;line-height:1.15;text-shadow:0 1px 6px 
 .ph .sp2{flex:1}
 .ph-t b{display:block;font-size:14.3px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ph-t span{display:block;margin-top:2.5px;font-size:11.6px;color:#9d9d9d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mt{height:43.7px;margin:8px 15.3px 0;border:1px solid #2a2a2a;border-radius:22px;background:#161616;overflow:hidden}
+.mt{height:43.7px;margin:8px 15.3px 0;border:1px solid rgba(255,255,255,.1);border-radius:22px;background:#161616;overflow:hidden;
+box-shadow:inset 0 1px 0 rgba(255,255,255,.07)}
 .mt-in{display:flex;align-items:center;height:100%;overflow-x:auto;padding:0 3.5px;scrollbar-width:none}
 .mt-in::-webkit-scrollbar{display:none}
-.mt button{flex:none;height:35px;padding:0 17.5px;border:0;border-radius:17.5px;background:none;color:#8e8e8e;font-size:13px}
+.mt-in{position:relative}
+.mt button{position:relative;z-index:1;flex:none;width:72.48px;height:35px;padding:0;border:0;border-radius:17.5px;background:none;color:#fff;font-size:13px;
+transition:color .25s}
 .mt button[aria-pressed="true"]{background:#313131;color:#fff}
 .hro{position:relative;height:150px;margin-top:12.5px;padding:4px 15.3px 0;border-bottom:1px solid #343434;overflow:hidden}
 .hro-l{position:relative;z-index:1;max-width:60%}
-.hro-l h2{margin:0;font-size:20.6px;font-weight:600;line-height:24px;letter-spacing:-.01em}
+.hro-l h2{margin:0;font-size:20.2px;font-weight:600;line-height:24px;letter-spacing:-.01em}
 .hro-s{font-size:12.4px;line-height:17.5px;color:#9b9b9b}
 .hro-s:first-of-type{margin-top:3.5px}
 .tlg{position:absolute;left:0;top:89.5px;display:flex;align-items:center;justify-content:center;width:43.7px;height:43.7px;border-radius:50%}
 .tlg img{width:30px;height:30px}
 .hro-i{position:absolute;right:4px;bottom:0;height:143px;width:auto}
 .sg2{position:relative;height:93px;padding:0 15.3px}
-.cells{position:absolute;left:15.3px;top:13.5px;display:grid;grid-template-columns:73px 73.4px auto;row-gap:10.6px}
+.cells{position:absolute;left:15.3px;top:14.1px;display:grid;grid-template-columns:73px 73.4px auto;row-gap:11.4px}
 .cells>div,.cells>button{min-width:0;padding:0;border:0;background:none;text-align:left;color:#fff}
-.cells i{display:block;font-style:normal;font-size:11.6px;line-height:14px;color:#a1a1a1;white-space:nowrap}
-.cells b{display:flex;align-items:center;gap:2px;margin-top:3px;font-size:13.2px;line-height:17px;font-weight:400;white-space:nowrap}
+.cells i{display:block;font-style:normal;font-size:12.6px;line-height:14px;color:#a1a1a1;white-space:nowrap}
+.cells b{display:flex;align-items:center;gap:1px;margin-top:3px;font-size:14.9px;font-stretch:62%;line-height:17px;font-weight:400;white-space:nowrap}
 .cv{margin-left:5px;color:#a1a1a1;font-size:15px;line-height:1}
-.tri{font-size:11.5px;margin-right:3px}
-.cells .vs{color:#a1a1a1;font-size:12px;margin-right:3px} .tri.up{color:var(--grn)} .tri.dn{color:var(--red)}
+.tri{font-size:11.5px;margin-right:1px}
+.cells .vs{color:#a1a1a1;font-size:14.9px;margin-right:3px} .tri.up{color:var(--grn)} .tri.dn{color:var(--red)}
 .muc{position:absolute;right:15.3px;top:13.1px;display:flex;flex-direction:column;align-items:center;justify-content:center;
 width:94.4px;height:79.5px;padding:0;border:1px solid #2a2a2a;border-radius:13px;background:#131313;color:#fff;font-size:11.6px}
 .muc svg{margin:-4px 0 -2px}
@@ -273,22 +306,22 @@ font-size:12px;line-height:15px;white-space:nowrap;pointer-events:none}
 svg.c2.pick g.br:not(.sel){opacity:.4}
 .c2w::-webkit-scrollbar{display:none}
 svg.c2{display:block}
-svg.c2 .ax{fill:#9a9a9a;font-size:11.3px}
-svg.c2 .lx{fill:#e6e6e6;font-size:11.3px}
-svg.c2 .mn{fill:#fff;font-size:13.3px;font-weight:400}
-svg.c2 .vv{fill:#0b0b0b;font-size:13.3px;font-weight:400}
-svg.c2 .vw{fill:#fff;font-size:13.3px;font-weight:400}
-svg.c2 .xl{fill:#9a9a9a;font-size:9.9px}
+svg.c2 .ax{fill:#9a9a9a;font-size:14.5px}
+svg.c2 .lx{fill:#fff;font-size:14.9px}
+svg.c2 .mn{fill:#fff;font-size:15.5px;font-weight:600}
+svg.c2 .vv{fill:#0b0b0b;font-size:14.9px;font-weight:400}
+svg.c2 .vw{fill:#fff;font-size:14.9px;font-weight:400}
+svg.c2 .xl{fill:#9a9a9a;font-size:10.5px}
 svg.c2 g.br:focus{outline:none} svg.c2 g.br:focus-visible rect{stroke:var(--blue);stroke-width:2}
 .wrow{display:flex;align-items:center;gap:9.6px;margin:17.5px 15.3px 0}
-.wcap{flex:1;display:flex;height:42.4px;padding:0 3.5px;align-items:center;border:1px solid #2a2a2a;border-radius:21.2px;
+.wcap{position:relative;flex:1;display:flex;height:42.4px;padding:0 3.5px;align-items:center;border:1px solid #2a2a2a;border-radius:21.2px;
 background:#161616;overflow-x:auto;scrollbar-width:none}
 .wcap::-webkit-scrollbar{display:none}
-.wc{flex:1;min-width:0;height:35px;padding:0;border:0;border-radius:17.5px;background:none;text-align:center;line-height:1.35}
+.wc{position:relative;z-index:1;flex:1;min-width:0;height:35px;padding:0;border:0;border-radius:17.5px;background:none;text-align:center;line-height:1.35}
 .wc i{display:block;font-style:normal;font-size:10.7px;font-weight:500;color:#fff}
 .wc b{display:block;font-size:11.8px;font-weight:700}
 .wc b.up{color:var(--grn)} .wc b.dn{color:var(--red)}
-.wc[aria-pressed="true"]{background:#313131}
+#mtl button[aria-pressed="true"],.wc[aria-pressed="true"],.tbc button[aria-pressed="true"]{background:none}
 .wc:disabled{opacity:.35}
 .fb{width:42.8px;height:42.8px}
 .fb svg{width:19px;height:15px}
@@ -296,12 +329,13 @@ background:#161616;overflow-x:auto;scrollbar-width:none}
 .cf-h{display:flex;align-items:center;gap:10.5px;height:19.2px}
 .cf-h h3{margin:0;font-size:12px;font-weight:600}
 .ca{height:19.2px;padding:0 9.2px;border:1px solid #4a4a4a;border-radius:9.6px;background:#171717;font-size:8.4px}
-.fcs{display:flex;flex-wrap:wrap;gap:8.3px;margin-top:16px}
-.fc{display:inline-flex;align-items:center;gap:0;height:26.2px;padding:0 12px;border:1px solid #3e3e3e;border-radius:13.1px;
-background:#171717;font-size:12.2px;color:#fff}
-.fc svg{width:13px;height:12px;margin-right:5px}
+.fcs{display:flex;flex-wrap:wrap;gap:8.3px;margin-top:17.2px}
+.fc{display:inline-flex;align-items:center;gap:0;height:26.2px;padding:0 12px;border:1px solid rgba(255,255,255,.15);border-radius:13.1px;
+background:#141414;font-size:12.8px;letter-spacing:-.25px;color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.07);
+transition:background-color .22s,border-color .22s,transform .16s}
+.fc svg{width:13px;height:12px;margin-right:7px}
 .fc em{font-style:normal;margin-left:.3em} .fc em.good{color:var(--grn)} .fc em.bad{color:var(--red)} .fc em.mid{color:var(--yel)}
-.fc.on{background:#2b2b2b;border-color:#4a4a4a}
+.fc.on{background:#2a2a2a;border-color:rgba(255,255,255,.2)}
 .rp{margin:17.3px 0 0}
 .rp-h{display:flex;justify-content:space-between;align-items:baseline;height:16px}
 .rp-h span{font-size:13.2px;font-weight:600}
@@ -315,6 +349,47 @@ background:#171717;font-size:12.2px;color:#fff}
 .box0{padding:12px;border:1px solid #2a2a2a;border-radius:13px;background:#141414;font-size:14px}
 .box0 .kv{font-size:14px;min-height:40px}
 .pg details.log summary{font-size:13.1px;text-transform:none;letter-spacing:0;color:#fff}
+/* books table (measured: header 31.5 pt with a 23 pt LINE pill, rows 39.7 pt, columns at 15.3 / 136.8 / 226.3 / 310.7 pt) */
+.bkt{margin-top:28.3px}
+.bkh,.bkr2{display:grid;grid-template-columns:121.5px 89.5px 84.4px 1fr;align-items:center;padding:0 15.3px;border-bottom:1px solid #262626}
+.bkh{height:39.4px;font-size:14.3px;font-weight:500;color:#9a9a9a}
+.lnp{display:inline-flex;align-items:center;justify-content:space-between;width:54.6px;height:23px;padding:0 8px 0 7.5px;
+border:1px solid rgba(255,255,255,.15);border-radius:11.5px;background:#151515;color:#9a9a9a;font:inherit;
+box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+.lnp svg{width:8.5px;height:6px}
+.bkr2{height:39.7px;font-size:15.4px;font-weight:500}
+.bkr2>button{justify-self:start;padding:6px 8px 6px 0;margin:-6px 0;border:0;background:none;color:#fff;font:inherit;font-weight:500;
+font-variant-numeric:normal}
+.bkr2 .bl{padding-left:4.8px}
+.bkr2 .best{color:var(--grn)}
+.bkr2.alt .bl,.bkr2 .na{color:#5f5f5f}
+/* capsule pills that slide to the pressed button */
+.pill2{position:absolute;left:0;top:0;z-index:0;border-radius:999px;background:#313131;pointer-events:none;opacity:0;
+transition:transform .36s cubic-bezier(.32,.72,0,1),opacity .2s;will-change:transform}
+.tbc{position:relative}
+.tbc .pill2{background:rgba(255,255,255,.13)}
+.tbc button{z-index:1}
+/* motion: an iOS push for the player page, springy sheets, press feedback, bars that grow in */
+.shade{position:fixed;inset:0;z-index:29;background:#000;opacity:0;pointer-events:none;transition:opacity .44s cubic-bezier(.32,.72,0,1)}
+.shade.on{opacity:.5}
+.snap{transition:none!important}
+.cb,.fc,.wc,.gc,.gc0,.mt button,.tbc button,.tbf,.muc,.lnp,.chip,.seg button,.btn,.opt,.cells button{transition:transform .16s ease,background-color .22s,color .22s}
+.cb:active,.fc:active,.gc:active,.gc0:active,.tbf:active,.muc:active,.lnp:active,.chip:active,.btn:active{transform:scale(.94)}
+.wc:active,.mt button:active,.tbc button:active,.seg button:active,.cells button:active{transform:scale(.92)}
+.opt:active{background:rgba(255,255,255,.06)}
+.cb.pop svg{animation:pop .36s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{45%{transform:scale(1.32)}}
+svg.c2.grow .bv,svg.c2.grow .bm{transform-box:fill-box;transform-origin:50% 100%;animation:grow .4s cubic-bezier(.2,.8,.2,1) both;
+animation-delay:var(--d)}
+svg.c2.grow .vv,svg.c2.grow .vw,svg.c2.grow .mn{animation:fade .3s ease both;animation-delay:calc(var(--d) + .16s)}
+@keyframes grow{from{transform:scaleY(0)}}
+@keyframes fade{from{opacity:0}}
+svg.c2 g.br{transition:opacity .2s}
+.rp.in{animation:rpin .3s cubic-bezier(.2,.8,.2,1)}
+@keyframes rpin{from{opacity:0;transform:translateY(-8px)}}
+.pr{content-visibility:auto;contain-intrinsic-size:auto 113px}
+@media (prefers-reduced-motion:reduce){.sheet,.pill2,.shade{transition:none!important}svg.c2.grow *{animation:none!important}}
+
 """
 
 JS_CORE = r"""
@@ -504,9 +579,9 @@ let D = null, ERR = null, LOADING = true, CUR = null;
 // on a touchscreen, moving focus by script only draws a ring (and focusing a <select> can pop its picker)
 const TOUCH = matchMedia("(pointer: coarse)").matches;
 const ST = {date: null, gid: "all", market: "points", side: "over", q: "", sort: "hit10", dir: "desc", team: "all",
-            book: "all", lmin: "", lmax: "", omin: "", omax: ""};
+            book: "all", lmin: "", lmax: "", omin: "", omax: "", view: "props"};
 const DT = {line: null, win: "l10", home: null, starter: null, result: null, rest: null, ranges: {}, without: {},
-            dvp: false, def: false, open: {min: true}, more: false};
+            dvp: false, def: false, open: {}, more: false, fresh: null};
 const RANGES = [["min", "Minutes", "Min"], ["fga", "Field goal attempts", "FGA"], ["fg3a", "3-point attempts", "3PA"],
                 ["fta", "Free throw attempts", "FTA"], ["margin", "Team margin", "Margin"]];
 const SEGS = [["home", "Location", [[null, "Any"], [true, "Home"], [false, "Away"]]],
@@ -519,7 +594,8 @@ const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&": "&am
 const iso = s => new Date(/Z|[+-]\d\d:\d\d$/.test(s) ? s : s + "Z");
 const mt = (s, day) => s ? iso(s).toLocaleString("en-US", Object.assign({timeZone: "America/Denver", hour: "numeric", minute: "2-digit"}, day ? {weekday: "short"} : {})) : "—";
 const ago = s => { if (!s) return "never"; const m = (Date.now() - iso(s).getTime()) / 60000; return m < 1 ? "just now" : m < 60 ? Math.round(m) + "m ago" : Math.round(m / 60) + "h ago"; };
-const logo = (t, c) => TEAM_ID[t] ? `<img class="${c || "lg"}" alt="" src="https://cdn.nba.com/logos/nba/${TEAM_ID[t]}/global/D/logo.svg">` : "";
+const logo = (t, c) => TEAM_ID[t] ? `<img class="${c || "lg"}" alt="" decoding="async" src="https://cdn.nba.com/logos/nba/${TEAM_ID[t]}/global/D/logo.svg">` : "";
+const heroSrc = pid => `https://cdn.nba.com/headshots/nba/latest/1040x760/${pid}.png`;
 const head = pid => `<img class="hs" alt="" loading="lazy" src="https://cdn.nba.com/headshots/nba/latest/260x190/${pid}.png" onerror="this.style.visibility='hidden'">`;
 const short = m => (D.markets || {})[m] || m;
 const gameOf = gid => D.games.find(g => g.gid === gid);
@@ -559,48 +635,58 @@ function when(g) {
 }
 const vs = p => p.team ? (p.home ? "vs " : "@ ") + p.opp : "";
 // ── list ──
+const MKT_TABS = ["trends", "points", "assists", "rebounds", "threes", "pra", "pts_reb", "pts_ast", "reb_ast"];
+const TREND_MIN = .7;                 // Trends: the chosen side hit in 70%+ of the last 10 (5+ games)
+const VIEWS = [["props", "Props"], ["markets", "Markets"], ["watch", "Watchlist"]];
+const unit = m => (D.markets || {})[m] || m;
+// long names shorten to an initial, as on the reference ("M. Diabaté")
+const nameOf = n => n.length > 13 && n.indexOf(" ") > 0 ? n[0] + ". " + n.slice(n.indexOf(" ") + 1) : n;
+const r1 = v => Math.round(v * 10) / 10;
+let RATES = new Map(), ROWS = new Map();
+function rates(p) {
+  const k = p.id + "|" + ST.side;
+  if (!RATES.has(k)) RATES.set(k, propRates(p, logsOf(p), ST.side, D.season));
+  return RATES.get(k);
+}
 function availMarkets() {
   const m = {};
   D.props.forEach(p => { const g = gameOf(p.gid); if (g && g.date === ST.date) m[p.market] = 1; });
   return ORDER.filter(k => m[k]);
 }
-function filtersOn() { return ["team", "book"].filter(k => ST[k] !== "all").length + ["lmin", "lmax", "omin", "omax"].filter(k => ST[k] !== "").length; }
-function header() {
-  const days = D.dates.map((d, i) => {
-    const n = D.games.filter(g => g.date === d).length;
-    const lab = i === 0 ? "Today" : i === 1 ? "Tomorrow" : d;
-    return `<button data-date="${d}" aria-pressed="${d === ST.date}">${lab} · ${n}</button>`;
-  }).join("");
-  const mk = availMarkets().map(m => `<button class="chip" data-market="${m}" aria-pressed="${m === ST.market}">${esc(NAME[m])}</button>`).join("");
-  const games = D.games.filter(g => g.date === ST.date).map(g =>
-    `<button class="chip" data-gid="${g.gid}" aria-pressed="${g.gid === ST.gid}">${logo(g.away, "")}${esc(g.away)} @ ${esc(g.home)}${logo(g.home, "")} <span class="t">${g.state === "live" ? '<span class="lv">LIVE</span>' : g.state === "final" ? "Final" : g.state === "postponed" ? "PPD" : mt(g.tip)}</span></button>`).join("");
-  const fo = filtersOn();
-  return `<div class="top"><div class="bar-r"><a class="bk" href="index.html">${CHEV}Pickz</a><span class="upd" id="upd">Updated ${ago(D.generated_at)}</span></div>
-    <h1>NBA Props</h1>
-    <label class="srch"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="5"/><path d="m11 11 3.5 3.5" stroke-linecap="round"/></svg>
-      <span class="sr">Search players</span><input id="q" type="search" placeholder="Search players or team" autocomplete="off" autocorrect="off" value="${esc(ST.q)}">
-      ${ST.q ? '<button class="clr" id="qx" aria-label="Clear search">×</button>' : ""}</label>
-    <div class="seg" role="group" aria-label="Day">${days}</div>
-    <nav class="chips" aria-label="Games"><button class="chip" data-gid="all" aria-pressed="${ST.gid === "all"}">All games</button>${games}</nav></div>
-    <div class="bar pin"><nav class="chips" aria-label="Markets">${mk}</nav>
-    <div class="tools"><div class="seg" role="group" aria-label="Side"><button data-side="over" aria-pressed="${ST.side === "over"}">Over</button><button data-side="under" aria-pressed="${ST.side === "under"}">Under</button></div>
-      <span class="sp"></span>
-      <button class="pill" id="sortb" aria-haspopup="dialog"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 2v10M1.5 9.5 4 12l2.5-2.5M10 12V2M7.5 4.5 10 2l2.5 2.5"/></svg>${esc((SORTS.find(s => s[0] === ST.sort) || SORTS[0])[1].replace(" hit rate", ""))}</button>
-      <button class="pill" id="filtb" aria-haspopup="dialog">Filters${fo ? `<b>${fo}</b>` : ""}</button></div></div>`;
+function filtersOn() { return ["team", "book"].filter(k => ST[k] !== "all").length + ["lmin", "lmax", "omin", "omax"].filter(k => ST[k] !== "").length + (ST.side === "under" ? 1 : 0); }
+function listProps() {
+  const st = Object.assign({}, ST, {market: ST.market === "trends" || ST.view === "watch" ? "all" : ST.market});
+  let list = filterProps(D.props, st, gameOf, logsOf);
+  if (ST.view === "watch") { const f = favs(); list = list.filter(p => f.indexOf(p.pid) >= 0 && (ST.market === "trends" || p.market === ST.market)); }
+  else if (ST.market === "trends") list = list.filter(p => { const r = rates(p).l10; return r && r.n >= 5 && r.rate !== null && r.rate >= TREND_MIN; });
+  return sortProps(list, ST.sort, ST.dir, logsOf, ST.side, D.season);
 }
 function row(p) {
-  const g = gameOf(p.gid), logs = logsOf(p), r = propRates(p, logs, ST.side, D.season);
-  const best = p.main === null ? null : bestPrice(p, p.main, ST.book, ST.side);
-  const cells = [["L5", "l5"], ["L10", "l10"], ["L20", "l20"], ["H2H", "h2h"], ["SZN", "season"]].map(([lab, k]) => {
-    const x = r[k] || {n: 0, rate: null};
-    return `<div class="hit ${hcls(x.rate, x.n)}"><i>${lab}</i><b>${pct(x.rate)}</b></div>`;
-  }).join("");
+  const g = gameOf(p.gid), r = rates(p), c = p.ctx || {}, side = ST.side;
+  const best = p.main === null ? null : bestPrice(p, p.main, ST.book, side);
+  const hc = x => !x || !x.n || x.rate === null ? "" : x.rate > .5 ? "up" : x.rate < .5 ? "dn" : "";
+  const cell = (lab, k) => { const x = r[k]; return `<div><i>${lab}</i><b class="${hc(x)}">${x && x.n ? pct(x.rate) : "–"}</b></div>`; };
+  const dv = c.dvp_rank ? `<b class="${{good: "up", bad: "dn", mid: "md"}[rankCls(c.dvp_rank, c.teams, side)]}">${ord(c.dvp_rank)}</b>` : "<b>–</b>";
+  const a = r.l10 && r.l10.n ? r.l10.avg : null;
+  const ac = a === null || p.main === null || a === p.main ? "" : (a > p.main) === (side !== "under") ? "up" : "dn";
   const live = p.live && g.state !== "pregame" ? `<span class="tg ${g.state === "live" ? "tl" : "tn"}">${g.state === "live" ? "LIVE" : "FINAL"} ${p.live.value}</span>` : "";
-  const flag = p.flag && p.flag.card === 1 ? '<span class="tg tf">ENGINE</span>' : "";
-  return `<button class="pr" data-id="${esc(p.id)}"><div class="pr-t"><div class="av">${head(p.pid)}${logo(p.team)}</div>
-    <div class="who"><div class="nm">${esc(p.player)}${injTag(p)}${live}${flag}</div><div class="sub">${esc(vs(p))} · ${when(g)}</div></div>
-    <div class="ln"><div class="v num"><i>${ST.side === "under" ? "U" : "O"}</i>${p.main === null ? "—" : p.main}</div><div class="o num">${best ? american(best.odds) + " " + best.book.toUpperCase() : p.main === null ? "alt only" : "—"}</div></div></div>
-    <div class="hits num" aria-label="Hit rates">${cells}</div></button>`;
+  return `<button class="pr" data-id="${esc(p.id)}"><span class="av">${head(p.pid)}</span>
+    <div class="who"><div class="nm">${esc(nameOf(p.player))}<span class="cd">${esc(p.team || "")}</span>${injTag(p)}${live}</div>
+    <div class="lin num">${p.main === null ? "alt lines" : p.main + " " + esc(unit(p.market))}</div></div>
+    <div class="oc o"><i>ODDS</i><b class="num">${best ? american(best.odds) : "–"}</b></div>
+    <div class="oc e"><i>AVG</i><b class="num ${ac}">${a === null ? "–" : r1(a)}</b></div>
+    <div class="bx6 num" aria-label="Hit rates">${cell(D.season.slice(0, 4), "season")}${cell("H2H", "h2h")}<div><i>DvP</i>${dv}</div>${cell("L5", "l5")}${cell("L10", "l10")}${cell("L20", "l20")}</div></button>`;
+}
+function mrow(p) {
+  const line = p.main;
+  const bo = line === null ? null : bestPrice(p, line, "all", "over"), bu = line === null ? null : bestPrice(p, line, "all", "under");
+  const px = b => {
+    const q = p.books[b], r = q && line !== null ? rungAt(q, line) : null;
+    if (!q) return '<div class="mp"><span class="na">—</span></div>';
+    if (!r) { const m = rungAt(q, q.main); return m ? `<div class="mp"><span class="na">${q.main}: ${american(m[1])}</span><span class="na">${american(m[2])}</span></div>` : '<div class="mp"><span class="na">—</span></div>'; }
+    return `<div class="mp"><span class="${bo && bo.book === b ? "best" : ""}">O ${american(r[1])}</span><span class="${bu && bu.book === b ? "best" : ""}">U ${american(r[2])}</span></div>`;
+  };
+  return `<button class="mrw" data-id="${esc(p.id)}"><div><div class="nm">${esc(nameOf(p.player))}<span class="cd">${esc(p.team || "")}</span></div><div class="lin">${line === null ? "alt lines" : line + " " + esc(unit(p.market))} · ${esc(vs(p))}</div></div>${px("fd")}${px("dk")}</button>`;
 }
 function banners() {
   const out = [], b = D.sources.books;
@@ -610,91 +696,227 @@ function banners() {
   if ((Date.now() - iso(D.generated_at).getTime()) / 60000 > 10) out.push("This page hasn't refreshed for a while — the prop feed may be down.");
   return out.map(t => `<div class="ban" role="status">${esc(t)}</div>`).join("");
 }
+function topRow() {
+  return `<div class="lh-r"><button class="cb tx" id="lgb" aria-haspopup="dialog" aria-label="League and data">NBA</button>
+    <label class="sx${ST.q ? " has" : ""}">${ICON.search}<span class="ph3" aria-hidden="true">Search <b>Pickz</b></span><input id="q" type="search" enterkeyhint="search" aria-label="Search players or teams" autocomplete="off" autocorrect="off" spellcheck="false" value="${esc(ST.q)}"><button class="clr" id="qx" aria-label="Clear search"${ST.q ? "" : " hidden"}>×</button></label>
+    <button class="cb tx" id="dvpb" aria-haspopup="dialog" aria-label="Defense vs position">DvP</button></div>`;
+}
+function cards() {
+  const gs = D.games.filter(g => g.date === ST.date), i = D.dates.indexOf(ST.date);
+  const lab = i === 0 ? "Today" : i === 1 ? "Tomorrow" : ST.date.slice(5).replace("-", "/");
+  return `<button class="gc0" id="dayb" aria-haspopup="dialog"><i>${lab}</i><i>${gs.length} GAME${gs.length === 1 ? "" : "S"}</i></button>` +
+    gs.map(g => `<button class="gc" data-gid="${g.gid}" aria-pressed="${g.gid === ST.gid}" aria-label="${esc(g.away)} at ${esc(g.home)}"><span class="gt"><span>${logo(g.away, "")}${esc(g.away)}</span><span>${logo(g.home, "")}${esc(g.home)}</span></span><em>${g.state === "live" ? '<span class="lv">LIVE</span>' : g.state === "final" ? "Final" : g.state === "postponed" ? "PPD" : mt(g.tip).replace(" ", "\u200a")}</em></button>`).join("");
+}
+// a pill under the pressed button of a capsule, moved with a transform so a tap slides it across
+function slide(box, instant) {
+  const pill = box && $(".pill2", box), b = box && $('[aria-pressed="true"]', box);
+  if (!pill) return;
+  if (!b) { pill.style.opacity = 0; return; }
+  if (instant) pill.style.transition = "none";
+  const w = +box.dataset.pw || b.offsetWidth;
+  pill.style.width = w + "px"; pill.style.height = b.offsetHeight + "px";
+  pill.style.transform = `translate(${b.offsetLeft + (b.offsetWidth - w) / 2}px,${b.offsetTop}px)`; pill.style.opacity = 1;
+  if (instant) { void pill.offsetWidth; pill.style.transition = ""; }
+}
+function press(sel, test, root) { $$(sel, root).forEach(b => b.setAttribute("aria-pressed", test(b))); }
 function render() {
   const app = $("#app");
   if (!D) {
-    app.innerHTML = LOADING ? '<div class="top"><div class="bar-r"><a class="bk" href="index.html">' + CHEV + 'Pickz</a></div><h1>NBA Props</h1></div><main aria-busy="true">' + '<div class="sk"></div>'.repeat(6) + "</main>"
-      : '<div class="top"><div class="bar-r"><a class="bk" href="index.html">' + CHEV + 'Pickz</a></div><h1>NBA Props</h1></div><div class="empty" role="alert"><b>Couldn\'t load props</b>' + esc(ERR) + '<br><button class="btn pri" id="retry">Try again</button></div>';
+    app.innerHTML = '<header class="lh"><div class="lh-r"><button class="cb tx">NBA</button><div class="sx"><span class="ph3">Search <b>Pickz</b></span></div><button class="cb tx">DvP</button></div></header>' +
+      (LOADING ? '<main class="lst" aria-busy="true">' + '<div class="sk"></div>'.repeat(7) + "</main>"
+      : '<div class="empty" role="alert"><b>Couldn\'t load props</b>' + esc(ERR) + '<br><button class="btn pri" id="retry">Try again</button></div>');
     const r = $("#retry"); if (r) r.onclick = load;
     return;
   }
   if (!ST.date || D.dates.indexOf(ST.date) < 0) ST.date = D.dates.find(d => D.props.some(p => (gameOf(p.gid) || {}).date === d)) || D.dates[0];
   const mks = availMarkets();
-  if (mks.length && mks.indexOf(ST.market) < 0) ST.market = mks[0];
-  const onDate = D.props.filter(p => (gameOf(p.gid) || {}).date === ST.date);
-  const list = sortProps(filterProps(D.props, ST, gameOf, logsOf), ST.sort, ST.dir, logsOf, ST.side, D.season);
-  let body;
+  if (ST.market !== "trends" && mks.length && mks.indexOf(ST.market) < 0) ST.market = mks[0];
+  if (!$("#lt")) {
+    app.innerHTML = `<header class="lh"><div id="lt">${topRow()}</div><nav class="mt ml" aria-label="Markets"><div class="mt-in" id="mtl"></div></nav>
+      <nav class="gcs" id="gcs" aria-label="Games"></nav><div class="ldv"></div></header><div id="ban"></div><main class="lst" id="lst"></main>`;
+    bindTop();
+  }
+  $("#mtl").innerHTML = '<span class="pill2"></span>' + MKT_TABS.filter(m => m === "trends" || mks.indexOf(m) >= 0).map(m => `<button data-market="${m}" aria-pressed="${m === ST.market}">${TAB[m]}</button>`).join("");
+  $("#gcs").innerHTML = cards();
+  $("#ban").innerHTML = banners();
+  bindHead();
+  slide($("#mtl"), true);
+  renderList();
+  tabbar();
+}
+function renderList() {
+  const lst = $("#lst"), onDate = D.props.filter(p => (gameOf(p.gid) || {}).date === ST.date), list = listProps();
+  let body = null;
   if (!D.games.some(g => g.date === ST.date)) body = '<div class="empty"><b>No games</b>There are no NBA games on this day.</div>';
   else if (!onDate.length) body = '<div class="empty"><b>No props yet</b>The books usually post player props on game day.</div>';
   else if (ST.gid !== "all" && !onDate.some(p => p.gid === ST.gid)) body = '<div class="empty"><b>No props for this game yet</b>Check back closer to tip.</div>';
-  else if (!list.length) body = '<div class="empty"><b>No matches</b>Nothing fits these filters.<br><button class="btn" id="reset2">Reset filters</button></div>';
-  else body = `<div class="hd"><span>${esc(NAME[ST.market] || "")}</span><span>${list.length} props · ${ST.side} hit rate at the main line</span></div>` + list.map(row).join("");
-  app.innerHTML = header() + banners() + `<main>${body}</main>`;
-  bindList();
+  else if (!list.length) body = ST.view === "watch" ? '<div class="empty"><b>Nothing on your watchlist</b>Tap ☆ on a player\'s page to follow him here.</div>'
+    : ST.market === "trends" ? `<div class="empty"><b>No hot trends</b>No ${ST.side} hit in ${TREND_MIN * 100}%+ of the last 10 games with these filters.</div>`
+    : '<div class="empty"><b>No matches</b>Nothing fits these filters.<br><button class="btn" id="reset2">Reset filters</button></div>';
+  if (body) { lst.innerHTML = body; const r2 = $("#reset2"); if (r2) r2.onclick = resetFilters; return; }
+  if (ST.view === "markets") {
+    lst.innerHTML = '<div class="mhd"><span>PLAYER</span><span>FANDUEL</span><span>DRAFTKINGS</span></div>' + list.map(mrow).join("");
+    return;
+  }
+  // rows are built once per prop and side, then reused: re-sorting or switching tabs never re-decodes the headshots
+  const frag = document.createDocumentFragment();
+  list.forEach(p => {
+    const k = p.id + "|" + ST.side + "|" + ST.book;
+    let e = ROWS.get(k);
+    if (!e) { const t = document.createElement("template"); t.innerHTML = row(p).trim(); e = t.content.firstChild; ROWS.set(k, e); }
+    frag.appendChild(e);
+  });
+  lst.replaceChildren(frag);
 }
-function bindList() {
-  $$("[data-date]").forEach(b => b.onclick = () => { ST.date = b.dataset.date; ST.gid = "all"; save(); render(); });
-  $$("[data-market]").forEach(b => b.onclick = () => { ST.market = b.dataset.market; save(); render(); });
-  $$("[data-gid]").forEach(b => b.onclick = () => { ST.gid = b.dataset.gid; save(); render(); });
-  $$("[data-side]").forEach(b => b.onclick = () => { ST.side = b.dataset.side; save(); render(); });
-  const q = $("#q");
-  if (q) q.oninput = () => { ST.q = q.value; save(); const at = q.selectionStart; render(); const n = $("#q"); n.focus(); n.setSelectionRange(at, at); };
-  const qx = $("#qx"); if (qx) qx.onclick = e => { e.preventDefault(); ST.q = ""; save(); render(); };
-  $("#sortb").onclick = sortSheet;
+function tabbar() {
+  const tb = $("#tb"), fo = filtersOn();
+  if (!$(".tbc", tb)) tb.innerHTML = `<div class="tbc glass" role="group" aria-label="Views" data-pw="72"><span class="pill2"></span>${VIEWS.map(([k, l]) => `<button data-view="${k}" aria-pressed="${ST.view === k}">${ICON[k]}<span>${l}</span></button>`).join("")}</div><button class="tbf glass" id="filtb" aria-haspopup="dialog" aria-label="Sort and filter"></button>`;
+  press("[data-view]", b => b.dataset.view === ST.view, tb);
+  $("#filtb").innerHTML = ICON.menu + (fo ? `<b>${fo}</b>` : "");
+  $$("[data-view]", tb).forEach(b => b.onclick = () => { if (ST.view === b.dataset.view) { window.scrollTo({top: 0, behavior: "smooth"}); return; } ST.view = b.dataset.view; save(); tabbar(); renderList(); window.scrollTo(0, 0); });
   $("#filtb").onclick = filterSheet;
-  const r2 = $("#reset2"); if (r2) r2.onclick = resetFilters;
-  $$(".pr").forEach(b => b.onclick = () => openProp(b.dataset.id));
+  slide($(".tbc", tb), !tb.dataset.on); tb.dataset.on = 1;
 }
-function resetFilters() { Object.assign(ST, {team: "all", book: "all", lmin: "", lmax: "", omin: "", omax: "", q: "", gid: "all"}); save(); render(); }
+function bindTop() {
+  const q = $("#q"), sx = q.closest(".sx"), qx = $("#qx");
+  let t = null;
+  q.oninput = () => { ST.q = q.value; sx.classList.toggle("has", !!ST.q); qx.hidden = !ST.q; clearTimeout(t); t = setTimeout(() => { save(); renderList(); }, 90); };
+  q.onkeydown = e => { if (e.key === "Enter") q.blur(); };
+  qx.onclick = e => { e.preventDefault(); q.value = ""; q.oninput(); };
+  $("#lgb").onclick = leagueSheet;
+  $("#dvpb").onclick = () => dvpSheet();
+}
+function bindHead() {
+  $$("[data-market]").forEach(b => b.onclick = () => { if (ST.market === b.dataset.market) return; ST.market = b.dataset.market; save(); press("[data-market]", x => x === b); slide($("#mtl")); renderList(); });
+  $$("[data-gid]").forEach(b => b.onclick = () => { ST.gid = ST.gid === b.dataset.gid ? "all" : b.dataset.gid; save(); press("[data-gid]", x => x.dataset.gid === ST.gid); renderList(); });
+  $("#dayb").onclick = daySheet;
+}
+function resetFilters() { Object.assign(ST, {team: "all", book: "all", lmin: "", lmax: "", omin: "", omax: "", q: "", gid: "all"}); const q = $("#q"); if (q) { q.value = ""; q.closest(".sx").classList.remove("has"); $("#qx").hidden = true; } save(); render(); }
 // ── sheets ──
-let SHEET_FOCUS = null;
+let SHEET_FOCUS = null, SHEET_T = null, SHEET_N = 0;
 function openSheet(html, bind) {
   SHEET_FOCUS = document.activeElement;
   const s = $("#sheet"), sc = $("#scrim");
-  s.innerHTML = '<div class="grab"></div>' + html;
+  clearTimeout(SHEET_T);
+  SHEET_N++; delete s.dataset.kind; delete s.dataset.closing; s.getAnimations().forEach(a => a.cancel());
+  s.innerHTML = '<div class="grab" aria-hidden="true"></div>' + html;
+  s.style.transform = "";
+  s.classList.remove("on");
   s.hidden = sc.hidden = false;
-  void s.offsetWidth;                       // a forced layout starts the transition; no animation frame needed
-  s.classList.add("on"); sc.classList.add("on");
+  s.scrollTop = 0;
   bind(s);
+  // as with the player page: lay out first, then rise as a Web Animation (the timer covers a background tab)
+  const go = () => {
+    if (s.hidden || s.classList.contains("on")) return;
+    s.classList.add("on"); sc.classList.add("on");
+    if (!REDUCED && !document.hidden) s.animate([{transform: "translateY(100%)"}, {transform: "none"}], {duration: 420, easing: EASE});
+  };
+  requestAnimationFrame(() => requestAnimationFrame(go)); setTimeout(go, 150);
   const f = TOUCH ? s : s.querySelector("button, select, input, [tabindex]"); if (f) f.focus({preventScroll: true});
 }
 function closeSheet() {
   const s = $("#sheet"), sc = $("#scrim");
-  s.classList.remove("on"); sc.classList.remove("on");
-  setTimeout(() => { s.hidden = sc.hidden = true; s.innerHTML = ""; }, 280);
+  if (s.hidden || s.dataset.closing) return;
+  const from = s.style.transform || "none";
+  s.dataset.closing = 1;
+  s.classList.remove("on"); sc.classList.remove("on"); s.style.transform = "";
+  const n = SHEET_N, done = () => { if (n !== SHEET_N || !s.dataset.closing) return; delete s.dataset.closing; s.hidden = sc.hidden = true; s.innerHTML = ""; };
+  // the timer also ends it where animations are held (a background tab), so a clear scrim can never be left blocking taps
+  if (REDUCED || document.hidden) done();
+  else { s.animate([{transform: from}, {transform: "translateY(100%)"}], {duration: 340, easing: EASE}).finished.then(done, done); SHEET_T = setTimeout(done, 400); }
   if (!TOUCH && SHEET_FOCUS && document.body.contains(SHEET_FOCUS)) SHEET_FOCUS.focus({preventScroll: true});
 }
-function sortSheet() {
-  openSheet('<h2 id="sht">Sort by</h2>' + SORTS.map(([k, lab]) => `<button class="opt" data-sort="${k}">${lab}<span class="ck">${k === ST.sort ? (ST.dir === "desc" ? "↓" : "↑") : ""}</span></button>`).join("") +
-    '<div class="note">Tap the selected option again to flip the order. Hit rates are for the chosen side (Over / Under) at each prop\'s main line.</div>', s => {
-    $$("[data-sort]", s).forEach(b => b.onclick = () => {
-      const k = b.dataset.sort;
-      if (k === ST.sort) ST.dir = ST.dir === "desc" ? "asc" : "desc";
-      else { ST.sort = k; ST.dir = k === "player" || k === "line" ? "asc" : "desc"; }
-      save(); render(); closeSheet();
-    });
-  });
+// drag a sheet down from its top (or anywhere once it is scrolled to the top) to dismiss it
+function sheetDrag() {
+  const s = $("#sheet");
+  let y0 = null, t0 = 0, dy = 0, live = false;
+  s.addEventListener("touchstart", e => {
+    if (e.touches.length !== 1 || s.scrollTop > 0 || e.target.closest(".dual,.dual2,select,input")) { y0 = null; return; }
+    y0 = e.touches[0].clientY; t0 = e.timeStamp; dy = 0; live = false;
+  }, {passive: true});
+  s.addEventListener("touchmove", e => {
+    if (y0 === null) return;
+    dy = e.touches[0].clientY - y0;
+    if (!live && dy > 6 && s.scrollTop <= 0) { live = true; s.classList.add("drag"); }
+    if (live) { e.preventDefault(); s.style.transform = `translateY(${Math.max(0, dy)}px)`; $("#scrim").style.opacity = Math.max(0, 1 - dy / 400); }
+  }, {passive: false});
+  const end = e => {
+    if (y0 === null) return;
+    y0 = null;
+    if (!live) return;
+    s.classList.remove("drag"); $("#scrim").style.opacity = "";
+    const v = dy / Math.max(1, e.timeStamp - t0);
+    if (dy > 110 || v > .45) closeSheet();
+    else { const from = s.style.transform; s.style.transform = ""; if (!REDUCED) s.animate([{transform: from}, {transform: "none"}], {duration: 300, easing: EASE}); }
+  };
+  s.addEventListener("touchend", end); s.addEventListener("touchcancel", end);
 }
 function filterSheet() {
-  const teams = {};
+  const dr = Object.assign({}, ST), teams = {};
   D.props.forEach(p => { if ((gameOf(p.gid) || {}).date === ST.date && p.team) teams[p.team] = 1; });
   const opt = (v, lab, cur) => `<option value="${v}"${v === cur ? " selected" : ""}>${esc(lab)}</option>`;
-  openSheet(`<h2 id="sht">Filters</h2>
-    <label class="fl"><span>Team</span><select id="f-team">${opt("all", "All teams", ST.team)}${Object.keys(teams).sort().map(t => opt(t, t, ST.team)).join("")}</select></label>
-    <label class="fl"><span>Sportsbook</span><select id="f-book">${opt("all", "FanDuel and DraftKings", ST.book)}${opt("fd", "FanDuel", ST.book)}${opt("dk", "DraftKings", ST.book)}</select></label>
-    <div class="two"><label class="fl"><span>Line from</span><input id="f-lmin" type="number" inputmode="decimal" step="0.5" value="${esc(ST.lmin)}"></label>
-    <label class="fl"><span>Line to</span><input id="f-lmax" type="number" inputmode="decimal" step="0.5" value="${esc(ST.lmax)}"></label></div>
-    <div class="two"><label class="fl"><span>Odds from</span><input id="f-omin" type="number" inputmode="numeric" placeholder="-200" value="${esc(ST.omin)}"></label>
-    <label class="fl"><span>Odds to</span><input id="f-omax" type="number" inputmode="numeric" placeholder="+150" value="${esc(ST.omax)}"></label></div>
-    <div class="note">Odds are the best ${ST.side} price at the main line, in US odds.</div>
-    <div class="acts"><button class="btn" id="f-reset">Reset</button><button class="btn pri" id="f-ok">Show props</button></div>`, s => {
-    $("#f-ok", s).onclick = () => {
-      ST.team = $("#f-team", s).value; ST.book = $("#f-book", s).value;
-      ["lmin", "lmax", "omin", "omax"].forEach(k => ST[k] = $("#f-" + k, s).value);
-      save(); render(); closeSheet();
-    };
-    $("#f-reset", s).onclick = () => { closeSheet(); resetFilters(); };
+  openSheet(`<h2 id="sht">Sort &amp; filter</h2>
+    <div class="sg"><span>Side</span><div class="seg" role="group" aria-label="Side"><button data-sd="over" aria-pressed="${dr.side === "over"}">Over</button><button data-sd="under" aria-pressed="${dr.side === "under"}">Under</button></div></div>
+    <div class="sg"><span>Sort by</span><div class="chips">${SORTS.map(([k, lab]) => `<button class="chip" data-sort="${k}" aria-pressed="${k === dr.sort}">${lab.replace(" hit rate", "").replace("Head-to-head", "H2H")}<span class="ar">${k === dr.sort ? (dr.dir === "desc" ? " ↓" : " ↑") : ""}</span></button>`).join("")}</div></div>
+    <label class="fl"><span>Team</span><select id="f-team">${opt("all", "All teams", dr.team)}${Object.keys(teams).sort().map(t => opt(t, t, dr.team)).join("")}</select></label>
+    <label class="fl"><span>Sportsbook</span><select id="f-book">${opt("all", "FanDuel and DraftKings", dr.book)}${opt("fd", "FanDuel", dr.book)}${opt("dk", "DraftKings", dr.book)}</select></label>
+    <div class="two"><label class="fl"><span>Line from</span><input id="f-lmin" type="number" inputmode="decimal" step="0.5" value="${esc(dr.lmin)}"></label>
+    <label class="fl"><span>Line to</span><input id="f-lmax" type="number" inputmode="decimal" step="0.5" value="${esc(dr.lmax)}"></label></div>
+    <div class="two"><label class="fl"><span>Odds from</span><input id="f-omin" type="number" inputmode="numeric" placeholder="-200" value="${esc(dr.omin)}"></label>
+    <label class="fl"><span>Odds to</span><input id="f-omax" type="number" inputmode="numeric" placeholder="+150" value="${esc(dr.omax)}"></label></div>
+    <div class="note">Hit rates, odds and AVG (the last-10 average) are for the chosen side at each prop's main line. Tap the chosen sort again to flip it.</div>
+    <div class="acts"><button class="btn" id="f-reset">Reset</button><button class="btn pri" id="f-ok"></button></div>`, s => {
+    const read = () => { dr.team = $("#f-team", s).value; dr.book = $("#f-book", s).value; ["lmin", "lmax", "omin", "omax"].forEach(k => dr[k] = $("#f-" + k, s).value); };
+    const upd = () => { read(); const n = sortProps(filterProps(D.props, Object.assign({}, dr, {market: dr.market === "trends" ? "all" : dr.market}), gameOf, logsOf), dr.sort, dr.dir, logsOf, dr.side, D.season).length; $("#f-ok", s).textContent = ST.market === "trends" ? "Apply" : `Show ${n} prop${n === 1 ? "" : "s"}`; };
+    $$("[data-sd]", s).forEach(b => b.onclick = () => { dr.side = b.dataset.sd; press("[data-sd]", x => x === b, s); upd(); });
+    $$("[data-sort]", s).forEach(b => b.onclick = () => {
+      const k = b.dataset.sort;
+      if (k === dr.sort) dr.dir = dr.dir === "desc" ? "asc" : "desc"; else { dr.sort = k; dr.dir = k === "player" || k === "line" ? "asc" : "desc"; }
+      press("[data-sort]", x => x.dataset.sort === dr.sort, s); $$("[data-sort] .ar", s).forEach(a => a.textContent = a.parentNode.dataset.sort === dr.sort ? (dr.dir === "desc" ? " ↓" : " ↑") : "");
+    });
+    $$("select,input", s).forEach(e => e.onchange = e.oninput = upd);
+    $("#f-ok", s).onclick = () => { read(); Object.assign(ST, {side: dr.side, sort: dr.sort, dir: dr.dir, team: dr.team, book: dr.book, lmin: dr.lmin, lmax: dr.lmax, omin: dr.omin, omax: dr.omax}); save(); closeSheet(); renderList(); tabbar(); };
+    $("#f-reset", s).onclick = () => { Object.assign(ST, {side: "over", sort: "hit10", dir: "desc"}); closeSheet(); resetFilters(); };
+    upd();
   });
+}
+function daySheet() {
+  openSheet('<h2 id="sht">Day</h2>' + D.dates.filter(d => /^\d{4}-/.test(d)).map((d, i) => {
+    const n = D.games.filter(g => g.date === d).length;
+    return `<button class="opt" data-date="${d}"><span>${i === 0 ? "Today" : i === 1 ? "Tomorrow" : d} · ${n} game${n === 1 ? "" : "s"}</span><span class="ck">${d === ST.date ? "✓" : ""}</span></button>`;
+  }).join(""), s => {
+    $$("[data-date]", s).forEach(b => b.onclick = () => { if (ST.date !== b.dataset.date) { ST.date = b.dataset.date; ST.gid = "all"; save(); render(); } closeSheet(); });
+  });
+}
+function leagueSheet() {
+  const b = D.sources.books, bk = k => b[k] ? (b[k].stale ? `${Math.round(b[k].age_min)} min old` : "live") : "—";
+  openSheet(`<h2 id="sht">Pickz</h2><div class="kv"><span>League</span><b>NBA ✓</b></div>
+    <div class="kv"><span>Props updated</span><b id="upd">${ago(D.generated_at)}</b></div>
+    <div class="kv"><span>FanDuel prices</span><b>${bk("fd")}</b></div><div class="kv"><span>DraftKings prices</span><b>${bk("dk")}</b></div>
+    <div class="note">Research only — history, matchups and prices. Nothing here is a pick or a bet.</div>
+    <div class="acts"><a class="btn" href="index.html" style="display:flex;align-items:center;justify-content:center;text-decoration:none">Back to Pickz</a><button class="btn pri" id="lg-ok">Done</button></div>`, s => { $("#lg-ok", s).onclick = closeSheet; });
+}
+function dvpSheet(grp, mkt) {
+  const rk = (D.ranks || {})[ST.date] || {}, tbl = rk.dvp || {}, n = rk.teams || 0;
+  grp = grp || "G";
+  const mks = ORDER.filter(m => tbl[grp] && tbl[grp][m]);
+  mkt = mkt && mks.indexOf(mkt) >= 0 ? mkt : mks.indexOf(ST.market) >= 0 ? ST.market : mks[0];
+  const t = (tbl[grp] || {})[mkt] || {}, order = Object.keys(t).sort((a, b) => t[b] - t[a]);
+  const rows = order.map(team => { const r = t[team], cl = {good: "up", bad: "dn", mid: "md"}[rankCls(r, n, "over")];
+    return `<div class="dvt"><b class="${cl}">${ord(r)}</b><span>${logo(team, "").replace("<img ", '<img loading="lazy" ')}${esc((TEAMS[team] || [team])[0])}</span><span>${team}</span></div>`; }).join("");
+  const html = `<h2 id="sht">Defense vs Position</h2>
+    <div class="seg" role="group" aria-label="Position">${[["G", "Guards"], ["F", "Forwards"], ["C", "Centers"]].map(([k, l]) => `<button data-dg="${k}" aria-pressed="${k === grp}">${l}</button>`).join("")}</div>
+    <div class="chips">${mks.map(m => `<button class="chip" data-dm="${m}" aria-pressed="${m === mkt}">${TAB[m]}</button>`).join("")}</div>
+    <div class="note" style="margin:10px 0 4px">What each defense allows ${GRPN[grp]} in ${esc((NAME[mkt] || "").toLowerCase())} per possession this season, before tonight. 30th = allows the most (best for overs); 1st = the toughest.</div>
+    ${rows || '<div class="empty">No games yet this season.</div>'}<div class="acts"><button class="btn pri" id="dv-ok">Done</button></div>`;
+  const bind = s => {
+    $$("[data-dg]", s).forEach(b => b.onclick = () => redraw(b.dataset.dg, mkt));
+    $$("[data-dm]", s).forEach(b => b.onclick = () => redraw(grp, b.dataset.dm));
+    $("#dv-ok", s).onclick = closeSheet;
+  };
+  const redraw = (g2, m2) => { const s = $("#sheet"), y = s.scrollTop; dvpSheet(g2, m2); s.scrollTop = y; };
+  if (!$("#sheet").hidden && $("#sheet").dataset.kind === "dvp") { $("#sheet").innerHTML = '<div class="grab" aria-hidden="true"></div>' + html; bind($("#sheet")); }
+  else { openSheet(html, bind); $("#sheet").dataset.kind = "dvp"; }
 }
 // ── player page ──
 function allLines(p) {
@@ -705,54 +927,38 @@ function allLines(p) {
 function openProp(id, push) {
   const p = D.props.find(x => x.id === id);
   if (!p) return;
-  const fresh = CUR !== id;
+  const fresh = CUR !== id, was = !!CUR;
   CUR = id;
   if (fresh) Object.assign(DT, {line: p.main !== null ? p.main : allLines(p)[0], win: "l10", home: null, starter: null,
-                                 result: null, rest: null, ranges: {}, without: {}, dvp: false, def: false, open: {min: true}, more: false});
+                                 result: null, rest: null, ranges: {}, without: {}, dvp: false, def: false, open: {}, more: false, fresh: null});
   if (push !== false) history.pushState({p: id}, "", hashState());
-  renderProp();
   const pg = $("#pg");
-  pg.hidden = false;
-  document.body.classList.add("lock");
-  void pg.offsetWidth;                      // (an animation frame never comes while the page is in the background)
-  pg.classList.add("on");
-  if (fresh) pg.scrollTop = 0;
+  pg.hidden = false;                        // (off-screen until it slides in; it must lay out for the pills to measure)
+  if (fresh) { renderProp(was ? undefined : "open"); pg.scrollTop = 0; }
+  if (was) return;
+  // the page lays out off-screen for a frame, then slides in as a Web Animation (on the compositor, no forced layout);
+  // the timer covers a background tab, where no frames come
+  const go = () => {
+    if (!CUR || pg.classList.contains("on")) return;
+    pg.classList.add("on"); $(".shade").classList.add("on");
+    if (!REDUCED && !document.hidden) pg.animate([{transform: "translateX(100%)"}, {transform: "none"}], {duration: 440, easing: EASE});
+  };
+  requestAnimationFrame(() => requestAnimationFrame(go)); setTimeout(go, 150);
   if (!TOUCH) setTimeout(() => { const b = $("#pg .bk"); if (b) b.focus({preventScroll: true}); }, 50);
 }
-function closeProp() {
-  const pg = $("#pg");
+// an iOS push: the page slides in from the right while the list drifts a third left under a shade. Safari's edge swipe
+// back animates by itself, so after one the page closes with no second slide
+let EDGE_T = 0;
+const EASE = "cubic-bezier(.32,.72,0,1)", REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function closeProp(instant) {
+  const pg = $("#pg"), sh = $(".shade");
+  clearTimeout(PX && PX.lazy);
+  const done = () => { if (!CUR && !pg.hidden) { pg.hidden = true; pg.innerHTML = ""; PX = null; } };
   pg.classList.remove("on");
-  document.body.classList.remove("lock");
-  setTimeout(() => { if (!pg.classList.contains("on")) pg.hidden = true; }, 330);
+  if (instant || REDUCED) { sh.classList.add("snap"); sh.classList.remove("on"); void sh.offsetWidth; sh.classList.remove("snap"); done(); }
+  else { sh.classList.remove("on"); pg.animate([{transform: "none"}, {transform: "translateX(100%)"}], {duration: 380, easing: EASE}).finished.then(done, done); setTimeout(done, 440); }
   const id = CUR; CUR = null;
   const b = !TOUCH && id && document.querySelector(`.pr[data-id="${CSS.escape(id)}"]`); if (b) b.focus({preventScroll: true});
-}
-function chart(logs, market, line) {
-  const n = logs.length;
-  if (!n) return '<div class="empty" style="padding:30px 0"><b>No games</b>Nothing matches this window and these filters.</div>';
-  const vals = logs.map(l => statValue(l, market));
-  const vmax = Math.max(line * 1.3, Math.max(...vals.filter(v => v !== null), 1));
-  const avail = Math.max(250, Math.min(window.innerWidth, 500) - 110);   // the card's inner width less the label room
-  const bw = Math.max(28, Math.min(44, avail / n)), gap = Math.round(bw * .22);
-  const W = Math.max(avail, n * bw + 4) + 50, H = 230, top = 22, bot = 182;   // + room for the line label
-  const y = v => bot - v / vmax * (bot - top);
-  const out = [`<svg class="ch" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="group" aria-label="${esc(NAME[market])} by game, ${n} games, line ${line}">`,
-    '<defs><pattern id="hz" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#ff453a"/><line x1="0" y1="0" x2="0" y2="6" stroke="#b32a22" stroke-width="3"/></pattern></defs>'];
-  logs.forEach((l, i) => {
-    const v = vals[i], x = 2 + i * bw, w = bw - gap, res = v === null ? "none" : v > line ? "over" : v < line ? "under" : "push";
-    const h = v === null ? 0 : Math.max(3, bot - y(v));
-    const fill = res === "over" ? "#30d158" : res === "under" ? "url(#hz)" : "#636366";
-    const d = iso(l.date + "T12:00:00Z").toLocaleDateString("en-US", {month: "numeric", day: "numeric", timeZone: "UTC"});
-    const desc = `${d} ${l.home ? "vs" : "at"} ${l.opp}: ${v === null ? "no value" : v} ${short(market)}, ${res} ${line}, ${l.min} min`;
-    out.push(`<g class="br" tabindex="0" role="img" aria-label="${esc(desc)}"><title>${esc(desc)}</title>` +
-      `<rect x="${x}" y="${bot - h}" width="${w}" height="${h}" rx="5" fill="${fill}"/>` +
-      (v !== null ? `<text class="vl" x="${x + w / 2}" y="${bot - h - 5}" text-anchor="middle">${v}</text>` : "") +
-      `<text x="${x + w / 2}" y="${bot + 15}" text-anchor="middle">${esc(l.opp)}</text><text class="dt" x="${x + w / 2}" y="${bot + 28}" text-anchor="middle">${d}</text></g>`);
-  });
-  const ly = y(line);
-  out.push(`<line x1="0" x2="${W}" y1="${ly}" y2="${ly}" stroke="#fff" stroke-width="1.5" stroke-dasharray="6 5" opacity=".9"/>`);
-  out.push(`<rect x="${W - 46}" y="${ly - 9}" width="44" height="18" rx="9" fill="#fff"/><text class="ll" x="${W - 24}" y="${ly + 4}" text-anchor="middle">${line}</text></svg>`);
-  return out.join("");
 }
 const TEAMS = {ATL: ["Atlanta Hawks", "#C8102E"], BOS: ["Boston Celtics", "#007A33"], BKN: ["Brooklyn Nets", "#2a2a2a"],
   CHA: ["Charlotte Hornets", "#00788C"], CHI: ["Chicago Bulls", "#CE1141"], CLE: ["Cleveland Cavaliers", "#860038"],
@@ -767,14 +973,19 @@ const TEAMS = {ATL: ["Atlanta Hawks", "#C8102E"], BOS: ["Boston Celtics", "#007A
 const POSN = {PG: "Point Guard", SG: "Shooting Guard", SF: "Small Forward", PF: "Power Forward", C: "Center", G: "Guard",
   F: "Forward", "G-F": "Guard-Forward", "F-G": "Forward-Guard", "F-C": "Forward-Center", "C-F": "Center-Forward"};
 const TAB_ORDER = ["points", "assists", "rebounds", "threes", "pts_ast", "pts_reb", "reb_ast", "pra"];
-const TAB = {points: "Points", rebounds: "Rebs", assists: "Assists", threes: "3PTM", pra: "PRA", pts_reb: "P+R", pts_ast: "P+A", reb_ast: "R+A"};
+const TAB = {trends: "Trends", points: "Points", rebounds: "Rebs", assists: "Assists", threes: "3PTM", pra: "PRA", pts_reb: "P+R", pts_ast: "P+A", reb_ast: "R+A"};
 const GRPN = {G: "guards", F: "forwards", C: "centers"};
 const ICON = {
   back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
   share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M21 3 3 10.5l7 2.5 2.5 7L21 3Z"/><path d="m10 13 4.5-4.5"/></svg>',
   star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/></svg>',
-  bars: '<svg viewBox="0 0 20 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M2 14.5h16M5 11V7M9 11V3M13 11V6M17 11V9"/></svg>',
-  menu: '<svg viewBox="0 0 22 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 3h18M5 8h12M8 13h6"/></svg>'};
+  bars: '<svg viewBox="0 0 18 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M1.5 1.5v13h15"/><path stroke-width="2.2" d="M5.5 11.5v-4M9 11.5v-7M12.5 11.5v-5M16 11.5V9"/></svg>',
+  menu: '<svg viewBox="0 0 22 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 3h18M5 8h12M8 13h6"/></svg>',
+  search: '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="7.5" cy="7.5" r="5.5"/><path d="m12 12 4.5 4.5"/></svg>',
+  props: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8.5 5.5H21M8.5 12H21M8.5 18.5H21"/><circle cx="3.6" cy="5.5" r=".6" fill="currentColor"/><circle cx="3.6" cy="12" r=".6" fill="currentColor"/><circle cx="3.6" cy="18.5" r=".6" fill="currentColor"/></svg>',
+  markets: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2.5v19h19"/><path d="m5.5 16 4-6.5 4.5 4 6-7.5"/><circle cx="9.5" cy="9.5" r="1.3" fill="currentColor"/><circle cx="14" cy="13.5" r="1.3" fill="currentColor"/><circle cx="20" cy="6" r="1.3" fill="currentColor"/></svg>',
+  watch: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="m12 2.5 2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9L12 2.5Z"/></svg>',
+  down: '<svg viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m2 2 4 4 4-4"/></svg>'};
 const favs = () => { try { return JSON.parse(localStorage.getItem("pickz_fav") || "[]"); } catch (e) { return []; } };
 function toggleFav(pid) {
   try { const f = favs(), i = f.indexOf(pid); if (i >= 0) f.splice(i, 1); else f.push(pid); localStorage.setItem("pickz_fav", JSON.stringify(f)); } catch (e) {}
@@ -806,35 +1017,37 @@ function gauge(gr) {
     `<circle cx="40" cy="40" r="${R}" fill="none" stroke="${col}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${fill} ${C}"/></g>` +
     `<text x="40" y="51" text-anchor="middle" font-size="31" font-weight="500" fill="${col}">${gr ? gr.g : "–"}</text></svg>`;
 }
-function chart2(logs, market, line) {
+function chart2(logs, market, line, showMin, grow) {
   const n = logs.length;
   if (!n) return '<div class="empty" style="padding:40px 0"><b>No games</b>Nothing matches this window and these filters.</div>';
-  const vals = logs.map(l => statValue(l, market)), mins = logs.map(l => l.min);
+  const vals = logs.map(l => statValue(l, market)), mins = showMin ? logs.map(l => l.min) : [];
   const top = Math.max(line, ...vals.filter(v => v !== null), ...mins.filter(v => v !== null), 1);
-  // measured from the reference: bars start 34 pt in, 34 pt per game with a 3 pt gap, a 144.6 pt plot
-  const W0 = Math.min(window.innerWidth, 520) - 30.6, AX = 34;
-  const slot = Math.max(30, (W0 - AX + 3) / n), W = Math.max(W0, AX + n * slot - 3), T = 8, B = T + 144.6, H = B + 38;
+  // measured from the reference: bars start 35 pt in and the plot is 144.6 pt tall; a slot is a fifth of the width until
+  // there are more than 5 games (5 or fewer: 69 pt slots, 8.3 pt gaps; 10: 34 pt, 3 pt; 20 scroll sideways)
+  const W0 = Math.min(window.innerWidth, 520) - 30.6, AX = 35, ne = Math.max(n, 5);
+  const gap = Math.max(2.4, 8.3 - (ne - 5) * 1.06), slot = Math.max(30, (W0 - AX + gap) / ne);
+  const W = Math.max(W0, AX + n * slot - gap), T = 8, B = T + 144.6, H = B + 38;
   const y = v => B - v / top * (B - T);
-  const o = [`<svg class="c2" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="group" aria-label="${esc(NAME[market])} and minutes by game, ${n} games, line ${line}">`];
-  o.push(`<text class="ax" x="0" y="${y(top) + 5}">${Math.round(top * 10) / 10}</text><text class="ax" x="0" y="${B - 3.5}">0</text>`);
+  const o = [`<svg class="c2${grow ? " grow" : ""}" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="group" aria-label="${esc(NAME[market])}${showMin ? " and minutes" : ""} by game, ${n} games, line ${line}">`];
+  o.push(`<text class="ax" x="0" y="${y(top) + 7.1}">${r1(top)}</text><text class="ax" x="0" y="${B - 3.5}">0</text>`);
   logs.forEach((l, i) => {
-    const v = vals[i], m = l.min, x = AX + i * slot, w = slot - 3, cx = x + w / 2;
+    const v = vals[i], m = l.min, x = AX + i * slot, w = slot - gap, cx = x + w / 2;
     const res = v === null ? "none" : v > line ? "over" : v < line ? "under" : "push";
     const fill = res === "over" ? "var(--grn)" : res === "under" ? "var(--red)" : "#8e8e93";
     const d = iso(l.date + "T12:00:00Z").toLocaleDateString("en-US", {month: "numeric", day: "numeric", timeZone: "UTC"});
     const desc = `${d} ${l.home ? "vs" : "at"} ${l.opp}: ${v === null ? "no value" : v} ${short(market)} in ${m} minutes, ${res} ${line}`;
-    const tip = `${d} ${l.home ? "vs " : "@"}${l.opp}|${v === null ? "—" : v} ${short(market)} · ${m === null || m === undefined ? "—" : Math.round(m * 10) / 10} min`;
-    let g = `<g class="br" tabindex="0" role="img" aria-label="${esc(desc)}" data-tip="${esc(tip)}"><title>${esc(desc)}</title>`;
-    if (v !== null && v > 0) g += `<rect x="${x}" y="${y(v)}" width="${w}" height="${B - y(v)}" fill="${fill}"/>`;
-    if (m) g += `<rect x="${x + .65}" y="${y(m) + .65}" width="${w - 1.3}" height="${B - y(m) - .65}" fill="none" stroke="#fff" stroke-width="1.1"/>` +
-      `<text class="mn" x="${cx}" y="${y(m) + 18}" text-anchor="middle">${Math.round(m * 10) / 10}</text>`;
+    const tip = `${d} ${l.home ? "vs " : "@"}${l.opp}|${v === null ? "—" : v} ${short(market)} · ${m === null || m === undefined ? "—" : r1(m)} min`;
+    let g = `<g class="br" tabindex="0" role="img" aria-label="${esc(desc)}" data-tip="${esc(tip)}" style="--d:${Math.min(i, 19) * 14}ms"><title>${esc(desc)}</title>`;
+    if (v !== null && v > 0) g += `<rect class="bv" x="${x}" y="${y(v)}" width="${w}" height="${B - y(v)}" fill="${fill}"/>`;
+    if (showMin && m) g += `<rect class="bm" x="${x + .65}" y="${y(m) + .65}" width="${w - 1.3}" height="${B - y(m) - .65}" fill="none" stroke="#fff" stroke-width="1.1"/>` +
+      `<text class="mn" x="${cx}" y="${v !== null && y(v) - y(m) < 34 ? y(m) - 6 : y(m) + 18}" text-anchor="middle">${r1(m)}</text>`;   // above a short box
     if (v !== null) g += B - y(v) >= 18 ? `<text class="vv" x="${cx}" y="${B - 3.5}" text-anchor="middle">${v}</text>`
       : `<text class="vw" x="${cx}" y="${y(v) - 4}" text-anchor="middle">${v}</text>`;
     g += `<text class="xl" x="${cx}" y="${B + 17.4}" text-anchor="middle">${d}</text><text class="xl" x="${cx}" y="${B + 30.5}" text-anchor="middle">${l.home ? "" : "@"}${esc(l.opp)}</text></g>`;
     o.push(g);
   });
   o.push(`<line x1="0" x2="${W}" y1="${y(line)}" y2="${y(line)}" stroke="#fff" stroke-width=".9"/>`);
-  o.push(`<text class="lx" x="0" y="${y(line) - 2.6}">${line}</text></svg>`);
+  o.push(`<text class="lx" x="0" y="${y(line) - 5.2}">${line}</text></svg>`);
   return o.join("");
 }
 // a bar's <title> only shows on hover, so a tap pins its game above the bar (tap it again, or the chart, to clear)
@@ -852,12 +1065,69 @@ function barTip(cw, gb) {
   t.style.left = Math.max(cw.scrollLeft + 4, Math.min(cw.scrollLeft + cw.clientWidth - w - 4, x - w / 2)) + "px";
   t.style.top = Math.max(0, r.top - c.top - t.offsetHeight - 6) + "px";
 }
-function renderProp() {
+// The page is built once per prop (header, tabs, hero, availability) and its live parts — cells, chart, window capsule,
+// chips, books, game log — are redrawn in place on every change, so the photo never reloads and the scroll never jumps.
+let PX = null;
+function renderProp(mode) {
   const p = D.props.find(x => x.id === CUR), pg = $("#pg");
-  if (!p) { pg.innerHTML = `<div class="ph"><button class="cb bk" aria-label="Back">${ICON.back}</button></div><div class="empty"><b>No longer posted</b>The books have taken this prop down.</div>`; $("#pg .bk").onclick = () => history.back(); return; }
-  const g = gameOf(p.gid), line = DT.line, side = ST.side, logs = logsOf(p), c = p.ctx || {};
+  if (!p) { PX = null; pg.innerHTML = `<div class="ph"><button class="cb bk" aria-label="Back">${ICON.back}</button></div><div class="empty"><b>No longer posted</b>The books have taken this prop down.</div>`; $("#pg .bk").onclick = () => history.back(); return; }
+  const g = gameOf(p.gid), logs = logsOf(p), c = p.ctx || {};
   const team = TEAMS[p.team] || [p.team || "", "#333"];
   const without = (D.absences[g.date + "|" + p.team] || []).map(a => ({key: String(a.pid), name: a.name || "teammate", played: a.played, since: a.since, team: p.team, status: a.status}));
+  const mkts = TAB_ORDER.filter(m => D.props.some(x => x.gid === p.gid && x.pid === p.pid && x.market === m));
+  const fav = favs().indexOf(p.pid) >= 0;
+  const wins = [["season", D.season.slice(0, 4)], ["h2h", "H2H"], ["l5", "L5"], ["l10", "L10"], ["l20", "L20"]];
+  // availability
+  const inj = D.injuries[g.date + "|" + p.pid] || {}, rep = D.sources.report[g.date];
+  const arows = [`<div class="kv"><span>Official report</span><b>${inj.official ? esc(inj.official.status) + (inj.official.reason ? " · " + esc(inj.official.reason.replace("Injury/Illness - ", "")) : "") : rep ? (inj.listed_team ? "Not listed" : "Team not listed yet") : "Not out yet"}</b></div>`];
+  if (rep) arows.push(`<div class="kv"><span>Report time</span><b>${mt((inj.official || {}).published || rep.published, true)}</b></div>`);
+  (inj.news || []).forEach(n => arows.push(`<div class="kv"><span>News · ${esc(n.source)}</span><b>${esc(n.headline || n.status || "")} · ${mt(n.detected)}</b></div>`));
+  if (without.length) arows.push(`<div class="kv"><span>Teammates out</span><b>${without.map(w => esc(w.name) + " (" + esc(w.status) + ")").join(", ")}</b></div>`);
+  const rel = (D.related[p.id] || []).map(r => {
+    const o = D.props.find(x => x.id === r.id); if (!o) return "";
+    return `<button class="rc" data-rel="${esc(o.id)}"><div class="nm">${esc(o.player.split(" ").slice(-1)[0])} ${esc(short(o.market))}</div><div class="sub">${o.main === null ? "alt lines" : "O/U " + o.main}</div><div class="rr">r ${r.r > 0 ? "+" : ""}${r.r} · ${r.n} games</div></button>`;
+  }).join("");
+  const live = p.live && g.state !== "pregame" ? `<div class="box0" style="margin:12px 15.3px 0" role="status"><div class="live"><span class="tg ${g.state === "live" ? "tl" : "tn"}">${g.state === "live" ? "LIVE" : "FINAL"}</span>${p.live.value} ${esc(short(p.market))} in ${p.live.min} min</div><div class="note">${esc(g.label || "")}${g.score ? " · " + esc(g.away) + " " + g.score[0] + " – " + esc(g.home) + " " + g.score[1] : ""} · box score ${ago(g.updated)}</div></div>` : "";
+  pg.innerHTML = `<div class="ph"><button class="cb bk" aria-label="Back">${ICON.back}</button>
+      <div class="ph-t"><b>${esc(p.player)}</b><span>${esc(team[0])}</span></div><span class="sp2"></span>
+      <button class="cb" id="shr" aria-label="Share">${ICON.share}</button><button class="cb${fav ? " fav" : ""}" id="fav" aria-label="Favorite" aria-pressed="${fav}">${ICON.star}</button></div>
+    <nav class="mt" aria-label="Markets"><div class="mt-in">${mkts.map(m => `<button data-mk="${m}" aria-pressed="${m === p.market}">${TAB[m]}</button>`).join("")}</div></nav>
+    <div class="hro"><div class="hro-l"><h2>${esc(p.player)}</h2><div class="hro-s">${esc(team[0])}</div><div class="hro-s">${esc(POSN[c.pos] || c.pos || "")}</div>
+      <div class="tlg" style="background:${team[1]}">${logo(p.team, "")}</div></div>
+      <img class="hro-i" alt="" decoding="async" src="${heroSrc(p.pid)}" onerror="this.style.visibility='hidden'"></div>
+    <div class="sg2" id="pcells"></div>
+    ${live}
+    <div class="c2w" id="chw"></div>
+    <div class="wrow"><div class="wcap" id="wcap" role="group" aria-label="Games window"><span class="pill2"></span>${wins.map(([k, lab]) => `<button class="wc" data-win="${k}"><i>${lab}</i><b></b></button>`).join("")}</div><button class="cb fb" id="pf" aria-label="All filters">${ICON.menu}</button></div>
+    <div class="sr" id="psr" role="status"></div>
+    <div class="cf" id="pcf"></div>
+    <div class="bkt" id="pbk"></div>
+    <div id="pstat"></div>
+    <div class="sec2" id="plog"></div>
+    <div class="end"></div>`;
+  const stat = `<div class="sec2"><h3>Availability</h3><div class="box0">${arows.join("")}<div class="note">Official = the NBA injury report. News is third-party.</div></div></div>
+    ${rel ? `<div class="sec2"><h3>Related Props</h3><div class="rel" style="margin:0;padding:0">${rel}</div><div class="note">How closely the two stats moved together in past games (r from −1 to +1). History, not a prediction.</div></div>` : ""}
+    ${p.flag ? `<div class="sec2"><h3>Engine</h3><div class="box0"><span class="tg tf" style="margin:0 6px 0 0">SHADOW · NOT A BET</span>${esc(p.flag.tier)} at ${p.flag.line} · ${p.flag.card === 1 ? "on the card" : "logged only" + (p.flag.why ? " (" + esc(p.flag.why.toLowerCase()) + ")" : "")}</div></div>` : ""}`;
+  clearTimeout(PX && PX.lazy);
+  PX = {p: p, g: g, logs: logs, c: c, without: without, wins: wins, stat: stat, statDone: false};
+  $("#pg .bk").onclick = () => history.back();
+  $("#fav", pg).onclick = () => { toggleFav(p.pid); const f = $("#fav", pg), on = favs().indexOf(p.pid) >= 0; f.classList.toggle("fav", on); f.setAttribute("aria-pressed", on); f.classList.remove("pop"); void f.offsetWidth; f.classList.add("pop"); if (ST.view === "watch") renderList(); };
+  $("#shr", pg).onclick = () => {
+    const url = location.href, title = `${p.player} ${NAME[p.market]} ${DT.line}`;
+    if (navigator.share) navigator.share({title: title, url: url}).catch(() => {});
+    else if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => { $("#live").textContent = "Link copied"; });
+  };
+  $$("[data-mk]", pg).forEach(b => b.onclick = () => { const id = p.gid + "|" + p.pid + "|" + b.dataset.mk; if (id !== p.id) { openProp(id, false); history.replaceState({p: id}, "", hashState()); } });
+  $$("[data-win]", pg).forEach(b => b.onclick = () => { if (DT.win === b.dataset.win || b.disabled) return; DT.win = b.dataset.win; updateProp(); });
+  $("#pf", pg).onclick = () => playerFilters(p, logs, without);
+  const cw = $("#chw");
+  cw.onclick = e => { const gb = e.target.closest("g.br"); barTip(cw, gb); };
+  updateProp(mode || true);
+}
+function updateProp(mode) {
+  if (!PX) return;
+  const first = !!mode && mode !== "rest", opening = mode === "open", rest = mode === "rest";
+  const {p, g, logs, c, without, wins} = PX, pg = $("#pg"), line = DT.line, side = ST.side;
   const prevS = (+D.season.slice(0, 4) - 1) + "-" + D.season.slice(2, 4);
   const rkCur = (D.ranks || {})[g.date] || {}, rkPrev = (D.ranks || {})[prevS] || {};
   const dvpT = c.group && rkCur.dvp ? tierOf(c.dvp_rank, c.teams) : null, defT = tierOf(c.def_rank, c.teams);
@@ -869,21 +1139,39 @@ function renderProp() {
   const f = {home: DT.home, starter: DT.starter, result: DT.result, rest: DT.rest, ranges: DT.ranges, oppSets: oppSets,
              without: without.filter(w => DT.without[w.key])};
   const base = filterLogs(logs, f);
-  const wins = [["season", D.season.slice(0, 4)], ["h2h", "H2H"], ["l5", "L5"], ["l10", "L10"], ["l20", "L20"]];
   const win = windowed(base, DT.win, D.season, p.opp);
   const s = hitSummary(win.map(l => statValue(l, p.market)), line);
   const rate = sideRate(s, side);
   const winLab = (wins.find(w => w[0] === DT.win) || ["", "L10"])[1];
   const tri = up => `<span class="tri ${up ? "up" : "dn"}">${up ? "▲" : "▼"}</span>`;
-  const mkts = TAB_ORDER.filter(m => D.props.some(x => x.gid === p.gid && x.pid === p.pid && x.market === m));
-  const fav = favs().indexOf(p.pid) >= 0;
   const gr = grade(p, side);
-  const opp = `<span class="vs">${p.home ? "vs" : "@"}</span>${esc(p.opp || "")} · ${g.state === "pregame" ? mt(g.tip).replace(" ", "") : esc(g.state === "live" ? "LIVE" : g.state === "final" ? "Final" : g.label || "")}`;
-  const capsule = wins.map(([k, lab]) => {
+  const opp = `<span class="vs">${p.home ? "vs" : "@"}</span>${esc(p.opp || "")}\u200a·\u200a${g.state === "pregame" ? mt(g.tip).replace(" ", "") : esc(g.state === "live" ? "LIVE" : g.state === "final" ? "Final" : g.label || "")}`;
+  const showMin = !!(DT.open.min || DT.ranges.min);
+  // cells
+  if (!rest) $("#pcells").innerHTML = `<div class="cells">
+      <div><i>${esc(winLab)} AVG</i><b>${s.avg === null ? "–" : tri(s.avg > line) + r1(s.avg)}</b></div>
+      <button id="lnb"><i>LINE</i><b>${line}<span class="cv">›</span></b></button>
+      <div><i>PROP</i><b>${esc(NAME[p.market])}</b></div>
+      <div><i>HIT RATE</i><b>${rate === null ? "–" : tri(rate >= .5) + Math.round(rate * 100) + "%"}</b></div>
+      <button id="psb"><i>POS RANK</i><b>${c.pos_rank ? ord(c.pos_rank) : "–"}<span class="cv">›</span></b></button>
+      <div><i>OPPONENT</i><b>${opp}</b></div></div>
+      <button class="muc" id="mub">${gauge(gr)}<span>Matchup <span class="cv">›</span></span></button>`;
+  // chart
+  if (!rest) {
+  const cw = $("#chw"), sl = cw.scrollLeft, atEnd = first || sl + cw.clientWidth >= cw.scrollWidth - 4;
+  cw.innerHTML = chart2(win, p.market, line, showMin, !first);
+  cw.scrollLeft = atEnd ? cw.scrollWidth : sl;
+  // window capsule
+  wins.forEach(([k]) => {
     const w = windowed(base, k, D.season, p.opp), ss = hitSummary(w.map(l => statValue(l, p.market)), line), r = sideRate(ss, side);
-    return `<button class="wc" data-win="${k}" aria-pressed="${k === DT.win}"${w.length ? "" : " disabled"}><i>${lab}</i><b class="${r === null ? "" : r >= .5 ? "up" : "dn"}">${pct(r)}</b></button>`;
-  }).join("");
-  // chart filter chips
+    const b = $(`[data-win="${k}"]`, pg), v = $("b", b);
+    b.setAttribute("aria-pressed", k === DT.win); b.disabled = !w.length;
+    v.textContent = pct(r); v.className = r === null ? "" : r >= .5 ? "up" : "dn";
+  });
+  slide($("#wcap"), first);
+  $("#psr").textContent = `${side === "under" ? "Under" : "Over"} ${line}: ${rate === null ? "no games" : Math.round(rate * 100) + "% of " + s.n + " games"}.${showMin ? " White box = minutes played." : ""}`;
+  }
+  // chart filter chips: DvP, Def Rank, Minutes, More (more: FGA, Home, Away, 3PA, FTA, Margin, Win, Loss, B2B, Without …)
   const on = (k, v) => DT[k] === v;
   const chip = (attrs, lab, active) => `<button class="fc${active ? " on" : ""}" ${attrs} aria-pressed="${!!active}">${lab}</button>`;
   const rangeOn = k => !!DT.ranges[k];
@@ -892,103 +1180,72 @@ function renderProp() {
   if (c.def_rank) chips.push(chip('data-t="def"', `Def Rank <em class="${rankCls(c.def_rank, c.teams, side)}">${ord(c.def_rank)}</em>`, DT.def));
   const rchip = k => { const b = bounds(logs, k), abbr = RANGES.find(r => r[0] === k)[2]; if (b && b[0] !== b[1]) chips.push(chip(`data-r="${k}"`, `${ICON.bars}${k === "min" ? "Minutes" : abbr}`, rangeOn(k) || DT.open[k])); };
   const tchip = (k, v, lab) => chips.push(chip(`data-k="${k}" data-v="${v}"`, lab, on(k, v)));
-  rchip("min"); rchip("fga"); tchip("home", true, "Home");
-  const extra = DT.home === false || DT.result !== null || DT.rest !== null || ["fg3a", "fta", "margin"].some(rangeOn) || Object.keys(DT.without).some(k => DT.without[k]);
-  if (DT.more || extra) {
-    tchip("home", false, "Away"); rchip("fg3a"); rchip("fta"); rchip("margin"); tchip("result", "W", "Win"); tchip("result", "L", "Loss"); tchip("rest", "b2b", "B2B");
+  rchip("min");
+  const extra = DT.home !== null || DT.result !== null || DT.rest !== null || ["fga", "fg3a", "fta", "margin"].some(k => rangeOn(k) || DT.open[k]) || Object.keys(DT.without).some(k => DT.without[k]);
+  const more = DT.more || extra;
+  if (more) {
+    rchip("fga"); tchip("home", true, "Home"); tchip("home", false, "Away"); rchip("fg3a"); rchip("fta"); rchip("margin");
+    tchip("result", "W", "Win"); tchip("result", "L", "Loss"); tchip("rest", "b2b", "B2B");
     without.forEach(w => chips.push(chip(`data-wo="${w.key}"`, "Without " + esc(w.name.split(" ").slice(-1)[0]), DT.without[w.key])));
   }
-  chips.push(`<button class="fc" id="more" aria-expanded="${DT.more || extra}">${DT.more || extra ? "Less" : "More"}</button>`);
+  chips.push(`<button class="fc" id="more" aria-expanded="${more}">${more ? "Less" : "More"}</button>`);
   const panels = RANGES.filter(([k]) => DT.open[k] || rangeOn(k)).map(([k, lab]) => {
     const b = bounds(logs, k); if (!b || b[0] === b[1]) return "";
     const cur = DT.ranges[k] || b;
-    return `<div class="rp" data-rk="${k}" data-lo="${b[0]}" data-hi="${b[1]}"><div class="rp-h"><span>${k === "min" ? "Minutes" : lab}</span><b class="rv"${DT.ranges[k] ? "" : " hidden"}>${cur[0]} – ${cur[1]}</b></div>
+    return `<div class="rp${DT.fresh === k ? " in" : ""}" data-rk="${k}" data-lo="${b[0]}" data-hi="${b[1]}"><div class="rp-h"><span>${k === "min" ? "Minutes" : lab}</span><b class="rv"${DT.ranges[k] ? "" : " hidden"}>${cur[0]} – ${cur[1]}</b></div>
       <div class="dual2"><div class="fil"></div>${thumbs(lab, b)}</div>
       <div class="rp-b"><span>${b[0]}</span><span>${b[1]}</span></div></div>`;
   }).join("");
-  const anyF = DT.dvp || DT.def || DT.home !== null || DT.starter !== null || DT.result !== null || DT.rest !== null || Object.keys(DT.ranges).length || Object.keys(DT.without).some(k => DT.without[k]);
-  // odds
+  DT.fresh = null;
+  const anyF = DT.dvp || DT.def || DT.home !== null || DT.starter !== null || DT.result !== null || DT.rest !== null || Object.keys(DT.ranges).length ||
+    Object.keys(DT.without).some(k => DT.without[k]) || Object.keys(DT.open).some(k => DT.open[k]);
+  if (!rest) $("#pcf").innerHTML = `<div class="cf-h"><h3>Chart Filters</h3><button class="ca" id="clr"${anyF ? "" : " hidden"}>Clear All</button></div>
+      <div class="fcs">${chips.join("")}</div>${panels}`;
+  if (opening) { PX.lazy = setTimeout(() => { if (PX && PX.p === p) updateProp("rest"); }, 470); bindLive(p, logs, without); return; }
+  if (!PX.statDone) { $("#pstat").innerHTML = PX.stat; PX.statDone = true; $$("[data-rel]", pg).forEach(b => b.onclick = () => openProp(b.dataset.rel)); }
+  // books
   const bestNow = bestPrice(p, line, "all", side);
-  const bk = [["fd", "FanDuel", "book-fd.png"], ["dk", "DraftKings", "book-dk.png"]].map(([b, name, img]) => {
+  const bk = [["fd", "FanDuel"], ["dk", "DraftKings"]].map(([b, name]) => {
     const q = p.books[b];
-    if (!q) return `<div class="bkr"><img src="${img}" alt=""><span>${name}</span><span class="od na" style="grid-column:span 2">no prop posted</span></div>`;
-    const r = rungAt(q, line);
-    const px = (sd, i, L) => r && r[i] ? `<button class="od${bestNow && bestNow.book === b && side === sd ? " best" : ""}" data-ps="${sd}" aria-pressed="${side === sd}" aria-label="${sd === "over" ? "Over" : "Under"} ${line}, ${name} ${american(r[i])}">${L} ${american(r[i])}</button>` : '<span class="od na">—</span>';
-    const ov = px("over", 1, "O"), un = px("under", 2, "U");
-    return `<div class="bkr"><img src="${img}" alt=""><span>${name}${D.sources.books[b] && D.sources.books[b].stale ? ' <span class="tg tq">STALE</span>' : ""}<br><span class="ln2">${q.main === line ? "main line" : r ? "alt line" : "main " + (q.main === null ? "—" : q.main)} · ${mt(q.updated)}</span></span>${r ? ov + un : `<span class="od na" style="grid-column:span 2">not at ${line}</span>`}</div>`;
+    if (!q) return `<div class="bkr2"><span>${name}</span><span class="na">—</span><span class="na">—</span><span class="na">—</span></div>`;
+    const here = rungAt(q, line), r = here || rungAt(q, q.main), l = here ? line : q.main;
+    const px = (sd, i) => r && r[i] ? `<button class="${here && bestNow && bestNow.book === b && side === sd ? "best" : ""}" data-ps="${sd}" data-pl="${l}" aria-pressed="${!!here && side === sd}" aria-label="${sd === "over" ? "Over" : "Under"} ${l}, ${name} ${american(r[i])}">${american(r[i])}</button>` : '<span class="na">—</span>';
+    return `<div class="bkr2${here ? "" : " alt"}"><span>${name}${D.sources.books[b] && D.sources.books[b].stale ? ' <span class="tg tq">STALE</span>' : ""}</span><button class="bl" data-pl="${l}" aria-label="Use line ${l}">${l === null ? "—" : l}</button>${px("over", 1)}${px("under", 2)}</div>`;
   }).join("");
-  // availability
-  const inj = D.injuries[g.date + "|" + p.pid] || {}, rep = D.sources.report[g.date];
-  const arows = [`<div class="kv"><span>Official report</span><b>${inj.official ? esc(inj.official.status) + (inj.official.reason ? " · " + esc(inj.official.reason.replace("Injury/Illness - ", "")) : "") : rep ? (inj.listed_team ? "Not listed" : "Team not listed yet") : "Not out yet"}</b></div>`];
-  if (rep) arows.push(`<div class="kv"><span>Report time</span><b>${mt((inj.official || {}).published || rep.published, true)}</b></div>`);
-  (inj.news || []).forEach(n => arows.push(`<div class="kv"><span>News · ${esc(n.source)}</span><b>${esc(n.headline || n.status || "")} · ${mt(n.detected)}</b></div>`));
-  if (without.length) arows.push(`<div class="kv"><span>Teammates out</span><b>${without.map(w => esc(w.name) + " (" + esc(w.status) + ")").join(", ")}</b></div>`);
-  const rel = (D.related[p.id] || []).map(r => {
-    const o = D.props.find(x => x.id === r.id); if (!o) return "";
-    return `<button class="rc" data-rel="${esc(o.id)}"><div class="nm">${esc(o.player.split(" ").slice(-1)[0])} ${esc(short(o.market))}</div><div class="sub">${o.main === null ? "alt lines" : "O/U " + o.main}</div><div class="rr">r ${r.r > 0 ? "+" : ""}${r.r} · ${r.n} games</div></button>`;
-  }).join("");
-  const live = p.live && g.state !== "pregame" ? `<div class="box" role="status"><div class="live"><span class="tg ${g.state === "live" ? "tl" : "tn"}">${g.state === "live" ? "LIVE" : "FINAL"}</span>${p.live.value} ${esc(short(p.market))} in ${p.live.min} min</div><div class="note">${esc(g.label || "")}${g.score ? " · " + esc(g.away) + " " + g.score[0] + " – " + esc(g.home) + " " + g.score[1] : ""} · box score ${ago(g.updated)}</div></div>` : "";
+  $("#pbk").innerHTML = `<div class="bkh"><span>BOOKS</span><button class="lnp" id="lnp" aria-haspopup="dialog" aria-label="Line ${line}">LINE${ICON.down}</button><span>OVER</span><span>UNDER</span></div>${bk}
+    ${p.open ? `<div class="note" style="margin:8px 15.3px 0">FanDuel opened ${p.open[0]} (${american(p.open[1])}) ${mt(p.open[2], true)}.</div>` : ""}`;
+  // game log
   const logRows = win.slice().reverse().map(l => {
     const v = statValue(l, p.market), r = v === null ? "–" : v > line ? '<span class="ov">O</span>' : v < line ? '<span class="un">U</span>' : '<span class="pu">P</span>';
     return `<tr><td>${esc(l.date.slice(5).replace("-", "/"))}</td><td>${l.home ? "" : "@"}${esc(l.opp)}${l.team !== p.team ? " <span style='color:var(--l3)'>(" + esc(l.team) + ")</span>" : ""}</td><td class="r">${l.min}</td><td class="r">${l.fga ?? "–"}</td><td class="r"><b>${v === null ? "–" : v}</b></td><td class="r">${r}</td></tr>`;
   }).join("");
-  pg.innerHTML = `<div class="ph"><button class="cb bk" aria-label="Back">${ICON.back}</button>
-      <div class="ph-t"><b>${esc(p.player)}</b><span>${esc(team[0])}</span></div><span class="sp2"></span>
-      <button class="cb" id="shr" aria-label="Share">${ICON.share}</button><button class="cb${fav ? " fav" : ""}" id="fav" aria-label="Favorite" aria-pressed="${fav}">${ICON.star}</button></div>
-    <nav class="mt" aria-label="Markets"><div class="mt-in">${mkts.map(m => `<button data-mk="${m}" aria-pressed="${m === p.market}">${TAB[m]}</button>`).join("")}</div></nav>
-    <div class="hro"><div class="hro-l"><h2>${esc(p.player)}</h2><div class="hro-s">${esc(team[0])}</div><div class="hro-s">${esc(POSN[c.pos] || c.pos || "")}</div>
-      <div class="tlg" style="background:${team[1]}">${logo(p.team, "")}</div></div>
-      <img class="hro-i" alt="" src="https://cdn.nba.com/headshots/nba/latest/1040x760/${p.pid}.png" onerror="this.style.visibility='hidden'"></div>
-    <div class="sg2"><div class="cells">
-      <div><i>${esc(winLab)} AVG</i><b>${s.avg === null ? "–" : tri(s.avg > line) + s.avg}</b></div>
-      <button id="lnb"><i>LINE</i><b>${line}<span class="cv">›</span></b></button>
-      <div><i>PROP</i><b>${esc(NAME[p.market])}</b></div>
-      <div><i>HIT RATE</i><b>${rate === null ? "–" : tri(rate >= .5) + Math.round(rate * 100) + "%"}</b></div>
-      <button id="psb"><i>POS RANK</i><b>${c.pos_rank ? ord(c.pos_rank) : "–"}<span class="cv">›</span></b></button>
-      <div><i>OPPONENT</i><b>${opp}</b></div></div>
-      <button class="muc" id="mub">${gauge(gr)}<span>Matchup <span class="cv">›</span></span></button></div>
-    ${live}
-    <div class="c2w" id="chw">${chart2(win, p.market, line)}</div>
-    <div class="wrow"><div class="wcap" role="group" aria-label="Games window">${capsule}</div><button class="cb fb" id="pf" aria-label="All filters">${ICON.menu}</button></div>
-    <div class="sr" role="status">${side === "under" ? "Under" : "Over"} ${line}: ${rate === null ? "no games" : Math.round(rate * 100) + "% of " + s.n + " games"}. White box = minutes played, fill = ${esc(short(p.market))}.</div>
-    <div class="cf"><div class="cf-h"><h3>Chart Filters</h3><button class="ca" id="clr"${anyF ? "" : ' aria-disabled="true"'}>Clear All</button></div>
-      <div class="fcs">${chips.join("")}</div>${panels}</div>
-    <div class="sec2"><h3>Odds</h3><div class="box0"><div class="bks" style="margin:0;border:0">${bk}</div>${p.open ? `<div class="note">FanDuel opened ${p.open[0]} (${american(p.open[1])}) ${mt(p.open[2], true)}.</div>` : ""}</div></div>
-    <div class="sec2"><h3>Availability</h3><div class="box0">${arows.join("")}<div class="note">Official = the NBA injury report. News is third-party.</div></div></div>
-    ${rel ? `<div class="sec2"><h3>Related Props</h3><div class="rel" style="margin:0;padding:0">${rel}</div><div class="note">How closely the two stats moved together in past games (r from −1 to +1). History, not a prediction.</div></div>` : ""}
-    ${p.flag ? `<div class="sec2"><h3>Engine</h3><div class="box0"><span class="tg tf" style="margin:0 6px 0 0">SHADOW · NOT A BET</span>${esc(p.flag.tier)} at ${p.flag.line} · ${p.flag.card === 1 ? "on the card" : "logged only" + (p.flag.why ? " (" + esc(p.flag.why.toLowerCase()) + ")" : "")}</div></div>` : ""}
-    <div class="sec2"><details class="log"><summary>Game Log · ${win.length}</summary><table><thead><tr><th>Date</th><th>Opp</th><th class="r">Min</th><th class="r">FGA</th><th class="r">${esc(short(p.market))}</th><th class="r">${line}</th></tr></thead><tbody>${logRows || '<tr><td colspan="6">No games.</td></tr>'}</tbody></table></details></div>
-    <div class="end"></div>`;
-  const cw = $("#chw");
-  if (cw) {
-    cw.scrollLeft = cw.scrollWidth;
-    $$("g.br", cw).forEach(gb => gb.onclick = e => { e.stopPropagation(); barTip(cw, gb); });
-    cw.onclick = () => barTip(cw, null);
-  }
-  $("#pg .bk").onclick = () => history.back();
+  const lg = $("#plog"), wasOpen = !!$("details", lg) && $("details", lg).open;
+  lg.innerHTML = `<details class="log"${wasOpen ? " open" : ""}><summary>Game Log · ${win.length}</summary><table><thead><tr><th>Date</th><th>Opp</th><th class="r">Min</th><th class="r">FGA</th><th class="r">${esc(short(p.market))}</th><th class="r">${line}</th></tr></thead><tbody>${logRows || '<tr><td colspan="6">No games.</td></tr>'}</tbody></table></details>`;
+  bindLive(p, logs, without);
+}
+function bindLive(p, logs, without) {
+  const pg = $("#pg"), c = p.ctx || {};
   const keep = sel => { const e = !TOUCH && $(sel, pg); if (e) e.focus({preventScroll: true}); };
-  $("#fav", pg).onclick = () => { toggleFav(p.pid); renderProp(); keep("#fav"); };
-  $("#shr", pg).onclick = () => {
-    const url = location.href, title = `${p.player} ${NAME[p.market]} ${line}`;
-    if (navigator.share) navigator.share({title: title, url: url}).catch(() => {});
-    else if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => { $("#live").textContent = "Link copied"; });
-  };
-  $$("[data-win]", pg).forEach(b => b.onclick = () => { DT.win = b.dataset.win; renderProp(); keep(`[data-win="${DT.win}"]`); });
-  $$("[data-mk]", pg).forEach(b => b.onclick = () => { const id = p.gid + "|" + p.pid + "|" + b.dataset.mk; if (id !== p.id) { openProp(id, false); history.replaceState({p: id}, "", hashState()); } });
-  $$("[data-t]", pg).forEach(b => b.onclick = () => { const k = b.dataset.t; DT[k] = !DT[k]; renderProp(); keep(`[data-t="${k}"]`); });
-  $$("[data-r]", pg).forEach(b => b.onclick = () => { const k = b.dataset.r; if (DT.ranges[k]) { delete DT.ranges[k]; DT.open[k] = false; } else DT.open[k] = !DT.open[k]; renderProp(); keep(`[data-r="${k}"]`); });
-  $$("[data-k]", pg).forEach(b => b.onclick = () => { const k = b.dataset.k, raw = b.dataset.v, v = raw === "true" ? true : raw === "false" ? false : raw; DT[k] = DT[k] === v ? null : v; renderProp(); keep(`[data-k="${k}"][data-v="${raw}"]`); });
-  $$("[data-wo]", pg).forEach(b => b.onclick = () => { const k = b.dataset.wo; DT.without[k] = !DT.without[k]; renderProp(); keep(`[data-wo="${k}"]`); });
-  $$("[data-rel]", pg).forEach(b => b.onclick = () => openProp(b.dataset.rel));
-  $$("[data-ps]", pg).forEach(b => b.onclick = () => { if (ST.side === b.dataset.ps) return; ST.side = b.dataset.ps; save(); render(); renderProp(); keep(`[data-ps="${ST.side}"]`); });
-  const clr = $("#clr", pg); if (clr) clr.onclick = () => { Object.assign(DT, {home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, dvp: false, def: false, open: {min: true}}); renderProp(); };
-  $("#more", pg).onclick = () => { DT.more = !(DT.more || $("#more", pg).getAttribute("aria-expanded") === "true"); renderProp(); keep("#more"); };
-  $("#pf", pg).onclick = () => playerFilters(p, logs, without);
+  $$("[data-t]", pg).forEach(b => b.onclick = () => { const k = b.dataset.t; DT[k] = !DT[k]; updateProp(); keep(`[data-t="${k}"]`); });
+  $$("[data-r]", pg).forEach(b => b.onclick = () => { const k = b.dataset.r; if (DT.ranges[k] || DT.open[k]) { delete DT.ranges[k]; DT.open[k] = false; } else { DT.open[k] = true; DT.fresh = k; } updateProp(); keep(`[data-r="${k}"]`); });
+  $$("[data-k]", pg).forEach(b => b.onclick = () => { const k = b.dataset.k, raw = b.dataset.v, v = raw === "true" ? true : raw === "false" ? false : raw; DT[k] = DT[k] === v ? null : v; updateProp(); keep(`[data-k="${k}"][data-v="${raw}"]`); });
+  $$("[data-wo]", pg).forEach(b => b.onclick = () => { const k = b.dataset.wo; DT.without[k] = !DT.without[k]; updateProp(); keep(`[data-wo="${k}"]`); });
+  $$("[data-ps]", pg).forEach(b => b.onclick = () => {
+    const l = +b.dataset.pl, sd = b.dataset.ps;
+    if (ST.side === sd && DT.line === l) return;
+    DT.line = l;
+    if (ST.side !== sd) { ST.side = sd; save(); renderList(); tabbar(); }
+    updateProp(); keep(`[data-ps="${sd}"]`);
+  });
+  $$(".bl", pg).forEach(b => b.onclick = () => { const l = +b.dataset.pl; if (DT.line !== l) { DT.line = l; updateProp(); } });
+  const clr = $("#clr", pg); if (clr) clr.onclick = () => { Object.assign(DT, {home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, dvp: false, def: false, open: {}}); updateProp(); };
+  $("#more", pg).onclick = () => { DT.more = $("#more", pg).getAttribute("aria-expanded") !== "true"; if (!DT.more) { ["fga", "fg3a", "fta", "margin"].forEach(k => { DT.open[k] = false; delete DT.ranges[k]; }); Object.assign(DT, {home: null, result: null, rest: null, without: {}}); } updateProp(); keep("#more"); };
   $("#lnb", pg).onclick = () => lineSheet(p);
+  const lnp = $("#lnp", pg); if (lnp) lnp.onclick = () => lineSheet(p);
   $("#psb", pg).onclick = () => openSheet(`<h2 id="sht">Position rank</h2><div class="note" style="font-size:15px;color:var(--l2)">${c.pos_rank
     ? `${esc(p.player)} is <b style="color:#fff">${ord(c.pos_rank)}</b> of ${c.pos_n} ${GRPN[MU_GROUP(c.pos)] || "players at his position"} in ${esc(NAME[p.market].toLowerCase())} per game (${esc(c.pos_season || "")}, 3+ games).`
     : "Not enough games to rank him yet."}</div><div class="acts"><button class="btn pri" id="ok1">Done</button></div>`, s2 => { $("#ok1", s2).onclick = closeSheet; });
-  $("#mub", pg).onclick = () => matchupSheet(p, side);
+  $("#mub", pg).onclick = () => matchupSheet(p, ST.side);
   $$(".rp", pg).forEach(gp => {
     const k = gp.dataset.rk, lo = +gp.dataset.lo, hi = +gp.dataset.hi, fil = $(".fil", gp), rv = $(".rv", gp);
     dualRange($(".dual2", gp), lo, hi, DT.ranges[k] || [lo, hi], 13, (v, fl, fr) => {
@@ -996,7 +1253,7 @@ function renderProp() {
       rv.textContent = `${v[0]} – ${v[1]}`; rv.hidden = v[0] === lo && v[1] === hi;
     }, (v, i) => {
       if (v[0] === lo && v[1] === hi) delete DT.ranges[k]; else DT.ranges[k] = v.slice();
-      DT.open[k] = true; renderProp(); keep(`.rp[data-rk="${k}"] .th.${i ? "b" : "a"}`);
+      DT.open[k] = true; updateProp(); keep(`.rp[data-rk="${k}"] .th.${i ? "b" : "a"}`);
     });
   });
 }
@@ -1052,8 +1309,8 @@ function lineSheet(p) {
     <div class="acts"><button class="btn pri" id="ls-ok">Done</button></div>`, s => {
     const set = v => { DT.line = Math.max(0.5, Math.round(v * 2) / 2); $("#ls-v", s).textContent = DT.line; };
     $("#ls-m", s).onclick = () => set(DT.line - .5); $("#ls-p", s).onclick = () => set(DT.line + .5);
-    $$("[data-l]", s).forEach(b => b.onclick = () => { set(+b.dataset.l); closeSheet(); renderProp(); });
-    $("#ls-ok", s).onclick = () => { closeSheet(); renderProp(); };
+    $$("[data-l]", s).forEach(b => b.onclick = () => { set(+b.dataset.l); closeSheet(); updateProp(); });
+    $("#ls-ok", s).onclick = () => { closeSheet(); updateProp(); };
   });
 }
 function matchupSheet(p, side) {
@@ -1117,8 +1374,8 @@ function playerFilters(p, logs, without) {
       dr[k] = v; $$(`[data-sk="${k}"]`, s).forEach(x => x.setAttribute("aria-pressed", x === b)); upd();
     });
     $$("[data-wk]", s).forEach(b => b.onclick = () => { const k = b.dataset.wk; dr.without[k] = !dr.without[k]; $(".ck", b).textContent = dr.without[k] ? "✓" : ""; upd(); });
-    $("#pf-reset", s).onclick = () => { Object.assign(DT, {home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, dvp: false, def: false, open: {min: true}}); closeSheet(); renderProp(); };
-    $("#pf-ok", s).onclick = () => { Object.assign(DT, {home: dr.home, starter: dr.starter, result: dr.result, rest: dr.rest, ranges: dr.ranges, without: dr.without}); closeSheet(); renderProp(); };
+    $("#pf-reset", s).onclick = () => { Object.assign(DT, {home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, dvp: false, def: false, open: {}}); closeSheet(); updateProp(); };
+    $("#pf-ok", s).onclick = () => { Object.assign(DT, {home: dr.home, starter: dr.starter, result: dr.result, rest: dr.rest, ranges: dr.ranges, without: dr.without}); closeSheet(); updateProp(); };
     upd();
   });
 }
@@ -1127,24 +1384,40 @@ function load() {
   if (!D) { LOADING = true; render(); }
   fetch("nba_props.json?t=" + Date.now(), {cache: "no-store"}).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
     .then(j => {
-      const first = !D; D = j; ERR = null; LOADING = false;
+      const first = !D; D = j; ERR = null; LOADING = false; RATES = new Map(); ROWS = new Map();
       const y = window.scrollY;
       render(); if (!first) window.scrollTo(0, y);
-      if (CUR) renderProp();
+      if (CUR) { const pg = $("#pg"), py = pg.scrollTop; renderProp(); pg.scrollTop = py; }
       $("#live").textContent = "Props updated";
       if (first && HASH_P) { history.replaceState(null, "", hashState()); openProp(HASH_P); }
     })
     .catch(e => { LOADING = false; ERR = e.message || String(e); if (!D) render(); else { const u = $("#upd"); if (u) u.textContent = "Refresh failed"; } });
 }
 const HASH_P = readHash();
+history.scrollRestoration = "manual";     // Back must not make Safari re-scroll the list
 { const m = location.search.match(/[?&]st=(\d+)/); if (m) document.documentElement.style.setProperty("--st", m[1] + "px"); }
-window.addEventListener("popstate", () => { const p = new URLSearchParams(location.hash.slice(1)).get("p"); if (p && p !== CUR) openProp(p, false); else if (!p && CUR) closeProp(); });
+// Safari's edge swipe already animates the page away: after one, close without a second slide
+document.addEventListener("touchstart", e => { if (e.touches[0].clientX < 24 || e.touches[0].clientX > innerWidth - 24) EDGE_T = e.timeStamp; }, {passive: true});
+window.addEventListener("popstate", e => {
+  const p = new URLSearchParams(location.hash.slice(1)).get("p"), swiped = e.timeStamp - EDGE_T < 1500;
+  if (!$("#sheet").hidden) closeSheet();
+  if (p && p !== CUR) openProp(p, false); else if (!p && CUR) closeProp(swiped);
+});
 document.addEventListener("keydown", e => { if (e.key === "Escape") { if (!$("#sheet").hidden) closeSheet(); else if (CUR) history.back(); } });
 document.addEventListener("DOMContentLoaded", () => {
   $("#scrim").onclick = closeSheet;
+  sheetDrag();
+  $("#app").addEventListener("click", e => { const b = e.target.closest(".pr[data-id],.mrw[data-id]"); if (b) openProp(b.dataset.id); });
+  // the big headshot starts loading and decoding the moment a finger lands on a row, so it is ready when the page slides in
+  const warm = new Set();
+  $("#app").addEventListener("pointerdown", e => {
+    const b = e.target.closest(".pr[data-id],.mrw[data-id]"), pid = b && b.dataset.id.split("|")[1];
+    if (!pid || warm.has(pid)) return;
+    warm.add(pid); const im = new Image(); im.src = heroSrc(pid); if (im.decode) im.decode().catch(() => {});
+  }, {passive: true});
   load();
   setInterval(load, 120000);
-  setInterval(() => { const u = $("#upd"); if (u && D) u.textContent = "Updated " + ago(D.generated_at); }, 30000);
+  setInterval(() => { const u = $("#upd"); if (u && D) u.textContent = ago(D.generated_at); }, 30000);
 });
 })();
 """
@@ -1161,12 +1434,12 @@ PAGE = r"""<!doctype html>
 <title>Pickz · NBA Props</title>
 <link rel="icon" href="icon-64.png">
 <link rel="apple-touch-icon" href="icon-180.png">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;500&display=swap">
 <style>__CSS__</style>
 </head>
 <body>
 <div id="app"></div>
+<nav id="tb" class="tb" aria-label="Views"></nav>
+<div class="shade" aria-hidden="true"></div>
 <div id="pg" class="pg" role="dialog" aria-modal="true" aria-label="Prop details" hidden></div>
 <div id="scrim" class="scrim" hidden></div>
 <div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="sht" tabindex="-1" hidden></div>
