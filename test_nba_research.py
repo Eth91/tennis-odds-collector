@@ -338,6 +338,10 @@ def test_page_controls_work_on_iphone():
     assert html.count("bindMates(s, dr, upd);") == 2 and "Object.assign(DT, {home: null, result: null, rest: null}); }" in html
     # the Injuries view is one list, most relevant first (minutes x the chance he sits); no Injuries tab among the Props tabs
     assert "injList().sort" not in html and "return out.sort((a, b) => injImpact(b) - injImpact(a));" in html
+    # a Starter chip after the adjustable filters; a prop opens on this season's window; hit-rate boxes show a percentage
+    assert html.index('.forEach(rchip);') < html.index('tchip("starter", true, "Starter")') < html.index("if (c.dvp_rank) chips.push(")
+    assert 'win: windowed(logsOf(p), "season", D.season).length ? "season" : "l10"' in html
+    assert 'if (x.n < 5) return {t: pct(x.rate), c: "sm"};' in html and 'h + "/" + x.n' not in html
     assert 'const ALL_TABS = ["trends"];' in html and 'injury: "Injuries"' not in html and '"injury"' not in html
     # motion runs as Web Animations with a timer fallback, and nothing is fetched from a font CDN
     assert ".animate([" in html and "setTimeout(done" in html and "fonts.googleapis" not in html
