@@ -253,6 +253,26 @@ box-shadow:0 2px 8px rgba(0,0,0,.45)}
 .mrn b{display:block;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mrn small{display:block;margin-top:2px;font-size:12px;color:var(--l2)}
 .seg.mseg{flex:none;width:162px;margin:0}
+/* the box score sheet: a team's players, the name column pinned while the stats scroll sideways */
+.bxh{display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px}
+.bxh img{width:26px;height:26px}
+.bxh span{font-size:24px;font-weight:700} .bxh span.lo{color:var(--l2)}
+.bxh i{font-style:normal;color:var(--l2)}
+.bxs{margin:4px 0 12px;text-align:center;font-size:13px;color:var(--l2)}
+.bxw{margin:12px -16px 0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+table.bx{border-collapse:collapse;font-family:system-ui,-apple-system,"Roboto Condensed",sans-serif;font-stretch:66%;font-size:14.5px;
+font-variant-numeric:tabular-nums;white-space:nowrap;color:#cfcfcf}
+.bx th,.bx td{padding:8px 7px;text-align:right;border-bottom:.5px solid var(--sep)}
+.bx th{font-size:11.5px;font-weight:600;color:var(--l2)}
+.bx th:first-child,.bx td:first-child{position:sticky;left:0;z-index:1;max-width:132px;padding-left:16px;overflow:hidden;
+text-overflow:ellipsis;text-align:left;background:#1c1c1e;color:#fff;font-stretch:100%;font-size:14px}
+.bx th:last-child,.bx td:last-child{padding-right:16px}
+.bx td.hi{color:#fff;font-weight:700} .bx th.hi{color:var(--grn)}
+.bx tr.me td{background:#2c2c2e;color:#fff;font-weight:700}
+.bx tr.bxd td{position:static;padding:12px 16px 4px;background:none;font-size:11.5px;font-weight:600;color:var(--l2)}
+.bx tr.tot td{font-weight:700;color:#fff}
+.bxn{margin-top:10px;font-size:13px;color:var(--l2);line-height:1.5}
+.bxn b{margin-right:6px;font-size:11.5px;color:var(--l1)}
 .sheet .acts.stk{position:sticky;bottom:calc(-16px - var(--sb));margin:0 -16px;padding:12px 16px calc(var(--sb) + 16px);background:#1c1c1e;
 box-shadow:0 -.5px 0 var(--sep)}
 .fch .chip{height:32px;font-size:13px;background:var(--g2)}
@@ -327,10 +347,6 @@ transition:color .25s}
 width:94.4px;height:79.5px;padding:0;border:1px solid #2a2a2a;border-radius:13px;background:#131313;color:#fff;font-size:11.6px}
 .muc svg{margin:-4px 0 -2px}
 .c2w{position:relative;margin-top:11px;padding:0 15.3px;overflow-x:auto;scrollbar-width:none}
-.c2w .tip{position:absolute;z-index:2;padding:5px 9px;border-radius:9px;background:#2c2c2e;box-shadow:0 4px 14px rgba(0,0,0,.5);
-font-size:12px;line-height:15px;white-space:nowrap;pointer-events:none}
-.c2w .tip b{display:block;font-weight:600}
-svg.c2.pick g.br:not(.sel){opacity:.4}
 .c2w::-webkit-scrollbar{display:none}
 svg.c2{display:block}
 svg.c2 .ax{fill:#9a9a9a;font-size:14.5px}
@@ -1327,8 +1343,7 @@ function chart2(logs, market, line, ov, grow) {
     const d = iso(l.date + "T12:00:00Z").toLocaleDateString("en-US", {month: "numeric", day: "numeric", timeZone: "UTC"});
     const ovTxt = ov && num(m) ? `, ${r1(m)} ${oname}` : "";
     const desc = `${d} ${l.home ? "vs" : "at"} ${l.opp}: ${v === null ? "no value" : v} ${short(market)}${ovTxt || ` in ${l.min} minutes`}, ${res} ${line}`;
-    const tip = `${d} ${l.home ? "vs " : "@"}${l.opp}|${v === null ? "—" : v} ${short(market)} · ${ov ? (num(m) ? r1(m) : "—") + " " + oname : (num(l.min) ? r1(l.min) : "—") + " min"}`;
-    let g = `<g class="br" tabindex="0" role="img" aria-label="${esc(desc)}" data-tip="${esc(tip)}" style="--d:${Math.min(i, 19) * 14}ms"><title>${esc(desc)}</title>`;
+    let g = `<g class="br" tabindex="0" role="button" aria-label="${esc(desc)}, box score" data-gid="${esc(l.gid)}" data-tm="${esc(l.team)}" style="--d:${Math.min(i, 19) * 14}ms"><title>${esc(desc)}</title>`;
     const hv = v !== null && v > 0 ? B - y(v) : 0;
     if (hv) g += `<rect class="bv" x="${x}" y="${y(v)}" width="${w}" height="${hv}" fill="${fill}"/>`;
     // the stat's label: inside the bar's foot when it fits, else just above the bar
@@ -1464,19 +1479,49 @@ function histChart(p) {
   return o.join("") + sum;
 }
 // a bar's <title> only shows on hover, so a tap pins its game above the bar (tap it again, or the chart, to clear)
-function barTip(cw, gb) {
-  const svg = $("svg.c2", cw), old = $(".tip", cw), was = $("g.br.sel", cw);
-  if (old) old.remove();
-  if (was) was.classList.remove("sel");
-  if (svg) svg.classList.toggle("pick", !!gb && gb !== was);
-  if (!gb || gb === was) return;
-  gb.classList.add("sel");
-  const [a, b] = gb.dataset.tip.split("|"), t = document.createElement("div");
-  t.className = "tip"; t.innerHTML = `<b>${esc(a)}</b>${esc(b)}`; cw.appendChild(t);
-  const r = gb.getBoundingClientRect(), c = cw.getBoundingClientRect();
-  const x = r.left - c.left + cw.scrollLeft + r.width / 2, w = t.offsetWidth;
-  t.style.left = Math.max(cw.scrollLeft + 4, Math.min(cw.scrollLeft + cw.clientWidth - w - 4, x - w / 2)) + "px";
-  t.style.top = Math.max(0, r.top - c.top - t.offsetHeight - 6) + "px";
+// a game's box score (docs/box/{gid}.json, nba_boxscore), opened from a chart bar: the team he played for first, his
+// row and the prop's stat columns marked; the name column stays put while the stats scroll sideways
+const BXC = ["MIN", "PTS", "REB", "AST", "FG", "3PT", "FT", "STL", "BLK", "TO", "PF", "+/-"];
+const BX_HI = {points: ["PTS"], rebounds: ["REB"], assists: ["AST"], threes: ["3PT"], pra: ["PTS", "REB", "AST"],
+               pts_reb: ["PTS", "REB"], pts_ast: ["PTS", "AST"], reb_ast: ["REB", "AST"]};
+// a player row [pid, name, starter, min, pts, reb, ast, fgm, fga, fg3m, fg3a, ftm, fta, stl, blk, tov, pf, pm]; a team's
+// tot [pts, reb, ast, fgm, fga, fg3m, fg3a, ftm, fta, stl, blk, tov, pf]
+const bxRow = r => [r[3], r[4], r[5], r[6], r[7] + "-" + r[8], r[9] + "-" + r[10], r[11] + "-" + r[12], r[13], r[14], r[15], r[16], (r[17] > 0 ? "+" : "") + r[17]];
+const bxTot = t => ["", t[0], t[1], t[2], t[3] + "-" + t[4], t[5] + "-" + t[6], t[7] + "-" + t[8], t[9], t[10], t[11], t[12], ""];
+function bxTable(t, p) {
+  const hi = BX_HI[p.market] || [], td = (v, i) => `<td${hi.indexOf(BXC[i]) >= 0 ? ' class="hi"' : ""}>${v}</td>`;
+  const row = r => `<tr${r[0] === p.pid ? ' class="me"' : ""}><td>${esc(nameOf(r[1]))}</td>${bxRow(r).map(td).join("")}</tr>`;
+  const st = t.players.filter(r => r[2]), bn = t.players.filter(r => !r[2]);
+  return `<div class="bxw"><table class="bx"><thead><tr><th>${st.length ? "STARTERS" : "PLAYER"}</th>${BXC.map((c, i) => `<th${hi.indexOf(c) >= 0 ? ' class="hi"' : ""}>${c}</th>`).join("")}</tr></thead>
+    <tbody>${st.map(row).join("")}${bn.length ? `<tr class="bxd"><td colspan="${BXC.length + 1}">BENCH</td></tr>${bn.map(row).join("")}` : ""}
+    <tr class="tot"><td>Team</td>${bxTot(t.tot).map(td).join("")}</tr></tbody></table></div>
+    ${t.dnp.length ? `<div class="bxn"><b>DNP</b>${t.dnp.map(([nm, why]) => esc(nameOf(nm)) + (why !== "DNP" ? ` <small>(${esc(injReason(why))})</small>` : "")).join(", ")}</div>` : ""}`;
+}
+function boxSheet(gid, team, p) {
+  openSheet('<h2 id="sht">Box Score</h2><div class="note" style="font-size:14px">Loading…</div>', () => {});
+  const s = $("#sheet"), n = SHEET_N;
+  s.dataset.kind = "box";
+  const fill = html => {
+    if (SHEET_N !== n || s.hidden) return false;
+    s.innerHTML = '<div class="grab" aria-hidden="true"></div><h2 id="sht">Box Score</h2>' + html + '<div class="acts"><button class="btn pri" id="bx-ok">Done</button></div>';
+    $("#bx-ok", s).onclick = closeSheet;
+    return true;
+  };
+  fetch(`box/${encodeURIComponent(gid)}.json`).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }).then(b => {
+    const [a, h] = b.teams;
+    let cur = b.teams.some(t => t.tri === team) ? team : h.tri;
+    const d = iso(b.date + "T12:00:00Z").toLocaleDateString("en-US", {weekday: "short", month: "numeric", day: "numeric", timeZone: "UTC"});
+    const ok = fill(`<div class="bxh">${logo(a.tri, "")}<b>${esc(a.tri)}</b><span class="num${a.pts > h.pts ? "" : " lo"}">${a.pts}</span><i>–</i><span class="num${h.pts > a.pts ? "" : " lo"}">${h.pts}</span><b>${esc(h.tri)}</b>${logo(h.tri, "")}</div>
+      <div class="bxs">${esc(d)} · ${esc(b.status)}</div>
+      <div class="seg" role="group" aria-label="Team">${b.teams.map(t => `<button data-bt="${esc(t.tri)}" aria-pressed="${t.tri === cur}">${esc(t.tri)}</button>`).join("")}</div>
+      <div id="bxt">${bxTable(b.teams.find(t => t.tri === cur), p)}</div>`);
+    if (!ok) return;
+    $$("[data-bt]", s).forEach(btn => btn.onclick = () => {
+      if (cur === btn.dataset.bt) return;
+      cur = btn.dataset.bt; press("[data-bt]", x => x === btn, s);
+      $("#bxt", s).innerHTML = bxTable(b.teams.find(t => t.tri === cur), p);
+    });
+  }).catch(() => fill('<div class="empty"><b>Box score not available yet</b></div>'));
 }
 // The page is built once per prop (header, tabs, hero, availability) and its live parts — cells, chart, window capsule,
 // chips, books, game log — are redrawn in place on every change, so the photo never reloads and the scroll never jumps.
@@ -1535,7 +1580,7 @@ function renderProp(mode) {
   $$("[data-win]", pg).forEach(b => b.onclick = () => { if (DT.win === b.dataset.win || b.disabled) return; DT.win = b.dataset.win; updateProp(); });
   $("#pf", pg).onclick = () => playerFilters(p, logs, without);
   const cw = $("#chw");
-  cw.onclick = e => { const gb = e.target.closest("g.br"); barTip(cw, gb); };
+  cw.onclick = e => { const gb = e.target.closest("g.br"); if (gb) boxSheet(gb.dataset.gid, gb.dataset.tm, p); };
   updateProp(mode || true);
 }
 // teammates on his team now, most minutes first: [{key, pid, name, since, played, mpg, gp, team}] (D.mates,
