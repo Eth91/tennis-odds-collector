@@ -260,35 +260,42 @@ def test_payload_never_invents_a_projection(monkeypatch):
     by, pl, meta = NP.for_payload(props, games, now)
     assert by == {} and meta["error"]                                     # not frozen: no numbers
     monkeypatch.setattr(NP, "TUNED_ON", "2023-24")
-    monkeypatch.setattr(NP, "PROJ_BLEND_W", .7)
     d = pathlib.Path(tempfile.mkdtemp())
-    by, pl, meta = NP.for_payload(props, games, now, gamelogs=d / "x.sqlite", matchup=d / "y.sqlite", profiles=d / "z.sqlite",
-                                  cache=d / "c.pkl")
-    assert by == {} and meta["error"] == "no box scores"
+    by, pl, meta = NP.for_payload(props, games, now, cache=d / "none.pkl")
+    assert by == {} and "not computed yet" in meta["error"]               # no cache: no numbers
+    assert NP.refresh([{"gid": "G", "date": "2026-10-26", "pid": 7, "team": "AAA", "opp": "BBB", "home": 1}],
+                      gamelogs=d / "x.sqlite", matchup=d / "y.sqlite", profiles=d / "z.sqlite", cache=d / "c.pkl") == "no box scores"
 
 
-def test_payload_projects_and_flags_stale(monkeypatch):
+def test_refresh_then_payload_and_stale(monkeypatch):
     import datetime as dt_
+    import os
     rows = synth()
-    monkeypatch.setattr(NP, "TUNED_ON", "2023-24")
-    monkeypatch.setattr(NP, "PROJ_BLEND_W", .7)
     monkeypatch.setattr(NP.PD, "load_box", lambda *a, **k: (rows, [], {}))
+    monkeypatch.setattr(NP, "availability_table", lambda *a, **k: {"Out": [0, 3]})
     d = pathlib.Path(tempfile.mkdtemp())
     for f in ("gl.sqlite", "mu.sqlite"):
         (d / f).write_text("x")
+    kw = dict(gamelogs=d / "gl.sqlite", matchup=d / "mu.sqlite", cache=d / "c.pkl")
+    tg = [{"gid": "G", "date": "2024-02-01", "pid": 102, "team": "AAA", "opp": "BBB", "home": 1}]
+    assert NP.refresh(tg, news=d / "news.sqlite", **kw).startswith("projected 1 players")
+    assert NP.refresh(tg, **kw).startswith("cache current")                  # nothing changed: skipped
     props = [{"id": "G|102|points", "gid": "G", "pid": 102, "market": "points", "team": "AAA", "opp": "BBB", "home": True,
-              "books": {"fd": {"main": 9.5, "rungs": [[9.5, 1.9, 1.9]]}}}]
+              "books": {"fd": {"main": 9.5, "rungs": [[9.5, 1.9, 1.9]]}}},
+             {"id": "G|999|points", "gid": "G", "pid": 999, "market": "points", "team": "AAA", "opp": "BBB", "home": True,
+              "books": {}}]                                                   # not in the cache: left unprojected
     games = [{"gid": "G", "date_et": "2024-02-01", "utc": "2024-02-02T00:00:00Z"}]
     now = dt_.datetime(2024, 2, 1, 18, 0, tzinfo=dt_.timezone.utc)
-    by, pl, meta = NP.for_payload(props, games, now, gamelogs=d / "gl.sqlite", matchup=d / "mu.sqlite", cache=d / "c.pkl",
-                                  log_db=d / "log.sqlite")
+    by, pl, meta = NP.for_payload(props, games, now, log_db=d / "log.sqlite", **kw)
     s = by["G|102|points"]
     assert meta["error"] is None and s["q10"] <= s["q50"] <= s["q90"] and sum(s["pmf"][1]) == pytest.approx(1, abs=2e-3)
-    assert set(pl["102"]) >= {"min", "steals", "blocks", "turnovers"} and meta["coverage"]["projected"] == 1
-    assert meta["stale"] is False and meta["logged"] == 1
-    games2 = [{"gid": "G", "date_et": "2024-06-01", "utc": "2024-06-02T00:00:00Z"}]
-    _, _, meta2 = NP.for_payload(props, games2, now, gamelogs=d / "gl.sqlite", matchup=d / "mu.sqlite", cache=d / "c.pkl")
-    assert meta2["stale"] is True and "days before the slate" in meta2["stale_reason"]
+    assert "G|999|points" not in by and meta["coverage"] == {"props": 2, "projected": 1, "thin_history": 0, "players": 1,
+                                                             "unknown_position": 0}
+    assert set(pl["102"]) >= {"min", "steals", "blocks", "turnovers"} and meta["logged"] == 1 and meta["drift"]["pts"] is not None
+    assert meta["stale"] is False and not meta.get("refresh_pending") and meta["availability"] == {"Out": [0, 3]}
+    os.utime(d / "mu.sqlite", (1, 2))                                        # new box scores since the refresh
+    _, _, m2 = NP.for_payload(props, [dict(games[0], date_et="2024-06-01")], now, **kw)
+    assert m2["refresh_pending"] is True and m2["stale"] is True and "days before the slate" in m2["stale_reason"]
 
 
 def test_forecast_log_keeps_first_and_last_before_cutoff():

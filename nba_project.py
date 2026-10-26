@@ -116,7 +116,9 @@ def walk(rows, cfg, targets=None, consts=None, keep=None):
     home_f = {1: np.array(consts["home"]), 0: np.array(consts["away"])}
     b2b_f = np.array(consts["b2b"])
     hs = sorted({cfg["h_m"], cfg["h_r"], 5, 10, 60})
-    dec = {h: 0.5 ** (1.0 / h) for h in hs}
+    hi = {h: i for i, h in enumerate(hs)}                     # state rows: one per half-life
+    decv = np.array([0.5 ** (1.0 / h) for h in hs])
+    memo = {}                                                  # (season, team, group) -> opponent factors, per date
     ks = np.array([cfg["k_" + s] for s in COUNTS])
     P = {}                                                     # pid -> player state
     teams = defaultdict(_Team)                                 # (season, team) -> _Team
@@ -127,8 +129,7 @@ def walk(rows, cfg, targets=None, consts=None, keep=None):
     def player(pid):
         p = P.get(pid)
         if p is None:
-            p = P[pid] = {"W": {h: 0.0 for h in hs}, "S": {h: np.zeros(NS) for h in hs}, "n": 0, "last": None,
-                          "season": {}}
+            p = P[pid] = {"W": np.zeros(len(hs)), "S": np.zeros((len(hs), NS)), "n": 0, "last": None, "season": {}}
         return p
 
     def group_prior(season, grp):
@@ -140,6 +141,12 @@ def walk(rows, cfg, targets=None, consts=None, keep=None):
         return np.concatenate([[COLD_MIN], tot[1:] / tot[0]])
 
     def opp_factor(season, opp, grp):
+        k = (season, opp, grp)
+        if k not in memo:
+            memo[k] = _opp_factor(season, opp, grp)
+        return memo[k]
+
+    def _opp_factor(season, opp, grp):
         """(per-stat factor for what `opp` allows to `grp` per possession / the league, pace factor for opp)."""
         cur_t, cur_l = teams[(season, opp)], league[season]
         prv = prev_final.get(_prev(season))
@@ -178,7 +185,8 @@ def walk(rows, cfg, targets=None, consts=None, keep=None):
         else:
             b1 = np.concatenate([[prior[0]], prior[1:] * prior[0]])
         # B2: recent form shrunk to long run, fixed constants
-        W5, S5, W10, S10, W60, S60 = p["W"][5], p["S"][5], p["W"][10], p["S"][10], p["W"][60], p["S"][60]
+        W, S = p["W"], p["S"]
+        W5, S5, W10, S10, W60, S60 = W[hi[5]], S[hi[5]], W[hi[10]], S[hi[10]], W[hi[60]], S[hi[60]]
         if W60 > 0 and S60[0] > 0:
             long_rate = S60[1:] / S60[0]
             m5 = S5[0] / W5
@@ -189,7 +197,7 @@ def walk(rows, cfg, targets=None, consts=None, keep=None):
         else:
             b2 = np.concatenate([[prior[0]], prior[1:] * prior[0]])
         # M1
-        Wm, Sm, Wr, Sr = p["W"][cfg["h_m"]], p["S"][cfg["h_m"]], p["W"][cfg["h_r"]], p["S"][cfg["h_r"]]
+        Wm, Sm, Wr, Sr = W[hi[cfg["h_m"]]], S[hi[cfg["h_m"]]], W[hi[cfg["h_r"]]], S[hi[cfg["h_r"]]]
         if W60 > 0:
             m_short = Sm[0] / Wm
             m_long = S60[0] / W60
@@ -216,9 +224,8 @@ def walk(rows, cfg, targets=None, consts=None, keep=None):
         for r in rs:
             p = player(r["pid"])
             v = np.array([r[s] for s in STATS], float)
-            for h in hs:
-                p["W"][h] = p["W"][h] * dec[h] + 1.0
-                p["S"][h] = p["S"][h] * dec[h] + v
+            p["W"] = p["W"] * decv + 1.0
+            p["S"] = p["S"] * decv[:, None] + v
             p["n"] += 1
             p["last"] = r["date"]
             cs = p["season"].get(r["season"])
@@ -259,6 +266,7 @@ def walk(rows, cfg, targets=None, consts=None, keep=None):
         if season_seen and s != season_seen:
             prev_final[season_seen] = ({k[1]: v for k, v in teams.items() if k[0] == season_seen}, league[season_seen])
         season_seen = s
+        memo.clear()                                           # state changes only between dates
         for i in by_date.get(d, []):
             if keep is None or i in keep:
                 out[i] = predict(rows[i])
@@ -451,14 +459,24 @@ def summarize(d, j, market, grid=160):
             "pmf": compact_pmf(pm)}
 
 
-def availability_table(news_db, matchup_db, cutoff_min=CUTOFF_MIN):
-    """{status: [appeared, n]} — the official report's status at T−cutoff (latest snapshot published before it)
-    against whether the player appeared (min > 0). 2026-27 only (reports exist from 2026-10-22). Shown with n."""
+def availability_table(news_db, matchup_db, lines_db=None, cutoff_min=CUTOFF_MIN):
+    """{status: [appeared, n]} — the official report's status at T−cutoff (the latest snapshot published before
+    it; the tip from nba_lines) against whether the player appeared (min > 0). 2026-27 only (reports exist from
+    2026-10-22). Shown with its n."""
     import datetime as dt_
-    n, m = PD._ro(news_db), PD._ro(matchup_db)
+    n, m, q = PD._ro(news_db), PD._ro(matchup_db), PD._ro(lines_db or PD.HERE / "nba_lines.sqlite")
     out = defaultdict(lambda: [0, 0])
-    if n is None or m is None:
+    if n is None or m is None or q is None:
         return {}
+    season_gids = [g for (g,) in m.execute("SELECT gid FROM games WHERE home_pts IS NOT NULL AND season='2026-27'")]
+    cut = {}
+    if not season_gids:
+        return {}
+    for g, t in q.execute(f"SELECT gid, MIN(tip_utc) FROM quotes WHERE gid IN ({','.join('?' * len(season_gids))}) "
+                          f"GROUP BY gid", season_gids):
+        if t:
+            tt = dt_.datetime.fromisoformat(t.replace("Z", "+00:00")) - dt_.timedelta(minutes=cutoff_min)
+            cut[g] = tt.isoformat()
     played = {(g, p) for g, p, mn in m.execute("SELECT gid, pid, min FROM player_games") if mn and mn > 0}
     games = {}
     for gid, d, h, a in m.execute("SELECT gid, date, home, away FROM games WHERE home_pts IS NOT NULL AND season='2026-27'"):
@@ -467,8 +485,8 @@ def availability_table(news_db, matchup_db, cutoff_min=CUTOFF_MIN):
     for d, team, pid, status, pub in n.execute("SELECT game_date, team, pid, status, published_at FROM snapshots "
                                                 "WHERE pid IS NOT NULL ORDER BY published_at"):
         gid = games.get((d, team))
-        if gid:
-            tips[(gid, pid)] = (status, pub)                 # the last listing (ordered by publish time)
+        if gid and gid in cut and pub < cut[gid]:
+            tips[(gid, pid)] = (status, pub)                 # the last listing published before the cutoff
     for (gid, pid), (status, pub) in tips.items():
         o = out[status]
         o[1] += 1
@@ -510,76 +528,97 @@ INPUTS_MISSING = ["injury news and teammate absences (no point-in-time history t
                   "starting lineups", "travel", "referees", "play types"]
 
 
-def for_payload(props, games, now, news=None, log_db=None, gamelogs=None, matchup=None, profiles=None, cache=None):
-    """(proj by prop id, players {pid: {stat: summary}}, meta). Never a stand-in number: on any failure the props
-    carry no projection and meta['error'] says why."""
-    import datetime as dt_
+def _cache_key(gamelogs, matchup):
+    import os
+    return (VERSION, cfg_hash(PROJ_CONFIG), os.path.getmtime(gamelogs) if os.path.exists(gamelogs) else 0,
+            os.path.getmtime(matchup) if os.path.exists(matchup) else 0)
+
+
+def load_cache(cache=None):
+    import pickle
+    try:
+        return pickle.loads(Path(cache or CACHE).read_bytes())
+    except (OSError, EOFError, pickle.UnpicklingError, AttributeError, ValueError):
+        return None
+
+
+def refresh(targets, gamelogs=None, matchup=None, profiles=None, cache=None, force=False, news=None, lines_db=None):
+    """Project `targets` (dicts: gid, date, pid, team, opp, home) and write the cache the 2-minute build reads.
+    Skipped when the cache already holds every target and the box-score stores have not changed. The heavy part
+    (load + walk, ~1 min on the VM) runs here, never inside the page build. Returns a short status string."""
     import os
     import pickle
     gamelogs, matchup, profiles, cache = gamelogs or GAMELOGS, matchup or MATCHUP, profiles or PROFILES, cache or CACHE
+    key = _cache_key(gamelogs, matchup)
+    want = {(t["gid"], t["pid"]): t for t in targets}
+    old = load_cache(cache)
+    if not force and old and old.get("key") == key and set(want) <= set(old.get("at", {})):
+        return f"cache current ({len(old['at'])} players)"
+    rows, _, pos = PD.load_box(gamelogs, matchup, profiles)
+    if not rows:
+        return "no box scores"
+    grp = {r["pid"]: r["group"] for r in rows}
+    last = defaultdict(list)
+    for r in rows:
+        last[r["pid"]].append(r)
+    keys = sorted(want)
+    slate, no_group = [], 0
+    for k in keys:
+        t = want[k]
+        g = grp.get(t["pid"]) or PD.group_of(pos.get(t["pid"]))
+        no_group += g is None
+        slate.append(dict(t, season=PD.season_of(t["date"]), group=g or "F"))   # unknown: forwards' rates (counted)
+    d, ot, ps = project(rows, slate)
+    l10 = np.array([np.mean([[r[s] for s in STATS] for r in last[t["pid"]][-10:]], 0) if len(last[t["pid"]]) >= 10
+                    else np.full(NS, np.nan) for t in slate])
+    obj = {"key": key, "at": {k: j for j, k in enumerate(keys)}, "vals": d.vals.astype(np.float32), "mu": d.mu,
+           "n_hist": [o["n_hist"] for o in ot], "rest": [o["rest"] for o in ot], "through": max(r["date"] for r in rows),
+           "pool": ps["pool"], "no_group": no_group, "last10": l10, "made_at": __import__("datetime").datetime.now(
+               __import__("datetime").timezone.utc).isoformat(timespec="seconds"),
+           "availability": availability_table(news, matchup, lines_db) if news is not None else None}
+    tmp = Path(str(cache) + ".tmp")
+    tmp.write_bytes(pickle.dumps(obj))
+    os.replace(tmp, cache)
+    return f"projected {len(keys)} players, box scores through {obj['through']}"
+
+
+def for_payload(props, games, now, log_db=None, cache=None, gamelogs=None, matchup=None):
+    """(proj by prop id, players {pid: {stat: summary}}, meta) from the refresh job's cache. Never a stand-in
+    number: a prop the cache does not hold carries no projection, and meta says why and how many."""
+    import datetime as dt_
+    gamelogs, matchup = gamelogs or GAMELOGS, matchup or MATCHUP
     meta = {"version": VERSION, "config": cfg_hash(PROJ_CONFIG), "tuned_on": TUNED_ON, "blend_w": PROJ_BLEND_W,
             "cutoff": f"tip − {CUTOFF_MIN} min; box scores from earlier dates only",
             "generated_at": now.astimezone(dt_.timezone.utc).isoformat(timespec="seconds"),
             "inputs_used": INPUTS_USED, "inputs_missing": INPUTS_MISSING, "target": "conditional on playing (books void a DNP)",
-            "error": None, "stale": False}
+            "error": None, "stale": False, "backtest": backtest_summary()}
     if TUNED_ON is None:
         meta["error"] = "the model config is not frozen yet"
         return {}, {}, meta
     try:
-        gmap = {g["gid"]: g for g in games}
-        want = {}
-        for p in props:
-            g = gmap.get(p["gid"])
-            if not g or not p.get("team") or not p.get("opp"):
-                continue
-            want[(p["gid"], p["pid"])] = {"date": g["date_et"] if "date_et" in g else g["date"], "pid": p["pid"],
-                                          "team": p["team"], "opp": p["opp"], "home": 1 if p.get("home") else 0}
-        if not want:
-            return {}, {}, meta
-        key = (VERSION, cfg_hash(PROJ_CONFIG), tuple(sorted(want)), os.path.getmtime(gamelogs) if os.path.exists(gamelogs) else 0,
-               os.path.getmtime(matchup) if os.path.exists(matchup) else 0)
-        hit = None
-        try:
-            c = pickle.loads(Path(cache).read_bytes())
-            hit = c if c.get("key") == key else None
-        except (OSError, EOFError, pickle.UnpicklingError, AttributeError):
-            hit = None
+        hit = load_cache(cache)
         if hit is None:
-            rows, _, pos = PD.load_box(gamelogs, matchup, profiles)
-            if not rows:
-                meta["error"] = "no box scores"
-                return {}, {}, meta
-            grp = {}
-            for r in rows:
-                grp[r["pid"]] = r["group"]
-            keys = sorted(want)
-            slate = [dict(want[k], season=PD.season_of(want[k]["date"]),
-                          group=grp.get(want[k]["pid"]) or PD.group_of(pos.get(want[k]["pid"]))) for k in keys]
-            no_group = sum(1 for t in slate if not t["group"])
-            for t in slate:
-                t["group"] = t["group"] or "F"                     # unknown position: forwards' league rates (counted)
-            d, ot, ps = project(rows, slate)
-            hit = {"key": key, "keys": keys, "vals": d.vals.astype(np.float32), "mu": d.mu, "n_hist": [o["n_hist"] for o in ot],
-                   "rest": [o["rest"] for o in ot], "through": max(r["date"] for r in rows), "pool": ps["pool"],
-                   "no_group": no_group, "pool_mean": ps.get("pool_mean")}
-            tmp = Path(str(cache) + ".tmp")
-            tmp.write_bytes(pickle.dumps(hit))
-            os.replace(tmp, cache)
+            meta["error"] = "projections not computed yet (nba_project.py --refresh)"
+            return {}, {}, meta
+        gmap = {g["gid"]: g for g in games}
         d = Dist.__new__(Dist)
-        d.vals, d.mu = hit["vals"].astype(float), hit["mu"]
-        at = {k: j for j, k in enumerate(hit["keys"])}
-        meta["logs_through"] = hit["through"]
-        meta["pool"] = hit["pool"]
-        first = min(v["date"] for v in want.values())
-        gap = (dt_.date.fromisoformat(first) - dt_.date.fromisoformat(hit["through"])).days
-        if gap > 3:
-            meta["stale"] = True
-            meta["stale_reason"] = f"latest box score is {hit['through']}, {gap} days before the slate"
-        by_prop, players = {}, {}
+        d.vals, d.mu = hit["vals"].astype(float), np.asarray(hit["mu"], float)
+        at = hit["at"]
+        meta.update(logs_through=hit["through"], pool=hit["pool"], projected_at=hit.get("made_at"))
+        if hit.get("key") != _cache_key(gamelogs, matchup):
+            meta["refresh_pending"] = True                    # new box scores since; the refresh job is behind
+        dates = [gmap[p["gid"]].get("date_et") or gmap[p["gid"]].get("date") for p in props if p["gid"] in gmap]
+        if dates:
+            gap = (dt_.date.fromisoformat(min(dates)) - dt_.date.fromisoformat(hit["through"])).days
+            if gap > 3:
+                meta["stale"] = True
+                meta["stale_reason"] = f"latest box score is {hit['through']}, {gap} days before the slate"
+        by_prop, players, rows_used = {}, {}, set()
         for p in props:
             j = at.get((p["gid"], p["pid"]))
             if j is None:
                 continue
+            rows_used.add(j)
             s = summarize(d, j, p["market"])
             s["n_hist"], s["rest"] = int(hit["n_hist"][j]), int(hit["rest"][j])
             by_prop[p["id"]] = s
@@ -587,22 +626,22 @@ def for_payload(props, games, now, news=None, log_db=None, gamelogs=None, matchu
                 players[str(p["pid"])] = {m: {k: v for k, v in summarize(d, j, m).items() if k != "pmf"}
                                           for m in ("points", "rebounds", "assists", "threes", "steals", "blocks", "turnovers")}
                 players[str(p["pid"])]["min"] = {k: v for k, v in summarize(d, j, "min", 70).items() if k != "pmf"}
-        meta["backtest"] = backtest_summary()
         meta["coverage"] = {"props": len(props), "projected": len(by_prop),
                             "thin_history": sum(1 for v in by_prop.values() if v["n_hist"] < 10),
-                            "players": len(hit["keys"]), "unknown_position": hit.get("no_group", 0)}
-        # drift: tonight's projected means against the analog pool's (the last two seasons' walk-forward means)
-        mu_now = np.asarray(hit["mu"], float).mean(0)
-        meta["drift"] = {"slate_mean": dict(zip(STATS, [round(float(x), 2) for x in mu_now])),
-                         "pool_mean": dict(zip(STATS, hit.get("pool_mean") or [None] * NS))}
-        if news is not None:
-            meta["availability"] = availability_table(news, matchup)
+                            "players": len(players), "unknown_position": hit.get("no_group", 0)}
+        # drift: tonight's projected means against the same players' last-10 averages (near 0 when inputs are sane)
+        if rows_used and hit.get("last10") is not None:
+            ix = sorted(rows_used)
+            diff = np.asarray(hit["mu"], float)[ix] - np.asarray(hit["last10"], float)[ix]
+            meta["drift"] = {s: (round(float(np.nanmedian(diff[:, k])), 2) if np.isfinite(diff[:, k]).any() else None)
+                             for k, s in enumerate(STATS)}
+        meta["availability"] = hit.get("availability")      # from the refresh job (finished games only)
         if log_db is not None:
             items = []
             for p in props:
                 s, j = by_prop.get(p["id"]), at.get((p["gid"], p["pid"]))
                 bk = next((b for b in ("fd", "dk") if (p["books"].get(b) or {}).get("main") is not None), None)
-                if s is None or bk is None:
+                if s is None or bk is None or p["gid"] not in gmap:
                     continue
                 line = p["books"][bk]["main"]
                 r = next(r for r in p["books"][bk]["rungs"] if r[0] == line)
@@ -625,11 +664,16 @@ RESULTS = PD.HERE / "PROJECTION_RESULTS.json"
 
 
 def backtest_summary(path=None):
-    """The headline numbers of the pre-registered evaluation (PROJECTION_RESULTS.json), for the page."""
+    """The headline numbers of the pre-registered evaluation (PROJECTION_RESULTS.json, or its copy in
+    nba_proj_results.py — the VM deploy copies code only), for the page."""
     try:
         r = json.loads(Path(path or RESULTS).read_text())
     except (OSError, ValueError):
-        return None
+        try:
+            import nba_proj_results
+            r = nba_proj_results.RESULTS
+        except ImportError:
+            return None
     out = {"version": r.get("version"), "generated_at": r.get("generated_at"), "periods": {}}
     for season, p in (r.get("periods") or {}).items():
         if not p:
@@ -644,3 +688,84 @@ def backtest_summary(path=None):
         out["periods"][season] = row
     out["verdicts"] = r.get("verdicts")
     return out
+
+
+def slate_targets(now=None, rows=None, lines_db=None, index=None, days=120):
+    """Today's and tomorrow's (ET) games: every player who appeared for one of those teams in the last `days` days
+    (his latest team), plus every player on the book board for those games (team from the player index)."""
+    import datetime as dt_
+    import nba_rosters as RO
+    now = now or dt_.datetime.now(dt_.timezone.utc)
+    et = now.astimezone(__import__("zoneinfo").ZoneInfo("America/New_York")).date()
+    dates = {et.isoformat(), (et + dt_.timedelta(days=1)).isoformat()}
+    games = [g for g in RO.schedule() if g["date_et"] in dates]
+    side = {}
+    for g in games:
+        side[(g["gid"], g["home"])] = (g["away"], 1, g["date_et"])
+        side[(g["gid"], g["away"])] = (g["home"], 0, g["date_et"])
+    if rows is None:
+        rows, _, _ = PD.load_box(GAMELOGS, MATCHUP, PROFILES)
+    lo = (et - dt_.timedelta(days=days)).isoformat()
+    latest = {}
+    for r in rows:
+        if r["date"] >= lo:
+            latest[r["pid"]] = r["team"]
+    out = {}
+    for g in games:
+        for team in (g["home"], g["away"]):
+            opp, home, date = side[(g["gid"], team)]
+            for pid, t in latest.items():
+                if t == team:
+                    out[(g["gid"], pid)] = {"gid": g["gid"], "date": date, "pid": pid, "team": team, "opp": opp, "home": home}
+    q = PD._ro(lines_db or PD.HERE / "nba_lines.sqlite")
+    try:
+        idx = {int(k): v[0] for k, v in json.loads(Path(index or PD.HERE / "nba_player_index.json").read_text())["players"].items()}
+    except (OSError, ValueError, KeyError):
+        idx = {}
+    if q is not None and games:
+        gids = [g["gid"] for g in games]
+        for gid, pid in q.execute(f"SELECT DISTINCT gid, pid FROM board WHERE pid IS NOT NULL AND gid IN ({','.join('?' * len(gids))})", gids):
+            team = latest.get(pid) or idx.get(pid)
+            if (gid, team) in side and (gid, pid) not in out:
+                opp, home, date = side[(gid, team)]
+                out[(gid, pid)] = {"gid": gid, "date": date, "pid": pid, "team": team, "opp": opp, "home": home}
+    return list(out.values()), rows
+
+
+def board_targets(now=None, lines_db=None):
+    """{(gid, pid)} on the book board for today's and tomorrow's (ET) games — the refresh job's cheap check."""
+    import datetime as dt_
+    import nba_rosters as RO
+    now = now or dt_.datetime.now(dt_.timezone.utc)
+    et = now.astimezone(__import__("zoneinfo").ZoneInfo("America/New_York")).date()
+    dates = {et.isoformat(), (et + dt_.timedelta(days=1)).isoformat()}
+    gids = [g["gid"] for g in RO.schedule() if g["date_et"] in dates]
+    q = PD._ro(lines_db or PD.HERE / "nba_lines.sqlite")
+    if q is None or not gids:
+        return set()
+    return {(g, p) for g, p in q.execute(f"SELECT DISTINCT gid, pid FROM board WHERE pid IS NOT NULL AND gid IN "
+                                         f"({','.join('?' * len(gids))})", gids)}
+
+
+def main():
+    import argparse
+    ap = argparse.ArgumentParser(description="NBA projection engine (research only)")
+    ap.add_argument("--refresh", action="store_true", help="cron: project today's and tomorrow's players into the cache")
+    ap.add_argument("--force", action="store_true")
+    a = ap.parse_args()
+    if a.refresh:
+        before = load_cache()
+        current = before is not None and before.get("key") == _cache_key(GAMELOGS, MATCHUP)
+        if current and not a.force:
+            board = board_targets()
+            missing = [k for k in board if k not in before["at"]]
+            if not missing:
+                print(f"nba_project --refresh: cache current ({len(before['at'])} players, {len(board)} on the board)")
+                return
+        targets, rows = slate_targets()
+        print("nba_project --refresh:", refresh(targets, force=True, news=PD.HERE / "nba_news.sqlite"))
+
+
+if __name__ == "__main__":
+    main()
+

@@ -13,11 +13,18 @@ the results are in `PROJECTION_RESULTS.md`.
 | `nba_research.py` | calls `nba_project.for_payload` in the 2-minute build; adds `proj` to each prop, `proj_players`, `proj_meta` to `nba_props.json` | VM |
 | `nba_research_ui.py` | the player page's Model Projection card, the MODEL column of the alt-line ladder, "proj" on list rows, the model status and scorecard | VM (static page) |
 
-Flow on the VM: cron (every 2 min) → `nba_research.py` → `nba_project.for_payload` (cached per day:
-recomputed only when the box-score stores or the slate change) → `docs/nba_props.json` → the page.
-Each build also writes forecasts to `nba_proj_log.sqlite` (the first and the last before tip − 30 min).
-Nightly at 11:15 UTC, `nba_proj_eval.py --prospective` grades them into `docs/nba_proj_score.json`.
-`dashboard.py` is not touched.
+Flow on the VM:
+- Cron every 30 min: `nba_project.py --refresh`. If the box-score stores are unchanged and every board
+  player for today and tomorrow is already in `nba_proj_cache.pkl`, it stops (about 2 s). Otherwise it
+  replays all box scores, projects the slate's players (about 2–3 min on the VM), rebuilds the
+  availability table, and replaces the cache atomically.
+- Cron every 2 min: `nba_research.py` → `nba_project.for_payload` reads the cache only (no model
+  work, ~0.1 s) → `docs/nba_props.json` → the page. A board player missing from the cache shows
+  no projection and `refresh_pending` until the next refresh; a cache older than the slate by more
+  than 3 days shows **stale**.
+- Each build also writes forecasts to `nba_proj_log.sqlite` (the first and the last before tip − 30 min).
+- Nightly at 11:15 UTC, `nba_proj_eval.py --prospective` grades them into `docs/nba_proj_score.json`.
+- `dashboard.py` is not touched.
 
 ## The prediction
 - Target: `(min, pts, reb, ast, fg3m, stl, blk, tov)` for a player who **appears**. Books void a DNP.
