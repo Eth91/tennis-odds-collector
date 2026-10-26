@@ -173,6 +173,7 @@ def test_payload_related_and_flags(payload):
     assert allen["ctx"]["group"] is None or allen["ctx"]["group"] in ("G", "F", "C")
     b = next(p for p in payload["props"] if p["id"] == "G1|1|points")
     assert b["ctx"]["group"] == "G" and b["ctx"]["opp_games"] == 0                 # SAC has no cached games
+    assert b["ctx"]["def_rank"] is None and b["ctx"]["pace_rank"] is None           # no rank without opponent games
 
 
 @pytest.mark.skipif(NODE is None, reason="node not installed")
@@ -200,6 +201,14 @@ out.f3 = C.filterProps(props, Object.assign({}, st, {market: 'all', book: 'all',
 out.s1 = C.sortProps(props, 'line', 'asc', () => []).map(p => p.id);
 out.s2 = C.sortProps(props, 'hit10', 'desc', () => []).map(p => p.id);
 out.am = [C.american(1.87), C.american(2.5), C.american(null), Math.round(C.decimalOf(-150) * 1000)];
+out.fl = [C.filterLogs(inp.logs, {home: true}).length, C.filterLogs(inp.logs, {home: false, starter: true}).length,
+          C.filterLogs(inp.logs, {without: [{played: inp.played, since: '2026-09-01', team: 'PHX'}]}).length,
+          C.filterLogs(inp.logs, {starter: false}).length];
+const book = props.find(p => p.id === 'G1|1|points');
+out.rates = C.propRates(book, inp.logs, 'under', '2026-27');
+const logsOf = p => p.pid === 1 ? inp.logs : [];
+out.su = C.sortProps(props, 'hit10', 'desc', logsOf, 'under', '2026-27').map(p => p.id);
+out.bp = [C.bestPrice(book, 24.5, 'all', 'under'), C.bestPrice(book, 25.5, 'all', 'over'), C.bestPrice(book, 29.5, 'all', 'under')];
 console.log(JSON.stringify(out));
 """)
     inp = {"cases": cases, "lines": lines, "logs": logs, "props": payload["props"],
@@ -225,6 +234,17 @@ console.log(JSON.stringify(out));
     assert len(out["s2"]) == 3                                                 # no logs: all missing, stable order
     assert out["s2"] == [p["id"] for p in payload["props"]]
     assert out["am"] == ["-115", "+150", "—", 1667]
+    homes = sum(1 for l in logs if l["home"] == 1)
+    assert out["fl"] == [homes, 30 - homes, 10, 0]                              # home; away starters; without Nurkic; bench
+    vals = [RS.stat_value(l, "points") for l in logs]
+    for w, sl in (("l5", vals[-5:]), ("l10", vals[-10:]), ("l20", vals[-20:]), ("season", vals)):
+        py = RS.hit_summary(sl, 24.5)
+        assert out["rates"][w]["n"] == py["n"] and out["rates"][w]["rate"] == pytest.approx(py["under"] / py["n"])
+    assert out["rates"]["h2h"]["n"] == 0 and out["rates"]["h2h"]["rate"] is None       # never played SAC
+    assert out["su"][0] == "G1|1|points" or out["su"][0] == "G1|1|assists"             # only pid 1 has logs
+    assert set(out["su"][2:]) == {"G1|2|points"}                                       # no logs: last
+    assert out["bp"][0] == {"book": "fd", "odds": 1.95} and out["bp"][1] == {"book": "dk", "odds": 1.95}
+    assert out["bp"][2] is None                                                        # the over-only alt has no under
 
 
 @pytest.mark.skipif(NODE is None, reason="node not installed")

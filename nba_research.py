@@ -382,14 +382,30 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
     live = live_state(games, get=box_get, now=now)
     # matchup context: point-in-time factors for this season (nba_matchup), per prop
     S = MU.Season(mcon, season, index_pos=pos) if mcon is not None else None
+    league = {}                                          # (date, group) -> {team: (pace, {stat: factor})}
+
+    def league_of(date, pid, group):
+        k = (date, group)
+        if k not in league:
+            league[k] = {t: S.factors(t, date, pid) for t in S.by_team if S._team_before(t, date)[0]}
+        return league[k]
     for p in props:
         g = gmap[p["gid"]]
-        ctx = {"group": None, "pace": None, "def": None, "opp_games": 0}
+        ctx = {"group": None, "pace": None, "def": None, "opp_games": 0, "pace_rank": None, "def_rank": None,
+               "teams": 0}
         if S is not None and p["opp"]:
             pace, mf = S.factors(p["opp"], g["date_et"], p["pid"])
             n_opp = S._team_before(p["opp"], g["date_et"])[0] if p["opp"] in S.by_team else 0
-            ctx.update(group=S.group(p["pid"], g["date_et"]), pace=round(pace, 3), opp_games=n_opp,
+            grp = S.group(p["pid"], g["date_et"])
+            ctx.update(group=grp, pace=round(pace, 3), opp_games=n_opp,
                        **({"def": round(mf.get(MATCHUP_KEY[p["market"]], 1.0), 3)} if p["market"] in MATCHUP_KEY else {}))
+            if n_opp:                                    # rank 1 = the most possessions / the most allowed
+                lg = league_of(g["date_et"], p["pid"], grp)
+                ctx["teams"] = len(lg)
+                ctx["pace_rank"] = 1 + sum(1 for t, (pc, _) in lg.items() if pc > pace)
+                if grp and p["market"] in MATCHUP_KEY:
+                    k = MATCHUP_KEY[p["market"]]
+                    ctx["def_rank"] = 1 + sum(1 for t, (_, f) in lg.items() if f.get(k, 1.0) > mf.get(k, 1.0))
         p["ctx"] = ctx
         p["flag"] = flags.get((p["gid"], p["pid"], p["market"]))
         lv = live.get(p["gid"], {})
