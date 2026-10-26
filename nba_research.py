@@ -46,7 +46,17 @@ MARKETS = {"points": ("PTS", ("pts",)), "rebounds": ("REB", ("reb",)), "assists"
 MATCHUP_KEY = {"points": "pts", "rebounds": "reb", "assists": "ast", "pra": "pra", "pts_reb": "pts_reb",
                "pts_ast": "pts_ast", "reb_ast": "reb_ast"}           # threes: no matchup factor is computed
 LOG_COLS = ("date", "gid", "team", "opp", "home", "starter", "min", "pts", "reb", "ast", "fg3m", "fga", "fg3a", "fta",
-            "margin", "rest")   # margin = his team's final margin; rest = days off before the game (0 = back-to-back)
+            "margin", "rest", "usg")   # margin = his team's final margin; rest = days off before the game (0 = back-to-back);
+                                       # usg = usage % (the share of his team's possessions he used while on the floor)
+
+
+def usage(mn, fga, fta, tov, t_fga, t_fta, t_tov, t_min):
+    """Usage % (Basketball-Reference): 100 * (FGA + .44 FTA + TOV) * (team minutes / 5) / (MP * (team FGA + .44 FTA + TOV)).
+    None under a minute or without the team's totals."""
+    if None in (fga, fta, tov, t_fga, t_fta, t_tov, t_min) or not mn or mn < 1:
+        return None
+    den = mn * (t_fga + .44 * t_fta + t_tov)
+    return round(100 * (fga + .44 * fta + tov) * (t_min / 5) / den, 1) if den else None
 BOOK_STALE_MIN = 20          # a book's board older than this is shown as stale (it refreshes every ~10 min)
 CORR_MIN_N, CORR_TOP = 15, 4
 EVEN = 1.9091
@@ -149,6 +159,9 @@ def opening(q, gid, pid, market):
     return None
 
 
+REST = LOG_COLS.index("rest")
+
+
 def game_logs(mcon, pids, seasons):
     """{pid: [log rows in LOG_COLS order]} from the cached box scores, oldest first."""
     out = defaultdict(list)
@@ -159,18 +172,20 @@ def game_logs(mcon, pids, seasons):
         chunk = pids[i:i + 400]
         q = ("SELECT p.pid, g.date, p.gid, p.team, CASE WHEN p.team = g.home THEN g.away ELSE g.home END, "
              "CASE WHEN p.team = g.home THEN 1 ELSE 0 END, p.starter, p.min, p.pts, p.reb, p.ast, p.fg3m, p.fga, p.fg3a, "
-             "p.fta, CASE WHEN p.team = g.home THEN g.home_pts - g.away_pts ELSE g.away_pts - g.home_pts END "
-             f"FROM player_games p JOIN games g ON g.gid = p.gid WHERE p.pid IN ({','.join('?' * len(chunk))}) "
+             "p.fta, CASE WHEN p.team = g.home THEN g.home_pts - g.away_pts ELSE g.away_pts - g.home_pts END, "
+             "p.tov, t.fga, t.fta, t.tov, (SELECT SUM(x.min) FROM player_games x WHERE x.gid = p.gid AND x.team = p.team) "
+             "FROM player_games p JOIN games g ON g.gid = p.gid LEFT JOIN team_games t ON t.gid = p.gid AND t.team = p.team "
+             f"WHERE p.pid IN ({','.join('?' * len(chunk))}) "
              f"AND g.season IN ({','.join('?' * len(seasons))}) ORDER BY g.date, p.gid")
         for r in mcon.execute(q, chunk + list(seasons)):
-            row = list(r[1:]) + [None]
+            row = list(r[1:16]) + [None, usage(r[7], r[12], r[14], *r[16:])]
             row[6] = round(row[6] or 0, 1)
             out[r[0]].append(row)
     for rows in out.values():                       # rest: days off since his previous game; none across the summer
         for prev, row in zip([None] + rows[:-1], rows):
             if prev is not None:
                 gap = (dt.date.fromisoformat(row[0]) - dt.date.fromisoformat(prev[0])).days - 1
-                row[-1] = gap if gap <= 30 else None
+                row[REST] = gap if gap <= 30 else None
     return out
 
 

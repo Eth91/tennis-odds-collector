@@ -149,6 +149,9 @@ def test_payload_props_and_books(payload):
     lg = [dict(zip(RS.LOG_COLS, r)) for r in payload["players"]["1"]["logs"]]
     assert [l["rest"] for l in lg[:5]] == [None, 0, 1, 2, 0]                     # days off; none before his first game
     assert [l["margin"] for l in lg[:2]] == [8, -5] and lg[0]["fga"] == 15 and lg[0]["fta"] == 4
+    # usage %: (15 FGA + .44 * 4 FTA + 3 TOV) of PHX's (90 + .44 * 20 + 12), over his 30 of the team's 84 minutes / 5
+    assert lg[0]["usg"] == round(100 * (15 + .44 * 4 + 3) * (84 / 5) / (30 * (90 + .44 * 20 + 12)), 1) == 10.0
+    assert RS.usage(0.5, 1, 0, 0, 90, 20, 12, 240) is None and RS.usage(30, 15, 4, 3, None, 20, 12, 240) is None
     s = b["summary"]["l10"]                                                    # last 10 PHX games: 20..29 pts
     assert s["n"] == 10 and s["over"] == 5 and s["under"] == 5
     assert payload["sources"]["books"]["dk"]["stale"] is True and payload["sources"]["books"]["fd"]["stale"] is False
@@ -280,6 +283,20 @@ def test_page_scripts_parse():
         r = subprocess.run([NODE, "--check", str(d / f"s{i}.js")], capture_output=True, text=True)
         assert r.returncode == 0, r.stderr
     assert "__" not in html.split("<style>")[0] and "__TEAM_ID__" not in html and "1610612756" in html
+
+
+def test_page_controls_work_on_iphone():
+    html = UI.page()
+    # iOS Safari can't drag the thumb of a range input stacked under another, so the dual sliders are pointer-event widgets
+    assert 'type="range"' not in html and "dualRange(" in html and "touch-action:pan-y" in html
+    # chart bars show their game on tap (a <title> only appears on hover); the book prices switch Over / Under
+    assert "barTip(" in html and "data-ps=" in html
+    # the reference layout: Trends tab, game cards, a floating Props / Markets / Watchlist bar, a books table
+    assert all(k in html for k in ('trends: "Trends"', 'class="gc"', 'data-view="', '["watch", "Watchlist"]', 'id="pbk"'))
+    # motion runs as Web Animations with a timer fallback, and nothing is fetched from a font CDN
+    assert ".animate([" in html and "setTimeout(done" in html and "fonts.googleapis" not in html
+    # every range chip but Margin draws its stat on the chart as white outline boxes (Margin can be negative: filter only)
+    assert 'const OVL = {min: "min", fga: "FGA", fg3a: "3PTA", fta: "FTA", usg: "usage %"}' in html and "l[ov]" in html
 
 
 def test_board_links_the_page():
