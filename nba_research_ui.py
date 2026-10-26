@@ -247,6 +247,14 @@ box-shadow:0 2px 8px rgba(0,0,0,.45)}
 .sg{margin:16px 0 0}
 .sg>span{display:block;margin:0 0 6px;font-size:15px}
 .sg .seg{margin:0}
+/* the With / Without sheet: a teammate a row, Any / With / W/O on the right */
+.mrr{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:58px;border-bottom:.5px solid var(--sep)}
+.mrn{min-width:0}
+.mrn b{display:block;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mrn small{display:block;margin-top:2px;font-size:12px;color:var(--l2)}
+.seg.mseg{flex:none;width:162px;margin:0}
+.sheet .acts.stk{position:sticky;bottom:calc(-16px - var(--sb));margin:0 -16px;padding:12px 16px calc(var(--sb) + 16px);background:#1c1c1e;
+box-shadow:0 -.5px 0 var(--sep)}
 .fch .chip{height:32px;font-size:13px;background:var(--g2)}
 .fch .chip[aria-pressed="true"]{background:var(--blue);color:#fff}
 .kv{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:44px;border-bottom:.5px solid var(--sep);
@@ -501,6 +509,7 @@ function windowed(logs, win, season, opp) {
 // player-page filters: home / starter = true, false or null (any); result = "W" / "L"; rest = "b2b" / "1" / "2+";
 // oppSets = [{season: [teams]}] (the opponent must be in each);
 // ranges = {min|fga|fg3a|fta|margin: [lo, hi]} inclusive (a game missing that stat is out); without = [{played, since, team}]
+// (his games for that team since the teammate's first there, the teammate out); with = [{played, team}] (both played)
 function filterLogs(logs, f) {
   f = f || {};
   return logs.filter(function (l) {
@@ -524,6 +533,10 @@ function filterLogs(logs, f) {
     for (var i = 0; i < (f.without || []).length; i++) {
       var w = f.without[i];
       if (l.team !== w.team || l.date < w.since || w.played.indexOf(l.gid) >= 0) return false;
+    }
+    for (var m = 0; m < (f.with || []).length; m++) {
+      var t = f.with[m];
+      if (l.team !== t.team || t.played.indexOf(l.gid) < 0) return false;
     }
     return true;
   });
@@ -692,7 +705,7 @@ let D = null, ERR = null, LOADING = true, CUR = null;
 const TOUCH = matchMedia("(pointer: coarse)").matches;
 const ST = {date: null, gid: "all", market: "points", side: "over", q: "", sort: "hit10", dir: "desc", team: "all",
             book: "all", lmin: "", lmax: "", omin: "", omax: "", watch: "", view: "props"};
-const DT = {line: null, win: "l10", home: null, starter: null, result: null, rest: null, ranges: {}, without: {},
+const DT = {line: null, win: "l10", home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, with: {},
             dvp: false, def: false, open: {}, more: false, fresh: null, ovs: []};
 const RANGES = [["min", "Minutes", "Minutes"], ["fga", "Field goal attempts", "FGA"], ["fg3a", "3-point attempts", "3PTA"],
                 ["fta", "Free throw attempts", "FTA"], ["usg", "Usage %", "Usage%"], ["pot_ast", "Potential assists", "Potential Assists"],
@@ -1201,7 +1214,7 @@ function openProp(id, push) {
   const fresh = CUR !== id, was = !!CUR;
   CUR = id;
   if (fresh) Object.assign(DT, {line: p.main !== null ? p.main : allLines(p)[0], win: "l10", home: null, starter: null,
-                                 result: null, rest: null, ranges: {}, without: {}, dvp: false, def: false, open: {}, more: false, fresh: null, ovs: []});
+                                 result: null, rest: null, ranges: {}, without: {}, with: {}, dvp: false, def: false, open: {}, more: false, fresh: null, ovs: []});
   if (push !== false) history.pushState({p: id}, "", hashState());
   const pg = $("#pg");
   pg.hidden = false;                        // (off-screen until it slides in; it must lay out for the pills to measure)
@@ -1256,6 +1269,7 @@ const ICON = {
   search: '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="7.5" cy="7.5" r="5.5"/><path d="m12 12 4.5 4.5"/></svg>',
   props: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8.5 5.5H21M8.5 12H21M8.5 18.5H21"/><circle cx="3.6" cy="5.5" r=".6" fill="currentColor"/><circle cx="3.6" cy="12" r=".6" fill="currentColor"/><circle cx="3.6" cy="18.5" r=".6" fill="currentColor"/></svg>',
   markets: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2.5v19h19"/><path d="m5.5 16 4-6.5 4.5 4 6-7.5"/><circle cx="9.5" cy="9.5" r="1.3" fill="currentColor"/><circle cx="14" cy="13.5" r="1.3" fill="currentColor"/><circle cx="20" cy="6" r="1.3" fill="currentColor"/></svg>',
+  people: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9" r="2.6"/><path d="M15.8 14.2c2.6-.3 4.3 1.3 4.8 4.3"/></svg>',
   injuries: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.5" y="2.5" width="19" height="19" rx="5"/><path d="M10 6.5h4V10h3.5v4H14v3.5h-4V14H6.5v-4H10z"/></svg>',
   down: '<svg viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m2 2 4 4 4-4"/></svg>'};
 const favs = () => { try { return JSON.parse(localStorage.getItem("pickz_fav") || "[]"); } catch (e) { return []; } };
@@ -1523,20 +1537,35 @@ function renderProp(mode) {
   cw.onclick = e => { const gb = e.target.closest("g.br"); barTip(cw, gb); };
   updateProp(mode || true);
 }
-function updateProp(mode) {
-  if (!PX) return;
-  const first = !!mode && mode !== "rest", opening = mode === "open", rest = mode === "rest";
-  const {p, g, logs, c, without, wins} = PX, pg = $("#pg"), line = DT.line, side = ST.side;
+// teammates on his team now, most minutes first: [{key, pid, name, since, played, mpg, gp, team}] (D.mates,
+// nba_research.team_mates), then any teammate out tonight the roster list lacks (D.absences)
+function matesAll(p, without) {
+  const T = (D.mates || {})[p.team];
+  if (T && !T.list) T.list = T.mates.map(m => ({key: String(m.pid), pid: m.pid, name: m.name, since: m.since, mpg: m.mpg, gp: m.gp,
+    team: p.team, played: T.gids.filter((g, i) => m.on[i] === "1")}));
+  const ms = (T ? T.list : []).filter(m => m.pid !== p.pid);
+  return ms.concat(without.filter(a => !ms.some(m => m.key === a.key)));
+}
+// the chart's filters from DT; dr overrides keys (a sheet's draft). with / without: {teammate key: true}
+function chartF(p, g, c, without, dr) {
+  const x = Object.assign({}, DT, dr || {});
   const prevS = (+D.season.slice(0, 4) - 1) + "-" + D.season.slice(2, 4);
   const rkCur = (D.ranks || {})[g.date] || {}, rkPrev = (D.ranks || {})[prevS] || {};
   const dvpT = c.group && rkCur.dvp ? tierOf(c.dvp_rank, c.teams) : null, defT = tierOf(c.def_rank, c.teams);
   const oppSets = [];
-  if (DT.dvp && dvpT) { const s = {}; s[D.season] = oppSet(rkCur.dvp[c.group][p.market], dvpT, rkCur.teams);
+  if (x.dvp && dvpT) { const s = {}; s[D.season] = oppSet(rkCur.dvp[c.group][p.market], dvpT, rkCur.teams);
     if (rkPrev.dvp && rkPrev.teams) s[prevS] = oppSet(rkPrev.dvp[c.group][p.market], dvpT, rkPrev.teams); oppSets.push(s); }
-  if (DT.def && defT) { const s = {}; s[D.season] = oppSet(rkCur.def, defT, rkCur.teams);
+  if (x.def && defT) { const s = {}; s[D.season] = oppSet(rkCur.def, defT, rkCur.teams);
     if (rkPrev.def && rkPrev.teams) s[prevS] = oppSet(rkPrev.def, defT, rkPrev.teams); oppSets.push(s); }
-  const f = {home: DT.home, starter: DT.starter, result: DT.result, rest: DT.rest, ranges: DT.ranges, oppSets: oppSets,
-             without: without.filter(w => DT.without[w.key])};
+  const ms = matesAll(p, without);
+  return {home: x.home, starter: x.starter, result: x.result, rest: x.rest, ranges: x.ranges, oppSets: oppSets,
+          with: ms.filter(m => x.with[m.key]), without: ms.filter(m => x.without[m.key])};
+}
+function updateProp(mode) {
+  if (!PX) return;
+  const first = !!mode && mode !== "rest", opening = mode === "open", rest = mode === "rest";
+  const {p, g, logs, c, without, wins} = PX, pg = $("#pg"), line = DT.line, side = ST.side;
+  const f = chartF(p, g, c, without);
   const base = filterLogs(logs, f);
   const win = windowed(base, DT.win, D.season, p.opp);
   const s = hitSummary(win.map(l => statValue(l, p.market)), line);
@@ -1584,12 +1613,16 @@ function updateProp(mode) {
   if (c.def_rank) chips.push(chip('data-t="def"', `Def Rank <em class="${rankCls(c.def_rank, c.teams, side)}">${ord(c.def_rank)}</em>`, DT.def));
   const wchip = w => chips.push(chip(`data-wo="${w.key}"`, (w.fresh ? "W/O " : "Without ") + esc(lastName(w.name)), DT.without[w.key]));
   without.filter(w => w.fresh).forEach(wchip);                 // tonight's news: up front
-  const extra = DT.home !== null || DT.result !== null || DT.rest !== null || MORE_R.some(k => rangeOn(k) || DT.open[k]) || without.some(w => !w.fresh && DT.without[w.key]);
+  // the With / Without filters set in the teammates sheet show as chips that are on (a tap clears one)
+  const ms = matesAll(p, without), fresh = k => without.some(w => w.fresh && w.key === k);
+  ms.filter(m => DT.with[m.key]).forEach(m => chips.push(chip(`data-mw="${m.key}"`, "With " + esc(lastName(m.name)), true)));
+  ms.filter(m => DT.without[m.key] && !fresh(m.key)).forEach(m => chips.push(chip(`data-mo="${m.key}"`, "W/O " + esc(lastName(m.name)), true)));
+  if (ms.length) chips.push(chip('id="mts" aria-haspopup="dialog"', `${ICON.people}With / Without`, false));
+  const extra = DT.home !== null || DT.result !== null || DT.rest !== null || MORE_R.some(k => rangeOn(k) || DT.open[k]);
   const more = DT.more || extra;
   if (more) {
     tchip("home", true, "Home"); tchip("home", false, "Away"); rchip("margin");
     tchip("result", "W", "Win"); tchip("result", "L", "Loss"); tchip("rest", "b2b", "B2B");
-    without.filter(w => !w.fresh).forEach(wchip);
   }
   chips.push(`<button class="fc" id="more" aria-expanded="${more}">${more ? "Less" : "More"}</button>`);
   const panels = RANGES.filter(([k]) => (DT.open[k] || rangeOn(k)) && forMarket(k, p.market)).map(([k, lab]) => {
@@ -1601,7 +1634,7 @@ function updateProp(mode) {
   }).join("");
   DT.fresh = null;
   const anyF = DT.dvp || DT.def || DT.home !== null || DT.starter !== null || DT.result !== null || DT.rest !== null || Object.keys(DT.ranges).length ||
-    Object.keys(DT.without).some(k => DT.without[k]) || Object.keys(DT.open).some(k => DT.open[k]);
+    Object.keys(DT.without).some(k => DT.without[k]) || Object.keys(DT.with).some(k => DT.with[k]) || Object.keys(DT.open).some(k => DT.open[k]);
   if (!rest) $("#pcf").innerHTML = `<div class="cf-h"><h3>Chart Filters</h3><button class="ca" id="clr"${anyF ? "" : " hidden"}>Clear All</button></div>
       <div class="fcs">${chips.join("")}</div>${panels}`;
   if (opening) { PX.lazy = setTimeout(() => { if (PX && PX.p === p) updateProp("rest"); }, 470); bindLive(p, logs, without); return; }
@@ -1641,7 +1674,10 @@ function bindLive(p, logs, without) {
     updateProp(); keep(`[data-r="${k}"]`);
   });
   $$("[data-k]", pg).forEach(b => b.onclick = () => { const k = b.dataset.k, raw = b.dataset.v, v = raw === "true" ? true : raw === "false" ? false : raw; DT[k] = DT[k] === v ? null : v; updateProp(); keep(`[data-k="${k}"][data-v="${raw}"]`); });
-  $$("[data-wo]", pg).forEach(b => b.onclick = () => { const k = b.dataset.wo; DT.without[k] = !DT.without[k]; updateProp(); keep(`[data-wo="${k}"]`); });
+  $$("[data-wo]", pg).forEach(b => b.onclick = () => { const k = b.dataset.wo; DT.without[k] = !DT.without[k]; if (DT.without[k]) delete DT.with[k]; updateProp(); keep(`[data-wo="${k}"]`); });
+  $$("[data-mw]", pg).forEach(b => b.onclick = () => { delete DT.with[b.dataset.mw]; updateProp(); });
+  $$("[data-mo]", pg).forEach(b => b.onclick = () => { delete DT.without[b.dataset.mo]; updateProp(); });
+  const mts = $("#mts", pg); if (mts) mts.onclick = () => mateSheet(p, logs, without);
   $$("[data-ps]", pg).forEach(b => b.onclick = () => {
     const l = +b.dataset.pl, sd = b.dataset.ps;
     if (ST.side === sd && DT.line === l) return;
@@ -1651,8 +1687,8 @@ function bindLive(p, logs, without) {
   });
   $$(".bl", pg).forEach(b => b.onclick = () => { const l = +b.dataset.pl; if (DT.line !== l) { DT.line = l; updateProp(); } });
   $$("[data-ll]", pg).forEach(b => b.onclick = () => { const l = +b.dataset.ll; if (DT.line !== l) { DT.line = l; updateProp(); keep(`[data-ll="${l}"]`); } });
-  const clr = $("#clr", pg); if (clr) clr.onclick = () => { Object.assign(DT, {home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, dvp: false, def: false, open: {}, ovs: []}); updateProp(); };
-  $("#more", pg).onclick = () => { DT.more = $("#more", pg).getAttribute("aria-expanded") !== "true"; if (!DT.more) { MORE_R.forEach(k => { DT.open[k] = false; delete DT.ranges[k]; }); DT.ovs = DT.ovs.filter(k => MORE_R.indexOf(k) < 0); Object.assign(DT, {home: null, result: null, rest: null, without: {}}); } updateProp(); keep("#more"); };
+  const clr = $("#clr", pg); if (clr) clr.onclick = () => { Object.assign(DT, {home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, with: {}, dvp: false, def: false, open: {}, ovs: []}); updateProp(); };
+  $("#more", pg).onclick = () => { DT.more = $("#more", pg).getAttribute("aria-expanded") !== "true"; if (!DT.more) { MORE_R.forEach(k => { DT.open[k] = false; delete DT.ranges[k]; }); DT.ovs = DT.ovs.filter(k => MORE_R.indexOf(k) < 0); Object.assign(DT, {home: null, result: null, rest: null}); } updateProp(); keep("#more"); };
   $("#lnb", pg).onclick = () => lineSheet(p);
   const lnp = $("#lnp", pg); if (lnp) lnp.onclick = () => lineSheet(p);
   $("#psb", pg).onclick = () => openSheet(`<h2 id="sht">Position rank</h2>${c.pos_rank
@@ -1754,11 +1790,42 @@ function bounds(logs, k) {
   const v = logs.map(l => l[k]).filter(x => x !== null && x !== undefined);
   return v.length ? [Math.floor(Math.min(...v)), Math.ceil(Math.max(...v))] : null;
 }
+// the With / Without rows: each teammate (out tonight tagged), his games beside and without him, Any / With / W/O
+function mateRows(p, logs, without, dr) {
+  const rep = ((D.inj_report || {})[gameOf(p.gid).date + "|" + p.team] || {}).players || [], mine = logs.filter(l => l.team === p.team);
+  return matesAll(p, without).map(m => {
+    const e = rep.find(x => x.pid === +m.key), v = dr.with[m.key] ? "w" : dr.without[m.key] ? "o" : "";
+    const nw = mine.filter(l => m.played.indexOf(l.gid) >= 0).length, no = mine.filter(l => l.date >= m.since && m.played.indexOf(l.gid) < 0).length;
+    return `<div class="mrr"><div class="mrn"><b>${esc(m.name)}${e && INJ_C[e.status] ? `<span class="tg ${INJ_C[e.status]}">${INJ_S[e.status]}</span>` : ""}</b>
+      <small>${m.mpg != null ? (+m.mpg).toFixed(1) + " MPG · " : ""}${nw} with · ${no} w/o</small></div>
+      <div class="seg mseg" role="group" aria-label="${esc(m.name)}">${[["", "Any"], ["w", "With"], ["o", "W/O"]].map(([k, t]) =>
+        `<button data-mk2="${m.key}" data-mv="${k}" aria-pressed="${v === k}">${t}</button>`).join("")}</div></div>`;
+  }).join("");
+}
+function bindMates(s, dr, upd) {
+  $$("[data-mk2]", s).forEach(b => b.onclick = () => {
+    const k = b.dataset.mk2, v = b.dataset.mv;
+    delete dr.with[k]; delete dr.without[k];
+    if (v === "w") dr.with[k] = true; else if (v === "o") dr.without[k] = true;
+    $$(`[data-mk2="${k}"]`, s).forEach(x => x.setAttribute("aria-pressed", x === b)); upd();
+  });
+}
+function mateSheet(p, logs, without) {
+  const dr = {with: Object.assign({}, DT.with), without: Object.assign({}, DT.without)};
+  const count = () => windowed(filterLogs(logs, chartF(p, gameOf(p.gid), p.ctx || {}, without, dr)), DT.win, D.season, p.opp).length;
+  openSheet(`<h2 id="sht">With / Without</h2>${mateRows(p, logs, without, dr)}
+    <div class="acts stk"><button class="btn" id="ms-reset">Reset</button><button class="btn pri" id="ms-ok"></button></div>`, s => {
+    const upd = () => { const n = count(); $("#ms-ok", s).textContent = `Show ${n} game${n === 1 ? "" : "s"}`; };
+    bindMates(s, dr, upd);
+    $("#ms-reset", s).onclick = () => { DT.with = {}; DT.without = {}; closeSheet(); updateProp(); };
+    $("#ms-ok", s).onclick = () => { DT.with = dr.with; DT.without = dr.without; closeSheet(); updateProp(); };
+    upd();
+  });
+}
 function playerFilters(p, logs, without) {
   const dr = {home: DT.home, starter: DT.starter, result: DT.result, rest: DT.rest, ranges: Object.assign({}, DT.ranges),
-              without: Object.assign({}, DT.without)};
-  const count = () => windowed(filterLogs(logs, {home: dr.home, starter: dr.starter, result: dr.result, rest: dr.rest,
-    ranges: dr.ranges, without: without.filter(w => dr.without[w.key])}), DT.win, D.season, p.opp).length;
+              without: Object.assign({}, DT.without), with: Object.assign({}, DT.with)};
+  const count = () => windowed(filterLogs(logs, chartF(p, gameOf(p.gid), p.ctx || {}, without, dr)), DT.win, D.season, p.opp).length;
   const rng = RANGES.filter(([k]) => forMarket(k, p.market)).map(([k, lab]) => {
     const b = bounds(logs, k);
     if (!b || b[0] === b[1]) return "";
@@ -1768,8 +1835,7 @@ function playerFilters(p, logs, without) {
   }).join("");
   const segs = SEGS.map(([k, lab, opts]) => `<div class="sg"><span>${lab}</span><div class="seg" role="group" aria-label="${lab}">${opts.map(([v, t]) =>
     `<button data-sk="${k}" data-sv="${v === null ? "" : v}" aria-pressed="${dr[k] === v}">${t}</button>`).join("")}</div></div>`).join("");
-  const wo = without.length ? `<div class="sg"><span>Teammates out tonight</span>${without.map(w =>
-    `<button class="opt" data-wk="${w.key}">Without ${esc(w.name)}<span class="ck">${dr.without[w.key] ? "✓" : ""}</span></button>`).join("")}</div>` : "";
+  const mr = mateRows(p, logs, without, dr), wo = mr ? `<div class="sg"><span>With / Without</span></div>${mr}` : "";
   openSheet(`<h2 id="sht">Filter ${esc(p.player.split(" ").slice(-1)[0])}'s games</h2>${rng}${segs}${wo}
     <div class="acts"><button class="btn" id="pf-reset">Reset</button><button class="btn pri" id="pf-ok"></button></div>`, s => {
     const upd = () => { const n = count(); $("#pf-ok", s).textContent = `Show ${n} game${n === 1 ? "" : "s"}`; };
@@ -1786,9 +1852,9 @@ function playerFilters(p, logs, without) {
       const k = b.dataset.sk, raw = b.dataset.sv, v = raw === "" ? null : raw === "true" ? true : raw === "false" ? false : raw;
       dr[k] = v; $$(`[data-sk="${k}"]`, s).forEach(x => x.setAttribute("aria-pressed", x === b)); upd();
     });
-    $$("[data-wk]", s).forEach(b => b.onclick = () => { const k = b.dataset.wk; dr.without[k] = !dr.without[k]; $(".ck", b).textContent = dr.without[k] ? "✓" : ""; upd(); });
-    $("#pf-reset", s).onclick = () => { Object.assign(DT, {home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, dvp: false, def: false, open: {}, ovs: []}); closeSheet(); updateProp(); };
-    $("#pf-ok", s).onclick = () => { Object.assign(DT, {home: dr.home, starter: dr.starter, result: dr.result, rest: dr.rest, ranges: dr.ranges, without: dr.without}); closeSheet(); updateProp(); };
+    bindMates(s, dr, upd);
+    $("#pf-reset", s).onclick = () => { Object.assign(DT, {home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, with: {}, dvp: false, def: false, open: {}, ovs: []}); closeSheet(); updateProp(); };
+    $("#pf-ok", s).onclick = () => { Object.assign(DT, {home: dr.home, starter: dr.starter, result: dr.result, rest: dr.rest, ranges: dr.ranges, without: dr.without, with: dr.with}); closeSheet(); updateProp(); };
     upd();
   });
 }
