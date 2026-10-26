@@ -1306,3 +1306,15 @@ registered amendment with ≥ 100 graded flags.
 **Game lines (forward only, information).** From nba_lines.game_lines (collected since 2026-10-25): the game total
 and the spread for B's team at flag time, as TOTAL (vs the slate median) and SPREAD (|spread| ≥ 10 = blowout risk)
 cells.
+
+**Amendment 30 — the registered test, run (2026-10-26 ~04:00 UTC).** nba_matchup.py cached 2,459 of 2,460 regular-
+season box scores (2023-24: 1,229; 2024-25: 1,230). The current card at tip lines (FD+DK, every absent star, band
+3-8, amendments 28-29), margins unchanged:
+- proj (current): 2023-24 35 bets +20.7% (+$725 at $100) · 2024-25 38 bets +40.4% (+$1,535)
+- proj_adj (× pace × matchup): 2023-24 37 bets +18.1% (+$668) · 2024-25 30 bets +7.9% (+$236)
+**Decision (as registered): KEEP proj.** proj_adj is worse in both seasons. The factors are information only.
+(Information, not a rule: the current card's plays by pace × matchup — < 0.95: 6 / 10 bets at +31.5% / +52.3%;
+0.95-1.05: 26 / 24 at +17.5% / +43.3%; > 1.05: 3 / 4 at +26.7% / −7.0%. The line already prices the matchup.)
+Applied: every wowy flag from AMEND30_CUTOVER (2026-10-26 06:00 UTC) stores pace_f, match_f, play_type, scheme,
+g_total, total_cell, g_spread (annotate30, inside a guard: it cannot break the pass); cells MATCHUP / SCHEME /
+TOTAL / SPREAD (30). The VM runs `nba_matchup.py --current` daily (this season's finals + a play-type snapshot).
