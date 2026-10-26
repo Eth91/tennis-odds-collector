@@ -248,14 +248,14 @@ border:1px solid #2c2c2e;background:rgba(28,28,30,.92);color:#fff;box-shadow:0 4
 .tlg img{width:48px;height:48px}
 .hro-i{position:absolute;right:-24px;bottom:0;height:226px;width:auto;object-fit:contain;object-position:bottom}
 .sg2{display:flex;align-items:center;gap:8px;padding:16px 16px 6px}
-.cells{flex:1;min-width:0;display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:16px 14px}
+.cells{flex:1;min-width:0;display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:16px 12px}
 .cells>div,.cells>button{min-width:0;padding:0;border:0;background:none;text-align:left}
 .cells i{display:block;font-style:normal;font-size:13px;color:var(--l2);letter-spacing:-.02em;white-space:nowrap}
-.cells b{display:flex;align-items:center;gap:3px;margin-top:4px;font-size:18px;font-weight:500;letter-spacing:-.03em;
+.cells b{display:flex;align-items:center;gap:3px;margin-top:4px;font-size:17px;font-weight:500;letter-spacing:-.03em;
 white-space:nowrap;font-variant-numeric:tabular-nums}
 .cv{margin-left:4px;color:var(--l2);font-size:20px;font-weight:300}
 .tri{font-size:13px} .tri.up{color:#2ed68f} .tri.dn{color:#ff2d2d}
-.muc{flex:none;display:flex;flex-direction:column;align-items:center;width:98px;padding:8px 0 10px;border:1px solid #2c2c2e;
+.muc{flex:none;display:flex;flex-direction:column;align-items:center;width:92px;padding:8px 0 10px;border:1px solid #2c2c2e;
 border-radius:14px;background:#121214;color:#fff;font-size:16px}
 .c2w{margin:14px 0 0;padding:0 16px;overflow-x:auto;scrollbar-width:none}
 .c2w::-webkit-scrollbar{display:none}
@@ -702,7 +702,8 @@ function openProp(id, push) {
   document.body.classList.add("lock");
   requestAnimationFrame(() => pg.classList.add("on"));
   if (fresh) pg.scrollTop = 0;
-  setTimeout(() => { const b = $("#pg .bk"); if (b) b.focus({preventScroll: true}); }, 50);
+  // move focus into the page for keyboard and screen-reader users; on a touchscreen it only draws a ring
+  if (!matchMedia("(pointer: coarse)").matches) setTimeout(() => { const b = $("#pg .bk"); if (b) b.focus({preventScroll: true}); }, 50);
 }
 function closeProp() {
   const pg = $("#pg");
