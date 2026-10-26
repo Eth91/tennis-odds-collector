@@ -47,8 +47,6 @@ def residual_walk(date, X, R, lam_mult):
     pred = np.zeros_like(R)
     if X.shape[1] == 0:
         return pred
-    p = X.shape[1]
-    lam = lam_mult * p
     for m in sorted({d[:7] for d in date}):
         start = m + "-01"
         if start < FIRST_FIT:
@@ -57,13 +55,19 @@ def residual_walk(date, X, R, lam_mult):
         te = (date >= start) & (date < _next_month(m) + "-01")
         if not tr.any() or not te.any():
             continue
-        mu_, sd_ = X[tr].mean(0), X[tr].std(0)
-        sd_ = np.where(sd_ > 1e-9, sd_, 1.0)
-        Z = (X[tr] - mu_) / sd_
-        y = R[tr] - R[tr].mean(0)
-        W = np.linalg.solve(Z.T @ Z + lam * np.eye(p), Z.T @ y)
+        mu_, sd_, W = fit_weights(X, R, tr, lam_mult)
         pred[te] = ((X[te] - mu_) / sd_) @ W
     return pred
+
+
+def fit_weights(X, R, tr, lam_mult):
+    """(feature means, sds, W [p, 8]) of the ridge fit on rows `tr`: standardized features, centred targets."""
+    p = X.shape[1]
+    mu_, sd_ = X[tr].mean(0), X[tr].std(0)
+    sd_ = np.where(sd_ > 1e-9, sd_, 1.0)
+    Z = (X[tr] - mu_) / sd_
+    y = R[tr] - R[tr].mean(0)
+    return mu_, sd_, np.linalg.solve(Z.T @ Z + lam_mult * p * np.eye(p), Z.T @ y)
 
 
 def apply_residual(mu, f):

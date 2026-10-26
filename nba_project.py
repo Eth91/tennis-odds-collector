@@ -501,7 +501,7 @@ def availability_table(news_db, matchup_db, lines_db=None, cutoff_min=CUTOFF_MIN
     return {k: list(v) for k, v in out.items()}
 
 
-def log_forecasts(db, items, now):
+def log_forecasts(db, items, now, version=None):
     """Prospective record (prereg test C): one 'first' row per (gid, pid, market, version) the first time it is
     projected, and a 'cutoff' row rewritten on every build until T−CUTOFF_MIN — so after the cutoff it holds the
     last forecast made before it. items: dicts with gid, pid, market, tip, line, book, over, under, p_over, p_push,
@@ -519,7 +519,7 @@ def log_forecasts(db, items, now):
         if now >= tip - dt_.timedelta(minutes=CUTOFF_MIN):
             continue                                          # past the cutoff: the record is closed
         vals = (stamp, it["gid"], it["pid"], it["market"], str(it["tip"]), it["line"], it["book"], it["over"],
-                it["under"], it["p_over"], it["p_push"], it["p_blend"], it["mean"], VERSION)
+                it["under"], it["p_over"], it["p_push"], it["p_blend"], it["mean"], version or VERSION)
         con.execute("INSERT OR IGNORE INTO forecasts VALUES ('first',?,?,?,?,?,?,?,?,?,?,?,?,?,?)", vals)
         con.execute("INSERT OR REPLACE INTO forecasts VALUES ('cutoff',?,?,?,?,?,?,?,?,?,?,?,?,?,?)", vals)
         n += 1

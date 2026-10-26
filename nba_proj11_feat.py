@@ -122,7 +122,9 @@ def starters_of(raw_starters):
 
 def build(rows, raw=None, families=("F0", "F1", "F2", "F3", "F4", "F5", "F6")):
     """(X float32 [n_rows, n_features], names, family of each feature, report). raw: {kind: {date: json}} —
-    loaded from nba_stats_fetch's store when None. Rows in any order; computed by date."""
+    loaded from nba_stats_fetch's store when None. Rows in any order; computed by date.
+    A row with target=True (a game not played yet, live) gets features from earlier dates and never updates any
+    state; its F0 same-game proxy columns are NaN, to be filled from the live lineups and injury report."""
     raw = raw if raw is not None else {k: F.load(k) for k in F.KINDS if k != "lineups"}
     n = len(rows)
     order = sorted(range(n), key=lambda i: rows[i]["date"])
@@ -170,6 +172,8 @@ def build(rows, raw=None, families=("F0", "F1", "F2", "F3", "F4", "F5", "F6")):
             Sn[p] *= dec; Sd[p] *= dec
             for k, i in enumerate(ii):
                 r = rows[i]
+                if r.get("target"):
+                    continue
                 num, den = np.zeros(C), np.zeros(C)
                 got = False
                 for c, (kind, col, mode) in enumerate(spec_ok):
@@ -276,10 +280,13 @@ def f0_features(rows, by_date, raw_starters, report):
         return {pid: (np.mean([m for m, _ in v]), np.mean([u for _, u in v]) / tot_u if tot_u else 0.0)
                 for pid, v in played.items() if len(v) >= REG_GAMES and np.mean([m for m, _ in v]) >= REG_MIN}
 
+    regulars = {}
     for d in sorted(by_date):
         out_info = {}
         for team, ii in games[d].items():
-            here = {rows[i]["pid"] for i in ii}
+            here = {rows[i]["pid"] for i in ii if not rows[i].get("target")}
+            if all(rows[i].get("target") for i in ii):
+                regulars[team] = regs(team)                   # live: the team's regulars as of this date
             rg = regs(team)
             out = {p: v for p, v in rg.items() if p not in here}
             out_info[team] = (len(out), sum(m for m, _ in out.values()) / 240.0, sum(u for _, u in out.values()))
@@ -297,11 +304,17 @@ def f0_features(rows, by_date, raw_starters, report):
                 ms = np.mean([m for _, m in la]) / 48.0 if la else 0.0
                 us = (np.mean([g[r["pid"]][1] for g in h if r["pid"] in g]) / tot_u) if tot_u and any(r["pid"] in g for g in h) else 0.0
                 X[i] = [st, 0.0 if st_known else 1.0, ss, ms, us, st * ms, mo[0], mo[1], mo[2], oo[0], oo[2], mo[2] * us]
+                if r.get("target"):
+                    X[i, [names.index(c) for c in F0_PROXY]] = np.nan
         # update after the date
         for team, ii in games[d].items():
+            ii = [i for i in ii if not rows[i].get("target")]
+            if not ii:
+                continue
             team_hist[team].append({rows[i]["pid"]: (rows[i]["min"], rows[i]["fga"] + 0.44 * rows[i]["fta"] + rows[i]["tov"])
                                     for i in ii})
             for i in ii:
                 last_app[rows[i]["pid"]].append((float((d, rows[i]["pid"]) in starters), rows[i]["min"]))
     report["coverage"]["F0_starters"] = round(len(dates_with & set(by_date)) / max(len(by_date), 1), 4)
+    report["regulars"] = regulars
     return X, names

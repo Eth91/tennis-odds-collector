@@ -27,8 +27,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-DATA = HERE / ".projdata"
-RAW = DATA / "nba_stats_raw.sqlite"
+DATA = HERE / ".projdata"                                   # the Mac research copy; the VM keeps the store beside the engine
+RAW = DATA / "nba_stats_raw.sqlite" if DATA.exists() else HERE / "nba_stats_raw.sqlite"
 H = {"Referer": "https://www.nba.com/", "Origin": "https://www.nba.com", "Accept": "application/json",
      "x-nba-stats-origin": "stats", "x-nba-stats-token": "true"}
 FILTERS = ("&College=&Conference=&Country=&Division=&DraftPick=&DraftYear=&GameScope=&GameSegment=&Height="
@@ -121,10 +121,15 @@ def rows_of(kind, j):
 
 
 def dates():
-    """Regular-season game dates: the box-score rows (2022-23..2025-26) plus this season's finished games."""
-    rows = pickle.loads((DATA / "cache.pkl").read_bytes())["rows"]
-    out = {r["date"] for r in rows}
-    m = sqlite3.connect(f"file:{DATA / 'nba_matchup.sqlite'}?mode=ro", uri=True)
+    """Regular-season game dates with box scores: 2022-23..2025-26 (gamelogs) plus finished games since (matchup)."""
+    if (DATA / "cache.pkl").exists():
+        out = {r["date"] for r in pickle.loads((DATA / "cache.pkl").read_bytes())["rows"]}
+        mu = DATA / "nba_matchup.sqlite"
+    else:
+        g = sqlite3.connect(f"file:{HERE / 'nba_gamelogs.sqlite'}?mode=ro", uri=True)
+        out = {d for (d,) in g.execute("SELECT DISTINCT date FROM logs")}
+        mu = HERE / "nba_matchup.sqlite"
+    m = sqlite3.connect(f"file:{mu}?mode=ro", uri=True)
     out |= {d for (d,) in m.execute("SELECT date FROM games WHERE home_pts IS NOT NULL")}
     return sorted(out)
 
@@ -154,7 +159,10 @@ def run(kinds, workers=2, get=None):
     lock = threading.Lock()
     have = {(k, key) for k, key in con.execute("SELECT kind, key FROM raw WHERE status IN (200, 404)")}
     todo = [(k + "@season", s) for k in kinds if k in SEASON_LOGS for s in SEASONS if (k + "@season", s) not in have]
-    todo += [(k, d) for k in kinds if k not in SEASON_LOGS for d in dates() if (k, d) not in have]
+    # season logs are fetched once; dates they do not cover (games played since) are fetched one date at a time
+    covered = {k: set(load(k, con)) if (k + "@season") in {kk for kk, _ in have} else set() for k in kinds if k in SEASON_LOGS}
+    todo += [(k, d) for k in kinds for d in dates()
+             if (k, d) not in have and (k not in SEASON_LOGS or (covered.get(k) and d not in covered[k]))]
     print(f"nba_stats_fetch: {len(todo)} requests to make ({len(have)} already stored)", flush=True)
     fails = [0]
     done = [0]

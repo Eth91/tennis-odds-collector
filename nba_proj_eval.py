@@ -524,16 +524,19 @@ def verdicts(P, prospective=None):
 
 
 # ── prospective test C (VM, nightly): the logged forecasts against results and the close ──────────────────
-def prospective(log_db, lines_db, matchup_db, out_json):
+def prospective(log_db, lines_db, matchup_db, out_json, version=None, recs_out=None):
     """Grade every 'cutoff' forecast (the last one made before tip − 30 min) whose game is final:
     log loss of the model, the blend and the close (no-vig at the same line, the board as of tip), and CLV of
     the 'first' forecast: no-vig close probability of the side the model favored minus the no-vig probability
     when it was made (positive = the close moved toward the model; not profit). Writes out_json."""
     import nba_research as R
     import sqlite3 as sq
-    out = {"generated_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"), "version": NP.VERSION,
+    version = version or NP.VERSION
+    out = {"generated_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"), "version": version,
            "graded": 0, "note": "prospective test C (NBA_PROJECTION_PREREG.md); small samples are reported as they are"}
     lg, q, m = PD._ro(log_db), PD._ro(lines_db), PD._ro(matchup_db)
+    if lg is not None and not lg.execute("SELECT 1 FROM sqlite_master WHERE name = 'forecasts'").fetchone():
+        lg = None                                              # no forecast logged yet
     if lg is None or q is None or m is None:
         out["error"] = "missing store"
         Path(out_json).write_text(json.dumps(out))
@@ -541,7 +544,7 @@ def prospective(log_db, lines_db, matchup_db, out_json):
     fc = defaultdict(dict)
     for kind, gid, pid, mk, tip, line, book, o, u, po, pp, pb, mean in lg.execute(
             "SELECT kind, gid, pid, market, tip, line, book, over, under, p_over, p_push, p_blend, mean FROM forecasts "
-            "WHERE version = ?", (NP.VERSION,)):
+            "WHERE version = ?", (version,)):
         fc[(gid, pid, mk)][kind] = {"tip": tip, "line": line, "book": book, "over": o, "under": u, "p": po, "pb": pb}
     box = {}
     for gid, pid, mn, pts, reb, ast, fg3m, stl, blk, tov in m.execute(
@@ -584,8 +587,10 @@ def prospective(log_db, lines_db, matchup_db, out_json):
             side_over = f["p"] >= p_then
             clv = (p_close - p_then) if side_over else (p_then - p_close)
         recs.append({"y": float(actual > c["line"]), "p": c["p"], "pb": c["pb"], "pc": p_close, "clv": clv,
-                     "date": c["tip"][:10], "market": mk})
+                     "date": c["tip"][:10], "market": mk, "key": (gid, pid, mk, c["line"])})
     out["graded"] = len(recs)
+    if recs_out is not None:
+        recs_out.extend(recs)
     if recs:
         y = np.array([r["y"] for r in recs])
         out["model_logloss"] = float(logloss(np.array([r["p"] for r in recs]), y).mean())
