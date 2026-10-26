@@ -182,6 +182,11 @@ def test_payload_availability(payload):
     assert inj[f"{GD}|1"]["news"][0]["source"] == "x @underdog" and inj[f"{GD}|1"]["official"] is None
     ab = payload["absences"][f"{GD}|PHX"]
     assert [a["pid"] for a in ab] == [3] and ab[0]["name"] == "Jusuf Nurkic" and len(ab[0]["played"]) == 20  # not the traded 8
+    # the With / Without filter's data: PHX's games, and each player on its roster now who played for it, most minutes first
+    mt = payload["mates"]["PHX"]
+    assert len(mt["gids"]) == 30 and [m["pid"] for m in mt["mates"]] == [1, 3, 2]          # not 8: no PHX game
+    nk = mt["mates"][1]
+    assert nk["on"] == "1" * 20 + "0" * 10 and nk["since"] == mt["mates"][0]["since"] and nk["gp"] == 20 and nk["mpg"] == 28.0
     ir = payload["inj_report"][f"{GD}|PHX"]                # the Injuries view: the traded-in 8 has no PHX game to read
     assert ir["listed"] and [(e["pid"], e["missed"], e["starter"]) for e in ir["players"]] == [(8, 0, True), (3, 10, True)]
     assert ir["players"][1]["reason"] == "Injury/Illness - Knee" and not ir["players"][1]["fresh"]   # out the last 10
@@ -243,6 +248,10 @@ out.fr = [C.filterLogs(inp.logs, {ranges: {min: [35, 39]}}).length, C.filterLogs
           C.filterLogs(inp.logs, {ranges: {margin: [-5, -5]}}).length,
           C.filterLogs(inp.logs, {oppSets: [{'2026-27': ['UTA']}]}).length, C.filterLogs(inp.logs, {oppSets: [{'2025-26': ['UTA']}]}).length];
 out.px = inp.props.map(p => [C.fairAt(p, p.main), C.valueAt(p, p.main, 'over'), C.valueAt(p, p.main, 'under')]);
+const nk = {played: inp.played, since: '2026-09-01', team: 'PHX'};
+out.fw = [C.filterLogs(inp.logs, {with: [nk]}).length, C.filterLogs(inp.logs, {with: [nk], without: [nk]}).length,
+          C.filterLogs(inp.logs, {with: [Object.assign({}, nk, {team: 'SAC'})]}).length,
+          C.filterLogs(inp.logs, {with: [nk], home: true}).length];
 out.z = [C.zscore(7, 10, 0.5), C.zscore(0, 0, 0.5), C.zscore(3, 3, null)];
 out.sv = C.sortProps(props, 'value', 'desc', () => [], 'over').map(p => p.id);
 console.log(JSON.stringify(out));
@@ -272,6 +281,8 @@ console.log(JSON.stringify(out));
     assert out["am"] == ["-115", "+150", "—", 1667]
     homes = sum(1 for l in logs if l["home"] == 1)
     assert out["fl"] == [homes, 30 - homes, 10, 0]                              # home; away starters; without Nurkic; bench
+    # with Nurkic: his 20; with and without him: none; with him on another team: none (the games must be that team's)
+    assert out["fw"] == [20, 0, 0, sum(1 for l in logs[:20] if l["home"] == 1)]
     vals = [RS.stat_value(l, "points") for l in logs]
     for w, sl in (("l5", vals[-5:]), ("l10", vals[-10:]), ("l20", vals[-20:]), ("season", vals)):
         py = RS.hit_summary(sl, 24.5)
@@ -322,6 +333,9 @@ def test_page_controls_work_on_iphone():
     # the Watchlist is a filter now (an old #view=watch link lands on it); a teammate named in an injury read opens his prop
     assert '["watch", "Watchlist"]' not in html and 'Object.assign(ST, {view: "props", watch: "1"})' in html and "data-wl=" in html
     assert ".ijb[data-id]" in html and "function injView(" in html and 'ST.view === "injuries"' in html
+    # the prop page's With / Without: any teammate, several at once, from the chip's sheet or the full filter sheet
+    assert "function mateSheet(" in html and "data-mk2=" in html and "with: ms.filter(m => x.with[m.key]), without: ms.filter(m => x.without[m.key])" in html
+    assert html.count("bindMates(s, dr, upd);") == 2 and "Object.assign(DT, {home: null, result: null, rest: null}); }" in html
     # the Injuries view is one list, most relevant first (minutes x the chance he sits); no Injuries tab among the Props tabs
     assert "injList().sort" not in html and "return out.sort((a, b) => injImpact(b) - injImpact(a));" in html
     assert 'const ALL_TABS = ["trends"];' in html and 'injury: "Injuries"' not in html and '"injury"' not in html
