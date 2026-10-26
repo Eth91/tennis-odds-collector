@@ -526,11 +526,32 @@ def depth_read(boxes, x, mates, stays):
     return played, missed, out
 
 
+def team_mates(boxes, roster):
+    """{team: {"gids": [its games, oldest first], "mates": [{pid, name, since, on, mpg, gp}]}} — everyone on each
+    team's roster now who has played for it in the cached seasons, the most minutes a game first. on: "1" / "0" per
+    team game (he played / did not); since: his first game for the team. The prop page's With / Without filter."""
+    out = {}
+    for team, bs in boxes.items():
+        mates = []
+        for k, v in roster.items():
+            pid = int(k)
+            if v[0] != team:
+                continue
+            on = "".join("1" if pid in b[3] else "0" for b in bs)
+            if "1" not in on:
+                continue
+            mins = [b[3][pid][1] for b in bs if pid in b[3]]
+            mates.append({"pid": pid, "name": v[1], "since": bs[on.index("1")][1], "on": on,
+                          "mpg": round(sum(mins) / len(mins), 1), "gp": len(mins)})
+        out[team] = {"gids": [b[0] for b in bs], "mates": sorted(mates, key=lambda m: -m["mpg"])}
+    return out
+
+
 def _pos_set(pos):
     return set((pos or "").replace("-", ""))
 
 
-def injury_report(mcon, official, teams_listed, report_meta, games, roster, seasons):
+def injury_report(mcon, official, teams_listed, report_meta, games, roster, seasons, boxes=None):
     """{"date|team": {"listed", "published", "players": [...]}} — every player on each slate team's latest official
     report (not Available), worst status then most minutes first: his minutes a game (this season, else last), whether
     he starts, fresh (he played in one of the team's last FRESH_GAMES games: news), and from the games he missed for the team (this season and last), the teammates who gained 2+ minutes a
@@ -544,7 +565,8 @@ def injury_report(mcon, official, teams_listed, report_meta, games, roster, seas
     for (d, pid), s in official.items():
         if s["status"] in INJ_ORDER and (d, s.get("team")) in teams_listed:
             listed[(d, s["team"])].append((pid, s))
-    boxes = team_boxes(mcon, sorted({t for _, t in slate}), seasons)
+    if boxes is None:
+        boxes = team_boxes(mcon, sorted({t for _, t in slate}), seasons)
     apps = appearances(mcon, {pid for v in listed.values() for pid, _ in v}
                        | {int(k) for k, v in roster.items() if v[0] in {t for _, t in slate}}, seasons)
     name = lambda pid, s=None: (roster.get(str(pid)) or [None, None])[1] or (s or {}).get("player") or str(pid)
@@ -888,7 +910,9 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
             for t in (h, a):
                 team_last[t] = (team_last[t] + [gid])[-FRESH_GAMES:]
     absent = absences(official, by_team, dates, team_last)
-    inj_report = injury_report(mcon, official, teams_listed, report_meta, games, idx, (prev_season(season), season))
+    both = (prev_season(season), season)
+    boxes = team_boxes(mcon, sorted({t for g in games for t in (g["home"], g["away"])}), both)
+    inj_report = injury_report(mcon, official, teams_listed, report_meta, games, idx, both, boxes=boxes)
     corr = correlations(props, logs)
     players = {}
     for pid in pids:
@@ -933,6 +957,7 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
                      for (d, t), v in absent.items()},
         "related": corr,
         "inj_report": inj_report,
+        "mates": team_mates(boxes, idx),
         # past games are filtered by the tier their opponent sits in (DvP / Def Rank chips): this season's ranks
         # as of the slate date, last season's as it finished
         "ranks": {k: v for k, v in ranks.items()},
