@@ -41,6 +41,7 @@ from zoneinfo import ZoneInfo
 HERE = Path(__file__).resolve().parent
 LINES, NEWS, SHADOW = HERE / "nba_lines.sqlite", HERE / "nba_news.sqlite", HERE / "nba_shadow.sqlite"
 INDEX = HERE / "nba_player_index.json"
+PROJ_LOG = HERE / "nba_proj_log.sqlite"          # the projection engine's prospective record (prereg test C)
 ET, MT = ZoneInfo("America/New_York"), ZoneInfo("America/Denver")
 # market -> (label, box-score parts). Only the markets the books' feeds carry (nba_lines.STAT_MAP).
 MARKETS = {"points": ("PTS", ("pts",)), "rebounds": ("REB", ("reb",)), "assists": ("AST", ("ast",)),
@@ -720,6 +721,16 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
         injuries[f"{d}|{p['pid']}"] = {
             "official": o, "listed_team": bool(teams_listed.get((d, p["team"]))) if p["team"] else False,
             "news": news_by.get((d, p["pid"]), [])}
+    # the projection engine (nba_project, NBA_PROJECTION_PREREG.md): model estimates beside the book prices,
+    # never a pick; on any failure the props carry no projection and proj_meta says why
+    try:
+        import nba_project as NPJ
+        proj, proj_players, proj_meta = NPJ.for_payload(props, games, now,
+                                                         log_db=PROJ_LOG if q is not None and lines is None else None)
+    except Exception as e:                                                   # noqa: BLE001
+        proj, proj_players, proj_meta = {}, {}, {"error": f"projection unavailable ({type(e).__name__})"}
+    for p in props:
+        p["proj"] = proj.get(p["id"])
     stamp = now.astimezone(dt.timezone.utc).replace(microsecond=0).isoformat()
     fresh = {}
     for b, at in newest.items():
@@ -744,6 +755,7 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
         # past games are filtered by the tier their opponent sits in (DvP / Def Rank chips): this season's ranks
         # as of the slate date, last season's as it finished
         "ranks": {k: v for k, v in ranks.items()},
+        "proj_players": proj_players, "proj_meta": proj_meta,
     }
     for c in (q, ncon, sh, mcon):
         if c is not None:

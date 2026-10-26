@@ -376,7 +376,8 @@ font-variant-numeric:normal}
 svg.hc{display:block;margin-top:2px;font-family:system-ui,-apple-system,sans-serif;font-stretch:66%}
 svg.hc text{fill:#8e8e8e;font-size:11px}
 .ldr{font-family:system-ui,-apple-system,sans-serif;font-stretch:66%}
-.lh2,.lr{display:grid;grid-template-columns:52px 64px 62px 1fr 1fr;align-items:center;column-gap:6px}
+.lh2,.lr{display:grid;grid-template-columns:46px 56px 54px 50px 1fr 1fr;align-items:center;column-gap:5px}
+.lr .mo{color:#7c7c7c;font-style:italic}
 .lh2{height:30px;font-size:13px;color:#9a9a9a;border-bottom:1px solid #262626}
 .lr{width:100%;height:36px;padding:0;border:0;border-bottom:1px solid #1e1e1e;background:none;color:#fff;font:inherit;font-size:15px;
 text-align:left;font-variant-numeric:tabular-nums}
@@ -395,6 +396,18 @@ border-bottom:.5px solid var(--sep);font-size:13px}
 .vd{display:inline-block;padding:2px 6px;border-radius:5px;background:var(--g3);color:var(--l2);font-style:normal;font-size:10.5px;
 font-weight:700;white-space:nowrap}
 .vd.g{background:rgba(48,209,88,.18);color:var(--grn)} .vd.r{background:rgba(255,69,58,.2);color:var(--red)}
+.pj .pjt{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}
+.pj .pjt b{font-size:24px;font-weight:700}
+.pj .pjt i{font-style:normal;color:#9a9a9a;font-size:12px}
+.pj .pjr{font-size:12px;color:#bdbdbd}
+svg.pjh{display:block;margin:2px 0 4px}
+svg.pjh text{fill:#8e8e8e;font-size:10px}
+.pj .kv small{color:#8e8e8e;font-weight:400}
+.pj .kv.mo1 span,.pj .kv.mo1 b{color:#8e8e8e;font-weight:400}
+.pjo{margin:10px 0 0;font-size:11px;color:#8e8e8e;text-transform:uppercase;letter-spacing:.04em}
+.pji summary{margin-top:8px;font-size:12px;color:#9a9a9a;list-style:none}
+.pji summary::-webkit-details-marker{display:none}
+.pjm{color:#9a9a9a;font-size:11px;margin-left:6px} .pjb{margin-top:6px;line-height:1.5}
 .hl{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12.5px;color:#bdbdbd;line-height:1.35}
 .hl i{flex:none;width:8px;height:8px;border-radius:50%}
 .hl b{color:#fff;font-weight:600}
@@ -556,6 +569,24 @@ function valueAt(prop, line, side) {
   ["fd", "dk"].forEach(function (b) { var r = rungAt(prop.books[b], line); if (r && r[k] && (!best || r[k] > best.price)) best = {book: b, price: r[k]}; });
   return best ? {ev: best.price * pr - 1, book: best.book, price: best.price, fair: pr} : null;
 }
+// a projection's compact pmf [start, [p...]] (nba_project.compact_pmf): P(X >= m)
+function pmfGe(pm, m) {
+  var s = 0;
+  for (var k = 0; k < pm[1].length; k++) if (pm[0] + k >= m) s += pm[1][k];
+  return s;
+}
+// {over, under, push} at a line from the projection's pmf (a half line cannot push) — the same arithmetic as
+// nba_project.Dist.probs; the pmf's 4-decimal rounding is renormalized away
+function projProbs(pm, line) {
+  var tot = pmfGe(pm, -1e9), k = Math.floor(line), half = line - k > 0.25;
+  var over = pmfGe(pm, k + 1) / tot, push = half ? 0 : pmfGe(pm, k) / tot - over;
+  return {over: over, under: Math.max(0, 1 - over - push), push: push};
+}
+// the M1+mkt blend (prereg): logit((1-w) logit(p_model) + w logit(p_market))
+function blendP(pModel, pMkt, w) {
+  var lg = function (p) { p = Math.min(Math.max(p, 1e-6), 1 - 1e-6); return Math.log(p / (1 - p)); };
+  return 1 / (1 + Math.exp(-((1 - w) * lg(pModel) + w * lg(pMkt))));
+}
 // how unusual `hits` in `n` games are if each hits with probability p (the price's); |z| >= 1 is what gets colored
 function zscore(hits, n, p) {
   if (!n || p === null || p === undefined || !(p > 0 && p < 1)) return null;
@@ -627,7 +658,7 @@ function sortProps(list, key, dir, logsOf, side, season) {
 if (typeof module !== "undefined") module.exports = {statValue: statValue, hitSummary: hitSummary, seasonOf: seasonOf,
   rowsToLogs: rowsToLogs, windowed: windowed, filterLogs: filterLogs, splitRows: splitRows, sideRate: sideRate,
   american: american, decimalOf: decimalOf, bestOver: bestOver, bestPrice: bestPrice, propRates: propRates,
-  noVig: noVig, fairAt: fairAt, valueAt: valueAt, zscore: zscore,
+  noVig: noVig, fairAt: fairAt, valueAt: valueAt, zscore: zscore, pmfGe: pmfGe, projProbs: projProbs, blendP: blendP,
   filterProps: filterProps, sortProps: sortProps};
 """
 
@@ -730,6 +761,19 @@ function chanceSide(p, line, side) {
   return b ? 1 / b.odds : null;
 }
 const hitsOf = x => x && x.n ? Math.round(x.rate * x.n) : 0;
+function mktOver(p, line) {
+  for (const b of ["fd", "dk"]) { const r = rungAt(p.books[b], line); const nv = r ? noVig(r[1], r[2]) : null; if (nv !== null) return nv; }
+  return null;
+}
+// the projection at a line for a side: {model, blend (null without a two-sided price), push}
+function projAt(p, line, side) {
+  const pr = p.proj, M = D.proj_meta || {};
+  if (!pr || line === null) return null;
+  const q = projProbs(pr.pmf, line), cond = q.over / Math.max(q.over + q.under, 1e-9);
+  const mk = mktOver(p, line), bo = mk === null || M.blend_w == null ? null : blendP(cond, mk, M.blend_w);
+  const pick = x => x === null ? null : side === "under" ? 1 - x : x;
+  return {model: pick(cond), blend: pick(bo), push: q.push, raw: q};
+}
 // every hit-rate box: under 5 games a plain count; otherwise the rate, colored only when it sits 1+ SD from what
 // the price implies (fs; a coin flip without a price) — a 3-for-3 or a -300 favorite going 7-for-10 stays white
 function hbox(x, fs) {
@@ -791,7 +835,7 @@ function row(p) {
   const differ = fd && dk && fd.main !== null && dk.main !== null && fd.main !== dk.main ? `DK ${dk.main}` : null;
   return `<button class="pr" data-id="${esc(p.id)}"><span class="av">${head(p.pid)}</span>
     <div class="who"><div class="nm">${esc(nameOf(p.player))}<span class="cd">${esc(p.team || "")}</span>${injTag(p)}${live}${p.flag ? '<span class="tg tf">ENGINE</span>' : ""}</div>
-    <div class="lin num">${p.main === null ? "alt lines" : p.main + " " + esc(unit(p.market))}${mv ? `<span class="mv" aria-label="line ${mv > 0 ? "up" : "down"} ${Math.abs(mv)} since open">${mv > 0 ? "▲" : "▼"}${Math.abs(mv)}</span>` : ""}${wo ? `<span class="pl ${wo.z === null ? "" : wo.z >= 1 ? "up" : wo.z <= -1 ? "dn" : ""}" title="${esc(out.name || "")} is ${esc(out.status)}: his ${side} hit rate without him">W/O ${esc(lastName(out.name).slice(0, 10))}${wo.n ? " " + wo.hits + "/" + wo.n : ""}</span>` : ""}</div></div>
+    <div class="lin num">${p.main === null ? "alt lines" : p.main + " " + esc(unit(p.market))}${p.proj ? `<span class="pjm" title="model projection (mean), not a book line">proj ${(+p.proj.mean).toFixed(1)}</span>` : ""}${mv ? `<span class="mv" aria-label="line ${mv > 0 ? "up" : "down"} ${Math.abs(mv)} since open">${mv > 0 ? "▲" : "▼"}${Math.abs(mv)}</span>` : ""}${wo ? `<span class="pl ${wo.z === null ? "" : wo.z >= 1 ? "up" : wo.z <= -1 ? "dn" : ""}" title="${esc(out.name || "")} is ${esc(out.status)}: his ${side} hit rate without him">W/O ${esc(lastName(out.name).slice(0, 10))}${wo.n ? " " + wo.hits + "/" + wo.n : ""}</span>` : ""}</div></div>
     <div class="oc o"><i${differ ? ' class="df" title="the books post different main lines"' : ""}>${differ || "ODDS"}</i><b class="num">${best ? american(best.odds) : "–"}</b></div>
     <div class="oc e"><i>VALUE</i><b class="num ${ev === null ? "" : ev > 0 ? "up" : "mu"}">${ev === null ? "–" : (ev > 0 ? "+" : "") + (ev * 100).toFixed(1) + "%"}</b></div>
     <div class="bx6 num" aria-label="Hit rates">${cell(D.season.slice(0, 4), "season")}${cell("H2H", "h2h")}<div><i>DvP</i>${dv}</div>${cell("L5", "l5")}${cell("L10", "l10")}${cell("L20", "l20")}</div></button>`;
@@ -1039,8 +1083,12 @@ function leagueSheet() {
     <div class="kv"><span>Props updated</span><b id="upd">${ago(D.generated_at)}</b></div>
     <div class="kv"><span>FanDuel prices</span><b>${bk("fd")}</b></div><div class="kv"><span>DraftKings prices</span><b>${bk("dk")}</b></div>
     <button class="opt" id="lg-sc">Scorecard: what has predicted anything<span class="ck">›</span></button>
+    ${(() => { const M = D.proj_meta || {}, c = M.coverage || {};
+      return `<div class="kv"><span>Projection model</span><b>${M.error ? esc(M.error) : `${esc(M.version || "")} · ${c.projected || 0}/${c.props || 0} props${M.stale ? ' · <span class="tg tq">STALE</span>' : ""}${M.refresh_pending ? " · updating" : ""}`}</b></div>
+        <div class="kv"><span>Box scores through</span><b>${esc(M.logs_through || "—")}</b></div>
+        <button class="opt" id="lg-pj">Model scorecard: held-out test and forward record<span class="ck">›</span></button>`; })()}
     <div class="note">Research only — history, matchups and prices. Nothing here is a pick or a bet.</div>
-    <div class="acts"><a class="btn" href="index.html" style="display:flex;align-items:center;justify-content:center;text-decoration:none">Back to Pickz</a><button class="btn pri" id="lg-ok">Done</button></div>`, s => { $("#lg-ok", s).onclick = closeSheet; $("#lg-sc", s).onclick = scoreSheet; });
+    <div class="acts"><a class="btn" href="index.html" style="display:flex;align-items:center;justify-content:center;text-decoration:none">Back to Pickz</a><button class="btn pri" id="lg-ok">Done</button></div>`, s => { $("#lg-ok", s).onclick = closeSheet; $("#lg-sc", s).onclick = scoreSheet; $("#lg-pj", s).onclick = projScoreSheet; });
 }
 function dvpSheet(grp, mkt) {
   const rk = (D.ranks || {})[ST.date] || {}, tbl = rk.dvp || {}, n = rk.teams || 0;
@@ -1225,10 +1273,80 @@ function ladder(p, win, side, cur, winLab) {
     const s = hitSummary(vals, L), hits = side === "under" ? s.under : s.over;
     const fs = fairSide(p, L, side), h = hbox({n: s.n, rate: s.n ? hits / s.n : null}, chanceSide(p, L, side));
     const px = b => { const r = rungAt(p.books[b], L); return r && r[k] ? `<span class="${fs !== null && r[k] * fs > 1 ? "best" : ""}">${american(r[k])}</span>` : '<span class="na">—</span>'; };
-    return `<button class="lr${L === cur ? " on" : ""}" data-ll="${L}" aria-pressed="${L === cur}"><span>${L}</span><span class="${h.c}">${h.t}</span><span class="fv">${fs === null ? "—" : american(1 / fs)}</span>${px("fd")}${px("dk")}</button>`;
+    const pj = projAt(p, L, side), mo = !pj ? "—" : pct(pj.model);   // model alone on every rung: one monotone column
+    return `<button class="lr${L === cur ? " on" : ""}" data-ll="${L}" aria-pressed="${L === cur}"><span>${L}</span><span class="${h.c}">${h.t}</span><span class="fv">${fs === null ? "—" : american(1 / fs)}</span><span class="mo">${mo}</span>${px("fd")}${px("dk")}</button>`;
   }).join("");
-  return `<div class="ldr"><div class="lh2"><span>LINE</span><span>HIT ${esc(winLab)}</span><span>FAIR</span><span>FD</span><span>DK</span></div>${rows}</div>
-    <div class="note">Fair only where a book prices both sides. On one-sided rungs (alt ladders) the HIT color compares with the price's own implied chance, margin included.</div>`;
+  return `<div class="ldr"><div class="lh2"><span>LINE</span><span>HIT ${esc(winLab)}</span><span>FAIR</span><span>MODEL</span><span>FD</span><span>DK</span></div>${rows}</div>
+    <div class="note">MODEL = the projection's own chance of the ${side} at each rung (model alone, which runs overconfident against book lines; the Model Projection card shows it blended with the price at the selected line). Fair only where a book prices both sides. On one-sided rungs (alt ladders) the HIT color compares with the price's own implied chance, margin included.</div>`;
+}
+// the projection engine's card: a model estimate, kept apart from the book prices and never a pick
+const STATN = {pts: "Points", reb: "Rebounds", ast: "Assists", fg3m: "3-pointers"};
+function projCard(p, line, side) {
+  const M = D.proj_meta || {}, pr = p.proj, unit_ = esc(short(p.market));
+  const head = `<h3>Model Projection <span class="tg tf" style="margin-left:6px">MODEL ESTIMATE · NOT A BET</span></h3>`;
+  if (M.error || !pr) return head + `<div class="box0 pj"><div class="note" style="margin:0">${esc(M.error || "Not projected yet. The projection job runs every 30 minutes and adds new board players.")}</div></div>`;
+  const at = projAt(p, line, side), sd = side === "under" ? "Under" : "Over";
+  // the pmf as bars, the selected line marked
+  const vals = pr.pmf[1], start = pr.pmf[0], mx = Math.max(...vals), W = Math.min(window.innerWidth, 520) - 56, H = 54;
+  const bw = W / vals.length, xL = (line - start + .5) * bw;
+  const bars = vals.map((v, i) => { const k = start + i, h = mx ? v / mx * (H - 4) : 0, win = side === "under" ? k < line : k > line;
+    return `<rect x="${(i * bw).toFixed(2)}" y="${(H - h).toFixed(2)}" width="${Math.max(bw - 1, .6).toFixed(2)}" height="${h.toFixed(2)}" fill="${win ? "#4a8f6f" : "#3a3a3c"}"/>`; }).join("");
+  const svg = `<svg class="pjh" width="${W}" height="${H + 14}" viewBox="0 0 ${W} ${H + 14}" role="img" aria-label="projected ${unit_} distribution">${bars}<line x1="${xL}" x2="${xL}" y1="0" y2="${H}" stroke="#fff" stroke-width="1.2" stroke-dasharray="3 2"/><text x="0" y="${H + 12}">${start}</text><text x="${W}" y="${H + 12}" text-anchor="end">${start + vals.length - 1}</text></svg>`;
+  const pl = D.proj_players && D.proj_players[String(p.pid)];
+  const other = pl ? [["min", "Minutes"], ["steals", "Steals"], ["blocks", "Blocks"], ["turnovers", "Turnovers"]].filter(([k]) => pl[k])
+    .map(([k, lab]) => `<div class="kv"><span>${lab}</span><b>${(+pl[k].mean).toFixed(1)} <small>(${pl[k].q10}–${pl[k].q90})</small></b></div>`).join("") : "";
+  // the input breakdown: μ = minutes x per-minute rate x opponent x pace x home (x back-to-back), per component
+  const I = pl && pl.inputs, f2 = x => (+x).toFixed(2), GRPN_ = {G: "guards", F: "forwards", C: "centers"};
+  const xf = (lab, v) => Math.abs(v - 1) < .005 ? "" : ` × ${lab} ${f2(v)}`, ha = p.home === false ? "away" : "home";
+  const brk = !I ? "" : `<div class="note pjb">Inputs (μ = minutes × per-minute rate × opponent × pace × home/away). The distribution then comes from what actually happened after similar past projections, rescaled to μ. Where projections like this one ran low or high, the mean shown above moves off μ:<br>
+    Minutes: ${(+I.min).toFixed(1)} recent, pulled toward his 60-game level${xf(ha, I.min_f.home)}${xf("back-to-back", I.min_f.b2b)} → μ ${(+I.mu.min).toFixed(1)}<br>
+    ${(MARKET_PARTS[p.market] || []).filter(k => I[k]).map(k => `${esc(STATN[k] || k)}: ${(+I.min).toFixed(1)} min × ${(+I[k][0]).toFixed(3)} per min (his rate, pooled with ${GRPN_[I.group] || "his position"})${xf("opponent", I[k][1])}${xf("pace", I[k][2])}${xf(ha, I[k][3])}${xf("back-to-back", I[k][4])} → μ ${(+I.mu[k]).toFixed(1)}`).join("<br>")}</div>`;
+  const inj = (D.injuries[gameOf(p.gid).date + "|" + p.pid] || {}).official, av = inj && M.availability && M.availability[inj.status];
+  const avail = inj ? `<div class="kv"><span>Plays tonight?</span><b>${esc(inj.status)}${av && av[1] ? ` · ${Math.round((av[0] + 1) / (av[1] + 2) * 100)}% <small>(${av[0]}/${av[1]} listed so since 10/22)</small>` : ""}</b></div>` : "";
+  return head + `<div class="box0 pj">
+    <div class="pjt"><div><b class="num">${(+pr.mean).toFixed(1)}</b> <i>${unit_} · mean</i></div><div class="pjr num">median ${pr.q50} · 80% range ${pr.q10}–${pr.q90}</div></div>
+    ${svg}
+    <div class="kv"><span>${sd} ${line} · model + market</span><b>${at.blend === null ? "— <small>no two-sided price here</small>" : pct(at.blend)}</b></div>
+    <div class="kv mo1"><span>${sd} ${line} · model alone</span><b>${pct(at.model)}${at.push > .001 ? ` <small>· push ${pct(at.push)}</small>` : ""}</b></div>
+    <div class="note" style="margin:4px 0 0">In held-out testing (2024-25), FanDuel's closing price was more accurate at its own lines than this model, and blending added nothing. The model alone runs overconfident against book lines. Use the projection for the stat's likely range, not as a price.</div>
+    ${avail}${other ? `<div class="pjo">Other stats (no book line collected)</div>${other}` : ""}
+    <details class="pji"><summary>How this is made${M.stale ? ' · <span class="tg tq">STALE</span>' : ""}</summary>
+      <div class="note">${esc(M.target || "")}. Uses: ${esc((M.inputs_used || []).join("; "))}. Not used: ${esc((M.inputs_missing || []).join("; "))}.
+      ${pr.n_hist < 10 ? `Only ${pr.n_hist} past games: wide range. ` : ""}Cutoff: ${esc(M.cutoff || "")}. Box scores through ${esc(M.logs_through || "?")}${M.stale ? " (" + esc(M.stale_reason || "stale") + ")" : ""}${M.refresh_pending ? " (newer box scores are in; the projection job will pick them up within 30 min)" : ""}.
+      Model ${esc(M.version || "")} (${esc(M.config || "")}), tuned on ${esc(M.tuned_on || "?")}; as of ${esc(mt(M.generated_at, true))}.
+      Its stat projections beat the baselines on two held-out seasons (CRPS, all 8 stats).</div>${brk}</details>
+    <button class="lk" id="pjsc" style="padding:12px 16px 6px 0;font-size:13px">Model scorecard ›</button></div>`;
+}
+// the projection engine's record: the pre-registered held-out test (proj_meta.backtest) and the forward record
+function projScoreSheet() {
+  openSheet('<h2 id="sht">Model scorecard</h2><div class="note" style="font-size:14px">Loading…</div>', () => {});
+  const s = $("#sheet"), n = SHEET_N, M = D.proj_meta || {}, B = M.backtest || {};
+  const pc = x => x == null ? "–" : (x * 100).toFixed(1) + "%", f4 = x => x == null ? "–" : x.toFixed(4);
+  const ci = c => c ? `${c[0] > 0 ? "+" : ""}${c[0].toFixed(4)} <small>(${c[1].toFixed(4)} to ${c[2].toFixed(4)})</small>` : "–";
+  const per = Object.entries(B.periods || {}).map(([season, p]) => {
+    const m = p.market;
+    const lab = season === M.tuned_on ? "tuning season: the config and blend weight were chosen here, so these are not held out" : p.label;
+    return (lab ? `<div class="note" style="margin:6px 0 0">${esc(lab)}</div>` : "") +
+      `<div class="kv"><span>${esc(season)} · ${p.n ? p.n.toLocaleString() : 0} player-games</span><b>CRPS vs recent form ${ci(p.crps_vs_b2)}</b></div>` +
+      (m ? `<div class="kv"><span>${esc(season)} · ${m.n.toLocaleString()} FanDuel lines</span><b>log loss: model ${f4(m.model_ll)} · blend ${f4(m.blend_ll)} · close ${f4(m.close_ll)}</b></div>
+            <div class="kv"><span>blend − close</span><b>${ci(m.blend_minus_close)}</b></div>` : "");
+  }).join("");
+  const fill = html => { if (SHEET_N === n && !s.hidden) { s.innerHTML = '<div class="grab" aria-hidden="true"></div><h2 id="sht">Model scorecard</h2>' + html; const d = $("#ps-ok", s); if (d) d.onclick = closeSheet; } };
+  fetch("nba_proj_score.json?t=" + Date.now(), {cache: "no-store"}).then(r => r.ok ? r.json() : null).catch(() => null).then(j => {
+    const fwd = j && j.graded ? `<div class="kv"><span>graded since ${esc(j.from || "")}</span><b>${j.graded} props</b></div>
+      <div class="kv"><span>log loss</span><b>model ${f4(j.model_logloss)} · blend ${f4(j.blend_logloss)}${j.close_logloss != null ? " · close " + f4(j.close_logloss) : ""}</b></div>
+      ${j.blend_minus_close ? `<div class="kv"><span>blend − close</span><b>${ci(j.blend_minus_close)}</b></div>` : ""}
+      ${j.clv ? `<div class="kv"><span>CLV (close moved toward the model)</span><b>${pc(j.clv.mean)} · ${pc(j.clv.share_positive)} of ${j.clv.n}</b></div>` : ""}
+      ${[["reliability_model", "model"], ["reliability_blend", "blend"], ["reliability_close", "close"]].filter(([k]) => j[k]).map(([k, lab]) =>
+        `<div class="note" style="margin:4px 0 0">Calibration, ${lab} (n: forecast → happened): ${j[k].filter(b => b[0]).map(b => `${b[0]}: ${pc(b[1])} → ${pc(b[2])}`).join(" · ")}</div>`).join("")}`
+      : '<div class="note" style="margin:0">No graded forecasts yet: the forward record starts with this version.</div>';
+    fill(`<div class="note" style="font-size:14px;color:var(--l2)">Every number is walk-forward: each prediction uses only games before that date. The config was tuned on ${esc(M.tuned_on || "2023-24")}; the later seasons were held out and run once (NBA_PROJECTION_PREREG.md). Lower log loss / CRPS is better; a difference whose range stays below 0 is a real improvement.</div>
+      <div class="sg"><span>Backtest</span></div>${per || '<div class="note">No results yet.</div>'}
+      <div class="sg"><span>Forward record (live forecasts, logged before tip)</span></div>${fwd}
+      <div class="note">${esc((B.verdicts || []).join(" "))}</div>
+      <div class="note">CLV says where the closing price went, not whether a bet would have won. Nothing here is a pick.</div>
+      <div class="acts"><button class="btn pri" id="ps-ok">Done</button></div>`);
+  });
 }
 // each book's main line over time (a step per change), its open and its price now
 function histChart(p) {
@@ -1309,6 +1427,7 @@ function renderProp(mode) {
     <div class="wrow"><div class="wcap" id="wcap" role="group" aria-label="Games window"><span class="pill2"></span>${wins.map(([k, lab]) => `<button class="wc" data-win="${k}"><i>${lab}</i><b></b></button>`).join("")}</div><button class="cb fb" id="pf" aria-label="All filters">${ICON.menu}</button></div>
     <div class="sr" id="psr" role="status"></div>
     <div class="cf" id="pcf"></div>
+    <div class="sec2" id="pproj"></div>
     <div class="bkt" id="pbk"></div>
     <div id="pstat"></div>
     <div class="sec2" id="plog"></div>
@@ -1426,6 +1545,7 @@ function updateProp(mode) {
     return `<div class="bkr2${here ? "" : " alt"}"><span>${name}${D.sources.books[b] && D.sources.books[b].stale ? ' <span class="tg tq">STALE</span>' : ""}</span><button class="bl" data-pl="${l}" aria-label="Use line ${l}">${l === null ? "—" : l}</button>${px("over", 1)}${px("under", 2)}</div>`;
   }).join("");
   const fr = fair.p === null ? "" : `<div class="bkr2 fr"><span>Fair${fair.n === 1 ? " <small>1 book</small>" : ""}</span><span class="bl">${line}</span><span>${american(1 / fair.p)}</span><span>${american(1 / (1 - fair.p))}</span></div>`;
+  $("#pproj").innerHTML = projCard(p, line, side);
   $("#pbk").innerHTML = `<div class="bkh"><span>BOOKS</span><button class="lnp" id="lnp" aria-haspopup="dialog" aria-label="Line ${line}">LINE${ICON.down}</button><span>OVER</span><span>UNDER</span></div>${bk}${fr}
     <div class="note" style="margin:8px 15.3px 0">Fair = the books' prices with their margin removed${fair.n === 2 ? " (both books)" : ""}. Green = a price better than fair.</div>
     <div class="sec2"><h3>Alt Lines · ${side === "under" ? "Under" : "Over"}</h3>${ladder(p, win, side, line, (wins.find(w => w[0] === DT.win) || ["", "L10"])[1])}</div>
@@ -1468,6 +1588,7 @@ function bindLive(p, logs, without) {
     ? `${esc(p.player)} is <b style="color:#fff">${ord(c.pos_rank)}</b> of ${c.pos_n} ${GRPN[MU_GROUP(c.pos)] || "players at his position"} in ${esc(NAME[p.market].toLowerCase())} per game (${esc(c.pos_season || "")}, 3+ games).`
     : "Not enough games to rank him yet."}</div><div class="acts"><button class="btn pri" id="ok1">Done</button></div>`, s2 => { $("#ok1", s2).onclick = closeSheet; });
   $("#mub", pg).onclick = () => matchupSheet(p, ST.side);
+  const pjsc = $("#pjsc", pg); if (pjsc) pjsc.onclick = projScoreSheet;
   $$(".rp", pg).forEach(gp => {
     const k = gp.dataset.rk, lo = +gp.dataset.lo, hi = +gp.dataset.hi, fil = $(".fil", gp), rv = $(".rv", gp);
     dualRange($(".dual2", gp), lo, hi, DT.ranges[k] || [lo, hi], 13, (v, fl, fr) => {

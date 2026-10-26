@@ -103,3 +103,7 @@ nba_profiles.sqlite
 nba_postseason.sqlite
 nba_features.sqlite
 nba_matchup.sqlite
+.projdata/
+nba_proj_cache.pkl
+nba_proj_cache.pkl.tmp
+nba_proj_log.sqlite
