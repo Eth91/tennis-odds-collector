@@ -1069,10 +1069,10 @@ function daySheet() {
 }
 // what the nightly replay (nba_research_score.py) found: each of the page's signals against what the price said
 function scoreSheet() {
-  openSheet('<h2 id="sht">Scorecard</h2><div class="note" style="font-size:14px">Loading…</div>', () => {});
+  openSheet('<h2 id="sht">Scorecard <span class="tg tf">NOT A BET</span></h2><div class="note" style="font-size:14px">Loading…</div>', () => {});
   const s = $("#sheet"), n = SHEET_N;
   s.dataset.kind = "score";
-  const fill = html => { if (SHEET_N === n && !s.hidden) { s.innerHTML = '<div class="grab" aria-hidden="true"></div><h2 id="sht">Scorecard</h2>' + html; const d = $("#sc-ok", s); if (d) d.onclick = closeSheet; } };
+  const fill = html => { if (SHEET_N === n && !s.hidden) { s.innerHTML = '<div class="grab" aria-hidden="true"></div><h2 id="sht">Scorecard <span class="tg tf">NOT A BET</span></h2>' + html; const d = $("#sc-ok", s); if (d) d.onclick = closeSheet; } };
   const pc = x => (x * 100).toFixed(1) + "%";
   fetch("nba_research_score.json?t=" + Date.now(), {cache: "no-store"}).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }).then(j => {
     if (!j.props) { fill('<div class="empty"><b>No graded games yet</b></div><div class="acts"><button class="btn pri" id="sc-ok">Done</button></div>'); return; }
@@ -1093,6 +1093,7 @@ function leagueSheet() {
     ${(() => { const M = D.proj_meta || {}, c = M.coverage || {};
       return `<div class="kv"><span>Projection model</span><b>${M.error ? esc(M.error) : `${esc(M.version || "")} · ${c.projected || 0}/${c.props || 0} props${M.stale ? ' · <span class="tg tq">STALE</span>' : ""}${M.refresh_pending ? " · updating" : ""}`}</b></div>
         <div class="kv"><span>Box scores through</span><b>${esc(M.logs_through || "—")}</b></div>
+        <div class="kv"><span>Picks or bets</span><b><span class="tg tf" style="margin:0">NONE · RESEARCH ONLY</span></b></div>
         <button class="opt" id="lg-pj">Model scorecard: held-out test and forward record<span class="ck">›</span></button>`; })()}
     <div class="acts"><a class="btn" href="index.html" style="display:flex;align-items:center;justify-content:center;text-decoration:none">Back to Pickz</a><button class="btn pri" id="lg-ok">Done</button></div>`, s => { $("#lg-ok", s).onclick = closeSheet; $("#lg-sc", s).onclick = scoreSheet; $("#lg-pj", s).onclick = projScoreSheet; });
 }
@@ -1288,7 +1289,7 @@ function ladder(p, win, side, cur, winLab) {
 const STATN = {pts: "Points", reb: "Rebounds", ast: "Assists", fg3m: "3-pointers"};
 function projCard(p, line, side) {
   const M = D.proj_meta || {}, pr = p.proj, unit_ = esc(short(p.market));
-  const head = `<h3>Model Projection <span class="tg tf" style="margin-left:6px">NOT A BET</span>${M.stale ? ' <span class="tg tq">STALE</span>' : ""}</h3>`;
+  const head = `<h3>Model Projection <span class="tg tf" style="margin-left:6px">MODEL ESTIMATE · NOT A BET</span>${M.stale ? ' <span class="tg tq">STALE</span>' : ""}</h3>`;
   if (M.error || !pr) return head + `<div class="box0 pj"><div class="note" style="margin:0">${esc(M.error ? "Unavailable" : "Not projected yet")}</div></div>`;
   const at = projAt(p, line, side), sd = side === "under" ? "Under" : "Over";
   // the pmf as bars, the selected line marked
@@ -1313,31 +1314,37 @@ function projCard(p, line, side) {
     ${svg}
     <div class="kv"><span>${sd} ${line} · model + market</span><b>${at.blend === null ? "— <small>no two-sided price here</small>" : pct(at.blend)}</b></div>
     <div class="kv mo1"><span>${sd} ${line} · model alone</span><b>${pct(at.model)}${at.push > .001 ? ` <small>· push ${pct(at.push)}</small>` : ""}</b></div>
+    <div class="kv"><span>Held-out 2024-25 vs FanDuel close</span><b class="dn">Lost</b></div>
+    <div class="kv"><span>Blend with the price</span><b>Added nothing</b></div>
     ${avail}${other ? `<div class="pjo">Other stats</div>${other}` : ""}
     <button class="lk" id="pjsc" style="padding:12px 16px 6px 0;font-size:13px">Model scorecard ›</button></div>`;
 }
 // the projection engine's record: the pre-registered held-out test (proj_meta.backtest) and the forward record
 function projScoreSheet() {
-  openSheet('<h2 id="sht">Model scorecard</h2><div class="note" style="font-size:14px">Loading…</div>', () => {});
+  openSheet('<h2 id="sht">Model scorecard <span class="tg tf">NOT A BET</span></h2><div class="note" style="font-size:14px">Loading…</div>', () => {});
   const s = $("#sheet"), n = SHEET_N, M = D.proj_meta || {}, B = M.backtest || {};
   const pc = x => x == null ? "–" : (x * 100).toFixed(1) + "%", f4 = x => x == null ? "–" : x.toFixed(4);
   const ci = c => c ? `${c[0] > 0 ? "+" : ""}${c[0].toFixed(4)} <small>(${c[1].toFixed(4)} to ${c[2].toFixed(4)})</small>` : "–";
   const per = Object.entries(B.periods || {}).map(([season, p]) => {
     const m = p.market;
-    return `<div class="kv"><span>${esc(season)}${season === M.tuned_on ? ' <span class="tg tn">TUNING</span>' : ""} · ${p.n ? p.n.toLocaleString() : 0} player-games</span><b>CRPS vs recent form ${ci(p.crps_vs_b2)}</b></div>` +
+    return `<div class="kv"><span>${esc(season)}${season === M.tuned_on ? ' <span class="tg tq">TUNING · IN-SAMPLE</span>' : ""} · ${p.n ? p.n.toLocaleString() : 0} player-games</span><b>CRPS vs recent form ${ci(p.crps_vs_b2)}</b></div>` +
+      (p.label ? `<div class="kv"><span>${esc(p.label)}</span></div>` : "") +
       (m ? `<div class="kv"><span>${esc(season)} · ${m.n.toLocaleString()} FanDuel lines</span><b>log loss: model ${f4(m.model_ll)} · blend ${f4(m.blend_ll)} · close ${f4(m.close_ll)}</b></div>
             <div class="kv"><span>blend − close</span><b>${ci(m.blend_minus_close)}</b></div>` : "");
   }).join("");
-  const fill = html => { if (SHEET_N === n && !s.hidden) { s.innerHTML = '<div class="grab" aria-hidden="true"></div><h2 id="sht">Model scorecard</h2>' + html; const d = $("#ps-ok", s); if (d) d.onclick = closeSheet; } };
+  const vds = (B.verdicts || []).map(v => { const m = /^(.*):\s*(YES|NO)\b\s*(.*?)\.?$/.exec(v);
+    return m ? `<div class="kv"><span>${esc(m[1])}${m[3] ? ` <small>${esc(m[3])}</small>` : ""}</span><b class="${m[2] === "YES" ? "up" : "dn"}">${m[2]}</b></div>` : `<div class="kv"><span>${esc(v)}</span></div>`; }).join("");
+  const fill = html => { if (SHEET_N === n && !s.hidden) { s.innerHTML = '<div class="grab" aria-hidden="true"></div><h2 id="sht">Model scorecard <span class="tg tf">NOT A BET</span></h2>' + html; const d = $("#ps-ok", s); if (d) d.onclick = closeSheet; } };
   fetch("nba_proj_score.json?t=" + Date.now(), {cache: "no-store"}).then(r => r.ok ? r.json() : null).catch(() => null).then(j => {
     const fwd = j && j.graded ? `<div class="kv"><span>graded since ${esc(j.from || "")}</span><b>${j.graded} props</b></div>
       <div class="kv"><span>log loss</span><b>model ${f4(j.model_logloss)} · blend ${f4(j.blend_logloss)}${j.close_logloss != null ? " · close " + f4(j.close_logloss) : ""}</b></div>
       ${j.blend_minus_close ? `<div class="kv"><span>blend − close</span><b>${ci(j.blend_minus_close)}</b></div>` : ""}
-      ${j.clv ? `<div class="kv"><span>CLV</span><b>${pc(j.clv.mean)} · ${pc(j.clv.share_positive)} of ${j.clv.n}</b></div>` : ""}
+      ${j.clv ? `<div class="kv"><span>CLV · close moved toward model</span><b>${pc(j.clv.mean)} · ${pc(j.clv.share_positive)} of ${j.clv.n}</b></div>` : ""}
       ${[["reliability_model", "model"], ["reliability_blend", "blend"], ["reliability_close", "close"]].filter(([k]) => j[k]).map(([k, lab]) =>
         `<div class="kv"><span>Calibration · ${lab}</span><b class="cal">${j[k].filter(b => b[0]).map(b => `${pc(b[1])}→${pc(b[2])}`).join(" · ")}</b></div>`).join("")}`
       : '<div class="empty"><b>No graded forecasts yet</b></div>';
     fill(`<div class="sg"><span>Backtest</span></div>${per || '<div class="empty"><b>No results yet</b></div>'}
+      ${vds ? `<div class="sg"><span>Pre-registered verdicts</span></div>${vds}` : ""}
       <div class="sg"><span>Forward record</span></div>${fwd}
       <div class="acts"><button class="btn pri" id="ps-ok">Done</button></div>`);
   });

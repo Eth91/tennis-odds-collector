@@ -337,6 +337,26 @@ def test_page_controls_work_on_iphone():
     assert "function ladder(" in html and "data-ll=" in html and "nba_research_score.json" in html and "function scoreSheet(" in html
 
 
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_page_never_hides_the_projection_record():
+    html = UI.page()
+    # the user's rule: never conceal that the model lost to FanDuel's close or that the blend added nothing; not-a-bet stays
+    assert "MODEL ESTIMATE · NOT A BET" in html and 'vs FanDuel close</span><b class="dn">Lost</b>' in html and 'Blend with the price</span><b>Added nothing</b>' in html
+    assert "TUNING · IN-SAMPLE" in html and "(p.label ?" in html and "Pre-registered verdicts" in html
+    assert html.count('NOT A BET</span></h2>') == 4 and "NONE · RESEARCH ONLY" in html
+    # the verdict rows split the pre-registered sentences into claim / YES-NO / reason
+    rx = r'/^(.*):\s*(YES|NO)\b\s*(.*?)\.?$/'
+    assert rx in html
+    vs = ["M1 projects stats better than B2 (CRPS, A and B): YES.",
+          "M1 is calibrated (FanDuel-line reliability within 3 pts and PIT deciles 10-12% on A): NO (reliability fails, PIT fails).",
+          "M1 beats FanDuel's close (model - close log loss, A and C): NO."]
+    js = f"const r = {rx}; console.log(JSON.stringify(process.argv.slice(1).map(v => (m => m && [m[1], m[2], m[3]])(r.exec(v)))))"
+    out = json.loads(subprocess.run([NODE, "-e", js, *vs], capture_output=True, text=True, check=True).stdout)
+    assert out == [["M1 projects stats better than B2 (CRPS, A and B)", "YES", ""],
+                   ["M1 is calibrated (FanDuel-line reliability within 3 pts and PIT deciles 10-12% on A)", "NO", "(reliability fails, PIT fails)"],
+                   ["M1 beats FanDuel's close (model - close log loss, A and C)", "NO", ""]], out
+
+
 def test_board_links_the_page():
     import nba_board as B
     assert 'href="nba_props.html"' in B.html({"record": None, "slates": [], "retracted": [], "offcard": []})
