@@ -247,26 +247,26 @@ border:1px solid #2c2c2e;background:rgba(28,28,30,.92);color:#fff;box-shadow:0 4
 .tlg{display:flex;align-items:center;justify-content:center;width:68px;height:68px;margin:22px 0 18px;border-radius:50%}
 .tlg img{width:48px;height:48px}
 .hro-i{position:absolute;right:-24px;bottom:0;height:226px;width:auto;object-fit:contain;object-position:bottom}
-.sg2{display:flex;align-items:center;gap:10px;padding:16px 16px 6px}
-.cells{flex:1;display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:16px 10px}
+.sg2{display:flex;align-items:center;gap:8px;padding:16px 16px 6px}
+.cells{flex:1;min-width:0;display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:16px 14px}
 .cells>div,.cells>button{min-width:0;padding:0;border:0;background:none;text-align:left}
-.cells i{display:block;font-style:normal;font-size:15px;color:var(--l2);font-stretch:condensed;letter-spacing:-.01em;white-space:nowrap}
-.cells b{display:flex;align-items:center;gap:4px;margin-top:4px;font-size:21px;font-weight:500;font-stretch:condensed;
-letter-spacing:-.02em;white-space:nowrap;font-variant-numeric:tabular-nums}
-.cv{margin-left:6px;color:var(--l2);font-size:22px;font-weight:300}
-.tri{font-size:16px} .tri.up{color:#2ed68f} .tri.dn{color:#ff2d2d}
-.muc{flex:none;display:flex;flex-direction:column;align-items:center;width:112px;padding:10px 0 12px;border:1px solid #2c2c2e;
+.cells i{display:block;font-style:normal;font-size:13px;color:var(--l2);letter-spacing:-.02em;white-space:nowrap}
+.cells b{display:flex;align-items:center;gap:3px;margin-top:4px;font-size:18px;font-weight:500;letter-spacing:-.03em;
+white-space:nowrap;font-variant-numeric:tabular-nums}
+.cv{margin-left:4px;color:var(--l2);font-size:20px;font-weight:300}
+.tri{font-size:13px} .tri.up{color:#2ed68f} .tri.dn{color:#ff2d2d}
+.muc{flex:none;display:flex;flex-direction:column;align-items:center;width:98px;padding:8px 0 10px;border:1px solid #2c2c2e;
 border-radius:14px;background:#121214;color:#fff;font-size:16px}
 .c2w{margin:14px 0 0;padding:0 16px;overflow-x:auto;scrollbar-width:none}
 .c2w::-webkit-scrollbar{display:none}
 svg.c2{display:block}
 svg.c2 text{font-family:inherit}
-svg.c2 .ax{fill:var(--l2);font-size:17px}
-svg.c2 .lx{fill:#fff;font-size:17px}
-svg.c2 .mn{fill:#fff;font-size:16px;font-weight:600}
-svg.c2 .vv{fill:#111;font-size:16px;font-weight:600}
-svg.c2 .vw{fill:#fff;font-size:15px;font-weight:600}
-svg.c2 .xl{fill:var(--l2);font-size:13px}
+svg.c2 .ax{fill:var(--l2);font-size:15px}
+svg.c2 .lx{fill:#fff;font-size:15px}
+svg.c2 .mn{fill:#fff;font-size:12.5px;font-weight:600;letter-spacing:-.03em}
+svg.c2 .vv{fill:#111;font-size:13px;font-weight:600}
+svg.c2 .vw{fill:#fff;font-size:13px;font-weight:600}
+svg.c2 .xl{fill:var(--l2);font-size:11px;letter-spacing:-.02em}
 svg.c2 g.br:focus{outline:none} svg.c2 g.br:focus rect{stroke:var(--blue);stroke-width:2.5}
 .wrow{display:flex;align-items:center;gap:10px;margin:18px 16px 0}
 .wcap{flex:1;display:flex;padding:6px;border:1px solid #2c2c2e;border-radius:34px;background:#121214;overflow-x:auto;scrollbar-width:none}
@@ -796,8 +796,8 @@ function chart2(logs, market, line) {
   if (!n) return '<div class="empty" style="padding:40px 0"><b>No games</b>Nothing matches this window and these filters.</div>';
   const vals = logs.map(l => statValue(l, market)), mins = logs.map(l => l.min);
   const top = Math.max(line, ...vals.filter(v => v !== null), ...mins.filter(v => v !== null), 1);
-  const W0 = Math.min(window.innerWidth, 520) - 32, AX = 46;
-  const slot = Math.max(38, (W0 - AX) / n), W = Math.max(W0, AX + n * slot), H = 400, T = 14, B = 330;
+  const W0 = Math.min(window.innerWidth, 520) - 32, AX = 40;          // ten games fit an iPhone's width
+  const slot = Math.max(30, (W0 - AX) / n), W = Math.max(W0, AX + n * slot), H = 390, T = 12, B = 324;
   const y = v => B - v / (top * 1.04) * (B - T);
   const o = [`<svg class="c2" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="group" aria-label="${esc(NAME[market])} and minutes by game, ${n} games, line ${line}">`];
   o.push(`<text class="ax" x="0" y="${y(top) + 6}">${Math.round(top * 10) / 10}</text><text class="ax" x="0" y="${B}">0</text>`);
@@ -810,10 +810,10 @@ function chart2(logs, market, line) {
     let g = `<g class="br" tabindex="0" role="img" aria-label="${esc(desc)}"><title>${esc(desc)}</title>`;
     if (v !== null && v > 0) g += `<rect x="${x}" y="${y(v)}" width="${w}" height="${B - y(v)}" fill="${fill}"/>`;
     if (m) g += `<rect x="${x}" y="${y(m)}" width="${w}" height="${B - y(m)}" fill="none" stroke="#e5e5ea" stroke-width="1.6"/>` +
-      `<text class="mn" x="${cx}" y="${y(m) + 24}" text-anchor="middle">${Math.round(m * 10) / 10}</text>`;
-    if (v !== null) g += B - y(v) >= 26 ? `<text class="vv" x="${cx}" y="${B - 9}" text-anchor="middle">${v}</text>`
+      `<text class="mn" x="${cx}" y="${y(m) + 18}" text-anchor="middle">${Math.round(m * 10) / 10}</text>`;
+    if (v !== null) g += B - y(v) >= 22 ? `<text class="vv" x="${cx}" y="${B - 7}" text-anchor="middle">${v}</text>`
       : `<text class="vw" x="${cx}" y="${y(v) - 6}" text-anchor="middle">${v}</text>`;
-    g += `<text class="xl" x="${cx}" y="${B + 24}" text-anchor="middle">${d}</text><text class="xl" x="${cx}" y="${B + 46}" text-anchor="middle">${l.home ? "" : "@"}${esc(l.opp)}</text></g>`;
+    g += `<text class="xl" x="${cx}" y="${B + 22}" text-anchor="middle">${d}</text><text class="xl" x="${cx}" y="${B + 42}" text-anchor="middle">${l.home ? "" : "@"}${esc(l.opp)}</text></g>`;
     o.push(g);
   });
   o.push(`<line x1="${AX - 2}" x2="${W}" y1="${y(line)}" y2="${y(line)}" stroke="#fff" stroke-width="1.6"/>`);
