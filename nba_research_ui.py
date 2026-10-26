@@ -581,9 +581,12 @@ const TOUCH = matchMedia("(pointer: coarse)").matches;
 const ST = {date: null, gid: "all", market: "points", side: "over", q: "", sort: "hit10", dir: "desc", team: "all",
             book: "all", lmin: "", lmax: "", omin: "", omax: "", view: "props"};
 const DT = {line: null, win: "l10", home: null, starter: null, result: null, rest: null, ranges: {}, without: {},
-            dvp: false, def: false, open: {}, more: false, fresh: null};
-const RANGES = [["min", "Minutes", "Min"], ["fga", "Field goal attempts", "FGA"], ["fg3a", "3-point attempts", "3PA"],
-                ["fta", "Free throw attempts", "FTA"], ["margin", "Team margin", "Margin"]];
+            dvp: false, def: false, open: {}, more: false, fresh: null, ovs: []};
+const RANGES = [["min", "Minutes", "Minutes"], ["fga", "Field goal attempts", "FGA"], ["fg3a", "3-point attempts", "3PTA"],
+                ["fta", "Free throw attempts", "FTA"], ["usg", "Usage %", "Usage%"], ["margin", "Team margin", "Margin"]];
+// the range chips that also draw their stat on the chart, as white outline boxes (margin can be negative, so it only filters)
+const OVL = {min: "min", fga: "FGA", fg3a: "3PTA", fta: "FTA", usg: "usage %"};
+const MORE_R = ["fga", "fg3a", "fta", "usg", "margin"];          // the range chips behind More
 const SEGS = [["home", "Location", [[null, "Any"], [true, "Home"], [false, "Away"]]],
               ["starter", "Role", [[null, "Any"], [true, "Starter"], [false, "Bench"]]],
               ["result", "Result", [[null, "Any"], ["W", "Win"], ["L", "Loss"]]],
@@ -930,7 +933,7 @@ function openProp(id, push) {
   const fresh = CUR !== id, was = !!CUR;
   CUR = id;
   if (fresh) Object.assign(DT, {line: p.main !== null ? p.main : allLines(p)[0], win: "l10", home: null, starter: null,
-                                 result: null, rest: null, ranges: {}, without: {}, dvp: false, def: false, open: {}, more: false, fresh: null});
+                                 result: null, rest: null, ranges: {}, without: {}, dvp: false, def: false, open: {}, more: false, fresh: null, ovs: []});
   if (push !== false) history.pushState({p: id}, "", hashState());
   const pg = $("#pg");
   pg.hidden = false;                        // (off-screen until it slides in; it must lay out for the pills to measure)
@@ -979,6 +982,7 @@ const ICON = {
   back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
   share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M21 3 3 10.5l7 2.5 2.5 7L21 3Z"/><path d="m10 13 4.5-4.5"/></svg>',
   star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/></svg>',
+  pm: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 1.5v8M4 5.5h8M4 14h8"/></svg>',
   bars: '<svg viewBox="0 0 18 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M1.5 1.5v13h15"/><path stroke-width="2.2" d="M5.5 11.5v-4M9 11.5v-7M12.5 11.5v-5M16 11.5V9"/></svg>',
   menu: '<svg viewBox="0 0 22 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 3h18M5 8h12M8 13h6"/></svg>',
   search: '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="7.5" cy="7.5" r="5.5"/><path d="m12 12 4.5 4.5"/></svg>',
@@ -1017,32 +1021,52 @@ function gauge(gr) {
     `<circle cx="40" cy="40" r="${R}" fill="none" stroke="${col}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${fill} ${C}"/></g>` +
     `<text x="40" y="51" text-anchor="middle" font-size="31" font-weight="500" fill="${col}">${gr ? gr.g : "–"}</text></svg>`;
 }
-function chart2(logs, market, line, showMin, grow) {
+// ov = the log key drawn as white outline boxes over the stat bars (min / fga / fg3a / fta / usg), or null
+function chart2(logs, market, line, ov, grow) {
   const n = logs.length;
   if (!n) return '<div class="empty" style="padding:40px 0"><b>No games</b>Nothing matches this window and these filters.</div>';
-  const vals = logs.map(l => statValue(l, market)), mins = showMin ? logs.map(l => l.min) : [];
-  const top = Math.max(line, ...vals.filter(v => v !== null), ...mins.filter(v => v !== null), 1);
+  const vals = logs.map(l => statValue(l, market)), ovs = ov ? logs.map(l => l[ov]) : [];
+  const num = x => x !== null && x !== undefined;
+  const top = Math.max(line, ...vals.filter(num), ...ovs.filter(num), 1);
   // measured from the reference: bars start 35 pt in and the plot is 144.6 pt tall; a slot is a fifth of the width until
   // there are more than 5 games (5 or fewer: 69 pt slots, 8.3 pt gaps; 10: 34 pt, 3 pt; 20 scroll sideways)
   const W0 = Math.min(window.innerWidth, 520) - 30.6, AX = 35, ne = Math.max(n, 5);
   const gap = Math.max(2.4, 8.3 - (ne - 5) * 1.06), slot = Math.max(30, (W0 - AX + gap) / ne);
   const W = Math.max(W0, AX + n * slot - gap), T = 8, B = T + 144.6, H = B + 38;
   const y = v => B - v / top * (B - T);
-  const o = [`<svg class="c2${grow ? " grow" : ""}" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="group" aria-label="${esc(NAME[market])}${showMin ? " and minutes" : ""} by game, ${n} games, line ${line}">`];
+  const oname = ov ? OVL[ov] : "";
+  const o = [`<svg class="c2${grow ? " grow" : ""}" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="group" aria-label="${esc(NAME[market])}${ov ? " and " + oname : ""} by game, ${n} games, line ${line}">`];
   o.push(`<text class="ax" x="0" y="${y(top) + 7.1}">${r1(top)}</text><text class="ax" x="0" y="${B - 3.5}">0</text>`);
   logs.forEach((l, i) => {
-    const v = vals[i], m = l.min, x = AX + i * slot, w = slot - gap, cx = x + w / 2;
+    const v = vals[i], m = ov ? ovs[i] : null, x = AX + i * slot, w = slot - gap, cx = x + w / 2;
     const res = v === null ? "none" : v > line ? "over" : v < line ? "under" : "push";
     const fill = res === "over" ? "var(--grn)" : res === "under" ? "var(--red)" : "#8e8e93";
     const d = iso(l.date + "T12:00:00Z").toLocaleDateString("en-US", {month: "numeric", day: "numeric", timeZone: "UTC"});
-    const desc = `${d} ${l.home ? "vs" : "at"} ${l.opp}: ${v === null ? "no value" : v} ${short(market)} in ${m} minutes, ${res} ${line}`;
-    const tip = `${d} ${l.home ? "vs " : "@"}${l.opp}|${v === null ? "—" : v} ${short(market)} · ${m === null || m === undefined ? "—" : r1(m)} min`;
+    const ovTxt = ov && num(m) ? `, ${r1(m)} ${oname}` : "";
+    const desc = `${d} ${l.home ? "vs" : "at"} ${l.opp}: ${v === null ? "no value" : v} ${short(market)}${ovTxt || ` in ${l.min} minutes`}, ${res} ${line}`;
+    const tip = `${d} ${l.home ? "vs " : "@"}${l.opp}|${v === null ? "—" : v} ${short(market)} · ${ov ? (num(m) ? r1(m) : "—") + " " + oname : (num(l.min) ? r1(l.min) : "—") + " min"}`;
     let g = `<g class="br" tabindex="0" role="img" aria-label="${esc(desc)}" data-tip="${esc(tip)}" style="--d:${Math.min(i, 19) * 14}ms"><title>${esc(desc)}</title>`;
-    if (v !== null && v > 0) g += `<rect class="bv" x="${x}" y="${y(v)}" width="${w}" height="${B - y(v)}" fill="${fill}"/>`;
-    if (showMin && m) g += `<rect class="bm" x="${x + .65}" y="${y(m) + .65}" width="${w - 1.3}" height="${B - y(m) - .65}" fill="none" stroke="#fff" stroke-width="1.1"/>` +
-      `<text class="mn" x="${cx}" y="${v !== null && y(v) - y(m) < 34 ? y(m) - 6 : y(m) + 18}" text-anchor="middle">${r1(m)}</text>`;   // above a short box
-    if (v !== null) g += B - y(v) >= 18 ? `<text class="vv" x="${cx}" y="${B - 3.5}" text-anchor="middle">${v}</text>`
-      : `<text class="vw" x="${cx}" y="${y(v) - 4}" text-anchor="middle">${v}</text>`;
+    const hv = v !== null && v > 0 ? B - y(v) : 0;
+    if (hv) g += `<rect class="bv" x="${x}" y="${y(v)}" width="${w}" height="${hv}" fill="${fill}"/>`;
+    // the stat's label: inside the bar's foot when it fits, else just above the bar
+    let vy = hv >= 18 ? B - 3.5 : B - hv - 4, vin = hv >= 18;
+    if (num(m)) {
+      const hm = B - y(m);
+      g += hm > 0 ? `<rect class="bm" x="${x + .65}" y="${y(m) + .65}" width="${w - 1.3}" height="${Math.max(0, hm - .65)}" fill="none" stroke="#fff" stroke-width="1.1"/>`
+        : `<line class="bm" x1="${x}" x2="${x + w}" y1="${B - .55}" y2="${B - .55}" stroke="#fff" stroke-width="1.1"/>`;
+      // its label: inside the box's top when the box clears the bar by 34+, else just above the box's top
+      let my = hm - hv >= 34 ? y(m) + 18 : y(m) - 5;
+      if (hm < hv && hm >= 34) my = y(m) + 17;           // a tall box inside the bar: its label at its top, the stat's at the foot
+      else if (hm < hv && vin) {                         // a short box would cover the stat's label at the foot:
+        if (hv >= 40) {                                  // move that label to the bar's top, and this one inside its box
+          vy = B - hv + 16;                              // when the box fits it (else just above, below the stat's)
+          my = hm >= 16 ? y(m) + 14 : Math.max(y(m) - 5, vy + 13);
+        } else if (my > B - 20) my = B - hv - 5;         // or, in a short bar, put this one above the bar
+      }
+      if (!vin && Math.abs(my - vy) < 13) my = Math.min(my, vy) - 13;   // both above a short bar: stack them
+      g += `<text class="mn" x="${cx}" y="${my}" text-anchor="middle">${ov === "min" || ov === "usg" ? r1(m) : m}</text>`;
+    }
+    if (v !== null) g += `<text class="${vin ? "vv" : "vw"}" x="${cx}" y="${vy}" text-anchor="middle">${v}</text>`;
     g += `<text class="xl" x="${cx}" y="${B + 17.4}" text-anchor="middle">${d}</text><text class="xl" x="${cx}" y="${B + 30.5}" text-anchor="middle">${l.home ? "" : "@"}${esc(l.opp)}</text></g>`;
     o.push(g);
   });
@@ -1146,7 +1170,8 @@ function updateProp(mode) {
   const tri = up => `<span class="tri ${up ? "up" : "dn"}">${up ? "▲" : "▼"}</span>`;
   const gr = grade(p, side);
   const opp = `<span class="vs">${p.home ? "vs" : "@"}</span>${esc(p.opp || "")}\u200a·\u200a${g.state === "pregame" ? mt(g.tip).replace(" ", "") : esc(g.state === "live" ? "LIVE" : g.state === "final" ? "Final" : g.label || "")}`;
-  const showMin = !!(DT.open.min || DT.ranges.min);
+  const ovOn = k => !!(DT.open[k] || DT.ranges[k]);
+  const ov = DT.ovs.slice().reverse().find(ovOn) || Object.keys(OVL).find(ovOn) || null;
   // cells
   if (!rest) $("#pcells").innerHTML = `<div class="cells">
       <div><i>${esc(winLab)} AVG</i><b>${s.avg === null ? "–" : tri(s.avg > line) + r1(s.avg)}</b></div>
@@ -1159,7 +1184,7 @@ function updateProp(mode) {
   // chart
   if (!rest) {
   const cw = $("#chw"), sl = cw.scrollLeft, atEnd = first || sl + cw.clientWidth >= cw.scrollWidth - 4;
-  cw.innerHTML = chart2(win, p.market, line, showMin, !first);
+  cw.innerHTML = chart2(win, p.market, line, ov, !first);
   cw.scrollLeft = atEnd ? cw.scrollWidth : sl;
   // window capsule
   wins.forEach(([k]) => {
@@ -1169,7 +1194,7 @@ function updateProp(mode) {
     v.textContent = pct(r); v.className = r === null ? "" : r >= .5 ? "up" : "dn";
   });
   slide($("#wcap"), first);
-  $("#psr").textContent = `${side === "under" ? "Under" : "Over"} ${line}: ${rate === null ? "no games" : Math.round(rate * 100) + "% of " + s.n + " games"}.${showMin ? " White box = minutes played." : ""}`;
+  $("#psr").textContent = `${side === "under" ? "Under" : "Over"} ${line}: ${rate === null ? "no games" : Math.round(rate * 100) + "% of " + s.n + " games"}.${ov ? " White boxes = " + OVL[ov] + "." : ""}`;
   }
   // chart filter chips: DvP, Def Rank, Minutes, More (more: FGA, Home, Away, 3PA, FTA, Margin, Win, Loss, B2B, Without …)
   const on = (k, v) => DT[k] === v;
@@ -1178,13 +1203,13 @@ function updateProp(mode) {
   const chips = [];
   if (c.dvp_rank) chips.push(chip('data-t="dvp"', `DvP <em class="${rankCls(c.dvp_rank, c.teams, side)}">${ord(c.dvp_rank)}</em>`, DT.dvp));
   if (c.def_rank) chips.push(chip('data-t="def"', `Def Rank <em class="${rankCls(c.def_rank, c.teams, side)}">${ord(c.def_rank)}</em>`, DT.def));
-  const rchip = k => { const b = bounds(logs, k), abbr = RANGES.find(r => r[0] === k)[2]; if (b && b[0] !== b[1]) chips.push(chip(`data-r="${k}"`, `${ICON.bars}${k === "min" ? "Minutes" : abbr}`, rangeOn(k) || DT.open[k])); };
+  const rchip = k => { const b = bounds(logs, k), abbr = RANGES.find(r => r[0] === k)[2]; if (b && b[0] !== b[1]) chips.push(chip(`data-r="${k}"`, `${OVL[k] ? ICON.bars : ICON.pm}${abbr}`, rangeOn(k) || DT.open[k])); };
   const tchip = (k, v, lab) => chips.push(chip(`data-k="${k}" data-v="${v}"`, lab, on(k, v)));
   rchip("min");
-  const extra = DT.home !== null || DT.result !== null || DT.rest !== null || ["fga", "fg3a", "fta", "margin"].some(k => rangeOn(k) || DT.open[k]) || Object.keys(DT.without).some(k => DT.without[k]);
+  const extra = DT.home !== null || DT.result !== null || DT.rest !== null || MORE_R.some(k => rangeOn(k) || DT.open[k]) || Object.keys(DT.without).some(k => DT.without[k]);
   const more = DT.more || extra;
   if (more) {
-    rchip("fga"); tchip("home", true, "Home"); tchip("home", false, "Away"); rchip("fg3a"); rchip("fta"); rchip("margin");
+    rchip("fga"); tchip("home", true, "Home"); tchip("home", false, "Away"); rchip("fg3a"); rchip("fta"); rchip("usg"); rchip("margin");
     tchip("result", "W", "Win"); tchip("result", "L", "Loss"); tchip("rest", "b2b", "B2B");
     without.forEach(w => chips.push(chip(`data-wo="${w.key}"`, "Without " + esc(w.name.split(" ").slice(-1)[0]), DT.without[w.key])));
   }
@@ -1192,7 +1217,7 @@ function updateProp(mode) {
   const panels = RANGES.filter(([k]) => DT.open[k] || rangeOn(k)).map(([k, lab]) => {
     const b = bounds(logs, k); if (!b || b[0] === b[1]) return "";
     const cur = DT.ranges[k] || b;
-    return `<div class="rp${DT.fresh === k ? " in" : ""}" data-rk="${k}" data-lo="${b[0]}" data-hi="${b[1]}"><div class="rp-h"><span>${k === "min" ? "Minutes" : lab}</span><b class="rv"${DT.ranges[k] ? "" : " hidden"}>${cur[0]} – ${cur[1]}</b></div>
+    return `<div class="rp${DT.fresh === k ? " in" : ""}" data-rk="${k}" data-lo="${b[0]}" data-hi="${b[1]}"><div class="rp-h"><span>${RANGES.find(r => r[0] === k)[2]}</span><b class="rv"${DT.ranges[k] ? "" : " hidden"}>${cur[0]} – ${cur[1]}</b></div>
       <div class="dual2"><div class="fil"></div>${thumbs(lab, b)}</div>
       <div class="rp-b"><span>${b[0]}</span><span>${b[1]}</span></div></div>`;
   }).join("");
@@ -1227,7 +1252,12 @@ function bindLive(p, logs, without) {
   const pg = $("#pg"), c = p.ctx || {};
   const keep = sel => { const e = !TOUCH && $(sel, pg); if (e) e.focus({preventScroll: true}); };
   $$("[data-t]", pg).forEach(b => b.onclick = () => { const k = b.dataset.t; DT[k] = !DT[k]; updateProp(); keep(`[data-t="${k}"]`); });
-  $$("[data-r]", pg).forEach(b => b.onclick = () => { const k = b.dataset.r; if (DT.ranges[k] || DT.open[k]) { delete DT.ranges[k]; DT.open[k] = false; } else { DT.open[k] = true; DT.fresh = k; } updateProp(); keep(`[data-r="${k}"]`); });
+  $$("[data-r]", pg).forEach(b => b.onclick = () => {
+    const k = b.dataset.r;
+    DT.ovs = DT.ovs.filter(x => x !== k);
+    if (DT.ranges[k] || DT.open[k]) { delete DT.ranges[k]; DT.open[k] = false; } else { DT.open[k] = true; DT.fresh = k; if (OVL[k]) DT.ovs.push(k); }
+    updateProp(); keep(`[data-r="${k}"]`);
+  });
   $$("[data-k]", pg).forEach(b => b.onclick = () => { const k = b.dataset.k, raw = b.dataset.v, v = raw === "true" ? true : raw === "false" ? false : raw; DT[k] = DT[k] === v ? null : v; updateProp(); keep(`[data-k="${k}"][data-v="${raw}"]`); });
   $$("[data-wo]", pg).forEach(b => b.onclick = () => { const k = b.dataset.wo; DT.without[k] = !DT.without[k]; updateProp(); keep(`[data-wo="${k}"]`); });
   $$("[data-ps]", pg).forEach(b => b.onclick = () => {
@@ -1238,8 +1268,8 @@ function bindLive(p, logs, without) {
     updateProp(); keep(`[data-ps="${sd}"]`);
   });
   $$(".bl", pg).forEach(b => b.onclick = () => { const l = +b.dataset.pl; if (DT.line !== l) { DT.line = l; updateProp(); } });
-  const clr = $("#clr", pg); if (clr) clr.onclick = () => { Object.assign(DT, {home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, dvp: false, def: false, open: {}}); updateProp(); };
-  $("#more", pg).onclick = () => { DT.more = $("#more", pg).getAttribute("aria-expanded") !== "true"; if (!DT.more) { ["fga", "fg3a", "fta", "margin"].forEach(k => { DT.open[k] = false; delete DT.ranges[k]; }); Object.assign(DT, {home: null, result: null, rest: null, without: {}}); } updateProp(); keep("#more"); };
+  const clr = $("#clr", pg); if (clr) clr.onclick = () => { Object.assign(DT, {home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, dvp: false, def: false, open: {}, ovs: []}); updateProp(); };
+  $("#more", pg).onclick = () => { DT.more = $("#more", pg).getAttribute("aria-expanded") !== "true"; if (!DT.more) { MORE_R.forEach(k => { DT.open[k] = false; delete DT.ranges[k]; }); DT.ovs = DT.ovs.filter(k => MORE_R.indexOf(k) < 0); Object.assign(DT, {home: null, result: null, rest: null, without: {}}); } updateProp(); keep("#more"); };
   $("#lnb", pg).onclick = () => lineSheet(p);
   const lnp = $("#lnp", pg); if (lnp) lnp.onclick = () => lineSheet(p);
   $("#psb", pg).onclick = () => openSheet(`<h2 id="sht">Position rank</h2><div class="note" style="font-size:15px;color:var(--l2)">${c.pos_rank
@@ -1374,7 +1404,7 @@ function playerFilters(p, logs, without) {
       dr[k] = v; $$(`[data-sk="${k}"]`, s).forEach(x => x.setAttribute("aria-pressed", x === b)); upd();
     });
     $$("[data-wk]", s).forEach(b => b.onclick = () => { const k = b.dataset.wk; dr.without[k] = !dr.without[k]; $(".ck", b).textContent = dr.without[k] ? "✓" : ""; upd(); });
-    $("#pf-reset", s).onclick = () => { Object.assign(DT, {home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, dvp: false, def: false, open: {}}); closeSheet(); updateProp(); };
+    $("#pf-reset", s).onclick = () => { Object.assign(DT, {home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, dvp: false, def: false, open: {}, ovs: []}); closeSheet(); updateProp(); };
     $("#pf-ok", s).onclick = () => { Object.assign(DT, {home: dr.home, starter: dr.starter, result: dr.result, rest: dr.rest, ranges: dr.ranges, without: dr.without}); closeSheet(); updateProp(); };
     upd();
   });
