@@ -135,8 +135,14 @@ def live_box(gid):
 def payload():
     d = pathlib.Path(tempfile.mkdtemp())
     stores(d)
+    tr = sqlite3.connect(d / "tracking.sqlite")
+    tr.execute("CREATE TABLE tracking (date TEXT, player_id INTEGER, potential_ast REAL, ast_trk REAL, passes REAL, "
+               "secondary_ast REAL, ft_ast REAL, reb_chances REAL, oreb_chances REAL, dreb_chances REAL, reb_trk REAL)")
+    tr.execute("INSERT INTO tracking (date, player_id, potential_ast, reb_chances) VALUES ('2026-09-01', 1, 14, 9)")
+    tr.execute("INSERT INTO tracking (date, player_id, potential_ast, reb_chances) VALUES ('2026-09-02', 1, 11, NULL)")
+    tr.commit(); tr.close()
     return RS.build(now=NOW, sched=SCHED, lines=d / "lines.sqlite", news=d / "news.sqlite", shadow=d / "shadow.sqlite",
-                    matchup=d / "matchup.sqlite", index=d / "index.json", box_get=live_box)
+                    matchup=d / "matchup.sqlite", index=d / "index.json", box_get=live_box, tracking=d / "tracking.sqlite")
 
 
 def test_payload_props_and_books(payload):
@@ -153,6 +159,8 @@ def test_payload_props_and_books(payload):
     # usage %: (15 FGA + .44 * 4 FTA + 3 TOV) of PHX's (90 + .44 * 20 + 12), over his 30 of the team's 84 minutes / 5
     assert lg[0]["usg"] == round(100 * (15 + .44 * 4 + 3) * (84 / 5) / (30 * (90 + .44 * 20 + 12)), 1) == 10.0
     assert RS.usage(0.5, 1, 0, 0, 90, 20, 12, 240) is None and RS.usage(30, 15, 4, 3, None, 20, 12, 240) is None
+    # tracking: potential assists / rebound chances; a tracked game with no rebounding row is 0 chances; none untracked
+    assert [(l["pot_ast"], l["reb_ch"]) for l in lg[:3]] == [(14, 9), (11, 0), (None, None)]
     s = b["summary"]["l10"]                                                    # last 10 PHX games: 20..29 pts
     assert s["n"] == 10 and s["over"] == 5 and s["under"] == 5
     assert payload["sources"]["books"]["dk"]["stale"] is True and payload["sources"]["books"]["fd"]["stale"] is False
@@ -310,13 +318,43 @@ def test_page_controls_work_on_iphone():
     # motion runs as Web Animations with a timer fallback, and nothing is fetched from a font CDN
     assert ".animate([" in html and "setTimeout(done" in html and "fonts.googleapis" not in html
     # every range chip but Margin draws its stat on the chart as white outline boxes (Margin can be negative: filter only)
-    assert 'const OVL = {min: "min", fga: "FGA", fg3a: "3PTA", fta: "FTA", usg: "usage %"}' in html and "l[ov]" in html
+    assert ('const OVL = {min: "min", fga: "FGA", fg3a: "3PTA", fta: "FTA", usg: "usage %", pot_ast: "potential assists", '
+            'reb_ch: "rebound chances"}') in html and "l[ov]" in html
+    # the adjustable filters come first; potential assists / rebound chances only on the props they bear on
+    assert '["min", "fga", "fg3a", "fta", "usg", "pot_ast", "reb_ch"].forEach(rchip)' in html
+    assert html.index('.forEach(rchip);') < html.index("if (c.dvp_rank) chips.push(") and 'const MORE_R = ["margin"];' in html
+    assert 'pot_ast: ["assists", "pra", "pts_ast", "reb_ast"], reb_ch: ["rebounds", "pra", "pts_reb", "reb_ast"]' in html
+    # no explanatory prose: notes are status only, empty states are titles only
+    import re
+    notes = re.findall(r'class="note"[^>]*>([^<$]*)', html)
+    assert all(n.strip() in ("Loading…", "") or n.startswith("Couldn") for n in notes), notes
+    assert not re.search(r'<div class="empty"><b>[^<]+</b>[A-Za-z]', html)
     # research+: fair price / VALUE, honest hit-rate boxes, Trends + Injuries tabs, line history, books that disagree
     assert all(k in html for k in ("fairAt(", "<i>VALUE</i>", "hbox(", 'injury: "Injuries"', "histChart(", "freshOut(", 'class="df"'))
     # 6-7: the alt-line ladder (one-sided rungs colored against their own implied chance) and the scorecard sheet
     assert all(k in html for k in ("function ladder(", "chanceSide(", "data-ll=", "nba_research_score.json", "scoreSheet"))
     # 6: the alt-line ladder (tap a rung to use it); 7: the scorecard sheet reads the nightly replay's JSON
     assert "function ladder(" in html and "data-ll=" in html and "nba_research_score.json" in html and "function scoreSheet(" in html
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_page_never_hides_the_projection_record():
+    html = UI.page()
+    # the user's rule: never conceal that the model lost to FanDuel's close or that the blend added nothing; not-a-bet stays
+    assert "MODEL ESTIMATE · NOT A BET" in html and 'vs FanDuel close</span><b class="dn">Lost</b>' in html and 'Blend with the price</span><b>Added nothing</b>' in html
+    assert "TUNING · IN-SAMPLE" in html and "(p.label ?" in html and "Pre-registered verdicts" in html
+    assert html.count('NOT A BET</span></h2>') == 4 and "NONE · RESEARCH ONLY" in html
+    # the verdict rows split the pre-registered sentences into claim / YES-NO / reason
+    rx = r'/^(.*):\s*(YES|NO)\b\s*(.*?)\.?$/'
+    assert rx in html
+    vs = ["M1 projects stats better than B2 (CRPS, A and B): YES.",
+          "M1 is calibrated (FanDuel-line reliability within 3 pts and PIT deciles 10-12% on A): NO (reliability fails, PIT fails).",
+          "M1 beats FanDuel's close (model - close log loss, A and C): NO."]
+    js = f"const r = {rx}; console.log(JSON.stringify(process.argv.slice(1).map(v => (m => m && [m[1], m[2], m[3]])(r.exec(v)))))"
+    out = json.loads(subprocess.run([NODE, "-e", js, *vs], capture_output=True, text=True, check=True).stdout)
+    assert out == [["M1 projects stats better than B2 (CRPS, A and B)", "YES", ""],
+                   ["M1 is calibrated (FanDuel-line reliability within 3 pts and PIT deciles 10-12% on A)", "NO", "(reliability fails, PIT fails)"],
+                   ["M1 beats FanDuel's close (model - close log loss, A and C)", "NO", ""]], out
 
 
 def test_board_links_the_page():

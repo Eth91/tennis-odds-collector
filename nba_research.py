@@ -41,6 +41,7 @@ from zoneinfo import ZoneInfo
 HERE = Path(__file__).resolve().parent
 LINES, NEWS, SHADOW = HERE / "nba_lines.sqlite", HERE / "nba_news.sqlite", HERE / "nba_shadow.sqlite"
 INDEX = HERE / "nba_player_index.json"
+TRACKING = HERE / "nba_tracking.sqlite"
 PROJ_LOG = HERE / "nba_proj_log.sqlite"          # the projection engine's prospective record (prereg test C)
 ET, MT = ZoneInfo("America/New_York"), ZoneInfo("America/Denver")
 # market -> (label, box-score parts). Only the markets the books' feeds carry (nba_lines.STAT_MAP).
@@ -50,8 +51,10 @@ MARKETS = {"points": ("PTS", ("pts",)), "rebounds": ("REB", ("reb",)), "assists"
 MATCHUP_KEY = {"points": "pts", "rebounds": "reb", "assists": "ast", "pra": "pra", "pts_reb": "pts_reb",
                "pts_ast": "pts_ast", "reb_ast": "reb_ast"}           # threes: no matchup factor is computed
 LOG_COLS = ("date", "gid", "team", "opp", "home", "starter", "min", "pts", "reb", "ast", "fg3m", "fga", "fg3a", "fta",
-            "margin", "rest", "usg")   # margin = his team's final margin; rest = days off before the game (0 = back-to-back);
+            "margin", "rest", "usg", "pot_ast", "reb_ch")   # margin = his team's final margin; rest = days off before the game (0 = back-to-back);
                                        # usg = usage % (the share of his team's possessions he used while on the floor)
+                                       # pot_ast / reb_ch = potential assists / rebound chances (nba_tracking.sqlite;
+                                       # None where tracking has no row for that game)
 
 
 def usage(mn, fga, fta, tov, t_fga, t_fta, t_tov, t_min):
@@ -261,12 +264,28 @@ def book_quotes(q, gids):
 REST = LOG_COLS.index("rest")
 
 
-def game_logs(mcon, pids, seasons):
-    """{pid: [log rows in LOG_COLS order]} from the cached box scores, oldest first."""
+def tracking(trk, pids):
+    """{(date, pid): (potential assists, rebound chances)} from nba_tracking.sqlite. The Rebounding feed omits
+    players with no rebound chances, so a tracked game without a rebounding value is 0 chances."""
+    out = {}
+    if trk is None or not pids:
+        return out
+    pids = list(pids)
+    for i in range(0, len(pids), 400):
+        chunk = pids[i:i + 400]
+        for d, pid, pa, rc in trk.execute(f"SELECT date, player_id, potential_ast, reb_chances FROM tracking "
+                                          f"WHERE player_id IN ({','.join('?' * len(chunk))})", chunk):
+            out[(d, pid)] = (pa, rc if rc is not None else (0 if pa is not None else None))
+    return out
+
+
+def game_logs(mcon, pids, seasons, trk=None):
+    """{pid: [log rows in LOG_COLS order]} from the cached box scores, oldest first; trk = nba_tracking.sqlite."""
     out = defaultdict(list)
     if mcon is None or not pids:
         return out
     pids = list(pids)
+    tr = tracking(trk, pids)
     for i in range(0, len(pids), 400):
         chunk = pids[i:i + 400]
         q = ("SELECT p.pid, g.date, p.gid, p.team, CASE WHEN p.team = g.home THEN g.away ELSE g.home END, "
@@ -277,7 +296,7 @@ def game_logs(mcon, pids, seasons):
              f"WHERE p.pid IN ({','.join('?' * len(chunk))}) "
              f"AND g.season IN ({','.join('?' * len(seasons))}) ORDER BY g.date, p.gid")
         for r in mcon.execute(q, chunk + list(seasons)):
-            row = list(r[1:16]) + [None, usage(r[7], r[12], r[14], *r[16:])]
+            row = list(r[1:16]) + [None, usage(r[7], r[12], r[14], *r[16:])] + list(tr.get((r[1], r[0]), (None, None)))
             row[6] = round(row[6] or 0, 1)
             out[r[0]].append(row)
     for rows in out.values():                       # rest: days off since his previous game; none across the summer
@@ -589,7 +608,7 @@ def correlations(props, logs):
 
 
 # ── the payload ──────────────────────────────────────────────────────────────────────────────────────────
-def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None, index=None, box_get=None):
+def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None, index=None, box_get=None, tracking=None):
     import nba_matchup as MU
     now = now or dt.datetime.now(dt.timezone.utc)
     if sched is None:
@@ -625,7 +644,8 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
                       "main": (books.get("fd") or {}).get("main") or (books.get("dk") or {}).get("main")})
     season = season_of(dates[0])
     pids = {p["pid"] for p in props}
-    logs = game_logs(mcon, pids, (prev_season(season), season))
+    trk = _ro(tracking or TRACKING)
+    logs = game_logs(mcon, pids, (prev_season(season), season), trk)
     for p in props:                                     # a player with no index entry: his latest box team
         if p["team"] is None and logs.get(p["pid"]):
             t = logs[p["pid"]][-1][2]
@@ -757,7 +777,7 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
         "ranks": {k: v for k, v in ranks.items()},
         "proj_players": proj_players, "proj_meta": proj_meta,
     }
-    for c in (q, ncon, sh, mcon):
+    for c in (q, ncon, sh, mcon, trk):
         if c is not None:
             c.close()
     return out

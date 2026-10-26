@@ -387,6 +387,11 @@ text-align:left;font-variant-numeric:tabular-nums}
 .lr .best{color:var(--grn)} .lr .na{color:#5f5f5f}
 .lr .up{color:var(--grn)} .lr .dn{color:var(--red)} .lr .sm{color:#8e8e8e}
 .lk{border:0;background:none;color:#9a9a9a;font:inherit;font-size:11.5px;padding:0}
+.sst{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:2px 0 10px}
+.sst>div{padding:9px 10px;border-radius:10px;background:var(--g2)}
+.sst b{display:block;font-size:17px;font-weight:700} .sst i{display:block;font-style:normal;font-size:11px;color:var(--l3)}
+.hl span{color:#bdbdbd;margin-left:auto}
+.cal{font-size:11.5px;font-weight:500;color:var(--l2)}
 .scr{display:grid;grid-template-columns:1fr 44px 70px 50px 64px;align-items:center;column-gap:6px;padding:9px 0;
 border-bottom:.5px solid var(--sep);font-size:13px}
 .scr b{display:block;font-weight:600;font-size:13.5px}
@@ -679,10 +684,14 @@ const ST = {date: null, gid: "all", market: "points", side: "over", q: "", sort:
 const DT = {line: null, win: "l10", home: null, starter: null, result: null, rest: null, ranges: {}, without: {},
             dvp: false, def: false, open: {}, more: false, fresh: null, ovs: []};
 const RANGES = [["min", "Minutes", "Minutes"], ["fga", "Field goal attempts", "FGA"], ["fg3a", "3-point attempts", "3PTA"],
-                ["fta", "Free throw attempts", "FTA"], ["usg", "Usage %", "Usage%"], ["margin", "Team margin", "Margin"]];
+                ["fta", "Free throw attempts", "FTA"], ["usg", "Usage %", "Usage%"], ["pot_ast", "Potential assists", "Potential Assists"],
+                ["reb_ch", "Rebound chances", "Rebound Chances"], ["margin", "Team margin", "Margin"]];
 // the range chips that also draw their stat on the chart, as white outline boxes (margin can be negative, so it only filters)
-const OVL = {min: "min", fga: "FGA", fg3a: "3PTA", fta: "FTA", usg: "usage %"};
-const MORE_R = ["fga", "fg3a", "fta", "usg", "margin"];          // the range chips behind More
+const OVL = {min: "min", fga: "FGA", fg3a: "3PTA", fta: "FTA", usg: "usage %", pot_ast: "potential assists", reb_ch: "rebound chances"};
+// tracking stats only on the props they bear on
+const RANGE_FOR = {pot_ast: ["assists", "pra", "pts_ast", "reb_ast"], reb_ch: ["rebounds", "pra", "pts_reb", "reb_ast"]};
+const forMarket = (k, m) => !RANGE_FOR[k] || RANGE_FOR[k].indexOf(m) >= 0;
+const MORE_R = ["margin"];                                        // the range chips behind More
 const SEGS = [["home", "Location", [[null, "Any"], [true, "Home"], [false, "Away"]]],
               ["starter", "Role", [[null, "Any"], [true, "Starter"], [false, "Bench"]]],
               ["result", "Result", [[null, "Any"], ["W", "Win"], ["L", "Loss"]]],
@@ -854,9 +863,9 @@ function mrow(p) {
 function banners() {
   const out = [], b = D.sources.books;
   [["fd", "FanDuel"], ["dk", "DraftKings"]].forEach(([k, n]) => {
-    if (b[k] && b[k].stale) out.push(`${n} prices are ${Math.round(b[k].age_min)} min old.`);
+    if (b[k] && b[k].stale) out.push(`${n} prices ${Math.round(b[k].age_min)} min old`);
   });
-  if ((Date.now() - iso(D.generated_at).getTime()) / 60000 > 10) out.push("This page hasn't refreshed for a while — the prop feed may be down.");
+  if ((Date.now() - iso(D.generated_at).getTime()) / 60000 > 10) out.push("Feed delayed");
   return out.map(t => `<div class="ban" role="status">${esc(t)}</div>`).join("");
 }
 function topRow() {
@@ -910,13 +919,13 @@ function render() {
 function renderList() {
   const lst = $("#lst"), onDate = D.props.filter(p => (gameOf(p.gid) || {}).date === ST.date), list = listProps();
   let body = null;
-  if (!D.games.some(g => g.date === ST.date)) body = '<div class="empty"><b>No games</b>There are no NBA games on this day.</div>';
-  else if (!onDate.length) body = '<div class="empty"><b>No props yet</b>The books usually post player props on game day.</div>';
-  else if (ST.gid !== "all" && !onDate.some(p => p.gid === ST.gid)) body = '<div class="empty"><b>No props for this game yet</b>Check back closer to tip.</div>';
-  else if (!list.length) body = ST.view === "watch" ? '<div class="empty"><b>Nothing on your watchlist</b>Tap ☆ on a player\'s page to follow him here.</div>'
-    : ST.market === "trends" ? `<div class="empty"><b>No trends</b>No ${ST.side} whose last 10 and last 20 both beat what the price implies, with these filters.</div>`
-    : ST.market === "injury" ? '<div class="empty"><b>No new absences</b>No rotation player who played in his team\'s last 2 games is Out or Doubtful tonight.</div>'
-    : '<div class="empty"><b>No matches</b>Nothing fits these filters.<br><button class="btn" id="reset2">Reset filters</button></div>';
+  if (!D.games.some(g => g.date === ST.date)) body = '<div class="empty"><b>No games</b></div>';
+  else if (!onDate.length) body = '<div class="empty"><b>No props yet</b></div>';
+  else if (ST.gid !== "all" && !onDate.some(p => p.gid === ST.gid)) body = '<div class="empty"><b>No props for this game yet</b></div>';
+  else if (!list.length) body = ST.view === "watch" ? '<div class="empty"><b>Watchlist empty</b></div>'
+    : ST.market === "trends" ? '<div class="empty"><b>No trends</b></div>'
+    : ST.market === "injury" ? '<div class="empty"><b>No new absences</b></div>'
+    : '<div class="empty"><b>No matches</b><button class="btn" id="reset2">Reset filters</button></div>';
   if (body) { lst.innerHTML = body; const r2 = $("#reset2"); if (r2) r2.onclick = resetFilters; return; }
   if (ST.view === "markets") {
     lst.innerHTML = '<div class="mhd"><span>PLAYER</span><span>FANDUEL</span><span>DRAFTKINGS</span></div>' + list.map(mrow).join("");
@@ -927,7 +936,7 @@ function renderList() {
   if (ALL_TABS.indexOf(ST.market) >= 0) {
     const h = document.createElement("div");
     h.className = "lhd";
-    h.innerHTML = `<span>${ST.market === "trends" ? `${ST.side === "under" ? "Unders" : "Overs"} whose L10 and L20 both beat the price` : "A teammate who just played is out tonight"}</span><button class="lk" id="scb">Scorecard ›</button>`;
+    h.innerHTML = `<span>${list.length} props</span><button class="lk" id="scb">Scorecard ›</button>`;
     $("#scb", h).onclick = scoreSheet;
     frag.appendChild(h);
   }
@@ -1035,7 +1044,6 @@ function filterSheet() {
     <label class="fl"><span>Line to</span><input id="f-lmax" type="number" inputmode="decimal" step="0.5" value="${esc(dr.lmax)}"></label></div>
     <div class="two"><label class="fl"><span>Odds from</span><input id="f-omin" type="number" inputmode="numeric" placeholder="-200" value="${esc(dr.omin)}"></label>
     <label class="fl"><span>Odds to</span><input id="f-omax" type="number" inputmode="numeric" placeholder="+150" value="${esc(dr.omax)}"></label></div>
-    <div class="note">Hit rates, odds and AVG (the last-10 average) are for the chosen side at each prop's main line. Tap the chosen sort again to flip it.</div>
     <div class="acts"><button class="btn" id="f-reset">Reset</button><button class="btn pri" id="f-ok"></button></div>`, s => {
     const read = () => { dr.team = $("#f-team", s).value; dr.book = $("#f-book", s).value; ["lmin", "lmax", "omin", "omax"].forEach(k => dr[k] = $("#f-" + k, s).value); };
     const upd = () => { read(); const n = sortProps(filterProps(D.props, Object.assign({}, dr, {market: dr.market === "trends" ? "all" : dr.market}), gameOf, logsOf), dr.sort, dr.dir, logsOf, dr.side, D.season).length; $("#f-ok", s).textContent = ST.market === "trends" ? "Apply" : `Show ${n} prop${n === 1 ? "" : "s"}`; };
@@ -1061,19 +1069,18 @@ function daySheet() {
 }
 // what the nightly replay (nba_research_score.py) found: each of the page's signals against what the price said
 function scoreSheet() {
-  openSheet('<h2 id="sht">Scorecard</h2><div class="note" style="font-size:14px">Loading…</div>', () => {});
+  openSheet('<h2 id="sht">Scorecard <span class="tg tf">NOT A BET</span></h2><div class="note" style="font-size:14px">Loading…</div>', () => {});
   const s = $("#sheet"), n = SHEET_N;
   s.dataset.kind = "score";
-  const fill = html => { if (SHEET_N === n && !s.hidden) { s.innerHTML = '<div class="grab" aria-hidden="true"></div><h2 id="sht">Scorecard</h2>' + html; const d = $("#sc-ok", s); if (d) d.onclick = closeSheet; } };
+  const fill = html => { if (SHEET_N === n && !s.hidden) { s.innerHTML = '<div class="grab" aria-hidden="true"></div><h2 id="sht">Scorecard <span class="tg tf">NOT A BET</span></h2>' + html; const d = $("#sc-ok", s); if (d) d.onclick = closeSheet; } };
   const pc = x => (x * 100).toFixed(1) + "%";
   fetch("nba_research_score.json?t=" + Date.now(), {cache: "no-store"}).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }).then(j => {
-    if (!j.props) { fill('<div class="note" style="font-size:14px">No finished games with prices yet.</div><div class="acts"><button class="btn pri" id="sc-ok">Done</button></div>'); return; }
+    if (!j.props) { fill('<div class="empty"><b>No graded games yet</b></div><div class="acts"><button class="btn pri" id="sc-ok">Done</button></div>'); return; }
     const b = j.brier || {};
-    const rows = j.signals.map(x => `<div class="scr"><div><b>${esc(x.signal)}</b><span>${esc(x.rule)}</span></div><div class="num">${x.n ? `${x.n}<span>picks</span>` : "–"}</div><div class="num">${x.n ? `${pc(x.rate)}<span>vs ${pc(x.implied)}</span>` : "–"}</div><div class="num ${x.roi > 0 ? "up" : x.roi < 0 ? "mu" : ""}">${x.n ? (x.roi > 0 ? "+" : "") + pc(x.roi) : "–"}</div><div><i class="vd ${x.verdict === "helps" ? "g" : x.verdict === "hurts" ? "r" : ""}">${esc(x.verdict)}</i></div></div>`).join("");
-    fill(`<div class="note" style="font-size:14px;color:var(--l2)">${j.props.toLocaleString()} props over ${j.nights} night${j.nights === 1 ? "" : "s"} (${esc(j.from)} to ${esc(j.to)}), each as this page would have shown it before tip, graded on the result.</div>
+    const rows = j.signals.map(x => `<div class="scr"><div><b>${esc(x.signal)}</b></div><div class="num">${x.n ? `${x.n}<span>picks</span>` : "–"}</div><div class="num">${x.n ? `${pc(x.rate)}<span>vs ${pc(x.implied)}</span>` : "–"}</div><div class="num ${x.roi > 0 ? "up" : x.roi < 0 ? "mu" : ""}">${x.n ? (x.roi > 0 ? "+" : "") + pc(x.roi) : "–"}</div><div><i class="vd ${x.verdict === "helps" ? "g" : x.verdict === "hurts" ? "r" : ""}">${esc(x.verdict)}</i></div></div>`).join("");
+    fill(`<div class="sst"><div><b class="num">${j.props.toLocaleString()}</b><i>props</i></div><div><b class="num">${j.nights}</b><i>nights</i></div><div><b class="num">${esc(j.from.slice(5).replace("-", "/"))}–${esc(j.to.slice(5).replace("-", "/"))}</b><i>graded</i></div></div>
       <div class="scr hd"><div>Signal</div><div>Picks</div><div>Won vs price</div><div>Return</div><div></div></div>${rows}
-      <div class="note">Accuracy as a probability (lower is better): the price ${b["price (no-vig)"]}, the L10 hit rate ${b["L10 hit rate"]}, a coin flip ${b["coin flip"]}. A hit rate is not a probability; the price already knows most of it.</div>
-      <div class="note">Won vs price: how often the pick won, against how often the price said it would. Return: per $1 at the best closing price. "Helps" = beat the price by 2+ standard errors over 100+ picks; props from the same game move together, so that is a loose bar. Updated nightly.</div>
+      <div class="sg"><span>Accuracy · lower is better</span></div><div class="kv"><span>Price</span><b class="num">${b["price (no-vig)"]}</b></div><div class="kv"><span>L10 hit rate</span><b class="num">${b["L10 hit rate"]}</b></div><div class="kv"><span>Coin flip</span><b class="num">${b["coin flip"]}</b></div>
       <div class="acts"><button class="btn pri" id="sc-ok">Done</button></div>`);
   }).catch(e => fill(`<div class="note" style="font-size:14px">Couldn't load the scorecard (${esc(e.message || e)}).</div><div class="acts"><button class="btn pri" id="sc-ok">Done</button></div>`));
 }
@@ -1082,12 +1089,12 @@ function leagueSheet() {
   openSheet(`<h2 id="sht">Pickz</h2><div class="kv"><span>League</span><b>NBA ✓</b></div>
     <div class="kv"><span>Props updated</span><b id="upd">${ago(D.generated_at)}</b></div>
     <div class="kv"><span>FanDuel prices</span><b>${bk("fd")}</b></div><div class="kv"><span>DraftKings prices</span><b>${bk("dk")}</b></div>
-    <button class="opt" id="lg-sc">Scorecard: what has predicted anything<span class="ck">›</span></button>
+    <button class="opt" id="lg-sc">Scorecard<span class="ck">›</span></button>
     ${(() => { const M = D.proj_meta || {}, c = M.coverage || {};
       return `<div class="kv"><span>Projection model</span><b>${M.error ? esc(M.error) : `${esc(M.version || "")} · ${c.projected || 0}/${c.props || 0} props${M.stale ? ' · <span class="tg tq">STALE</span>' : ""}${M.refresh_pending ? " · updating" : ""}`}</b></div>
         <div class="kv"><span>Box scores through</span><b>${esc(M.logs_through || "—")}</b></div>
+        <div class="kv"><span>Picks or bets</span><b><span class="tg tf" style="margin:0">NONE · RESEARCH ONLY</span></b></div>
         <button class="opt" id="lg-pj">Model scorecard: held-out test and forward record<span class="ck">›</span></button>`; })()}
-    <div class="note">Research only — history, matchups and prices. Nothing here is a pick or a bet.</div>
     <div class="acts"><a class="btn" href="index.html" style="display:flex;align-items:center;justify-content:center;text-decoration:none">Back to Pickz</a><button class="btn pri" id="lg-ok">Done</button></div>`, s => { $("#lg-ok", s).onclick = closeSheet; $("#lg-sc", s).onclick = scoreSheet; $("#lg-pj", s).onclick = projScoreSheet; });
 }
 function dvpSheet(grp, mkt) {
@@ -1101,8 +1108,7 @@ function dvpSheet(grp, mkt) {
   const html = `<h2 id="sht">Defense vs Position</h2>
     <div class="seg" role="group" aria-label="Position">${[["G", "Guards"], ["F", "Forwards"], ["C", "Centers"]].map(([k, l]) => `<button data-dg="${k}" aria-pressed="${k === grp}">${l}</button>`).join("")}</div>
     <div class="chips">${mks.map(m => `<button class="chip" data-dm="${m}" aria-pressed="${m === mkt}">${TAB[m]}</button>`).join("")}</div>
-    <div class="note" style="margin:10px 0 4px">What each defense allows ${GRPN[grp]} in ${esc((NAME[mkt] || "").toLowerCase())} per possession this season, before tonight. 30th = allows the most (best for overs); 1st = the toughest.</div>
-    ${rows || '<div class="empty">No games yet this season.</div>'}<div class="acts"><button class="btn pri" id="dv-ok">Done</button></div>`;
+    ${rows || '<div class="empty"><b>No games</b></div>'}<div class="acts"><button class="btn pri" id="dv-ok">Done</button></div>`;
   const bind = s => {
     $$("[data-dg]", s).forEach(b => b.onclick = () => redraw(b.dataset.dg, mkt));
     $$("[data-dm]", s).forEach(b => b.onclick = () => redraw(grp, b.dataset.dm));
@@ -1277,14 +1283,14 @@ function ladder(p, win, side, cur, winLab) {
     return `<button class="lr${L === cur ? " on" : ""}" data-ll="${L}" aria-pressed="${L === cur}"><span>${L}</span><span class="${h.c}">${h.t}</span><span class="fv">${fs === null ? "—" : american(1 / fs)}</span><span class="mo">${mo}</span>${px("fd")}${px("dk")}</button>`;
   }).join("");
   return `<div class="ldr"><div class="lh2"><span>LINE</span><span>HIT ${esc(winLab)}</span><span>FAIR</span><span>MODEL</span><span>FD</span><span>DK</span></div>${rows}</div>
-    <div class="note">MODEL = the projection's own chance of the ${side} at each rung (model alone, which runs overconfident against book lines; the Model Projection card shows it blended with the price at the selected line). Fair only where a book prices both sides. On one-sided rungs (alt ladders) the HIT color compares with the price's own implied chance, margin included.</div>`;
+`;
 }
 // the projection engine's card: a model estimate, kept apart from the book prices and never a pick
 const STATN = {pts: "Points", reb: "Rebounds", ast: "Assists", fg3m: "3-pointers"};
 function projCard(p, line, side) {
   const M = D.proj_meta || {}, pr = p.proj, unit_ = esc(short(p.market));
-  const head = `<h3>Model Projection <span class="tg tf" style="margin-left:6px">MODEL ESTIMATE · NOT A BET</span></h3>`;
-  if (M.error || !pr) return head + `<div class="box0 pj"><div class="note" style="margin:0">${esc(M.error || "Not projected yet. The projection job runs every 30 minutes and adds new board players.")}</div></div>`;
+  const head = `<h3>Model Projection <span class="tg tf" style="margin-left:6px">MODEL ESTIMATE · NOT A BET</span>${M.stale ? ' <span class="tg tq">STALE</span>' : ""}</h3>`;
+  if (M.error || !pr) return head + `<div class="box0 pj"><div class="note" style="margin:0">${esc(M.error ? "Unavailable" : "Not projected yet")}</div></div>`;
   const at = projAt(p, line, side), sd = side === "under" ? "Under" : "Over";
   // the pmf as bars, the selected line marked
   const vals = pr.pmf[1], start = pr.pmf[0], mx = Math.max(...vals), W = Math.min(window.innerWidth, 520) - 56, H = 54;
@@ -1302,56 +1308,51 @@ function projCard(p, line, side) {
     Minutes: ${(+I.min).toFixed(1)} recent, pulled toward his 60-game level${xf(ha, I.min_f.home)}${xf("back-to-back", I.min_f.b2b)} → μ ${(+I.mu.min).toFixed(1)}<br>
     ${(MARKET_PARTS[p.market] || []).filter(k => I[k]).map(k => `${esc(STATN[k] || k)}: ${(+I.min).toFixed(1)} min × ${(+I[k][0]).toFixed(3)} per min (his rate, pooled with ${GRPN_[I.group] || "his position"})${xf("opponent", I[k][1])}${xf("pace", I[k][2])}${xf(ha, I[k][3])}${xf("back-to-back", I[k][4])} → μ ${(+I.mu[k]).toFixed(1)}`).join("<br>")}</div>`;
   const inj = (D.injuries[gameOf(p.gid).date + "|" + p.pid] || {}).official, av = inj && M.availability && M.availability[inj.status];
-  const avail = inj ? `<div class="kv"><span>Plays tonight?</span><b>${esc(inj.status)}${av && av[1] ? ` · ${Math.round((av[0] + 1) / (av[1] + 2) * 100)}% <small>(${av[0]}/${av[1]} listed so since 10/22)</small>` : ""}</b></div>` : "";
+  const avail = inj ? `<div class="kv"><span>Plays tonight?</span><b>${esc(inj.status)}${av && av[1] ? ` · ${Math.round((av[0] + 1) / (av[1] + 2) * 100)}% <small>(${av[0]}/${av[1]})</small>` : ""}</b></div>` : "";
   return head + `<div class="box0 pj">
     <div class="pjt"><div><b class="num">${(+pr.mean).toFixed(1)}</b> <i>${unit_} · mean</i></div><div class="pjr num">median ${pr.q50} · 80% range ${pr.q10}–${pr.q90}</div></div>
     ${svg}
     <div class="kv"><span>${sd} ${line} · model + market</span><b>${at.blend === null ? "— <small>no two-sided price here</small>" : pct(at.blend)}</b></div>
     <div class="kv mo1"><span>${sd} ${line} · model alone</span><b>${pct(at.model)}${at.push > .001 ? ` <small>· push ${pct(at.push)}</small>` : ""}</b></div>
-    <div class="note" style="margin:4px 0 0">In held-out testing (2024-25), FanDuel's closing price was more accurate at its own lines than this model, and blending added nothing. The model alone runs overconfident against book lines. Use the projection for the stat's likely range, not as a price.</div>
-    ${avail}${other ? `<div class="pjo">Other stats (no book line collected)</div>${other}` : ""}
-    <details class="pji"><summary>How this is made${M.stale ? ' · <span class="tg tq">STALE</span>' : ""}</summary>
-      <div class="note">${esc(M.target || "")}. Uses: ${esc((M.inputs_used || []).join("; "))}. Not used: ${esc((M.inputs_missing || []).join("; "))}.
-      ${pr.n_hist < 10 ? `Only ${pr.n_hist} past games: wide range. ` : ""}Cutoff: ${esc(M.cutoff || "")}. Box scores through ${esc(M.logs_through || "?")}${M.stale ? " (" + esc(M.stale_reason || "stale") + ")" : ""}${M.refresh_pending ? " (newer box scores are in; the projection job will pick them up within 30 min)" : ""}.
-      Model ${esc(M.version || "")} (${esc(M.config || "")}), tuned on ${esc(M.tuned_on || "?")}; as of ${esc(mt(M.generated_at, true))}.
-      Its stat projections beat the baselines on two held-out seasons (CRPS, all 8 stats).</div>${brk}</details>
+    <div class="kv"><span>Held-out 2024-25 vs FanDuel close</span><b class="dn">Lost</b></div>
+    <div class="kv"><span>Blend with the price</span><b>Added nothing</b></div>
+    ${avail}${other ? `<div class="pjo">Other stats</div>${other}` : ""}
     <button class="lk" id="pjsc" style="padding:12px 16px 6px 0;font-size:13px">Model scorecard ›</button></div>`;
 }
 // the projection engine's record: the pre-registered held-out test (proj_meta.backtest) and the forward record
 function projScoreSheet() {
-  openSheet('<h2 id="sht">Model scorecard</h2><div class="note" style="font-size:14px">Loading…</div>', () => {});
+  openSheet('<h2 id="sht">Model scorecard <span class="tg tf">NOT A BET</span></h2><div class="note" style="font-size:14px">Loading…</div>', () => {});
   const s = $("#sheet"), n = SHEET_N, M = D.proj_meta || {}, B = M.backtest || {};
   const pc = x => x == null ? "–" : (x * 100).toFixed(1) + "%", f4 = x => x == null ? "–" : x.toFixed(4);
   const ci = c => c ? `${c[0] > 0 ? "+" : ""}${c[0].toFixed(4)} <small>(${c[1].toFixed(4)} to ${c[2].toFixed(4)})</small>` : "–";
   const per = Object.entries(B.periods || {}).map(([season, p]) => {
     const m = p.market;
-    const lab = season === M.tuned_on ? "tuning season: the config and blend weight were chosen here, so these are not held out" : p.label;
-    return (lab ? `<div class="note" style="margin:6px 0 0">${esc(lab)}</div>` : "") +
-      `<div class="kv"><span>${esc(season)} · ${p.n ? p.n.toLocaleString() : 0} player-games</span><b>CRPS vs recent form ${ci(p.crps_vs_b2)}</b></div>` +
+    return `<div class="kv"><span>${esc(season)}${season === M.tuned_on ? ' <span class="tg tq">TUNING · IN-SAMPLE</span>' : ""} · ${p.n ? p.n.toLocaleString() : 0} player-games</span><b>CRPS vs recent form ${ci(p.crps_vs_b2)}</b></div>` +
+      (p.label ? `<div class="kv"><span>${esc(p.label)}</span></div>` : "") +
       (m ? `<div class="kv"><span>${esc(season)} · ${m.n.toLocaleString()} FanDuel lines</span><b>log loss: model ${f4(m.model_ll)} · blend ${f4(m.blend_ll)} · close ${f4(m.close_ll)}</b></div>
             <div class="kv"><span>blend − close</span><b>${ci(m.blend_minus_close)}</b></div>` : "");
   }).join("");
-  const fill = html => { if (SHEET_N === n && !s.hidden) { s.innerHTML = '<div class="grab" aria-hidden="true"></div><h2 id="sht">Model scorecard</h2>' + html; const d = $("#ps-ok", s); if (d) d.onclick = closeSheet; } };
+  const vds = (B.verdicts || []).map(v => { const m = /^(.*):\s*(YES|NO)\b\s*(.*?)\.?$/.exec(v);
+    return m ? `<div class="kv"><span>${esc(m[1])}${m[3] ? ` <small>${esc(m[3])}</small>` : ""}</span><b class="${m[2] === "YES" ? "up" : "dn"}">${m[2]}</b></div>` : `<div class="kv"><span>${esc(v)}</span></div>`; }).join("");
+  const fill = html => { if (SHEET_N === n && !s.hidden) { s.innerHTML = '<div class="grab" aria-hidden="true"></div><h2 id="sht">Model scorecard <span class="tg tf">NOT A BET</span></h2>' + html; const d = $("#ps-ok", s); if (d) d.onclick = closeSheet; } };
   fetch("nba_proj_score.json?t=" + Date.now(), {cache: "no-store"}).then(r => r.ok ? r.json() : null).catch(() => null).then(j => {
     const fwd = j && j.graded ? `<div class="kv"><span>graded since ${esc(j.from || "")}</span><b>${j.graded} props</b></div>
       <div class="kv"><span>log loss</span><b>model ${f4(j.model_logloss)} · blend ${f4(j.blend_logloss)}${j.close_logloss != null ? " · close " + f4(j.close_logloss) : ""}</b></div>
       ${j.blend_minus_close ? `<div class="kv"><span>blend − close</span><b>${ci(j.blend_minus_close)}</b></div>` : ""}
-      ${j.clv ? `<div class="kv"><span>CLV (close moved toward the model)</span><b>${pc(j.clv.mean)} · ${pc(j.clv.share_positive)} of ${j.clv.n}</b></div>` : ""}
+      ${j.clv ? `<div class="kv"><span>CLV · close moved toward model</span><b>${pc(j.clv.mean)} · ${pc(j.clv.share_positive)} of ${j.clv.n}</b></div>` : ""}
       ${[["reliability_model", "model"], ["reliability_blend", "blend"], ["reliability_close", "close"]].filter(([k]) => j[k]).map(([k, lab]) =>
-        `<div class="note" style="margin:4px 0 0">Calibration, ${lab} (n: forecast → happened): ${j[k].filter(b => b[0]).map(b => `${b[0]}: ${pc(b[1])} → ${pc(b[2])}`).join(" · ")}</div>`).join("")}`
-      : '<div class="note" style="margin:0">No graded forecasts yet: the forward record starts with this version.</div>';
-    fill(`<div class="note" style="font-size:14px;color:var(--l2)">Every number is walk-forward: each prediction uses only games before that date. The config was tuned on ${esc(M.tuned_on || "2023-24")}; the later seasons were held out and run once (NBA_PROJECTION_PREREG.md). Lower log loss / CRPS is better; a difference whose range stays below 0 is a real improvement.</div>
-      <div class="sg"><span>Backtest</span></div>${per || '<div class="note">No results yet.</div>'}
-      <div class="sg"><span>Forward record (live forecasts, logged before tip)</span></div>${fwd}
-      <div class="note">${esc((B.verdicts || []).join(" "))}</div>
-      <div class="note">CLV says where the closing price went, not whether a bet would have won. Nothing here is a pick.</div>
+        `<div class="kv"><span>Calibration · ${lab}</span><b class="cal">${j[k].filter(b => b[0]).map(b => `${pc(b[1])}→${pc(b[2])}`).join(" · ")}</b></div>`).join("")}`
+      : '<div class="empty"><b>No graded forecasts yet</b></div>';
+    fill(`<div class="sg"><span>Backtest</span></div>${per || '<div class="empty"><b>No results yet</b></div>'}
+      ${vds ? `<div class="sg"><span>Pre-registered verdicts</span></div>${vds}` : ""}
+      <div class="sg"><span>Forward record</span></div>${fwd}
       <div class="acts"><button class="btn pri" id="ps-ok">Done</button></div>`);
   });
 }
 // each book's main line over time (a step per change), its open and its price now
 function histChart(p) {
   const H = p.hist || {}, books = [["fd", "FanDuel", "#2d9bff"], ["dk", "DraftKings", "#62d26f"]].filter(([b]) => (H[b] || []).length);
-  if (!books.length) return '<div class="note" style="margin:0">No price history yet.</div>';
+  if (!books.length) return '<div class="empty" style="padding:16px 0"><b>No history yet</b></div>';
   const ms = t => iso(t).getTime(), end = Math.max(Date.now() - 60000, ...books.map(([b]) => ms(H[b][H[b].length - 1][0])));
   const t0 = Math.min(...books.map(([b]) => ms(H[b][0][0])));
   const vals = books.flatMap(([b]) => H[b].map(x => x[1]));
@@ -1372,9 +1373,9 @@ function histChart(p) {
   o.push(`<text x="${AX}" y="${Hh - 1}">${esc(mt(new Date(t0).toISOString(), true))}</text><text x="${W}" y="${Hh - 1}" text-anchor="end">now</text></svg>`);
   const sum = books.map(([b, name, col]) => {
     const h = H[b], a = h[0], z = h[h.length - 1], lines = h.filter((pt, i) => !i || pt[1] !== h[i - 1][1]).length - 1;
-    return `<div class="hl"><i style="background:${col}"></i><b>${name}</b> opened ${a[1]} (${american(a[2])}) → ${z[1]} (${american(z[2])}) now · ${lines ? lines + " line move" + (lines > 1 ? "s" : "") : "line unchanged"}, ${h.length - 1 - lines} price change${h.length - 1 - lines === 1 ? "" : "s"}</div>`;
+    return `<div class="hl"><i style="background:${col}"></i><b>${name}</b><span class="num">${a[1]} ${american(a[2])} → ${z[1]} ${american(z[2])}</span></div>`;
   }).join("");
-  return o.join("") + sum + '<div class="note">In replays of past games, following a move has not beaten the closing price. It is here so you know the price you are getting (see the Scorecard).</div>';
+  return o.join("") + sum;
 }
 // a bar's <title> only shows on hover, so a tap pins its game above the bar (tap it again, or the chart, to clear)
 function barTip(cw, gb) {
@@ -1396,7 +1397,7 @@ function barTip(cw, gb) {
 let PX = null;
 function renderProp(mode) {
   const p = D.props.find(x => x.id === CUR), pg = $("#pg");
-  if (!p) { PX = null; pg.innerHTML = `<div class="ph"><button class="cb bk" aria-label="Back">${ICON.back}</button></div><div class="empty"><b>No longer posted</b>The books have taken this prop down.</div>`; $("#pg .bk").onclick = () => history.back(); return; }
+  if (!p) { PX = null; pg.innerHTML = `<div class="ph"><button class="cb bk" aria-label="Back">${ICON.back}</button></div><div class="empty"><b>No longer posted</b></div>`; $("#pg .bk").onclick = () => history.back(); return; }
   const g = gameOf(p.gid), logs = logsOf(p), c = p.ctx || {};
   const team = TEAMS[p.team] || [p.team || "", "#333"];
   const without = (D.absences[g.date + "|" + p.team] || []).map(a => ({key: String(a.pid), name: a.name || "teammate", played: a.played, since: a.since, team: p.team, status: a.status, fresh: a.fresh}));
@@ -1432,8 +1433,8 @@ function renderProp(mode) {
     <div id="pstat"></div>
     <div class="sec2" id="plog"></div>
     <div class="end"></div>`;
-  const stat = `<div class="sec2"><h3>Availability</h3><div class="box0">${arows.join("")}<div class="note">Official = the NBA injury report. News is third-party.</div></div></div>
-    ${rel ? `<div class="sec2"><h3>Related Props</h3><div class="rel" style="margin:0;padding:0">${rel}</div><div class="note">How closely the two stats moved together in past games (r from −1 to +1). History, not a prediction.</div></div>` : ""}
+  const stat = `<div class="sec2"><h3>Availability</h3><div class="box0">${arows.join("")}</div></div>
+    ${rel ? `<div class="sec2"><h3>Related Props</h3><div class="rel" style="margin:0;padding:0">${rel}</div></div>` : ""}
     ${p.flag ? `<div class="sec2"><h3>Engine</h3><div class="box0"><span class="tg tf" style="margin:0 6px 0 0">SHADOW · NOT A BET</span>${esc(p.flag.tier)} at ${p.flag.line} · ${p.flag.card === 1 ? "on the card" : "logged only" + (p.flag.why ? " (" + esc(p.flag.why.toLowerCase()) + ")" : "")}</div></div>` : ""}`;
   clearTimeout(PX && PX.lazy);
   PX = {p: p, g: g, logs: logs, c: c, without: without, wins: wins, stat: stat, statDone: false};
@@ -1505,22 +1506,22 @@ function updateProp(mode) {
   const chip = (attrs, lab, active) => `<button class="fc${active ? " on" : ""}" ${attrs} aria-pressed="${!!active}">${lab}</button>`;
   const rangeOn = k => !!DT.ranges[k];
   const chips = [];
+  const rchip = k => { if (!forMarket(k, p.market)) return; const b = bounds(logs, k), abbr = RANGES.find(r => r[0] === k)[2]; if (b && b[0] !== b[1]) chips.push(chip(`data-r="${k}"`, `${OVL[k] ? ICON.bars : ICON.pm}${abbr}`, rangeOn(k) || DT.open[k])); };
+  const tchip = (k, v, lab) => chips.push(chip(`data-k="${k}" data-v="${v}"`, lab, on(k, v)));
+  ["min", "fga", "fg3a", "fta", "usg", "pot_ast", "reb_ch"].forEach(rchip);   // the adjustable filters first
   if (c.dvp_rank) chips.push(chip('data-t="dvp"', `DvP <em class="${rankCls(c.dvp_rank, c.teams, side)}">${ord(c.dvp_rank)}</em>`, DT.dvp));
   if (c.def_rank) chips.push(chip('data-t="def"', `Def Rank <em class="${rankCls(c.def_rank, c.teams, side)}">${ord(c.def_rank)}</em>`, DT.def));
-  const rchip = k => { const b = bounds(logs, k), abbr = RANGES.find(r => r[0] === k)[2]; if (b && b[0] !== b[1]) chips.push(chip(`data-r="${k}"`, `${OVL[k] ? ICON.bars : ICON.pm}${abbr}`, rangeOn(k) || DT.open[k])); };
-  const tchip = (k, v, lab) => chips.push(chip(`data-k="${k}" data-v="${v}"`, lab, on(k, v)));
-  rchip("min");
   const wchip = w => chips.push(chip(`data-wo="${w.key}"`, (w.fresh ? "W/O " : "Without ") + esc(lastName(w.name)), DT.without[w.key]));
   without.filter(w => w.fresh).forEach(wchip);                 // tonight's news: up front
   const extra = DT.home !== null || DT.result !== null || DT.rest !== null || MORE_R.some(k => rangeOn(k) || DT.open[k]) || without.some(w => !w.fresh && DT.without[w.key]);
   const more = DT.more || extra;
   if (more) {
-    rchip("fga"); tchip("home", true, "Home"); tchip("home", false, "Away"); rchip("fg3a"); rchip("fta"); rchip("usg"); rchip("margin");
+    tchip("home", true, "Home"); tchip("home", false, "Away"); rchip("margin");
     tchip("result", "W", "Win"); tchip("result", "L", "Loss"); tchip("rest", "b2b", "B2B");
     without.filter(w => !w.fresh).forEach(wchip);
   }
   chips.push(`<button class="fc" id="more" aria-expanded="${more}">${more ? "Less" : "More"}</button>`);
-  const panels = RANGES.filter(([k]) => DT.open[k] || rangeOn(k)).map(([k, lab]) => {
+  const panels = RANGES.filter(([k]) => (DT.open[k] || rangeOn(k)) && forMarket(k, p.market)).map(([k, lab]) => {
     const b = bounds(logs, k); if (!b || b[0] === b[1]) return "";
     const cur = DT.ranges[k] || b;
     return `<div class="rp${DT.fresh === k ? " in" : ""}" data-rk="${k}" data-lo="${b[0]}" data-hi="${b[1]}"><div class="rp-h"><span>${RANGES.find(r => r[0] === k)[2]}</span><b class="rv"${DT.ranges[k] ? "" : " hidden"}>${cur[0]} – ${cur[1]}</b></div>
@@ -1547,7 +1548,6 @@ function updateProp(mode) {
   const fr = fair.p === null ? "" : `<div class="bkr2 fr"><span>Fair${fair.n === 1 ? " <small>1 book</small>" : ""}</span><span class="bl">${line}</span><span>${american(1 / fair.p)}</span><span>${american(1 / (1 - fair.p))}</span></div>`;
   $("#pproj").innerHTML = projCard(p, line, side);
   $("#pbk").innerHTML = `<div class="bkh"><span>BOOKS</span><button class="lnp" id="lnp" aria-haspopup="dialog" aria-label="Line ${line}">LINE${ICON.down}</button><span>OVER</span><span>UNDER</span></div>${bk}${fr}
-    <div class="note" style="margin:8px 15.3px 0">Fair = the books' prices with their margin removed${fair.n === 2 ? " (both books)" : ""}. Green = a price better than fair.</div>
     <div class="sec2"><h3>Alt Lines · ${side === "under" ? "Under" : "Over"}</h3>${ladder(p, win, side, line, (wins.find(w => w[0] === DT.win) || ["", "L10"])[1])}</div>
     <div class="sec2"><h3>Line Movement</h3>${histChart(p)}</div>`;
   // game log
@@ -1584,9 +1584,9 @@ function bindLive(p, logs, without) {
   $("#more", pg).onclick = () => { DT.more = $("#more", pg).getAttribute("aria-expanded") !== "true"; if (!DT.more) { MORE_R.forEach(k => { DT.open[k] = false; delete DT.ranges[k]; }); DT.ovs = DT.ovs.filter(k => MORE_R.indexOf(k) < 0); Object.assign(DT, {home: null, result: null, rest: null, without: {}}); } updateProp(); keep("#more"); };
   $("#lnb", pg).onclick = () => lineSheet(p);
   const lnp = $("#lnp", pg); if (lnp) lnp.onclick = () => lineSheet(p);
-  $("#psb", pg).onclick = () => openSheet(`<h2 id="sht">Position rank</h2><div class="note" style="font-size:15px;color:var(--l2)">${c.pos_rank
-    ? `${esc(p.player)} is <b style="color:#fff">${ord(c.pos_rank)}</b> of ${c.pos_n} ${GRPN[MU_GROUP(c.pos)] || "players at his position"} in ${esc(NAME[p.market].toLowerCase())} per game (${esc(c.pos_season || "")}, 3+ games).`
-    : "Not enough games to rank him yet."}</div><div class="acts"><button class="btn pri" id="ok1">Done</button></div>`, s2 => { $("#ok1", s2).onclick = closeSheet; });
+  $("#psb", pg).onclick = () => openSheet(`<h2 id="sht">Position rank</h2>${c.pos_rank
+    ? `<div class="kv"><span>Rank</span><b>${ord(c.pos_rank)} of ${c.pos_n}</b></div><div class="kv"><span>Group</span><b>${esc((GRPN[MU_GROUP(c.pos)] || "position").replace(/^./, x => x.toUpperCase()))}</b></div><div class="kv"><span>Stat</span><b>${esc(NAME[p.market])} per game</b></div><div class="kv"><span>Season</span><b>${esc(c.pos_season || "")}</b></div>`
+    : '<div class="empty"><b>Not ranked yet</b></div>'}<div class="acts"><button class="btn pri" id="ok1">Done</button></div>`, s2 => { $("#ok1", s2).onclick = closeSheet; });
   $("#mub", pg).onclick = () => matchupSheet(p, ST.side);
   const pjsc = $("#pjsc", pg); if (pjsc) pjsc.onclick = projScoreSheet;
   $$(".rp", pg).forEach(gp => {
@@ -1648,7 +1648,7 @@ function lineSheet(p) {
     return `<button class="opt" data-l="${l}"><span>${l}${l === p.main ? ' <span class="tg tn">MAIN</span>' : ""}</span><span class="num" style="color:var(--l2);font-size:14px">FD ${pr(f, 1)}/${pr(f, 2)} · DK ${pr(k, 1)}/${pr(k, 2)}</span></button>`;
   }).join("");
   openSheet(`<h2 id="sht">Line</h2><div class="lc" style="margin-bottom:8px"><div class="big num" id="ls-v">${DT.line}</div><div class="stp"><button id="ls-m" aria-label="Lower the line by half a point">−</button><button id="ls-p" aria-label="Raise the line by half a point">+</button></div></div>
-    <div class="note" style="margin-bottom:6px">Posted lines (over / under prices):</div>${rows}
+    ${rows}
     <div class="acts"><button class="btn pri" id="ls-ok">Done</button></div>`, s => {
     const set = v => { DT.line = Math.max(0.5, Math.round(v * 2) / 2); $("#ls-v", s).textContent = DT.line; };
     $("#ls-m", s).onclick = () => set(DT.line - .5); $("#ls-p", s).onclick = () => set(DT.line + .5);
@@ -1658,12 +1658,12 @@ function lineSheet(p) {
 }
 function matchupSheet(p, side) {
   const c = p.ctx || {}, g = gameOf(p.gid), gr = grade(p, side), rows = [];
-  const row = (lab, r, n, note) => `<div class="kv"><span>${lab}</span><b>${r ? `<span class="rk ${rankCls(r, n, side) === "good" ? "g" : rankCls(r, n, side) === "bad" ? "r" : "n"}">${ord(r)}</span>` : "—"}</b></div>${note ? `<div class="note" style="margin:-4px 0 6px">${note}</div>` : ""}`;
+  const row = (lab, r, n, note) => `<div class="kv"><span>${lab}</span><b>${r ? `<span class="rk ${rankCls(r, n, side) === "good" ? "g" : rankCls(r, n, side) === "bad" ? "r" : "n"}">${ord(r)}</span>` : "—"}</b></div>`;
   rows.push(row(`DvP · ${esc(short(p.market))} to ${GRPN[c.group] || "his position"}`, c.dvp_rank, c.teams, c.dvp_rank ? `${esc(p.opp)} allows the ${ord(c.teams - c.dvp_rank + 1)}-most ${esc(short(p.market))} to ${GRPN[c.group]} per possession.` : (p.market === "threes" ? "Not computed for threes." : "")));
   rows.push(row("Def Rank · points allowed", c.def_rank, c.teams, ""));
   rows.push(`<div class="kv"><span>Pace</span><b>${c.pace_rank ? ord(c.pace_rank) + " fastest" : "—"}</b></div>`);
   if (g.lines) rows.push(`<div class="kv"><span>Game</span><b>${g.lines.total ? "Total " + g.lines.total : ""}${g.lines.spread_home !== undefined ? " · " + esc(g.home) + " " + (g.lines.spread_home > 0 ? "+" : "") + g.lines.spread_home : ""}</b></div>`);
-  openSheet(`<h2 id="sht">Matchup vs ${esc(p.opp || "")}</h2><div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">${gauge(gr)}<div class="note" style="margin:0;font-size:14px">Grade for the ${side}: A = one of the softest matchups, F = one of the toughest. From ${esc(p.opp || "")}'s rank among ${c.teams || 0} teams (1st = toughest defense): last season's, blended with this season's ${c.rank_n || 0} game${c.rank_n === 1 ? "" : "s"} — this season counts for more as games are played.</div></div>${rows.join("")}
+  openSheet(`<h2 id="sht">Matchup vs ${esc(p.opp || "")}</h2><div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">${gauge(gr)}</div>${rows.join("")}
     <div class="acts"><button class="btn pri" id="mu-ok">Done</button></div>`, s => { $("#mu-ok", s).onclick = closeSheet; });
 }
 // ── player filters ──
@@ -1688,7 +1688,7 @@ function playerFilters(p, logs, without) {
               without: Object.assign({}, DT.without)};
   const count = () => windowed(filterLogs(logs, {home: dr.home, starter: dr.starter, result: dr.result, rest: dr.rest,
     ranges: dr.ranges, without: without.filter(w => dr.without[w.key])}), DT.win, D.season, p.opp).length;
-  const rng = RANGES.map(([k, lab]) => {
+  const rng = RANGES.filter(([k]) => forMarket(k, p.market)).map(([k, lab]) => {
     const b = bounds(logs, k);
     if (!b || b[0] === b[1]) return "";
     const cur = dr.ranges[k] || b;
@@ -1700,7 +1700,6 @@ function playerFilters(p, logs, without) {
   const wo = without.length ? `<div class="sg"><span>Teammates out tonight</span>${without.map(w =>
     `<button class="opt" data-wk="${w.key}">Without ${esc(w.name)}<span class="ck">${dr.without[w.key] ? "✓" : ""}</span></button>`).join("")}</div>` : "";
   openSheet(`<h2 id="sht">Filter ${esc(p.player.split(" ").slice(-1)[0])}'s games</h2>${rng}${segs}${wo}
-    <div class="note">Every number on this page uses only the games that pass. L5 / L10 / L20 = the last games that pass.</div>
     <div class="acts"><button class="btn" id="pf-reset">Reset</button><button class="btn pri" id="pf-ok"></button></div>`, s => {
     const upd = () => { const n = count(); $("#pf-ok", s).textContent = `Show ${n} game${n === 1 ? "" : "s"}`; };
     $$(".rg", s).forEach(g => {
