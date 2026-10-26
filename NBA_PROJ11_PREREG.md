@@ -120,3 +120,19 @@ Expected, as recorded), and from the official injury report. Nothing seen after 
 - A family or arm not listed here is not added after seeing results. If one is, it gets a new version,
   a new pre-registration and its own prospective test.
 - All arms are reported, including the ones that fail.
+
+## Implementation notes (added 2026-10-26, still before any proj-1.1 feature has been built or scored)
+
+1. **No intercept in r̂.** Features are standardized on each training window, and r̂ is the fitted feature
+   effect only. A row at the training mean keeps proj-1.0's mean. Exponentiating a fitted mean
+   log-ratio *with* its intercept would bring back the log-retransformation bias (Jensen: E log < log E)
+   and pull every mean down.
+2. **Shrinkage for made/attempted ratios** (zone FG%, rim FG% allowed) uses 20 pseudo-attempts. Team
+   EWMAs (F5) use 3 pseudo-games toward the league mean.
+3. **Tracking rebounding** omits players with no rebound chances. Such a game counts as zero chances, as
+   in NBA_TRACKING_PREREG.md.
+4. **Starts.** "Starts this game" comes from the `starters` feed (leaguedashplayerstats, StarterBench =
+   Starters, one date per call) for every season. The daily lineups file exists from 2023-24 only, and
+   only in its final state (its timestamps are the last update, around the final buzzer), so it is not used
+   historically. Prospectively, lineups come from `nba_lineups_poll.py` snapshots.
+5. Columns a feed does not return are dropped and listed in the results. Nothing is substituted.
