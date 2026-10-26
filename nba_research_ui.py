@@ -375,6 +375,26 @@ font-variant-numeric:normal}
 .bkr2.fr .bl{padding-left:4.8px;color:#8e8e8e}
 svg.hc{display:block;margin-top:2px;font-family:system-ui,-apple-system,sans-serif;font-stretch:66%}
 svg.hc text{fill:#8e8e8e;font-size:11px}
+.ldr{font-family:system-ui,-apple-system,sans-serif;font-stretch:66%}
+.lh2,.lr{display:grid;grid-template-columns:52px 64px 62px 1fr 1fr;align-items:center;column-gap:6px}
+.lh2{height:30px;font-size:13px;color:#9a9a9a;border-bottom:1px solid #262626}
+.lr{width:100%;height:36px;padding:0;border:0;border-bottom:1px solid #1e1e1e;background:none;color:#fff;font:inherit;font-size:15px;
+text-align:left;font-variant-numeric:tabular-nums}
+.lr.on{background:#1b1b1b;box-shadow:inset 3px 0 0 #fff}
+.lr>span:first-child{padding-left:8px}
+.lr .fv{color:#8e8e8e}
+.lr .best{color:var(--grn)} .lr .na{color:#5f5f5f}
+.lr .up{color:var(--grn)} .lr .dn{color:var(--red)} .lr .sm{color:#8e8e8e}
+.lk{border:0;background:none;color:#9a9a9a;font:inherit;font-size:11.5px;padding:0}
+.scr{display:grid;grid-template-columns:1fr 44px 70px 50px 64px;align-items:center;column-gap:6px;padding:9px 0;
+border-bottom:.5px solid var(--sep);font-size:13px}
+.scr b{display:block;font-weight:600;font-size:13.5px}
+.scr div>span{display:block;color:var(--l3);font-size:10.5px;line-height:1.3}
+.scr.hd{padding:6px 0;font-size:11px;color:var(--l3)}
+.scr .num{text-align:right}
+.vd{display:inline-block;padding:2px 6px;border-radius:5px;background:var(--g3);color:var(--l2);font-style:normal;font-size:10.5px;
+font-weight:700;white-space:nowrap}
+.vd.g{background:rgba(48,209,88,.18);color:var(--grn)} .vd.r{background:rgba(255,69,58,.2);color:var(--red)}
 .hl{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12.5px;color:#bdbdbd;line-height:1.35}
 .hl i{flex:none;width:8px;height:8px;border-radius:50%}
 .hl b{color:#fff;font-weight:600}
@@ -701,6 +721,14 @@ function rates(p, side) {
 }
 // the probability the price gives `side` at `line` (the books' no-vig), or null when no book prices both sides
 function fairSide(p, line, side) { const f = line === null ? null : fairAt(p, line).p; return f === null ? null : side === "under" ? 1 - f : f; }
+// what hit rates are colored against: the fair probability, or on a one-sided rung (an alt ladder) the best price's
+// own implied chance, margin included — so 8-for-10 at -2500 (96%) reads as a miss, not a green 80%
+function chanceSide(p, line, side) {
+  const f = fairSide(p, line, side);
+  if (f !== null || line === null) return f;
+  const b = bestPrice(p, line, "all", side);
+  return b ? 1 / b.odds : null;
+}
 const hitsOf = x => x && x.n ? Math.round(x.rate * x.n) : 0;
 // every hit-rate box: under 5 games a plain count; otherwise the rate, colored only when it sits 1+ SD from what
 // the price implies (fs; a coin flip without a price) — a 3-for-3 or a -300 favorite going 7-for-10 stays white
@@ -751,8 +779,8 @@ function listProps() {
 }
 function row(p) {
   const g = gameOf(p.gid), r = rates(p), c = p.ctx || {}, side = ST.side;
-  const best = p.main === null ? null : bestPrice(p, p.main, ST.book, side), fs = fairSide(p, p.main, side);
-  const cell = (lab, k) => { const h = hbox(r[k], fs); return `<div><i>${lab}</i><b class="${h.c}">${h.t}</b></div>`; };
+  const best = p.main === null ? null : bestPrice(p, p.main, ST.book, side), fs = fairSide(p, p.main, side), cs = chanceSide(p, p.main, side);
+  const cell = (lab, k) => { const h = hbox(r[k], cs); return `<div><i>${lab}</i><b class="${h.c}">${h.t}</b></div>`; };
   const dv = c.dvp_rank ? `<b class="${{good: "up", bad: "dn", mid: "md"}[rankCls(c.dvp_rank, c.teams, side)]}">${ord(c.dvp_rank)}</b>` : "<b>–</b>";
   // VALUE: the price shown against the books' fair price for that side (positive only when one book beats the other)
   const ev = best && fs !== null ? best.odds * fs - 1 : null;
@@ -852,6 +880,13 @@ function renderList() {
   }
   // rows are built once per prop and side, then reused: re-sorting or switching tabs never re-decodes the headshots
   const frag = document.createDocumentFragment();
+  if (ALL_TABS.indexOf(ST.market) >= 0) {
+    const h = document.createElement("div");
+    h.className = "lhd";
+    h.innerHTML = `<span>${ST.market === "trends" ? `${ST.side === "under" ? "Unders" : "Overs"} whose L10 and L20 both beat the price` : "A teammate who just played is out tonight"}</span><button class="lk" id="scb">Scorecard ›</button>`;
+    $("#scb", h).onclick = scoreSheet;
+    frag.appendChild(h);
+  }
   list.forEach(p => {
     const k = p.id + "|" + ST.side + "|" + ST.book;
     let e = ROWS.get(k);
@@ -980,13 +1015,32 @@ function daySheet() {
     $$("[data-date]", s).forEach(b => b.onclick = () => { if (ST.date !== b.dataset.date) { ST.date = b.dataset.date; ST.gid = "all"; save(); render(); } closeSheet(); });
   });
 }
+// what the nightly replay (nba_research_score.py) found: each of the page's signals against what the price said
+function scoreSheet() {
+  openSheet('<h2 id="sht">Scorecard</h2><div class="note" style="font-size:14px">Loading…</div>', () => {});
+  const s = $("#sheet"), n = SHEET_N;
+  s.dataset.kind = "score";
+  const fill = html => { if (SHEET_N === n && !s.hidden) { s.innerHTML = '<div class="grab" aria-hidden="true"></div><h2 id="sht">Scorecard</h2>' + html; const d = $("#sc-ok", s); if (d) d.onclick = closeSheet; } };
+  const pc = x => (x * 100).toFixed(1) + "%";
+  fetch("nba_research_score.json?t=" + Date.now(), {cache: "no-store"}).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }).then(j => {
+    if (!j.props) { fill('<div class="note" style="font-size:14px">No finished games with prices yet.</div><div class="acts"><button class="btn pri" id="sc-ok">Done</button></div>'); return; }
+    const b = j.brier || {};
+    const rows = j.signals.map(x => `<div class="scr"><div><b>${esc(x.signal)}</b><span>${esc(x.rule)}</span></div><div class="num">${x.n ? `${x.n}<span>picks</span>` : "–"}</div><div class="num">${x.n ? `${pc(x.rate)}<span>vs ${pc(x.implied)}</span>` : "–"}</div><div class="num ${x.roi > 0 ? "up" : x.roi < 0 ? "mu" : ""}">${x.n ? (x.roi > 0 ? "+" : "") + pc(x.roi) : "–"}</div><div><i class="vd ${x.verdict === "helps" ? "g" : x.verdict === "hurts" ? "r" : ""}">${esc(x.verdict)}</i></div></div>`).join("");
+    fill(`<div class="note" style="font-size:14px;color:var(--l2)">${j.props.toLocaleString()} props over ${j.nights} night${j.nights === 1 ? "" : "s"} (${esc(j.from)} to ${esc(j.to)}), each as this page would have shown it before tip, graded on the result.</div>
+      <div class="scr hd"><div>Signal</div><div>Picks</div><div>Won vs price</div><div>Return</div><div></div></div>${rows}
+      <div class="note">Accuracy as a probability (lower is better): the price ${b["price (no-vig)"]}, the L10 hit rate ${b["L10 hit rate"]}, a coin flip ${b["coin flip"]}. A hit rate is not a probability; the price already knows most of it.</div>
+      <div class="note">Won vs price: how often the pick won, against how often the price said it would. Return: per $1 at the best closing price. "Helps" = beat the price by 2+ standard errors over 100+ picks; props from the same game move together, so that is a loose bar. Updated nightly.</div>
+      <div class="acts"><button class="btn pri" id="sc-ok">Done</button></div>`);
+  }).catch(e => fill(`<div class="note" style="font-size:14px">Couldn't load the scorecard (${esc(e.message || e)}).</div><div class="acts"><button class="btn pri" id="sc-ok">Done</button></div>`));
+}
 function leagueSheet() {
   const b = D.sources.books, bk = k => b[k] ? (b[k].stale ? `${Math.round(b[k].age_min)} min old` : "live") : "—";
   openSheet(`<h2 id="sht">Pickz</h2><div class="kv"><span>League</span><b>NBA ✓</b></div>
     <div class="kv"><span>Props updated</span><b id="upd">${ago(D.generated_at)}</b></div>
     <div class="kv"><span>FanDuel prices</span><b>${bk("fd")}</b></div><div class="kv"><span>DraftKings prices</span><b>${bk("dk")}</b></div>
+    <button class="opt" id="lg-sc">Scorecard: what has predicted anything<span class="ck">›</span></button>
     <div class="note">Research only — history, matchups and prices. Nothing here is a pick or a bet.</div>
-    <div class="acts"><a class="btn" href="index.html" style="display:flex;align-items:center;justify-content:center;text-decoration:none">Back to Pickz</a><button class="btn pri" id="lg-ok">Done</button></div>`, s => { $("#lg-ok", s).onclick = closeSheet; });
+    <div class="acts"><a class="btn" href="index.html" style="display:flex;align-items:center;justify-content:center;text-decoration:none">Back to Pickz</a><button class="btn pri" id="lg-ok">Done</button></div>`, s => { $("#lg-ok", s).onclick = closeSheet; $("#lg-sc", s).onclick = scoreSheet; });
 }
 function dvpSheet(grp, mkt) {
   const rk = (D.ranks || {})[ST.date] || {}, tbl = rk.dvp || {}, n = rk.teams || 0;
@@ -1163,6 +1217,19 @@ function chart2(logs, market, line, ov, grow) {
   o.push(`<text class="lx" x="0" y="${y(line) - 5.2}">${line}</text></svg>`);
   return o.join("");
 }
+// every rung either book posts: the hit rate there (this window and filters), the fair price, each book's price on
+// the side. Tap a rung to use it. Green = better than fair; the HIT colors follow the list's rule (hbox).
+function ladder(p, win, side, cur, winLab) {
+  const vals = win.map(l => statValue(l, p.market)), k = side === "under" ? 2 : 1;
+  const rows = allLines(p).map(L => {
+    const s = hitSummary(vals, L), hits = side === "under" ? s.under : s.over;
+    const fs = fairSide(p, L, side), h = hbox({n: s.n, rate: s.n ? hits / s.n : null}, chanceSide(p, L, side));
+    const px = b => { const r = rungAt(p.books[b], L); return r && r[k] ? `<span class="${fs !== null && r[k] * fs > 1 ? "best" : ""}">${american(r[k])}</span>` : '<span class="na">—</span>'; };
+    return `<button class="lr${L === cur ? " on" : ""}" data-ll="${L}" aria-pressed="${L === cur}"><span>${L}</span><span class="${h.c}">${h.t}</span><span class="fv">${fs === null ? "—" : american(1 / fs)}</span>${px("fd")}${px("dk")}</button>`;
+  }).join("");
+  return `<div class="ldr"><div class="lh2"><span>LINE</span><span>HIT ${esc(winLab)}</span><span>FAIR</span><span>FD</span><span>DK</span></div>${rows}</div>
+    <div class="note">Fair only where a book prices both sides. On one-sided rungs (alt ladders) the HIT color compares with the price's own implied chance, margin included.</div>`;
+}
 // each book's main line over time (a step per change), its open and its price now
 function histChart(p) {
   const H = p.hist || {}, books = [["fd", "FanDuel", "#2d9bff"], ["dk", "DraftKings", "#62d26f"]].filter(([b]) => (H[b] || []).length);
@@ -1189,7 +1256,7 @@ function histChart(p) {
     const h = H[b], a = h[0], z = h[h.length - 1], lines = h.filter((pt, i) => !i || pt[1] !== h[i - 1][1]).length - 1;
     return `<div class="hl"><i style="background:${col}"></i><b>${name}</b> opened ${a[1]} (${american(a[2])}) → ${z[1]} (${american(z[2])}) now · ${lines ? lines + " line move" + (lines > 1 ? "s" : "") : "line unchanged"}, ${h.length - 1 - lines} price change${h.length - 1 - lines === 1 ? "" : "s"}</div>`;
   }).join("");
-  return o.join("") + sum + '<div class="note">In replays of past games, following a move has not beaten the closing price. It is here so you know the price you are getting.</div>';
+  return o.join("") + sum + '<div class="note">In replays of past games, following a move has not beaten the closing price. It is here so you know the price you are getting (see the Scorecard).</div>';
 }
 // a bar's <title> only shows on hover, so a tap pins its game above the bar (tap it again, or the chart, to clear)
 function barTip(cw, gb) {
@@ -1285,7 +1352,7 @@ function updateProp(mode) {
   const rate = sideRate(s, side);
   const winLab = (wins.find(w => w[0] === DT.win) || ["", "L10"])[1];
   const tri = up => `<span class="tri ${up ? "up" : "dn"}">${up ? "▲" : "▼"}</span>`;
-  const fs = fairSide(p, line, side), hr = hbox({n: s.n, rate: rate}, fs);
+  const fs = chanceSide(p, line, side), hr = hbox({n: s.n, rate: rate}, fs);
   const gr = grade(p, side);
   const opp = `<span class="vs">${p.home ? "vs" : "@"}</span>${esc(p.opp || "")}\u200a·\u200a${g.state === "pregame" ? mt(g.tip).replace(" ", "") : esc(g.state === "live" ? "LIVE" : g.state === "final" ? "Final" : g.label || "")}`;
   const ovOn = k => !!(DT.open[k] || DT.ranges[k]);
@@ -1361,6 +1428,7 @@ function updateProp(mode) {
   const fr = fair.p === null ? "" : `<div class="bkr2 fr"><span>Fair${fair.n === 1 ? " <small>1 book</small>" : ""}</span><span class="bl">${line}</span><span>${american(1 / fair.p)}</span><span>${american(1 / (1 - fair.p))}</span></div>`;
   $("#pbk").innerHTML = `<div class="bkh"><span>BOOKS</span><button class="lnp" id="lnp" aria-haspopup="dialog" aria-label="Line ${line}">LINE${ICON.down}</button><span>OVER</span><span>UNDER</span></div>${bk}${fr}
     <div class="note" style="margin:8px 15.3px 0">Fair = the books' prices with their margin removed${fair.n === 2 ? " (both books)" : ""}. Green = a price better than fair.</div>
+    <div class="sec2"><h3>Alt Lines · ${side === "under" ? "Under" : "Over"}</h3>${ladder(p, win, side, line, (wins.find(w => w[0] === DT.win) || ["", "L10"])[1])}</div>
     <div class="sec2"><h3>Line Movement</h3>${histChart(p)}</div>`;
   // game log
   const logRows = win.slice().reverse().map(l => {
@@ -1391,6 +1459,7 @@ function bindLive(p, logs, without) {
     updateProp(); keep(`[data-ps="${sd}"]`);
   });
   $$(".bl", pg).forEach(b => b.onclick = () => { const l = +b.dataset.pl; if (DT.line !== l) { DT.line = l; updateProp(); } });
+  $$("[data-ll]", pg).forEach(b => b.onclick = () => { const l = +b.dataset.ll; if (DT.line !== l) { DT.line = l; updateProp(); keep(`[data-ll="${l}"]`); } });
   const clr = $("#clr", pg); if (clr) clr.onclick = () => { Object.assign(DT, {home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, dvp: false, def: false, open: {}, ovs: []}); updateProp(); };
   $("#more", pg).onclick = () => { DT.more = $("#more", pg).getAttribute("aria-expanded") !== "true"; if (!DT.more) { MORE_R.forEach(k => { DT.open[k] = false; delete DT.ranges[k]; }); DT.ovs = DT.ovs.filter(k => MORE_R.indexOf(k) < 0); Object.assign(DT, {home: null, result: null, rest: null, without: {}}); } updateProp(); keep("#more"); };
   $("#lnb", pg).onclick = () => lineSheet(p);
