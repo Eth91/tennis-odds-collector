@@ -721,6 +721,14 @@ function rates(p, side) {
 }
 // the probability the price gives `side` at `line` (the books' no-vig), or null when no book prices both sides
 function fairSide(p, line, side) { const f = line === null ? null : fairAt(p, line).p; return f === null ? null : side === "under" ? 1 - f : f; }
+// what hit rates are colored against: the fair probability, or on a one-sided rung (an alt ladder) the best price's
+// own implied chance, margin included — so 8-for-10 at -2500 (96%) reads as a miss, not a green 80%
+function chanceSide(p, line, side) {
+  const f = fairSide(p, line, side);
+  if (f !== null || line === null) return f;
+  const b = bestPrice(p, line, "all", side);
+  return b ? 1 / b.odds : null;
+}
 const hitsOf = x => x && x.n ? Math.round(x.rate * x.n) : 0;
 // every hit-rate box: under 5 games a plain count; otherwise the rate, colored only when it sits 1+ SD from what
 // the price implies (fs; a coin flip without a price) — a 3-for-3 or a -300 favorite going 7-for-10 stays white
@@ -771,8 +779,8 @@ function listProps() {
 }
 function row(p) {
   const g = gameOf(p.gid), r = rates(p), c = p.ctx || {}, side = ST.side;
-  const best = p.main === null ? null : bestPrice(p, p.main, ST.book, side), fs = fairSide(p, p.main, side);
-  const cell = (lab, k) => { const h = hbox(r[k], fs); return `<div><i>${lab}</i><b class="${h.c}">${h.t}</b></div>`; };
+  const best = p.main === null ? null : bestPrice(p, p.main, ST.book, side), fs = fairSide(p, p.main, side), cs = chanceSide(p, p.main, side);
+  const cell = (lab, k) => { const h = hbox(r[k], cs); return `<div><i>${lab}</i><b class="${h.c}">${h.t}</b></div>`; };
   const dv = c.dvp_rank ? `<b class="${{good: "up", bad: "dn", mid: "md"}[rankCls(c.dvp_rank, c.teams, side)]}">${ord(c.dvp_rank)}</b>` : "<b>–</b>";
   // VALUE: the price shown against the books' fair price for that side (positive only when one book beats the other)
   const ev = best && fs !== null ? best.odds * fs - 1 : null;
@@ -1215,13 +1223,12 @@ function ladder(p, win, side, cur, winLab) {
   const vals = win.map(l => statValue(l, p.market)), k = side === "under" ? 2 : 1;
   const rows = allLines(p).map(L => {
     const s = hitSummary(vals, L), hits = side === "under" ? s.under : s.over;
-    const f = fairAt(p, L).p, fs = f === null ? null : side === "under" ? 1 - f : f;
-    const h = hbox({n: s.n, rate: s.n ? hits / s.n : null}, fs);
+    const fs = fairSide(p, L, side), h = hbox({n: s.n, rate: s.n ? hits / s.n : null}, chanceSide(p, L, side));
     const px = b => { const r = rungAt(p.books[b], L); return r && r[k] ? `<span class="${fs !== null && r[k] * fs > 1 ? "best" : ""}">${american(r[k])}</span>` : '<span class="na">—</span>'; };
     return `<button class="lr${L === cur ? " on" : ""}" data-ll="${L}" aria-pressed="${L === cur}"><span>${L}</span><span class="${h.c}">${h.t}</span><span class="fv">${fs === null ? "—" : american(1 / fs)}</span>${px("fd")}${px("dk")}</button>`;
   }).join("");
   return `<div class="ldr"><div class="lh2"><span>LINE</span><span>HIT ${esc(winLab)}</span><span>FAIR</span><span>FD</span><span>DK</span></div>${rows}</div>
-    <div class="note">Fair only where a book prices both sides. One-sided rungs (alt ladders) show the price alone.</div>`;
+    <div class="note">Fair only where a book prices both sides. On one-sided rungs (alt ladders) the HIT color compares with the price's own implied chance, margin included.</div>`;
 }
 // each book's main line over time (a step per change), its open and its price now
 function histChart(p) {
@@ -1345,7 +1352,7 @@ function updateProp(mode) {
   const rate = sideRate(s, side);
   const winLab = (wins.find(w => w[0] === DT.win) || ["", "L10"])[1];
   const tri = up => `<span class="tri ${up ? "up" : "dn"}">${up ? "▲" : "▼"}</span>`;
-  const fs = fairSide(p, line, side), hr = hbox({n: s.n, rate: rate}, fs);
+  const fs = chanceSide(p, line, side), hr = hbox({n: s.n, rate: rate}, fs);
   const gr = grade(p, side);
   const opp = `<span class="vs">${p.home ? "vs" : "@"}</span>${esc(p.opp || "")}\u200a·\u200a${g.state === "pregame" ? mt(g.tip).replace(" ", "") : esc(g.state === "live" ? "LIVE" : g.state === "final" ? "Final" : g.label || "")}`;
   const ovOn = k => !!(DT.open[k] || DT.ranges[k]);
