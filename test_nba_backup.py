@@ -63,6 +63,7 @@ def check(b, p=P):
     db(shadow, flags=30, cands=60)
     xlog.write_text("".join(json.dumps({"i": i}) + "\n" for i in range(20)) + '{"torn')
     sent = []
+    host_floor, b.FREE_FLOOR = b.FREE_FLOOR, 0       # this machine's free disk is not under test (the low-disk case is, below)
 
     def night(day, **kw):
         sent.clear()
@@ -134,6 +135,7 @@ def check(b, p=P):
         finally:
             b.FREE_FLOOR = floor
     finally:
+        b.FREE_FLOOR = host_floor
         shutil.rmtree(root, ignore_errors=True)
     return ok
 
