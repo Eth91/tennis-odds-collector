@@ -377,7 +377,7 @@ svg.hc{display:block;margin-top:2px;font-family:system-ui,-apple-system,sans-ser
 svg.hc text{fill:#8e8e8e;font-size:11px}
 .ldr{font-family:system-ui,-apple-system,sans-serif;font-stretch:66%}
 .lh2,.lr{display:grid;grid-template-columns:46px 56px 54px 50px 1fr 1fr;align-items:center;column-gap:5px}
-.lr .mo{color:#d7d7d7} .lr .mo.only{color:#7c7c7c;font-style:italic}
+.lr .mo{color:#7c7c7c;font-style:italic}
 .lh2{height:30px;font-size:13px;color:#9a9a9a;border-bottom:1px solid #262626}
 .lr{width:100%;height:36px;padding:0;border:0;border-bottom:1px solid #1e1e1e;background:none;color:#fff;font:inherit;font-size:15px;
 text-align:left;font-variant-numeric:tabular-nums}
@@ -835,7 +835,7 @@ function row(p) {
   const differ = fd && dk && fd.main !== null && dk.main !== null && fd.main !== dk.main ? `DK ${dk.main}` : null;
   return `<button class="pr" data-id="${esc(p.id)}"><span class="av">${head(p.pid)}</span>
     <div class="who"><div class="nm">${esc(nameOf(p.player))}<span class="cd">${esc(p.team || "")}</span>${injTag(p)}${live}${p.flag ? '<span class="tg tf">ENGINE</span>' : ""}</div>
-    <div class="lin num">${p.main === null ? "alt lines" : p.main + " " + esc(unit(p.market))}${p.proj ? `<span class="pjm" title="model projection (mean), not a book line">proj ${p.proj.mean}</span>` : ""}${mv ? `<span class="mv" aria-label="line ${mv > 0 ? "up" : "down"} ${Math.abs(mv)} since open">${mv > 0 ? "▲" : "▼"}${Math.abs(mv)}</span>` : ""}${wo ? `<span class="pl ${wo.z === null ? "" : wo.z >= 1 ? "up" : wo.z <= -1 ? "dn" : ""}" title="${esc(out.name || "")} is ${esc(out.status)}: his ${side} hit rate without him">W/O ${esc(lastName(out.name).slice(0, 10))}${wo.n ? " " + wo.hits + "/" + wo.n : ""}</span>` : ""}</div></div>
+    <div class="lin num">${p.main === null ? "alt lines" : p.main + " " + esc(unit(p.market))}${p.proj ? `<span class="pjm" title="model projection (mean), not a book line">proj ${(+p.proj.mean).toFixed(1)}</span>` : ""}${mv ? `<span class="mv" aria-label="line ${mv > 0 ? "up" : "down"} ${Math.abs(mv)} since open">${mv > 0 ? "▲" : "▼"}${Math.abs(mv)}</span>` : ""}${wo ? `<span class="pl ${wo.z === null ? "" : wo.z >= 1 ? "up" : wo.z <= -1 ? "dn" : ""}" title="${esc(out.name || "")} is ${esc(out.status)}: his ${side} hit rate without him">W/O ${esc(lastName(out.name).slice(0, 10))}${wo.n ? " " + wo.hits + "/" + wo.n : ""}</span>` : ""}</div></div>
     <div class="oc o"><i${differ ? ' class="df" title="the books post different main lines"' : ""}>${differ || "ODDS"}</i><b class="num">${best ? american(best.odds) : "–"}</b></div>
     <div class="oc e"><i>VALUE</i><b class="num ${ev === null ? "" : ev > 0 ? "up" : "mu"}">${ev === null ? "–" : (ev > 0 ? "+" : "") + (ev * 100).toFixed(1) + "%"}</b></div>
     <div class="bx6 num" aria-label="Hit rates">${cell(D.season.slice(0, 4), "season")}${cell("H2H", "h2h")}<div><i>DvP</i>${dv}</div>${cell("L5", "l5")}${cell("L10", "l10")}${cell("L20", "l20")}</div></button>`;
@@ -1273,11 +1273,11 @@ function ladder(p, win, side, cur, winLab) {
     const s = hitSummary(vals, L), hits = side === "under" ? s.under : s.over;
     const fs = fairSide(p, L, side), h = hbox({n: s.n, rate: s.n ? hits / s.n : null}, chanceSide(p, L, side));
     const px = b => { const r = rungAt(p.books[b], L); return r && r[k] ? `<span class="${fs !== null && r[k] * fs > 1 ? "best" : ""}">${american(r[k])}</span>` : '<span class="na">—</span>'; };
-    const pj = projAt(p, L, side), mo = !pj ? "—" : pct(pj.blend !== null ? pj.blend : pj.model);
-    return `<button class="lr${L === cur ? " on" : ""}" data-ll="${L}" aria-pressed="${L === cur}"><span>${L}</span><span class="${h.c}">${h.t}</span><span class="fv">${fs === null ? "—" : american(1 / fs)}</span><span class="mo${pj && pj.blend === null ? " only" : ""}">${mo}</span>${px("fd")}${px("dk")}</button>`;
+    const pj = projAt(p, L, side), mo = !pj ? "—" : pct(pj.model);   // model alone on every rung: one monotone column
+    return `<button class="lr${L === cur ? " on" : ""}" data-ll="${L}" aria-pressed="${L === cur}"><span>${L}</span><span class="${h.c}">${h.t}</span><span class="fv">${fs === null ? "—" : american(1 / fs)}</span><span class="mo">${mo}</span>${px("fd")}${px("dk")}</button>`;
   }).join("");
   return `<div class="ldr"><div class="lh2"><span>LINE</span><span>HIT ${esc(winLab)}</span><span>FAIR</span><span>MODEL</span><span>FD</span><span>DK</span></div>${rows}</div>
-    <div class="note">MODEL = the projection's chance of the ${side}, blended with the price where a book prices both sides (grey italics: model only, which runs overconfident against book lines). Fair only where a book prices both sides. On one-sided rungs (alt ladders) the HIT color compares with the price's own implied chance, margin included.</div>`;
+    <div class="note">MODEL = the projection's own chance of the ${side} at each rung (model alone, which runs overconfident against book lines; the Model Projection card shows it blended with the price at the selected line). Fair only where a book prices both sides. On one-sided rungs (alt ladders) the HIT color compares with the price's own implied chance, margin included.</div>`;
 }
 // the projection engine's card: a model estimate, kept apart from the book prices and never a pick
 function projCard(p, line, side) {
@@ -1293,11 +1293,11 @@ function projCard(p, line, side) {
   const svg = `<svg class="pjh" width="${W}" height="${H + 14}" viewBox="0 0 ${W} ${H + 14}" role="img" aria-label="projected ${unit_} distribution">${bars}<line x1="${xL}" x2="${xL}" y1="0" y2="${H}" stroke="#fff" stroke-width="1.2" stroke-dasharray="3 2"/><text x="0" y="${H + 12}">${start}</text><text x="${W}" y="${H + 12}" text-anchor="end">${start + vals.length - 1}</text></svg>`;
   const pl = D.proj_players && D.proj_players[String(p.pid)];
   const other = pl ? [["min", "Minutes"], ["steals", "Steals"], ["blocks", "Blocks"], ["turnovers", "Turnovers"]].filter(([k]) => pl[k])
-    .map(([k, lab]) => `<div class="kv"><span>${lab}</span><b>${pl[k].mean} <small>(${pl[k].q10}–${pl[k].q90})</small></b></div>`).join("") : "";
+    .map(([k, lab]) => `<div class="kv"><span>${lab}</span><b>${(+pl[k].mean).toFixed(1)} <small>(${pl[k].q10}–${pl[k].q90})</small></b></div>`).join("") : "";
   const inj = (D.injuries[gameOf(p.gid).date + "|" + p.pid] || {}).official, av = inj && M.availability && M.availability[inj.status];
   const avail = inj ? `<div class="kv"><span>Plays tonight?</span><b>${esc(inj.status)}${av && av[1] ? ` · ${Math.round((av[0] + 1) / (av[1] + 2) * 100)}% <small>(${av[0]}/${av[1]} listed so since 10/22)</small>` : ""}</b></div>` : "";
   return head + `<div class="box0 pj">
-    <div class="pjt"><div><b class="num">${pr.mean}</b> <i>${unit_} · mean</i></div><div class="pjr num">median ${pr.q50} · 80% range ${pr.q10}–${pr.q90}</div></div>
+    <div class="pjt"><div><b class="num">${(+pr.mean).toFixed(1)}</b> <i>${unit_} · mean</i></div><div class="pjr num">median ${pr.q50} · 80% range ${pr.q10}–${pr.q90}</div></div>
     ${svg}
     <div class="kv"><span>${sd} ${line} · model + market</span><b>${at.blend === null ? "— <small>no two-sided price here</small>" : pct(at.blend)}</b></div>
     <div class="kv mo1"><span>${sd} ${line} · model alone</span><b>${pct(at.model)}${at.push > .001 ? ` <small>· push ${pct(at.push)}</small>` : ""}</b></div>
@@ -1308,7 +1308,7 @@ function projCard(p, line, side) {
       ${pr.n_hist < 10 ? `Only ${pr.n_hist} past games: wide range. ` : ""}Cutoff: ${esc(M.cutoff || "")}. Box scores through ${esc(M.logs_through || "?")}${M.stale ? " (" + esc(M.stale_reason || "stale") + ")" : ""}.
       Model ${esc(M.version || "")} (${esc(M.config || "")}), tuned on ${esc(M.tuned_on || "?")}; as of ${esc(mt(M.generated_at, true))}.
       Its stat projections beat the baselines on two held-out seasons (CRPS, all 8 stats).</div></details>
-    <button class="lk" id="pjsc" style="margin-top:8px">Model scorecard ›</button></div>`;
+    <button class="lk" id="pjsc" style="padding:12px 16px 6px 0;font-size:13px">Model scorecard ›</button></div>`;
 }
 // the projection engine's record: the pre-registered held-out test (proj_meta.backtest) and the forward record
 function projScoreSheet() {
@@ -1318,7 +1318,8 @@ function projScoreSheet() {
   const ci = c => c ? `${c[0] > 0 ? "+" : ""}${c[0].toFixed(4)} <small>(${c[1].toFixed(4)} to ${c[2].toFixed(4)})</small>` : "–";
   const per = Object.entries(B.periods || {}).map(([season, p]) => {
     const m = p.market;
-    return (p.label ? `<div class="note" style="margin:6px 0 0">${esc(p.label)}</div>` : "") +
+    const lab = season === M.tuned_on ? "tuning season: the config and blend weight were chosen here, so these are not held out" : p.label;
+    return (lab ? `<div class="note" style="margin:6px 0 0">${esc(lab)}</div>` : "") +
       `<div class="kv"><span>${esc(season)} · ${p.n ? p.n.toLocaleString() : 0} player-games</span><b>CRPS vs recent form ${ci(p.crps_vs_b2)}</b></div>` +
       (m ? `<div class="kv"><span>${esc(season)} · ${m.n.toLocaleString()} FanDuel lines</span><b>log loss: model ${f4(m.model_ll)} · blend ${f4(m.blend_ll)} · close ${f4(m.close_ll)}</b></div>
             <div class="kv"><span>blend − close</span><b>${ci(m.blend_minus_close)}</b></div>` : "");
@@ -1330,8 +1331,8 @@ function projScoreSheet() {
       ${j.blend_minus_close ? `<div class="kv"><span>blend − close</span><b>${ci(j.blend_minus_close)}</b></div>` : ""}
       ${j.clv ? `<div class="kv"><span>CLV (close moved toward the model)</span><b>${pc(j.clv.mean)} · ${pc(j.clv.share_positive)} of ${j.clv.n}</b></div>` : ""}`
       : '<div class="note" style="margin:0">No graded forecasts yet: the forward record starts with this version.</div>';
-    fill(`<div class="note" style="font-size:14px;color:var(--l2)">Every number is out of sample: tuned on 2023-24 only, then tested on seasons it never saw (NBA_PROJECTION_PREREG.md). Lower log loss / CRPS is better; a difference whose range stays below 0 is a real improvement.</div>
-      <div class="sg"><span>Held-out test</span></div>${per || '<div class="note">No results yet.</div>'}
+    fill(`<div class="note" style="font-size:14px;color:var(--l2)">Every number is walk-forward: each prediction uses only games before that date. The config was tuned on ${esc(M.tuned_on || "2023-24")}; the later seasons were held out and run once (NBA_PROJECTION_PREREG.md). Lower log loss / CRPS is better; a difference whose range stays below 0 is a real improvement.</div>
+      <div class="sg"><span>Backtest</span></div>${per || '<div class="note">No results yet.</div>'}
       <div class="sg"><span>Forward record (live forecasts, logged before tip)</span></div>${fwd}
       <div class="note">${esc((B.verdicts || []).join(" "))}</div>
       <div class="note">CLV says where the closing price went, not whether a bet would have won. Nothing here is a pick.</div>
