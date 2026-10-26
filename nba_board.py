@@ -253,6 +253,11 @@ CSS = """<style>
 #nba .noff{margin-top:26px}
 #nba .noff div{padding:9px 0;border-bottom:1px solid var(--hair);font-size:12.5px;color:var(--cu-lbl3)}
 #nba .noff b{color:var(--cu-lbl2);font-weight:600}
+#nba .nres{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0 2px;padding:14px 16px;
+  border-radius:16px;background:var(--cu-grp);color:var(--cu-lbl);text-decoration:none}
+#nba .nres b{display:block;font-size:16px;font-weight:700;letter-spacing:-.01em}
+#nba .nres span{display:block;margin-top:2px;font-size:12px;font-weight:600;color:var(--cu-lbl2)}
+#nba .nres i{font-style:normal;font-size:22px;color:var(--cu-lbl3)}
 #nba .nnone{padding:28px 0;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
   color:var(--cu-lbl3)}
 </style>"""
@@ -338,7 +343,9 @@ def _games(s):
 def html(b):
     e = H.escape
     rec = b.get("record") or {}
-    parts = [CSS, '<h2>NBA · <span class="nsh">SHADOW · NOT BETS</span></h2>']
+    parts = [CSS, '<h2>NBA · <span class="nsh">SHADOW · NOT BETS</span></h2>',
+             '<a class="nres" href="nba_props.html"><div><b>Prop research</b><span>Every posted prop · game logs · '
+             'splits · book prices</span></div><i aria-hidden="true">›</i></a>']
     if rec:
         n = rec["closed"]
         units = (f'<b class="{"up" if rec["units"] > 0 else "dn" if rec["units"] < 0 else ""}">'
