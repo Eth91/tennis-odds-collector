@@ -246,11 +246,11 @@ class RatioData:
         def ro(path):
             return sqlite3.connect(f"file:{path}?mode=ro", uri=True) if Path(path).exists() else None
         m, t = ro(matchup_db), ro(tracking_db)
-        self.games = defaultdict(list)                   # pid -> [(date, fga)]
+        self.games = defaultdict(list)                   # pid -> [(date, fga, minutes)]
         if m is not None:
-            for d, pid, fga in m.execute("SELECT gm.date, p.pid, p.fga FROM player_games p JOIN games gm ON gm.gid = p.gid "
-                                         "WHERE gm.season = ? AND p.min > 0", (season,)):
-                self.games[pid].append((d, fga or 0.0))
+            for d, pid, fga, mn in m.execute("SELECT gm.date, p.pid, p.fga, p.min FROM player_games p JOIN games gm ON gm.gid = p.gid "
+                                             "WHERE gm.season = ? AND p.min > 0", (season,)):
+                self.games[pid].append((d, fga or 0.0, mn))
         self.trk, self.fetched = {}, set()
         if t is not None:
             self.fetched = {d for d, ms in t.execute("SELECT date, COUNT(DISTINCT measure) FROM fetched GROUP BY date") if ms >= 2}
@@ -258,12 +258,51 @@ class RatioData:
 
     def volume(self, pid, date):
         """{n, fga, pa, rc} per game over his games this season before the date (pa / rc over tracked dates), or None."""
-        g = [(d, f) for d, f in self.games.get(pid, ()) if d < date]
+        g = [(d, f, mn) for d, f, mn in self.games.get(pid, ()) if d < date]
         if len(g) < MIN_GAMES:
             return None
-        tr = [self.trk.get((d, pid), (0.0, 0.0)) for d, _f in g if d in self.fetched]
-        return {"n": len(g), "fga": sum(f for _d, f in g) / len(g),
+        tr = [self.trk.get((d, pid), (0.0, 0.0)) for d, _f, _m in g if d in self.fetched]
+        return {"n": len(g), "fga": sum(f for _d, f, _m in g) / len(g), "mpg": sum(mn for _d, _f, mn in g) / len(g),
                 "pa": sum(x[0] for x in tr) / len(tr) if tr else None, "rc": sum(x[1] for x in tr) / len(tr) if tr else None}
+
+
+class DvpData:
+    """Amendment 5: points allowed per game to each position group by each team this season, before a date, as a
+    ratio to the league's per-team-game average for that group (nba_matchup box scores; groups from positions)."""
+
+    def __init__(self, matchup_db, gamelogs_db, season):
+        def ro(path):
+            return sqlite3.connect(f"file:{path}?mode=ro", uri=True) if Path(path).exists() else None
+        m, g = ro(matchup_db), ro(gamelogs_db)
+        self.groups = {pid: (pos or "")[:1] or None for pid, pos in g.execute("SELECT player_id, position FROM positions")} \
+            if g is not None and g.execute("SELECT 1 FROM sqlite_master WHERE name = 'positions'").fetchone() else {}
+        self.games, self.box = {}, defaultdict(list)     # gid -> (date, home, away); gid -> [(team, pid, pts)]
+        if m is not None:
+            for gid, d, h, a in m.execute("SELECT gid, date, home, away FROM games WHERE season = ? AND home_pts IS NOT NULL", (season,)):
+                self.games[gid] = (d, h, a)
+            for gid, team, pid, pts in m.execute("SELECT gid, team, pid, pts FROM player_games WHERE min > 0"):
+                if gid in self.games:
+                    self.box[gid].append((team, pid, pts or 0))
+
+    def dvp(self, opp, group, date):
+        """The ratio, or None when the opponent has fewer than 10 games or the group is unknown."""
+        if not group:
+            return None
+        allowed, opp_games, league, team_games = 0.0, 0, 0.0, 0
+        for gid, (d, h, a) in self.games.items():
+            if d >= date:
+                continue
+            team_games += 2
+            in_game = opp in (h, a)
+            opp_games += in_game
+            for team, pid, pts in self.box[gid]:
+                if self.groups.get(pid) == group:
+                    league += pts
+                    if in_game and team != opp:
+                        allowed += pts
+        if opp_games < 10 or not league:
+            return None
+        return (allowed / opp_games) / (league / team_games)
 
 
 def ratio_eval(rd, spec, pid, date, market, line):
