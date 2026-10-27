@@ -72,3 +72,35 @@ Reported for over winners vs under winners:
 fingerprint), judged forward.
 
 **If it fails:** the report shows what was found, set against what chance produces. No registration.
+
+---
+
+## Result (2026-10-27): FAIL, so no filters are registered
+2,944 props (FanDuel main line at tip − 30, 2026-10-22..26, with a result). Run with `nba_why.py` on read-only
+snapshots.
+
+**Part 1: why they won or lost** (post-game; none of it known before tip):
+
+| | n | minutes vs last-10 | minutes effect | rate effect | played 5+ min more | 5+ min less | blowout |
+|---|---|---|---|---|---|---|---|
+| over winners | 1,449 | +2.9 | +1.4 | +2.2 | 38% | 9% | 18.5% |
+| under winners | 1,495 | −1.0 | −0.6 | −3.4 | 18% | 24% | 28.3% |
+
+- **The biggest driver both ways is production per minute** (shooting and usage on the night).
+- **Next is minutes:** a minutes surge makes overs, and blowouts make unders.
+- **Overs hit 49.2%.** Always over: −5.2%; always under: −6.2%.
+
+**Part 2: filters:**
+- **The search:** 1,190 filters (a side × 1 or 2 conditions).
+- **Selected on all 5 days: 0.** The shuffle control, with results randomized, gave a median of 2 and a 95th
+  percentile of 11. The real data produced fewer consistent filters than chance does.
+- **Leave one day out:** the filters chosen on the other 4 days lost on the held-out day. Over 717 bets,
+  298-419, ROI −23.5% and CLV −5.7%. On two of the folds, no filter passed on the other 4 days at all.
+- **Checks:** held-out ROI > 0: no; held-out CLV > 0: no; more than chance: no.
+
+**The nearest thing to a pattern, assist unders:** they hit 58% (+5.2% ROI, n 295), but lost 20% on 10-24 and
+had CLV −5.6%. FanDuel priced them fairly; it reads as a lucky week.
+
+**Reading.** In these five days, what decided a prop was mostly the night itself: shooting, usage, a minutes
+surge, a blowout. Simple pre-game conditions did not predict it from one day to the next. Filters picked from
+these outcomes would be the overfit backtest again.
