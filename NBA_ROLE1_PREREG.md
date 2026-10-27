@@ -177,3 +177,31 @@ hand.
   - That is far too few to call an edge.
 - **Reading:** at tip lines, about 9% of the model's disagreement with the book is real. ROLE_OPEN uses
   β = 0.09 and fires rarely.
+
+# AMENDMENT 3: add WOWY (written 2026-10-27, about 08:20 UTC, before it was built or run)
+**User:** "once we get more seasonal data we can use WOWY and see how a player performs without that player but
+with the others who will play. So you can add WOWY to ROLE1."
+
+**Change ("v3" = v2 + WOWY):**
+- **Matching games:** for each active player B, this season's team games before the date in which:
+  - every absent rotation player tonight was out (did not play);
+  - every active rotation player tonight (≥ 17 min over ≥ 3 games this season) played;
+  - B played.
+
+  That is "without that player but with the others who will play".
+- **From those n games:** B's mean minutes, and his per-minute FGA, FTA, 3PA, REB and AST.
+- **Blend:** weight w = n / (n + 3).
+  - minutes = (1 − w) × v2 minutes + w × WOWY minutes;
+  - each rate = (1 − w) × v2 rate + w × WOWY rate.
+- The rest is unchanged: cap 40, roster 240, team volume conserved, efficiency, pricing, β.
+- With no matching games (n = 0), v3 equals v2.
+
+**Check (decided now):**
+- **Test A, v3 against v2, on 2022-23**, a season no version has been tested on. There are no 2021-22 priors,
+  so both use the league-default rates.
+- **Pass:** v3's MAE is ≤ v2's for minutes and FGA on 2022-23, and on the 2022-23 rows where WOWY applies
+  (n ≥ 1).
+- The seen seasons are re-reported for information.
+
+**If it passes:** ROLE_OPEN uses v3, re-fingerprinted before its 13:00 UTC registration, so the forward record is
+unchanged. **If it fails:** ROLE_OPEN keeps v2, and v3 stays a reported option until more of this season is in.
