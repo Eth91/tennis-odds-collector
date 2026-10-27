@@ -85,3 +85,42 @@ The archive has no openers, and tip lines are the hardest version of the market,
   phone, labeled SHADOW, the moment it fires.
 
 **If Test A fails:** the model is simplified before any registration, and the report says so.
+
+---
+
+## Test A: result (2026-10-27, about 08:10 UTC): FAIL on minutes
+- **Data:** 15,894 teammate-games in spots in 2025-26 and 15,192 in 2024-25 (`nba_role.py --test-a`).
+
+| MAE (2025-26 / 2024-25) | model | season average | last 5 |
+|---|---|---|---|
+| minutes | 5.312 / 5.345 | 5.459 / 5.599 | **5.171 / 5.330** |
+| FGA | **2.860 / 2.881** | 2.958 / 2.997 | 2.938 / 3.008 |
+| FTA | 1.695 / 1.643 | **1.669 / 1.598** | 1.715 / 1.647 |
+| points | **4.711 / 4.789** | 4.767 / 4.844 | 4.880 / 4.975 |
+| rebounds | 1.974 / 1.998 | **1.959 / 1.997** | 2.025 / 2.063 |
+| assists | **1.403 / 1.397** | 1.404 / 1.398 | 1.441 / 1.449 |
+| threes | 0.927 / 0.934 | **0.911 / 0.916** | 0.950 / 0.965 |
+
+- **Bias:** the model runs +0.70 / +0.76 minutes high.
+- **The minutes change** (predicted vs actual, against base) correlates 0.378 / 0.376.
+- **FGA:** the model beats both baselines in both seasons.
+- **Minutes:** it beats the season average but not the last-5 average, so it fails the registered bar.
+- **Negative binomial r** (2025-26): points 6.99, rebounds 11.1, assists 12.0, threes 9.7.
+
+# AMENDMENT 1: the simplified minutes model (written before it was run), and a clean season to check it
+**Why.** The model's base minutes use only games the absent player played. In absence games 2–3, the last 5
+games already include games without him, which is why "last 5" wins on minutes.
+
+**Change (minutes only; everything else unchanged):**
+- **Base:** B's mean minutes over his last 5 games this season.
+- **Bump:** each absent X's minutes, distributed by the same weights (base × 3 for the same position group), times
+  the share of B's last-5 games in which X played. That is the part of X's absence not already in his last 5.
+- No separate empirical bump. Capped at 40 and rescaled so the roster totals 240, as before.
+
+**Check (decided now):** Test A again, with the same measures, on **2023-24** (last season 2022-23). That season
+was not used in Test A.
+- **Pass:** model MAE < both baselines for minutes and FGA on 2023-24.
+- 2025-26 and 2024-25 are re-reported for information only; they have been seen.
+- **If it passes:** the forward rule uses the simplified model.
+- **If it fails:** ROLE_OPEN is still registered as a forward test, since the user asked for it, with the model
+  that did better on the 2023-24 check. The report says plainly that the minutes model does not beat last-5.
