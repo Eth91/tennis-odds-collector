@@ -21,6 +21,7 @@ RATE_STATS = ("fga", "fta", "fg3a", "reb", "ast")
 K_RATE, K_TS, K_3P = 150.0, 60.0, 40.0
 HALF_LIFE, X_MIN, X_GAMES, SAME_W, CAP, ROSTER_MIN = 3.0, 17.0, 3, 3.0, 40.0, 240.0
 PREV = {"2025-26": "2024-25", "2024-25": "2023-24", "2023-24": "2022-23", "2026-27": "2025-26"}
+DEFAULT_RATES = {"fga": 0.35, "fta": 0.10, "fg3a": 0.13, "reb": 0.18, "ast": 0.10, "eff": 1.12, "p3": 0.35}   # no history at all
 LAST_N = 5                                               # amendment 1: the simplified minutes base
 
 
@@ -61,7 +62,7 @@ class Priors:
                 "p3": t["fg3m"] / t["fg3a"] if t["fg3a"] else 0.33}
 
     def of(self, pid, g):
-        return self.player.get(pid) or self.league.get(g) or next(iter(self.league.values()))
+        return self.player.get(pid) or self.league.get(g) or next(iter(self.league.values()), DEFAULT_RATES)
 
 
 class Season:
@@ -411,6 +412,68 @@ def calibrate(gamelogs_db, odds_db):
                               "roi": round(float(np.mean([b["u"] for b in bets])), 4) if bets else None,
                               "by_side": {sd: (sum(b["side"] == sd for b in bets), round(float(np.mean([b["u"] for b in bets if b["side"] == sd])), 4))
                                           for sd in ("over", "under") if any(b["side"] == sd for b in bets)}}}
+
+
+# ── ROLE_OPEN: the decision shared by the side-by-side replay and the live pinger ────────────────────────────────
+BETA, EV_AT, SPOT_MAX = 0.09, 0.05, 3                    # amendment 2's calibration; the rule's threshold; absence games 1-3
+
+
+def season_of(date):
+    y, mth = int(date[:4]), int(date[5:7])
+    return f"{y}-{(y + 1) % 100:02d}" if mth >= 8 else f"{y - 1}-{y % 100:02d}"
+
+
+class RoleData:
+    """This season's box scores (nba_matchup, the season's games), last season's priors (nba_gamelogs logs_full) and
+    position groups (nba_gamelogs positions). A rule reads only games before its date (Season.before)."""
+
+    def __init__(self, matchup_db, gamelogs_db, season):
+        import sqlite3
+        from pathlib import Path
+        ro = lambda p: sqlite3.connect(f"file:{p}?mode=ro", uri=True) if Path(p).exists() else None
+        has = lambda c, t: c is not None and c.execute("SELECT 1 FROM sqlite_master WHERE name = ?", (t,)).fetchone()
+        m, g = ro(matchup_db), ro(gamelogs_db)
+        cols = ("gid", "date", "team", "pid", "min", "fga", "fta", "fg3a", "fg3m", "reb", "ast", "pts")
+        rows = [dict(zip(cols, r)) for r in m.execute(
+            "SELECT p.gid, gm.date, p.team, p.pid, p.min, p.fga, p.fta, p.fg3a, p.fg3m, p.reb, p.ast, p.pts FROM player_games p "
+            "JOIN games gm ON gm.gid = p.gid WHERE gm.season = ?", (season,))] if has(m, "player_games") else []
+        for r in rows:
+            r["min"] = r["min"] or 0.0
+        self.groups = {pid: group(pos) for pid, pos in g.execute("SELECT player_id, position FROM positions")} if has(g, "positions") else {}
+        prior = [dict(zip(cols, r)) for r in g.execute(
+            "SELECT game_id, date, team, player_id, min, fga, fta, fg3a, fg3m, reb, ast, pts FROM logs_full WHERE season = ?",
+            (PREV.get(season, ""),))] if has(g, "logs_full") else []
+        self.season, self.priors, self.cache = Season(rows), Priors(prior, self.groups), {}
+
+    def team_of(self, pid, date):
+        last = None
+        for team, games in self.season.games.items():
+            for d, _g, b in games:
+                if d < date and pid in b and b[pid]["min"] and (last is None or d > last[0]):
+                    last = (d, team)
+        return last[1] if last else None
+
+
+def role_eval(rd, date, team, pid, market, line, over, under, out_now):
+    """ROLE_OPEN for one opener: the sides with calibrated EV >= EV_AT, as [{side, price, ev, p, mu, spots}]."""
+    spots = {x: n for x, n in rd.season.absences(team, date, set(out_now)).items() if n <= SPOT_MAX}
+    if not spots or not over or not under:
+        return []
+    key = (team, date, frozenset(out_now))
+    if key not in rd.cache:
+        active = rd.season.roster(team, date) - set(out_now)
+        rd.cache[key] = project(rd.season, rd.priors, rd.groups, team, date, active, set(spots), mode="v2")
+    proj = rd.cache[key]
+    if pid not in proj:
+        return []
+    mu = proj[pid][MARKET_STAT[market]]
+    q_over = (1 / over) / (1 / over + 1 / under)
+    out = []
+    for side, price, q in (("over", over, q_over), ("under", under, 1 - q_over)):
+        pc = calibrated(p_side(mu, market, line, side), q, BETA)
+        if pc * price - 1 >= EV_AT:
+            out.append({"side": side, "price": price, "ev": pc * price - 1, "p": pc, "mu": mu, "spots": spots})
+    return out
 
 
 def main():
