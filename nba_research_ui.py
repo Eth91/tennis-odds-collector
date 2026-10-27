@@ -164,6 +164,7 @@ font-size:13px;font-weight:600;color:#fff}
 .chip{display:inline-flex;align-items:center;height:30px;padding:0 13px;border:1px solid rgba(255,255,255,.15);border-radius:15px;background:none;
 color:#fff;font-size:13px;font-weight:500}
 .chip[aria-pressed="true"]{border-color:rgba(255,255,255,.3);background:#2a2a2a}
+.chip{transition:background-color .2s,border-color .2s,color .2s}
 /* ── bottom sheet ── */
 .scrim{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.5);opacity:0;transition:opacity .34s ease;pointer-events:none}
 .scrim.on{pointer-events:auto}
@@ -426,6 +427,7 @@ border:1px solid rgba(255,255,255,.1);background:rgba(19,19,19,.86);color:#fff;b
 .cb svg{width:19px;height:19px}
 .cb.fav{color:var(--yel)} .cb.fav svg{fill:var(--yel)}
 #pg .ph-t{opacity:0;transition:opacity .2s;left:64px;right:156px;align-items:flex-start;text-align:left}
+#cmb{transition:background-color .25s,color .25s}
 .cb[aria-pressed="true"]#cmb{background:#fff;color:#000}
 #pg .ph.tt .ph-t{opacity:1}
 .ph-t{position:absolute;left:110px;right:110px;top:var(--st);height:42.8px;display:flex;flex-direction:column;
@@ -531,7 +533,7 @@ padding:0 14px 0 12px;border-radius:20px;color:#fff;font:inherit;font-size:14px;
 .cbl div{flex:1;min-width:0} .cbl b{display:block;font-size:15px} .cbl span{font-size:13px;color:var(--l2)}
 .cbl em{font-style:normal;font-size:15px;font-weight:700}
 .cbl .x{flex:none;width:32px;height:32px;border:0;border-radius:50%;background:#222;color:#bbb;font-size:18px;line-height:1}
-.cbw{margin:14px 0 4px}
+.cbw{position:relative;margin:14px 0 4px} .cbw button{position:relative;z-index:1;background:none} .cbw .pill2{background:#313131}
 .cbr{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px;margin:12px 0}
 .cbr div{padding:10px 8px;border:1px solid #2a2a2a;border-radius:13px;background:#141414;text-align:center}
 .cbr b{display:block;font-size:20px;font-weight:800} .cbr span{font-size:11.5px;color:var(--l3)}
@@ -611,18 +613,12 @@ transition:transform .36s cubic-bezier(.32,.72,0,1),opacity .2s;will-change:tran
 .opt:active{background:rgba(255,255,255,.06)}
 .cb.pop svg{animation:pop .36s cubic-bezier(.3,1.6,.5,1)}
 @keyframes pop{45%{transform:scale(1.32)}}
-@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes lvg{from{transform:scaleX(0)}}
+.lvin .lvbar i{transform-origin:left;animation:lvg .7s cubic-bezier(.2,.8,.2,1) both}
 @keyframes bsy{from{transform:translateX(-100%)}to{transform:translateX(250%)}}
 .bsy{position:fixed;left:0;right:0;top:0;z-index:50;height:2.5px;overflow:hidden;opacity:0;pointer-events:none;transition:opacity .2s}
 .bsy.on{opacity:1;transition-delay:.15s}
 .bsy::after{content:"";position:absolute;top:0;bottom:0;width:40%;background:linear-gradient(90deg,transparent,#fff,transparent);animation:bsy 1s ease-in-out infinite}
-/* pull to refresh */
-.ptr{position:fixed;left:50%;top:0;z-index:24;width:32px;height:32px;margin:6px 0 0 -16px;border-radius:50%;background:#222;
-box-shadow:0 3px 12px rgba(0,0,0,.55);opacity:0;pointer-events:none}
-.ptr i{position:absolute;inset:8px;border:2px solid #4a4a4a;border-top-color:#fff;border-radius:50%}
-.ptr.go i{border-color:#fff #fff #fff #4a4a4a}
-.ptr.spin{opacity:1;transform:translateY(40px)!important;transition:transform .25s}
-.ptr.spin i{animation:spin .7s linear infinite}
 /* toast */
 .tst{position:fixed;left:50%;bottom:calc(max(var(--sb),10px) + 128px);z-index:45;max-width:80vw;padding:10px 16px;border-radius:20px;
 background:rgba(44,44,46,.94);color:#fff;font-size:14px;font-weight:600;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.45);
@@ -630,9 +626,9 @@ opacity:0;transform:translate(-50%,8px);pointer-events:none;transition:opacity .
 .tst.on{opacity:1;transform:translate(-50%,0)}
 /* list header: Over / Under */
 .lhd{align-items:center} .lhd .lhr{display:inline-flex;align-items:center;gap:10px}
-.ou{display:inline-flex;padding:2px;border-radius:13px;background:#222}
-.ou button{height:22px;padding:0 11px;border:0;border-radius:11px;background:none;color:#8e8e8e;font:inherit;font-size:11.5px;font-weight:600;transition:background-color .2s,color .2s}
-.ou button[aria-pressed="true"]{background:#3a3a3c;color:#fff}
+.ou{position:relative;display:inline-flex;padding:2px;border-radius:13px;background:#222}
+.ou button{position:relative;z-index:1;height:22px;padding:0 11px;border:0;border-radius:11px;background:none;color:#8e8e8e;font:inherit;font-size:11.5px;font-weight:600;transition:color .25s}
+.ou button[aria-pressed="true"]{color:#fff} .ou .pill2{background:#3a3a3c}
 /* recent players */
 .rcs{display:flex;gap:6px;overflow-x:auto;padding:10px 15.3px 14px;scrollbar-width:none;border-bottom:1px solid #343434}
 .rcs::-webkit-scrollbar{display:none}
@@ -1006,7 +1002,7 @@ const unit = m => (D.markets || {})[m] || m;
 // long names shorten to an initial, as on the reference ("M. Diabaté")
 const nameOf = n => n.length > 13 && n.indexOf(" ") > 0 ? n[0] + ". " + n.slice(n.indexOf(" ") + 1) : n;
 const r1 = v => Math.round(v * 10) / 10;
-let RATES = new Map(), ROWS = new Map();
+let RATES = new Map(), ROWS = new Map(), OU_FROM = null, LIVE_IN = true;
 function rates(p, side) {
   side = side || ST.side;
   const k = p.id + "|" + side;
@@ -1139,7 +1135,7 @@ function banners() {
   [["fd", "FanDuel"], ["dk", "DraftKings"]].forEach(([k, n]) => {
     if (b[k] && b[k].stale) out.push(`${n} prices ${Math.round(b[k].age_min)} min old`);
   });
-  if ((Date.now() - iso(D.generated_at).getTime()) / 60000 > 10) out.push("Feed delayed");
+  if (FRESH && (Date.now() - iso(D.generated_at).getTime()) / 60000 > 10) out.push("Feed delayed");
   return out.map(t => `<div class="ban" role="status">${esc(t)}</div>`).join("");
 }
 function topRow() {
@@ -1199,8 +1195,8 @@ function render() {
   tabbar();
   comboPill();
 }
-function renderList() {
-  renderRows();
+function renderList(ivFrom) {
+  renderRows(ivFrom);
   const q = ST.q.trim();
   if (ST.view !== "injuries" && q.length >= 2) searchPlayers(q);
 }
@@ -1218,6 +1214,7 @@ function recentShow(on) {
   box.innerHTML = '<div class="lhd"><span>Recent</span></div><div class="rcs">' + r.map(([pid, name, team]) =>
     `<button class="rcp" data-vp="${pid}" aria-label="${esc(name)}"><span class="av">${head(pid)}</span><b>${esc(lastName(name))}</b><i>${esc(team)}</i></button>`).join("") + "</div>";
   lst.prepend(box);
+  swapIn(box);
 }
 function searchPlayers(q) {
   const n = ++SRCH_N;
@@ -1235,15 +1232,20 @@ function searchPlayers(q) {
     lst.appendChild(box);
   });
 }
-function renderRows() {
+function renderRows(ivFrom) {
   const lst = $("#lst"), ml = $(".ml");
   if (ml) ml.style.display = ST.view === "injuries" ? "none" : "";
   if (ST.view === "injuries") {
     lst.innerHTML = `<div class="seg ivs" role="group" aria-label="Show"><span class="pill2"></span><button data-iv="" aria-pressed="${ST.iv !== "lu" && ST.iv !== "ro"}">Injuries</button><button data-iv="lu" aria-pressed="${ST.iv === "lu"}">Lineups</button><button data-iv="ro" aria-pressed="${ST.iv === "ro"}">Roles</button></div>` +
       (ST.iv === "lu" ? lineupsView() : ST.iv === "ro" ? '<div id="rov"><div class="vsk"><div class="sk"></div><div class="sk"></div></div></div>' : injView());
     if (ST.iv === "ro") rolesView();
-    slide($(".ivs", lst), true);
-    $$("[data-iv]", lst).forEach(b => b.onclick = () => { if (ST.iv !== b.dataset.iv) { ST.iv = b.dataset.iv; save(); renderList(); } });
+    const ivs = $(".ivs", lst);
+    if (ivFrom !== undefined) {                               // the pill slides from the view it left; the body rises in
+      press("[data-iv]", x => x.dataset.iv === ivFrom, ivs); slide(ivs, true);
+      press("[data-iv]", x => x.dataset.iv === ST.iv, ivs); requestAnimationFrame(() => slide(ivs));
+      swapIn(ivs.nextElementSibling);
+    } else slide(ivs, true);
+    $$("[data-iv]", lst).forEach(b => b.onclick = () => { if (ST.iv !== b.dataset.iv) { const from = ST.iv; ST.iv = b.dataset.iv; save(); renderList(from); } });
     return;
   }
   const onDate = D.props.filter(p => (gameOf(p.gid) || {}).date === ST.date), list = listProps();
@@ -1267,9 +1269,9 @@ function renderRows() {
   // rows are built once per prop and side, then reused: re-sorting or switching tabs never re-decodes the headshots
   const frag = document.createDocumentFragment(), h = document.createElement("div");
   h.className = "lhd";
-  h.innerHTML = `<span>${list.length} props${ST.market === "live" ? ` · <span id="lupd">${ago(D.generated_at)}</span>` : ""}</span><span class="lhr">${ALL_TABS.indexOf(ST.market) >= 0 ? '<button class="lk" id="scb">Scorecard ›</button>' : ""}<span class="ou" role="group" aria-label="Side"><button data-side="over" aria-pressed="${ST.side !== "under"}">Over</button><button data-side="under" aria-pressed="${ST.side === "under"}">Under</button></span></span>`;
+  h.innerHTML = `<span>${list.length} props${ST.market === "live" ? ` · <span id="lupd">${ago(D.generated_at)}</span>` : ""}</span><span class="lhr">${ALL_TABS.indexOf(ST.market) >= 0 ? '<button class="lk" id="scb">Scorecard ›</button>' : ""}<span class="ou" role="group" aria-label="Side"><span class="pill2"></span><button data-side="over" aria-pressed="${ST.side !== "under"}">Over</button><button data-side="under" aria-pressed="${ST.side === "under"}">Under</button></span></span>`;
   const sc = $("#scb", h); if (sc) sc.onclick = scoreSheet;
-  $$("[data-side]", h).forEach(b => b.onclick = () => { if (ST.side !== b.dataset.side) { ST.side = b.dataset.side; save(); renderList(); tabbar(); } });
+  $$("[data-side]", h).forEach(b => b.onclick = () => { if (ST.side !== b.dataset.side) { OU_FROM = ST.side; ST.side = b.dataset.side; save(); renderList(); tabbar(); } });
   frag.appendChild(h);
   list.forEach(p => {
     if (ST.market === "live") { const t = document.createElement("template"); t.innerHTML = liveRow(p).trim(); frag.appendChild(t.content.firstChild); return; }
@@ -1279,6 +1281,15 @@ function renderRows() {
     frag.appendChild(e);
   });
   lst.replaceChildren(frag);
+  const ou = $(".ou", h);
+  if (OU_FROM && OU_FROM !== ST.side) {                       // a side switched: the pill slides over, the rows rise in
+    press("[data-side]", x => x.dataset.side === OU_FROM, ou); slide(ou, true);
+    press("[data-side]", x => x.dataset.side === ST.side, ou); requestAnimationFrame(() => slide(ou));
+    swapIn(lst);
+  } else slide(ou, true);
+  OU_FROM = null;
+  if (ST.market === "live" && LIVE_IN) { lst.classList.add("lvin"); setTimeout(() => lst.classList.remove("lvin"), 900); }
+  LIVE_IN = ST.market !== "live";
 }
 // ── injuries: the slate's listed rotation players (10+ minutes a game; Out, Doubtful, Questionable), most relevant
 // first. Boxes, from the games he missed for his team (nba_research.injury_report): for a starter, who started in his
@@ -1344,9 +1355,9 @@ let ROLES = null;
 const ROLE_ST = [["min", "Minutes", "min", "MIN"], ["fga", "FGA", "FGA", "FGA"], ["fg3a", "3PTA", "3PA", "3PTA"],
                  ["pot_ast", "Potential ast", "pot. ast", "POT AST"], ["reb_ch", "Reb chances", "reb ch.", "REB CH"]];
 const ROLE_TH = {min: 4, fga: 3, fg3a: 2, pot_ast: 2.5, reb_ch: 3};
-function rolesView() {
-  if (!ROLES) ROLES = fetch("player/roles.json").then(r => r.ok ? r.json() : null).catch(() => null);
-  ROLES.then(j => {
+const rolesLoad = () => ROLES || (ROLES = fetch("player/roles.json").then(r => r.ok ? r.json() : null).catch(() => null));
+function rolesView(swap) {
+  rolesLoad().then(j => {
     const el = $("#rov");
     if (!el || ST.view !== "injuries" || ST.iv !== "ro") return;
     const teams = new Set(D.games.filter(g => g.date === ST.date && (ST.gid === "all" || g.gid === ST.gid)).flatMap(g => [g.away, g.home]));
@@ -1357,10 +1368,15 @@ function rolesView() {
     const rows = ((j && j.rows) || []).filter(r => teams.has(r.team) && (ST.team === "all" || r.team === ST.team) && (!q || r.name.toLowerCase().indexOf(q) >= 0))
       .filter(r => { const v = stat(r); return v && Math.abs(v[0] - v[1]) >= th[k]; })
       .sort((a, b) => Math.abs(stat(b)[0] - stat(b)[1]) - Math.abs(stat(a)[0] - stat(a)[1]));
-    const sw = `<div class="chips rsw" role="group" aria-label="Stat">${ROLE_ST.map(([x, lab]) => `<button class="chip" data-rs="${x}" aria-pressed="${x === k}">${lab}</button>`).join("")}</div>`;
-    const bind = () => $$("[data-rs]", el).forEach(b => b.onclick = () => { if (b.dataset.rs !== k) { ST.rs = b.dataset.rs === "min" ? "" : b.dataset.rs; save(); rolesView(); } });
-    if (!rows.length) { el.innerHTML = sw + `<div class="empty"><b>${k === "reb_ch" ? "None yet this season" : "No role changes"}</b></div>`; bind(); return; }
-    el.innerHTML = sw + `<div class="lhd"><span>${rows.length} players</span><span>Last 3 games</span></div>` + rows.map(r => {
+    if (!$(".rsw", el)) {
+      el.innerHTML = `<div class="chips rsw" role="group" aria-label="Stat">${ROLE_ST.map(([x, lab]) => `<button class="chip" data-rs="${x}">${lab}</button>`).join("")}</div><div id="rol"></div>`;
+      $$("[data-rs]", el).forEach(b => b.onclick = () => { if (b.dataset.rs !== (ST.rs || "min")) { ST.rs = b.dataset.rs === "min" ? "" : b.dataset.rs; save(); rolesView(true); } });
+    }
+    press("[data-rs]", x => x.dataset.rs === k, el);
+    const rl = $("#rol", el);
+    if (swap) swapIn(rl);
+    if (!rows.length) { rl.innerHTML = `<div class="empty"><b>${k === "reb_ch" ? "None yet this season" : "No role changes"}</b></div>`; return; }
+    rl.innerHTML = `<div class="lhd"><span>${rows.length} players</span><span>Last 3 games</span></div>` + rows.map(r => {
       const v = stat(r), dv = v[0] - v[1], up = dv > 0, was = r.starts[2] ? r.starts[1] / r.starts[2] : 0;
       const why = [k !== "min" ? `${r.min[1]} → ${r.min[0]} min` : "",
                    r.starts[0] === 3 && was < .5 ? "Now starting" : r.starts[0] === 0 && was >= .5 ? "Lost his start" : "",
@@ -1370,7 +1386,6 @@ function rolesView() {
         <div class="lin">${v[1]} → <b>${v[0]}</b> ${sd[2]}${r.base === "last season" ? " <small>vs last season</small>" : ""}</div>
         <div class="ros">${why.join(" · ")}</div></div>
         <span class="rod ${up ? "up" : "dn"}">${up ? "▲" : "▼"}${Math.abs(dv).toFixed(1)}<i>${sd[3]}</i></span></button>`; }).join("");
-    bind();
   });
 }
 // ── lineups (nba_research.lineups, NBA.com's daily lineups): each team's five, Confirmed or Expected; a starter outside its
@@ -1397,7 +1412,7 @@ function tabbar() {
   if (!$(".tbc", tb)) tb.innerHTML = `<div class="tbc glass" role="group" aria-label="Views" data-pw="72"><span class="pill2"></span>${VIEWS.map(([k, l]) => `<button data-view="${k}" aria-pressed="${ST.view === k}">${ICON[k]}<span>${l}</span></button>`).join("")}</div><button class="tbf glass" id="filtb" aria-haspopup="dialog" aria-label="Sort and filter"></button>`;
   press("[data-view]", b => b.dataset.view === ST.view, tb);
   $("#filtb").innerHTML = ICON.menu + (fo ? `<b>${fo}</b>` : "");
-  $$("[data-view]", tb).forEach(b => b.onclick = () => { if (ST.view === b.dataset.view) { window.scrollTo({top: 0, behavior: "smooth"}); return; } ST.view = b.dataset.view; save(); tabbar(); renderList(); window.scrollTo(0, 0); });
+  $$("[data-view]", tb).forEach(b => b.onclick = () => { if (ST.view === b.dataset.view) { window.scrollTo({top: 0, behavior: "smooth"}); return; } ST.view = b.dataset.view; save(); tabbar(); renderList(); window.scrollTo(0, 0); swapIn($("#lst")); });
   $("#filtb").onclick = filterSheet;
   slide($(".tbc", tb), !tb.dataset.on); tb.dataset.on = 1;
 }
@@ -1413,9 +1428,9 @@ function bindTop() {
   $("#dvpb").onclick = () => dvpSheet();
 }
 function bindHead() {
-  $$("[data-market]").forEach(b => b.onclick = () => { if (ST.market === b.dataset.market) return; ST.market = b.dataset.market; save(); press("[data-market]", x => x === b); slide($("#mtl")); renderList(); });
+  $$("[data-market]").forEach(b => b.onclick = () => { if (ST.market === b.dataset.market) return; ST.market = b.dataset.market; save(); press("[data-market]", x => x === b); slide($("#mtl")); renderList(); swapIn($("#lst")); });
   const gcs = $("#gcs");
-  $$("[data-gid]", gcs).forEach(b => b.onclick = () => { ST.gid = ST.gid === b.dataset.gid ? "all" : b.dataset.gid; save(); press("[data-gid]", x => x.dataset.gid === ST.gid, gcs); renderList(); });
+  $$("[data-gid]", gcs).forEach(b => b.onclick = () => { ST.gid = ST.gid === b.dataset.gid ? "all" : b.dataset.gid; save(); press("[data-gid]", x => x.dataset.gid === ST.gid, gcs); renderList(); swapIn($("#lst")); });
   $("#dayb").onclick = daySheet;
 }
 function resetFilters() { Object.assign(ST, {team: "all", book: "all", lmin: "", lmax: "", omin: "", omax: "", watch: "", q: "", gid: "all"}); const q = $("#q"); if (q) { q.value = ""; q.closest(".sx").classList.remove("has"); $("#qx").hidden = true; } save(); render(); }
@@ -1653,6 +1668,8 @@ function openProp(id, push) {
 // back animates by itself, so after one the page closes with no second slide
 let EDGE_T = 0;
 const EASE = "cubic-bezier(.32,.72,0,1)", REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+// new content rises into place: a tab, a side, a view or a stat switched (not a background refresh)
+const swapIn = el => { if (el && !REDUCED && !document.hidden) el.animate([{opacity: 0, transform: "translateY(6px)"}, {opacity: 1, transform: "none"}], {duration: 260, easing: EASE}); };
 function closeProp(instant) {
   const pg = $("#pg"), sh = $(".shade");
   clearTimeout(PX && PX.lazy);
@@ -1857,7 +1874,9 @@ function projScoreSheet() {
 function histChart(p) {
   const H = p.hist || {}, books = [["fd", "FanDuel", "#2d9bff"], ["dk", "DraftKings", "#62d26f"]].filter(([b]) => (H[b] || []).length);
   if (!books.length) return '<div class="empty" style="padding:16px 0"><b>No history yet</b></div>';
-  const ms = t => iso(t).getTime(), end = Math.max(Date.now() - 60000, ...books.map(([b]) => ms(H[b][H[b].length - 1][0])));
+  // a point's time: minutes since the payload's hist_t0 (nba_research's compact history), or an ISO string (older files)
+  const T0 = D.hist_t0 ? iso(D.hist_t0).getTime() : 0, ms = t => typeof t === "number" ? T0 + t * 60000 : iso(t).getTime();
+  const end = Math.max(Date.now() - 60000, ...books.map(([b]) => ms(H[b][H[b].length - 1][0])));
   const t0 = Math.min(...books.map(([b]) => ms(H[b][0][0])));
   const vals = books.flatMap(([b]) => H[b].map(x => x[1]));
   let lo = Math.min(...vals), hi = Math.max(...vals);
@@ -2210,13 +2229,16 @@ function refsRow(p, g) {
     const el = $("#gsr"), c = crewOf(j, g.gid);
     if (!el || !PX || PX.p !== p || !c || !c.avg) return;
     el.innerHTML = `<div class="kv"><span>Refs</span><b>Fouls ${signed(c.avg[0])} · FTA ${signed(c.avg[1])} · Pts ${signed(c.avg[2])}</b></div>`;
+    swapIn(el);
   });
 }
 function refCard() {
   const el = $("#rfc"); if (!el || !MUP) return;
   const p = MUP.p, g = gameOf(p.gid);
+  if (!el.innerHTML) el.innerHTML = '<div class="shh"><b>REFEREES</b></div><div class="vsk"><div class="sk"></div><div class="sk"></div></div>';
   refsLoad().then(j => {
     if (!MUP || MUP.p !== p) return;
+    requestAnimationFrame(() => swapIn(el.querySelector("table, .empty")));
     const c = crewOf(j, g.gid), cell = (d, i) => d ? `<td class="${d[i] > .05 ? "up" : d[i] < -.05 ? "dn" : ""}">${signed(d[i])}</td>` : "<td>–</td>";
     const head = '<div class="shh"><b>REFEREES</b></div>';
     if (!c) { el.innerHTML = head + '<div class="empty"><b>Not posted yet</b></div>'; return; }
@@ -2246,11 +2268,15 @@ function comboPill() {
   let b = $("#cbp");
   const n = D ? comboLegs().length : 0;
   if (!b) { b = document.createElement("button"); b.id = "cbp"; b.className = "cbp glass"; b.setAttribute("aria-haspopup", "dialog"); b.onclick = comboSheet; document.body.appendChild(b); }
+  const was = b.hidden ? 0 : +(b.dataset.n || 0);
   b.hidden = !n; document.body.classList.toggle("cbon", n > 0);       // room under the last row for the button
-  b.innerHTML = `${ICON.combo}<span>Combo</span><b>${n}</b>`;
+  b.innerHTML = `${ICON.combo}<span>Combo</span><b>${n}</b>`; b.dataset.n = n;
+  if (REDUCED || document.hidden || !n || n === was) return;
+  if (!was) b.animate([{opacity: 0, transform: "translateY(16px) scale(.9)"}, {opacity: 1, transform: "none"}], {duration: 420, easing: EASE});
+  else $("b", b).animate([{transform: "scale(1)"}, {transform: "scale(1.35)"}, {transform: "scale(1)"}], {duration: 320, easing: "ease-out"});
 }
 function comboSheet() {
-  const draw = s => {
+  const draw = (s, from) => {
     const legs = comboLegs().map(l => ({l: l, p: propFor(l.id)}));
     if (!legs.length) { closeSheet(); return; }
     const L = legs.map(({l, p}) => ({logs: logsOf(p).map(x => ({gid: x.gid, date: x.date, v: statValue(x, p.market)})), line: l.line, side: l.side}));
@@ -2262,12 +2288,18 @@ function comboSheet() {
       ${C.games.slice().reverse().map(x => { const lg = logsOf(legs[0].p).find(y => y.gid === x.gid) || {};
         return `<tr><td>${esc(x.date.slice(5).replace("-", "/"))} <small>${lg.home ? "" : "@"}${esc(lg.opp || "")}</small></td>${x.vals.map((v, i) => `<td class="${x.hits[i] ? "up" : "dn"}">${v}</td>`).join("")}<td>${x.all ? "✓" : ""}</td></tr>`; }).join("")}</tbody></table>` : "";
     s.innerHTML = `<div class="grab" aria-hidden="true"></div><h2 id="sht">Combo</h2>${legs.map(legRow).join("")}
-      <div class="seg cbw" role="group" aria-label="Games">${wins.map(([k, lab]) => `<button data-cw="${k}" aria-pressed="${k === CMB_W}">${lab}</button>`).join("")}</div>
-      ${legs.length < 2 ? '<div class="empty"><b>Add another prop</b></div>' : !C.n ? `<div class="cbr"><div><b class="num">–</b><span>No games together</span></div><div><b class="num">${C.indep === null ? "–" : Math.round(C.indep * 100) + "%"}</b><span>If unrelated</span></div></div>` : `
-      <div class="cbr"><div><b class="num">${C.k}/${C.n}</b><span>All hit</span></div><div><b class="num">${Math.round(C.rate * 100)}%</b><span>Together</span></div><div><b class="num">${Math.round(C.indep * 100)}%</b><span>If unrelated</span></div></div>${tbl}`}
+      <div class="seg cbw" role="group" aria-label="Games"><span class="pill2"></span>${wins.map(([k, lab]) => `<button data-cw="${k}" aria-pressed="${k === CMB_W}">${lab}</button>`).join("")}</div>
+      <div class="cbres">${legs.length < 2 ? '<div class="empty"><b>Add another prop</b></div>' : !C.n ? `<div class="cbr"><div><b class="num">–</b><span>No games together</span></div><div><b class="num">${C.indep === null ? "–" : Math.round(C.indep * 100) + "%"}</b><span>If unrelated</span></div></div>` : `
+      <div class="cbr"><div><b class="num">${C.k}/${C.n}</b><span>All hit</span></div><div><b class="num">${Math.round(C.rate * 100)}%</b><span>Together</span></div><div><b class="num">${Math.round(C.indep * 100)}%</b><span>If unrelated</span></div></div>${tbl}`}</div>
       <div class="acts stk"><button class="btn" id="cb-clr">Clear</button><button class="btn pri" id="cb-ok">Done</button></div>`;
     $$("[data-rm]", s).forEach(b => b.onclick = () => { comboSave(comboLegs().filter(l => l.id !== b.dataset.rm)); syncCmb(); draw(s); });
-    $$("[data-cw]", s).forEach(b => b.onclick = () => { CMB_W = b.dataset.cw; draw(s); });
+    const seg = $(".cbw", s);
+    if (from && from !== CMB_W) {                              // the pill slides from the window it left; the numbers rise in
+      press("[data-cw]", x => x.dataset.cw === from, seg); slide(seg, true);
+      press("[data-cw]", x => x.dataset.cw === CMB_W, seg); requestAnimationFrame(() => slide(seg));
+      swapIn($(".cbres", s));
+    } else slide(seg, true);
+    $$("[data-cw]", s).forEach(b => b.onclick = () => { if (CMB_W !== b.dataset.cw) { const f = CMB_W; CMB_W = b.dataset.cw; draw(s, f); } });
     $("#cb-clr", s).onclick = () => { comboSave([]); syncCmb(); closeSheet(); };
     $("#cb-ok", s).onclick = closeSheet;
   };
@@ -2685,7 +2717,20 @@ const sigOf = p => { const g = gameOf(p.gid) || {};
 const pageSig = id => { const p = propFor(id); if (!p) return ""; const g = gameOf(p.gid) || {};
   const around = JSON.stringify([D.injuries[g.date + "|" + p.pid] || null, (D.inj_report || {})[g.date + "|" + p.team] || null, D.absences[g.date + "|" + p.team] || null]);
   return p.v ? "v" + around : sigOf(p) + JSON.stringify(g) + around + JSON.stringify([D.related[p.id] || null, D.sources.books]); };
-let LOADED_AT = 0, PDOWN = false, REDRAW = false;
+let LOADED_AT = 0, PDOWN = false, REDRAW = false, FRESH = false, SAVED_AT = 0;
+// the last data this phone loaded (Cache Storage), drawn at once on a launch while the fresh copy downloads
+const CACHE = "pickz-data";
+function cacheRead() {
+  try { return caches.open(CACHE).then(c => c.match("nba_props.json")).then(r => r ? r.json() : null).catch(() => null); }
+  catch (e) { return Promise.resolve(null); }
+}
+function cacheWrite(text) {
+  if (Date.now() - SAVED_AT < 600000) return;               // at most every 10 minutes: it is 4-5 MB
+  SAVED_AT = Date.now();
+  try { caches.open(CACHE).then(c => c.put("nba_props.json", new Response(text, {headers: {"Content-Type": "application/json"}}))).catch(() => {}); } catch (e) {}
+}
+// once the fresh data is in: what the other views read, so they open without a wait
+function prefetch() { refsLoad(); rolesLoad(); playerIndex(); }
 function redrawPage() {
   if (PDOWN) { REDRAW = true; return; }                  // mid-drag or mid-tap: after the finger lifts
   REDRAW = false;
@@ -2698,24 +2743,32 @@ document.addEventListener("pointerdown", () => { PDOWN = true; }, true);
 ["pointerup", "pointercancel"].forEach(t => document.addEventListener(t, () => { PDOWN = false; if (REDRAW) setTimeout(redrawPage, 0); }, true));
 function load() {
   if (!D) { LOADING = true; render(); }
-  return fetch("nba_props.json?t=" + Date.now(), {cache: "no-store"}).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-    .then(j => {
-      const first = !D, was = D ? new Map(D.props.map(p => [p.id, sigOf(p)])) : null, pg0 = CUR && D ? pageSig(CUR) : null;
-      D = j; ERR = null; LOADING = false; LOADED_AT = Date.now(); VP = new Map(); REFS = null; ROLES = null;
-      if (was) {
-        const now = new Map(D.props.map(p => [p.id, p])), memo = new Map();
-        const same = k => { const id = k.split("|").slice(0, 3).join("|");
-          if (!memo.has(id)) { const p = now.get(id); memo.set(id, !!p && was.get(id) === sigOf(p)); } return memo.get(id); };
-        ROWS = new Map([...ROWS].filter(([k]) => same(k))); RATES = new Map([...RATES].filter(([k]) => same(k)));
-      } else { RATES = new Map(); ROWS = new Map(); }
-      const y = window.scrollY;
-      render(); if (!first) window.scrollTo(0, y);
-      if (CUR && pageSig(CUR) !== pg0) redrawPage();
-      $("#live").textContent = "Props updated";
-      if (first && HASH_P) { history.replaceState(null, "", hashState()); openProp(HASH_P); }
+  const boot = !FRESH;
+  if (boot) { busy(true); cacheRead().then(j => { if (j && !D && !FRESH) apply(j); }); }
+  return fetch("nba_props.json?t=" + Date.now(), {cache: "no-store"}).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); })
+    .then(text => {
+      const j = JSON.parse(text);
+      FRESH = true; apply(j); cacheWrite(text);
+      if (boot) { busy(false); setTimeout(prefetch, 1500); }
       return true;
     })
-    .catch(e => { LOADING = false; ERR = e.message || String(e); if (!D) render(); else { const u = $("#upd"); if (u) u.textContent = "Refresh failed"; } return false; });
+    .catch(e => { if (boot) busy(false); LOADING = false; ERR = e.message || String(e); if (!D) render(); else { const u = $("#upd"); if (u) u.textContent = "Refresh failed"; } return false; });
+}
+// a payload onto the page (the cached copy at a launch, then each fresh one)
+function apply(j) {
+  const first = !D, was = D ? new Map(D.props.map(p => [p.id, sigOf(p)])) : null, pg0 = CUR && D ? pageSig(CUR) : null;
+  D = j; ERR = null; LOADING = false; LOADED_AT = Date.now(); VP = new Map(); REFS = null; ROLES = null;
+  if (was) {
+    const now = new Map(D.props.map(p => [p.id, p])), memo = new Map();
+    const same = k => { const id = k.split("|").slice(0, 3).join("|");
+      if (!memo.has(id)) { const p = now.get(id); memo.set(id, !!p && was.get(id) === sigOf(p)); } return memo.get(id); };
+    ROWS = new Map([...ROWS].filter(([k]) => same(k))); RATES = new Map([...RATES].filter(([k]) => same(k)));
+  } else { RATES = new Map(); ROWS = new Map(); }
+  const y = window.scrollY;
+  render(); if (!first) window.scrollTo(0, y);
+  if (CUR && pageSig(CUR) !== pg0) redrawPage();
+  $("#live").textContent = "Props updated";
+  if (first && HASH_P) { history.replaceState(null, "", hashState()); openProp(HASH_P); }
 }
 // a thin bar across the top while something a tap asked for is loading
 let BUSY = 0, OPEN_N = 0;
@@ -2731,31 +2784,6 @@ function toast(t) {
   if (!el) { el = document.createElement("div"); el.id = "tst"; el.className = "tst"; el.setAttribute("aria-hidden", "true"); document.body.appendChild(el); }
   el.textContent = t; el.classList.add("on"); $("#live").textContent = t;
   clearTimeout(TOAST_T); TOAST_T = setTimeout(() => el.classList.remove("on"), 1700);
-}
-// pull the list down from the top to refresh
-function pullRefresh() {
-  const ind = document.createElement("div");
-  ind.className = "ptr"; ind.setAttribute("aria-hidden", "true"); ind.innerHTML = "<i></i>"; document.body.appendChild(ind);
-  let y0 = null, dy = 0, busy = false;
-  const reset = () => { ind.style.transform = ""; ind.style.opacity = ""; ind.classList.remove("go"); };
-  document.addEventListener("touchstart", e => {
-    y0 = !busy && D && window.scrollY <= 0 && !CUR && !MUP && $("#sheet").hidden && e.touches.length === 1 && !e.target.closest(".gcs,.mt,input") ? e.touches[0].clientY : null;
-    dy = 0; if (y0 !== null) { const h = $(".lh"); ind.style.top = (h ? h.getBoundingClientRect().bottom : 0) + "px"; }
-  }, {passive: true});
-  document.addEventListener("touchmove", e => {
-    if (y0 === null) return;
-    dy = e.touches[0].clientY - y0;
-    if (dy <= 0 || window.scrollY > 0) { reset(); return; }
-    ind.style.transform = `translateY(${Math.min(dy, 140) * .45}px) rotate(${dy * 2}deg)`; ind.style.opacity = Math.min(1, dy / 70);
-    ind.classList.toggle("go", dy > 80);
-  }, {passive: true});
-  document.addEventListener("touchend", () => {
-    if (y0 === null) return;
-    y0 = null;
-    if (dy <= 80) { reset(); return; }
-    busy = true; ind.classList.add("spin");
-    load().then(ok => { toast(ok ? "Updated" : "Couldn't refresh"); }).finally(() => { busy = false; ind.classList.remove("spin"); reset(); });
-  }, {passive: true});
 }
 const HASH_P = readHash();
 history.scrollRestoration = "manual";     // Back must not make Safari re-scroll the list
@@ -2787,7 +2815,6 @@ document.addEventListener("DOMContentLoaded", () => {
     warm.add(pid); const im = new Image(); im.src = heroSrc(pid); if (im.decode) im.decode().catch(() => {});
   }, {passive: true});
   load();
-  pullRefresh();
   setInterval(load, 120000);
   setInterval(() => { if (!D) return; const u = $("#upd"), l = $("#lupd"); if (u) u.textContent = ago(D.generated_at); if (l) l.textContent = ago(D.generated_at); }, 30000);
   // back from another app: the 2-minute timer was asleep, so catch up at once
