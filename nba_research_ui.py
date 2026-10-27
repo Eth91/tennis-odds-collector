@@ -250,6 +250,41 @@ svg.ch g.br:focus{outline:none} svg.ch g.br:focus-visible rect{stroke:var(--blue
 .mrn small{display:block;margin-top:2px;font-size:12px;color:#9a9a9a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .seg.mseg{flex:none;width:146px;height:34px;margin:0;padding:0 2.5px}
 .seg.mseg button{height:27px;border-radius:13.5px;font-size:12px}
+/* the Matchup page: a full page over the player's (the reference's measures, 402 pt wide) */
+#mp{z-index:32}
+.mpc{margin:6px 15.3px 0;padding:14px 14px 12px;border:1px solid #2a2a2a;border-radius:16px;background:linear-gradient(#171717,#111)}
+.mpg{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+.mpg b{display:block;font-size:17px;font-weight:700} .mpg span{display:block;margin-top:2px;font-size:13px;color:#9a9a9a}
+.mpc .kv{min-height:40px;font-size:14px;border-bottom-color:#262626}
+.mpft{display:flex;align-items:center;gap:10px;margin-top:10px;padding-top:12px;border-top:1px solid #262626}
+.mpft>div{flex:1} .mpft span{display:block;font-size:15px;color:#8e8e8e} .mpft b{display:block;margin-top:2px;font-size:17px;font-weight:500;color:#8e8e8e}
+.mpft .cb{background:#1c1c1c}
+.mpt{margin:40px 15.3px 0;font-size:21px;font-weight:700;letter-spacing:-.2px}
+.mpf{display:flex;align-items:center;gap:9px;margin:13px 15.3px 0;font-size:15.5px;font-weight:600;white-space:nowrap}
+.dd{position:relative;display:inline-flex;align-items:center;gap:9px;height:27.3px;padding:0 12px;border:1px solid rgba(255,255,255,.2);border-radius:14px;
+font-size:13.8px;font-weight:500}
+.dd svg{width:11px;height:7px}
+.dd select{position:absolute;inset:0;width:100%;height:100%;opacity:0;font-size:16px;-webkit-appearance:none;appearance:none}
+table.vs{width:100%;margin-top:10px;border-collapse:collapse;table-layout:fixed}
+.vs th{height:30px;padding:0;text-align:left;font-family:system-ui,-apple-system,"Roboto Condensed",sans-serif;font-stretch:66%;font-size:12.6px;
+font-weight:400;color:#9a9a9a;border-bottom:1px solid #343434}
+.vs td{height:42.8px;padding:0;font-size:15.4px;border-bottom:1px solid #343434;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vs th:first-child,.vs td:first-child{padding-left:15.3px}
+.vs td i{font-style:normal;font-size:12.5px;margin-right:4px;vertical-align:1px}
+.vs td.cd{font-size:13px;color:#9a9a9a} .vs td.cd b{font-weight:400;color:#e6e6e6}
+.vs tr[data-g]{cursor:pointer} .vs tr[data-g]:active td{background:#161616}
+.vsm{display:flex;align-items:center;gap:9px;height:26.6px;margin:20px auto 0;padding:0 13px;border:1px solid rgba(255,255,255,.2);border-radius:13.3px;
+background:none;color:#fff;font-size:13.8px;font-weight:500}
+.vsm svg{width:11px;height:7px;transition:transform .25s} .vsm[aria-expanded="true"] svg{transform:rotate(180deg)}
+.vsk{margin:12px 15.3px 0} .vsk .sk{height:34px;margin-bottom:8px}
+/* the box score sheet: one height whatever is in it, so it never resizes while it rises; a skeleton of the box's shape */
+.sheet[data-kind="box"]{height:86vh}
+.sheet[data-kind="box"] .seg{position:relative}
+.sheet[data-kind="box"] .seg button{position:relative;z-index:1;background:none}
+.sheet[data-kind="box"] .seg .pill2{background:#313131}
+.bxsk i,.bxsk b{display:block;border-radius:8px;background:linear-gradient(90deg,#141414,#1d1d1d,#141414);background-size:200% 100%;animation:sk 1.2s linear infinite}
+.bxsk i:nth-child(1){width:62%;height:30px;margin:2px auto 8px} .bxsk i:nth-child(2){width:34%;height:14px;margin:0 auto 14px}
+.bxsk i:nth-child(3){height:42px;border-radius:21px;margin-bottom:12px} .bxsk b{height:34px;margin-bottom:4px}
 /* the box score sheet: a team's players, the name column pinned while the stats scroll sideways */
 .bxh{display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px}
 .bxh img{width:26px;height:26px}
@@ -757,6 +792,7 @@ function hashState() {
   const h = new URLSearchParams();
   Object.keys(ST).forEach(k => { if (ST[k] !== "" && ST[k] !== null && ST[k] !== "all") h.set(k, ST[k]); });
   if (CUR) h.set("p", CUR);
+  if (MUP) h.set("mu", "1");
   return "#" + h.toString();
 }
 function readHash() {
@@ -1284,6 +1320,8 @@ const ICON = {
   markets: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2.5v19h19"/><path d="m5.5 16 4-6.5 4.5 4 6-7.5"/><circle cx="9.5" cy="9.5" r="1.3" fill="currentColor"/><circle cx="14" cy="13.5" r="1.3" fill="currentColor"/><circle cx="20" cy="6" r="1.3" fill="currentColor"/></svg>',
   people: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9" r="2.6"/><path d="M15.8 14.2c2.6-.3 4.3 1.3 4.8 4.3"/></svg>',
   injuries: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.5" y="2.5" width="19" height="19" rx="5"/><path d="M10 6.5h4V10h3.5v4H14v3.5h-4V14H6.5v-4H10z"/></svg>',
+  ham: '<svg viewBox="0 0 22 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M2 2.5h18M2 8h18M2 13.5h18"/></svg>',
+  info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 10.5v8"/><circle cx="12" cy="6.2" r=".9" fill="currentColor" stroke="none"/></svg>',
   down: '<svg viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m2 2 4 4 4-4"/></svg>'};
 const favs = () => { try { return JSON.parse(localStorage.getItem("pickz_fav") || "[]"); } catch (e) { return []; } };
 function toggleFav(pid) {
@@ -1493,31 +1531,63 @@ function bxTable(t, p) {
     <tr class="tot"><td>Team</td>${bxTot(t.tot).map(td).join("")}</tr></tbody></table></div>
     ${t.dnp.length ? `<div class="bxn"><b>DNP</b>${t.dnp.map(([nm, why]) => esc(nameOf(nm)) + (why !== "DNP" ? ` <small>(${esc(injReason(why))})</small>` : "")).join(", ")}</div>` : ""}`;
 }
+// box scores are fetched once and kept: a finger landing on a bar starts its fetch, and the bars on screen are
+// fetched while the page is idle, so a tap usually finds the box already here
+const BOXC = new Map();
+function boxGet(gid) {
+  if (!BOXC.has(gid)) BOXC.set(gid, fetch(`box/${encodeURIComponent(gid)}.json`)
+    .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .catch(e => { BOXC.delete(gid); throw e; }));
+  return BOXC.get(gid);
+}
+let BOX_WARM = 0;
+function boxWarm(logs) {
+  clearTimeout(BOX_WARM);
+  BOX_WARM = setTimeout(() => logs.slice(-12).reverse().forEach((l, i) => setTimeout(() => boxGet(l.gid).catch(() => {}), i * 60)), 900);
+}
+function boxHtml(b, cur, p) {
+  const [a, h] = b.teams;
+  const d = iso(b.date + "T12:00:00Z").toLocaleDateString("en-US", {weekday: "short", month: "numeric", day: "numeric", timeZone: "UTC"});
+  return `<div class="bxh">${logo(a.tri, "")}<b>${esc(a.tri)}</b><span class="num${a.pts > h.pts ? "" : " lo"}">${a.pts}</span><i>–</i><span class="num${h.pts > a.pts ? "" : " lo"}">${h.pts}</span><b>${esc(h.tri)}</b>${logo(h.tri, "")}</div>
+    <div class="bxs">${esc(d)} · ${esc(b.status)}</div>
+    <div class="seg" role="group" aria-label="Team"><span class="pill2"></span>${b.teams.map(t => `<button data-bt="${esc(t.tri)}" aria-pressed="${t.tri === cur}">${logo(t.tri, "")}${esc(t.tri)}</button>`).join("")}</div>
+    <div id="bxt">${bxTable(b.teams.find(t => t.tri === cur), p)}</div>`;
+}
+// The sheet rises once, at its full height, with the box in it: when the box is not here within 140 ms it rises with a
+// skeleton of the same shape and the box fades in over it, so nothing changes size while it moves
 function boxSheet(gid, team, p) {
-  openSheet('<h2 id="sht">Box Score</h2><div class="note" style="font-size:14px">Loading…</div>', () => {});
-  const s = $("#sheet"), n = SHEET_N;
-  s.dataset.kind = "box";
-  const fill = html => {
-    if (SHEET_N !== n || s.hidden) return false;
-    s.innerHTML = '<div class="grab" aria-hidden="true"></div><h2 id="sht">Box Score</h2>' + html + '<div class="acts"><button class="btn pri" id="bx-ok">Done</button></div>';
+  const pr = boxGet(gid), wait = new Promise(r => setTimeout(r, 140, null));
+  const frame = body => `<h2 id="sht">Box Score</h2><div class="bxb">${body}</div><div class="acts stk"><button class="btn pri" id="bx-ok">Done</button></div>`;
+  const bind = (s, b) => {
     $("#bx-ok", s).onclick = closeSheet;
-    return true;
-  };
-  fetch(`box/${encodeURIComponent(gid)}.json`).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }).then(b => {
-    const [a, h] = b.teams;
-    let cur = b.teams.some(t => t.tri === team) ? team : h.tri;
-    const d = iso(b.date + "T12:00:00Z").toLocaleDateString("en-US", {weekday: "short", month: "numeric", day: "numeric", timeZone: "UTC"});
-    const ok = fill(`<div class="bxh">${logo(a.tri, "")}<b>${esc(a.tri)}</b><span class="num${a.pts > h.pts ? "" : " lo"}">${a.pts}</span><i>–</i><span class="num${h.pts > a.pts ? "" : " lo"}">${h.pts}</span><b>${esc(h.tri)}</b>${logo(h.tri, "")}</div>
-      <div class="bxs">${esc(d)} · ${esc(b.status)}</div>
-      <div class="seg" role="group" aria-label="Team">${b.teams.map(t => `<button data-bt="${esc(t.tri)}" aria-pressed="${t.tri === cur}">${logo(t.tri, "")}${esc(t.tri)}</button>`).join("")}</div>
-      <div id="bxt">${bxTable(b.teams.find(t => t.tri === cur), p)}</div>`);
-    if (!ok) return;
+    if (!b) return;
+    let cur = b.teams.some(t => t.tri === team) ? team : b.teams[1].tri;
+    const seg = $(".seg", s);
+    slide(seg, true);
     $$("[data-bt]", s).forEach(btn => btn.onclick = () => {
       if (cur === btn.dataset.bt) return;
-      cur = btn.dataset.bt; press("[data-bt]", x => x === btn, s);
-      $("#bxt", s).innerHTML = bxTable(b.teams.find(t => t.tri === cur), p);
+      cur = btn.dataset.bt; press("[data-bt]", x => x === btn, s); slide(seg);
+      const t = $("#bxt", s);
+      t.innerHTML = bxTable(b.teams.find(x => x.tri === cur), p);
+      if (!REDUCED) t.animate([{opacity: .35}, {opacity: 1}], {duration: 200, easing: "ease-out"});
     });
-  }).catch(() => fill('<div class="empty"><b>Box score not available yet</b></div>'));
+  };
+  const missing = '<div class="empty"><b>Box score not available yet</b></div>';
+  const cur0 = b => b.teams.some(t => t.tri === team) ? team : b.teams[1].tri;
+  Promise.race([pr, wait]).then(b => {
+    if (b) { openSheet(frame(boxHtml(b, cur0(b), p)), s => bind(s, b)); $("#sheet").dataset.kind = "box"; return; }
+    openSheet(frame('<div class="bxsk"><i></i><i></i><i></i>' + "<b></b>".repeat(12) + "</div>"), s => bind(s, null));
+    const s = $("#sheet"), n = SHEET_N;
+    s.dataset.kind = "box";
+    const put = html => {
+      if (SHEET_N !== n || s.hidden) return null;
+      const box = $(".bxb", s);
+      box.innerHTML = html;
+      if (!REDUCED) box.animate([{opacity: 0}, {opacity: 1}], {duration: 220, easing: "ease-out"});
+      return box;
+    };
+    pr.then(b2 => { if (put(boxHtml(b2, cur0(b2), p))) bind(s, b2); }, () => put(missing));
+  }, () => openSheet(frame(missing), s => bind(s, null)));
 }
 // The page is built once per prop (header, tabs, hero, availability) and its live parts — cells, chart, window capsule,
 // chips, books, game log — are redrawn in place on every change, so the photo never reloads and the scroll never jumps.
@@ -1577,6 +1647,7 @@ function renderProp(mode) {
   $("#pf", pg).onclick = () => playerFilters(p, logs, without);
   const cw = $("#chw");
   cw.onclick = e => { const gb = e.target.closest("g.br"); if (gb) boxSheet(gb.dataset.gid, gb.dataset.tm, p); };
+  cw.onpointerdown = e => { const gb = e.target.closest("g.br"); if (gb) boxGet(gb.dataset.gid).catch(() => {}); };
   updateProp(mode || true);
 }
 // teammates on his team now, most minutes first: [{key, pid, name, since, played, mpg, gp, team}] (D.mates,
@@ -1633,6 +1704,7 @@ function updateProp(mode) {
   const cw = $("#chw"), sl = cw.scrollLeft, atEnd = first || sl + cw.clientWidth >= cw.scrollWidth - 4;
   cw.innerHTML = chart2(win, p.market, line, ov, !first);
   cw.scrollLeft = atEnd ? cw.scrollWidth : sl;
+  boxWarm(win);
   // window capsule
   wins.forEach(([k]) => {
     const w = windowed(base, k, D.season, p.opp), ss = hitSummary(w.map(l => statValue(l, p.market)), line), r = sideRate(ss, side);
@@ -1737,7 +1809,7 @@ function bindLive(p, logs, without) {
   $("#psb", pg).onclick = () => openSheet(`<h2 id="sht">Position rank</h2>${c.pos_rank
     ? `<div class="kv"><span>Rank</span><b>${ord(c.pos_rank)} of ${c.pos_n}</b></div><div class="kv"><span>Group</span><b>${esc((GRPN[MU_GROUP(c.pos)] || "position").replace(/^./, x => x.toUpperCase()))}</b></div><div class="kv"><span>Stat</span><b>${esc(NAME[p.market])} per game</b></div><div class="kv"><span>Season</span><b>${esc(c.pos_season || "")}</b></div>`
     : '<div class="empty"><b>Not ranked yet</b></div>'}<div class="acts"><button class="btn pri" id="ok1">Done</button></div>`, s2 => { $("#ok1", s2).onclick = closeSheet; });
-  $("#mub", pg).onclick = () => matchupSheet(p, ST.side);
+  $("#mub", pg).onclick = () => openMatchup(p);
   const pjsc = $("#pjsc", pg); if (pjsc) pjsc.onclick = projScoreSheet;
   $$(".rp", pg).forEach(gp => {
     const k = gp.dataset.rk, lo = +gp.dataset.lo, hi = +gp.dataset.hi, fil = $(".fil", gp), rv = $(".rv", gp);
@@ -1806,15 +1878,92 @@ function lineSheet(p) {
     $("#ls-ok", s).onclick = () => { closeSheet(); updateProp(); };
   });
 }
-function matchupSheet(p, side) {
-  const c = p.ctx || {}, g = gameOf(p.gid), gr = grade(p, side), rows = [];
-  const row = (lab, r, n, note) => `<div class="kv"><span>${lab}</span><b>${r ? `<span class="rk ${rankCls(r, n, side) === "good" ? "g" : rankCls(r, n, side) === "bad" ? "r" : "n"}">${ord(r)}</span>` : "—"}</b></div>`;
-  rows.push(row(`DvP · ${esc(short(p.market))} to ${GRPN[c.group] || "his position"}`, c.dvp_rank, c.teams, c.dvp_rank ? `${esc(p.opp)} allows the ${ord(c.teams - c.dvp_rank + 1)}-most ${esc(short(p.market))} to ${GRPN[c.group]} per possession.` : (p.market === "threes" ? "Not computed for threes." : "")));
-  rows.push(row("Def Rank · points allowed", c.def_rank, c.teams, ""));
-  rows.push(`<div class="kv"><span>Pace</span><b>${c.pace_rank ? ord(c.pace_rank) + " fastest" : "—"}</b></div>`);
-  if (g.lines) rows.push(`<div class="kv"><span>Game</span><b>${g.lines.total ? "Total " + g.lines.total : ""}${g.lines.spread_home !== undefined ? " · " + esc(g.home) + " " + (g.lines.spread_home > 0 ? "+" : "") + g.lines.spread_home : ""}</b></div>`);
-  openSheet(`<h2 id="sht">Matchup vs ${esc(p.opp || "")}</h2><div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">${gauge(gr)}</div>${rows.join("")}
-    <div class="acts"><button class="btn pri" id="mu-ok">Done</button></div>`, s => { $("#mu-ok", s).onclick = closeSheet; });
+// ── the Matchup page (from the gauge): the grade and its parts, then "<OPP> Team Defense": the opponent's recent games
+// against players of a position group, each with his result, closing line and over price (docs/vs/{TEAM}.json, nba_vs);
+// a row opens that game's box score ──
+let MUP = null;
+const VS_GRP = [["G", "Guards"], ["F", "Forwards"], ["C", "Centers"]];
+const initialName = n => { const i = String(n || "").indexOf(" "); return i > 0 ? n[0] + ". " + n.slice(i + 1) : n || ""; };
+function openMatchup(p, push) {
+  if (!p) return;
+  MUP = {p: p, grp: VS_GRP.some(g => g[0] === (p.ctx || {}).group) ? p.ctx.group : "G", mkt: p.market, more: false, rows: null};
+  if (push !== false) history.pushState({p: p.id, mu: 1}, "", hashState());
+  const mp = $("#mp");
+  mp.hidden = false;
+  renderMatchup();
+  mp.scrollTop = 0;
+  fetch(`vs/${encodeURIComponent(p.opp || "")}.json`).then(r => r.ok ? r.json() : null).catch(() => null)
+    .then(j => { if (MUP && MUP.p === p) { MUP.rows = j && j.rows || []; vsTable(); } });
+  const go = () => {
+    if (!MUP || mp.classList.contains("on")) return;
+    mp.classList.add("on");
+    if (!REDUCED && !document.hidden) mp.animate([{transform: "translateX(100%)"}, {transform: "none"}], {duration: 440, easing: EASE});
+  };
+  requestAnimationFrame(() => requestAnimationFrame(go)); setTimeout(go, 150);
+}
+function closeMatchup(instant) {
+  const mp = $("#mp"), done = () => { if (!MUP && !mp.hidden) { mp.hidden = true; mp.innerHTML = ""; } };
+  MUP = null;
+  mp.classList.remove("on");
+  if (instant || REDUCED) done();
+  else { mp.animate([{transform: "none"}, {transform: "translateX(100%)"}], {duration: 380, easing: EASE}).finished.then(done, done); setTimeout(done, 440); }
+}
+function renderMatchup() {
+  const p = MUP.p, c = p.ctx || {}, g = gameOf(p.gid), side = ST.side, gr = grade(p, side), mp = $("#mp");
+  const rk = (r, n) => r ? `<span class="rk ${rankCls(r, n, side) === "good" ? "g" : rankCls(r, n, side) === "bad" ? "r" : "n"}">${ord(r)}</span>` : "—";
+  const dd = (k, opts, cur) => `<label class="dd"><span>${esc((opts.find(o => o[0] === cur) || opts[0])[1])}</span>${ICON.down}
+    <select data-dd="${k}" aria-label="${k === "grp" ? "Position" : "Stat"}">${opts.map(([v, t]) => `<option value="${v}"${v === cur ? " selected" : ""}>${esc(t)}</option>`).join("")}</select></label>`;
+  mp.innerHTML = `<div class="ph"><button class="cb bk" aria-label="Back">${ICON.back}</button>
+      <div class="ph-t"><b>${esc(p.player)} vs ${esc(p.opp || "")}</b><span>Matchup</span></div><span class="sp2"></span>
+      <button class="cb" id="mps" aria-label="Search">${ICON.search}</button><button class="cb" id="mpm" aria-label="Menu">${ICON.ham}</button></div>
+    <div class="mpc">
+      <div class="mpg">${gauge(gr)}<div><b>${gr ? "Grade " + gr.g : "Not graded yet"}</b><span>${esc(NAME[p.market])} · ${side === "under" ? "Under" : "Over"} ${DT.line === null ? "" : DT.line}</span></div></div>
+      <div class="kv"><span>DvP · ${esc(short(p.market))} to ${GRPN[c.group] || "his position"}</span><b>${rk(c.dvp_rank, c.teams)}</b></div>
+      <div class="kv"><span>Def Rank · points allowed</span><b>${rk(c.def_rank, c.teams)}</b></div>
+      <div class="kv"><span>Pace</span><b>${c.pace_rank ? ord(c.pace_rank) + " fastest" : "—"}</b></div>
+      ${g.lines ? `<div class="kv"><span>Game</span><b>${g.lines.total ? "Total " + g.lines.total : ""}${g.lines.spread_home !== undefined ? " · " + esc(g.home) + " " + (g.lines.spread_home > 0 ? "+" : "") + g.lines.spread_home : ""}</b></div>` : ""}
+      <div class="mpft"><div><span>Regular Season</span><b>${esc(D.season.slice(0, 4))}</b></div>
+        <button class="cb" id="mpi" aria-label="How the ranks are built">${ICON.info}</button><button class="cb" id="mpsh" aria-label="Share">${ICON.share}</button></div>
+    </div>
+    <h2 class="mpt">${esc(p.opp || "")} Team Defense</h2>
+    <div class="mpf"><span>Recent Games vs</span>${dd("grp", VS_GRP, MUP.grp)}${dd("mkt", TAB_ORDER.map(m => [m, NAME[m]]), MUP.mkt)}</div>
+    <div id="vst"></div>`;
+  $(".bk", mp).onclick = () => history.back();
+  $("#mps", mp).onclick = () => { history.go(-2); setTimeout(() => { if (ST.view !== "props") { ST.view = "props"; save(); tabbar(); renderList(); } const q = $("#q"); if (q) q.focus(); }, 480); };
+  $("#mpm", mp).onclick = leagueSheet;
+  $("#mpsh", mp).onclick = () => { const url = location.href; if (navigator.share) navigator.share({title: `${p.player} vs ${p.opp}`, url: url}).catch(() => {}); else if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => { $("#live").textContent = "Link copied"; }); };
+  $("#mpi", mp).onclick = () => openSheet(`<h2 id="sht">Ranks</h2>
+    <div class="kv"><span>Teams ranked</span><b>${c.teams || "—"}</b></div>
+    <div class="kv"><span>${esc(p.opp || "")} games this season</span><b>${c.rank_n != null ? c.rank_n : c.opp_games || 0}</b></div>
+    <div class="kv"><span>Last season's weight</span><b>${c.rank_n != null ? Math.round(15 / (15 + c.rank_n) * 100) + "%" : "—"}</b></div>
+    <div class="kv"><span>1st</span><b>the toughest</b></div>
+    <div class="acts"><button class="btn pri" id="mpi-ok">Done</button></div>`, s => { $("#mpi-ok", s).onclick = closeSheet; });
+  $$("[data-dd]", mp).forEach(sel => sel.onchange = () => {
+    MUP[sel.dataset.dd] = sel.value; MUP.more = false;
+    $("span", sel.parentNode).textContent = sel.options[sel.selectedIndex].text;
+    vsTable();
+  });
+  vsTable();
+}
+function vsTable() {
+  const el = $("#vst");
+  if (!el || !MUP) return;
+  if (!MUP.rows) { el.innerHTML = '<div class="vsk">' + '<div class="sk"></div>'.repeat(5) + "</div>"; return; }
+  const all = MUP.rows.filter(r => r[5] === MUP.grp), rows = all.slice(0, MUP.more ? 10 : 5), mk = MUP.mkt;
+  if (!rows.length) { el.innerHTML = '<div class="empty"><b>No games</b></div>'; return; }
+  const tr = r => {
+    const v = statValue({pts: r[7], reb: r[8], ast: r[9], fg3m: r[10]}, mk), ln = (r[11] || {})[mk];
+    const res = !ln ? "" : v > ln[0] ? '<i class="up">▲</i>' : v < ln[0] ? '<i class="dn">▼</i>' : "";
+    const d = r[0].slice(5).split("-").map(Number).join("/");
+    return `<tr data-g="${esc(r[1])}" data-t="${esc(r[2])}" data-pid="${r[3]}"><td>${esc(initialName(r[4]))}</td><td>${res}${v === null ? "–" : v}</td>
+      <td>${ln ? ln[0] : "–"}</td><td>${ln ? american(ln[1]) : "–"}</td><td class="cd"><b>${esc(r[2])}</b> ${d}</td></tr>`;
+  };
+  el.innerHTML = `<table class="vs"><colgroup><col style="width:35.5%"><col style="width:16%"><col style="width:15.5%"><col style="width:16%"><col></colgroup>
+    <thead><tr><th>PLAYER</th><th>RESULT</th><th>LINE</th><th>ODDS</th><th>DATE</th></tr></thead><tbody>${rows.map(tr).join("")}</tbody></table>
+    ${all.length > 5 ? `<button class="vsm" id="vsm" aria-expanded="${MUP.more}">${MUP.more ? "Less Results" : "More Results"}${ICON.down}</button>` : ""}`;
+  const m = $("#vsm", el); if (m) m.onclick = () => { MUP.more = !MUP.more; vsTable(); };
+  $$("tr[data-g]", el).forEach(t => { t.onclick = () => boxSheet(t.dataset.g, t.dataset.t, {market: mk, pid: +t.dataset.pid});
+    t.onpointerdown = () => boxGet(t.dataset.g).catch(() => {}); });
 }
 // ── player filters ──
 function activeFilters(without) {
@@ -1921,11 +2070,13 @@ history.scrollRestoration = "manual";     // Back must not make Safari re-scroll
 // Safari's edge swipe already animates the page away: after one, close without a second slide
 document.addEventListener("touchstart", e => { if (e.touches[0].clientX < 24 || e.touches[0].clientX > innerWidth - 24) EDGE_T = e.timeStamp; }, {passive: true});
 window.addEventListener("popstate", e => {
-  const p = new URLSearchParams(location.hash.slice(1)).get("p"), swiped = e.timeStamp - EDGE_T < 1500;
+  const h = new URLSearchParams(location.hash.slice(1)), p = h.get("p"), swiped = e.timeStamp - EDGE_T < 1500;
   if (!$("#sheet").hidden) closeSheet();
+  if (MUP && !h.get("mu")) closeMatchup(swiped);
   if (p && p !== CUR) openProp(p, false); else if (!p && CUR) closeProp(swiped);
+  if (h.get("mu") && !MUP && CUR) openMatchup(D.props.find(x => x.id === CUR), false);
 });
-document.addEventListener("keydown", e => { if (e.key === "Escape") { if (!$("#sheet").hidden) closeSheet(); else if (CUR) history.back(); } });
+document.addEventListener("keydown", e => { if (e.key === "Escape") { if (!$("#sheet").hidden) closeSheet(); else if (MUP || CUR) history.back(); } });
 document.addEventListener("DOMContentLoaded", () => {
   $("#scrim").onclick = closeSheet;
   sheetDrag();
@@ -1963,6 +2114,7 @@ PAGE = r"""<!doctype html>
 <nav id="tb" class="tb" aria-label="Views"></nav>
 <div class="shade" aria-hidden="true"></div>
 <div id="pg" class="pg" role="dialog" aria-modal="true" aria-label="Prop details" hidden></div>
+<div id="mp" class="pg" role="dialog" aria-modal="true" aria-label="Matchup" hidden></div>
 <div id="scrim" class="scrim" hidden></div>
 <div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="sht" tabindex="-1" hidden></div>
 <div id="live" class="sr" role="status" aria-live="polite"></div>
