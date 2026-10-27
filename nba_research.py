@@ -204,6 +204,9 @@ def main_of(state):
 HIST_MAX = 40
 
 
+_r3 = lambda x: None if x is None else round(x, 3)
+
+
 def line_history(q, gids):
     """{(gid, pid, stat): {book: [[seen_at, line, over, under], ...]}} — each book's main rung every time it changed
     (the first entry = the open), from the change log. Long histories keep the first, the last and an even sample."""
@@ -955,6 +958,11 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
     for k, n in cnames.items():
         names.setdefault(k, n)
     hist = line_history(q, gids)
+    # the line history goes out compact: minutes since the slate's first quote (hist_t0) and prices to 3 places; as
+    # ISO strings it was two thirds of every prop (45,000 points a slate)
+    t0 = min((pts[0][0] for h in hist.values() for pts in h.values() if pts), default=None)
+    t0 = dt.datetime.fromisoformat(t0).replace(second=0, microsecond=0) if t0 else None
+    _hmin = lambda s_: int((dt.datetime.fromisoformat(s_) - t0).total_seconds() // 60)
     gmap = {g["gid"]: g for g in games}
     props = []
     for (gid, pid, market), books in sorted(quotes.items()):
@@ -1040,7 +1048,7 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
             "l5": hit_summary(vals[-5:], main), "l10": hit_summary(vals[-10:], main),
             "l20": hit_summary(vals[-20:], main), "season": hit_summary(cur, main)}
         h = hist.get((p["gid"], p["pid"], p["market"]), {})
-        p["hist"] = h                                    # {book: [[seen_at, line, over, under], ...]} main-rung changes
+        p["hist"] = {b: [[_hmin(x[0]), x[1], _r3(x[2]), _r3(x[3])] for x in pts] for b, pts in h.items()}
         fd0 = (h.get("fd") or [None])[0]
         p["open"] = [fd0[1], fd0[2], fd0[0]] if fd0 else None
     # 'without' splits: every team's absences for its game date
@@ -1088,6 +1096,7 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
         fresh[b] = {"updated": at, "age_min": round(age, 1), "stale": age > BOOK_STALE_MIN}
     out = {
         "generated_at": stamp, "season": season, "dates": dates, "log_cols": list(LOG_COLS),
+        "hist_t0": t0.isoformat() if t0 else None,
         "markets": {k: v[0] for k, v in MARKETS.items()},
         "sources": {"books": fresh, "report": report_meta,
                     "logs": {"through": max((r[0] for v in logs.values() for r in v), default=None),
