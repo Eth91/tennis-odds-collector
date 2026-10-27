@@ -95,3 +95,16 @@ def test_nothing_kept_nothing_runs():
     tmp = pathlib.Path(tempfile.mkdtemp())
     (tmp / "cfg.json").write_text(json.dumps({"kept": [], "lambda": 10, "blend_w": .85}))
     assert "nothing to run" in L.refresh11([], cfg=L.load_config(tmp / "cfg.json"), cache=tmp / "c.pkl")
+
+
+def test_proj12_recalibration_config_is_its_own_version():
+    tmp = pathlib.Path(tempfile.mkdtemp())
+    rows, raw, cfg, targets = setup(tmp)
+    mz = [[1.0, 0.9]] + [[0.2, 0.9]] * 7
+    (tmp / "c12.json").write_text(json.dumps(dict({k: cfg[k] for k in ("kept", "lambda", "blend_w")}, name="proj-1.2", mz=mz)))
+    c12 = L.load_config(tmp / "c12.json")
+    assert c12["version"].startswith("proj-1.2:") and c12["hash"] != cfg["hash"]
+    mu = np.array([[30.0, 20, 5, 4, 2, 1, 1, 2]])
+    assert np.allclose(L.recalibrate(mu, c12), [[28.0, 18.2, 4.7, 3.8, 2.0, 1.1, 1.1, 2.0]])
+    assert np.allclose(L.recalibrate(mu, cfg), mu)                 # configs without mz are untouched
+    assert L.cache_for(tmp / "nba_proj12_config.json").name == "nba_proj12_cache.pkl"

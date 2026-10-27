@@ -53,6 +53,17 @@ nothing here is a pick. It is logged beside proj-1.0 at the same cutoff, under i
    - proj-1.0's forecast count is unchanged.
 6. **Roll back:** delete those cron lines. proj-1.0 is unaffected (separate version rows, separate cache).
 
+## Versions logged (shadow), as of 2026-10-27
+| version | config | what it is |
+|---|---|---|
+| `proj-1.1-dev:9075eab3ef` | `nba_proj11_config.json.proj-1.1-dev` (kept on the VM) | the original F0. **Superseded** by amendment 1 (audit C1); its 78 logged rows stay |
+| `proj-1.1.1:1cc04e3140` | `nba_proj11_config.json` | F0 with one "regulars out" rule for training and live |
+| `proj-1.2:69e0f8a534` | `nba_proj12_config.json` (cache `nba_proj12_cache.pkl`) | proj-1.1.1 + T1, the frozen 2023-24 mean recalibration (`NBA_PROJ12_PREREG.md`) |
+
+proj-1.2 runs the same jobs with `--config nba_proj12_config.json`. T4-live (`NBA_T4_LIVE_PREREG.md`)
+grades DraftKings against FanDuel's fair price from the quote change logs: `nba_t4_live.py --grade
+docs/nba_t4_score.json`, nightly, read-only.
+
 ## Limits
 - **Historical F0 is an optimistic proxy.** The starters and absences come from the game itself. Live F0
   uses only what was visible before the cutoff. Where most lineups are still "Expected" at tip − 30 (as
