@@ -393,7 +393,7 @@ def calibrated(p_model, q_book, beta):
     return 1.0 / (1.0 + math.exp(-(logit(q_book) + beta * (logit(p_model) - logit(q_book)))))
 
 
-def tip_props(gamelogs_db, odds_db, seasons):
+def tip_props(gamelogs_db, odds_db, seasons, mode="v2"):
     """One row per prop in absence games 2-3 at the archive's tip line: the book's no-vig over (FanDuel's pair, else
     DraftKings'), the model's P(over), the best over/under prices and the result."""
     import sqlite3
@@ -422,7 +422,7 @@ def tip_props(gamelogs_db, odds_db, seasons):
                 if not spots:
                     continue
                 active = last3 & played
-                proj = project(season, priors, groups, team, d, active, set(spots), mode="v2")
+                proj = project(season, priors, groups, team, d, active, set(spots), mode=mode)
                 for p in active:
                     for mk, st in MARKET_STAT.items():
                         lb = raw.get((d, p, mk))
@@ -440,7 +440,7 @@ def tip_props(gamelogs_db, odds_db, seasons):
                         _g, line, two = best
                         pair = two.get("fanduel") or two.get("draftkings")
                         a = box[p][st] or 0
-                        out.append({"season": s, "date": d, "market": mk, "line": line, "actual": a,
+                        out.append({"season": s, "date": d, "pid": p, "n_wowy": proj[p].get("n_wowy", 0), "market": mk, "line": line, "actual": a,
                                     "q_book": (1 / pair[0]) / (1 / pair[0] + 1 / pair[1]),
                                     "p_model": p_side(proj[p][st], mk, line, "over"),
                                     "over": max(v[0] for v in two.values()), "under": max(v[1] for v in two.values())})
@@ -471,6 +471,42 @@ def calibrate(gamelogs_db, odds_db):
                               "roi": round(float(np.mean([b["u"] for b in bets])), 4) if bets else None,
                               "by_side": {sd: (sum(b["side"] == sd for b in bets), round(float(np.mean([b["u"] for b in bets if b["side"] == sd])), 4))
                                           for sd in ("over", "under") if any(b["side"] == sd for b in bets)}}}
+
+
+def compare_bets(gamelogs_db, odds_db):
+    """Amendment 4: v2 against v3 on bets at the tip lines (absence games 2-3); beta per model on 2023-24, read on 2024-25."""
+    res = {}
+    by = {m: tip_props(gamelogs_db, odds_db, ("2023-24", "2024-25"), mode=m) for m in ("v2", "v3")}
+    wowy_keys = {(r["date"], r["pid"], r["market"]) for r in by["v3"] if r["n_wowy"] >= 1}
+    nll = lambda rs, f: -float(np.mean([math.log(max(1e-9, f(r) if r["actual"] > r["line"] else 1 - f(r))) for r in rs]))
+    for m, props in by.items():
+        fit = [r for r in props if r["season"] == "2023-24" and r["actual"] != r["line"]]
+        beta = min((i / 100 for i in range(0, 151)), key=lambda b: nll(fit, lambda r: calibrated(r["p_model"], r["q_book"], b)))
+        out = {"beta": beta}
+        for lab, keep in (("all", lambda r: True), ("wowy_applies", lambda r: (r["date"], r["pid"], r["market"]) in wowy_keys)):
+            chk = [r for r in props if r["season"] == "2024-25" and keep(r)]
+            np_ = [r for r in chk if r["actual"] != r["line"]]
+            bets, bands = [], defaultdict(list)
+            for r in chk:
+                pc = calibrated(r["p_model"], r["q_book"], beta)
+                for side, pr, raw_p, price in (("over", pc, r["p_model"], r["over"]), ("under", 1 - pc, 1 - r["p_model"], r["under"])):
+                    u = 0.0 if r["actual"] == r["line"] else ((price - 1) if (r["actual"] > r["line"]) == (side == "over") else -1.0)
+                    ev_raw = raw_p * price - 1
+                    bands["<0" if ev_raw < 0 else "0-5%" if ev_raw < 0.05 else "5-10%" if ev_raw < 0.10 else "10%+"].append(u)
+                    if pr * price - 1 >= 0.05:
+                        bets.append((side, u))
+            out[lab] = {"props": len(chk), "logloss": {"book": round(nll(np_, lambda r: r["q_book"]), 5),
+                                                       "calibrated": round(nll(np_, lambda r: calibrated(r["p_model"], r["q_book"], beta)), 5),
+                                                       "raw": round(nll(np_, lambda r: r["p_model"]), 5)},
+                        "ev5": {"n": len(bets), "roi": round(float(np.mean([u for _s, u in bets])), 4) if bets else None,
+                                "over": [sum(1 for s_, _u in bets if s_ == "over"), round(float(np.mean([u for s_, u in bets if s_ == "over"] or [0])), 4)],
+                                "under": [sum(1 for s_, _u in bets if s_ == "under"), round(float(np.mean([u for s_, u in bets if s_ == "under"] or [0])), 4)]},
+                        "raw_ev_bands": {k: [len(v), round(float(np.mean(v)), 4)] for k, v in sorted(bands.items())}}
+        res[m] = out
+    a, b = res["v3"]["all"], res["v2"]["all"]
+    revert = a["logloss"]["calibrated"] > b["logloss"]["calibrated"] and (a["ev5"]["roi"] or -9) < (b["ev5"]["roi"] or -9)
+    res["decision"] = "REVERT ROLE_OPEN to v2" if revert else "KEEP v3"
+    return res
 
 
 # ── ROLE_OPEN: the decision shared by the side-by-side replay and the live pinger ────────────────────────────────
@@ -544,8 +580,14 @@ def main():
     ap.add_argument("--test-b", nargs=2, metavar=("GAMELOGS_DB", "ODDS_DB"))
     ap.add_argument("--calibrate", nargs=2, metavar=("GAMELOGS_DB", "ODDS_DB"))
     ap.add_argument("--compare-wowy")
+    ap.add_argument("--compare-bets", nargs=2, metavar=("GAMELOGS_DB", "ODDS_DB"))
     ap.add_argument("--json")
     a = ap.parse_args()
+    if a.compare_bets:
+        res = compare_bets(*a.compare_bets)
+        print(json.dumps(res, indent=1))
+        if a.json:
+            open(a.json, "w").write(json.dumps(res, indent=1))
     if a.compare_wowy:
         res = compare_wowy(a.compare_wowy, tuple(a.seasons.split(",")))
         print(json.dumps(res, indent=1))

@@ -245,3 +245,23 @@ yet.
   Otherwise it stays on v3.
 - **Honest limit:** both seasons have been used (Test B, amendment 2), and tip lines are not openers. This
   compares two versions; it does not show an edge.
+
+**Amendment 4: run (2026-10-27, about 08:30 UTC). KEEP v3** (`nba_role.py --compare-bets`).
+18,109 props in 2024-25; v3 has WOWY games for 14,868 of them.
+
+| 2024-25 | v2 | v3 |
+|---|---|---|
+| β (fit on 2023-24) | 0.09 | 0.10 |
+| log loss, all (book 0.68541) | 0.68523 | **0.68506** |
+| log loss, WOWY applies (book 0.68547) | 0.68534 | **0.68512** |
+| EV′ ≥ 5%, all | 265, ROI **+3.5%** | 315, ROI +0.5% |
+| overs / unders, all | −2.9% (125) / +9.3% (140) | −8.5% (146) / +8.4% (169) |
+| EV′ ≥ 5%, WOWY applies | 212, −0.8% | 257, −4.0% |
+| raw EV 10%+ band | −2.6% (8,046) | −1.2% (8,919) |
+
+**Reading:**
+- WOWY makes the probabilities slightly more accurate: both calibrated log losses are lower, and β rises.
+- The few sides it flags did not do better. About 300 bets swing ±12%, so the ROI difference is within noise.
+- The registered rule needs both measures worse to revert, so ROLE_OPEN stays on v3.
+- In both versions the flagged unders won (+8–9%, about 150 each) and the overs lost. That is not significant;
+  watch it forward.
