@@ -517,13 +517,13 @@ transition:background-color .22s,border-color .22s,transform .16s}
 /* game cards: a team on a back-to-back */
 .gc .gt .b2t{color:var(--org)}
 /* referees */
-.rft th:first-child{text-align:left;font-weight:400}
-.rft td:first-child{font-weight:600;color:#fff;white-space:nowrap} .rft td small{display:block;font-size:11px;font-weight:400;color:#7c7c7c}
-.rft tr.cr td{font-weight:800} .rft tr.cr td:first-child{color:#fff}
+.rft td{height:46px;line-height:1.15} .rft td small{display:block;margin-top:1px;font-size:11px;color:#8e8e8e}
+.rft td.up{color:var(--grn)} .rft td.dn{color:var(--red)} .rft tr.cr td{font-weight:700}
 /* combo checker */
 .cbp{position:fixed;right:15.3px;bottom:calc(max(var(--sb),10px) + 74px);z-index:35;display:flex;align-items:center;gap:6px;height:40px;
 padding:0 14px 0 12px;border-radius:20px;color:#fff;font:inherit;font-size:14px;font-weight:600}
 .cbp[hidden]{display:none} .cbp svg{width:19px;height:19px}
+.cbon .lst{padding-bottom:calc(var(--sb) + 160px)} .cbon .end{height:calc(var(--sb) + 80px)}
 .cbp b{min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#fff;color:#000;font-size:12px;line-height:20px;text-align:center}
 .cbl{display:flex;align-items:center;gap:10px;min-height:56px;border-bottom:.5px solid var(--sep)}
 .cbl .av{position:relative;left:0;top:0;flex:none;width:38px;height:38px} .cbl .av .hs{left:-7px;width:52px}
@@ -610,6 +610,35 @@ transition:transform .36s cubic-bezier(.32,.72,0,1),opacity .2s;will-change:tran
 .opt:active{background:rgba(255,255,255,.06)}
 .cb.pop svg{animation:pop .36s cubic-bezier(.3,1.6,.5,1)}
 @keyframes pop{45%{transform:scale(1.32)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes bsy{from{transform:translateX(-100%)}to{transform:translateX(250%)}}
+.bsy{position:fixed;left:0;right:0;top:0;z-index:50;height:2.5px;overflow:hidden;opacity:0;pointer-events:none;transition:opacity .2s}
+.bsy.on{opacity:1;transition-delay:.15s}
+.bsy::after{content:"";position:absolute;top:0;bottom:0;width:40%;background:linear-gradient(90deg,transparent,#fff,transparent);animation:bsy 1s ease-in-out infinite}
+/* pull to refresh */
+.ptr{position:fixed;left:50%;top:0;z-index:24;width:32px;height:32px;margin:6px 0 0 -16px;border-radius:50%;background:#222;
+box-shadow:0 3px 12px rgba(0,0,0,.55);opacity:0;pointer-events:none}
+.ptr i{position:absolute;inset:8px;border:2px solid #4a4a4a;border-top-color:#fff;border-radius:50%}
+.ptr.go i{border-color:#fff #fff #fff #4a4a4a}
+.ptr.spin{opacity:1;transform:translateY(40px)!important;transition:transform .25s}
+.ptr.spin i{animation:spin .7s linear infinite}
+/* toast */
+.tst{position:fixed;left:50%;bottom:calc(max(var(--sb),10px) + 128px);z-index:45;max-width:80vw;padding:10px 16px;border-radius:20px;
+background:rgba(44,44,46,.94);color:#fff;font-size:14px;font-weight:600;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.45);
+opacity:0;transform:translate(-50%,8px);pointer-events:none;transition:opacity .2s,transform .3s cubic-bezier(.32,.72,0,1)}
+.tst.on{opacity:1;transform:translate(-50%,0)}
+/* list header: Over / Under */
+.lhd{align-items:center} .lhd .lhr{display:inline-flex;align-items:center;gap:10px}
+.ou{display:inline-flex;padding:2px;border-radius:13px;background:#222}
+.ou button{height:22px;padding:0 11px;border:0;border-radius:11px;background:none;color:#8e8e8e;font:inherit;font-size:11.5px;font-weight:600;transition:background-color .2s,color .2s}
+.ou button[aria-pressed="true"]{background:#3a3a3c;color:#fff}
+/* recent players */
+.rcs{display:flex;gap:6px;overflow-x:auto;padding:10px 15.3px 14px;scrollbar-width:none;border-bottom:1px solid #343434}
+.rcs::-webkit-scrollbar{display:none}
+.rcp{flex:none;display:flex;flex-direction:column;align-items:center;width:64px;padding:0;border:0;background:none;color:#fff;font:inherit}
+.rcp .av{position:relative;left:0;top:0;width:48px;height:48px} .rcp .av .hs{left:-9px;width:66px}
+.rcp b{margin-top:5px;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:600}
+.rcp i{font-style:normal;font-size:10.5px;color:#8e8e8e}
 svg.c2.grow .bv,svg.c2.grow .bm{transform-box:fill-box;transform-origin:50% 100%;animation:grow .4s cubic-bezier(.2,.8,.2,1) both;
 animation-delay:var(--d)}
 svg.c2.grow .vv,svg.c2.grow .vw,svg.c2.grow .mn{animation:fade .3s ease both;animation-delay:calc(var(--d) + .16s)}
@@ -748,11 +777,11 @@ function fairAt(prop, line) {
   return ps.length ? {p: ps.reduce(function (a, b) { return a + b; }, 0) / ps.length, n: ps.length} : {p: null, n: 0};
 }
 // the best price on a side against the fair probability: {ev (per $1), book, price, fair} or null
-function valueAt(prop, line, side) {
+function valueAt(prop, line, side, book) {
   var f = fairAt(prop, line).p;
   if (f === null) return null;
   var k = side === "under" ? 2 : 1, pr = side === "under" ? 1 - f : f, best = null;
-  ["fd", "dk"].forEach(function (b) { var r = rungAt(prop.books[b], line); if (r && r[k] && (!best || r[k] > best.price)) best = {book: b, price: r[k]}; });
+  (book && book !== "all" ? [book] : ["fd", "dk"]).forEach(function (b) { var r = rungAt(prop.books[b], line); if (r && r[k] && (!best || r[k] > best.price)) best = {book: b, price: r[k]}; });
   return best ? {ev: best.price * pr - 1, book: best.book, price: best.price, fair: pr} : null;
 }
 // a projection's compact pmf [start, [p...]] (nba_project.compact_pmf): P(X >= m)
@@ -816,15 +845,15 @@ function filterProps(props, st, gameOf, logsOf) {
 }
 // keys: hit5 / hit10 / hit20 / h2h / szn (the side's hit rate), avgdiff (L10 average minus the line, signed by side),
 // line, odds (the side's best price), value (that price against the books' fair price), player; avg10 kept for old links
-function sortProps(list, key, dir, logsOf, side, season) {
+function sortProps(list, key, dir, logsOf, side, season, book) {
   var sgn = dir === "asc" ? 1 : -1;
-  side = side || "over";
+  side = side || "over"; book = book || "all";
   var W = {hit5: "l5", hit10: "l10", hit20: "l20", h2h: "h2h", szn: "season"};
   function val(p) {
     if (key === "player") return p.player.toLowerCase();
     if (key === "line") return p.main;
-    if (key === "odds") { var b = p.main === null ? null : bestPrice(p, p.main, "all", side); return b ? b.odds : null; }
-    if (key === "value") { var v = p.main === null ? null : valueAt(p, p.main, side); return v ? v.ev : null; }
+    if (key === "odds") { var b = p.main === null ? null : bestPrice(p, p.main, book, side); return b ? b.odds : null; }
+    if (key === "value") { var v = p.main === null ? null : valueAt(p, p.main, side, book); return v ? v.ev : null; }
     if (W[key]) { var r = propRates(p, logsOf(p), side, season)[W[key]]; return r && r.rate !== null ? r.rate : null; }
     var s = l10(p, logsOf);
     if (!s || !s.n) return null;
@@ -857,17 +886,26 @@ function comboStats(legs, win, season) {
   const each = legs.map(function (L, i) { return n ? games.filter(function (x) { return x.hits[i]; }).length / n : null; });
   return {games: games, n: n, k: k, rate: n ? k / n : null, each: each, indep: n ? each.reduce(function (a, b) { return a * b; }, 1) : null};
 }
+// the Live tab's word for a prop: an over HIT / NEEDS n / MISS, an under n ROOM / NO ROOM / BUST / HIT, a push at
+// the final PUSH. NEEDS counts to the next whole number past the line; ROOM is what can still come and win
+function liveStatus(v, line, over, live) {
+  if (!live && v === line) return ["PUSH", ""];
+  if (over) return v > line ? ["HIT", "up"] : live ? ["NEEDS " + (Math.floor(line) + 1 - v), ""] : ["MISS", "dn"];
+  if (v > line) return ["BUST", "dn"];
+  var room = Math.ceil(line) - 1 - v;
+  return live ? [room > 0 ? room + " ROOM" : "NO ROOM", ""] : ["HIT", "up"];
+}
 function liveStage(state, v, line, over) {
   // the Live tab's order: props still in play, then ones settled in a game still on (an over past its line, an
   // under at it), then finals
   if (state === "final") return 2;
-  return (over ? v > line : v >= line) ? 1 : 0;
+  return v > line ? 1 : 0;                         // an over past its line; an under past it (bust)
 }
 if (typeof module !== "undefined") module.exports = {statValue: statValue, hitSummary: hitSummary, seasonOf: seasonOf,
   rowsToLogs: rowsToLogs, windowed: windowed, filterLogs: filterLogs, splitRows: splitRows, sideRate: sideRate,
   american: american, decimalOf: decimalOf, bestOver: bestOver, bestPrice: bestPrice, propRates: propRates,
   noVig: noVig, fairAt: fairAt, valueAt: valueAt, zscore: zscore, pmfGe: pmfGe, projProbs: projProbs, blendP: blendP,
-  filterProps: filterProps, sortProps: sortProps, liveStage: liveStage, comboStats: comboStats};
+  filterProps: filterProps, sortProps: sortProps, liveStage: liveStage, liveStatus: liveStatus, comboStats: comboStats};
 """
 
 JS_APP = r"""
@@ -927,14 +965,23 @@ function hashState() {
   if (MUP) h.set("mu", "1");
   return "#" + h.toString();
 }
+// how the list was last set up (tab, view, side, sort, book), for a launch from the home screen with no hash: not the
+// day, game, team, search or line filters, which would hide the next slate
+const PREF = ["view", "market", "side", "sort", "dir", "book", "iv"];
 function readHash() {
   const h = new URLSearchParams(location.hash.slice(1));
+  if (![...h.keys()].length) { try { const pf = JSON.parse(localStorage.getItem("pickz_pref") || "{}") || {}; PREF.forEach(k => { if (typeof pf[k] === "string") ST[k] = pf[k]; }); } catch (e) {} }
   Object.keys(ST).forEach(k => { if (h.has(k)) ST[k] = h.get(k); });
   if (ST.view === "watch") Object.assign(ST, {view: "props", watch: "1"});    // the old Watchlist tab, now a filter
   if (["props", "markets", "injuries"].indexOf(ST.view) < 0) ST.view = "props";
   return h.get("p");
 }
-const save = () => history.replaceState(history.state, "", hashState());
+// entries the app pushed above the list (pages, the Matchup page), kept in each entry's state
+const navDepth = () => (history.state && history.state.d) || 0;
+const save = () => {
+  history.replaceState(history.state, "", hashState());
+  try { const pf = {}; PREF.forEach(k => { pf[k] = ST[k]; }); localStorage.setItem("pickz_pref", JSON.stringify(pf)); } catch (e) {}
+};
 function injTag(p) {
   const g = gameOf(p.gid), inj = D.injuries[g.date + "|" + p.pid];
   if (!inj || !inj.official || inj.official.status === "Available") return "";
@@ -1030,9 +1077,8 @@ function liveOf(p) {
 }
 function liveRow(p) {
   const g = gameOf(p.gid) || {}, x = liveOf(p), over = ST.side !== "under", live = g.state === "live";
-  const st = over ? (x.hit ? ["HIT", "up"] : live ? [`NEEDS ${Math.ceil(x.line - x.v)}`, ""] : ["MISS", "dn"])
-                  : (!x.hit ? ["BUST", "dn"] : live ? [`${r1(x.line - x.v)} ROOM`, ""] : ["HIT", "up"]);
-  const bar = x.hit && over ? "up" : !x.hit && !over ? "dn" : !live ? (x.hit ? "up" : "dn") : x.pace !== null && (over ? x.pace > x.line : x.pace < x.line) ? "on" : "";
+  const push = !live && x.v === x.line, st = liveStatus(x.v, x.line, over, live);
+  const bar = push ? "" : x.hit && over ? "up" : x.v > x.line && !over ? "dn" : !live ? (x.hit ? "up" : "dn") : x.pace !== null && (over ? x.pace > x.line : x.pace < x.line) ? "on" : "";
   return `<button class="pr lvr" data-id="${esc(p.id)}"><span class="av">${head(p.pid)}</span>
     <div class="who"><div class="nm">${esc(nameOf(p.player))}<span class="cd">${esc(p.team || "")}</span></div>
       <div class="lin">${over ? "Over" : "Under"} ${x.line} ${esc(unit(p.market))} · ${live ? esc(g.label || "Live") : "Final"}</div></div>
@@ -1058,7 +1104,7 @@ function listProps() {
   if (ST.market === "movers") return list.map(p => [p, mover(p)]).filter(x => x[1]).sort((a, b) => b[1].k - a[1].k).map(x => x[0]);
   // Trends: strongest first
   if (ST.market === "trends") return list.map(p => [p, trend(p)]).filter(x => x[1] && x[1].side === ST.side).sort((a, b) => b[1].z - a[1].z).map(x => x[0]);
-  return sortProps(list, ST.sort, ST.dir, logsOf, ST.side, D.season);
+  return sortProps(list, ST.sort, ST.dir, logsOf, ST.side, D.season, ST.book);
 }
 function row(p) {
   const g = gameOf(p.gid), r = rates(p), c = p.ctx || {}, side = ST.side;
@@ -1134,6 +1180,7 @@ function render() {
     return;
   }
   if (!ST.date || D.dates.indexOf(ST.date) < 0) ST.date = D.dates.find(d => D.props.some(p => (gameOf(p.gid) || {}).date === d)) || D.dates[0];
+  if (ST.gid !== "all" && !D.games.some(g => g.gid === ST.gid && g.date === ST.date)) ST.gid = "all";
   const mks = availMarkets();
   if (ALL_TABS.indexOf(ST.market) < 0 && mks.length && mks.indexOf(ST.market) < 0) ST.market = mks[0];
   if (!$("#lt")) {
@@ -1157,6 +1204,20 @@ function renderList() {
   if (ST.view !== "injuries" && q.length >= 2) searchPlayers(q);
 }
 // the players a search finds, prop or not, under the props it finds; a tap opens his prop or his player page
+const recents = () => { try { return JSON.parse(localStorage.getItem("pickz_recent") || "[]") || []; } catch (e) { return []; } };
+function recentAdd(p) {
+  try { const r = recents().filter(x => x[0] !== p.pid); r.unshift([p.pid, p.player, p.team || ""]); localStorage.setItem("pickz_recent", JSON.stringify(r.slice(0, 8))); } catch (e) {}
+}
+function recentShow(on) {
+  const old = $("#rcn"); if (old) old.remove();
+  const r = recents(), lst = $("#lst");
+  if (!on || !r.length || !lst || ST.view === "injuries" || ST.q.trim()) return;
+  const box = document.createElement("div");
+  box.id = "rcn";
+  box.innerHTML = '<div class="lhd"><span>Recent</span></div><div class="rcs">' + r.map(([pid, name, team]) =>
+    `<button class="rcp" data-vp="${pid}" aria-label="${esc(name)}"><span class="av">${head(pid)}</span><b>${esc(lastName(name))}</b><i>${esc(team)}</i></button>`).join("") + "</div>";
+  lst.prepend(box);
+}
 function searchPlayers(q) {
   const n = ++SRCH_N;
   playerIndex().then(pl => {
@@ -1203,14 +1264,12 @@ function renderRows() {
     return;
   }
   // rows are built once per prop and side, then reused: re-sorting or switching tabs never re-decodes the headshots
-  const frag = document.createDocumentFragment();
-  if (ALL_TABS.indexOf(ST.market) >= 0) {
-    const h = document.createElement("div");
-    h.className = "lhd";
-    h.innerHTML = `<span>${list.length} props</span><button class="lk" id="scb">Scorecard ›</button>`;
-    $("#scb", h).onclick = scoreSheet;
-    frag.appendChild(h);
-  }
+  const frag = document.createDocumentFragment(), h = document.createElement("div");
+  h.className = "lhd";
+  h.innerHTML = `<span>${list.length} props${ST.market === "live" ? ` · <span id="lupd">${ago(D.generated_at)}</span>` : ""}</span><span class="lhr">${ALL_TABS.indexOf(ST.market) >= 0 ? '<button class="lk" id="scb">Scorecard ›</button>' : ""}<span class="ou" role="group" aria-label="Side"><button data-side="over" aria-pressed="${ST.side !== "under"}">Over</button><button data-side="under" aria-pressed="${ST.side === "under"}">Under</button></span></span>`;
+  const sc = $("#scb", h); if (sc) sc.onclick = scoreSheet;
+  $$("[data-side]", h).forEach(b => b.onclick = () => { if (ST.side !== b.dataset.side) { ST.side = b.dataset.side; save(); renderList(); tabbar(); } });
+  frag.appendChild(h);
   list.forEach(p => {
     if (ST.market === "live") { const t = document.createElement("template"); t.innerHTML = liveRow(p).trim(); frag.appendChild(t.content.firstChild); return; }
     const k = p.id + "|" + ST.side + "|" + ST.book + (ST.market === "movers" ? "|mv" : "");
@@ -1330,15 +1389,18 @@ function tabbar() {
 function bindTop() {
   const q = $("#q"), sx = q.closest(".sx"), qx = $("#qx");
   let t = null;
-  q.oninput = () => { ST.q = q.value; sx.classList.toggle("has", !!ST.q); qx.hidden = !ST.q; clearTimeout(t); t = setTimeout(() => { save(); renderList(); }, 90); };
+  q.oninput = () => { ST.q = q.value; if (ST.q) recentShow(false); sx.classList.toggle("has", !!ST.q); qx.hidden = !ST.q; clearTimeout(t); t = setTimeout(() => { save(); renderList(); }, 90); };
   q.onkeydown = e => { if (e.key === "Enter") q.blur(); };
+  q.onfocus = () => recentShow(true);
+  q.onblur = () => setTimeout(() => { if (document.activeElement !== q) recentShow(false); }, 250);
   qx.onclick = e => { e.preventDefault(); q.value = ""; q.oninput(); };
   $("#lgb").onclick = leagueSheet;
   $("#dvpb").onclick = () => dvpSheet();
 }
 function bindHead() {
   $$("[data-market]").forEach(b => b.onclick = () => { if (ST.market === b.dataset.market) return; ST.market = b.dataset.market; save(); press("[data-market]", x => x === b); slide($("#mtl")); renderList(); });
-  $$("[data-gid]").forEach(b => b.onclick = () => { ST.gid = ST.gid === b.dataset.gid ? "all" : b.dataset.gid; save(); press("[data-gid]", x => x.dataset.gid === ST.gid); renderList(); });
+  const gcs = $("#gcs");
+  $$("[data-gid]", gcs).forEach(b => b.onclick = () => { ST.gid = ST.gid === b.dataset.gid ? "all" : b.dataset.gid; save(); press("[data-gid]", x => x.dataset.gid === ST.gid, gcs); renderList(); });
   $("#dayb").onclick = daySheet;
 }
 function resetFilters() { Object.assign(ST, {team: "all", book: "all", lmin: "", lmax: "", omin: "", omax: "", watch: "", q: "", gid: "all"}); const q = $("#q"); if (q) { q.value = ""; q.closest(".sx").classList.remove("has"); $("#qx").hidden = true; } save(); render(); }
@@ -1417,7 +1479,7 @@ function filterSheet() {
     <label class="fl"><span>Odds to</span><input id="f-omax" type="number" inputmode="numeric" placeholder="+150" value="${esc(dr.omax)}"></label></div>
     <div class="acts stk"><button class="btn" id="f-reset">Reset</button><button class="btn pri" id="f-ok"></button></div>`, s => {
     const read = () => { dr.team = $("#f-team", s).value; dr.book = $("#f-book", s).value; ["lmin", "lmax", "omin", "omax"].forEach(k => dr[k] = $("#f-" + k, s).value); };
-    const upd = () => { read(); const f = favs(), n = sortProps(filterProps(D.props, Object.assign({}, dr, {market: ALL_TABS.indexOf(dr.market) >= 0 ? "all" : dr.market}), gameOf, logsOf).filter(p => !dr.watch || f.indexOf(p.pid) >= 0), dr.sort, dr.dir, logsOf, dr.side, D.season).length; $("#f-ok", s).textContent = ALL_TABS.indexOf(ST.market) >= 0 ? "Apply" : `Show ${n} prop${n === 1 ? "" : "s"}`; };
+    const upd = () => { read(); const f = favs(), n = sortProps(filterProps(D.props, Object.assign({}, dr, {market: ALL_TABS.indexOf(dr.market) >= 0 ? "all" : dr.market}), gameOf, logsOf).filter(p => !dr.watch || f.indexOf(p.pid) >= 0), dr.sort, dr.dir, logsOf, dr.side, D.season, dr.book).length; $("#f-ok", s).textContent = ALL_TABS.indexOf(ST.market) >= 0 ? "Apply" : `Show ${n} prop${n === 1 ? "" : "s"}`; };
     $$("[data-sd]", s).forEach(b => b.onclick = () => { dr.side = b.dataset.sd; press("[data-sd]", x => x === b, s); upd(); });
     $$("[data-wl]", s).forEach(b => b.onclick = () => { dr.watch = b.dataset.wl; press("[data-wl]", x => x === b, s); upd(); });
     $$("[data-sort]", s).forEach(b => b.onclick = () => {
@@ -1447,14 +1509,14 @@ function scoreSheet() {
   const fill = html => { if (SHEET_N === n && !s.hidden) { s.innerHTML = '<div class="grab" aria-hidden="true"></div><h2 id="sht">Scorecard <span class="tg tf">NOT A BET</span></h2>' + html; const d = $("#sc-ok", s); if (d) d.onclick = closeSheet; } };
   const pc = x => (x * 100).toFixed(1) + "%";
   fetch("nba_research_score.json?t=" + Date.now(), {cache: "no-store"}).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }).then(j => {
-    if (!j.props) { fill('<div class="empty"><b>No graded games yet</b></div><div class="acts"><button class="btn pri" id="sc-ok">Done</button></div>'); return; }
+    if (!j.props) { fill('<div class="empty"><b>No graded games yet</b></div><div class="acts stk"><button class="btn pri" id="sc-ok">Done</button></div>'); return; }
     const b = j.brier || {};
     const rows = j.signals.map(x => `<div class="scr"><div><b>${esc(x.signal)}</b><i class="vd ${x.verdict === "helps" ? "g" : x.verdict === "hurts" ? "r" : ""}">${esc(x.verdict)}</i></div><div class="num">${x.n || "–"}</div><div class="num">${x.n ? `${pc(x.rate)}<span>vs ${pc(x.implied)}</span>` : "–"}</div><div class="num ${x.roi > 0 ? "up" : x.roi < 0 ? "mu" : ""}">${x.n ? (x.roi > 0 ? "+" : "") + pc(x.roi) : "–"}</div></div>`).join("");
     fill(`<div class="ssl">${j.props.toLocaleString()} props · ${j.nights} nights · ${esc(j.from.slice(5).replace("-", "/"))}–${esc(j.to.slice(5).replace("-", "/"))}</div>
       <div class="scr hd"><div>Signal</div><div class="num">Picks</div><div class="num">Won</div><div class="num">Return</div></div>${rows}
       <div class="sg"><span>Accuracy · lower is better</span></div><div class="kv"><span>Price</span><b class="num">${b["price (no-vig)"]}</b></div><div class="kv"><span>L10 hit rate</span><b class="num">${b["L10 hit rate"]}</b></div><div class="kv"><span>Coin flip</span><b class="num">${b["coin flip"]}</b></div>
-      <div class="acts"><button class="btn pri" id="sc-ok">Done</button></div>`);
-  }).catch(e => fill(`<div class="note" style="font-size:14px">Couldn't load the scorecard (${esc(e.message || e)}).</div><div class="acts"><button class="btn pri" id="sc-ok">Done</button></div>`));
+      <div class="acts stk"><button class="btn pri" id="sc-ok">Done</button></div>`);
+  }).catch(e => fill(`<div class="note" style="font-size:14px">Couldn't load the scorecard (${esc(e.message || e)}).</div><div class="acts stk"><button class="btn pri" id="sc-ok">Done</button></div>`));
 }
 function leagueSheet() {
   const b = D.sources.books, bk = k => b[k] ? (b[k].stale ? `${Math.round(b[k].age_min)} min old` : "live") : "—";
@@ -1480,7 +1542,7 @@ function dvpSheet(grp, mkt) {
   const html = `<h2 id="sht">Defense vs Position</h2>
     <div class="seg" role="group" aria-label="Position">${[["G", "Guards"], ["F", "Forwards"], ["C", "Centers"]].map(([k, l]) => `<button data-dg="${k}" aria-pressed="${k === grp}">${l}</button>`).join("")}</div>
     <div class="chips">${mks.map(m => `<button class="chip" data-dm="${m}" aria-pressed="${m === mkt}">${TAB[m]}</button>`).join("")}</div>
-    ${rows || '<div class="empty"><b>No games</b></div>'}<div class="acts"><button class="btn pri" id="dv-ok">Done</button></div>`;
+    ${rows || '<div class="empty"><b>No games</b></div>'}<div class="acts stk"><button class="btn pri" id="dv-ok">Done</button></div>`;
   const bind = s => {
     $$("[data-dg]", s).forEach(b => b.onclick = () => redraw(b.dataset.dg, mkt));
     $$("[data-dm]", s).forEach(b => b.onclick = () => redraw(grp, b.dataset.dm));
@@ -1543,17 +1605,21 @@ function openPlayer(pid, market) {
 }
 function openProp(id, push) {
   if (String(id).startsWith("v|") && !VPL.has(+String(id).split("|")[1])) {
-    playerLoad(+String(id).split("|")[1]).then(() => openProp(id, push), () => { $("#live").textContent = "Player not found"; });
+    const tok = ++OPEN_N, at = CUR;
+    busy(true);
+    playerLoad(+String(id).split("|")[1]).then(() => { busy(false); if (tok === OPEN_N && CUR === at) openProp(id, push); }, () => { busy(false); if (tok === OPEN_N) toast("Couldn't load that player"); });
     return;
   }
+  OPEN_N++;
   const p = propFor(id);
   if (!p) return;
+  recentAdd(p);
   const fresh = CUR !== id, was = !!CUR;
   CUR = id;
   if (fresh) Object.assign(DT, {line: p.v ? vLine(p) : p.main !== null ? p.main : allLines(p)[0],
                                  win: windowed(logsOf(p), "season", D.season).length ? "season" : "l10", home: null, starter: null, blow: null,
                                  result: null, rest: null, ranges: {}, without: {}, with: {}, dvp: false, def: false, open: {}, fresh: null, ovs: []});
-  if (push !== false) history.pushState({p: id}, "", hashState());
+  if (push !== false) history.pushState({p: id, d: navDepth() + 1}, "", hashState());
   const pg = $("#pg");
   pg.hidden = false;                        // (off-screen until it slides in; it must lay out for the pills to measure)
   if (fresh) { renderProp(was ? undefined : "open"); pg.scrollTop = 0; }
@@ -1769,7 +1835,7 @@ function projScoreSheet() {
     fill(`<div class="sg"><span>Backtest</span></div>${per || '<div class="empty"><b>No results yet</b></div>'}
       ${vds ? `<div class="sg"><span>Pre-registered verdicts</span></div>${vds}` : ""}
       <div class="sg"><span>Forward record</span></div>${fwd}
-      <div class="acts"><button class="btn pri" id="ps-ok">Done</button></div>`);
+      <div class="acts stk"><button class="btn pri" id="ps-ok">Done</button></div>`);
   });
 }
 // each book's main line over time (a step per change), its open and its price now
@@ -1861,8 +1927,9 @@ function boxSheet(gid, team, p) {
     });
   };
   const missing = '<div class="empty"><b>Box score not available yet</b></div>';
-  const cur0 = b => b.teams.some(t => t.tri === team) ? team : b.teams[1].tri;
+  const cur0 = b => b.teams.some(t => t.tri === team) ? team : b.teams[1].tri, n0 = SHEET_N, at = CUR, mu = MUP;
   Promise.race([pr, wait]).then(b => {
+    if (SHEET_N !== n0 || CUR !== at || MUP !== mu) return;
     if (b) { openSheet(frame(boxHtml(b, cur0(b), p)), s => bind(s, b)); $("#sheet").dataset.kind = "box"; return; }
     openSheet(frame('<div class="bxsk"><i></i><i></i><i></i>' + "<b></b>".repeat(12) + "</div>"), s => bind(s, null));
     const s = $("#sheet"), n = SHEET_N;
@@ -1927,13 +1994,14 @@ function renderProp(mode) {
   PX = {p: p, g: g, logs: logs, c: c, without: without, wins: wins, stat: stat, statDone: false};
   $("#pg .bk").onclick = () => history.back();
   const ph = $(".ph", pg); pg.onscroll = () => ph.classList.toggle("tt", pg.scrollTop > 150);
+  ph.onclick = e => { if (!e.target.closest("button")) pg.scrollTo({top: 0, behavior: REDUCED ? "auto" : "smooth"}); };
   $("#fav", pg).onclick = () => { toggleFav(p.pid); const f = $("#fav", pg), on = favs().indexOf(p.pid) >= 0; f.classList.toggle("fav", on); f.setAttribute("aria-pressed", on); f.classList.remove("pop"); void f.offsetWidth; f.classList.add("pop"); if (ST.watch && ST.view !== "injuries") renderList(); };
   const cmb = $("#cmb", pg);
-  if (cmb) cmb.onclick = () => { const on = comboToggle(p); if (on === null) return; cmb.setAttribute("aria-pressed", on); $("#live").textContent = on ? "Added to combo" : "Removed from combo"; };
+  if (cmb) cmb.onclick = () => { const on = comboToggle(p); if (on === null) return; cmb.setAttribute("aria-pressed", on); toast(on ? `Added to combo · ${comboLegs().length}` : "Removed from combo"); };
   $("#shr", pg).onclick = () => {
     const url = location.href, title = `${p.player} ${NAME[p.market]} ${DT.line}`;
     if (navigator.share) navigator.share({title: title, url: url}).catch(() => {});
-    else if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => { $("#live").textContent = "Link copied"; });
+    else if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => toast("Link copied"));
   };
   $$("[data-mk]", pg).forEach(b => b.onclick = () => { const id = (p.v ? "v" : p.gid) + "|" + p.pid + "|" + b.dataset.mk; if (id !== p.id) { openProp(id, false); history.replaceState({p: id}, "", hashState()); } });
   $$("[data-win]", pg).forEach(b => b.onclick = () => { if (DT.win === b.dataset.win || b.disabled) return; DT.win = b.dataset.win; updateProp(); });
@@ -2137,8 +2205,10 @@ function refCard() {
     const c = crewOf(j, g.gid), cell = (d, i) => d ? `<td class="${d[i] > .05 ? "up" : d[i] < -.05 ? "dn" : ""}">${signed(d[i])}</td>` : "<td>–</td>";
     const head = '<div class="shh"><b>REFEREES</b></div>';
     if (!c) { el.innerHTML = head + '<div class="empty"><b>Not posted yet</b></div>'; return; }
-    el.innerHTML = head + `<table class="gst rft"><thead><tr><th>vs avg a game</th><th>Fouls</th><th>FTA</th><th>Pts</th><th>Pace</th></tr></thead><tbody>
-      ${c.rows.map(r => `<tr><td>${esc(r.name)}<small>${esc(r.role)}${r.n ? ` · ${r.n} game${r.n === 1 ? "" : "s"}` : " · new"}</small></td>${[0, 1, 2, 3].map(i => cell(r.d, i)).join("")}</tr>`).join("")}
+    el.innerHTML = head + `<div class="shy"><span>vs league average a game</span></div>
+      <table class="vs rft"><colgroup><col style="width:40%"><col><col><col><col></colgroup>
+      <thead><tr><th>OFFICIAL</th><th>FOULS</th><th>FTA</th><th>PTS</th><th>PACE</th></tr></thead><tbody>
+      ${c.rows.map(r => `<tr><td>${esc(initialName(r.name))}<small>${esc(r.role)}${r.n ? ` · ${r.n} game${r.n === 1 ? "" : "s"}` : " · new"}</small></td>${[0, 1, 2, 3].map(i => cell(r.d, i)).join("")}</tr>`).join("")}
       ${c.avg ? `<tr class="cr"><td>Crew</td>${[0, 1, 2, 3].map(i => cell(c.avg, i)).join("")}</tr>` : ""}</tbody></table>`;
   });
 }
@@ -2152,7 +2222,7 @@ function comboSave(legs) { try { localStorage.setItem("pickz_combo", JSON.string
 function comboToggle(p) {
   const legs = comboLegs(), i = legs.findIndex(l => l.id === p.id);
   if (i >= 0) legs.splice(i, 1);
-  else if (legs.length >= COMBO_MAX) { $("#live").textContent = "A combo holds " + COMBO_MAX + " props"; return null; }
+  else if (legs.length >= COMBO_MAX) { toast("A combo holds " + COMBO_MAX + " props"); return null; }
   else legs.push({id: p.id, side: ST.side, line: DT.line});
   comboSave(legs);
   return i < 0;
@@ -2161,7 +2231,7 @@ function comboPill() {
   let b = $("#cbp");
   const n = D ? comboLegs().length : 0;
   if (!b) { b = document.createElement("button"); b.id = "cbp"; b.className = "cbp glass"; b.setAttribute("aria-haspopup", "dialog"); b.onclick = comboSheet; document.body.appendChild(b); }
-  b.hidden = !n;
+  b.hidden = !n; document.body.classList.toggle("cbon", n > 0);       // room under the last row for the button
   b.innerHTML = `${ICON.combo}<span>Combo</span><b>${n}</b>`;
 }
 function comboSheet() {
@@ -2211,7 +2281,7 @@ function bindLive(p, logs, without) {
     if (ST.side !== sd) { ST.side = sd; save(); renderList(); tabbar(); }
     updateProp(); keep(`[data-ps="${sd}"]`);
   });
-  $$(".bl", pg).forEach(b => b.onclick = () => { const l = +b.dataset.pl; if (DT.line !== l) { DT.line = l; updateProp(); } });
+  $$("button.bl", pg).forEach(b => b.onclick = () => { const l = parseFloat(b.dataset.pl); if (isFinite(l) && DT.line !== l) { DT.line = l; updateProp(); } });
   $$("[data-ll]", pg).forEach(b => b.onclick = () => { const l = +b.dataset.ll; if (DT.line !== l) { DT.line = l; updateProp(); keep(`[data-ll="${l}"]`); } });
   const clr = $("#clr", pg); if (clr) clr.onclick = () => { Object.assign(DT, {home: null, starter: null, blow: null, result: null, rest: null, ranges: {}, without: {}, with: {}, dvp: false, def: false, open: {}, ovs: []}); updateProp(); };
   $("#lnb", pg).onclick = () => lineSheet(p);
@@ -2282,10 +2352,12 @@ function lineSheet(p) {
   openSheet(`<h2 id="sht">Line</h2><div class="lc" style="margin-bottom:8px"><div class="big num" id="ls-v">${DT.line}</div><div class="stp"><button id="ls-m" aria-label="Lower the line by half a point">−</button><button id="ls-p" aria-label="Raise the line by half a point">+</button></div></div>
     ${rows}
     <div class="acts"><button class="btn pri" id="ls-ok">Done</button></div>`, s => {
-    const set = v => { DT.line = Math.max(0.5, Math.round(v * 2) / 2); $("#ls-v", s).textContent = DT.line; };
-    $("#ls-m", s).onclick = () => set(DT.line - .5); $("#ls-p", s).onclick = () => set(DT.line + .5);
-    $$("[data-l]", s).forEach(b => b.onclick = () => { set(+b.dataset.l); closeSheet(); updateProp(); });
-    $("#ls-ok", s).onclick = () => { closeSheet(); updateProp(); };
+    let v = DT.line;
+    const set = x => { v = Math.max(0.5, Math.round(x * 2) / 2); $("#ls-v", s).textContent = v; };
+    const done = () => { closeSheet(); if (DT.line !== v) { DT.line = v; updateProp(); } };
+    $("#ls-m", s).onclick = () => set(v - .5); $("#ls-p", s).onclick = () => set(v + .5);
+    $$("[data-l]", s).forEach(b => b.onclick = () => { set(+b.dataset.l); done(); });
+    $("#ls-ok", s).onclick = done;
   });
 }
 // ── the Matchup page (from the gauge): the grade and its parts, then "<OPP> Team Defense": the opponent's recent games
@@ -2298,7 +2370,7 @@ function openMatchup(p, push) {
   if (!p) return;
   MUP = {p: p, grp: VS_GRP.some(g => g[0] === (p.ctx || {}).group) ? p.ctx.group : "G", mkt: p.market, more: false, rows: null,
          shView: "player", shSeason: null, shMode: "shots"};
-  if (push !== false) history.pushState({p: p.id, mu: 1}, "", hashState());
+  if (push !== false) history.pushState({p: p.id, mu: 1, d: navDepth() + 1}, "", hashState());
   const mp = $("#mp");
   mp.hidden = false;
   renderMatchup();
@@ -2341,11 +2413,12 @@ function renderMatchup() {
     <div id="vst"></div>
     <div class="shc wg" id="wgd"></div>
     <div class="shc" id="shc"></div>
-    <div class="shc" id="rfc"></div>`;
+    <div class="shc wg" id="rfc"></div>`;
   $(".bk", mp).onclick = () => history.back();
-  $("#mps", mp).onclick = () => { history.go(-2); setTimeout(() => { if (ST.view !== "props") { ST.view = "props"; save(); tabbar(); renderList(); } const q = $("#q"); if (q) q.focus(); }, 480); };
+  $(".ph", mp).onclick = e => { if (!e.target.closest("button")) mp.scrollTo({top: 0, behavior: REDUCED ? "auto" : "smooth"}); };
+  $("#mps", mp).onclick = () => { history.go(-Math.max(1, navDepth())); setTimeout(() => { if (ST.view !== "props") { ST.view = "props"; save(); tabbar(); renderList(); } const q = $("#q"); if (q) q.focus(); }, 480); };
   $("#mpm", mp).onclick = leagueSheet;
-  $("#mpsh", mp).onclick = () => { const url = location.href; if (navigator.share) navigator.share({title: `${p.player} vs ${p.opp}`, url: url}).catch(() => {}); else if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => { $("#live").textContent = "Link copied"; }); };
+  $("#mpsh", mp).onclick = () => { const url = location.href; if (navigator.share) navigator.share({title: `${p.player} vs ${p.opp}`, url: url}).catch(() => {}); else if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => toast("Link copied")); };
   $("#mpi", mp).onclick = () => openSheet(`<h2 id="sht">Ranks</h2>
     <div class="kv"><span>Teams ranked</span><b>${c.teams || "—"}</b></div>
     <div class="kv"><span>${esc(p.opp || "")} games this season</span><b>${c.rank_n != null ? c.rank_n : c.opp_games || 0}</b></div>
@@ -2590,18 +2663,84 @@ function playerFilters(p, logs, without) {
   });
 }
 // ── data ──
+// what a row, a prop's rates and an open page are built from: on a refresh, props whose signature did not move keep
+// their built rows and rates (no headshot re-decoded, no rate recomputed), and an open page re-renders only if its own did
+const sigOf = p => { const g = gameOf(p.gid) || {};
+  return JSON.stringify(p) + "|" + g.state + "|" + (((D.injuries[g.date + "|" + p.pid] || {}).official || {}).status || "") + "|" + ((D.players[String(p.pid)] || {}).logs || []).length; };
+const pageSig = id => { const p = propFor(id); if (!p) return ""; const g = gameOf(p.gid) || {};
+  const around = JSON.stringify([D.injuries[g.date + "|" + p.pid] || null, (D.inj_report || {})[g.date + "|" + p.team] || null, D.absences[g.date + "|" + p.team] || null]);
+  return p.v ? "v" + around : sigOf(p) + JSON.stringify(g) + around + JSON.stringify([D.related[p.id] || null, D.sources.books]); };
+let LOADED_AT = 0, PDOWN = false, REDRAW = false;
+function redrawPage() {
+  if (PDOWN) { REDRAW = true; return; }                  // mid-drag or mid-tap: after the finger lifts
+  REDRAW = false;
+  if (!CUR) return;
+  const pg = $("#pg"), py = pg.scrollTop, logOpen = !!$("#plog details[open]");
+  renderProp(); pg.scrollTop = py;
+  const d = $("#plog details"); if (d && logOpen) d.open = true;
+}
+document.addEventListener("pointerdown", () => { PDOWN = true; }, true);
+["pointerup", "pointercancel"].forEach(t => document.addEventListener(t, () => { PDOWN = false; if (REDRAW) setTimeout(redrawPage, 0); }, true));
 function load() {
   if (!D) { LOADING = true; render(); }
-  fetch("nba_props.json?t=" + Date.now(), {cache: "no-store"}).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+  return fetch("nba_props.json?t=" + Date.now(), {cache: "no-store"}).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
     .then(j => {
-      const first = !D; D = j; ERR = null; LOADING = false; RATES = new Map(); ROWS = new Map(); VP = new Map();
+      const first = !D, was = D ? new Map(D.props.map(p => [p.id, sigOf(p)])) : null, pg0 = CUR && D ? pageSig(CUR) : null;
+      D = j; ERR = null; LOADING = false; LOADED_AT = Date.now(); VP = new Map(); REFS = null; ROLES = null;
+      if (was) {
+        const now = new Map(D.props.map(p => [p.id, p])), memo = new Map();
+        const same = k => { const id = k.split("|").slice(0, 3).join("|");
+          if (!memo.has(id)) { const p = now.get(id); memo.set(id, !!p && was.get(id) === sigOf(p)); } return memo.get(id); };
+        ROWS = new Map([...ROWS].filter(([k]) => same(k))); RATES = new Map([...RATES].filter(([k]) => same(k)));
+      } else { RATES = new Map(); ROWS = new Map(); }
       const y = window.scrollY;
       render(); if (!first) window.scrollTo(0, y);
-      if (CUR) { const pg = $("#pg"), py = pg.scrollTop; renderProp(); pg.scrollTop = py; }
+      if (CUR && pageSig(CUR) !== pg0) redrawPage();
       $("#live").textContent = "Props updated";
       if (first && HASH_P) { history.replaceState(null, "", hashState()); openProp(HASH_P); }
+      return true;
     })
-    .catch(e => { LOADING = false; ERR = e.message || String(e); if (!D) render(); else { const u = $("#upd"); if (u) u.textContent = "Refresh failed"; } });
+    .catch(e => { LOADING = false; ERR = e.message || String(e); if (!D) render(); else { const u = $("#upd"); if (u) u.textContent = "Refresh failed"; } return false; });
+}
+// a thin bar across the top while something a tap asked for is loading
+let BUSY = 0, OPEN_N = 0;
+function busy(on) {
+  let el = $("#bsy");
+  if (!el) { el = document.createElement("div"); el.id = "bsy"; el.className = "bsy"; el.setAttribute("aria-hidden", "true"); document.body.appendChild(el); }
+  BUSY = Math.max(0, BUSY + (on ? 1 : -1)); el.classList.toggle("on", BUSY > 0);
+}
+// a small note at the bottom for what a tap did (screen readers hear it too)
+let TOAST_T = null;
+function toast(t) {
+  let el = $("#tst");
+  if (!el) { el = document.createElement("div"); el.id = "tst"; el.className = "tst"; el.setAttribute("aria-hidden", "true"); document.body.appendChild(el); }
+  el.textContent = t; el.classList.add("on"); $("#live").textContent = t;
+  clearTimeout(TOAST_T); TOAST_T = setTimeout(() => el.classList.remove("on"), 1700);
+}
+// pull the list down from the top to refresh
+function pullRefresh() {
+  const ind = document.createElement("div");
+  ind.className = "ptr"; ind.setAttribute("aria-hidden", "true"); ind.innerHTML = "<i></i>"; document.body.appendChild(ind);
+  let y0 = null, dy = 0, busy = false;
+  const reset = () => { ind.style.transform = ""; ind.style.opacity = ""; ind.classList.remove("go"); };
+  document.addEventListener("touchstart", e => {
+    y0 = !busy && D && window.scrollY <= 0 && !CUR && !MUP && $("#sheet").hidden && e.touches.length === 1 && !e.target.closest(".gcs,.mt,input") ? e.touches[0].clientY : null;
+    dy = 0; if (y0 !== null) { const h = $(".lh"); ind.style.top = (h ? h.getBoundingClientRect().bottom : 0) + "px"; }
+  }, {passive: true});
+  document.addEventListener("touchmove", e => {
+    if (y0 === null) return;
+    dy = e.touches[0].clientY - y0;
+    if (dy <= 0 || window.scrollY > 0) { reset(); return; }
+    ind.style.transform = `translateY(${Math.min(dy, 140) * .45}px) rotate(${dy * 2}deg)`; ind.style.opacity = Math.min(1, dy / 70);
+    ind.classList.toggle("go", dy > 80);
+  }, {passive: true});
+  document.addEventListener("touchend", () => {
+    if (y0 === null) return;
+    y0 = null;
+    if (dy <= 80) { reset(); return; }
+    busy = true; ind.classList.add("spin");
+    load().then(ok => { toast(ok ? "Updated" : "Couldn't refresh"); }).finally(() => { busy = false; ind.classList.remove("spin"); reset(); });
+  }, {passive: true});
 }
 const HASH_P = readHash();
 history.scrollRestoration = "manual";     // Back must not make Safari re-scroll the list
@@ -2633,8 +2772,11 @@ document.addEventListener("DOMContentLoaded", () => {
     warm.add(pid); const im = new Image(); im.src = heroSrc(pid); if (im.decode) im.decode().catch(() => {});
   }, {passive: true});
   load();
+  pullRefresh();
   setInterval(load, 120000);
-  setInterval(() => { const u = $("#upd"); if (u && D) u.textContent = ago(D.generated_at); }, 30000);
+  setInterval(() => { if (!D) return; const u = $("#upd"), l = $("#lupd"); if (u) u.textContent = ago(D.generated_at); if (l) l.textContent = ago(D.generated_at); }, 30000);
+  // back from another app: the 2-minute timer was asleep, so catch up at once
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && D && Date.now() - LOADED_AT > 45000) load(); });
 });
 })();
 """
