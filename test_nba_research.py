@@ -353,6 +353,10 @@ def test_page_controls_work_on_iphone():
     assert '<div class="shc" id="shc"></div>' in html and "fetch(`shots/${encodeURIComponent(season)}.json`)" in html
     assert "MUP.shSeason = t && t.gp >= 10 ? D.season : prevSeason(D.season);" in html and "Where ${esc(p.opp)} gets scored on" in html
     assert "opp[k][0] * SH_PTS[k] / t.gp - j.league[k][0] * SH_PTS[k] / games" in html and "SH_PATH.length" not in html
+    # the shot dots (docs/shots/p/{pid}.json): every shot on a to-scale court (the corner line 22 ft out, so a dot lands
+    # in its zone), made green over missed red rings, Shots by default for the player, Zones as before; defense: zones
+    assert "const SH_R3 = 237.5, SH_CX = 220," in html and "fetch(`shots/p/${pid}.json`)" in html
+    assert 'shView: "player", shSeason: null, shMode: "shots"' in html and 'const dotsOn = MUP.shView !== "def" && MUP.shMode !== "zones";' in html
     # every sheet in the player page's look: near-black with a thin edge, capsule toggles, outline chips and buttons,
     # the main action white, the chart filters' capsule slider; no iOS grey sheet, blue button or blue slider
     import re
