@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Every player's page, prop or not: docs/player/{pid}.json — his game logs for this season and last in the props
 page's LOG_COLS (nba_research.game_logs, the same rows a prop's page charts) — and docs/player/index.json, the list
-the page searches: [pid, name, team, position] for everyone on a roster now (the player index) who has a game.
+the page searches: [pid, name, team, position] for everyone on a roster now (the player index) who has a game —
+and docs/player/roles.json, the role changes (roles()).
 
     python3 nba_players.py --out /home/ubuntu/tennis-odds-collector/docs/player
 """
@@ -23,6 +24,60 @@ def _write(path, doc):
     os.replace(tmp, path)
 
 
+ROLE_MIN = 4.0      # minutes a game his last 3 must move off his baseline to be listed
+REG_MPG = 18.0      # a teammate this regular (minutes a game this season, 3+ games) who sat 2 of the last 3 is named
+
+
+def roles(logs, idx, season, team_games):
+    """Players whose minutes moved 4+ a game over their last 3 games against their baseline: this season's games before
+    those 3 (3+ of them), else last season's last 20 for the same team. Each with his usage and starts then and now, and the regular
+    teammates who sat 2 of his team's last 3 games (the likely reason). logs: {pid: LOG_COLS rows}; team_games:
+    {team: [gid, ...] this season, oldest first}. Biggest move first."""
+    C = {c: k for k, c in enumerate(R.LOG_COLS)}
+    played = {}                                              # (team, gid) -> pids who played
+    for pid, rows in logs.items():
+        for r in rows:
+            played.setdefault((r[C["team"]], r[C["gid"]]), set()).add(pid)
+    mean = lambda xs: sum(xs) / len(xs) if xs else None
+    out = []
+    for pid, rows in logs.items():
+        info = idx.get(str(pid))
+        if not info:
+            continue
+        team = info[0]
+        cur = [r for r in rows if R.season_of(r[C["date"]]) == season and r[C["team"]] == team]
+        last4 = (team_games.get(team) or [])[-4:]
+        if len(cur) < 3 or any(r[C["gid"]] not in last4 for r in cur[-3:]):
+            continue                                         # not playing lately: a return or an absence, not a role
+        recent, base = cur[-3:], cur[:-3]
+        frm = "this season"
+        if len(base) < 3:
+            # last season's last 20, for this team only (a new team is a new role, not a change in one)
+            base, frm = [r for r in rows if R.season_of(r[C["date"]]) != season and r[C["team"]] == team][-20:], "last season"
+        if len(base) < 3:
+            continue
+        d = mean([r[C["min"]] for r in recent]) - mean([r[C["min"]] for r in base])
+        if abs(d) < ROLE_MIN:
+            continue
+        us = lambda rs: mean([r[C["usg"]] for r in rs if r[C["usg"]] is not None])
+        last3 = (team_games.get(team) or [])[-3:]
+        regs = []
+        for mate, mrows in logs.items():
+            mi = idx.get(str(mate))
+            if mate == pid or not mi or mi[0] != team:
+                continue
+            mcur = [r for r in mrows if R.season_of(r[C["date"]]) == season and r[C["team"]] == team and r[C["gid"]] not in last3]
+            if len(mcur) >= 3 and mean([r[C["min"]] for r in mcur]) >= REG_MPG and \
+                    sum(1 for g in last3 if mate in played.get((team, g), ())) <= len(last3) - 2:
+                regs.append(mi[1])
+        out.append({"pid": pid, "name": info[1], "team": team, "d_min": round(d, 1),
+                    "min": [round(mean([r[C["min"]] for r in recent]), 1), round(mean([r[C["min"]] for r in base]), 1)],
+                    "usg": [None if us(recent) is None else round(us(recent), 1), None if us(base) is None else round(us(base), 1)],
+                    "starts": [sum(r[C["starter"]] or 0 for r in recent), sum(r[C["starter"]] or 0 for r in base), len(base)],
+                    "base": frm, "out": regs})
+    return sorted(out, key=lambda e: -abs(e["d_min"]))
+
+
 def build(mcon, out, idx, season, trk=None):
     """Write one file per player with games, and the index. Returns the number of players written."""
     out = Path(out)
@@ -39,6 +94,12 @@ def build(mcon, out, idx, season, trk=None):
         rows.append([pid, name, team, pos or ""])
     _write(out / "index.json", {"season": season, "log_cols": list(R.LOG_COLS),
                                 "players": sorted(rows, key=lambda r: r[1])})
+    team_games = {}
+    for gid, h, a in mcon.execute("SELECT gid, home, away FROM games WHERE season=? AND home_pts IS NOT NULL "
+                                  "ORDER BY date, gid", (season,)):
+        for t in (h, a):
+            team_games.setdefault(t, []).append(gid)
+    _write(out / "roles.json", {"season": season, "rows": roles(logs, idx, season, team_games)})
     return len(rows)
 
 

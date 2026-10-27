@@ -330,6 +330,24 @@ svg.shct{display:block;width:100%;height:auto;margin-top:6px}
 .wg table.vs{margin-top:6px} .wg .vs th:first-child,.wg .vs td:first-child{padding-left:0}
 .wg .vs td small{font-size:11px;color:#9a9a9a} .wg .vs tr:last-child td{border-bottom:0}
 .wg .vs tr[data-vp]{cursor:pointer}
+/* the Live tab: his stat so far against the line */
+.pr.lvr{height:98px;contain-intrinsic-size:auto 98px}
+.lvs{position:absolute;right:15.3px;top:14px;font-size:13px;font-weight:800;letter-spacing:.3px;color:#cfcfcf}
+.lvs.up{color:var(--grn)} .lvs.dn{color:var(--red)}
+.lvb{position:absolute;left:15.3px;right:15.3px;top:60px}
+.lvbar{position:relative;height:8px;border-radius:4px;background:#262626;overflow:hidden}
+.lvbar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:#5a5a5e}
+.lvbar i.up{background:var(--grn)} .lvbar i.dn{background:var(--red)} .lvbar i.on{background:#2f9e6e}
+.lvt{display:flex;justify-content:space-between;margin-top:7px;font-size:12.5px;color:#9a9a9a} .lvt b{font-size:14px;color:#fff}
+/* game cards: a spread of 10+ */
+.gc em .gsp{display:block;margin-top:2px;color:var(--org);font-weight:700}
+/* role changes */
+.pr.ror{height:82px;contain-intrinsic-size:auto 82px;width:100%;text-align:left}
+.ror .who{right:86px} .ror .lin{font-size:13.6px;color:#d6d6d6} .ror small{font-size:11.5px;color:#8e8e8e}
+.ros{margin-top:2px;font-size:12.5px;color:#9a9a9a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .ros span{color:var(--org)}
+.rod{position:absolute;right:15.3px;top:18px;font-size:19px;font-weight:800;text-align:right} .rod.up{color:var(--grn)} .rod.dn{color:var(--red)}
+.rod i{display:block;font-style:normal;font-size:10.5px;font-weight:600;color:#8e8e8e}
+.seg.ivs button{font-size:12.5px}
 /* the Movers tab: the line from its open */
 .lin .mvo{color:#9a9a9a} .lin .mv.up{color:var(--grn)} .lin .mv.dn{color:var(--red)}
 /* the box score sheet: one height whatever is in it, so it never resizes while it rises; a skeleton of the box's shape */
@@ -622,6 +640,7 @@ function filterLogs(logs, f) {
     if (f.home === false && l.home !== 0) return false;
     if (f.starter === true && l.starter !== 1) return false;
     if (f.starter === false && l.starter !== 0) return false;
+    if (f.blow === "b" && !(Math.abs(l.margin) >= 15)) return false;   // a blowout: a final margin of 15+
     if (f.result === "W" && !(l.margin > 0)) return false;
     if (f.result === "L" && !(l.margin < 0)) return false;
     if (f.rest === "b2b" && l.rest !== 0) return false;
@@ -789,11 +808,17 @@ function sortProps(list, key, dir, logsOf, side, season) {
     return a.i - b.i;
   }).map(function (x) { return x.p; });
 }
+function liveStage(state, v, line, over) {
+  // the Live tab's order: props still in play, then ones settled in a game still on (an over past its line, an
+  // under at it), then finals
+  if (state === "final") return 2;
+  return (over ? v > line : v >= line) ? 1 : 0;
+}
 if (typeof module !== "undefined") module.exports = {statValue: statValue, hitSummary: hitSummary, seasonOf: seasonOf,
   rowsToLogs: rowsToLogs, windowed: windowed, filterLogs: filterLogs, splitRows: splitRows, sideRate: sideRate,
   american: american, decimalOf: decimalOf, bestOver: bestOver, bestPrice: bestPrice, propRates: propRates,
   noVig: noVig, fairAt: fairAt, valueAt: valueAt, zscore: zscore, pmfGe: pmfGe, projProbs: projProbs, blendP: blendP,
-  filterProps: filterProps, sortProps: sortProps};
+  filterProps: filterProps, sortProps: sortProps, liveStage: liveStage};
 """
 
 JS_APP = r"""
@@ -810,7 +835,7 @@ let D = null, ERR = null, LOADING = true, CUR = null;
 const TOUCH = matchMedia("(pointer: coarse)").matches;
 const ST = {date: null, gid: "all", market: "points", side: "over", q: "", sort: "hit10", dir: "desc", team: "all",
             book: "all", lmin: "", lmax: "", omin: "", omax: "", watch: "", view: "props", iv: ""};
-const DT = {line: null, win: "l10", home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, with: {},
+const DT = {line: null, win: "l10", home: null, starter: null, blow: null, result: null, rest: null, ranges: {}, without: {}, with: {},
             dvp: false, def: false, open: {}, more: false, fresh: null, ovs: []};
 const RANGES = [["min", "Minutes", "Minutes"], ["fga", "Field goal attempts", "FGA"], ["fg3a", "3-point attempts", "3PTA"],
                 ["fta", "Free throw attempts", "FTA"], ["usg", "Usage %", "Usage%"], ["pot_ast", "Potential assists", "Potential Assists"],
@@ -876,8 +901,8 @@ function when(g) {
 }
 const vs = p => p.team ? (p.home ? "vs " : "@ ") + p.opp : "";
 // ── list ──
-const MKT_TABS = ["trends", "movers", "points", "assists", "rebounds", "threes", "pra", "pts_reb", "pts_ast", "reb_ast"];
-const ALL_TABS = ["trends", "movers"];          // tabs that span every market
+const MKT_TABS = ["live", "trends", "movers", "points", "assists", "rebounds", "threes", "pra", "pts_reb", "pts_ast", "reb_ast"];
+const ALL_TABS = ["live", "trends", "movers"];  // tabs that span every market
 // Trends (nba_research_score.trend_side): the L10 and L20 hit rates both 1+ SD from what the price implies, the same
 // way, 8+ games each. A plain 70% L10 put a third of the slate in Trends and ignored the price.
 const VIEWS = [["props", "Props"], ["markets", "Markets"], ["injuries", "Injuries"]];
@@ -954,6 +979,27 @@ function mover(p) {
   const gap = fd && dk && fd.main !== null && dk.main !== null ? Math.abs(fd.main - dk.main) : 0;
   return mv || gap ? {mv: mv, gap: gap, k: Math.abs(mv) * 100 + gap} : null;
 }
+// a prop under way: his stat so far against the line, his minutes, and his pace (per minute so far, over his usual
+// minutes: the average of his last 10); fin = 1 once the game is final; k ranks the live ones, nearest to cashing first
+function liveOf(p) {
+  const g = gameOf(p.gid) || {}, lv = p.live || {}, v = lv.value === null || lv.value === undefined ? 0 : lv.value, mn = lv.min || 0;
+  const line = p.main !== null ? p.main : allLines(p)[0], last = logsOf(p).slice(-10), exp = last.length ? last.reduce((a, l) => a + (l.min || 0), 0) / last.length : null;
+  const pace = mn >= 4 && exp ? v / mn * Math.max(exp, mn) : null, over = ST.side !== "under";
+  return {v: v, mn: mn, line: line, pace: pace, fin: liveStage(g.state, v, line, over), hit: over ? v > line : v < line,
+          k: over ? (line ? v / line : 0) : (line ? 1 - v / line : 0)};
+}
+function liveRow(p) {
+  const g = gameOf(p.gid) || {}, x = liveOf(p), over = ST.side !== "under", live = g.state === "live";
+  const st = over ? (x.hit ? ["HIT", "up"] : live ? [`NEEDS ${Math.ceil(x.line - x.v)}`, ""] : ["MISS", "dn"])
+                  : (!x.hit ? ["BUST", "dn"] : live ? [`${r1(x.line - x.v)} ROOM`, ""] : ["HIT", "up"]);
+  const bar = x.hit && over ? "up" : !x.hit && !over ? "dn" : !live ? (x.hit ? "up" : "dn") : x.pace !== null && (over ? x.pace > x.line : x.pace < x.line) ? "on" : "";
+  return `<button class="pr lvr" data-id="${esc(p.id)}"><span class="av">${head(p.pid)}</span>
+    <div class="who"><div class="nm">${esc(nameOf(p.player))}<span class="cd">${esc(p.team || "")}</span></div>
+      <div class="lin">${over ? "Over" : "Under"} ${x.line} ${esc(unit(p.market))} · ${live ? esc(g.label || "Live") : "Final"}</div></div>
+    <span class="lvs ${st[1]}">${st[0]}</span>
+    <div class="lvb"><div class="lvbar"><i class="${bar}" style="width:${x.line ? Math.min(100, x.v / x.line * 100).toFixed(1) : 0}%"></i></div>
+      <div class="lvt"><span><b>${x.v}</b> / ${x.line}</span><span>${x.mn ? Math.round(x.mn) + " min" : "not in yet"}${x.pace !== null && live ? " · pace " + r1(x.pace) : ""}</span></div></div></button>`;
+}
 function availMarkets() {
   const m = {};
   D.props.forEach(p => { const g = gameOf(p.gid); if (g && g.date === ST.date) m[p.market] = 1; });
@@ -963,6 +1009,10 @@ function filtersOn() { return ["team", "book"].filter(k => ST[k] !== "all").leng
 function listProps() {
   const st = Object.assign({}, ST, {market: ALL_TABS.indexOf(ST.market) >= 0 ? "all" : ST.market});
   let list = filterProps(D.props, st, gameOf, logsOf);
+  // games under way: only the Live tab (their props stay on from the closing board, nba_research.closing_boards)
+  if (ST.market === "live") return list.filter(p => { const g = gameOf(p.gid); return p.main !== null && g && (g.state === "live" || g.state === "final"); })
+    .map(p => [p, liveOf(p)]).sort((a, b) => (a[1].fin - b[1].fin) || (b[1].k - a[1].k)).map(x => x[0]);
+  list = list.filter(p => !p.closed);
   if (ST.watch) { const f = favs(); list = list.filter(p => f.indexOf(p.pid) >= 0); }
   // Movers: the biggest line move since open first, then the widest FanDuel / DraftKings gap
   if (ST.market === "movers") return list.map(p => [p, mover(p)]).filter(x => x[1]).sort((a, b) => b[1].k - a[1].k).map(x => x[0]);
@@ -1017,7 +1067,7 @@ function cards() {
   const gs = D.games.filter(g => g.date === ST.date), i = D.dates.indexOf(ST.date);
   const lab = i === 0 ? "Today" : i === 1 ? "Tomorrow" : ST.date.slice(5).replace("-", "/");
   return `<button class="gc0" id="dayb" aria-haspopup="dialog"><i>${lab}</i><i>${gs.length} GAME${gs.length === 1 ? "" : "S"}</i></button>` +
-    gs.map(g => `<button class="gc" data-gid="${g.gid}" aria-pressed="${g.gid === ST.gid}" aria-label="${esc(g.away)} at ${esc(g.home)}"><span class="gt"><span>${logo(g.away, "")}${esc(g.away)}</span><span>${logo(g.home, "")}${esc(g.home)}</span></span><em>${g.state === "live" ? '<span class="lv">LIVE</span>' : g.state === "final" ? "Final" : g.state === "postponed" ? "PPD" : mt(g.tip).replace(" ", "\u200a")}</em></button>`).join("");
+    gs.map(g => `<button class="gc" data-gid="${g.gid}" aria-pressed="${g.gid === ST.gid}" aria-label="${esc(g.away)} at ${esc(g.home)}"><span class="gt"><span>${logo(g.away, "")}${esc(g.away)}</span><span>${logo(g.home, "")}${esc(g.home)}</span></span><em>${g.state === "live" ? '<span class="lv">LIVE</span>' : g.state === "final" ? "Final" : g.state === "postponed" ? "PPD" : mt(g.tip).replace(" ", "\u200a")}${g.lines && Math.abs(g.lines.spread_home) >= 10 ? `<span class="gsp">±${Math.abs(g.lines.spread_home)}</span>` : ""}</em></button>`).join("");
 }
 // a pill under the pressed button of a capsule, moved with a transform so a tap slides it across
 function slide(box, instant) {
@@ -1048,7 +1098,8 @@ function render() {
       <nav class="gcs" id="gcs" aria-label="Games"></nav><div class="ldv"></div></header><div id="ban"></div><main class="lst" id="lst"></main>`;
     bindTop();
   }
-  $("#mtl").innerHTML = '<span class="pill2"></span>' + MKT_TABS.filter(m => ALL_TABS.indexOf(m) >= 0 || mks.indexOf(m) >= 0).map(m => `<button data-market="${m}" aria-pressed="${m === ST.market}">${TAB[m]}</button>`).join("");
+  const liveOn = D.games.some(g => g.date === ST.date && (g.state === "live" || g.state === "final"));
+  $("#mtl").innerHTML = '<span class="pill2"></span>' + MKT_TABS.filter(m => m === "live" ? liveOn || ST.market === "live" : ALL_TABS.indexOf(m) >= 0 || mks.indexOf(m) >= 0).map(m => `<button data-market="${m}" aria-pressed="${m === ST.market}">${TAB[m]}</button>`).join("");
   $("#gcs").innerHTML = cards();
   $("#ban").innerHTML = banners();
   bindHead();
@@ -1082,8 +1133,9 @@ function renderRows() {
   const lst = $("#lst"), ml = $(".ml");
   if (ml) ml.style.display = ST.view === "injuries" ? "none" : "";
   if (ST.view === "injuries") {
-    lst.innerHTML = `<div class="seg ivs" role="group" aria-label="Show"><span class="pill2"></span><button data-iv="" aria-pressed="${ST.iv !== "lu"}">Injuries</button><button data-iv="lu" aria-pressed="${ST.iv === "lu"}">Lineups</button></div>` +
-      (ST.iv === "lu" ? lineupsView() : injView());
+    lst.innerHTML = `<div class="seg ivs" role="group" aria-label="Show"><span class="pill2"></span><button data-iv="" aria-pressed="${ST.iv !== "lu" && ST.iv !== "ro"}">Injuries</button><button data-iv="lu" aria-pressed="${ST.iv === "lu"}">Lineups</button><button data-iv="ro" aria-pressed="${ST.iv === "ro"}">Roles</button></div>` +
+      (ST.iv === "lu" ? lineupsView() : ST.iv === "ro" ? '<div id="rov"><div class="vsk"><div class="sk"></div><div class="sk"></div></div></div>' : injView());
+    if (ST.iv === "ro") rolesView();
     slide($(".ivs", lst), true);
     $$("[data-iv]", lst).forEach(b => b.onclick = () => { if (ST.iv !== b.dataset.iv) { ST.iv = b.dataset.iv; save(); renderList(); } });
     return;
@@ -1094,11 +1146,14 @@ function renderRows() {
   else if (!onDate.length) body = '<div class="empty"><b>No props yet</b></div>';
   else if (ST.gid !== "all" && !onDate.some(p => p.gid === ST.gid)) body = '<div class="empty"><b>No props for this game yet</b></div>';
   else if (!list.length && ST.q.trim().length >= 2) body = '<div class="lhd"><span>No props</span></div>';
+  else if (!list.length && ST.market !== "live" && onDate.every(p => p.closed)) body = '<div class="empty"><b>Games under way</b><button class="btn" id="golive">Live</button></div>';
   else if (!list.length) body = ST.watch ? '<div class="empty"><b>Watchlist empty</b><button class="btn" id="reset2">Reset filters</button></div>'
     : ST.market === "trends" ? '<div class="empty"><b>No trends</b></div>'
     : ST.market === "movers" ? '<div class="empty"><b>No movers</b></div>'
+    : ST.market === "live" ? '<div class="empty"><b>No games under way</b></div>'
     : '<div class="empty"><b>No matches</b><button class="btn" id="reset2">Reset filters</button></div>';
-  if (body) { lst.innerHTML = body; const r2 = $("#reset2"); if (r2) r2.onclick = resetFilters; return; }
+  if (body) { lst.innerHTML = body; const r2 = $("#reset2"); if (r2) r2.onclick = resetFilters;
+    const gl = $("#golive"); if (gl) gl.onclick = () => { ST.market = "live"; save(); render(); }; return; }
   if (ST.view === "markets") {
     lst.innerHTML = '<div class="mhd"><span>PLAYER</span><span>FANDUEL</span><span>DRAFTKINGS</span></div>' + list.map(mrow).join("");
     return;
@@ -1113,6 +1168,7 @@ function renderRows() {
     frag.appendChild(h);
   }
   list.forEach(p => {
+    if (ST.market === "live") { const t = document.createElement("template"); t.innerHTML = liveRow(p).trim(); frag.appendChild(t.content.firstChild); return; }
     const k = p.id + "|" + ST.side + "|" + ST.book + (ST.market === "movers" ? "|mv" : "");
     let e = ROWS.get(k);
     if (!e) { const t = document.createElement("template"); t.innerHTML = row(p).trim(); e = t.content.firstChild; ROWS.set(k, e); }
@@ -1175,6 +1231,26 @@ function injView() {
   const list = injList();
   return `<div class="lhd"><span>${list.length} players</span><span>Report ${esc(mt(rep.published, true))}</span></div>` +
     (list.length ? list.map(injRow).join("") : '<div class="empty"><b>No injuries</b></div>');
+}
+// ── role changes (docs/player/roles.json, nba_players.roles): the slate's players whose minutes moved 4+ a game over their
+// last 3 games, biggest first: minutes and usage now against before, starts, and the regulars who sat (the likely why) ──
+let ROLES = null;
+function rolesView() {
+  if (!ROLES) ROLES = fetch("player/roles.json").then(r => r.ok ? r.json() : null).catch(() => null);
+  ROLES.then(j => {
+    const el = $("#rov");
+    if (!el || ST.view !== "injuries" || ST.iv !== "ro") return;
+    const teams = new Set(D.games.filter(g => g.date === ST.date && (ST.gid === "all" || g.gid === ST.gid)).flatMap(g => [g.away, g.home]));
+    const q = ST.q.trim().toLowerCase();
+    const rows = ((j && j.rows) || []).filter(r => teams.has(r.team) && (ST.team === "all" || r.team === ST.team) && (!q || r.name.toLowerCase().indexOf(q) >= 0));
+    if (!rows.length) { el.innerHTML = '<div class="empty"><b>No role changes</b></div>'; return; }
+    el.innerHTML = `<div class="lhd"><span>${rows.length} players</span><span>Last 3 games</span></div>` + rows.map(r => {
+      const up = r.d_min > 0, u = r.usg[0] !== null && r.usg[1] !== null ? ` · USG ${r.usg[0]}% <small>was ${r.usg[1]}%</small>` : "";
+      return `<button class="pr ir ir0 ror" data-vp="${r.pid}"><span class="av">${head(r.pid)}</span><div class="who"><div class="nm">${esc(nameOf(r.name))}<span class="cd">${esc(r.team)}</span></div>
+        <div class="lin">${r.min[0]} min <small>was ${r.min[1]}${r.base === "last season" ? " last season" : ""}</small>${u}</div>
+        <div class="ros">Started ${r.starts[0]}/3 <small>was ${r.starts[1]}/${r.starts[2]}</small>${r.out.length ? ` · <span>Out: ${r.out.map(esc).join(", ")}</span>` : ""}</div></div>
+        <span class="rod ${up ? "up" : "dn"}">${up ? "▲" : "▼"}${Math.abs(r.d_min).toFixed(1)}<i>MIN</i></span></button>`; }).join("");
+  });
 }
 // ── lineups (nba_research.lineups, NBA.com's daily lineups): each team's five, Confirmed or Expected; a starter outside its
 // usual five (its most frequent over the last 10 games) marked NEW, a usual starter not starting listed with his report
@@ -1428,7 +1504,7 @@ function openProp(id, push) {
   const fresh = CUR !== id, was = !!CUR;
   CUR = id;
   if (fresh) Object.assign(DT, {line: p.v ? vLine(p) : p.main !== null ? p.main : allLines(p)[0],
-                                 win: windowed(logsOf(p), "season", D.season).length ? "season" : "l10", home: null, starter: null,
+                                 win: windowed(logsOf(p), "season", D.season).length ? "season" : "l10", home: null, starter: null, blow: null,
                                  result: null, rest: null, ranges: {}, without: {}, with: {}, dvp: false, def: false, open: {}, more: false, fresh: null, ovs: []});
   if (push !== false) history.pushState({p: id}, "", hashState());
   const pg = $("#pg");
@@ -1472,7 +1548,7 @@ const TEAMS = {ATL: ["Atlanta Hawks", "#C8102E"], BOS: ["Boston Celtics", "#007A
 const POSN = {PG: "Point Guard", SG: "Shooting Guard", SF: "Small Forward", PF: "Power Forward", C: "Center", G: "Guard",
   F: "Forward", "G-F": "Guard-Forward", "F-G": "Forward-Guard", "F-C": "Forward-Center", "C-F": "Center-Forward"};
 const TAB_ORDER = ["points", "assists", "rebounds", "threes", "pts_ast", "pts_reb", "reb_ast", "pra"];
-const TAB = {trends: "Trends", movers: "Movers", points: "Points", rebounds: "Rebs", assists: "Assists", threes: "3PTM", pra: "PRA", pts_reb: "P+R", pts_ast: "P+A", reb_ast: "R+A"};
+const TAB = {live: "Live", trends: "Trends", movers: "Movers", points: "Points", rebounds: "Rebs", assists: "Assists", threes: "3PTM", pra: "PRA", pts_reb: "P+R", pts_ast: "P+A", reb_ast: "R+A"};
 const GRPN = {G: "guards", F: "forwards", C: "centers"};
 const ICON = {
   back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
@@ -1793,6 +1869,7 @@ function renderProp(mode) {
     <div class="wrow"><div class="wcap" id="wcap" role="group" aria-label="Games window"><span class="pill2"></span>${wins.map(([k, lab]) => `<button class="wc" data-win="${k}"><i>${lab}</i><b></b></button>`).join("")}</div><button class="cb fb" id="pf" aria-label="All filters">${ICON.menu}</button></div>
     <div class="sr" id="psr" role="status"></div>
     <div class="cf" id="pcf"></div>
+    <div class="sec2" id="pgs"></div>
     <div class="sec2" id="pproj"></div>
     <div class="bkt" id="pbk"></div>
     <div id="pstat"></div>
@@ -1839,7 +1916,7 @@ function chartF(p, g, c, without, dr) {
   if (x.def && defT) { const s = {}; s[D.season] = oppSet(rkCur.def, defT, rkCur.teams);
     if (rkPrev.def && rkPrev.teams) s[prevS] = oppSet(rkPrev.def, defT, rkPrev.teams); oppSets.push(s); }
   const ms = matesAll(p, without);
-  return {home: x.home, starter: x.starter, result: x.result, rest: x.rest, ranges: x.ranges, oppSets: oppSets,
+  return {home: x.home, starter: x.starter, blow: x.blow, result: x.result, rest: x.rest, ranges: x.ranges, oppSets: oppSets,
           with: ms.filter(m => x.with[m.key]), without: ms.filter(m => x.without[m.key])};
 }
 function updateProp(mode) {
@@ -1892,6 +1969,7 @@ function updateProp(mode) {
   const tchip = (k, v, lab) => chips.push(chip(`data-k="${k}" data-v="${v}"`, lab, on(k, v)));
   ["min", "fga", "fg3a", "fta", "usg", "pot_ast", "reb_ch"].forEach(rchip);   // the adjustable filters first
   if (logs.some(l => l.starter === 1)) tchip("starter", true, "Starter");     // only the games he started
+  if (logs.some(l => Math.abs(l.margin) >= 15)) tchip("blow", "b", "Blowouts"); // only games decided by 15+
   if (c.dvp_rank) chips.push(chip('data-t="dvp"', `DvP <em class="${rankCls(c.dvp_rank, c.teams, side)}">${ord(c.dvp_rank)}</em>`, DT.dvp));
   if (c.def_rank) chips.push(chip('data-t="def"', `Def Rank <em class="${rankCls(c.def_rank, c.teams, side)}">${ord(c.def_rank)}</em>`, DT.def));
   const wchip = w => chips.push(chip(`data-wo="${w.key}"`, (w.fresh ? "W/O " : "Without ") + esc(lastName(w.name)), DT.without[w.key]));
@@ -1916,10 +1994,11 @@ function updateProp(mode) {
       <div class="rp-b"><span>${b[0]}</span><span>${b[1]}</span></div></div>`;
   }).join("");
   DT.fresh = null;
-  const anyF = DT.dvp || DT.def || DT.home !== null || DT.starter !== null || DT.result !== null || DT.rest !== null || Object.keys(DT.ranges).length ||
+  const anyF = DT.dvp || DT.def || DT.home !== null || DT.starter !== null || DT.blow !== null || DT.result !== null || DT.rest !== null || Object.keys(DT.ranges).length ||
     Object.keys(DT.without).some(k => DT.without[k]) || Object.keys(DT.with).some(k => DT.with[k]) || Object.keys(DT.open).some(k => DT.open[k]);
   if (!rest) $("#pcf").innerHTML = `<div class="cf-h"><h3>Chart Filters</h3><button class="ca" id="clr"${anyF ? "" : " hidden"}>Clear All</button></div>
       <div class="fcs">${chips.join("")}</div>${panels}`;
+  if (!rest) $("#pgs").innerHTML = gameScript(p, g, logs, line, side);
   if (opening) { PX.lazy = setTimeout(() => { if (PX && PX.p === p) updateProp("rest"); }, 470); bindLive(p, logs, without); return; }
   if (!PX.statDone) { $("#pstat").innerHTML = PX.stat; PX.statDone = true; $$("[data-rel]", pg).forEach(b => b.onclick = () => openProp(b.dataset.rel)); }
   if (p.v) { $("#pproj").innerHTML = ""; $("#pbk").innerHTML = ""; }      // a player page: no line posted, no books
@@ -1949,6 +2028,20 @@ function updateProp(mode) {
   lg.innerHTML = `<details class="log"${wasOpen ? " open" : ""}><summary>Game Log · ${win.length}</summary><table><thead><tr><th>Date</th><th>Opp</th><th class="r">Min</th><th class="r">FGA</th><th class="r">${esc(short(p.market))}</th><th class="r">${line}</th></tr></thead><tbody>${logRows || '<tr><td colspan="6">No games.</td></tr>'}</tbody></table></details>`;
   bindLive(p, logs, without);
 }
+// game script: tonight's spread (FanDuel) and how he does in lopsided games: a final margin of 15+ against 10 or less
+function gameScript(p, g, logs, line, side) {
+  const L = g.lines || {}, sh = L.spread_home;
+  if (sh === undefined || sh === null || !p.team) return "";
+  const st = l => statValue(l, p.market), avg = xs => xs.length ? r1(xs.reduce((a, b) => a + b, 0) / xs.length) : "–";
+  const blow = logs.filter(l => Math.abs(l.margin) >= 15), close = logs.filter(l => l.margin !== null && l.margin !== undefined && Math.abs(l.margin) <= 10);
+  const rate = xs => { const v = xs.map(st).filter(x => x !== null); return v.length ? Math.round(v.filter(x => side === "under" ? x < line : x > line).length / v.length * 100) + "%" : "–"; };
+  const row = (lab, f) => `<div class="kv"><span>${lab}</span><b>${f(close)} <small>close</small> · ${f(blow)} <small>blowouts</small></b></div>`;
+  return `<h3>Game Script${Math.abs(sh) >= 10 ? ' <span class="tg tf">BLOWOUT RISK</span>' : ""}</h3><div class="box0">
+    <div class="kv"><span>Spread</span><b>${sh === 0 ? "PK" : esc(sh < 0 ? g.home : g.away) + " −" + Math.abs(sh)}${L.total ? " · Total " + L.total : ""}</b></div>
+    ${row("Minutes", xs => avg(xs.map(l => l.min)))}${row(esc(NAME[p.market]), xs => avg(xs.map(st).filter(x => x !== null)))}
+    ${row(`${side === "under" ? "Under" : "Over"} ${line}`, rate)}
+    <div class="kv"><span>Games</span><b>${close.length} <small>within 10</small> · ${blow.length} <small>by 15+</small></b></div></div>`;
+}
 function bindLive(p, logs, without) {
   const pg = $("#pg"), c = p.ctx || {};
   const keep = sel => { const e = !TOUCH && $(sel, pg); if (e) e.focus({preventScroll: true}); };
@@ -1973,7 +2066,7 @@ function bindLive(p, logs, without) {
   });
   $$(".bl", pg).forEach(b => b.onclick = () => { const l = +b.dataset.pl; if (DT.line !== l) { DT.line = l; updateProp(); } });
   $$("[data-ll]", pg).forEach(b => b.onclick = () => { const l = +b.dataset.ll; if (DT.line !== l) { DT.line = l; updateProp(); keep(`[data-ll="${l}"]`); } });
-  const clr = $("#clr", pg); if (clr) clr.onclick = () => { Object.assign(DT, {home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, with: {}, dvp: false, def: false, open: {}, ovs: []}); updateProp(); };
+  const clr = $("#clr", pg); if (clr) clr.onclick = () => { Object.assign(DT, {home: null, starter: null, blow: null, result: null, rest: null, ranges: {}, without: {}, with: {}, dvp: false, def: false, open: {}, ovs: []}); updateProp(); };
   $("#more", pg).onclick = () => { DT.more = $("#more", pg).getAttribute("aria-expanded") !== "true"; if (!DT.more) { MORE_R.forEach(k => { DT.open[k] = false; delete DT.ranges[k]; }); DT.ovs = DT.ovs.filter(k => MORE_R.indexOf(k) < 0); Object.assign(DT, {home: null, result: null, rest: null}); } updateProp(); keep("#more"); };
   $("#lnb", pg).onclick = () => lineSheet(p);
   const lnp = $("#lnp", pg); if (lnp) lnp.onclick = () => lineSheet(p);
@@ -2343,7 +2436,7 @@ function playerFilters(p, logs, without) {
       dr[k] = v; $$(`[data-sk="${k}"]`, s).forEach(x => x.setAttribute("aria-pressed", x === b)); upd();
     });
     bindMates(s, dr, upd);
-    $("#pf-reset", s).onclick = () => { Object.assign(DT, {home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, with: {}, dvp: false, def: false, open: {}, ovs: []}); closeSheet(); updateProp(); };
+    $("#pf-reset", s).onclick = () => { Object.assign(DT, {home: null, starter: null, blow: null, result: null, rest: null, ranges: {}, without: {}, with: {}, dvp: false, def: false, open: {}, ovs: []}); closeSheet(); updateProp(); };
     $("#pf-ok", s).onclick = () => { Object.assign(DT, {home: dr.home, starter: dr.starter, result: dr.result, rest: dr.rest, ranges: dr.ranges, without: dr.without, with: dr.with}); closeSheet(); updateProp(); };
     upd();
   });

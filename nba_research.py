@@ -45,6 +45,8 @@ INDEX = HERE / "nba_player_index.json"
 TRACKING = HERE / "nba_tracking.sqlite"
 PROJ_LOG = HERE / "nba_proj_log.sqlite"          # the projection engine's prospective record (prereg test C)
 LINEUPS = HERE / "nba_lineups.sqlite"            # NBA.com's daily lineups as seen (nba_lineups_poll.py, the VM cron)
+CLOSE_BOARDS = HERE / "nba_close_boards.json"    # each started game's last board before tip (closing_boards), cached
+SLATE_ROLL_H = 6     # the slate moves on to the next day at 6 AM ET (4 AM MT), not midnight: late games stay on it
 USUAL_GAMES = 10                                 # a team's usual starters: its most frequent five over its last 10 games
 USUAL_MIN = 3                                    # ...this season, once it has 3 (before that, no starter is marked new)
 ET, MT = ZoneInfo("America/New_York"), ZoneInfo("America/Denver")
@@ -529,6 +531,44 @@ def depth_read(boxes, x, mates, stays):
     return played, missed, out
 
 
+def closing_boards(q, gids, cache=CLOSE_BOARDS):
+    """The books pull a game's props at tip, so the board loses them; the Live tab still wants them. -> ({(gid, pid,
+    stat): {book: {"updated", "rungs", "main"}}}, {(gid, pid): name}) from each prop's last board before tip
+    (nba_research_score.boards_before_tip), for started games. Cached per game in `cache`: a past board never changes."""
+    import nba_research_score as RSC
+    out, names = defaultdict(dict), {}
+    if q is None or not gids:
+        return out, names
+    try:
+        cached = json.loads(Path(cache).read_text())
+    except (OSError, ValueError):
+        cached = {}
+    todo = [g for g in gids if g not in cached]
+    if todo:
+        marks = ",".join("?" * len(todo))
+        nm = {}
+        for gid, pid, player in q.execute(f"SELECT gid, pid, MAX(player) FROM quotes WHERE gid IN ({marks}) AND pid IS NOT NULL "
+                                          f"GROUP BY gid, pid", todo):
+            nm.setdefault(gid, {})[str(int(pid))] = player
+        for gid in todo:
+            cached[gid] = {"names": nm.get(gid, {}), "boards": {}}
+        for (gid, pid, stat, book), rec in RSC.boards_before_tip(q, todo).items():
+            rr = rungs_of(rec["close"] or {})
+            if rr:
+                cached[gid]["boards"][f"{pid}|{stat}|{book}"] = rr
+        tmp = Path(cache).with_name("." + Path(cache).name + ".tmp")
+        tmp.write_text(json.dumps(cached, separators=(",", ":")))
+        os.replace(tmp, cache)
+    for gid in gids:
+        c = cached.get(gid) or {}
+        for k, rr in c.get("boards", {}).items():
+            pid, stat, book = k.split("|")
+            out[(gid, int(pid), stat)][book] = {"updated": None, "rungs": rr, "main": main_line(rr)}
+        for pid, name in c.get("names", {}).items():
+            names[(gid, int(pid))] = name
+    return out, names
+
+
 def lineups(lcon, dates, boxes, official):
     """{"date|TEAM": {status, at, starters: [[pid, name, pos]], usual: [pid], missing: [[pid, name, status]],
     inactive: [[pid, name]]}} from the latest NBA.com lineups snapshot of each date (nba_lineups_poll.py). status:
@@ -845,7 +885,7 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
     if sched is None:
         import nba_rosters as R
         sched = R.schedule()
-    today = now.astimezone(ET).date()
+    today = (now.astimezone(ET) - dt.timedelta(hours=SLATE_ROLL_H)).date()
     dates = [(today + dt.timedelta(days=k)).isoformat() for k in (0, 1)]
     games = [g for g in sched if g["date_et"] in dates]
     gids = [g["gid"] for g in games]
@@ -860,6 +900,16 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
     team_of = {int(k): v[0] for k, v in idx.items()}
 
     quotes, names, newest = book_quotes(q, gids)
+    # games under way: their props come off the board at tip; their closing boards fill in, marked closed (Live tab only)
+    started = [g["gid"] for g in games if g.get("utc") and _naive_utc(g["utc"]) <= now.astimezone(dt.timezone.utc).replace(tzinfo=None)]
+    cb, cnames = closing_boards(q, started, cache=CLOSE_BOARDS if lines is None else Path(lines).with_name("close_boards.json"))
+    closed = set()
+    for k, books in cb.items():
+        if k not in quotes:
+            quotes[k] = books
+            closed.add(k)
+    for k, n in cnames.items():
+        names.setdefault(k, n)
     hist = line_history(q, gids)
     gmap = {g["gid"]: g for g in games}
     props = []
@@ -872,7 +922,8 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
                       "player": names.get((gid, pid), ""), "team": team,
                       "opp": (g["away"] if team == g["home"] else g["home"]) if team else None,
                       "home": team == g["home"] if team else None, "books": books,
-                      "main": (books.get("fd") or {}).get("main") or (books.get("dk") or {}).get("main")})
+                      "main": (books.get("fd") or {}).get("main") or (books.get("dk") or {}).get("main"),
+                      **({"closed": True} if (gid, pid, market) in closed else {})})
     season = season_of(dates[0])
     pids = {p["pid"] for p in props}
     trk = _ro(tracking or TRACKING)

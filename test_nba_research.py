@@ -132,8 +132,7 @@ def live_box(gid):
             "awayTeam": {"score": 66, "players": []}}
 
 
-@pytest.fixture(scope="module")
-def payload():
+def built(now):
     d = pathlib.Path(tempfile.mkdtemp())
     stores(d)
     tr = sqlite3.connect(d / "tracking.sqlite")
@@ -142,8 +141,20 @@ def payload():
     tr.execute("INSERT INTO tracking (date, player_id, potential_ast, reb_chances) VALUES ('2026-09-01', 1, 14, 9)")
     tr.execute("INSERT INTO tracking (date, player_id, potential_ast, reb_chances) VALUES ('2026-09-02', 1, 11, NULL)")
     tr.commit(); tr.close()
-    return RS.build(now=NOW, sched=SCHED, lines=d / "lines.sqlite", news=d / "news.sqlite", shadow=d / "shadow.sqlite",
+    return RS.build(now=now, sched=SCHED, lines=d / "lines.sqlite", news=d / "news.sqlite", shadow=d / "shadow.sqlite",
                     matchup=d / "matchup.sqlite", index=d / "index.json", box_get=live_box, tracking=d / "tracking.sqlite")
+
+
+@pytest.fixture(scope="module")
+def payload():
+    return built(NOW)
+
+
+def test_slate_holds_until_6am_et():
+    # 1:30 AM ET (11:30 PM MT): still Monday's slate, the late game and its props on it; 6:30 AM ET: Tuesday's
+    late = built(NOW + dt.timedelta(hours=6))
+    assert late["dates"][0] == GD and any(g["gid"] == "G1" for g in late["games"]) and late["props"]
+    assert built(NOW + dt.timedelta(hours=11))["dates"][0] == "2026-10-27"
 
 
 def test_payload_props_and_books(payload):
@@ -251,9 +262,11 @@ out.px = inp.props.map(p => [C.fairAt(p, p.main), C.valueAt(p, p.main, 'over'), 
 const nk = {played: inp.played, since: '2026-09-01', team: 'PHX'};
 out.fw = [C.filterLogs(inp.logs, {with: [nk]}).length, C.filterLogs(inp.logs, {with: [nk], without: [nk]}).length,
           C.filterLogs(inp.logs, {with: [Object.assign({}, nk, {team: 'SAC'})]}).length,
-          C.filterLogs(inp.logs, {with: [nk], home: true}).length];
+          C.filterLogs(inp.logs, {with: [nk], home: true}).length, C.filterLogs(inp.logs, {blow: 'b'}).length];
 out.z = [C.zscore(7, 10, 0.5), C.zscore(0, 0, 0.5), C.zscore(3, 3, null)];
 out.sv = C.sortProps(props, 'value', 'desc', () => [], 'over').map(p => p.id);
+out.ls = [C.liveStage('live', 3, 1.5, true), C.liveStage('live', 1, 1.5, true), C.liveStage('final', 0, 1.5, true),
+          C.liveStage('live', 20, 18.5, false), C.liveStage('live', 10, 18.5, false)];
 console.log(JSON.stringify(out));
 """)
     inp = {"cases": cases, "lines": lines, "logs": logs, "props": payload["props"],
@@ -273,6 +286,7 @@ console.log(JSON.stringify(out));
     assert sp["Without N"][0] == 10                                            # Nurkic sat the last 10
     assert sp["vs UTA"][0] == 30
     assert out["f1"] == ["G1|1|points"]                                        # DK + points
+    assert out["ls"] == [1, 0, 2, 1, 0]               # Live: in play first, then settled in a game still on, then finals
     assert out["f2"] == ["G1|2|points"]                                        # search
     assert out["f3"] == ["G1|1|points"]                                        # line >= 12 and over price <= -110
     assert out["s1"] == ["G1|1|assists", "G1|2|points", "G1|1|points"]          # ascending line
@@ -282,7 +296,7 @@ console.log(JSON.stringify(out));
     homes = sum(1 for l in logs if l["home"] == 1)
     assert out["fl"] == [homes, 30 - homes, 10, 0]                              # home; away starters; without Nurkic; bench
     # with Nurkic: his 20; with and without him: none; with him on another team: none (the games must be that team's)
-    assert out["fw"] == [20, 0, 0, sum(1 for l in logs[:20] if l["home"] == 1)]
+    assert out["fw"] == [20, 0, 0, sum(1 for l in logs[:20] if l["home"] == 1), 0]      # no blowout: won by 8, lost by 5
     vals = [RS.stat_value(l, "points") for l in logs]
     for w, sl in (("l5", vals[-5:]), ("l10", vals[-10:]), ("l20", vals[-20:]), ("season", vals)):
         py = RS.hit_summary(sl, 24.5)
@@ -360,7 +374,13 @@ def test_page_controls_work_on_iphone():
     # Movers (a line moved since open, or the books disagree: the move first), Lineups beside Injuries (NEW starters, the usual
     # five not starting), who guards him on the Matchup page (docs/matchups/{pid}.json, nba_defmatch)
     assert 'if (ST.market === "movers") return list.map(p => [p, mover(p)])' in html and "k: Math.abs(mv) * 100 + gap" in html
-    assert '(ST.iv === "lu" ? lineupsView() : injView())' in html and "function luTeam(t, e)" in html and 'isNew(pid) ? " · NEW" : ""' in html
+    assert '(ST.iv === "lu" ? lineupsView() : ST.iv === "ro" ?' in html and "function luTeam(t, e)" in html and 'isNew(pid) ? " · NEW" : ""' in html
+    # role changes (docs/player/roles.json), the Live tab (props under way from their closing boards: only there), game script
+    assert 'fetch("player/roles.json")' in html and "function rolesView()" in html and 'data-iv="ro"' in html
+    assert 'const ALL_TABS = ["live", "trends", "movers"];' in html and "list = list.filter(p => !p.closed);" in html
+    assert "function liveRow(p)" in html and 'NEEDS ${Math.ceil(x.line - x.v)}' in html
+    assert 'if (f.blow === "b" && !(Math.abs(l.margin) >= 15)) return false;' in html and 'tchip("blow", "b", "Blowouts")' in html
+    assert "function gameScript(p, g, logs, line, side)" in html and '<span class="gsp">' in html
     assert "fetch(`matchups/${pid}.json`)" in html and '<div class="shc wg" id="wgd"></div>' in html and "guardCard();" in html
     # the floating header fades what scrolls under it (no text under its title)
     assert '.ph::before{content:"";position:absolute;' in html
@@ -384,7 +404,7 @@ def test_page_controls_work_on_iphone():
     assert html.index('.forEach(rchip);') < html.index('tchip("starter", true, "Starter")') < html.index("if (c.dvp_rank) chips.push(")
     assert 'win: windowed(logsOf(p), "season", D.season).length ? "season" : "l10"' in html
     assert 'if (x.n < 5) return {t: pct(x.rate), c: "sm"};' in html and 'h + "/" + x.n' not in html
-    assert 'const ALL_TABS = ["trends", "movers"];' in html and 'injury: "Injuries"' not in html and '"injury"' not in html
+    assert "ALL_TABS = [" in html and 'injury: "Injuries"' not in html and '"injury"' not in html
     # motion runs as Web Animations with a timer fallback, and nothing is fetched from a font CDN
     assert ".animate([" in html and "setTimeout(done" in html and "fonts.googleapis" not in html
     # every range chip but Margin draws its stat on the chart as white outline boxes (Margin can be negative: filter only)
@@ -662,3 +682,24 @@ def test_lineups_flags_new_starters_and_missing_regulars():
     assert sorted(e["usual"]) == [1, 2, 3, 4, 5] and e["missing"] == [[5, "E Five", "Questionable"]]
     assert e["inactive"] == [[6, "F Six"]] and out[f"{GD}|SAC"]["status"] == "Expected"
     assert not any(k.startswith("2026-10-27") for k in out)                                    # no snapshot yet
+
+
+def test_closing_boards_keep_started_games_props():
+    d = pathlib.Path(tempfile.mkdtemp())
+    q = sqlite3.connect(d / "lines.sqlite")
+    q.execute("CREATE TABLE quotes (seen_at TEXT, book TEXT, gid TEXT, tip_utc TEXT, pid INTEGER, player TEXT, stat TEXT, "
+              "line REAL, side TEXT, odds REAL)")
+    tip = "2026-10-26T23:00:00"
+    rows = [("2026-10-26T20:00:00", "fd", 5, "Coby White", "points", 18.5, "over", 1.98), ("2026-10-26T20:00:00", "fd", 5, "Coby White", "points", 18.5, "under", 1.86),
+            ("2026-10-26T20:00:00", "fd", 5, "Coby White", "points", 21.5, "over", 3.1),
+            ("2026-10-26T23:20:00", "fd", 5, "Coby White", "points", 25.5, "over", 1.9),        # in-game: not the close
+            ("2026-10-26T23:20:00", "fd", 5, "Coby White", "points", 25.5, "under", 1.9)]
+    q.executemany("INSERT INTO quotes VALUES (?,?, 'G1', ?, ?,?,?,?,?,?)", [(t, b, tip, p, n, s, ln, sd, o) for t, b, p, n, s, ln, sd, o in rows])
+    q.commit()
+    cache = d / "close.json"
+    out, names = RS.closing_boards(q, ["G1"], cache=cache)
+    fd = out[("G1", 5, "points")]["fd"]
+    assert fd["rungs"] == [[18.5, 1.98, 1.86], [21.5, 3.1, None]] and fd["main"] == 18.5 and names[("G1", 5)] == "Coby White"
+    q.execute("DELETE FROM quotes"); q.commit()                     # a started game's board never changes: the cache serves
+    out2, names2 = RS.closing_boards(q, ["G1"], cache=cache)
+    assert out2 == out and names2 == names
