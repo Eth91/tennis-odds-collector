@@ -18,6 +18,7 @@ with minutes should have a tracking row. Exit 1 if not.
 
     python nba_tracking.py --fetch --seasons 2022-23 2023-24 2024-25
     python nba_tracking.py --fetch --seasons 2025-26 --current    # + this season's played dates
+    python nba_tracking.py --fetch --dates 2026-04-01 2026-10-22     # pending dates only (amendment 33)
     python nba_tracking.py --verify
 
 WHERE. stats.nba.com answers the Oracle VM with curl_cffi impersonation (verified 2026-10-23), so the
@@ -59,6 +60,30 @@ CREATE TABLE IF NOT EXISTS fetched (date TEXT, measure TEXT, rows INTEGER, fetch
     PRIMARY KEY (date, measure));
 """
 PAUSE_S = 1.0
+# AMENDMENT 33: GP = 1 did not stop 2026-04-01 (multi-game totals: 517 potential assists in 18 min) or
+# 2026-10-22 (Jokić 44 potential assists / 101 passes in 35 min). A row past these caps is not one game.
+# Per minute = the props page's caps (nba_research.game_logs), on the response's MIN floored at 10:
+# without the floor, 1 minute and 2 rebound chances rejected 26 good dates of the 2025-26 store.
+CAP_PER_MIN = {"POTENTIAL_AST": 1.0, "REB_CHANCES": 1.4}
+MIN_FLOOR = 10.0
+CAP_ABS = {"POTENTIAL_AST": 40, "PASSES_MADE": 150}          # only if a response has no MIN column
+
+
+def implausible(rs):
+    """Why this response cannot be one game per player (a string), or None if it can."""
+    ix = {h: k for k, h in enumerate(rs["headers"])}
+    who = ix.get("PLAYER_NAME", ix["PLAYER_ID"])
+    for r in rs["rowSet"]:
+        if "MIN" in ix:
+            m = max(r[ix["MIN"]] or 0.0, MIN_FLOOR)
+            for c, cap in CAP_PER_MIN.items():
+                if c in ix and (r[ix[c]] or 0) / m > cap:
+                    return f"{r[who]}: {c} {r[ix[c]]} in {r[ix['MIN']]} min (cap {cap}/min)"
+        else:
+            for c, cap in CAP_ABS.items():
+                if c in ix and (r[ix[c]] or 0) > cap:
+                    return f"{r[who]}: {c} {r[ix[c]]} (cap {cap}, no MIN column)"
+    return None
 
 
 def _get(url, tries=4):
@@ -100,41 +125,60 @@ def current_dates(today_et=None):
     return sorted((d, season_of(d)) for d in dates if d < today_et)
 
 
-def fetch(seasons, current=False):
+def fetch(seasons, current=False, dates=()):
+    """Fetch every pending (date, measure). Returns the dates REJECTED by `implausible`: nothing of
+    theirs is stored, for either measure (opp_cell would read a missing measure as 0), and they stay
+    pending, so the next run retries them."""
     con = sqlite3.connect(DB)
     con.executescript(DDL)
-    dates = (game_dates(seasons) if seasons else []) + (current_dates() if current else [])
-    todo = [(d, s, m) for d, s in sorted(set(dates)) for m in COLS
-            if not con.execute("SELECT 1 FROM fetched WHERE date=? AND measure=?", (d, m)).fetchone()]
-    print(f"{len(todo)} (date, measure) calls to make", flush=True)
-    t0 = time.time()
-    for i, (d, season, measure) in enumerate(todo, 1):
-        mmddyyyy = f"{d[5:7]}/{d[8:10]}/{d[:4]}"
-        rs = _get(URL.format(season=season, measure=measure, d=mmddyyyy))
-        ix = {h: k for k, h in enumerate(rs["headers"])}
-        gp_bad = [r for r in rs["rowSet"] if r[ix["GP"]] not in (0, 1)]
-        if gp_bad:                                   # one date must mean one game per player
-            raise RuntimeError(f"{d} {measure}: {len(gp_bad)} rows with GP > 1 — the date filter failed")
-        cols = COLS[measure]
-        for r in rs["rowSet"]:
-            con.execute("INSERT OR IGNORE INTO tracking (date, player_id) VALUES (?, ?)",
-                        (d, int(r[ix["PLAYER_ID"]])))
-            con.execute(f"UPDATE tracking SET {', '.join(f'{v}=?' for v in cols.values())} "
-                        "WHERE date=? AND player_id=?",
-                        (*[r[ix[c]] for c in cols], d, int(r[ix["PLAYER_ID"]])))
-        # A game date ALWAYS has rows once published. Zero rows = the league has not posted that
-        # night's tracking yet (2026-10-24: the 10-23 games, fetched at 08:00 UTC). Marking it done
-        # would skip it forever; leave it pending so the next run retries.
-        if rs["rowSet"]:
-            con.execute("INSERT OR REPLACE INTO fetched VALUES (?,?,?,?)",
-                        (d, measure, len(rs["rowSet"]), dt.datetime.now(dt.timezone.utc).isoformat()))
+    want = ((game_dates(seasons) if seasons else []) + (current_dates() if current else [])
+            + [(d, season_of(d)) for d in dates])
+    todo = [((d, s), [m for m in COLS
+                      if not con.execute("SELECT 1 FROM fetched WHERE date=? AND measure=?", (d, m)).fetchone()])
+            for d, s in sorted(set(want))]
+    todo = [(ds, ms) for ds, ms in todo if ms]
+    n = sum(len(ms) for _, ms in todo)
+    print(f"{n} (date, measure) calls to make", flush=True)
+    t0, i, rejected = time.time(), 0, []
+    for (d, season), measures in todo:
+        got = {}
+        for measure in measures:
+            mmddyyyy = f"{d[5:7]}/{d[8:10]}/{d[:4]}"
+            rs = _get(URL.format(season=season, measure=measure, d=mmddyyyy))
+            ix = {h: k for k, h in enumerate(rs["headers"])}
+            gp_bad = [r for r in rs["rowSet"] if r[ix["GP"]] not in (0, 1)]
+            if gp_bad:                               # one date must mean one game per player
+                raise RuntimeError(f"{d} {measure}: {len(gp_bad)} rows with GP > 1 — the date filter failed")
+            got[measure] = rs
+            i += 1
+            time.sleep(PAUSE_S)
+        bad = [(m, w) for m, rs in got.items() if (w := implausible(rs))]
+        if bad:
+            print(f"  REJECTED {d} {bad[0][0]}: {bad[0][1]} · nothing stored, stays pending", flush=True)
+            rejected.append(d)
+            continue
+        for measure, rs in got.items():
+            ix = {h: k for k, h in enumerate(rs["headers"])}
+            cols = COLS[measure]
+            for r in rs["rowSet"]:
+                con.execute("INSERT OR IGNORE INTO tracking (date, player_id) VALUES (?, ?)",
+                            (d, int(r[ix["PLAYER_ID"]])))
+                con.execute(f"UPDATE tracking SET {', '.join(f'{v}=?' for v in cols.values())} "
+                            "WHERE date=? AND player_id=?",
+                            (*[r[ix[c]] for c in cols], d, int(r[ix["PLAYER_ID"]])))
+            # A game date ALWAYS has rows once published. Zero rows = the league has not posted that
+            # night's tracking yet (2026-10-24: the 10-23 games, fetched at 08:00 UTC). Marking it done
+            # would skip it forever; leave it pending so the next run retries.
+            if rs["rowSet"]:
+                con.execute("INSERT OR REPLACE INTO fetched VALUES (?,?,?,?)",
+                            (d, measure, len(rs["rowSet"]), dt.datetime.now(dt.timezone.utc).isoformat()))
         con.commit()
-        if i % 25 == 0 or i == len(todo):
+        if i // 25 != (i - len(measures)) // 25 or i == n:     # crossed a multiple of 25 calls, or done
             rate = (time.time() - t0) / i
-            print(f"  {i}/{len(todo)} · {d} {measure} {len(rs['rowSet'])} rows · "
-                  f"~{(len(todo) - i) * rate / 60:.0f} min left", flush=True)
-        time.sleep(PAUSE_S)
+            print(f"  {i}/{n} · {d} " + " · ".join(f"{m} {len(rs['rowSet'])} rows" for m, rs in got.items())
+                  + f" · ~{(n - i) * rate / 60:.0f} min left", flush=True)
     con.close()
+    return rejected
 
 
 def verify():
@@ -172,10 +216,14 @@ if __name__ == "__main__":
     ap.add_argument("--fetch", action="store_true")
     ap.add_argument("--seasons", nargs="+", default=None)
     ap.add_argument("--current", action="store_true", help="also this season's played dates (daily on the VM)")
+    ap.add_argument("--dates", nargs="+", default=[], help="also these YYYY-MM-DD dates (a pending date only: "
+                    "delete its rows and fetched markers first to refetch it)")
     ap.add_argument("--verify", action="store_true")
     a = ap.parse_args()
+    rejected = []
     if a.fetch:
-        seasons = a.seasons if a.seasons is not None else ([] if a.current else ["2022-23", "2023-24", "2024-25"])
-        fetch(seasons, current=a.current)
-    if a.verify:
-        sys.exit(0 if verify() else 1)
+        seasons = a.seasons if a.seasons is not None else ([] if a.current or a.dates else ["2022-23", "2023-24", "2024-25"])
+        rejected = fetch(seasons, current=a.current, dates=a.dates)
+    if a.verify and not verify():
+        sys.exit(1)
+    sys.exit(1 if rejected else 0)

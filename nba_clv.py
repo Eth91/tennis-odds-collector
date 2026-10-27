@@ -56,6 +56,7 @@ AMEND30_CUTOVER = "2026-10-26T06:00:00"     # AMENDMENT 30: pace / matchup / sch
 FILTER_CELL = ("PASS", "EDGE TOO BIG", "REBOUNDS OFF CARD", "STAR 32+ MIN", "PRICE -125 OR SHORTER")
 COMBO_STATS = frozenset({"pra", "pts_reb", "pts_ast", "reb_ast"})
 AMEND9_CUTOVER = "2026-10-24T08:03:00"      # OPPORTUNITY cell: deployment time after the VM backfill (amendment 9)
+AMEND33_CUTOVER = "2026-10-27T10:00:00"     # OPPORTUNITY cell restarts: the flag's season only (amendment 33)
 PRICE_EPS = 0.03                            # a "move" on an unchanged line (== amendment 5)
 WOWY_MARGIN = {"pts": 3.0, "reb": 2.0, "pra": 5.0}
 AMEND23_CUTOVER = "2026-10-25T10:12:00"     # wowy margins re-derived with recalibrated minutes (amendment 23)
@@ -163,7 +164,7 @@ def collect():
         if r["logged_at"] >= AMEND8_CUTOVER:                  # forward only (amendment 8)
             row["cells"] = {"STALE LINE": cell_stale(q, r), "GAP": cell_gap(r),
                             "MINUTES BAND": cell_band(r)}
-            if r["logged_at"] >= AMEND9_CUTOVER:             # stored at flag time (amendment 9)
+            if r["logged_at"] >= AMEND33_CUTOVER:            # stored at flag time (amendments 9, 33)
                 row["cells"]["OPPORTUNITY"] = r.get("opp_cell") or "n/a"
             if r["logged_at"] >= AMEND19_CUTOVER and r["tier"] in ("wowy", "cold"):   # amendment 19
                 row["cells"]["STAT TYPE"] = "COMBO" if r["stat"] in COMBO_STATS else "SINGLE"
@@ -451,7 +452,7 @@ def cells_report(rows):
                   f"{tc['fd_beat']}/{tc['fd_n']} (mean line move {tc['moved'] / max(1, tc['fd_n']):+.2f}) · decided price "
                   f"vs FD close: beat {tc['dec_beat']}/{tc['dec_n']}")
     print(f"\ntracked cells (amendments 8-9, information only; flags since {AMEND8_CUTOVER} UTC, "
-          f"OPPORTUNITY since {AMEND9_CUTOVER} UTC), FD yardstick")
+          f"OPPORTUNITY since {AMEND33_CUTOVER} UTC), FD yardstick")
     if not vs:
         print("  (no closed flags since the cutover yet)")
         return
