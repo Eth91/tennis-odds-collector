@@ -95,3 +95,13 @@ the market knows and a last-10 average misses: a role that has changed in the la
 - If neither passes, the projection is unchanged.
 - An adopted change goes live only through a new NBA_SPEED_PREREG amendment, with a forward automatic
   revert.
+
+**Amendment 1: run (2026-10-27).**
+- **Fit (2023-24):** R picked K = 240. M fitted proj_min = 6.54 + 0.391 × last-10 + 0.396 × last-3 +
+  0.164 × d_min.
+- **Card units, 2023-24 / 2024-25:**
+  - current +26.12 / +9.25;
+  - R +12.95 / +5.37;
+  - M +10.45 / −0.71;
+  - R + M +9.48 / +7.36.
+- **Decision as registered:** neither passes, so the projection is unchanged (`nba_flags_model_test.py`).
