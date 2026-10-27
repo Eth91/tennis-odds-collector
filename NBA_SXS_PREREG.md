@@ -1,6 +1,6 @@
 # PRE-REGISTRATION: the replay tool and the side-by-side test of flagging rules
 
-Written 2026-10-27 (about 06:00 UTC), before any rule below has been run on any data. Research only: nothing is
+Written 2026-10-27 (committed 05:47 UTC), before any rule below has been run on any data. Research only: nothing is
 bet, nothing is shown as a pick, and `nba_flags.LIVE_TIERS` stays empty.
 
 ## Why
@@ -80,7 +80,7 @@ Shared definitions:
   - upper bound < 0 → **LOSES TO THE CLOSE**;
   - otherwise **NO EDGE SHOWN**.
 - **ROI**, read at ≥ 500 graded signals: lower bound > 0 → **PROFITABLE**.
-- **Correction before registration (2026-10-27, about 08:00 UTC): minimum dates.**
+- **Correction before registration (2026-10-27, about 05:53 UTC): minimum dates.**
   - The CLV verdict also needs ≥ 10 game dates, and the ROI reading ≥ 20.
   - **Why:** the development replay showed NULL_TIP30 making about 250 signals a night and DK_LAGS_FD about 100.
     Without a date minimum, either would reach 200 signals in one or two nights, when a date-clustered interval
