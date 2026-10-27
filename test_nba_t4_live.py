@@ -72,3 +72,35 @@ def test_t5_first_under_edge_one_per_prop():
     assert len(s3) == 1 and s3[0]["odds"] == 2.3 and s3[0]["min_before_tip"] == 420 and s3[0]["result"] == "win"
     assert all(s["side"] == "under" for s in sig)
     assert not [s for s in sig if s["gid"] == "OLD"]                           # before the start date: not counted
+
+
+def test_t5b_confirmation_status_and_model_filters():
+    d = pathlib.Path(tempfile.mkdtemp())
+    stores(d)
+    q = sqlite3.connect(d / "lines.sqlite")
+    q.execute("CREATE TABLE cycles (ts TEXT, book TEXT, status TEXT, rows INTEGER, events INTEGER, matched_events INTEGER, "
+              "resolved INTEGER, unresolved INTEGER, detail TEXT)")
+    for ts in ("2026-10-28T15:00:00", "2026-10-28T15:10:00", "2026-10-28T17:00:00", "2026-10-28T17:10:00"):
+        q.execute("INSERT INTO cycles VALUES (?, 'fd', 'ok', 0, 0, 0, 0, 0, '')", (ts,))
+    tip = "2026-10-29T00:00:00Z"
+    ins = lambda t, bk, pid, line, side, odds: q.execute("INSERT INTO quotes VALUES (?,?,?,?,?,'','points',?,?,?)",
+                                                        (t, bk, "G", tip, pid, line, side, odds))
+    for pid in (5, 6, 7, 8):
+        ins("2026-10-28T15:00:00", "fd", pid, 12.5, "over", 1.9); ins("2026-10-28T15:00:00", "fd", pid, 12.5, "under", 1.9)
+        ins("2026-10-28T15:05:00", "dk", pid, 12.5, "under", 2.2)             # trigger at 15:05 (EV .10)
+    ins("2026-10-28T15:08:00", "dk", 6, 12.5, "under", 1.9)                   # pid 6 reverts before FD's next poll
+    q.commit()
+    m = sqlite3.connect(d / "mu.sqlite")
+    for pid in (5, 6, 7, 8):
+        m.execute("INSERT INTO player_games VALUES ('G','AAA',?,'G',1,30,10,0,0,0,0,0,0,0,0,0)", (pid,))
+    m.commit()
+    n = sqlite3.connect(d / "news.sqlite")
+    n.execute("CREATE TABLE snapshots (mark TEXT, published_at TEXT, game_date TEXT, matchup TEXT, team TEXT, pid INTEGER, "
+              "player TEXT, status TEXT, reason TEXT)")
+    n.execute("INSERT INTO snapshots VALUES ('m','2026-10-28T14:00:00+00:00','2026-10-28','','AAA',7,'','Questionable','')")
+    n.commit()
+    model = lambda s, t: 0.40 if s["pid"] == 8 else 0.60                       # pid 8: the model leans over
+    sig, cnt = T.signals_t5b(d / "lines.sqlite", d / "mu.sqlite", d / "news.sqlite", model_p_under=model)
+    got = {s["pid"]: s for s in sig}
+    assert set(got) == {5} and got[5]["seen_at"] == "2026-10-28T15:10:00" and got[5]["odds"] == 2.2
+    assert cnt["fail_confirm"] >= 1 and cnt["fail_status"] == 1 and cnt["fail_model"] >= 1
