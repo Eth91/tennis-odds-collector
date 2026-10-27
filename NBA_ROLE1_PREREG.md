@@ -144,3 +144,26 @@ was not used in Test A.
 - **The gains are modest:** about 2% better than last-5 on minutes and 4% on FGA.
 - **Negative binomial r for pricing** (v2 on 2025-26): points 7.211, rebounds 11.747, assists 13.092,
   threes 10.157.
+
+## Test B: result (information, 2026-10-27, about 08:30 UTC)
+Absence games 2–3 at the archive's tip lines (FanDuel/DraftKings main), v2 model, negative-binomial pricing:
+
+| | 2023-24 | 2024-25 |
+|---|---|---|
+| sides with model EV ≥ 5% | 10,322 (31% of sides), ROI −3.5% | 10,972 (34%), ROI −3.8% |
+| sides with model EV < 0 | ROI −6.2% | ROI −5.5% |
+
+The model orders sides a little: what it likes loses less. But it is badly overconfident; a third of all sides
+clear 5% EV. Unchanged, the forward rule would fire on about a third of openers in a spot, too many to bet by
+hand.
+
+# AMENDMENT 2: calibrate toward the book (written before the fit was run)
+- **The calibrated probability** of a side:
+  P′ = sigmoid( logit(book no-vig) + β × (logit(P_model) − logit(book no-vig)) ).
+  β is the share of the model's disagreement with the book that is real.
+- **The fit:** β by maximum likelihood on **2023-24** over sides at the tip lines in absence games 2–3. One row
+  per prop: its over side, pushes dropped.
+- **The check on 2024-25:** report the log loss of P′ against the book, and the ROI of P′ × price − 1 ≥ 0.05.
+  Information, since tip lines are not openers.
+- **The forward rule (ROLE_OPEN) uses P′ with this β**, and the rest is unchanged: an opener, a spot, EV′ ≥ 0.05.
+  At openers β is likely conservative.
