@@ -1415,3 +1415,17 @@ chances rejects 26 good dates in the store. With a 10-minute floor no stored goo
 do. A rejected date stores nothing for either measure. It stays pending, so the daily run retries it and picks
 it up if the league corrects it. 2026-04-01, 04-10, 04-12 and 10-22 are refetched through the guard; the result
 is recorded below when applied.
+
+**Amendment 33 applied (2026-10-27T07:28Z).** Deployed `8ebc8b95a6` (branch `tracking-fix-deploy`) through the
+guarded script. Before any change the store was copied to `~/nba-engine/nba_tracking.bak.20261027T071906Z.sqlite`
+(sqlite backup API, integrity ok, 27,458 rows). The four dates were deleted (871 rows, 8 markers) and refetched
+through the guard with `--dates`:
+- **2026-04-10 and 04-12: stored**, identical to before (0 of 325 / 311 rows differ). Their 39 / 38 potential-assist
+  maxes are real end-of-season games: Mashack 48 minutes with 14 assists, Nembhard 38 minutes with 23 assists.
+- **2026-04-01: rejected** (Adebayo 261 potential assists in 38 minutes). Left empty.
+- **2026-10-22: rejected** (Murray 41 potential assists in 37 minutes). Left empty. The daily `--current` run retries
+  it and stores it if the league corrects it.
+
+`--verify` passes for 2025-26 (tracked 100.0%, AST and REB agree 100.00%). Cron passes run the new cell at once.
+The X fast path (`nba-x-fast`, running since 2026-10-26 04:50 UTC) holds `nba_flags` in memory: until it is
+restarted, the flags it logs carry the old cell, including any logged after AMEND33_CUTOVER.
