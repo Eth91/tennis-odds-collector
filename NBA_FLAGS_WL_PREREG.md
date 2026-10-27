@@ -54,3 +54,44 @@ with the current projection and once with the change.
 
 **Honest limit.** Both seasons have been looked at before: amendments 23, 27, 28 and 30 used them. So a
 pass is weak evidence, and an adopted change is judged forward with its own automatic revert.
+
+---
+
+# AMENDMENT 1: the two model changes (written after the diagnosis, before either was fit or run)
+
+**What the diagnosis found** (`NBA_FLAGS_WINLOSS.md`):
+- **Across all ~48k backtest candidates, the projection is unbiased:** minutes 1.01× projected, rate 1.00×.
+- **The plays it flags (excess ≥ 1) are overprojected by about 2.5 units in both seasons.**
+  - Minutes come in at 0.91× projected and rate at 0.88×.
+  - More than half the losses are B playing 4+ minutes fewer than projected.
+- **Live is the same** (81 plays): overprojected by 2.4 units, minutes 0.92×, 64% of losses 4+ minutes short.
+
+The high projections we act on are partly noise (winner's curse). On minutes, part of it is plausibly what
+the market knows and a last-10 average misses: a role that has changed in the last few games.
+
+**Change R (rate): more shrinkage.**
+- `rate = (stat in games without X + base_rate × K) / (minutes without X + K)`, with K raised from 60
+  pseudo-minutes.
+- K is chosen from {60, 120, 240, 480, 960, 1920} on **2023-24 only, over all candidates**. The choice
+  minimizes the mean over stats of MSE(actual, rate × actual minutes) relative to K = 60.
+- No line, price or result enters the fit.
+
+**Change M (minutes): recency.**
+- `proj_min = a + b × last-10 minutes + c × last-3 minutes + k × d_min` (d_min shrunk as now).
+- Fit by least squares on **2023-24 only, over all candidates** (one row per date, B, X), against B's
+  actual minutes.
+
+**The test** (the card at tip lines, FanDuel + DraftKings prices):
+- **The card's rules:** minutes band 3–8, fewer than 2 stars out, absent star < 32 min, price ≥ 1.80,
+  excess 1–2, rebounds included, 1 per player (singles first), 2 per team-game.
+- Margins unchanged (pts 5, reb 1, PRA 6.5).
+- Built with the current projection, with R, with M, and with R + M.
+
+**Decision:**
+- A change is adopted only if its card units are ≥ the current card's units in **both** 2023-24 and
+  2024-25.
+- If R and M both pass, R + M is adopted only if it also passes. Otherwise the one with more total units
+  is adopted.
+- If neither passes, the projection is unchanged.
+- An adopted change goes live only through a new NBA_SPEED_PREREG amendment, with a forward automatic
+  revert.
