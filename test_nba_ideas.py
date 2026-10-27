@@ -125,3 +125,113 @@ def test_mutants():
             for k in ("nba_ideas", "nba_sxs_rules_imut"):
                 sys.modules.pop(k, None)
             sys.modules["nba_ideas"] = saved
+
+
+def check_early(mod_sr=SR, last_fga=6.0, n_games=2):
+    """B: last season 6 FGA a game; this season n_games at 30 min and 11 FGA. His points open at 10.5 (15:00)."""
+    tmp = pathlib.Path(tempfile.mkdtemp())
+    p = T.stores(tmp)
+    m = sqlite3.connect(p["matchup"])
+    for i in range(n_games):
+        g, d = f"E{i}", f"2026-10-{20 + i:02d}"
+        m.execute("INSERT INTO games VALUES (?, '2026-27', ?, 'HOM', 'OTH', 100, 99)", (g, d))
+        m.execute("INSERT INTO player_games (gid, team, pid, min, fga) VALUES (?, 'HOM', ?, 30, 11)", (g, T.B))
+    m.commit()
+    gl = sqlite3.connect(p["gamelogs"])
+    gl.execute("CREATE TABLE logs_full (season, game_id, date, team, player_id, player, min, fga)")
+    gl.executemany("INSERT INTO logs_full VALUES ('2025-26', ?, ?, 'HOM', ?, '', 25, ?)",
+                   [(f"L{i}", f"2026-01-{1 + i:02d}", T.B, last_fga) for i in range(25)])
+    gl.commit()
+    mod_sr.MATCHUP_DB, mod_sr.ROLE_GAMELOGS_DB = p["matchup"], p["gamelogs"]
+    mod_sr._ED.clear()
+    day = RP.Day(T.D, p["lines"], p["news"], p["matchup"], RP.History(p["gamelogs"], p["matchup"]))
+    return [(s["pid"], s["market"], s["line"]) for s in RP.run_day(day, [mod_sr.EARLY_SURGE()])]
+
+
+def test_early_surge():
+    try:
+        assert check_early() == [(T.B, "points", 10.5)]                # 11 >= 1.2 x 6 and >= 0.8 x 10.5: fires
+        assert check_early(last_fga=10.0) == []                        # 11 < 1.2 x 10: no surge
+        assert check_early(n_games=5) == []                            # game 6: the window is over
+    finally:
+        SR._ED.clear()
+
+
+def test_early_surge_mutants():
+    import nba_early as EARLY
+    src = pathlib.Path(EARLY.__file__).read_text()
+    sr_src = pathlib.Path(SR.__file__).read_text()
+    for tag, a, b, kw in (("window ignored", "if not 1 <= len(g) <= 4 or pid not in ed.last:", "if pid not in ed.last:", {"n_games": 5}),
+                          ("no surge needed", "fga >= SURGE * ed.last[pid]", "fga >= 0 * ed.last[pid]", {"last_fga": 10.0})):
+        assert src.count(a) == 1, tag
+        d = pathlib.Path(tempfile.mkdtemp())
+        (d / "nba_early.py").write_text(src.replace(a, b))
+        (d / "nba_sxs_rules_emut.py").write_text(sr_src)
+        sys.path.insert(0, str(d))
+        saved = sys.modules.pop("nba_early")
+        try:
+            assert check_early(importlib.import_module("nba_sxs_rules_emut"), **kw) != [], tag
+        finally:
+            sys.path.remove(str(d))
+            for k in ("nba_early", "nba_sxs_rules_emut"):
+                sys.modules.pop(k, None)
+            sys.modules["nba_early"] = saved
+
+
+def check_live_early(L):
+    """B surges (11 FGA vs 6 last season), C doesn't (11 vs 10). DraftKings opens both at 16:10; FanDuel opens B at 16:12."""
+    tmp = pathlib.Path(tempfile.mkdtemp())
+    p = T.stores(tmp)
+    m = sqlite3.connect(p["matchup"])
+    for i in range(2):
+        g, d = f"E{i}", f"2026-10-{20 + i:02d}"
+        m.execute("INSERT INTO games VALUES (?, '2026-27', ?, 'HOM', 'OTH', 100, 99)", (g, d))
+        m.executemany("INSERT INTO player_games (gid, team, pid, min, fga) VALUES (?, 'HOM', ?, 30, 11)", [(g, T.B), (g, T.C)])
+    m.commit()
+    gl = sqlite3.connect(p["gamelogs"])
+    gl.execute("CREATE TABLE logs_full (season, game_id, date, team, player_id, player, min, fga, fta, fg3a, fg3m, reb, ast, pts)")
+    gl.executemany("INSERT INTO logs_full (season, game_id, date, team, player_id, player, min, fga) VALUES ('2025-26', ?, ?, 'HOM', ?, '', 25, ?)",
+                   [(f"L{i}", f"2026-01-{1 + i:02d}", pid, f) for i in range(25) for pid, f in ((T.B, 6.0), (T.C, 10.0))])
+    gl.commit()
+    q = sqlite3.connect(p["lines"])
+    q.execute("CREATE TABLE board (book TEXT, collected_at TEXT, gid TEXT, tip_utc TEXT, event TEXT, home TEXT, away TEXT, "
+              "pid INTEGER, player TEXT, stat TEXT, line REAL, side TEXT, odds REAL)")
+    q.commit()
+    sent = []
+    kw = dict(lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"], tracking_db=tmp / "t.sqlite",
+              lineups_db=tmp / "none.sqlite", index_json=tmp / "none.json", db=tmp / "role.sqlite", sender=lambda b: sent.append(b) or True)
+    assert L.process(now="2026-11-01T14:00:00", **kw) == 0                               # install
+    q.executemany("INSERT INTO board (book, collected_at, gid, tip_utc, home, away, pid, player, stat, line, side, odds) "
+                  "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", [("dk", "2026-11-01T16:10:00", T.G, T.TIP, "HOM", "AWY", pid, nm, "points", ln, s, 1.9)
+                                                       for pid, nm, ln in ((T.B, "Bee", 10.5), (T.C, "Cee", 12.5)) for s in ("over", "under")])
+    q.commit()
+    assert L.process(now="2026-11-01T16:11:00", **kw) == 1
+    assert sent == ["🟡 EARLY Bee PTS o10.5 -111 DK · 11.0 FGA vs 6.0 last season (1.83x) · shadow"], sent
+    q.executemany("INSERT INTO board (book, collected_at, gid, tip_utc, home, away, pid, player, stat, line, side, odds) "
+                  "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", [("fd", "2026-11-01T16:12:00", T.G, T.TIP, "HOM", "AWY", T.B, "Bee", "points", 10.5, s, 1.87)
+                                                       for s in ("over", "under")])
+    q.commit()
+    assert L.process(now="2026-11-01T16:13:00", **kw) == 0 and len(sent) == 1           # FanDuel's opener later: once per player
+
+
+def test_live_early_ping():
+    import nba_role_open as L
+    check_live_early(L)
+
+
+def test_live_early_mutants():
+    src = pathlib.Path(sys.modules["nba_role_open"].__file__).read_text()
+    for tag, a, b in (("no surge check", "            if EARLY.early_surge(ed, pid, date, m[0]):", "            if ed.last.get(pid):"),
+                      ("no dedupe", "                if cur.rowcount:\n                    ok = sender(early_body(", "                if True:\n                    ok = sender(early_body(")):
+        assert src.count(a) == 1, tag
+        d = pathlib.Path(tempfile.mkdtemp())
+        (d / "nba_role_open_emut.py").write_text(src.replace(a, b))
+        sys.path.insert(0, str(d))
+        try:
+            check_live_early(importlib.import_module("nba_role_open_emut"))
+        except (AssertionError, ZeroDivisionError):
+            continue
+        finally:
+            sys.path.remove(str(d))
+            sys.modules.pop("nba_role_open_emut", None)
+        raise AssertionError(f"mutant survived: {tag}")
