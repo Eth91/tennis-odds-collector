@@ -661,6 +661,71 @@ def lineups(lcon, dates, boxes, official):
     return out
 
 
+LINEUP_OUT = ("Out", "Doubtful")                 # a projected lineup leaves these out; Questionable / Probable are in
+
+
+def projected_lineups(games, boxes, official, roster, posted):
+    """{"date|TEAM": {status: "Projected", starters: [[pid, name, pos, report status]], subs: [[pid, for pid, for name]],
+    usual: [pid], missing: [[pid, name, status]], inactive: []}} for each slate team with no posted lineup: its usual
+    five (the most starts over its last USUAL_GAMES games this season, players on its roster now; USUAL_MIN games
+    first) less anyone Out or Doubtful on the official report (Questionable and Probable players stay, their status
+    shown). Each missing starter is replaced by whoever started most often in the team's games he did not start (this
+    season and last, the seasons he was on the team), a player of his position first among equals, then the most starts
+    and minutes lately; the surest replacement is placed first. Guards first, then forwards, then centers."""
+    out = {}
+    for g in games:
+        d, season = g["date_et"], season_of(g["date_et"])
+        for team in (g["away"], g["home"]):
+            if f"{d}|{team}" in posted:
+                continue
+            seasonb = [b for b in boxes.get(team, []) if b[1] < d and b[2] == season]
+            recent = seasonb[-USUAL_GAMES:]
+            if len(recent) < USUAL_MIN:
+                continue
+            mine = {int(k) for k, v in roster.items() if v[0] == team}
+            starts, mins = defaultdict(int), defaultdict(float)
+            for b in recent:
+                for pid, (st_, mn) in b[3].items():
+                    if pid in mine:
+                        starts[pid] += st_
+                        mins[pid] += mn
+            status = lambda pid: (official.get((d, pid)) or {}).get("status")
+            ok = lambda pid: status(pid) not in LINEUP_OUT
+            pos = lambda pid: (roster.get(str(pid)) or ["", "", ""])[2] or ""
+            usual = [pid for pid, n in sorted(starts.items(), key=lambda kv: (-kv[1], -mins[kv[0]]))[:5] if n]
+            five, subs, gone = [pid for pid in usual if ok(pid)], [], [u for u in usual if not ok(u)]
+            when = {}                                        # for each missing starter: who started in the games he did not
+            for u in gone:
+                when[u] = defaultdict(int)
+                his = {b[2] for b in boxes.get(team, []) if u in b[3]}           # the seasons he played for this team
+                for b in boxes.get(team, []):
+                    if b[1] < d and b[2] in his and not b[3].get(u, (0, 0))[0]:
+                        for pid, (st_, _) in b[3].items():
+                            when[u][pid] += st_
+            grp = lambda pid: set(pos(pid).replace("-", "")) or {"F"}
+            key = lambda u, pid: (when[u][pid], bool(grp(u) & grp(pid)), starts[pid], mins[pid])
+            while gone:                                      # the surest replacement first, then the next
+                cands = [pid for pid in mine if pid not in five and ok(pid)]
+                if not cands:
+                    break
+                u, pick = max(((u, max(cands, key=lambda pid: key(u, pid))) for u in gone), key=lambda up: key(*up))
+                gone.remove(u)
+                five.append(pick)
+                subs.append([pick, u, (roster.get(str(u)) or ["", ""])[1]])
+            while len(five) < 5:                             # fewer than five usual starters yet: the most-used others
+                cands = [pid for pid in mine if pid not in five and ok(pid)]
+                if not cands:
+                    break
+                five.append(max(cands, key=lambda pid: (starts[pid], mins[pid])))
+            five.sort(key=lambda pid: {"G": 0, "F": 1, "C": 2}.get(pos(pid)[:1], 1))
+            out[f"{d}|{team}"] = {"status": "Projected", "at": None,
+                                  "starters": [[pid, (roster.get(str(pid)) or ["", ""])[1], pos(pid), status(pid)] for pid in five],
+                                  "subs": subs, "usual": usual,
+                                  "missing": [[u, (roster.get(str(u)) or ["", ""])[1], status(u)] for u in usual if not ok(u)],
+                                  "inactive": []}
+    return out
+
+
 def team_mates(boxes, roster):
     """{team: {"gids": [its games, oldest first], "mates": [{pid, name, since, on, mpg, gp}]}} — everyone on each
     team's roster now who has played for it in the cached seasons, the most minutes a game first. on: "1" / "0" per
@@ -1100,6 +1165,9 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
     for b, at in newest.items():
         age = (now.astimezone(dt.timezone.utc).replace(tzinfo=None) - _naive_utc(at)).total_seconds() / 60
         fresh[b] = {"updated": at, "age_min": round(age, 1), "stale": age > BOOK_STALE_MIN}
+    # NBA.com's posted lineups, and a projected five for every slate team still without one
+    lu = lineups(lcon, dates, boxes, official)
+    lu.update(projected_lineups(games, boxes, official, idx, lu))
     out = {
         "generated_at": stamp, "season": season, "dates": dates, "log_cols": list(LOG_COLS),
         "hist_t0": t0.isoformat() if t0 else None,
@@ -1120,7 +1188,7 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
         "related": corr,
         "inj_report": inj_report,
         "mates": team_mates(boxes, idx),
-        "lineups": lineups(lcon, dates, boxes, official),
+        "lineups": lu,
         # past games are filtered by the tier their opponent sits in (DvP / Def Rank chips): this season's ranks
         # as of the slate date, last season's as it finished
         "ranks": {k: v for k, v in ranks.items()},

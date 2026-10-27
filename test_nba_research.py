@@ -849,3 +849,40 @@ def test_a_slate_leaves_when_its_last_game_ends():
     lagging = built(NOW, SCHED, final_box)
     assert lagging["dates"][0] == "2026-10-27"
     assert built(NOW)["dates"][0] == GD                                            # still being played: the night stays
+
+
+def test_projected_lineups_fill_in_for_who_is_out():
+    # MIN, 10 games: A B C D E start; when E sat (3 games) F started; G and H come off the bench (G more minutes)
+    box = lambda i, five, bench: (f"m{i}", f"2026-10-{10 + i}", "2026-27",
+                                  {**{p: (1, 32.0) for p in five}, **{p: (0, m) for p, m in bench.items()}})
+    sat = {7, 8, 9}
+    mins = [box(i, [1, 2, 3, 4, 6] if i in sat else [1, 2, 3, 4, 5], {7: 20.0, 8: 12.0} if i in sat else {6: 18.0, 7: 20.0, 8: 12.0})
+            for i in range(10)]
+    boxes = {"MIN": mins, "WAS": [box(i, [11, 12, 13, 14, 15], {}) for i in range(10)], "NEW": [box(0, [21, 22, 23, 24, 25], {})]}
+    roster = {"1": ["MIN", "Ay G", "G"], "2": ["MIN", "Bee F", "F"], "3": ["MIN", "Cee C", "C"], "4": ["MIN", "Dee G", "G"],
+              "5": ["MIN", "Eee F", "F"], "6": ["MIN", "Eff F", "F"], "7": ["MIN", "Gee G", "G"], "8": ["MIN", "Aitch C", "C"],
+              "11": ["WAS", "W1", "G"], "21": ["NEW", "N1", "G"]}
+    D = "2026-10-27"
+    official = {(D, 5): {"status": "Out"}, (D, 4): {"status": "Questionable"}, (D, 3): {"status": "Doubtful"}}
+    games = [{"date_et": D, "home": "MIN", "away": "WAS"}, {"date_et": D, "home": "NEW", "away": "CHI"}]
+    out = RS.projected_lineups(games, boxes, official, roster, {f"{D}|WAS": {"status": "Confirmed"}})
+    assert set(out) == {f"{D}|MIN"}                          # WAS posted; NEW (1 game) and CHI (none) too early to project
+    m = out[f"{D}|MIN"]
+    five = [s[0] for s in m["starters"]]
+    # E (Out) -> F, who started when E sat; C (Doubtful, never missed a start) -> H, the other center (over G's minutes)
+    assert sorted(five) == [1, 2, 4, 6, 8] and m["subs"] == [[6, 5, "Eee F"], [8, 3, "Cee C"]]
+    assert [s[2][:1] for s in m["starters"]] == ["G", "G", "F", "F", "C"]          # guards, then forwards, then centers
+    assert dict((s[0], s[3]) for s in m["starters"])[4] == "Questionable" and m["status"] == "Projected"
+    assert sorted(x[0] for x in m["missing"]) == [3, 5]
+    # last season C sat twice for MIN and G started both: that evidence beats position (and E's 3 makes his the surer pick)
+    full = {p: (1, 30.0) for p in (1, 2, 3, 4, 5)}
+    ls = [("p0", "2026-03-01", "2025-26", full)] + [(f"p{i}", f"2026-03-0{i + 1}", "2025-26", {**{p: (1, 30.0) for p in (1, 2, 4, 5)}, 7: (1, 30.0)})
+                                                    for i in (1, 2)]
+    m2 = RS.projected_lineups(games, dict(boxes, MIN=ls + mins), official, roster, {})[f"{D}|MIN"]
+    assert m2["subs"] == [[6, 5, "Eee F"], [7, 3, "Cee C"]]
+
+
+def test_page_shows_projected_lineups():
+    html = UI.page()
+    assert 'proj = e.status === "Projected"' in html and '"PROJECTED"' in html and "<b>In for</b>" in html
+    assert 'proj && INJ_S[st] ? ` · <em class="lq">' in html and "const miss = !proj && e.missing.length" in html

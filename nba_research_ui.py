@@ -327,7 +327,7 @@ svg.shct{display:block;width:100%;height:auto;margin-top:6px}
 .lus .av{position:relative;left:auto;top:auto;width:40px;height:40px}
 .lus .av .hs{left:-8px;top:1px;width:56px}
 .lus b{max-width:100%;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lus i{font-style:normal;font-size:10.5px;color:#9a9a9a} .lus.new i{color:var(--org);font-weight:700}
+.lus i{font-style:normal;font-size:10.5px;color:#9a9a9a} .lus.new i{color:var(--org);font-weight:700} .lus .lq{font-style:normal;color:var(--yel);font-weight:700}
 .lum{margin-top:9px;font-size:12.5px;color:#b0b0b0;line-height:1.7}
 .lum b{margin-right:6px;font-size:10.5px;letter-spacing:.3px;color:#8e8e8e;text-transform:uppercase}
 .lum button{padding:0;border:0;background:none;color:#e6e6e6;font-size:12.5px} .lum .tg{margin:0 0 0 4px}
@@ -1436,13 +1436,18 @@ function lineupsView() {
 }
 function luTeam(t, e) {
   if (!e) return `<div class="lut"><div class="luth">${logo(t, "")}<b>${esc(t)}</b><span class="tg tn">NOT POSTED</span></div></div>`;
-  const usual = new Set(e.usual), isNew = pid => usual.size > 0 && !usual.has(pid);
-  const tiles = e.starters.map(([pid, name, pos]) => `<button class="lus${isNew(pid) ? " new" : ""}" data-vp="${pid}"><span class="av">${head(pid)}</span><b>${esc(lastName(name))}</b><i>${esc(pos)}${isNew(pid) ? " · NEW" : ""}</i></button>`).join("");
-  const miss = e.missing.length ? `<div class="lum"><b>Not starting</b>${e.missing.map(([pid, name, st]) => `<button data-vp="${pid}">${esc(nameOf(name))}</button>${st ? `<span class="tg ${INJ_C[st] || "tn"}">${INJ_S[st] || esc(String(st).toUpperCase())}</span>` : ""}`).join(", ")}</div>` : "";
+  const usual = new Set(e.usual), isNew = pid => usual.size > 0 && !usual.has(pid), proj = e.status === "Projected";
+  const tag = st => st ? `<span class="tg ${INJ_C[st] || "tn"}">${INJ_S[st] || esc(String(st).toUpperCase())}</span>` : "";
+  // a projected five (nba_research.projected_lineups): a Questionable starter carries his Q; who comes in for whom below
+  const tiles = e.starters.map(([pid, name, pos, st]) => `<button class="lus${isNew(pid) ? " new" : ""}" data-vp="${pid}"><span class="av">${head(pid)}</span><b>${esc(lastName(name))}</b><i>${esc(pos)}${isNew(pid) ? " · NEW" : ""}${proj && INJ_S[st] ? ` · <em class="lq">${INJ_S[st]}</em>` : ""}</i></button>`).join("");
+  const nm = pid => (e.starters.find(x => x[0] === pid) || [, ""])[1];
+  const subs = proj && (e.subs || []).length ? `<div class="lum"><b>In for</b>${e.subs.map(([pid, out, outName]) =>
+    `${esc(lastName(nm(pid)))} for <button data-vp="${out}">${esc(nameOf(outName))}</button>${tag((e.missing.find(m => m[0] === out) || [])[2])}`).join(", ")}</div>` : "";
+  const miss = !proj && e.missing.length ? `<div class="lum"><b>Not starting</b>${e.missing.map(([pid, name, st]) => `<button data-vp="${pid}">${esc(nameOf(name))}</button>${st ? `<span class="tg ${INJ_C[st] || "tn"}">${INJ_S[st] || esc(String(st).toUpperCase())}</span>` : ""}`).join(", ")}</div>` : "";
   const ina = e.inactive.length ? `<div class="lum"><b>Inactive</b>${e.inactive.map(([, name]) => esc(nameOf(name))).join(", ")}</div>` : "";
   const ok = e.status === "Confirmed";
-  return `<div class="lut"><div class="luth">${logo(t, "")}<b>${esc(t)}</b><span class="tg ${ok ? "tp" : "tq"}">${ok ? "CONFIRMED" : "EXPECTED"}</span>${ok && e.at ? `<em>${esc(mt(e.at))}</em>` : ""}</div>
-    <div class="lur">${tiles}</div>${miss}${ina}</div>`;
+  return `<div class="lut"><div class="luth">${logo(t, "")}<b>${esc(t)}</b><span class="tg ${ok ? "tp" : proj ? "tn" : "tq"}">${ok ? "CONFIRMED" : proj ? "PROJECTED" : "EXPECTED"}</span>${ok && e.at ? `<em>${esc(mt(e.at))}</em>` : ""}</div>
+    <div class="lur">${tiles}</div>${subs}${miss}${ina}</div>`;
 }
 function tabbar() {
   const tb = $("#tb"), fo = filtersOn();
@@ -2862,6 +2867,9 @@ document.addEventListener("DOMContentLoaded", () => {
   load();
   setInterval(load, 120000);
   setInterval(() => { if (!D) return; const u = $("#upd"), l = $("#lupd"); if (u) u.textContent = ago(D.generated_at); if (l) l.textContent = ago(D.generated_at); }, 30000);
+  // a turned phone (or a resized window) re-measures every sliding pill, which sit where the buttons were laid out
+  let RZ = null;
+  window.addEventListener("resize", () => { clearTimeout(RZ); RZ = setTimeout(() => $$(".pill2").forEach(x => slide(x.parentElement, true)), 120); });
   // back from another app: the 2-minute timer was asleep, so catch up at once
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) { HIDDEN_AT = Date.now(); return; }
