@@ -1349,3 +1349,25 @@ minutes old by then. Amendment 27's tip-card decision stops accumulating.
 **Record.** From the first pass after this amendment, carded plays are its forward record. Nothing is bet;
 `LIVE_TIERS` stays empty. The STALE LINE, MINUTES BAND and other cells keep tracking all flags, carded or
 not, so fresh and late plays stay comparable. Switch: `FRESH_RULE_ON` in nba_flags.py.
+
+# AMENDMENT 32: rebounds back on the card (2026-10-27)
+
+**Why.** User: "put rebounds back on the card." Amendment 28 took rebounds off as one of four filters chosen
+in sample. In that backtest, rebounds were 82% of the card at +0.9% ROI (2023-24 + 2024-25, tip lines). No
+rebound threshold held across both seasons, so the fix there was "off". Live, the shadow flags' rebounds
+went 10-5 on 2026-10-26 (logged only, one night, re-flags included). Neither number shows an edge either
+way. This is the owner's call, and it is judged forward.
+
+**Rule (both cards).** Amendment 28's rule 2 (REBOUNDS OFF CARD) is removed. The other three filters stay:
+EDGE TOO BIG, STAR 32+ MIN, PRICE −125 OR SHORTER. Everything else is unchanged, including amendment 31's
+15-minute fresh-news rule, the 3–8 minutes band, 1 per player and 2 per team-game. A rebound play can again
+be a player's lead.
+
+**Record.**
+- From the first pass after this amendment, carded rebound plays are graded with the rest of the card.
+- They are also reported in their own STAT cell, so they can be read apart.
+- Amendment 28's forward decision (its first 60 carded wowy plays from its cutover; units < 0 → the
+  remaining filters come off) now counts rebound plays carded from this amendment.
+- `flags.filt` no longer records REBOUNDS OFF CARD for new flags.
+- Switch: `FILTER_REB_ON = False` in nba_flags.py.
+- Nothing is bet: `LIVE_TIERS` stays empty.
