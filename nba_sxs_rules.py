@@ -694,8 +694,45 @@ class MIN_RESTRICT(Rule):
         return out
 
 
+# ── AMENDMENT 7: EARLY_SURGE (NBA_EARLY_PREREG.md) ─────────────────────────────────────────────────────────────
+import nba_early as EARLY                                # noqa: E402
+
+_ED = {}
+
+
+def early_data(season):
+    key = (str(MATCHUP_DB), str(ROLE_GAMELOGS_DB), season)
+    if key not in _ED:
+        _ED.clear()
+        _ED[key] = EARLY.EarlyData(MATCHUP_DB, ROLE_GAMELOGS_DB, season)
+    return _ED[key]
+
+
+class EARLY_SURGE(Rule):
+    """In a player's games 2-5, at the points opener: the over when his FGA/g is >= 1.2x last season's, he plays 20+ minutes,
+    and his FGA/g is >= 0.8x the line (the books' lines lag a new role early in the season)."""
+    name, deps, spec = "EARLY_SURGE", (early_data, EARLY.EarlyData, EARLY.early_surge, ROLE.season_of), (1.2, 20.0, 0.8, 1, 4)
+
+    def start_day(self, v):
+        self.opened = set()
+
+    def on_obs(self, v, book, seen):
+        out = []
+        for k in sorted(v.changed):
+            g, p, mk, b = k
+            if b != book or g not in seen or mk != "points" or k in self.opened:
+                continue
+            m = RP.main_of(v.board(*k))
+            if not m:
+                continue
+            self.opened.add(k)
+            if v.t <= RP.minus(v.games()[g]["tip"], 5) and EARLY.early_surge(early_data(ROLE.season_of(v.date)), p, v.date, m[0]):
+                out.append(sig(g, p, mk, "over", m[0], b, m[1], note="early volume surge"))
+        return out
+
+
 RULES = (NULL_TIP30, NEWS_FD, NEWS_DK, DK_LAGS_FD, T4_TIP30, ENGINE_CARD, S1, DEPTH_NEXT, DEPTH_NEXT_TIP30, NEW_STARTER,
-         LOST_START, ROLE_OPEN, RATIO_FGA, RATIO_PA, RATIO_RC, RATIO_PA28, PTS_DVP, RETURN_UNDER, FOUL_BIG, MIN_RESTRICT)
+         LOST_START, ROLE_OPEN, RATIO_FGA, RATIO_PA, RATIO_RC, RATIO_PA28, PTS_DVP, RETURN_UNDER, FOUL_BIG, MIN_RESTRICT, EARLY_SURGE)
 
 
 def fingerprint(cls):
@@ -725,6 +762,7 @@ REGISTRY = {                                             # name -> (registered a
     "ROLE_OPEN": ("2026-10-27T13:00:00", "fce63818bc"),           # amendment 2 (NBA_ROLE1_PREREG.md)
     "RATIO_FGA": ("2026-10-27T13:00:00", "7931edb259"),           # amendment 3 (NBA_RATIO_PREREG.md)
     "RATIO_PA": ("2026-10-27T13:00:00", "738f3b6032"),
+    "EARLY_SURGE": ("2026-10-27T13:00:00", "4fe0ca2d33"),         # amendment 7 (NBA_EARLY_PREREG.md)
     "RETURN_UNDER": ("2026-10-27T13:00:00", "c099fdf615"),        # amendment 6 (NBA_IDEAS_PREREG.md)
     "FOUL_BIG": ("2026-10-27T13:00:00", "08df997f93"),
     "MIN_RESTRICT": ("2026-10-27T13:00:00", "4ee15c815c"),

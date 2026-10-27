@@ -167,6 +167,37 @@ def part2(gamelogs_db, L):
     return res
 
 
+# ── amendment 1: EARLY_SURGE, forward ────────────────────────────────────────────────────────────────────────
+class EarlyData:
+    """This season's games (nba_matchup: minutes, FGA) and last season's FGA per game (nba_gamelogs logs_full)."""
+
+    def __init__(self, matchup_db, gamelogs_db, season):
+        def ro(path):
+            return sqlite3.connect(f"file:{path}?mode=ro", uri=True) if Path(path).exists() else None
+        m, g = ro(matchup_db), ro(gamelogs_db)
+        self.games = defaultdict(list)                   # pid -> [(date, minutes, FGA)]
+        if m is not None:
+            for d, pid, mn, fga in m.execute("SELECT gm.date, p.pid, p.min, p.fga FROM player_games p JOIN games gm ON gm.gid = p.gid "
+                                             "WHERE gm.season = ? AND p.min > 0", (season,)):
+                self.games[pid].append((d, mn, fga or 0))
+        self.last = {}                                   # pid -> FGA per game last season (>= 20 games)
+        prev = ROLE.PREV.get(season)
+        if g is not None and prev and g.execute("SELECT 1 FROM sqlite_master WHERE name = 'logs_full'").fetchone():
+            for pid, n, fga in g.execute("SELECT player_id, COUNT(*), SUM(fga) FROM logs_full WHERE season = ? AND min > 0 "
+                                         "GROUP BY player_id", (prev,)):
+                if n >= 20:
+                    self.last[pid] = (fga or 0) / n
+
+
+def early_surge(ed, pid, date, line):
+    """E3 at games 2-5: FGA/g >= 1.2x last season's, mpg >= 20, FGA/g >= 0.8x the line."""
+    g = [(mn, f) for d, mn, f in ed.games.get(pid, ()) if d < date]
+    if not 1 <= len(g) <= 4 or pid not in ed.last:
+        return False
+    mpg, fga = sum(mn for mn, _f in g) / len(g), sum(f for _m, f in g) / len(g)
+    return mpg >= MIN_MPG and fga >= SURGE * ed.last[pid] and fga >= 0.8 * line
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--gamelogs", required=True)

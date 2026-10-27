@@ -125,3 +125,54 @@ def test_mutants():
             for k in ("nba_ideas", "nba_sxs_rules_imut"):
                 sys.modules.pop(k, None)
             sys.modules["nba_ideas"] = saved
+
+
+def check_early(mod_sr=SR, last_fga=6.0, n_games=2):
+    """B: last season 6 FGA a game; this season n_games at 30 min and 11 FGA. His points open at 10.5 (15:00)."""
+    tmp = pathlib.Path(tempfile.mkdtemp())
+    p = T.stores(tmp)
+    m = sqlite3.connect(p["matchup"])
+    for i in range(n_games):
+        g, d = f"E{i}", f"2026-10-{20 + i:02d}"
+        m.execute("INSERT INTO games VALUES (?, '2026-27', ?, 'HOM', 'OTH', 100, 99)", (g, d))
+        m.execute("INSERT INTO player_games (gid, team, pid, min, fga) VALUES (?, 'HOM', ?, 30, 11)", (g, T.B))
+    m.commit()
+    gl = sqlite3.connect(p["gamelogs"])
+    gl.execute("CREATE TABLE logs_full (season, game_id, date, team, player_id, player, min, fga)")
+    gl.executemany("INSERT INTO logs_full VALUES ('2025-26', ?, ?, 'HOM', ?, '', 25, ?)",
+                   [(f"L{i}", f"2026-01-{1 + i:02d}", T.B, last_fga) for i in range(25)])
+    gl.commit()
+    mod_sr.MATCHUP_DB, mod_sr.ROLE_GAMELOGS_DB = p["matchup"], p["gamelogs"]
+    mod_sr._ED.clear()
+    day = RP.Day(T.D, p["lines"], p["news"], p["matchup"], RP.History(p["gamelogs"], p["matchup"]))
+    return [(s["pid"], s["market"], s["line"]) for s in RP.run_day(day, [mod_sr.EARLY_SURGE()])]
+
+
+def test_early_surge():
+    try:
+        assert check_early() == [(T.B, "points", 10.5)]                # 11 >= 1.2 x 6 and >= 0.8 x 10.5: fires
+        assert check_early(last_fga=10.0) == []                        # 11 < 1.2 x 10: no surge
+        assert check_early(n_games=5) == []                            # game 6: the window is over
+    finally:
+        SR._ED.clear()
+
+
+def test_early_surge_mutants():
+    import nba_early as EARLY
+    src = pathlib.Path(EARLY.__file__).read_text()
+    sr_src = pathlib.Path(SR.__file__).read_text()
+    for tag, a, b, kw in (("window ignored", "if not 1 <= len(g) <= 4 or pid not in ed.last:", "if pid not in ed.last:", {"n_games": 5}),
+                          ("no surge needed", "fga >= SURGE * ed.last[pid]", "fga >= 0 * ed.last[pid]", {"last_fga": 10.0})):
+        assert src.count(a) == 1, tag
+        d = pathlib.Path(tempfile.mkdtemp())
+        (d / "nba_early.py").write_text(src.replace(a, b))
+        (d / "nba_sxs_rules_emut.py").write_text(sr_src)
+        sys.path.insert(0, str(d))
+        saved = sys.modules.pop("nba_early")
+        try:
+            assert check_early(importlib.import_module("nba_sxs_rules_emut"), **kw) != [], tag
+        finally:
+            sys.path.remove(str(d))
+            for k in ("nba_early", "nba_sxs_rules_emut"):
+                sys.modules.pop(k, None)
+            sys.modules["nba_early"] = saved

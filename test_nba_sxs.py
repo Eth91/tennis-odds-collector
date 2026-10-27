@@ -73,7 +73,7 @@ def isolate(mod_sr, tmp):
     for name in ("MATCHUP_DB", "LINEUPS_DB", "INDEX_JSON", "ROLE_GAMELOGS_DB", "TRACKING_DB", "NEWS_DB"):
         if hasattr(mod_sr, name):
             setattr(mod_sr, name, tmp / f"absent_{name.lower()}")
-    for cache in ("_VD", "_RD", "_RT", "_DV", "_FD"):
+    for cache in ("_VD", "_RD", "_RT", "_DV", "_FD", "_ED"):
         getattr(mod_sr, cache, {}).clear()
 
 
