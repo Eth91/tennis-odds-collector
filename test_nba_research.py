@@ -254,6 +254,8 @@ out.fw = [C.filterLogs(inp.logs, {with: [nk]}).length, C.filterLogs(inp.logs, {w
           C.filterLogs(inp.logs, {with: [nk], home: true}).length, C.filterLogs(inp.logs, {blow: 'b'}).length];
 out.z = [C.zscore(7, 10, 0.5), C.zscore(0, 0, 0.5), C.zscore(3, 3, null)];
 out.sv = C.sortProps(props, 'value', 'desc', () => [], 'over').map(p => p.id);
+out.ls = [C.liveStage('live', 3, 1.5, true), C.liveStage('live', 1, 1.5, true), C.liveStage('final', 0, 1.5, true),
+          C.liveStage('live', 20, 18.5, false), C.liveStage('live', 10, 18.5, false)];
 console.log(JSON.stringify(out));
 """)
     inp = {"cases": cases, "lines": lines, "logs": logs, "props": payload["props"],
@@ -273,6 +275,7 @@ console.log(JSON.stringify(out));
     assert sp["Without N"][0] == 10                                            # Nurkic sat the last 10
     assert sp["vs UTA"][0] == 30
     assert out["f1"] == ["G1|1|points"]                                        # DK + points
+    assert out["ls"] == [1, 0, 2, 1, 0]               # Live: in play first, then settled in a game still on, then finals
     assert out["f2"] == ["G1|2|points"]                                        # search
     assert out["f3"] == ["G1|1|points"]                                        # line >= 12 and over price <= -110
     assert out["s1"] == ["G1|1|assists", "G1|2|points", "G1|1|points"]          # ascending line

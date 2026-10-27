@@ -808,11 +808,17 @@ function sortProps(list, key, dir, logsOf, side, season) {
     return a.i - b.i;
   }).map(function (x) { return x.p; });
 }
+function liveStage(state, v, line, over) {
+  // the Live tab's order: props still in play, then ones settled in a game still on (an over past its line, an
+  // under at it), then finals
+  if (state === "final") return 2;
+  return (over ? v > line : v >= line) ? 1 : 0;
+}
 if (typeof module !== "undefined") module.exports = {statValue: statValue, hitSummary: hitSummary, seasonOf: seasonOf,
   rowsToLogs: rowsToLogs, windowed: windowed, filterLogs: filterLogs, splitRows: splitRows, sideRate: sideRate,
   american: american, decimalOf: decimalOf, bestOver: bestOver, bestPrice: bestPrice, propRates: propRates,
   noVig: noVig, fairAt: fairAt, valueAt: valueAt, zscore: zscore, pmfGe: pmfGe, projProbs: projProbs, blendP: blendP,
-  filterProps: filterProps, sortProps: sortProps};
+  filterProps: filterProps, sortProps: sortProps, liveStage: liveStage};
 """
 
 JS_APP = r"""
@@ -979,7 +985,7 @@ function liveOf(p) {
   const g = gameOf(p.gid) || {}, lv = p.live || {}, v = lv.value === null || lv.value === undefined ? 0 : lv.value, mn = lv.min || 0;
   const line = p.main !== null ? p.main : allLines(p)[0], last = logsOf(p).slice(-10), exp = last.length ? last.reduce((a, l) => a + (l.min || 0), 0) / last.length : null;
   const pace = mn >= 4 && exp ? v / mn * Math.max(exp, mn) : null, over = ST.side !== "under";
-  return {v: v, mn: mn, line: line, pace: pace, fin: g.state === "final" ? 1 : 0, hit: over ? v > line : v < line,
+  return {v: v, mn: mn, line: line, pace: pace, fin: liveStage(g.state, v, line, over), hit: over ? v > line : v < line,
           k: over ? (line ? v / line : 0) : (line ? 1 - v / line : 0)};
 }
 function liveRow(p) {
