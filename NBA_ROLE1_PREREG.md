@@ -205,3 +205,25 @@ with the others who will play. So you can add WOWY to ROLE1."
 
 **If it passes:** ROLE_OPEN uses v3, re-fingerprinted before its 13:00 UTC registration, so the forward record is
 unchanged. **If it fails:** ROLE_OPEN keeps v2, and v3 stays a reported option until more of this season is in.
+
+**Amendment 3: run (2026-10-27, about 08:15 UTC). PASS, so ROLE_OPEN uses v3**, re-fingerprinted before its 13:00
+UTC registration.
+
+| 2022-23 (clean) MAE, v2 → v3 | all (14,283) | WOWY applies, n ≥ 1 (7,100) | n ≥ 3 (2,366) |
+|---|---|---|---|
+| minutes | 5.307 → **5.220** | 4.898 → **4.715** | 4.709 → **4.550** |
+| FGA | 2.862 → **2.852** | 2.803 → **2.778** | 2.800 → **2.787** |
+| points | 4.785 → **4.759** | 4.804 → **4.749** | 4.836 → **4.774** |
+
+**Seen seasons (information):**
+- **Minutes improve in every season** where WOWY applies, by 0.13–0.18 MAE (about 3–4%).
+- **WOWY's per-minute rates are mixed:**
+  - in 2023-24 and 2025-26, FGA, FTA, REB and AST get slightly worse (for example, FGA 2.761 → 2.786 on
+    2023-24's n ≥ 1);
+  - in 2024-25 FGA improves and FTA, REB and AST get slightly worse.
+- The rates help in 2022-23, where there were no player priors, and add noise where the priors are good.
+- A minutes-only WOWY is the natural next version. No clean season is left to test it on, so it would be judged
+  forward.
+
+**Development replay with v3 (2026-10-22..26):** the same 5 signals. Few of this season's games are WOWY games
+yet.

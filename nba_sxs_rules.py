@@ -507,5 +507,5 @@ REGISTRY = {                                             # name -> (registered a
     "DEPTH_NEXT_TIP30": (REGISTERED_AT, "726d7f5e54"),
     "NEW_STARTER": (REGISTERED_AT, "5e5996fb1a"),
     "LOST_START": (REGISTERED_AT, "134f9fb1e9"),
-    "ROLE_OPEN": ("2026-10-27T13:00:00", "c6b50c9d1a"),           # amendment 2 (NBA_ROLE1_PREREG.md)
+    "ROLE_OPEN": ("2026-10-27T13:00:00", "fce63818bc"),           # amendment 2 (NBA_ROLE1_PREREG.md)
 }

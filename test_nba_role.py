@@ -61,6 +61,25 @@ def test_role_model():
     assert check()
 
 
+def check_wowy(mod=ROLE):
+    """X (a C) missed games 4-5 and B played 30 then (not his usual 20); in game 5 a G (pid 3) also sat. v3 counts only
+    game 4 (the others who will play tonight all played) and pulls B's minutes up from v2."""
+    rs = [r for r in rows(n_games=6) if not (r["pid"] == 1 and r["gid"] in ("g3", "g4"))]
+    for r in rs:
+        if r["pid"] == 2 and r["gid"] in ("g3", "g4"):
+            r["min"] = 30.0
+    rs = [r for r in rs if not (r["pid"] == 3 and r["gid"] == "g4")]
+    se, pr = mod.Season(rs), mod.Priors([], GROUPS)
+    active = se.roster("HOM", "2026-10-27") - {1}
+    v2 = mod.project(se, pr, GROUPS, "HOM", "2026-10-27", active, {1}, mode="v2")
+    v3 = mod.project(se, pr, GROUPS, "HOM", "2026-10-27", active, {1}, mode="v3")
+    return v3[2]["n_wowy"] == 1 and v3[2]["min"] > v2[2]["min"] and v3[8]["n_wowy"] == 1
+
+
+def test_wowy():
+    assert check_wowy()
+
+
 def day_stores(tmp):
     p = T.stores(tmp)
     m = sqlite3.connect(p["matchup"])
@@ -131,13 +150,16 @@ def test_mutants():
                        "        pc = p_side(mu, market, line, side)\n"),
                       ("volume not conserved", "    scale = {s: (team_tot[s] / sum(raw[s].values())) if sum(raw[s].values()) > 0 else 1.0 for s in RATE_STATS}",
                        "    scale = {s: 1.0 for s in RATE_STATS}"),
-                      ("no position weight", "(SAME_W if groups.get(p) and groups.get(p) == groups.get(x) else 1.0)", "1.0")):
+                      ("no position weight", "(SAME_W if groups.get(p) and groups.get(p) == groups.get(x) else 1.0)", "1.0"),
+                      ("wowy ignores who else played", " and all(played(b, q) for q in rot)]", "]"),
+                      ("wowy off", "    if mode == \"v3\":\n        played", "    if False:\n        played")):
         assert src.count(a) == 1, tag
         d = pathlib.Path(tempfile.mkdtemp())
         (d / "nba_role_mut.py").write_text(src.replace(a, b))
         sys.path.insert(0, str(d))
         try:
-            assert not check(importlib.import_module("nba_role_mut")), tag
+            m_ = importlib.import_module("nba_role_mut")
+            assert not (check(m_) and check_wowy(m_)), tag
         finally:
             sys.path.remove(str(d))
             sys.modules.pop("nba_role_mut", None)

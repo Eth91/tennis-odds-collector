@@ -20,9 +20,10 @@ STATS = ("min", "fga", "fta", "fg3a", "reb", "ast", "pts", "fg3m")
 RATE_STATS = ("fga", "fta", "fg3a", "reb", "ast")
 K_RATE, K_TS, K_3P = 150.0, 60.0, 40.0
 HALF_LIFE, X_MIN, X_GAMES, SAME_W, CAP, ROSTER_MIN = 3.0, 17.0, 3, 3.0, 40.0, 240.0
-PREV = {"2025-26": "2024-25", "2024-25": "2023-24", "2023-24": "2022-23", "2026-27": "2025-26"}
+PREV = {"2025-26": "2024-25", "2024-25": "2023-24", "2023-24": "2022-23", "2022-23": "2021-22", "2026-27": "2025-26"}
 DEFAULT_RATES = {"fga": 0.35, "fta": 0.10, "fg3a": 0.13, "reb": 0.18, "ast": 0.10, "eff": 1.12, "p3": 0.35}   # no history at all
 LAST_N = 5                                               # amendment 1: the simplified minutes base
+K_WOWY = 3.0                                             # amendment 3: WOWY's weight is n / (n + K_WOWY)
 
 
 def group(pos):
@@ -105,7 +106,8 @@ class Season:
 def project(season, priors, groups, team, date, active, absent, mode="v2"):
     """{pid: {stat: projection}} for the active roster, with `absent` (rotation players out tonight) redistributed.
     mode "v1": the registered model (base over games X played + empirical bump); "v2" (amendment 1): base = last 5
-    games, bump = X's minutes x the share of those 5 games X played."""
+    games, bump = X's minutes x the share of those 5 games X played; "v3" (amendment 3): v2 blended with WOWY, the
+    games without tonight's absent players but with tonight's other rotation players."""
     prior = season.before(team, date)
     if not prior or not active:
         return {}
@@ -120,7 +122,7 @@ def project(season, priors, groups, team, date, active, absent, mode="v2"):
         emp[p] = (sum(wo) / len(wo) - base[p], len(wo)) if wo else (0.0, 0)
     x_min = {x: ewma([b[x]["min"] for _d, _g, b in prior if x in b and b[x]["min"]]) or 0.0 for x in absent}
     share = {(p, x): 1.0 for p in active for x in absent}
-    if mode == "v2":
+    if mode in ("v2", "v3"):
         for p in active:
             last = [b for _d, _g, b in prior if p in b and b[p]["min"]][-LAST_N:]
             base[p] = sum(b[p]["min"] for b in last) / len(last) if last else 0.0
@@ -132,10 +134,28 @@ def project(season, priors, groups, team, date, active, absent, mode="v2"):
         tw = sum(w.values())
         for p in active:
             bump[p] += (mx * w[p] / tw if tw else 0.0) * share[(p, x)]
+    wowy = {}                                            # amendment 3: p -> (n, mean minutes, {stat: per-minute rate})
+    if mode == "v3":
+        played = lambda b, q: q in b and b[q]["min"]
+        rot = set()
+        for q in active:
+            m_ = [b[q]["min"] for _d, _g, b in prior if played(b, q)]
+            if len(m_) >= X_GAMES and sum(m_) / len(m_) >= X_MIN:
+                rot.add(q)
+        match = [b for _d, _g, b in prior if not any(played(b, x) for x in absent) and all(played(b, q) for q in rot)]
+        for q in active:
+            g_ = [b[q] for b in match if played(b, q)]
+            if g_:
+                mn = sum(r["min"] for r in g_)
+                wowy[q] = (len(g_), mn / len(g_), {st: sum(r[st] or 0 for r in g_) / mn for st in RATE_STATS})
     mins = {}
     for p in active:
-        if mode == "v2":
+        if mode in ("v2", "v3"):
             mins[p] = min(CAP, max(0.0, base[p] + bump[p]))
+            if p in wowy:
+                n_, wm_, _r = wowy[p]
+                w_ = n_ / (n_ + K_WOWY)
+                mins[p] = min(CAP, max(0.0, (1 - w_) * mins[p] + w_ * wm_))
             continue
         d, n = emp[p]
         a = n / (n + 2.0)
@@ -158,6 +178,11 @@ def project(season, priors, groups, team, date, active, absent, mode="v2"):
         rates[p] = {s: (t[s] + pr[s] * K_RATE) / (t["min"] + K_RATE) for s in RATE_STATS}
         rates[p]["eff"] = (t["pts"] + pr["eff"] * K_TS) / (t["fga"] + 0.44 * t["fta"] + K_TS)
         rates[p]["p3"] = (t["fg3m"] + pr["p3"] * K_3P) / (t["fg3a"] + K_3P)
+        if p in wowy:
+            n_, _m, wr = wowy[p]
+            w_ = n_ / (n_ + K_WOWY)
+            for s in RATE_STATS:
+                rates[p][s] = (1 - w_) * rates[p][s] + w_ * wr[s]
         for s in RATE_STATS:
             raw[s][p] = mins[p] * rates[p][s]
     out = {}
@@ -167,6 +192,7 @@ def project(season, priors, groups, team, date, active, absent, mode="v2"):
         v["pts"] = (v["fga"] + 0.44 * v["fta"]) * rates[p]["eff"]
         v["fg3m"] = v["fg3a"] * rates[p]["p3"]
         v["base_min"] = base[p]
+        v["n_wowy"] = wowy.get(p, (0,))[0]
         out[p] = v
     return out
 
@@ -229,6 +255,39 @@ def test_a(gamelogs_db, seasons=("2025-26", "2024-25"), mode="v1"):
                 disp[mk] = round(1.0 / inv_r, 3)
     res["nb_r"] = disp
     res["verdict"] = "PASS" if all(res[s]["passes"] for s in seasons) else "FAIL"
+    return res
+
+
+def compare_wowy(gamelogs_db, seasons=("2022-23",)):
+    """Amendment 3's check: v3 (WOWY) against v2 on the same teammate-games, overall and where WOWY applies."""
+    rows, groups = load(gamelogs_db)
+    res = {}
+    for s in seasons:
+        season, priors = Season(rows[s]), Priors(rows.get(PREV.get(s, ""), []), groups)
+        recs = []
+        for team, games in season.games.items():
+            for i, (d, g, box) in enumerate(games):
+                if i < X_GAMES:
+                    continue
+                played = {p for p, r in box.items() if r["min"]}
+                last3 = season.roster(team, d)
+                spots = season.absences(team, d, last3 - played)
+                if not spots or min(spots.values()) > 3:
+                    continue
+                active = last3 & played
+                p2 = project(season, priors, groups, team, d, active, set(spots), mode="v2")
+                p3 = project(season, priors, groups, team, d, active, set(spots), mode="v3")
+                for p in active:
+                    if p in p2 and p in p3:
+                        recs.append({"n": p3[p]["n_wowy"], "a": {k: box[p][k] or 0 for k in STATS},
+                                     "v2": {k: p2[p][k] for k in STATS}, "v3": {k: p3[p][k] for k in STATS}})
+        out = {}
+        for lab, rs in (("all", recs), ("wowy_n>=1", [r for r in recs if r["n"] >= 1]), ("wowy_n>=3", [r for r in recs if r["n"] >= 3])):
+            out[lab] = {"n": len(rs), **{k: {m: round(float(np.mean([abs(r[m][k] - r["a"][k]) for r in rs])), 4) if rs else None
+                                             for m in ("v2", "v3")} for k in ("min", "fga", "fta", "pts", "reb", "ast", "fg3m")}}
+        out["passes"] = all(out[lab][k]["v3"] <= out[lab][k]["v2"] for lab in ("all", "wowy_n>=1") for k in ("min", "fga")
+                            if out[lab]["n"])
+        res[s] = out
     return res
 
 
@@ -455,14 +514,15 @@ class RoleData:
 
 
 def role_eval(rd, date, team, pid, market, line, over, under, out_now):
-    """ROLE_OPEN for one opener: the sides with calibrated EV >= EV_AT, as [{side, price, ev, p, mu, spots}]."""
+    """ROLE_OPEN for one opener: the sides with calibrated EV >= EV_AT, as [{side, price, ev, p, mu, spots}]. The mean is
+    ROLE1 v3 (v2 + WOWY, amendment 3); the negative binomial r and beta were fit on v2 and are kept as registered."""
     spots = {x: n for x, n in rd.season.absences(team, date, set(out_now)).items() if n <= SPOT_MAX}
     if not spots or not over or not under:
         return []
     key = (team, date, frozenset(out_now))
     if key not in rd.cache:
         active = rd.season.roster(team, date) - set(out_now)
-        rd.cache[key] = project(rd.season, rd.priors, rd.groups, team, date, active, set(spots), mode="v2")
+        rd.cache[key] = project(rd.season, rd.priors, rd.groups, team, date, active, set(spots), mode="v3")   # amendment 3
     proj = rd.cache[key]
     if pid not in proj:
         return []
@@ -480,11 +540,17 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--test-a")
     ap.add_argument("--seasons", default="2025-26,2024-25")
-    ap.add_argument("--mode", default="v1", choices=("v1", "v2"))
+    ap.add_argument("--mode", default="v1", choices=("v1", "v2", "v3"))
     ap.add_argument("--test-b", nargs=2, metavar=("GAMELOGS_DB", "ODDS_DB"))
     ap.add_argument("--calibrate", nargs=2, metavar=("GAMELOGS_DB", "ODDS_DB"))
+    ap.add_argument("--compare-wowy")
     ap.add_argument("--json")
     a = ap.parse_args()
+    if a.compare_wowy:
+        res = compare_wowy(a.compare_wowy, tuple(a.seasons.split(",")))
+        print(json.dumps(res, indent=1))
+        if a.json:
+            open(a.json, "w").write(json.dumps(res, indent=1))
     if a.calibrate:
         res = calibrate(*a.calibrate)
         print(json.dumps(res, indent=1))
