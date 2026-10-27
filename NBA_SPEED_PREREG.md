@@ -1318,3 +1318,34 @@ season box scores (2023-24: 1,229; 2024-25: 1,230). The current card at tip line
 Applied: every wowy flag from AMEND30_CUTOVER (2026-10-26 06:00 UTC) stores pace_f, match_f, play_type, scheme,
 g_total, total_cell, g_spread (annotate30, inside a guard: it cannot break the pass); cells MATCHUP / SCHEME /
 TOTAL / SPREAD (30). The VM runs `nba_matchup.py --current` daily (this season's finals + a play-type snapshot).
+
+# AMENDMENT 31: fresh news only, on both cards (2026-10-27)
+
+**Why.** User: "make the flag engine only use fresh news." `NBA_FLAGS_DIAGNOSIS.md` (development data,
+2026-10-22..26):
+- **FanDuel's speed.** After an official report newly lists a regular Out or Doubtful, FanDuel had moved
+  0.7% of his teammates' props by our first fetch (about 3 s after the report). The ones that move do so
+  after a median of 3 minutes, 75% within 16.
+- **The flags' timing.** 77 graded shadow flags, −8.3% ROI. 64 were logged 2+ hours after their news;
+  they went 32-32, −4.3 units, about the vig on a fairly priced line. Only the flags logged within minutes
+  acted inside FanDuel's window.
+- **Before this rule, in sample:** flags logged within 15 minutes went 4-4, −0.78 units (n 8: 3-4 under 5
+  minutes, 1-0 at 5–15). The "2-0" the user cites is the 5–30 minute cell (n 2). That is far too few to
+  judge, so this is a forward test, not a finding.
+
+**Rule.** A play goes on a card (speed card or tip card) and is pinged only if it is logged within
+**FRESH_MIN = 15 minutes** of its `news_at`:
+- for a report trigger, the report that first listed the player's absence;
+- for an X or Bluesky trigger, when the news was detected.
+
+A play with no `news_at`, or older news, is logged only, with `card_why = 'NEWS NOT FRESH'`. Everything
+before it (filters, minutes band, stale line, slots, 1 per player) is unchanged. A re-flag inherits its
+play's card value, as before.
+
+The 15 minutes is set from FanDuel's lag (median 3, p75 16 minutes), not from any outcome. It turns the
+tip card off almost always: its plays are decided 5–30 minutes before tip, and their news is rarely under 15
+minutes old by then. Amendment 27's tip-card decision stops accumulating.
+
+**Record.** From the first pass after this amendment, carded plays are its forward record. Nothing is bet;
+`LIVE_TIERS` stays empty. The STALE LINE, MINUTES BAND and other cells keep tracking all flags, carded or
+not, so fresh and late plays stay comparable. Switch: `FRESH_RULE_ON` in nba_flags.py.
