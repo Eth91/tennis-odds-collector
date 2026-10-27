@@ -219,13 +219,223 @@ class S1(Rule):
         return out
 
 
-RULES = (NULL_TIP30, NEWS_FD, NEWS_DK, DK_LAGS_FD, T4_TIP30, ENGINE_CARD, S1)
+# ── AMENDMENT 1: the volume rules ────────────────────────────────────────────────────────────────────────────
+VOLUME_MARKETS = ("points", "rebounds", "assists", "pra")
+LINEUPS_DB, MATCHUP_DB, INDEX_JSON = RP.HERE / "nba_lineups.sqlite", RP.HERE / "nba_matchup.sqlite", RP.HERE / "nba_player_index.json"
+
+
+class VolumeData:
+    """Point-in-time helpers the volume rules read: position groups, starts and appearances before a date, team
+    schedules, and the lineup snapshot as of a moment."""
+
+    def __init__(self, lineups_db, matchup_db, index_json):
+        from collections import defaultdict
+        self.pos = {}
+        if index_json.exists():
+            for pid, v in json.load(open(index_json))["players"].items():
+                if len(v) > 2 and v[2]:
+                    self.pos[int(pid)] = v[2][0]
+        self.apps, self.team_days = defaultdict(list), defaultdict(set)    # pid -> [(date, started)]; team -> dates
+        m = PD._ro(matchup_db)
+        if m is not None:
+            for d, h, a in m.execute("SELECT date, home, away FROM games"):
+                self.team_days[h].add(d)
+                self.team_days[a].add(d)
+            for d, pid, st in m.execute("SELECT gm.date, p.pid, p.starter FROM player_games p JOIN games gm ON gm.gid = p.gid "
+                                        "WHERE p.min > 0"):
+                self.apps[pid].append((d, bool(st)))
+        for v in self.apps.values():
+            v.sort()
+        self.lineups_db, self.snaps = lineups_db, {}     # date -> [(fetched_at, {team: {"starters", "active"}})], loaded per date
+
+    def _snaps(self, date):
+        import zlib
+        if date not in self.snaps:
+            self.snaps = {date: []}                      # one date in memory at a time
+            lc = PD._ro(self.lineups_db)
+            for f, body in (lc.execute("SELECT fetched_at, body FROM snaps WHERE date_et = ? ORDER BY fetched_at", (date,))
+                            if lc is not None else ()):
+                teams = {}
+                for g in json.loads(zlib.decompress(body)).get("games", []):
+                    for side in ("homeTeam", "awayTeam"):
+                        t = g.get(side) or {}
+                        ps = t.get("players") or []
+                        teams[t.get("teamAbbreviation")] = {
+                            "starters": {p["personId"] for p in ps if p.get("position") and p.get("lineupStatus") in ("Expected", "Confirmed")},
+                            "active": {p["personId"] for p in ps if p.get("rosterStatus") == "Active"}}
+                self.snaps[date].append((RP.iso(f), teams))
+        return self.snaps[date]
+
+    def group(self, pid):
+        return self.pos.get(pid)
+
+    def starts(self, pid, date):
+        """(starts, appearances) over his last 10 appearances before the date."""
+        a = [s for d, s in self.apps.get(pid, ()) if d < date][-10:]
+        return sum(a), len(a)
+
+    def recently_active(self, pid, team, date):
+        last4 = sorted(d for d in self.team_days.get(team, ()) if d < date)[-4:]
+        return bool(last4) and any(d in last4 for d, _s in self.apps.get(pid, ()))
+
+    def lineup(self, date, t):
+        """{team: {"starters", "active"}} from the latest snapshot fetched at or before t (or {})."""
+        best = {}
+        for f, teams in self._snaps(date):
+            if f <= t:
+                best = teams
+        return best
+
+
+_VD = {}
+
+
+def volume_data():
+    key = (str(LINEUPS_DB), str(MATCHUP_DB), str(INDEX_JSON))
+    if key not in _VD:
+        _VD.clear()
+        _VD[key] = VolumeData(LINEUPS_DB, MATCHUP_DB, INDEX_JSON)
+    return _VD[key]
+
+
+def next_man(v, vd, gid, team, x, taken=()):
+    """The next man up behind X: same position group, not Out/Doubtful, a FanDuel board, fewer last-10 minutes than
+    X, the most of those (ties: the lower id)."""
+    gx, (mx, _n) = vd.group(x), v.last10_min(x)
+    if gx is None or mx is None:
+        return None
+    best = None
+    for p in sorted({p for p, _mk in v.props(gid, "fd")}):
+        if p == x or p in taken or v.team_of(p) != team or v.status(p) in RP.OUTS or vd.group(p) != gx:
+            continue
+        mp, _k = v.last10_min(p)
+        if mp is not None and mp < mx and (best is None or mp > best[0]):
+            best = (mp, p)
+    return best[1] if best else None
+
+
+def side_bets(v, gid, pid, side, note=""):
+    out = []
+    for mk in VOLUME_MARKETS:
+        m = RP.main_of(v.board(gid, pid, mk, "fd"))
+        if m and m[1 if side == "over" else 2]:
+            out.append(sig(gid, pid, mk, side, m[0], "fd", m[1 if side == "over" else 2], note=note))
+    return out
+
+
+VOL_DEPS = (VolumeData, volume_data, next_man, side_bets)
+
+
+class DEPTH_NEXT(Rule):
+    """A regular newly Out/Doubtful: the next man up behind him, volume overs at FanDuel's first look after the report."""
+    name, window, deps = "DEPTH_NEXT", 10, VOL_DEPS
+
+    def start_day(self, v):
+        self.pending = []
+
+    def on_report(self, v, t, rows, prev, seen_before):
+        self.pending += [(t, g, team, x) for x, team, g in newly_out(v, t, rows, seen_before, prev)]
+        return ()
+
+    def on_obs(self, v, book, seen):
+        if book != "fd":
+            return ()
+        vd, out, keep = volume_data(), [], []
+        for P, g, team, x in self.pending:
+            if RP.minus(v.t, self.window) > P:
+                continue
+            if g not in seen:
+                keep.append((P, g, team, x))
+                continue
+            b = next_man(v, vd, g, team, x)
+            if b is not None:
+                out += side_bets(v, g, b, "over", note=f"behind={x}")
+        self.pending = keep
+        return out
+
+
+class DEPTH_NEXT_TIP30(Rule):
+    """At tip - 30: each recently active regular listed Out/Doubtful -> the next man up behind him, volume overs."""
+    name, deps = "DEPTH_NEXT_TIP30", VOL_DEPS
+
+    def start_day(self, v):
+        self.listed = {}                                 # pid -> (team, latest status)
+
+    def on_report(self, v, t, rows, prev, seen_before):
+        for team, pid, st in rows:
+            self.listed[pid] = (team, st)
+        return ()
+
+    def on_tick(self, v, gid, minutes):
+        if minutes != 30:
+            return ()
+        vd, g, out = volume_data(), v.games()[gid], []
+        for team in (g["home"], g["away"]):
+            xs = []
+            for pid, (tm, st) in self.listed.items():
+                if tm != team or st not in RP.OUTS or v.team_of(pid) != team:
+                    continue
+                mn, n = v.last10_min(pid)
+                if n >= REG_APPS and mn >= REG_MIN and vd.recently_active(pid, team, v.date):
+                    xs.append((-mn, pid))
+            taken = {x for _m, x in xs}
+            for _m, x in sorted(xs):
+                b = next_man(v, vd, gid, team, x, taken)
+                if b is not None:
+                    taken.add(b)
+                    out += side_bets(v, gid, b, "over", note=f"behind={x}")
+        return out
+
+
+class NEW_STARTER(Rule):
+    """At tip - 30: a starter in tonight's lineup who started <= 30% of his last (up to) 10, with >= 3 appearances: overs."""
+    name, deps = "NEW_STARTER", VOL_DEPS
+
+    def on_tick(self, v, gid, minutes):
+        if minutes != 30:
+            return ()
+        vd, g, out = volume_data(), v.games()[gid], []
+        lu = vd.lineup(v.date, v.t)
+        for team in (g["home"], g["away"]):
+            e = lu.get(team)
+            if not e or len(e["starters"]) != 5:
+                continue
+            for p in sorted(e["starters"]):
+                st, n = vd.starts(p, v.date)
+                if n >= 3 and st <= 0.3 * n:
+                    out += side_bets(v, gid, p, "over", note=f"started {st}/{n}")
+        return out
+
+
+class LOST_START(Rule):
+    """At tip - 30: a usual starter (>= 8 of his last 10) listed Active but not in tonight's starting five: volume unders."""
+    name, deps = "LOST_START", VOL_DEPS
+
+    def on_tick(self, v, gid, minutes):
+        if minutes != 30:
+            return ()
+        vd, g, out = volume_data(), v.games()[gid], []
+        lu = vd.lineup(v.date, v.t)
+        for team in (g["home"], g["away"]):
+            e = lu.get(team)
+            if not e or len(e["starters"]) != 5:
+                continue
+            for p in sorted(e["active"] - e["starters"]):
+                st, n = vd.starts(p, v.date)
+                if st >= 8 and v.status(p) not in RP.OUTS:
+                    out += side_bets(v, gid, p, "under", note=f"started {st}/{n}")
+        return out
+
+
+RULES = (NULL_TIP30, NEWS_FD, NEWS_DK, DK_LAGS_FD, T4_TIP30, ENGINE_CARD, S1, DEPTH_NEXT, DEPTH_NEXT_TIP30, NEW_STARTER,
+         LOST_START)
 
 
 def fingerprint(cls):
     """A hash of the rule's source (with its bases here), the shared helpers and constants, and the View it reads."""
     parts = [inspect.getsource(c) for c in cls.__mro__ if c is not object and c.__module__ == __name__]
     parts += [inspect.getsource(f) for f in (newly_out, teammates, fd_vs_dk, sig)] + [inspect.getsource(RP.View)]
+    parts += [inspect.getsource(f) for f in getattr(cls, "deps", ())]
     parts.append(json.dumps([REG_MIN, REG_APPS, NEWS_MARKETS, NULL_MARKETS, FLAG_MARKET, RP.OUTS, RP.TICKS], sort_keys=True))
     return hashlib.sha256("\n".join(parts).encode()).hexdigest()[:10]
 
@@ -239,4 +449,8 @@ REGISTRY = {                                             # name -> (registered a
     "T4_TIP30": (REGISTERED_AT, "b57ce355df"),
     "ENGINE_CARD": (REGISTERED_AT, "ef893ad2bd"),
     "S1": (REGISTERED_AT, "063cde0069"),
+    "DEPTH_NEXT": (REGISTERED_AT, "80c7346297"),                   # amendment 1 (the volume rules)
+    "DEPTH_NEXT_TIP30": (REGISTERED_AT, "726d7f5e54"),
+    "NEW_STARTER": (REGISTERED_AT, "5e5996fb1a"),
+    "LOST_START": (REGISTERED_AT, "134f9fb1e9"),
 }

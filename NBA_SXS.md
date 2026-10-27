@@ -38,6 +38,13 @@ same thing.
 | T4_TIP30 | 48 | +3.5% | +1.9% (23-25) |
 | ENGINE_CARD | 8 | −10.9% (2 of 8 with a close) | −8.3% (4-4) |
 | S1 | 0 | | |
+| DEPTH_NEXT (amendment 1) | 39 | −3.1% (26 with a close) | +5.8% (22-17) |
+| DEPTH_NEXT_TIP30 | 129 | −5.7% | +8.5% (74-55) |
+| NEW_STARTER (one night of lineups) | 14 | −4.6% | +3.1% (8-6) |
+| LOST_START (one night) | 8 | −7.4% | −49.8% (2-6) |
+
+The volume rules (amendment 1, the user's "volume is king") replay from the same logs. Their lineup-based rules
+have only one night of lineups so far. Forward, they all start at 2026-10-27 12:00 UTC.
 
 **The control reads about the vig, as it should.** Two rules are positive on CLV, both "DraftKings is slower than
 FanDuel" ideas: DK_LAGS_FD and T4_TIP30. Four nights tell us nothing about profit. The forward record starts

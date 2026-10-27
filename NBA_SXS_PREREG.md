@@ -94,3 +94,63 @@ Shared definitions:
   every signal to `nba_sxs.sqlite` and the scoreboard to JSON.
 - Ad hoc: `nba_replay.py --rule MODULE:NAME --from DATE --to DATE` replays any rule over the logs. That gives
   a development record, never a verdict.
+
+---
+
+# AMENDMENT 1: four volume rules (2026-10-27, written before any of them was run)
+
+**Why.** User: "Volume is king ... if we can predict which players on any given night will receive more or less
+volume than normal, then we can easily make money from the NBA." They asked to restrict flags to players with a
+reason for a volume change:
+- the next man up in the depth chart when the player ahead of him is out (their example: Aday Mara with Chet
+  Holmgren out);
+- a minutes bump;
+- a player new to the starting lineup who usually doesn't start.
+
+The three studies the same day (`NBA_ML1_PREREG.md`, `NBA_WHY_PREREG.md`, `NBA_ZONES_PREREG.md`) found:
+- generic conditions and outcome-mined filters predict nothing;
+- the zone matchup is real but priced.
+
+These rules aim at specific volume mechanisms instead. They depend on who sat and who started, which box scores
+only know in hindsight, so they are tested here, point in time, forward.
+
+**Shared definitions** (in addition to those above):
+- **Position group:** G, F or C, from `nba_player_index.json` (the first letter of its position).
+- **Starts:** how many of his last 10 appearances (minutes > 0, before the date) he started, from nba_matchup's
+  box scores.
+- **Lineup at t:** the latest `nba_lineups.sqlite` snapshot fetched at or before t for the date.
+  - A team's starting five are its players with a position, under a lineupStatus of Expected or Confirmed.
+  - A team is skipped when the snapshot does not list five starters for it.
+- **Next man up behind X:**
+  - a teammate in X's position group, not Out or Doubtful, with a FanDuel board for the game;
+  - his last-10 minutes are below X's;
+  - he has the most last-10 minutes of those (ties go to the lower player id).
+- **Recently active:** X appeared in at least one of his team's last 4 games before the date.
+- **Volume markets:** points, rebounds, assists, PRA. All bets are at FanDuel's main line and price.
+
+The rules:
+
+8. **DEPTH_NEXT** (fresh news).
+   - **Trigger:** a regular X newly Out or Doubtful on a report, for a game ≥ 30 min after it (as NEWS_FD).
+   - **Bet:** at FanDuel's first observation of the game after the report (within 10 min), the next man up
+     behind X: overs in the volume markets at the current price. There is no stale-line condition.
+9. **DEPTH_NEXT_TIP30** (known absences).
+   - **Trigger:** at tip − 30, every regular X who is recently active and listed Out or Doubtful on his team's
+     latest report.
+   - **Bet:** the next man up behind each X (once each): overs in the volume markets. A player who is himself an
+     X is skipped.
+10. **NEW_STARTER.** At tip − 30, each player in his team's starting five in the lineup at that moment who
+    started ≤ 30% of his last (up to) 10 appearances, with ≥ 3 appearances: overs in the volume markets.
+    - *Corrected before registration (about 07:10 UTC).* The first wording, "≤ 3 of his last 10", let a player
+      who had started 3 of his only 3 appearances count as a new starter. That surfaced on the development
+      replay; the intent is "usually comes off the bench".
+11. **LOST_START** (volume down). At tip − 30, each player who started ≥ 8 of his last 10 appearances, is listed
+    Active, is not Out or Doubtful, and is not in his team's starting five in the lineup at that moment (the team
+    listing five): unders in the volume markets.
+
+**Registration and bars.**
+- Registered at **2026-10-27T12:00:00 UTC**, with fingerprints that also cover their data helpers (lineups,
+  positions, starts, schedule).
+- The verdicts are the same as every other rule here: CLV first, at ≥ 200 signals and ≥ 10 dates.
+- The development replay covers 2026-10-22..26. The lineup log starts on the evening of 2026-10-26, so
+  NEW_STARTER and LOST_START have one night of development data.
