@@ -160,7 +160,7 @@ font-size:13px;font-weight:600;color:#fff}
 .seg button img{width:16px;height:16px} .seg button svg{width:14px;height:14px;fill:currentColor}
 /* chips: the chart filters' outline pills */
 .chips{display:flex;flex-wrap:wrap;gap:8.3px;margin-top:10px}
-.chips.rsw{flex-wrap:nowrap;overflow-x:auto;margin:2px 0 4px;padding:0 15.3px 8px;scrollbar-width:none} .rsw::-webkit-scrollbar{display:none} .rsw .chip{flex:none}
+.mt.rrl{margin:14px 15.3px 4px} .mt.rrl button{width:auto;padding:0 15px;white-space:nowrap} .mt.rrl button[aria-pressed="true"]{background:none}
 .chip{display:inline-flex;align-items:center;height:30px;padding:0 13px;border:1px solid rgba(255,255,255,.15);border-radius:15px;background:none;
 color:#fff;font-size:13px;font-weight:500}
 .chip[aria-pressed="true"]{border-color:rgba(255,255,255,.3);background:#2a2a2a}
@@ -1353,7 +1353,7 @@ let ROLES = null;
 // the Roles switch: [key, chip, unit after the numbers, label under the move]; ROLE_TH stands in for a file without
 // thresholds (nba_players.ROLE_MOVE)
 const ROLE_ST = [["min", "Minutes", "min", "MIN"], ["fga", "FGA", "FGA", "FGA"], ["fg3a", "3PTA", "3PA", "3PTA"],
-                 ["pot_ast", "Potential ast", "pot. ast", "POT AST"], ["reb_ch", "Reb chances", "reb ch.", "REB CH"]];
+                 ["pot_ast", "Potential Assists", "pot. ast", "POT AST"], ["reb_ch", "Rebound Chances", "reb ch.", "REB CH"]];
 const ROLE_TH = {min: 4, fga: 3, fg3a: 2, pot_ast: 2.5, reb_ch: 3};
 const rolesLoad = () => ROLES || (ROLES = fetch("player/roles.json").then(r => r.ok ? r.json() : null).catch(() => null));
 function rolesView(swap) {
@@ -1368,22 +1368,31 @@ function rolesView(swap) {
     const rows = ((j && j.rows) || []).filter(r => teams.has(r.team) && (ST.team === "all" || r.team === ST.team) && (!q || r.name.toLowerCase().indexOf(q) >= 0))
       .filter(r => { const v = stat(r); return v && Math.abs(v[0] - v[1]) >= th[k]; })
       .sort((a, b) => Math.abs(stat(b)[0] - stat(b)[1]) - Math.abs(stat(a)[0] - stat(a)[1]));
-    if (!$(".rsw", el)) {
-      el.innerHTML = `<div class="chips rsw" role="group" aria-label="Stat">${ROLE_ST.map(([x, lab]) => `<button class="chip" data-rs="${x}">${lab}</button>`).join("")}</div><div id="rol"></div>`;
+    // the stat rail: built once, like the market rail up top (a pill slides to the stat, the rail scrolls it into view)
+    if (!$(".rrl", el)) {
+      el.innerHTML = `<nav class="mt rrl" aria-label="Stat"><div class="mt-in" id="rsl"><span class="pill2"></span>${ROLE_ST.map(([x, lab]) => `<button data-rs="${x}">${lab}</button>`).join("")}</div></nav><div id="rol"></div>`;
       $$("[data-rs]", el).forEach(b => b.onclick = () => { if (b.dataset.rs !== (ST.rs || "min")) { ST.rs = b.dataset.rs === "min" ? "" : b.dataset.rs; save(); rolesView(true); } });
     }
-    press("[data-rs]", x => x.dataset.rs === k, el);
+    const rail = $("#rsl", el);
+    press("[data-rs]", x => x.dataset.rs === k, rail); slide(rail, !swap);
+    const on = $('[aria-pressed="true"]', rail);
+    if (on && (on.offsetLeft < rail.scrollLeft || on.offsetLeft + on.offsetWidth > rail.scrollLeft + rail.clientWidth))
+      rail.scrollTo({left: on.offsetLeft - (rail.clientWidth - on.offsetWidth) / 2, behavior: swap && !REDUCED ? "smooth" : "auto"});
     const rl = $("#rol", el);
     if (swap) swapIn(rl);
     if (!rows.length) { rl.innerHTML = `<div class="empty"><b>${k === "reb_ch" ? "None yet this season" : "No role changes"}</b></div>`; return; }
-    rl.innerHTML = `<div class="lhd"><span>${rows.length} players</span><span>Last 3 games</span></div>` + rows.map(r => {
-      const v = stat(r), dv = v[0] - v[1], up = dv > 0, was = r.starts[2] ? r.starts[1] / r.starts[2] : 0;
-      const why = [k !== "min" ? `${r.min[1]} → ${r.min[0]} min` : "",
-                   r.starts[0] === 3 && was < .5 ? "Now starting" : r.starts[0] === 0 && was >= .5 ? "Lost his start" : "",
+    // the comparison (nba_players.roles_mode): early on, his season so far against last season; later, his last 3 games
+    // against the rest of his season
+    const cmp = j && j.mode === "season" ? "This season vs last" : "Last 3 games vs season";
+    rl.innerHTML = `<div class="lhd"><span>${rows.length} players</span><span>${cmp}</span></div>` + rows.map(r => {
+      const v = stat(r), dv = v[0] - v[1], up = dv > 0, was = r.starts[2] ? r.starts[1] / r.starts[2] : 0, now = r.starts[0] / (r.starts[3] || 3);
+      const why = [r.was_team ? `<span>New team</span> (was ${esc(r.was_team)})` : "",
+                   k !== "min" ? `${r.min[1]} → ${r.min[0]} min` : "",
+                   now >= .8 && was < .5 ? "Now starting" : now <= .2 && was >= .5 ? "Lost his start" : "",
                    r.out.length ? `<span>${r.out.map(n => esc(lastName(n))).join(", ")} out</span>` : "",
                    r.usg[0] !== null && r.usg[1] !== null ? `USG ${Math.round(r.usg[1])} → ${Math.round(r.usg[0])}%` : ""].filter(Boolean);
       return `<button class="pr ir ir0 ror" data-vp="${r.pid}"><span class="av">${head(r.pid)}</span><div class="who"><div class="nm">${esc(nameOf(r.name))}<span class="cd">${esc(r.team)}</span></div>
-        <div class="lin">${v[1]} → <b>${v[0]}</b> ${sd[2]}${r.base === "last season" ? " <small>vs last season</small>" : ""}</div>
+        <div class="lin">${v[1]} → <b>${v[0]}</b> ${sd[2]}</div>
         <div class="ros">${why.join(" · ")}</div></div>
         <span class="rod ${up ? "up" : "dn"}">${up ? "▲" : "▼"}${Math.abs(dv).toFixed(1)}<i>${sd[3]}</i></span></button>`; }).join("");
   });
