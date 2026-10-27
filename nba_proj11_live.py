@@ -320,8 +320,15 @@ def main():
     if a.write_config:
         print("nba_proj11_live --write-config:", write_config())
     if a.refresh:
-        targets, rows = NP.slate_targets()
-        print("nba_proj11_live --refresh:", refresh11(targets, rows=rows, force=a.force))
+        cfg = load_config()
+        old = _load(CACHE)
+        raw_m = os.path.getmtime(FT.F.RAW) if FT.F.RAW.exists() else 0
+        if not a.force and old and old.get("key") == (NP._cache_key(NP.GAMELOGS, NP.MATCHUP), raw_m, cfg["hash"]) \
+                and NP.board_targets() <= set(old["at"]):
+            print(f"nba_proj11_live --refresh: cache current ({len(old['at'])} players)")   # no box-score load
+        else:
+            targets, rows = NP.slate_targets()
+            print("nba_proj11_live --refresh:", refresh11(targets, rows=rows, cfg=cfg, force=True))
     if a.forecast:
         print("nba_proj11_live --forecast:", forecast11())
     if a.prospective:
