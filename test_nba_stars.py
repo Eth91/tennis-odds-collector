@@ -39,7 +39,8 @@ def check(mod):
         nonlocal ok
         ok &= bool(cond)
         print(f"   {'ok ' if cond else 'BAD'} {label}")
-    saved = (mod._stale_of, mod.MARGIN, mod.FILTERS_ON, mod.STARS_RULE_ON, mod.FRESH_RULE_ON)
+    saved = (mod._stale_of, mod.MARGIN, mod.FILTERS_ON, mod.STARS_RULE_ON, mod.FRESH_RULE_ON, mod.FILTER_REB_ON)
+    mod.FILTER_REB_ON = True                                # its rebound case checks amendment 28 comes first
     mod._stale_of, mod.MARGIN = (lambda f, st: f["_stale"]), {"pra": 6.5, "pts": 5.0, "reb": 1.0}
     mod.FILTERS_ON, mod.STARS_RULE_ON = True, True
     mod.FRESH_RULE_ON = False                               # amendment 31 is tested in test_nba_fresh
@@ -70,7 +71,7 @@ def check(mod):
         so = mod.stars_out_by_team({5: "PHX", 6: "PHX", 7: "PHX", 8: "PHX", 9: "PHX"}, apps, GD)
         want(so == Counter({"PHX": 2}), f"STARS OUT counts 24+ min, >= 10 apps, active <= 12 days (got {dict(so)})")
     finally:
-        mod._stale_of, mod.MARGIN, mod.FILTERS_ON, mod.STARS_RULE_ON, mod.FRESH_RULE_ON = saved
+        mod._stale_of, mod.MARGIN, mod.FILTERS_ON, mod.STARS_RULE_ON, mod.FRESH_RULE_ON, mod.FILTER_REB_ON = saved
     return ok
 
 

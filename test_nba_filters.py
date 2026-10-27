@@ -43,8 +43,9 @@ def check(mod):
         nonlocal ok
         ok &= bool(cond)
         print(f"   {'ok ' if cond else 'BAD'} {label}")
-    saved = (mod._stale_of, mod.MARGIN, mod.FILTERS_ON, mod.FRESH_RULE_ON)
+    saved = (mod._stale_of, mod.MARGIN, mod.FILTERS_ON, mod.FRESH_RULE_ON, mod.FILTER_REB_ON)
     mod.FRESH_RULE_ON = False                               # amendment 31 is tested in test_nba_fresh
+    mod.FILTER_REB_ON = True                                # amendment 28 as registered; 32 in check32()
     mod._stale_of, mod.MARGIN, mod.FILTERS_ON = (lambda f, st: f["_stale"]), {"pra": 6.5, "pts": 5.0, "reb": 1.0}, True
     try:
         sh = mod._shadow(pathlib.Path(tempfile.mkdtemp()) / "s.sqlite")
@@ -76,12 +77,50 @@ def check(mod):
         want(c3[("Collin Gillespie", "reb")] == (1, "REBOUNDS OFF CARD") and c3[("Ryan Dunn", "pts")][0] == 1,
              "filters off: rebounds and big edges are carded again; filt is still stored")
     finally:
-        mod._stale_of, mod.MARGIN, mod.FILTERS_ON, mod.FRESH_RULE_ON = saved
+        mod._stale_of, mod.MARGIN, mod.FILTERS_ON, mod.FRESH_RULE_ON, mod.FILTER_REB_ON = saved
     return ok
 
 
 def test_filters():
     assert check(F)
+
+
+def check32(mod):
+    """AMENDMENT 32: rebounds back on both cards; the other three filters stay."""
+    ok = True
+
+    def want(cond, label):
+        nonlocal ok
+        ok &= bool(cond)
+        print(f"   {'ok ' if cond else 'BAD'} {label}")
+    saved = (mod._stale_of, mod.MARGIN, mod.FILTERS_ON, mod.FRESH_RULE_ON)
+    mod.FRESH_RULE_ON = False                               # amendment 31 is tested in test_nba_fresh
+    mod._stale_of, mod.MARGIN, mod.FILTERS_ON = (lambda f, st: f["_stale"]), {"pra": 6.5, "pts": 5.0, "reb": 1.0}, True
+    try:
+        sh = mod._shadow(pathlib.Path(tempfile.mkdtemp()) / "s.sqlite")
+        _, ins = mod._log_flags(sh, SPEED, STAMP, Counter())
+        c = {(b, s): (v, w, f) for b, s, v, w, f in sh.execute("SELECT b, stat, card, card_why, filt FROM flags")}
+        want(c[("Collin Gillespie", "reb")] == (1, None, None) and c[("Collin Gillespie", "pts")][:2] == (0, "1 PER PLAYER"),
+             "rebounds carded: Gillespie REB (1.5) is his lead again, his PTS (1.4) logged only; filt not stored")
+        want(c[("Ryan Dunn", "pts")][:2] == (0, "EDGE TOO BIG") and c[("Royce O'Neale", "pts")][:2] ==
+             (0, "PRICE -125 OR SHORTER") and c[("Ayo Dosunmu", "pts")][:2] == (0, "STAR 32+ MIN"),
+             "the other three filters stay")
+        want(sorted((f["b"], f["stat"]) for f in ins) == [("Collin Gillespie", "reb"), ("Naz Reid", "pts")],
+             "pinged: Gillespie REB and Reid PTS")
+        sh2 = mod._shadow(pathlib.Path(tempfile.mkdtemp()) / "s.sqlite")
+        tipf = [dict(f, _stale="POSTED-AFTER") for f in SPEED]
+        mod._log_flags(sh2, tipf, STAMP, Counter())
+        tip = mod._tip_card(sh2, tipf, GAMES, LINES, NOW, STAMP, Counter(), GD)
+        want(sorted((f["b"], f["stat"]) for f in tip) == [("Collin Gillespie", "reb"), ("Naz Reid", "pts")],
+             "tip card: rebounds carded too")
+    finally:
+        mod._stale_of, mod.MARGIN, mod.FILTERS_ON, mod.FRESH_RULE_ON = saved
+    return ok
+
+
+def test_rebounds_back():
+    assert F.FILTER_REB_ON is False
+    assert check32(F)
 
 
 def store(db, plays, cut=V.AMEND28_CUTOVER):
@@ -142,7 +181,7 @@ def test_mutants():
     for tag, a, b in (
             ("no edge cap", "    if _excess(f) >= FILTER_EXCESS_MAX:\n        return \"EDGE TOO BIG\"\n", ""),
             ("edge cap exclusive", "if _excess(f) >= FILTER_EXCESS_MAX:", "if _excess(f) > FILTER_EXCESS_MAX:"),
-            ("rebounds carded", "    if f[\"stat\"] in (\"reb\", \"rebounds\"):\n        return \"REBOUNDS OFF CARD\"\n", ""),
+            ("rebounds carded", "    if FILTER_REB_ON and f[\"stat\"] in (\"reb\", \"rebounds\"):\n        return \"REBOUNDS OFF CARD\"\n", ""),
             ("stars carded", "f[\"x_min\"] >= FILTER_STAR_MAX:", "f[\"x_min\"] > FILTER_STAR_MAX + 9:"),
             ("short prices carded", "f[\"odds\"] < FILTER_PRICE_MIN:", "f[\"odds\"] < 1.0:"),
             ("lead among all plays", "        if f[\"tier\"] == \"priced\" or _off_card(f):", "        if f[\"tier\"] == \"priced\":"),
@@ -163,6 +202,25 @@ def test_mutants():
             sys.modules.pop("nba_flags_mut28", None)
 
 
+def test_mutants_32():
+    src = pathlib.Path(F.__file__).read_text()
+    for tag, a, b in (
+            ("rebounds still off", "FILTER_REB_ON = False", "FILTER_REB_ON = True"),
+            ("switch ignored", "    if FILTER_REB_ON and f[\"stat\"] in (\"reb\", \"rebounds\"):",
+             "    if f[\"stat\"] in (\"reb\", \"rebounds\"):"),
+            ("all filters dropped with rebounds", "    if _excess(f) >= FILTER_EXCESS_MAX:\n        return \"EDGE TOO BIG\"\n", "")):
+        assert src.count(a) == 1, tag
+        d = pathlib.Path(tempfile.mkdtemp())
+        (d / "nba_flags_mut32.py").write_text(src.replace(a, b))
+        sys.path.insert(0, str(d))
+        try:
+            print(f"MUTANT ({tag}) — must fail:")
+            assert not check32(importlib.import_module("nba_flags_mut32")), tag
+        finally:
+            sys.path.remove(str(d))
+            sys.modules.pop("nba_flags_mut32", None)
+
+
 if __name__ == "__main__":
-    test_filters(); test_filter_decision(); test_filter_cell(); test_mutants()
+    test_filters(); test_rebounds_back(); test_filter_decision(); test_filter_cell(); test_mutants(); test_mutants_32()
     print("test_nba_filters: OK")
