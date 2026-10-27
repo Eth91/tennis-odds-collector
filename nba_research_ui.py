@@ -94,10 +94,21 @@ letter-spacing:.04em;vertical-align:1.5px}
 .tf{background:rgba(255,159,10,.18);color:var(--org)} .tn{background:var(--g3);color:var(--l2)}
 .lhd{display:flex;justify-content:space-between;padding:12px 15.3px 8px;font-size:11.5px;color:#8e8e8e;border-bottom:1px solid #343434}
 .empty{padding:56px 24px;text-align:center;color:var(--l2);font-size:15px;line-height:1.4}
+/* the Injuries view: prop-row look; the boxes are the teammates who took his start / minutes */
+.ir .lin{font-size:13.6px;color:#b0b0b0}
+.bx4{position:absolute;left:15.3px;right:15.3px;top:61.3px;display:grid;grid-template-columns:repeat(4,1fr);gap:6.1px}
+.ijb{display:block;width:100%;min-width:0;height:41.5px;padding:5.6px 4px 0;border:0;border-radius:5px;background:#222;color:#fff;text-align:center}
+button.ijb:active{background:#333}
+.ijb i{display:block;font-family:system-ui,-apple-system,"Roboto Condensed",sans-serif;font-stretch:66%;font-style:normal;font-size:10.4px;
+line-height:12px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ijb b{display:block;margin-top:1.6px;font-size:13.4px;line-height:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ijb b.sm{color:#8e8e8e;font-weight:500}
+.ijb small{font-size:11px;font-weight:500;color:#9a9a9a}
+.pr.ir0{height:62px;contain-intrinsic-size:auto 62px}
 .empty b{display:block;margin-bottom:6px;color:var(--l1);font-size:18px}
 .empty button{margin-top:16px}
-.btn{height:44px;padding:0 20px;border:0;border-radius:12px;background:var(--g2);font-size:16px;font-weight:600}
-.btn.pri{background:var(--blue)}
+.btn{height:46px;padding:0 20px;border:1px solid rgba(255,255,255,.15);border-radius:23px;background:none;color:#fff;font-size:16px;font-weight:600}
+.btn.pri{border-color:#fff;background:#fff;color:#000}
 .ban{margin:10px 15.3px 0;padding:10px 12px;border-radius:12px;background:rgba(255,159,10,.14);color:var(--org);font-size:13px;
 font-weight:600}
 .ban.err{background:rgba(255,69,58,.15);color:var(--red)}
@@ -132,36 +143,41 @@ padding:0 0 1px;border:0;border-radius:26.5px;background:none;color:#fff;font-si
 .tbc button[aria-pressed="true"]{background:rgba(255,255,255,.12)}
 .tbf{position:relative;width:62.9px;height:62.9px;padding:0;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center}
 .tbf svg{width:22px;height:17px}
-.tbf b{position:absolute;right:6px;top:6px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--blue);
-font-size:11px;line-height:17px;text-align:center}
+.tbf b{position:absolute;right:6px;top:6px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#fff;
+color:#000;font-size:11px;font-weight:700;line-height:17px;text-align:center}
 /* DvP table */
 .dvt{display:grid;grid-template-columns:44px 1fr auto;align-items:center;min-height:42px;border-bottom:.5px solid var(--sep);font-size:15px}
 .dvt img{width:22px;height:22px;vertical-align:-6px;margin-right:8px}
 .dvt b{font-weight:600;font-variant-numeric:tabular-nums}
 .dvt span:last-child{color:var(--l2);font-size:13px}
-.seg{display:flex;padding:2px;border-radius:9px;background:var(--g2);margin-top:10px}
-.seg button{flex:1;height:30px;border:0;border-radius:7px;background:none;font-size:13px;font-weight:600;color:var(--l1)}
-.seg button[aria-pressed="true"]{background:#5a5a5e;box-shadow:0 3px 8px rgba(0,0,0,.25)}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.chip{display:inline-flex;align-items:center;height:32px;padding:0 13px;border-radius:16px;border:0;background:var(--g2);
-color:var(--l1);font-size:13px;font-weight:600}
-.chip[aria-pressed="true"]{background:var(--l1);color:#000}
+.seg{display:flex;align-items:center;height:42.4px;margin-top:10px;padding:0 3.5px;border:1px solid #2a2a2a;border-radius:21.2px;background:#101010}
+.seg button{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;height:35px;border:0;border-radius:17.5px;background:none;
+font-size:13px;font-weight:600;color:#fff}
+.seg button[aria-pressed="true"]{background:#313131}
+.seg button img{width:16px;height:16px} .seg button svg{width:14px;height:14px;fill:currentColor}
+/* chips: the chart filters' outline pills */
+.chips{display:flex;flex-wrap:wrap;gap:8.3px;margin-top:10px}
+.chip{display:inline-flex;align-items:center;height:30px;padding:0 13px;border:1px solid rgba(255,255,255,.15);border-radius:15px;background:none;
+color:#fff;font-size:13px;font-weight:500}
+.chip[aria-pressed="true"]{border-color:rgba(255,255,255,.3);background:#2a2a2a}
 /* ── bottom sheet ── */
 .scrim{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.5);opacity:0;transition:opacity .34s ease;pointer-events:none}
 .scrim.on{pointer-events:auto}
 .scrim.on{opacity:1}
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;max-height:86vh;overflow-y:auto;padding:8px 16px calc(var(--sb) + 16px);
-border-radius:16px 16px 0 0;background:#1c1c1e;transform:translateY(100%);overscroll-behavior:contain}
+border-top:1px solid #2a2a2a;border-radius:20px 20px 0 0;background:#0c0c0c;box-shadow:0 -12px 40px rgba(0,0,0,.6);
+transform:translateY(100%);overscroll-behavior:contain}
 .sheet.on{transform:none}
 .sheet:focus{outline:none}
-.grab{width:36px;height:5px;margin:0 auto 10px;border-radius:3px;background:var(--g3)}
-.sheet h2{margin:0 0 10px;font-size:20px;font-weight:700}
+.grab{width:36px;height:5px;margin:0 auto 12px;border-radius:3px;background:#3a3a3a}
+.sheet h2{margin:0 0 12px;font-size:20px;font-weight:700;letter-spacing:-.2px}
+.sheet .kv,.sheet .opt,.sheet .dvt,.mrr{border-bottom-color:#262626}
 .opt{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:48px;padding:0 4px;border:0;
 border-bottom:.5px solid var(--sep);background:none;font-size:17px;text-align:left}
-.opt .ck{color:var(--blue);font-weight:700}
+.opt .ck{color:var(--grn);font-weight:700}
 .fl{display:block;margin:12px 0 0}
-.fl span{display:block;margin:0 0 6px 4px;font-size:13px;color:var(--l2)}
-.fl select,.fl input{width:100%;height:44px;padding:0 12px;border:0;border-radius:10px;background:var(--g2);font-size:17px}
+.fl span{display:block;margin:0 0 8px;font-size:13.1px;font-weight:600}
+.fl select,.fl input{width:100%;height:44px;padding:0 14px;border:1px solid #2a2a2a;border-radius:12px;background:#141414;color:#fff;font-size:17px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .sheet .acts{display:flex;gap:10px;margin-top:18px}
 .sheet .acts .btn{flex:1}
@@ -183,7 +199,7 @@ border-bottom:.5px solid var(--sep);background:none;font-size:17px;text-align:le
 .lc .big{font-size:34px;font-weight:800;letter-spacing:-.02em}
 .lc .big i{font-style:normal;font-size:16px;font-weight:700;color:var(--l2);margin-right:4px}
 .stp{display:flex;gap:8px}
-.stp button{width:44px;height:44px;border:0;border-radius:22px;background:var(--g2);font-size:24px;font-weight:500;line-height:1}
+.stp button{width:44px;height:44px;border:1px solid rgba(255,255,255,.15);border-radius:22px;background:#141414;color:#fff;font-size:24px;font-weight:500;line-height:1}
 .bks{margin-top:12px;border-top:.5px solid var(--sep)}
 .bkr{display:grid;grid-template-columns:28px 1fr auto auto;align-items:center;gap:10px;min-height:52px;
 border-bottom:.5px solid var(--sep);font-size:15px}
@@ -217,27 +233,81 @@ svg.ch .vl{fill:var(--l1);font-size:12px;font-weight:800}
 svg.ch .dt{font-size:9px;letter-spacing:-.03em}
 svg.ch .ll{fill:#000;font-size:11px;font-weight:800}
 svg.ch g.br:focus{outline:none} svg.ch g.br:focus-visible rect{stroke:var(--blue);stroke-width:2}
-.fch{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.fch .pill{height:32px;background:var(--blue);font-size:13px}
-.fch .pill b{background:#fff;color:var(--blue)}
-.fch .x{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 10px 0 12px;border:0;border-radius:16px;
-background:rgba(10,132,255,.2);color:#64b0ff;font-size:13px;font-weight:600}
-.fch .x span{font-size:15px;opacity:.8}
 .rg{margin:16px 0 0}
-.rg-h{display:flex;justify-content:space-between;align-items:baseline;font-size:15px}
-.rg-h b{font-variant-numeric:tabular-nums}
-.dual,.dual2{touch-action:pan-y;-webkit-user-select:none;user-select:none;cursor:pointer}
-.dual{position:relative;height:36px;margin:2px 4px 0}
-.dual .trk,.dual .fil{position:absolute;top:16px;height:4px;border-radius:2px}
-.dual .trk{left:0;right:0;background:var(--g3)}
-.dual .fil{background:var(--blue)}
-.dual .th{position:absolute;top:4px;width:28px;height:28px;margin-left:-14px;border-radius:50%;background:#fff;
-box-shadow:0 2px 8px rgba(0,0,0,.45)}
+.rg-h{display:flex;justify-content:space-between;align-items:baseline;font-size:13.2px;font-weight:600}
+.rg-h b{font-size:12px;font-weight:500;color:#9a9a9a;font-variant-numeric:tabular-nums}
+.rg .dual2{margin-top:10px}
+.dual2{touch-action:pan-y;-webkit-user-select:none;user-select:none;cursor:pointer}
 .sg{margin:16px 0 0}
-.sg>span{display:block;margin:0 0 6px;font-size:15px}
+.sg>span{display:block;margin:0 0 8px;font-size:13.1px;font-weight:600}
 .sg .seg{margin:0}
-.fch .chip{height:32px;font-size:13px;background:var(--g2)}
-.fch .chip[aria-pressed="true"]{background:var(--blue);color:#fff}
+/* the With / Without sheet: a teammate a row, Any / With / W/O on the right */
+.mrr{display:flex;align-items:center;justify-content:space-between;gap:9px;min-height:58px;border-bottom:.5px solid var(--sep)}
+.mrn{flex:1;min-width:0}
+.av.mav{position:relative;left:auto;top:auto;flex:none;width:36px;height:36px}
+.av.mav .hs{left:-7px;top:1px;width:50px}
+.mrn b{display:block;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mrn small{display:block;margin-top:2px;font-size:12px;color:#9a9a9a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seg.mseg{flex:none;width:146px;height:34px;margin:0;padding:0 2.5px}
+.seg.mseg button{height:27px;border-radius:13.5px;font-size:12px}
+/* the Matchup page: a full page over the player's (the reference's measures, 402 pt wide) */
+#mp{z-index:32}
+.mpc{margin:6px 15.3px 0;padding:14px 14px 12px;border:1px solid #2a2a2a;border-radius:16px;background:linear-gradient(#171717,#111)}
+.mpg{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+.mpg b{display:block;font-size:17px;font-weight:700} .mpg span{display:block;margin-top:2px;font-size:13px;color:#9a9a9a}
+.mpc .kv{min-height:40px;font-size:14px;border-bottom-color:#262626}
+.mpft{display:flex;align-items:center;gap:10px;margin-top:10px;padding-top:12px;border-top:1px solid #262626}
+.mpft>div{flex:1} .mpft span{display:block;font-size:15px;color:#8e8e8e} .mpft b{display:block;margin-top:2px;font-size:17px;font-weight:500;color:#8e8e8e}
+.mpft .cb{background:#1c1c1c}
+.mpt{margin:40px 15.3px 0;font-size:21px;font-weight:700;letter-spacing:-.2px}
+.mpf{display:flex;align-items:center;gap:9px;margin:13px 15.3px 0;font-size:15.5px;font-weight:600;white-space:nowrap}
+.dd{position:relative;display:inline-flex;align-items:center;gap:9px;height:27.3px;padding:0 12px;border:1px solid rgba(255,255,255,.2);border-radius:14px;
+font-size:13.8px;font-weight:500}
+.dd svg{width:11px;height:7px}
+.dd select{position:absolute;inset:0;width:100%;height:100%;opacity:0;font-size:16px;-webkit-appearance:none;appearance:none}
+table.vs{width:100%;margin-top:10px;border-collapse:collapse;table-layout:fixed}
+.vs th{height:30px;padding:0;text-align:left;font-family:system-ui,-apple-system,"Roboto Condensed",sans-serif;font-stretch:66%;font-size:12.6px;
+font-weight:400;color:#9a9a9a;border-bottom:1px solid #343434}
+.vs td{height:42.8px;padding:0;font-size:15.4px;border-bottom:1px solid #343434;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vs th:first-child,.vs td:first-child{padding-left:15.3px}
+.vs td i{font-style:normal;font-size:12.5px;margin-right:4px;vertical-align:1px}
+.vs td.cd{font-size:13px;color:#9a9a9a} .vs td.cd b{font-weight:400;color:#e6e6e6}
+.vs tr[data-g]{cursor:pointer} .vs tr[data-g]:active td{background:#161616}
+.vsm{display:flex;align-items:center;gap:9px;height:26.6px;margin:20px auto 0;padding:0 13px;border:1px solid rgba(255,255,255,.2);border-radius:13.3px;
+background:none;color:#fff;font-size:13.8px;font-weight:500}
+.vsm svg{width:11px;height:7px;transition:transform .25s} .vsm[aria-expanded="true"] svg{transform:rotate(180deg)}
+.vsk{margin:12px 15.3px 0} .vsk .sk{height:34px;margin-bottom:8px}
+/* the box score sheet: one height whatever is in it, so it never resizes while it rises; a skeleton of the box's shape */
+.sheet[data-kind="box"]{height:86vh}
+.sheet[data-kind="box"] .seg{position:relative}
+.sheet[data-kind="box"] .seg button{position:relative;z-index:1;background:none}
+.sheet[data-kind="box"] .seg .pill2{background:#313131}
+.bxsk i,.bxsk b{display:block;border-radius:8px;background:linear-gradient(90deg,#141414,#1d1d1d,#141414);background-size:200% 100%;animation:sk 1.2s linear infinite}
+.bxsk i:nth-child(1){width:62%;height:30px;margin:2px auto 8px} .bxsk i:nth-child(2){width:34%;height:14px;margin:0 auto 14px}
+.bxsk i:nth-child(3){height:42px;border-radius:21px;margin-bottom:12px} .bxsk b{height:34px;margin-bottom:4px}
+/* the box score sheet: a team's players, the name column pinned while the stats scroll sideways */
+.bxh{display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px}
+.bxh img{width:26px;height:26px}
+.bxh span{font-size:24px;font-weight:700} .bxh span.lo{color:var(--l2)}
+.bxh i{font-style:normal;color:var(--l2)}
+.bxs{margin:4px 0 12px;text-align:center;font-size:13px;color:var(--l2)}
+.bxw{margin:12px 0 0;overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid #2a2a2a;border-radius:13px;background:#141414}
+table.bx{border-collapse:collapse;font-family:system-ui,-apple-system,"Roboto Condensed",sans-serif;font-stretch:66%;font-size:14.5px;
+font-variant-numeric:tabular-nums;white-space:nowrap;color:#cfcfcf}
+.bx th,.bx td{padding:8px 7px;text-align:right;border-bottom:.5px solid var(--sep)}
+.bx th{font-size:11.5px;font-weight:500;color:#9a9a9a;letter-spacing:.2px}
+.bx th:first-child,.bx td:first-child{position:sticky;left:0;z-index:1;max-width:142px;padding-left:12px;overflow:hidden;
+text-overflow:ellipsis;text-align:left;background:#141414;color:#fff;font-stretch:100%;font-size:14px}
+.bx th:last-child,.bx td:last-child{padding-right:12px}
+.bx th,.bx td{border-bottom-color:#262626} .bx tr:last-child td{border-bottom:0}
+.bx td.hi{color:#fff;font-weight:700} .bx th.hi{color:var(--grn)}
+.bx tr.me td{background:#262626;color:#fff;font-weight:700}
+.bx tr.bxd td{position:static;padding:12px 12px 4px;background:none;font-size:11.5px;font-weight:500;color:#9a9a9a}
+.bx tr.tot td{font-weight:700;color:#fff}
+.bxn{margin:10px 2px 0;font-size:13px;color:#9a9a9a;line-height:1.5}
+.bxn b{margin-right:6px;font-size:11.5px;color:var(--l1)}
+.sheet .acts.stk{position:sticky;bottom:calc(-16px - var(--sb));margin:0 -16px;padding:12px 16px calc(var(--sb) + 16px);background:#0c0c0c;
+box-shadow:0 -1px 0 #262626}
 .kv{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:44px;border-bottom:.5px solid var(--sep);
 font-size:15px}
 .kv:last-child{border-bottom:0}
@@ -308,10 +378,6 @@ transition:color .25s}
 width:94.4px;height:79.5px;padding:0;border:1px solid #2a2a2a;border-radius:13px;background:#131313;color:#fff;font-size:11.6px}
 .muc svg{margin:-4px 0 -2px}
 .c2w{position:relative;margin-top:11px;padding:0 15.3px;overflow-x:auto;scrollbar-width:none}
-.c2w .tip{position:absolute;z-index:2;padding:5px 9px;border-radius:9px;background:#2c2c2e;box-shadow:0 4px 14px rgba(0,0,0,.5);
-font-size:12px;line-height:15px;white-space:nowrap;pointer-events:none}
-.c2w .tip b{display:block;font-weight:600}
-svg.c2.pick g.br:not(.sel){opacity:.4}
 .c2w::-webkit-scrollbar{display:none}
 svg.c2{display:block}
 svg.c2 .ax{fill:#9a9a9a;font-size:14.5px}
@@ -387,6 +453,11 @@ text-align:left;font-variant-numeric:tabular-nums}
 .lr .best{color:var(--grn)} .lr .na{color:#5f5f5f}
 .lr .up{color:var(--grn)} .lr .dn{color:var(--red)} .lr .sm{color:#8e8e8e}
 .lk{border:0;background:none;color:#9a9a9a;font:inherit;font-size:11.5px;padding:0}
+.sst{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:2px 0 10px}
+.sst>div{padding:9px 10px;border:1px solid #2a2a2a;border-radius:13px;background:#141414}
+.sst b{display:block;font-size:17px;font-weight:700} .sst i{display:block;font-style:normal;font-size:11px;color:var(--l3)}
+.hl span{color:#bdbdbd;margin-left:auto}
+.cal{font-size:11.5px;font-weight:500;color:var(--l2)}
 .scr{display:grid;grid-template-columns:1fr 44px 70px 50px 64px;align-items:center;column-gap:6px;padding:9px 0;
 border-bottom:.5px solid var(--sep);font-size:13px}
 .scr b{display:block;font-weight:600;font-size:13.5px}
@@ -485,6 +556,7 @@ function windowed(logs, win, season, opp) {
 // player-page filters: home / starter = true, false or null (any); result = "W" / "L"; rest = "b2b" / "1" / "2+";
 // oppSets = [{season: [teams]}] (the opponent must be in each);
 // ranges = {min|fga|fg3a|fta|margin: [lo, hi]} inclusive (a game missing that stat is out); without = [{played, since, team}]
+// (his games for that team since the teammate's first there, the teammate out); with = [{played, team}] (both played)
 function filterLogs(logs, f) {
   f = f || {};
   return logs.filter(function (l) {
@@ -508,6 +580,10 @@ function filterLogs(logs, f) {
     for (var i = 0; i < (f.without || []).length; i++) {
       var w = f.without[i];
       if (l.team !== w.team || l.date < w.since || w.played.indexOf(l.gid) >= 0) return false;
+    }
+    for (var m = 0; m < (f.with || []).length; m++) {
+      var t = f.with[m];
+      if (l.team !== t.team || t.played.indexOf(l.gid) < 0) return false;
     }
     return true;
   });
@@ -675,14 +751,18 @@ let D = null, ERR = null, LOADING = true, CUR = null;
 // on a touchscreen, moving focus by script only draws a ring (and focusing a <select> can pop its picker)
 const TOUCH = matchMedia("(pointer: coarse)").matches;
 const ST = {date: null, gid: "all", market: "points", side: "over", q: "", sort: "hit10", dir: "desc", team: "all",
-            book: "all", lmin: "", lmax: "", omin: "", omax: "", view: "props"};
-const DT = {line: null, win: "l10", home: null, starter: null, result: null, rest: null, ranges: {}, without: {},
+            book: "all", lmin: "", lmax: "", omin: "", omax: "", watch: "", view: "props"};
+const DT = {line: null, win: "l10", home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, with: {},
             dvp: false, def: false, open: {}, more: false, fresh: null, ovs: []};
 const RANGES = [["min", "Minutes", "Minutes"], ["fga", "Field goal attempts", "FGA"], ["fg3a", "3-point attempts", "3PTA"],
-                ["fta", "Free throw attempts", "FTA"], ["usg", "Usage %", "Usage%"], ["margin", "Team margin", "Margin"]];
+                ["fta", "Free throw attempts", "FTA"], ["usg", "Usage %", "Usage%"], ["pot_ast", "Potential assists", "Potential Assists"],
+                ["reb_ch", "Rebound chances", "Rebound Chances"], ["margin", "Team margin", "Margin"]];
 // the range chips that also draw their stat on the chart, as white outline boxes (margin can be negative, so it only filters)
-const OVL = {min: "min", fga: "FGA", fg3a: "3PTA", fta: "FTA", usg: "usage %"};
-const MORE_R = ["fga", "fg3a", "fta", "usg", "margin"];          // the range chips behind More
+const OVL = {min: "min", fga: "FGA", fg3a: "3PTA", fta: "FTA", usg: "usage %", pot_ast: "potential assists", reb_ch: "rebound chances"};
+// tracking stats only on the props they bear on
+const RANGE_FOR = {pot_ast: ["assists", "pra", "pts_ast", "reb_ast"], reb_ch: ["rebounds", "pra", "pts_reb", "reb_ast"]};
+const forMarket = (k, m) => !RANGE_FOR[k] || RANGE_FOR[k].indexOf(m) >= 0;
+const MORE_R = ["margin"];                                        // the range chips behind More
 const SEGS = [["home", "Location", [[null, "Any"], [true, "Home"], [false, "Away"]]],
               ["starter", "Role", [[null, "Any"], [true, "Starter"], [false, "Bench"]]],
               ["result", "Result", [[null, "Any"], ["W", "Win"], ["L", "Loss"]]],
@@ -712,11 +792,14 @@ function hashState() {
   const h = new URLSearchParams();
   Object.keys(ST).forEach(k => { if (ST[k] !== "" && ST[k] !== null && ST[k] !== "all") h.set(k, ST[k]); });
   if (CUR) h.set("p", CUR);
+  if (MUP) h.set("mu", "1");
   return "#" + h.toString();
 }
 function readHash() {
   const h = new URLSearchParams(location.hash.slice(1));
   Object.keys(ST).forEach(k => { if (h.has(k)) ST[k] = h.get(k); });
+  if (ST.view === "watch") Object.assign(ST, {view: "props", watch: "1"});    // the old Watchlist tab, now a filter
+  if (["props", "markets", "injuries"].indexOf(ST.view) < 0) ST.view = "props";
   return h.get("p");
 }
 const save = () => history.replaceState(history.state, "", hashState());
@@ -734,11 +817,11 @@ function when(g) {
 }
 const vs = p => p.team ? (p.home ? "vs " : "@ ") + p.opp : "";
 // ── list ──
-const MKT_TABS = ["trends", "injury", "points", "assists", "rebounds", "threes", "pra", "pts_reb", "pts_ast", "reb_ast"];
-const ALL_TABS = ["trends", "injury"];          // tabs that span every market
+const MKT_TABS = ["trends", "points", "assists", "rebounds", "threes", "pra", "pts_reb", "pts_ast", "reb_ast"];
+const ALL_TABS = ["trends"];                    // tabs that span every market
 // Trends (nba_research_score.trend_side): the L10 and L20 hit rates both 1+ SD from what the price implies, the same
 // way, 8+ games each. A plain 70% L10 put a third of the slate in Trends and ignored the price.
-const VIEWS = [["props", "Props"], ["markets", "Markets"], ["watch", "Watchlist"]];
+const VIEWS = [["props", "Props"], ["markets", "Markets"], ["injuries", "Injuries"]];
 const unit = m => (D.markets || {})[m] || m;
 // long names shorten to an initial, as on the reference ("M. Diabaté")
 const nameOf = n => n.length > 13 && n.indexOf(" ") > 0 ? n[0] + ". " + n.slice(n.indexOf(" ") + 1) : n;
@@ -774,12 +857,12 @@ function projAt(p, line, side) {
   const pick = x => x === null ? null : side === "under" ? 1 - x : x;
   return {model: pick(cond), blend: pick(bo), push: q.push, raw: q};
 }
-// every hit-rate box: under 5 games a plain count; otherwise the rate, colored only when it sits 1+ SD from what
-// the price implies (fs; a coin flip without a price) — a 3-for-3 or a -300 favorite going 7-for-10 stays white
+// every hit-rate box: the rate; under 5 games grey (too few to color), otherwise colored only when it sits 1+ SD
+// from what the price implies (fs; a coin flip without a price) — a -300 favorite going 7-for-10 stays white
 function hbox(x, fs) {
   if (!x || !x.n) return {t: "–", c: ""};
   const h = hitsOf(x);
-  if (x.n < 5) return {t: h + "/" + x.n, c: "sm"};
+  if (x.n < 5) return {t: pct(x.rate), c: "sm"};
   const z = zscore(h, x.n, fs === null || fs === undefined ? .5 : fs);
   return {t: pct(x.rate), c: z >= 1 ? "up" : z <= -1 ? "dn" : ""};
 }
@@ -810,15 +893,13 @@ function availMarkets() {
   D.props.forEach(p => { const g = gameOf(p.gid); if (g && g.date === ST.date) m[p.market] = 1; });
   return ORDER.filter(k => m[k]);
 }
-function filtersOn() { return ["team", "book"].filter(k => ST[k] !== "all").length + ["lmin", "lmax", "omin", "omax"].filter(k => ST[k] !== "").length + (ST.side === "under" ? 1 : 0); }
+function filtersOn() { return ["team", "book"].filter(k => ST[k] !== "all").length + ["lmin", "lmax", "omin", "omax", "watch"].filter(k => ST[k] !== "").length + (ST.side === "under" ? 1 : 0); }
 function listProps() {
-  const st = Object.assign({}, ST, {market: ALL_TABS.indexOf(ST.market) >= 0 || ST.view === "watch" ? "all" : ST.market});
+  const st = Object.assign({}, ST, {market: ALL_TABS.indexOf(ST.market) >= 0 ? "all" : ST.market});
   let list = filterProps(D.props, st, gameOf, logsOf);
-  if (ST.view === "watch") { const f = favs(); return sortProps(list.filter(p => f.indexOf(p.pid) >= 0 && (ALL_TABS.indexOf(ST.market) >= 0 || p.market === ST.market)), ST.sort, ST.dir, logsOf, ST.side, D.season); }
-  // Trends: strongest first. Injuries: the without-teammate split furthest from the price first (thin samples last)
+  if (ST.watch) { const f = favs(); list = list.filter(p => f.indexOf(p.pid) >= 0); }
+  // Trends: strongest first
   if (ST.market === "trends") return list.map(p => [p, trend(p)]).filter(x => x[1] && x[1].side === ST.side).sort((a, b) => b[1].z - a[1].z).map(x => x[0]);
-  if (ST.market === "injury") return list.filter(p => p.main !== null && freshOut(p).length).map(p => [p, woSplit(p, freshOut(p)[0], ST.side).z])
-    .sort((a, b) => (b[1] === null ? -99 : b[1]) - (a[1] === null ? -99 : a[1])).map(x => x[0]);
   return sortProps(list, ST.sort, ST.dir, logsOf, ST.side, D.season);
 }
 function row(p) {
@@ -854,9 +935,9 @@ function mrow(p) {
 function banners() {
   const out = [], b = D.sources.books;
   [["fd", "FanDuel"], ["dk", "DraftKings"]].forEach(([k, n]) => {
-    if (b[k] && b[k].stale) out.push(`${n} prices are ${Math.round(b[k].age_min)} min old.`);
+    if (b[k] && b[k].stale) out.push(`${n} prices ${Math.round(b[k].age_min)} min old`);
   });
-  if ((Date.now() - iso(D.generated_at).getTime()) / 60000 > 10) out.push("This page hasn't refreshed for a while — the prop feed may be down.");
+  if ((Date.now() - iso(D.generated_at).getTime()) / 60000 > 10) out.push("Feed delayed");
   return out.map(t => `<div class="ban" role="status">${esc(t)}</div>`).join("");
 }
 function topRow() {
@@ -908,15 +989,17 @@ function render() {
   tabbar();
 }
 function renderList() {
-  const lst = $("#lst"), onDate = D.props.filter(p => (gameOf(p.gid) || {}).date === ST.date), list = listProps();
+  const lst = $("#lst"), ml = $(".ml");
+  if (ml) ml.style.display = ST.view === "injuries" ? "none" : "";
+  if (ST.view === "injuries") { lst.innerHTML = injView(); return; }
+  const onDate = D.props.filter(p => (gameOf(p.gid) || {}).date === ST.date), list = listProps();
   let body = null;
-  if (!D.games.some(g => g.date === ST.date)) body = '<div class="empty"><b>No games</b>There are no NBA games on this day.</div>';
-  else if (!onDate.length) body = '<div class="empty"><b>No props yet</b>The books usually post player props on game day.</div>';
-  else if (ST.gid !== "all" && !onDate.some(p => p.gid === ST.gid)) body = '<div class="empty"><b>No props for this game yet</b>Check back closer to tip.</div>';
-  else if (!list.length) body = ST.view === "watch" ? '<div class="empty"><b>Nothing on your watchlist</b>Tap ☆ on a player\'s page to follow him here.</div>'
-    : ST.market === "trends" ? `<div class="empty"><b>No trends</b>No ${ST.side} whose last 10 and last 20 both beat what the price implies, with these filters.</div>`
-    : ST.market === "injury" ? '<div class="empty"><b>No new absences</b>No rotation player who played in his team\'s last 2 games is Out or Doubtful tonight.</div>'
-    : '<div class="empty"><b>No matches</b>Nothing fits these filters.<br><button class="btn" id="reset2">Reset filters</button></div>';
+  if (!D.games.some(g => g.date === ST.date)) body = '<div class="empty"><b>No games</b></div>';
+  else if (!onDate.length) body = '<div class="empty"><b>No props yet</b></div>';
+  else if (ST.gid !== "all" && !onDate.some(p => p.gid === ST.gid)) body = '<div class="empty"><b>No props for this game yet</b></div>';
+  else if (!list.length) body = ST.watch ? '<div class="empty"><b>Watchlist empty</b><button class="btn" id="reset2">Reset filters</button></div>'
+    : ST.market === "trends" ? '<div class="empty"><b>No trends</b></div>'
+    : '<div class="empty"><b>No matches</b><button class="btn" id="reset2">Reset filters</button></div>';
   if (body) { lst.innerHTML = body; const r2 = $("#reset2"); if (r2) r2.onclick = resetFilters; return; }
   if (ST.view === "markets") {
     lst.innerHTML = '<div class="mhd"><span>PLAYER</span><span>FANDUEL</span><span>DRAFTKINGS</span></div>' + list.map(mrow).join("");
@@ -927,7 +1010,7 @@ function renderList() {
   if (ALL_TABS.indexOf(ST.market) >= 0) {
     const h = document.createElement("div");
     h.className = "lhd";
-    h.innerHTML = `<span>${ST.market === "trends" ? `${ST.side === "under" ? "Unders" : "Overs"} whose L10 and L20 both beat the price` : "A teammate who just played is out tonight"}</span><button class="lk" id="scb">Scorecard ›</button>`;
+    h.innerHTML = `<span>${list.length} props</span><button class="lk" id="scb">Scorecard ›</button>`;
     $("#scb", h).onclick = scoreSheet;
     frag.appendChild(h);
   }
@@ -938,6 +1021,62 @@ function renderList() {
     frag.appendChild(e);
   });
   lst.replaceChildren(frag);
+}
+// ── injuries: the slate's listed rotation players (10+ minutes a game; Out, Doubtful, Questionable), most relevant
+// first. Boxes, from the games he missed for his team (nba_research.injury_report): for a starter, who started in his
+// place (or by position, with no such games); then the teammates who gained the most minutes a game without him.
+const INJ_C = {Out: "to", Doubtful: "to", Questionable: "tq"};
+const INJ_S = {Out: "OUT", Doubtful: "DOUBT", Questionable: "Q"};
+const INJ_P = {Out: 1, Doubtful: .9, Questionable: .4};          // the chance he sits, until the report has a record
+const injReason = r => String(r || "").replace(/^Injury\/Illness\s*-\s*/i, "").replace(/^G League\s*-\s*/i, "G League · ").replace(/;\s*/g, " ");
+const injRot = e => e.mpg !== null && e.mpg >= 10;
+function injSits(status) {                       // how often players listed so have sat since 10/22 (proj_meta.availability)
+  const a = ((D.proj_meta || {}).availability || {})[status];
+  return status === "Out" ? 1 : a && a[1] >= 10 ? 1 - (a[0] + 1) / (a[1] + 2) : INJ_P[status] || 0;
+}
+// relevance: minutes a game x the chance he sits, halved when he has no game this season (the team is used to it)
+const injImpact = e => (e.mpg || 0) * injSits(e.status) * (e.season === D.season ? 1 : .5);
+function injList() {
+  const q = ST.q.trim().toLowerCase(), out = [];
+  D.games.filter(g => g.date === ST.date && (ST.gid === "all" || g.gid === ST.gid)).forEach(g => [g.away, g.home].forEach(t => {
+    if (ST.team !== "all" && t !== ST.team) return;
+    (((D.inj_report || {})[g.date + "|" + t] || {}).players || []).forEach(e => {
+      if (!injRot(e) || !INJ_P[e.status]) return;
+      const names = [e.name].concat(e.minutes.map(m => m.name), e.starts ? [e.starts.name] : []);
+      if (q && t.toLowerCase() !== q && !names.some(n => n.toLowerCase().indexOf(q) >= 0)) return;
+      out.push(Object.assign({team: t}, e));
+    });
+  }));
+  return out.sort((a, b) => injImpact(b) - injImpact(a));
+}
+function injProp(pid) {                          // tonight's prop for a teammate in a box, points first
+  return D.props.filter(p => p.pid === pid && (gameOf(p.gid) || {}).date === ST.date)
+    .sort((a, b) => ORDER.indexOf(a.market) - ORDER.indexOf(b.market))[0] || null;
+}
+// a box: the teammate on top, what he took below (a start, from k of n games or "?" by position; or minutes a game)
+function injBox(m, val, cls) {
+  const p = injProp(m.pid), tag = p ? "button" : "div";
+  return `<${tag} class="ijb"${p ? ` data-id="${esc(p.id)}"` : ""}><i>${esc(m.name)}</i><b class="${cls}">${val}</b></${tag}>`;
+}
+function injRow(e) {
+  const bx = [], s = e.starts;
+  if (s) bx.push(injBox(s, s.how === "games" ? `Starts <small>${s.k}/${s.n}</small>` : "Starts?", s.how === "games" ? "" : "sm"));
+  e.minutes.filter(m => !s || m.pid !== s.pid).forEach(m => bx.push(injBox(m, "+" + m.gain.toFixed(1), "up")));   // one box a player
+  const tags = `<span class="tg ${INJ_C[e.status]}">${INJ_S[e.status]}</span>${e.fresh ? '<span class="tg tf">NEW</span>' : ""}`;
+  return `<div class="pr ir${bx.length ? "" : " ir0"}"><span class="av">${head(e.pid)}</span>
+    <div class="who"><div class="nm">${esc(nameOf(e.name))}<span class="cd">${esc(e.team)}</span>${tags}</div>
+    <div class="lin">${e.starter ? "Starter" : "Bench"}${e.reason ? " · " + esc(injReason(e.reason)) : ""}</div></div>
+    <div class="oc o"><i>${e.season && e.season !== D.season ? "MPG " + esc(e.season.slice(2)) : "MPG"}</i><b class="num">${e.mpg.toFixed(1)}</b></div>
+    <div class="oc e"><i>MISSED</i><b class="num">${e.missed}</b></div>
+    ${bx.length ? `<div class="bx4">${bx.slice(0, 4).join("")}</div>` : ""}</div>`;
+}
+function injView() {
+  if (!D.games.some(g => g.date === ST.date)) return '<div class="empty"><b>No games</b></div>';
+  const rep = (D.sources.report || {})[ST.date];
+  if (!rep) return '<div class="empty"><b>No injury report yet</b></div>';
+  const list = injList();
+  return `<div class="lhd"><span>${list.length} players</span><span>Report ${esc(mt(rep.published, true))}</span></div>` +
+    (list.length ? list.map(injRow).join("") : '<div class="empty"><b>No injuries</b></div>');
 }
 function tabbar() {
   const tb = $("#tb"), fo = filtersOn();
@@ -962,7 +1101,7 @@ function bindHead() {
   $$("[data-gid]").forEach(b => b.onclick = () => { ST.gid = ST.gid === b.dataset.gid ? "all" : b.dataset.gid; save(); press("[data-gid]", x => x.dataset.gid === ST.gid); renderList(); });
   $("#dayb").onclick = daySheet;
 }
-function resetFilters() { Object.assign(ST, {team: "all", book: "all", lmin: "", lmax: "", omin: "", omax: "", q: "", gid: "all"}); const q = $("#q"); if (q) { q.value = ""; q.closest(".sx").classList.remove("has"); $("#qx").hidden = true; } save(); render(); }
+function resetFilters() { Object.assign(ST, {team: "all", book: "all", lmin: "", lmax: "", omin: "", omax: "", watch: "", q: "", gid: "all"}); const q = $("#q"); if (q) { q.value = ""; q.closest(".sx").classList.remove("has"); $("#qx").hidden = true; } save(); render(); }
 // ── sheets ──
 let SHEET_FOCUS = null, SHEET_T = null, SHEET_N = 0;
 function openSheet(html, bind) {
@@ -1028,6 +1167,7 @@ function filterSheet() {
   const opt = (v, lab, cur) => `<option value="${v}"${v === cur ? " selected" : ""}>${esc(lab)}</option>`;
   openSheet(`<h2 id="sht">Sort &amp; filter</h2>
     <div class="sg"><span>Side</span><div class="seg" role="group" aria-label="Side"><button data-sd="over" aria-pressed="${dr.side === "over"}">Over</button><button data-sd="under" aria-pressed="${dr.side === "under"}">Under</button></div></div>
+    <div class="sg"><span>Show</span><div class="seg" role="group" aria-label="Show"><button data-wl="" aria-pressed="${!dr.watch}">All</button><button data-wl="1" aria-pressed="${!!dr.watch}">${ICON.star}Watchlist</button></div></div>
     <div class="sg"><span>Sort by</span><div class="chips">${SORTS.map(([k, lab]) => `<button class="chip" data-sort="${k}" aria-pressed="${k === dr.sort}">${lab.replace(" hit rate", "").replace("Head-to-head", "H2H")}<span class="ar">${k === dr.sort ? (dr.dir === "desc" ? " ↓" : " ↑") : ""}</span></button>`).join("")}</div></div>
     <label class="fl"><span>Team</span><select id="f-team">${opt("all", "All teams", dr.team)}${Object.keys(teams).sort().map(t => opt(t, t, dr.team)).join("")}</select></label>
     <label class="fl"><span>Sportsbook</span><select id="f-book">${opt("all", "FanDuel and DraftKings", dr.book)}${opt("fd", "FanDuel", dr.book)}${opt("dk", "DraftKings", dr.book)}</select></label>
@@ -1035,18 +1175,18 @@ function filterSheet() {
     <label class="fl"><span>Line to</span><input id="f-lmax" type="number" inputmode="decimal" step="0.5" value="${esc(dr.lmax)}"></label></div>
     <div class="two"><label class="fl"><span>Odds from</span><input id="f-omin" type="number" inputmode="numeric" placeholder="-200" value="${esc(dr.omin)}"></label>
     <label class="fl"><span>Odds to</span><input id="f-omax" type="number" inputmode="numeric" placeholder="+150" value="${esc(dr.omax)}"></label></div>
-    <div class="note">Hit rates, odds and AVG (the last-10 average) are for the chosen side at each prop's main line. Tap the chosen sort again to flip it.</div>
-    <div class="acts"><button class="btn" id="f-reset">Reset</button><button class="btn pri" id="f-ok"></button></div>`, s => {
+    <div class="acts stk"><button class="btn" id="f-reset">Reset</button><button class="btn pri" id="f-ok"></button></div>`, s => {
     const read = () => { dr.team = $("#f-team", s).value; dr.book = $("#f-book", s).value; ["lmin", "lmax", "omin", "omax"].forEach(k => dr[k] = $("#f-" + k, s).value); };
-    const upd = () => { read(); const n = sortProps(filterProps(D.props, Object.assign({}, dr, {market: dr.market === "trends" ? "all" : dr.market}), gameOf, logsOf), dr.sort, dr.dir, logsOf, dr.side, D.season).length; $("#f-ok", s).textContent = ST.market === "trends" ? "Apply" : `Show ${n} prop${n === 1 ? "" : "s"}`; };
+    const upd = () => { read(); const f = favs(), n = sortProps(filterProps(D.props, Object.assign({}, dr, {market: dr.market === "trends" ? "all" : dr.market}), gameOf, logsOf).filter(p => !dr.watch || f.indexOf(p.pid) >= 0), dr.sort, dr.dir, logsOf, dr.side, D.season).length; $("#f-ok", s).textContent = ST.market === "trends" ? "Apply" : `Show ${n} prop${n === 1 ? "" : "s"}`; };
     $$("[data-sd]", s).forEach(b => b.onclick = () => { dr.side = b.dataset.sd; press("[data-sd]", x => x === b, s); upd(); });
+    $$("[data-wl]", s).forEach(b => b.onclick = () => { dr.watch = b.dataset.wl; press("[data-wl]", x => x === b, s); upd(); });
     $$("[data-sort]", s).forEach(b => b.onclick = () => {
       const k = b.dataset.sort;
       if (k === dr.sort) dr.dir = dr.dir === "desc" ? "asc" : "desc"; else { dr.sort = k; dr.dir = k === "player" || k === "line" ? "asc" : "desc"; }
       press("[data-sort]", x => x.dataset.sort === dr.sort, s); $$("[data-sort] .ar", s).forEach(a => a.textContent = a.parentNode.dataset.sort === dr.sort ? (dr.dir === "desc" ? " ↓" : " ↑") : "");
     });
     $$("select,input", s).forEach(e => e.onchange = e.oninput = upd);
-    $("#f-ok", s).onclick = () => { read(); Object.assign(ST, {side: dr.side, sort: dr.sort, dir: dr.dir, team: dr.team, book: dr.book, lmin: dr.lmin, lmax: dr.lmax, omin: dr.omin, omax: dr.omax}); save(); closeSheet(); renderList(); tabbar(); };
+    $("#f-ok", s).onclick = () => { read(); Object.assign(ST, {side: dr.side, sort: dr.sort, dir: dr.dir, team: dr.team, book: dr.book, lmin: dr.lmin, lmax: dr.lmax, omin: dr.omin, omax: dr.omax, watch: dr.watch}); save(); closeSheet(); renderList(); tabbar(); };
     $("#f-reset", s).onclick = () => { Object.assign(ST, {side: "over", sort: "hit10", dir: "desc"}); closeSheet(); resetFilters(); };
     upd();
   });
@@ -1061,19 +1201,18 @@ function daySheet() {
 }
 // what the nightly replay (nba_research_score.py) found: each of the page's signals against what the price said
 function scoreSheet() {
-  openSheet('<h2 id="sht">Scorecard</h2><div class="note" style="font-size:14px">Loading…</div>', () => {});
+  openSheet('<h2 id="sht">Scorecard <span class="tg tf">NOT A BET</span></h2><div class="note" style="font-size:14px">Loading…</div>', () => {});
   const s = $("#sheet"), n = SHEET_N;
   s.dataset.kind = "score";
-  const fill = html => { if (SHEET_N === n && !s.hidden) { s.innerHTML = '<div class="grab" aria-hidden="true"></div><h2 id="sht">Scorecard</h2>' + html; const d = $("#sc-ok", s); if (d) d.onclick = closeSheet; } };
+  const fill = html => { if (SHEET_N === n && !s.hidden) { s.innerHTML = '<div class="grab" aria-hidden="true"></div><h2 id="sht">Scorecard <span class="tg tf">NOT A BET</span></h2>' + html; const d = $("#sc-ok", s); if (d) d.onclick = closeSheet; } };
   const pc = x => (x * 100).toFixed(1) + "%";
   fetch("nba_research_score.json?t=" + Date.now(), {cache: "no-store"}).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }).then(j => {
-    if (!j.props) { fill('<div class="note" style="font-size:14px">No finished games with prices yet.</div><div class="acts"><button class="btn pri" id="sc-ok">Done</button></div>'); return; }
+    if (!j.props) { fill('<div class="empty"><b>No graded games yet</b></div><div class="acts"><button class="btn pri" id="sc-ok">Done</button></div>'); return; }
     const b = j.brier || {};
-    const rows = j.signals.map(x => `<div class="scr"><div><b>${esc(x.signal)}</b><span>${esc(x.rule)}</span></div><div class="num">${x.n ? `${x.n}<span>picks</span>` : "–"}</div><div class="num">${x.n ? `${pc(x.rate)}<span>vs ${pc(x.implied)}</span>` : "–"}</div><div class="num ${x.roi > 0 ? "up" : x.roi < 0 ? "mu" : ""}">${x.n ? (x.roi > 0 ? "+" : "") + pc(x.roi) : "–"}</div><div><i class="vd ${x.verdict === "helps" ? "g" : x.verdict === "hurts" ? "r" : ""}">${esc(x.verdict)}</i></div></div>`).join("");
-    fill(`<div class="note" style="font-size:14px;color:var(--l2)">${j.props.toLocaleString()} props over ${j.nights} night${j.nights === 1 ? "" : "s"} (${esc(j.from)} to ${esc(j.to)}), each as this page would have shown it before tip, graded on the result.</div>
+    const rows = j.signals.map(x => `<div class="scr"><div><b>${esc(x.signal)}</b></div><div class="num">${x.n ? `${x.n}<span>picks</span>` : "–"}</div><div class="num">${x.n ? `${pc(x.rate)}<span>vs ${pc(x.implied)}</span>` : "–"}</div><div class="num ${x.roi > 0 ? "up" : x.roi < 0 ? "mu" : ""}">${x.n ? (x.roi > 0 ? "+" : "") + pc(x.roi) : "–"}</div><div><i class="vd ${x.verdict === "helps" ? "g" : x.verdict === "hurts" ? "r" : ""}">${esc(x.verdict)}</i></div></div>`).join("");
+    fill(`<div class="sst"><div><b class="num">${j.props.toLocaleString()}</b><i>props</i></div><div><b class="num">${j.nights}</b><i>nights</i></div><div><b class="num">${esc(j.from.slice(5).replace("-", "/"))}–${esc(j.to.slice(5).replace("-", "/"))}</b><i>graded</i></div></div>
       <div class="scr hd"><div>Signal</div><div>Picks</div><div>Won vs price</div><div>Return</div><div></div></div>${rows}
-      <div class="note">Accuracy as a probability (lower is better): the price ${b["price (no-vig)"]}, the L10 hit rate ${b["L10 hit rate"]}, a coin flip ${b["coin flip"]}. A hit rate is not a probability; the price already knows most of it.</div>
-      <div class="note">Won vs price: how often the pick won, against how often the price said it would. Return: per $1 at the best closing price. "Helps" = beat the price by 2+ standard errors over 100+ picks; props from the same game move together, so that is a loose bar. Updated nightly.</div>
+      <div class="sg"><span>Accuracy · lower is better</span></div><div class="kv"><span>Price</span><b class="num">${b["price (no-vig)"]}</b></div><div class="kv"><span>L10 hit rate</span><b class="num">${b["L10 hit rate"]}</b></div><div class="kv"><span>Coin flip</span><b class="num">${b["coin flip"]}</b></div>
       <div class="acts"><button class="btn pri" id="sc-ok">Done</button></div>`);
   }).catch(e => fill(`<div class="note" style="font-size:14px">Couldn't load the scorecard (${esc(e.message || e)}).</div><div class="acts"><button class="btn pri" id="sc-ok">Done</button></div>`));
 }
@@ -1082,12 +1221,12 @@ function leagueSheet() {
   openSheet(`<h2 id="sht">Pickz</h2><div class="kv"><span>League</span><b>NBA ✓</b></div>
     <div class="kv"><span>Props updated</span><b id="upd">${ago(D.generated_at)}</b></div>
     <div class="kv"><span>FanDuel prices</span><b>${bk("fd")}</b></div><div class="kv"><span>DraftKings prices</span><b>${bk("dk")}</b></div>
-    <button class="opt" id="lg-sc">Scorecard: what has predicted anything<span class="ck">›</span></button>
+    <button class="opt" id="lg-sc">Scorecard<span class="ck">›</span></button>
     ${(() => { const M = D.proj_meta || {}, c = M.coverage || {};
       return `<div class="kv"><span>Projection model</span><b>${M.error ? esc(M.error) : `${esc(M.version || "")} · ${c.projected || 0}/${c.props || 0} props${M.stale ? ' · <span class="tg tq">STALE</span>' : ""}${M.refresh_pending ? " · updating" : ""}`}</b></div>
         <div class="kv"><span>Box scores through</span><b>${esc(M.logs_through || "—")}</b></div>
+        <div class="kv"><span>Picks or bets</span><b><span class="tg tf" style="margin:0">NONE · RESEARCH ONLY</span></b></div>
         <button class="opt" id="lg-pj">Model scorecard: held-out test and forward record<span class="ck">›</span></button>`; })()}
-    <div class="note">Research only — history, matchups and prices. Nothing here is a pick or a bet.</div>
     <div class="acts"><a class="btn" href="index.html" style="display:flex;align-items:center;justify-content:center;text-decoration:none">Back to Pickz</a><button class="btn pri" id="lg-ok">Done</button></div>`, s => { $("#lg-ok", s).onclick = closeSheet; $("#lg-sc", s).onclick = scoreSheet; $("#lg-pj", s).onclick = projScoreSheet; });
 }
 function dvpSheet(grp, mkt) {
@@ -1101,8 +1240,7 @@ function dvpSheet(grp, mkt) {
   const html = `<h2 id="sht">Defense vs Position</h2>
     <div class="seg" role="group" aria-label="Position">${[["G", "Guards"], ["F", "Forwards"], ["C", "Centers"]].map(([k, l]) => `<button data-dg="${k}" aria-pressed="${k === grp}">${l}</button>`).join("")}</div>
     <div class="chips">${mks.map(m => `<button class="chip" data-dm="${m}" aria-pressed="${m === mkt}">${TAB[m]}</button>`).join("")}</div>
-    <div class="note" style="margin:10px 0 4px">What each defense allows ${GRPN[grp]} in ${esc((NAME[mkt] || "").toLowerCase())} per possession this season, before tonight. 30th = allows the most (best for overs); 1st = the toughest.</div>
-    ${rows || '<div class="empty">No games yet this season.</div>'}<div class="acts"><button class="btn pri" id="dv-ok">Done</button></div>`;
+    ${rows || '<div class="empty"><b>No games</b></div>'}<div class="acts"><button class="btn pri" id="dv-ok">Done</button></div>`;
   const bind = s => {
     $$("[data-dg]", s).forEach(b => b.onclick = () => redraw(b.dataset.dg, mkt));
     $$("[data-dm]", s).forEach(b => b.onclick = () => redraw(grp, b.dataset.dm));
@@ -1123,8 +1261,9 @@ function openProp(id, push) {
   if (!p) return;
   const fresh = CUR !== id, was = !!CUR;
   CUR = id;
-  if (fresh) Object.assign(DT, {line: p.main !== null ? p.main : allLines(p)[0], win: "l10", home: null, starter: null,
-                                 result: null, rest: null, ranges: {}, without: {}, dvp: false, def: false, open: {}, more: false, fresh: null, ovs: []});
+  if (fresh) Object.assign(DT, {line: p.main !== null ? p.main : allLines(p)[0],
+                                 win: windowed(logsOf(p), "season", D.season).length ? "season" : "l10", home: null, starter: null,
+                                 result: null, rest: null, ranges: {}, without: {}, with: {}, dvp: false, def: false, open: {}, more: false, fresh: null, ovs: []});
   if (push !== false) history.pushState({p: id}, "", hashState());
   const pg = $("#pg");
   pg.hidden = false;                        // (off-screen until it slides in; it must lay out for the pills to measure)
@@ -1167,7 +1306,7 @@ const TEAMS = {ATL: ["Atlanta Hawks", "#C8102E"], BOS: ["Boston Celtics", "#007A
 const POSN = {PG: "Point Guard", SG: "Shooting Guard", SF: "Small Forward", PF: "Power Forward", C: "Center", G: "Guard",
   F: "Forward", "G-F": "Guard-Forward", "F-G": "Forward-Guard", "F-C": "Forward-Center", "C-F": "Center-Forward"};
 const TAB_ORDER = ["points", "assists", "rebounds", "threes", "pts_ast", "pts_reb", "reb_ast", "pra"];
-const TAB = {trends: "Trends", injury: "Injuries", points: "Points", rebounds: "Rebs", assists: "Assists", threes: "3PTM", pra: "PRA", pts_reb: "P+R", pts_ast: "P+A", reb_ast: "R+A"};
+const TAB = {trends: "Trends", points: "Points", rebounds: "Rebs", assists: "Assists", threes: "3PTM", pra: "PRA", pts_reb: "P+R", pts_ast: "P+A", reb_ast: "R+A"};
 const GRPN = {G: "guards", F: "forwards", C: "centers"};
 const ICON = {
   back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
@@ -1179,7 +1318,10 @@ const ICON = {
   search: '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="7.5" cy="7.5" r="5.5"/><path d="m12 12 4.5 4.5"/></svg>',
   props: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8.5 5.5H21M8.5 12H21M8.5 18.5H21"/><circle cx="3.6" cy="5.5" r=".6" fill="currentColor"/><circle cx="3.6" cy="12" r=".6" fill="currentColor"/><circle cx="3.6" cy="18.5" r=".6" fill="currentColor"/></svg>',
   markets: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2.5v19h19"/><path d="m5.5 16 4-6.5 4.5 4 6-7.5"/><circle cx="9.5" cy="9.5" r="1.3" fill="currentColor"/><circle cx="14" cy="13.5" r="1.3" fill="currentColor"/><circle cx="20" cy="6" r="1.3" fill="currentColor"/></svg>',
-  watch: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="m12 2.5 2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9L12 2.5Z"/></svg>',
+  people: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9" r="2.6"/><path d="M15.8 14.2c2.6-.3 4.3 1.3 4.8 4.3"/></svg>',
+  injuries: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.5" y="2.5" width="19" height="19" rx="5"/><path d="M10 6.5h4V10h3.5v4H14v3.5h-4V14H6.5v-4H10z"/></svg>',
+  ham: '<svg viewBox="0 0 22 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M2 2.5h18M2 8h18M2 13.5h18"/></svg>',
+  info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 10.5v8"/><circle cx="12" cy="6.2" r=".9" fill="currentColor" stroke="none"/></svg>',
   down: '<svg viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m2 2 4 4 4-4"/></svg>'};
 const favs = () => { try { return JSON.parse(localStorage.getItem("pickz_fav") || "[]"); } catch (e) { return []; } };
 function toggleFav(pid) {
@@ -1235,8 +1377,7 @@ function chart2(logs, market, line, ov, grow) {
     const d = iso(l.date + "T12:00:00Z").toLocaleDateString("en-US", {month: "numeric", day: "numeric", timeZone: "UTC"});
     const ovTxt = ov && num(m) ? `, ${r1(m)} ${oname}` : "";
     const desc = `${d} ${l.home ? "vs" : "at"} ${l.opp}: ${v === null ? "no value" : v} ${short(market)}${ovTxt || ` in ${l.min} minutes`}, ${res} ${line}`;
-    const tip = `${d} ${l.home ? "vs " : "@"}${l.opp}|${v === null ? "—" : v} ${short(market)} · ${ov ? (num(m) ? r1(m) : "—") + " " + oname : (num(l.min) ? r1(l.min) : "—") + " min"}`;
-    let g = `<g class="br" tabindex="0" role="img" aria-label="${esc(desc)}" data-tip="${esc(tip)}" style="--d:${Math.min(i, 19) * 14}ms"><title>${esc(desc)}</title>`;
+    let g = `<g class="br" tabindex="0" role="button" aria-label="${esc(desc)}, box score" data-gid="${esc(l.gid)}" data-tm="${esc(l.team)}" style="--d:${Math.min(i, 19) * 14}ms"><title>${esc(desc)}</title>`;
     const hv = v !== null && v > 0 ? B - y(v) : 0;
     if (hv) g += `<rect class="bv" x="${x}" y="${y(v)}" width="${w}" height="${hv}" fill="${fill}"/>`;
     // the stat's label: inside the bar's foot when it fits, else just above the bar
@@ -1277,14 +1418,14 @@ function ladder(p, win, side, cur, winLab) {
     return `<button class="lr${L === cur ? " on" : ""}" data-ll="${L}" aria-pressed="${L === cur}"><span>${L}</span><span class="${h.c}">${h.t}</span><span class="fv">${fs === null ? "—" : american(1 / fs)}</span><span class="mo">${mo}</span>${px("fd")}${px("dk")}</button>`;
   }).join("");
   return `<div class="ldr"><div class="lh2"><span>LINE</span><span>HIT ${esc(winLab)}</span><span>FAIR</span><span>MODEL</span><span>FD</span><span>DK</span></div>${rows}</div>
-    <div class="note">MODEL = the projection's own chance of the ${side} at each rung (model alone, which runs overconfident against book lines; the Model Projection card shows it blended with the price at the selected line). Fair only where a book prices both sides. On one-sided rungs (alt ladders) the HIT color compares with the price's own implied chance, margin included.</div>`;
+`;
 }
 // the projection engine's card: a model estimate, kept apart from the book prices and never a pick
 const STATN = {pts: "Points", reb: "Rebounds", ast: "Assists", fg3m: "3-pointers"};
 function projCard(p, line, side) {
   const M = D.proj_meta || {}, pr = p.proj, unit_ = esc(short(p.market));
-  const head = `<h3>Model Projection <span class="tg tf" style="margin-left:6px">MODEL ESTIMATE · NOT A BET</span></h3>`;
-  if (M.error || !pr) return head + `<div class="box0 pj"><div class="note" style="margin:0">${esc(M.error || "Not projected yet. The projection job runs every 30 minutes and adds new board players.")}</div></div>`;
+  const head = `<h3>Model Projection <span class="tg tf" style="margin-left:6px">MODEL ESTIMATE · NOT A BET</span>${M.stale ? ' <span class="tg tq">STALE</span>' : ""}</h3>`;
+  if (M.error || !pr) return head + `<div class="box0 pj"><div class="note" style="margin:0">${esc(M.error ? "Unavailable" : "Not projected yet")}</div></div>`;
   const at = projAt(p, line, side), sd = side === "under" ? "Under" : "Over";
   // the pmf as bars, the selected line marked
   const vals = pr.pmf[1], start = pr.pmf[0], mx = Math.max(...vals), W = Math.min(window.innerWidth, 520) - 56, H = 54;
@@ -1302,56 +1443,51 @@ function projCard(p, line, side) {
     Minutes: ${(+I.min).toFixed(1)} recent, pulled toward his 60-game level${xf(ha, I.min_f.home)}${xf("back-to-back", I.min_f.b2b)} → μ ${(+I.mu.min).toFixed(1)}<br>
     ${(MARKET_PARTS[p.market] || []).filter(k => I[k]).map(k => `${esc(STATN[k] || k)}: ${(+I.min).toFixed(1)} min × ${(+I[k][0]).toFixed(3)} per min (his rate, pooled with ${GRPN_[I.group] || "his position"})${xf("opponent", I[k][1])}${xf("pace", I[k][2])}${xf(ha, I[k][3])}${xf("back-to-back", I[k][4])} → μ ${(+I.mu[k]).toFixed(1)}`).join("<br>")}</div>`;
   const inj = (D.injuries[gameOf(p.gid).date + "|" + p.pid] || {}).official, av = inj && M.availability && M.availability[inj.status];
-  const avail = inj ? `<div class="kv"><span>Plays tonight?</span><b>${esc(inj.status)}${av && av[1] ? ` · ${Math.round((av[0] + 1) / (av[1] + 2) * 100)}% <small>(${av[0]}/${av[1]} listed so since 10/22)</small>` : ""}</b></div>` : "";
+  const avail = inj ? `<div class="kv"><span>Plays tonight?</span><b>${esc(inj.status)}${av && av[1] ? ` · ${Math.round((av[0] + 1) / (av[1] + 2) * 100)}% <small>(${av[0]}/${av[1]})</small>` : ""}</b></div>` : "";
   return head + `<div class="box0 pj">
     <div class="pjt"><div><b class="num">${(+pr.mean).toFixed(1)}</b> <i>${unit_} · mean</i></div><div class="pjr num">median ${pr.q50} · 80% range ${pr.q10}–${pr.q90}</div></div>
     ${svg}
     <div class="kv"><span>${sd} ${line} · model + market</span><b>${at.blend === null ? "— <small>no two-sided price here</small>" : pct(at.blend)}</b></div>
     <div class="kv mo1"><span>${sd} ${line} · model alone</span><b>${pct(at.model)}${at.push > .001 ? ` <small>· push ${pct(at.push)}</small>` : ""}</b></div>
-    <div class="note" style="margin:4px 0 0">In held-out testing (2024-25), FanDuel's closing price was more accurate at its own lines than this model, and blending added nothing. The model alone runs overconfident against book lines. Use the projection for the stat's likely range, not as a price.</div>
-    ${avail}${other ? `<div class="pjo">Other stats (no book line collected)</div>${other}` : ""}
-    <details class="pji"><summary>How this is made${M.stale ? ' · <span class="tg tq">STALE</span>' : ""}</summary>
-      <div class="note">${esc(M.target || "")}. Uses: ${esc((M.inputs_used || []).join("; "))}. Not used: ${esc((M.inputs_missing || []).join("; "))}.
-      ${pr.n_hist < 10 ? `Only ${pr.n_hist} past games: wide range. ` : ""}Cutoff: ${esc(M.cutoff || "")}. Box scores through ${esc(M.logs_through || "?")}${M.stale ? " (" + esc(M.stale_reason || "stale") + ")" : ""}${M.refresh_pending ? " (newer box scores are in; the projection job will pick them up within 30 min)" : ""}.
-      Model ${esc(M.version || "")} (${esc(M.config || "")}), tuned on ${esc(M.tuned_on || "?")}; as of ${esc(mt(M.generated_at, true))}.
-      Its stat projections beat the baselines on two held-out seasons (CRPS, all 8 stats).</div>${brk}</details>
+    <div class="kv"><span>Held-out 2024-25 vs FanDuel close</span><b class="dn">Lost</b></div>
+    <div class="kv"><span>Blend with the price</span><b>Added nothing</b></div>
+    ${avail}${other ? `<div class="pjo">Other stats</div>${other}` : ""}
     <button class="lk" id="pjsc" style="padding:12px 16px 6px 0;font-size:13px">Model scorecard ›</button></div>`;
 }
 // the projection engine's record: the pre-registered held-out test (proj_meta.backtest) and the forward record
 function projScoreSheet() {
-  openSheet('<h2 id="sht">Model scorecard</h2><div class="note" style="font-size:14px">Loading…</div>', () => {});
+  openSheet('<h2 id="sht">Model scorecard <span class="tg tf">NOT A BET</span></h2><div class="note" style="font-size:14px">Loading…</div>', () => {});
   const s = $("#sheet"), n = SHEET_N, M = D.proj_meta || {}, B = M.backtest || {};
   const pc = x => x == null ? "–" : (x * 100).toFixed(1) + "%", f4 = x => x == null ? "–" : x.toFixed(4);
   const ci = c => c ? `${c[0] > 0 ? "+" : ""}${c[0].toFixed(4)} <small>(${c[1].toFixed(4)} to ${c[2].toFixed(4)})</small>` : "–";
   const per = Object.entries(B.periods || {}).map(([season, p]) => {
     const m = p.market;
-    const lab = season === M.tuned_on ? "tuning season: the config and blend weight were chosen here, so these are not held out" : p.label;
-    return (lab ? `<div class="note" style="margin:6px 0 0">${esc(lab)}</div>` : "") +
-      `<div class="kv"><span>${esc(season)} · ${p.n ? p.n.toLocaleString() : 0} player-games</span><b>CRPS vs recent form ${ci(p.crps_vs_b2)}</b></div>` +
+    return `<div class="kv"><span>${esc(season)}${season === M.tuned_on ? ' <span class="tg tq">TUNING · IN-SAMPLE</span>' : ""} · ${p.n ? p.n.toLocaleString() : 0} player-games</span><b>CRPS vs recent form ${ci(p.crps_vs_b2)}</b></div>` +
+      (p.label ? `<div class="kv"><span>${esc(p.label)}</span></div>` : "") +
       (m ? `<div class="kv"><span>${esc(season)} · ${m.n.toLocaleString()} FanDuel lines</span><b>log loss: model ${f4(m.model_ll)} · blend ${f4(m.blend_ll)} · close ${f4(m.close_ll)}</b></div>
             <div class="kv"><span>blend − close</span><b>${ci(m.blend_minus_close)}</b></div>` : "");
   }).join("");
-  const fill = html => { if (SHEET_N === n && !s.hidden) { s.innerHTML = '<div class="grab" aria-hidden="true"></div><h2 id="sht">Model scorecard</h2>' + html; const d = $("#ps-ok", s); if (d) d.onclick = closeSheet; } };
+  const vds = (B.verdicts || []).map(v => { const m = /^(.*):\s*(YES|NO)\b\s*(.*?)\.?$/.exec(v);
+    return m ? `<div class="kv"><span>${esc(m[1])}${m[3] ? ` <small>${esc(m[3])}</small>` : ""}</span><b class="${m[2] === "YES" ? "up" : "dn"}">${m[2]}</b></div>` : `<div class="kv"><span>${esc(v)}</span></div>`; }).join("");
+  const fill = html => { if (SHEET_N === n && !s.hidden) { s.innerHTML = '<div class="grab" aria-hidden="true"></div><h2 id="sht">Model scorecard <span class="tg tf">NOT A BET</span></h2>' + html; const d = $("#ps-ok", s); if (d) d.onclick = closeSheet; } };
   fetch("nba_proj_score.json?t=" + Date.now(), {cache: "no-store"}).then(r => r.ok ? r.json() : null).catch(() => null).then(j => {
     const fwd = j && j.graded ? `<div class="kv"><span>graded since ${esc(j.from || "")}</span><b>${j.graded} props</b></div>
       <div class="kv"><span>log loss</span><b>model ${f4(j.model_logloss)} · blend ${f4(j.blend_logloss)}${j.close_logloss != null ? " · close " + f4(j.close_logloss) : ""}</b></div>
       ${j.blend_minus_close ? `<div class="kv"><span>blend − close</span><b>${ci(j.blend_minus_close)}</b></div>` : ""}
-      ${j.clv ? `<div class="kv"><span>CLV (close moved toward the model)</span><b>${pc(j.clv.mean)} · ${pc(j.clv.share_positive)} of ${j.clv.n}</b></div>` : ""}
+      ${j.clv ? `<div class="kv"><span>CLV · close moved toward model</span><b>${pc(j.clv.mean)} · ${pc(j.clv.share_positive)} of ${j.clv.n}</b></div>` : ""}
       ${[["reliability_model", "model"], ["reliability_blend", "blend"], ["reliability_close", "close"]].filter(([k]) => j[k]).map(([k, lab]) =>
-        `<div class="note" style="margin:4px 0 0">Calibration, ${lab} (n: forecast → happened): ${j[k].filter(b => b[0]).map(b => `${b[0]}: ${pc(b[1])} → ${pc(b[2])}`).join(" · ")}</div>`).join("")}`
-      : '<div class="note" style="margin:0">No graded forecasts yet: the forward record starts with this version.</div>';
-    fill(`<div class="note" style="font-size:14px;color:var(--l2)">Every number is walk-forward: each prediction uses only games before that date. The config was tuned on ${esc(M.tuned_on || "2023-24")}; the later seasons were held out and run once (NBA_PROJECTION_PREREG.md). Lower log loss / CRPS is better; a difference whose range stays below 0 is a real improvement.</div>
-      <div class="sg"><span>Backtest</span></div>${per || '<div class="note">No results yet.</div>'}
-      <div class="sg"><span>Forward record (live forecasts, logged before tip)</span></div>${fwd}
-      <div class="note">${esc((B.verdicts || []).join(" "))}</div>
-      <div class="note">CLV says where the closing price went, not whether a bet would have won. Nothing here is a pick.</div>
+        `<div class="kv"><span>Calibration · ${lab}</span><b class="cal">${j[k].filter(b => b[0]).map(b => `${pc(b[1])}→${pc(b[2])}`).join(" · ")}</b></div>`).join("")}`
+      : '<div class="empty"><b>No graded forecasts yet</b></div>';
+    fill(`<div class="sg"><span>Backtest</span></div>${per || '<div class="empty"><b>No results yet</b></div>'}
+      ${vds ? `<div class="sg"><span>Pre-registered verdicts</span></div>${vds}` : ""}
+      <div class="sg"><span>Forward record</span></div>${fwd}
       <div class="acts"><button class="btn pri" id="ps-ok">Done</button></div>`);
   });
 }
 // each book's main line over time (a step per change), its open and its price now
 function histChart(p) {
   const H = p.hist || {}, books = [["fd", "FanDuel", "#2d9bff"], ["dk", "DraftKings", "#62d26f"]].filter(([b]) => (H[b] || []).length);
-  if (!books.length) return '<div class="note" style="margin:0">No price history yet.</div>';
+  if (!books.length) return '<div class="empty" style="padding:16px 0"><b>No history yet</b></div>';
   const ms = t => iso(t).getTime(), end = Math.max(Date.now() - 60000, ...books.map(([b]) => ms(H[b][H[b].length - 1][0])));
   const t0 = Math.min(...books.map(([b]) => ms(H[b][0][0])));
   const vals = books.flatMap(([b]) => H[b].map(x => x[1]));
@@ -1372,31 +1508,93 @@ function histChart(p) {
   o.push(`<text x="${AX}" y="${Hh - 1}">${esc(mt(new Date(t0).toISOString(), true))}</text><text x="${W}" y="${Hh - 1}" text-anchor="end">now</text></svg>`);
   const sum = books.map(([b, name, col]) => {
     const h = H[b], a = h[0], z = h[h.length - 1], lines = h.filter((pt, i) => !i || pt[1] !== h[i - 1][1]).length - 1;
-    return `<div class="hl"><i style="background:${col}"></i><b>${name}</b> opened ${a[1]} (${american(a[2])}) → ${z[1]} (${american(z[2])}) now · ${lines ? lines + " line move" + (lines > 1 ? "s" : "") : "line unchanged"}, ${h.length - 1 - lines} price change${h.length - 1 - lines === 1 ? "" : "s"}</div>`;
+    return `<div class="hl"><i style="background:${col}"></i><b>${name}</b><span class="num">${a[1]} ${american(a[2])} → ${z[1]} ${american(z[2])}</span></div>`;
   }).join("");
-  return o.join("") + sum + '<div class="note">In replays of past games, following a move has not beaten the closing price. It is here so you know the price you are getting (see the Scorecard).</div>';
+  return o.join("") + sum;
 }
 // a bar's <title> only shows on hover, so a tap pins its game above the bar (tap it again, or the chart, to clear)
-function barTip(cw, gb) {
-  const svg = $("svg.c2", cw), old = $(".tip", cw), was = $("g.br.sel", cw);
-  if (old) old.remove();
-  if (was) was.classList.remove("sel");
-  if (svg) svg.classList.toggle("pick", !!gb && gb !== was);
-  if (!gb || gb === was) return;
-  gb.classList.add("sel");
-  const [a, b] = gb.dataset.tip.split("|"), t = document.createElement("div");
-  t.className = "tip"; t.innerHTML = `<b>${esc(a)}</b>${esc(b)}`; cw.appendChild(t);
-  const r = gb.getBoundingClientRect(), c = cw.getBoundingClientRect();
-  const x = r.left - c.left + cw.scrollLeft + r.width / 2, w = t.offsetWidth;
-  t.style.left = Math.max(cw.scrollLeft + 4, Math.min(cw.scrollLeft + cw.clientWidth - w - 4, x - w / 2)) + "px";
-  t.style.top = Math.max(0, r.top - c.top - t.offsetHeight - 6) + "px";
+// a game's box score (docs/box/{gid}.json, nba_boxscore), opened from a chart bar: the team he played for first, his
+// row and the prop's stat columns marked; the name column stays put while the stats scroll sideways
+const BXC = ["MIN", "PTS", "REB", "AST", "FG", "3PT", "FT", "STL", "BLK", "TO", "PF", "+/-"];
+const BX_HI = {points: ["PTS"], rebounds: ["REB"], assists: ["AST"], threes: ["3PT"], pra: ["PTS", "REB", "AST"],
+               pts_reb: ["PTS", "REB"], pts_ast: ["PTS", "AST"], reb_ast: ["REB", "AST"]};
+// a player row [pid, name, starter, min, pts, reb, ast, fgm, fga, fg3m, fg3a, ftm, fta, stl, blk, tov, pf, pm]; a team's
+// tot [pts, reb, ast, fgm, fga, fg3m, fg3a, ftm, fta, stl, blk, tov, pf]
+const bxRow = r => [r[3], r[4], r[5], r[6], r[7] + "-" + r[8], r[9] + "-" + r[10], r[11] + "-" + r[12], r[13], r[14], r[15], r[16], (r[17] > 0 ? "+" : "") + r[17]];
+const bxTot = t => ["", t[0], t[1], t[2], t[3] + "-" + t[4], t[5] + "-" + t[6], t[7] + "-" + t[8], t[9], t[10], t[11], t[12], ""];
+function bxTable(t, p) {
+  const hi = BX_HI[p.market] || [], td = (v, i) => `<td${hi.indexOf(BXC[i]) >= 0 ? ' class="hi"' : ""}>${v}</td>`;
+  const row = r => `<tr${r[0] === p.pid ? ' class="me"' : ""}><td>${esc(nameOf(r[1]))}</td>${bxRow(r).map(td).join("")}</tr>`;
+  const st = t.players.filter(r => r[2]), bn = t.players.filter(r => !r[2]);
+  return `<div class="bxw"><table class="bx"><thead><tr><th>${st.length ? "STARTERS" : "PLAYER"}</th>${BXC.map((c, i) => `<th${hi.indexOf(c) >= 0 ? ' class="hi"' : ""}>${c}</th>`).join("")}</tr></thead>
+    <tbody>${st.map(row).join("")}${bn.length ? `<tr class="bxd"><td colspan="${BXC.length + 1}">BENCH</td></tr>${bn.map(row).join("")}` : ""}
+    <tr class="tot"><td>Team</td>${bxTot(t.tot).map(td).join("")}</tr></tbody></table></div>
+    ${t.dnp.length ? `<div class="bxn"><b>DNP</b>${t.dnp.map(([nm, why]) => esc(nameOf(nm)) + (why !== "DNP" ? ` <small>(${esc(injReason(why))})</small>` : "")).join(", ")}</div>` : ""}`;
+}
+// box scores are fetched once and kept: a finger landing on a bar starts its fetch, and the bars on screen are
+// fetched while the page is idle, so a tap usually finds the box already here
+const BOXC = new Map();
+function boxGet(gid) {
+  if (!BOXC.has(gid)) BOXC.set(gid, fetch(`box/${encodeURIComponent(gid)}.json`)
+    .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .catch(e => { BOXC.delete(gid); throw e; }));
+  return BOXC.get(gid);
+}
+let BOX_WARM = 0;
+function boxWarm(logs) {
+  clearTimeout(BOX_WARM);
+  BOX_WARM = setTimeout(() => logs.slice(-12).reverse().forEach((l, i) => setTimeout(() => boxGet(l.gid).catch(() => {}), i * 60)), 900);
+}
+function boxHtml(b, cur, p) {
+  const [a, h] = b.teams;
+  const d = iso(b.date + "T12:00:00Z").toLocaleDateString("en-US", {weekday: "short", month: "numeric", day: "numeric", timeZone: "UTC"});
+  return `<div class="bxh">${logo(a.tri, "")}<b>${esc(a.tri)}</b><span class="num${a.pts > h.pts ? "" : " lo"}">${a.pts}</span><i>–</i><span class="num${h.pts > a.pts ? "" : " lo"}">${h.pts}</span><b>${esc(h.tri)}</b>${logo(h.tri, "")}</div>
+    <div class="bxs">${esc(d)} · ${esc(b.status)}</div>
+    <div class="seg" role="group" aria-label="Team"><span class="pill2"></span>${b.teams.map(t => `<button data-bt="${esc(t.tri)}" aria-pressed="${t.tri === cur}">${logo(t.tri, "")}${esc(t.tri)}</button>`).join("")}</div>
+    <div id="bxt">${bxTable(b.teams.find(t => t.tri === cur), p)}</div>`;
+}
+// The sheet rises once, at its full height, with the box in it: when the box is not here within 140 ms it rises with a
+// skeleton of the same shape and the box fades in over it, so nothing changes size while it moves
+function boxSheet(gid, team, p) {
+  const pr = boxGet(gid), wait = new Promise(r => setTimeout(r, 140, null));
+  const frame = body => `<h2 id="sht">Box Score</h2><div class="bxb">${body}</div><div class="acts stk"><button class="btn pri" id="bx-ok">Done</button></div>`;
+  const bind = (s, b) => {
+    $("#bx-ok", s).onclick = closeSheet;
+    if (!b) return;
+    let cur = b.teams.some(t => t.tri === team) ? team : b.teams[1].tri;
+    const seg = $(".seg", s);
+    slide(seg, true);
+    $$("[data-bt]", s).forEach(btn => btn.onclick = () => {
+      if (cur === btn.dataset.bt) return;
+      cur = btn.dataset.bt; press("[data-bt]", x => x === btn, s); slide(seg);
+      const t = $("#bxt", s);
+      t.innerHTML = bxTable(b.teams.find(x => x.tri === cur), p);
+      if (!REDUCED) t.animate([{opacity: .35}, {opacity: 1}], {duration: 200, easing: "ease-out"});
+    });
+  };
+  const missing = '<div class="empty"><b>Box score not available yet</b></div>';
+  const cur0 = b => b.teams.some(t => t.tri === team) ? team : b.teams[1].tri;
+  Promise.race([pr, wait]).then(b => {
+    if (b) { openSheet(frame(boxHtml(b, cur0(b), p)), s => bind(s, b)); $("#sheet").dataset.kind = "box"; return; }
+    openSheet(frame('<div class="bxsk"><i></i><i></i><i></i>' + "<b></b>".repeat(12) + "</div>"), s => bind(s, null));
+    const s = $("#sheet"), n = SHEET_N;
+    s.dataset.kind = "box";
+    const put = html => {
+      if (SHEET_N !== n || s.hidden) return null;
+      const box = $(".bxb", s);
+      box.innerHTML = html;
+      if (!REDUCED) box.animate([{opacity: 0}, {opacity: 1}], {duration: 220, easing: "ease-out"});
+      return box;
+    };
+    pr.then(b2 => { if (put(boxHtml(b2, cur0(b2), p))) bind(s, b2); }, () => put(missing));
+  }, () => openSheet(frame(missing), s => bind(s, null)));
 }
 // The page is built once per prop (header, tabs, hero, availability) and its live parts — cells, chart, window capsule,
 // chips, books, game log — are redrawn in place on every change, so the photo never reloads and the scroll never jumps.
 let PX = null;
 function renderProp(mode) {
   const p = D.props.find(x => x.id === CUR), pg = $("#pg");
-  if (!p) { PX = null; pg.innerHTML = `<div class="ph"><button class="cb bk" aria-label="Back">${ICON.back}</button></div><div class="empty"><b>No longer posted</b>The books have taken this prop down.</div>`; $("#pg .bk").onclick = () => history.back(); return; }
+  if (!p) { PX = null; pg.innerHTML = `<div class="ph"><button class="cb bk" aria-label="Back">${ICON.back}</button></div><div class="empty"><b>No longer posted</b></div>`; $("#pg .bk").onclick = () => history.back(); return; }
   const g = gameOf(p.gid), logs = logsOf(p), c = p.ctx || {};
   const team = TEAMS[p.team] || [p.team || "", "#333"];
   const without = (D.absences[g.date + "|" + p.team] || []).map(a => ({key: String(a.pid), name: a.name || "teammate", played: a.played, since: a.since, team: p.team, status: a.status, fresh: a.fresh}));
@@ -1432,13 +1630,13 @@ function renderProp(mode) {
     <div id="pstat"></div>
     <div class="sec2" id="plog"></div>
     <div class="end"></div>`;
-  const stat = `<div class="sec2"><h3>Availability</h3><div class="box0">${arows.join("")}<div class="note">Official = the NBA injury report. News is third-party.</div></div></div>
-    ${rel ? `<div class="sec2"><h3>Related Props</h3><div class="rel" style="margin:0;padding:0">${rel}</div><div class="note">How closely the two stats moved together in past games (r from −1 to +1). History, not a prediction.</div></div>` : ""}
+  const stat = `<div class="sec2"><h3>Availability</h3><div class="box0">${arows.join("")}</div></div>
+    ${rel ? `<div class="sec2"><h3>Related Props</h3><div class="rel" style="margin:0;padding:0">${rel}</div></div>` : ""}
     ${p.flag ? `<div class="sec2"><h3>Engine</h3><div class="box0"><span class="tg tf" style="margin:0 6px 0 0">SHADOW · NOT A BET</span>${esc(p.flag.tier)} at ${p.flag.line} · ${p.flag.card === 1 ? "on the card" : "logged only" + (p.flag.why ? " (" + esc(p.flag.why.toLowerCase()) + ")" : "")}</div></div>` : ""}`;
   clearTimeout(PX && PX.lazy);
   PX = {p: p, g: g, logs: logs, c: c, without: without, wins: wins, stat: stat, statDone: false};
   $("#pg .bk").onclick = () => history.back();
-  $("#fav", pg).onclick = () => { toggleFav(p.pid); const f = $("#fav", pg), on = favs().indexOf(p.pid) >= 0; f.classList.toggle("fav", on); f.setAttribute("aria-pressed", on); f.classList.remove("pop"); void f.offsetWidth; f.classList.add("pop"); if (ST.view === "watch") renderList(); };
+  $("#fav", pg).onclick = () => { toggleFav(p.pid); const f = $("#fav", pg), on = favs().indexOf(p.pid) >= 0; f.classList.toggle("fav", on); f.setAttribute("aria-pressed", on); f.classList.remove("pop"); void f.offsetWidth; f.classList.add("pop"); if (ST.watch && ST.view !== "injuries") renderList(); };
   $("#shr", pg).onclick = () => {
     const url = location.href, title = `${p.player} ${NAME[p.market]} ${DT.line}`;
     if (navigator.share) navigator.share({title: title, url: url}).catch(() => {});
@@ -1448,23 +1646,39 @@ function renderProp(mode) {
   $$("[data-win]", pg).forEach(b => b.onclick = () => { if (DT.win === b.dataset.win || b.disabled) return; DT.win = b.dataset.win; updateProp(); });
   $("#pf", pg).onclick = () => playerFilters(p, logs, without);
   const cw = $("#chw");
-  cw.onclick = e => { const gb = e.target.closest("g.br"); barTip(cw, gb); };
+  cw.onclick = e => { const gb = e.target.closest("g.br"); if (gb) boxSheet(gb.dataset.gid, gb.dataset.tm, p); };
+  cw.onpointerdown = e => { const gb = e.target.closest("g.br"); if (gb) boxGet(gb.dataset.gid).catch(() => {}); };
   updateProp(mode || true);
+}
+// teammates on his team now, most minutes first: [{key, pid, name, since, played, mpg, gp, team}] (D.mates,
+// nba_research.team_mates), then any teammate out tonight the roster list lacks (D.absences)
+function matesAll(p, without) {
+  const T = (D.mates || {})[p.team];
+  if (T && !T.list) T.list = T.mates.map(m => ({key: String(m.pid), pid: m.pid, name: m.name, since: m.since, mpg: m.mpg, gp: m.gp,
+    team: p.team, played: T.gids.filter((g, i) => m.on[i] === "1")}));
+  const ms = (T ? T.list : []).filter(m => m.pid !== p.pid);
+  return ms.concat(without.filter(a => !ms.some(m => m.key === a.key)));
+}
+// the chart's filters from DT; dr overrides keys (a sheet's draft). with / without: {teammate key: true}
+function chartF(p, g, c, without, dr) {
+  const x = Object.assign({}, DT, dr || {});
+  const prevS = (+D.season.slice(0, 4) - 1) + "-" + D.season.slice(2, 4);
+  const rkCur = (D.ranks || {})[g.date] || {}, rkPrev = (D.ranks || {})[prevS] || {};
+  const dvpT = c.group && rkCur.dvp ? tierOf(c.dvp_rank, c.teams) : null, defT = tierOf(c.def_rank, c.teams);
+  const oppSets = [];
+  if (x.dvp && dvpT) { const s = {}; s[D.season] = oppSet(rkCur.dvp[c.group][p.market], dvpT, rkCur.teams);
+    if (rkPrev.dvp && rkPrev.teams) s[prevS] = oppSet(rkPrev.dvp[c.group][p.market], dvpT, rkPrev.teams); oppSets.push(s); }
+  if (x.def && defT) { const s = {}; s[D.season] = oppSet(rkCur.def, defT, rkCur.teams);
+    if (rkPrev.def && rkPrev.teams) s[prevS] = oppSet(rkPrev.def, defT, rkPrev.teams); oppSets.push(s); }
+  const ms = matesAll(p, without);
+  return {home: x.home, starter: x.starter, result: x.result, rest: x.rest, ranges: x.ranges, oppSets: oppSets,
+          with: ms.filter(m => x.with[m.key]), without: ms.filter(m => x.without[m.key])};
 }
 function updateProp(mode) {
   if (!PX) return;
   const first = !!mode && mode !== "rest", opening = mode === "open", rest = mode === "rest";
   const {p, g, logs, c, without, wins} = PX, pg = $("#pg"), line = DT.line, side = ST.side;
-  const prevS = (+D.season.slice(0, 4) - 1) + "-" + D.season.slice(2, 4);
-  const rkCur = (D.ranks || {})[g.date] || {}, rkPrev = (D.ranks || {})[prevS] || {};
-  const dvpT = c.group && rkCur.dvp ? tierOf(c.dvp_rank, c.teams) : null, defT = tierOf(c.def_rank, c.teams);
-  const oppSets = [];
-  if (DT.dvp && dvpT) { const s = {}; s[D.season] = oppSet(rkCur.dvp[c.group][p.market], dvpT, rkCur.teams);
-    if (rkPrev.dvp && rkPrev.teams) s[prevS] = oppSet(rkPrev.dvp[c.group][p.market], dvpT, rkPrev.teams); oppSets.push(s); }
-  if (DT.def && defT) { const s = {}; s[D.season] = oppSet(rkCur.def, defT, rkCur.teams);
-    if (rkPrev.def && rkPrev.teams) s[prevS] = oppSet(rkPrev.def, defT, rkPrev.teams); oppSets.push(s); }
-  const f = {home: DT.home, starter: DT.starter, result: DT.result, rest: DT.rest, ranges: DT.ranges, oppSets: oppSets,
-             without: without.filter(w => DT.without[w.key])};
+  const f = chartF(p, g, c, without);
   const base = filterLogs(logs, f);
   const win = windowed(base, DT.win, D.season, p.opp);
   const s = hitSummary(win.map(l => statValue(l, p.market)), line);
@@ -1490,6 +1704,7 @@ function updateProp(mode) {
   const cw = $("#chw"), sl = cw.scrollLeft, atEnd = first || sl + cw.clientWidth >= cw.scrollWidth - 4;
   cw.innerHTML = chart2(win, p.market, line, ov, !first);
   cw.scrollLeft = atEnd ? cw.scrollWidth : sl;
+  boxWarm(win);
   // window capsule
   wins.forEach(([k]) => {
     const w = windowed(base, k, D.season, p.opp), ss = hitSummary(w.map(l => statValue(l, p.market)), line), r = sideRate(ss, side);
@@ -1505,22 +1720,27 @@ function updateProp(mode) {
   const chip = (attrs, lab, active) => `<button class="fc${active ? " on" : ""}" ${attrs} aria-pressed="${!!active}">${lab}</button>`;
   const rangeOn = k => !!DT.ranges[k];
   const chips = [];
+  const rchip = k => { if (!forMarket(k, p.market)) return; const b = bounds(logs, k), abbr = RANGES.find(r => r[0] === k)[2]; if (b && b[0] !== b[1]) chips.push(chip(`data-r="${k}"`, `${OVL[k] ? ICON.bars : ICON.pm}${abbr}`, rangeOn(k) || DT.open[k])); };
+  const tchip = (k, v, lab) => chips.push(chip(`data-k="${k}" data-v="${v}"`, lab, on(k, v)));
+  ["min", "fga", "fg3a", "fta", "usg", "pot_ast", "reb_ch"].forEach(rchip);   // the adjustable filters first
+  if (logs.some(l => l.starter === 1)) tchip("starter", true, "Starter");     // only the games he started
   if (c.dvp_rank) chips.push(chip('data-t="dvp"', `DvP <em class="${rankCls(c.dvp_rank, c.teams, side)}">${ord(c.dvp_rank)}</em>`, DT.dvp));
   if (c.def_rank) chips.push(chip('data-t="def"', `Def Rank <em class="${rankCls(c.def_rank, c.teams, side)}">${ord(c.def_rank)}</em>`, DT.def));
-  const rchip = k => { const b = bounds(logs, k), abbr = RANGES.find(r => r[0] === k)[2]; if (b && b[0] !== b[1]) chips.push(chip(`data-r="${k}"`, `${OVL[k] ? ICON.bars : ICON.pm}${abbr}`, rangeOn(k) || DT.open[k])); };
-  const tchip = (k, v, lab) => chips.push(chip(`data-k="${k}" data-v="${v}"`, lab, on(k, v)));
-  rchip("min");
   const wchip = w => chips.push(chip(`data-wo="${w.key}"`, (w.fresh ? "W/O " : "Without ") + esc(lastName(w.name)), DT.without[w.key]));
   without.filter(w => w.fresh).forEach(wchip);                 // tonight's news: up front
-  const extra = DT.home !== null || DT.result !== null || DT.rest !== null || MORE_R.some(k => rangeOn(k) || DT.open[k]) || without.some(w => !w.fresh && DT.without[w.key]);
+  // the With / Without filters set in the teammates sheet show as chips that are on (a tap clears one)
+  const ms = matesAll(p, without), fresh = k => without.some(w => w.fresh && w.key === k);
+  ms.filter(m => DT.with[m.key]).forEach(m => chips.push(chip(`data-mw="${m.key}"`, "With " + esc(lastName(m.name)), true)));
+  ms.filter(m => DT.without[m.key] && !fresh(m.key)).forEach(m => chips.push(chip(`data-mo="${m.key}"`, "W/O " + esc(lastName(m.name)), true)));
+  if (ms.length) chips.push(chip('id="mts" aria-haspopup="dialog"', `${ICON.people}With / Without`, false));
+  const extra = DT.home !== null || DT.result !== null || DT.rest !== null || MORE_R.some(k => rangeOn(k) || DT.open[k]);
   const more = DT.more || extra;
   if (more) {
-    rchip("fga"); tchip("home", true, "Home"); tchip("home", false, "Away"); rchip("fg3a"); rchip("fta"); rchip("usg"); rchip("margin");
+    tchip("home", true, "Home"); tchip("home", false, "Away"); rchip("margin");
     tchip("result", "W", "Win"); tchip("result", "L", "Loss"); tchip("rest", "b2b", "B2B");
-    without.filter(w => !w.fresh).forEach(wchip);
   }
   chips.push(`<button class="fc" id="more" aria-expanded="${more}">${more ? "Less" : "More"}</button>`);
-  const panels = RANGES.filter(([k]) => DT.open[k] || rangeOn(k)).map(([k, lab]) => {
+  const panels = RANGES.filter(([k]) => (DT.open[k] || rangeOn(k)) && forMarket(k, p.market)).map(([k, lab]) => {
     const b = bounds(logs, k); if (!b || b[0] === b[1]) return "";
     const cur = DT.ranges[k] || b;
     return `<div class="rp${DT.fresh === k ? " in" : ""}" data-rk="${k}" data-lo="${b[0]}" data-hi="${b[1]}"><div class="rp-h"><span>${RANGES.find(r => r[0] === k)[2]}</span><b class="rv"${DT.ranges[k] ? "" : " hidden"}>${cur[0]} – ${cur[1]}</b></div>
@@ -1529,7 +1749,7 @@ function updateProp(mode) {
   }).join("");
   DT.fresh = null;
   const anyF = DT.dvp || DT.def || DT.home !== null || DT.starter !== null || DT.result !== null || DT.rest !== null || Object.keys(DT.ranges).length ||
-    Object.keys(DT.without).some(k => DT.without[k]) || Object.keys(DT.open).some(k => DT.open[k]);
+    Object.keys(DT.without).some(k => DT.without[k]) || Object.keys(DT.with).some(k => DT.with[k]) || Object.keys(DT.open).some(k => DT.open[k]);
   if (!rest) $("#pcf").innerHTML = `<div class="cf-h"><h3>Chart Filters</h3><button class="ca" id="clr"${anyF ? "" : " hidden"}>Clear All</button></div>
       <div class="fcs">${chips.join("")}</div>${panels}`;
   if (opening) { PX.lazy = setTimeout(() => { if (PX && PX.p === p) updateProp("rest"); }, 470); bindLive(p, logs, without); return; }
@@ -1547,7 +1767,6 @@ function updateProp(mode) {
   const fr = fair.p === null ? "" : `<div class="bkr2 fr"><span>Fair${fair.n === 1 ? " <small>1 book</small>" : ""}</span><span class="bl">${line}</span><span>${american(1 / fair.p)}</span><span>${american(1 / (1 - fair.p))}</span></div>`;
   $("#pproj").innerHTML = projCard(p, line, side);
   $("#pbk").innerHTML = `<div class="bkh"><span>BOOKS</span><button class="lnp" id="lnp" aria-haspopup="dialog" aria-label="Line ${line}">LINE${ICON.down}</button><span>OVER</span><span>UNDER</span></div>${bk}${fr}
-    <div class="note" style="margin:8px 15.3px 0">Fair = the books' prices with their margin removed${fair.n === 2 ? " (both books)" : ""}. Green = a price better than fair.</div>
     <div class="sec2"><h3>Alt Lines · ${side === "under" ? "Under" : "Over"}</h3>${ladder(p, win, side, line, (wins.find(w => w[0] === DT.win) || ["", "L10"])[1])}</div>
     <div class="sec2"><h3>Line Movement</h3>${histChart(p)}</div>`;
   // game log
@@ -1570,7 +1789,10 @@ function bindLive(p, logs, without) {
     updateProp(); keep(`[data-r="${k}"]`);
   });
   $$("[data-k]", pg).forEach(b => b.onclick = () => { const k = b.dataset.k, raw = b.dataset.v, v = raw === "true" ? true : raw === "false" ? false : raw; DT[k] = DT[k] === v ? null : v; updateProp(); keep(`[data-k="${k}"][data-v="${raw}"]`); });
-  $$("[data-wo]", pg).forEach(b => b.onclick = () => { const k = b.dataset.wo; DT.without[k] = !DT.without[k]; updateProp(); keep(`[data-wo="${k}"]`); });
+  $$("[data-wo]", pg).forEach(b => b.onclick = () => { const k = b.dataset.wo; DT.without[k] = !DT.without[k]; if (DT.without[k]) delete DT.with[k]; updateProp(); keep(`[data-wo="${k}"]`); });
+  $$("[data-mw]", pg).forEach(b => b.onclick = () => { delete DT.with[b.dataset.mw]; updateProp(); });
+  $$("[data-mo]", pg).forEach(b => b.onclick = () => { delete DT.without[b.dataset.mo]; updateProp(); });
+  const mts = $("#mts", pg); if (mts) mts.onclick = () => mateSheet(p, logs, without);
   $$("[data-ps]", pg).forEach(b => b.onclick = () => {
     const l = +b.dataset.pl, sd = b.dataset.ps;
     if (ST.side === sd && DT.line === l) return;
@@ -1580,14 +1802,14 @@ function bindLive(p, logs, without) {
   });
   $$(".bl", pg).forEach(b => b.onclick = () => { const l = +b.dataset.pl; if (DT.line !== l) { DT.line = l; updateProp(); } });
   $$("[data-ll]", pg).forEach(b => b.onclick = () => { const l = +b.dataset.ll; if (DT.line !== l) { DT.line = l; updateProp(); keep(`[data-ll="${l}"]`); } });
-  const clr = $("#clr", pg); if (clr) clr.onclick = () => { Object.assign(DT, {home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, dvp: false, def: false, open: {}, ovs: []}); updateProp(); };
-  $("#more", pg).onclick = () => { DT.more = $("#more", pg).getAttribute("aria-expanded") !== "true"; if (!DT.more) { MORE_R.forEach(k => { DT.open[k] = false; delete DT.ranges[k]; }); DT.ovs = DT.ovs.filter(k => MORE_R.indexOf(k) < 0); Object.assign(DT, {home: null, result: null, rest: null, without: {}}); } updateProp(); keep("#more"); };
+  const clr = $("#clr", pg); if (clr) clr.onclick = () => { Object.assign(DT, {home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, with: {}, dvp: false, def: false, open: {}, ovs: []}); updateProp(); };
+  $("#more", pg).onclick = () => { DT.more = $("#more", pg).getAttribute("aria-expanded") !== "true"; if (!DT.more) { MORE_R.forEach(k => { DT.open[k] = false; delete DT.ranges[k]; }); DT.ovs = DT.ovs.filter(k => MORE_R.indexOf(k) < 0); Object.assign(DT, {home: null, result: null, rest: null}); } updateProp(); keep("#more"); };
   $("#lnb", pg).onclick = () => lineSheet(p);
   const lnp = $("#lnp", pg); if (lnp) lnp.onclick = () => lineSheet(p);
-  $("#psb", pg).onclick = () => openSheet(`<h2 id="sht">Position rank</h2><div class="note" style="font-size:15px;color:var(--l2)">${c.pos_rank
-    ? `${esc(p.player)} is <b style="color:#fff">${ord(c.pos_rank)}</b> of ${c.pos_n} ${GRPN[MU_GROUP(c.pos)] || "players at his position"} in ${esc(NAME[p.market].toLowerCase())} per game (${esc(c.pos_season || "")}, 3+ games).`
-    : "Not enough games to rank him yet."}</div><div class="acts"><button class="btn pri" id="ok1">Done</button></div>`, s2 => { $("#ok1", s2).onclick = closeSheet; });
-  $("#mub", pg).onclick = () => matchupSheet(p, ST.side);
+  $("#psb", pg).onclick = () => openSheet(`<h2 id="sht">Position rank</h2>${c.pos_rank
+    ? `<div class="kv"><span>Rank</span><b>${ord(c.pos_rank)} of ${c.pos_n}</b></div><div class="kv"><span>Group</span><b>${esc((GRPN[MU_GROUP(c.pos)] || "position").replace(/^./, x => x.toUpperCase()))}</b></div><div class="kv"><span>Stat</span><b>${esc(NAME[p.market])} per game</b></div><div class="kv"><span>Season</span><b>${esc(c.pos_season || "")}</b></div>`
+    : '<div class="empty"><b>Not ranked yet</b></div>'}<div class="acts"><button class="btn pri" id="ok1">Done</button></div>`, s2 => { $("#ok1", s2).onclick = closeSheet; });
+  $("#mub", pg).onclick = () => openMatchup(p);
   const pjsc = $("#pjsc", pg); if (pjsc) pjsc.onclick = projScoreSheet;
   $$(".rp", pg).forEach(gp => {
     const k = gp.dataset.rk, lo = +gp.dataset.lo, hi = +gp.dataset.hi, fil = $(".fil", gp), rv = $(".rv", gp);
@@ -1648,7 +1870,7 @@ function lineSheet(p) {
     return `<button class="opt" data-l="${l}"><span>${l}${l === p.main ? ' <span class="tg tn">MAIN</span>' : ""}</span><span class="num" style="color:var(--l2);font-size:14px">FD ${pr(f, 1)}/${pr(f, 2)} · DK ${pr(k, 1)}/${pr(k, 2)}</span></button>`;
   }).join("");
   openSheet(`<h2 id="sht">Line</h2><div class="lc" style="margin-bottom:8px"><div class="big num" id="ls-v">${DT.line}</div><div class="stp"><button id="ls-m" aria-label="Lower the line by half a point">−</button><button id="ls-p" aria-label="Raise the line by half a point">+</button></div></div>
-    <div class="note" style="margin-bottom:6px">Posted lines (over / under prices):</div>${rows}
+    ${rows}
     <div class="acts"><button class="btn pri" id="ls-ok">Done</button></div>`, s => {
     const set = v => { DT.line = Math.max(0.5, Math.round(v * 2) / 2); $("#ls-v", s).textContent = DT.line; };
     $("#ls-m", s).onclick = () => set(DT.line - .5); $("#ls-p", s).onclick = () => set(DT.line + .5);
@@ -1656,15 +1878,92 @@ function lineSheet(p) {
     $("#ls-ok", s).onclick = () => { closeSheet(); updateProp(); };
   });
 }
-function matchupSheet(p, side) {
-  const c = p.ctx || {}, g = gameOf(p.gid), gr = grade(p, side), rows = [];
-  const row = (lab, r, n, note) => `<div class="kv"><span>${lab}</span><b>${r ? `<span class="rk ${rankCls(r, n, side) === "good" ? "g" : rankCls(r, n, side) === "bad" ? "r" : "n"}">${ord(r)}</span>` : "—"}</b></div>${note ? `<div class="note" style="margin:-4px 0 6px">${note}</div>` : ""}`;
-  rows.push(row(`DvP · ${esc(short(p.market))} to ${GRPN[c.group] || "his position"}`, c.dvp_rank, c.teams, c.dvp_rank ? `${esc(p.opp)} allows the ${ord(c.teams - c.dvp_rank + 1)}-most ${esc(short(p.market))} to ${GRPN[c.group]} per possession.` : (p.market === "threes" ? "Not computed for threes." : "")));
-  rows.push(row("Def Rank · points allowed", c.def_rank, c.teams, ""));
-  rows.push(`<div class="kv"><span>Pace</span><b>${c.pace_rank ? ord(c.pace_rank) + " fastest" : "—"}</b></div>`);
-  if (g.lines) rows.push(`<div class="kv"><span>Game</span><b>${g.lines.total ? "Total " + g.lines.total : ""}${g.lines.spread_home !== undefined ? " · " + esc(g.home) + " " + (g.lines.spread_home > 0 ? "+" : "") + g.lines.spread_home : ""}</b></div>`);
-  openSheet(`<h2 id="sht">Matchup vs ${esc(p.opp || "")}</h2><div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">${gauge(gr)}<div class="note" style="margin:0;font-size:14px">Grade for the ${side}: A = one of the softest matchups, F = one of the toughest. From ${esc(p.opp || "")}'s rank among ${c.teams || 0} teams (1st = toughest defense): last season's, blended with this season's ${c.rank_n || 0} game${c.rank_n === 1 ? "" : "s"} — this season counts for more as games are played.</div></div>${rows.join("")}
-    <div class="acts"><button class="btn pri" id="mu-ok">Done</button></div>`, s => { $("#mu-ok", s).onclick = closeSheet; });
+// ── the Matchup page (from the gauge): the grade and its parts, then "<OPP> Team Defense": the opponent's recent games
+// against players of a position group, each with his result, closing line and over price (docs/vs/{TEAM}.json, nba_vs);
+// a row opens that game's box score ──
+let MUP = null;
+const VS_GRP = [["G", "Guards"], ["F", "Forwards"], ["C", "Centers"]];
+const initialName = n => { const i = String(n || "").indexOf(" "); return i > 0 ? n[0] + ". " + n.slice(i + 1) : n || ""; };
+function openMatchup(p, push) {
+  if (!p) return;
+  MUP = {p: p, grp: VS_GRP.some(g => g[0] === (p.ctx || {}).group) ? p.ctx.group : "G", mkt: p.market, more: false, rows: null};
+  if (push !== false) history.pushState({p: p.id, mu: 1}, "", hashState());
+  const mp = $("#mp");
+  mp.hidden = false;
+  renderMatchup();
+  mp.scrollTop = 0;
+  fetch(`vs/${encodeURIComponent(p.opp || "")}.json`).then(r => r.ok ? r.json() : null).catch(() => null)
+    .then(j => { if (MUP && MUP.p === p) { MUP.rows = j && j.rows || []; vsTable(); } });
+  const go = () => {
+    if (!MUP || mp.classList.contains("on")) return;
+    mp.classList.add("on");
+    if (!REDUCED && !document.hidden) mp.animate([{transform: "translateX(100%)"}, {transform: "none"}], {duration: 440, easing: EASE});
+  };
+  requestAnimationFrame(() => requestAnimationFrame(go)); setTimeout(go, 150);
+}
+function closeMatchup(instant) {
+  const mp = $("#mp"), done = () => { if (!MUP && !mp.hidden) { mp.hidden = true; mp.innerHTML = ""; } };
+  MUP = null;
+  mp.classList.remove("on");
+  if (instant || REDUCED) done();
+  else { mp.animate([{transform: "none"}, {transform: "translateX(100%)"}], {duration: 380, easing: EASE}).finished.then(done, done); setTimeout(done, 440); }
+}
+function renderMatchup() {
+  const p = MUP.p, c = p.ctx || {}, g = gameOf(p.gid), side = ST.side, gr = grade(p, side), mp = $("#mp");
+  const rk = (r, n) => r ? `<span class="rk ${rankCls(r, n, side) === "good" ? "g" : rankCls(r, n, side) === "bad" ? "r" : "n"}">${ord(r)}</span>` : "—";
+  const dd = (k, opts, cur) => `<label class="dd"><span>${esc((opts.find(o => o[0] === cur) || opts[0])[1])}</span>${ICON.down}
+    <select data-dd="${k}" aria-label="${k === "grp" ? "Position" : "Stat"}">${opts.map(([v, t]) => `<option value="${v}"${v === cur ? " selected" : ""}>${esc(t)}</option>`).join("")}</select></label>`;
+  mp.innerHTML = `<div class="ph"><button class="cb bk" aria-label="Back">${ICON.back}</button>
+      <div class="ph-t"><b>${esc(p.player)} vs ${esc(p.opp || "")}</b><span>Matchup</span></div><span class="sp2"></span>
+      <button class="cb" id="mps" aria-label="Search">${ICON.search}</button><button class="cb" id="mpm" aria-label="Menu">${ICON.ham}</button></div>
+    <div class="mpc">
+      <div class="mpg">${gauge(gr)}<div><b>${gr ? "Grade " + gr.g : "Not graded yet"}</b><span>${esc(NAME[p.market])} · ${side === "under" ? "Under" : "Over"} ${DT.line === null ? "" : DT.line}</span></div></div>
+      <div class="kv"><span>DvP · ${esc(short(p.market))} to ${GRPN[c.group] || "his position"}</span><b>${rk(c.dvp_rank, c.teams)}</b></div>
+      <div class="kv"><span>Def Rank · points allowed</span><b>${rk(c.def_rank, c.teams)}</b></div>
+      <div class="kv"><span>Pace</span><b>${c.pace_rank ? ord(c.pace_rank) + " fastest" : "—"}</b></div>
+      ${g.lines ? `<div class="kv"><span>Game</span><b>${g.lines.total ? "Total " + g.lines.total : ""}${g.lines.spread_home !== undefined ? " · " + esc(g.home) + " " + (g.lines.spread_home > 0 ? "+" : "") + g.lines.spread_home : ""}</b></div>` : ""}
+      <div class="mpft"><div><span>Regular Season</span><b>${esc(D.season.slice(0, 4))}</b></div>
+        <button class="cb" id="mpi" aria-label="How the ranks are built">${ICON.info}</button><button class="cb" id="mpsh" aria-label="Share">${ICON.share}</button></div>
+    </div>
+    <h2 class="mpt">${esc(p.opp || "")} Team Defense</h2>
+    <div class="mpf"><span>Recent Games vs</span>${dd("grp", VS_GRP, MUP.grp)}${dd("mkt", TAB_ORDER.map(m => [m, NAME[m]]), MUP.mkt)}</div>
+    <div id="vst"></div>`;
+  $(".bk", mp).onclick = () => history.back();
+  $("#mps", mp).onclick = () => { history.go(-2); setTimeout(() => { if (ST.view !== "props") { ST.view = "props"; save(); tabbar(); renderList(); } const q = $("#q"); if (q) q.focus(); }, 480); };
+  $("#mpm", mp).onclick = leagueSheet;
+  $("#mpsh", mp).onclick = () => { const url = location.href; if (navigator.share) navigator.share({title: `${p.player} vs ${p.opp}`, url: url}).catch(() => {}); else if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => { $("#live").textContent = "Link copied"; }); };
+  $("#mpi", mp).onclick = () => openSheet(`<h2 id="sht">Ranks</h2>
+    <div class="kv"><span>Teams ranked</span><b>${c.teams || "—"}</b></div>
+    <div class="kv"><span>${esc(p.opp || "")} games this season</span><b>${c.rank_n != null ? c.rank_n : c.opp_games || 0}</b></div>
+    <div class="kv"><span>Last season's weight</span><b>${c.rank_n != null ? Math.round(15 / (15 + c.rank_n) * 100) + "%" : "—"}</b></div>
+    <div class="kv"><span>1st</span><b>the toughest</b></div>
+    <div class="acts"><button class="btn pri" id="mpi-ok">Done</button></div>`, s => { $("#mpi-ok", s).onclick = closeSheet; });
+  $$("[data-dd]", mp).forEach(sel => sel.onchange = () => {
+    MUP[sel.dataset.dd] = sel.value; MUP.more = false;
+    $("span", sel.parentNode).textContent = sel.options[sel.selectedIndex].text;
+    vsTable();
+  });
+  vsTable();
+}
+function vsTable() {
+  const el = $("#vst");
+  if (!el || !MUP) return;
+  if (!MUP.rows) { el.innerHTML = '<div class="vsk">' + '<div class="sk"></div>'.repeat(5) + "</div>"; return; }
+  const all = MUP.rows.filter(r => r[5] === MUP.grp), rows = all.slice(0, MUP.more ? 10 : 5), mk = MUP.mkt;
+  if (!rows.length) { el.innerHTML = '<div class="empty"><b>No games</b></div>'; return; }
+  const tr = r => {
+    const v = statValue({pts: r[7], reb: r[8], ast: r[9], fg3m: r[10]}, mk), ln = (r[11] || {})[mk];
+    const res = !ln ? "" : v > ln[0] ? '<i class="up">▲</i>' : v < ln[0] ? '<i class="dn">▼</i>' : "";
+    const d = r[0].slice(5).split("-").map(Number).join("/");
+    return `<tr data-g="${esc(r[1])}" data-t="${esc(r[2])}" data-pid="${r[3]}"><td>${esc(initialName(r[4]))}</td><td>${res}${v === null ? "–" : v}</td>
+      <td>${ln ? ln[0] : "–"}</td><td>${ln ? american(ln[1]) : "–"}</td><td class="cd"><b>${esc(r[2])}</b> ${d}</td></tr>`;
+  };
+  el.innerHTML = `<table class="vs"><colgroup><col style="width:35.5%"><col style="width:16%"><col style="width:15.5%"><col style="width:16%"><col></colgroup>
+    <thead><tr><th>PLAYER</th><th>RESULT</th><th>LINE</th><th>ODDS</th><th>DATE</th></tr></thead><tbody>${rows.map(tr).join("")}</tbody></table>
+    ${all.length > 5 ? `<button class="vsm" id="vsm" aria-expanded="${MUP.more}">${MUP.more ? "Less Results" : "More Results"}${ICON.down}</button>` : ""}`;
+  const m = $("#vsm", el); if (m) m.onclick = () => { MUP.more = !MUP.more; vsTable(); };
+  $$("tr[data-g]", el).forEach(t => { t.onclick = () => boxSheet(t.dataset.g, t.dataset.t, {market: mk, pid: +t.dataset.pid});
+    t.onpointerdown = () => boxGet(t.dataset.g).catch(() => {}); });
 }
 // ── player filters ──
 function activeFilters(without) {
@@ -1683,30 +1982,59 @@ function bounds(logs, k) {
   const v = logs.map(l => l[k]).filter(x => x !== null && x !== undefined);
   return v.length ? [Math.floor(Math.min(...v)), Math.ceil(Math.max(...v))] : null;
 }
+// the With / Without rows: each teammate (out tonight tagged), his games beside and without him, Any / With / W/O
+function mateRows(p, logs, without, dr) {
+  const rep = ((D.inj_report || {})[gameOf(p.gid).date + "|" + p.team] || {}).players || [], mine = logs.filter(l => l.team === p.team);
+  return matesAll(p, without).map(m => {
+    const e = rep.find(x => x.pid === +m.key), v = dr.with[m.key] ? "w" : dr.without[m.key] ? "o" : "";
+    const nw = mine.filter(l => m.played.indexOf(l.gid) >= 0).length, no = mine.filter(l => l.date >= m.since && m.played.indexOf(l.gid) < 0).length;
+    return `<div class="mrr"><span class="av mav">${head(+m.key)}</span><div class="mrn"><b>${esc(m.name)}${e && INJ_C[e.status] ? `<span class="tg ${INJ_C[e.status]}">${INJ_S[e.status]}</span>` : ""}</b>
+      <small>${m.mpg != null ? (+m.mpg).toFixed(1) + " MPG · " : ""}${nw} with · ${no} w/o</small></div>
+      <div class="seg mseg" role="group" aria-label="${esc(m.name)}">${[["", "Any"], ["w", "With"], ["o", "W/O"]].map(([k, t]) =>
+        `<button data-mk2="${m.key}" data-mv="${k}" aria-pressed="${v === k}">${t}</button>`).join("")}</div></div>`;
+  }).join("");
+}
+function bindMates(s, dr, upd) {
+  $$("[data-mk2]", s).forEach(b => b.onclick = () => {
+    const k = b.dataset.mk2, v = b.dataset.mv;
+    delete dr.with[k]; delete dr.without[k];
+    if (v === "w") dr.with[k] = true; else if (v === "o") dr.without[k] = true;
+    $$(`[data-mk2="${k}"]`, s).forEach(x => x.setAttribute("aria-pressed", x === b)); upd();
+  });
+}
+function mateSheet(p, logs, without) {
+  const dr = {with: Object.assign({}, DT.with), without: Object.assign({}, DT.without)};
+  const count = () => windowed(filterLogs(logs, chartF(p, gameOf(p.gid), p.ctx || {}, without, dr)), DT.win, D.season, p.opp).length;
+  openSheet(`<h2 id="sht">With / Without</h2>${mateRows(p, logs, without, dr)}
+    <div class="acts stk"><button class="btn" id="ms-reset">Reset</button><button class="btn pri" id="ms-ok"></button></div>`, s => {
+    const upd = () => { const n = count(); $("#ms-ok", s).textContent = `Show ${n} game${n === 1 ? "" : "s"}`; };
+    bindMates(s, dr, upd);
+    $("#ms-reset", s).onclick = () => { DT.with = {}; DT.without = {}; closeSheet(); updateProp(); };
+    $("#ms-ok", s).onclick = () => { DT.with = dr.with; DT.without = dr.without; closeSheet(); updateProp(); };
+    upd();
+  });
+}
 function playerFilters(p, logs, without) {
   const dr = {home: DT.home, starter: DT.starter, result: DT.result, rest: DT.rest, ranges: Object.assign({}, DT.ranges),
-              without: Object.assign({}, DT.without)};
-  const count = () => windowed(filterLogs(logs, {home: dr.home, starter: dr.starter, result: dr.result, rest: dr.rest,
-    ranges: dr.ranges, without: without.filter(w => dr.without[w.key])}), DT.win, D.season, p.opp).length;
-  const rng = RANGES.map(([k, lab]) => {
+              without: Object.assign({}, DT.without), with: Object.assign({}, DT.with)};
+  const count = () => windowed(filterLogs(logs, chartF(p, gameOf(p.gid), p.ctx || {}, without, dr)), DT.win, D.season, p.opp).length;
+  const rng = RANGES.filter(([k]) => forMarket(k, p.market)).map(([k, lab]) => {
     const b = bounds(logs, k);
     if (!b || b[0] === b[1]) return "";
     const cur = dr.ranges[k] || b;
     return `<div class="rg" data-rk="${k}" data-lo="${b[0]}" data-hi="${b[1]}"><div class="rg-h"><span>${lab}</span><b class="rv">${cur[0]} – ${cur[1]}</b></div>
-      <div class="dual"><div class="trk"></div><div class="fil"></div>${thumbs(lab, b)}</div></div>`;
+      <div class="dual2"><div class="fil"></div>${thumbs(lab, b)}</div><div class="rp-b"><span>${b[0]}</span><span>${b[1]}</span></div></div>`;
   }).join("");
   const segs = SEGS.map(([k, lab, opts]) => `<div class="sg"><span>${lab}</span><div class="seg" role="group" aria-label="${lab}">${opts.map(([v, t]) =>
     `<button data-sk="${k}" data-sv="${v === null ? "" : v}" aria-pressed="${dr[k] === v}">${t}</button>`).join("")}</div></div>`).join("");
-  const wo = without.length ? `<div class="sg"><span>Teammates out tonight</span>${without.map(w =>
-    `<button class="opt" data-wk="${w.key}">Without ${esc(w.name)}<span class="ck">${dr.without[w.key] ? "✓" : ""}</span></button>`).join("")}</div>` : "";
+  const mr = mateRows(p, logs, without, dr), wo = mr ? `<div class="sg"><span>With / Without</span></div>${mr}` : "";
   openSheet(`<h2 id="sht">Filter ${esc(p.player.split(" ").slice(-1)[0])}'s games</h2>${rng}${segs}${wo}
-    <div class="note">Every number on this page uses only the games that pass. L5 / L10 / L20 = the last games that pass.</div>
-    <div class="acts"><button class="btn" id="pf-reset">Reset</button><button class="btn pri" id="pf-ok"></button></div>`, s => {
+    <div class="acts stk"><button class="btn" id="pf-reset">Reset</button><button class="btn pri" id="pf-ok"></button></div>`, s => {
     const upd = () => { const n = count(); $("#pf-ok", s).textContent = `Show ${n} game${n === 1 ? "" : "s"}`; };
     $$(".rg", s).forEach(g => {
       const k = g.dataset.rk, lo = +g.dataset.lo, hi = +g.dataset.hi, fil = $(".fil", g), rv = $(".rv", g);
-      dualRange($(".dual", g), lo, hi, dr.ranges[k] || [lo, hi], 0, (v, fl, fr) => {
-        fil.style.left = (100 * fl) + "%"; fil.style.right = (100 * fr) + "%";
+      dualRange($(".dual2", g), lo, hi, dr.ranges[k] || [lo, hi], 13, (v, fl, fr) => {
+        fil.style.left = `calc(4px + (100% - 26px) * ${fl})`; fil.style.right = `calc(4px + (100% - 26px) * ${fr})`;
         rv.textContent = `${v[0]} – ${v[1]}`;
         if (v[0] === lo && v[1] === hi) delete dr.ranges[k]; else dr.ranges[k] = v.slice();
         upd();
@@ -1716,9 +2044,9 @@ function playerFilters(p, logs, without) {
       const k = b.dataset.sk, raw = b.dataset.sv, v = raw === "" ? null : raw === "true" ? true : raw === "false" ? false : raw;
       dr[k] = v; $$(`[data-sk="${k}"]`, s).forEach(x => x.setAttribute("aria-pressed", x === b)); upd();
     });
-    $$("[data-wk]", s).forEach(b => b.onclick = () => { const k = b.dataset.wk; dr.without[k] = !dr.without[k]; $(".ck", b).textContent = dr.without[k] ? "✓" : ""; upd(); });
-    $("#pf-reset", s).onclick = () => { Object.assign(DT, {home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, dvp: false, def: false, open: {}, ovs: []}); closeSheet(); updateProp(); };
-    $("#pf-ok", s).onclick = () => { Object.assign(DT, {home: dr.home, starter: dr.starter, result: dr.result, rest: dr.rest, ranges: dr.ranges, without: dr.without}); closeSheet(); updateProp(); };
+    bindMates(s, dr, upd);
+    $("#pf-reset", s).onclick = () => { Object.assign(DT, {home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, with: {}, dvp: false, def: false, open: {}, ovs: []}); closeSheet(); updateProp(); };
+    $("#pf-ok", s).onclick = () => { Object.assign(DT, {home: dr.home, starter: dr.starter, result: dr.result, rest: dr.rest, ranges: dr.ranges, without: dr.without, with: dr.with}); closeSheet(); updateProp(); };
     upd();
   });
 }
@@ -1742,19 +2070,21 @@ history.scrollRestoration = "manual";     // Back must not make Safari re-scroll
 // Safari's edge swipe already animates the page away: after one, close without a second slide
 document.addEventListener("touchstart", e => { if (e.touches[0].clientX < 24 || e.touches[0].clientX > innerWidth - 24) EDGE_T = e.timeStamp; }, {passive: true});
 window.addEventListener("popstate", e => {
-  const p = new URLSearchParams(location.hash.slice(1)).get("p"), swiped = e.timeStamp - EDGE_T < 1500;
+  const h = new URLSearchParams(location.hash.slice(1)), p = h.get("p"), swiped = e.timeStamp - EDGE_T < 1500;
   if (!$("#sheet").hidden) closeSheet();
+  if (MUP && !h.get("mu")) closeMatchup(swiped);
   if (p && p !== CUR) openProp(p, false); else if (!p && CUR) closeProp(swiped);
+  if (h.get("mu") && !MUP && CUR) openMatchup(D.props.find(x => x.id === CUR), false);
 });
-document.addEventListener("keydown", e => { if (e.key === "Escape") { if (!$("#sheet").hidden) closeSheet(); else if (CUR) history.back(); } });
+document.addEventListener("keydown", e => { if (e.key === "Escape") { if (!$("#sheet").hidden) closeSheet(); else if (MUP || CUR) history.back(); } });
 document.addEventListener("DOMContentLoaded", () => {
   $("#scrim").onclick = closeSheet;
   sheetDrag();
-  $("#app").addEventListener("click", e => { const b = e.target.closest(".pr[data-id],.mrw[data-id]"); if (b) openProp(b.dataset.id); });
+  $("#app").addEventListener("click", e => { const b = e.target.closest(".pr[data-id],.mrw[data-id],.ijb[data-id]"); if (b) openProp(b.dataset.id); });
   // the big headshot starts loading and decoding the moment a finger lands on a row, so it is ready when the page slides in
   const warm = new Set();
   $("#app").addEventListener("pointerdown", e => {
-    const b = e.target.closest(".pr[data-id],.mrw[data-id]"), pid = b && b.dataset.id.split("|")[1];
+    const b = e.target.closest(".pr[data-id],.mrw[data-id],.ijb[data-id]"), pid = b && b.dataset.id.split("|")[1];
     if (!pid || warm.has(pid)) return;
     warm.add(pid); const im = new Image(); im.src = heroSrc(pid); if (im.decode) im.decode().catch(() => {});
   }, {passive: true});
@@ -1784,6 +2114,7 @@ PAGE = r"""<!doctype html>
 <nav id="tb" class="tb" aria-label="Views"></nav>
 <div class="shade" aria-hidden="true"></div>
 <div id="pg" class="pg" role="dialog" aria-modal="true" aria-label="Prop details" hidden></div>
+<div id="mp" class="pg" role="dialog" aria-modal="true" aria-label="Matchup" hidden></div>
 <div id="scrim" class="scrim" hidden></div>
 <div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="sht" tabindex="-1" hidden></div>
 <div id="live" class="sr" role="status" aria-live="polite"></div>

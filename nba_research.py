@@ -32,6 +32,7 @@ import datetime as dt
 import json
 import math
 import os
+import re
 import sqlite3
 import statistics as st
 from collections import defaultdict
@@ -41,6 +42,7 @@ from zoneinfo import ZoneInfo
 HERE = Path(__file__).resolve().parent
 LINES, NEWS, SHADOW = HERE / "nba_lines.sqlite", HERE / "nba_news.sqlite", HERE / "nba_shadow.sqlite"
 INDEX = HERE / "nba_player_index.json"
+TRACKING = HERE / "nba_tracking.sqlite"
 PROJ_LOG = HERE / "nba_proj_log.sqlite"          # the projection engine's prospective record (prereg test C)
 ET, MT = ZoneInfo("America/New_York"), ZoneInfo("America/Denver")
 # market -> (label, box-score parts). Only the markets the books' feeds carry (nba_lines.STAT_MAP).
@@ -50,8 +52,10 @@ MARKETS = {"points": ("PTS", ("pts",)), "rebounds": ("REB", ("reb",)), "assists"
 MATCHUP_KEY = {"points": "pts", "rebounds": "reb", "assists": "ast", "pra": "pra", "pts_reb": "pts_reb",
                "pts_ast": "pts_ast", "reb_ast": "reb_ast"}           # threes: no matchup factor is computed
 LOG_COLS = ("date", "gid", "team", "opp", "home", "starter", "min", "pts", "reb", "ast", "fg3m", "fga", "fg3a", "fta",
-            "margin", "rest", "usg")   # margin = his team's final margin; rest = days off before the game (0 = back-to-back);
+            "margin", "rest", "usg", "pot_ast", "reb_ch")   # margin = his team's final margin; rest = days off before the game (0 = back-to-back);
                                        # usg = usage % (the share of his team's possessions he used while on the floor)
+                                       # pot_ast / reb_ch = potential assists / rebound chances (nba_tracking.sqlite;
+                                       # None where tracking has no row for that game)
 
 
 def usage(mn, fga, fta, tov, t_fga, t_fta, t_tov, t_min):
@@ -261,12 +265,28 @@ def book_quotes(q, gids):
 REST = LOG_COLS.index("rest")
 
 
-def game_logs(mcon, pids, seasons):
-    """{pid: [log rows in LOG_COLS order]} from the cached box scores, oldest first."""
+def tracking(trk, pids):
+    """{(date, pid): (potential assists, rebound chances)} from nba_tracking.sqlite. The Rebounding feed omits
+    players with no rebound chances, so a tracked game without a rebounding value is 0 chances."""
+    out = {}
+    if trk is None or not pids:
+        return out
+    pids = list(pids)
+    for i in range(0, len(pids), 400):
+        chunk = pids[i:i + 400]
+        for d, pid, pa, rc in trk.execute(f"SELECT date, player_id, potential_ast, reb_chances FROM tracking "
+                                          f"WHERE player_id IN ({','.join('?' * len(chunk))})", chunk):
+            out[(d, pid)] = (pa, rc if rc is not None else (0 if pa is not None else None))
+    return out
+
+
+def game_logs(mcon, pids, seasons, trk=None):
+    """{pid: [log rows in LOG_COLS order]} from the cached box scores, oldest first; trk = nba_tracking.sqlite."""
     out = defaultdict(list)
     if mcon is None or not pids:
         return out
     pids = list(pids)
+    tr = tracking(trk, pids)
     for i in range(0, len(pids), 400):
         chunk = pids[i:i + 400]
         q = ("SELECT p.pid, g.date, p.gid, p.team, CASE WHEN p.team = g.home THEN g.away ELSE g.home END, "
@@ -277,7 +297,7 @@ def game_logs(mcon, pids, seasons):
              f"WHERE p.pid IN ({','.join('?' * len(chunk))}) "
              f"AND g.season IN ({','.join('?' * len(seasons))}) ORDER BY g.date, p.gid")
         for r in mcon.execute(q, chunk + list(seasons)):
-            row = list(r[1:16]) + [None, usage(r[7], r[12], r[14], *r[16:])]
+            row = list(r[1:16]) + [None, usage(r[7], r[12], r[14], *r[16:])] + list(tr.get((r[1], r[0]), (None, None)))
             row[6] = round(row[6] or 0, 1)
             out[r[0]].append(row)
     for rows in out.values():                       # rest: days off since his previous game; none across the summer
@@ -305,7 +325,9 @@ def official_status(ncon, game_dates):
                 "SELECT team, pid, player, status, reason FROM snapshots WHERE game_date=? AND mark=?", (d, mark)):
             teams[(d, team)] = True
             if pid is not None:
-                status[(d, int(pid))] = {"status": st_, "reason": (reason or "")[:80], "published": pub, "team": team}
+                reason = re.sub(r"\s*\d{1,2}:\d{2}\s*\(ET\)\s*$", "", reason or "")   # the parser's game-time column
+                status[(d, int(pid))] = {"status": st_, "reason": reason[:80], "published": pub, "team": team,
+                                         "player": player}
     return status, teams, meta
 
 
@@ -427,6 +449,184 @@ def absences(official, logs_by_team, game_dates, team_last=None):
                                        "fresh": any(g in played for g in (team_last or {}).get(team, []))})
     for v in out.values():
         v.sort(key=lambda a: -a["mpg"])                    # the biggest minutes first: the one the list names
+    return out
+
+
+INJ_ORDER = ("Out", "Doubtful", "Questionable", "Probable")
+ROTATION_MPG = 10.0  # a listed player under 10 minutes a game gets no replacement read (two-ways, the end of the bench)
+MIN_WITHOUT = 2      # games a teammate played beside his absence before his minutes / starts in them are read
+MIN_GAIN = 2.0       # minutes a game a teammate must gain without him to be named
+
+
+def team_boxes(mcon, teams, seasons):
+    """{team: [(gid, date, season, {pid: (starter, min)})]} oldest first, from the cached box scores (players who
+    played; a player missing from a game's box did not play)."""
+    out = defaultdict(list)
+    if mcon is None or not teams:
+        return out
+    seen = {}
+    for gid, d, s, team, pid, st, mn in mcon.execute(
+            f"SELECT g.gid, g.date, g.season, p.team, p.pid, p.starter, p.min FROM player_games p JOIN games g "
+            f"ON g.gid = p.gid WHERE p.team IN ({','.join('?' * len(teams))}) "
+            f"AND g.season IN ({','.join('?' * len(seasons))}) ORDER BY g.date, g.gid", list(teams) + list(seasons)):
+        if (team, gid) not in seen:
+            seen[(team, gid)] = (gid, d, s, {})
+            out[team].append(seen[(team, gid)])
+        seen[(team, gid)][3][pid] = (st or 0, mn or 0.0)
+    return out
+
+
+def appearances(mcon, pids, seasons):
+    """{pid: [(date, season, team, starter, min)]} every game each player played, any team, oldest first."""
+    out = defaultdict(list)
+    if mcon is None or not pids:
+        return out
+    pids = list(pids)
+    for i in range(0, len(pids), 400):
+        chunk = pids[i:i + 400]
+        for pid, d, s, team, st, mn in mcon.execute(
+                f"SELECT p.pid, g.date, g.season, p.team, p.starter, p.min FROM player_games p JOIN games g ON g.gid = p.gid "
+                f"WHERE p.pid IN ({','.join('?' * len(chunk))}) AND g.season IN ({','.join('?' * len(seasons))}) "
+                f"ORDER BY g.date", chunk + list(seasons)):
+            out[pid].append((d, s, team, st or 0, mn or 0.0))
+    return out
+
+
+def depth_read(boxes, x, mates, stays):
+    """How the team played the games player x missed. boxes: the team's team_boxes rows; mates: the teammates to read;
+    stays: {season: True} when x was still on the team after his last game that season (sitting, not traded), so
+    the team's later games that season count as missed. Each teammate is read over his own first-to-last game for
+    the team (a game inside that span he sat counts as 0 minutes).
+    -> (games x played, games x missed, {pid: [n_with, n_without, min_with, min_without, starts_with, starts_without]})"""
+    by_season = defaultdict(list)
+    for b in boxes:
+        by_season[b[2]].append(b)
+    out, played, missed = defaultdict(lambda: [0, 0, 0.0, 0.0, 0, 0]), 0, 0
+    for s, gs in by_season.items():
+        at = [i for i, b in enumerate(gs) if x in b[3]]
+        if at:
+            lo, hi = at[0], len(gs) - 1 if stays.get(s) else at[-1]
+        elif stays.get(s):
+            lo, hi = 0, len(gs) - 1                      # on the team all season without a game
+        else:
+            continue
+        played += sum(1 for b in gs[lo:hi + 1] if x in b[3])
+        missed += sum(1 for b in gs[lo:hi + 1] if x not in b[3])
+        for y in mates:
+            ay = [i for i, b in enumerate(gs) if y in b[3]]
+            if not ay:
+                continue
+            for b in gs[max(lo, ay[0]):min(hi, ay[-1]) + 1]:
+                st, mn = b[3].get(y, (0, 0.0))
+                k = 0 if x in b[3] else 1
+                r = out[y]
+                r[k] += 1
+                r[2 + k] += mn
+                r[4 + k] += st
+    return played, missed, out
+
+
+def team_mates(boxes, roster):
+    """{team: {"gids": [its games, oldest first], "mates": [{pid, name, since, on, mpg, gp}]}} — everyone on each
+    team's roster now who has played for it in the cached seasons, the most minutes a game first. on: "1" / "0" per
+    team game (he played / did not); since: his first game for the team. The prop page's With / Without filter."""
+    out = {}
+    for team, bs in boxes.items():
+        mates = []
+        for k, v in roster.items():
+            pid = int(k)
+            if v[0] != team:
+                continue
+            on = "".join("1" if pid in b[3] else "0" for b in bs)
+            if "1" not in on:
+                continue
+            mins = [b[3][pid][1] for b in bs if pid in b[3]]
+            mates.append({"pid": pid, "name": v[1], "since": bs[on.index("1")][1], "on": on,
+                          "mpg": round(sum(mins) / len(mins), 1), "gp": len(mins)})
+        out[team] = {"gids": [b[0] for b in bs], "mates": sorted(mates, key=lambda m: -m["mpg"])}
+    return out
+
+
+def _pos_set(pos):
+    return set((pos or "").replace("-", ""))
+
+
+def injury_report(mcon, official, teams_listed, report_meta, games, roster, seasons, boxes=None):
+    """{"date|team": {"listed", "published", "players": [...]}} — every player on each slate team's latest official
+    report (not Available), worst status then most minutes first: his minutes a game (this season, else last), whether
+    he starts, fresh (he played in one of the team's last FRESH_GAMES games: news), and from the games he missed for the team (this season and last), the teammates who gained 2+ minutes a
+    game and, for a starter, who started in his place. With no such games, the bench player at his position with the
+    most minutes is named for the start (how = "position"). No read for a player without a game for the team (it has
+    played without him all along) or a bench player who has missed more of its games than he played (the games he
+    played are the odd ones). roster: {pid: [team, name, pos]} (the player index)."""
+    season = seasons[-1]
+    slate = sorted({(g["date_et"], t) for g in games for t in (g["home"], g["away"])})
+    listed = defaultdict(list)
+    for (d, pid), s in official.items():
+        if s["status"] in INJ_ORDER and (d, s.get("team")) in teams_listed:
+            listed[(d, s["team"])].append((pid, s))
+    if boxes is None:
+        boxes = team_boxes(mcon, sorted({t for _, t in slate}), seasons)
+    apps = appearances(mcon, {pid for v in listed.values() for pid, _ in v}
+                       | {int(k) for k, v in roster.items() if v[0] in {t for _, t in slate}}, seasons)
+    name = lambda pid, s=None: (roster.get(str(pid)) or [None, None])[1] or (s or {}).get("player") or str(pid)
+
+    def form(pid, team):                          # (mpg, games, season of them, starter) from his recent games
+        rows = apps.get(pid, [])
+        cur = [r for r in rows if r[1] == season]
+        use = cur or [r for r in rows if r[1] != season]
+        if not use:
+            return None, 0, None, False
+        recent = ([r for r in rows if r[2] == team] or rows)[-20:]
+        return (round(sum(r[4] for r in use) / len(use), 1), len(use), use[-1][1],
+                sum(r[3] for r in recent) >= len(recent) / 2)
+
+    out = {}
+    for d, team in slate:
+        sick = {pid for pid, s in listed.get((d, team), []) if s["status"] in ("Out", "Doubtful")}
+        mates = {int(k): v for k, v in roster.items() if v[0] == team and int(k) not in sick}
+        last = [b for b in boxes.get(team, []) if b[1] < d][-FRESH_GAMES:]       # the team's last games before tonight
+        players = []
+        for pid, s in listed.get((d, team), []):
+            mpg, gp, ssn, starter = form(pid, team)
+            e = {"pid": pid, "name": name(pid, s), "pos": (roster.get(str(pid)) or ["", "", ""])[2] or "",
+                 "status": s["status"], "reason": s.get("reason") or "", "mpg": mpg, "gp": gp, "season": ssn,
+                 "starter": bool(starter), "missed": 0, "starts": None, "minutes": [],
+                 "fresh": any(pid in b[3] for b in last)}
+            if mpg is not None and mpg >= ROTATION_MPG:
+                rows = apps.get(pid, [])
+                stays = {}
+                for sn in seasons:
+                    in_s = [r for r in rows if r[1] == sn]
+                    stays[sn] = (in_s[-1][2] == team) if in_s else (sn == season and bool(rows) and rows[-1][2] == team)
+                played, missed, rd = depth_read(boxes.get(team, []), pid, [m for m in mates if m != pid], stays)
+                e["missed"] = missed
+                if not played:
+                    rd = {}               # no game for this team yet: it has played without him all along
+                elif not starter and played < missed:
+                    rd = {}               # a bench player out more often than in: the games he played are the odd ones
+                gains = []
+                for y, (nw, no, mw, mo, sw, so) in rd.items():
+                    if no >= MIN_WITHOUT and nw >= MIN_WITHOUT and mo / no - mw / nw >= MIN_GAIN:
+                        gains.append({"pid": y, "name": name(y), "gain": round(mo / no - mw / nw, 1),
+                                      "mpg": round(mo / no, 1), "n": no})
+                e["minutes"] = sorted(gains, key=lambda g: -g["gain"])[:3]
+                if starter and played:
+                    best = max(((so / no - (sw / nw if nw else 0), y, so, no) for y, (nw, no, mw, mo, sw, so) in rd.items()
+                                if no >= MIN_WITHOUT and nw >= MIN_WITHOUT and so / no >= .5 and sw / nw < .5), default=None)
+                    if best:
+                        e["starts"] = {"pid": best[1], "name": name(best[1]), "k": best[2], "n": best[3], "how": "games"}
+                    else:
+                        ps = _pos_set(e["pos"])
+                        bench = [(form(y, team), y) for y, v in mates.items() if y != pid and _pos_set(v[2]) & ps]
+                        bench = [(f[0], y) for f, y in bench if f[0] is not None and not f[3]]
+                        if bench:
+                            y = max(bench)[1]
+                            e["starts"] = {"pid": y, "name": name(y), "k": None, "n": None, "how": "position"}
+            players.append(e)
+        players.sort(key=lambda e: (INJ_ORDER.index(e["status"]), -(e["mpg"] or 0)))
+        out[f"{d}|{team}"] = {"listed": (d, team) in teams_listed, "published": (report_meta.get(d) or {}).get("published"),
+                              "players": players}
     return out
 
 
@@ -589,7 +789,7 @@ def correlations(props, logs):
 
 
 # ── the payload ──────────────────────────────────────────────────────────────────────────────────────────
-def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None, index=None, box_get=None):
+def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None, index=None, box_get=None, tracking=None):
     import nba_matchup as MU
     now = now or dt.datetime.now(dt.timezone.utc)
     if sched is None:
@@ -625,7 +825,8 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
                       "main": (books.get("fd") or {}).get("main") or (books.get("dk") or {}).get("main")})
     season = season_of(dates[0])
     pids = {p["pid"] for p in props}
-    logs = game_logs(mcon, pids, (prev_season(season), season))
+    trk = _ro(tracking or TRACKING)
+    logs = game_logs(mcon, pids, (prev_season(season), season), trk)
     for p in props:                                     # a player with no index entry: his latest box team
         if p["team"] is None and logs.get(p["pid"]):
             t = logs[p["pid"]][-1][2]
@@ -709,6 +910,9 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
             for t in (h, a):
                 team_last[t] = (team_last[t] + [gid])[-FRESH_GAMES:]
     absent = absences(official, by_team, dates, team_last)
+    both = (prev_season(season), season)
+    boxes = team_boxes(mcon, sorted({t for g in games for t in (g["home"], g["away"])}), both)
+    inj_report = injury_report(mcon, official, teams_listed, report_meta, games, idx, both, boxes=boxes)
     corr = correlations(props, logs)
     players = {}
     for pid in pids:
@@ -752,12 +956,14 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
                                        or (idx.get(str(a["pid"])) or [None, None])[1]) for a in v]
                      for (d, t), v in absent.items()},
         "related": corr,
+        "inj_report": inj_report,
+        "mates": team_mates(boxes, idx),
         # past games are filtered by the tier their opponent sits in (DvP / Def Rank chips): this season's ranks
         # as of the slate date, last season's as it finished
         "ranks": {k: v for k, v in ranks.items()},
         "proj_players": proj_players, "proj_meta": proj_meta,
     }
-    for c in (q, ncon, sh, mcon):
+    for c in (q, ncon, sh, mcon, trk):
         if c is not None:
             c.close()
     return out
