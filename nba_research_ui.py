@@ -373,6 +373,9 @@ th.r,td.r{text-align:right}
 .ph{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8.3px;height:calc(var(--st) + 42.8px);
 padding:var(--st) 15.3px 0;pointer-events:none}
 .ph>*{pointer-events:auto}
+/* what scrolls under the floating header fades out behind its title, as on the reference */
+.ph::before{content:"";position:absolute;left:0;right:0;top:0;bottom:-22px;z-index:-1;pointer-events:none;
+background:linear-gradient(#000 0,#000 calc(100% - 34px),rgba(0,0,0,0))}
 .cb{flex:none;display:inline-flex;align-items:center;justify-content:center;width:42.8px;height:42.8px;border-radius:50%;
 border:1px solid rgba(255,255,255,.1);background:rgba(19,19,19,.86);color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.55);
 -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
