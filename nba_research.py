@@ -46,6 +46,7 @@ TRACKING = HERE / "nba_tracking.sqlite"
 PROJ_LOG = HERE / "nba_proj_log.sqlite"          # the projection engine's prospective record (prereg test C)
 LINEUPS = HERE / "nba_lineups.sqlite"            # NBA.com's daily lineups as seen (nba_lineups_poll.py, the VM cron)
 CLOSE_BOARDS = HERE / "nba_close_boards.json"    # each started game's last board before tip (closing_boards), cached
+SLATE_ROLL_H = 6     # the slate moves on to the next day at 6 AM ET (4 AM MT), not midnight: late games stay on it
 USUAL_GAMES = 10                                 # a team's usual starters: its most frequent five over its last 10 games
 USUAL_MIN = 3                                    # ...this season, once it has 3 (before that, no starter is marked new)
 ET, MT = ZoneInfo("America/New_York"), ZoneInfo("America/Denver")
@@ -884,7 +885,7 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
     if sched is None:
         import nba_rosters as R
         sched = R.schedule()
-    today = now.astimezone(ET).date()
+    today = (now.astimezone(ET) - dt.timedelta(hours=SLATE_ROLL_H)).date()
     dates = [(today + dt.timedelta(days=k)).isoformat() for k in (0, 1)]
     games = [g for g in sched if g["date_et"] in dates]
     gids = [g["gid"] for g in games]

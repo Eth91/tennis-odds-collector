@@ -132,8 +132,7 @@ def live_box(gid):
             "awayTeam": {"score": 66, "players": []}}
 
 
-@pytest.fixture(scope="module")
-def payload():
+def built(now):
     d = pathlib.Path(tempfile.mkdtemp())
     stores(d)
     tr = sqlite3.connect(d / "tracking.sqlite")
@@ -142,8 +141,20 @@ def payload():
     tr.execute("INSERT INTO tracking (date, player_id, potential_ast, reb_chances) VALUES ('2026-09-01', 1, 14, 9)")
     tr.execute("INSERT INTO tracking (date, player_id, potential_ast, reb_chances) VALUES ('2026-09-02', 1, 11, NULL)")
     tr.commit(); tr.close()
-    return RS.build(now=NOW, sched=SCHED, lines=d / "lines.sqlite", news=d / "news.sqlite", shadow=d / "shadow.sqlite",
+    return RS.build(now=now, sched=SCHED, lines=d / "lines.sqlite", news=d / "news.sqlite", shadow=d / "shadow.sqlite",
                     matchup=d / "matchup.sqlite", index=d / "index.json", box_get=live_box, tracking=d / "tracking.sqlite")
+
+
+@pytest.fixture(scope="module")
+def payload():
+    return built(NOW)
+
+
+def test_slate_holds_until_6am_et():
+    # 1:30 AM ET (11:30 PM MT): still Monday's slate, the late game and its props on it; 6:30 AM ET: Tuesday's
+    late = built(NOW + dt.timedelta(hours=6))
+    assert late["dates"][0] == GD and any(g["gid"] == "G1" for g in late["games"]) and late["props"]
+    assert built(NOW + dt.timedelta(hours=11))["dates"][0] == "2026-10-27"
 
 
 def test_payload_props_and_books(payload):
