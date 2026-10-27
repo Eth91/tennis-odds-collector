@@ -131,3 +131,23 @@ at the selected line, the model version, the cutoff and "as of" time, the inputs
 and a stale state when its inputs are old. Every element is labeled as a model estimate, kept apart
 from book prices, never a pick. Steals, blocks and turnovers are shown as projections with "no book
 line collected".
+
+## Amendment (2026-10-27): prospective grading fixes, before any forecast was graded
+
+The independent audit (`NBA_PROJECTION_AUDIT.md`) found the test-C grader biased in ways that favour the
+model. It was fixed on 2026-10-27, before the first nightly grading run and before any outcome had been
+seen. The fixes apply to every version.
+
+- **C2, moved lines:** a prop whose line moved after the cutoff forecast was dropped from the comparison
+  with the close. It is now graded at the close's main line, using the forecast's logged distribution
+  (`forecast_pmf`, logged from 2026-10-27). A market pulled before tip keeps the model's own score but has
+  no close. The counts are reported.
+- **C4, CLV:** CLV is now computed within one book only. Where the line moved, the report says whether it
+  moved toward the side the model favoured.
+- **C5, books:** the FanDuel decision lines use FanDuel rows only; DraftKings fall-back rows are
+  reported separately.
+- **C6, postponed games:** a forecast whose tip's ET date is not the game's date is void.
+- **C7, clustering:** bootstrap clusters are ET dates.
+
+The decision lines themselves are unchanged. This includes the calibration rule (deciles in 10–12%),
+which as written can only pass with an exactly uniform histogram (audit C3). It stays as registered.

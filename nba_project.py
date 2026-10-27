@@ -501,7 +501,7 @@ def availability_table(news_db, matchup_db, lines_db=None, cutoff_min=CUTOFF_MIN
     return {k: list(v) for k, v in out.items()}
 
 
-def log_forecasts(db, items, now):
+def log_forecasts(db, items, now, version=None):
     """Prospective record (prereg test C): one 'first' row per (gid, pid, market, version) the first time it is
     projected, and a 'cutoff' row rewritten on every build until T−CUTOFF_MIN — so after the cutoff it holds the
     last forecast made before it. items: dicts with gid, pid, market, tip, line, book, over, under, p_over, p_push,
@@ -512,6 +512,8 @@ def log_forecasts(db, items, now):
     con.execute("CREATE TABLE IF NOT EXISTS forecasts (kind TEXT, logged_at TEXT, gid TEXT, pid INTEGER, market TEXT, "
                 "tip TEXT, line REAL, book TEXT, over REAL, under REAL, p_over REAL, p_push REAL, p_blend REAL, "
                 "mean REAL, version TEXT, PRIMARY KEY (kind, gid, pid, market, version))")
+    con.execute("CREATE TABLE IF NOT EXISTS forecast_pmf (kind TEXT, gid TEXT, pid INTEGER, market TEXT, version TEXT, "
+                "pmf TEXT, PRIMARY KEY (kind, gid, pid, market, version))")
     stamp = now.astimezone(dt_.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
     n = 0
     for it in items:
@@ -519,9 +521,13 @@ def log_forecasts(db, items, now):
         if now >= tip - dt_.timedelta(minutes=CUTOFF_MIN):
             continue                                          # past the cutoff: the record is closed
         vals = (stamp, it["gid"], it["pid"], it["market"], str(it["tip"]), it["line"], it["book"], it["over"],
-                it["under"], it["p_over"], it["p_push"], it["p_blend"], it["mean"], VERSION)
+                it["under"], it["p_over"], it["p_push"], it["p_blend"], it["mean"], version or VERSION)
         con.execute("INSERT OR IGNORE INTO forecasts VALUES ('first',?,?,?,?,?,?,?,?,?,?,?,?,?,?)", vals)
         con.execute("INSERT OR REPLACE INTO forecasts VALUES ('cutoff',?,?,?,?,?,?,?,?,?,?,?,?,?,?)", vals)
+        if it.get("pmf") is not None:                        # the distribution, so a moved line can still be graded
+            pv = (it["gid"], it["pid"], it["market"], version or VERSION, json.dumps(it["pmf"]))
+            con.execute("INSERT OR IGNORE INTO forecast_pmf VALUES ('first',?,?,?,?,?)", pv)
+            con.execute("INSERT OR REPLACE INTO forecast_pmf VALUES ('cutoff',?,?,?,?,?)", pv)
         n += 1
     con.commit()
     con.close()
@@ -661,7 +667,7 @@ def for_payload(props, games, now, log_db=None, cache=None, gamelogs=None, match
                 items.append({"gid": p["gid"], "pid": p["pid"], "market": p["market"], "tip": gmap[p["gid"]].get("utc"),
                               "line": line, "book": bk, "over": r[1], "under": r[2], "p_over": pc, "p_push": float(pp[0]),
                               "p_blend": float(blend(np.array([pc]), np.array([no_vig(r[1], r[2])]), PROJ_BLEND_W)[0]),
-                              "mean": s["mean"]})
+                              "mean": s["mean"], "pmf": s["pmf"]})
             meta["logged"] = log_forecasts(log_db, items, now)
         return by_prop, players, meta
     except Exception as e:                                                   # noqa: BLE001

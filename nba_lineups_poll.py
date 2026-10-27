@@ -16,7 +16,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-DB = HERE / "nba_lineups.sqlite"
+DB = HERE / ".projdata" / "lineups_live.sqlite" if (HERE / ".projdata").exists() else HERE / "nba_lineups.sqlite"
 H = {"Referer": "https://www.nba.com/", "Origin": "https://www.nba.com", "Accept": "application/json"}
 DDL = "CREATE TABLE IF NOT EXISTS snaps (fetched_at TEXT, date_et TEXT, sha TEXT, body BLOB)"
 

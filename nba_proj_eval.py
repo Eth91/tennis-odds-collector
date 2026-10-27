@@ -524,16 +524,47 @@ def verdicts(P, prospective=None):
 
 
 # ── prospective test C (VM, nightly): the logged forecasts against results and the close ──────────────────
-def prospective(log_db, lines_db, matchup_db, out_json):
-    """Grade every 'cutoff' forecast (the last one made before tip − 30 min) whose game is final:
-    log loss of the model, the blend and the close (no-vig at the same line, the board as of tip), and CLV of
-    the 'first' forecast: no-vig close probability of the side the model favored minus the no-vig probability
-    when it was made (positive = the close moved toward the model; not profit). Writes out_json."""
+def p_at(pmf, line):
+    """P(over | no push) at `line` from a compact pmf [start, [p...]]."""
+    start, vals = pmf
+    o = sum(v for k, v in enumerate(vals) if start + k > line)
+    u = sum(v for k, v in enumerate(vals) if start + k < line)
+    return o / max(o + u, 1e-9)
+
+
+def _close_main(st):
+    """The close's main line: the two-sided rung whose no-vig over probability is nearest 0.5 (None if pulled)."""
+    two = {}
+    for (ln, side), odds in st.items():
+        if odds:
+            two.setdefault(ln, {})[side] = odds
+    best = [(abs(float(NP.no_vig(v["over"], v["under"])) - .5), ln) for ln, v in two.items() if "over" in v and "under" in v]
+    return min(best)[1] if best else None
+
+
+def _et_date(tip):
+    from zoneinfo import ZoneInfo
+    return dt.datetime.fromisoformat(str(tip).replace("Z", "+00:00")).astimezone(ZoneInfo("America/New_York")).date().isoformat()
+
+
+def prospective(log_db, lines_db, matchup_db, out_json, version=None, recs_out=None):
+    """Grade every 'cutoff' forecast (the last one made before tip − 30 min) whose game is final, against the
+    result and the same book's close (the board strictly before that forecast's own tip). Audit fixes
+    (NBA_PROJECTION_AUDIT.md C2, C4-C7, C13), applied before any record was graded:
+      * a prop whose line moved is graded at the close's main line, using the forecast's logged pmf (not dropped);
+        a market pulled before tip keeps the model's own score but has no close;
+      * a forecast whose tip's ET date is not the game's date is void (a postponed game's stale forecast);
+      * CLV only within one book: at the same line, the change in the no-vig probability of the side the
+        model favoured; where the line moved, whether it moved toward that side;
+      * bootstrap clusters are ET dates; decision lines can filter by book.
+    Writes out_json."""
     import nba_research as R
-    import sqlite3 as sq
-    out = {"generated_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"), "version": NP.VERSION,
+    version = version or NP.VERSION
+    out = {"generated_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"), "version": version,
            "graded": 0, "note": "prospective test C (NBA_PROJECTION_PREREG.md); small samples are reported as they are"}
     lg, q, m = PD._ro(log_db), PD._ro(lines_db), PD._ro(matchup_db)
+    if lg is not None and not lg.execute("SELECT 1 FROM sqlite_master WHERE name = 'forecasts'").fetchone():
+        lg = None                                              # no forecast logged yet
     if lg is None or q is None or m is None:
         out["error"] = "missing store"
         Path(out_json).write_text(json.dumps(out))
@@ -541,78 +572,124 @@ def prospective(log_db, lines_db, matchup_db, out_json):
     fc = defaultdict(dict)
     for kind, gid, pid, mk, tip, line, book, o, u, po, pp, pb, mean in lg.execute(
             "SELECT kind, gid, pid, market, tip, line, book, over, under, p_over, p_push, p_blend, mean FROM forecasts "
-            "WHERE version = ?", (NP.VERSION,)):
+            "WHERE version = ?", (version,)):
         fc[(gid, pid, mk)][kind] = {"tip": tip, "line": line, "book": book, "over": o, "under": u, "p": po, "pb": pb}
+    pmfs = {}
+    if lg.execute("SELECT 1 FROM sqlite_master WHERE name = 'forecast_pmf'").fetchone():
+        for kind, gid, pid, mk, js in lg.execute("SELECT kind, gid, pid, market, pmf FROM forecast_pmf WHERE version = ?", (version,)):
+            pmfs[(kind, gid, pid, mk)] = json.loads(js)
+    final = {g: d for g, d in m.execute("SELECT gid, date FROM games WHERE home_pts IS NOT NULL")}
     box = {}
     for gid, pid, mn, pts, reb, ast, fg3m, stl, blk, tov in m.execute(
             "SELECT p.gid, p.pid, p.min, p.pts, p.reb, p.ast, p.fg3m, p.stl, p.blk, p.tov FROM player_games p JOIN games g "
             "ON g.gid = p.gid WHERE g.home_pts IS NOT NULL"):
         box[(gid, pid)] = {"min": mn, "pts": pts, "reb": reb, "ast": ast, "fg3m": fg3m, "stl": stl, "blk": blk, "tov": tov}
-    gids = sorted({k[0] for k in fc if any(k[0] == g for g, _ in box)})
-    close = {}
+    gids = sorted({k[0] for k in fc} & set(final))
+    tips_by = defaultdict(set)
+    for (g, _, _), kinds in fc.items():
+        for kk in ("cutoff", "first"):
+            if kinds.get(kk):
+                tips_by[g].add(str(kinds[kk]["tip"])[:19].replace("Z", ""))
+    close = {}                                                 # (gid, pid, stat, book, tip) -> board state
     if gids:
-        tips = {g: t for g, t in q.execute(f"SELECT gid, MIN(tip_utc) FROM quotes WHERE gid IN ({','.join('?' * len(gids))}) "
-                                           f"GROUP BY gid", gids)}
-        # the close is the board before the tip the forecast was made against: a postponed game that was
-        # rescheduled keeps its gid, and the quotes' earliest tip would be the original date
-        for (g, _, _), kinds in fc.items():
-            t = (kinds.get("cutoff") or {}).get("tip")
-            if t:
-                tips[g] = t
         rows = q.execute(f"SELECT seen_at, book, gid, pid, stat, line, side, odds FROM quotes WHERE gid IN "
                          f"({','.join('?' * len(gids))}) AND pid IS NOT NULL ORDER BY seen_at", gids)
         for t, changed in R.replay(r for r in rows if r[4] in PD.MARKET_PARTS):
             for k, st in changed.items():
-                if t < (tips.get(k[0]) or "")[:19]:
-                    close[k] = dict(st)
+                for T in tips_by.get(k[0], ()):
+                    if t < T:
+                        close[k + (T,)] = dict(st)
+    n = defaultdict(int)
     recs = []
     for (gid, pid, mk), kinds in fc.items():
         c = kinds.get("cutoff")
+        if c is None or gid not in final:
+            continue                                           # not final yet
+        if _et_date(c["tip"]) != final[gid]:
+            n["void_postponed"] += 1
+            continue
         b = box.get((gid, pid))
-        if c is None or b is None or not b["min"]:
-            continue                                           # not final yet, or he did not play (void)
+        if b is None or not b["min"]:
+            n["void_dnp"] += 1
+            continue
         actual = sum(b[s] for s in PD.MARKET_PARTS[mk])
-        if actual == c["line"]:
-            continue                                           # push: void
-        st = close.get((gid, pid, mk, c["book"])) or {}
-        co, cu = st.get((c["line"], "over")), st.get((c["line"], "under"))
-        p_close = float(NP.no_vig(co, cu)) if co and cu else None
+        T = str(c["tip"])[:19].replace("Z", "")
+        st = close.get((gid, pid, mk, c["book"], T)) or {}
+        line, p, pb, moved, pc = c["line"], c["p"], c["pb"], False, None
+        co, cu = st.get((line, "over")), st.get((line, "under"))
+        if co and cu:
+            pc = float(NP.no_vig(co, cu))
+        else:
+            main = _close_main(st)
+            pm = pmfs.get(("cutoff", gid, pid, mk))
+            if main is None:
+                n["pulled_before_tip"] += 1                    # no close: graded for the model only
+            elif pm is None:
+                n["moved_no_pmf"] += 1
+            else:
+                line, moved, pb = main, True, None
+                p = p_at(pm, main)
+                pc = float(NP.no_vig(st[(main, "over")], st[(main, "under")]))
+                n["regraded_at_moved_line"] += 1
+        if actual == line:
+            n["void_push"] += 1
+            continue
         f = kinds.get("first")
-        clv = None
-        if f and p_close is not None and f["line"] == c["line"]:
+        clv, toward = None, None
+        if f and f["book"] == c["book"]:
             p_then = float(NP.no_vig(f["over"], f["under"]))
             side_over = f["p"] >= p_then
-            clv = (p_close - p_then) if side_over else (p_then - p_close)
-        recs.append({"y": float(actual > c["line"]), "p": c["p"], "pb": c["pb"], "pc": p_close, "clv": clv,
-                     "date": c["tip"][:10], "market": mk})
+            fo, fu = st.get((f["line"], "over")), st.get((f["line"], "under"))
+            if fo and fu:
+                pcl = float(NP.no_vig(fo, fu))
+                clv = (pcl - p_then) if side_over else (p_then - pcl)
+            elif _close_main(st) is not None and _close_main(st) != f["line"]:
+                toward = (_close_main(st) > f["line"]) == side_over   # a higher close line means the over got pricier
+        recs.append({"y": float(actual > line), "p": p, "pb": pb, "pc": pc, "clv": clv, "toward": toward,
+                     "date": _et_date(c["tip"]), "market": mk, "book": c["book"], "moved": moved,
+                     "key": (gid, pid, mk, line)})
     out["graded"] = len(recs)
+    out["counts"] = dict(n)
+    if recs_out is not None:
+        recs_out.extend(recs)
     if recs:
         y = np.array([r["y"] for r in recs])
         out["model_logloss"] = float(logloss(np.array([r["p"] for r in recs]), y).mean())
-        out["blend_logloss"] = float(logloss(np.array([r["pb"] for r in recs]), y).mean())
-        # realized calibration of the forward record (monitoring; the prereg's lines are judged on n >= 2,000)
+        wb = [r for r in recs if r["pb"] is not None]
+        if wb:
+            out["blend_logloss"] = float(logloss(np.array([r["pb"] for r in wb]), np.array([r["y"] for r in wb])).mean())
+            out["reliability_blend"] = reliability(np.array([r["pb"] for r in wb]), np.array([r["y"] for r in wb]))
         out["reliability_model"] = reliability(np.array([r["p"] for r in recs]), y)
-        out["reliability_blend"] = reliability(np.array([r["pb"] for r in recs]), y)
-        wc = [r for r in recs if r["pc"] is not None]
-        if wc:
+        for tag, sel in (("", lambda r: True), ("_fd", lambda r: r["book"] == "fd")):
+            wc = [r for r in recs if r["pc"] is not None and sel(r)]
+            if not wc:
+                continue
             yc = np.array([r["y"] for r in wc])
-            out["with_close"] = len(wc)
-            out["close_logloss"] = float(logloss(np.array([r["pc"] for r in wc]), yc).mean())
-            out["reliability_close"] = reliability(np.array([r["pc"] for r in wc]), yc)
-            out["model_minus_close"] = list(boot_ci(logloss(np.array([r["p"] for r in wc]), yc) - logloss(np.array([r["pc"] for r in wc]), yc),
-                                                    [r["date"] for r in wc], reps=1000))
-            out["blend_minus_close"] = list(boot_ci(logloss(np.array([r["pb"] for r in wc]), yc) - logloss(np.array([r["pc"] for r in wc]), yc),
-                                                    [r["date"] for r in wc], reps=1000))
+            dts = [r["date"] for r in wc]
+            out["with_close" + tag] = len(wc)
+            out["close_logloss" + tag] = float(logloss(np.array([r["pc"] for r in wc]), yc).mean())
+            out["model_minus_close" + tag] = list(boot_ci(logloss(np.array([r["p"] for r in wc]), yc)
+                                                          - logloss(np.array([r["pc"] for r in wc]), yc), dts, reps=1000))
+            wcb = [r for r in wc if r["pb"] is not None]
+            if wcb:
+                yb = np.array([r["y"] for r in wcb])
+                out["blend_minus_close" + tag] = list(boot_ci(logloss(np.array([r["pb"] for r in wcb]), yb)
+                                                              - logloss(np.array([r["pc"] for r in wcb]), yb),
+                                                              [r["date"] for r in wcb], reps=1000))
+            if not tag:
+                out["reliability_close"] = reliability(np.array([r["pc"] for r in wc]), yc)
         cl = [r["clv"] for r in recs if r["clv"] is not None]
         if cl:
             out["clv"] = {"n": len(cl), "mean": float(np.mean(cl)), "share_positive": float(np.mean(np.array(cl) > 0))}
+        tw = [r["toward"] for r in recs if r["toward"] is not None]
+        if tw:
+            out["moved_toward_model"] = {"n": len(tw), "share": float(np.mean(tw))}
         out["from"], out["to"] = min(r["date"] for r in recs), max(r["date"] for r in recs)
     tmp = Path(str(out_json) + ".tmp")
     tmp.write_text(json.dumps(out))
     import os
     os.replace(tmp, out_json)
     return out
-
 
 if __name__ == "__main__":
     main()
