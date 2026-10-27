@@ -227,3 +227,21 @@ UTC registration.
 
 **Development replay with v3 (2026-10-22..26):** the same 5 signals. Few of this season's games are WOWY games
 yet.
+
+# AMENDMENT 4: backtest WOWY's inclusion on bets (written 2026-10-27, about 08:25 UTC, before it was run)
+**User:** "backtest WOWY's inclusion."
+
+- **Props:** the archive's tip lines in 2023-24 and 2024-25, absence games 2–3 (as in Test B), priced by v2 and by
+  v3.
+- **Calibration:** β fit for each model by maximum likelihood on 2023-24 (as in amendment 2).
+- **Reported on 2024-25, for all props and for those where v3 has WOWY games (n ≥ 1):**
+  - log loss for the book, each calibrated model and each raw model;
+  - the number and ROI of EV′ ≥ 5% sides, by side;
+  - ROI by raw-EV band.
+- **Decision (fixed now):** ROLE_OPEN reverts to v2 before its 13:00 UTC registration if both hold:
+  1. v3's calibrated log loss on 2024-25 is worse than v2's;
+  2. v3's EV′ ≥ 5% ROI on 2024-25 is below v2's.
+
+  Otherwise it stays on v3.
+- **Honest limit:** both seasons have been used (Test B, amendment 2), and tip lines are not openers. This
+  compares two versions; it does not show an edge.
