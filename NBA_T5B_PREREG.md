@@ -45,3 +45,17 @@ Everything else is T5's rule:
 
 **In-sample check:** what the filters would have done on 2026-10-22..25 is reported once and labeled
 in-sample, not evidence. That window chose them.
+
+## In-sample check (2026-10-27, games 2026-10-22..25). These nights chose the filters, so this is not evidence
+- **T5 triggers 258 → T5b signals 105.** Dropped: 56 not confirmed at FanDuel's next poll, 2 for status,
+  95 where the model disagreed.
+- **ROI −19.8%** [−29%, +13%]; T5 was −9.5%.
+- **CLV −0.45 points**, positive on 30%; T5 was −1.1.
+- By timing: 6 h+ −11% (n 50), 2–6 h −29% (n 37), under 2 h −25% (n 18).
+- **Not an overs week.** On all FanDuel main lines at tip − 30 those nights, overs hit 49.4% against a
+  no-vig 49.1% (n 2,391); DraftKings 49.5% against 49.5%.
+- **Reading:** the selection itself picks losing unders. Where DraftKings' under looks generous next to
+  FanDuel's early price, DraftKings tends to be right, or FanDuel's early number is the off one. The
+  filters halve the negative CLV but do not reverse it, even in-sample.
+
+The forward test runs as registered from 2026-10-28, and nothing is changed.
