@@ -36,3 +36,23 @@ fetched into a research copy (`.projdata/tracking_hist.sqlite`), never the VM's 
   They are registered with fingerprints, using this season's volume (box scores for FGA; nba_tracking for PA
   and RC).
 - **Phone pings** (SHADOW) go only for rules that pass the backtest.
+
+# AMENDMENT 1: the solver, the threshold that would have paid (written 2026-10-27, about 08:45 UTC, before it ran)
+**User:** "use a solver type scenario to test the ratio needed to be profitable."
+
+- **The sweep, for each rule:**
+  - FGA ÷ points line from 0.80 to 2.00, step 0.05;
+  - potential assists ÷ assists line from 1.0 to 4.0, step 0.1;
+  - rebound chances ÷ rebounds line from 1.0 to 4.0, step 0.1.
+- **At each threshold k:** the over whenever the ratio is ≥ k. Report n and ROI in each season.
+- **The pick:** on one season (2023-24), the k with the highest ROI among thresholds with ≥ 150 bets.
+- **The check:** the picked k's ROI on the other season (2024-25), which played no part in the pick. The same is
+  done in reverse (pick on 2024-25, check on 2023-24).
+- **What "profitable" requires:**
+  - the picked k is positive on the season it did not see, in both directions;
+  - **and** the neighbouring thresholds (k ± one step) are positive in both seasons, so it is a region, not a
+    spike.
+- **Honest limits:**
+  - A sweep tries many thresholds, so the best one on a season is always optimistic. The other season is the
+    real number.
+  - These are tip lines; a threshold that works there would very likely work at softer openers too.
