@@ -19,7 +19,7 @@ UTC = dt.timezone.utc
 def setup(tmp):
     rows = T.synth()
     for r in rows:
-        r.update(season="2022-23", team_poss=100.0)
+        r.update(season="2023-24", team_poss=100.0)               # the slate's season: regulars are current-season (rule 1.1.1)
     raw = T.synth_raw(rows)
     cfg = {"kept": ["F0", "F1"], "lambda": 10, "blend_w": 0.85}
     (tmp / "cfg.json").write_text(json.dumps(cfg))

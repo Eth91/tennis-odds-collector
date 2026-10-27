@@ -68,7 +68,7 @@ def _load(cache):
         return None
 
 
-def refresh11(targets, rows=None, raw=None, cfg=None, cache=CACHE, force=False):
+def refresh11(targets, rows=None, raw=None, cfg=None, cache=CACHE, force=False, pos=None):
     """Build nba_proj11_cache.pkl for `targets` (dicts: gid, date, pid, team, opp, home). Returns a status line."""
     cfg = cfg or load_config()
     if not cfg["kept"]:
@@ -81,8 +81,7 @@ def refresh11(targets, rows=None, raw=None, cfg=None, cache=CACHE, force=False):
         return f"cache current ({len(old['at'])} players)"
     if rows is None:
         rows, _, pos = PD.load_box(NP.GAMELOGS, NP.MATCHUP, NP.PROFILES)
-    else:
-        pos = {}
+    pos = pos or {}
     grp = {r["pid"]: r["group"] for r in rows}
     keys = sorted(want)
     slate = [dict(want[k], season=PD.season_of(want[k]["date"]),
@@ -232,7 +231,8 @@ def forecast11(now=None, cfg=None, cache=CACHE, lineups_db=LINEUPS, news_db=NEWS
         items.append({"gid": p["gid"], "pid": p["pid"], "market": p["market"], "tip": g.get("tip") or g.get("utc"), "line": line,
                       "book": bk, "over": r[1], "under": r[2], "p_over": pc, "p_push": float(pp[0]),
                       "p_blend": float(NP.blend(np.array([pc]), np.array([NP.no_vig(r[1], r[2])]), cfg["blend_w"])[0]),
-                      "mean": round(float(sub.mean(p["market"])[0]), 2)})
+                      "mean": round(float(sub.mean(p["market"])[0]), 2),
+                      "pmf": NP.compact_pmf(sub.pmf(p["market"], 160)[0])})
     n = NP.log_forecasts(log_db, items, now, version=cfg["version"])
     _log_inputs(log_db, audit, now, cfg["version"], {(it["gid"], it["pid"]) for it in items}, gmap)
     return f"logged {n} forecasts ({cfg['version']}); lineups seen for {sum(1 for a in audit if a[2] != 'none')} of {len(audit)} players"
@@ -266,7 +266,8 @@ def prospective11(out_json, cfg=None, log_db=LOG, lines_db=HERE / "nba_lines.sql
     E.prospective(log_db, lines_db, matchup_db, str(out_json) + ".p10.tmp", version=NP.VERSION, recs_out=r10)
     Path(str(out_json) + ".p10.tmp").unlink(missing_ok=True)
     k10 = {r["key"]: r for r in r10}
-    pair = sorted([(r, k10[r["key"]]) for r in r11 if r["key"] in k10], key=lambda x: (x[0]["date"], x[0]["key"]))
+    # decision lines are FanDuel only (audit C5); pairs share the same prop, line and close
+    pair = sorted([(r, k10[r["key"]]) for r in r11 if r["key"] in k10 and r["book"] == "fd"], key=lambda x: (x[0]["date"], x[0]["key"]))
     out["paired_with_proj10"] = len(pair)
     dec = {"proj11_minus_proj10": None, "proj11_minus_close": None, "replication": None}
     if pair:
@@ -275,7 +276,7 @@ def prospective11(out_json, cfg=None, log_db=LOG, lines_db=HERE / "nba_lines.sql
         l10 = E.logloss(np.array([b["p"] for _, b in pair]), y)
         dates = [a["date"] for a, _ in pair]
         out["proj11_minus_proj10"] = list(E.boot_ci(l11 - l10, dates, reps=1000))
-    wc = sorted([r for r in r11 if r["pc"] is not None], key=lambda r: (r["date"], r["key"]))
+    wc = sorted([r for r in r11 if r["pc"] is not None and r["book"] == "fd"], key=lambda r: (r["date"], r["key"]))
     if len(wc) >= NEED:
         first, nxt = wc[:NEED], wc[NEED:NEED + REPLICATE]
         diff = lambda rr: E.logloss(np.array([r["p"] for r in rr]), np.array([r["y"] for r in rr])) - \
@@ -300,13 +301,25 @@ def prospective11(out_json, cfg=None, log_db=LOG, lines_db=HERE / "nba_lines.sql
         "proj-1.1 better than proj-1.0 (paired, FanDuel lines): " + (
             "not enough prospective evidence" if not isinstance(dec["proj11_minus_proj10"], dict) else
             ("YES" if dec["proj11_minus_proj10"]["hi"] < 0 else "NO")),
-        "proj-1.1 beats FanDuel's close (model alone, then replicated): " + (
-            "not enough prospective evidence" if not dec["proj11_minus_close"] else
-            ("YES" if beats else ("NO" if dec["replication"] or dec["proj11_minus_close"]["hi"] >= 0 else
-                                  "first 2,000 pass; waiting on the replication sample")))]
+        "proj-1.1 beats FanDuel's close (model alone, then replicated): " + _beats_text(dec, beats)]
     out["config"] = {k: cfg[k] for k in ("kept", "lambda", "blend_w", "hash")}
     Path(out_json).write_text(json.dumps(out, default=float))
     return out
+
+
+def _beats_text(dec, beats):
+    c, r = dec["proj11_minus_close"], dec["replication"]
+    if not c:
+        return "not enough prospective evidence"
+    if beats:
+        return "YES"
+    if c["hi"] >= 0:
+        return "NO (first 2,000: interval reaches 0)"
+    if not c["reliability_ok"]:
+        return "NO (first 2,000: reliability outside 3 points)"
+    if r is None:
+        return "first 2,000 pass; waiting on the replication sample"
+    return "NO (replication: interval reaches 0)"
 
 
 def main():
@@ -327,8 +340,9 @@ def main():
                 and NP.board_targets() <= set(old["at"]):
             print(f"nba_proj11_live --refresh: cache current ({len(old['at'])} players)")   # no box-score load
         else:
-            targets, rows = NP.slate_targets()
-            print("nba_proj11_live --refresh:", refresh11(targets, rows=rows, cfg=cfg, force=True))
+            rows, _, pos = PD.load_box(NP.GAMELOGS, NP.MATCHUP, NP.PROFILES)
+            targets, rows = NP.slate_targets(rows=rows)
+            print("nba_proj11_live --refresh:", refresh11(targets, rows=rows, cfg=cfg, force=True, pos=pos))
     if a.forecast:
         print("nba_proj11_live --forecast:", forecast11())
     if a.prospective:
