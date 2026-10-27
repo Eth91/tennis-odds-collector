@@ -931,9 +931,16 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
     if sched is None:
         import nba_rosters as R
         sched = R.schedule()
-    today = (now.astimezone(ET) - dt.timedelta(hours=SLATE_ROLL_H)).date()
-    dates = [(today + dt.timedelta(days=k)).isoformat() for k in (0, 1)]
-    games = [g for g in sched if g["date_et"] in dates]
+    base = (now.astimezone(ET) - dt.timedelta(hours=SLATE_ROLL_H)).date()
+    day = lambda k: (base + dt.timedelta(days=k)).isoformat()
+    cand = [g for g in sched if g["date_et"] in (day(0), day(1), day(2))]
+    live = live_state(cand, get=box_get, now=now)
+    # a slate leaves the moment its last game is final (or postponed): the SLATE_ROLL_H hold only keeps a late game on
+    # while it is being played, and the next slate (and the one after) takes its place
+    first = [g for g in cand if g["date_et"] == day(0)]
+    k0 = 1 if first and all(live[g["gid"]]["state"] in ("final", "postponed") for g in first) else 0
+    dates = [day(k0), day(k0 + 1)]
+    games = [g for g in cand if g["date_et"] in dates]
     gids = [g["gid"] for g in games]
     q, ncon, sh = _ro(lines or LINES), _ro(news or NEWS), _ro(shadow or SHADOW)
     mpath = Path(matchup or MU.DB)
@@ -991,7 +998,6 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
     news_by = news_items(ncon, dates)
     flags = engine_flags(sh, dates)
     glines = game_lines(q, gids)
-    live = live_state(games, get=box_get, now=now)
     # matchup context: point-in-time factors for this season (nba_matchup), per prop
     S = MU.Season(mcon, season, index_pos=pos) if mcon is not None else None
     S_prev = MU.Season(mcon, prev_season(season), index_pos=pos) if mcon is not None else None
