@@ -177,7 +177,8 @@ def test_mutants():
             ("rp", "reports applied after the rules run", "            for tm, pid, st in payload:\n                day.status[pid] = st\n        for r in rules:",
              "        for r in rules:"),
             ("sr", "stale check dropped", "if m and m[0] == line and m[1] == over:", "if m:"),
-            ("sr", "window ignored", "            if RP.minus(v.t, self.window) > P:\n                continue", "            if False:\n                continue"),
+            ("sr", "window ignored", "            if RP.minus(v.t, self.window) > P:\n                continue                                 # no observation",
+             "            if False:\n                continue                                 # no observation"),
             ("sr", "T4 at tip - 5", "        if minutes != 30:\n            return ()\n        return [s for", "        if minutes != 5:\n            return ()\n        return [s for")):
         src = rp_src if target == "rp" else sr_src
         assert src.count(a) == 1, tag
