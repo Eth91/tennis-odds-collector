@@ -175,7 +175,8 @@ def minutes_first(rows):
 
 
 # ── forward (NBA_RATIO_PREREG.md): this season's volume as of a date, for the side-by-side at the opener ──────────
-FORWARD = {"RATIO_FGA": ("points", "fga", 1.0), "RATIO_PA": ("assists", "pa", 2.0), "RATIO_RC": ("rebounds", "rc", 2.0)}
+FORWARD = {"RATIO_FGA": ("points", "fga", 1.0), "RATIO_PA": ("assists", "pa", 2.0), "RATIO_RC": ("rebounds", "rc", 2.0),
+           "RATIO_PA28": ("assists", "pa", 2.8)}         # amendment 3: the solver's one region positive in both seasons
 
 
 class RatioData:
@@ -206,9 +207,9 @@ class RatioData:
                 "pa": sum(x[0] for x in tr) / len(tr) if tr else None, "rc": sum(x[1] for x in tr) / len(tr) if tr else None}
 
 
-def ratio_eval(rd, rule, pid, date, market, line):
-    """True when the rule's volume clears its multiple of the line."""
-    mk, key, k = FORWARD[rule]
+def ratio_eval(rd, spec, pid, date, market, line):
+    """True when the volume in spec = (market, volume key, multiple) clears its multiple of the line."""
+    mk, key, k = spec
     v = rd.volume(pid, date) if mk == market else None
     return bool(v and v[key] is not None and v[key] >= k * line)
 

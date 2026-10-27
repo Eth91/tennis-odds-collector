@@ -18,6 +18,7 @@ import nba_proj_data as PD
 import nba_proj_eval as E
 import nba_replay as RP
 import nba_research as R
+import nba_ratio as RATIO
 import nba_role as ROLE
 
 HERE = Path(__file__).resolve().parent
@@ -31,7 +32,10 @@ DDL = ["CREATE TABLE IF NOT EXISTS opened (gid TEXT, pid INTEGER, market TEXT, b
        "CREATE TABLE IF NOT EXISTS signals (gid TEXT, pid INTEGER, market TEXT, side TEXT, book TEXT, line REAL, price REAL, "
        "ev REAL, p REAL, mu REAL, out_pids TEXT, date TEXT, team TEXT, player TEXT, logged_at TEXT, pinged INTEGER, "
        "PRIMARY KEY (gid, pid, market, side))",
-       "CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT)"]
+       "CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT)",
+       "CREATE TABLE IF NOT EXISTS ratio_signals (rule TEXT, gid TEXT, pid INTEGER, market TEXT, book TEXT, line REAL, "
+       "price REAL, volume REAL, date TEXT, player TEXT, logged_at TEXT, pinged INTEGER, PRIMARY KEY (rule, gid, pid, market))"]
+PINGED_RATIOS = ("RATIO_PA28",)                          # NBA_RATIO_PREREG.md amendment 3: the ratio rules that ping
 
 
 def current_boards(q):
@@ -65,8 +69,14 @@ def body(e, team, player, market, line, book, xs):
             f"· EV {e['ev']:.0%} · {', '.join(xs)} out · shadow")
 
 
+def ratio_body(rule, player, market, line, price, book, vol):
+    from nba_ping import american
+    return (f"🟣 PA28 {player} {ABBR[market]} o{line:g} {american(price)} {BOOK[book]} "
+            f"· pot. ast {vol:.1f} ({vol / line:.1f}x) · shadow")
+
+
 def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_news.sqlite", matchup_db=HERE / "nba_matchup.sqlite",
-            gamelogs_db=HERE / "nba_gamelogs.sqlite", db=DB, sender=None):
+            gamelogs_db=HERE / "nba_gamelogs.sqlite", tracking_db=HERE / "nba_tracking.sqlite", db=DB, sender=None):
     import nba_ping as PING
     sender = sender or PING.send
     now = now or dt.datetime.now(dt.timezone.utc).replace(tzinfo=None, microsecond=0).isoformat()
@@ -77,7 +87,7 @@ def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_ne
     first_run = con.execute("SELECT value FROM meta WHERE key = 'installed'").fetchone() is None
     keys = current_boards(q)
     done = {(g, p, m, b) for g, p, m, b in con.execute("SELECT gid, pid, market, book FROM opened")}
-    rds, stat_cache, fired = {}, {}, 0
+    rds, rts, stat_cache, fired = {}, {}, {}, 0
     for (gid, pid, market, book), (board, tip, player, seen) in sorted(keys.items()):
         if (gid, pid, market, book) in done or seen > now:
             continue
@@ -89,6 +99,19 @@ def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_ne
             continue                                     # install: mark what is already open; never act near or after tip
         date = E._et_date(tip)
         season = ROLE.season_of(date)
+        for rule in PINGED_RATIOS:                       # the same decision the side-by-side's RATIO_PA28 replays
+            if RATIO.FORWARD[rule][0] != market:
+                continue
+            rt = rts.get(season) or rts.setdefault(season, RATIO.RatioData(matchup_db, tracking_db, season))
+            if RATIO.ratio_eval(rt, RATIO.FORWARD[rule], pid, date, market, m[0]):
+                vol = rt.volume(pid, date)[RATIO.FORWARD[rule][1]]
+                cur = con.execute("INSERT OR IGNORE INTO ratio_signals VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                                  (rule, gid, pid, market, book, m[0], m[1], round(vol, 2), date, player, now, 0))
+                if cur.rowcount:
+                    ok = sender(ratio_body(rule, player, market, m[0], m[1], book, vol))
+                    con.execute("UPDATE ratio_signals SET pinged = ? WHERE rule = ? AND gid = ? AND pid = ? AND market = ?",
+                                (1 if ok else 0, rule, gid, pid, market))
+                    fired += 1
         rd = rds.get(season) or rds.setdefault(season, ROLE.RoleData(matchup_db, gamelogs_db, season))
         team = rd.team_of(pid, date)
         if team is None:

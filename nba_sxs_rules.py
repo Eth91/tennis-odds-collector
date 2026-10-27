@@ -500,14 +500,15 @@ RATIO_DEPS = (ratio_data, RATIO.RatioData, RATIO.ratio_eval, ROLE.season_of)
 
 
 class _RatioOpen(Rule):
-    """At a book's opener (first two-sided main), the over when this season's volume clears the rule's multiple of the line."""
-    deps = RATIO_DEPS
+    """At a book's opener (first two-sided main), the over when this season's volume clears the rule's multiple of the line.
+    Each rule carries its own spec (market, volume, multiple), so the fingerprint covers the threshold."""
+    deps, spec = RATIO_DEPS, None
 
     def start_day(self, v):
         self.opened = set()
 
     def on_obs(self, v, book, seen):
-        mk, out = RATIO.FORWARD[self.name][0], []
+        mk, out = self.spec[0], []
         for k in sorted(v.changed):
             g, p, m_, b = k
             if b != book or g not in seen or m_ != mk or k in self.opened:
@@ -516,25 +517,30 @@ class _RatioOpen(Rule):
             if not m:
                 continue
             self.opened.add(k)
-            if v.t <= RP.minus(v.games()[g]["tip"], 5) and RATIO.ratio_eval(ratio_data(ROLE.season_of(v.date)), self.name, p, v.date, mk, m[0]):
+            if v.t <= RP.minus(v.games()[g]["tip"], 5) and RATIO.ratio_eval(ratio_data(ROLE.season_of(v.date)), self.spec, p, v.date, mk, m[0]):
                 out.append(sig(g, p, mk, "over", m[0], b, m[1], note=self.name))
         return out
 
 
 class RATIO_FGA(_RatioOpen):
-    name = "RATIO_FGA"
+    name, spec = "RATIO_FGA", RATIO.FORWARD["RATIO_FGA"]
 
 
 class RATIO_PA(_RatioOpen):
-    name = "RATIO_PA"
+    name, spec = "RATIO_PA", RATIO.FORWARD["RATIO_PA"]
 
 
 class RATIO_RC(_RatioOpen):
-    name = "RATIO_RC"
+    name, spec = "RATIO_RC", RATIO.FORWARD["RATIO_RC"]
+
+
+class RATIO_PA28(_RatioOpen):
+    """Amendment 4: potential assists >= 2.8x the assists line at the opener (in-sample threshold; pinged, SHADOW)."""
+    name, spec = "RATIO_PA28", RATIO.FORWARD["RATIO_PA28"]
 
 
 RULES = (NULL_TIP30, NEWS_FD, NEWS_DK, DK_LAGS_FD, T4_TIP30, ENGINE_CARD, S1, DEPTH_NEXT, DEPTH_NEXT_TIP30, NEW_STARTER,
-         LOST_START, ROLE_OPEN, RATIO_FGA, RATIO_PA, RATIO_RC)
+         LOST_START, ROLE_OPEN, RATIO_FGA, RATIO_PA, RATIO_RC, RATIO_PA28)
 
 
 def fingerprint(cls):
@@ -542,6 +548,8 @@ def fingerprint(cls):
     parts = [inspect.getsource(c) for c in cls.__mro__ if c is not object and c.__module__ == __name__]
     parts += [inspect.getsource(f) for f in (newly_out, teammates, fd_vs_dk, sig)] + [inspect.getsource(RP.View)]
     parts += [inspect.getsource(f) for f in getattr(cls, "deps", ())]
+    if getattr(cls, "spec", None) is not None:           # a rule's own threshold, wherever it is defined
+        parts.append(json.dumps(cls.spec))
     parts.append(json.dumps([REG_MIN, REG_APPS, NEWS_MARKETS, NULL_MARKETS, FLAG_MARKET, RP.OUTS, RP.TICKS], sort_keys=True))
     return hashlib.sha256("\n".join(parts).encode()).hexdigest()[:10]
 
@@ -560,7 +568,8 @@ REGISTRY = {                                             # name -> (registered a
     "NEW_STARTER": (REGISTERED_AT, "5e5996fb1a"),
     "LOST_START": (REGISTERED_AT, "134f9fb1e9"),
     "ROLE_OPEN": ("2026-10-27T13:00:00", "fce63818bc"),           # amendment 2 (NBA_ROLE1_PREREG.md)
-    "RATIO_FGA": ("2026-10-27T13:00:00", "d6f50b254a"),           # amendment 3 (NBA_RATIO_PREREG.md)
-    "RATIO_PA": ("2026-10-27T13:00:00", "adff6abb74"),
-    "RATIO_RC": ("2026-10-27T13:00:00", "5d33e6a68e"),
+    "RATIO_FGA": ("2026-10-27T13:00:00", "7ca598259a"),           # amendment 3 (NBA_RATIO_PREREG.md)
+    "RATIO_PA": ("2026-10-27T13:00:00", "a9207a8c73"),
+    "RATIO_PA28": ("2026-10-27T13:00:00", "941a17c6df"),          # amendment 4
+    "RATIO_RC": ("2026-10-27T13:00:00", "ebac385d95"),
 }

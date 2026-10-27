@@ -91,3 +91,34 @@ def test_mutants():
             for k in ("nba_ratio", "nba_sxs_rules_rmut"):
                 sys.modules.pop(k, None)
             sys.modules["nba_ratio"] = saved
+
+
+def test_pa28_replay_and_live():
+    """B: 7.0 potential assists a game. A 2.5 assists opener clears 2.8x (7.0); 3.5 doesn't (9.8). Live pings once."""
+    import nba_role_open as L
+    tmp = pathlib.Path(tempfile.mkdtemp())
+    p = stores(tmp)
+    q = sqlite3.connect(p["lines"])
+    q.execute("UPDATE quotes SET line = 2.5 WHERE pid = ? AND stat = 'assists'", (T.B,))
+    q.commit()
+    SR.MATCHUP_DB, SR.TRACKING_DB = p["matchup"], p["tracking"]
+    SR._RT.clear()
+    try:
+        day = RP.Day(T.D, p["lines"], p["news"], p["matchup"], RP.History(p["gamelogs"], p["matchup"]))
+        sig = RP.run_day(day, [SR.RATIO_PA28()])
+        assert [(s["pid"], s["market"], s["line"], s["t"]) for s in sig] == [(T.B, "assists", 2.5, "2026-11-01T16:10:00")]
+    finally:
+        SR._RT.clear()
+    q.execute("CREATE TABLE board (book TEXT, collected_at TEXT, gid TEXT, tip_utc TEXT, event TEXT, home TEXT, away TEXT, "
+              "pid INTEGER, player TEXT, stat TEXT, line REAL, side TEXT, odds REAL)")
+    sent = []
+    kw = dict(lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"],
+              tracking_db=p["tracking"], db=tmp / "role.sqlite", sender=lambda b: sent.append(b) or True)
+    assert L.process(now="2026-11-01T15:00:00", **kw) == 0                               # install
+    for pid, nm, ln in ((T.B, "Bee", 2.5), (T.C, "Cee", 3.5)):
+        q.executemany("INSERT INTO board (book, collected_at, gid, tip_utc, pid, player, stat, line, side, odds) VALUES (?,?,?,?,?,?,?,?,?,?)",
+                      [("fd", "2026-11-01T16:10:00", T.G, T.TIP, pid, nm, "assists", ln, s, 1.9) for s in ("over", "under")])
+    q.commit()
+    assert L.process(now="2026-11-01T16:11:00", **kw) == 1 and len(sent) == 1
+    assert sent[0].startswith("🟣 PA28 Bee AST o2.5") and "2.8x" in sent[0] and sent[0].endswith("shadow")
+    assert L.process(now="2026-11-01T16:12:00", **kw) == 0 and len(sent) == 1
