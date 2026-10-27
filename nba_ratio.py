@@ -45,6 +45,7 @@ def main_line(lb):
 def build(gamelogs_db, odds_db, tracking_db=None):
     g = sqlite3.connect(f"file:{gamelogs_db}?mode=ro", uri=True)
     name2pid = {MR.norm(nm): pid for pid, nm in g.execute("SELECT DISTINCT player_id, player FROM logs_full")}
+    groups = {pid: (pos or "")[:1] or None for pid, pos in g.execute("SELECT player_id, position FROM positions")}
     trk = {}
     if tracking_db and Path(tracking_db).exists():
         t = sqlite3.connect(f"file:{tracking_db}?mode=ro", uri=True)
@@ -60,13 +61,24 @@ def build(gamelogs_db, odds_db, tracking_db=None):
     rows = []
     for s in SEASONS:
         by_date = defaultdict(list)
-        for d, pid, mn, fga, pts, ast, reb in g.execute("SELECT date, player_id, min, fga, pts, ast, reb FROM logs_full WHERE season = ?", (s,)):
+        teams_of = defaultdict(set)                       # game -> its two teams
+        for d, pid, mn, fga, pts, ast, reb, gid, team in g.execute(
+                "SELECT date, player_id, min, fga, pts, ast, reb, game_id, team FROM logs_full WHERE season = ?", (s,)):
+            teams_of[gid].add(team)
             if mn:
-                by_date[d].append((pid, fga or 0, pts or 0, ast or 0, reb or 0, mn))
+                by_date[d].append((pid, fga or 0, pts or 0, ast or 0, reb or 0, mn, gid, team))
+        allowed = defaultdict(lambda: defaultdict(lambda: [0.0, 0.0]))   # opponent -> group -> [points, rebounds] allowed
+        tgames, league, league_tg = defaultdict(int), defaultdict(lambda: [0.0, 0.0]), 0
         acc = defaultdict(lambda: {"n": 0, "min": 0.0, "fga": 0.0, "pa": 0.0, "rc": 0.0, "n_trk": 0})
         for d in sorted(by_date):
-            for pid, fga, pts, ast, reb, _mn in by_date[d]:
+            for pid, fga, pts, ast, reb, _mn, gid, team in by_date[d]:
                 a = acc[pid]
+                opp = next((t for t in teams_of[gid] if t != team), None)
+                grp = groups.get(pid)
+                dvp = None                                    # amendment 4: defense vs position, before the date
+                if opp and grp and tgames[opp] >= 10 and league_tg and league[grp][0]:
+                    al = allowed[opp][grp]
+                    dvp = ((al[0] / tgames[opp]) / (league[grp][0] / league_tg), (al[1] / tgames[opp]) / (league[grp][1] / league_tg))
                 if a["n"] >= MIN_GAMES:
                     for mk in ("points", "assists", "rebounds"):
                         lb = raw.get((d, pid, mk))
@@ -79,8 +91,21 @@ def build(gamelogs_db, odds_db, tracking_db=None):
                                      "games": a["n"], "mpg": a["min"] / a["n"], "fga": a["fga"] / a["n"],
                                      "pa": a["pa"] / a["n_trk"] if a["n_trk"] else None,
                                      "rc": a["rc"] / a["n_trk"] if a["n_trk"] else None, "actual": act,
+                                     "dvp_pts": dvp[0] if dvp else None, "dvp_reb": dvp[1] if dvp else None,
                                      "u": (price - 1) if act > line else 0.0 if act == line else -1.0})
-            for pid, fga, pts, ast, reb, mn in by_date[d]:      # the date's games join the season-to-date totals
+            for gid in {r[6] for r in by_date[d]}:            # amendment 4: the date's games join the allowances
+                for t in teams_of[gid]:
+                    tgames[t] += 1
+                    league_tg += 1
+            for pid, fga, pts, ast, reb, mn, gid, team in by_date[d]:
+                opp = next((t for t in teams_of[gid] if t != team), None)
+                grp = groups.get(pid)
+                if opp and grp:
+                    allowed[opp][grp][0] += pts
+                    allowed[opp][grp][1] += reb
+                    league[grp][0] += pts
+                    league[grp][1] += reb
+            for pid, fga, pts, ast, reb, mn, _gid, _team in by_date[d]:      # the date's games join the season-to-date totals
                 a = acc[pid]
                 a["n"] += 1
                 a["min"] += mn
@@ -174,6 +199,40 @@ def minutes_first(rows):
     return res
 
 
+# ── amendment 4: matchup conditions ───────────────────────────────────────────────────────────────────────────
+def matchup_test(rows, zone_rows):
+    """PTS_MATCH and REB_MATCH against their ratio rules; each condition alone; top-tercile versions."""
+    zone = {(z["date"], z["pid"]): z["zone"] for z in zone_rows}
+    for r in rows:
+        r["zone"] = zone.get((r["date"], r["pid"])) if r["market"] == "points" else None
+    fit = [r for r in rows if r["season"] == SEASONS[0]]
+    q = lambda key, mk, pct: float(np.percentile([r[key] for r in fit if r["market"] == mk and r[key] is not None], pct))
+    cut = {"zone": (q("zone", "points", 50), q("zone", "points", 200 / 3)), "dvp_pts": (q("dvp_pts", "points", 50), q("dvp_pts", "points", 200 / 3)),
+           "dvp_reb": (q("dvp_reb", "rebounds", 50), q("dvp_reb", "rebounds", 200 / 3))}
+    good = lambda r, key, top=False: r[key] is not None and r[key] > cut[key][1 if top else 0]
+    pts_base = lambda r: r["market"] == "points" and r["mpg"] >= MIN_MPG and r["fga"] >= r["line"]
+    reb_base = lambda r: r["market"] == "rebounds" and r["rc"] is not None and r["rc"] >= 2 * r["line"]
+    variants = {
+        "PTS ratio (FGA 1x, 20+ min)": pts_base,
+        "  + zone good": lambda r: pts_base(r) and good(r, "zone"),
+        "  + points-DvP good": lambda r: pts_base(r) and good(r, "dvp_pts"),
+        "PTS_MATCH (+ both good)": lambda r: pts_base(r) and good(r, "zone") and good(r, "dvp_pts"),
+        "  both top tercile": lambda r: pts_base(r) and good(r, "zone", True) and good(r, "dvp_pts", True),
+        "REB ratio (RC 2x)": reb_base,
+        "REB_MATCH (+ rebounds-DvP good)": lambda r: reb_base(r) and good(r, "dvp_reb"),
+        "  + 20+ min": lambda r: reb_base(r) and good(r, "dvp_reb") and r["mpg"] >= MIN_MPG,
+        "  DvP top tercile": lambda r: reb_base(r) and good(r, "dvp_reb", True)}
+    res = {"cuts (2023-24 median, top tercile)": {k: [round(x, 4) for x in v] for k, v in cut.items()}, "variants": {}}
+    for name, f in variants.items():
+        res["variants"][name] = {s: summ([r for r in rows if r["season"] == s and f(r)]) for s in SEASONS}
+    v = res["variants"]
+    res["PTS_MATCH passes"] = all(v["PTS_MATCH (+ both good)"][s].get("n") and v["PTS_MATCH (+ both good)"][s]["roi"] > 0
+                                  and v["PTS_MATCH (+ both good)"][s]["roi"] > v["PTS ratio (FGA 1x, 20+ min)"][s]["roi"] for s in SEASONS)
+    res["REB_MATCH passes"] = all(v["REB_MATCH (+ rebounds-DvP good)"][s].get("n") and v["REB_MATCH (+ rebounds-DvP good)"][s]["roi"] > 0
+                                  and v["REB_MATCH (+ rebounds-DvP good)"][s]["roi"] > v["REB ratio (RC 2x)"][s]["roi"] for s in SEASONS)
+    return res
+
+
 # ── forward (NBA_RATIO_PREREG.md): this season's volume as of a date, for the side-by-side at the opener ──────────
 FORWARD = {"RATIO_FGA": ("points", "fga", 1.0), "RATIO_PA": ("assists", "pa", 2.0), "RATIO_RC": ("rebounds", "rc", 2.0),
            "RATIO_PA28": ("assists", "pa", 2.8)}         # amendment 3: the solver's one region positive in both seasons
@@ -221,8 +280,17 @@ def main():
     ap.add_argument("--tracking")
     ap.add_argument("--solve", nargs="*", metavar="RULE")
     ap.add_argument("--minutes-first", action="store_true")
+    ap.add_argument("--matchup", metavar="SHOTS_DB", help="amendment 4; the zone score needs the 2023-25 shots")
+    ap.add_argument("--zone-data", default=str(Path.home() / "nba-engine"), help="nba_zones' data folder")
     ap.add_argument("--json")
     a = ap.parse_args()
+    if a.matchup:
+        import nba_zones as Z
+        res = matchup_test(build(a.gamelogs, a.odds, a.tracking), Z.build(a.matchup, Path(a.zone_data)))
+        print(json.dumps(res, indent=1))
+        if a.json:
+            Path(a.json).write_text(json.dumps(res, indent=1))
+        return
     if a.minutes_first:
         res = minutes_first(build(a.gamelogs, a.odds, a.tracking))
         print(json.dumps(res, indent=1))

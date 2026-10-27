@@ -144,3 +144,30 @@ with defense vs their position."
 
 **Forward:** both rules enter the side-by-side at the opener, registered with fingerprints. They ping only if they
 pass. Because of the 10-game minimum, they cannot fire until opponents have played 10 games (about mid-November).
+
+**Amendment 4: run (2026-10-27, about 09:20 UTC). Neither rule passes.**
+- **Cuts (2023-24 median / top tercile):** ZONE −0.004 / 0.026; points-DvP 1.004 / 1.032; rebounds-DvP
+  1.006 / 1.032.
+
+| n, hit rate, ROI | 2023-24 | 2024-25 |
+|---|---|---|
+| PTS ratio (FGA 1×, 20+ min) | 962, 51.1%, −2.3% | 997, 50.9%, −3.3% |
+| + ZONE good | 397, 49.9%, −4.8% | 410, 50.2%, −4.5% |
+| + points-DvP good | 414, 53.9%, **+3.0%** | 355, 51.5%, −1.8% |
+| PTS_MATCH (both good) | 260, 53.1%, +1.2% | 218, 50.9%, −3.2% |
+| both top tercile | 119, 52.9%, +1.2% | 93, 51.6%, −1.7% |
+| REB ratio (RC 2×) | 3,672, 51.8%, −4.0% | 1,991, 55.3%, +0.3% |
+| REB_MATCH (+ rebounds-DvP good) | 1,455, 51.9%, −4.2% | 711, 54.1%, −2.1% |
+| + 20+ min | 1,299, 51.6%, −4.7% | 604, 54.0%, −2.8% |
+| rebounds-DvP top tercile | 955, 50.4%, −7.2% | 473, 54.5%, −1.0% |
+
+**Reading:**
+- **Points-DvP** is the one condition that improves the points rule in both seasons (+5.3 and +1.5 ROI points),
+  but it is not positive in 2024-25.
+- **The zone condition makes it worse.** The books price where a player scores against the opponent's zones,
+  as the zone study found.
+- **Rebounds-DvP adds nothing.**
+
+**Forward (changed from above, before any forward run).** Neither rule passed, and neither can fire before
+opponents have 10 games (about mid-November). So the forward versions are not built now; they would be
+registered then if wanted. Nothing pings.
