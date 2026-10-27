@@ -218,3 +218,4 @@ All three are registered at **2026-10-27T13:00:00 UTC**.
 # AMENDMENT 7: EARLY_SURGE (2026-10-27, before it ran)
 21. **EARLY_SURGE:** the early-season volume surge at the opener (`NBA_EARLY_PREREG.md` amendment 1). Registered at
     **2026-10-27T13:00:00 UTC**; no pings.
+    - Later the same day, the user turned on SHADOW pings at the opener (`NBA_EARLY_PREREG.md` amendment 2). The rule is unchanged.

@@ -15,6 +15,7 @@ import sqlite3
 from collections import defaultdict
 from pathlib import Path
 
+import nba_early as EARLY
 import nba_proj_data as PD
 import nba_proj_eval as E
 import nba_replay as RP
@@ -71,6 +72,12 @@ def body(e, team, player, market, line, book, xs):
     from nba_ping import american
     return (f"🟢 ROLE {team} {player} {ABBR[market]} {e['side'][0]}{line:g} {american(e['price'])} {BOOK[book]} "
             f"· EV {e['ev']:.0%} · {', '.join(xs)} out · shadow")
+
+
+def early_body(player, line, price, book, fga, last):
+    from nba_ping import american
+    return (f"🟡 EARLY {player} PTS o{line:g} {american(price)} {BOOK[book]} · {fga:.1f} FGA vs {last:.1f} last season "
+            f"({fga / last:.2f}x) · shadow")
 
 
 def ratio_body(rule, player, market, line, price, book, vol):
@@ -147,7 +154,7 @@ def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_ne
     first_run = con.execute("SELECT value FROM meta WHERE key = 'installed'").fetchone() is None
     keys = current_boards(q, markets=("points", "rebounds", "assists", "threes", "pra"))
     done = {(g, p, m, b) for g, p, m, b in con.execute("SELECT gid, pid, market, book FROM opened")}
-    rds, rts, stat_cache, fired = {}, {}, {}, 0
+    rds, rts, eds, stat_cache, fired = {}, {}, {}, {}, 0
     for (gid, pid, market, book), (board, tip, player, seen) in sorted(keys.items()):
         if market not in ROLE.MARKET_STAT or (gid, pid, market, book) in done or seen > now:
             continue
@@ -171,6 +178,18 @@ def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_ne
                     ok = sender(ratio_body(rule, player, market, m[0], m[1], book, vol))
                     con.execute("UPDATE ratio_signals SET pinged = ? WHERE rule = ? AND gid = ? AND pid = ? AND market = ?",
                                 (1 if ok else 0, rule, gid, pid, market))
+                    fired += 1
+        if market == "points":                           # NBA_EARLY_PREREG.md amendment 2: the early volume surge, pinged
+            ed = eds.get(season) or eds.setdefault(season, EARLY.EarlyData(matchup_db, gamelogs_db, season))
+            if EARLY.early_surge(ed, pid, date, m[0]):
+                g_ = [(mn, f) for d_, mn, f in ed.games.get(pid, ()) if d_ < date]
+                fga = sum(f for _m, f in g_) / len(g_)
+                cur = con.execute("INSERT OR IGNORE INTO ratio_signals VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                                  ("EARLY_SURGE", gid, pid, market, book, m[0], m[1], round(fga, 2), date, player, now, 0))
+                if cur.rowcount:
+                    ok = sender(early_body(player, m[0], m[1], book, fga, ed.last[pid]))
+                    con.execute("UPDATE ratio_signals SET pinged = ? WHERE rule = 'EARLY_SURGE' AND gid = ? AND pid = ? AND market = ?",
+                                (1 if ok else 0, gid, pid, market))
                     fired += 1
         rd = rds.get(season) or rds.setdefault(season, ROLE.RoleData(matchup_db, gamelogs_db, season))
         team = rd.team_of(pid, date)
