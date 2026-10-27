@@ -14,6 +14,7 @@ import json
 import os
 import sqlite3
 from pathlib import Path
+from statistics import median
 
 import nba_research as R
 
@@ -24,15 +25,24 @@ def _write(path, doc):
     os.replace(tmp, path)
 
 
-ROLE_MIN = 4.0      # minutes a game his last 3 must move off his baseline to be listed
+# how far a stat a game must move over his last 3 games off his baseline for him to be listed on it (the page's Roles
+# switch); a player is in the file if any one of them moved that far
+ROLE_MOVE = {"min": 4.0, "fga": 3.0, "fg3a": 2.0, "pot_ast": 2.5, "reb_ch": 3.0}
+ROLE_MIN = ROLE_MOVE["min"]
+TRACKED = ("pot_ast", "reb_ch")
+# the NBA's rebound chances are not comparable across seasons: 1.37-1.54 per box rebound in 2025-26, 1.89 in 2026-27 at
+# the same 0.18 rebounds a minute (potential assists held at 1.8 per assist). Rebound chances move only against this season
+SAME_SEASON_ONLY = ("reb_ch",)
 REG_MPG = 18.0      # a teammate this regular (minutes a game this season, 3+ games) who sat 2 of the last 3 is named
 
 
 def roles(logs, idx, season, team_games):
-    """Players whose minutes moved 4+ a game over their last 3 games against their baseline: this season's games before
-    those 3 (3+ of them), else last season's last 20 for the same team. Each with his usage and starts then and now, and the regular
-    teammates who sat 2 of his team's last 3 games (the likely reason). logs: {pid: LOG_COLS rows}; team_games:
-    {team: [gid, ...] this season, oldest first}. Biggest move first."""
+    """Players whose minutes, shots (FGA, 3PTA), potential assists or rebound chances a game moved over their last 3
+    games against their baseline by at least ROLE_MOVE: this season's games before those 3 (3+ of them), else last
+    season's last 20 for the same team. Each with every stat now and before ("st", None where tracking has too few
+    games), his usage and starts then and now, and the regular teammates who sat 2 of his team's last 3 games (the
+    likely reason). logs: {pid: LOG_COLS rows}; team_games: {team: [gid, ...] this season, oldest first}. Biggest
+    minutes move first."""
     C = {c: k for k, c in enumerate(R.LOG_COLS)}
     played = {}                                              # (team, gid) -> pids who played
     for pid, rows in logs.items():
@@ -56,9 +66,15 @@ def roles(logs, idx, season, team_games):
             base, frm = [r for r in rows if R.season_of(r[C["date"]]) != season and r[C["team"]] == team][-20:], "last season"
         if len(base) < 3:
             continue
-        d = mean([r[C["min"]] for r in recent]) - mean([r[C["min"]] for r in base])
-        if abs(d) < ROLE_MIN:
+        st = {}
+        for k in ROLE_MOVE:
+            now, was = [r[C[k]] for r in recent if r[C[k]] is not None], [r[C[k]] for r in base if r[C[k]] is not None]
+            avg = median if k in TRACKED else mean            # the tracking feed has bad nights: a typical game, not the mean
+            st[k] = [round(avg(now), 1), round(avg(was), 1)] if len(now) >= 2 and len(was) >= 3 and \
+                not (k in SAME_SEASON_ONLY and frm == "last season") else None
+        if not any(v and abs(v[0] - v[1]) >= ROLE_MOVE[k] for k, v in st.items()):
             continue
+        d = mean([r[C["min"]] for r in recent]) - mean([r[C["min"]] for r in base])
         us = lambda rs: mean([r[C["usg"]] for r in rs if r[C["usg"]] is not None])
         last3 = (team_games.get(team) or [])[-3:]
         regs = []
@@ -74,7 +90,7 @@ def roles(logs, idx, season, team_games):
                     "min": [round(mean([r[C["min"]] for r in recent]), 1), round(mean([r[C["min"]] for r in base]), 1)],
                     "usg": [None if us(recent) is None else round(us(recent), 1), None if us(base) is None else round(us(base), 1)],
                     "starts": [sum(r[C["starter"]] or 0 for r in recent), sum(r[C["starter"]] or 0 for r in base), len(base)],
-                    "base": frm, "out": regs})
+                    "base": frm, "out": regs, "st": st})
     return sorted(out, key=lambda e: -abs(e["d_min"]))
 
 
@@ -99,7 +115,7 @@ def build(mcon, out, idx, season, trk=None):
                                   "ORDER BY date, gid", (season,)):
         for t in (h, a):
             team_games.setdefault(t, []).append(gid)
-    _write(out / "roles.json", {"season": season, "rows": roles(logs, idx, season, team_games)})
+    _write(out / "roles.json", {"season": season, "thresholds": ROLE_MOVE, "rows": roles(logs, idx, season, team_games)})
     return len(rows)
 
 

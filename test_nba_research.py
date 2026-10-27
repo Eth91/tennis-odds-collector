@@ -267,8 +267,11 @@ out.fw = [C.filterLogs(inp.logs, {with: [nk]}).length, C.filterLogs(inp.logs, {w
           C.filterLogs(inp.logs, {with: [nk], home: true}).length, C.filterLogs(inp.logs, {blow: 'b'}).length];
 out.z = [C.zscore(7, 10, 0.5), C.zscore(0, 0, 0.5), C.zscore(3, 3, null)];
 out.sv = C.sortProps(props, 'value', 'desc', () => [], 'over').map(p => p.id);
+out.lst = [[18, 20.5, true, true], [18, 20, true, true], [21, 20, true, true], [20, 20, true, false], [19, 20.5, true, false],
+           [18, 20.5, false, true], [20, 20.5, false, true], [19, 20, false, true], [21, 20, false, true], [20, 20, false, false], [18, 20, false, false]]
+          .map(a => C.liveStatus(a[0], a[1], a[2], a[3])[0]);
 out.ls = [C.liveStage('live', 3, 1.5, true), C.liveStage('live', 1, 1.5, true), C.liveStage('final', 0, 1.5, true),
-          C.liveStage('live', 20, 18.5, false), C.liveStage('live', 10, 18.5, false)];
+          C.liveStage('live', 20, 18.5, false), C.liveStage('live', 10, 18.5, false), C.liveStage('live', 20, 20, false)];
 console.log(JSON.stringify(out));
 """)
     inp = {"cases": cases, "lines": lines, "logs": logs, "props": payload["props"],
@@ -288,7 +291,9 @@ console.log(JSON.stringify(out));
     assert sp["Without N"][0] == 10                                            # Nurkic sat the last 10
     assert sp["vs UTA"][0] == 30
     assert out["f1"] == ["G1|1|points"]                                        # DK + points
-    assert out["ls"] == [1, 0, 2, 1, 0]               # Live: in play first, then settled in a game still on, then finals
+    # over 20.5 / 20 at 18: 3 more either way; a whole line's final push; under 20.5 at 18: 2 can still come; at 20: none
+    assert out["lst"] == ["NEEDS 3", "NEEDS 3", "HIT", "PUSH", "MISS", "2 ROOM", "NO ROOM", "NO ROOM", "BUST", "PUSH", "HIT"]
+    assert out["ls"] == [1, 0, 2, 1, 0, 0]              # an under at a whole line mid-game is still in play               # Live: in play first, then settled in a game still on, then finals
     assert out["f2"] == ["G1|2|points"]                                        # search
     assert out["f3"] == ["G1|1|points"]                                        # line >= 12 and over price <= -110
     assert out["s1"] == ["G1|1|assists", "G1|2|points", "G1|1|points"]          # ascending line
@@ -380,13 +385,13 @@ def test_page_controls_work_on_iphone():
     # role changes (docs/player/roles.json), the Live tab (props under way from their closing boards: only there), game script
     assert 'fetch("player/roles.json")' in html and "function rolesView()" in html and 'data-iv="ro"' in html
     assert 'const ALL_TABS = ["live", "trends", "movers"];' in html and "list = list.filter(p => !p.closed);" in html
-    assert "function liveRow(p)" in html and 'NEEDS ${Math.ceil(x.line - x.v)}' in html
+    assert "function liveRow(p)" in html and 'st = liveStatus(x.v, x.line, over, live)' in html
     assert 'if (f.blow === "b" && !(Math.abs(l.margin) >= 15)) return false;' in html and 'tchip("blow", "b", "Blowouts")' in html
     assert "function gameScript(p, g, logs, line, side)" in html and '<span class="gsp">' in html
     # schedule spots: a card on the player page, the back-to-back team in orange on its game card
     assert "function schedCard(p, g, logs, line, side)" in html and '$("#psc").innerHTML = schedCard(' in html and "function cardNote(g)" in html
     # referees: docs/refs.json (nba_refs) on the Matchup page and one line in the game script; officials under 10 games left out of the crew's mean
-    assert 'fetch("refs.json?t="' in html and '<div class="shc" id="rfc"></div>' in html and "refCard();" in html and "refsRow(p, g);" in html
+    assert 'fetch("refs.json?t="' in html and '<div class="shc wg" id="rfc"></div>' in html and "refCard();" in html and "refsRow(p, g);" in html
     assert "d: r && r[1] >= 10 ?" in html
     # the combo checker: kept on the phone, opened from the floating button, the math in the shared core
     assert 'localStorage.getItem("pickz_combo")' in html and "comboStats(L, CMB_W, D.season)" in html and 'id="cmb"' in html and "comboPill();" in html
@@ -753,3 +758,33 @@ console.log(JSON.stringify([C.comboStats(legs, 'all', '2026-27'), C.comboStats(l
     assert full["each"] == [0.75, 0.75] and full["indep"] == 0.5625 and full["rate"] == 0.5
     assert l10 == 4 and none == 0
     assert (same["k"], same["n"]) == (2, 5)                    # one player's two props share every game; only 25 → 5, 30 → 6 hit both
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_price_sorts_follow_the_book_filter():
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "core.js").write_text(UI.JS_CORE)
+    # A: FanDuel's best by far, DraftKings poor; B: the reverse. Filtered to DraftKings, B's price and value lead
+    q = lambda o, u: {"main": 20.5, "rungs": [[20.5, o, u]]}
+    props = [{"id": "A", "main": 20.5, "books": {"fd": q(2.4, 1.6), "dk": q(1.7, 2.1)}},
+             {"id": "B", "main": 20.5, "books": {"fd": q(1.8, 2.0), "dk": q(2.0, 1.8)}}]
+    (d / "t.js").write_text("""
+const C = require('./core.js'), ps = %s, ids = l => l.map(p => p.id);
+console.log(JSON.stringify([ids(C.sortProps(ps, 'odds', 'desc', () => [], 'over', '2026-27')), ids(C.sortProps(ps, 'odds', 'desc', () => [], 'over', '2026-27', 'dk')),
+  ids(C.sortProps(ps, 'value', 'desc', () => [], 'over', '2026-27', 'dk')), C.valueAt(ps[0], 20.5, 'over', 'dk').book]));
+""" % json.dumps(props))
+    allb, dk, dkv, book = json.loads(subprocess.run([NODE, str(d / "t.js")], capture_output=True, text=True, check=True, cwd=d).stdout)
+    assert allb == ["A", "B"] and dk == ["B", "A"] and dkv == ["B", "A"] and book == "dk"
+
+
+def test_page_navigation_guards():
+    html = UI.page()
+    # game cards' tap handler stays on the cards (the chart bars carry data-gid too); a stale game filter goes with its day
+    assert '$$("[data-gid]", gcs)' in html and 'if (ST.gid !== "all" && !D.games.some(g => g.gid === ST.gid && g.date === ST.date)) ST.gid = "all";' in html
+    # a books-table line only when it is a number; the line sheet's −/+ are a draft until Done
+    assert '$$("button.bl", pg)' in html and "if (isFinite(l) && DT.line !== l)" in html and "const done = () => { closeSheet(); if (DT.line !== v)" in html
+    # the Matchup page's search goes back as deep as the app went; a late player load or box score opens only where it was asked
+    assert "history.go(-Math.max(1, navDepth()))" in html and "d: navDepth() + 1" in html
+    assert "if (tok === OPEN_N && CUR === at) openProp(id, push)" in html and "if (SHEET_N !== n0 || CUR !== at || MUP !== mu) return;" in html
+    # a refresh: side files refetch, an open page redraws only if its data moved, after a finger lifts, keeping the game log open
+    assert "REFS = null; ROLES = null;" in html and "if (CUR && pageSig(CUR) !== pg0) redrawPage();" in html and "if (PDOWN) { REDRAW = true; return; }" in html
