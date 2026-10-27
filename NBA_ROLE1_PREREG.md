@@ -124,3 +124,23 @@ was not used in Test A.
 - **If it passes:** the forward rule uses the simplified model.
 - **If it fails:** ROLE_OPEN is still registered as a forward test, since the user asked for it, with the model
   that did better on the 2023-24 check. The report says plainly that the minutes model does not beat last-5.
+
+**Amendment 1 check: run (2026-10-27, about 08:20 UTC). PASS, so the forward rule uses the simplified model
+("v2").**
+
+| 2023-24 (clean) MAE | v2 | season average | last 5 | (v1, for comparison) |
+|---|---|---|---|---|
+| minutes | **5.282** | 5.738 | 5.375 | 5.447 |
+| FGA | **2.858** | 2.974 | 2.963 | 2.898 |
+| points | **4.700** | 4.740 | 4.854 | 4.738 |
+| rebounds | 1.969 | **1.966** | 2.029 | 1.987 |
+| assists | **1.393** | 1.398 | 1.449 | 1.403 |
+| threes | 0.893 | **0.883** | 0.919 | 0.898 |
+
+- **Seen seasons, information only.** v2 also beats both baselines on minutes and FGA in 2025-26 (5.120 / 2.814)
+  and 2024-25 (5.220 / 2.854).
+- **Bias:** +0.70 to +0.76 minutes. The roster excludes players returning outside the last 3 games, so the
+  others share 240 minutes.
+- **The gains are modest:** about 2% better than last-5 on minutes and 4% on FGA.
+- **Negative binomial r for pricing** (v2 on 2025-26): points 7.211, rebounds 11.747, assists 13.092,
+  threes 10.157.
