@@ -55,3 +55,35 @@ Written 2026-10-27 (about 09:50 UTC), before any feature below was computed on l
 only after a forward record.
 
 **If neither passes:** the report shows which stats carry information and which don't.
+
+---
+
+## Results (2026-10-27, about 10:00 UTC; `nba_pts.py`): neither solver passes
+29,307 points props (players with ≥ 5 games). All overs at 20+ min: 47.7%, −7.9% (2023-24) and 48.9%, −5.8%
+(2024-25).
+
+**Solver A (xPTS_m ÷ line ≥ k, 20+ min):**
+- ROI improves only slightly with k: −6.5% at 1.0×, −2.4% at 1.3× (2023-24).
+- Picked on 2023-24 (1.40×, +1.6% on 321), it loses 11.2% on 2024-25 (295).
+- Picked on 2024-25 (1.14×, −3.4%), it is −3.3% on 2023-24.
+- xPTS without the matchup is the same: 1.40× on 2023-24 (+1.8%) gives −7.7% on 2024-25.
+- The encoded expected points tilt the hit rate less than the plain FGA ratio did.
+
+**Solver B (L2 logistic beyond the book; λ = 100 chosen by CV both ways):**
+- **Held-out log loss:** model 0.69305 vs book 0.69202 (fit 2023-24, test 2024-25); 0.69194 vs 0.69236 (the
+  reverse).
+- **Held-out bets (EV ≥ 3%):** 202 at −6.1%; 48 at −4.6%.
+- **Coefficients per SD (fit 2023-24 / fit 2024-25):**
+  - **same sign both ways:** FGA/line +0.038 / +0.034; 3P% −0.020 / −0.027; 3PA share −0.017 / −0.025;
+    xPTS/line −0.024 / −0.021; FTA/line −0.009 / −0.012;
+  - **inconsistent:** xPTS_m/line +0.033 / +0.002; eFG% +0.007 / −0.041; TS% −0.036 / +0.032; FT% +0.044 /
+    −0.001; mpg −0.072 / +0.005.
+
+**Reading:**
+- **Shot volume against the line is the one consistent positive.**
+- **Efficiency hurts or adds nothing.** A hot 3P% and a three-heavy mix lean negative in both seasons: the books
+  price shooting regression, and threes add variance.
+- **Free-throw volume and the zone matchup add nothing reliable.**
+
+**Limit:** these backtests start at a player's 6th game. The first five games, the user's "books haven't caught up"
+window, are not covered. The forward ratio rules, from game 4, test that.
