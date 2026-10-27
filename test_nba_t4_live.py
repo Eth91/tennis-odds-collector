@@ -50,3 +50,25 @@ def test_signals_rule_cutoff_and_since():
     assert s["clv"] == pytest.approx(NP.no_vig(1.8, 2.0) - 0.5) and s["clv"] > 0
     r = T.grade(d / "lines.sqlite", d / "mu.sqlite", d / "o.json")
     assert r["graded"] == 1 and r["verdict"].startswith("not enough prospective evidence")
+
+
+def test_t5_first_under_edge_one_per_prop():
+    d = pathlib.Path(tempfile.mkdtemp())
+    stores(d)
+    q = sqlite3.connect(d / "lines.sqlite")
+    tip = "2026-10-29T00:00:00Z"
+    ins = lambda t, bk, line, side, odds: q.execute("INSERT INTO quotes VALUES (?,?,?,?,?,'','points',?,?,?)",
+                                                   (t, bk, "G", tip, 3, line, side, odds))
+    ins("2026-10-28T15:00:00", "fd", 12.5, "over", 1.8); ins("2026-10-28T15:00:00", "fd", 12.5, "under", 2.0)  # FD under fair ~.474
+    ins("2026-10-28T15:00:00", "dk", 12.5, "under", 2.1)                      # EV .474*2.1-1 = -.004: no
+    ins("2026-10-28T17:00:00", "dk", 12.5, "under", 2.3)                      # EV +.09: the first signal (7 h before tip)
+    ins("2026-10-28T19:00:00", "dk", 12.5, "under", 2.5)                      # later, bigger edge: not counted again
+    q.commit()
+    m = sqlite3.connect(d / "mu.sqlite")
+    m.execute("INSERT INTO player_games VALUES ('G','AAA',3,'G',1,30,10,0,0,0,0,0,0,0,0,0)")   # 10 < 12.5: under wins
+    m.commit()
+    sig, _ = T.signals_t5(d / "lines.sqlite", d / "mu.sqlite")
+    s3 = [s for s in sig if s["pid"] == 3]
+    assert len(s3) == 1 and s3[0]["odds"] == 2.3 and s3[0]["min_before_tip"] == 420 and s3[0]["result"] == "win"
+    assert all(s["side"] == "under" for s in sig)
+    assert not [s for s in sig if s["gid"] == "OLD"]                           # before the start date: not counted
