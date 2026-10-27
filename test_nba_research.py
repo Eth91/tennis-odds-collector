@@ -333,7 +333,13 @@ def test_page_controls_work_on_iphone():
     assert "fetch(`box/${encodeURIComponent(gid)}.json`)" in html and "barTip(" not in html and ".tip{" not in html
     # the gauge opens the Matchup page (a page of its own in the history), with the opponent's recent games vs a position
     # group from docs/vs/{TEAM}.json (nba_vs): 5 rows, More / Less to 10, a row opens that game's box score
-    assert '$("#mub", pg).onclick = () => openMatchup(p);' in html and "function matchupSheet(" not in html
+    assert '$("#mub", pg).onclick = () => { if (p.opp) openMatchup(p); };' in html and "function matchupSheet(" not in html
+    # any player's page, prop or not: "v|<pid>|<market>" from docs/player/{pid}.json (nba_players), every stat's tab, a line
+    # he sets (his average to the half below), no books; search finds any player; box score and Injuries rows open one
+    assert "fetch(`player/${pid}.json`)" in html and 'fetch("player/index.json")' in html and "function propFor(id)" in html
+    assert "line: p.v ? vLine(p) :" in html and "const mkts = p.v ? TAB_ORDER :" in html and 'if (p.v) { $("#pproj").innerHTML = ""; $("#pbk").innerHTML = ""; }' in html
+    assert 'String(gid).startsWith("none:")' in html and "if (ST.view !== \"injuries\" && q.length >= 2) searchPlayers(q);" in html
+    assert '<tr data-vp="${r[0]}"' in html and 'data-vp="${e.pid}"' in html and "openPlayer(+v.dataset.vp)" in html
     assert "fetch(`vs/${encodeURIComponent(p.opp || \"\")}.json`)" in html and 'if (MUP) h.set("mu", "1");' in html
     assert 'if (MUP && !h.get("mu")) closeMatchup(swiped);' in html and "rows = all.slice(0, MUP.more ? 10 : 5)" in html
     assert 'boxSheet(t.dataset.g, t.dataset.t, {market: mk, pid: +t.dataset.pid})' in html and '<div id="mp" class="pg"' in html
