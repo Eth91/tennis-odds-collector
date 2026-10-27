@@ -427,8 +427,120 @@ class LOST_START(Rule):
         return out
 
 
+# ── AMENDMENT 2: ROLE_OPEN (NBA_ROLE1_PREREG.md) ─────────────────────────────────────────────────────────────
+import nba_role as ROLE                                  # noqa: E402
+
+ROLE_GAMELOGS_DB = RP.HERE / "nba_gamelogs.sqlite"
+_RD = {}
+
+
+def role_data(season):
+    key = (str(MATCHUP_DB), str(ROLE_GAMELOGS_DB), season)
+    if key not in _RD:
+        _RD.clear()
+        _RD[key] = ROLE.RoleData(MATCHUP_DB, ROLE_GAMELOGS_DB, season)
+    return _RD[key]
+
+
+ROLE_DEPS = (role_data, ROLE.RoleData, ROLE.role_eval, ROLE.project, ROLE.Season, ROLE.Priors, ROLE.ewma, ROLE.group,
+             ROLE.p_over, ROLE.p_side, ROLE.calibrated, ROLE.logit, ROLE.season_of)
+
+
+class ROLE_OPEN(Rule):
+    """A book's opener for a player whose role is elevated (a rotation teammate out, absence game 1-3): the side whose
+    calibrated EV (ROLE1 v2, beta 0.09) is >= 5%, at the opener's price."""
+    name, deps = "ROLE_OPEN", ROLE_DEPS
+
+    def start_day(self, v):
+        self.listed, self.opened = {}, set()             # pid -> (team, latest status); keys already opened
+
+    def on_report(self, v, t, rows, prev, seen_before):
+        for team, pid, st in rows:
+            self.listed[pid] = (team, st)
+        return ()
+
+    def on_obs(self, v, book, seen):
+        out, rd = [], None
+        for k in sorted(v.changed):
+            g, p, mk, b = k
+            if b != book or g not in seen or mk not in ROLE.MARKET_STAT or k in self.opened:
+                continue
+            m = RP.main_of(v.board(*k))
+            if not m:
+                continue
+            self.opened.add(k)                           # the opener: the first observation with a two-sided main
+            if v.t > RP.minus(v.games()[g]["tip"], 5):
+                continue
+            team = v.team_of(p)
+            out_now = {x for x, (tm, st) in self.listed.items() if tm == team and st in RP.OUTS}
+            if not team or not out_now:
+                continue
+            rd = rd or role_data(ROLE.season_of(v.date))
+            for e in ROLE.role_eval(rd, v.date, team, p, mk, m[0], m[1], m[2], out_now):
+                out.append(sig(g, p, mk, e["side"], m[0], b, e["price"], note=f"ev={e['ev']:.3f} mu={e['mu']:.1f}"))
+        return out
+
+
+# ── AMENDMENT 3: the user's volume-to-line ratios (NBA_RATIO_PREREG.md) ───────────────────────────────────────
+import nba_ratio as RATIO                                # noqa: E402
+
+TRACKING_DB = RP.HERE / "nba_tracking.sqlite"
+_RT = {}
+
+
+def ratio_data(season):
+    key = (str(MATCHUP_DB), str(TRACKING_DB), season)
+    if key not in _RT:
+        _RT.clear()
+        _RT[key] = RATIO.RatioData(MATCHUP_DB, TRACKING_DB, season)
+    return _RT[key]
+
+
+RATIO_DEPS = (ratio_data, RATIO.RatioData, RATIO.ratio_eval, ROLE.season_of)
+
+
+class _RatioOpen(Rule):
+    """At a book's opener (first two-sided main), the over when this season's volume clears the rule's multiple of the line.
+    Each rule carries its own spec (market, volume, multiple), so the fingerprint covers the threshold."""
+    deps, spec = RATIO_DEPS, None
+
+    def start_day(self, v):
+        self.opened = set()
+
+    def on_obs(self, v, book, seen):
+        mk, out = self.spec[0], []
+        for k in sorted(v.changed):
+            g, p, m_, b = k
+            if b != book or g not in seen or m_ != mk or k in self.opened:
+                continue
+            m = RP.main_of(v.board(*k))
+            if not m:
+                continue
+            self.opened.add(k)
+            if v.t <= RP.minus(v.games()[g]["tip"], 5) and RATIO.ratio_eval(ratio_data(ROLE.season_of(v.date)), self.spec, p, v.date, mk, m[0]):
+                out.append(sig(g, p, mk, "over", m[0], b, m[1], note=self.name))
+        return out
+
+
+class RATIO_FGA(_RatioOpen):
+    name, spec = "RATIO_FGA", RATIO.FORWARD["RATIO_FGA"]
+
+
+class RATIO_PA(_RatioOpen):
+    name, spec = "RATIO_PA", RATIO.FORWARD["RATIO_PA"]
+
+
+class RATIO_RC(_RatioOpen):
+    name, spec = "RATIO_RC", RATIO.FORWARD["RATIO_RC"]
+
+
+class RATIO_PA28(_RatioOpen):
+    """Amendment 4: potential assists >= 2.8x the assists line at the opener (in-sample threshold; pinged, SHADOW)."""
+    name, spec = "RATIO_PA28", RATIO.FORWARD["RATIO_PA28"]
+
+
 RULES = (NULL_TIP30, NEWS_FD, NEWS_DK, DK_LAGS_FD, T4_TIP30, ENGINE_CARD, S1, DEPTH_NEXT, DEPTH_NEXT_TIP30, NEW_STARTER,
-         LOST_START)
+         LOST_START, ROLE_OPEN, RATIO_FGA, RATIO_PA, RATIO_RC, RATIO_PA28)
 
 
 def fingerprint(cls):
@@ -436,6 +548,8 @@ def fingerprint(cls):
     parts = [inspect.getsource(c) for c in cls.__mro__ if c is not object and c.__module__ == __name__]
     parts += [inspect.getsource(f) for f in (newly_out, teammates, fd_vs_dk, sig)] + [inspect.getsource(RP.View)]
     parts += [inspect.getsource(f) for f in getattr(cls, "deps", ())]
+    if getattr(cls, "spec", None) is not None:           # a rule's own threshold, wherever it is defined
+        parts.append(json.dumps(cls.spec))
     parts.append(json.dumps([REG_MIN, REG_APPS, NEWS_MARKETS, NULL_MARKETS, FLAG_MARKET, RP.OUTS, RP.TICKS], sort_keys=True))
     return hashlib.sha256("\n".join(parts).encode()).hexdigest()[:10]
 
@@ -453,4 +567,9 @@ REGISTRY = {                                             # name -> (registered a
     "DEPTH_NEXT_TIP30": (REGISTERED_AT, "726d7f5e54"),
     "NEW_STARTER": (REGISTERED_AT, "5e5996fb1a"),
     "LOST_START": (REGISTERED_AT, "134f9fb1e9"),
+    "ROLE_OPEN": ("2026-10-27T13:00:00", "fce63818bc"),           # amendment 2 (NBA_ROLE1_PREREG.md)
+    "RATIO_FGA": ("2026-10-27T13:00:00", "7ca598259a"),           # amendment 3 (NBA_RATIO_PREREG.md)
+    "RATIO_PA": ("2026-10-27T13:00:00", "a9207a8c73"),
+    "RATIO_PA28": ("2026-10-27T13:00:00", "941a17c6df"),          # amendment 4
+    "RATIO_RC": ("2026-10-27T13:00:00", "ebac385d95"),
 }

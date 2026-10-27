@@ -154,3 +154,48 @@ The rules:
 - The verdicts are the same as every other rule here: CLV first, at ≥ 200 signals and ≥ 10 dates.
 - The development replay covers 2026-10-22..26. The lineup log starts on the evening of 2026-10-26, so
   NEW_STARTER and LOST_START have one night of development data.
+
+---
+
+# AMENDMENT 2: ROLE_OPEN, elevated roles at the opener (2026-10-27, before it was run on live data)
+**Specified in `NBA_ROLE1_PREREG.md`.** This is the user's thesis: injury news, an elevated role, the first 1–3
+games of the absence, and speed at the opener.
+
+12. **ROLE_OPEN.**
+    - **The moment:** a book's opener for a prop in points, rebounds, assists or threes. That is the first
+      observation of the prop with a two-sided main rung (FanDuel or DraftKings).
+    - **The spot:**
+      - X averaged ≥ 17 min this season for the player's team (≥ 3 games);
+      - X is listed Out or Doubtful on a report published before the observation;
+      - this is X's absence game 1–3;
+      - the player is on the active roster.
+    - **The price:**
+      - the ROLE1 v2 model gives the player's mean;
+      - a negative binomial (r per market, `nba_role.NB_R`) gives P(side) at the opener's line;
+      - that P is calibrated toward the opener's no-vig with β = 0.09.
+    - **The signal:** EV′ = P′ × price − 1 ≥ 0.05. The bet is that side at the opener's price.
+    - **Registered at 2026-10-27T13:00:00 UTC.** Its fingerprint covers `nba_role`'s model, pricing and data
+      helpers.
+    - **Verdict:** the same bars as every rule here.
+    - **Live:** `nba_role_open.py --process` runs every minute on the VM with the same evaluation. It pings
+      the phone (SHADOW) when it fires, and logs to `nba_role.sqlite`.
+
+---
+
+# AMENDMENT 3: the user's volume-to-line ratios at the opener (2026-10-27, before they ran on live data)
+**Specified in `NBA_RATIO_PREREG.md`.** At a book's opener (its first observation of the prop with a two-sided
+main rung, up to tip − 5), with ≥ 3 games this season:
+
+13. **RATIO_FGA:** the points over when his FGA per game this season (box scores) ≥ the points line.
+14. **RATIO_PA:** the assists over when his potential assists per game this season (nba_tracking) ≥ 2 × the
+    assists line.
+15. **RATIO_RC:** the rebounds over when his rebound chances per game this season (nba_tracking) ≥ 2 × the
+    rebounds line.
+
+In nba_tracking, a missing row on a fetched date counts as 0. **Registered at 2026-10-27T13:00:00 UTC**, with
+fingerprints covering `nba_ratio`'s data helper. The same bars as every rule. Phone pings only for rules whose
+backtest passes (NBA_RATIO_PREREG.md).
+
+# AMENDMENT 4: RATIO_PA28 (2026-10-27, before it ran live)
+16. **RATIO_PA28:** RATIO_PA at 2.8× instead of 2× (`NBA_RATIO_PREREG.md` amendment 3). This threshold was
+    chosen in sample, so only forward counts. Registered at **2026-10-27T13:00:00 UTC**. It pings (SHADOW).
