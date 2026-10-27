@@ -119,3 +119,69 @@ points. None is positive in both seasons at tip lines.
 - **Honest status:** 2.8× was chosen by the solver after both backtest seasons were seen (+8.0% on 91, +4.3% on
   175). So the backtest is in sample, and only the forward record counts. It is judged by the side-by-side's
   bars (side-by-side amendment 4).
+
+# AMENDMENT 4: matchup conditions (written 2026-10-27, about 09:10 UTC, before they were computed)
+**User:** "for rebounds and points, add a matchup rule so it has to be a good rebounding matchup vs their position,
+and for points, where they score from and where their opponents give up points needs to be a good matchup, along
+with defense vs their position."
+
+**Measures** (season to date, strictly before the game's date; the opponent needs ≥ 10 team games):
+- **Defense vs position (DvP):** points, or rebounds, scored per game against the opponent by players in the
+  player's position group (G / F / C, from `positions`), ÷ the league's per-team-game average for that group over
+  the same dates. Above 1 means the opponent gives that position more than average.
+- **ZONE:** `nba_zones`' all-zone score: the player's share of his points from each zone × (the opponent's points
+  allowed there ÷ league − 1). Above 0 means the opponent is soft where he scores.
+- **"Good":** above the 2023-24 median of the measure; the top tercile is also reported.
+
+**Rules:**
+- **PTS_MATCH:** FGA ≥ 1.0 × the points line, 20+ minutes, ZONE good **and** points-DvP good. Points over.
+- **REB_MATCH:** rebound chances ≥ 2 × the rebounds line **and** rebounds-DvP good. Rebounds over.
+  Also reported with 20+ minutes.
+
+**Backtest:** 2023-24 and 2024-25, tip lines, as above.
+- **Pass:** ROI > 0 in both seasons **and** above the same ratio rule without the matchup in both seasons.
+- Also reported: each matchup condition alone on top of the ratio rule, and the top-tercile versions.
+
+**Forward:** both rules enter the side-by-side at the opener, registered with fingerprints. They ping only if they
+pass. Because of the 10-game minimum, they cannot fire until opponents have played 10 games (about mid-November).
+
+**Amendment 4: run (2026-10-27, about 09:20 UTC). Neither rule passes.**
+- **Cuts (2023-24 median / top tercile):** ZONE −0.004 / 0.026; points-DvP 1.004 / 1.032; rebounds-DvP
+  1.006 / 1.032.
+
+| n, hit rate, ROI | 2023-24 | 2024-25 |
+|---|---|---|
+| PTS ratio (FGA 1×, 20+ min) | 962, 51.1%, −2.3% | 997, 50.9%, −3.3% |
+| + ZONE good | 397, 49.9%, −4.8% | 410, 50.2%, −4.5% |
+| + points-DvP good | 414, 53.9%, **+3.0%** | 355, 51.5%, −1.8% |
+| PTS_MATCH (both good) | 260, 53.1%, +1.2% | 218, 50.9%, −3.2% |
+| both top tercile | 119, 52.9%, +1.2% | 93, 51.6%, −1.7% |
+| REB ratio (RC 2×) | 3,672, 51.8%, −4.0% | 1,991, 55.3%, +0.3% |
+| REB_MATCH (+ rebounds-DvP good) | 1,455, 51.9%, −4.2% | 711, 54.1%, −2.1% |
+| + 20+ min | 1,299, 51.6%, −4.7% | 604, 54.0%, −2.8% |
+| rebounds-DvP top tercile | 955, 50.4%, −7.2% | 473, 54.5%, −1.0% |
+
+**Reading:**
+- **Points-DvP** is the one condition that improves the points rule in both seasons (+5.3 and +1.5 ROI points),
+  but it is not positive in 2024-25.
+- **The zone condition makes it worse.** The books price where a player scores against the opponent's zones,
+  as the zone study found.
+- **Rebounds-DvP adds nothing.**
+
+**Forward (changed from above, before any forward run).** Neither rule passed, and neither can fire before
+opponents have 10 games (about mid-November). So the forward versions are not built now; they would be
+registered then if wanted. Nothing pings.
+
+# AMENDMENT 5: PTS_DVP, forward (written 2026-10-27, about 09:25 UTC)
+**User:** "yes, register it for mid-November."
+
+- **The rule:** at a book's opener (first two-sided main, up to tip − 5), the points over when all hold:
+  - his FGA per game this season ≥ 1.0 × the points line;
+  - his minutes per game this season ≥ 20, with ≥ 3 games;
+  - the opponent's points-DvP for his position group is > **1.0036** (amendment 4's 2023-24 median, fixed);
+  - the opponent has ≥ 10 games this season.
+- **DvP** is computed point-in-time from this season's box scores (nba_matchup) and position groups
+  (`nba_gamelogs.positions`).
+- **Registered now** (side-by-side amendment 5), so its record starts today. Because of the 10-game minimum it
+  cannot fire until about mid-November.
+- **No pings.** Amendment 4 failed in 2024-25 (+3.0%, then −1.8%), so it is forward-only.

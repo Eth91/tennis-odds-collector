@@ -70,11 +70,11 @@ def test_registry_covers_ratio_rules():
 
 def test_mutants():
     src = pathlib.Path(RATIO.__file__).read_text()
-    for tag, a, b in (("same-day volume", 'g = [(d, f) for d, f in self.games.get(pid, ()) if d < date]',
-                       'g = [(d, f) for d, f in self.games.get(pid, ()) if d <= date]'),
+    for tag, a, b in (("same-day volume", 'g = [(d, f, mn) for d, f, mn in self.games.get(pid, ()) if d < date]',
+                       'g = [(d, f, mn) for d, f, mn in self.games.get(pid, ()) if d <= date]'),
                       ("PA multiple 1x", '"RATIO_PA": ("assists", "pa", 2.0)', '"RATIO_PA": ("assists", "pa", 1.0)'),
-                      ("missing tracking skipped, not 0", "tr = [self.trk.get((d, pid), (0.0, 0.0)) for d, _f in g if d in self.fetched]",
-                       "tr = [self.trk[(d, pid)] for d, _f in g if (d, pid) in self.trk]")):
+                      ("missing tracking skipped, not 0", "tr = [self.trk.get((d, pid), (0.0, 0.0)) for d, _f, _m in g if d in self.fetched]",
+                       "tr = [self.trk[(d, pid)] for d, _f, _m in g if (d, pid) in self.trk]")):
         assert src.count(a) == 1, tag
         d = pathlib.Path(tempfile.mkdtemp())
         (d / "nba_ratio.py").write_text(src.replace(a, b))
@@ -122,3 +122,56 @@ def test_pa28_replay_and_live():
     assert L.process(now="2026-11-01T16:11:00", **kw) == 1 and len(sent) == 1
     assert sent[0].startswith("🟣 PA28 Bee AST o2.5") and "2.8x" in sent[0] and sent[0].endswith("shadow")
     assert L.process(now="2026-11-01T16:12:00", **kw) == 0 and len(sent) == 1
+
+
+def dvp_stores(tmp, oth_guard_pts=30, b_min=30):
+    """AWY has 14 games before the date: 10 vs OTH (OTH's guard scores oth_guard_pts) and 4 vs HOM (B, a G, scores 12)."""
+    p = stores(tmp)
+    m = sqlite3.connect(p["matchup"])
+    m.execute("UPDATE player_games SET min = ? WHERE pid = ? AND gid LIKE 'R%'", (b_min, T.B))
+    for i in range(10):
+        g, d = f"O{i}", f"2026-10-{15 + i:02d}"
+        m.execute("INSERT INTO games VALUES (?, '2026-27', ?, 'OTH', 'AWY', 100, 99)", (g, d))
+        m.executemany("INSERT INTO player_games (gid, team, pid, min, pts, fga) VALUES (?,?,?,?,?,?)",
+                      [(g, "OTH", 50, 34, oth_guard_pts, 15), (g, "AWY", T.O, 30, 10, 9)])
+    m.commit()
+    gl = sqlite3.connect(p["gamelogs"])
+    gl.execute("CREATE TABLE positions (player_id INTEGER, player TEXT, position TEXT)")
+    gl.executemany("INSERT INTO positions VALUES (?, '', ?)", [(T.B, "G"), (T.C, "F"), (50, "G"), (T.O, "G")])
+    gl.commit()
+    return p
+
+
+def check_dvp(mod_sr=SR, **kw):
+    tmp = pathlib.Path(tempfile.mkdtemp())
+    p = dvp_stores(tmp, **kw)
+    mod_sr.MATCHUP_DB, mod_sr.TRACKING_DB, mod_sr.ROLE_GAMELOGS_DB = p["matchup"], p["tracking"], p["gamelogs"]
+    mod_sr._RT.clear()
+    mod_sr._DV.clear()
+    day = RP.Day(T.D, p["lines"], p["news"], p["matchup"], RP.History(p["gamelogs"], p["matchup"]))
+    return [(s["pid"], s["market"], s["line"]) for s in RP.run_day(day, [mod_sr.PTS_DVP()])]
+
+
+def test_pts_dvp():
+    try:
+        assert check_dvp() == [(T.B, "points", 10.5)]                   # soft on guards: B (11 FGA, 30 min) fires
+        assert check_dvp(oth_guard_pts=4) == []                         # AWY tough on guards: no
+        assert check_dvp(b_min=18) == []                                # under 20 minutes: no
+    finally:
+        SR._RT.clear()
+        SR._DV.clear()
+
+
+def test_pts_dvp_mutants():
+    src = pathlib.Path(SR.__file__).read_text()
+    for tag, a, b, kw in (("DvP cut ignored", "if d is not None and d > cut:", "if d is not None:", {"oth_guard_pts": 4}),
+                          ("minutes ignored", 'or vol["mpg"] < mpg:', ":", {"b_min": 18})):
+        assert src.count(a) == 1, tag
+        d = pathlib.Path(tempfile.mkdtemp())
+        (d / "nba_sxs_rules_dmut.py").write_text(src.replace(a, b))
+        sys.path.insert(0, str(d))
+        try:
+            assert check_dvp(importlib.import_module("nba_sxs_rules_dmut"), **kw) != [], tag
+        finally:
+            sys.path.remove(str(d))
+            sys.modules.pop("nba_sxs_rules_dmut", None)
