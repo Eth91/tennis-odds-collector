@@ -80,7 +80,13 @@ Shared definitions:
   - upper bound < 0 → **LOSES TO THE CLOSE**;
   - otherwise **NO EDGE SHOWN**.
 - **ROI**, read at ≥ 500 graded signals: lower bound > 0 → **PROFITABLE**.
-- **Grader check:** if NULL_TIP30's forward mean CLV is outside −8% to 0% (with ≥ 200 signals), every
+- **Correction before registration (2026-10-27, about 08:00 UTC): minimum dates.**
+  - The CLV verdict also needs ≥ 10 game dates, and the ROI reading ≥ 20.
+  - **Why:** the development replay showed NULL_TIP30 making about 250 signals a night and DK_LAGS_FD about 100.
+    Without a date minimum, either would reach 200 signals in one or two nights, when a date-clustered interval
+    is meaningless.
+  - No rule definition changed.
+- **Grader check:** if NULL_TIP30's forward mean CLV is outside −8% to 0% (with ≥ 200 signals and ≥ 10 dates), every
   verdict is marked **GRADER CHECK FAILED**.
 
 ## Running
