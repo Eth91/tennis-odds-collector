@@ -14,6 +14,7 @@ import json
 import os
 import sqlite3
 from pathlib import Path
+from collections import Counter
 from statistics import median
 
 import nba_research as R
@@ -33,39 +34,63 @@ TRACKED = ("pot_ast", "reb_ch")
 # the NBA's rebound chances are not comparable across seasons: 1.37-1.54 per box rebound in 2025-26, 1.89 in 2026-27 at
 # the same 0.18 rebounds a minute (potential assists held at 1.8 per assist). Rebound chances move only against this season
 SAME_SEASON_ONLY = ("reb_ch",)
+# early in a season there is too little of it to judge a player's last 3 games against: until the median team has
+# played RECENT_FROM games, Roles compares his season so far with last season (LAST_MIN_GP+ games there, any team); from
+# then on, his last 3 games with the rest of his season (5+ games). The file says which ("mode")
+RECENT_FROM = 10
+LAST_MIN_GP = 10
+
+
+def lined_players(q, season):
+    """Players a book (FanDuel or DraftKings) has posted a prop line for this season (nba_lines.sqlite quotes): Roles
+    lists only these, not players no one can bet."""
+    return {int(pid) for (pid,) in q.execute("SELECT DISTINCT pid FROM quotes WHERE seen_at >= ? AND pid IS NOT NULL",
+                                             (f"{season[:4]}-08-01",))}
+
+
+def roles_mode(team_games):
+    gp = sorted(len(v) for v in team_games.values())
+    return "recent" if gp and gp[len(gp) // 2] >= RECENT_FROM else "season"
 REG_MPG = 18.0      # a teammate this regular (minutes a game this season, 3+ games) who sat 2 of the last 3 is named
 
 
-def roles(logs, idx, season, team_games):
-    """Players whose minutes, shots (FGA, 3PTA), potential assists or rebound chances a game moved over their last 3
-    games against their baseline by at least ROLE_MOVE: this season's games before those 3 (3+ of them), else last
-    season's last 20 for the same team. Each with every stat now and before ("st", None where tracking has too few
-    games), his usage and starts then and now, and the regular teammates who sat 2 of his team's last 3 games (the
-    likely reason). logs: {pid: LOG_COLS rows}; team_games: {team: [gid, ...] this season, oldest first}. Biggest
-    minutes move first."""
+def roles(logs, idx, season, team_games, lined=None):
+    """Players whose minutes, shots (FGA, 3PTA), potential assists or rebound chances a game moved by at least
+    ROLE_MOVE, in roles_mode's comparison: "season" (his games this season for his team against all of last season's,
+    "was_team" set when he played most of them elsewhere) or "recent" (his last 3 games against the rest of his season).
+    Each with every stat now and before ("st", None where tracking has too few games or the stat does not compare across
+    seasons), his usage and starts then and now ([starts now, starts before, games before, games now]), and the regular
+    teammates who sat 2 of his team's last 3 games. logs: {pid: LOG_COLS rows}; team_games: {team: [gid, ...] this
+    season, oldest first}; lined: lined_players (None: everyone). Biggest minutes move first."""
     C = {c: k for k, c in enumerate(R.LOG_COLS)}
     played = {}                                              # (team, gid) -> pids who played
     for pid, rows in logs.items():
         for r in rows:
             played.setdefault((r[C["team"]], r[C["gid"]]), set()).add(pid)
     mean = lambda xs: sum(xs) / len(xs) if xs else None
+    mode, last = roles_mode(team_games), R.prev_season(season)
     out = []
     for pid, rows in logs.items():
         info = idx.get(str(pid))
-        if not info:
+        if not info or (lined is not None and pid not in lined):
             continue
         team = info[0]
         cur = [r for r in rows if R.season_of(r[C["date"]]) == season and r[C["team"]] == team]
         last4 = (team_games.get(team) or [])[-4:]
         if len(cur) < 3 or any(r[C["gid"]] not in last4 for r in cur[-3:]):
             continue                                         # not playing lately: a return or an absence, not a role
-        recent, base = cur[-3:], cur[:-3]
-        frm = "this season"
-        if len(base) < 3:
-            # last season's last 20, for this team only (a new team is a new role, not a change in one)
-            base, frm = [r for r in rows if R.season_of(r[C["date"]]) != season and r[C["team"]] == team][-20:], "last season"
-        if len(base) < 3:
-            continue
+        was_team = None
+        if mode == "recent":
+            recent, base, frm = cur[-3:], cur[:-3], "this season"
+            if len(base) < 5:
+                continue
+        else:
+            recent, frm = cur, "last season"
+            base = [r for r in rows if R.season_of(r[C["date"]]) == last]
+            if len(base) < LAST_MIN_GP:
+                continue
+            top = Counter(r[C["team"]] for r in base).most_common(1)[0][0]
+            was_team = top if top != team else None              # a new team: the biggest role change of all
         st = {}
         for k in ROLE_MOVE:
             now, was = [r[C[k]] for r in recent if r[C[k]] is not None], [r[C[k]] for r in base if r[C[k]] is not None]
@@ -89,12 +114,12 @@ def roles(logs, idx, season, team_games):
         out.append({"pid": pid, "name": info[1], "team": team, "d_min": round(d, 1),
                     "min": [round(mean([r[C["min"]] for r in recent]), 1), round(mean([r[C["min"]] for r in base]), 1)],
                     "usg": [None if us(recent) is None else round(us(recent), 1), None if us(base) is None else round(us(base), 1)],
-                    "starts": [sum(r[C["starter"]] or 0 for r in recent), sum(r[C["starter"]] or 0 for r in base), len(base)],
-                    "base": frm, "out": regs, "st": st})
+                    "starts": [sum(r[C["starter"]] or 0 for r in recent), sum(r[C["starter"]] or 0 for r in base), len(base), len(recent)],
+                    "base": frm, "was_team": was_team, "out": regs, "st": st})
     return sorted(out, key=lambda e: -abs(e["d_min"]))
 
 
-def build(mcon, out, idx, season, trk=None):
+def build(mcon, out, idx, season, trk=None, lined=None):
     """Write one file per player with games, and the index. Returns the number of players written."""
     out = Path(out)
     out.mkdir(parents=True, exist_ok=True)
@@ -115,7 +140,8 @@ def build(mcon, out, idx, season, trk=None):
                                   "ORDER BY date, gid", (season,)):
         for t in (h, a):
             team_games.setdefault(t, []).append(gid)
-    _write(out / "roles.json", {"season": season, "thresholds": ROLE_MOVE, "rows": roles(logs, idx, season, team_games)})
+    _write(out / "roles.json", {"season": season, "thresholds": ROLE_MOVE, "mode": roles_mode(team_games),
+                                "rows": roles(logs, idx, season, team_games, lined)})
     return len(rows)
 
 
@@ -127,7 +153,8 @@ def main():
     mcon = sqlite3.connect(f"file:{MU.DB}?mode=ro", uri=True)
     idx = json.loads(R.INDEX.read_text()).get("players", {})
     season = R.season_of(dt.datetime.now(R.ET).date().isoformat())
-    n = build(mcon, a.out, idx, season, R._ro(R.TRACKING))
+    q = R._ro(R.LINES)
+    n = build(mcon, a.out, idx, season, R._ro(R.TRACKING), lined_players(q, season) if q else None)
     print(f"nba_players: {n} players -> {a.out}")
 
 

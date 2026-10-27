@@ -132,7 +132,7 @@ def live_box(gid):
             "awayTeam": {"score": 66, "players": []}}
 
 
-def built(now):
+def built(now, sched=None, box_get=None):
     d = pathlib.Path(tempfile.mkdtemp())
     stores(d)
     tr = sqlite3.connect(d / "tracking.sqlite")
@@ -141,8 +141,8 @@ def built(now):
     tr.execute("INSERT INTO tracking (date, player_id, potential_ast, reb_chances) VALUES ('2026-09-01', 1, 14, 9)")
     tr.execute("INSERT INTO tracking (date, player_id, potential_ast, reb_chances) VALUES ('2026-09-02', 1, 11, NULL)")
     tr.commit(); tr.close()
-    return RS.build(now=now, sched=SCHED, lines=d / "lines.sqlite", news=d / "news.sqlite", shadow=d / "shadow.sqlite",
-                    matchup=d / "matchup.sqlite", index=d / "index.json", box_get=live_box, tracking=d / "tracking.sqlite")
+    return RS.build(now=now, sched=sched or SCHED, lines=d / "lines.sqlite", news=d / "news.sqlite", shadow=d / "shadow.sqlite",
+                    matchup=d / "matchup.sqlite", index=d / "index.json", box_get=box_get or live_box, tracking=d / "tracking.sqlite")
 
 
 @pytest.fixture(scope="module")
@@ -805,3 +805,84 @@ def test_page_boots_from_its_last_copy_and_animates_swaps():
     # swaps rise in; Over / Under, the combo window and the Injuries switch slide their pills; Live's bars grow on entry
     assert html.count("swapIn(") >= 9 and '<span class="ou" role="group" aria-label="Side"><span class="pill2">' in html
     assert '<div class="seg cbw" role="group" aria-label="Games"><span class="pill2">' in html and ".lvin .lvbar i{" in html
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_slate_day_moves_on_once_the_night_is_over():
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "core.js").write_text(UI.JS_CORE)
+    (d / "t.js").write_text("""
+const C = require('./core.js'), D = ['2026-10-26', '2026-10-27'];
+const g = (gid, date, state) => ({gid, date, state}), p = (gid, closed) => ({gid, closed});
+const finals = [g('a', D[0], 'final'), g('b', D[0], 'final'), g('c', D[1], 'pregame')];
+const late = [g('a', D[0], 'final'), g('b', D[0], 'live'), g('c', D[1], 'pregame')];
+const props = [p('a', true), p('b', true), p('c', false)], noLines = [p('a', true), p('b', true)];
+console.log(JSON.stringify([
+  C.slateDay(D, finals, props, null), C.slateDay(D, finals, props, D[0]),      // the night is over, tomorrow has lines
+  C.slateDay(D, late, props, D[0]), C.slateDay(D, late, props, null),          // a late game still on: tonight stays
+  C.slateDay(D, finals, noLines, D[0]), C.slateDay(D, finals, noLines, null),  // over, but no lines for tomorrow yet
+  C.slateDay(D, finals, props, '2026-10-25'), C.slateDay(D, finals, props, D[1])]));
+""")
+    out = json.loads(subprocess.run([NODE, str(d / "t.js")], capture_output=True, text=True, check=True, cwd=d).stdout)
+    assert out == ["2026-10-27", "2026-10-27", "2026-10-26", "2026-10-26", "2026-10-26", "2026-10-26", "2026-10-27", "2026-10-27"]
+
+
+def test_page_names_days_by_the_phones_date_and_finished_slates_by_name():
+    html = UI.page()
+    assert "ST.date = slateDay(D.dates, D.games, D.props, AUTO_DAY ? ST.date : null);" in html and "AUTO_DAY = false; if (ST.date !== b.dataset.date)" in html
+    assert "if (HIDDEN_AT && Date.now() - HIDDEN_AT > 1800000) AUTO_DAY = true;" in html          # back after 30+ min: choose again
+    assert 'const lab = dayName(ST.date);' in html and '"Yesterday"' in html and 'm === "live" && !liveNow ? "Results"' in html
+    assert "<b>All games final</b>" in html and 'id="gonext"' in html
+
+
+def test_a_slate_leaves_when_its_last_game_ends():
+    # 7:30 PM ET, the night's one live game has just gone final (the other is postponed): the page moves on to the next
+    # slate at once, the 6 AM ET hold notwithstanding; while that game is still on, the night stays (as built(NOW))
+    final = [dict(g, status=3, status_text="Final") if g["gid"] == "G1" else g for g in SCHED]
+    def final_box(gid):
+        b = live_box(gid)
+        return dict(b, gameStatus=3, gameStatusText="Final")
+    over = built(NOW, final, final_box)
+    assert over["dates"] == ["2026-10-27", "2026-10-28"] and {g["gid"] for g in over["games"]} == {"G3"}
+    assert all(p["gid"] == "G3" for p in over["props"])
+    # the schedule still says live but the box score says final: the box wins, the night is over
+    lagging = built(NOW, SCHED, final_box)
+    assert lagging["dates"][0] == "2026-10-27"
+    assert built(NOW)["dates"][0] == GD                                            # still being played: the night stays
+
+
+def test_projected_lineups_fill_in_for_who_is_out():
+    # MIN, 10 games: A B C D E start; when E sat (3 games) F started; G and H come off the bench (G more minutes)
+    box = lambda i, five, bench: (f"m{i}", f"2026-10-{10 + i}", "2026-27",
+                                  {**{p: (1, 32.0) for p in five}, **{p: (0, m) for p, m in bench.items()}})
+    sat = {7, 8, 9}
+    mins = [box(i, [1, 2, 3, 4, 6] if i in sat else [1, 2, 3, 4, 5], {7: 20.0, 8: 12.0} if i in sat else {6: 18.0, 7: 20.0, 8: 12.0})
+            for i in range(10)]
+    boxes = {"MIN": mins, "WAS": [box(i, [11, 12, 13, 14, 15], {}) for i in range(10)], "NEW": [box(0, [21, 22, 23, 24, 25], {})]}
+    roster = {"1": ["MIN", "Ay G", "G"], "2": ["MIN", "Bee F", "F"], "3": ["MIN", "Cee C", "C"], "4": ["MIN", "Dee G", "G"],
+              "5": ["MIN", "Eee F", "F"], "6": ["MIN", "Eff F", "F"], "7": ["MIN", "Gee G", "G"], "8": ["MIN", "Aitch C", "C"],
+              "11": ["WAS", "W1", "G"], "21": ["NEW", "N1", "G"]}
+    D = "2026-10-27"
+    official = {(D, 5): {"status": "Out"}, (D, 4): {"status": "Questionable"}, (D, 3): {"status": "Doubtful"}}
+    games = [{"date_et": D, "home": "MIN", "away": "WAS"}, {"date_et": D, "home": "NEW", "away": "CHI"}]
+    out = RS.projected_lineups(games, boxes, official, roster, {f"{D}|WAS": {"status": "Confirmed"}})
+    assert set(out) == {f"{D}|MIN"}                          # WAS posted; NEW (1 game) and CHI (none) too early to project
+    m = out[f"{D}|MIN"]
+    five = [s[0] for s in m["starters"]]
+    # E (Out) -> F, who started when E sat; C (Doubtful, never missed a start) -> H, the other center (over G's minutes)
+    assert sorted(five) == [1, 2, 4, 6, 8] and m["subs"] == [[6, 5, "Eee F"], [8, 3, "Cee C"]]
+    assert [s[2][:1] for s in m["starters"]] == ["G", "G", "F", "F", "C"]          # guards, then forwards, then centers
+    assert dict((s[0], s[3]) for s in m["starters"])[4] == "Questionable" and m["status"] == "Projected"
+    assert sorted(x[0] for x in m["missing"]) == [3, 5]
+    # last season C sat twice for MIN and G started both: that evidence beats position (and E's 3 makes his the surer pick)
+    full = {p: (1, 30.0) for p in (1, 2, 3, 4, 5)}
+    ls = [("p0", "2026-03-01", "2025-26", full)] + [(f"p{i}", f"2026-03-0{i + 1}", "2025-26", {**{p: (1, 30.0) for p in (1, 2, 4, 5)}, 7: (1, 30.0)})
+                                                    for i in (1, 2)]
+    m2 = RS.projected_lineups(games, dict(boxes, MIN=ls + mins), official, roster, {})[f"{D}|MIN"]
+    assert m2["subs"] == [[6, 5, "Eee F"], [7, 3, "Cee C"]]
+
+
+def test_page_shows_projected_lineups():
+    html = UI.page()
+    assert 'proj = e.status === "Projected"' in html and '"PROJECTED"' in html and "<b>In for</b>" in html
+    assert 'proj && INJ_S[st] ? ` · <em class="lq">' in html and "const miss = !proj && e.missing.length" in html
