@@ -324,9 +324,11 @@ def load_tracking(pids):
     return out
 
 
-def opp_cell(trk, b_id, b_out, b_in, stat):
+def opp_cell(trk, b_id, b_out, b_in, stat, season):
     """AMENDMENT 9: does B's role bump show up in OPPORTUNITIES (rebound chances / potential assists
-    per game), not just in makes? (label, ratio). b_out / b_in are the split's PRIOR games."""
+    per game), not just in makes? (label, ratio). b_out / b_in are the split's PRIOR games.
+    AMENDMENT 33: only games of `season` (the flag's, C.season_of) count. Rebound chances per rebound
+    ran 1.88 in 2026-10 against ~1.3 for most of 2025-26, so a split across seasons measured the feed."""
     keys = OPP_KEYS.get(stat)
     if not keys:
         return "n/a", None
@@ -337,7 +339,7 @@ def opp_cell(trk, b_id, b_out, b_in, stat):
         # a game counts when it has a tracking row; a blank component is 0 — the Rebounding feed
         # OMITS players with no rebound chances (nba_tracking.verify: 96-100% zero-rebound games)
         return [sum(row.get(k) or 0.0 for k in keys)
-                for row in (trk.get((a[0], b_id)) for a in apps) if row]
+                for row in (trk.get((a[0], b_id)) for a in apps if C.season_of(a[0]) == season) if row]
     vo, vi = per_game(b_out), per_game(b_in)
     if len(vo) < C.MIN_WOWY or len(vi) < 3 or sum(vi) <= 0:
         return "THIN", None
@@ -670,7 +672,8 @@ def flags(dry=False, game_date=None):
     for f in out_flags:
         if f["tier"] in ("wowy", "priced") and f.get("pid") and f.get("x_pid"):
             b_out, b_in = split(apps, f["pid"], f["x_pid"], f["team"])
-            f["opp_cell"], f["opp_ratio"] = opp_cell(trk, f["pid"], b_out, b_in, f["stat"])
+            f["opp_cell"], f["opp_ratio"] = opp_cell(trk, f["pid"], b_out, b_in, f["stat"],
+                                                     C.season_of(f["game_date"]))
         else:
             f["opp_cell"], f["opp_ratio"] = "n/a", None
 
