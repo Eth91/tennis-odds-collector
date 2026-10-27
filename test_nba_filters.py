@@ -43,7 +43,8 @@ def check(mod):
         nonlocal ok
         ok &= bool(cond)
         print(f"   {'ok ' if cond else 'BAD'} {label}")
-    saved = (mod._stale_of, mod.MARGIN, mod.FILTERS_ON)
+    saved = (mod._stale_of, mod.MARGIN, mod.FILTERS_ON, mod.FRESH_RULE_ON)
+    mod.FRESH_RULE_ON = False                               # amendment 31 is tested in test_nba_fresh
     mod._stale_of, mod.MARGIN, mod.FILTERS_ON = (lambda f, st: f["_stale"]), {"pra": 6.5, "pts": 5.0, "reb": 1.0}, True
     try:
         sh = mod._shadow(pathlib.Path(tempfile.mkdtemp()) / "s.sqlite")
@@ -75,7 +76,7 @@ def check(mod):
         want(c3[("Collin Gillespie", "reb")] == (1, "REBOUNDS OFF CARD") and c3[("Ryan Dunn", "pts")][0] == 1,
              "filters off: rebounds and big edges are carded again; filt is still stored")
     finally:
-        mod._stale_of, mod.MARGIN, mod.FILTERS_ON = saved
+        mod._stale_of, mod.MARGIN, mod.FILTERS_ON, mod.FRESH_RULE_ON = saved
     return ok
 
 
