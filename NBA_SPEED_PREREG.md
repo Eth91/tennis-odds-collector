@@ -1371,3 +1371,47 @@ be a player's lead.
 - `flags.filt` no longer records REBOUNDS OFF CARD for new flags.
 - Switch: `FILTER_REB_ON = False` in nba_flags.py.
 - Nothing is bet: `LIVE_TIERS` stays empty.
+
+# AMENDMENT 33: the OPPORTUNITY cell uses the flag's season only; a sanity guard on the tracking feed (2026-10-27, information only)
+
+**Why.** An audit of the VM's `nba_tracking.sqlite` (2026-10-27) found two problems in the data amendment 9 reads:
+- **Bad dates.** On 2026-04-01 the feed filed multi-game totals as one game: 517 potential assists for a
+  player who played 18 minutes, and a date average of 10.8 against about 4. On 2026-10-22 it returned
+  inflated values: Jokić had 44 potential assists and 101 passes in 35 minutes. Both responses said GP = 1, so
+  they passed `fetch`'s only check. A refetch on 2026-10-27 returned the same values.
+- **Rebound chances are not comparable across periods.** League rebound chances per box rebound:
+  - 1.83 in 2025-10;
+  - about 1.25–1.35 from early December 2025 to 2026-03-23 (in this period some rows even have fewer
+    chances than rebounds);
+  - 1.84 in 2026-04 and 1.88 in 2026-10.
+
+  Potential assists per assist held at 1.73–1.85 throughout. Amendment 9's split runs from X's first
+  franchise game, so "without X" games can sit in 2026-27 and "with X" games in 2025-26. A ratio across that
+  boundary measures the feed: 1.88 / 1.3 alone is above the 1.10 line.
+
+**Rule (the cell).** `opp_cell` counts only games in the same NBA season as the flag's game date
+(`nba_coldstart.season_of`), both without X and with X, before the tracking lookup. Everything else in
+amendment 9 is unchanged: the opportunity keys, the 1.10 line, a blank component = 0, fewer than 2 games
+without X or 3 with X = `THIN`, `NO DATA`, `n/a`. Early in a season most flags will read THIN; that is the
+honest answer.
+
+**Known limit, stated now.** The low period in 2025-26 was inside one season. If the feed shifts the same way
+mid-season in 2026-27, a current-season split can straddle it again. This amendment does not correct that;
+it would need its own amendment.
+
+**Record.** The 62 flags labelled under the old split (28 CONFIRMED, 28 NOT CONFIRMED, 6 THIN; logged
+2026-10-24 → 10-27) keep their stored labels. The scoreboard's OPPORTUNITY cell restarts: it scores flags logged
+at or after **AMEND33_CUTOVER = 2026-10-27T10:00:00 UTC** (`nba_clv`), after deployment. The cell stays
+information only. No card rule, ping or side-by-side rule reads it. Nothing is bet: `LIVE_TIERS` stays empty.
+
+**Data guard (apparatus, not a rule).** `nba_tracking.fetch` rejects a date when any row of its response is
+impossible for one game:
+- more than 1.0 potential assists or 1.4 rebound chances per minute (the props page's caps), using the
+  response's MIN floored at 10 minutes;
+- with no MIN column, more than 40 potential assists or 150 passes.
+
+The floor is there because short stints break a per-minute test: without it, a 1-minute row with 2 rebound
+chances rejects 26 good dates in the store. With a 10-minute floor no stored good date trips, and both bad ones
+do. A rejected date stores nothing for either measure. It stays pending, so the daily run retries it and picks
+it up if the league corrects it. 2026-04-01, 04-10, 04-12 and 10-22 are refetched through the guard; the result
+is recorded below when applied.
