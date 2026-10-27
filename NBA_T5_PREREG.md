@@ -44,3 +44,14 @@ as *development, not evidence*. No setting is changed after it.
   in size.
 - **Sampling delay:** DraftKings is sampled about every 3 minutes (Mac push) and FanDuel about every 10
   (VM cycle), so "the first moment" is the first sample, not the first posting.
+
+## Development look (2026-10-27, games 2026-10-22..25). Information only; nothing changed after it
+- **T5:** 255 graded signals. ROI −9.2% [−16.3%, +13.2%].
+  - By timing: 6 h+ −2.4% (n 123), 2–6 h −18.4% (n 79), under 2 h −11.4% (n 53).
+  - **CLV −1.05 points**, positive on only 25% of signals. FanDuel's no-vig under probability usually
+    *fell* between the signal and tip, so FanDuel's early price was a poor reference for "fair".
+  - Median signal time: 5.7 h before tip.
+- **T4 on the same window, for comparison:** 48 signals, ROI +1.9% [−23%, +12%], CLV −0.3 points.
+
+Four nights cannot decide either test. The rule stands as registered, and the confirmatory sample starts
+2026-10-28.
