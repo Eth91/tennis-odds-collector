@@ -1381,14 +1381,18 @@ function rolesView(swap) {
     const rl = $("#rol", el);
     if (swap) swapIn(rl);
     if (!rows.length) { rl.innerHTML = `<div class="empty"><b>${k === "reb_ch" ? "None yet this season" : "No role changes"}</b></div>`; return; }
-    rl.innerHTML = `<div class="lhd"><span>${rows.length} players</span><span>Last 3 games</span></div>` + rows.map(r => {
-      const v = stat(r), dv = v[0] - v[1], up = dv > 0, was = r.starts[2] ? r.starts[1] / r.starts[2] : 0;
-      const why = [k !== "min" ? `${r.min[1]} → ${r.min[0]} min` : "",
-                   r.starts[0] === 3 && was < .5 ? "Now starting" : r.starts[0] === 0 && was >= .5 ? "Lost his start" : "",
+    // the comparison (nba_players.roles_mode): early on, his season so far against last season; later, his last 3 games
+    // against the rest of his season
+    const cmp = j && j.mode === "season" ? "This season vs last" : "Last 3 games vs season";
+    rl.innerHTML = `<div class="lhd"><span>${rows.length} players</span><span>${cmp}</span></div>` + rows.map(r => {
+      const v = stat(r), dv = v[0] - v[1], up = dv > 0, was = r.starts[2] ? r.starts[1] / r.starts[2] : 0, now = r.starts[0] / (r.starts[3] || 3);
+      const why = [r.was_team ? `<span>New team</span> (was ${esc(r.was_team)})` : "",
+                   k !== "min" ? `${r.min[1]} → ${r.min[0]} min` : "",
+                   now >= .8 && was < .5 ? "Now starting" : now <= .2 && was >= .5 ? "Lost his start" : "",
                    r.out.length ? `<span>${r.out.map(n => esc(lastName(n))).join(", ")} out</span>` : "",
                    r.usg[0] !== null && r.usg[1] !== null ? `USG ${Math.round(r.usg[1])} → ${Math.round(r.usg[0])}%` : ""].filter(Boolean);
       return `<button class="pr ir ir0 ror" data-vp="${r.pid}"><span class="av">${head(r.pid)}</span><div class="who"><div class="nm">${esc(nameOf(r.name))}<span class="cd">${esc(r.team)}</span></div>
-        <div class="lin">${v[1]} → <b>${v[0]}</b> ${sd[2]}${r.base === "last season" ? " <small>vs last season</small>" : ""}</div>
+        <div class="lin">${v[1]} → <b>${v[0]}</b> ${sd[2]}</div>
         <div class="ros">${why.join(" · ")}</div></div>
         <span class="rod ${up ? "up" : "dn"}">${up ? "▲" : "▼"}${Math.abs(dv).toFixed(1)}<i>${sd[3]}</i></span></button>`; }).join("");
   });
