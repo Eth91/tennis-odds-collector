@@ -78,3 +78,12 @@ seasons over plain season FGA.
 - **Registered** at 2026-10-27T13:00:00 UTC (side-by-side amendment 7).
 - **No pings,** as registered above, until a forward record exists. The user can change that.
 - The window is short (games 2–5), so this season's record comes in the next week or two.
+
+# AMENDMENT 2: EARLY_SURGE pings on (2026-10-27, at the user's request)
+**User:** "yes, turn on shadow pings for early surge. I was looking at Harper and Achiuwa too, so this does have
+some credibility."
+
+- `nba_role_open.py` (every minute) pings "🟡 EARLY" (SHADOW) at each new points opener that passes
+  `nba_early.early_surge`, the same decision the side-by-side's EARLY_SURGE replays.
+- Only props opened after the deploy ping; lines already up are not pinged retroactively.
+- The rule and its registration are unchanged; it is still judged by the side-by-side's bars.
