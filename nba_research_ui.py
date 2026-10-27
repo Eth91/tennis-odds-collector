@@ -160,7 +160,7 @@ font-size:13px;font-weight:600;color:#fff}
 .seg button img{width:16px;height:16px} .seg button svg{width:14px;height:14px;fill:currentColor}
 /* chips: the chart filters' outline pills */
 .chips{display:flex;flex-wrap:wrap;gap:8.3px;margin-top:10px}
-.chips.rsw{flex-wrap:nowrap;overflow-x:auto;margin:2px 0 4px;padding:0 15.3px 8px;scrollbar-width:none} .rsw::-webkit-scrollbar{display:none} .rsw .chip{flex:none}
+.mt.rrl{margin:14px 15.3px 4px} .mt.rrl button{width:auto;padding:0 15px;white-space:nowrap} .mt.rrl button[aria-pressed="true"]{background:none}
 .chip{display:inline-flex;align-items:center;height:30px;padding:0 13px;border:1px solid rgba(255,255,255,.15);border-radius:15px;background:none;
 color:#fff;font-size:13px;font-weight:500}
 .chip[aria-pressed="true"]{border-color:rgba(255,255,255,.3);background:#2a2a2a}
@@ -327,7 +327,7 @@ svg.shct{display:block;width:100%;height:auto;margin-top:6px}
 .lus .av{position:relative;left:auto;top:auto;width:40px;height:40px}
 .lus .av .hs{left:-8px;top:1px;width:56px}
 .lus b{max-width:100%;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lus i{font-style:normal;font-size:10.5px;color:#9a9a9a} .lus.new i{color:var(--org);font-weight:700}
+.lus i{font-style:normal;font-size:10.5px;color:#9a9a9a} .lus.new i{color:var(--org);font-weight:700} .lus .lq{font-style:normal;color:var(--yel);font-weight:700}
 .lum{margin-top:9px;font-size:12.5px;color:#b0b0b0;line-height:1.7}
 .lum b{margin-right:6px;font-size:10.5px;letter-spacing:.3px;color:#8e8e8e;text-transform:uppercase}
 .lum button{padding:0;border:0;background:none;color:#e6e6e6;font-size:12.5px} .lum .tg{margin:0 0 0 4px}
@@ -526,6 +526,7 @@ transition:background-color .22s,border-color .22s,transform .16s}
 .cbp{position:fixed;right:15.3px;bottom:calc(max(var(--sb),10px) + 74px);z-index:35;display:flex;align-items:center;gap:6px;height:40px;
 padding:0 14px 0 12px;border-radius:20px;color:#fff;font:inherit;font-size:14px;font-weight:600}
 .cbp[hidden]{display:none} .cbp svg{width:19px;height:19px}
+.empty .ebt{display:flex;justify-content:center;gap:10px;margin-top:14px} .empty .ebt .btn{margin:0;padding:0 18px;width:auto}
 .cbon .lst{padding-bottom:calc(var(--sb) + 160px)} .cbon .end{height:calc(var(--sb) + 80px)}
 .cbp b{min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#fff;color:#000;font-size:12px;line-height:20px;text-align:center}
 .cbl{display:flex;align-items:center;gap:10px;min-height:56px;border-bottom:.5px solid var(--sep)}
@@ -885,6 +886,21 @@ function comboStats(legs, win, season) {
 }
 // the Live tab's word for a prop: an over HIT / NEEDS n / MISS, an under n ROOM / NO ROOM / BUST / HIT, a push at
 // the final PUSH. NEEDS counts to the next whole number past the line; ROOM is what can still come and win
+// the slate to show: `cur` while it is a listed day with a game still to come or under way, or while no later day has
+// lines; else the first day with an unfinished game that has open props or a live game, else the first with props. A
+// finished slate gives way to the next one as soon as its lines are up
+function slateDay(dates, games, props, cur) {
+  var byGid = {};
+  games.forEach(function (g) { byGid[g.gid] = g; });
+  var done = function (d) { var gs = games.filter(function (g) { return g.date === d; });
+    return gs.length > 0 && gs.every(function (g) { return g.state === "final" || g.state === "postponed"; }); };
+  var on = function (p, d) { return byGid[p.gid] && byGid[p.gid].date === d; };
+  var open = function (d) { return props.some(function (p) { return !p.closed && on(p, d); }); };
+  var live = function (d) { return games.some(function (g) { return g.date === d && g.state === "live"; }); };
+  if (cur && dates.indexOf(cur) >= 0 && !(done(cur) && dates.some(function (d) { return d > cur && open(d); }))) return cur;
+  return dates.find(function (d) { return !done(d) && (open(d) || live(d)); }) ||
+    dates.find(function (d) { return props.some(function (p) { return on(p, d); }); }) || dates[0];
+}
 function liveStatus(v, line, over, live) {
   if (!live && v === line) return ["PUSH", ""];
   if (over) return v > line ? ["HIT", "up"] : live ? ["NEEDS " + (Math.floor(line) + 1 - v), ""] : ["MISS", "dn"];
@@ -902,7 +918,7 @@ if (typeof module !== "undefined") module.exports = {statValue: statValue, hitSu
   rowsToLogs: rowsToLogs, windowed: windowed, filterLogs: filterLogs, splitRows: splitRows, sideRate: sideRate,
   american: american, decimalOf: decimalOf, bestOver: bestOver, bestPrice: bestPrice, propRates: propRates,
   noVig: noVig, fairAt: fairAt, valueAt: valueAt, zscore: zscore, pmfGe: pmfGe, projProbs: projProbs, blendP: blendP,
-  filterProps: filterProps, sortProps: sortProps, liveStage: liveStage, liveStatus: liveStatus, comboStats: comboStats};
+  filterProps: filterProps, sortProps: sortProps, liveStage: liveStage, liveStatus: liveStatus, slateDay: slateDay, comboStats: comboStats};
 """
 
 JS_APP = r"""
@@ -1145,7 +1161,7 @@ function topRow() {
 }
 function cards() {
   const gs = D.games.filter(g => g.date === ST.date), i = D.dates.indexOf(ST.date);
-  const lab = i === 0 ? "Today" : i === 1 ? "Tomorrow" : ST.date.slice(5).replace("-", "/");
+  const lab = dayName(ST.date);
   return `<button class="gc0" id="dayb" aria-haspopup="dialog"><i>${lab}</i><i>${gs.length} GAME${gs.length === 1 ? "" : "S"}</i></button>` +
     gs.map(g => `<button class="gc" data-gid="${g.gid}" aria-pressed="${g.gid === ST.gid}" aria-label="${esc(g.away)} at ${esc(g.home)}"><span class="gt">${[g.away, g.home].map(t => `<span${b2(g, t) ? ' class="b2t"' : ""}>${logo(t, "")}${esc(t)}</span>`).join("")}</span><em>${g.state === "live" ? '<span class="lv">LIVE</span>' : g.state === "final" ? "Final" : g.state === "postponed" ? "PPD" : mt(g.tip).replace(" ", "\u200a")}${cardNote(g)}</em></button>`).join("");
 }
@@ -1176,7 +1192,12 @@ function render() {
     const r = $("#retry"); if (r) r.onclick = load;
     return;
   }
-  if (!ST.date || D.dates.indexOf(ST.date) < 0) ST.date = D.dates.find(d => D.props.some(p => (gameOf(p.gid) || {}).date === d)) || D.dates[0];
+  if (AUTO_DAY || !ST.date || D.dates.indexOf(ST.date) < 0) {
+    const was = ST.date;
+    ST.date = slateDay(D.dates, D.games, D.props, AUTO_DAY ? ST.date : null);
+    if (was && ST.date !== was && ST.market === "live" && !D.games.some(g => g.date === ST.date && (g.state === "live" || g.state === "final"))) ST.market = "points";
+    if (ST.date !== was) save();                               // the URL follows, so a reload or a shared link lands there too
+  }
   if (ST.gid !== "all" && !D.games.some(g => g.gid === ST.gid && g.date === ST.date)) ST.gid = "all";
   const mks = availMarkets();
   if (ALL_TABS.indexOf(ST.market) < 0 && mks.length && mks.indexOf(ST.market) < 0) ST.market = mks[0];
@@ -1185,8 +1206,8 @@ function render() {
       <nav class="gcs" id="gcs" aria-label="Games"></nav><div class="ldv"></div></header><div id="ban"></div><main class="lst" id="lst"></main>`;
     bindTop();
   }
-  const liveOn = D.games.some(g => g.date === ST.date && (g.state === "live" || g.state === "final"));
-  $("#mtl").innerHTML = '<span class="pill2"></span>' + MKT_TABS.filter(m => m === "live" ? liveOn || ST.market === "live" : ALL_TABS.indexOf(m) >= 0 || mks.indexOf(m) >= 0).map(m => `<button data-market="${m}" aria-pressed="${m === ST.market}">${TAB[m]}</button>`).join("");
+  const liveOn = D.games.some(g => g.date === ST.date && (g.state === "live" || g.state === "final")), liveNow = D.games.some(g => g.date === ST.date && g.state === "live");
+  $("#mtl").innerHTML = '<span class="pill2"></span>' + MKT_TABS.filter(m => m === "live" ? liveOn || ST.market === "live" : ALL_TABS.indexOf(m) >= 0 || mks.indexOf(m) >= 0).map(m => `<button data-market="${m}" aria-pressed="${m === ST.market}">${m === "live" && !liveNow ? "Results" : TAB[m]}</button>`).join("");
   $("#gcs").innerHTML = cards();
   $("#ban").innerHTML = banners();
   bindHead();
@@ -1254,14 +1275,21 @@ function renderRows(ivFrom) {
   else if (!onDate.length) body = '<div class="empty"><b>No props yet</b></div>';
   else if (ST.gid !== "all" && !onDate.some(p => p.gid === ST.gid)) body = '<div class="empty"><b>No props for this game yet</b></div>';
   else if (!list.length && ST.q.trim().length >= 2) body = '<div class="lhd"><span>No props</span></div>';
-  else if (!list.length && ST.market !== "live" && onDate.every(p => p.closed)) body = '<div class="empty"><b>Games under way</b><button class="btn" id="golive">Live</button></div>';
+  else if (!list.length && ST.market !== "live" && onDate.every(p => p.closed)) {
+    const allDone = D.games.filter(g => g.date === ST.date).every(g => g.state === "final" || g.state === "postponed");
+    const next = D.dates.find(d => d > ST.date && D.props.some(p => !p.closed && (gameOf(p.gid) || {}).date === d));
+    body = allDone ? `<div class="empty"><b>All games final</b><div class="ebt"><button class="btn" id="golive">Results</button>${next ? `<button class="btn pri" id="gonext" data-d="${next}">${esc(dayName(next))}'s props</button>` : ""}</div></div>`
+      : '<div class="empty"><b>Games under way</b><button class="btn" id="golive">Live</button></div>';
+  }
   else if (!list.length) body = ST.watch ? '<div class="empty"><b>Watchlist empty</b><button class="btn" id="reset2">Reset filters</button></div>'
     : ST.market === "trends" ? '<div class="empty"><b>No trends</b></div>'
     : ST.market === "movers" ? '<div class="empty"><b>No movers</b></div>'
     : ST.market === "live" ? '<div class="empty"><b>No games under way</b></div>'
     : '<div class="empty"><b>No matches</b><button class="btn" id="reset2">Reset filters</button></div>';
   if (body) { lst.innerHTML = body; const r2 = $("#reset2"); if (r2) r2.onclick = resetFilters;
-    const gl = $("#golive"); if (gl) gl.onclick = () => { ST.market = "live"; save(); render(); }; return; }
+    const gl = $("#golive"); if (gl) gl.onclick = () => { ST.market = "live"; save(); render(); swapIn($("#lst")); };
+    const gn = $("#gonext"); if (gn) gn.onclick = () => { AUTO_DAY = false; ST.date = gn.dataset.d; ST.gid = "all"; save(); render(); swapIn($("#lst")); };
+    return; }
   if (ST.view === "markets") {
     lst.innerHTML = '<div class="mhd"><span>PLAYER</span><span>FANDUEL</span><span>DRAFTKINGS</span></div>' + list.map(mrow).join("");
     return;
@@ -1323,9 +1351,9 @@ function injProp(pid) {                          // tonight's prop for a teammat
     .sort((a, b) => ORDER.indexOf(a.market) - ORDER.indexOf(b.market))[0] || null;
 }
 // a box: the teammate on top, what he took below (a start, from k of n games or "?" by position; or minutes a game)
-function injBox(m, val, cls) {
-  const p = injProp(m.pid), tag = p ? "button" : "div";
-  return `<${tag} class="ijb"${p ? ` data-id="${esc(p.id)}"` : ""}><i>${esc(m.name)}</i><b class="${cls}">${val}</b></${tag}>`;
+function injBox(m, val, cls) {                      // a tap opens his prop on this slate, else his player page
+  const p = injProp(m.pid);
+  return `<button class="ijb"${p ? ` data-id="${esc(p.id)}"` : ` data-vp="${m.pid}"`}><i>${esc(m.name)}</i><b class="${cls}">${val}</b></button>`;
 }
 function injRow(e) {
   const bx = [], s = e.starts;
@@ -1353,7 +1381,7 @@ let ROLES = null;
 // the Roles switch: [key, chip, unit after the numbers, label under the move]; ROLE_TH stands in for a file without
 // thresholds (nba_players.ROLE_MOVE)
 const ROLE_ST = [["min", "Minutes", "min", "MIN"], ["fga", "FGA", "FGA", "FGA"], ["fg3a", "3PTA", "3PA", "3PTA"],
-                 ["pot_ast", "Potential ast", "pot. ast", "POT AST"], ["reb_ch", "Reb chances", "reb ch.", "REB CH"]];
+                 ["pot_ast", "Potential Assists", "pot. ast", "POT AST"], ["reb_ch", "Rebound Chances", "reb ch.", "REB CH"]];
 const ROLE_TH = {min: 4, fga: 3, fg3a: 2, pot_ast: 2.5, reb_ch: 3};
 const rolesLoad = () => ROLES || (ROLES = fetch("player/roles.json").then(r => r.ok ? r.json() : null).catch(() => null));
 function rolesView(swap) {
@@ -1368,22 +1396,31 @@ function rolesView(swap) {
     const rows = ((j && j.rows) || []).filter(r => teams.has(r.team) && (ST.team === "all" || r.team === ST.team) && (!q || r.name.toLowerCase().indexOf(q) >= 0))
       .filter(r => { const v = stat(r); return v && Math.abs(v[0] - v[1]) >= th[k]; })
       .sort((a, b) => Math.abs(stat(b)[0] - stat(b)[1]) - Math.abs(stat(a)[0] - stat(a)[1]));
-    if (!$(".rsw", el)) {
-      el.innerHTML = `<div class="chips rsw" role="group" aria-label="Stat">${ROLE_ST.map(([x, lab]) => `<button class="chip" data-rs="${x}">${lab}</button>`).join("")}</div><div id="rol"></div>`;
+    // the stat rail: built once, like the market rail up top (a pill slides to the stat, the rail scrolls it into view)
+    if (!$(".rrl", el)) {
+      el.innerHTML = `<nav class="mt rrl" aria-label="Stat"><div class="mt-in" id="rsl"><span class="pill2"></span>${ROLE_ST.map(([x, lab]) => `<button data-rs="${x}">${lab}</button>`).join("")}</div></nav><div id="rol"></div>`;
       $$("[data-rs]", el).forEach(b => b.onclick = () => { if (b.dataset.rs !== (ST.rs || "min")) { ST.rs = b.dataset.rs === "min" ? "" : b.dataset.rs; save(); rolesView(true); } });
     }
-    press("[data-rs]", x => x.dataset.rs === k, el);
+    const rail = $("#rsl", el);
+    press("[data-rs]", x => x.dataset.rs === k, rail); slide(rail, !swap);
+    const on = $('[aria-pressed="true"]', rail);
+    if (on && (on.offsetLeft < rail.scrollLeft || on.offsetLeft + on.offsetWidth > rail.scrollLeft + rail.clientWidth))
+      rail.scrollTo({left: on.offsetLeft - (rail.clientWidth - on.offsetWidth) / 2, behavior: swap && !REDUCED ? "smooth" : "auto"});
     const rl = $("#rol", el);
     if (swap) swapIn(rl);
     if (!rows.length) { rl.innerHTML = `<div class="empty"><b>${k === "reb_ch" ? "None yet this season" : "No role changes"}</b></div>`; return; }
-    rl.innerHTML = `<div class="lhd"><span>${rows.length} players</span><span>Last 3 games</span></div>` + rows.map(r => {
-      const v = stat(r), dv = v[0] - v[1], up = dv > 0, was = r.starts[2] ? r.starts[1] / r.starts[2] : 0;
-      const why = [k !== "min" ? `${r.min[1]} → ${r.min[0]} min` : "",
-                   r.starts[0] === 3 && was < .5 ? "Now starting" : r.starts[0] === 0 && was >= .5 ? "Lost his start" : "",
+    // the comparison (nba_players.roles_mode): early on, his season so far against last season; later, his last 3 games
+    // against the rest of his season
+    const cmp = j && j.mode === "season" ? "This season vs last" : "Last 3 games vs season";
+    rl.innerHTML = `<div class="lhd"><span>${rows.length} players</span><span>${cmp}</span></div>` + rows.map(r => {
+      const v = stat(r), dv = v[0] - v[1], up = dv > 0, was = r.starts[2] ? r.starts[1] / r.starts[2] : 0, now = r.starts[0] / (r.starts[3] || 3);
+      const why = [r.was_team ? `<span>New team</span> (was ${esc(r.was_team)})` : "",
+                   k !== "min" ? `${r.min[1]} → ${r.min[0]} min` : "",
+                   now >= .8 && was < .5 ? "Now starting" : now <= .2 && was >= .5 ? "Lost his start" : "",
                    r.out.length ? `<span>${r.out.map(n => esc(lastName(n))).join(", ")} out</span>` : "",
                    r.usg[0] !== null && r.usg[1] !== null ? `USG ${Math.round(r.usg[1])} → ${Math.round(r.usg[0])}%` : ""].filter(Boolean);
       return `<button class="pr ir ir0 ror" data-vp="${r.pid}"><span class="av">${head(r.pid)}</span><div class="who"><div class="nm">${esc(nameOf(r.name))}<span class="cd">${esc(r.team)}</span></div>
-        <div class="lin">${v[1]} → <b>${v[0]}</b> ${sd[2]}${r.base === "last season" ? " <small>vs last season</small>" : ""}</div>
+        <div class="lin">${v[1]} → <b>${v[0]}</b> ${sd[2]}</div>
         <div class="ros">${why.join(" · ")}</div></div>
         <span class="rod ${up ? "up" : "dn"}">${up ? "▲" : "▼"}${Math.abs(dv).toFixed(1)}<i>${sd[3]}</i></span></button>`; }).join("");
   });
@@ -1399,13 +1436,18 @@ function lineupsView() {
 }
 function luTeam(t, e) {
   if (!e) return `<div class="lut"><div class="luth">${logo(t, "")}<b>${esc(t)}</b><span class="tg tn">NOT POSTED</span></div></div>`;
-  const usual = new Set(e.usual), isNew = pid => usual.size > 0 && !usual.has(pid);
-  const tiles = e.starters.map(([pid, name, pos]) => `<button class="lus${isNew(pid) ? " new" : ""}" data-vp="${pid}"><span class="av">${head(pid)}</span><b>${esc(lastName(name))}</b><i>${esc(pos)}${isNew(pid) ? " · NEW" : ""}</i></button>`).join("");
-  const miss = e.missing.length ? `<div class="lum"><b>Not starting</b>${e.missing.map(([pid, name, st]) => `<button data-vp="${pid}">${esc(nameOf(name))}</button>${st ? `<span class="tg ${INJ_C[st] || "tn"}">${INJ_S[st] || esc(String(st).toUpperCase())}</span>` : ""}`).join(", ")}</div>` : "";
+  const usual = new Set(e.usual), isNew = pid => usual.size > 0 && !usual.has(pid), proj = e.status === "Projected";
+  const tag = st => st ? `<span class="tg ${INJ_C[st] || "tn"}">${INJ_S[st] || esc(String(st).toUpperCase())}</span>` : "";
+  // a projected five (nba_research.projected_lineups): a Questionable starter carries his Q; who comes in for whom below
+  const tiles = e.starters.map(([pid, name, pos, st]) => `<button class="lus${isNew(pid) ? " new" : ""}" data-vp="${pid}"><span class="av">${head(pid)}</span><b>${esc(lastName(name))}</b><i>${esc(pos)}${isNew(pid) ? " · NEW" : ""}${proj && INJ_S[st] ? ` · <em class="lq">${INJ_S[st]}</em>` : ""}</i></button>`).join("");
+  const nm = pid => (e.starters.find(x => x[0] === pid) || [, ""])[1];
+  const subs = proj && (e.subs || []).length ? `<div class="lum"><b>In for</b>${e.subs.map(([pid, out, outName]) =>
+    `${esc(lastName(nm(pid)))} for <button data-vp="${out}">${esc(nameOf(outName))}</button>${tag((e.missing.find(m => m[0] === out) || [])[2])}`).join(", ")}</div>` : "";
+  const miss = !proj && e.missing.length ? `<div class="lum"><b>Not starting</b>${e.missing.map(([pid, name, st]) => `<button data-vp="${pid}">${esc(nameOf(name))}</button>${st ? `<span class="tg ${INJ_C[st] || "tn"}">${INJ_S[st] || esc(String(st).toUpperCase())}</span>` : ""}`).join(", ")}</div>` : "";
   const ina = e.inactive.length ? `<div class="lum"><b>Inactive</b>${e.inactive.map(([, name]) => esc(nameOf(name))).join(", ")}</div>` : "";
   const ok = e.status === "Confirmed";
-  return `<div class="lut"><div class="luth">${logo(t, "")}<b>${esc(t)}</b><span class="tg ${ok ? "tp" : "tq"}">${ok ? "CONFIRMED" : "EXPECTED"}</span>${ok && e.at ? `<em>${esc(mt(e.at))}</em>` : ""}</div>
-    <div class="lur">${tiles}</div>${miss}${ina}</div>`;
+  return `<div class="lut"><div class="luth">${logo(t, "")}<b>${esc(t)}</b><span class="tg ${ok ? "tp" : proj ? "tn" : "tq"}">${ok ? "CONFIRMED" : proj ? "PROJECTED" : "EXPECTED"}</span>${ok && e.at ? `<em>${esc(mt(e.at))}</em>` : ""}</div>
+    <div class="lur">${tiles}</div>${subs}${miss}${ina}</div>`;
 }
 function tabbar() {
   const tb = $("#tb"), fo = filtersOn();
@@ -1523,12 +1565,18 @@ function filterSheet() {
     upd();
   });
 }
+// Today / Tomorrow / Yesterday by the phone's calendar (the payload keeps last night's slate until 6 AM ET)
+function dayName(d) {
+  const t = new Date(), iso_ = x => `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`;
+  const off = k => { const x = new Date(t); x.setDate(x.getDate() + k); return iso_(x); };
+  return d === off(0) ? "Today" : d === off(1) ? "Tomorrow" : d === off(-1) ? "Yesterday" : d.slice(5).replace("-", "/");
+}
 function daySheet() {
   openSheet('<h2 id="sht">Day</h2>' + D.dates.filter(d => /^\d{4}-/.test(d)).map((d, i) => {
     const n = D.games.filter(g => g.date === d).length;
-    return `<button class="opt" data-date="${d}"><span>${i === 0 ? "Today" : i === 1 ? "Tomorrow" : d} · ${n} game${n === 1 ? "" : "s"}</span><span class="ck">${d === ST.date ? "✓" : ""}</span></button>`;
+    return `<button class="opt" data-date="${d}"><span>${dayName(d)} · ${n} game${n === 1 ? "" : "s"}</span><span class="ck">${d === ST.date ? "✓" : ""}</span></button>`;
   }).join(""), s => {
-    $$("[data-date]", s).forEach(b => b.onclick = () => { if (ST.date !== b.dataset.date) { ST.date = b.dataset.date; ST.gid = "all"; save(); render(); } closeSheet(); });
+    $$("[data-date]", s).forEach(b => b.onclick = () => { AUTO_DAY = false; if (ST.date !== b.dataset.date) { ST.date = b.dataset.date; ST.gid = "all"; save(); render(); swapIn($("#lst")); } closeSheet(); });
   });
 }
 // what the nightly replay (nba_research_score.py) found: each of the page's signals against what the price said
@@ -2717,7 +2765,9 @@ const sigOf = p => { const g = gameOf(p.gid) || {};
 const pageSig = id => { const p = propFor(id); if (!p) return ""; const g = gameOf(p.gid) || {};
   const around = JSON.stringify([D.injuries[g.date + "|" + p.pid] || null, (D.inj_report || {})[g.date + "|" + p.team] || null, D.absences[g.date + "|" + p.team] || null]);
   return p.v ? "v" + around : sigOf(p) + JSON.stringify(g) + around + JSON.stringify([D.related[p.id] || null, D.sources.books]); };
-let LOADED_AT = 0, PDOWN = false, REDRAW = false, FRESH = false, SAVED_AT = 0;
+let LOADED_AT = 0, PDOWN = false, REDRAW = false, FRESH = false, SAVED_AT = 0, HIDDEN_AT = 0;
+// the slate is chosen for the user (slateDay) at a launch and on a return after 30+ minutes away, until they pick a day
+let AUTO_DAY = true;
 // the last data this phone loaded (Cache Storage), drawn at once on a launch while the fresh copy downloads
 const CACHE = "pickz-data";
 function cacheRead() {
@@ -2748,7 +2798,7 @@ function load() {
   return fetch("nba_props.json?t=" + Date.now(), {cache: "no-store"}).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); })
     .then(text => {
       const j = JSON.parse(text);
-      FRESH = true; apply(j); cacheWrite(text);
+      FRESH = true; apply(j); cacheWrite(text); AUTO_DAY = false;
       if (boot) { busy(false); setTimeout(prefetch, 1500); }
       return true;
     })
@@ -2810,15 +2860,22 @@ document.addEventListener("DOMContentLoaded", () => {
   // the big headshot starts loading and decoding the moment a finger lands on a row, so it is ready when the page slides in
   const warm = new Set();
   $("#app").addEventListener("pointerdown", e => {
-    const b = e.target.closest(".pr[data-id],.mrw[data-id],.ijb[data-id]"), pid = b && b.dataset.id.split("|")[1];
+    const b = e.target.closest(".pr[data-id],.mrw[data-id],.ijb[data-id],[data-vp]"), pid = b && (b.dataset.vp || b.dataset.id.split("|")[1]);
     if (!pid || warm.has(pid)) return;
     warm.add(pid); const im = new Image(); im.src = heroSrc(pid); if (im.decode) im.decode().catch(() => {});
   }, {passive: true});
   load();
   setInterval(load, 120000);
   setInterval(() => { if (!D) return; const u = $("#upd"), l = $("#lupd"); if (u) u.textContent = ago(D.generated_at); if (l) l.textContent = ago(D.generated_at); }, 30000);
+  // a turned phone (or a resized window) re-measures every sliding pill, which sit where the buttons were laid out
+  let RZ = null;
+  window.addEventListener("resize", () => { clearTimeout(RZ); RZ = setTimeout(() => $$(".pill2").forEach(x => slide(x.parentElement, true)), 120); });
   // back from another app: the 2-minute timer was asleep, so catch up at once
-  document.addEventListener("visibilitychange", () => { if (!document.hidden && D && Date.now() - LOADED_AT > 45000) load(); });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) { HIDDEN_AT = Date.now(); return; }
+    if (HIDDEN_AT && Date.now() - HIDDEN_AT > 1800000) AUTO_DAY = true;          // away a while: the slate may have moved on
+    if (D && Date.now() - LOADED_AT > 45000) load().then(() => { AUTO_DAY = false; });
+  });
 });
 })();
 """
