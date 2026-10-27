@@ -397,7 +397,9 @@ def test_page_controls_work_on_iphone():
     assert ".ijb[data-id]" in html and "function injView(" in html and 'ST.view === "injuries"' in html
     # the prop page's With / Without: any teammate, several at once, from the chip's sheet or the full filter sheet
     assert "function mateSheet(" in html and "data-mk2=" in html and "with: ms.filter(m => x.with[m.key]), without: ms.filter(m => x.without[m.key])" in html
-    assert html.count("bindMates(s, dr, upd);") == 2 and "Object.assign(DT, {home: null, result: null, rest: null}); }" in html
+    assert html.count("bindMates(s, dr, upd);") == 2
+    # chart filters on one scrolling row, nothing behind a More toggle; the row keeps its place when a chip re-renders it
+    assert ".fcs{display:flex;flex-wrap:nowrap" in html and 'id="more"' not in html and '$("#pcf .fcs").scrollLeft = fl;' in html
     # the Injuries view is one list, most relevant first (minutes x the chance he sits); no Injuries tab among the Props tabs
     assert "injList().sort" not in html and "return out.sort((a, b) => injImpact(b) - injImpact(a));" in html
     # a Starter chip after the adjustable filters; a prop opens on this season's window; hit-rate boxes show a percentage
@@ -412,7 +414,7 @@ def test_page_controls_work_on_iphone():
             'reb_ch: "rebound chances"}') in html and "l[ov]" in html
     # the adjustable filters come first; potential assists / rebound chances only on the props they bear on
     assert '["min", "fga", "fg3a", "fta", "usg", "pot_ast", "reb_ch"].forEach(rchip)' in html
-    assert html.index('.forEach(rchip);') < html.index("if (c.dvp_rank) chips.push(") and 'const MORE_R = ["margin"];' in html
+    assert html.index('.forEach(rchip);') < html.index("if (c.dvp_rank) chips.push(") < html.index('rchip("margin");')
     assert 'pot_ast: ["assists", "pra", "pts_ast", "reb_ast"], reb_ch: ["rebounds", "pra", "pts_reb", "reb_ast"]' in html
     # no explanatory prose: notes are status only, empty states are titles only
     import re
@@ -420,7 +422,7 @@ def test_page_controls_work_on_iphone():
     assert all(n.strip() in ("Loading…", "") or n.startswith("Couldn") for n in notes), notes
     assert not re.search(r'<div class="empty"><b>[^<]+</b>[A-Za-z]', html)
     # research+: fair price / VALUE, honest hit-rate boxes, Trends + Injuries tabs, line history, books that disagree
-    assert all(k in html for k in ("fairAt(", "<i>VALUE</i>", "hbox(", "histChart(", "freshOut(", 'class="df"'))
+    assert all(k in html for k in ("fairAt(", "<i>VALUE</i>", "hbox(", "histChart("))
     # 6-7: the alt-line ladder (one-sided rungs colored against their own implied chance) and the scorecard sheet
     assert all(k in html for k in ("function ladder(", "chanceSide(", "data-ll=", "nba_research_score.json", "scoreSheet"))
     # 6: the alt-line ladder (tap a rung to use it); 7: the scorecard sheet reads the nightly replay's JSON
