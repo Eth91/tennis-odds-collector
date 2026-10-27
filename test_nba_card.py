@@ -46,8 +46,9 @@ def cards(sh):
 
 def check(mod):
     ok = True
-    saved = (mod.MARGIN, mod._stale_of, mod.OFF_CARD_TIERS, mod.FILTERS_ON)
+    saved = (mod.MARGIN, mod._stale_of, mod.OFF_CARD_TIERS, mod.FILTERS_ON, mod.FRESH_RULE_ON)
     mod.OFF_CARD_TIERS, mod.FILTERS_ON = frozenset(), False          # amendment 28 is tested in test_nba_filters
+    mod.FRESH_RULE_ON = False                                         # amendment 31 is tested in test_nba_fresh
 
     def want(cond, label):
         nonlocal ok
@@ -87,7 +88,7 @@ def check(mod):
     want(sorted(f["b"] for f in pinged2) == ["Andrew Wiggins", "Austin Reaves", "Bam Adebayo", "Collin Gillespie",
                                              "LeBron James"],
          "pass 2 pings the new card plays and the Gillespie re-flag (deduped downstream by nba_ping)")
-    mod.MARGIN, mod._stale_of, mod.OFF_CARD_TIERS, mod.FILTERS_ON = saved
+    mod.MARGIN, mod._stale_of, mod.OFF_CARD_TIERS, mod.FILTERS_ON, mod.FRESH_RULE_ON = saved
     return ok
 
 
@@ -97,8 +98,9 @@ def test_card():
 
 def check22(mod):
     ok = True
-    saved = (mod.MARGIN, mod._stale_of, mod.OFF_CARD_TIERS, mod.FILTERS_ON)
+    saved = (mod.MARGIN, mod._stale_of, mod.OFF_CARD_TIERS, mod.FILTERS_ON, mod.FRESH_RULE_ON)
     mod.OFF_CARD_TIERS, mod.FILTERS_ON = frozenset(), False          # amendment 28 is tested in test_nba_filters
+    mod.FRESH_RULE_ON = False                                         # amendment 31 is tested in test_nba_fresh
 
     def want(cond, label):
         nonlocal ok
@@ -125,7 +127,7 @@ def check22(mod):
     _, again = mod._log_flags(sh, [dict(flags[4], line=9.5, _stale="STALE")], "2026-10-24T23:00:00", Counter())
     want(not again and cards(sh)[("Gary Payton II", "pts", 9.5)] == 0,
          "sticky: a later STALE re-flag of an off-card play stays off (and is not pinged)")
-    mod.MARGIN, mod._stale_of, mod.OFF_CARD_TIERS, mod.FILTERS_ON = saved
+    mod.MARGIN, mod._stale_of, mod.OFF_CARD_TIERS, mod.FILTERS_ON, mod.FRESH_RULE_ON = saved
     return ok
 
 
@@ -144,10 +146,11 @@ def test_backfill_matches_live():
     saved, F.MARGIN = F.MARGIN, {"pra": 5.0, "pts": 3.0, "reb": 2.0}
     saved_off, F.OFF_CARD_TIERS = F.OFF_CARD_TIERS, frozenset()
     saved_f, F.FILTERS_ON = F.FILTERS_ON, False
+    saved_r, F.FRESH_RULE_ON = F.FRESH_RULE_ON, False
     try:
         F.card_backfill([GD], path=d / "s.sqlite")
     finally:
-        F.MARGIN, F.OFF_CARD_TIERS, F.FILTERS_ON = saved, saved_off, saved_f
+        F.MARGIN, F.OFF_CARD_TIERS, F.FILTERS_ON, F.FRESH_RULE_ON = saved, saved_off, saved_f, saved_r
     on = sorted((b, s) for b, s in F._shadow(d / "s.sqlite").execute("SELECT b, stat FROM flags WHERE card=1"))
     assert on == [("Collin Gillespie", "pts"), ("Dillon Brooks", "pts"), ("Gui Santos", "pts"), ("Jamal Murray", "pts_ast")], on
 
@@ -165,10 +168,11 @@ def test_backfill_wowy_v0_shares_wowy_slots():
     saved, F.MARGIN = F.MARGIN, {"pra": 5.0, "pts": 3.0, "reb": 2.0}
     saved_off, F.OFF_CARD_TIERS = F.OFF_CARD_TIERS, frozenset()
     saved_f, F.FILTERS_ON = F.FILTERS_ON, False
+    saved_r, F.FRESH_RULE_ON = F.FRESH_RULE_ON, False
     try:
         F.card_backfill([GD], path=d / "s.sqlite")
     finally:
-        F.MARGIN, F.OFF_CARD_TIERS, F.FILTERS_ON = saved, saved_off, saved_f
+        F.MARGIN, F.OFF_CARD_TIERS, F.FILTERS_ON, F.FRESH_RULE_ON = saved, saved_off, saved_f, saved_r
     got = dict(F._shadow(d / "s.sqlite").execute("SELECT flag_id, card FROM flags"))
     assert got == {"a": 1, "b": 0, "c": 0}, got     # earliest pass first, its single lead; no NULL left
 
@@ -211,14 +215,14 @@ if __name__ == "__main__":
 
 def check24(mod):
     sh = mod._shadow(pathlib.Path(tempfile.mkdtemp()) / "s.sqlite")
-    saved = mod._stale_of
-    mod._stale_of = lambda f, stamp: "STALE"
+    saved = (mod._stale_of, mod.FRESH_RULE_ON)
+    mod._stale_of, mod.FRESH_RULE_ON = (lambda f, stamp: "STALE"), False   # amendment 31 is tested in test_nba_fresh
     try:
         flags = [fl("priced", "DAL", "Max Christie", 1, "points", 11.5, 1.9), fl("cold", "CHA", "Brandon Miller", 2, "pra", 33.5, 5.8),
                  fl("wowy", "PHX", "Collin Gillespie", 3, "pts", 8.5, 5.4, d_min=4.0)]
         _, pinged = mod._log_flags(sh, flags, "2026-10-25T12:00:00", Counter())
     finally:
-        mod._stale_of = saved
+        mod._stale_of, mod.FRESH_RULE_ON = saved
     c = cards(sh)
     ok = (c[("Max Christie", "points", 11.5)] == 0 and c[("Brandon Miller", "pra", 33.5)] == 0
           and c[("Collin Gillespie", "pts", 8.5)] == 1 and [f["b"] for f in pinged] == ["Collin Gillespie"])
@@ -288,10 +292,11 @@ def test_recard_tonight_shape():
                    (fid, at, "2026-10-25", tier, "DET" if pid != 2 else "ORL", b, stat, line, m, pid, dmin, "G", card,
                     "2026-10-24T20:00:00+00:00"))
     sh.commit()
-    saved = (F._stale_of, F.MARGIN)
+    saved = (F._stale_of, F.MARGIN, F.FRESH_RULE_ON)
     F._stale_of = lambda f, stamp: {"reed": "POSTED-AFTER", "bane": "POSTED-AFTER", "ok": "STALE"}[f["flag_id"]]
+    F.FRESH_RULE_ON = False                                           # amendment 31 is tested in test_nba_fresh
     try:
         out = {fid: (card, why) for fid, _b, _s, _l, card, why in F.recard(["2026-10-25"], path=d / "s.sqlite")}
     finally:
-        F._stale_of, F.MARGIN = saved
+        F._stale_of, F.MARGIN, F.FRESH_RULE_ON = saved
     assert out == {"reed": (0, "LINE POSTED AFTER NEWS"), "bane": (0, "PRICED OFF CARD"), "ok": (1, None)}, out

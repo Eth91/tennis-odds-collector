@@ -43,16 +43,17 @@ PASS = [fl("PHX", "Collin Gillespie", 1, "pts", 8.5, 9.0),            # lead, ex
 
 
 def run(mod, sh, flags=PASS, now=NOW, stamp=STAMP, lines=LINES):
-    saved = (mod._stale_of, mod.MARGIN, mod.FILTERS_ON)
+    saved = (mod._stale_of, mod.MARGIN, mod.FILTERS_ON, mod.FRESH_RULE_ON)
     mod._stale_of = lambda f, st: f["_stale"]
     mod.MARGIN = {"pra": 5.0, "pts": 5.0, "reb": 1.0}
     mod.FILTERS_ON = False                                  # amendment 28 is tested in test_nba_filters
+    mod.FRESH_RULE_ON = False                               # amendment 31 is tested in test_nba_fresh
     why = Counter()
     try:
         _, ins = mod._log_flags(sh, flags, stamp, why)
         tip = mod._tip_card(sh, flags, GAMES, lines, now, stamp, why, GD)
     finally:
-        mod._stale_of, mod.MARGIN, mod.FILTERS_ON = saved
+        mod._stale_of, mod.MARGIN, mod.FILTERS_ON, mod.FRESH_RULE_ON = saved
     return ins, tip, why
 
 
@@ -119,13 +120,14 @@ def test_tip_decision():
     voids = [(g, a, o, "premise died") for g, a, o, _ in p(10, 0)]
     assert V.tip_decision(decided(d / "f.sqlite", voids + p(59, 59)))["n"] == 59              # voids excluded
     sh = decided(d / "g.sqlite", p(60, 31))
-    saved = (F._stale_of, F.MARGIN, F.FILTERS_ON)
+    saved = (F._stale_of, F.MARGIN, F.FILTERS_ON, F.FRESH_RULE_ON)
     F._stale_of, F.MARGIN, F.FILTERS_ON = (lambda f, st: f["_stale"]), {"pra": 5.0, "pts": 5.0, "reb": 1.0}, False
+    F.FRESH_RULE_ON = False
     try:
         F._log_flags(sh, PASS, STAMP, Counter())
         out = F._tip_card(sh, PASS, GAMES, LINES, NOW, STAMP, Counter(), GD)
     finally:
-        F._stale_of, F.MARGIN, F.FILTERS_ON = saved
+        F._stale_of, F.MARGIN, F.FILTERS_ON, F.FRESH_RULE_ON = saved
     assert not out and sh.execute("SELECT COUNT(*) FROM tipcard WHERE gid='G1' AND why='TIP CARD OFF (DECISION)'"
                                   ).fetchone()[0] == 3, "decided OFF: the tip card logs only"
 

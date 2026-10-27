@@ -96,6 +96,8 @@ COMBO_STATS = frozenset({"pra", "pts_reb", "pts_ast", "reb_ast"})
 # AMENDMENT 24: tiers that are logged but never carded or pinged (their own real-line tests lose:
 # priced -4.7% / KILL, cold -5.7%) until a registered recalibration passes.
 OFF_CARD_TIERS = frozenset({"priced", "cold"})
+# AMENDMENT 31: a play is carded (speed card or tip card) only within FRESH_MIN minutes of its news_at
+FRESH_RULE_ON, FRESH_MIN = True, 15.0
 DMIN_BAND = (3.0, 8.0)
 # AMENDMENT 27: FanDuel's background price jitter on an unchanged line — the 95th percentile of |change in
 # decimal odds| on control props, polls 5-15 min apart (nba_reaction.price_jitter, 2026-10-25: n 743,994,
@@ -878,7 +880,16 @@ def _stale_of(f, stamp):
         return "UNKNOWN"
 
 
-def _card(sh, f, lead=True, stale="STALE"):
+def _fresh(f, stamp):
+    """AMENDMENT 31: is the play logged within FRESH_MIN minutes of its news_at? No news_at: not fresh."""
+    if not f.get("news_at") or not stamp:
+        return False
+    import nba_clv as V
+    t = lambda iso: dt.datetime.fromisoformat(V._utc_naive(iso))
+    return (t(stamp) - t(f["news_at"])).total_seconds() / 60 <= FRESH_MIN
+
+
+def _card(sh, f, lead=True, stale="STALE", stamp=None):
     """A re-flag of a known play (same date, player, stat, tier; any line) inherits that play's card
     value — sticky, never un-carded or re-pinged. A NEW wowy play must pass amendment 28's filters; it is
     carded only on a STALE line (amendment 22); priced then keeps its own selection; a wowy/cold play must be its player's lead in this pass
@@ -895,6 +906,8 @@ def _card(sh, f, lead=True, stale="STALE"):
         return 0, off
     if stale != "STALE":
         return 0, STALE_WHY.get(stale, "LINE NOT STALE")
+    if FRESH_RULE_ON and not _fresh(f, stamp):          # amendment 31
+        return 0, "NEWS NOT FRESH"
     if f["tier"] == "priced":
         return 1, None
     if not lead:
@@ -924,7 +937,7 @@ def _log_flags(sh, out_flags, stamp, why):
         if f["tier"] == "priced" and not _priced_slot_open(sh, f["game_date"], f, fid):
             why["priced_slot_taken"] += 1
             continue
-        card, card_why = _card(sh, f, lead=is_lead(f), stale=_stale_of(f, stamp))
+        card, card_why = _card(sh, f, lead=is_lead(f), stale=_stale_of(f, stamp), stamp=stamp)
         cur = sh.execute("INSERT OR IGNORE INTO flags (flag_id, logged_at, game_date, tier, "
                          "team, x, b, stat, line, odds, proj, margin, gid, gtime, matchup, ev, "
                          "pid, news_at, stale, horizon, x_pid, trigger_src, d_min, opp_cell, opp_ratio, x_status, x_min, "
@@ -993,6 +1006,8 @@ def _tip_card(sh, out_flags, games, lines, now, stamp, why, gdate):
             fid = _fid(f)
             if _off_card(f):                                # amendments 28-29
                 v, w = 0, _off_card(f)
+            elif FRESH_RULE_ON and not _fresh(f, stamp):     # amendment 31
+                v, w = 0, "NEWS NOT FRESH"
             elif not is_lead(f):
                 v, w = 0, "1 PER PLAYER"
             elif not (f.get("d_min") is not None and DMIN_BAND[0] <= f["d_min"] <= DMIN_BAND[1]):
@@ -1074,7 +1089,7 @@ def recard(game_dates, path=None):
     for at in sorted(passes):
         order, is_lead = _pass_order(passes[at])
         for f in order:
-            v, why = _card(sh, f, lead=is_lead(f), stale=_stale_of(f, at))
+            v, why = _card(sh, f, lead=is_lead(f), stale=_stale_of(f, at), stamp=at)
             sh.execute("UPDATE flags SET card=?, card_why=? WHERE flag_id=?", (v, why, f["flag_id"]))
             out.append((f["flag_id"], f["b"], f["stat"], f["line"], v, why))
     sh.commit()
