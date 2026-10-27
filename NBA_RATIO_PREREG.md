@@ -171,3 +171,17 @@ pass. Because of the 10-game minimum, they cannot fire until opponents have play
 **Forward (changed from above, before any forward run).** Neither rule passed, and neither can fire before
 opponents have 10 games (about mid-November). So the forward versions are not built now; they would be
 registered then if wanted. Nothing pings.
+
+# AMENDMENT 5: PTS_DVP, forward (written 2026-10-27, about 09:25 UTC)
+**User:** "yes, register it for mid-November."
+
+- **The rule:** at a book's opener (first two-sided main, up to tip − 5), the points over when all hold:
+  - his FGA per game this season ≥ 1.0 × the points line;
+  - his minutes per game this season ≥ 20, with ≥ 3 games;
+  - the opponent's points-DvP for his position group is > **1.0036** (amendment 4's 2023-24 median, fixed);
+  - the opponent has ≥ 10 games this season.
+- **DvP** is computed point-in-time from this season's box scores (nba_matchup) and position groups
+  (`nba_gamelogs.positions`).
+- **Registered now** (side-by-side amendment 5), so its record starts today. Because of the 10-game minimum it
+  cannot fire until about mid-November.
+- **No pings.** Amendment 4 failed in 2024-25 (+3.0%, then −1.8%), so it is forward-only.

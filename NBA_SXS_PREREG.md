@@ -199,3 +199,7 @@ backtest passes (NBA_RATIO_PREREG.md).
 # AMENDMENT 4: RATIO_PA28 (2026-10-27, before it ran live)
 16. **RATIO_PA28:** RATIO_PA at 2.8× instead of 2× (`NBA_RATIO_PREREG.md` amendment 3). This threshold was
     chosen in sample, so only forward counts. Registered at **2026-10-27T13:00:00 UTC**. It pings (SHADOW).
+
+# AMENDMENT 5: PTS_DVP (2026-10-27, before it ran)
+17. **PTS_DVP:** as `NBA_RATIO_PREREG.md` amendment 5. It fires from about mid-November, when opponents reach 10
+    games. Registered at **2026-10-27T13:00:00 UTC**; no pings.
