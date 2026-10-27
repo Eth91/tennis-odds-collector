@@ -160,6 +160,8 @@ def test_slate_holds_until_6am_et():
 def test_payload_props_and_books(payload):
     ids = {p["id"] for p in payload["props"]}
     assert ids == {"G1|1|points", "G1|1|assists", "G1|2|points"}, ids          # no steals, no out-of-range game
+    g1 = next(g for g in payload["games"] if g["gid"] == "G1")
+    assert set(g1["spots"]) == {g1["home"], g1["away"]} and g1["spots"][g1["home"]]["rest"] is None   # each team's schedule spot
     b = next(p for p in payload["props"] if p["id"] == "G1|1|points")
     assert b["main"] == 24.5 and b["books"]["fd"]["main"] == 24.5 and b["books"]["dk"]["main"] == 25.5
     assert [29.5, 3.2, None] in b["books"]["fd"]["rungs"]                       # the over-only alt is kept, as such
@@ -381,6 +383,13 @@ def test_page_controls_work_on_iphone():
     assert "function liveRow(p)" in html and 'NEEDS ${Math.ceil(x.line - x.v)}' in html
     assert 'if (f.blow === "b" && !(Math.abs(l.margin) >= 15)) return false;' in html and 'tchip("blow", "b", "Blowouts")' in html
     assert "function gameScript(p, g, logs, line, side)" in html and '<span class="gsp">' in html
+    # schedule spots: a card on the player page, the back-to-back team in orange on its game card
+    assert "function schedCard(p, g, logs, line, side)" in html and '$("#psc").innerHTML = schedCard(' in html and "function cardNote(g)" in html
+    # referees: docs/refs.json (nba_refs) on the Matchup page and one line in the game script; officials under 10 games left out of the crew's mean
+    assert 'fetch("refs.json?t="' in html and '<div class="shc" id="rfc"></div>' in html and "refCard();" in html and "refsRow(p, g);" in html
+    assert "d: r && r[1] >= 10 ?" in html
+    # the combo checker: kept on the phone, opened from the floating button, the math in the shared core
+    assert 'localStorage.getItem("pickz_combo")' in html and "comboStats(L, CMB_W, D.season)" in html and 'id="cmb"' in html and "comboPill();" in html
     assert "fetch(`matchups/${pid}.json`)" in html and '<div class="shc wg" id="wgd"></div>' in html and "guardCard();" in html
     # the floating header fades what scrolls under it (no text under its title)
     assert '.ph::before{content:"";position:absolute;' in html
@@ -705,3 +714,42 @@ def test_closing_boards_keep_started_games_props():
     q.execute("DELETE FROM quotes"); q.commit()                     # a started game's board never changes: the cache serves
     out2, names2 = RS.closing_boards(q, ["G1"], cache=cache)
     assert out2 == out and names2 == names
+
+
+def test_schedule_spots():
+    g = lambda gid, d, home, away, st="": {"gid": gid, "date_et": d, "home": home, "away": away, "status_text": st}
+    sched = [g("a", "2026-10-20", "BOS", "NYK"), g("b", "2026-10-22", "MIA", "BOS"), g("c", "2026-10-23", "ORL", "BOS"),
+             g("p", "2026-10-24", "ATL", "BOS", "PPD"),                                   # postponed: not a game
+             g("d", "2026-10-25", "CHA", "BOS"), g("e", "2026-10-26", "BOS", "NYK"), g("f", "2026-10-29", "NYK", "MIA")]
+    sp = RS.schedule_spots(sched, ["a", "c", "d", "e", "f"])
+    assert sp["a"]["BOS"] == {"rest": None, "b2b": False, "g3in4": False, "g4in6": False, "trip": None}
+    assert sp["c"]["BOS"] == {"rest": 0, "b2b": True, "g3in4": True, "g4in6": False, "trip": [2, 3]}   # 20, 22, 23
+    assert sp["d"]["BOS"]["trip"] == [3, 3] and sp["d"]["BOS"]["g3in4"] and sp["d"]["BOS"]["rest"] == 1
+    assert sp["e"]["BOS"] == {"rest": 0, "b2b": True, "g3in4": True, "g4in6": True, "trip": None}   # 22, 23, 25, 26
+    assert sp["e"]["NYK"]["rest"] == 5 and sp["e"]["NYK"]["trip"] == [2, 2] and sp["f"]["MIA"]["trip"] == [1, 1]   # NYK away the 20th too; MIA home the 22nd
+    assert "b" not in sp and "p" not in sp
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_combo_stats():
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "core.js").write_text(UI.JS_CORE)
+    # A: points over 20.5 in g1-g5; B (a teammate who sat g3): rebounds under 6.5; C: never played with them
+    a = [{"gid": f"g{k}", "date": f"2026-10-2{k}", "v": v} for k, v in enumerate([25, 18, 30, 22, 21], 1)]
+    b = [{"gid": f"g{k}", "date": f"2026-10-2{k}", "v": v} for k, v in [(1, 4), (2, 5), (4, 9), (5, 3)]]
+    b.append({"gid": "g0", "date": "2025-04-01", "v": 2})                     # last season, A had no game: not shared
+    c = [{"gid": "x1", "date": "2026-10-21", "v": 10}]
+    (d / "t.js").write_text("""
+const C = require('./core.js');
+const a = %s, b = %s, c = %s;
+const legs = [{logs: a, line: 20.5, side: 'over'}, {logs: b, line: 6.5, side: 'under'}];
+console.log(JSON.stringify([C.comboStats(legs, 'all', '2026-27'), C.comboStats(legs, 'l10', '2026-27').n,
+  C.comboStats(legs.concat([{logs: c, line: 5, side: 'over'}]), 'all', '2026-27').n,
+  C.comboStats([{logs: a, line: 20.5, side: 'over'}, {logs: a.map(x => Object.assign({}, x, {v: x.v / 5})), line: 4.5, side: 'over'}], 'all', '2026-27')]));
+""" % (json.dumps(a), json.dumps(b), json.dumps(c)))
+    full, l10, none, same = json.loads(subprocess.run([NODE, str(d / "t.js")], capture_output=True, text=True, check=True, cwd=d).stdout)
+    assert [x["gid"] for x in full["games"]] == ["g1", "g2", "g4", "g5"]          # the games both played, oldest first
+    assert [x["all"] for x in full["games"]] == [True, False, False, True] and (full["k"], full["n"]) == (2, 4)
+    assert full["each"] == [0.75, 0.75] and full["indep"] == 0.5625 and full["rate"] == 0.5
+    assert l10 == 4 and none == 0
+    assert (same["k"], same["n"]) == (2, 5)                    # one player's two props share every game; only 25 → 5, 30 → 6 hit both

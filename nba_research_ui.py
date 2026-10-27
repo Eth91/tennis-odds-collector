@@ -424,7 +424,8 @@ border:1px solid rgba(255,255,255,.1);background:rgba(19,19,19,.86);color:#fff;b
 -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
 .cb svg{width:19px;height:19px}
 .cb.fav{color:var(--yel)} .cb.fav svg{fill:var(--yel)}
-#pg .ph-t{opacity:0;transition:opacity .2s}
+#pg .ph-t{opacity:0;transition:opacity .2s;left:64px;right:156px;align-items:flex-start;text-align:left}
+.cb[aria-pressed="true"]#cmb{background:#fff;color:#000}
 #pg .ph.tt .ph-t{opacity:1}
 .ph-t{position:absolute;left:110px;right:110px;top:var(--st);height:42.8px;display:flex;flex-direction:column;
 justify-content:center;text-align:center;line-height:1.15;text-shadow:0 1px 6px rgba(0,0,0,.6)}
@@ -511,6 +512,29 @@ transition:background-color .22s,border-color .22s,transform .16s}
 .gst td{height:38px;text-align:right;font-weight:600;border-bottom:.5px solid var(--sep)}
 .gst td:first-child{text-align:left;font-weight:400;color:var(--l2)}
 .gst tr:last-child td{border-bottom:0}
+.gst th.on{color:#fff} .gst td.on{background:rgba(255,255,255,.06)}
+.gst td.up{color:var(--grn)} .gst td.dn{color:var(--red)}
+/* game cards: a team on a back-to-back */
+.gc .gt .b2t{color:var(--org)}
+/* referees */
+.rft th:first-child{text-align:left;font-weight:400}
+.rft td:first-child{font-weight:600;color:#fff;white-space:nowrap} .rft td small{display:block;font-size:11px;font-weight:400;color:#7c7c7c}
+.rft tr.cr td{font-weight:800} .rft tr.cr td:first-child{color:#fff}
+/* combo checker */
+.cbp{position:fixed;right:15.3px;bottom:calc(max(var(--sb),10px) + 74px);z-index:35;display:flex;align-items:center;gap:6px;height:40px;
+padding:0 14px 0 12px;border-radius:20px;color:#fff;font:inherit;font-size:14px;font-weight:600}
+.cbp[hidden]{display:none} .cbp svg{width:19px;height:19px}
+.cbp b{min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#fff;color:#000;font-size:12px;line-height:20px;text-align:center}
+.cbl{display:flex;align-items:center;gap:10px;min-height:56px;border-bottom:.5px solid var(--sep)}
+.cbl .av{position:relative;left:0;top:0;flex:none;width:38px;height:38px} .cbl .av .hs{left:-7px;width:52px}
+.cbl div{flex:1;min-width:0} .cbl b{display:block;font-size:15px} .cbl span{font-size:13px;color:var(--l2)}
+.cbl em{font-style:normal;font-size:15px;font-weight:700}
+.cbl .x{flex:none;width:32px;height:32px;border:0;border-radius:50%;background:#222;color:#bbb;font-size:18px;line-height:1}
+.cbw{margin:14px 0 4px}
+.cbr{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px;margin:12px 0}
+.cbr div{padding:10px 8px;border:1px solid #2a2a2a;border-radius:13px;background:#141414;text-align:center}
+.cbr b{display:block;font-size:20px;font-weight:800} .cbr span{font-size:11.5px;color:var(--l3)}
+.cbt th small{display:block;font-size:10px} .cbt th:first-child{text-align:left} .cbt td small{color:#7c7c7c;font-weight:400}
 .pg details.log summary{font-size:13.1px;text-transform:none;letter-spacing:0;color:#fff}
 /* books table (measured: header 31.5 pt with a 23 pt LINE pill, rows 39.7 pt, columns at 15.3 / 136.8 / 226.3 / 310.7 pt) */
 .bkt{margin-top:28.3px}
@@ -817,6 +841,22 @@ function sortProps(list, key, dir, logsOf, side, season) {
     return a.i - b.i;
   }).map(function (x) { return x.p; });
 }
+// the combo checker: how often every leg hit in the games all the legs' players played. legs [{logs: [{gid, date, v}],
+// line, side}]; win "l10" / "l20" (the last shared games), "season" (shared games this season) or "all". each = every
+// leg's own rate in those games; indep = their product, the rate if the legs had nothing to do with each other
+function comboStats(legs, win, season) {
+  const maps = legs.map(function (L) { const m = {}; L.logs.forEach(function (l) { if (l.v !== null && l.v !== undefined) m[l.gid] = l; }); return m; });
+  let games = Object.keys(maps[0] || {}).filter(function (g) { return maps.every(function (m) { return m[g]; }); }).map(function (g) {
+    const vals = maps.map(function (m) { return m[g].v; });
+    const hits = vals.map(function (v, i) { return legs[i].side === "under" ? v < legs[i].line : v > legs[i].line; });
+    return {gid: g, date: maps[0][g].date, vals: vals, hits: hits, all: hits.every(Boolean)};
+  }).sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+  if (win === "season") games = games.filter(function (x) { return seasonOf(x.date) === season; });
+  else if (win === "l10" || win === "l20") games = games.slice(-(win === "l10" ? 10 : 20));
+  const n = games.length, k = games.filter(function (x) { return x.all; }).length;
+  const each = legs.map(function (L, i) { return n ? games.filter(function (x) { return x.hits[i]; }).length / n : null; });
+  return {games: games, n: n, k: k, rate: n ? k / n : null, each: each, indep: n ? each.reduce(function (a, b) { return a * b; }, 1) : null};
+}
 function liveStage(state, v, line, over) {
   // the Live tab's order: props still in play, then ones settled in a game still on (an over past its line, an
   // under at it), then finals
@@ -827,7 +867,7 @@ if (typeof module !== "undefined") module.exports = {statValue: statValue, hitSu
   rowsToLogs: rowsToLogs, windowed: windowed, filterLogs: filterLogs, splitRows: splitRows, sideRate: sideRate,
   american: american, decimalOf: decimalOf, bestOver: bestOver, bestPrice: bestPrice, propRates: propRates,
   noVig: noVig, fairAt: fairAt, valueAt: valueAt, zscore: zscore, pmfGe: pmfGe, projProbs: projProbs, blendP: blendP,
-  filterProps: filterProps, sortProps: sortProps, liveStage: liveStage};
+  filterProps: filterProps, sortProps: sortProps, liveStage: liveStage, comboStats: comboStats};
 """
 
 JS_APP = r"""
@@ -1064,7 +1104,13 @@ function cards() {
   const gs = D.games.filter(g => g.date === ST.date), i = D.dates.indexOf(ST.date);
   const lab = i === 0 ? "Today" : i === 1 ? "Tomorrow" : ST.date.slice(5).replace("-", "/");
   return `<button class="gc0" id="dayb" aria-haspopup="dialog"><i>${lab}</i><i>${gs.length} GAME${gs.length === 1 ? "" : "S"}</i></button>` +
-    gs.map(g => `<button class="gc" data-gid="${g.gid}" aria-pressed="${g.gid === ST.gid}" aria-label="${esc(g.away)} at ${esc(g.home)}"><span class="gt"><span>${logo(g.away, "")}${esc(g.away)}</span><span>${logo(g.home, "")}${esc(g.home)}</span></span><em>${g.state === "live" ? '<span class="lv">LIVE</span>' : g.state === "final" ? "Final" : g.state === "postponed" ? "PPD" : mt(g.tip).replace(" ", "\u200a")}${g.lines && Math.abs(g.lines.spread_home) >= 10 ? `<span class="gsp">±${Math.abs(g.lines.spread_home)}</span>` : ""}</em></button>`).join("");
+    gs.map(g => `<button class="gc" data-gid="${g.gid}" aria-pressed="${g.gid === ST.gid}" aria-label="${esc(g.away)} at ${esc(g.home)}"><span class="gt">${[g.away, g.home].map(t => `<span${b2(g, t) ? ' class="b2t"' : ""}>${logo(t, "")}${esc(t)}</span>`).join("")}</span><em>${g.state === "live" ? '<span class="lv">LIVE</span>' : g.state === "final" ? "Final" : g.state === "postponed" ? "PPD" : mt(g.tip).replace(" ", "\u200a")}${cardNote(g)}</em></button>`).join("");
+}
+// a card's second line under the tip: a spread of 10+ and a team on a back-to-back (its abbreviation in orange)
+const b2 = (g, t) => !!((g.spots || {})[t] || {}).b2b;
+function cardNote(g) {
+  const n = [g.lines && Math.abs(g.lines.spread_home) >= 10 ? "±" + Math.abs(g.lines.spread_home) : "", b2(g, g.away) || b2(g, g.home) ? "B2B" : ""].filter(Boolean);
+  return n.length ? `<span class="gsp">${n.join(" · ")}</span>` : "";
 }
 // a pill under the pressed button of a capsule, moved with a transform so a tap slides it across
 function slide(box, instant) {
@@ -1103,6 +1149,7 @@ function render() {
   slide($("#mtl"), true);
   renderList();
   tabbar();
+  comboPill();
 }
 function renderList() {
   renderRows();
@@ -1564,6 +1611,7 @@ const ICON = {
   injuries: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.5" y="2.5" width="19" height="19" rx="5"/><path d="M10 6.5h4V10h3.5v4H14v3.5h-4V14H6.5v-4H10z"/></svg>',
   ham: '<svg viewBox="0 0 22 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M2 2.5h18M2 8h18M2 13.5h18"/></svg>',
   info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 10.5v8"/><circle cx="12" cy="6.2" r=".9" fill="currentColor" stroke="none"/></svg>',
+  combo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="13" height="14" rx="3"/><path d="M8 3h10a3 3 0 0 1 3 3v10"/><path d="M9.5 11v6M6.5 14h6"/></svg>',
   down: '<svg viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m2 2 4 4 4-4"/></svg>'};
 const favs = () => { try { return JSON.parse(localStorage.getItem("pickz_fav") || "[]"); } catch (e) { return []; } };
 function toggleFav(pid) {
@@ -1854,7 +1902,7 @@ function renderProp(mode) {
   const live = p.live && g.state !== "pregame" ? `<div class="box0" style="margin:12px 15.3px 0" role="status"><div class="live"><span class="tg ${g.state === "live" ? "tl" : "tn"}">${g.state === "live" ? "LIVE" : "FINAL"}</span>${p.live.value} ${esc(short(p.market))} in ${p.live.min} min</div><div class="note">${esc(g.label || "")}${g.score ? " · " + esc(g.away) + " " + g.score[0] + " – " + esc(g.home) + " " + g.score[1] : ""} · box score ${ago(g.updated)}</div></div>` : "";
   pg.innerHTML = `<div class="ph"><button class="cb bk" aria-label="Back">${ICON.back}</button>
       <div class="ph-t"><b>${esc(p.player)}</b><span>${esc(team[0])}</span></div><span class="sp2"></span>
-      <button class="cb" id="shr" aria-label="Share">${ICON.share}</button><button class="cb${fav ? " fav" : ""}" id="fav" aria-label="Favorite" aria-pressed="${fav}">${ICON.star}</button></div>
+      ${p.v ? "" : `<button class="cb" id="cmb" aria-label="Add to combo" aria-pressed="${inCombo(p.id)}">${ICON.combo}</button>`}<button class="cb" id="shr" aria-label="Share">${ICON.share}</button><button class="cb${fav ? " fav" : ""}" id="fav" aria-label="Favorite" aria-pressed="${fav}">${ICON.star}</button></div>
     <nav class="mt" aria-label="Markets"><div class="mt-in">${mkts.map(m => `<button data-mk="${m}" aria-pressed="${m === p.market}">${TAB[m]}</button>`).join("")}</div></nav>
     <div class="hro"><div class="hro-l"><h2>${esc(p.player)}</h2><div class="hro-s">${esc(team[0])}</div><div class="hro-s">${esc(POSN[c.pos] || c.pos || "")}</div>
       <div class="tlg" style="background:${team[1]}">${logo(p.team, "")}</div></div>
@@ -1866,6 +1914,7 @@ function renderProp(mode) {
     <div class="sr" id="psr" role="status"></div>
     <div class="cf" id="pcf"></div>
     <div class="sec2" id="pgs"></div>
+    <div class="sec2" id="psc"></div>
     <div class="sec2" id="pproj"></div>
     <div class="bkt" id="pbk"></div>
     <div id="pstat"></div>
@@ -1879,6 +1928,8 @@ function renderProp(mode) {
   $("#pg .bk").onclick = () => history.back();
   const ph = $(".ph", pg); pg.onscroll = () => ph.classList.toggle("tt", pg.scrollTop > 150);
   $("#fav", pg).onclick = () => { toggleFav(p.pid); const f = $("#fav", pg), on = favs().indexOf(p.pid) >= 0; f.classList.toggle("fav", on); f.setAttribute("aria-pressed", on); f.classList.remove("pop"); void f.offsetWidth; f.classList.add("pop"); if (ST.watch && ST.view !== "injuries") renderList(); };
+  const cmb = $("#cmb", pg);
+  if (cmb) cmb.onclick = () => { const on = comboToggle(p); if (on === null) return; cmb.setAttribute("aria-pressed", on); $("#live").textContent = on ? "Added to combo" : "Removed from combo"; };
   $("#shr", pg).onclick = () => {
     const url = location.href, title = `${p.player} ${NAME[p.market]} ${DT.line}`;
     if (navigator.share) navigator.share({title: title, url: url}).catch(() => {});
@@ -1992,7 +2043,7 @@ function updateProp(mode) {
     $("#pcf").innerHTML = `<div class="cf-h"><h3>Chart Filters</h3><button class="ca" id="clr"${anyF ? "" : " hidden"}>Clear All</button></div>
       <div class="fcs">${chips.join("")}</div>${panels}`;
     $("#pcf .fcs").scrollLeft = fl; }
-  if (!rest) $("#pgs").innerHTML = gameScript(p, g, logs, line, side);
+  if (!rest) { $("#pgs").innerHTML = gameScript(p, g, logs, line, side); $("#psc").innerHTML = schedCard(p, g, logs, line, side); refsRow(p, g); }
   if (opening) { PX.lazy = setTimeout(() => { if (PX && PX.p === p) updateProp("rest"); }, 470); bindLive(p, logs, without); return; }
   if (!PX.statDone) { $("#pstat").innerHTML = PX.stat; PX.statDone = true; $$("[data-rel]", pg).forEach(b => b.onclick = () => openProp(b.dataset.rel)); }
   if (p.v) { $("#pproj").innerHTML = ""; $("#pbk").innerHTML = ""; }      // a player page: no line posted, no books
@@ -2034,8 +2085,110 @@ function gameScript(p, g, logs, line, side) {
     <div class="kv"><span>Spread</span><b>${sh === 0 ? "PK" : esc(sh < 0 ? g.home : g.away) + " −" + Math.abs(sh)}${L.total ? " · Total " + L.total : ""}</b></div>
     <table class="gst"><thead><tr><th></th><th>Close <small>≤10</small></th><th>Blowout <small>15+</small></th></tr></thead><tbody>
     ${row("Games", xs => xs.length)}${row("Minutes", xs => avg(xs.map(l => l.min)))}${row(esc(NAME[p.market]), xs => avg(xs.map(st).filter(x => x !== null)))}
+    ${row(`${side === "under" ? "Under" : "Over"} ${line}`, rate)}</tbody></table><div id="gsr"></div></div>`;
+}
+// schedule spot: both teams' rest tonight, and how he has done on no rest, one day and two or more (his logs' rest)
+function spotText(s) {
+  if (!s) return "—";
+  const a = [s.rest === null ? "First game" : s.rest === 0 ? "Back-to-back" : s.rest === 1 ? "1 day rest" : s.rest + " days rest"];
+  if (s.g3in4) a.push("3 in 4 nights"); else if (s.g4in6) a.push("4 in 6 nights");
+  if (s.trip && s.trip[1] >= 3) a.push(`Road game ${s.trip[0]} of ${s.trip[1]}`);
+  return a.join(" · ");
+}
+function schedCard(p, g, logs, line, side) {
+  const S = g.spots || {}, me = S[p.team], op = S[p.opp];
+  if (!me) return "";
+  const st = l => statValue(l, p.market), avg = xs => xs.length ? r1(xs.reduce((a, b) => a + b, 0) / xs.length) : "–";
+  const cols = [["0", "B2B", l => l.rest === 0], ["1", "1 day", l => l.rest === 1], ["2", "2+ days", l => l.rest >= 2]];
+  const cur = me.rest === 0 ? "0" : me.rest === 1 ? "1" : "2", grp = cols.map(c => logs.filter(c[2]));
+  const rate = xs => { const v = xs.map(st).filter(x => x !== null); return v.length ? Math.round(v.filter(x => side === "under" ? x < line : x > line).length / v.length * 100) + "%" : "–"; };
+  const row = (lab, f) => `<tr><td>${lab}</td>${grp.map((xs, i) => `<td${cols[i][0] === cur ? ' class="on"' : ""}>${f(xs)}</td>`).join("")}</tr>`;
+  return `<h3>Schedule${me.b2b ? ' <span class="tg tf">BACK-TO-BACK</span>' : ""}</h3><div class="box0">
+    <div class="kv"><span>${esc(p.team)}</span><b>${spotText(me)}</b></div>${op ? `<div class="kv"><span>${esc(p.opp)}</span><b>${spotText(op)}</b></div>` : ""}
+    <table class="gst"><thead><tr><th></th>${cols.map(c => `<th${c[0] === cur ? ' class="on"' : ""}>${c[1]}</th>`).join("")}</tr></thead><tbody>
+    ${row("Games", xs => xs.length)}${row("Minutes", xs => avg(xs.map(l => l.min)))}${row(esc(NAME[p.market]), xs => avg(xs.map(st).filter(x => x !== null)))}
     ${row(`${side === "under" ? "Under" : "Over"} ${line}`, rate)}</tbody></table></div>`;
 }
+// ── referees (docs/refs.json, nba_refs): tonight's crew and how each official's games have run against the league's,
+// both teams together a game: fouls, free throw attempts, points, possessions ──
+let REFS = null;
+const refsLoad = () => REFS || (REFS = fetch("refs.json?t=" + Math.floor(Date.now() / 600000)).then(r => r.ok ? r.json() : null).catch(() => null));
+const signed = (x, d) => (x > 0 ? "+" : x < 0 ? "−" : "") + Math.abs(x).toFixed(d === undefined ? 1 : d);
+function crewOf(j, gid) {
+  const c = j && j.games && j.games[gid];
+  if (!c || !c.length) return null;
+  const L = j.league, rows = c.map(([pid, name, role]) => { const r = pid != null && j.refs[String(pid)];
+    return {pid: pid, name: name, role: role, n: r ? r[1] : 0, d: r && r[1] >= 10 ? [r[3] - L[2], r[4] - L[3], r[2] - L[1], r[5] - L[4]] : null}; });
+  const k = rows.filter(r => r.d);                                // fouls, FTA, points, pace; 10+ games or left out
+  return {rows: rows, avg: k.length ? [0, 1, 2, 3].map(i => k.reduce((a, r) => a + r.d[i], 0) / k.length) : null};
+}
+function refsRow(p, g) {
+  refsLoad().then(j => {
+    const el = $("#gsr"), c = crewOf(j, g.gid);
+    if (!el || !PX || PX.p !== p || !c || !c.avg) return;
+    el.innerHTML = `<div class="kv"><span>Refs</span><b>Fouls ${signed(c.avg[0])} · FTA ${signed(c.avg[1])} · Pts ${signed(c.avg[2])}</b></div>`;
+  });
+}
+function refCard() {
+  const el = $("#rfc"); if (!el || !MUP) return;
+  const p = MUP.p, g = gameOf(p.gid);
+  refsLoad().then(j => {
+    if (!MUP || MUP.p !== p) return;
+    const c = crewOf(j, g.gid), cell = (d, i) => d ? `<td class="${d[i] > .05 ? "up" : d[i] < -.05 ? "dn" : ""}">${signed(d[i])}</td>` : "<td>–</td>";
+    const head = '<div class="shh"><b>REFEREES</b></div>';
+    if (!c) { el.innerHTML = head + '<div class="empty"><b>Not posted yet</b></div>'; return; }
+    el.innerHTML = head + `<table class="gst rft"><thead><tr><th>vs avg a game</th><th>Fouls</th><th>FTA</th><th>Pts</th><th>Pace</th></tr></thead><tbody>
+      ${c.rows.map(r => `<tr><td>${esc(r.name)}<small>${esc(r.role)}${r.n ? ` · ${r.n} game${r.n === 1 ? "" : "s"}` : " · new"}</small></td>${[0, 1, 2, 3].map(i => cell(r.d, i)).join("")}</tr>`).join("")}
+      ${c.avg ? `<tr class="cr"><td>Crew</td>${[0, 1, 2, 3].map(i => cell(c.avg, i)).join("")}</tr>` : ""}</tbody></table>`;
+  });
+}
+// ── combo checker: 2-4 props kept on the phone (pickz_combo: [{id, side, line}]), how often they all hit together ──
+const COMBO_MAX = 4;
+let CMB_W = "l10";
+const comboLegs = () => { try { return (JSON.parse(localStorage.getItem("pickz_combo") || "[]") || []).filter(l => D && propFor(l.id)); } catch (e) { return []; } };
+const inCombo = id => comboLegs().some(l => l.id === id);
+function comboSave(legs) { try { localStorage.setItem("pickz_combo", JSON.stringify(legs)); } catch (e) {} comboPill(); }
+// add the open prop at the line and side on screen, or take it out: true added, false removed, null full
+function comboToggle(p) {
+  const legs = comboLegs(), i = legs.findIndex(l => l.id === p.id);
+  if (i >= 0) legs.splice(i, 1);
+  else if (legs.length >= COMBO_MAX) { $("#live").textContent = "A combo holds " + COMBO_MAX + " props"; return null; }
+  else legs.push({id: p.id, side: ST.side, line: DT.line});
+  comboSave(legs);
+  return i < 0;
+}
+function comboPill() {
+  let b = $("#cbp");
+  const n = D ? comboLegs().length : 0;
+  if (!b) { b = document.createElement("button"); b.id = "cbp"; b.className = "cbp glass"; b.setAttribute("aria-haspopup", "dialog"); b.onclick = comboSheet; document.body.appendChild(b); }
+  b.hidden = !n;
+  b.innerHTML = `${ICON.combo}<span>Combo</span><b>${n}</b>`;
+}
+function comboSheet() {
+  const draw = s => {
+    const legs = comboLegs().map(l => ({l: l, p: propFor(l.id)}));
+    if (!legs.length) { closeSheet(); return; }
+    const L = legs.map(({l, p}) => ({logs: logsOf(p).map(x => ({gid: x.gid, date: x.date, v: statValue(x, p.market)})), line: l.line, side: l.side}));
+    const C = comboStats(L, CMB_W, D.season);
+    if (!C.n) { C.each = L.map(x => comboStats([x], CMB_W, D.season).each[0]); C.indep = C.each.every(e => e !== null) ? C.each.reduce((a, b) => a * b, 1) : null; }   // no shared games: each leg on its own
+    const wins = [["l10", "L10"], ["l20", "L20"], ["season", D.season.slice(0, 4)], ["all", "All"]];
+    const legRow = ({l, p}, i) => `<div class="cbl"><span class="av">${head(p.pid)}</span><div><b>${esc(nameOf(p.player))}</b><span>${l.side === "under" ? "Under" : "Over"} ${l.line} ${esc(unit(p.market))}</span></div><em class="num">${C.each[i] === null ? "–" : Math.round(C.each[i] * 100) + "%"}</em><button class="x" data-rm="${esc(l.id)}" aria-label="Remove ${esc(p.player)}">×</button></div>`;
+    const tbl = C.n ? `<table class="gst cbt"><thead><tr><th>Game</th>${legs.map(({p}) => `<th>${esc(lastName(p.player))} <small>${esc(short(p.market))}</small></th>`).join("")}<th></th></tr></thead><tbody>
+      ${C.games.slice().reverse().map(x => { const lg = logsOf(legs[0].p).find(y => y.gid === x.gid) || {};
+        return `<tr><td>${esc(x.date.slice(5).replace("-", "/"))} <small>${lg.home ? "" : "@"}${esc(lg.opp || "")}</small></td>${x.vals.map((v, i) => `<td class="${x.hits[i] ? "up" : "dn"}">${v}</td>`).join("")}<td>${x.all ? "✓" : ""}</td></tr>`; }).join("")}</tbody></table>` : "";
+    s.innerHTML = `<div class="grab" aria-hidden="true"></div><h2 id="sht">Combo</h2>${legs.map(legRow).join("")}
+      <div class="seg cbw" role="group" aria-label="Games">${wins.map(([k, lab]) => `<button data-cw="${k}" aria-pressed="${k === CMB_W}">${lab}</button>`).join("")}</div>
+      ${legs.length < 2 ? '<div class="empty"><b>Add another prop</b></div>' : !C.n ? `<div class="cbr"><div><b class="num">–</b><span>No games together</span></div><div><b class="num">${C.indep === null ? "–" : Math.round(C.indep * 100) + "%"}</b><span>If unrelated</span></div></div>` : `
+      <div class="cbr"><div><b class="num">${C.k}/${C.n}</b><span>All hit</span></div><div><b class="num">${Math.round(C.rate * 100)}%</b><span>Together</span></div><div><b class="num">${Math.round(C.indep * 100)}%</b><span>If unrelated</span></div></div>${tbl}`}
+      <div class="acts stk"><button class="btn" id="cb-clr">Clear</button><button class="btn pri" id="cb-ok">Done</button></div>`;
+    $$("[data-rm]", s).forEach(b => b.onclick = () => { comboSave(comboLegs().filter(l => l.id !== b.dataset.rm)); syncCmb(); draw(s); });
+    $$("[data-cw]", s).forEach(b => b.onclick = () => { CMB_W = b.dataset.cw; draw(s); });
+    $("#cb-clr", s).onclick = () => { comboSave([]); syncCmb(); closeSheet(); };
+    $("#cb-ok", s).onclick = closeSheet;
+  };
+  openSheet("", draw);
+}
+const syncCmb = () => { const b = $("#cmb"); if (b && PX) b.setAttribute("aria-pressed", inCombo(PX.p.id)); };
 function bindLive(p, logs, without) {
   const pg = $("#pg"), c = p.ctx || {};
   const keep = sel => { const e = !TOUCH && $(sel, pg); if (e) e.focus({preventScroll: true}); };
@@ -2187,7 +2340,8 @@ function renderMatchup() {
     <div class="mpf"><span>Recent Games vs</span>${dd("grp", VS_GRP, MUP.grp)}${dd("mkt", TAB_ORDER.map(m => [m, NAME[m]]), MUP.mkt)}</div>
     <div id="vst"></div>
     <div class="shc wg" id="wgd"></div>
-    <div class="shc" id="shc"></div>`;
+    <div class="shc" id="shc"></div>
+    <div class="shc" id="rfc"></div>`;
   $(".bk", mp).onclick = () => history.back();
   $("#mps", mp).onclick = () => { history.go(-2); setTimeout(() => { if (ST.view !== "props") { ST.view = "props"; save(); tabbar(); renderList(); } const q = $("#q"); if (q) q.focus(); }, 480); };
   $("#mpm", mp).onclick = leagueSheet;
@@ -2199,6 +2353,7 @@ function renderMatchup() {
     <div class="kv"><span>1st</span><b>the toughest</b></div>
     <div class="acts"><button class="btn pri" id="mpi-ok">Done</button></div>`, s => { $("#mpi-ok", s).onclick = closeSheet; });
   guardCard();
+  refCard();
   shotLoad(D.season).then(j => {                       // this season once the opponent has 10 games, else last season
     if (!MUP || MUP.p !== p) return;
     const t = j && j.teams[p.opp];

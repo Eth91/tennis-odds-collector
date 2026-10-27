@@ -531,6 +531,39 @@ def depth_read(boxes, x, mates, stays):
     return played, missed, out
 
 
+def schedule_spots(sched, gids):
+    """Each team's schedule spot in the games `gids`, from the season's schedule (postponed games left out) ->
+    {gid: {TRI: {rest, b2b, g3in4, g4in6, trip}}}: days off before the game (None for a team's first), a back-to-back,
+    a 3rd game in 4 nights, a 4th in 6, and on the road, which game of the trip it is: [k, n] (None at home)."""
+    want, by = set(gids), defaultdict(list)
+    for g in sched:
+        if "PPD" in (g.get("status_text") or "").upper():
+            continue
+        by[g["home"]].append((g["date_et"], g["gid"], True))
+        by[g["away"]].append((g["date_et"], g["gid"], False))
+    out = {}
+    for team, gl in by.items():
+        gl.sort()
+        days = [dt.date.fromisoformat(d) for d, _, _ in gl]
+        for i, (_, gid, home) in enumerate(gl):
+            if gid not in want:
+                continue
+            day = days[i]
+            rest = (day - days[i - 1]).days - 1 if i else None
+            within = lambda n: sum(1 for x in days[max(0, i - n):i + 1] if (day - x).days < n + 1)
+            trip = None
+            if not home:
+                a = b = i
+                while a > 0 and not gl[a - 1][2]:
+                    a -= 1
+                while b + 1 < len(gl) and not gl[b + 1][2]:
+                    b += 1
+                trip = [i - a + 1, b - a + 1]
+            out.setdefault(gid, {})[team] = {"rest": rest, "b2b": rest == 0, "g3in4": within(3) >= 3,
+                                             "g4in6": within(5) >= 4, "trip": trip}
+    return out
+
+
 def closing_boards(q, gids, cache=CLOSE_BOARDS):
     """The books pull a game's props at tip, so the board loses them; the Live tab still wants them. -> ({(gid, pid,
     stat): {book: {"updated", "rungs", "main"}}}, {(gid, pid): name}) from each prop's last board before tip
@@ -900,6 +933,7 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
     team_of = {int(k): v[0] for k, v in idx.items()}
 
     quotes, names, newest = book_quotes(q, gids)
+    spots = schedule_spots(sched, gids)
     # games under way: their props come off the board at tip; their closing boards fill in, marked closed (Live tab only)
     started = [g["gid"] for g in games if g.get("utc") and _naive_utc(g["utc"]) <= now.astimezone(dt.timezone.utc).replace(tzinfo=None)]
     cb, cnames = closing_boards(q, started, cache=CLOSE_BOARDS if lines is None else Path(lines).with_name("close_boards.json"))
@@ -1051,7 +1085,8 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
                     "matchup": {"available": S is not None},
                     "game_lines": {"games": len(glines)}},
         "games": [{"gid": g["gid"], "date": g["date_et"], "tip": g["utc"], "away": g["away"], "home": g["home"],
-                   "lines": glines.get(g["gid"]), **{k: v for k, v in live.get(g["gid"], {}).items() if k != "stats"}}
+                   "lines": glines.get(g["gid"]), "spots": spots.get(g["gid"]),
+                   **{k: v for k, v in live.get(g["gid"], {}).items() if k != "stats"}}
                   for g in sorted(games, key=lambda g: g["utc"])],
         "props": props, "players": {str(k): v for k, v in players.items()}, "injuries": injuries,
         "absences": {f"{d}|{t}": [dict(a, name=next((n for (gg, pp), n in names.items() if pp == a["pid"]), None)
