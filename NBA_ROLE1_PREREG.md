@@ -167,3 +167,13 @@ hand.
   Information, since tip lines are not openers.
 - **The forward rule (ROLE_OPEN) uses P′ with this β**, and the rest is unchanged: an opener, a spot, EV′ ≥ 0.05.
   At openers β is likely conservative.
+
+**Amendment 2: run (2026-10-27, about 08:40 UTC).**
+- **The fit (2023-24, 16,323 props):** β = **0.09**. Log loss: book 0.68325, calibrated 0.68301, raw model
+  0.70798.
+- **The check (2024-25, 18,109 props):** log loss book 0.68541, calibrated **0.68523**, raw model 0.70780.
+  - The calibrated model beats the book out of sample, by a little.
+  - EV′ ≥ 5% fires on 265 sides (0.7%): ROI +3.5%, overs −2.9% (n 125), unders +9.3% (n 140).
+  - That is far too few to call an edge.
+- **Reading:** at tip lines, about 9% of the model's disagreement with the book is real. ROLE_OPEN uses
+  β = 0.09 and fires rarely.

@@ -231,13 +231,207 @@ def test_a(gamelogs_db, seasons=("2025-26", "2024-25"), mode="v1"):
     return res
 
 
+# ── pricing ─────────────────────────────────────────────────────────────────────────────────────────────────────
+NB_R = {"points": 7.211, "rebounds": 11.747, "assists": 13.092, "threes": 10.157}   # amendment 1: v2 on 2025-26
+MARKET_STAT = {"points": "pts", "rebounds": "reb", "assists": "ast", "threes": "fg3m"}
+
+
+def p_over(mu, r, line):
+    """P(X > line) for a negative binomial with mean mu and size r (no push at a .5 line; at a whole line, P(X > line))."""
+    mu = max(mu, 1e-6)
+    q = r / (r + mu)
+    cdf, k = 0.0, 0
+    while k <= math.floor(line):
+        cdf += math.exp(math.lgamma(k + r) - math.lgamma(r) - math.lgamma(k + 1) + r * math.log(q) + k * math.log(1 - q))
+        k += 1
+    return max(0.0, 1.0 - cdf)
+
+
+def p_side(mu, market, line, side):
+    """P(side wins | no push), from the market's negative binomial."""
+    r = NB_R[market]
+    po = p_over(mu, r, line)
+    if line == math.floor(line):                         # a whole line can push
+        pu = 1.0 - p_over(mu, r, line - 1)
+        tot = po + pu
+        po, pu = (po / tot, pu / tot) if tot else (0.5, 0.5)
+        return po if side == "over" else pu
+    return po if side == "over" else 1.0 - po
+
+
+def test_b(gamelogs_db, odds_db, seasons=("2023-24", "2024-25"), ev_at=0.05):
+    """Information only: spots with n = 2-3 at the archive's tip line (FanDuel/DraftKings main), v2 model."""
+    import sqlite3
+    import nba_margin_refit as MR
+    rows, groups = load(gamelogs_db)
+    c = sqlite3.connect(f"file:{gamelogs_db}?mode=ro", uri=True)
+    name2pid = {MR.norm(nm): pid for pid, nm in c.execute("SELECT DISTINCT player_id, player FROM logs_full")}
+    mk_of = {"player_points": "points", "player_rebounds": "rebounds", "player_assists": "assists", "player_threes": "threes"}
+    o = sqlite3.connect(f"file:{odds_db}?mode=ro", uri=True)
+    raw = defaultdict(lambda: defaultdict(dict))
+    for d, pl, m, line, side, price, book in o.execute(
+            "SELECT game_date, player, market, line, side, price, book FROM props WHERE market IN ('player_points', "
+            "'player_rebounds', 'player_assists', 'player_threes') AND price IS NOT NULL AND line IS NOT NULL"):
+        if book in ("fanduel", "draftkings"):
+            raw[(d, name2pid.get(MR.norm(pl)), mk_of[m])][float(line)].setdefault(book, [None, None])[0 if side == "over" else 1] = float(price)
+    bets = []
+    for s in seasons:
+        season, priors = Season(rows[s]), Priors(rows[PREV[s]], groups)
+        for team, games in season.games.items():
+            for i, (d, g, box) in enumerate(games):
+                if i < X_GAMES:
+                    continue
+                played = {p for p, r in box.items() if r["min"]}
+                last3 = season.roster(team, d)
+                spots = season.absences(team, d, last3 - played)
+                spots = {x: n for x, n in spots.items() if n in (2, 3)}
+                if not spots:
+                    continue
+                active = last3 & played
+                proj = project(season, priors, groups, team, d, active, set(spots), mode="v2")
+                for p in active:
+                    for mk, st in MARKET_STAT.items():
+                        lb = raw.get((d, p, mk))
+                        if not lb or p not in proj:
+                            continue
+                        best = None                            # FanDuel/DraftKings main: two-sided, over nearest even money
+                        for line, bk in lb.items():
+                            two = [(b, v) for b, v in bk.items() if v[0] and v[1]]
+                            if two:
+                                gap = min(abs(v[0] - 2.0) for _b, v in two)
+                                if best is None or gap < best[0]:
+                                    best = (gap, line, max(v[0] for _b, v in two), max(v[1] for _b, v in two))
+                        if not best:
+                            continue
+                        _g, line, ov, un = best
+                        a = box[p][st] or 0
+                        for side, price in (("over", ov), ("under", un)):
+                            ev = p_side(proj[p][st], mk, line, side) * price - 1
+                            u = 0.0 if a == line else ((price - 1) if (a > line) == (side == "over") else -1.0)
+                            bets.append({"season": s, "date": d, "market": mk, "side": side, "ev": ev, "u": u})
+    out = {}
+    for s in seasons:
+        b = [x for x in bets if x["season"] == s]
+        out[s] = {lab: (lambda k: {"n": len(k), "roi": round(float(np.mean([x["u"] for x in k])), 4) if k else None})(
+            [x for x in b if lo <= x["ev"] < hi]) for lab, lo, hi in (("ev<0", -9, 0), ("0-5%", 0, 0.05), ("5-10%", 0.05, 0.10), ("10%+", 0.10, 9))}
+        k = [x for x in b if x["ev"] >= ev_at]
+        out[s]["flagged"] = {"n": len(k), "roi": round(float(np.mean([x["u"] for x in k])), 4) if k else None,
+                             "by_side": {sd: round(float(np.mean([x["u"] for x in k if x["side"] == sd])), 4)
+                                         for sd in ("over", "under") if any(x["side"] == sd for x in k)},
+                             "by_market": {m: (sum(1 for x in k if x["market"] == m), round(float(np.mean([x["u"] for x in k if x["market"] == m])), 4))
+                                           for m in MARKET_STAT if any(x["market"] == m for x in k)}}
+    return out
+
+
+def logit(p):
+    p = min(max(p, 1e-6), 1 - 1e-6)
+    return math.log(p / (1 - p))
+
+
+def calibrated(p_model, q_book, beta):
+    """Amendment 2: the book's no-vig probability moved toward the model's by the share beta of their disagreement."""
+    return 1.0 / (1.0 + math.exp(-(logit(q_book) + beta * (logit(p_model) - logit(q_book)))))
+
+
+def tip_props(gamelogs_db, odds_db, seasons):
+    """One row per prop in absence games 2-3 at the archive's tip line: the book's no-vig over (FanDuel's pair, else
+    DraftKings'), the model's P(over), the best over/under prices and the result."""
+    import sqlite3
+    import nba_margin_refit as MR
+    rows, groups = load(gamelogs_db)
+    c = sqlite3.connect(f"file:{gamelogs_db}?mode=ro", uri=True)
+    name2pid = {MR.norm(nm): pid for pid, nm in c.execute("SELECT DISTINCT player_id, player FROM logs_full")}
+    mk_of = {"player_points": "points", "player_rebounds": "rebounds", "player_assists": "assists", "player_threes": "threes"}
+    o = sqlite3.connect(f"file:{odds_db}?mode=ro", uri=True)
+    raw = defaultdict(lambda: defaultdict(dict))
+    for d, pl, m, line, side, price, book in o.execute(
+            "SELECT game_date, player, market, line, side, price, book FROM props WHERE market IN ('player_points', "
+            "'player_rebounds', 'player_assists', 'player_threes') AND price IS NOT NULL AND line IS NOT NULL"):
+        if book in ("fanduel", "draftkings"):
+            raw[(d, name2pid.get(MR.norm(pl)), mk_of[m])][float(line)].setdefault(book, [None, None])[0 if side == "over" else 1] = float(price)
+    out = []
+    for s in seasons:
+        season, priors = Season(rows[s]), Priors(rows[PREV[s]], groups)
+        for team, games in season.games.items():
+            for i, (d, g, box) in enumerate(games):
+                if i < X_GAMES:
+                    continue
+                played = {p for p, r in box.items() if r["min"]}
+                last3 = season.roster(team, d)
+                spots = {x: n for x, n in season.absences(team, d, last3 - played).items() if n in (2, 3)}
+                if not spots:
+                    continue
+                active = last3 & played
+                proj = project(season, priors, groups, team, d, active, set(spots), mode="v2")
+                for p in active:
+                    for mk, st in MARKET_STAT.items():
+                        lb = raw.get((d, p, mk))
+                        if not lb or p not in proj:
+                            continue
+                        best = None
+                        for line, bk in lb.items():
+                            two = {b: v for b, v in bk.items() if v[0] and v[1]}
+                            if two:
+                                gap = min(abs(v[0] - 2.0) for v in two.values())
+                                if best is None or gap < best[0]:
+                                    best = (gap, line, two)
+                        if not best:
+                            continue
+                        _g, line, two = best
+                        pair = two.get("fanduel") or two.get("draftkings")
+                        a = box[p][st] or 0
+                        out.append({"season": s, "date": d, "market": mk, "line": line, "actual": a,
+                                    "q_book": (1 / pair[0]) / (1 / pair[0] + 1 / pair[1]),
+                                    "p_model": p_side(proj[p][st], mk, line, "over"),
+                                    "over": max(v[0] for v in two.values()), "under": max(v[1] for v in two.values())})
+    return out
+
+
+def calibrate(gamelogs_db, odds_db):
+    """Amendment 2: beta by maximum likelihood on 2023-24; checked on 2024-25 (information)."""
+    props = tip_props(gamelogs_db, odds_db, ("2023-24", "2024-25"))
+    fit = [r for r in props if r["season"] == "2023-24" and r["actual"] != r["line"]]
+    ll = lambda b, rs: -float(np.mean([math.log(max(1e-9, calibrated(r["p_model"], r["q_book"], b) if r["actual"] > r["line"]
+                                                     else 1 - calibrated(r["p_model"], r["q_book"], b))) for r in rs]))
+    grid = [i / 100 for i in range(0, 151)]
+    beta = min(grid, key=lambda b: ll(b, fit))
+    chk = [r for r in props if r["season"] == "2024-25" and r["actual"] != r["line"]]
+    bets = []
+    for r in [x for x in props if x["season"] == "2024-25"]:
+        po = calibrated(r["p_model"], r["q_book"], beta)
+        for side, pr, price in (("over", po, r["over"]), ("under", 1 - po, r["under"])):
+            if pr * price - 1 >= 0.05:
+                u = 0.0 if r["actual"] == r["line"] else ((price - 1) if (r["actual"] > r["line"]) == (side == "over") else -1.0)
+                bets.append({"side": side, "market": r["market"], "u": u})
+    return {"beta": beta, "fit_props": len(fit), "logloss_2023_24": {"book": round(ll(0.0, fit), 5), "calibrated": round(ll(beta, fit), 5),
+                                                                       "model": round(ll(1.0, fit), 5)},
+            "check_2024_25": {"props": len(chk), "logloss_book": round(ll(0.0, chk), 5), "logloss_calibrated": round(ll(beta, chk), 5),
+                              "logloss_model": round(ll(1.0, chk), 5), "flags_ev5": len(bets),
+                              "flag_rate": round(len(bets) / max(1, 2 * len([x for x in props if x["season"] == "2024-25"])), 4),
+                              "roi": round(float(np.mean([b["u"] for b in bets])), 4) if bets else None,
+                              "by_side": {sd: (sum(b["side"] == sd for b in bets), round(float(np.mean([b["u"] for b in bets if b["side"] == sd])), 4))
+                                          for sd in ("over", "under") if any(b["side"] == sd for b in bets)}}}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--test-a")
     ap.add_argument("--seasons", default="2025-26,2024-25")
     ap.add_argument("--mode", default="v1", choices=("v1", "v2"))
+    ap.add_argument("--test-b", nargs=2, metavar=("GAMELOGS_DB", "ODDS_DB"))
+    ap.add_argument("--calibrate", nargs=2, metavar=("GAMELOGS_DB", "ODDS_DB"))
     ap.add_argument("--json")
     a = ap.parse_args()
+    if a.calibrate:
+        res = calibrate(*a.calibrate)
+        print(json.dumps(res, indent=1))
+        if a.json:
+            open(a.json, "w").write(json.dumps(res, indent=1))
+    if a.test_b:
+        res = test_b(*a.test_b)
+        print(json.dumps(res, indent=1))
+        if a.json:
+            open(a.json, "w").write(json.dumps(res, indent=1))
     if a.test_a:
         res = test_a(a.test_a, tuple(a.seasons.split(",")), a.mode)
         print(json.dumps(res, indent=1))
