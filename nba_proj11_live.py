@@ -48,7 +48,12 @@ def write_config(results=P.OUT_JSON, path=CONFIG):
     """The candidate (A_keep) as the development run chose it: kept families, λ, its 2023-24 blend weight, the F0
     regulars rule and the version name. PROJ11_1_RESULTS.json (amendment 1) carries proj-1.1.1."""
     r = json.loads(Path(results).read_text())
-    if r.get("version") == "proj-1.1.1":
+    if r.get("base") == "proj-1.1.1" and "tests" in r:          # PROJ12_RESULTS.json: proj-1.2 = proj-1.1.1 + T1
+        base = load_config(CONFIG)
+        cfg = {"name": "proj-1.2", "kept": base["kept"], "lambda": base["lambda"], "blend_w": base["blend_w"],
+               "f0_rule": base["f0_rule"], "mz": r["tests"]["T1"]["mz"],
+               "from": f"{Path(results).name} generated {r['generated_at']} (T1 passed; blend weight kept from proj-1.1.1)"}
+    elif r.get("version") == "proj-1.1.1":
         cfg = {"name": "proj-1.1.1", "kept": ["F0"], "lambda": r["lambda"], "blend_w": r["blend_w"]["A_keep"],
                "f0_rule": r["f0_rule"], "from": f"{Path(results).name} generated {r['generated_at']}"}
     else:
@@ -61,10 +66,24 @@ def write_config(results=P.OUT_JSON, path=CONFIG):
 def load_config(path=CONFIG):
     cfg = json.loads(Path(path).read_text())
     cfg.setdefault("f0_rule", "1.1")                          # configs before amendment 1 used the old rule
-    keys = ("kept", "lambda", "blend_w") + (("f0_rule",) if cfg["f0_rule"] != "1.1" else ())
+    keys = ("kept", "lambda", "blend_w") + (("f0_rule",) if cfg["f0_rule"] != "1.1" else ()) + (("mz",) if cfg.get("mz") else ())
     cfg["hash"] = hashlib.sha1(json.dumps({k: cfg[k] for k in keys}, sort_keys=True).encode()).hexdigest()[:10]
     cfg["version"] = f"{cfg.get('name', VERSION)}:{cfg['hash']}"
     return cfg
+
+
+def recalibrate(mu, cfg):
+    """proj-1.2 (NBA_PROJ12_PREREG.md T1): the frozen 2023-24 Mincer-Zarnowitz line per stat, floored at 0."""
+    if not cfg.get("mz"):
+        return mu
+    ab = np.asarray(cfg["mz"], float)
+    return np.maximum(ab[:, 0] + ab[:, 1] * mu, 0)
+
+
+def cache_for(config_path):
+    """nba_proj11_cache.pkl for the default config; <stem>_cache.pkl for any other (e.g. nba_proj12_cache.pkl)."""
+    cp = Path(config_path)
+    return CACHE if cp.resolve() == CONFIG.resolve() else cp.with_name(cp.stem.replace("_config", "") + "_cache.pkl")
 
 
 def _load(cache):
@@ -108,7 +127,7 @@ def refresh11(targets, rows=None, raw=None, cfg=None, cache=CACHE, force=False, 
     run = type("R", (), {"mu": {"m1": mu_h}, "Y": Y})()
     R = P.residual_targets(run)
     date = np.array([r["date"] for r in rows])
-    mu_p = P.apply_residual(mu_h, P.residual_walk(date, Xh, R, cfg["lambda"]))
+    mu_p = recalibrate(P.apply_residual(mu_h, P.residual_walk(date, Xh, R, cfg["lambda"])), cfg)
     month = min(t["date"] for t in slate)[:7] + "-01"
     wmu, wsd, W = P.fit_weights(Xh, R, date < month, cfg["lambda"])
     first = min(t["date"] for t in slate)
@@ -215,7 +234,7 @@ def forecast11(now=None, cfg=None, cache=CACHE, lineups_db=LINEUPS, news_db=NEWS
     status = latest_status(news_db, now, {t["date"] for t in hit["slate"]})
     Xt, audit = live_inputs(hit, lineups, status)
     f = ((Xt - hit["wmu"]) / hit["wsd"]) @ hit["W"]
-    mu = P.apply_residual(hit["mu10"], f)
+    mu = recalibrate(P.apply_residual(hit["mu10"], f), cfg)
     tf = NP.features(mu, np.array(hit["n_hist"], float), np.array(hit["rest"], float), NP.PROJ_CONFIG)
     nb = NP.neighbors(tf, hit["pool_f"], NP.PROJ_CONFIG["K"], hit["scale"])
     d = NP.Dist(mu, hit["pool_mu"], hit["pool_y"], nb)
@@ -335,12 +354,14 @@ def main():
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--forecast", action="store_true")
     ap.add_argument("--prospective", metavar="OUT_JSON")
+    ap.add_argument("--config", default=str(CONFIG), help="the candidate's config (default proj-1.1.1)")
     a = ap.parse_args()
+    cache = cache_for(a.config)
     if a.write_config:
-        print("nba_proj11_live --write-config:", write_config(a.write_config))
+        print("nba_proj11_live --write-config:", write_config(a.write_config, path=a.config))
     if a.refresh:
-        cfg = load_config()
-        old = _load(CACHE)
+        cfg = load_config(a.config)
+        old = _load(cache)
         raw_m = os.path.getmtime(FT.F.RAW) if FT.F.RAW.exists() else 0
         if not a.force and old and old.get("key") == (NP._cache_key(NP.GAMELOGS, NP.MATCHUP), raw_m, cfg["hash"]) \
                 and NP.board_targets() <= set(old["at"]):
@@ -348,11 +369,11 @@ def main():
         else:
             rows, _, pos = PD.load_box(NP.GAMELOGS, NP.MATCHUP, NP.PROFILES)
             targets, rows = NP.slate_targets(rows=rows)
-            print("nba_proj11_live --refresh:", refresh11(targets, rows=rows, cfg=cfg, force=True, pos=pos))
+            print("nba_proj11_live --refresh:", refresh11(targets, rows=rows, cfg=cfg, force=True, pos=pos, cache=cache))
     if a.forecast:
-        print("nba_proj11_live --forecast:", forecast11())
+        print("nba_proj11_live --forecast:", forecast11(cfg=load_config(a.config), cache=cache))
     if a.prospective:
-        o = prospective11(a.prospective)
+        o = prospective11(a.prospective, cfg=load_config(a.config))
         print("nba_proj11_live --prospective:", {k: o.get(k) for k in ("graded", "paired_with_proj10", "verdicts")})
 
 
