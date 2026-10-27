@@ -2,6 +2,8 @@
 """ROLE_OPEN live (NBA_ROLE1_PREREG.md, NBA_SXS_PREREG.md amendment 2): every minute, find props a book has just
 opened (first seen with a two-sided main rung), run the same decision the side-by-side replays
 (nba_role.role_eval), log it to nba_role.sqlite and ping the phone, labeled shadow, when it fires.
+It reads nba_lines' `board` (the current pre-game board, replaced every poll, a few thousand rows), not the change log,
+so a minute's work stays small all season.
 
     python3 nba_role_open.py --process      # cron, every minute (the first run only marks what is already open)
 """
@@ -20,7 +22,7 @@ import nba_role as ROLE
 
 HERE = Path(__file__).resolve().parent
 DB = HERE / "nba_role.sqlite"
-LOOKBACK_MIN, TOO_LATE_MIN = 15, 5
+TOO_LATE_MIN = 5
 OUTS = ("Out", "Doubtful")
 BOOK = {"fd": "FD", "dk": "DK"}
 ABBR = {"points": "PTS", "rebounds": "REB", "assists": "AST", "threes": "3PM"}
@@ -32,16 +34,17 @@ DDL = ["CREATE TABLE IF NOT EXISTS opened (gid TEXT, pid INTEGER, market TEXT, b
        "CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT)"]
 
 
-def board_of(q, gid, pid, market, book, until):
-    b = {}
-    for line, side, odds in q.execute("SELECT line, side, odds FROM quotes WHERE gid = ? AND pid = ? AND stat = ? AND book = ? "
-                                      "AND seen_at <= ? ORDER BY seen_at", (gid, pid, market, book, until)):
-        k = (round(float(line), 1), side)
-        if odds is None:
-            b.pop(k, None)
-        else:
-            b[k] = odds
-    return b
+def current_boards(q):
+    """{(gid, pid, market, book): (board, tip, player, collected_at)} from nba_lines' current board."""
+    out = {}
+    for book, at, gid, tip, pid, player, stat, line, side, odds in q.execute(
+            "SELECT book, collected_at, gid, tip_utc, pid, player, stat, line, side, odds FROM board WHERE pid IS NOT NULL "
+            "AND book IN ('fd', 'dk') AND stat IN ('points', 'rebounds', 'assists', 'threes') AND odds IS NOT NULL"):
+        k = (gid, pid, stat, book)
+        b, _t, _p, last = out.get(k, ({}, tip, player, at))
+        b[(round(float(line), 1), side)] = odds
+        out[k] = (b, tip, player, max(last, at))
+    return out
 
 
 def statuses(n, date, now):
@@ -72,19 +75,16 @@ def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_ne
         con.execute(s_)
     q, n = PD._ro(lines_db), PD._ro(news_db)
     first_run = con.execute("SELECT value FROM meta WHERE key = 'installed'").fetchone() is None
-    since = "0000" if first_run else (dt.datetime.fromisoformat(now) - dt.timedelta(minutes=LOOKBACK_MIN)).isoformat()
-    keys = q.execute("SELECT gid, pid, stat, book, MAX(tip_utc), MAX(player) FROM quotes WHERE seen_at > ? AND seen_at <= ? "
-                     "AND pid IS NOT NULL AND book IN ('fd', 'dk') AND stat IN ('points', 'rebounds', 'assists', 'threes') "
-                     "GROUP BY gid, pid, stat, book", (since, now)).fetchall()
+    keys = current_boards(q)
     done = {(g, p, m, b) for g, p, m, b in con.execute("SELECT gid, pid, market, book FROM opened")}
     rds, stat_cache, fired = {}, {}, 0
-    for gid, pid, market, book, tip, player in keys:
-        if (gid, pid, market, book) in done:
+    for (gid, pid, market, book), (board, tip, player, seen) in sorted(keys.items()):
+        if (gid, pid, market, book) in done or seen > now:
             continue
-        m = R.main_of(board_of(q, gid, pid, market, book, now))
+        m = R.main_of(board)
         if not m:
             continue
-        con.execute("INSERT OR IGNORE INTO opened VALUES (?, ?, ?, ?, ?)", (gid, pid, market, book, now))
+        con.execute("INSERT OR IGNORE INTO opened VALUES (?, ?, ?, ?, ?)", (gid, pid, market, book, seen))
         if first_run or not tip or RP.iso(tip) <= (dt.datetime.fromisoformat(now) + dt.timedelta(minutes=TOO_LATE_MIN)).isoformat():
             continue                                     # install: mark what is already open; never act near or after tip
         date = E._et_date(tip)
@@ -110,7 +110,7 @@ def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_ne
     if first_run:
         con.execute("INSERT OR REPLACE INTO meta VALUES ('installed', ?)", (now,))
     con.commit()
-    print(f"nba_role_open {now}: {len(keys)} recent props, {fired} fired{' (install: marked open, no pings)' if first_run else ''}")
+    print(f"nba_role_open {now}: {len(keys)} props on the board, {fired} fired{' (install: marked open, no pings)' if first_run else ''}")
     return fired
 
 

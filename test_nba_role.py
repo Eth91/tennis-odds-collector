@@ -108,18 +108,19 @@ def test_live_pinger():
     kw = dict(lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"], db=tmp / "role.sqlite",
               sender=lambda b: sent.append(b) or True)
     q = sqlite3.connect(p["lines"])
-    q.execute("DELETE FROM quotes WHERE stat = 'rebounds'")
-    q.commit()
+    q.execute("CREATE TABLE board (book TEXT, collected_at TEXT, gid TEXT, tip_utc TEXT, event TEXT, home TEXT, away TEXT, "
+              "pid INTEGER, player TEXT, stat TEXT, line REAL, side TEXT, odds REAL)")
+    def put(at, pid, nm, stat, line):
+        q.executemany("INSERT INTO board (book, collected_at, gid, tip_utc, pid, player, stat, line, side, odds) VALUES (?,?,?,?,?,?,?,?,?,?)",
+                      [("fd", at, T.G, T.TIP, pid, nm, stat, line, s, 1.9) for s in ("over", "under")])
+        q.commit()
+    put("2026-11-01T15:00:00", T.B, "Bee", "points", 10.5)
     assert L.process(now="2026-11-01T16:00:00", **kw) == 0 and sent == []              # install: mark what is open
-    q.executemany("INSERT INTO quotes VALUES (?,?,?,?,?,?,?,?,?,?)",
-                  [("2026-11-01T17:00:30", "fd", T.G, T.TIP, T.B, "Bee", "rebounds", 2.5, s, 1.9) for s in ("over", "under")])
-    q.commit()
+    put("2026-11-01T17:00:30", T.B, "Bee", "rebounds", 2.5)                             # opens after X goes out
     assert L.process(now="2026-11-01T17:01:00", **kw) == 1 and len(sent) == 1
     assert sent[0].startswith("🟢 ROLE HOM Bee REB o2.5") and sent[0].endswith("shadow")
     assert L.process(now="2026-11-01T17:02:00", **kw) == 0 and len(sent) == 1           # once
-    sqlite3.connect(p["lines"]).executemany("INSERT INTO quotes VALUES (?,?,?,?,?,?,?,?,?,?)",
-                                            [("2026-11-01T23:57:00", "fd", T.G, T.TIP, T.C, "Cee", "rebounds", 1.5, s, 1.9)
-                                             for s in ("over", "under")]).connection.commit()
+    put("2026-11-01T23:57:00", T.C, "Cee", "rebounds", 1.5)
     assert L.process(now="2026-11-01T23:58:00", **kw) == 0                              # within 5 min of tip: never
 
 
