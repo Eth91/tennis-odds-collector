@@ -1,6 +1,8 @@
 """nba_shots: the six-zone shot data behind the Matchup page's shot chart (docs/shots/{season}.json)."""
+import datetime as dt
 import json
 import pathlib
+import sqlite3
 import sys
 import tempfile
 
@@ -63,3 +65,41 @@ def test_build_and_write():
                             "WAS": {"gp": 2, "opp": [[130, 170], [50, 110], [20, 70], [14, 28], [11, 29], [70, 180]]}}
     assert doc["league"][0] == [230, 320] and doc["league"][5] == [130, 350]           # the two teams' totals, zone by zone
     assert json.loads((d / "shots" / "2026-27.json").read_text())["season"] == "2026-27"
+
+
+SHOT_HEAD = ["GRID_TYPE", "GAME_ID", "GAME_EVENT_ID", "PLAYER_ID", "PLAYER_NAME", "TEAM_ID", "TEAM_NAME", "PERIOD",
+             "MINUTES_REMAINING", "SECONDS_REMAINING", "EVENT_TYPE", "ACTION_TYPE", "SHOT_TYPE", "SHOT_ZONE_BASIC",
+             "SHOT_ZONE_AREA", "SHOT_ZONE_RANGE", "SHOT_DISTANCE", "LOC_X", "LOC_Y", "SHOT_ATTEMPTED_FLAG", "SHOT_MADE_FLAG",
+             "GAME_DATE", "HTM", "VTM"]
+
+
+def shot(gid, ev, pid, date, x, y, made):
+    return ["Shot Chart Detail", gid, ev, pid, "P", 10, "T", 1, 5, 0, "", "", "", "", "", "", 0, x, y, 1, made, date, "MIN", "WAS"]
+
+
+def test_shots_store_fetch_and_player_files():
+    d = pathlib.Path(tempfile.mkdtemp())
+    con = sqlite3.connect(d / "shots.sqlite")
+    con.executescript(SH.DDL)
+    urls = []
+    oct_ = [shot("g1", 1, 7, "20261022", -230, 10, 1), shot("g1", 2, 7, "20261022", 0, 5, 0),
+            shot("g1", 3, 8, "20261022", 10, 600, 0)]                                     # a heave past half court
+    nov = [shot("g2", 4, 7, "20261103", 50, 120, 1)]
+
+    def get(url):
+        urls.append(url)
+        rows = oct_ if "DateTo=10%2F31%2F2026" in url else nov if "DateTo=11%2F30%2F2026" in url else []
+        return {"resultSets": [{"name": "Shot_Chart_Detail", "headers": SHOT_HEAD, "rowSet": rows}]}
+    # a month at a time (a response stops at 102,400 rows): October and November so far, nothing after today
+    assert SH.fetch_shots(con, "2026-27", get=get, today=dt.date(2026, 11, 5)) == 4
+    assert [u.split("DateFrom=")[1].split("&Division")[0] for u in urls] == ["10%2F01%2F2026&DateTo=10%2F31%2F2026",
+                                                                            "11%2F01%2F2026&DateTo=11%2F30%2F2026"]
+    assert [r[0] for r in con.execute("SELECT month FROM fetched")] == ["2026-10"]          # over by 3+ days: marked
+    urls.clear()
+    # the next day: October is not fetched again; the open November whole again (a cut-off response can leave holes)
+    assert SH.fetch_shots(con, "2026-27", get=get, today=dt.date(2026, 11, 6)) == 1 and len(urls) == 1
+    assert "DateFrom=11%2F01%2F2026&DateTo=11%2F30%2F2026" in urls[0]
+    assert con.execute("SELECT COUNT(*) FROM shots").fetchone()[0] == 4                     # the repeat ignored
+    assert SH.write_player_shots(con, d / "out", ("2026-27",)) == 1                         # 8's only shot is a heave
+    doc = json.loads((d / "out" / "p" / "7.json").read_text())
+    assert doc == {"pid": 7, "s": {"2026-27": [-230, 10, 1, 0, 5, 0, 50, 120, 1]}}
