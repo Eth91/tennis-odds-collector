@@ -10,6 +10,8 @@ nba_wowy, nba_lab_cache, the .json/.pkl caches)
   nba_pm         the Kalshi prop change log behind T1-T3 (amendment 20); Kalshi keeps no quote history
   nba_matchup    for its `playtypes`: Synergy gives season totals only, snapshotted daily (amendment 30),
                  so a past day's snapshot cannot be re-fetched. The box scores beside it can (2.5 MB, kept whole)
+  nba_lineups    NBA.com's daily lineups file as seen before each tip (nba_lineups_poll.py): the file itself
+                 keeps only its final state, so what was "Expected" at tip − 30 cannot be re-fetched
   underdog_nba_log.jsonl   the raw X news log the watchers append to (NBA_X_LOG)
 
 MODELLED ON wnba_backup.py, with three changes its own record forced:
@@ -58,7 +60,7 @@ HERE = Path(__file__).resolve().parent
 OUT = Path(os.environ.get("NBA_BACKUP_DIR") or Path.home() / "backups" / "nba")
 X_LOG = Path(os.environ.get("NBA_X_LOG") or "/home/ubuntu/tennis-odds-collector/underdog_nba_log.jsonl")
 STORES = [(n, HERE / f"{n}.sqlite") for n in
-          ("nba_lines", "nba_shadow", "nba_news", "nba_proj_log", "nba_pm", "nba_matchup")] + [("underdog_nba_log", X_LOG)]
+          ("nba_lines", "nba_shadow", "nba_news", "nba_proj_log", "nba_pm", "nba_matchup", "nba_lineups")] + [("underdog_nba_log", X_LOG)]
 EXEMPT = {("nba_lines", "board")}            # current state, replaced every cycle: not a history
 KEEP_DAILY, KEEP_SUNDAYS = 7, 28             # days; a store's last good snapshot is kept regardless
 LOCK_WARN_S = 20
