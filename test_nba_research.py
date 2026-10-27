@@ -327,7 +327,16 @@ def test_page_controls_work_on_iphone():
     # iOS Safari can't drag the thumb of a range input stacked under another, so the dual sliders are pointer-event widgets
     assert 'type="range"' not in html and "dualRange(" in html and "touch-action:pan-y" in html
     # chart bars show their game on tap (a <title> only appears on hover); the book prices switch Over / Under
-    assert "barTip(" in html and "data-ps=" in html
+    assert "data-ps=" in html
+    # a tap on a bar opens that game's box score (docs/box/{gid}.json, nba_boxscore), his row and the prop's stats marked
+    assert 'if (gb) boxSheet(gb.dataset.gid, gb.dataset.tm, p);' in html and 'data-gid="${esc(l.gid)}"' in html
+    assert "fetch(`box/${encodeURIComponent(gid)}.json`)" in html and "barTip(" not in html and ".tip{" not in html
+    # every sheet in the player page's look: near-black with a thin edge, capsule toggles, outline chips and buttons,
+    # the main action white, the chart filters' capsule slider; no iOS grey sheet, blue button or blue slider
+    import re
+    assert "background:#0c0c0c" in html and ".btn.pri{border-color:#fff;background:#fff;color:#000}" in html
+    assert re.search(r"\.seg\{[^}]*border:1px solid #2a2a2a;border-radius:21\.2px", html) and ".seg button[aria-pressed=\"true\"]{background:#313131}" in html
+    assert 'class="dual"' not in html and "background:var(--blue)" not in html and "background:#1c1c1e" not in html
     # the reference layout: Trends tab, game cards, a floating Props / Markets / Injuries bar, a books table
     assert all(k in html for k in ('trends: "Trends"', 'class="gc"', 'data-view="', '["injuries", "Injuries"]', 'id="pbk"'))
     # the Watchlist is a filter now (an old #view=watch link lands on it); a teammate named in an injury read opens his prop
