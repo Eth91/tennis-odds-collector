@@ -54,3 +54,36 @@ seasons for a different matchup factor (pace × position allowances, rejected).
 judged forward. It takes the FanDuel main-line over in points at tip − 30 for players in the top INSIDE tercile.
 
 **If it fails:** report, and no rule.
+
+---
+
+## Result (2026-10-27): FAIL, so no rule
+- **Data:** 438,227 shots fetched (2023-24: 218,700; 2024-25: 219,527).
+- **Props:** 27,206 points props with an archive tip line and enough history (13,445 / 13,761).
+- **Code:** `nba_zones.py`.
+
+**INSIDE score (primary):**
+
+| tercile | 2023-24 over rate / ROI | 2024-25 over rate / ROI |
+|---|---|---|
+| bottom (worst inside matchup) | 47.7% / −7.9% | 48.6% / −6.5% |
+| middle | 47.7% / −8.1% | 48.9% / −6.0% |
+| top (best inside matchup) | 47.7% / −7.9% | 48.9% / −5.8% |
+
+- Top − bottom ROI: +0.01 and +0.73 points. Positive in both seasons, but tiny.
+- Spearman with (actual − line): +0.004 [−0.005, +0.013]. The interval includes 0, so the test fails.
+
+**The volume questions** (Spearman with the INSIDE score):
+
+| | correlation |
+|---|---|
+| FGA − his average | +0.026 |
+| points − his average | +0.045 |
+| **line − his average** | **+0.129** |
+
+**ZONE score (secondary):** the same picture. Over ROI top − bottom is +0.55 / +0.63 points; Spearman with
+(actual − line) is +0.006 [−0.004, +0.016]; points +0.050; line +0.141.
+
+**Reading.** The matchup is real. Players who score inside against teams that allow a lot inside do score more
+than their average and take slightly more shots. The books move the line for it, by more than the effect, so the
+over at the line earns nothing. Amendment 30 found the same with a position-based matchup factor.
