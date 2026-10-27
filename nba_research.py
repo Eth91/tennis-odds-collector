@@ -44,6 +44,9 @@ LINES, NEWS, SHADOW = HERE / "nba_lines.sqlite", HERE / "nba_news.sqlite", HERE 
 INDEX = HERE / "nba_player_index.json"
 TRACKING = HERE / "nba_tracking.sqlite"
 PROJ_LOG = HERE / "nba_proj_log.sqlite"          # the projection engine's prospective record (prereg test C)
+LINEUPS = HERE / "nba_lineups.sqlite"            # NBA.com's daily lineups as seen (nba_lineups_poll.py, the VM cron)
+USUAL_GAMES = 10                                 # a team's usual starters: its most frequent five over its last 10 games
+USUAL_MIN = 3                                    # ...this season, once it has 3 (before that, no starter is marked new)
 ET, MT = ZoneInfo("America/New_York"), ZoneInfo("America/Denver")
 # market -> (label, box-score parts). Only the markets the books' feeds carry (nba_lines.STAT_MAP).
 MARKETS = {"points": ("PTS", ("pts",)), "rebounds": ("REB", ("reb",)), "assists": ("AST", ("ast",)),
@@ -526,6 +529,52 @@ def depth_read(boxes, x, mates, stays):
     return played, missed, out
 
 
+def lineups(lcon, dates, boxes, official):
+    """{"date|TEAM": {status, at, starters: [[pid, name, pos]], usual: [pid], missing: [[pid, name, status]],
+    inactive: [[pid, name]]}} from the latest NBA.com lineups snapshot of each date (nba_lineups_poll.py). status:
+    Confirmed once all five starters are, else Expected; at: the newest confirmation. usual: the five who started most
+    of the team's last USUAL_GAMES games this season (team_boxes rows), empty until it has USUAL_MIN (last season's
+    starters are not this team's after an offseason); missing: a usual starter on tonight's list not starting, with his
+    status on the official report. A date with no snapshot (lineups are posted on game day) is left out."""
+    import zlib
+    out = {}
+    if lcon is None:
+        return out
+    for d in dates:
+        row = lcon.execute("SELECT body FROM snaps WHERE date_et=? ORDER BY fetched_at DESC LIMIT 1", (d,)).fetchone()
+        if not row:
+            continue
+        try:
+            j = json.loads(zlib.decompress(row[0]))
+        except (zlib.error, ValueError):
+            j = json.loads(row[0])
+        for g in j.get("games", []):
+            for side in ("homeTeam", "awayTeam"):
+                t = g.get(side) or {}
+                team, ps = t.get("teamAbbreviation"), t.get("players") or []
+                if not team or not ps:
+                    continue
+                st = [p for p in ps if p.get("position")]
+                recent = [b for b in boxes.get(team, []) if b[1] < d and b[2] == season_of(d)][-USUAL_GAMES:]
+                starts = defaultdict(int)
+                for b in recent:
+                    for pid, (s_, _) in b[3].items():
+                        starts[pid] += s_
+                usual = [pid for pid, n in sorted(starts.items(), key=lambda kv: -kv[1])[:5] if n] if len(recent) >= USUAL_MIN else []
+                on = {int(p["personId"]) for p in st}
+                name = {int(p["personId"]): p.get("playerName") or "" for p in ps}
+                out[f"{d}|{team}"] = {
+                    "status": "Confirmed" if st and all(p.get("lineupStatus") == "Confirmed" for p in st) else "Expected",
+                    "at": max((p.get("timestamp") or "" for p in st), default="") or None,
+                    "starters": [[int(p["personId"]), p.get("playerName") or "", p.get("position") or ""] for p in st],
+                    "usual": usual,
+                    "missing": [[pid, name[pid], (official.get((d, pid)) or {}).get("status")] for pid in usual
+                                if pid not in on and pid in name],
+                    "inactive": [[int(p["personId"]), p.get("playerName") or ""] for p in ps
+                                 if p.get("rosterStatus") == "Inactive"]}
+    return out
+
+
 def team_mates(boxes, roster):
     """{team: {"gids": [its games, oldest first], "mates": [{pid, name, since, on, mpg, gp}]}} — everyone on each
     team's roster now who has played for it in the cached seasons, the most minutes a game first. on: "1" / "0" per
@@ -789,7 +838,8 @@ def correlations(props, logs):
 
 
 # ── the payload ──────────────────────────────────────────────────────────────────────────────────────────
-def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None, index=None, box_get=None, tracking=None):
+def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None, index=None, box_get=None, tracking=None,
+          lineups_db=None):
     import nba_matchup as MU
     now = now or dt.datetime.now(dt.timezone.utc)
     if sched is None:
@@ -826,6 +876,7 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
     season = season_of(dates[0])
     pids = {p["pid"] for p in props}
     trk = _ro(tracking or TRACKING)
+    lcon = _ro(lineups_db or LINEUPS)
     logs = game_logs(mcon, pids, (prev_season(season), season), trk)
     for p in props:                                     # a player with no index entry: his latest box team
         if p["team"] is None and logs.get(p["pid"]):
@@ -958,12 +1009,13 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
         "related": corr,
         "inj_report": inj_report,
         "mates": team_mates(boxes, idx),
+        "lineups": lineups(lcon, dates, boxes, official),
         # past games are filtered by the tier their opponent sits in (DvP / Def Rank chips): this season's ranks
         # as of the slate date, last season's as it finished
         "ranks": {k: v for k, v in ranks.items()},
         "proj_players": proj_players, "proj_meta": proj_meta,
     }
-    for c in (q, ncon, sh, mcon, trk):
+    for c in (q, ncon, sh, mcon, trk, lcon):
         if c is not None:
             c.close()
     return out
