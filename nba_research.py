@@ -270,6 +270,12 @@ def book_quotes(q, gids):
 REST = LOG_COLS.index("rest")
 
 
+# a tracking value no real game reaches, per minute played: nba_tracking.sqlite has a few dates stored as multi-game totals
+# (2026-04-01: up to 517 potential assists). Every single game in the store sits at or under 0.99 potential assists and
+# 1.39 rebound chances a minute (10+ minutes, 23,100 player-games); past these the value is dropped, not used
+TRK_MAX_PER_MIN = (1.0, 1.4)
+
+
 def tracking(trk, pids):
     """{(date, pid): (potential assists, rebound chances)} from nba_tracking.sqlite. The Rebounding feed omits
     players with no rebound chances, so a tracked game without a rebounding value is 0 chances."""
@@ -302,7 +308,11 @@ def game_logs(mcon, pids, seasons, trk=None):
              f"WHERE p.pid IN ({','.join('?' * len(chunk))}) "
              f"AND g.season IN ({','.join('?' * len(seasons))}) ORDER BY g.date, p.gid")
         for r in mcon.execute(q, chunk + list(seasons)):
-            row = list(r[1:16]) + [None, usage(r[7], r[12], r[14], *r[16:])] + list(tr.get((r[1], r[0]), (None, None)))
+            t = list(tr.get((r[1], r[0]), (None, None)))
+            for k in (0, 1):                                    # an impossible tracking value: dropped
+                if t[k] is not None and (r[7] or 0) >= 5 and t[k] / r[7] > TRK_MAX_PER_MIN[k]:
+                    t[k] = None
+            row = list(r[1:16]) + [None, usage(r[7], r[12], r[14], *r[16:])] + t
             row[6] = round(row[6] or 0, 1)
             out[r[0]].append(row)
     for rows in out.values():                       # rest: days off since his previous game; none across the summer

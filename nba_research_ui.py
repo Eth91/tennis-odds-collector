@@ -160,6 +160,7 @@ font-size:13px;font-weight:600;color:#fff}
 .seg button img{width:16px;height:16px} .seg button svg{width:14px;height:14px;fill:currentColor}
 /* chips: the chart filters' outline pills */
 .chips{display:flex;flex-wrap:wrap;gap:8.3px;margin-top:10px}
+.chips.rsw{flex-wrap:nowrap;overflow-x:auto;margin:2px 0 4px;padding:0 15.3px 8px;scrollbar-width:none} .rsw::-webkit-scrollbar{display:none} .rsw .chip{flex:none}
 .chip{display:inline-flex;align-items:center;height:30px;padding:0 13px;border:1px solid rgba(255,255,255,.15);border-radius:15px;background:none;
 color:#fff;font-size:13px;font-weight:500}
 .chip[aria-pressed="true"]{border-color:rgba(255,255,255,.3);background:#2a2a2a}
@@ -921,7 +922,7 @@ let D = null, ERR = null, LOADING = true, CUR = null;
 // on a touchscreen, moving focus by script only draws a ring (and focusing a <select> can pop its picker)
 const TOUCH = matchMedia("(pointer: coarse)").matches;
 const ST = {date: null, gid: "all", market: "points", side: "over", q: "", sort: "hit10", dir: "desc", team: "all",
-            book: "all", lmin: "", lmax: "", omin: "", omax: "", watch: "", view: "props", iv: ""};
+            book: "all", lmin: "", lmax: "", omin: "", omax: "", watch: "", view: "props", iv: "", rs: ""};
 const DT = {line: null, win: "l10", home: null, starter: null, blow: null, result: null, rest: null, ranges: {}, without: {}, with: {},
             dvp: false, def: false, open: {}, fresh: null, ovs: []};
 const RANGES = [["min", "Minutes", "Minutes"], ["fga", "Field goal attempts", "FGA"], ["fg3a", "3-point attempts", "3PTA"],
@@ -967,7 +968,7 @@ function hashState() {
 }
 // how the list was last set up (tab, view, side, sort, book), for a launch from the home screen with no hash: not the
 // day, game, team, search or line filters, which would hide the next slate
-const PREF = ["view", "market", "side", "sort", "dir", "book", "iv"];
+const PREF = ["view", "market", "side", "sort", "dir", "book", "iv", "rs"];
 function readHash() {
   const h = new URLSearchParams(location.hash.slice(1));
   if (![...h.keys()].length) { try { const pf = JSON.parse(localStorage.getItem("pickz_pref") || "{}") || {}; PREF.forEach(k => { if (typeof pf[k] === "string") ST[k] = pf[k]; }); } catch (e) {} }
@@ -1338,6 +1339,11 @@ function injView() {
 // ── role changes (docs/player/roles.json, nba_players.roles): the slate's players whose minutes moved 4+ a game over their
 // last 3 games, biggest first: minutes and usage now against before, starts, and the regulars who sat (the likely why) ──
 let ROLES = null;
+// the Roles switch: [key, chip, unit after the numbers, label under the move]; ROLE_TH stands in for a file without
+// thresholds (nba_players.ROLE_MOVE)
+const ROLE_ST = [["min", "Minutes", "min", "MIN"], ["fga", "FGA", "FGA", "FGA"], ["fg3a", "3PTA", "3PA", "3PTA"],
+                 ["pot_ast", "Potential ast", "pot. ast", "POT AST"], ["reb_ch", "Reb chances", "reb ch.", "REB CH"]];
+const ROLE_TH = {min: 4, fga: 3, fg3a: 2, pot_ast: 2.5, reb_ch: 3};
 function rolesView() {
   if (!ROLES) ROLES = fetch("player/roles.json").then(r => r.ok ? r.json() : null).catch(() => null);
   ROLES.then(j => {
@@ -1345,17 +1351,26 @@ function rolesView() {
     if (!el || ST.view !== "injuries" || ST.iv !== "ro") return;
     const teams = new Set(D.games.filter(g => g.date === ST.date && (ST.gid === "all" || g.gid === ST.gid)).flatMap(g => [g.away, g.home]));
     const q = ST.q.trim().toLowerCase();
-    const rows = ((j && j.rows) || []).filter(r => teams.has(r.team) && (ST.team === "all" || r.team === ST.team) && (!q || r.name.toLowerCase().indexOf(q) >= 0));
-    if (!rows.length) { el.innerHTML = '<div class="empty"><b>No role changes</b></div>'; return; }
-    el.innerHTML = `<div class="lhd"><span>${rows.length} players</span><span>Last 3 games</span></div>` + rows.map(r => {
-      const up = r.d_min > 0, was = r.starts[2] ? r.starts[1] / r.starts[2] : 0;
-      const why = [r.starts[0] === 3 && was < .5 ? "Now starting" : r.starts[0] === 0 && was >= .5 ? "Lost his start" : "",
+    // the stat the list is about (the switch): its now and before a game, listed if it moved its threshold, biggest move first
+    const k = ROLE_ST.some(x => x[0] === ST.rs) ? ST.rs : "min", sd = ROLE_ST.find(x => x[0] === k), th = (j && j.thresholds) || ROLE_TH;
+    const stat = r => r.st ? r.st[k] : k === "min" ? [r.min[0], r.min[1]] : null;     // a file from before the switch: minutes only
+    const rows = ((j && j.rows) || []).filter(r => teams.has(r.team) && (ST.team === "all" || r.team === ST.team) && (!q || r.name.toLowerCase().indexOf(q) >= 0))
+      .filter(r => { const v = stat(r); return v && Math.abs(v[0] - v[1]) >= th[k]; })
+      .sort((a, b) => Math.abs(stat(b)[0] - stat(b)[1]) - Math.abs(stat(a)[0] - stat(a)[1]));
+    const sw = `<div class="chips rsw" role="group" aria-label="Stat">${ROLE_ST.map(([x, lab]) => `<button class="chip" data-rs="${x}" aria-pressed="${x === k}">${lab}</button>`).join("")}</div>`;
+    const bind = () => $$("[data-rs]", el).forEach(b => b.onclick = () => { if (b.dataset.rs !== k) { ST.rs = b.dataset.rs === "min" ? "" : b.dataset.rs; save(); rolesView(); } });
+    if (!rows.length) { el.innerHTML = sw + `<div class="empty"><b>${k === "reb_ch" ? "None yet this season" : "No role changes"}</b></div>`; bind(); return; }
+    el.innerHTML = sw + `<div class="lhd"><span>${rows.length} players</span><span>Last 3 games</span></div>` + rows.map(r => {
+      const v = stat(r), dv = v[0] - v[1], up = dv > 0, was = r.starts[2] ? r.starts[1] / r.starts[2] : 0;
+      const why = [k !== "min" ? `${r.min[1]} → ${r.min[0]} min` : "",
+                   r.starts[0] === 3 && was < .5 ? "Now starting" : r.starts[0] === 0 && was >= .5 ? "Lost his start" : "",
                    r.out.length ? `<span>${r.out.map(n => esc(lastName(n))).join(", ")} out</span>` : "",
                    r.usg[0] !== null && r.usg[1] !== null ? `USG ${Math.round(r.usg[1])} → ${Math.round(r.usg[0])}%` : ""].filter(Boolean);
       return `<button class="pr ir ir0 ror" data-vp="${r.pid}"><span class="av">${head(r.pid)}</span><div class="who"><div class="nm">${esc(nameOf(r.name))}<span class="cd">${esc(r.team)}</span></div>
-        <div class="lin">${r.min[1]} → <b>${r.min[0]}</b> min${r.base === "last season" ? " <small>vs last season</small>" : ""}</div>
+        <div class="lin">${v[1]} → <b>${v[0]}</b> ${sd[2]}${r.base === "last season" ? " <small>vs last season</small>" : ""}</div>
         <div class="ros">${why.join(" · ")}</div></div>
-        <span class="rod ${up ? "up" : "dn"}">${up ? "▲" : "▼"}${Math.abs(r.d_min).toFixed(1)}<i>MIN</i></span></button>`; }).join("");
+        <span class="rod ${up ? "up" : "dn"}">${up ? "▲" : "▼"}${Math.abs(dv).toFixed(1)}<i>${sd[3]}</i></span></button>`; }).join("");
+    bind();
   });
 }
 // ── lineups (nba_research.lineups, NBA.com's daily lineups): each team's five, Confirmed or Expected; a starter outside its
