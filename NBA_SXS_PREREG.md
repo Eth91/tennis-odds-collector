@@ -141,7 +141,7 @@ The rules:
      X is skipped.
 10. **NEW_STARTER.** At tip − 30, each player in his team's starting five in the lineup at that moment who
     started ≤ 30% of his last (up to) 10 appearances, with ≥ 3 appearances: overs in the volume markets.
-    - *Corrected before registration (about 07:30 UTC).* The first wording, "≤ 3 of his last 10", let a player
+    - *Corrected before registration (about 07:10 UTC).* The first wording, "≤ 3 of his last 10", let a player
       who had started 3 of his only 3 appearances count as a new starter. That surfaced on the development
       replay; the intent is "usually comes off the bench".
 11. **LOST_START** (volume down). At tip − 30, each player who started ≥ 8 of his last 10 appearances, is listed
