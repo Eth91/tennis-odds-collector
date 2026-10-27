@@ -422,3 +422,54 @@ def test_cli_guard_comes_after_every_definition():
         body = ast.parse((pathlib.Path(__file__).parent / f).read_text()).body
         guards = [i for i, n in enumerate(body) if isinstance(n, ast.If) and "__main__" in ast.dump(n.test)]
         assert all(i == len(body) - 1 for i in guards), f
+
+
+def test_prospective_moved_line_pulled_postponed_and_fd_filter():
+    """Audit fixes C2/C5/C6: a moved line is graded at the close's main line from the logged pmf; a pulled
+    market has no close; a forecast for the wrong ET date is void; the FanDuel-only metrics leave DraftKings out."""
+    import json
+    import datetime as dt_
+    import nba_proj_eval as E
+    d = pathlib.Path(tempfile.mkdtemp())
+    tip = "2026-10-27T00:00:00Z"
+    pm = [10, [0.1] * 10]                                       # uniform over 10..19
+    items = [{"gid": "G", "pid": 1, "market": "points", "tip": tip, "line": 13.5, "book": "fd", "over": 1.9, "under": 1.9,
+              "p_over": .6, "p_push": 0, "p_blend": .55, "mean": 14.5, "pmf": pm},          # line moves to 15.5
+             {"gid": "G", "pid": 2, "market": "points", "tip": tip, "line": 13.5, "book": "fd", "over": 1.9, "under": 1.9,
+              "p_over": .6, "p_push": 0, "p_blend": .55, "mean": 14.5, "pmf": pm},          # market pulled
+             {"gid": "G", "pid": 3, "market": "points", "tip": tip, "line": 13.5, "book": "dk", "over": 1.9, "under": 1.9,
+              "p_over": .6, "p_push": 0, "p_blend": .55, "mean": 14.5, "pmf": pm},          # DraftKings, unmoved
+             {"gid": "H", "pid": 4, "market": "points", "tip": "2026-10-30T00:00:00Z", "line": 13.5, "book": "fd",
+              "over": 1.9, "under": 1.9, "p_over": .6, "p_push": 0, "p_blend": .55, "mean": 14.5, "pmf": pm}]  # postponed
+    NP.log_forecasts(d / "log.sqlite", items, dt_.datetime(2026, 10, 26, 18, tzinfo=dt_.timezone.utc))
+    q = sqlite3.connect(d / "lines.sqlite")
+    q.execute("CREATE TABLE quotes (seen_at TEXT, book TEXT, gid TEXT, tip_utc TEXT, pid INTEGER, player TEXT, stat TEXT, "
+              "line REAL, side TEXT, odds REAL)")
+    ins = lambda t, bk, pid, line, side, odds: q.execute("INSERT INTO quotes VALUES (?,?,?,?,?,'','points',?,?,?)",
+                                                        (t, bk, "G", tip, pid, line, side, odds))
+    for side in ("over", "under"):
+        ins("2026-10-26T18:00:00", "fd", 1, 13.5, side, 1.9)
+        ins("2026-10-26T18:00:00", "fd", 2, 13.5, side, 1.9)
+        ins("2026-10-26T18:00:00", "dk", 3, 13.5, side, 1.9)
+    ins("2026-10-26T23:00:00", "fd", 1, 13.5, "over", None); ins("2026-10-26T23:00:00", "fd", 1, 13.5, "under", None)
+    ins("2026-10-26T23:00:00", "fd", 1, 15.5, "over", 2.0); ins("2026-10-26T23:00:00", "fd", 1, 15.5, "under", 1.8)
+    ins("2026-10-26T23:10:00", "fd", 2, 13.5, "over", None); ins("2026-10-26T23:10:00", "fd", 2, 13.5, "under", None)
+    q.commit()
+    m = sqlite3.connect(d / "mu.sqlite")
+    m.execute("CREATE TABLE games (gid TEXT, season TEXT, date TEXT, home TEXT, away TEXT, home_pts REAL, away_pts REAL)")
+    m.execute("CREATE TABLE player_games (gid TEXT, team TEXT, pid INTEGER, pos TEXT, starter INTEGER, min REAL, pts REAL, "
+              "reb REAL, ast REAL, fg3m REAL, stl REAL, blk REAL, tov REAL, fga REAL, fg3a REAL, fta REAL)")
+    m.execute("INSERT INTO games VALUES ('G','2026-27','2026-10-26','AAA','BBB',100,99)")
+    m.execute("INSERT INTO games VALUES ('H','2026-27','2026-10-28','AAA','BBB',100,99)")             # played on the 28th
+    for pid, g in ((1, "G"), (2, "G"), (3, "G"), (4, "H")):
+        m.execute("INSERT INTO player_games VALUES (?,'AAA',?,'G',1,30,17,0,0,0,0,0,0,0,0,0)", (g, pid))
+    m.commit()
+    recs = []
+    out = E.prospective(d / "log.sqlite", d / "lines.sqlite", d / "mu.sqlite", d / "o.json", recs_out=recs)
+    by = {r["key"][1]: r for r in recs}
+    assert out["counts"]["void_postponed"] == 1 and 4 not in by
+    assert by[1]["moved"] and by[1]["key"][3] == 15.5 and by[1]["p"] == pytest.approx(0.4) and by[1]["pb"] is None
+    assert by[1]["pc"] == pytest.approx(NP.no_vig(2.0, 1.8)) and by[1]["y"] == 1.0                 # 17 > 15.5
+    assert by[2]["pc"] is None and out["counts"]["pulled_before_tip"] == 1
+    assert out["with_close"] == 2 and out["with_close_fd"] == 1                                    # DraftKings row left out
+    assert by[1]["date"] == "2026-10-26"                                                           # ET date, not UTC

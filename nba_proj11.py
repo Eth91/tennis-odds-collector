@@ -9,6 +9,7 @@ import copy
 import json
 import pickle
 import time
+from pathlib import Path
 
 import numpy as np
 
@@ -348,3 +349,42 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def run_amendment1(out_json=E.HERE / "PROJ11_1_RESULTS.json"):
+    """NBA_PROJ11_PREREG.md amendment 1, run once: A0 vs A_keep (F0, regulars rule 1.1.1) on 2023-24, 2024-25,
+    2025-26; blend weight fitted on 2023-24; the decision on 2023-24 (CRPS upper bound < 0, FanDuel log loss
+    not worse)."""
+    import nba_proj11_feat as FT
+    data = E.load()
+    rows = data["rows"]
+    run = E.Run(rows, NP.PROJ_CONFIG, NP.context_constants(rows))
+    X, names, fams, rep = FT.build(rows, families=("F0",), f0_rule="1.1.1")
+    proxy = np.array([n in FT.F0_PROXY for n in names])
+    R = residual_targets(run)
+    arms = {"A_keep": np.ones(X.shape[1], bool), "A_keep-proxy": ~proxy}
+    runs = {k: arm_run(run, apply_residual(run.mu["m1"], residual_walk(run.date, X[:, c].astype(float), R, 10)))
+            for k, c in arms.items()}
+    res = {"version": "proj-1.1.1", "f0_rule": "1.1.1", "lambda": 10, "seasons": {},
+           "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+    sc_dev = {"A0": score_season(run, data, DEV), **{k: score_season(a, data, DEV) for k, a in runs.items()}}
+    wb = {k: fit_w(s["fd"]) for k, s in sc_dev.items()}
+    res["blend_w"] = wb
+    for season in (DEV, EXPOSED, STATS_ONLY):
+        sc = sc_dev if season == DEV else {"A0": score_season(run, data, season), **{k: score_season(a, data, season) for k, a in runs.items()}}
+        out = {}
+        for name, s in sc.items():
+            c = compare(s, sc["A0"], run)
+            c["crps"], c["mae"] = s["crps"], s["mae"]
+            if "fd" in s:
+                fd = s["fd"]
+                pb = NP.blend(fd["p_m1"], fd["p_mkt"], wb[name])
+                c["blend_minus_close_ll"] = boot(ll(pb, fd["over"]) - ll(fd["p_mkt"], fd["over"]), run.date[fd["row"]])
+            out[name] = c
+        res["seasons"][season] = out
+        print(season, {k: (round(v["ncrps"], 5), v.get("model_minus_ref_ll", {}).get("mean"), v.get("model_minus_close_ll", {}).get("mean")) for k, v in out.items()}, flush=True)
+    d = res["seasons"][DEV]["A_keep"]
+    res["decision"] = {"crps_upper_below_0": d["ncrps_minus_ref"]["hi"] < 0, "fd_ll_not_worse": d["model_minus_ref_ll"]["mean"] <= 0}
+    res["replace_logger"] = all(res["decision"].values())
+    Path(out_json).write_text(json.dumps(res, indent=1, default=float))
+    return res

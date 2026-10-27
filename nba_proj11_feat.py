@@ -16,6 +16,10 @@ import nba_stats_fetch as F
 HL, HL_TEAM = 15, 10
 K_MIN, K_ATT = 100.0, 20.0               # pseudo-minutes (rates, minute-weighted shares); pseudo-attempts (FG%)
 REG_GAMES, REG_MIN = 7, 24.0
+# F0's "regular" rule. "1.1": last 10 team games across seasons, 7+ appearances (proj-1.1, as run). "1.1.1"
+# (amendment 1): this season's games on this team only: 5+ team games, 70% of the last <=10, 24+ min, and his
+# latest appearance was for this team, so departed and traded players are never "out" (audit C1).
+F0_RULE = "1.1.1"
 
 # family -> [(kind, column, mode)]; mode: "rate" per minute, "wavg" minute-weighted average,
 # ("ratio", made_column) for a made/attempted ratio whose attempts are `column`
@@ -130,7 +134,7 @@ def kinds_for(families):
     return k
 
 
-def build(rows, raw=None, families=("F0", "F1", "F2", "F3", "F4", "F5", "F6")):
+def build(rows, raw=None, families=("F0", "F1", "F2", "F3", "F4", "F5", "F6"), f0_rule=None):
     """(X float32 [n_rows, n_features], names, family of each feature, report). raw: {kind: {date: json}} —
     loaded from nba_stats_fetch's store when None. Rows in any order; computed by date.
     A row with target=True (a game not played yet, live) gets features from earlier dates and never updates any
@@ -249,7 +253,7 @@ def build(rows, raw=None, families=("F0", "F1", "F2", "F3", "F4", "F5", "F6")):
         fams += ["F5"] * (2 * len(tcols) + 1)
 
     if "F0" in families:
-        X0, n0 = f0_features(rows, by_date, raw.get("starters", {}), report)
+        X0, n0 = f0_features(rows, by_date, raw.get("starters", {}), report, rule=f0_rule or F0_RULE)
         blocks.insert(0, X0)
         cols_out = n0 + cols_out
         fams = ["F0"] * len(n0) + fams
@@ -261,7 +265,7 @@ F0_PROXY = ("F0:starts_today", "F0:starts_x_minshare", "F0:mates_out_n", "F0:mat
             "F0:opp_out_n", "F0:opp_out_usg", "F0:mates_out_usg_x_usg", "F0:starts_missing")
 
 
-def f0_features(rows, by_date, raw_starters, report):
+def f0_features(rows, by_date, raw_starters, report, rule=F0_RULE):
     """Availability and lineups. Same-game inputs (the proxy): starts today (the starters feed) and which
     regulars are absent from the box score. History inputs: his start share and minute share over his last 10
     appearances, his usage share over his team's last 10 games."""
@@ -273,31 +277,42 @@ def f0_features(rows, by_date, raw_starters, report):
     X = np.zeros((n, len(names)), np.float32)
     last_app = defaultdict(lambda: deque(maxlen=10))        # pid -> (started, minutes)
     team_hist = defaultdict(lambda: deque(maxlen=10))       # team -> [{pid: (min, usage)}]
+    season_hist = defaultdict(lambda: deque(maxlen=10))     # (team, season) -> the same, this season only
+    season_games = defaultdict(int)
+    last_team = {}                                          # pid -> team of his latest appearance
     games = defaultdict(lambda: defaultdict(list))          # date -> team -> row indices
     for d, ii in by_date.items():
         for i in ii:
             games[d][rows[i]["team"]].append(i)
 
-    def regs(team):
-        h = team_hist[team]
-        if len(h) < 10:
-            return {}
+    def regs(team, season):
+        if rule == "1.1":
+            h = team_hist[team]
+            if len(h) < 10:
+                return {}
+            need, keep = REG_GAMES, lambda pid: True
+        else:
+            h = season_hist[(team, season)]
+            if season_games[(team, season)] < 5:
+                return {}
+            need, keep = 0.7 * len(h), lambda pid: last_team.get(pid) == team
         played = defaultdict(list)
         for g in h:
             for pid, (mn, u) in g.items():
                 played[pid].append((mn, u))
         tot_u = sum(u for g in h for (_, u) in g.values()) / len(h)
         return {pid: (np.mean([m for m, _ in v]), np.mean([u for _, u in v]) / tot_u if tot_u else 0.0)
-                for pid, v in played.items() if len(v) >= REG_GAMES and np.mean([m for m, _ in v]) >= REG_MIN}
+                for pid, v in played.items() if len(v) >= need and np.mean([m for m, _ in v]) >= REG_MIN and keep(pid)}
 
     regulars = {}
     for d in sorted(by_date):
         out_info = {}
         for team, ii in games[d].items():
             here = {rows[i]["pid"] for i in ii if not rows[i].get("target")}
+            season = rows[ii[0]]["season"]
             if all(rows[i].get("target") for i in ii):
-                regulars[team] = regs(team)                   # live: the team's regulars as of this date
-            rg = regs(team)
+                regulars[team] = regs(team, season)           # live: the team's regulars as of this date
+            rg = regs(team, season)
             out = {p: v for p, v in rg.items() if p not in here}
             out_info[team] = (len(out), sum(m for m, _ in out.values()) / 240.0, sum(u for _, u in out.values()))
         for team, ii in games[d].items():
@@ -321,10 +336,13 @@ def f0_features(rows, by_date, raw_starters, report):
             ii = [i for i in ii if not rows[i].get("target")]
             if not ii:
                 continue
-            team_hist[team].append({rows[i]["pid"]: (rows[i]["min"], rows[i]["fga"] + 0.44 * rows[i]["fta"] + rows[i]["tov"])
-                                    for i in ii})
+            g_ = {rows[i]["pid"]: (rows[i]["min"], rows[i]["fga"] + 0.44 * rows[i]["fta"] + rows[i]["tov"]) for i in ii}
+            team_hist[team].append(g_)
+            season_hist[(team, rows[ii[0]]["season"])].append(g_)
+            season_games[(team, rows[ii[0]]["season"])] += 1
             for i in ii:
                 last_app[rows[i]["pid"]].append((float((d, rows[i]["pid"]) in starters), rows[i]["min"]))
+                last_team[rows[i]["pid"]] = team
     report["coverage"]["F0_starters"] = round(len(dates_with & set(by_date)) / max(len(by_date), 1), 4)
     report["regulars"] = regulars
     return X, names

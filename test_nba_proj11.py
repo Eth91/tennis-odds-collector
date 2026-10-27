@@ -127,3 +127,25 @@ def test_boot_is_date_clustered():
     b = P.boot(np.r_[np.full(50, -1.0), np.full(50, 1.0)], d, reps=500)
     assert b["mean"] == pytest.approx(0) and b["lo"] < 0 < b["hi"]
 
+
+
+def test_f0_regulars_rule_111_ignores_departed_and_last_season():
+    """Amendment 1: a regular who has moved to another team, or last season's regulars before 5 games of
+    this season, are never "out" for his old team."""
+    rows = T_rows = synth()
+    traded = 1                                                   # AAA's star moves to BBB from game 20 on
+    for r in rows:
+        if r["pid"] == traded and r["date"] >= "2024-01-21":
+            r.update(team="BBB", opp="AAA")
+    X, names, *_ = FT.build(rows, synth_raw(rows), families=("F0",), f0_rule="1.1.1")
+    Xo, *_ = FT.build(rows, synth_raw(rows), families=("F0",), f0_rule="1.1")
+    k = names.index("F0:mates_out_n")
+    aaa = [i for i, r in enumerate(rows) if r["team"] == "AAA" and r["date"] >= "2024-01-22"]
+    assert all(X[i, k] == 0 for i in aaa)                       # 1.1.1: he is BBB's player now, not AAA's "out" regular
+    assert any(Xo[i, k] > 0 for i in aaa)                       # the old rule counted him out
+    rows2 = synth()
+    for r in rows2:
+        r["season"] = "2023-24" if r["date"] < "2024-01-16" else "2024-25"
+    X2, names2, *_ = FT.build(rows2, synth_raw(rows2), families=("F0",), f0_rule="1.1.1")
+    early = [i for i, r in enumerate(rows2) if "2024-01-16" <= r["date"] <= "2024-01-20"]
+    assert all(X2[i, names2.index("F0:mates_out_n")] == 0 for i in early)   # under 5 games this season: no regulars yet

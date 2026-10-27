@@ -136,3 +136,35 @@ Expected, as recorded), and from the official injury report. Nothing seen after 
    only in its final state (its timestamps are the last update, around the final buzzer), so it is not used
    historically. Prospectively, lineups come from `nba_lineups_poll.py` snapshots.
 5. Columns a feed does not return are dropped and listed in the results. Nothing is substituted.
+
+## Amendment 1 — proj-1.1.1 (2026-10-27, before it is built or scored)
+
+**Why.** The audit (`NBA_PROJECTION_AUDIT.md` C1) found F0's "regulars out" defined differently in training
+and live. In training, regulars came from a team's last 10 games across seasons, and "out" meant missing from
+the box score. In October, 57–62% of those "out" events were players who had left or been traded. Live, out
+means Out/Doubtful on the report or Inactive in the lineup file. The live test must run what was trained,
+so the definition is fixed and the version changes. proj-1.1-dev's rows logged so far stay in the log,
+labeled superseded.
+
+**The one change (F0 only).** A player is a *regular* of team T on date d if all of these hold:
+- T has played at least 5 games this season before d;
+- he appeared in at least 70% of T's last (up to) 10 games this season;
+- he averaged at least 24 minutes in them;
+- his latest appearance before d was for T.
+
+*Out:*
+- in training, a regular absent from T's box score;
+- live, a regular listed Out or Doubtful, or Inactive in the lineup file.
+
+Nothing else changes: the other F0 columns, the model, λ = 10·p, and the analog ensemble.
+
+**Run, once.** A0 (proj-1.0) and A_keep (F0 as amended) on 2023-24, 2024-25 and 2025-26, with the same
+metrics and the same blend-weight fit on 2023-24. This is development after exposure: proj-1.1's results
+on the same seasons are already known.
+
+**Decision.** proj-1.1.1 replaces proj-1.1-dev in the live logger only if both hold on 2023-24:
+- the normalized CRPS difference against A0 has an upper 95% bound below 0;
+- the FanDuel log-loss point estimate is not worse.
+
+Otherwise proj-1.1 logging stops. The prospective decision lines are unchanged and apply to proj-1.1.1 from
+its first logged forecast.

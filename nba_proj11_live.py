@@ -45,19 +45,25 @@ NEED, REPLICATE = 2000, 2000
 
 
 def write_config(results=P.OUT_JSON, path=CONFIG):
-    """The candidate (A_keep) as the development run chose it: kept families, λ, its 2023-24 blend weight."""
+    """The candidate (A_keep) as the development run chose it: kept families, λ, its 2023-24 blend weight, the F0
+    regulars rule and the version name. PROJ11_1_RESULTS.json (amendment 1) carries proj-1.1.1."""
     r = json.loads(Path(results).read_text())
-    cfg = {"kept": r["kept"], "lambda": r["lambda"]["chosen"], "blend_w": r["blend_w"].get("A_keep", NP.PROJ_BLEND_W),
-           "from": f"{Path(results).name} generated {r['generated_at']}"}
+    if r.get("version") == "proj-1.1.1":
+        cfg = {"name": "proj-1.1.1", "kept": ["F0"], "lambda": r["lambda"], "blend_w": r["blend_w"]["A_keep"],
+               "f0_rule": r["f0_rule"], "from": f"{Path(results).name} generated {r['generated_at']}"}
+    else:
+        cfg = {"kept": r["kept"], "lambda": r["lambda"]["chosen"], "blend_w": r["blend_w"].get("A_keep", NP.PROJ_BLEND_W),
+               "from": f"{Path(results).name} generated {r['generated_at']}"}
     Path(path).write_text(json.dumps(cfg, indent=1))
     return cfg
 
 
 def load_config(path=CONFIG):
     cfg = json.loads(Path(path).read_text())
-    cfg["hash"] = hashlib.sha1(json.dumps({k: cfg[k] for k in ("kept", "lambda", "blend_w")}, sort_keys=True)
-                               .encode()).hexdigest()[:10]
-    cfg["version"] = f"{VERSION}:{cfg['hash']}"
+    cfg.setdefault("f0_rule", "1.1")                          # configs before amendment 1 used the old rule
+    keys = ("kept", "lambda", "blend_w") + (("f0_rule",) if cfg["f0_rule"] != "1.1" else ())
+    cfg["hash"] = hashlib.sha1(json.dumps({k: cfg[k] for k in keys}, sort_keys=True).encode()).hexdigest()[:10]
+    cfg["version"] = f"{cfg.get('name', VERSION)}:{cfg['hash']}"
     return cfg
 
 
@@ -68,7 +74,7 @@ def _load(cache):
         return None
 
 
-def refresh11(targets, rows=None, raw=None, cfg=None, cache=CACHE, force=False):
+def refresh11(targets, rows=None, raw=None, cfg=None, cache=CACHE, force=False, pos=None):
     """Build nba_proj11_cache.pkl for `targets` (dicts: gid, date, pid, team, opp, home). Returns a status line."""
     cfg = cfg or load_config()
     if not cfg["kept"]:
@@ -81,8 +87,7 @@ def refresh11(targets, rows=None, raw=None, cfg=None, cache=CACHE, force=False):
         return f"cache current ({len(old['at'])} players)"
     if rows is None:
         rows, _, pos = PD.load_box(NP.GAMELOGS, NP.MATCHUP, NP.PROFILES)
-    else:
-        pos = {}
+    pos = pos or {}
     grp = {r["pid"]: r["group"] for r in rows}
     keys = sorted(want)
     slate = [dict(want[k], season=PD.season_of(want[k]["date"]),
@@ -92,7 +97,7 @@ def refresh11(targets, rows=None, raw=None, cfg=None, cache=CACHE, force=False):
     nh_h, rs_h = np.array([o["n_hist"] for o in out], float), np.array([o["rest"] for o in out], float)
     trows = [dict(t, min=0.0, pts=0.0, reb=0.0, ast=0.0, fg3m=0.0, stl=0.0, blk=0.0, tov=0.0, fga=0.0, fta=0.0,
                   team_poss=0.0, name="", target=True) for t in slate]
-    X, names, fams, rep = FT.build(rows + trows, raw, families=tuple(cfg["kept"]))
+    X, names, fams, rep = FT.build(rows + trows, raw, families=tuple(cfg["kept"]), f0_rule=cfg["f0_rule"])
     fams, names = np.array(fams), list(names)
     cols = np.isin(fams, cfg["kept"])
     kn = [n for n, c in zip(names, cols) if c]
@@ -232,7 +237,8 @@ def forecast11(now=None, cfg=None, cache=CACHE, lineups_db=LINEUPS, news_db=NEWS
         items.append({"gid": p["gid"], "pid": p["pid"], "market": p["market"], "tip": g.get("tip") or g.get("utc"), "line": line,
                       "book": bk, "over": r[1], "under": r[2], "p_over": pc, "p_push": float(pp[0]),
                       "p_blend": float(NP.blend(np.array([pc]), np.array([NP.no_vig(r[1], r[2])]), cfg["blend_w"])[0]),
-                      "mean": round(float(sub.mean(p["market"])[0]), 2)})
+                      "mean": round(float(sub.mean(p["market"])[0]), 2),
+                      "pmf": NP.compact_pmf(sub.pmf(p["market"], 160)[0])})
     n = NP.log_forecasts(log_db, items, now, version=cfg["version"])
     _log_inputs(log_db, audit, now, cfg["version"], {(it["gid"], it["pid"]) for it in items}, gmap)
     return f"logged {n} forecasts ({cfg['version']}); lineups seen for {sum(1 for a in audit if a[2] != 'none')} of {len(audit)} players"
@@ -266,7 +272,8 @@ def prospective11(out_json, cfg=None, log_db=LOG, lines_db=HERE / "nba_lines.sql
     E.prospective(log_db, lines_db, matchup_db, str(out_json) + ".p10.tmp", version=NP.VERSION, recs_out=r10)
     Path(str(out_json) + ".p10.tmp").unlink(missing_ok=True)
     k10 = {r["key"]: r for r in r10}
-    pair = sorted([(r, k10[r["key"]]) for r in r11 if r["key"] in k10], key=lambda x: (x[0]["date"], x[0]["key"]))
+    # decision lines are FanDuel only (audit C5); pairs share the same prop, line and close
+    pair = sorted([(r, k10[r["key"]]) for r in r11 if r["key"] in k10 and r["book"] == "fd"], key=lambda x: (x[0]["date"], x[0]["key"]))
     out["paired_with_proj10"] = len(pair)
     dec = {"proj11_minus_proj10": None, "proj11_minus_close": None, "replication": None}
     if pair:
@@ -275,7 +282,7 @@ def prospective11(out_json, cfg=None, log_db=LOG, lines_db=HERE / "nba_lines.sql
         l10 = E.logloss(np.array([b["p"] for _, b in pair]), y)
         dates = [a["date"] for a, _ in pair]
         out["proj11_minus_proj10"] = list(E.boot_ci(l11 - l10, dates, reps=1000))
-    wc = sorted([r for r in r11 if r["pc"] is not None], key=lambda r: (r["date"], r["key"]))
+    wc = sorted([r for r in r11 if r["pc"] is not None and r["book"] == "fd"], key=lambda r: (r["date"], r["key"]))
     if len(wc) >= NEED:
         first, nxt = wc[:NEED], wc[NEED:NEED + REPLICATE]
         diff = lambda rr: E.logloss(np.array([r["p"] for r in rr]), np.array([r["y"] for r in rr])) - \
@@ -300,25 +307,37 @@ def prospective11(out_json, cfg=None, log_db=LOG, lines_db=HERE / "nba_lines.sql
         "proj-1.1 better than proj-1.0 (paired, FanDuel lines): " + (
             "not enough prospective evidence" if not isinstance(dec["proj11_minus_proj10"], dict) else
             ("YES" if dec["proj11_minus_proj10"]["hi"] < 0 else "NO")),
-        "proj-1.1 beats FanDuel's close (model alone, then replicated): " + (
-            "not enough prospective evidence" if not dec["proj11_minus_close"] else
-            ("YES" if beats else ("NO" if dec["replication"] or dec["proj11_minus_close"]["hi"] >= 0 else
-                                  "first 2,000 pass; waiting on the replication sample")))]
+        "proj-1.1 beats FanDuel's close (model alone, then replicated): " + _beats_text(dec, beats)]
     out["config"] = {k: cfg[k] for k in ("kept", "lambda", "blend_w", "hash")}
     Path(out_json).write_text(json.dumps(out, default=float))
     return out
 
 
+def _beats_text(dec, beats):
+    c, r = dec["proj11_minus_close"], dec["replication"]
+    if not c:
+        return "not enough prospective evidence"
+    if beats:
+        return "YES"
+    if c["hi"] >= 0:
+        return "NO (first 2,000: interval reaches 0)"
+    if not c["reliability_ok"]:
+        return "NO (first 2,000: reliability outside 3 points)"
+    if r is None:
+        return "first 2,000 pass; waiting on the replication sample"
+    return "NO (replication: interval reaches 0)"
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--write-config", action="store_true")
+    ap.add_argument("--write-config", metavar="RESULTS_JSON", nargs="?", const=str(P.OUT_JSON))
     ap.add_argument("--refresh", action="store_true")
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--forecast", action="store_true")
     ap.add_argument("--prospective", metavar="OUT_JSON")
     a = ap.parse_args()
     if a.write_config:
-        print("nba_proj11_live --write-config:", write_config())
+        print("nba_proj11_live --write-config:", write_config(a.write_config))
     if a.refresh:
         cfg = load_config()
         old = _load(CACHE)
@@ -327,8 +346,9 @@ def main():
                 and NP.board_targets() <= set(old["at"]):
             print(f"nba_proj11_live --refresh: cache current ({len(old['at'])} players)")   # no box-score load
         else:
-            targets, rows = NP.slate_targets()
-            print("nba_proj11_live --refresh:", refresh11(targets, rows=rows, cfg=cfg, force=True))
+            rows, _, pos = PD.load_box(NP.GAMELOGS, NP.MATCHUP, NP.PROFILES)
+            targets, rows = NP.slate_targets(rows=rows)
+            print("nba_proj11_live --refresh:", refresh11(targets, rows=rows, cfg=cfg, force=True, pos=pos))
     if a.forecast:
         print("nba_proj11_live --forecast:", forecast11())
     if a.prospective:
