@@ -357,6 +357,8 @@ def test_page_controls_work_on_iphone():
     # in its zone), made green over missed red rings, Shots by default for the player, Zones as before; defense: zones
     assert "const SH_R3 = 237.5, SH_CX = 220," in html and "fetch(`shots/p/${pid}.json`)" in html
     assert 'shView: "player", shSeason: null, shMode: "shots"' in html and 'const dotsOn = MUP.shView !== "def" && MUP.shMode !== "zones";' in html
+    # the floating header fades what scrolls under it (no text under its title)
+    assert '.ph::before{content:"";position:absolute;' in html
     # every sheet in the player page's look: near-black with a thin edge, capsule toggles, outline chips and buttons,
     # the main action white, the chart filters' capsule slider; no iOS grey sheet, blue button or blue slider
     import re
