@@ -277,6 +277,28 @@ font-weight:400;color:#9a9a9a;border-bottom:1px solid #343434}
 background:none;color:#fff;font-size:13.8px;font-weight:500}
 .vsm svg{width:11px;height:7px;transition:transform .25s} .vsm[aria-expanded="true"] svg{transform:rotate(180deg)}
 .vsk{margin:12px 15.3px 0} .vsk .sk{height:34px;margin-bottom:8px}
+/* the shot chart card (the reference's card, under the recent games) */
+.shc{margin:30px 15.3px 0;padding:0 14px 12px;border:1px solid #2a2a2a;border-radius:16px;background:linear-gradient(#171717,#111)}
+.shc:empty{display:none}
+.shh{position:relative;display:flex;align-items:center;justify-content:center;height:56px;margin:0 -14px 12px;border-bottom:1px solid #2a2a2a;
+font-family:system-ui,-apple-system,"Roboto Condensed",sans-serif;font-stretch:66%;font-size:18px;font-weight:500;letter-spacing:.3px}
+.shh .av{position:absolute;left:14px;top:9px;width:38px;height:38px}
+.shh .av .hs{left:-7px;top:1px;width:52px}
+.shh .shl0{position:absolute;right:14px;top:9px;width:38px;height:38px}
+.shc .seg{position:relative} .shc .seg button{position:relative;z-index:1;background:none} .shc .seg .pill2{background:#313131}
+.shy{display:flex;align-items:center;gap:8px;margin:10px 0 4px} .shy .chip{height:28px;padding:0 12px}
+.shy span{margin-left:auto;font-size:12.5px;color:#9a9a9a}
+svg.shct{display:block;width:100%;height:auto;margin-top:6px}
+.shct .shl{fill:none;stroke:#4a4a4a;stroke-width:2}
+.shct text{text-anchor:middle;fill:#fff}
+.shct .shv{font-size:24px;font-weight:700} .shct .shv.sm{font-size:19px}
+.shct .shs{font-size:15px;fill:#cfcfcf}
+.shk{display:flex;align-items:center;gap:8px;margin:8px 0 2px;font-size:11.5px;color:#9a9a9a}
+.shk i{flex:1;height:6px;border-radius:3px;background:linear-gradient(90deg,rgba(255,69,58,.62),#191919,rgba(40,218,142,.62))}
+.shw{margin:18px 0 4px;font-size:15px;font-weight:700}
+.shr span small,.shr b small{display:block;margin-top:2px;font-size:12px;font-weight:400;color:#9a9a9a}
+.shr b em{font-style:normal}
+.shc .shr{min-height:52px;border-bottom-color:#262626}
 /* the box score sheet: one height whatever is in it, so it never resizes while it rises; a skeleton of the box's shape */
 .sheet[data-kind="box"]{height:86vh}
 .sheet[data-kind="box"] .seg{position:relative}
@@ -1886,7 +1908,8 @@ const VS_GRP = [["G", "Guards"], ["F", "Forwards"], ["C", "Centers"]];
 const initialName = n => { const i = String(n || "").indexOf(" "); return i > 0 ? n[0] + ". " + n.slice(i + 1) : n || ""; };
 function openMatchup(p, push) {
   if (!p) return;
-  MUP = {p: p, grp: VS_GRP.some(g => g[0] === (p.ctx || {}).group) ? p.ctx.group : "G", mkt: p.market, more: false, rows: null};
+  MUP = {p: p, grp: VS_GRP.some(g => g[0] === (p.ctx || {}).group) ? p.ctx.group : "G", mkt: p.market, more: false, rows: null,
+         shView: "player", shSeason: null};
   if (push !== false) history.pushState({p: p.id, mu: 1}, "", hashState());
   const mp = $("#mp");
   mp.hidden = false;
@@ -1927,7 +1950,8 @@ function renderMatchup() {
     </div>
     <h2 class="mpt">${esc(p.opp || "")} Team Defense</h2>
     <div class="mpf"><span>Recent Games vs</span>${dd("grp", VS_GRP, MUP.grp)}${dd("mkt", TAB_ORDER.map(m => [m, NAME[m]]), MUP.mkt)}</div>
-    <div id="vst"></div>`;
+    <div id="vst"></div>
+    <div class="shc" id="shc"></div>`;
   $(".bk", mp).onclick = () => history.back();
   $("#mps", mp).onclick = () => { history.go(-2); setTimeout(() => { if (ST.view !== "props") { ST.view = "props"; save(); tabbar(); renderList(); } const q = $("#q"); if (q) q.focus(); }, 480); };
   $("#mpm", mp).onclick = leagueSheet;
@@ -1938,6 +1962,12 @@ function renderMatchup() {
     <div class="kv"><span>Last season's weight</span><b>${c.rank_n != null ? Math.round(15 / (15 + c.rank_n) * 100) + "%" : "—"}</b></div>
     <div class="kv"><span>1st</span><b>the toughest</b></div>
     <div class="acts"><button class="btn pri" id="mpi-ok">Done</button></div>`, s => { $("#mpi-ok", s).onclick = closeSheet; });
+  shotLoad(D.season).then(j => {                       // this season once the opponent has 10 games, else last season
+    if (!MUP || MUP.p !== p) return;
+    const t = j && j.teams[p.opp];
+    MUP.shSeason = t && t.gp >= 10 ? D.season : prevSeason(D.season);
+    shotCard();
+  });
   $$("[data-dd]", mp).forEach(sel => sel.onchange = () => {
     MUP[sel.dataset.dd] = sel.value; MUP.more = false;
     $("span", sel.parentNode).textContent = sel.options[sel.selectedIndex].text;
@@ -1964,6 +1994,76 @@ function vsTable() {
   const m = $("#vsm", el); if (m) m.onclick = () => { MUP.more = !MUP.more; vsTable(); };
   $$("tr[data-g]", el).forEach(t => { t.onclick = () => boxSheet(t.dataset.g, t.dataset.t, {market: mk, pid: +t.dataset.pid});
     t.onpointerdown = () => boxGet(t.dataset.g).catch(() => {}); });
+}
+// ── the shot chart (docs/shots/{season}.json, nba_shots): the six zones on a half court, the player's shooting or
+// what the opponent allows, each zone shaded against the league's FG% there (green = better for the shooter); then the
+// zones where the opponent gives up the most points a game over the league's average, beside how often he shoots there
+const SHOTS = new Map();
+function shotLoad(season) {
+  if (!SHOTS.has(season)) SHOTS.set(season, fetch(`shots/${encodeURIComponent(season)}.json`).then(r => r.ok ? r.json() : null).catch(() => null));
+  return SHOTS.get(season);
+}
+const prevSeason = s => (+s.slice(0, 4) - 1) + "-" + s.slice(2, 4);
+const SH_Z = ["Restricted Area", "Paint", "Mid-Range", "Left Corner 3", "Right Corner 3", "Above the Break 3"];
+const SH_PTS = [2, 2, 2, 3, 3, 3];
+// a schematic half court, basket at the top (court units: 10 a foot; the corners drawn wider so their numbers fit)
+const SH_R3 = 237.5, SH_CX = 205, SH_CY = Math.sqrt(SH_R3 * SH_R3 - SH_CX * SH_CX), SH_B = -47.5, SH_BOT = 300;
+const SH_PATH = [
+  "M0,-40A40,40 0 1 1 0,40A40,40 0 1 1 0,-40Z",
+  `M-80,${SH_B}H80V142.5H-80Z M0,-40A40,40 0 1 0 0,40A40,40 0 1 0 0,-40Z`,
+  `M-${SH_CX},${SH_B}V${SH_CY}A${SH_R3},${SH_R3} 0 0 0 ${SH_CX},${SH_CY}V${SH_B}Z M-80,${SH_B}V142.5H80V${SH_B}Z`,
+  `M-250,${SH_B}H-${SH_CX}V${SH_CY}H-250Z`,
+  `M${SH_CX},${SH_B}H250V${SH_CY}H${SH_CX}Z`,
+  `M-250,${SH_CY}H-${SH_CX}A${SH_R3},${SH_R3} 0 0 0 ${SH_CX},${SH_CY}H250V${SH_BOT}H-250Z`];
+const SH_LAB = [[0, 6], [0, 104], [0, 186], [-227.5, 40], [227.5, 40], [0, 268]];
+const pctOf = z => z && z[1] ? z[0] / z[1] : null;
+function shFill(d) {                                   // d = FG% minus the league's, in points: green above, red below
+  if (d === null) return "#191919";
+  const a = Math.min(1, Math.abs(d) / 12);
+  return d >= 0 ? `rgba(40,218,142,${(.12 + .5 * a).toFixed(3)})` : `rgba(255,69,58,${(.12 + .5 * a).toFixed(3)})`;
+}
+function shotCard() {
+  const el = $("#shc");
+  if (!el || !MUP || !MUP.shSeason) return;
+  const p = MUP.p, season = MUP.shSeason;
+  shotLoad(season).then(j => {
+    if (!MUP || MUP.p !== p || MUP.shSeason !== season) return;
+    const t = j && j.teams[p.opp], me = j && j.players[String(p.pid)];
+    if (!j || !t) { el.innerHTML = '<div class="shh">SHOT CHART</div><div class="empty"><b>No shot data</b></div>'; return; }
+    const lg = j.league.map(pctOf), opp = t.opp, def = MUP.shView === "def";
+    // ranks among the teams by the FG% they allow in each zone: 1st = the lowest (the toughest), as the other ranks
+    const all = Object.values(j.teams), rk = k => 1 + all.filter(x => pctOf(x.opp[k]) < pctOf(opp[k])).length;
+    const zs = SH_Z.map((_, k) => {
+      const z = def ? opp[k] : me && me[k], f = pctOf(z);
+      return {f: f, d: f === null || lg[k] === null ? null : (f - lg[k]) * 100, sub: def ? (opp[k][1] ? ord(rk(k)) : "") : z && z[1] ? `${z[0]}/${z[1]}` : ""};
+    });
+    const lines = '<g class="shl"><path d="M-250,-47.5H250"/><path d="M-80,-47.5V142.5H80V-47.5"/><path d="M-60,142.5A60,60 0 0 0 60,142.5"/>' +
+      `<path d="M-${SH_CX},-47.5V${SH_CY}A${SH_R3},${SH_R3} 0 0 0 ${SH_CX},${SH_CY}V-47.5"/><path d="M-30,-7.5H30"/><circle cx="0" cy="0" r="7.5"/>` +
+      '<path d="M-40,0A40,40 0 0 0 40,0"/></g>';
+    const court = `<svg class="shct" viewBox="-252 -50 504 352" role="img" aria-label="${def ? esc(p.opp) + " defense" : esc(p.player)} by zone, ${esc(season)}">` +
+      zs.map((z, k) => `<path d="${SH_PATH[k]}" fill="${shFill(z.d)}" fill-rule="evenodd"/>`).join("") + lines +
+      zs.map((z, k) => `<text x="${SH_LAB[k][0]}" y="${SH_LAB[k][1]}" class="shv${k === 3 || k === 4 ? " sm" : ""}">${z.f === null ? "–" : Math.round(z.f * 100) + "%"}</text>` +
+        (z.sub ? `<text x="${SH_LAB[k][0]}" y="${SH_LAB[k][1] + (k === 3 || k === 4 ? 19 : 23)}" class="shs">${esc(z.sub)}</text>` : "")).join("") + "</svg>";
+    // where the opponent gets scored on: points a game it allows in each zone over the league's average for a team
+    const games = all.reduce((a, x) => a + x.gp, 0) || 1, mine = me ? me.reduce((a, z) => a + z[1], 0) : 0;
+    const rows = SH_Z.map((nm, k) => ({nm: nm, k: k, d: t.gp ? opp[k][0] * SH_PTS[k] / t.gp - j.league[k][0] * SH_PTS[k] / games : null}))
+      .filter(r => r.d !== null).sort((a, b) => b.d - a.d);
+    const last = lastName(p.player);
+    el.innerHTML = `<div class="shh"><span class="av">${head(p.pid)}</span><b>SHOT CHART</b>${logo(p.opp, "shl0")}</div>
+      <div class="seg" role="group" aria-label="View"><span class="pill2"></span><button data-shv="player" aria-pressed="${!def}">${esc(last)}</button><button data-shv="def" aria-pressed="${def}">${esc(p.opp)} Defense</button></div>
+      <div class="shy" role="group" aria-label="Season">${[D.season, prevSeason(D.season)].map(s => `<button class="chip" data-shs="${s}" aria-pressed="${s === season}">${s.slice(0, 4)}</button>`).join("")}
+        <span>${def ? `${t.gp} games` : me ? `${mine} shots` : "No shots"}</span></div>
+      ${court}
+      <div class="shk"><span>Below league avg</span><i></i><span>Above</span></div>
+      <h3 class="shw">Where ${esc(p.opp)} gets scored on</h3>
+      ${rows.map(r => { const z = me && me[r.k];
+        return `<div class="kv shr"><span>${r.nm}<small>${esc(last)}: ${z && z[1] ? Math.round(z[1] / mine * 100) + "% of shots · " + Math.round(z[0] / z[1] * 100) + "%" : "no shots"}</small></span>
+          <b><em class="${r.d > 0 ? "up" : "dn"}">${r.d > 0 ? "+" : ""}${r.d.toFixed(1)} pts/g</em><small>${opp[r.k][1] ? Math.round(pctOf(opp[r.k]) * 100) + "% allowed · " + ord(rk(r.k)) : "–"}</small></b></div>`; }).join("")}`;
+    const seg = $(".seg", el);
+    slide(seg, true);
+    $$("[data-shv]", el).forEach(b => b.onclick = () => { if (MUP.shView !== b.dataset.shv) { MUP.shView = b.dataset.shv; shotCard(); } });
+    $$("[data-shs]", el).forEach(b => b.onclick = () => { if (MUP.shSeason !== b.dataset.shs) { MUP.shSeason = b.dataset.shs; shotCard(); } });
+  });
 }
 // ── player filters ──
 function activeFilters(without) {

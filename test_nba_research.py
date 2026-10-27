@@ -342,6 +342,11 @@ def test_page_controls_work_on_iphone():
     assert "const BOXC = new Map();" in html and "cw.onpointerdown" in html and "boxWarm(win);" in html
     assert '.sheet[data-kind="box"]{height:86vh}' in html and "setTimeout(r, 140, null)" in html and 'class="bxsk"' in html
     assert "Loading…</div>', () => {});\n  const s = $(\"#sheet\"), n = SHEET_N;\n  s.dataset.kind = \"box\"" not in html
+    # the Matchup page's shot chart (docs/shots/{season}.json, nba_shots): six zones shaded against the league, the
+    # player or the opponent's defense, this season once the opponent has 10 games, and where it gets scored on
+    assert '<div class="shc" id="shc"></div>' in html and "fetch(`shots/${encodeURIComponent(season)}.json`)" in html
+    assert "MUP.shSeason = t && t.gp >= 10 ? D.season : prevSeason(D.season);" in html and "Where ${esc(p.opp)} gets scored on" in html
+    assert "opp[k][0] * SH_PTS[k] / t.gp - j.league[k][0] * SH_PTS[k] / games" in html and "SH_PATH.length" not in html
     # every sheet in the player page's look: near-black with a thin edge, capsule toggles, outline chips and buttons,
     # the main action white, the chart filters' capsule slider; no iOS grey sheet, blue button or blue slider
     import re
