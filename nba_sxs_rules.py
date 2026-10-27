@@ -585,8 +585,117 @@ class RATIO_PA28(_RatioOpen):
     name, spec = "RATIO_PA28", RATIO.FORWARD["RATIO_PA28"]
 
 
+# ── AMENDMENT 6: the six ideas' forward rules (NBA_IDEAS_PREREG.md) ─────────────────────────────────────────────
+import nba_ideas as IDEAS                                # noqa: E402
+
+NEWS_DB = RP.HERE / "nba_news.sqlite"
+_FD = {}
+
+
+def foul_data(season):
+    key = (str(MATCHUP_DB), season)
+    if key not in _FD:
+        _FD.clear()
+        _FD[key] = IDEAS.FoulData(MATCHUP_DB, season)
+    return _FD[key]
+
+
+def cleared_returners(rd, vd, team, date, t, listed):
+    """Absent rotation players not listed Out/Doubtful (and Active in the lineup when one is posted for the team)."""
+    lu = vd.lineup(date, t).get(team)
+    out = set()
+    history = [b for _d, _g, b in rd.season.before(team, date)]
+    seen = {p for b in history for p in b}
+    for x in seen:
+        if history and x in history[-1] and history[-1][x]["min"]:
+            continue                                     # played the team's last game: not returning
+        st = listed.get(x, (None, None))[1]
+        if st in RP.OUTS or (lu and x not in lu["active"]):
+            continue
+        out.add(x)
+    return out
+
+
+IDEA_DEPS = (role_data, ROLE.RoleData, ROLE.Season, volume_data, VolumeData, IDEAS.return_bets, IDEAS._returning,
+             cleared_returners, foul_data, IDEAS.FoulData, IDEAS.foul_bet, IDEAS.restricted, ROLE.season_of)
+
+
+class RETURN_UNDER(Rule):
+    """Idea 4: at tip - 30, a rotation player who missed >= 2 straight games is cleared -> unders on the teammates whose
+    minutes rose >= 4 while he was out (points, rebounds, assists, PRA at FanDuel's main)."""
+    name, deps = "RETURN_UNDER", IDEA_DEPS
+
+    def start_day(self, v):
+        self.listed = {}
+
+    def on_report(self, v, t, rows, prev, seen_before):
+        for team, pid, st in rows:
+            self.listed[pid] = (team, st)
+        return ()
+
+    def on_tick(self, v, gid, minutes):
+        if minutes != 30:
+            return ()
+        rd, vd, g, out = role_data(ROLE.season_of(v.date)), volume_data(), v.games()[gid], []
+        for team in (g["home"], g["away"]):
+            boards = {p for p, mk in v.props(gid, "fd") if v.team_of(p) == team}
+            history = [{p: r["min"] for p, r in b.items() if r["min"]} for _d, _g, b in rd.season.before(team, v.date)]
+            cleared = cleared_returners(rd, vd, team, v.date, v.t, self.listed)
+            for b in sorted(IDEAS.return_bets(history, cleared, boards)):
+                out += side_bets(v, gid, b, "under", note="teammate returns")
+        return out
+
+
+class FOUL_BIG(Rule):
+    """Idea 2: at tip - 30, an F/C fouling >= 4.5 per 36 vs a team drawing > 23.5 FTA a game -> points and rebounds unders."""
+    name, deps = "FOUL_BIG", IDEA_DEPS
+
+    def on_tick(self, v, gid, minutes):
+        if minutes != 30:
+            return ()
+        season = ROLE.season_of(v.date)
+        fd, dv, vd, g, out = foul_data(season), dvp_data(season), volume_data(), v.games()[gid], []
+        for p in sorted({p for p, mk in v.props(gid, "fd")}):
+            team = v.team_of(p)
+            opp = g["away"] if team == g["home"] else g["home"] if team == g["away"] else None
+            if IDEAS.foul_bet(fd, dv.groups.get(p) or vd.group(p), p, opp, v.date):
+                for mk in ("points", "rebounds"):
+                    m = RP.main_of(v.board(gid, p, mk, "fd"))
+                    if m and m[2]:
+                        out.append(sig(gid, p, mk, "under", m[0], "fd", m[2], note="foul-prone big"))
+        return out
+
+
+class MIN_RESTRICT(Rule):
+    """Idea 5: an X/Bluesky item says he is on a minutes restriction -> at FanDuel's next look (within 15 min), unders in
+    points, rebounds, assists and PRA."""
+    name, deps, window = "MIN_RESTRICT", IDEA_DEPS, 15
+
+    def start_day(self, v):
+        n = PD._ro(NEWS_DB)
+        self.items = sorted((RP.iso(at), int(pid)) for at, pid, h, b in (n.execute(
+            "SELECT detected_at, pid, headline, body FROM news_items WHERE game_date = ? AND pid IS NOT NULL", (v.date,))
+            if n is not None and n.execute("SELECT 1 FROM sqlite_master WHERE name = 'news_items'").fetchone() else ())
+            if IDEAS.restricted(f"{h} {b}"))
+        self.done = set()
+
+    def on_obs(self, v, book, seen):
+        if book != "fd":
+            return ()
+        out, games = [], v.games()
+        for at, pid in self.items:
+            if at > v.t or pid in self.done or RP.minus(v.t, self.window) > at:
+                continue
+            g = next((g_ for g_ in seen if g_ in games and any(p == pid for p, _mk in v.props(g_, "fd"))), None)
+            if g is None or v.t > RP.minus(games[g]["tip"], 5):
+                continue
+            self.done.add(pid)
+            out += side_bets(v, g, pid, "under", note="minutes restriction")
+        return out
+
+
 RULES = (NULL_TIP30, NEWS_FD, NEWS_DK, DK_LAGS_FD, T4_TIP30, ENGINE_CARD, S1, DEPTH_NEXT, DEPTH_NEXT_TIP30, NEW_STARTER,
-         LOST_START, ROLE_OPEN, RATIO_FGA, RATIO_PA, RATIO_RC, RATIO_PA28, PTS_DVP)
+         LOST_START, ROLE_OPEN, RATIO_FGA, RATIO_PA, RATIO_RC, RATIO_PA28, PTS_DVP, RETURN_UNDER, FOUL_BIG, MIN_RESTRICT)
 
 
 def fingerprint(cls):
@@ -616,6 +725,9 @@ REGISTRY = {                                             # name -> (registered a
     "ROLE_OPEN": ("2026-10-27T13:00:00", "fce63818bc"),           # amendment 2 (NBA_ROLE1_PREREG.md)
     "RATIO_FGA": ("2026-10-27T13:00:00", "7931edb259"),           # amendment 3 (NBA_RATIO_PREREG.md)
     "RATIO_PA": ("2026-10-27T13:00:00", "738f3b6032"),
+    "RETURN_UNDER": ("2026-10-27T13:00:00", "c099fdf615"),        # amendment 6 (NBA_IDEAS_PREREG.md)
+    "FOUL_BIG": ("2026-10-27T13:00:00", "08df997f93"),
+    "MIN_RESTRICT": ("2026-10-27T13:00:00", "4ee15c815c"),
     "PTS_DVP": ("2026-10-27T13:00:00", "fc8387835f"),             # amendment 5
     "RATIO_PA28": ("2026-10-27T13:00:00", "2404e38806"),          # amendment 4
     "RATIO_RC": ("2026-10-27T13:00:00", "17e2e5ea3f"),
