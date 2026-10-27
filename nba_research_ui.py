@@ -299,6 +299,10 @@ svg.shct{display:block;width:100%;height:auto;margin-top:6px}
 .shr span small,.shr b small{display:block;margin-top:2px;font-size:12px;font-weight:400;color:#9a9a9a}
 .shr b em{font-style:normal}
 .shc .shr{min-height:52px;border-bottom-color:#262626}
+/* player search rows (any player), tappable box score rows */
+.vpr{width:100%;text-align:left} .vpr .vgo{position:absolute;right:16px;top:20px;font-size:20px;color:#6e6e6e}
+.bx tr[data-vp]{cursor:pointer} .bx tr[data-vp]:active td{background:#222}
+.ir[data-vp]{cursor:pointer}
 /* the box score sheet: one height whatever is in it, so it never resizes while it rises; a skeleton of the box's shape */
 .sheet[data-kind="box"]{height:86vh}
 .sheet[data-kind="box"] .seg{position:relative}
@@ -799,13 +803,14 @@ const logo = (t, c) => TEAM_ID[t] ? `<img class="${c || "lg"}" alt="" decoding="
 const heroSrc = pid => `https://cdn.nba.com/headshots/nba/latest/1040x760/${pid}.png`;
 const head = pid => `<img class="hs" alt="" loading="lazy" src="https://cdn.nba.com/headshots/nba/latest/260x190/${pid}.png" onerror="this.style.visibility='hidden'">`;
 const short = m => (D.markets || {})[m] || m;
-const gameOf = gid => D.games.find(g => g.gid === gid);
+const gameOf = gid => D.games.find(g => g.gid === gid) ||
+  (String(gid).startsWith("none:") ? {gid: gid, date: D.dates[0], home: gid.slice(5), away: "", state: "none", tip: null} : undefined);
 const pct = r => r === null || r === undefined ? "–" : Math.round(r * 100) + "%";
 const hcls = (r, n) => r === null || r === undefined || !n ? "h0" : r >= .7 ? "h5" : r >= .6 ? "h4" : r > .4 ? "h3" : r > .3 ? "h2" : "h1";
 const ord = n => n + (n % 100 >= 11 && n % 100 <= 13 ? "th" : ["th", "st", "nd", "rd"][n % 10] || "th");
 const CHEV = '<svg viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2 2 10l8 8"/></svg>';
 function logsOf(p) {
-  const pl = D.players[String(p.pid)];
+  const pl = D.players[String(p.pid)] || VPL.get(p.pid);
   if (!pl) return [];
   if (!pl._logs) pl._logs = rowsToLogs(D.log_cols, pl.logs);
   return pl._logs;
@@ -1011,6 +1016,28 @@ function render() {
   tabbar();
 }
 function renderList() {
+  renderRows();
+  const q = ST.q.trim();
+  if (ST.view !== "injuries" && q.length >= 2) searchPlayers(q);
+}
+// the players a search finds, prop or not, under the props it finds; a tap opens his prop or his player page
+function searchPlayers(q) {
+  const n = ++SRCH_N;
+  playerIndex().then(pl => {
+    const lst = $("#lst");
+    if (n !== SRCH_N || ST.q.trim() !== q || ST.view === "injuries" || !lst) return;
+    const k = q.toLowerCase(), hits = pl.filter(r => r[1].toLowerCase().indexOf(k) >= 0 || r[2].toLowerCase() === k).slice(0, 15);
+    const old = $("#vpl", lst); if (old) old.remove();
+    if (!hits.length) return;
+    const box = document.createElement("div");
+    box.id = "vpl";
+    box.innerHTML = '<div class="lhd"><span>Players</span></div>' + hits.map(([pid, name, team, pos]) =>
+      `<button class="pr ir ir0 vpr" data-vp="${pid}"><span class="av">${head(pid)}</span><div class="who"><div class="nm">${esc(nameOf(name))}<span class="cd">${esc(team)}</span></div>
+        <div class="lin">${esc(POSN[pos] || pos || "")}</div></div><span class="vgo">›</span></button>`).join("");
+    lst.appendChild(box);
+  });
+}
+function renderRows() {
   const lst = $("#lst"), ml = $(".ml");
   if (ml) ml.style.display = ST.view === "injuries" ? "none" : "";
   if (ST.view === "injuries") { lst.innerHTML = injView(); return; }
@@ -1019,6 +1046,7 @@ function renderList() {
   if (!D.games.some(g => g.date === ST.date)) body = '<div class="empty"><b>No games</b></div>';
   else if (!onDate.length) body = '<div class="empty"><b>No props yet</b></div>';
   else if (ST.gid !== "all" && !onDate.some(p => p.gid === ST.gid)) body = '<div class="empty"><b>No props for this game yet</b></div>';
+  else if (!list.length && ST.q.trim().length >= 2) body = '<div class="lhd"><span>No props</span></div>';
   else if (!list.length) body = ST.watch ? '<div class="empty"><b>Watchlist empty</b><button class="btn" id="reset2">Reset filters</button></div>'
     : ST.market === "trends" ? '<div class="empty"><b>No trends</b></div>'
     : '<div class="empty"><b>No matches</b><button class="btn" id="reset2">Reset filters</button></div>';
@@ -1085,7 +1113,7 @@ function injRow(e) {
   if (s) bx.push(injBox(s, s.how === "games" ? `Starts <small>${s.k}/${s.n}</small>` : "Starts?", s.how === "games" ? "" : "sm"));
   e.minutes.filter(m => !s || m.pid !== s.pid).forEach(m => bx.push(injBox(m, "+" + m.gain.toFixed(1), "up")));   // one box a player
   const tags = `<span class="tg ${INJ_C[e.status]}">${INJ_S[e.status]}</span>${e.fresh ? '<span class="tg tf">NEW</span>' : ""}`;
-  return `<div class="pr ir${bx.length ? "" : " ir0"}"><span class="av">${head(e.pid)}</span>
+  return `<div class="pr ir${bx.length ? "" : " ir0"}" data-vp="${e.pid}"><span class="av">${head(e.pid)}</span>
     <div class="who"><div class="nm">${esc(nameOf(e.name))}<span class="cd">${esc(e.team)}</span>${tags}</div>
     <div class="lin">${e.starter ? "Starter" : "Bench"}${e.reason ? " · " + esc(injReason(e.reason)) : ""}</div></div>
     <div class="oc o"><i>${e.season && e.season !== D.season ? "MPG " + esc(e.season.slice(2)) : "MPG"}</i><b class="num">${e.mpg.toFixed(1)}</b></div>
@@ -1278,12 +1306,61 @@ function allLines(p) {
   ["fd", "dk"].forEach(b => { if (p.books[b]) p.books[b].rungs.forEach(r => s[r[0]] = 1); });
   return Object.keys(s).map(Number).sort((a, b) => a - b);
 }
+// ── any player's page, prop or not: docs/player/{pid}.json (nba_players), charted like a prop's with a line he sets
+// (his average, to the half below), no books; reached from search, a box score row or the Injuries list ──
+const VPL = new Map();
+let PIDX = null, VP = new Map(), SRCH_N = 0;
+function playerIndex() {
+  if (!PIDX) PIDX = fetch("player/index.json").then(r => r.ok ? r.json() : null).catch(() => null).then(j => j ? j.players : []);
+  return PIDX;
+}
+function playerLoad(pid) {
+  if (VPL.has(pid)) return Promise.resolve(VPL.get(pid));
+  return fetch(`player/${pid}.json`).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }).then(j => { VPL.set(pid, j); return j; });
+}
+// a prop by id, or a player page: "v|<pid>|<market>" (his next game on the slate, if any, for the opponent and ranks)
+function propFor(id) {
+  const real = D.props.find(x => x.id === id);
+  if (real || !String(id).startsWith("v|")) return real;
+  if (VP.has(id)) return VP.get(id);
+  const [, pidS, market] = String(id).split("|"), pid = +pidS, v = VPL.get(pid);
+  if (!v || !NAME[market]) return null;
+  const g = D.games.filter(x => (x.home === v.team || x.away === v.team) && x.state !== "final" && x.state !== "postponed")
+    .sort((a, b) => a.tip < b.tip ? -1 : 1)[0];
+  const opp = g ? (g.home === v.team ? g.away : g.home) : null, grp = MU_GROUP(v.pos), rk = g ? (D.ranks || {})[g.date] || {} : {};
+  const vp = {id: id, v: true, gid: g ? g.gid : "none:" + v.team, pid: pid, market: market, player: v.name, team: v.team, opp: opp,
+    home: g ? g.home === v.team : null, books: {}, main: null, hist: {}, proj: null, flag: null, live: null, summary: null,
+    ctx: {pos: v.pos, group: grp, teams: rk.teams || 0, rank_n: g && rk.n ? rk.n[opp] : null,
+          dvp_rank: g && grp && rk.dvp && rk.dvp[grp] && rk.dvp[grp][market] ? rk.dvp[grp][market][opp] || null : null,
+          def_rank: g && rk.def ? rk.def[opp] || null : null}};
+  VP.set(id, vp);
+  return vp;
+}
+// a player page's starting line: his average for the stat (this season with 3+ games, else his last 10), to the half below
+function vLine(p) {
+  const logs = logsOf(p), cur = logs.filter(l => seasonOf(l.date) === D.season), use = (cur.length >= 3 ? cur : logs.slice(-10))
+    .map(l => statValue(l, p.market)).filter(x => x !== null);
+  return use.length ? Math.floor(use.reduce((a, b) => a + b, 0) / use.length) + .5 : .5;
+}
+// open a player: his prop on the slate's date (this stat, else his first), else his player page
+function openPlayer(pid, market) {
+  const m = market || (NAME[ST.market] ? ST.market : "points");
+  const ps = D.props.filter(p => p.pid === pid && (gameOf(p.gid) || {}).date === ST.date);
+  const real = ps.find(p => p.market === m) || ps.sort((a, b) => ORDER.indexOf(a.market) - ORDER.indexOf(b.market))[0];
+  const go = () => openProp(real ? real.id : `v|${pid}|${m}`);
+  if (!$("#sheet").hidden) closeSheet();
+  if (MUP) { history.back(); setTimeout(go, 450); } else go();
+}
 function openProp(id, push) {
-  const p = D.props.find(x => x.id === id);
+  if (String(id).startsWith("v|") && !VPL.has(+String(id).split("|")[1])) {
+    playerLoad(+String(id).split("|")[1]).then(() => openProp(id, push), () => { $("#live").textContent = "Player not found"; });
+    return;
+  }
+  const p = propFor(id);
   if (!p) return;
   const fresh = CUR !== id, was = !!CUR;
   CUR = id;
-  if (fresh) Object.assign(DT, {line: p.main !== null ? p.main : allLines(p)[0],
+  if (fresh) Object.assign(DT, {line: p.v ? vLine(p) : p.main !== null ? p.main : allLines(p)[0],
                                  win: windowed(logsOf(p), "season", D.season).length ? "season" : "l10", home: null, starter: null,
                                  result: null, rest: null, ranges: {}, without: {}, with: {}, dvp: false, def: false, open: {}, more: false, fresh: null, ovs: []});
   if (push !== false) history.pushState({p: id}, "", hashState());
@@ -1391,7 +1468,8 @@ function chart2(logs, market, line, ov, grow) {
   const y = v => B - v / top * (B - T);
   const oname = ov ? OVL[ov] : "";
   const o = [`<svg class="c2${grow ? " grow" : ""}" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="group" aria-label="${esc(NAME[market])}${ov ? " and " + oname : ""} by game, ${n} games, line ${line}">`];
-  o.push(`<text class="ax" x="0" y="${y(top) + 7.1}">${r1(top)}</text><text class="ax" x="0" y="${B - 3.5}">0</text>`);
+  // the top label stays off when the line sits at the top: its own label is there
+  o.push(`${y(line) - y(top) < 14 ? "" : `<text class="ax" x="0" y="${y(top) + 7.1}">${r1(top)}</text>`}<text class="ax" x="0" y="${B - 3.5}">0</text>`);
   logs.forEach((l, i) => {
     const v = vals[i], m = ov ? ovs[i] : null, x = AX + i * slot, w = slot - gap, cx = x + w / 2;
     const res = v === null ? "none" : v > line ? "over" : v < line ? "under" : "push";
@@ -1546,7 +1624,7 @@ const bxRow = r => [r[3], r[4], r[5], r[6], r[7] + "-" + r[8], r[9] + "-" + r[10
 const bxTot = t => ["", t[0], t[1], t[2], t[3] + "-" + t[4], t[5] + "-" + t[6], t[7] + "-" + t[8], t[9], t[10], t[11], t[12], ""];
 function bxTable(t, p) {
   const hi = BX_HI[p.market] || [], td = (v, i) => `<td${hi.indexOf(BXC[i]) >= 0 ? ' class="hi"' : ""}>${v}</td>`;
-  const row = r => `<tr${r[0] === p.pid ? ' class="me"' : ""}><td>${esc(nameOf(r[1]))}</td>${bxRow(r).map(td).join("")}</tr>`;
+  const row = r => `<tr data-vp="${r[0]}"${r[0] === p.pid ? ' class="me"' : ""}><td>${esc(nameOf(r[1]))}</td>${bxRow(r).map(td).join("")}</tr>`;
   const st = t.players.filter(r => r[2]), bn = t.players.filter(r => !r[2]);
   return `<div class="bxw"><table class="bx"><thead><tr><th>${st.length ? "STARTERS" : "PLAYER"}</th>${BXC.map((c, i) => `<th${hi.indexOf(c) >= 0 ? ' class="hi"' : ""}>${c}</th>`).join("")}</tr></thead>
     <tbody>${st.map(row).join("")}${bn.length ? `<tr class="bxd"><td colspan="${BXC.length + 1}">BENCH</td></tr>${bn.map(row).join("")}` : ""}
@@ -1615,16 +1693,17 @@ function boxSheet(gid, team, p) {
 // chips, books, game log — are redrawn in place on every change, so the photo never reloads and the scroll never jumps.
 let PX = null;
 function renderProp(mode) {
-  const p = D.props.find(x => x.id === CUR), pg = $("#pg");
+  const p = propFor(CUR), pg = $("#pg");
   if (!p) { PX = null; pg.innerHTML = `<div class="ph"><button class="cb bk" aria-label="Back">${ICON.back}</button></div><div class="empty"><b>No longer posted</b></div>`; $("#pg .bk").onclick = () => history.back(); return; }
   const g = gameOf(p.gid), logs = logsOf(p), c = p.ctx || {};
   const team = TEAMS[p.team] || [p.team || "", "#333"];
   const without = (D.absences[g.date + "|" + p.team] || []).map(a => ({key: String(a.pid), name: a.name || "teammate", played: a.played, since: a.since, team: p.team, status: a.status, fresh: a.fresh}));
-  const mkts = TAB_ORDER.filter(m => D.props.some(x => x.gid === p.gid && x.pid === p.pid && x.market === m));
+  const mkts = p.v ? TAB_ORDER : TAB_ORDER.filter(m => D.props.some(x => x.gid === p.gid && x.pid === p.pid && x.market === m));
   const fav = favs().indexOf(p.pid) >= 0;
   const wins = [["season", D.season.slice(0, 4)], ["h2h", "H2H"], ["l5", "L5"], ["l10", "L10"], ["l20", "L20"]];
   // availability
-  const inj = D.injuries[g.date + "|" + p.pid] || {}, rep = D.sources.report[g.date];
+  const rpE = p.v && (((D.inj_report || {})[g.date + "|" + p.team] || {}).players || []).find(e => e.pid === p.pid);
+  const inj = D.injuries[g.date + "|" + p.pid] || (rpE ? {official: {status: rpE.status, reason: rpE.reason}, listed_team: true} : {}), rep = D.sources.report[g.date];
   const arows = [`<div class="kv"><span>Official report</span><b>${inj.official ? esc(inj.official.status) + (inj.official.reason ? " · " + esc(inj.official.reason.replace("Injury/Illness - ", "")) : "") : rep ? (inj.listed_team ? "Not listed" : "Team not listed yet") : "Not out yet"}</b></div>`];
   if (rep) arows.push(`<div class="kv"><span>Report time</span><b>${mt((inj.official || {}).published || rep.published, true)}</b></div>`);
   (inj.news || []).forEach(n => arows.push(`<div class="kv"><span>News · ${esc(n.source)}</span><b>${esc(n.headline || n.status || "")} · ${mt(n.detected)}</b></div>`));
@@ -1664,7 +1743,7 @@ function renderProp(mode) {
     if (navigator.share) navigator.share({title: title, url: url}).catch(() => {});
     else if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => { $("#live").textContent = "Link copied"; });
   };
-  $$("[data-mk]", pg).forEach(b => b.onclick = () => { const id = p.gid + "|" + p.pid + "|" + b.dataset.mk; if (id !== p.id) { openProp(id, false); history.replaceState({p: id}, "", hashState()); } });
+  $$("[data-mk]", pg).forEach(b => b.onclick = () => { const id = (p.v ? "v" : p.gid) + "|" + p.pid + "|" + b.dataset.mk; if (id !== p.id) { openProp(id, false); history.replaceState({p: id}, "", hashState()); } });
   $$("[data-win]", pg).forEach(b => b.onclick = () => { if (DT.win === b.dataset.win || b.disabled) return; DT.win = b.dataset.win; updateProp(); });
   $("#pf", pg).onclick = () => playerFilters(p, logs, without);
   const cw = $("#chw");
@@ -1709,7 +1788,7 @@ function updateProp(mode) {
   const tri = up => `<span class="tri ${up ? "up" : "dn"}">${up ? "▲" : "▼"}</span>`;
   const fs = chanceSide(p, line, side), hr = hbox({n: s.n, rate: rate}, fs);
   const gr = grade(p, side);
-  const opp = `<span class="vs">${p.home ? "vs" : "@"}</span>${esc(p.opp || "")}\u200a·\u200a${g.state === "pregame" ? mt(g.tip).replace(" ", "") : esc(g.state === "live" ? "LIVE" : g.state === "final" ? "Final" : g.label || "")}`;
+  const opp = g.state === "none" ? "No game" : `<span class="vs">${p.home ? "vs" : "@"}</span>${esc(p.opp || "")}\u200a·\u200a${g.state === "pregame" ? mt(g.tip).replace(" ", "") : esc(g.state === "live" ? "LIVE" : g.state === "final" ? "Final" : g.label || "")}`;
   const ovOn = k => !!(DT.open[k] || DT.ranges[k]);
   const ov = DT.ovs.slice().reverse().find(ovOn) || Object.keys(OVL).find(ovOn) || null;
   // cells
@@ -1776,6 +1855,8 @@ function updateProp(mode) {
       <div class="fcs">${chips.join("")}</div>${panels}`;
   if (opening) { PX.lazy = setTimeout(() => { if (PX && PX.p === p) updateProp("rest"); }, 470); bindLive(p, logs, without); return; }
   if (!PX.statDone) { $("#pstat").innerHTML = PX.stat; PX.statDone = true; $$("[data-rel]", pg).forEach(b => b.onclick = () => openProp(b.dataset.rel)); }
+  if (p.v) { $("#pproj").innerHTML = ""; $("#pbk").innerHTML = ""; }      // a player page: no line posted, no books
+  else {
   // books
   const fair = fairAt(p, line);
   const beats = (sd, price) => fair.p !== null && price * (sd === "over" ? fair.p : 1 - fair.p) > 1;
@@ -1791,6 +1872,7 @@ function updateProp(mode) {
   $("#pbk").innerHTML = `<div class="bkh"><span>BOOKS</span><button class="lnp" id="lnp" aria-haspopup="dialog" aria-label="Line ${line}">LINE${ICON.down}</button><span>OVER</span><span>UNDER</span></div>${bk}${fr}
     <div class="sec2"><h3>Alt Lines · ${side === "under" ? "Under" : "Over"}</h3>${ladder(p, win, side, line, (wins.find(w => w[0] === DT.win) || ["", "L10"])[1])}</div>
     <div class="sec2"><h3>Line Movement</h3>${histChart(p)}</div>`;
+  }
   // game log
   const logRows = win.slice().reverse().map(l => {
     const v = statValue(l, p.market), r = v === null ? "–" : v > line ? '<span class="ov">O</span>' : v < line ? '<span class="un">U</span>' : '<span class="pu">P</span>';
@@ -1831,7 +1913,7 @@ function bindLive(p, logs, without) {
   $("#psb", pg).onclick = () => openSheet(`<h2 id="sht">Position rank</h2>${c.pos_rank
     ? `<div class="kv"><span>Rank</span><b>${ord(c.pos_rank)} of ${c.pos_n}</b></div><div class="kv"><span>Group</span><b>${esc((GRPN[MU_GROUP(c.pos)] || "position").replace(/^./, x => x.toUpperCase()))}</b></div><div class="kv"><span>Stat</span><b>${esc(NAME[p.market])} per game</b></div><div class="kv"><span>Season</span><b>${esc(c.pos_season || "")}</b></div>`
     : '<div class="empty"><b>Not ranked yet</b></div>'}<div class="acts"><button class="btn pri" id="ok1">Done</button></div>`, s2 => { $("#ok1", s2).onclick = closeSheet; });
-  $("#mub", pg).onclick = () => openMatchup(p);
+  $("#mub", pg).onclick = () => { if (p.opp) openMatchup(p); };
   const pjsc = $("#pjsc", pg); if (pjsc) pjsc.onclick = projScoreSheet;
   $$(".rp", pg).forEach(gp => {
     const k = gp.dataset.rk, lo = +gp.dataset.lo, hi = +gp.dataset.hi, fil = $(".fil", gp), rv = $(".rv", gp);
@@ -2155,7 +2237,7 @@ function load() {
   if (!D) { LOADING = true; render(); }
   fetch("nba_props.json?t=" + Date.now(), {cache: "no-store"}).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
     .then(j => {
-      const first = !D; D = j; ERR = null; LOADING = false; RATES = new Map(); ROWS = new Map();
+      const first = !D; D = j; ERR = null; LOADING = false; RATES = new Map(); ROWS = new Map(); VP = new Map();
       const y = window.scrollY;
       render(); if (!first) window.scrollTo(0, y);
       if (CUR) { const pg = $("#pg"), py = pg.scrollTop; renderProp(); pg.scrollTop = py; }
@@ -2174,13 +2256,18 @@ window.addEventListener("popstate", e => {
   if (!$("#sheet").hidden) closeSheet();
   if (MUP && !h.get("mu")) closeMatchup(swiped);
   if (p && p !== CUR) openProp(p, false); else if (!p && CUR) closeProp(swiped);
-  if (h.get("mu") && !MUP && CUR) openMatchup(D.props.find(x => x.id === CUR), false);
+  if (h.get("mu") && !MUP && CUR) openMatchup(propFor(CUR), false);
 });
 document.addEventListener("keydown", e => { if (e.key === "Escape") { if (!$("#sheet").hidden) closeSheet(); else if (MUP || CUR) history.back(); } });
 document.addEventListener("DOMContentLoaded", () => {
   $("#scrim").onclick = closeSheet;
   sheetDrag();
-  $("#app").addEventListener("click", e => { const b = e.target.closest(".pr[data-id],.mrw[data-id],.ijb[data-id]"); if (b) openProp(b.dataset.id); });
+  $("#app").addEventListener("click", e => {
+    const b = e.target.closest(".pr[data-id],.mrw[data-id],.ijb[data-id]");
+    if (b) { openProp(b.dataset.id); return; }
+    const v = e.target.closest("[data-vp]"); if (v) openPlayer(+v.dataset.vp);
+  });
+  $("#sheet").addEventListener("click", e => { const v = e.target.closest(".bx tr[data-vp]"); if (v && +v.dataset.vp !== (PX && PX.p.pid)) openPlayer(+v.dataset.vp); });
   // the big headshot starts loading and decoding the moment a finger lands on a row, so it is ready when the page slides in
   const warm = new Set();
   $("#app").addEventListener("pointerdown", e => {
