@@ -294,6 +294,13 @@ svg.shct{display:block;width:100%;height:auto;margin-top:6px}
 .shct .shv{font-size:24px;font-weight:700} .shct .shv.sm{font-size:19px}
 .shct .shs{font-size:15px;fill:#cfcfcf}
 .shk{display:flex;align-items:center;gap:8px;margin:8px 0 2px;font-size:11.5px;color:#9a9a9a}
+.shk b{display:inline-block;width:9px;height:9px;margin-right:5px;border-radius:50%;vertical-align:-1px}
+.shk b.d1{background:#28da8e} .shk b.d0{border:1.5px solid #ff453a}
+.shk span:last-child{margin-left:auto}
+.shmd{display:flex;gap:6px;margin-left:auto}
+.shct .shz{stroke:#262626;stroke-width:1.5}
+.shct .shm circle{fill:none;stroke:#ff453a;stroke-width:1.6;opacity:.7}
+.shct .shk2 circle{fill:#28da8e;opacity:.85}
 .shk i{flex:1;height:6px;border-radius:3px;background:linear-gradient(90deg,rgba(255,69,58,.62),#191919,rgba(40,218,142,.62))}
 .shw{margin:18px 0 4px;font-size:15px;font-weight:700}
 .shr span small,.shr b small{display:block;margin-top:2px;font-size:12px;font-weight:400;color:#9a9a9a}
@@ -1991,7 +1998,7 @@ const initialName = n => { const i = String(n || "").indexOf(" "); return i > 0 
 function openMatchup(p, push) {
   if (!p) return;
   MUP = {p: p, grp: VS_GRP.some(g => g[0] === (p.ctx || {}).group) ? p.ctx.group : "G", mkt: p.market, more: false, rows: null,
-         shView: "player", shSeason: null};
+         shView: "player", shSeason: null, shMode: "shots"};
   if (push !== false) history.pushState({p: p.id, mu: 1}, "", hashState());
   const mp = $("#mp");
   mp.hidden = false;
@@ -2088,8 +2095,8 @@ function shotLoad(season) {
 const prevSeason = s => (+s.slice(0, 4) - 1) + "-" + s.slice(2, 4);
 const SH_Z = ["Restricted Area", "Paint", "Mid-Range", "Left Corner 3", "Right Corner 3", "Above the Break 3"];
 const SH_PTS = [2, 2, 2, 3, 3, 3];
-// a schematic half court, basket at the top (court units: 10 a foot; the corners drawn wider so their numbers fit)
-const SH_R3 = 237.5, SH_CX = 205, SH_CY = Math.sqrt(SH_R3 * SH_R3 - SH_CX * SH_CX), SH_B = -47.5, SH_BOT = 300;
+// a half court to scale, basket at the top (court units: 10 a foot, the NBA's shot coordinates)
+const SH_R3 = 237.5, SH_CX = 220, SH_CY = Math.sqrt(SH_R3 * SH_R3 - SH_CX * SH_CX), SH_B = -47.5, SH_BOT = 300;
 const SH_PATH = [
   "M0,-40A40,40 0 1 1 0,40A40,40 0 1 1 0,-40Z",
   `M-80,${SH_B}H80V142.5H-80Z M0,-40A40,40 0 1 0 0,40A40,40 0 1 0 0,-40Z`,
@@ -2097,7 +2104,13 @@ const SH_PATH = [
   `M-250,${SH_B}H-${SH_CX}V${SH_CY}H-250Z`,
   `M${SH_CX},${SH_B}H250V${SH_CY}H${SH_CX}Z`,
   `M-250,${SH_CY}H-${SH_CX}A${SH_R3},${SH_R3} 0 0 0 ${SH_CX},${SH_CY}H250V${SH_BOT}H-250Z`];
-const SH_LAB = [[0, 6], [0, 104], [0, 186], [-227.5, 40], [227.5, 40], [0, 268]];
+const SH_LAB = [[0, 6], [0, 104], [0, 186], [-235, 40], [235, 40], [0, 268]];
+// each player's shots, for the dots (docs/shots/p/{pid}.json, nba_shots): {s: {season: [x, y, made, ...]}}
+const SHOTP = new Map();
+function shotDots(pid) {
+  if (!SHOTP.has(pid)) SHOTP.set(pid, fetch(`shots/p/${pid}.json`).then(r => r.ok ? r.json() : null).catch(() => null));
+  return SHOTP.get(pid);
+}
 const pctOf = z => z && z[1] ? z[0] / z[1] : null;
 function shFill(d) {                                   // d = FG% minus the league's, in points: green above, red below
   if (d === null) return "#191919";
@@ -2108,7 +2121,8 @@ function shotCard() {
   const el = $("#shc");
   if (!el || !MUP || !MUP.shSeason) return;
   const p = MUP.p, season = MUP.shSeason;
-  shotLoad(season).then(j => {
+  const dotsOn = MUP.shView !== "def" && MUP.shMode !== "zones";
+  Promise.all([shotLoad(season), dotsOn ? shotDots(p.pid) : null]).then(([j, dots]) => {
     if (!MUP || MUP.p !== p || MUP.shSeason !== season) return;
     const t = j && j.teams[p.opp], me = j && j.players[String(p.pid)];
     if (!j || !t) { el.innerHTML = '<div class="shh">SHOT CHART</div><div class="empty"><b>No shot data</b></div>'; return; }
@@ -2122,10 +2136,17 @@ function shotCard() {
     const lines = '<g class="shl"><path d="M-250,-47.5H250"/><path d="M-80,-47.5V142.5H80V-47.5"/><path d="M-60,142.5A60,60 0 0 0 60,142.5"/>' +
       `<path d="M-${SH_CX},-47.5V${SH_CY}A${SH_R3},${SH_R3} 0 0 0 ${SH_CX},${SH_CY}V-47.5"/><path d="M-30,-7.5H30"/><circle cx="0" cy="0" r="7.5"/>` +
       '<path d="M-40,0A40,40 0 0 0 40,0"/></g>';
-    const court = `<svg class="shct" viewBox="-252 -50 504 352" role="img" aria-label="${def ? esc(p.opp) + " defense" : esc(p.player)} by zone, ${esc(season)}">` +
-      zs.map((z, k) => `<path d="${SH_PATH[k]}" fill="${shFill(z.d)}" fill-rule="evenodd"/>`).join("") + lines +
-      zs.map((z, k) => `<text x="${SH_LAB[k][0]}" y="${SH_LAB[k][1]}" class="shv${k === 3 || k === 4 ? " sm" : ""}">${z.f === null ? "–" : Math.round(z.f * 100) + "%"}</text>` +
-        (z.sub ? `<text x="${SH_LAB[k][0]}" y="${SH_LAB[k][1] + (k === 3 || k === 4 ? 19 : 23)}" class="shs">${esc(z.sub)}</text>` : "")).join("") + "</svg>";
+    // the dots: every shot he took, made (green) over missed (red rings); the zones keep only their faint lines
+    const pts = dotsOn && dots && dots.s[season] || [];
+    const dotSvg = () => { const miss = [], make = [];
+      for (let i = 0; i + 2 < pts.length; i += 3) (pts[i + 2] ? make : miss).push(`<circle cx="${pts[i]}" cy="${pts[i + 1]}" r="4.6"/>`);
+      return `<g class="shm">${miss.join("")}</g><g class="shk2">${make.join("")}</g>`; };
+    const court = `<svg class="shct" viewBox="-252 -50 504 352" role="img" aria-label="${def ? esc(p.opp) + " defense" : esc(p.player)} ${dotsOn ? "shots" : "by zone"}, ${esc(season)}"><defs><clipPath id="shclip"><rect x="-250" y="-47.5" width="500" height="347.5"/></clipPath></defs>` +
+      (dotsOn ? `<rect x="-250" y="-47.5" width="500" height="347.5" fill="#131313"/>${SH_PATH.map(d => `<path d="${d}" fill="none" class="shz" fill-rule="evenodd"/>`).join("")}${lines}<g clip-path="url(#shclip)">${dotSvg()}</g>`
+      : zs.map((z, k) => `<path d="${SH_PATH[k]}" fill="${shFill(z.d)}" fill-rule="evenodd"/>`).join("") + lines +
+        zs.map((z, k) => `<text x="${SH_LAB[k][0]}" y="${SH_LAB[k][1]}" class="shv${k === 3 || k === 4 ? " sm" : ""}">${z.f === null ? "–" : Math.round(z.f * 100) + "%"}</text>` +
+          (z.sub ? `<text x="${SH_LAB[k][0]}" y="${SH_LAB[k][1] + (k === 3 || k === 4 ? 19 : 23)}" class="shs">${esc(z.sub)}</text>` : "")).join("")) + "</svg>";
+    const made = (() => { let m = 0; for (let i = 2; i < pts.length; i += 3) m += pts[i]; return m; })(), att = pts.length / 3;
     // where the opponent gets scored on: points a game it allows in each zone over the league's average for a team
     const games = all.reduce((a, x) => a + x.gp, 0) || 1, mine = me ? me.reduce((a, z) => a + z[1], 0) : 0;
     const rows = SH_Z.map((nm, k) => ({nm: nm, k: k, d: t.gp ? opp[k][0] * SH_PTS[k] / t.gp - j.league[k][0] * SH_PTS[k] / games : null}))
@@ -2134,9 +2155,10 @@ function shotCard() {
     el.innerHTML = `<div class="shh"><span class="av">${head(p.pid)}</span><b>SHOT CHART</b>${logo(p.opp, "shl0")}</div>
       <div class="seg" role="group" aria-label="View"><span class="pill2"></span><button data-shv="player" aria-pressed="${!def}">${esc(last)}</button><button data-shv="def" aria-pressed="${def}">${esc(p.opp)} Defense</button></div>
       <div class="shy" role="group" aria-label="Season">${[D.season, prevSeason(D.season)].map(s => `<button class="chip" data-shs="${s}" aria-pressed="${s === season}">${s.slice(0, 4)}</button>`).join("")}
-        <span>${def ? `${t.gp} games` : me ? `${mine} shots` : "No shots"}</span></div>
+        ${def ? `<span>${t.gp} games</span>` : `<span class="shmd" role="group" aria-label="Show">${[["shots", "Shots"], ["zones", "Zones"]].map(([k, l]) => `<button class="chip" data-shm="${k}" aria-pressed="${(MUP.shMode || "shots") === k}">${l}</button>`).join("")}</span>`}</div>
       ${court}
-      <div class="shk"><span>Below league avg</span><i></i><span>Above</span></div>
+      ${dotsOn ? `<div class="shk"><span><b class="d1"></b>Made ${made}</span><span><b class="d0"></b>Missed ${att - made}</span><span>${att ? Math.round(made / att * 100) + "% of " + att : "No shots"}</span></div>`
+        : `<div class="shk"><span>Below league avg</span><i></i><span>Above</span></div>`}
       <h3 class="shw">Where ${esc(p.opp)} gets scored on</h3>
       ${rows.map(r => { const z = me && me[r.k];
         return `<div class="kv shr"><span>${r.nm}<small>${esc(last)}: ${z && z[1] ? Math.round(z[1] / mine * 100) + "% of shots · " + Math.round(z[0] / z[1] * 100) + "%" : "no shots"}</small></span>
@@ -2145,6 +2167,7 @@ function shotCard() {
     slide(seg, true);
     $$("[data-shv]", el).forEach(b => b.onclick = () => { if (MUP.shView !== b.dataset.shv) { MUP.shView = b.dataset.shv; shotCard(); } });
     $$("[data-shs]", el).forEach(b => b.onclick = () => { if (MUP.shSeason !== b.dataset.shs) { MUP.shSeason = b.dataset.shs; shotCard(); } });
+    $$("[data-shm]", el).forEach(b => b.onclick = () => { if ((MUP.shMode || "shots") !== b.dataset.shm) { MUP.shMode = b.dataset.shm; shotCard(); } });
   });
 }
 // ── player filters ──
