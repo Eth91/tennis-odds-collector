@@ -67,9 +67,20 @@ def stores(tmp, fd_after_report="2026-11-01T17:00:30"):
     return p
 
 
+def isolate(mod_sr, tmp):
+    """Point every store the rules read at the test's folder (absent files read as empty) and drop their caches, so a
+    checkout with real data files next to the code can't leak into the replay."""
+    for name in ("MATCHUP_DB", "LINEUPS_DB", "INDEX_JSON", "ROLE_GAMELOGS_DB", "TRACKING_DB", "NEWS_DB"):
+        if hasattr(mod_sr, name):
+            setattr(mod_sr, name, tmp / f"absent_{name.lower()}")
+    for cache in ("_VD", "_RD", "_RT", "_DV", "_FD"):
+        getattr(mod_sr, cache, {}).clear()
+
+
 def replay(mod_rp=RP, mod_sr=SR, **kw):
     tmp = pathlib.Path(tempfile.mkdtemp())
     p = stores(tmp, **kw)
+    isolate(mod_sr, tmp)
     day = mod_rp.Day(D, p["lines"], p["news"], p["matchup"], mod_rp.History(p["gamelogs"], p["matchup"]))
     rules = [cls() for cls in mod_sr.RULES if cls.kind == "replay"]
     sig = mod_rp.run_day(day, rules)
@@ -130,6 +141,7 @@ def test_no_lookahead():
     assert v.last10_min(B) == (25.0, 10) and not hasattr(v, "box")
     sig, p2 = replay()
     sqlite3.connect(p2["matchup"]).execute("DELETE FROM player_games").connection.commit()
+    isolate(SR, p2["matchup"].parent)
     day = RP.Day(D, p2["lines"], p2["news"], p2["matchup"], RP.History(p2["gamelogs"], p2["matchup"]))
     again = RP.run_day(day, [cls() for cls in SR.RULES if cls.kind == "replay"])
     assert sorted((s["rule"], s["pid"], s["market"], s["side"], s["t"]) for s in again) == \
