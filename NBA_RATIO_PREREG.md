@@ -109,3 +109,13 @@ points. None is positive in both seasons at tip lines.
 
 **Forward, as registered:** RATIO_FGA, RATIO_PA (2×) and RATIO_RC (2×) enter the side-by-side at the opener from
 13:00 UTC. No rule passed, so there are **no pings** for them.
+
+# AMENDMENT 3: RATIO_PA28, forward with pings (written 2026-10-27, about 09:05 UTC)
+**User:** "yes, add it shadowing. I want to see how it forward tests with the speed factor involved."
+
+- **The rule:** at a book's opener (first two-sided main, up to tip − 5), the assists over when his potential
+  assists per game this season are ≥ **2.8 ×** the assists line, with ≥ 3 games.
+- **Pings:** to the phone, labeled SHADOW, the moment it fires (`nba_role_open.py`, every minute).
+- **Honest status:** 2.8× was chosen by the solver after both backtest seasons were seen (+8.0% on 91, +4.3% on
+  175). So the backtest is in sample, and only the forward record counts. It is judged by the side-by-side's
+  bars (side-by-side amendment 4).
