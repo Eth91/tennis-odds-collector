@@ -179,3 +179,19 @@ games of the absence, and speed at the opener.
     - **Verdict:** the same bars as every rule here.
     - **Live:** `nba_role_open.py --process` runs every minute on the VM with the same evaluation. It pings
       the phone (SHADOW) when it fires, and logs to `nba_role.sqlite`.
+
+---
+
+# AMENDMENT 3: the user's volume-to-line ratios at the opener (2026-10-27, before they ran on live data)
+**Specified in `NBA_RATIO_PREREG.md`.** At a book's opener (its first observation of the prop with a two-sided
+main rung, up to tip − 5), with ≥ 3 games this season:
+
+13. **RATIO_FGA:** the points over when his FGA per game this season (box scores) ≥ the points line.
+14. **RATIO_PA:** the assists over when his potential assists per game this season (nba_tracking) ≥ 2 × the
+    assists line.
+15. **RATIO_RC:** the rebounds over when his rebound chances per game this season (nba_tracking) ≥ 2 × the
+    rebounds line.
+
+In nba_tracking, a missing row on a fetched date counts as 0. **Registered at 2026-10-27T13:00:00 UTC**, with
+fingerprints covering `nba_ratio`'s data helper. The same bars as every rule. Phone pings only for rules whose
+backtest passes (NBA_RATIO_PREREG.md).

@@ -68,3 +68,44 @@ then have 1-1.2x+ as many FGA as points line."
 - **The solver curve** (k from 0.80 to 1.50) restricted to 20+ minutes, using amendment 1's pick-and-check rule.
 - **The minutes condition is applied to PA and RC too** (20+ minutes, at their 2× rule and in the solver), and
   reported beside the unfiltered versions.
+
+---
+
+## Results (2026-10-27, about 09:00 UTC): no rule passes as registered
+Tracking history: 51,277 player-games over 317 dates. The guard rejected 5 dates, which are left out.
+
+**The rules as stated, tip lines** (n, hit rate, ROI; each market's all-overs baseline in brackets):
+
+| | 2023-24 | 2024-25 |
+|---|---|---|
+| FGA ≥ points line | 1,102, 50.5%, −3.6% [−7.8%] | 1,169, 50.4%, −4.5% [−5.9%] |
+| FGA, 20+ min, k 1.0 / 1.1 / 1.2 | −2.3% (962) / +1.3% (469) / +2.6% (199) | −3.3% (997) / −4.9% (410) / −7.3% (183) |
+| PA ≥ 2× assists line | 1,985, 52.1%, −3.0% [−5.5%] | 2,701, 53.1%, −3.5% [−5.2%] |
+| PA, 20+ min | 1,874, −2.1% | 2,617, −3.2% |
+| RC ≥ 2× rebounds line | 3,672, 51.8%, −4.0% [−9.6%] | 1,991, 55.3%, **+0.3%** [−8.2%] |
+| RC ≥ 2.5× | 572, −0.9% | 216, −5.8% |
+| RC, 20+ min, 2× | 3,274, −4.6% | 1,743, **+0.7%** |
+
+Every rule picks overs that hit 2–8 points more often than the market's overs, and beats blind overs by 1–8 ROI
+points. None is positive in both seasons at tip lines.
+
+**The solver (amendment 1):** not profitable as registered for any rule.
+- **FGA:** 2023-24's best (1.2×, +3.9%) loses 12.3% in 2024-25.
+- **RC:** the picks fail in reverse; 2.8× gives −8.3% on 54, and 2.2× gives −1.4%.
+- **PA, the closest:**
+  - ROI rises steadily with the ratio, from −5% at 1× to +9–21% at 3×.
+  - 2.7×: +1.9% (124) and +0.4% (241).
+  - 2.8×: +8.0% (91) and +4.3% (175).
+  - 2.9×: +10.8% (68) and +4.2% (108).
+  - 3.0×: +20.8% (45) and +9.0% (60).
+  - Picked on 2024-25 (2.8×), it holds on 2023-24 with positive neighbours. Picked on 2023-24 (where 2.8× has
+    under 150 bets, so the pick was 2.2×), it does not hold (−2.4%). The registered both-ways test fails.
+  - PA ≥ 2.8× is the one region positive in both seasons, on 266 bets in all. Not significant.
+
+**Definitions across seasons:**
+- Potential assists per assist are stable: 1.72 (2023-24), 1.82 (2024-25), 1.85 (2026-27).
+- Rebound chances per rebound drift: 1.75, 1.68, then 1.88 in 2026-27. "2× the rebounds line" this season is
+  about 1.8× in 2024-25's terms.
+
+**Forward, as registered:** RATIO_FGA, RATIO_PA (2×) and RATIO_RC (2×) enter the side-by-side at the opener from
+13:00 UTC. No rule passed, so there are **no pings** for them.
