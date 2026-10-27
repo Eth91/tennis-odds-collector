@@ -41,20 +41,27 @@ RECENT_FROM = 10
 LAST_MIN_GP = 10
 
 
+def lined_players(q, season):
+    """Players a book (FanDuel or DraftKings) has posted a prop line for this season (nba_lines.sqlite quotes): Roles
+    lists only these, not players no one can bet."""
+    return {int(pid) for (pid,) in q.execute("SELECT DISTINCT pid FROM quotes WHERE seen_at >= ? AND pid IS NOT NULL",
+                                             (f"{season[:4]}-08-01",))}
+
+
 def roles_mode(team_games):
     gp = sorted(len(v) for v in team_games.values())
     return "recent" if gp and gp[len(gp) // 2] >= RECENT_FROM else "season"
 REG_MPG = 18.0      # a teammate this regular (minutes a game this season, 3+ games) who sat 2 of the last 3 is named
 
 
-def roles(logs, idx, season, team_games):
+def roles(logs, idx, season, team_games, lined=None):
     """Players whose minutes, shots (FGA, 3PTA), potential assists or rebound chances a game moved by at least
     ROLE_MOVE, in roles_mode's comparison: "season" (his games this season for his team against all of last season's,
     "was_team" set when he played most of them elsewhere) or "recent" (his last 3 games against the rest of his season).
     Each with every stat now and before ("st", None where tracking has too few games or the stat does not compare across
     seasons), his usage and starts then and now ([starts now, starts before, games before, games now]), and the regular
     teammates who sat 2 of his team's last 3 games. logs: {pid: LOG_COLS rows}; team_games: {team: [gid, ...] this
-    season, oldest first}. Biggest minutes move first."""
+    season, oldest first}; lined: lined_players (None: everyone). Biggest minutes move first."""
     C = {c: k for k, c in enumerate(R.LOG_COLS)}
     played = {}                                              # (team, gid) -> pids who played
     for pid, rows in logs.items():
@@ -65,7 +72,7 @@ def roles(logs, idx, season, team_games):
     out = []
     for pid, rows in logs.items():
         info = idx.get(str(pid))
-        if not info:
+        if not info or (lined is not None and pid not in lined):
             continue
         team = info[0]
         cur = [r for r in rows if R.season_of(r[C["date"]]) == season and r[C["team"]] == team]
@@ -112,7 +119,7 @@ def roles(logs, idx, season, team_games):
     return sorted(out, key=lambda e: -abs(e["d_min"]))
 
 
-def build(mcon, out, idx, season, trk=None):
+def build(mcon, out, idx, season, trk=None, lined=None):
     """Write one file per player with games, and the index. Returns the number of players written."""
     out = Path(out)
     out.mkdir(parents=True, exist_ok=True)
@@ -134,7 +141,7 @@ def build(mcon, out, idx, season, trk=None):
         for t in (h, a):
             team_games.setdefault(t, []).append(gid)
     _write(out / "roles.json", {"season": season, "thresholds": ROLE_MOVE, "mode": roles_mode(team_games),
-                                "rows": roles(logs, idx, season, team_games)})
+                                "rows": roles(logs, idx, season, team_games, lined)})
     return len(rows)
 
 
@@ -146,7 +153,8 @@ def main():
     mcon = sqlite3.connect(f"file:{MU.DB}?mode=ro", uri=True)
     idx = json.loads(R.INDEX.read_text()).get("players", {})
     season = R.season_of(dt.datetime.now(R.ET).date().isoformat())
-    n = build(mcon, a.out, idx, season, R._ro(R.TRACKING))
+    q = R._ro(R.LINES)
+    n = build(mcon, a.out, idx, season, R._ro(R.TRACKING), lined_players(q, season) if q else None)
     print(f"nba_players: {n} players -> {a.out}")
 
 
