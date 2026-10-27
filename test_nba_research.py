@@ -886,3 +886,10 @@ def test_page_shows_projected_lineups():
     html = UI.page()
     assert 'proj = e.status === "Projected"' in html and '"PROJECTED"' in html and "<b>In for</b>" in html
     assert 'proj && INJ_S[st] ? ` · <em class="lq">' in html and "const miss = !proj && e.missing.length" in html
+
+
+def test_injury_beneficiaries_open_their_page():
+    html = UI.page()
+    # every box under an injury is a button: his prop on the slate, else his player page (openPlayer via data-vp)
+    assert 'return `<button class="ijb"${p ? ` data-id="${esc(p.id)}"` : ` data-vp="${m.pid}"`}>' in html
+    assert 'e.target.closest(".pr[data-id],.mrw[data-id],.ijb[data-id],[data-vp]")' in html

@@ -1351,9 +1351,9 @@ function injProp(pid) {                          // tonight's prop for a teammat
     .sort((a, b) => ORDER.indexOf(a.market) - ORDER.indexOf(b.market))[0] || null;
 }
 // a box: the teammate on top, what he took below (a start, from k of n games or "?" by position; or minutes a game)
-function injBox(m, val, cls) {
-  const p = injProp(m.pid), tag = p ? "button" : "div";
-  return `<${tag} class="ijb"${p ? ` data-id="${esc(p.id)}"` : ""}><i>${esc(m.name)}</i><b class="${cls}">${val}</b></${tag}>`;
+function injBox(m, val, cls) {                      // a tap opens his prop on this slate, else his player page
+  const p = injProp(m.pid);
+  return `<button class="ijb"${p ? ` data-id="${esc(p.id)}"` : ` data-vp="${m.pid}"`}><i>${esc(m.name)}</i><b class="${cls}">${val}</b></button>`;
 }
 function injRow(e) {
   const bx = [], s = e.starts;
@@ -2860,7 +2860,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // the big headshot starts loading and decoding the moment a finger lands on a row, so it is ready when the page slides in
   const warm = new Set();
   $("#app").addEventListener("pointerdown", e => {
-    const b = e.target.closest(".pr[data-id],.mrw[data-id],.ijb[data-id]"), pid = b && b.dataset.id.split("|")[1];
+    const b = e.target.closest(".pr[data-id],.mrw[data-id],.ijb[data-id],[data-vp]"), pid = b && (b.dataset.vp || b.dataset.id.split("|")[1]);
     if (!pid || warm.has(pid)) return;
     warm.add(pid); const im = new Image(); im.src = heroSrc(pid); if (im.decode) im.decode().catch(() => {});
   }, {passive: true});
