@@ -72,3 +72,36 @@ side-by-side's bars judge it forward.
 - The features were chosen with the latency and win/loss findings in mind, so the held-out days are the only
   check on the fit.
 - A pass means "worth a forward test", not "it works".
+
+---
+
+## Result (2026-10-27, about 06:25 UTC): FAIL, so ML1 is not registered
+- **Dataset:** 38 games over 5 dates; 64,152 rows, 52,416 with a closing price (`nba_ml1.py --build`).
+- **Where it ran:** the build moved off the VM after its first attempt, because the VM was swapping with 82% CPU
+  steal while live jobs ran. It ran on read-only snapshots of the four stores, taken with the SQLite backup API
+  at 06:15 UTC.
+
+| held-out flags (5 folds) | n | mean EV at the close [95%] | ROI (W-L) |
+|---|---|---|---|
+| ML1 | 72 | +2.0% [−0.5, +4.8] | −18.1% (30-42) |
+| DK lag baseline (EV now at FanDuel's fair ≥ 3%) | 118 | +2.0% [+0.8, +3.6] | −8.7% (56-62) |
+| every row (first checkpoint) | 6,168 | −6.2% | −6.2% |
+
+**Checks:**
+- pooled CLV > 0: yes;
+- beats DK lag: **no** (+2.01% vs +2.03%);
+- positive on ≥ 4 of 5 days: **no** (3);
+- ≥ 100 flags: **no** (72).
+
+**What it learned** (all 5 days; change in EV per standard deviation):
+- EV now at FanDuel's fair: **+0.026**;
+- the missing indicator for that EV: −0.008;
+- DraftKings' fair minus FanDuel's: +0.007;
+- over (vs under): −0.003;
+- line move since open (toward the side): +0.002;
+- FanDuel fair drift: +0.001;
+- every news and player feature: |w| ≤ 0.0003.
+
+The model rediscovered one signal, DraftKings' price against FanDuel's fair price. That signal is already in
+the side-by-side as DK_LAGS_FD and T4_TIP30. None of the news, injury-count or player-form features predicted
+the close in these five days.
