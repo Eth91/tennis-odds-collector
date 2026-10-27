@@ -92,7 +92,7 @@ def refresh11(targets, rows=None, raw=None, cfg=None, cache=CACHE, force=False):
     nh_h, rs_h = np.array([o["n_hist"] for o in out], float), np.array([o["rest"] for o in out], float)
     trows = [dict(t, min=0.0, pts=0.0, reb=0.0, ast=0.0, fg3m=0.0, stl=0.0, blk=0.0, tov=0.0, fga=0.0, fta=0.0,
                   team_poss=0.0, name="", target=True) for t in slate]
-    X, names, fams, rep = FT.build(rows + trows, raw)
+    X, names, fams, rep = FT.build(rows + trows, raw, families=tuple(cfg["kept"]))
     fams, names = np.array(fams), list(names)
     cols = np.isin(fams, cfg["kept"])
     kn = [n for n, c in zip(names, cols) if c]
@@ -219,7 +219,7 @@ def forecast11(now=None, cfg=None, cache=CACHE, lineups_db=LINEUPS, news_db=NEWS
         j = hit["at"].get((p["gid"], p["pid"]))
         g = gmap.get(p["gid"])
         bk = next((b for b in ("fd", "dk") if (p["books"].get(b) or {}).get("main") is not None), None)
-        if j is None or g is None or bk is None or p["market"] not in PD.MARKET_PARTS:
+        if j is None or g is None or bk is None or p["market"] not in PD.MARKET_PARTS or not (g.get("tip") or g.get("utc")):
             continue
         line = p["books"][bk]["main"]
         r = next((r for r in p["books"][bk]["rungs"] if r[0] == line), None)
@@ -229,7 +229,7 @@ def forecast11(now=None, cfg=None, cache=CACHE, lineups_db=LINEUPS, news_db=NEWS
         sub.vals, sub.mu = d.vals[j:j + 1], d.mu[j:j + 1]
         po, pu, pp = sub.probs(p["market"], [line])
         pc = float(po[0] / max(po[0] + pu[0], 1e-9))
-        items.append({"gid": p["gid"], "pid": p["pid"], "market": p["market"], "tip": g.get("utc"), "line": line,
+        items.append({"gid": p["gid"], "pid": p["pid"], "market": p["market"], "tip": g.get("tip") or g.get("utc"), "line": line,
                       "book": bk, "over": r[1], "under": r[2], "p_over": pc, "p_push": float(pp[0]),
                       "p_blend": float(NP.blend(np.array([pc]), np.array([NP.no_vig(r[1], r[2])]), cfg["blend_w"])[0]),
                       "mean": round(float(sub.mean(p["market"])[0]), 2)})
@@ -248,7 +248,7 @@ def _log_inputs(db, audit, now, version, keep, gmap):
         g = gmap.get(gid)
         if (gid, pid) not in keep or g is None:
             continue
-        tip = dt.datetime.fromisoformat(str(g["utc"]).replace("Z", "+00:00"))
+        tip = dt.datetime.fromisoformat(str(g.get("tip") or g.get("utc")).replace("Z", "+00:00"))
         if now >= tip - dt.timedelta(minutes=NP.CUTOFF_MIN):
             continue
         con.execute("INSERT OR REPLACE INTO p11_inputs VALUES (?,?,?,?,?,?,?,?)", (gid, pid, version, stamp, lu, st, mo, oo))

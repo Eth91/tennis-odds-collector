@@ -120,12 +120,22 @@ def starters_of(raw_starters):
     return s, set(raw_starters)
 
 
+def kinds_for(families):
+    """The fetch kinds a set of families reads (F0 and F5 need the starters feed: starts, and team ids)."""
+    k = {kind for f in families if f in SPECS for kind, _, _ in SPECS[f]}
+    if "F5" in families:
+        k |= set(TEAM_SPECS)
+    if "F0" in families or "F5" in families:
+        k.add("starters")
+    return k
+
+
 def build(rows, raw=None, families=("F0", "F1", "F2", "F3", "F4", "F5", "F6")):
     """(X float32 [n_rows, n_features], names, family of each feature, report). raw: {kind: {date: json}} —
     loaded from nba_stats_fetch's store when None. Rows in any order; computed by date.
     A row with target=True (a game not played yet, live) gets features from earlier dates and never updates any
     state; its F0 same-game proxy columns are NaN, to be filled from the live lineups and injury report."""
-    raw = raw if raw is not None else {k: F.load(k) for k in F.KINDS if k != "lineups"}
+    raw = raw if raw is not None else {k: F.load(k) for k in kinds_for(families)}
     n = len(rows)
     order = sorted(range(n), key=lambda i: rows[i]["date"])
     by_date = defaultdict(list)

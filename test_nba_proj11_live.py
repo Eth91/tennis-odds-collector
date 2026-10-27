@@ -61,7 +61,7 @@ def test_refresh_forecast_and_cutoff():
                                  ("2024-02-02T00:20:00+00:00", {1, 3, 4, 5, 6}, set())])   # seen only later
     news_db(tmp / "n.sqlite")
     (tmp / "props.json").write_text(json.dumps({
-        "games": [{"gid": "G", "utc": "2024-02-02T01:00:00Z"}],
+        "games": [{"gid": "G", "date": "2024-02-01", "tip": "2024-02-02T01:00:00Z"}],      # the page payload's shape
         "props": [{"gid": "G", "pid": 2, "market": "points", "books": {"fd": {"main": 15.5, "rungs": [[15.5, 1.9, 1.9]]}}},
                   {"gid": "G", "pid": 12, "market": "rebounds", "books": {"dk": {"main": 4.5, "rungs": [[4.5, 1.8, 2.0]]}}}]}))
     kw = dict(cfg=cfg, cache=tmp / "c.pkl", lineups_db=tmp / "l.sqlite", news_db=tmp / "n.sqlite", log_db=tmp / "log.sqlite",
