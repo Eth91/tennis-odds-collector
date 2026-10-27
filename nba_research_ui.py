@@ -277,6 +277,14 @@ font-weight:400;color:#9a9a9a;border-bottom:1px solid #343434}
 background:none;color:#fff;font-size:13.8px;font-weight:500}
 .vsm svg{width:11px;height:7px;transition:transform .25s} .vsm[aria-expanded="true"] svg{transform:rotate(180deg)}
 .vsk{margin:12px 15.3px 0} .vsk .sk{height:34px;margin-bottom:8px}
+/* the box score sheet: one height whatever is in it, so it never resizes while it rises; a skeleton of the box's shape */
+.sheet[data-kind="box"]{height:86vh}
+.sheet[data-kind="box"] .seg{position:relative}
+.sheet[data-kind="box"] .seg button{position:relative;z-index:1;background:none}
+.sheet[data-kind="box"] .seg .pill2{background:#313131}
+.bxsk i,.bxsk b{display:block;border-radius:8px;background:linear-gradient(90deg,#141414,#1d1d1d,#141414);background-size:200% 100%;animation:sk 1.2s linear infinite}
+.bxsk i:nth-child(1){width:62%;height:30px;margin:2px auto 8px} .bxsk i:nth-child(2){width:34%;height:14px;margin:0 auto 14px}
+.bxsk i:nth-child(3){height:42px;border-radius:21px;margin-bottom:12px} .bxsk b{height:34px;margin-bottom:4px}
 /* the box score sheet: a team's players, the name column pinned while the stats scroll sideways */
 .bxh{display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px}
 .bxh img{width:26px;height:26px}
@@ -1523,31 +1531,63 @@ function bxTable(t, p) {
     <tr class="tot"><td>Team</td>${bxTot(t.tot).map(td).join("")}</tr></tbody></table></div>
     ${t.dnp.length ? `<div class="bxn"><b>DNP</b>${t.dnp.map(([nm, why]) => esc(nameOf(nm)) + (why !== "DNP" ? ` <small>(${esc(injReason(why))})</small>` : "")).join(", ")}</div>` : ""}`;
 }
+// box scores are fetched once and kept: a finger landing on a bar starts its fetch, and the bars on screen are
+// fetched while the page is idle, so a tap usually finds the box already here
+const BOXC = new Map();
+function boxGet(gid) {
+  if (!BOXC.has(gid)) BOXC.set(gid, fetch(`box/${encodeURIComponent(gid)}.json`)
+    .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .catch(e => { BOXC.delete(gid); throw e; }));
+  return BOXC.get(gid);
+}
+let BOX_WARM = 0;
+function boxWarm(logs) {
+  clearTimeout(BOX_WARM);
+  BOX_WARM = setTimeout(() => logs.slice(-12).reverse().forEach((l, i) => setTimeout(() => boxGet(l.gid).catch(() => {}), i * 60)), 900);
+}
+function boxHtml(b, cur, p) {
+  const [a, h] = b.teams;
+  const d = iso(b.date + "T12:00:00Z").toLocaleDateString("en-US", {weekday: "short", month: "numeric", day: "numeric", timeZone: "UTC"});
+  return `<div class="bxh">${logo(a.tri, "")}<b>${esc(a.tri)}</b><span class="num${a.pts > h.pts ? "" : " lo"}">${a.pts}</span><i>–</i><span class="num${h.pts > a.pts ? "" : " lo"}">${h.pts}</span><b>${esc(h.tri)}</b>${logo(h.tri, "")}</div>
+    <div class="bxs">${esc(d)} · ${esc(b.status)}</div>
+    <div class="seg" role="group" aria-label="Team"><span class="pill2"></span>${b.teams.map(t => `<button data-bt="${esc(t.tri)}" aria-pressed="${t.tri === cur}">${logo(t.tri, "")}${esc(t.tri)}</button>`).join("")}</div>
+    <div id="bxt">${bxTable(b.teams.find(t => t.tri === cur), p)}</div>`;
+}
+// The sheet rises once, at its full height, with the box in it: when the box is not here within 140 ms it rises with a
+// skeleton of the same shape and the box fades in over it, so nothing changes size while it moves
 function boxSheet(gid, team, p) {
-  openSheet('<h2 id="sht">Box Score</h2><div class="note" style="font-size:14px">Loading…</div>', () => {});
-  const s = $("#sheet"), n = SHEET_N;
-  s.dataset.kind = "box";
-  const fill = html => {
-    if (SHEET_N !== n || s.hidden) return false;
-    s.innerHTML = '<div class="grab" aria-hidden="true"></div><h2 id="sht">Box Score</h2>' + html + '<div class="acts"><button class="btn pri" id="bx-ok">Done</button></div>';
+  const pr = boxGet(gid), wait = new Promise(r => setTimeout(r, 140, null));
+  const frame = body => `<h2 id="sht">Box Score</h2><div class="bxb">${body}</div><div class="acts stk"><button class="btn pri" id="bx-ok">Done</button></div>`;
+  const bind = (s, b) => {
     $("#bx-ok", s).onclick = closeSheet;
-    return true;
-  };
-  fetch(`box/${encodeURIComponent(gid)}.json`).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }).then(b => {
-    const [a, h] = b.teams;
-    let cur = b.teams.some(t => t.tri === team) ? team : h.tri;
-    const d = iso(b.date + "T12:00:00Z").toLocaleDateString("en-US", {weekday: "short", month: "numeric", day: "numeric", timeZone: "UTC"});
-    const ok = fill(`<div class="bxh">${logo(a.tri, "")}<b>${esc(a.tri)}</b><span class="num${a.pts > h.pts ? "" : " lo"}">${a.pts}</span><i>–</i><span class="num${h.pts > a.pts ? "" : " lo"}">${h.pts}</span><b>${esc(h.tri)}</b>${logo(h.tri, "")}</div>
-      <div class="bxs">${esc(d)} · ${esc(b.status)}</div>
-      <div class="seg" role="group" aria-label="Team">${b.teams.map(t => `<button data-bt="${esc(t.tri)}" aria-pressed="${t.tri === cur}">${logo(t.tri, "")}${esc(t.tri)}</button>`).join("")}</div>
-      <div id="bxt">${bxTable(b.teams.find(t => t.tri === cur), p)}</div>`);
-    if (!ok) return;
+    if (!b) return;
+    let cur = b.teams.some(t => t.tri === team) ? team : b.teams[1].tri;
+    const seg = $(".seg", s);
+    slide(seg, true);
     $$("[data-bt]", s).forEach(btn => btn.onclick = () => {
       if (cur === btn.dataset.bt) return;
-      cur = btn.dataset.bt; press("[data-bt]", x => x === btn, s);
-      $("#bxt", s).innerHTML = bxTable(b.teams.find(t => t.tri === cur), p);
+      cur = btn.dataset.bt; press("[data-bt]", x => x === btn, s); slide(seg);
+      const t = $("#bxt", s);
+      t.innerHTML = bxTable(b.teams.find(x => x.tri === cur), p);
+      if (!REDUCED) t.animate([{opacity: .35}, {opacity: 1}], {duration: 200, easing: "ease-out"});
     });
-  }).catch(() => fill('<div class="empty"><b>Box score not available yet</b></div>'));
+  };
+  const missing = '<div class="empty"><b>Box score not available yet</b></div>';
+  const cur0 = b => b.teams.some(t => t.tri === team) ? team : b.teams[1].tri;
+  Promise.race([pr, wait]).then(b => {
+    if (b) { openSheet(frame(boxHtml(b, cur0(b), p)), s => bind(s, b)); $("#sheet").dataset.kind = "box"; return; }
+    openSheet(frame('<div class="bxsk"><i></i><i></i><i></i>' + "<b></b>".repeat(12) + "</div>"), s => bind(s, null));
+    const s = $("#sheet"), n = SHEET_N;
+    s.dataset.kind = "box";
+    const put = html => {
+      if (SHEET_N !== n || s.hidden) return null;
+      const box = $(".bxb", s);
+      box.innerHTML = html;
+      if (!REDUCED) box.animate([{opacity: 0}, {opacity: 1}], {duration: 220, easing: "ease-out"});
+      return box;
+    };
+    pr.then(b2 => { if (put(boxHtml(b2, cur0(b2), p))) bind(s, b2); }, () => put(missing));
+  }, () => openSheet(frame(missing), s => bind(s, null)));
 }
 // The page is built once per prop (header, tabs, hero, availability) and its live parts — cells, chart, window capsule,
 // chips, books, game log — are redrawn in place on every change, so the photo never reloads and the scroll never jumps.
@@ -1607,6 +1647,7 @@ function renderProp(mode) {
   $("#pf", pg).onclick = () => playerFilters(p, logs, without);
   const cw = $("#chw");
   cw.onclick = e => { const gb = e.target.closest("g.br"); if (gb) boxSheet(gb.dataset.gid, gb.dataset.tm, p); };
+  cw.onpointerdown = e => { const gb = e.target.closest("g.br"); if (gb) boxGet(gb.dataset.gid).catch(() => {}); };
   updateProp(mode || true);
 }
 // teammates on his team now, most minutes first: [{key, pid, name, since, played, mpg, gp, team}] (D.mates,
@@ -1663,6 +1704,7 @@ function updateProp(mode) {
   const cw = $("#chw"), sl = cw.scrollLeft, atEnd = first || sl + cw.clientWidth >= cw.scrollWidth - 4;
   cw.innerHTML = chart2(win, p.market, line, ov, !first);
   cw.scrollLeft = atEnd ? cw.scrollWidth : sl;
+  boxWarm(win);
   // window capsule
   wins.forEach(([k]) => {
     const w = windowed(base, k, D.season, p.opp), ss = hitSummary(w.map(l => statValue(l, p.market)), line), r = sideRate(ss, side);
@@ -1920,7 +1962,8 @@ function vsTable() {
     <thead><tr><th>PLAYER</th><th>RESULT</th><th>LINE</th><th>ODDS</th><th>DATE</th></tr></thead><tbody>${rows.map(tr).join("")}</tbody></table>
     ${all.length > 5 ? `<button class="vsm" id="vsm" aria-expanded="${MUP.more}">${MUP.more ? "Less Results" : "More Results"}${ICON.down}</button>` : ""}`;
   const m = $("#vsm", el); if (m) m.onclick = () => { MUP.more = !MUP.more; vsTable(); };
-  $$("tr[data-g]", el).forEach(t => t.onclick = () => boxSheet(t.dataset.g, t.dataset.t, {market: mk, pid: +t.dataset.pid}));
+  $$("tr[data-g]", el).forEach(t => { t.onclick = () => boxSheet(t.dataset.g, t.dataset.t, {market: mk, pid: +t.dataset.pid});
+    t.onpointerdown = () => boxGet(t.dataset.g).catch(() => {}); });
 }
 // ── player filters ──
 function activeFilters(without) {

@@ -337,6 +337,11 @@ def test_page_controls_work_on_iphone():
     assert "fetch(`vs/${encodeURIComponent(p.opp || \"\")}.json`)" in html and 'if (MUP) h.set("mu", "1");' in html
     assert 'if (MUP && !h.get("mu")) closeMatchup(swiped);' in html and "rows = all.slice(0, MUP.more ? 10 : 5)" in html
     assert 'boxSheet(t.dataset.g, t.dataset.t, {market: mk, pid: +t.dataset.pid})' in html and '<div id="mp" class="pg"' in html
+    # the box score rises once, full height, with the box in it: fetched on touch-down and kept, the bars on screen
+    # fetched while idle; if it is not here in 140 ms a same-shape skeleton rises and the box fades in over it
+    assert "const BOXC = new Map();" in html and "cw.onpointerdown" in html and "boxWarm(win);" in html
+    assert '.sheet[data-kind="box"]{height:86vh}' in html and "setTimeout(r, 140, null)" in html and 'class="bxsk"' in html
+    assert "Loading…</div>', () => {});\n  const s = $(\"#sheet\"), n = SHEET_N;\n  s.dataset.kind = \"box\"" not in html
     # every sheet in the player page's look: near-black with a thin edge, capsule toggles, outline chips and buttons,
     # the main action white, the chart filters' capsule slider; no iOS grey sheet, blue button or blue slider
     import re
