@@ -203,3 +203,14 @@ backtest passes (NBA_RATIO_PREREG.md).
 # AMENDMENT 5: PTS_DVP (2026-10-27, before it ran)
 17. **PTS_DVP:** as `NBA_RATIO_PREREG.md` amendment 5. It fires from about mid-November, when opponents reach 10
     games. Registered at **2026-10-27T13:00:00 UTC**; no pings.
+
+# AMENDMENT 6: the six ideas' forward rules (2026-10-27, before they ran)
+**As in `NBA_IDEAS_PREREG.md` amendment 1:**
+18. **RETURN_UNDER** (idea 4, passed): at tip − 30, unders for the teammates of a cleared returning rotation
+    player. Pinged (SHADOW).
+19. **FOUL_BIG** (idea 2, passed): at tip − 30, unders for foul-prone bigs against teams that draw free throws.
+    Pinged (SHADOW); it fires once teams have 10 games and nba_matchup has this season's personal fouls.
+20. **MIN_RESTRICT** (idea 5, forward only): at FanDuel's next look after an X/Bluesky item reports a minutes
+    restriction, unders. No pings.
+
+All three are registered at **2026-10-27T13:00:00 UTC**.
