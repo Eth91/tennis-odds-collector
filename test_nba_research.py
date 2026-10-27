@@ -805,3 +805,31 @@ def test_page_boots_from_its_last_copy_and_animates_swaps():
     # swaps rise in; Over / Under, the combo window and the Injuries switch slide their pills; Live's bars grow on entry
     assert html.count("swapIn(") >= 9 and '<span class="ou" role="group" aria-label="Side"><span class="pill2">' in html
     assert '<div class="seg cbw" role="group" aria-label="Games"><span class="pill2">' in html and ".lvin .lvbar i{" in html
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_slate_day_moves_on_once_the_night_is_over():
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "core.js").write_text(UI.JS_CORE)
+    (d / "t.js").write_text("""
+const C = require('./core.js'), D = ['2026-10-26', '2026-10-27'];
+const g = (gid, date, state) => ({gid, date, state}), p = (gid, closed) => ({gid, closed});
+const finals = [g('a', D[0], 'final'), g('b', D[0], 'final'), g('c', D[1], 'pregame')];
+const late = [g('a', D[0], 'final'), g('b', D[0], 'live'), g('c', D[1], 'pregame')];
+const props = [p('a', true), p('b', true), p('c', false)], noLines = [p('a', true), p('b', true)];
+console.log(JSON.stringify([
+  C.slateDay(D, finals, props, null), C.slateDay(D, finals, props, D[0]),      // the night is over, tomorrow has lines
+  C.slateDay(D, late, props, D[0]), C.slateDay(D, late, props, null),          // a late game still on: tonight stays
+  C.slateDay(D, finals, noLines, D[0]), C.slateDay(D, finals, noLines, null),  // over, but no lines for tomorrow yet
+  C.slateDay(D, finals, props, '2026-10-25'), C.slateDay(D, finals, props, D[1])]));
+""")
+    out = json.loads(subprocess.run([NODE, str(d / "t.js")], capture_output=True, text=True, check=True, cwd=d).stdout)
+    assert out == ["2026-10-27", "2026-10-27", "2026-10-26", "2026-10-26", "2026-10-26", "2026-10-26", "2026-10-27", "2026-10-27"]
+
+
+def test_page_names_days_by_the_phones_date_and_finished_slates_by_name():
+    html = UI.page()
+    assert "ST.date = slateDay(D.dates, D.games, D.props, AUTO_DAY ? ST.date : null);" in html and "AUTO_DAY = false; if (ST.date !== b.dataset.date)" in html
+    assert "if (HIDDEN_AT && Date.now() - HIDDEN_AT > 1800000) AUTO_DAY = true;" in html          # back after 30+ min: choose again
+    assert 'const lab = dayName(ST.date);' in html and '"Yesterday"' in html and 'm === "live" && !liveNow ? "Results"' in html
+    assert "<b>All games final</b>" in html and 'id="gonext"' in html

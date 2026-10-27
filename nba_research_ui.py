@@ -526,6 +526,7 @@ transition:background-color .22s,border-color .22s,transform .16s}
 .cbp{position:fixed;right:15.3px;bottom:calc(max(var(--sb),10px) + 74px);z-index:35;display:flex;align-items:center;gap:6px;height:40px;
 padding:0 14px 0 12px;border-radius:20px;color:#fff;font:inherit;font-size:14px;font-weight:600}
 .cbp[hidden]{display:none} .cbp svg{width:19px;height:19px}
+.empty .ebt{display:flex;justify-content:center;gap:10px;margin-top:14px} .empty .ebt .btn{margin:0;padding:0 18px;width:auto}
 .cbon .lst{padding-bottom:calc(var(--sb) + 160px)} .cbon .end{height:calc(var(--sb) + 80px)}
 .cbp b{min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#fff;color:#000;font-size:12px;line-height:20px;text-align:center}
 .cbl{display:flex;align-items:center;gap:10px;min-height:56px;border-bottom:.5px solid var(--sep)}
@@ -885,6 +886,21 @@ function comboStats(legs, win, season) {
 }
 // the Live tab's word for a prop: an over HIT / NEEDS n / MISS, an under n ROOM / NO ROOM / BUST / HIT, a push at
 // the final PUSH. NEEDS counts to the next whole number past the line; ROOM is what can still come and win
+// the slate to show: `cur` while it is a listed day with a game still to come or under way, or while no later day has
+// lines; else the first day with an unfinished game that has open props or a live game, else the first with props. A
+// finished slate gives way to the next one as soon as its lines are up
+function slateDay(dates, games, props, cur) {
+  var byGid = {};
+  games.forEach(function (g) { byGid[g.gid] = g; });
+  var done = function (d) { var gs = games.filter(function (g) { return g.date === d; });
+    return gs.length > 0 && gs.every(function (g) { return g.state === "final" || g.state === "postponed"; }); };
+  var on = function (p, d) { return byGid[p.gid] && byGid[p.gid].date === d; };
+  var open = function (d) { return props.some(function (p) { return !p.closed && on(p, d); }); };
+  var live = function (d) { return games.some(function (g) { return g.date === d && g.state === "live"; }); };
+  if (cur && dates.indexOf(cur) >= 0 && !(done(cur) && dates.some(function (d) { return d > cur && open(d); }))) return cur;
+  return dates.find(function (d) { return !done(d) && (open(d) || live(d)); }) ||
+    dates.find(function (d) { return props.some(function (p) { return on(p, d); }); }) || dates[0];
+}
 function liveStatus(v, line, over, live) {
   if (!live && v === line) return ["PUSH", ""];
   if (over) return v > line ? ["HIT", "up"] : live ? ["NEEDS " + (Math.floor(line) + 1 - v), ""] : ["MISS", "dn"];
@@ -902,7 +918,7 @@ if (typeof module !== "undefined") module.exports = {statValue: statValue, hitSu
   rowsToLogs: rowsToLogs, windowed: windowed, filterLogs: filterLogs, splitRows: splitRows, sideRate: sideRate,
   american: american, decimalOf: decimalOf, bestOver: bestOver, bestPrice: bestPrice, propRates: propRates,
   noVig: noVig, fairAt: fairAt, valueAt: valueAt, zscore: zscore, pmfGe: pmfGe, projProbs: projProbs, blendP: blendP,
-  filterProps: filterProps, sortProps: sortProps, liveStage: liveStage, liveStatus: liveStatus, comboStats: comboStats};
+  filterProps: filterProps, sortProps: sortProps, liveStage: liveStage, liveStatus: liveStatus, slateDay: slateDay, comboStats: comboStats};
 """
 
 JS_APP = r"""
@@ -1145,7 +1161,7 @@ function topRow() {
 }
 function cards() {
   const gs = D.games.filter(g => g.date === ST.date), i = D.dates.indexOf(ST.date);
-  const lab = i === 0 ? "Today" : i === 1 ? "Tomorrow" : ST.date.slice(5).replace("-", "/");
+  const lab = dayName(ST.date);
   return `<button class="gc0" id="dayb" aria-haspopup="dialog"><i>${lab}</i><i>${gs.length} GAME${gs.length === 1 ? "" : "S"}</i></button>` +
     gs.map(g => `<button class="gc" data-gid="${g.gid}" aria-pressed="${g.gid === ST.gid}" aria-label="${esc(g.away)} at ${esc(g.home)}"><span class="gt">${[g.away, g.home].map(t => `<span${b2(g, t) ? ' class="b2t"' : ""}>${logo(t, "")}${esc(t)}</span>`).join("")}</span><em>${g.state === "live" ? '<span class="lv">LIVE</span>' : g.state === "final" ? "Final" : g.state === "postponed" ? "PPD" : mt(g.tip).replace(" ", "\u200a")}${cardNote(g)}</em></button>`).join("");
 }
@@ -1176,7 +1192,12 @@ function render() {
     const r = $("#retry"); if (r) r.onclick = load;
     return;
   }
-  if (!ST.date || D.dates.indexOf(ST.date) < 0) ST.date = D.dates.find(d => D.props.some(p => (gameOf(p.gid) || {}).date === d)) || D.dates[0];
+  if (AUTO_DAY || !ST.date || D.dates.indexOf(ST.date) < 0) {
+    const was = ST.date;
+    ST.date = slateDay(D.dates, D.games, D.props, AUTO_DAY ? ST.date : null);
+    if (was && ST.date !== was && ST.market === "live" && !D.games.some(g => g.date === ST.date && (g.state === "live" || g.state === "final"))) ST.market = "points";
+    if (ST.date !== was) save();                               // the URL follows, so a reload or a shared link lands there too
+  }
   if (ST.gid !== "all" && !D.games.some(g => g.gid === ST.gid && g.date === ST.date)) ST.gid = "all";
   const mks = availMarkets();
   if (ALL_TABS.indexOf(ST.market) < 0 && mks.length && mks.indexOf(ST.market) < 0) ST.market = mks[0];
@@ -1185,8 +1206,8 @@ function render() {
       <nav class="gcs" id="gcs" aria-label="Games"></nav><div class="ldv"></div></header><div id="ban"></div><main class="lst" id="lst"></main>`;
     bindTop();
   }
-  const liveOn = D.games.some(g => g.date === ST.date && (g.state === "live" || g.state === "final"));
-  $("#mtl").innerHTML = '<span class="pill2"></span>' + MKT_TABS.filter(m => m === "live" ? liveOn || ST.market === "live" : ALL_TABS.indexOf(m) >= 0 || mks.indexOf(m) >= 0).map(m => `<button data-market="${m}" aria-pressed="${m === ST.market}">${TAB[m]}</button>`).join("");
+  const liveOn = D.games.some(g => g.date === ST.date && (g.state === "live" || g.state === "final")), liveNow = D.games.some(g => g.date === ST.date && g.state === "live");
+  $("#mtl").innerHTML = '<span class="pill2"></span>' + MKT_TABS.filter(m => m === "live" ? liveOn || ST.market === "live" : ALL_TABS.indexOf(m) >= 0 || mks.indexOf(m) >= 0).map(m => `<button data-market="${m}" aria-pressed="${m === ST.market}">${m === "live" && !liveNow ? "Results" : TAB[m]}</button>`).join("");
   $("#gcs").innerHTML = cards();
   $("#ban").innerHTML = banners();
   bindHead();
@@ -1254,14 +1275,21 @@ function renderRows(ivFrom) {
   else if (!onDate.length) body = '<div class="empty"><b>No props yet</b></div>';
   else if (ST.gid !== "all" && !onDate.some(p => p.gid === ST.gid)) body = '<div class="empty"><b>No props for this game yet</b></div>';
   else if (!list.length && ST.q.trim().length >= 2) body = '<div class="lhd"><span>No props</span></div>';
-  else if (!list.length && ST.market !== "live" && onDate.every(p => p.closed)) body = '<div class="empty"><b>Games under way</b><button class="btn" id="golive">Live</button></div>';
+  else if (!list.length && ST.market !== "live" && onDate.every(p => p.closed)) {
+    const allDone = D.games.filter(g => g.date === ST.date).every(g => g.state === "final" || g.state === "postponed");
+    const next = D.dates.find(d => d > ST.date && D.props.some(p => !p.closed && (gameOf(p.gid) || {}).date === d));
+    body = allDone ? `<div class="empty"><b>All games final</b><div class="ebt"><button class="btn" id="golive">Results</button>${next ? `<button class="btn pri" id="gonext" data-d="${next}">${esc(dayName(next))}'s props</button>` : ""}</div></div>`
+      : '<div class="empty"><b>Games under way</b><button class="btn" id="golive">Live</button></div>';
+  }
   else if (!list.length) body = ST.watch ? '<div class="empty"><b>Watchlist empty</b><button class="btn" id="reset2">Reset filters</button></div>'
     : ST.market === "trends" ? '<div class="empty"><b>No trends</b></div>'
     : ST.market === "movers" ? '<div class="empty"><b>No movers</b></div>'
     : ST.market === "live" ? '<div class="empty"><b>No games under way</b></div>'
     : '<div class="empty"><b>No matches</b><button class="btn" id="reset2">Reset filters</button></div>';
   if (body) { lst.innerHTML = body; const r2 = $("#reset2"); if (r2) r2.onclick = resetFilters;
-    const gl = $("#golive"); if (gl) gl.onclick = () => { ST.market = "live"; save(); render(); }; return; }
+    const gl = $("#golive"); if (gl) gl.onclick = () => { ST.market = "live"; save(); render(); swapIn($("#lst")); };
+    const gn = $("#gonext"); if (gn) gn.onclick = () => { AUTO_DAY = false; ST.date = gn.dataset.d; ST.gid = "all"; save(); render(); swapIn($("#lst")); };
+    return; }
   if (ST.view === "markets") {
     lst.innerHTML = '<div class="mhd"><span>PLAYER</span><span>FANDUEL</span><span>DRAFTKINGS</span></div>' + list.map(mrow).join("");
     return;
@@ -1532,12 +1560,18 @@ function filterSheet() {
     upd();
   });
 }
+// Today / Tomorrow / Yesterday by the phone's calendar (the payload keeps last night's slate until 6 AM ET)
+function dayName(d) {
+  const t = new Date(), iso_ = x => `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`;
+  const off = k => { const x = new Date(t); x.setDate(x.getDate() + k); return iso_(x); };
+  return d === off(0) ? "Today" : d === off(1) ? "Tomorrow" : d === off(-1) ? "Yesterday" : d.slice(5).replace("-", "/");
+}
 function daySheet() {
   openSheet('<h2 id="sht">Day</h2>' + D.dates.filter(d => /^\d{4}-/.test(d)).map((d, i) => {
     const n = D.games.filter(g => g.date === d).length;
-    return `<button class="opt" data-date="${d}"><span>${i === 0 ? "Today" : i === 1 ? "Tomorrow" : d} · ${n} game${n === 1 ? "" : "s"}</span><span class="ck">${d === ST.date ? "✓" : ""}</span></button>`;
+    return `<button class="opt" data-date="${d}"><span>${dayName(d)} · ${n} game${n === 1 ? "" : "s"}</span><span class="ck">${d === ST.date ? "✓" : ""}</span></button>`;
   }).join(""), s => {
-    $$("[data-date]", s).forEach(b => b.onclick = () => { if (ST.date !== b.dataset.date) { ST.date = b.dataset.date; ST.gid = "all"; save(); render(); } closeSheet(); });
+    $$("[data-date]", s).forEach(b => b.onclick = () => { AUTO_DAY = false; if (ST.date !== b.dataset.date) { ST.date = b.dataset.date; ST.gid = "all"; save(); render(); swapIn($("#lst")); } closeSheet(); });
   });
 }
 // what the nightly replay (nba_research_score.py) found: each of the page's signals against what the price said
@@ -2726,7 +2760,9 @@ const sigOf = p => { const g = gameOf(p.gid) || {};
 const pageSig = id => { const p = propFor(id); if (!p) return ""; const g = gameOf(p.gid) || {};
   const around = JSON.stringify([D.injuries[g.date + "|" + p.pid] || null, (D.inj_report || {})[g.date + "|" + p.team] || null, D.absences[g.date + "|" + p.team] || null]);
   return p.v ? "v" + around : sigOf(p) + JSON.stringify(g) + around + JSON.stringify([D.related[p.id] || null, D.sources.books]); };
-let LOADED_AT = 0, PDOWN = false, REDRAW = false, FRESH = false, SAVED_AT = 0;
+let LOADED_AT = 0, PDOWN = false, REDRAW = false, FRESH = false, SAVED_AT = 0, HIDDEN_AT = 0;
+// the slate is chosen for the user (slateDay) at a launch and on a return after 30+ minutes away, until they pick a day
+let AUTO_DAY = true;
 // the last data this phone loaded (Cache Storage), drawn at once on a launch while the fresh copy downloads
 const CACHE = "pickz-data";
 function cacheRead() {
@@ -2757,7 +2793,7 @@ function load() {
   return fetch("nba_props.json?t=" + Date.now(), {cache: "no-store"}).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); })
     .then(text => {
       const j = JSON.parse(text);
-      FRESH = true; apply(j); cacheWrite(text);
+      FRESH = true; apply(j); cacheWrite(text); AUTO_DAY = false;
       if (boot) { busy(false); setTimeout(prefetch, 1500); }
       return true;
     })
@@ -2827,7 +2863,11 @@ document.addEventListener("DOMContentLoaded", () => {
   setInterval(load, 120000);
   setInterval(() => { if (!D) return; const u = $("#upd"), l = $("#lupd"); if (u) u.textContent = ago(D.generated_at); if (l) l.textContent = ago(D.generated_at); }, 30000);
   // back from another app: the 2-minute timer was asleep, so catch up at once
-  document.addEventListener("visibilitychange", () => { if (!document.hidden && D && Date.now() - LOADED_AT > 45000) load(); });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) { HIDDEN_AT = Date.now(); return; }
+    if (HIDDEN_AT && Date.now() - HIDDEN_AT > 1800000) AUTO_DAY = true;          // away a while: the slate may have moved on
+    if (D && Date.now() - LOADED_AT > 45000) load().then(() => { AUTO_DAY = false; });
+  });
 });
 })();
 """
