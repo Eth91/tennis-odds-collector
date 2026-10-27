@@ -45,19 +45,25 @@ NEED, REPLICATE = 2000, 2000
 
 
 def write_config(results=P.OUT_JSON, path=CONFIG):
-    """The candidate (A_keep) as the development run chose it: kept families, λ, its 2023-24 blend weight."""
+    """The candidate (A_keep) as the development run chose it: kept families, λ, its 2023-24 blend weight, the F0
+    regulars rule and the version name. PROJ11_1_RESULTS.json (amendment 1) carries proj-1.1.1."""
     r = json.loads(Path(results).read_text())
-    cfg = {"kept": r["kept"], "lambda": r["lambda"]["chosen"], "blend_w": r["blend_w"].get("A_keep", NP.PROJ_BLEND_W),
-           "from": f"{Path(results).name} generated {r['generated_at']}"}
+    if r.get("version") == "proj-1.1.1":
+        cfg = {"name": "proj-1.1.1", "kept": ["F0"], "lambda": r["lambda"], "blend_w": r["blend_w"]["A_keep"],
+               "f0_rule": r["f0_rule"], "from": f"{Path(results).name} generated {r['generated_at']}"}
+    else:
+        cfg = {"kept": r["kept"], "lambda": r["lambda"]["chosen"], "blend_w": r["blend_w"].get("A_keep", NP.PROJ_BLEND_W),
+               "from": f"{Path(results).name} generated {r['generated_at']}"}
     Path(path).write_text(json.dumps(cfg, indent=1))
     return cfg
 
 
 def load_config(path=CONFIG):
     cfg = json.loads(Path(path).read_text())
-    cfg["hash"] = hashlib.sha1(json.dumps({k: cfg[k] for k in ("kept", "lambda", "blend_w")}, sort_keys=True)
-                               .encode()).hexdigest()[:10]
-    cfg["version"] = f"{VERSION}:{cfg['hash']}"
+    cfg.setdefault("f0_rule", "1.1")                          # configs before amendment 1 used the old rule
+    keys = ("kept", "lambda", "blend_w") + (("f0_rule",) if cfg["f0_rule"] != "1.1" else ())
+    cfg["hash"] = hashlib.sha1(json.dumps({k: cfg[k] for k in keys}, sort_keys=True).encode()).hexdigest()[:10]
+    cfg["version"] = f"{cfg.get('name', VERSION)}:{cfg['hash']}"
     return cfg
 
 
@@ -91,7 +97,7 @@ def refresh11(targets, rows=None, raw=None, cfg=None, cache=CACHE, force=False, 
     nh_h, rs_h = np.array([o["n_hist"] for o in out], float), np.array([o["rest"] for o in out], float)
     trows = [dict(t, min=0.0, pts=0.0, reb=0.0, ast=0.0, fg3m=0.0, stl=0.0, blk=0.0, tov=0.0, fga=0.0, fta=0.0,
                   team_poss=0.0, name="", target=True) for t in slate]
-    X, names, fams, rep = FT.build(rows + trows, raw, families=tuple(cfg["kept"]))
+    X, names, fams, rep = FT.build(rows + trows, raw, families=tuple(cfg["kept"]), f0_rule=cfg["f0_rule"])
     fams, names = np.array(fams), list(names)
     cols = np.isin(fams, cfg["kept"])
     kn = [n for n, c in zip(names, cols) if c]
@@ -324,14 +330,14 @@ def _beats_text(dec, beats):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--write-config", action="store_true")
+    ap.add_argument("--write-config", metavar="RESULTS_JSON", nargs="?", const=str(P.OUT_JSON))
     ap.add_argument("--refresh", action="store_true")
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--forecast", action="store_true")
     ap.add_argument("--prospective", metavar="OUT_JSON")
     a = ap.parse_args()
     if a.write_config:
-        print("nba_proj11_live --write-config:", write_config())
+        print("nba_proj11_live --write-config:", write_config(a.write_config))
     if a.refresh:
         cfg = load_config()
         old = _load(CACHE)

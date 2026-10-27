@@ -1,8 +1,10 @@
 {
+ "name": "proj-1.1.1",
  "kept": [
   "F0"
  ],
  "lambda": 10,
  "blend_w": 0.8,
- "from": "PROJ11_RESULTS.json generated 2026-10-27T00:19:58Z"
+ "f0_rule": "1.1.1",
+ "from": "PROJ11_1_RESULTS.json generated 2026-10-27T01:28:50Z"
 }
