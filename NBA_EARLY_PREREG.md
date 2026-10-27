@@ -39,3 +39,42 @@ criteria as well."
 - **V1:** points over when B's projected FGA ≥ the points line and his season mpg ≥ 20.
 - **V0, the comparison:** the same spots with B's plain season FGA/g ≥ the line, which ignores the vacated shots.
 - **Baseline:** all points overs in the spots at 20+ mpg.
+
+---
+
+## Results (2026-10-27, about 10:15 UTC; `nba_early.py`)
+**Part 1, games 2–5** (n, hit rate, ROI; 2023-24 | 2024-25):
+
+| rule | games 2–5 | baseline 2–5 | the same rule in games 6+ |
+|---|---|---|---|
+| E1 FGA ≥ line, 20+ min | 99, 50.5%, −3.4% \| 94, 56.4%, +7.3% | −6.8% \| −2.4% | −2.1% \| −4.1% |
+| E2 blended | 87, −2.8% \| 71, −14.1% | | −3.1% \| −0.7% |
+| **E3 volume surge** | **149, 53.0%, +2.4% \| 146, 54.1%, +3.9%** | −6.8% \| −2.4% | **746, −9.8% \| 1,186, −2.9%** |
+| E4 potential assists 2× | 200, −9.0% \| 175, −12.6% | −9.6% \| −13.8% | −3.0% \| −3.0% |
+| E5 rebound chances 2× | 411, −4.6% \| 239, −3.1% | −6.5% \| −6.7% | −3.9% \| +0.5% |
+
+- **E3 passes,** and the same rule loses after game 5. That fits the user's thesis: early in the season the line
+  lags a player's new volume.
+- **The samples are small** (about 150 a season).
+
+**Part 2, vacated shots:**
+
+| | absence games 2–3: 2023-24 \| 2024-25 | absence game 1 (hindsight) |
+|---|---|---|
+| V1 projected FGA ≥ line | 244, 53.7%, +1.9% \| 233, 51.9%, −1.2% | −9.4% \| −0.0% |
+| V0 season FGA ≥ line | 163, 51.5%, −2.0% \| 171, 49.7%, −5.8% | +1.0% \| +3.5% |
+| baseline, 20+ min | 49.3%, −4.7% \| 50.2%, −3.5% | −8.3% \| −5.3% |
+
+V1 fails (−1.2% in 2024-25). Counting vacated shots still improves the volume rule by about 4 ROI points in both
+seasons over plain season FGA.
+
+# AMENDMENT 1: EARLY_SURGE, forward (written before it ran)
+- **The rule:** E3 at a book's opener (first two-sided main, up to tip − 5). The points over in the player's games
+  2–5 when all hold:
+  - this season's FGA/g ≥ 1.2 × last season's (last season ≥ 20 games, from `logs_full`);
+  - this season's mpg ≥ 20;
+  - this season's FGA/g ≥ 0.8 × the line.
+- **Data:** this season's FGA and minutes from nba_matchup.
+- **Registered** at 2026-10-27T13:00:00 UTC (side-by-side amendment 7).
+- **No pings,** as registered above, until a forward record exists. The user can change that.
+- The window is short (games 2–5), so this season's record comes in the next week or two.

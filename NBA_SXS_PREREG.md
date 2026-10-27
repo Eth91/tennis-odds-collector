@@ -214,3 +214,7 @@ backtest passes (NBA_RATIO_PREREG.md).
     restriction, unders. No pings.
 
 All three are registered at **2026-10-27T13:00:00 UTC**.
+
+# AMENDMENT 7: EARLY_SURGE (2026-10-27, before it ran)
+21. **EARLY_SURGE:** the early-season volume surge at the opener (`NBA_EARLY_PREREG.md` amendment 1). Registered at
+    **2026-10-27T13:00:00 UTC**; no pings.
