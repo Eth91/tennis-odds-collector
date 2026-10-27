@@ -110,6 +110,8 @@ TIP_WINDOW_MIN, TIP_FRESH_MIN, TIP_SLOTS = (5.0, 30.0), 10.0, 2
 # off automatically if the forward reading says so (nba_clv.filter_decision, read at the start of each pass).
 FILTER_EXCESS_MAX, FILTER_STAR_MAX, FILTER_PRICE_MIN = 2.0, 32.0, 1.80
 FILTERS_ON = True
+# AMENDMENT 32: rebounds are back on the card (amendment 28's rule 2 removed)
+FILTER_REB_ON = False
 # AMENDMENT 29: a wowy play is off the card when its team has 2+ star absences tonight (the projection splits
 # by ONE absent player). Off automatically if its forward check says so (nba_clv.stars_decision).
 STARS_RULE_ON = True
@@ -787,7 +789,7 @@ def _filter_reason(f):
         return None
     if _excess(f) >= FILTER_EXCESS_MAX:
         return "EDGE TOO BIG"
-    if f["stat"] in ("reb", "rebounds"):
+    if FILTER_REB_ON and f["stat"] in ("reb", "rebounds"):
         return "REBOUNDS OFF CARD"
     if f.get("x_min") is not None and f["x_min"] >= FILTER_STAR_MAX:
         return "STAR 32+ MIN"
