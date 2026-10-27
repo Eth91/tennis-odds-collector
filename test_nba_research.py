@@ -160,6 +160,10 @@ def test_slate_holds_until_6am_et():
 def test_payload_props_and_books(payload):
     ids = {p["id"] for p in payload["props"]}
     assert ids == {"G1|1|points", "G1|1|assists", "G1|2|points"}, ids          # no steals, no out-of-range game
+    # the line history, compact: whole minutes since hist_t0, prices to 3 places (as ISO strings it was 2/3 of a prop)
+    pts = [x for p in payload["props"] for h in p["hist"].values() for x in h]
+    assert pts and payload["hist_t0"] and all(isinstance(x[0], int) and x[0] >= 0 for x in pts)
+    assert all(x[k] is None or round(x[k], 3) == x[k] for x in pts for k in (2, 3))
     g1 = next(g for g in payload["games"] if g["gid"] == "G1")
     assert set(g1["spots"]) == {g1["home"], g1["away"]} and g1["spots"][g1["home"]]["rest"] is None   # each team's schedule spot
     b = next(p for p in payload["props"] if p["id"] == "G1|1|points")
@@ -383,7 +387,7 @@ def test_page_controls_work_on_iphone():
     assert 'if (ST.market === "movers") return list.map(p => [p, mover(p)])' in html and "k: Math.abs(mv) * 100 + gap" in html
     assert '(ST.iv === "lu" ? lineupsView() : ST.iv === "ro" ?' in html and "function luTeam(t, e)" in html and 'isNew(pid) ? " · NEW" : ""' in html
     # role changes (docs/player/roles.json), the Live tab (props under way from their closing boards: only there), game script
-    assert 'fetch("player/roles.json")' in html and "function rolesView()" in html and 'data-iv="ro"' in html
+    assert 'fetch("player/roles.json")' in html and "function rolesView(" in html and 'data-iv="ro"' in html
     assert 'const ALL_TABS = ["live", "trends", "movers"];' in html and "list = list.filter(p => !p.closed);" in html
     assert "function liveRow(p)" in html and 'st = liveStatus(x.v, x.line, over, live)' in html
     assert 'if (f.blow === "b" && !(Math.abs(l.margin) >= 15)) return false;' in html and 'tchip("blow", "b", "Blowouts")' in html
@@ -788,3 +792,16 @@ def test_page_navigation_guards():
     assert "if (tok === OPEN_N && CUR === at) openProp(id, push)" in html and "if (SHEET_N !== n0 || CUR !== at || MUP !== mu) return;" in html
     # a refresh: side files refetch, an open page redraws only if its data moved, after a finger lifts, keeping the game log open
     assert "REFS = null; ROLES = null;" in html and "if (CUR && pageSig(CUR) !== pg0) redrawPage();" in html and "if (PDOWN) { REDRAW = true; return; }" in html
+
+
+def test_page_boots_from_its_last_copy_and_animates_swaps():
+    html = UI.page()
+    # no pull to refresh (the user found it bad); the 2-minute refresh and the back-from-another-app refresh stay
+    assert "pullRefresh" not in html and ".ptr" not in html and "setInterval(load, 120000)" in html and '"visibilitychange"' in html
+    # a launch draws the phone's last copy (Cache Storage) while the fresh one downloads; no "Feed delayed" off a stale copy
+    assert 'caches.open(CACHE).then(c => c.match("nba_props.json"))' in html and "if (j && !D && !FRESH) apply(j);" in html
+    assert 'if (FRESH && (Date.now() - iso(D.generated_at).getTime()) / 60000 > 10) out.push("Feed delayed");' in html
+    assert "function prefetch() { refsLoad(); rolesLoad(); playerIndex(); }" in html and "setTimeout(prefetch, 1500)" in html
+    # swaps rise in; Over / Under, the combo window and the Injuries switch slide their pills; Live's bars grow on entry
+    assert html.count("swapIn(") >= 9 and '<span class="ou" role="group" aria-label="Side"><span class="pill2">' in html
+    assert '<div class="seg cbw" role="group" aria-label="Games"><span class="pill2">' in html and ".lvin .lvbar i{" in html
