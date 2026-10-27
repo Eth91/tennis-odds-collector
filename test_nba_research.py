@@ -357,6 +357,11 @@ def test_page_controls_work_on_iphone():
     # in its zone), made green over missed red rings, Shots by default for the player, Zones as before; defense: zones
     assert "const SH_R3 = 237.5, SH_CX = 220," in html and "fetch(`shots/p/${pid}.json`)" in html
     assert 'shView: "player", shSeason: null, shMode: "shots"' in html and 'const dotsOn = MUP.shView !== "def" && MUP.shMode !== "zones";' in html
+    # Movers (a line moved since open, or the books disagree: the move first), Lineups beside Injuries (NEW starters, the usual
+    # five not starting), who guards him on the Matchup page (docs/matchups/{pid}.json, nba_defmatch)
+    assert 'if (ST.market === "movers") return list.map(p => [p, mover(p)])' in html and "k: Math.abs(mv) * 100 + gap" in html
+    assert '(ST.iv === "lu" ? lineupsView() : injView())' in html and "function luTeam(t, e)" in html and 'isNew(pid) ? " · NEW" : ""' in html
+    assert "fetch(`matchups/${pid}.json`)" in html and '<div class="shc wg" id="wgd"></div>' in html and "guardCard();" in html
     # the floating header fades what scrolls under it (no text under its title)
     assert '.ph::before{content:"";position:absolute;' in html
     # every sheet in the player page's look: near-black with a thin edge, capsule toggles, outline chips and buttons,
@@ -379,7 +384,7 @@ def test_page_controls_work_on_iphone():
     assert html.index('.forEach(rchip);') < html.index('tchip("starter", true, "Starter")') < html.index("if (c.dvp_rank) chips.push(")
     assert 'win: windowed(logsOf(p), "season", D.season).length ? "season" : "l10"' in html
     assert 'if (x.n < 5) return {t: pct(x.rate), c: "sm"};' in html and 'h + "/" + x.n' not in html
-    assert 'const ALL_TABS = ["trends"];' in html and 'injury: "Injuries"' not in html and '"injury"' not in html
+    assert 'const ALL_TABS = ["trends", "movers"];' in html and 'injury: "Injuries"' not in html and '"injury"' not in html
     # motion runs as Web Animations with a timer fallback, and nothing is fetched from a font CDN
     assert ".animate([" in html and "setTimeout(done" in html and "fonts.googleapis" not in html
     # every range chip but Margin draws its stat on the chart as white outline boxes (Margin can be negative: filter only)
@@ -629,3 +634,31 @@ def test_mutants_research_plus():
             globals()["RS"] = saved
             sys.modules["nba_research"] = saved
             sys.path.remove(str(d))
+
+
+def test_lineups_flags_new_starters_and_missing_regulars():
+    import zlib
+    lc = sqlite3.connect(":memory:")
+    lc.execute("CREATE TABLE snaps (fetched_at TEXT, date_et TEXT, sha TEXT, body BLOB)")
+    P = lambda pid, nm, pos, st="Confirmed", ro="Active", ts="2026-10-26T22:32:00": {
+        "personId": pid, "playerName": nm, "position": pos, "lineupStatus": st, "rosterStatus": ro, "timestamp": ts}
+    early = {"games": [{"gameId": "G1", "homeTeam": {"teamAbbreviation": "PHX", "players": [P(1, "A One", "PG", "Expected")]}}]}
+    late = {"games": [{"gameId": "G1", "homeTeam": {"teamAbbreviation": "PHX", "players": [
+        P(1, "A One", "PG"), P(2, "B Two", "SG"), P(3, "C Three", "SF"), P(4, "D Four", "PF", ts="2026-10-26T22:40:00"),
+        P(9, "New Nine", "C"), P(5, "E Five", ""), P(6, "F Six", "", ro="Inactive")]},
+        "awayTeam": {"teamAbbreviation": "SAC", "players": [P(20, "Exp Twenty", "PG", "Expected")]}}]}
+    lc.execute("INSERT INTO snaps VALUES ('2026-10-26T20:00:00+00:00', ?, 'a', ?)", (GD, zlib.compress(json.dumps(early).encode())))
+    lc.execute("INSERT INTO snaps VALUES ('2026-10-26T23:00:00+00:00', ?, 'b', ?)", (GD, zlib.compress(json.dumps(late).encode())))
+    # PHX's last 10 games before tonight: 1-5 start every one (5 is its regular center); an older game does not count
+    boxes = {"PHX": [(f"g{i}", f"2026-10-{i + 1:02d}", "2026-27", {**{k: (1, 30) for k in (1, 2, 3, 4, 5)}, 9: (0, 12)})
+                     for i in range(11)] + [("g99", GD, "2026-27", {7: (1, 30)})]}           # tonight's own: not before it
+    boxes["SAC"] = [(f"s{i}", f"2026-10-2{i}", "2026-27", {21: (1, 30)}) for i in (1, 3)]      # 2 games this season
+    boxes["SAC"] += [(f"o{i}", f"2026-03-{i + 1:02d}", "2025-26", {22: (1, 30)}) for i in range(10)]   # last season's
+    out = RS.lineups(lc, [GD, "2026-10-27"], boxes, {(GD, 5): {"status": "Questionable"}})
+    assert out[f"{GD}|SAC"]["usual"] == [] and out[f"{GD}|SAC"]["missing"] == []      # under 3 this season: nothing marked
+    e = out[f"{GD}|PHX"]
+    assert e["status"] == "Confirmed" and e["at"] == "2026-10-26T22:40:00"                     # the latest snapshot
+    assert [s[0] for s in e["starters"]] == [1, 2, 3, 4, 9] and e["starters"][4] == [9, "New Nine", "C"]
+    assert sorted(e["usual"]) == [1, 2, 3, 4, 5] and e["missing"] == [[5, "E Five", "Questionable"]]
+    assert e["inactive"] == [[6, "F Six"]] and out[f"{GD}|SAC"]["status"] == "Expected"
+    assert not any(k.startswith("2026-10-27") for k in out)                                    # no snapshot yet

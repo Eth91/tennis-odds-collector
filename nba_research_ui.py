@@ -310,6 +310,28 @@ svg.shct{display:block;width:100%;height:auto;margin-top:6px}
 .vpr{width:100%;text-align:left} .vpr .vgo{position:absolute;right:16px;top:20px;font-size:20px;color:#6e6e6e}
 .bx tr[data-vp]{cursor:pointer} .bx tr[data-vp]:active td{background:#222}
 .ir[data-vp]{cursor:pointer}
+/* Lineups (beside Injuries): a card a game, each team's five as tiles, NEW for a starter outside its usual five */
+.seg.ivs{margin:10px 15.3px 2px;position:relative} .seg.ivs button{position:relative;z-index:1;background:none} .seg.ivs .pill2{background:#313131}
+.lug{margin:14px 15.3px 0;border:1px solid #2a2a2a;border-radius:16px;background:#121212;overflow:hidden}
+.lugh{display:flex;justify-content:space-between;padding:10px 14px;font-size:11.5px;letter-spacing:.3px;color:#8e8e8e;text-transform:uppercase;border-bottom:1px solid #222}
+.lut{padding:10px 12px 12px;border-bottom:1px solid #222} .lut:last-child{border-bottom:0}
+.luth{display:flex;align-items:center;gap:8px;font-size:15px} .luth img{width:22px;height:22px} .luth em{margin-left:auto;font-style:normal;font-size:12px;color:#8e8e8e}
+.lur{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}
+.lus{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;padding:7px 2px;border:1px solid #262626;border-radius:12px;background:#181818;color:#fff}
+.lus:active{background:#222} .lus.new{border-color:var(--org)}
+.lus .av{position:relative;left:auto;top:auto;width:40px;height:40px}
+.lus .av .hs{left:-8px;top:1px;width:56px}
+.lus b{max-width:100%;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lus i{font-style:normal;font-size:10.5px;color:#9a9a9a} .lus.new i{color:var(--org);font-weight:700}
+.lum{margin-top:9px;font-size:12.5px;color:#b0b0b0;line-height:1.7}
+.lum b{margin-right:6px;font-size:10.5px;letter-spacing:.3px;color:#8e8e8e;text-transform:uppercase}
+.lum button{padding:0;border:0;background:none;color:#e6e6e6;font-size:12.5px} .lum .tg{margin:0 0 0 4px}
+/* who guards him: the shot chart's card, the recent games' table */
+.wg table.vs{margin-top:6px} .wg .vs th:first-child,.wg .vs td:first-child{padding-left:0}
+.wg .vs td small{font-size:11px;color:#9a9a9a} .wg .vs tr:last-child td{border-bottom:0}
+.wg .vs tr[data-vp]{cursor:pointer}
+/* the Movers tab: the line from its open */
+.lin .mvo{color:#9a9a9a} .lin .mv.up{color:var(--grn)} .lin .mv.dn{color:var(--red)}
 /* the box score sheet: one height whatever is in it, so it never resizes while it rises; a skeleton of the box's shape */
 .sheet[data-kind="box"]{height:86vh}
 .sheet[data-kind="box"] .seg{position:relative}
@@ -787,7 +809,7 @@ let D = null, ERR = null, LOADING = true, CUR = null;
 // on a touchscreen, moving focus by script only draws a ring (and focusing a <select> can pop its picker)
 const TOUCH = matchMedia("(pointer: coarse)").matches;
 const ST = {date: null, gid: "all", market: "points", side: "over", q: "", sort: "hit10", dir: "desc", team: "all",
-            book: "all", lmin: "", lmax: "", omin: "", omax: "", watch: "", view: "props"};
+            book: "all", lmin: "", lmax: "", omin: "", omax: "", watch: "", view: "props", iv: ""};
 const DT = {line: null, win: "l10", home: null, starter: null, result: null, rest: null, ranges: {}, without: {}, with: {},
             dvp: false, def: false, open: {}, more: false, fresh: null, ovs: []};
 const RANGES = [["min", "Minutes", "Minutes"], ["fga", "Field goal attempts", "FGA"], ["fg3a", "3-point attempts", "3PTA"],
@@ -854,8 +876,8 @@ function when(g) {
 }
 const vs = p => p.team ? (p.home ? "vs " : "@ ") + p.opp : "";
 // ── list ──
-const MKT_TABS = ["trends", "points", "assists", "rebounds", "threes", "pra", "pts_reb", "pts_ast", "reb_ast"];
-const ALL_TABS = ["trends"];                    // tabs that span every market
+const MKT_TABS = ["trends", "movers", "points", "assists", "rebounds", "threes", "pra", "pts_reb", "pts_ast", "reb_ast"];
+const ALL_TABS = ["trends", "movers"];          // tabs that span every market
 // Trends (nba_research_score.trend_side): the L10 and L20 hit rates both 1+ SD from what the price implies, the same
 // way, 8+ games each. A plain 70% L10 put a third of the slate in Trends and ignored the price.
 const VIEWS = [["props", "Props"], ["markets", "Markets"], ["injuries", "Injuries"]];
@@ -925,6 +947,13 @@ function moveOf(p) {                              // the main line's move since 
   if (!h || !h.length || !p.books[bk] || p.books[bk].main === null) return 0;
   return Math.round((p.books[bk].main - h[0][1]) * 2) / 2;
 }
+// a line on the move: its main line's move since the book opened it (moveOf), or FanDuel and DraftKings posting different
+// main lines; k ranks them (a half-point move outranks any gap)
+function mover(p) {
+  const mv = moveOf(p), fd = p.books.fd, dk = p.books.dk;
+  const gap = fd && dk && fd.main !== null && dk.main !== null ? Math.abs(fd.main - dk.main) : 0;
+  return mv || gap ? {mv: mv, gap: gap, k: Math.abs(mv) * 100 + gap} : null;
+}
 function availMarkets() {
   const m = {};
   D.props.forEach(p => { const g = gameOf(p.gid); if (g && g.date === ST.date) m[p.market] = 1; });
@@ -935,6 +964,8 @@ function listProps() {
   const st = Object.assign({}, ST, {market: ALL_TABS.indexOf(ST.market) >= 0 ? "all" : ST.market});
   let list = filterProps(D.props, st, gameOf, logsOf);
   if (ST.watch) { const f = favs(); list = list.filter(p => f.indexOf(p.pid) >= 0); }
+  // Movers: the biggest line move since open first, then the widest FanDuel / DraftKings gap
+  if (ST.market === "movers") return list.map(p => [p, mover(p)]).filter(x => x[1]).sort((a, b) => b[1].k - a[1].k).map(x => x[0]);
   // Trends: strongest first
   if (ST.market === "trends") return list.map(p => [p, trend(p)]).filter(x => x[1] && x[1].side === ST.side).sort((a, b) => b[1].z - a[1].z).map(x => x[0]);
   return sortProps(list, ST.sort, ST.dir, logsOf, ST.side, D.season);
@@ -953,7 +984,7 @@ function row(p) {
   const differ = fd && dk && fd.main !== null && dk.main !== null && fd.main !== dk.main ? `DK ${dk.main}` : null;
   return `<button class="pr" data-id="${esc(p.id)}"><span class="av">${head(p.pid)}</span>
     <div class="who"><div class="nm">${esc(nameOf(p.player))}<span class="cd">${esc(p.team || "")}</span>${injTag(p)}${live}${p.flag ? '<span class="tg tf">ENGINE</span>' : ""}</div>
-    <div class="lin num">${p.main === null ? "alt lines" : p.main + " " + esc(unit(p.market))}${p.proj ? `<span class="pjm" title="model projection (mean), not a book line">proj ${(+p.proj.mean).toFixed(1)}</span>` : ""}${mv ? `<span class="mv" aria-label="line ${mv > 0 ? "up" : "down"} ${Math.abs(mv)} since open">${mv > 0 ? "▲" : "▼"}${Math.abs(mv)}</span>` : ""}${wo ? `<span class="pl ${wo.z === null ? "" : wo.z >= 1 ? "up" : wo.z <= -1 ? "dn" : ""}" title="${esc(out.name || "")} is ${esc(out.status)}: his ${side} hit rate without him">W/O ${esc(lastName(out.name).slice(0, 10))}${wo.n ? " " + wo.hits + "/" + wo.n : ""}</span>` : ""}</div></div>
+    <div class="lin num">${ST.market === "movers" && mv ? `<span class="mvo">${r1(p.main - mv)} →</span> ${p.main} ${esc(unit(p.market))}<span class="mv ${mv > 0 ? "up" : "dn"}">${mv > 0 ? "▲" : "▼"}${Math.abs(mv)}</span>` : (p.main === null ? "alt lines" : p.main + " " + esc(unit(p.market))) + (ST.market === "movers" ? "" : `${p.proj ? `<span class="pjm" title="model projection (mean), not a book line">proj ${(+p.proj.mean).toFixed(1)}</span>` : ""}${mv ? `<span class="mv" aria-label="line ${mv > 0 ? "up" : "down"} ${Math.abs(mv)} since open">${mv > 0 ? "▲" : "▼"}${Math.abs(mv)}</span>` : ""}${wo ? `<span class="pl ${wo.z === null ? "" : wo.z >= 1 ? "up" : wo.z <= -1 ? "dn" : ""}" title="${esc(out.name || "")} is ${esc(out.status)}: his ${side} hit rate without him">W/O ${esc(lastName(out.name).slice(0, 10))}${wo.n ? " " + wo.hits + "/" + wo.n : ""}</span>` : ""}`)}</div></div>
     <div class="oc o"><i${differ ? ' class="df" title="the books post different main lines"' : ""}>${differ || "ODDS"}</i><b class="num">${best ? american(best.odds) : "–"}</b></div>
     <div class="oc e"><i>VALUE</i><b class="num ${ev === null ? "" : ev > 0 ? "up" : "mu"}">${ev === null ? "–" : (ev > 0 ? "+" : "") + (ev * 100).toFixed(1) + "%"}</b></div>
     <div class="bx6 num" aria-label="Hit rates">${cell(D.season.slice(0, 4), "season")}${cell("H2H", "h2h")}<div><i>DvP</i>${dv}</div>${cell("L5", "l5")}${cell("L10", "l10")}${cell("L20", "l20")}</div></button>`;
@@ -1050,7 +1081,13 @@ function searchPlayers(q) {
 function renderRows() {
   const lst = $("#lst"), ml = $(".ml");
   if (ml) ml.style.display = ST.view === "injuries" ? "none" : "";
-  if (ST.view === "injuries") { lst.innerHTML = injView(); return; }
+  if (ST.view === "injuries") {
+    lst.innerHTML = `<div class="seg ivs" role="group" aria-label="Show"><span class="pill2"></span><button data-iv="" aria-pressed="${ST.iv !== "lu"}">Injuries</button><button data-iv="lu" aria-pressed="${ST.iv === "lu"}">Lineups</button></div>` +
+      (ST.iv === "lu" ? lineupsView() : injView());
+    slide($(".ivs", lst), true);
+    $$("[data-iv]", lst).forEach(b => b.onclick = () => { if (ST.iv !== b.dataset.iv) { ST.iv = b.dataset.iv; save(); renderList(); } });
+    return;
+  }
   const onDate = D.props.filter(p => (gameOf(p.gid) || {}).date === ST.date), list = listProps();
   let body = null;
   if (!D.games.some(g => g.date === ST.date)) body = '<div class="empty"><b>No games</b></div>';
@@ -1059,6 +1096,7 @@ function renderRows() {
   else if (!list.length && ST.q.trim().length >= 2) body = '<div class="lhd"><span>No props</span></div>';
   else if (!list.length) body = ST.watch ? '<div class="empty"><b>Watchlist empty</b><button class="btn" id="reset2">Reset filters</button></div>'
     : ST.market === "trends" ? '<div class="empty"><b>No trends</b></div>'
+    : ST.market === "movers" ? '<div class="empty"><b>No movers</b></div>'
     : '<div class="empty"><b>No matches</b><button class="btn" id="reset2">Reset filters</button></div>';
   if (body) { lst.innerHTML = body; const r2 = $("#reset2"); if (r2) r2.onclick = resetFilters; return; }
   if (ST.view === "markets") {
@@ -1075,7 +1113,7 @@ function renderRows() {
     frag.appendChild(h);
   }
   list.forEach(p => {
-    const k = p.id + "|" + ST.side + "|" + ST.book;
+    const k = p.id + "|" + ST.side + "|" + ST.book + (ST.market === "movers" ? "|mv" : "");
     let e = ROWS.get(k);
     if (!e) { const t = document.createElement("template"); t.innerHTML = row(p).trim(); e = t.content.firstChild; ROWS.set(k, e); }
     frag.appendChild(e);
@@ -1137,6 +1175,25 @@ function injView() {
   const list = injList();
   return `<div class="lhd"><span>${list.length} players</span><span>Report ${esc(mt(rep.published, true))}</span></div>` +
     (list.length ? list.map(injRow).join("") : '<div class="empty"><b>No injuries</b></div>');
+}
+// ── lineups (nba_research.lineups, NBA.com's daily lineups): each team's five, Confirmed or Expected; a starter outside its
+// usual five (its most frequent over the last 10 games) marked NEW, a usual starter not starting listed with his report
+// status, the inactive list; a tap opens the player ──
+function lineupsView() {
+  const gs = D.games.filter(g => g.date === ST.date && (ST.gid === "all" || g.gid === ST.gid)), L = D.lineups || {};
+  if (!gs.length) return '<div class="empty"><b>No games</b></div>';
+  if (!gs.some(g => L[g.date + "|" + g.home] || L[g.date + "|" + g.away])) return '<div class="empty"><b>Lineups not posted yet</b></div>';
+  return gs.map(g => `<div class="lug"><div class="lugh"><span>${esc(g.away)} @ ${esc(g.home)}</span><span>${when(g)}</span></div>${[g.away, g.home].map(t => luTeam(t, L[g.date + "|" + t])).join("")}</div>`).join("");
+}
+function luTeam(t, e) {
+  if (!e) return `<div class="lut"><div class="luth">${logo(t, "")}<b>${esc(t)}</b><span class="tg tn">NOT POSTED</span></div></div>`;
+  const usual = new Set(e.usual), isNew = pid => usual.size > 0 && !usual.has(pid);
+  const tiles = e.starters.map(([pid, name, pos]) => `<button class="lus${isNew(pid) ? " new" : ""}" data-vp="${pid}"><span class="av">${head(pid)}</span><b>${esc(lastName(name))}</b><i>${esc(pos)}${isNew(pid) ? " · NEW" : ""}</i></button>`).join("");
+  const miss = e.missing.length ? `<div class="lum"><b>Not starting</b>${e.missing.map(([pid, name, st]) => `<button data-vp="${pid}">${esc(nameOf(name))}</button>${st ? `<span class="tg ${INJ_C[st] || "tn"}">${INJ_S[st] || esc(String(st).toUpperCase())}</span>` : ""}`).join(", ")}</div>` : "";
+  const ina = e.inactive.length ? `<div class="lum"><b>Inactive</b>${e.inactive.map(([, name]) => esc(nameOf(name))).join(", ")}</div>` : "";
+  const ok = e.status === "Confirmed";
+  return `<div class="lut"><div class="luth">${logo(t, "")}<b>${esc(t)}</b><span class="tg ${ok ? "tp" : "tq"}">${ok ? "CONFIRMED" : "EXPECTED"}</span>${ok && e.at ? `<em>${esc(mt(e.at))}</em>` : ""}</div>
+    <div class="lur">${tiles}</div>${miss}${ina}</div>`;
 }
 function tabbar() {
   const tb = $("#tb"), fo = filtersOn();
@@ -1237,7 +1294,7 @@ function filterSheet() {
     <label class="fl"><span>Odds to</span><input id="f-omax" type="number" inputmode="numeric" placeholder="+150" value="${esc(dr.omax)}"></label></div>
     <div class="acts stk"><button class="btn" id="f-reset">Reset</button><button class="btn pri" id="f-ok"></button></div>`, s => {
     const read = () => { dr.team = $("#f-team", s).value; dr.book = $("#f-book", s).value; ["lmin", "lmax", "omin", "omax"].forEach(k => dr[k] = $("#f-" + k, s).value); };
-    const upd = () => { read(); const f = favs(), n = sortProps(filterProps(D.props, Object.assign({}, dr, {market: dr.market === "trends" ? "all" : dr.market}), gameOf, logsOf).filter(p => !dr.watch || f.indexOf(p.pid) >= 0), dr.sort, dr.dir, logsOf, dr.side, D.season).length; $("#f-ok", s).textContent = ST.market === "trends" ? "Apply" : `Show ${n} prop${n === 1 ? "" : "s"}`; };
+    const upd = () => { read(); const f = favs(), n = sortProps(filterProps(D.props, Object.assign({}, dr, {market: ALL_TABS.indexOf(dr.market) >= 0 ? "all" : dr.market}), gameOf, logsOf).filter(p => !dr.watch || f.indexOf(p.pid) >= 0), dr.sort, dr.dir, logsOf, dr.side, D.season).length; $("#f-ok", s).textContent = ALL_TABS.indexOf(ST.market) >= 0 ? "Apply" : `Show ${n} prop${n === 1 ? "" : "s"}`; };
     $$("[data-sd]", s).forEach(b => b.onclick = () => { dr.side = b.dataset.sd; press("[data-sd]", x => x === b, s); upd(); });
     $$("[data-wl]", s).forEach(b => b.onclick = () => { dr.watch = b.dataset.wl; press("[data-wl]", x => x === b, s); upd(); });
     $$("[data-sort]", s).forEach(b => b.onclick = () => {
@@ -1415,7 +1472,7 @@ const TEAMS = {ATL: ["Atlanta Hawks", "#C8102E"], BOS: ["Boston Celtics", "#007A
 const POSN = {PG: "Point Guard", SG: "Shooting Guard", SF: "Small Forward", PF: "Power Forward", C: "Center", G: "Guard",
   F: "Forward", "G-F": "Guard-Forward", "F-G": "Forward-Guard", "F-C": "Forward-Center", "C-F": "Center-Forward"};
 const TAB_ORDER = ["points", "assists", "rebounds", "threes", "pts_ast", "pts_reb", "reb_ast", "pra"];
-const TAB = {trends: "Trends", points: "Points", rebounds: "Rebs", assists: "Assists", threes: "3PTM", pra: "PRA", pts_reb: "P+R", pts_ast: "P+A", reb_ast: "R+A"};
+const TAB = {trends: "Trends", movers: "Movers", points: "Points", rebounds: "Rebs", assists: "Assists", threes: "3PTM", pra: "PRA", pts_reb: "P+R", pts_ast: "P+A", reb_ast: "R+A"};
 const GRPN = {G: "guards", F: "forwards", C: "centers"};
 const ICON = {
   back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
@@ -2043,6 +2100,7 @@ function renderMatchup() {
     <h2 class="mpt">${esc(p.opp || "")} Team Defense</h2>
     <div class="mpf"><span>Recent Games vs</span>${dd("grp", VS_GRP, MUP.grp)}${dd("mkt", TAB_ORDER.map(m => [m, NAME[m]]), MUP.mkt)}</div>
     <div id="vst"></div>
+    <div class="shc wg" id="wgd"></div>
     <div class="shc" id="shc"></div>`;
   $(".bk", mp).onclick = () => history.back();
   $("#mps", mp).onclick = () => { history.go(-2); setTimeout(() => { if (ST.view !== "props") { ST.view = "props"; save(); tabbar(); renderList(); } const q = $("#q"); if (q) q.focus(); }, 480); };
@@ -2054,6 +2112,7 @@ function renderMatchup() {
     <div class="kv"><span>Last season's weight</span><b>${c.rank_n != null ? Math.round(15 / (15 + c.rank_n) * 100) + "%" : "—"}</b></div>
     <div class="kv"><span>1st</span><b>the toughest</b></div>
     <div class="acts"><button class="btn pri" id="mpi-ok">Done</button></div>`, s => { $("#mpi-ok", s).onclick = closeSheet; });
+  guardCard();
   shotLoad(D.season).then(j => {                       // this season once the opponent has 10 games, else last season
     if (!MUP || MUP.p !== p) return;
     const t = j && j.teams[p.opp];
@@ -2171,6 +2230,37 @@ function shotCard() {
     $$("[data-shv]", el).forEach(b => b.onclick = () => { if (MUP.shView !== b.dataset.shv) { MUP.shView = b.dataset.shv; shotCard(); } });
     $$("[data-shs]", el).forEach(b => b.onclick = () => { if (MUP.shSeason !== b.dataset.shs) { MUP.shSeason = b.dataset.shs; shotCard(); } });
     $$("[data-shm]", el).forEach(b => b.onclick = () => { if ((MUP.shMode || "shots") !== b.dataset.shm) { MUP.shMode = b.dataset.shm; shotCard(); } });
+  });
+}
+// ── who guards him (docs/matchups/{pid}.json, nba_defmatch: NBA.com's tracking matchups): the opponent's players now
+// (the player index) who have guarded him, most possessions first; possessions, points, FG and 3PT in them; the season
+// with the most possessions against them first; a row opens the defender ──
+const MATCHC = new Map();
+function matchLoad(pid) {
+  if (!MATCHC.has(pid)) MATCHC.set(pid, fetch(`matchups/${pid}.json`).then(r => r.ok ? r.json() : null).catch(() => null));
+  return MATCHC.get(pid);
+}
+function guardCard() {
+  const el = $("#wgd");
+  if (!el || !MUP) return;
+  const p = MUP.p;
+  Promise.all([matchLoad(p.pid), playerIndex()]).then(([m, pl]) => {
+    if (!MUP || MUP.p !== p) return;
+    const roster = new Set(pl.filter(r => r[2] === p.opp).map(r => r[0])), s = (m && m.s) || {};
+    const vs = season => (s[season] || []).filter(r => roster.has(r[0]));
+    const poss = season => vs(season).reduce((a, r) => a + r[3], 0);
+    if (!MUP.gSeason) MUP.gSeason = poss(D.season) >= poss(prevSeason(D.season)) ? D.season : prevSeason(D.season);
+    const rows = vs(MUP.gSeason), pc = (m_, a) => a ? Math.round(m_ / a * 100) + "%" : "–";
+    const head_ = `<div class="shh"><span class="av">${head(p.pid)}</span><b>WHO GUARDS HIM</b>${logo(p.opp, "shl0")}</div>
+      <div class="shy" role="group" aria-label="Season">${[D.season, prevSeason(D.season)].map(x => `<button class="chip" data-gs="${x}" aria-pressed="${x === MUP.gSeason}">${x.slice(0, 4)}</button>`).join("")}
+        <span>${rows.length ? Math.round(poss(MUP.gSeason)) + " possessions" : ""}</span></div>`;
+    el.innerHTML = head_ + (rows.length ? `<table class="vs"><colgroup><col style="width:38%"><col style="width:14%"><col style="width:12%"><col style="width:20%"><col></colgroup>
+      <thead><tr><th>DEFENDER</th><th>POSS</th><th>PTS</th><th>FG</th><th>3PT</th></tr></thead>
+      <tbody>${rows.slice(0, 8).map(r => `<tr data-vp="${r[0]}"><td>${esc(initialName(r[1]))}</td><td>${Math.round(r[3])}</td><td>${Math.round(r[4])}</td>
+        <td>${Math.round(r[5])}/${Math.round(r[6])} <small>${pc(r[5], r[6])}</small></td><td>${Math.round(r[7])}/${Math.round(r[8])}</td></tr>`).join("")}</tbody></table>`
+      : `<div class="empty"><b>No matchups vs ${esc(p.opp || "")} yet</b></div>`);
+    $$("[data-gs]", el).forEach(b => b.onclick = () => { if (MUP.gSeason !== b.dataset.gs) { MUP.gSeason = b.dataset.gs; guardCard(); } });
+    $$("tr[data-vp]", el).forEach(t => t.onclick = () => openPlayer(+t.dataset.vp));
   });
 }
 // ── player filters ──
