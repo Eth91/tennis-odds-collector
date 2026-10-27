@@ -145,3 +145,32 @@ def test_game_logs_drop_impossible_tracking_values():
     C = {c: k for k, c in enumerate(R.LOG_COLS)}
     logs = R.game_logs(m, [7], ("2026-27",), tr)[7]
     assert [(l[C["pot_ast"]], l[C["reb_ch"]]) for l in logs] == [(12, 14), (None, None), (4, 5)]   # 45 / 30 min > 1.4 too
+
+
+def test_roles_only_players_with_a_line_this_season():
+    d = pathlib.Path(tempfile.mkdtemp())
+    q = sqlite3.connect(d / "lines.sqlite")
+    q.execute("CREATE TABLE quotes (seen_at TEXT, book TEXT, gid TEXT, tip_utc TEXT, pid INTEGER, player TEXT, stat TEXT, "
+              "line REAL, side TEXT, odds REAL)")
+    q.executemany("INSERT INTO quotes VALUES (?, 'fd', 'g', '', ?, '', 'points', 10.5, 'over', 1.9)",
+                  [("2026-10-23T01:00:00", 1), ("2026-10-24T01:00:00", 1), ("2026-04-01T01:00:00", 2), ("2026-10-23T01:00:00", None)])
+    assert PL.lined_players(q, "2026-27") == {1}           # 2 only had lines last season; an unmatched quote is skipped
+    m = MU.connect(d / "m.sqlite")
+    PG = "INSERT INTO player_games (gid, team, pid, pos, starter, min, pts, reb, ast, fg3m, stl, blk, tov, fga, fg3a, fta) " \
+         "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+    for i in range(12):
+        m.execute("INSERT INTO games (gid, season, date, home, away, home_pts, away_pts) VALUES (?,?,?,?,?,100,90)",
+                  (f"m{i}", "2025-26", f"2026-01-{i + 1:02d}", "MIN", "WAS"))
+        for pid in (1, 2):
+            m.execute(PG, (f"m{i}", "MIN", pid, "F", 0, 15, 6, 3, 1, 1, 0, 0, 1, 6, 2, 1))
+    for i in range(4):
+        m.execute("INSERT INTO games (gid, season, date, home, away, home_pts, away_pts) VALUES (?,?,?,?,?,100,90)",
+                  (f"g{i}", "2026-27", f"2026-10-{21 + i}", "MIN", "WAS"))
+        for pid in (1, 2):
+            m.execute(PG, (f"g{i}", "MIN", pid, "F", 1, 30, 14, 6, 3, 2, 0, 0, 1, 12, 4, 3))     # both up 15 minutes
+    m.commit()
+    idx = {"1": ["MIN", "Has Line", "F"], "2": ["MIN", "No Line", "F"]}
+    PL.build(m, d / "player", idx, "2026-27", lined=PL.lined_players(q, "2026-27"))
+    assert [r["pid"] for r in json.loads((d / "player" / "roles.json").read_text())["rows"]] == [1]
+    PL.build(m, d / "player", idx, "2026-27")                                      # no lines store: everyone
+    assert sorted(r["pid"] for r in json.loads((d / "player" / "roles.json").read_text())["rows"]) == [1, 2]
