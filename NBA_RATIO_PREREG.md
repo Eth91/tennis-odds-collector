@@ -56,3 +56,15 @@ fetched into a research copy (`.projdata/tracking_hist.sqlite`), never the VM's 
   - A sweep tries many thresholds, so the best one on a season is always optimistic. The other season is the
     real number.
   - These are tip lines; a threshold that works there would very likely work at softer openers too.
+
+# AMENDMENT 2: minutes first (written 2026-10-27, about 08:50 UTC, before it ran)
+**User:** "I usually do them correlated with minutes, so they have to have a decent amount of minutes like 20+, and
+then have 1-1.2x+ as many FGA as points line."
+
+- **FGA20:** his season-to-date minutes per game ≥ 20 **and** FGA per game ≥ k × the points line.
+  - Primary: k = 1.0. Also reported: k = 1.1 and k = 1.2.
+- **Baseline:** every points over among players at 20+ minutes.
+- **Same pass bar:** ROI > 0 in both seasons and above that baseline in both.
+- **The solver curve** (k from 0.80 to 1.50) restricted to 20+ minutes, using amendment 1's pick-and-check rule.
+- **The minutes condition is applied to PA and RC too** (20+ minutes, at their 2× rule and in the solver), and
+  reported beside the unfiltered versions.
