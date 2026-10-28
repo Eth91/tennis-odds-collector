@@ -150,3 +150,58 @@ no-vig price implied (51%).
 3. **Then:** the findings go to the user with proposed refinements and choices. Nothing is changed before that.
 4. **Any adopted refinement** is written here as a v2 before it is run on 2024-25 and 2025-26. Same bars: v2's MAE must
    be below the blend's (A) or the fitted model's (B) in both test seasons. Bets as before.
+
+## Amendment 1: the audit, run (2026-10-28, about 21:30 UTC). Exploration on 2023-24 only
+`nba_minutes_audit.py`. Bias = actual − model, so positive means under-projected.
+
+**Target A (the blend), all: bias +2.0, MAE 5.81 (n 1,204):**
+- **no past starts: +6.0** (n 173). 1–2 starts +2.5; 3–5 +0.6; 6–10 +1.1;
+- **his season mpg under 15: +5.0**; not started before for this X +4.2 (with: +1.3);
+- absence game 1 +2.4 (game 3 +0.8); Oct–Nov +3.2 (April +0.9); a big out (X in group C) +2.9;
+- team means from NYK +5.8 to PHX −0.4;
+- **hindsight:** blowouts (20+) −0.2 against close games +2.9; overtime +4.8 (n 53).
+
+Without past starts the blend falls back to V3, which is built on his bench role. Those players actually played a
+median of 28 minutes (10th–90th percentiles 18–37) while V3 said 21.6.
+
+**Fixes sized on 2023-24 (MAE all / no starts):**
+
+| | all | no starts |
+|---|---|---|
+| current | 5.81 / 8.15 | |
+| K = 1, 2, 5 | 5.79–5.86 | 8.15 |
+| floor at the team's starter minutes | 5.53 (bias −1.5) | |
+| floor at X's minutes | 5.63 (bias −1.4) | |
+| V3 + 2 | 5.56 | 7.23 |
+| **V3 floored at 24 / 26 / 28** | 5.31 / **5.29** / 5.34 | 5.56 / **5.40** / 5.52 |
+
+After the 26 floor, every pre-game bucket is within ±0.6 minutes, except the layoff bucket (+2.6, n 11). That covers
+absence game, month, X's group, no starts, starters out, rest, rotation, and team starter minutes.
+- **Team means do not persist:** the correlation between 2023-24 and 2024-25 team biases is −0.07 over 30 teams, so
+  there is no coach adjustment.
+- **What is left is hindsight:** blowouts −1.8, close games +1.0, overtime +3.6.
+
+**Target B:** the fitted model out of fold (5 folds by date within 2023-24) has MAE 5.45 and bias −0.2, against V3's
+6.02. Every bucket is within ±0.4 (the layoff bucket −0.8, n 18). Nothing is missing.
+
+# AMENDMENT 2: A v2, the 26-minute floor (2026-10-28, before it was run on 2024-25 or 2025-26)
+**User:** chose "26 minutes" and "show me first".
+- **A v2:** w × his last-10-starts mean + (1 − w) × max(V3, 26.0), with w = n / (n + 3). The floor was chosen by
+  looking at 2023-24, so 2024-25 and 2025-26 are the test.
+- **Pass:** v2's MAE is below the current blend's in both 2024-25 and 2025-26, for confirmed starters. Projected
+  fives are reported too.
+- **Bets (information):** STEP-style flags from v2 against the v1 blend, at 2024-25 tip lines.
+- **If it passes,** the result goes to the user before anything changes live.
+
+# AMENDMENT 3: the spread test (planned 2026-10-28; to run once there are 300+ games with lines)
+**User:** "yes, once there's enough data." Blowouts and overtime are the largest remaining error, and only the spread
+can foresee them.
+- **Data:** `nba_lines.sqlite` `game_lines` (FanDuel/DraftKings spread and total, from 2026-10-25), and this season's box
+  scores.
+- **Measure:** each starter's minutes minus his own last-10 mean, against |spread| (FanDuel's last before tip;
+  DraftKings' if FanDuel has none) and the total.
+- **Bucketed,** then a one-coefficient linear fit (minutes per point of |spread| beyond 6), on games before the run date.
+- **Run when** 300 games have a spread and box scores (around early December). The first 150 games fit the
+  coefficient; the next 150 test it.
+- **Pass:** a STEP projection with the spread term has lower MAE than v2's on the new starters in the test games.
+  With few step-ins there, starters as a whole are reported too.
