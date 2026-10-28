@@ -916,5 +916,15 @@ def test_matchup_shows_assist_and_rebound_zones_only_for_their_props():
     assert 'const AST_M = new Set(["assists", "pts_ast", "reb_ast", "pra"]), REB_M = new Set(["rebounds", "pts_reb", "reb_ast", "pra"]);' in html
     assert """${AST_M.has(p.market) ? '<div class="shc wg" id="asc"></div>' : ""}${REB_M.has(p.market) ? '<div class="shc wg" id="rbc"></div>' : ""}""" in html
     assert 'if (AST_M.has(p.market)) zoneCard("ast");' in html and "fetch(`pbp/${encodeURIComponent(s)}.json?t=${t}`)" in html
+    # the shot chart only on props with points or threes in them: none on assists, rebounds or R+A
+    assert 'const SHOT_M = new Set(["points", "threes", "pts_reb", "pts_ast", "pra"]);' in html
+    assert """${SHOT_M.has(p.market) ? '<div class="shc" id="shc"></div>' : ""}""" in html and "if (SHOT_M.has(p.market)) shotLoad(D.season)" in html
+    # the assists court: the shot chart's six zones (one shared drawing), his assists a game shaded by his share against the
+    # league's, or the opponent's assisted baskets allowed a game shaded against the league and ranked; a view switch
+    # redraws the court alone
+    assert "const zoneMarks = zs =>" in html and html.count("zoneMarks(") == 2 and html.count('<g class="shl">') == 1
+    assert "fill: shFill(lt ? (mine[k] / tot - L.ast[k] / lt) * 100 : null)" in html and "fill: shFill(la ? (a / la - 1) * 50 : null)" in html
+    assert "sub: ord(1 + all.filter(x => x[1 + k] / x[0] < a).length)" in html and "const k = j.zones.indexOf(nm);" in html
+    assert 'if (view) { const v = $(".zcv", el);' in html and 'asView: "player"};' in html
     # a rookie facing a team with few games this season still gets his own season, not last season's blank
     assert "MUP[key] = (t && t[0] >= 10) || (me(j) && !me(q)) ? D.season : prevSeason(D.season);" in html

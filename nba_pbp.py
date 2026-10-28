@@ -7,11 +7,12 @@ cdn.nba.com play-by-play (fetched once: a final game's play-by-play does not cha
   rebounds  every player rebound, offensive or defensive, and the zone of the miss it came off (a missed free throw
             its own zone): where a player's rebounds come from, and how many rebounds each team's opponents get
 
-Zones: Restricted Area (4 ft), Paint, Mid-Range, Corner 3, Above the Break 3 (+ Free Throw for rebounds), from the shot's
-legacy court position in tenths of a foot (basket at 0,0; a three with y <= 92 is a corner three).
+Zones: the shot chart's six, Restricted Area (4 ft), Paint, Mid-Range, Left Corner 3, Right Corner 3, Above the Break 3
+(+ Free Throw for rebounds), from the shot's legacy court position in tenths of a foot (basket at 0,0; a three with
+y <= 92 is a corner three; x < 0 the left corner, as stats.nba's LOC_X, which xLegacy matches shot for shot).
 
-File: {season, fetched_at, league: {gp, ast: [5], reb: [6]}, teams: {TRI: [gp, ast allowed x5, reb allowed x6]},
-       players: {pid: [gp, ast x5, reb x6, oreb]}}
+File: {season, fetched_at, zones, league: {gp, ast: [6], reb: [7]}, teams: {TRI: [gp, ast allowed x6, reb allowed x7]},
+       players: {pid: [gp, ast x6, reb x7, oreb]}}
   gp       a team's games, a player's games with minutes (nba_matchup.sqlite)
   ast      assisted makes by zone (a team: its opponents' assisted makes against it); reb: rebounds by the miss's zone
            (a team: its opponents' players' rebounds against it); league: all teams' totals, gp = team-games
@@ -30,8 +31,9 @@ from pathlib import Path
 
 DB = Path(__file__).resolve().parent / "nba_pbp.sqlite"
 URL = "https://cdn.nba.com/static/json/liveData/playbyplay/playbyplay_{}.json"
-ZONES = ("Restricted Area", "Paint", "Mid-Range", "Corner 3", "Above the Break 3")
-FT = len(ZONES)                                          # rebounds off a missed free throw: zone 5
+ZONES = ("Restricted Area", "Paint", "Mid-Range", "Left Corner 3", "Right Corner 3", "Above the Break 3")
+FT = len(ZONES)                                          # rebounds off a missed free throw: zone 6
+VERSION = 2                                              # 2: the corners split (a store of an older version is refilled)
 DDL = """CREATE TABLE IF NOT EXISTS games (gid TEXT PRIMARY KEY, season TEXT, date TEXT);
 CREATE TABLE IF NOT EXISTS makes (gid TEXT, team TEXT, opp TEXT, pid INTEGER, ast_pid INTEGER, zone INTEGER, pts INTEGER);
 CREATE TABLE IF NOT EXISTS rebs (gid TEXT, team TEXT, opp TEXT, pid INTEGER, kind TEXT, zone INTEGER);
@@ -43,7 +45,7 @@ def zone(a):
     """A shot action -> its zone index (ZONES), from its legacy court position, else its distance."""
     t, d, x, y = a.get("actionType"), a.get("shotDistance"), a.get("xLegacy"), a.get("yLegacy")
     if t == "3pt":
-        return 3 if y is not None and y <= 92 else 4
+        return (3 if x < 0 else 4) if x is not None and y is not None and y <= 92 else 5
     if d is not None and d <= 4:
         return 0
     if x is not None and y is not None:
@@ -71,6 +73,16 @@ def parse(actions, home, away):
             z = FT if miss.get("actionType") == "freethrow" else zone(miss)
             rebs.append((team, other[team], int(a["personId"]), "o" if a.get("subType") == "offensive" else "d", z))
     return makes, rebs
+
+
+def connect(path):
+    """The store; one written by an older VERSION is emptied, so every game is fetched again under the current zones."""
+    con = sqlite3.connect(path)
+    if con.execute("PRAGMA user_version").fetchone()[0] < VERSION:
+        con.executescript("DROP TABLE IF EXISTS games; DROP TABLE IF EXISTS makes; DROP TABLE IF EXISTS rebs;")
+        con.execute(f"PRAGMA user_version = {VERSION}")
+    con.executescript(DDL)
+    return con
 
 
 def fetch(con, mcon, seasons, get=None, workers=4):
@@ -151,8 +163,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--out", required=True, help="the folder the page reads (docs/pbp)")
     a = ap.parse_args()
-    con = sqlite3.connect(DB)
-    con.executescript(DDL)
+    con = connect(DB)
     mcon = sqlite3.connect(f"file:{MU.DB}?mode=ro", uri=True)
     cur = R.season_of(dt.datetime.now(R.ET).date().isoformat())
     seasons = (R.prev_season(cur), cur)
