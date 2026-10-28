@@ -252,3 +252,9 @@ excluded because he plays 26+ minutes, which made him a "starter".) Asked:
    - One flag per (rule, game, player, market). Nothing within 5 minutes of tip.
 6. **Re-registration:** all three rules change (the starters feed every one) and are re-fingerprinted. They are
    registered at the deploy time, since 21:00 UTC will have passed.
+
+**Amendment 4: deployed d36ecff5be at about 20:16 UTC; all three rules registered at 20:30 UTC.** The backtest is
+unchanged (it has no starter flags or lineups, so it keeps the minutes-based definitions). On the deploy run, the
+second check against NBA.com's 20:15 lineup sent one STEP ping: Kenrich Williams (OKC, in for Holmgren, game 2) P+R
+over 13.5 at −114, projected 15.7 at 24 minutes. Black (33.5 projected minutes), da Silva (28.1) and Dosunmu (33.1)
+already project 24+ minutes, so by the user's choice they are not STEP flags.
