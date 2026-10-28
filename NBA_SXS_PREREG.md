@@ -154,3 +154,68 @@ The rules:
 - The verdicts are the same as every other rule here: CLV first, at ≥ 200 signals and ≥ 10 dates.
 - The development replay covers 2026-10-22..26. The lineup log starts on the evening of 2026-10-26, so
   NEW_STARTER and LOST_START have one night of development data.
+
+---
+
+# AMENDMENT 2: ROLE_OPEN, elevated roles at the opener (2026-10-27, before it was run on live data)
+**Specified in `NBA_ROLE1_PREREG.md`.** This is the user's thesis: injury news, an elevated role, the first 1–3
+games of the absence, and speed at the opener.
+
+12. **ROLE_OPEN.**
+    - **The moment:** a book's opener for a prop in points, rebounds, assists or threes. That is the first
+      observation of the prop with a two-sided main rung (FanDuel or DraftKings).
+    - **The spot:**
+      - X averaged ≥ 17 min this season for the player's team (≥ 3 games);
+      - X is listed Out or Doubtful on a report published before the observation;
+      - this is X's absence game 1–3;
+      - the player is on the active roster.
+    - **The price:**
+      - the ROLE1 v2 model gives the player's mean;
+      - a negative binomial (r per market, `nba_role.NB_R`) gives P(side) at the opener's line;
+      - that P is calibrated toward the opener's no-vig with β = 0.09.
+    - **The signal:** EV′ = P′ × price − 1 ≥ 0.05. The bet is that side at the opener's price.
+    - **Registered at 2026-10-27T13:00:00 UTC.** Its fingerprint covers `nba_role`'s model, pricing and data
+      helpers.
+    - **Verdict:** the same bars as every rule here.
+    - **Live:** `nba_role_open.py --process` runs every minute on the VM with the same evaluation. It pings
+      the phone (SHADOW) when it fires, and logs to `nba_role.sqlite`.
+
+---
+
+# AMENDMENT 3: the user's volume-to-line ratios at the opener (2026-10-27, before they ran on live data)
+**Specified in `NBA_RATIO_PREREG.md`.** At a book's opener (its first observation of the prop with a two-sided
+main rung, up to tip − 5), with ≥ 3 games this season:
+
+13. **RATIO_FGA:** the points over when his FGA per game this season (box scores) ≥ the points line.
+14. **RATIO_PA:** the assists over when his potential assists per game this season (nba_tracking) ≥ 2 × the
+    assists line.
+15. **RATIO_RC:** the rebounds over when his rebound chances per game this season (nba_tracking) ≥ 2 × the
+    rebounds line.
+
+In nba_tracking, a missing row on a fetched date counts as 0. **Registered at 2026-10-27T13:00:00 UTC**, with
+fingerprints covering `nba_ratio`'s data helper. The same bars as every rule. Phone pings only for rules whose
+backtest passes (NBA_RATIO_PREREG.md).
+
+# AMENDMENT 4: RATIO_PA28 (2026-10-27, before it ran live)
+16. **RATIO_PA28:** RATIO_PA at 2.8× instead of 2× (`NBA_RATIO_PREREG.md` amendment 3). This threshold was
+    chosen in sample, so only forward counts. Registered at **2026-10-27T13:00:00 UTC**. It pings (SHADOW).
+
+# AMENDMENT 5: PTS_DVP (2026-10-27, before it ran)
+17. **PTS_DVP:** as `NBA_RATIO_PREREG.md` amendment 5. It fires from about mid-November, when opponents reach 10
+    games. Registered at **2026-10-27T13:00:00 UTC**; no pings.
+
+# AMENDMENT 6: the six ideas' forward rules (2026-10-27, before they ran)
+**As in `NBA_IDEAS_PREREG.md` amendment 1:**
+18. **RETURN_UNDER** (idea 4, passed): at tip − 30, unders for the teammates of a cleared returning rotation
+    player. Pinged (SHADOW).
+19. **FOUL_BIG** (idea 2, passed): at tip − 30, unders for foul-prone bigs against teams that draw free throws.
+    Pinged (SHADOW); it fires once teams have 10 games and nba_matchup has this season's personal fouls.
+20. **MIN_RESTRICT** (idea 5, forward only): at FanDuel's next look after an X/Bluesky item reports a minutes
+    restriction, unders. No pings.
+
+All three are registered at **2026-10-27T13:00:00 UTC**.
+
+# AMENDMENT 7: EARLY_SURGE (2026-10-27, before it ran)
+21. **EARLY_SURGE:** the early-season volume surge at the opener (`NBA_EARLY_PREREG.md` amendment 1). Registered at
+    **2026-10-27T13:00:00 UTC**; no pings.
+    - Later the same day, the user turned on SHADOW pings at the opener (`NBA_EARLY_PREREG.md` amendment 2). The rule is unchanged.
