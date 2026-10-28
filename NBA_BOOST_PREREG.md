@@ -350,7 +350,7 @@ result. All three rules are re-fingerprinted and registered at the deploy time.
 - **One ping per prop (added while building, before deploy):** a prop that already pinged as BOOST (history) records
   its STEP flag silently instead of pinging twice. The side-by-side keeps both records.
 
-# AMENDMENT 7: the 26-minute floor once NBA.com's lineup is posted (2026-10-28, about 22:10 UTC, before code)
+# AMENDMENT 7: the 26-minute floor once NBA.com's lineup is posted (2026-10-28, about 21:50 UTC, before code)
 **User:** "turn on the 26 minute floor once lineups post."
 - **Change:** when the STEP judgement uses NBA.com's posted five (at an opener after it posts, or the second check),
   the new starter's minutes are w × his last-10-starts mean + (1 − w) × max(V3, 26.0). This is `NBA_MINUTES_PREREG.md`
