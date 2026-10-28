@@ -323,6 +323,198 @@ def test_live_mutants():
         raise AssertionError(f"mutant survived: {tag}")
 
 
+# ── amendment 4: the lineup tab's usual five, its projected five, NBA.com's lineup ─────────────────────────────────
+def lineup_stores(tmp, n9_started=False):
+    """This season (with starter flags): T1-T6, X, S2, S6, G4 and F5 start; B (24 min) and N9 (12 min) come off the
+    bench. With n9_started, last season's P1 (2026-03-01): X came off the bench and N9 started. X is Out on the 16:00
+    report."""
+    p = {k: tmp / f"{k}.sqlite" for k in ("lines", "news", "matchup", "gamelogs", "lineups")}
+    m = sqlite3.connect(p["matchup"])
+    m.execute("CREATE TABLE games (gid, season, date, home, away, home_pts, away_pts)")
+    m.execute("CREATE TABLE player_games (gid, team, pid, pos, starter, min, pts, reb, ast, fg3m, stl, blk, tov, fga, fg3a, fta, pf)")
+    five = (X, S2, S6, G4, F5)
+    games = [(f"T{i}", "2026-27", f"2026-10-2{i}") for i in range(1, 7)] + ([("P1", "2025-26", "2026-03-01")] if n9_started else [])
+    for g, season, d in games:
+        m.execute("INSERT INTO games VALUES (?, ?, ?, 'HOM', 'AWY', 100, 99)", (g, season, d))
+        for pid in five + (B, N9):
+            mn, fga, fg3m, reb, ast, pts = BASE[pid]
+            st = int(pid in five)
+            if g == "P1":
+                st, mn = (0, 20) if pid == X else (1, 25) if pid == N9 else (st, mn)
+            m.execute("INSERT INTO player_games (gid, team, pid, starter, min, fga, fg3m, reb, ast, pts) VALUES (?, 'HOM', ?,?,?,?,?,?,?,?)",
+                      (g, pid, st, mn, fga, fg3m, reb, ast, pts))
+    m.commit()
+    gl = sqlite3.connect(p["gamelogs"])
+    gl.execute("CREATE TABLE logs_full (season, game_id, date, team, player_id, player, min, fgm, fga, fg3m, fg3a, ftm, fta, oreb, dreb, "
+               "reb, ast, stl, blk, tov, pf, pts, plus_minus)")
+    gl.execute("CREATE TABLE positions (player_id, player, position)")
+    gl.executemany("INSERT INTO positions VALUES (?,?,?)", [(pid, NAME[pid], v) for pid, v in POS.items()])
+    gl.commit()
+    n = sqlite3.connect(p["news"])
+    n.execute("CREATE TABLE snapshots (mark, published_at, game_date, matchup, team, pid, player, status, reason)")
+    n.execute("INSERT INTO snapshots (published_at, game_date, team, pid, player, status) VALUES "
+              "('2026-11-01T16:00:04+00:00', ?, 'HOM', ?, 'Xavier Big', 'Out')", (D, X))
+    n.commit()
+    q = sqlite3.connect(p["lines"])
+    q.execute("CREATE TABLE board (book TEXT, collected_at TEXT, gid TEXT, tip_utc TEXT, event TEXT, home TEXT, away TEXT, "
+              "pid INTEGER, player TEXT, stat TEXT, line REAL, side TEXT, odds REAL)")
+    q.commit()
+    sqlite3.connect(p["lineups"]).execute("CREATE TABLE snaps (fetched_at TEXT, date_et TEXT, sha TEXT, body BLOB)")
+    return p
+
+
+def post_lineup(p, at, five):
+    """NBA.com's lineups snapshot: HOM's five Expected (position set), AWY's empty."""
+    import json
+    import zlib
+    body = {"games": [{"gameId": "G1", "homeTeam": {"teamAbbreviation": "HOM", "players": [
+        {"personId": pid, "playerName": NAME[pid], "position": POS[pid][:1] + "X", "lineupStatus": "Expected"} for pid in five]},
+        "awayTeam": {"teamAbbreviation": "AWY", "players": []}}]}
+    c = sqlite3.connect(p["lineups"])
+    c.execute("INSERT INTO snaps VALUES (?, ?, 'x', ?)", (at, D, zlib.compress(json.dumps(body).encode())))
+    c.commit()
+
+
+def check_lineups(mod):
+    ok = True
+
+    def want(cond, label):
+        nonlocal ok
+        ok &= bool(cond)
+        print(f"   {'ok ' if cond else 'BAD'} {label}")
+
+    tmp = pathlib.Path(tempfile.mkdtemp())
+    p = lineup_stores(tmp)
+    bd = mod.live_data(p["matchup"], p["gamelogs"], "2026-27")
+    want(bd.usual_five("HOM", D) == {X, S2, S6, G4, F5} and bd.starters("HOM", D) == {X, S2, S6, G4, F5},
+         "starters are the usual five (most starts in the last 10), not 26+ minutes")
+    five, pairs = bd.tonight("HOM", D, {X})
+    want(five == {S2, S6, G4, F5, B} and pairs == {B: X}, "projected five: X's spot to B (shares a letter, more minutes than N9)")
+    posted = (S2, S6, G4, F5, N9)
+    want(bd.tonight("HOM", D, {X}, posted)[1] == {N9: X}, "NBA.com's five names N9 instead")
+    want(ev_(mod, bd, N9, 4.5, None) is None, "projected five: N9 is not the step-in (17.2 minutes, no flag)")
+    f = ev_(mod, bd, N9, 4.5, posted)
+    want(f and mod.kind_of(f) == "step" and abs(f["proj_min"] - 24.0) < 1e-9, "NBA.com's five: N9 steps in at 24 minutes, a STEP flag")
+    f = ev_(mod, bd, B, 7.5, None)
+    want(f is None or mod.kind_of(f) != "step", "B steps in on the projected five but projects 24+: never a STEP flag")
+    tmp2 = pathlib.Path(tempfile.mkdtemp())
+    bd2 = mod.live_data(lineup_stores(tmp2, n9_started=True)["matchup"], tmp2 / "gamelogs.sqlite", "2026-27")
+    want(bd2.tonight("HOM", D, {X})[1] == {N9: X},
+         "projected five: N9 started last season's game X did not (no starts in the last 10), so he steps in")
+    return ok
+
+
+def ev_(mod, bd, pid, line, posted):
+    return mod.boost_eval(bd, D, "HOM", pid, "rebounds", line, 1.9, {X}, posted)
+
+
+def check_live_lineup(L):
+    """DraftKings opens N9's rebounds (4.5) at 16:10, before NBA.com's lineup: no flag. NBA.com posts N9 starting at
+    17:00; the 17:01 run judges his 16:10 prop at its line: one STEP ping; the 17:02 run adds nothing."""
+    tmp = pathlib.Path(tempfile.mkdtemp())
+    p = lineup_stores(tmp)
+    sent = []
+    kw = dict(lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"], tracking_db=tmp / "t.sqlite",
+              lineups_db=p["lineups"], index_json=tmp / "none.json", db=tmp / "role.sqlite", sender=lambda b: sent.append(b) or True)
+    L.process(now="2026-11-01T14:00:00", **kw)
+    post(p, "dk", "2026-11-01T16:10:00", ((N9, "Ned Nine", "rebounds", 4.5),))
+    L.process(now="2026-11-01T16:11:00", **kw)
+    assert not [b for b in sent if "BOOST" in b], sent
+    post_lineup(p, "2026-11-01T17:00:00+00:00", (S2, S6, G4, F5, N9))
+    L.process(now="2026-11-01T17:01:00", **kw)
+    L.process(now="2026-11-01T17:02:00", **kw)
+    boost = [b for b in sent if "BOOST" in b]
+    assert boost == ["🟢 BOOST STEP Ned Nine REB o4.5 -111 DK · Xavier Big out (game 1) · steps in, proj 6.5 at 24 min · shadow"], sent
+
+
+class FakeView:
+    def __init__(self, boards):
+        self.date, self.t, self.changed, self._b = D, None, set(), boards
+
+    def board(self, g, p, mk, b):
+        return self._b.get((g, p, mk, b), {})
+
+    def props(self, g, book):
+        return [(p, mk) for (g2, p, mk, b) in self._b if g2 == g and b == book]
+
+    def games(self):
+        return {"G1": {"tip": "2026-11-02T00:00:00", "home": "HOM", "away": "AWY"}}
+
+    def game_of(self, team):
+        return "G1" if team in ("HOM", "AWY") else None
+
+
+def check_replay_step(SR):
+    """The side-by-side's BOOST_STEP: the 16:10 opener without a lineup gives nothing; DraftKings' first look after
+    NBA.com's 17:00 lineup gives N9's STEP signal once."""
+    tmp = pathlib.Path(tempfile.mkdtemp())
+    p = lineup_stores(tmp)
+    post_lineup(p, "2026-11-01T17:00:00+00:00", (S2, S6, G4, F5, N9))
+    saved = SR.MATCHUP_DB, SR.ROLE_GAMELOGS_DB, SR.LINEUPS_DB
+    SR.MATCHUP_DB, SR.ROLE_GAMELOGS_DB, SR.LINEUPS_DB = p["matchup"], p["gamelogs"], p["lineups"]
+    try:
+        k = ("G1", N9, "rebounds", "dk")
+        v = FakeView({k: {(4.5, "over"): 1.9, (4.5, "under"): 1.9}})
+        r = SR.BOOST_STEP()
+        r.start_day(v)
+        r.on_report(v, "2026-11-01T16:00:04", [("HOM", X, "Out")], {}, set())
+        v.t, v.changed = "2026-11-01T16:10:00", {k}
+        first = r.on_obs(v, "dk", {"G1"})
+        v.t, v.changed = "2026-11-01T17:03:00", set()
+        second = r.on_obs(v, "dk", {"G1"})
+        third = r.on_obs(v, "dk", {"G1"})
+    finally:
+        SR.MATCHUP_DB, SR.ROLE_GAMELOGS_DB, SR.LINEUPS_DB = saved
+    assert first == [] and third == [], (first, third)
+    assert [(s["pid"], s["market"], s["line"], s["book"]) for s in second] == [(N9, "rebounds", 4.5, "dk")], second
+
+
+def test_lineups():
+    import nba_role_open as L
+    import nba_sxs_rules as SR
+    assert check_lineups(BOOST)
+    check_live_lineup(L)
+    check_replay_step(SR)
+
+
+LINEUP_MUTANTS = (
+    ("no usual five", "if self.has_starts and len(recent) >= USUAL_MIN:", "if False:"),
+    ("NBA.com's lineup ignored", "            if posted:\n                five, gone = set(posted)", "            if False:\n                five, gone = set(posted)"),
+    ("who started when he sat ignored", "key = lambda u, p: (self.started_for(u, team, date)[p],", "key = lambda u, p: (0,"),
+)
+
+
+def test_lineup_mutants():
+    src = pathlib.Path(BOOST.__file__).read_text()
+    for tag, a, b in LINEUP_MUTANTS:
+        assert src.count(a) == 1, tag
+        d = pathlib.Path(tempfile.mkdtemp())
+        (d / "nba_boost_lmut.py").write_text(src.replace(a, b))
+        sys.path.insert(0, str(d))
+        try:
+            print(f"MUTANT ({tag}) — must fail:")
+            assert not check_lineups(importlib.import_module("nba_boost_lmut")), tag
+        finally:
+            sys.path.remove(str(d))
+            sys.modules.pop("nba_boost_lmut", None)
+    import nba_role_open as L
+    lsrc = pathlib.Path(L.__file__).read_text()
+    a = "        fired += step_checks(con, keys, now, n, matchup_db, gamelogs_db, lineups_db, sender, bds, stat_cache)\n"
+    assert lsrc.count(a) == 1
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "nba_role_open_lmut.py").write_text(lsrc.replace(a, ""))
+    sys.path.insert(0, str(d))
+    try:
+        check_live_lineup(importlib.import_module("nba_role_open_lmut"))
+    except AssertionError:
+        pass
+    else:
+        raise AssertionError("mutant survived: no second check when NBA.com's lineup posts")
+    finally:
+        sys.path.remove(str(d))
+        sys.modules.pop("nba_role_open_lmut", None)
+
+
 def test_boost():
     assert check(BOOST)
     assert check_backtest(BOOST)
@@ -374,4 +566,6 @@ if __name__ == "__main__":
     test_mutants()
     test_live()
     test_live_mutants()
+    test_lineups()
+    test_lineup_mutants()
     print("test_nba_boost: OK")

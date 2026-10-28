@@ -15,7 +15,7 @@ import argparse
 import json
 import random
 import sqlite3
-from bisect import bisect_left
+from bisect import bisect_left, bisect_right
 from collections import defaultdict
 from pathlib import Path
 
@@ -23,6 +23,7 @@ STARTER_MIN, BASE_THIS, BASE_LAST, SPOT_MAX = 26.0, 3, 10, 3
 MIN_H, MIN_H_IRRELEVANT, HIT_AT, MIN_AVG_MIN = 3, 6, 0.80, 20.0
 PROJ_AT, BASE_N, BASE_MIN_GAMES, SAME_W, PRICE_MIN = 1.15, 10, 3, 3.0, 1 / 0.6   # -150 = decimal 1.6667
 STEP_MIN = 24.0                                          # amendment 2: the step-in player's minutes floor
+USUAL_GAMES, USUAL_MIN = 10, 3                           # amendment 4: the lineup tab's usual five (nba_research.py)
 TOP = {"reb": ("reb", 2), "pts": ("fga", 3), "fg3m": ("fga", 3), "ast": ("ast", 2)}   # stat -> (ranked by, top n)
 PARTS = {"points": ("pts",), "rebounds": ("reb",), "assists": ("ast",), "threes": ("fg3m",), "pts_reb": ("pts", "reb"),
          "pts_ast": ("pts", "ast"), "reb_ast": ("reb", "ast"), "pra": ("pts", "reb", "ast")}
@@ -42,8 +43,9 @@ def group(pos):
 class BoostData:
     """Two seasons of box rows (this one and last). Every question takes tonight's date and reads only games before it."""
 
-    def __init__(self, rows, groups, season):
-        self.season, self.groups = season, groups
+    def __init__(self, rows, groups, season, pos=None):
+        self.season, self.groups, self.pos = season, groups, pos or {}
+        self.has_starts = any(r.get("starter") is not None for r in rows if r["season"] == season)   # amendment 4
         by = defaultdict(dict)
         for r in rows:
             by[(r["team"], r["date"], r["gid"], r["season"])][r["pid"]] = r
@@ -101,11 +103,79 @@ class BoostData:
             self.cache[k] = {p for p in seen if self.team_now(p, date) == team}
         return self.cache[k]
 
+    def usual_five(self, team, date):
+        """The five now on the team with the most starts in its last 10 games this season (ties: more minutes), players
+        with a start only; None under 3 games or without starter flags (amendment 4, the lineup tab's usual five)."""
+        k = ("usual", team, date)
+        if k not in self.cache:
+            recent = [b for _d, _g, s, b in self.before(team, date) if s == self.season][-USUAL_GAMES:]
+            out = None
+            if self.has_starts and len(recent) >= USUAL_MIN:
+                on, starts, mins = self.on_team_tonight(team, date), defaultdict(int), defaultdict(float)
+                for b in recent:
+                    for p, r in b.items():
+                        if p in on:
+                            starts[p] += r.get("starter") or 0
+                            mins[p] += r["min"]
+                out = {p for p in sorted(starts, key=lambda p: (-starts[p], -mins[p], p))[:5] if starts[p]}
+            self.cache[k] = out
+        return self.cache[k]
+
     def starters(self, team, date):
+        """The usual five (amendment 4); without starter flags or 3 games, 26+ minutes per game (rule 2)."""
         k = ("st", team, date)
         if k not in self.cache:
-            self.cache[k] = {p for p in self.on_team_tonight(team, date)
-                             if (pg := self.per_game(p, team, date)) and pg["min"] >= STARTER_MIN}
+            u = self.usual_five(team, date)
+            self.cache[k] = u if u is not None else {p for p in self.on_team_tonight(team, date)
+                                                     if (pg := self.per_game(p, team, date)) and pg["min"] >= STARTER_MIN}
+        return self.cache[k]
+
+    def letters(self, p):
+        return set((self.pos.get(p) or "").replace("-", "")) or {"F"}
+
+    def started_for(self, u, team, date):
+        """{pid: games he started} over the team's games before the date, in the seasons u played for it, that u did not
+        start (amendment 4: who started when he did not)."""
+        k = ("when", u, team, date)
+        if k not in self.cache:
+            prior = self.before(team, date)
+            his = {s for _d, _g, s, b in prior if u in b and b[u]["min"]}
+            out = defaultdict(int)
+            for _d, _g, s, b in prior:
+                if s in his and not (u in b and b[u].get("starter")):
+                    for p, r in b.items():
+                        out[p] += r.get("starter") or 0
+            self.cache[k] = out
+        return self.cache[k]
+
+    def tonight(self, team, date, out_all, posted=None):
+        """(tonight's five, {new starter: the usual starter he replaces}) (amendment 4): NBA.com's five when posted, else
+        the usual five less the outs, each missing starter replaced by who started when he did not, a player sharing a
+        position letter first, then the most starts and minutes in the last 10 games; the surest pairing first."""
+        k = ("five", team, date, frozenset(out_all), tuple(sorted(posted)) if posted else None)
+        if k not in self.cache:
+            usual = self.usual_five(team, date) or set()
+            recent = [b for _d, _g, s, b in self.before(team, date) if s == self.season][-USUAL_GAMES:]
+            starts, mins = defaultdict(int), defaultdict(float)
+            for b in recent:
+                for p, r in b.items():
+                    starts[p] += r.get("starter") or 0
+                    mins[p] += r["min"]
+            key = lambda u, p: (self.started_for(u, team, date)[p], bool(self.letters(u) & self.letters(p)), starts[p], mins[p], -p)
+            if posted:
+                five, gone = set(posted), usual - set(posted)
+                cands = five - usual
+            else:
+                five, gone = usual - set(out_all), usual & set(out_all)
+                cands = self.on_team_tonight(team, date) - usual - set(out_all)
+            pairs = {}
+            while gone and cands:
+                u, pick = max(((u, max(cands, key=lambda p: key(u, p))) for u in sorted(gone)), key=lambda up: key(*up) + (-up[0],))
+                gone.discard(u)
+                cands.discard(pick)
+                pairs[pick] = u
+                five.add(pick)
+            self.cache[k] = (five, pairs)
         return self.cache[k]
 
     def absence_n(self, x, team, date):
@@ -151,18 +221,21 @@ class BoostData:
             return None
         return {s: sum(r[s] or 0 for r in rs) / len(rs) for s in ("min", "reb", "ast", "pts", "fg3m")}
 
-    def step_in(self, x, team, date, out_all):
-        """The active non-starter in X's position group with the most minutes per game over his base games (amendment 2)."""
+    def step_in(self, x, team, date, out_all, posted=None):
+        """The new starter paired with X in tonight's five (amendment 4). Without the usual five (the backtest), the
+        active non-starter in X's position group with the most minutes per game over his base games (amendment 2)."""
+        if self.usual_five(team, date) is not None:
+            return next((p for p, u in self.tonight(team, date, out_all, posted)[1].items() if u == x), None)
         gx = self.groups.get(x)
         cands = [(pg["min"], p) for p in self.roster(team, date) - set(out_all) - self.starters(team, date)
                  if gx and self.groups.get(p) == gx and (pg := self.per_game(p, team, date))]
         return max(cands)[1] if cands else None
 
-    def projection(self, b, x, team, date, out_all):
+    def projection(self, b, x, team, date, out_all, posted=None):
         """{stat: projection} for B with X's per-game numbers redistributed over the active roster, 3x to X's position
         group (rule 10). Bases come from games with tonight's other starters, and the step-in player gets 24+ minutes
         (amendment 2). None when B or X has no base."""
-        k = ("proj", x, team, date, frozenset(out_all))
+        k = ("proj", x, team, date, frozenset(out_all), tuple(sorted(posted)) if posted else None)
         if k not in self.cache:
             xs = self.per_game(x, team, date)
             playing = self.starters(team, date) - set(out_all)
@@ -175,7 +248,7 @@ class BoostData:
                 for s in bw:
                     tot = sum(bases[a][s] * w[a] for a in bases)
                     proj[p][s] = bw[s] + (xs[s] * bw[s] * w[p] / tot if xs and tot else 0.0)
-            step = self.step_in(x, team, date, out_all)
+            step = self.step_in(x, team, date, out_all, posted)
             if step in proj and proj[step]["min"] < STEP_MIN and bases[step]["min"]:
                 add = STEP_MIN - proj[step]["min"]       # he starts: 24 minutes at least, at his own per-minute rates
                 for s in proj[step]:
@@ -189,8 +262,9 @@ def stat_of(row, market):
     return sum(row[s] or 0 for s in PARTS[market])
 
 
-def boost_eval(bd, date, team, pid, market, line, price, out_all):
-    """The flag for one prop (rules 4-13), or None. out_all: everyone on the team out tonight."""
+def boost_eval(bd, date, team, pid, market, line, price, out_all, posted=None):
+    """The flag for one prop (rules 4-13), or None. out_all: everyone on the team out tonight; posted: the team's five
+    in NBA.com's lineup, if posted (amendment 4)."""
     if price is None or price < PRICE_MIN - 1e-9 or pid in out_all:
         return None
     starters = bd.starters(team, date)
@@ -214,7 +288,7 @@ def boost_eval(bd, date, team, pid, market, line, price, out_all):
                 cand = {"kind": "history", "x": x, "n": n, "hits": hits, "h": len(hist), "relevant": rel,
                         "avg": sum(stat_of(r, market) for r in hist) / len(hist), "avg_min": avg_min}
         elif rel:
-            pr = bd.projection(pid, x, team, date, out_all)
+            pr = bd.projection(pid, x, team, date, out_all, posted)
             if pr:
                 mu = sum(pr[s] for s in PARTS[market])
                 if mu >= PROJ_AT * line and pr["min"] >= MIN_AVG_MIN:
@@ -240,21 +314,57 @@ ABBR = {"points": "PTS", "rebounds": "REB", "assists": "AST", "threes": "3PM", "
 
 
 def live_data(matchup_db, gamelogs_db, season):
-    """This season's box scores (nba_matchup) and last season's logs (nba_gamelogs logs_full), as ROLE's RoleData reads them."""
+    """This season's and last season's box scores with starter flags (nba_matchup); last season from nba_gamelogs
+    logs_full when nba_matchup lacks it (no starter flags there). Positions from nba_gamelogs."""
     ro = lambda p: sqlite3.connect(f"file:{p}?mode=ro", uri=True) if Path(p).exists() else None
     has = lambda c, t: c is not None and c.execute("SELECT 1 FROM sqlite_master WHERE name = ?", (t,)).fetchone()
     m, g = ro(matchup_db), ro(gamelogs_db)
-    rows = [dict(zip(COLS, r)) for r in m.execute(
-        "SELECT gm.season, p.gid, gm.date, p.team, p.pid, p.min, p.fga, p.fg3m, p.reb, p.ast, p.pts FROM player_games p "
-        "JOIN games gm ON gm.gid = p.gid WHERE gm.season = ?", (season,))] if has(m, "player_games") else []
-    if has(g, "logs_full"):
+    rows = [dict(zip(COLS + ("starter",), r)) for r in m.execute(
+        "SELECT gm.season, p.gid, gm.date, p.team, p.pid, p.min, p.fga, p.fg3m, p.reb, p.ast, p.pts, p.starter FROM player_games p "
+        "JOIN games gm ON gm.gid = p.gid WHERE gm.season IN (?, ?)", (season, PREV.get(season, "")))] if has(m, "player_games") else []
+    if has(g, "logs_full") and not any(r["season"] != season for r in rows):
         rows += [dict(zip(COLS, r)) for r in g.execute(
             "SELECT season, game_id, date, team, player_id, min, fga, fg3m, reb, ast, pts FROM logs_full WHERE season = ?",
             (PREV.get(season, ""),))]
     for r in rows:
         r["min"] = r["min"] or 0.0
-    groups = {pid: group(pos) for pid, pos in g.execute("SELECT player_id, position FROM positions")} if has(g, "positions") else {}
-    return BoostData(rows, groups, season)
+    pos = dict(g.execute("SELECT player_id, position FROM positions")) if has(g, "positions") else {}
+    return BoostData(rows, {pid: group(v) for pid, v in pos.items()}, season, pos)
+
+
+_SNAPS = {}
+
+
+def posted_fives(lineups_db, date, at):
+    """(fetched_at, {team: (pid, ...)}) from NBA.com's latest lineups snapshot for the date fetched by `at` (UTC):
+    the players with a position, Expected or Confirmed (nba_lineups_poll.py); (None, {}) when there is none."""
+    import zlib
+    path = Path(lineups_db)
+    if not path.exists():
+        return None, {}
+    key = (str(path), date, path.stat().st_mtime_ns)
+    if key not in _SNAPS:
+        c = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+        _SNAPS[key] = [[f[:19], body, None] for f, body in
+                       c.execute("SELECT fetched_at, body FROM snaps WHERE date_et = ? ORDER BY fetched_at", (date,))]
+    snaps = _SNAPS[key]
+    i = bisect_right([x[0] for x in snaps], str(at)[:19])
+    if not i:
+        return None, {}
+    snap = snaps[i - 1]
+    if snap[2] is None:
+        try:
+            j = json.loads(zlib.decompress(snap[1]))
+        except (zlib.error, TypeError, ValueError):
+            j = json.loads(snap[1])
+        snap[2] = {}
+        for gm in j.get("games", []):
+            for side in ("homeTeam", "awayTeam"):
+                t = gm.get(side) or {}
+                five = tuple(int(x["personId"]) for x in t.get("players") or [] if x.get("position"))
+                if t.get("teamAbbreviation") and five:
+                    snap[2][t["teamAbbreviation"]] = five
+    return snap[0], snap[2]
 
 
 def body(player, market, line, price, book, f, x_name):

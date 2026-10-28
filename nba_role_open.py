@@ -43,6 +43,7 @@ PINGED_RATIOS = ("RATIO_PA28",)                          # NBA_RATIO_PREREG.md a
 DDL.append("CREATE TABLE IF NOT EXISTS idea_signals (rule TEXT, gid TEXT, pid INTEGER, market TEXT, line REAL, price REAL, "
            "note TEXT, date TEXT, player TEXT, logged_at TEXT, pinged INTEGER, PRIMARY KEY (rule, gid, pid, market))")
 DDL.append("CREATE TABLE IF NOT EXISTS tip30_done (gid TEXT PRIMARY KEY, done_at TEXT)")
+DDL.append("CREATE TABLE IF NOT EXISTS step_seen (date TEXT, pid INTEGER, seen_at TEXT, PRIMARY KEY (date, pid))")
 
 
 def current_boards(q, markets=("points", "rebounds", "assists", "threes")):
@@ -86,6 +87,56 @@ def ratio_body(rule, player, market, line, price, book, vol):
     from nba_ping import american
     return (f"🟣 PA28 {player} {ABBR[market]} o{line:g} {american(price)} {BOOK[book]} "
             f"· pot. ast {vol:.1f} ({vol / line:.1f}x) · shadow")
+
+
+def boost_signal(con, sender, f, gid, pid, market, book, line, price, date, player, x_name, now):
+    """Record a BOOST flag, one per (rule, game, player, market) across books; ping it unless BOOST_NH. Returns pings."""
+    rule = {"history": "BOOST", "step": "BOOST_STEP", "no history": "BOOST_NH"}[BOOST.kind_of(f)]
+    cur = con.execute("INSERT OR IGNORE INTO ratio_signals VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                      (rule, gid, pid, market, book, line, price, round(f["hits"] / f["h"] if rule == "BOOST" else f["proj"], 3),
+                       date, player, now, 0))
+    if cur.rowcount and rule != "BOOST_NH":              # amendments 1 and 3: history and STEP flags ping
+        ok = sender(BOOST.body(player, market, line, price, BOOK[book], f, x_name))
+        con.execute("UPDATE ratio_signals SET pinged = ? WHERE rule = ? AND gid = ? AND pid = ? AND market = ?",
+                    (1 if ok else 0, rule, gid, pid, market))
+        return 1
+    return 0
+
+
+def step_checks(con, keys, now, n, matchup_db, gamelogs_db, lineups_db, sender, bds, stat_cache):
+    """NBA_BOOST_PREREG.md amendment 4: at the first run after a player first appears as a new starter in NBA.com's
+    lineup, his props that opened before that snapshot are judged for STEP at their current main line. Returns pings."""
+    by = defaultdict(list)                               # (date, pid) -> [(gid, market, book, board, tip, player)]
+    for (gid, pid, market, book), (board, tip, player, seen) in keys.items():
+        if tip and seen <= now:
+            by[(E._et_date(tip), pid)].append((gid, market, book, board, tip, player))
+    late = (dt.datetime.fromisoformat(now) + dt.timedelta(minutes=TOO_LATE_MIN)).isoformat()
+    fired = 0
+    for date in sorted({d for d, _p in by}):
+        at, fives = BOOST.posted_fives(lineups_db, date, now)
+        if not fives:
+            continue
+        season = ROLE.season_of(date)
+        bd = bds.get(season) or bds.setdefault(season, BOOST.live_data(matchup_db, gamelogs_db, season))
+        st = stat_cache.get(date) or stat_cache.setdefault(date, statuses(n, date, now))
+        for team, five in sorted(fives.items()):
+            if bd.usual_five(team, date) is None:
+                continue
+            out = {x for x, (tm, s_, _nm) in st.items() if tm == team and s_ in OUTS}
+            for p in sorted(bd.tonight(team, date, out, five)[1]):
+                if not con.execute("INSERT OR IGNORE INTO step_seen VALUES (?, ?, ?)", (date, p, now)).rowcount:
+                    continue                             # checked when he first appeared
+                for gid, market, book, board, tip, player in by.get((date, p), ()):
+                    op = con.execute("SELECT opened_at FROM opened WHERE gid = ? AND pid = ? AND market = ? AND book = ?",
+                                     (gid, p, market, book)).fetchone()
+                    m = R.main_of(board)
+                    if not op or op[0][:19] >= at or not m or RP.iso(tip) <= late:
+                        continue                         # judged at its opener with this lineup, or too late
+                    f = BOOST.boost_eval(bd, date, team, p, market, m[0], m[1], out, five)
+                    if f and BOOST.kind_of(f) == "step":
+                        fired += boost_signal(con, sender, f, gid, p, market, book, m[0], m[1], date, player,
+                                              st[f["x"]][2] or str(f["x"]), now)
+    return fired
 
 
 def tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json, sender):
@@ -157,7 +208,7 @@ def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_ne
     keys = current_boards(q, markets=tuple(BOOST.PARTS))
     installed = set((con.execute("SELECT value FROM meta WHERE key = 'markets'").fetchone() or (",".join(ROLE.MARKET_STAT),))[0].split(","))
     done = {(g, p, m, b) for g, p, m, b in con.execute("SELECT gid, pid, market, book FROM opened")}
-    rds, rts, eds, bds, stat_cache, fired = {}, {}, {}, {}, {}, 0
+    rds, rts, eds, bds, stat_cache, fives_of, fired = {}, {}, {}, {}, {}, {}, 0
     for (gid, pid, market, book), (board, tip, player, seen) in sorted(keys.items()):
         if market not in BOOST.PARTS or (gid, pid, market, book) in done or seen > now:
             continue
@@ -199,17 +250,11 @@ def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_ne
         if bteam:
             st = stat_cache.get(date) or stat_cache.setdefault(date, statuses(n, date, now))
             out_b = {x for x, (tm, s_, _nm) in st.items() if tm == bteam and s_ in OUTS}
-            f = BOOST.boost_eval(bd, date, bteam, pid, market, m[0], m[1], out_b) if out_b else None
+            fv = fives_of.get(date) or fives_of.setdefault(date, BOOST.posted_fives(lineups_db, date, now))
+            f = BOOST.boost_eval(bd, date, bteam, pid, market, m[0], m[1], out_b, fv[1].get(bteam)) if out_b else None
             if f:
-                rule = {"history": "BOOST", "step": "BOOST_STEP", "no history": "BOOST_NH"}[BOOST.kind_of(f)]
-                cur = con.execute("INSERT OR IGNORE INTO ratio_signals VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-                                  (rule, gid, pid, market, book, m[0], m[1],
-                                   round(f["hits"] / f["h"] if rule == "BOOST" else f["proj"], 3), date, player, now, 0))
-                if cur.rowcount and rule != "BOOST_NH":  # amendments 1 and 3: history and STEP flags ping
-                    ok = sender(BOOST.body(player, market, m[0], m[1], BOOK[book], f, st[f["x"]][2] or str(f["x"])))
-                    con.execute("UPDATE ratio_signals SET pinged = ? WHERE rule = ? AND gid = ? AND pid = ? AND market = ?",
-                                (1 if ok else 0, rule, gid, pid, market))
-                    fired += 1
+                fired += boost_signal(con, sender, f, gid, pid, market, book, m[0], m[1], date, player,
+                                      st[f["x"]][2] or str(f["x"]), now)
         if market not in ROLE.MARKET_STAT:
             continue
         rd = rds.get(season) or rds.setdefault(season, ROLE.RoleData(matchup_db, gamelogs_db, season))
@@ -231,6 +276,7 @@ def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_ne
                             (1 if ok else 0, gid, pid, market, e["side"]))
                 fired += 1
     if not first_run:
+        fired += step_checks(con, keys, now, n, matchup_db, gamelogs_db, lineups_db, sender, bds, stat_cache)
         fired += tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json, sender)
     if first_run:
         con.execute("INSERT OR REPLACE INTO meta VALUES ('installed', ?)", (now,))

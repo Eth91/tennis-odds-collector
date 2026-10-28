@@ -295,5 +295,7 @@ but it changes live code.
     line). No pings.
 24. **BOOST_STEP:** the no-history flags for the step-in player raised to 24 minutes (`NBA_BOOST_PREREG.md`
     amendments 2–3), split out of BOOST_NH before either ran. Pinged (SHADOW).
+    - Re-registered at **2026-10-28T20:30:00 UTC**, before any of the three ran: the starters and step-ins now come
+      from the lineup tab (`NBA_BOOST_PREREG.md` amendment 4).
 
 Both are registered at **2026-10-28T21:00:00 UTC**.

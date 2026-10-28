@@ -746,10 +746,11 @@ def boost_data(season):
 
 
 BOOST_DEPS = (boost_data, BOOST_M.live_data, BOOST_M.BoostData, BOOST_M.boost_eval, BOOST_M.rank, BOOST_M.kind_of,
-              BOOST_M.stat_of, BOOST_M.group, ROLE.season_of)
+              BOOST_M.stat_of, BOOST_M.group, BOOST_M.posted_fives, ROLE.season_of)
 BOOST_SPEC = [BOOST_M.STARTER_MIN, BOOST_M.BASE_THIS, BOOST_M.BASE_LAST, BOOST_M.SPOT_MAX, BOOST_M.MIN_H,
               BOOST_M.MIN_H_IRRELEVANT, BOOST_M.HIT_AT, BOOST_M.MIN_AVG_MIN, BOOST_M.PROJ_AT, BOOST_M.BASE_N,
-              BOOST_M.BASE_MIN_GAMES, BOOST_M.SAME_W, BOOST_M.PRICE_MIN, BOOST_M.TOP, BOOST_M.PARTS, BOOST_M.STEP_MIN]
+              BOOST_M.BASE_MIN_GAMES, BOOST_M.SAME_W, BOOST_M.PRICE_MIN, BOOST_M.TOP, BOOST_M.PARTS, BOOST_M.STEP_MIN,
+              BOOST_M.USUAL_GAMES, BOOST_M.USUAL_MIN]
 
 
 class BOOST(Rule):
@@ -759,7 +760,7 @@ class BOOST(Rule):
     name, deps, spec, flag_kind = "BOOST", BOOST_DEPS, BOOST_SPEC, "history"
 
     def start_day(self, v):
-        self.listed, self.opened = {}, set()             # pid -> (team, latest status); keys already opened
+        self.listed, self.opened, self.step_seen = {}, {}, set()   # pid -> (team, status); key -> opened at; (pid, book)
 
     def on_report(self, v, t, rows, prev, seen_before):
         for team, pid, st in rows:
@@ -768,6 +769,7 @@ class BOOST(Rule):
 
     def on_obs(self, v, book, seen):
         out, bd = [], None
+        at, fives = BOOST_M.posted_fives(LINEUPS_DB, v.date, v.t)   # amendment 4: NBA.com's lineup as of t
         for k in sorted(v.changed):
             g, p, mk, b = k
             if b != book or g not in seen or mk not in BOOST_M.PARTS or k in self.opened:
@@ -775,7 +777,7 @@ class BOOST(Rule):
             m = RP.main_of(v.board(*k))
             if not m:
                 continue
-            self.opened.add(k)                           # the opener: the first observation with a two-sided main
+            self.opened[k] = v.t                         # the opener: the first observation with a two-sided main
             if v.t > RP.minus(v.games()[g]["tip"], 5):
                 continue
             bd = bd or boost_data(ROLE.season_of(v.date))
@@ -783,10 +785,27 @@ class BOOST(Rule):
             out_now = {x for x, (tm, st) in self.listed.items() if tm == team and st in RP.OUTS}
             if not team or not out_now:
                 continue
-            f = BOOST_M.boost_eval(bd, v.date, team, p, mk, m[0], m[1], out_now)
+            f = BOOST_M.boost_eval(bd, v.date, team, p, mk, m[0], m[1], out_now, fives.get(team))
             if f and BOOST_M.kind_of(f) == self.flag_kind:
                 why = f"{f['hits']}/{f['h']}" if f["kind"] == "history" else f"proj={f['proj']:.1f}"
                 out.append(sig(g, p, mk, "over", m[0], b, m[1], note=f"x={f['x']} n={f['n']} {why}"))
+        if self.flag_kind == "step" and fives:          # amendment 4: a new starter in NBA.com's lineup, at this book's
+            bd = bd or boost_data(ROLE.season_of(v.date))   # next look, for his props that opened before the snapshot
+            for team, five in sorted(fives.items()):
+                g = v.game_of(team)
+                if bd.usual_five(team, v.date) is None or g not in seen or v.t > RP.minus(v.games()[g]["tip"], 5):
+                    continue
+                out_now = {x for x, (tm, st) in self.listed.items() if tm == team and st in RP.OUTS}
+                for p in sorted(bd.tonight(team, v.date, out_now, five)[1]):
+                    if (p, book) in self.step_seen:
+                        continue
+                    self.step_seen.add((p, book))
+                    for p2, mk in sorted(v.props(g, book)):
+                        k = (g, p, mk, book)
+                        m = RP.main_of(v.board(*k)) if p2 == p and mk in BOOST_M.PARTS and self.opened.get(k, at) < at else None
+                        f = m and BOOST_M.boost_eval(bd, v.date, team, p, mk, m[0], m[1], out_now, five)
+                        if f and BOOST_M.kind_of(f) == "step":
+                            out.append(sig(g, p, mk, "over", m[0], book, m[1], note=f"x={f['x']} n={f['n']} lineup step"))
         return out
 
 
@@ -844,7 +863,7 @@ REGISTRY = {                                             # name -> (registered a
     "PTS_DVP": ("2026-10-27T13:00:00", "fc8387835f"),             # amendment 5
     "RATIO_PA28": ("2026-10-27T13:00:00", "2404e38806"),          # amendment 4
     "RATIO_RC": ("2026-10-27T13:00:00", "17e2e5ea3f"),
-    "BOOST": ("2026-10-28T21:00:00", "87d002e0e6"),               # amendment 9 (NBA_BOOST_PREREG.md amendments 2-3)
-    "BOOST_STEP": ("2026-10-28T21:00:00", "d09f14b1cc"),
-    "BOOST_NH": ("2026-10-28T21:00:00", "7f9b0dcc5f"),
+    "BOOST": ("2026-10-28T20:30:00", "16df23793c"),               # amendment 9 (NBA_BOOST_PREREG.md amendments 2-4)
+    "BOOST_STEP": ("2026-10-28T20:30:00", "293216f606"),
+    "BOOST_NH": ("2026-10-28T20:30:00", "3e2b8dc054"),
 }
