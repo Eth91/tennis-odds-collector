@@ -731,8 +731,73 @@ class EARLY_SURGE(Rule):
         return out
 
 
+# ── AMENDMENT 9: BOOST and BOOST_NH (NBA_BOOST_PREREG.md) ──────────────────────────────────────────────────────
+import nba_boost as BOOST_M                               # noqa: E402
+
+_BD = {}
+
+
+def boost_data(season):
+    key = (str(MATCHUP_DB), str(ROLE_GAMELOGS_DB), season)
+    if key not in _BD:
+        _BD.clear()
+        _BD[key] = BOOST_M.live_data(MATCHUP_DB, ROLE_GAMELOGS_DB, season)
+    return _BD[key]
+
+
+BOOST_DEPS = (boost_data, BOOST_M.live_data, BOOST_M.BoostData, BOOST_M.boost_eval, BOOST_M.rank, BOOST_M.stat_of,
+              BOOST_M.group, ROLE.season_of)
+BOOST_SPEC = [BOOST_M.STARTER_MIN, BOOST_M.BASE_THIS, BOOST_M.BASE_LAST, BOOST_M.SPOT_MAX, BOOST_M.MIN_H,
+              BOOST_M.MIN_H_IRRELEVANT, BOOST_M.HIT_AT, BOOST_M.MIN_AVG_MIN, BOOST_M.PROJ_AT, BOOST_M.BASE_N,
+              BOOST_M.BASE_MIN_GAMES, BOOST_M.SAME_W, BOOST_M.PRICE_MIN, BOOST_M.TOP, BOOST_M.PARTS]
+
+
+class BOOST(Rule):
+    """A starter (26+ min/g) out, absence game 1-3: at a book's opener, a teammate's over (-150 or better) when 80%+ of
+    his past games without that starter but with tonight's other starters beat the line (3+ games, 6+ when the
+    starter's own numbers make him irrelevant to the market; 20+ minutes on average)."""
+    name, deps, spec, flag_kind = "BOOST", BOOST_DEPS, BOOST_SPEC, "history"
+
+    def start_day(self, v):
+        self.listed, self.opened = {}, set()             # pid -> (team, latest status); keys already opened
+
+    def on_report(self, v, t, rows, prev, seen_before):
+        for team, pid, st in rows:
+            self.listed[pid] = (team, st)
+        return ()
+
+    def on_obs(self, v, book, seen):
+        out, bd = [], None
+        for k in sorted(v.changed):
+            g, p, mk, b = k
+            if b != book or g not in seen or mk not in BOOST_M.PARTS or k in self.opened:
+                continue
+            m = RP.main_of(v.board(*k))
+            if not m:
+                continue
+            self.opened.add(k)                           # the opener: the first observation with a two-sided main
+            if v.t > RP.minus(v.games()[g]["tip"], 5):
+                continue
+            bd = bd or boost_data(ROLE.season_of(v.date))
+            team = bd.team_now(p, v.date)
+            out_now = {x for x, (tm, st) in self.listed.items() if tm == team and st in RP.OUTS}
+            if not team or not out_now:
+                continue
+            f = BOOST_M.boost_eval(bd, v.date, team, p, mk, m[0], m[1], out_now)
+            if f and f["kind"] == self.flag_kind:
+                why = f"{f['hits']}/{f['h']}" if f["kind"] == "history" else f"proj={f['proj']:.1f}"
+                out.append(sig(g, p, mk, "over", m[0], b, m[1], note=f"x={f['x']} n={f['n']} {why}"))
+        return out
+
+
+class BOOST_NH(BOOST):
+    """BOOST's no-history flags (fewer than 3 such games): the position rules alone put him 15%+ over the line."""
+    name, flag_kind = "BOOST_NH", "no history"
+
+
 RULES = (NULL_TIP30, NEWS_FD, NEWS_DK, DK_LAGS_FD, T4_TIP30, ENGINE_CARD, S1, DEPTH_NEXT, DEPTH_NEXT_TIP30, NEW_STARTER,
-         LOST_START, ROLE_OPEN, RATIO_FGA, RATIO_PA, RATIO_RC, RATIO_PA28, PTS_DVP, RETURN_UNDER, FOUL_BIG, MIN_RESTRICT, EARLY_SURGE)
+         LOST_START, ROLE_OPEN, RATIO_FGA, RATIO_PA, RATIO_RC, RATIO_PA28, PTS_DVP, RETURN_UNDER, FOUL_BIG, MIN_RESTRICT, EARLY_SURGE,
+         BOOST, BOOST_NH)
 
 
 def fingerprint(cls):
@@ -769,4 +834,6 @@ REGISTRY = {                                             # name -> (registered a
     "PTS_DVP": ("2026-10-27T13:00:00", "fc8387835f"),             # amendment 5
     "RATIO_PA28": ("2026-10-27T13:00:00", "2404e38806"),          # amendment 4
     "RATIO_RC": ("2026-10-27T13:00:00", "17e2e5ea3f"),
+    "BOOST": ("2026-10-28T21:00:00", "f533c2a355"),               # amendment 9 (NBA_BOOST_PREREG.md)
+    "BOOST_NH": ("2026-10-28T21:00:00", "fc3b753e55"),
 }

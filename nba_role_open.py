@@ -15,6 +15,7 @@ import sqlite3
 from collections import defaultdict
 from pathlib import Path
 
+import nba_boost as BOOST
 import nba_early as EARLY
 import nba_proj_data as PD
 import nba_proj_eval as E
@@ -28,7 +29,8 @@ DB = HERE / "nba_role.sqlite"
 TOO_LATE_MIN = 5
 OUTS = ("Out", "Doubtful")
 BOOK = {"fd": "FD", "dk": "DK"}
-ABBR = {"points": "PTS", "rebounds": "REB", "assists": "AST", "threes": "3PM", "pra": "PRA"}
+ABBR = {"points": "PTS", "rebounds": "REB", "assists": "AST", "threes": "3PM", "pra": "PRA", "pts_reb": "P+R", "pts_ast": "P+A",
+        "reb_ast": "R+A"}
 DDL = ["CREATE TABLE IF NOT EXISTS opened (gid TEXT, pid INTEGER, market TEXT, book TEXT, opened_at TEXT, "
        "PRIMARY KEY (gid, pid, market, book))",
        "CREATE TABLE IF NOT EXISTS signals (gid TEXT, pid INTEGER, market TEXT, side TEXT, book TEXT, line REAL, price REAL, "
@@ -152,18 +154,19 @@ def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_ne
         con.execute(s_)
     q, n = PD._ro(lines_db), PD._ro(news_db)
     first_run = con.execute("SELECT value FROM meta WHERE key = 'installed'").fetchone() is None
-    keys = current_boards(q, markets=("points", "rebounds", "assists", "threes", "pra"))
+    keys = current_boards(q, markets=tuple(BOOST.PARTS))
+    installed = set((con.execute("SELECT value FROM meta WHERE key = 'markets'").fetchone() or (",".join(ROLE.MARKET_STAT),))[0].split(","))
     done = {(g, p, m, b) for g, p, m, b in con.execute("SELECT gid, pid, market, book FROM opened")}
-    rds, rts, eds, stat_cache, fired = {}, {}, {}, {}, 0
+    rds, rts, eds, bds, stat_cache, fired = {}, {}, {}, {}, {}, 0
     for (gid, pid, market, book), (board, tip, player, seen) in sorted(keys.items()):
-        if market not in ROLE.MARKET_STAT or (gid, pid, market, book) in done or seen > now:
+        if market not in BOOST.PARTS or (gid, pid, market, book) in done or seen > now:
             continue
         m = R.main_of(board)
         if not m:
             continue
         con.execute("INSERT OR IGNORE INTO opened VALUES (?, ?, ?, ?, ?)", (gid, pid, market, book, seen))
-        if first_run or not tip or RP.iso(tip) <= (dt.datetime.fromisoformat(now) + dt.timedelta(minutes=TOO_LATE_MIN)).isoformat():
-            continue                                     # install: mark what is already open; never act near or after tip
+        if first_run or market not in installed or not tip or RP.iso(tip) <= (dt.datetime.fromisoformat(now) + dt.timedelta(minutes=TOO_LATE_MIN)).isoformat():
+            continue                                     # install (or a market new here): mark what is open; never act near tip
         date = E._et_date(tip)
         season = ROLE.season_of(date)
         for rule in PINGED_RATIOS:                       # the same decision the side-by-side's RATIO_PA28 replays
@@ -191,6 +194,24 @@ def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_ne
                     con.execute("UPDATE ratio_signals SET pinged = ? WHERE rule = 'EARLY_SURGE' AND gid = ? AND pid = ? AND market = ?",
                                 (1 if ok else 0, gid, pid, market))
                     fired += 1
+        bd = bds.get(season) or bds.setdefault(season, BOOST.live_data(matchup_db, gamelogs_db, season))
+        bteam = bd.team_now(pid, date)                   # NBA_BOOST_PREREG.md: a starter out, the teammate's over
+        if bteam:
+            st = stat_cache.get(date) or stat_cache.setdefault(date, statuses(n, date, now))
+            out_b = {x for x, (tm, s_, _nm) in st.items() if tm == bteam and s_ in OUTS}
+            f = BOOST.boost_eval(bd, date, bteam, pid, market, m[0], m[1], out_b) if out_b else None
+            if f:
+                rule = "BOOST" if f["kind"] == "history" else "BOOST_NH"
+                cur = con.execute("INSERT OR IGNORE INTO ratio_signals VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                                  (rule, gid, pid, market, book, m[0], m[1],
+                                   round(f["hits"] / f["h"] if rule == "BOOST" else f["proj"], 3), date, player, now, 0))
+                if cur.rowcount and rule == "BOOST":     # amendment 1: only the history flags ping
+                    ok = sender(BOOST.body(player, market, m[0], m[1], BOOK[book], f, st[f["x"]][2] or str(f["x"])))
+                    con.execute("UPDATE ratio_signals SET pinged = ? WHERE rule = 'BOOST' AND gid = ? AND pid = ? AND market = ?",
+                                (1 if ok else 0, gid, pid, market))
+                    fired += 1
+        if market not in ROLE.MARKET_STAT:
+            continue
         rd = rds.get(season) or rds.setdefault(season, ROLE.RoleData(matchup_db, gamelogs_db, season))
         team = rd.team_of(pid, date)
         if team is None:
@@ -213,6 +234,7 @@ def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_ne
         fired += tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json, sender)
     if first_run:
         con.execute("INSERT OR REPLACE INTO meta VALUES ('installed', ?)", (now,))
+    con.execute("INSERT OR REPLACE INTO meta VALUES ('markets', ?)", (",".join(BOOST.PARTS),))
     con.commit()
     print(f"nba_role_open {now}: {len(keys)} props on the board, {fired} fired{' (install: marked open, no pings)' if first_run else ''}")
     return fired

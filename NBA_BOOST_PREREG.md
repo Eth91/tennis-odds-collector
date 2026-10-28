@@ -136,3 +136,18 @@ By market, every market loses in both seasons (−2% to −13%).
 - Volume: about 30 flags a day (5–6 with history) on 10–11 players.
 - The archive has tip lines only. Whether openers are stale before the injury news is priced is what the forward
   test can show and this backtest cannot.
+
+# AMENDMENT 1: what pings, and the two registered rules (2026-10-28, about 20:00 UTC, after the result, before live)
+**Asked after the result** (about 30 flags a day, losing at tip lines), the user chose: **only the history flags ping**
+(5–6 a day). The no-history flags are recorded silently. Every flag is still tracked against the closing line.
+
+- **Side-by-side:** two rules with the same decision, split by kind, so each has its own record:
+  - **BOOST**: the history flags (rule 9);
+  - **BOOST_NH**: the no-history flags (rule 10).
+
+  Both registered at **2026-10-28T21:00:00 UTC** (`NBA_SXS_PREREG.md` amendment 9).
+- **Live (`nba_role_open.py`):** rows go to `ratio_signals` as BOOST (pinged) or BOOST_NH (not pinged), one per
+  (rule, game, player, market) across books. The value column holds the hit rate (BOOST) or the projection (BOOST_NH).
+- **The combo markets are new to the live pinger** (it watched points, rebounds, assists and threes). On the first run
+  after deploy, combo props already on the board are marked open without acting, as at install, so only true openers
+  are judged.

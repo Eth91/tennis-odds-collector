@@ -136,6 +136,135 @@ def check_backtest(mod):
     return ok
 
 
+N7 = 7                                                   # joined this season: no history games
+TIP, D = "2026-11-02T00:00:00+00:00", "2026-11-01"
+
+
+def live_stores(tmp):
+    """This season (nba_matchup): T1-T6, everyone plays (N7 22 min, 6 rebounds). Last season (logs_full 2025-26): L1-L5
+    everyone, X out L6-L10 with S2 and S6 in (B 26 min, 12, 11, 13, 10, 12 rebounds), L11-L13 everyone. Tonight X is Out
+    on the 16:00 report."""
+    p = {k: tmp / f"{k}.sqlite" for k in ("lines", "news", "matchup", "gamelogs")}
+    m = sqlite3.connect(p["matchup"])
+    m.execute("CREATE TABLE games (gid, season, date, home, away, home_pts, away_pts)")
+    m.execute("CREATE TABLE player_games (gid, team, pid, pos, starter, min, pts, reb, ast, fg3m, stl, blk, tov, fga, fg3a, fta, pf)")
+    base = {**BASE, N7: (22, 6, 0, 6, 1, 7)}
+    for i in range(1, 7):
+        g = f"T{i}"
+        m.execute("INSERT INTO games VALUES (?, '2026-27', ?, 'HOM', 'AWY', 100, 99)", (g, f"2026-10-2{i}"))
+        m.executemany("INSERT INTO player_games (gid, team, pid, min, fga, fg3m, reb, ast, pts) VALUES (?, 'HOM', ?,?,?,?,?,?,?)",
+                      [(g, pid) + base[pid] for pid in (X, S2, S6, B, G4, F5, N7)])
+    m.commit()
+    gl = sqlite3.connect(p["gamelogs"])
+    gl.execute("CREATE TABLE logs_full (season, game_id, date, team, player_id, player, min, fgm, fga, fg3m, fg3a, ftm, fta, oreb, dreb, "
+               "reb, ast, stl, blk, tov, pf, pts, plus_minus)")
+    rows = []
+    for i in range(1, 14):
+        out_x = 6 <= i <= 10
+        for pid in (X, S2, S6, B, G4, F5):
+            if out_x and pid == X:
+                continue
+            mn, fga, fg3m, reb, ast, pts = BASE[pid]
+            if out_x and pid == B:
+                mn, reb = 26, (12, 11, 13, 10, 12)[i - 6]
+            rows.append(("2025-26", f"L{i}", f"2026-01-{i:02d}", "HOM", pid, NAME[pid], mn, fga, fg3m, reb, ast, pts))
+    gl.executemany("INSERT INTO logs_full (season, game_id, date, team, player_id, player, min, fga, fg3m, reb, ast, pts) "
+                   "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", rows)
+    gl.execute("CREATE TABLE positions (player_id, player, position)")
+    gl.executemany("INSERT INTO positions VALUES (?,?,?)", [(pid, NAME.get(pid, "Nate Seven"), v) for pid, v in {**POS, N7: "C"}.items()])
+    gl.commit()
+    n = sqlite3.connect(p["news"])
+    n.execute("CREATE TABLE snapshots (mark, published_at, game_date, matchup, team, pid, player, status, reason)")
+    n.execute("INSERT INTO snapshots (published_at, game_date, team, pid, player, status) VALUES "
+              "('2026-11-01T16:00:04+00:00', ?, 'HOM', ?, 'Xavier Big', 'Out')", (D, X))
+    n.commit()
+    q = sqlite3.connect(p["lines"])
+    q.execute("CREATE TABLE board (book TEXT, collected_at TEXT, gid TEXT, tip_utc TEXT, event TEXT, home TEXT, away TEXT, "
+              "pid INTEGER, player TEXT, stat TEXT, line REAL, side TEXT, odds REAL)")
+    q.commit()
+    return p
+
+
+def post(p, book, at, props):
+    q = sqlite3.connect(p["lines"])
+    q.executemany("INSERT INTO board (book, collected_at, gid, tip_utc, home, away, pid, player, stat, line, side, odds) "
+                  "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", [(book, at, "G1", TIP, "HOM", "AWY", pid, nm, stat, ln, s, 1.9)
+                                                       for pid, nm, stat, ln in props for s in ("over", "under")])
+    q.commit()
+
+
+def check_live(L):
+    """DraftKings opens B's rebounds (9.5) and N7's (7.5) at 16:10; FanDuel opens B's at 16:12. One BOOST ping (B, 5 of 5
+    without X); N7's no-history flag is recorded, not pinged; FanDuel's later opener does not ping again."""
+    tmp = pathlib.Path(tempfile.mkdtemp())
+    p = live_stores(tmp)
+    sent = []
+    kw = dict(lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"], tracking_db=tmp / "t.sqlite",
+              lineups_db=tmp / "none.sqlite", index_json=tmp / "none.json", db=tmp / "role.sqlite", sender=lambda b: sent.append(b) or True)
+    L.process(now="2026-11-01T14:00:00", **kw)                                          # install
+    post(p, "dk", "2026-11-01T16:10:00", ((B, "Bee Big", "rebounds", 9.5), (N7, "Nate Seven", "rebounds", 7.5)))
+    L.process(now="2026-11-01T16:11:00", **kw)
+    boost = [b for b in sent if "BOOST" in b]
+    assert boost == ["🟢 BOOST Bee Big REB o9.5 -111 DK · Xavier Big out (game 1) · 5/5 beat 9.5 without him, avg 11.6 · shadow"], sent
+    post(p, "fd", "2026-11-01T16:12:00", ((B, "Bee Big", "rebounds", 9.5),))
+    L.process(now="2026-11-01T16:13:00", **kw)
+    assert [b for b in sent if "BOOST" in b] == boost, sent
+    rows = sqlite3.connect(tmp / "role.sqlite").execute(
+        "SELECT rule, pid, market, book, pinged FROM ratio_signals WHERE rule LIKE 'BOOST%' ORDER BY rule").fetchall()
+    assert rows == [("BOOST", B, "rebounds", "dk", 1), ("BOOST_NH", N7, "rebounds", "dk", 0)], rows
+
+
+def check_new_markets(L):
+    """Running before the combos were watched (installed, no 'markets' key): a P+R prop already posted is marked open, not
+    acted on; the rebounds opener still pings."""
+    tmp = pathlib.Path(tempfile.mkdtemp())
+    p = live_stores(tmp)
+    con = sqlite3.connect(tmp / "role.sqlite")
+    for s_ in L.DDL:
+        con.execute(s_)
+    con.execute("INSERT INTO meta VALUES ('installed', '2026-10-27T00:00:00')")
+    con.commit()
+    sent = []
+    kw = dict(lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"], tracking_db=tmp / "t.sqlite",
+              lineups_db=tmp / "none.sqlite", index_json=tmp / "none.json", db=tmp / "role.sqlite", sender=lambda b: sent.append(b) or True)
+    post(p, "dk", "2026-11-01T16:10:00", ((B, "Bee Big", "pts_reb", 15.5), (B, "Bee Big", "rebounds", 9.5)))
+    L.process(now="2026-11-01T16:11:00", **kw)
+    assert [b for b in sent if "BOOST" in b] == [
+        "🟢 BOOST Bee Big REB o9.5 -111 DK · Xavier Big out (game 1) · 5/5 beat 9.5 without him, avg 11.6 · shadow"], sent
+    post(p, "fd", "2026-11-01T16:12:00", ((B, "Bee Big", "pts_reb", 15.5),))
+    L.process(now="2026-11-01T16:13:00", **kw)
+    assert [b for b in sent if "P+R" in b] == [
+        "🟢 BOOST Bee Big P+R o15.5 -111 FD · Xavier Big out (game 1) · 5/5 beat 15.5 without him, avg 21.6 · shadow"], sent
+
+
+def test_live():
+    import nba_role_open as L
+    check_live(L)
+    check_new_markets(L)
+
+
+def test_live_mutants():
+    import nba_role_open as L
+    src = pathlib.Path(L.__file__).read_text()
+    for tag, a, b in (("no-history flags ping", 'if cur.rowcount and rule == "BOOST":', "if cur.rowcount:"),
+                      ("no dedupe", 'if cur.rowcount and rule == "BOOST":', 'if rule == "BOOST":'),
+                      ("new markets act at once", "if first_run or market not in installed or", "if first_run or")):
+        assert src.count(a) == 1, tag
+        d = pathlib.Path(tempfile.mkdtemp())
+        (d / "nba_role_open_bmut.py").write_text(src.replace(a, b))
+        sys.path.insert(0, str(d))
+        try:
+            mod = importlib.import_module("nba_role_open_bmut")
+            check_live(mod)
+            check_new_markets(mod)
+        except AssertionError:
+            continue
+        finally:
+            sys.path.remove(str(d))
+            sys.modules.pop("nba_role_open_bmut", None)
+        raise AssertionError(f"mutant survived: {tag}")
+
+
 def test_boost():
     assert check(BOOST)
     assert check_backtest(BOOST)
@@ -176,4 +305,6 @@ def test_mutants():
 if __name__ == "__main__":
     test_boost()
     test_mutants()
+    test_live()
+    test_live_mutants()
     print("test_nba_boost: OK")

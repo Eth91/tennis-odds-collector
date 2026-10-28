@@ -208,6 +208,37 @@ def rank(c):
     return (c["kind"] == "history", c["hits"] / c["h"] if c["kind"] == "history" else 0.0, c["h"])
 
 
+# ── live ──────────────────────────────────────────────────────────────────────────────────────────────────────────
+ABBR = {"points": "PTS", "rebounds": "REB", "assists": "AST", "threes": "3PM", "pts_reb": "P+R", "pts_ast": "P+A",
+        "reb_ast": "R+A", "pra": "PRA"}
+
+
+def live_data(matchup_db, gamelogs_db, season):
+    """This season's box scores (nba_matchup) and last season's logs (nba_gamelogs logs_full), as ROLE's RoleData reads them."""
+    ro = lambda p: sqlite3.connect(f"file:{p}?mode=ro", uri=True) if Path(p).exists() else None
+    has = lambda c, t: c is not None and c.execute("SELECT 1 FROM sqlite_master WHERE name = ?", (t,)).fetchone()
+    m, g = ro(matchup_db), ro(gamelogs_db)
+    rows = [dict(zip(COLS, r)) for r in m.execute(
+        "SELECT gm.season, p.gid, gm.date, p.team, p.pid, p.min, p.fga, p.fg3m, p.reb, p.ast, p.pts FROM player_games p "
+        "JOIN games gm ON gm.gid = p.gid WHERE gm.season = ?", (season,))] if has(m, "player_games") else []
+    if has(g, "logs_full"):
+        rows += [dict(zip(COLS, r)) for r in g.execute(
+            "SELECT season, game_id, date, team, player_id, min, fga, fg3m, reb, ast, pts FROM logs_full WHERE season = ?",
+            (PREV.get(season, ""),))]
+    for r in rows:
+        r["min"] = r["min"] or 0.0
+    groups = {pid: group(pos) for pid, pos in g.execute("SELECT player_id, position FROM positions")} if has(g, "positions") else {}
+    return BoostData(rows, groups, season)
+
+
+def body(player, market, line, price, book, f, x_name):
+    from nba_ping import american
+    why = (f"{f['hits']}/{f['h']} beat {line:g} without him, avg {f['avg']:.1f}" if f["kind"] == "history"
+           else f"no history, proj {f['proj']:.1f}")
+    return (f"🟢 BOOST {player} {ABBR[market]} o{line:g} {american(price)} {book} · {x_name} out (game {f['n']}) · {why} "
+            f"· shadow")
+
+
 # ── the backtest ──────────────────────────────────────────────────────────────────────────────────────────────────
 def load_rows(gamelogs_db, seasons):
     g = sqlite3.connect(f"file:{gamelogs_db}?mode=ro", uri=True)

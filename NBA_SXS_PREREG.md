@@ -219,3 +219,12 @@ All three are registered at **2026-10-27T13:00:00 UTC**.
 21. **EARLY_SURGE:** the early-season volume surge at the opener (`NBA_EARLY_PREREG.md` amendment 1). Registered at
     **2026-10-27T13:00:00 UTC**; no pings.
     - Later the same day, the user turned on SHADOW pings at the opener (`NBA_EARLY_PREREG.md` amendment 2). The rule is unchanged.
+
+# AMENDMENT 9: BOOST and BOOST_NH (2026-10-28, before they ran)
+22. **BOOST:** a starter (26+ min/g) out in absence game 1–3; at a book's opener, a teammate's over (−150 or better)
+    when 80%+ of his past games without that starter but with tonight's other starters beat the line
+    (`NBA_BOOST_PREREG.md`). All 8 markets. Pinged (SHADOW).
+23. **BOOST_NH:** the same rule's no-history flags (fewer than 3 such games; the position rules put him 15%+ over the
+    line). No pings.
+
+Both are registered at **2026-10-28T21:00:00 UTC**.
