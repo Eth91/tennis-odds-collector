@@ -745,18 +745,23 @@ def boost_data(season):
     return _BD[key]
 
 
-BOOST_DEPS = (boost_data, BOOST_M.live_data, BOOST_M.BoostData, BOOST_M.boost_eval, BOOST_M.rank, BOOST_M.kind_of,
-              BOOST_M.stat_of, BOOST_M.group, BOOST_M.posted_fives, ROLE.season_of)
+BOOST_DEPS = (boost_data, role_data, BOOST_M.live_data, BOOST_M.BoostData, BOOST_M.boost_eval, BOOST_M.step_eval,
+              BOOST_M.pickup_eval, BOOST_M.step_minutes, BOOST_M.minutes_features, BOOST_M.v3_minutes, BOOST_M.rates,
+              BOOST_M.Trees, BOOST_M.rank, BOOST_M.kind_of, BOOST_M.stat_of, BOOST_M.group, BOOST_M.posted_fives,
+              ROLE.season_of) + ROLE_DEPS
 BOOST_SPEC = [BOOST_M.STARTER_MIN, BOOST_M.BASE_THIS, BOOST_M.BASE_LAST, BOOST_M.SPOT_MAX, BOOST_M.MIN_H,
               BOOST_M.MIN_H_IRRELEVANT, BOOST_M.HIT_AT, BOOST_M.MIN_AVG_MIN, BOOST_M.PROJ_AT, BOOST_M.BASE_N,
-              BOOST_M.BASE_MIN_GAMES, BOOST_M.SAME_W, BOOST_M.PRICE_MIN, BOOST_M.TOP, BOOST_M.PARTS, BOOST_M.STEP_MIN,
-              BOOST_M.USUAL_GAMES, BOOST_M.USUAL_MIN]
+              BOOST_M.BASE_MIN_GAMES, BOOST_M.SAME_W, BOOST_M.PRICE_MIN, BOOST_M.TOP, BOOST_M.PARTS, BOOST_M.USUAL_GAMES,
+              BOOST_M.USUAL_MIN, BOOST_M.STEP_K, BOOST_M.STEP_STARTS, BOOST_M.K_RATE, BOOST_M.PICK_SPLIT,
+              BOOST_M.MIN_FEATURES]
+if BOOST_M.TREES_B.exists():                             # the fitted bench-pickup model is part of BOOST_PICKUP
+    BOOST_SPEC.append(hashlib.sha256(BOOST_M.TREES_B.read_bytes()).hexdigest()[:16])
 
 
 class BOOST(Rule):
-    """A starter (26+ min/g) out, absence game 1-3: at a book's opener, a teammate's over (-150 or better) when 80%+ of
-    his past games without that starter but with tonight's other starters beat the line (3+ games, 6+ when the
-    starter's own numbers make him irrelevant to the market; 20+ minutes on average)."""
+    """A usual starter out, absence game 1-3: at a book's opener, a teammate's over (-150 or better) when 80%+ of his
+    past games without that starter but with tonight's other starters beat the line (3+ games, 6+ when the starter's
+    own numbers make him irrelevant to the market; 20+ minutes on average)."""
     name, deps, spec, flag_kind = "BOOST", BOOST_DEPS, BOOST_SPEC, "history"
 
     def start_day(self, v):
@@ -766,6 +771,16 @@ class BOOST(Rule):
         for team, pid, st in rows:
             self.listed[pid] = (team, st)
         return ()
+
+    def judge(self, bd, date, team, p, mk, m, out_now, five):
+        """This rule's flag for one prop, or None (NBA_BOOST_PREREG.md amendments 1-6)."""
+        if self.flag_kind in ("history", "no history"):
+            f = BOOST_M.boost_eval(bd, date, team, p, mk, m[0], m[1], out_now)
+            return f if f and BOOST_M.kind_of(f) == self.flag_kind else None
+        rd = role_data(ROLE.season_of(date))
+        if self.flag_kind == "step":
+            return BOOST_M.step_eval(bd, rd, date, team, p, mk, m[0], m[1], out_now, five)
+        return BOOST_M.pickup_eval(bd, rd, date, team, p, mk, m[0], m[1], out_now, five)
 
     def on_obs(self, v, book, seen):
         out, bd = [], None
@@ -785,38 +800,47 @@ class BOOST(Rule):
             out_now = {x for x, (tm, st) in self.listed.items() if tm == team and st in RP.OUTS}
             if not team or not out_now:
                 continue
-            f = BOOST_M.boost_eval(bd, v.date, team, p, mk, m[0], m[1], out_now, fives.get(team))
-            if f and BOOST_M.kind_of(f) == self.flag_kind:
-                why = f"{f['hits']}/{f['h']}" if f["kind"] == "history" else f"proj={f['proj']:.1f}"
+            f = self.judge(bd, v.date, team, p, mk, m, out_now, fives.get(team))
+            if f:
+                why = f"{f['hits']}/{f['h']}" if f["kind"] == "history" else f"proj={f['proj']:.1f} min={f.get('proj_min', 0):.1f}"
                 out.append(sig(g, p, mk, "over", m[0], b, m[1], note=f"x={f['x']} n={f['n']} {why}"))
-        if self.flag_kind == "step" and fives:          # amendment 4: a new starter in NBA.com's lineup, at this book's
-            bd = bd or boost_data(ROLE.season_of(v.date))   # next look, for his props that opened before the snapshot
+        if self.flag_kind in ("step", "pickup") and fives:   # amendment 4: at this book's next look after NBA.com's
+            bd = bd or boost_data(ROLE.season_of(v.date))   # lineup, the new starter's (or pickup's) earlier props
             for team, five in sorted(fives.items()):
                 g = v.game_of(team)
                 if bd.usual_five(team, v.date) is None or g not in seen or v.t > RP.minus(v.games()[g]["tip"], 5):
                     continue
                 out_now = {x for x, (tm, st) in self.listed.items() if tm == team and st in RP.OUTS}
-                for p in sorted(bd.tonight(team, v.date, out_now, five)[1]):
+                tfive, pairs = bd.tonight(team, v.date, out_now, five)
+                who = sorted(pairs) if self.flag_kind == "step" else \
+                    sorted({pk[0] for s_ in pairs if (pk := bd.pickup(team, v.date, s_, tfive, out_now))})
+                for p in who:
                     if (p, book) in self.step_seen:
                         continue
                     self.step_seen.add((p, book))
                     for p2, mk in sorted(v.props(g, book)):
                         k = (g, p, mk, book)
                         m = RP.main_of(v.board(*k)) if p2 == p and mk in BOOST_M.PARTS and self.opened.get(k, at) < at else None
-                        f = m and BOOST_M.boost_eval(bd, v.date, team, p, mk, m[0], m[1], out_now, five)
-                        if f and BOOST_M.kind_of(f) == "step":
-                            out.append(sig(g, p, mk, "over", m[0], book, m[1], note=f"x={f['x']} n={f['n']} lineup step"))
+                        f = m and self.judge(bd, v.date, team, p, mk, m, out_now, five)
+                        if f:
+                            out.append(sig(g, p, mk, "over", m[0], book, m[1], note=f"x={f['x']} n={f['n']} lineup"))
         return out
 
 
 class BOOST_STEP(BOOST):
-    """BOOST's no-history flags for the step-in player (the top bench player at the missing starter's position) projected
-    up to 24 minutes (NBA_BOOST_PREREG.md amendment 3)."""
+    """The new starter for an out usual starter: his minutes from the MINUTES blend (his last 10 starts and ROLE1 v3)
+    x his rates, 15%+ over the line (NBA_BOOST_PREREG.md amendment 6). Pinged."""
     name, flag_kind = "BOOST_STEP", "step"
 
 
+class BOOST_PICKUP(BOOST):
+    """The bench pickup for that new starter, once NBA.com's lineup is posted: the fitted minutes model x his rates,
+    15%+ over the line (amendment 6). Silent."""
+    name, flag_kind = "BOOST_PICKUP", "pickup"
+
+
 class BOOST_NH(BOOST):
-    """BOOST's other no-history flags (fewer than 3 such games): the position rules alone put him 15%+ over the line."""
+    """BOOST's no-history flags (fewer than 3 such games): the position rules alone put him 15%+ over the line."""
     name, flag_kind = "BOOST_NH", "no history"
 
 
@@ -826,7 +850,7 @@ PIT_STORES = {"MATCHUP_DB": "matchup", "TRACKING_DB": "tracking"}
 
 RULES = (NULL_TIP30, NEWS_FD, NEWS_DK, DK_LAGS_FD, T4_TIP30, ENGINE_CARD, S1, DEPTH_NEXT, DEPTH_NEXT_TIP30, NEW_STARTER,
          LOST_START, ROLE_OPEN, RATIO_FGA, RATIO_PA, RATIO_RC, RATIO_PA28, PTS_DVP, RETURN_UNDER, FOUL_BIG, MIN_RESTRICT, EARLY_SURGE,
-         BOOST, BOOST_STEP, BOOST_NH)
+         BOOST, BOOST_STEP, BOOST_PICKUP, BOOST_NH)
 
 
 def fingerprint(cls):
@@ -863,7 +887,8 @@ REGISTRY = {                                             # name -> (registered a
     "PTS_DVP": ("2026-10-27T13:00:00", "fc8387835f"),             # amendment 5
     "RATIO_PA28": ("2026-10-27T13:00:00", "2404e38806"),          # amendment 4
     "RATIO_RC": ("2026-10-27T13:00:00", "17e2e5ea3f"),
-    "BOOST": ("2026-10-28T20:30:00", "16df23793c"),               # amendment 9 (NBA_BOOST_PREREG.md amendments 2-4)
-    "BOOST_STEP": ("2026-10-28T20:30:00", "293216f606"),
-    "BOOST_NH": ("2026-10-28T20:30:00", "3e2b8dc054"),
+    "BOOST": ("2026-10-28T22:00:00", "63b290d65d"),               # amendment 9 (NBA_BOOST_PREREG.md amendments 2-6)
+    "BOOST_STEP": ("2026-10-28T22:00:00", "b81a5fe4bf"),
+    "BOOST_PICKUP": ("2026-10-28T22:00:00", "9ca17d7c70"),
+    "BOOST_NH": ("2026-10-28T22:00:00", "2ce3e8ed7d"),
 }

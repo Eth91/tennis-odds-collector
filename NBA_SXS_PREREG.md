@@ -299,3 +299,6 @@ but it changes live code.
       from the lineup tab (`NBA_BOOST_PREREG.md` amendment 4).
 
 Both are registered at **2026-10-28T21:00:00 UTC**.
+
+25. **BOOST_PICKUP** (`NBA_BOOST_PREREG.md` amendment 6): the bench pickup for a new starter once NBA.com's lineup is posted, on the MINUTES study's fitted model. No pings.
+    - BOOST_STEP now runs on the MINUTES blend for all new starters (amendment 6). BOOST, BOOST_STEP, BOOST_PICKUP and BOOST_NH are re-registered at **2026-10-28T22:00:00 UTC**.

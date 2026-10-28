@@ -347,3 +347,5 @@ result. All three rules are re-fingerprinted and registered at the deploy time.
 **BOOST_NH:** loses amendment 2's 24-minute floor. Its no-history flags use rule 10's redistribution only.
 
 **Registration:** BOOST, BOOST_NH, BOOST_STEP and BOOST_PICKUP are re-fingerprinted and registered at the deploy time.
+- **One ping per prop (added while building, before deploy):** a prop that already pinged as BOOST (history) records
+  its STEP flag silently instead of pinging twice. The side-by-side keeps both records.
