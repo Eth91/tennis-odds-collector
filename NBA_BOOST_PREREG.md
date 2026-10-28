@@ -1,6 +1,6 @@
 # PRE-REGISTRATION: BOOST, players who gain when a teammate is out
 
-Written 2026-10-28 (about 19:15 UTC), before the rule was built or run on any data. It is research: nothing is bet
+Written 2026-10-28 (about 19:13 UTC), before the rule was built or run on any data. It is research: nothing is bet
 automatically, `nba_flags.LIVE_TIERS` stays empty, and pings carry the SHADOW label.
 
 ## The user's idea
@@ -110,7 +110,7 @@ Everything reads only games before the date. "Team games" are team T's box score
   its CLV and ROI on the same bars as the other rules (CLV at ≥ 200 signals over ≥ 10 dates).
 - Nothing is called an edge without the forward record.
 
-## Result (2026-10-28, about 19:45 UTC): FAIL
+## Result (2026-10-28, about 19:18 UTC): FAIL
 `python3 nba_boost.py --json .projdata/boost_result.json`. The game logs hold regular seasons only, so the archive's
 playoff props have no box score and drop out.
 
@@ -137,7 +137,7 @@ By market, every market loses in both seasons (−2% to −13%).
 - The archive has tip lines only. Whether openers are stale before the injury news is priced is what the forward
   test can show and this backtest cannot.
 
-# AMENDMENT 1: what pings, and the two registered rules (2026-10-28, about 20:00 UTC, after the result, before live)
+# AMENDMENT 1: what pings, and the two registered rules (2026-10-28, about 19:23 UTC, after the result, before live)
 **Asked after the result** (about 30 flags a day, losing at tip lines), the user chose: **only the history flags ping**
 (5–6 a day). The no-history flags are recorded silently. Every flag is still tracked against the closing line.
 
