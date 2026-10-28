@@ -521,12 +521,35 @@ def check_replay_step(SR):
     assert got == {"BOOST_STEP": ([], [(N9, "rebounds", 4.5)], []), "BOOST_PICKUP": ([], [(B, "assists", 0.5)], [])}, got
 
 
+def check_snapshot_gate(L):
+    """step_checks loads nothing while NBA.com's snapshot is unchanged (2026-10-28: it had reloaded both seasons every
+    minute, adding to the VM's load): after the 17:01 run handled the 17:00 snapshot, the 17:02 run must not load data."""
+    tmp = pathlib.Path(tempfile.mkdtemp())
+    p = lineup_stores(tmp)
+    kw = dict(phone=L.ALL_RULES, lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"],
+              tracking_db=tmp / "t.sqlite", lineups_db=p["lineups"], index_json=tmp / "none.json", db=tmp / "role.sqlite",
+              sender=lambda b: True)
+    L.process(now="2026-11-01T14:00:00", **kw)
+    post(p, "dk", "2026-11-01T16:10:00", ((N9, "Ned Nine", "rebounds", 4.5),))
+    L.process(now="2026-11-01T16:11:00", **kw)
+    post_lineup(p, "2026-11-01T17:00:00+00:00", (S2, S6, G4, F5, N9))
+    L.process(now="2026-11-01T17:01:00", **kw)
+    real, calls = BOOST.live_data, []
+    BOOST.live_data = lambda *a: calls.append(a) or real(*a)
+    try:
+        L.process(now="2026-11-01T17:02:00", **kw)
+    finally:
+        BOOST.live_data = real
+    assert calls == [], "the unchanged snapshot was checked again"
+
+
 def test_lineups():
     import nba_role_open as L
     import nba_sxs_rules as SR
     assert check_lineups(BOOST)
     check_live_lineup(L)
     check_replay_step(SR)
+    check_snapshot_gate(L)
 
 
 LINEUP_MUTANTS = (

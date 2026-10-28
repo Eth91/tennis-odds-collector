@@ -128,8 +128,10 @@ def step_checks(con, keys, now, n, matchup_db, gamelogs_db, lineups_db, sender, 
     fired = 0
     for date in sorted({d for d, _p in by}):
         at, fives = BOOST.posted_fives(lineups_db, date, now)
-        if not fives:
-            continue
+        key = f"step_snap {date}"
+        if not fives or (con.execute("SELECT value FROM meta WHERE key = ?", (key,)).fetchone() or (None,))[0] == at:
+            continue                                     # no lineup, or this snapshot was already checked: load nothing
+        con.execute("INSERT OR REPLACE INTO meta VALUES (?, ?)", (key, at))
         season = ROLE.season_of(date)
         bd = bds.get(season) or bds.setdefault(season, BOOST.live_data(matchup_db, gamelogs_db, season))
         rd = rds.get(season) or rds.setdefault(season, ROLE.RoleData(matchup_db, gamelogs_db, season))
