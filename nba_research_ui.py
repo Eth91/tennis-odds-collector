@@ -2312,8 +2312,8 @@ function zoneCard(kind) {
         `<button data-asv="${k}" aria-pressed="${def === (k === "def")}">${l}</button>`).join("")}</div>` : "") +
       `<div class="shy" role="group" aria-label="Season">${[D.season, prevSeason(D.season)].map(x => `<button class="chip" data-pbs="${x}" aria-pressed="${x === MUP[key]}">${x.slice(0, 4)}</button>`).join("")}<span>${esc(sub)}</span></div>
       <div class="zbd">${ast ? `<div class="zcv">${court()}</div>` : ""}<h3 class="shw">${ast ? `Where ${esc(p.opp)} gives up assisted baskets` : `Where ${esc(p.opp)}'s opponents rebound`}<small>${ast ? "by where the basket was made" : "by where the missed shot came from"}</small></h3>
-      ${rows.length ? rows.map(r => `<div class="kv shr"><span>${r.nm}<small>${tot ? Math.round(mine[r.k] / tot * 100) + `% of his ${ast ? "assists" : "rebounds"} · ` + r1(mine[r.k] / gp) + "/g" : "none"}</small></span>
-        <b><em class="${r.d > 0 ? "up" : "dn"}">${r.d > 0 ? "+" : ""}${r.d.toFixed(1)}/g</em><small>${r1(r.a)} a game</small></b></div>`).join("") : '<div class="empty"><b>No games yet</b></div>'}</div>`;
+      ${rows.length ? rows.map(r => `<div class="kv shr"><span>${r.nm}<small>${tot ? Math.round(mine[r.k] / tot * 100) + `% of his ${ast ? "assists" : "rebounds"} · ` + (mine[r.k] / gp).toFixed(1) + "/g" : "none"}</small></span>
+        <b><em class="${r.d > 0 ? "up" : "dn"}">${r.d > 0 ? "+" : ""}${r.d.toFixed(1)}/g</em><small>${r.a.toFixed(1)} a game</small></b></div>`).join("") : '<div class="empty"><b>No games yet</b></div>'}</div>`;
     if (fresh) swapIn($(".zbd", el));
     $$("[data-pbs]", el).forEach(b => b.onclick = () => { if (MUP[key] !== b.dataset.pbs) { MUP[key] = b.dataset.pbs; draw(true); } });
     if (ast) {                                 // the view switch slides its pill and redraws the court alone
