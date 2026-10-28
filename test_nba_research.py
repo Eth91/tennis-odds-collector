@@ -893,3 +893,10 @@ def test_injury_beneficiaries_open_their_page():
     # every box under an injury is a button: his prop on the slate, else his player page (openPlayer via data-vp)
     assert 'return `<button class="ijb"${p ? ` data-id="${esc(p.id)}"` : ` data-vp="${m.pid}"`}>' in html
     assert 'e.target.closest(".pr[data-id],.mrw[data-id],.ijb[data-id],[data-vp]")' in html
+
+
+def test_player_page_has_last_seasons_window():
+    html = UI.page()
+    # 2026 · H2H · L5 · L10 · L20 · 2025: last season's games at the far right ("last" in windowed: every game before this season)
+    assert '["l20", "L20"], ["last", String(+D.season.slice(0, 4) - 1)]];' in html
+    assert 'if (win === "last") return logs.filter(function (l) { return seasonOf(l.date) !== season; });' in html
