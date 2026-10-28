@@ -68,3 +68,9 @@ the same rows as T2's checks.)
   - ROI rises to about 30% below, then flattens while the count falls.
   - Total profit is larger at 20%+ (2024-25: about 195 units against about 109).
   - The cut was chosen after looking, from five tried, so the forward record decides. No live change without the user.
+
+# AMENDMENT 3: a star on 30%+ (2026-10-28, about 22:40 UTC, before code)
+- **User:** "mark 30%+ as strong." UNDER20's pinged flags whose projection is under 70% of the line ping as "🔵⭐ UNDER";
+  the rest stay "🔵 UNDER". No flag is added or removed.
+- **The side-by-side tracks UNDER30P:** UNDER20P's flags with projection < 0.70 × the line. It is registered at the
+  deploy time, so the 30% cut's own forward record starts clean.

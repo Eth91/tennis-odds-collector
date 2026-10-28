@@ -36,6 +36,8 @@ def check(mod):
     f = mod.under20(bd, rd, TB.D, "HOM", TB.B, "rebounds", line, 1.9, {TB.X})
     want(f and f["side"] == "under" and abs(f["ratio"] - 0.79) < 1e-9, "79% of the line: an UNDER20 flag")
     want(mod.under20(bd, rd, TB.D, "HOM", TB.B, "rebounds", proj / 0.81, 1.9, {TB.X}) is None, "81% of the line: none")
+    want(not mod.strong(f) and mod.strong(mod.under20(bd, rd, TB.D, "HOM", TB.B, "rebounds", proj / 0.69, 1.9, {TB.X})),
+         "a star under 70% of the line (69%), not at 79%")
     want(mod.under20(bd, rd, TB.D, "HOM", TB.B, "rebounds", line, 1.9, {TB.X, TB.B}) is None, "a player listed out is not judged")
     x = mod.features(bd, rd, TB.D, "HOM", TB.B, "rebounds", line, 0.5, {TB.X})
     want(x[0] == 0.0 and x[2] == 0.79 and x[UNDER.FEATURES.index("mk_rebounds")] == 1.0, "features: logit(q), proj/line, the market")
@@ -82,8 +84,8 @@ def check_live(L, fake_model=True):
         if saved:
             U._MODEL["m"] = saved
     under = [b for b in sent if "UNDER" in b]
-    assert len(under) == 1 and re.fullmatch(r"🔵 UNDER Bee Big REB u30\.5 -111 FD · proj [\d.]+ \(\d+% of the line\), \d+ min · shadow",
-                                            under[0]), sent
+    assert len(under) == 1 and re.fullmatch(r"🔵⭐ UNDER Bee Big REB u30\.5 -111 FD · proj [\d.]+ \(\d+% of the line\), \d+ min · shadow",
+                                            under[0]), sent                       # far under 70% of the line: a star
     rows = sqlite3.connect(tmp / "role.sqlite").execute(
         "SELECT rule, pid, market, pinged FROM idea_signals WHERE rule LIKE 'UNDER%' ORDER BY rule, pid").fetchall()
     u20 = [(r[1], r[2], r[3]) for r in rows if r[0] == "UNDER20"]
@@ -122,6 +124,7 @@ def test_mutants():
     src = pathlib.Path(UNDER.__file__).read_text()
     for tag, a, b in (("the 80% cut", "if pr and pr[1] < RATIO_AT * line:", "if pr and pr[1] < line:"),
                       ("a missing input is 0", "v = med if v != v else v", "v = 0.0 if v != v else v"),
+                      ("no star cut", 'return f["ratio"] < STRONG_AT', 'return f["ratio"] < RATIO_AT'),
                       ("no EV bar", 'if p * over - 1 >= EV_AT:\n        return {"side": "over"', 'if p * over - 1 >= -1:\n        return {"side": "over"')):
         assert src.count(a) == 1, tag
         d = pathlib.Path(tempfile.mkdtemp())

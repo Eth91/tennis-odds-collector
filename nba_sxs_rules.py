@@ -848,8 +848,8 @@ class BOOST_NH(BOOST):
 import nba_under as UNDER_M                               # noqa: E402
 
 UNDER_DEPS = (boost_data, role_data, UNDER_M.projection, UNDER_M.under20, UNDER_M.features, UNDER_M.predict,
-              UNDER_M.underml, UNDER_M.pings, BOOST_M.v3_minutes, BOOST_M.rates, BOOST_M.live_data, BOOST_M.BoostData, ROLE.season_of) + ROLE_DEPS
-UNDER_SPEC = [UNDER_M.RATIO_AT, UNDER_M.EV_AT, list(UNDER_M.FEATURES), UNDER_M.PING_PRICE_MIN, list(UNDER_M.PING_SKIP)]
+              UNDER_M.underml, UNDER_M.pings, UNDER_M.strong, BOOST_M.v3_minutes, BOOST_M.rates, BOOST_M.live_data, BOOST_M.BoostData, ROLE.season_of) + ROLE_DEPS
+UNDER_SPEC = [UNDER_M.RATIO_AT, UNDER_M.EV_AT, list(UNDER_M.FEATURES), UNDER_M.PING_PRICE_MIN, list(UNDER_M.PING_SKIP), UNDER_M.STRONG_AT]
 if UNDER_M.MODEL_PY.exists():                            # the fitted model is part of UNDERML
     UNDER_SPEC.append(hashlib.sha256(UNDER_M.MODEL_PY.read_bytes()).hexdigest()[:16])
 
@@ -896,6 +896,15 @@ class UNDER20P(UNDER20):
         return f if f and UNDER_M.pings(f, mk) else None
 
 
+class UNDER30P(UNDER20):
+    """UNDER20P's flags under 70% of the line, the starred pings (NBA_UNDER_PREREG.md amendment 3)."""
+    name = "UNDER30P"
+
+    def judge(self, bd, rd, date, team, p, mk, m, out_now):
+        f = UNDER_M.under20(bd, rd, date, team, p, mk, m[0], m[2], out_now)
+        return f if f and UNDER_M.pings(f, mk) and UNDER_M.strong(f) else None
+
+
 class UNDERML(UNDER20):
     """At tip - 30, FanDuel's main: T2's logistic model (no hindsight outs features, fit on 2023-24), either side at EV
     >= 5%. Silent."""
@@ -911,7 +920,7 @@ PIT_STORES = {"MATCHUP_DB": "matchup", "TRACKING_DB": "tracking"}
 
 RULES = (NULL_TIP30, NEWS_FD, NEWS_DK, DK_LAGS_FD, T4_TIP30, ENGINE_CARD, S1, DEPTH_NEXT, DEPTH_NEXT_TIP30, NEW_STARTER,
          LOST_START, ROLE_OPEN, RATIO_FGA, RATIO_PA, RATIO_RC, RATIO_PA28, PTS_DVP, RETURN_UNDER, FOUL_BIG, MIN_RESTRICT, EARLY_SURGE,
-         BOOST, BOOST_STEP, BOOST_PICKUP, BOOST_NH, UNDER20, UNDER20P, UNDERML)
+         BOOST, BOOST_STEP, BOOST_PICKUP, BOOST_NH, UNDER20, UNDER20P, UNDER30P, UNDERML)
 
 
 def fingerprint(cls):
@@ -952,7 +961,8 @@ REGISTRY = {                                             # name -> (registered a
     "BOOST_STEP": ("2026-10-28T23:00:00", "5ed40c5557"),
     "BOOST_PICKUP": ("2026-10-28T23:00:00", "4356b2332b"),
     "BOOST_NH": ("2026-10-28T23:00:00", "8c7915ffdb"),
-    "UNDER20": ("2026-10-29T00:00:00", "88c6acc802"),             # amendment 10 (NBA_UNDER_PREREG.md)
-    "UNDER20P": ("2026-10-29T00:00:00", "2ded6fa2a6"),            # its pinged subset (amendment 1)
-    "UNDERML": ("2026-10-29T00:00:00", "11b0b922b1"),
+    "UNDER20": ("2026-10-29T00:00:00", "dd2159fd47"),             # amendment 10 (NBA_UNDER_PREREG.md)
+    "UNDER20P": ("2026-10-29T00:00:00", "3e5404a3fc"),            # its pinged subset (amendment 1)
+    "UNDER30P": ("2026-10-29T00:00:00", "7548775af6"),            # the starred subset (amendment 3)
+    "UNDERML": ("2026-10-29T00:00:00", "72123e6124"),
 }
