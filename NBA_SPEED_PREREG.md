@@ -1429,3 +1429,51 @@ through the guard with `--dates`:
 `--verify` passes for 2025-26 (tracked 100.0%, AST and REB agree 100.00%). Cron passes run the new cell at once.
 The X fast path (`nba-x-fast`, running since 2026-10-26 04:50 UTC) holds `nba_flags` in memory: until it is
 restarted, the flags it logs carry the old cell, including any logged after AMEND33_CUTOVER.
+
+# AMENDMENT 34: box scores and tracking as soon as NBA.com posts them (2026-10-28, apparatus only)
+
+**User** (through the props-page session, answering its proposal to pull stats as soon as NBA.com posts them):
+"yes have it make that change".
+
+**Why.**
+- **Box scores** post when a game ends, but the VM fetched them once a day at 10:30 UTC (amendment 30). Last
+  night's finals landed about 6 hours late, and the props page's box scores, matchup page and player pages
+  followed at 10:40–10:55.
+- **Tracking** (amendment 9) ran once a day at 11:20 UTC. The league posts a night's tracking 1–2 days later,
+  at no fixed hour (the 10-23 and 10-24 games appeared by 10-26 11:20; the 10-25 games by 10-27 11:20). A night
+  not posted by 11:20 waited a full extra day. 10-26 and 10-27 are pending now.
+
+**Changes.** These touch only the schedule and the data plumbing. No rule, cell, ping, threshold or registration
+changes.
+1. **`nba_finals.py`, every 15 minutes** (`*/15 0-9,12-23 * * *` UTC; 10:00–11:59 is left to the daily jobs).
+   - It stores this season's newly final box scores through `nba_matchup.fetch`. As before, it takes only games
+     that both the schedule and the box score mark final (status 3).
+   - If it stored at least one game, it runs nba_boxscore, nba_vs and nba_players, with the same arguments as
+     their daily runs.
+   - It takes no play-type snapshot.
+2. **The daily `nba_matchup.py --current` at 10:30 UTC keeps its schedule** and still takes the play-type
+   snapshot.
+   - Amendment 30 stores snapshots by date and uses them forward. A snapshot every 15 minutes could fold that
+     day's early games into that day's label.
+   - It now also refetches last night's finals (yesterday, ET). A box score corrected after the buzzer is
+     therefore stored as the 10:30 run used to store it.
+3. **`nba_tracking.py --fetch --current` runs hourly** (`20 * * * *`), replacing the 11:20 daily run.
+   - **New guard:** a date is stored only when every team in that date's box scores (`nba_season_boxes.json`)
+     has at least one player in each non-empty measure.
+   - **Otherwise** nothing is stored for that date and it stays pending, logged as "INCOMPLETE". This is not a
+     rejection, so the exit code does not change.
+   - **Checked on the store before writing this:** every stored 2026-27 date has every team in both measures.
+     Passing rows equal the players who played (68/68, 254/254, 275/275, 170/170, 157/157), so no good date
+     trips the guard.
+   - 2026-10-22 stays rejected by amendment 33's guard and is retried each hour (two calls).
+
+**Effect on the live rules (stated now).**
+- The pinger reads nba_matchup and nba_tracking every minute. That covers ROLE_OPEN, RATIO_PA28, EARLY_SURGE,
+  RETURN_UNDER and FOUL_BIG.
+- An opener posted overnight now sees last night's finals within about 15 minutes, instead of after 10:30 UTC.
+- The side-by-side already replays these rules with every game before the game date, so the live pings move
+  closer to what is graded.
+
+**Known limit (not changed here).** The replay counts the night-before game even when a book's opener for the
+next day was posted before that game ended. That happens on a back-to-back with an overnight opener. It is a small
+look-ahead in the side-by-side for those spots, and fixing it needs its own amendment.
