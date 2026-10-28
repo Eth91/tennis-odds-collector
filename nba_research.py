@@ -44,6 +44,7 @@ LINES, NEWS, SHADOW = HERE / "nba_lines.sqlite", HERE / "nba_news.sqlite", HERE 
 INDEX = HERE / "nba_player_index.json"
 TRACKING = HERE / "nba_tracking.sqlite"
 PROJ_LOG = HERE / "nba_proj_log.sqlite"          # the projection engine's prospective record (prereg test C)
+ROLE = HERE / "nba_role.sqlite"                  # the engine's flag rules' log (nba_role_open.py, the VM cron); read-only
 LINEUPS = HERE / "nba_lineups.sqlite"            # NBA.com's daily lineups as seen (nba_lineups_poll.py, the VM cron)
 CLOSE_BOARDS = HERE / "nba_close_boards.json"    # each started game's last board before tip (closing_boards), cached
 SLATE_ROLL_H = 6     # the slate moves on to the next day at 6 AM ET (4 AM MT), not midnight: late games stay on it
@@ -403,6 +404,69 @@ def engine_flags(sh, game_dates):
         cur = out.get(k)
         if cur is None or (card == 1 and cur["card"] != 1):
             out[k] = {"tier": tier, "card": card, "why": why, "line": line}
+    return out
+
+
+def _vol(rule, v):
+    """An opener rule's own number (ratio_signals.volume), as the page shows it."""
+    if v is None:
+        return ""
+    if rule == "BOOST":
+        return f"hit {v * 100:.0f}% without the starter"
+    if rule == "EARLY_SURGE":
+        return f"{v:.1f} FGA a game"
+    if rule == "RATIO_PA28":
+        return f"{v:.1f} potential assists"
+    return f"proj {v:.1f}"                                   # BOOST_STEP, BOOST_PICKUP, BOOST_NH
+
+
+def _idea(rule, note):
+    """(side, text) of a tip - 30 rule's row: UNDERML's side leads its note ("under p 0.443 ev 0.073"); the rest are
+    unders ("proj 1.8 min 19.8")."""
+    w = (note or "").split()
+    if rule == "UNDERML" and w and w[0] in ("over", "under"):
+        kv = dict(zip(w[1::2], w[2::2]))
+        try:
+            return w[0], f"p {float(kv['p']):.2f} · ev {float(kv['ev']) * 100:+.1f}%"
+        except (KeyError, ValueError):
+            return w[0], " ".join(w[1:])
+    return "under", " · ".join(" ".join(w[i:i + 2]) for i in range(0, len(w), 2)) if w[:1] == ["proj"] else (note or "")
+
+
+def role_flags(rc, game_dates):
+    """Every flag the engine's rules logged for the slate's dates (nba_role.sqlite, read-only), pinged first, then as
+    logged: [{rule, date, gid, pid, market, side, line, price (decimal), pinged, info, at (UTC), player}]. SHADOW flags:
+    none is a bet. ratio_signals: overs at the opener; idea_signals: tip - 30 on FanDuel; signals: ROLE_OPEN, either
+    side. One row per rule, game, player and market (the first book), as the engine keeps them."""
+    out = []
+    if rc is None or not game_dates:
+        return out
+    marks = ",".join("?" * len(game_dates))
+
+    def rows(sql):
+        try:
+            return rc.execute(sql.format(marks), list(game_dates)).fetchall()
+        except sqlite3.OperationalError:                     # a table the engine has not made yet
+            return []
+    for rule, d, gid, pid, mk, line, price, vol, player, at, pinged in rows(
+            "SELECT rule, date, gid, pid, market, line, price, volume, player, logged_at, pinged FROM ratio_signals "
+            "WHERE date IN ({})"):
+        out.append({"rule": rule, "date": d, "gid": gid, "pid": pid, "market": mk, "side": "over", "line": line,
+                    "price": price, "pinged": int(bool(pinged)), "info": _vol(rule, vol), "at": at, "player": player})
+    for rule, d, gid, pid, mk, line, price, note, player, at, pinged in rows(
+            "SELECT rule, date, gid, pid, market, line, price, note, player, logged_at, pinged FROM idea_signals "
+            "WHERE date IN ({})"):
+        side, info = _idea(rule, note)
+        out.append({"rule": rule, "date": d, "gid": gid, "pid": pid, "market": mk, "side": side, "line": line,
+                    "price": price, "pinged": int(bool(pinged)), "info": info, "at": at, "player": player})
+    for d, gid, pid, mk, side, line, price, ev, mu, player, at, pinged in rows(
+            "SELECT date, gid, pid, market, side, line, price, ev, mu, player, logged_at, pinged FROM signals "
+            "WHERE date IN ({})"):
+        info = " · ".join(x for x in (f"proj {mu:.1f}" if mu is not None else "",
+                                      f"ev {ev * 100:+.1f}%" if ev is not None else "") if x)
+        out.append({"rule": "ROLE_OPEN", "date": d, "gid": gid, "pid": pid, "market": mk, "side": side, "line": line,
+                    "price": price, "pinged": int(bool(pinged)), "info": info, "at": at, "player": player})
+    out.sort(key=lambda f: (-f["pinged"], f["at"] or ""))
     return out
 
 
@@ -990,7 +1054,7 @@ def correlations(props, logs):
 
 # ── the payload ──────────────────────────────────────────────────────────────────────────────────────────
 def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None, index=None, box_get=None, tracking=None,
-          lineups_db=None):
+          lineups_db=None, role_db=None):
     import nba_matchup as MU
     now = now or dt.datetime.now(dt.timezone.utc)
     if sched is None:
@@ -1062,6 +1126,9 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
     official, teams_listed, report_meta = official_status(ncon, dates)
     news_by = news_items(ncon, dates)
     flags = engine_flags(sh, dates)
+    rflags = role_flags(_ro(role_db or ROLE), dates)
+    for f in rflags:
+        f["team"] = team_of.get(f["pid"])
     glines = game_lines(q, gids)
     # matchup context: point-in-time factors for this season (nba_matchup), per prop
     S = MU.Season(mcon, season, index_pos=pos) if mcon is not None else None
@@ -1182,6 +1249,7 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
                    **{k: v for k, v in live.get(g["gid"], {}).items() if k != "stats"}}
                   for g in sorted(games, key=lambda g: g["utc"])],
         "props": props, "players": {str(k): v for k, v in players.items()}, "injuries": injuries,
+        "flags": rflags,
         "absences": {f"{d}|{t}": [dict(a, name=next((n for (gg, pp), n in names.items() if pp == a["pid"]), None)
                                        or (idx.get(str(a["pid"])) or [None, None])[1]) for a in v]
                      for (d, t), v in absent.items()},
