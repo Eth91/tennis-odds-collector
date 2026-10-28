@@ -388,6 +388,9 @@ def test_page_controls_work_on_iphone():
     assert "user-scalable" not in html and "maximum-scale" not in html
     # the Pickz P (docs/icon.svg; icon-small.svg for the 64 px tab icon), versioned so a phone fetches the new one
     assert '<link rel="icon" href="icon-64.png?v=2">' in html and '<link rel="apple-touch-icon" href="icon-180.png?v=2">' in html
+    # the headers (list, player and Matchup pages, all through --st) start 10 px below each iPhone's status bar /
+    # Dynamic Island: its own safe-area inset, plus a gap
+    assert "--st:calc(env(safe-area-inset-top) + 10px);" in html and html.count("env(safe-area-inset-top)") == 1
     # chart bars show their game on tap (a <title> only appears on hover); the book prices switch Over / Under
     assert "data-ps=" in html
     # a tap on a bar opens that game's box score (docs/box/{gid}.json, nba_boxscore), his row and the prop's stats marked
