@@ -175,6 +175,57 @@ def payload():
     return built(NOW)
 
 
+def _corr_reference(props, logs):
+    """correlations as first written (every pair both ways, five-pass Pearson): the fast one must match it exactly."""
+    def pearson(xs, ys):
+        pairs = [(x, y) for x, y in zip(xs, ys) if x is not None and y is not None]
+        if len(pairs) < 3:
+            return None
+        mx = sum(x for x, _ in pairs) / len(pairs)
+        my = sum(y for _, y in pairs) / len(pairs)
+        sxy = sum((x - mx) * (y - my) for x, y in pairs)
+        sxx = sum((x - mx) ** 2 for x, _ in pairs)
+        syy = sum((y - my) ** 2 for _, y in pairs)
+        return None if sxx <= 0 or syy <= 0 else sxy / math.sqrt(sxx * syy)
+    series = {p["id"]: {r[1]: (r[2], RS.stat_value(dict(zip(RS.LOG_COLS, r)), p["market"])) for r in logs.get(p["pid"], [])} for p in props}
+    out = {}
+    for p in props:
+        mine, res = series[p["id"]], []
+        for o in props:
+            if o["gid"] != p["gid"] or o["id"] == p["id"] or (o["pid"] == p["pid"] and o["market"] == p["market"]):
+                continue
+            if o["pid"] != p["pid"] and o["team"] != p["team"]:
+                continue
+            theirs = series[o["id"]]
+            shared = [g for g in mine.keys() & theirs.keys() if mine[g][0] == theirs[g][0] == p["team"]]
+            if len(shared) < RS.CORR_MIN_N:
+                continue
+            r = pearson([mine[g][1] for g in shared], [theirs[g][1] for g in shared])
+            if r is not None:
+                res.append({"id": o["id"], "r": round(r, 2), "n": len(shared)})
+        out[p["id"]] = sorted(res, key=lambda x: (-abs(x["r"]), x["id"]))[:RS.CORR_TOP]
+    return out
+
+
+def test_correlations_match_the_reference():
+    # each pair computed once now (r is symmetric): the same lists as computing both ways, on random teams and logs,
+    # a player's props on two teams (one unresolved) included
+    for seed in range(4):
+        rnd = random.Random(seed)
+        props, logs = [], {}
+        for g in range(4):
+            for t in ("A", "B"):
+                for pid in range(g * 100 + (0 if t == "A" else 50), g * 100 + (0 if t == "A" else 50) + 6):
+                    logs[pid] = [[{"date": f"2026-0{1 + k % 9}-{10 + k % 18}", "gid": f"g{k}", "team": t if rnd.random() < 0.95 else "Z",
+                                   "min": 30.0, "pts": rnd.randint(0, 40), "reb": rnd.randint(0, 15), "ast": rnd.randint(0, 12),
+                                   "fg3m": rnd.randint(0, 6)}.get(c) for c in RS.LOG_COLS] for k in range(40 if pid % 3 else 12)
+                                  if rnd.random() < 0.8]                       # some with few games: under the minimum
+                    for m in rnd.sample(["points", "rebounds", "assists", "threes", "pra", "pts_reb"], 3):
+                        props.append({"id": f"G{g}|{pid}|{m}", "gid": f"G{g}", "pid": pid, "market": m, "team": t if rnd.random() < 0.95 else None})
+        assert RS.correlations(props, logs) == _corr_reference(props, logs)
+    assert RS.pearson([1, 2, 3, None, 4], [2, 4, 6.5, 1, 8]) == pytest.approx(0.99586, abs=1e-5) and RS.pearson([1, 1, 1], [1, 2, 3]) is None
+
+
 def test_flags_are_the_under_plays(payload):
     # only the under plays that ping: UNDER20 rows at −150 or better, not threes, our projection 30–50% below the line,
     # whether or not the send went through; another date's, the other rules', and UNDER20's other rows left out
@@ -440,6 +491,14 @@ console.log(JSON.stringify({def: rebRings(T.BOS, avg, T, "BOS"), me: rebRings(me
 
 def test_page_controls_work_on_iphone():
     html = UI.page()
+    # every tap (and every 30 s, and a return to the app) checks the data file's Last-Modified with a bodiless HEAD, at
+    # most every 8 s, and downloads it in the background only when the server wrote a new one; the same file again
+    # (generated_at unchanged) is not redrawn
+    assert 'document.addEventListener("click", freshen, true);' in html and "setInterval(freshen, 30000);" in html
+    assert 'fetch("nba_props.json?t=" + Date.now(), {method: "HEAD", cache: "no-store"})' in html
+    assert "return m && m !== LAST_MOD ? load() : null;" in html and 'LAST_MOD = r.headers.get("Last-Modified") || LAST_MOD;' in html
+    assert "Date.now() - CHECK_AT < 8000" in html and "if (D) { CHECK_AT = 0; freshen(); }" in html
+    assert "if (D && FRESH && !AUTO_DAY && j.generated_at === D.generated_at) { LOADED_AT = Date.now(); return true; }" in html
     # iOS Safari can't drag the thumb of a range input stacked under another, so the dual sliders are pointer-event widgets
     assert 'type="range"' not in html and "dualRange(" in html and "touch-action:pan-y" in html
     # a double tap doesn't zoom the page (taps on the stat chips, pills and bars come quickly); a pinch still does
@@ -916,7 +975,7 @@ def test_page_navigation_guards():
 def test_page_boots_from_its_last_copy_and_animates_swaps():
     html = UI.page()
     # no pull to refresh (the user found it bad); the 2-minute refresh and the back-from-another-app refresh stay
-    assert "pullRefresh" not in html and ".ptr" not in html and "setInterval(load, 120000)" in html and '"visibilitychange"' in html
+    assert "pullRefresh" not in html and ".ptr" not in html and "setInterval(load, 120000)" not in html and '"visibilitychange"' in html
     # a launch draws the phone's last copy (Cache Storage) while the fresh one downloads; no "Feed delayed" off a stale copy
     assert 'caches.open(CACHE).then(c => c.match("nba_props.json"))' in html and "if (j && !D && !FRESH) apply(j);" in html
     assert 'if (FRESH && (Date.now() - iso(D.generated_at).getTime()) / 60000 > 10) out.push("Feed delayed");' in html

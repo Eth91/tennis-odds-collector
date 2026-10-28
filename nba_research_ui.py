@@ -2934,14 +2934,27 @@ function load() {
   if (!D) { LOADING = true; render(); }
   const boot = !FRESH;
   if (boot) { busy(true); cacheRead().then(j => { if (j && !D && !FRESH) apply(j); }); }
-  return fetch("nba_props.json?t=" + Date.now(), {cache: "no-store"}).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); })
+  return fetch("nba_props.json?t=" + Date.now(), {cache: "no-store"}).then(r => { if (!r.ok) throw new Error("HTTP " + r.status);
+      LAST_MOD = r.headers.get("Last-Modified") || LAST_MOD; return r.text(); })
     .then(text => {
       const j = JSON.parse(text);
+      if (D && FRESH && !AUTO_DAY && j.generated_at === D.generated_at) { LOADED_AT = Date.now(); return true; }   // nothing new: no redraw
       FRESH = true; apply(j); cacheWrite(text); AUTO_DAY = false;
       if (boot) { busy(false); setTimeout(prefetch, 1500); }
       return true;
     })
     .catch(e => { if (boot) busy(false); LOADING = false; ERR = e.message || String(e); if (!D) render(); else { const u = $("#upd"); if (u) u.textContent = "Refresh failed"; } return false; });
+}
+// fresh data on every tap (the user: "every time you click a button ... refresh in the background"): a HEAD for the
+// file's Last-Modified, no body, at most every 8 s; only when the server has written a new one (every ~2 minutes),
+// the download, in the background, the screen redrawn in place as on any refresh. Also every 30 s while open
+let LAST_MOD = null, CHECK_AT = 0, CHECKING = false;
+function freshen() {
+  if (!D || !FRESH || CHECKING || document.hidden || Date.now() - CHECK_AT < 8000) return;
+  CHECKING = true; CHECK_AT = Date.now();
+  fetch("nba_props.json?t=" + Date.now(), {method: "HEAD", cache: "no-store"})
+    .then(r => { const m = r.ok ? r.headers.get("Last-Modified") : null; return m && m !== LAST_MOD ? load() : null; })
+    .catch(() => null).then(() => { CHECKING = false; });
 }
 // a payload onto the page (the cached copy at a launch, then each fresh one)
 function apply(j) {
@@ -3004,7 +3017,8 @@ document.addEventListener("DOMContentLoaded", () => {
     warm.add(pid); const im = new Image(); im.src = heroSrc(pid); if (im.decode) im.decode().catch(() => {});
   }, {passive: true});
   load();
-  setInterval(load, 120000);
+  document.addEventListener("click", freshen, true);
+  setInterval(freshen, 30000);
   setInterval(() => { if (!D) return; const u = $("#upd"), l = $("#lupd"); if (u) u.textContent = ago(D.generated_at); if (l) l.textContent = ago(D.generated_at); }, 30000);
   // a turned phone (or a resized window) re-measures every sliding pill, which sit where the buttons were laid out
   let RZ = null;
@@ -3013,7 +3027,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) { HIDDEN_AT = Date.now(); return; }
     if (HIDDEN_AT && Date.now() - HIDDEN_AT > 1800000) AUTO_DAY = true;          // away a while: the slate may have moved on
-    if (D && Date.now() - LOADED_AT > 45000) load().then(() => { AUTO_DAY = false; });
+    if (D) { CHECK_AT = 0; freshen(); }
   });
 });
 })();
