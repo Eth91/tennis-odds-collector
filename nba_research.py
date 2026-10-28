@@ -112,13 +112,20 @@ def hit_summary(values, line):
 def pearson(xs, ys):
     """Pearson r over aligned pairs (both present), or None with < 3 pairs or no variance."""
     pairs = [(x, y) for x, y in zip(xs, ys) if x is not None and y is not None]
-    if len(pairs) < 3:
+    n = len(pairs)
+    if n < 3:
         return None
-    mx = sum(x for x, _ in pairs) / len(pairs)
-    my = sum(y for _, y in pairs) / len(pairs)
-    sxy = sum((x - mx) * (y - my) for x, y in pairs)
-    sxx = sum((x - mx) ** 2 for x, _ in pairs)
-    syy = sum((y - my) ** 2 for _, y in pairs)
+    sx = sy = 0                                       # two passes, not five: the page build runs it ~15k times
+    for x, y in pairs:
+        sx += x
+        sy += y
+    mx, my = sx / n, sy / n
+    sxy = sxx = syy = 0
+    for x, y in pairs:
+        dx, dy = x - mx, y - my
+        sxy += dx * dy
+        sxx += dx * dx
+        syy += dy * dy
     if sxx <= 0 or syy <= 0:
         return None
     return sxy / math.sqrt(sxx * syy)
@@ -1007,7 +1014,8 @@ def correlations(props, logs):
     by_game = defaultdict(list)
     for p in props:
         by_game[p["gid"]].append(p)
-    out = {}
+    out, pair = {}, {}                                # pair: (n, r) of each pair once (r is symmetric); the team too,
+                                                      # as the shared games are the ones played for it
     for p in props:
         mine = series[p["id"]]
         res = []
@@ -1016,13 +1024,15 @@ def correlations(props, logs):
                 continue
             if o["pid"] != p["pid"] and o["team"] != p["team"]:
                 continue                                   # same team only: shared games mean the same games
-            theirs = series[o["id"]]
-            shared = [g for g in mine.keys() & theirs.keys() if mine[g][0] == theirs[g][0] == p["team"]]
-            if len(shared) < CORR_MIN_N:
-                continue
-            r = pearson([mine[g][1] for g in shared], [theirs[g][1] for g in shared])
+            k = (p["id"], o["id"], p["team"]) if p["id"] < o["id"] else (o["id"], p["id"], p["team"])
+            if k not in pair:
+                theirs = series[o["id"]]
+                shared = [g for g in mine.keys() & theirs.keys() if mine[g][0] == theirs[g][0] == p["team"]]
+                pair[k] = (len(shared), pearson([mine[g][1] for g in shared], [theirs[g][1] for g in shared])
+                           if len(shared) >= CORR_MIN_N else None)
+            n, r = pair[k]
             if r is not None:
-                res.append({"id": o["id"], "r": round(r, 2), "n": len(shared)})
+                res.append({"id": o["id"], "r": round(r, 2), "n": n})
         out[p["id"]] = sorted(res, key=lambda x: (-abs(x["r"]), x["id"]))[:CORR_TOP]
     return out
 
