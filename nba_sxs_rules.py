@@ -844,13 +844,74 @@ class BOOST_NH(BOOST):
     name, flag_kind = "BOOST_NH", "no history"
 
 
+# ── AMENDMENT 10: UNDER20 and UNDERML (NBA_UNDER_PREREG.md) ────────────────────────────────────────────────────────
+import nba_under as UNDER_M                               # noqa: E402
+
+UNDER_DEPS = (boost_data, role_data, UNDER_M.projection, UNDER_M.under20, UNDER_M.features, UNDER_M.predict,
+              UNDER_M.underml, UNDER_M.pings, BOOST_M.v3_minutes, BOOST_M.rates, BOOST_M.live_data, BOOST_M.BoostData, ROLE.season_of) + ROLE_DEPS
+UNDER_SPEC = [UNDER_M.RATIO_AT, UNDER_M.EV_AT, list(UNDER_M.FEATURES), UNDER_M.PING_PRICE_MIN, list(UNDER_M.PING_SKIP)]
+if UNDER_M.MODEL_PY.exists():                            # the fitted model is part of UNDERML
+    UNDER_SPEC.append(hashlib.sha256(UNDER_M.MODEL_PY.read_bytes()).hexdigest()[:16])
+
+
+class UNDER20(Rule):
+    """At tip - 30, FanDuel's main: the under when our projection (ROLE1 v3 minutes x his rates) is under 80% of the line."""
+    name, deps, spec = "UNDER20", UNDER_DEPS, UNDER_SPEC
+
+    def start_day(self, v):
+        self.listed = {}
+
+    def on_report(self, v, t, rows, prev, seen_before):
+        for team, pid, st in rows:
+            self.listed[pid] = (team, st)
+        return ()
+
+    def judge(self, bd, rd, date, team, p, mk, m, out_now):
+        return UNDER_M.under20(bd, rd, date, team, p, mk, m[0], m[2], out_now)
+
+    def on_tick(self, v, gid, minutes):
+        if minutes != 30:
+            return ()
+        season = ROLE.season_of(v.date)
+        bd, rd, out = boost_data(season), role_data(season), []
+        for p, mk in sorted(set(v.props(gid, "fd"))):
+            m = RP.main_of(v.board(gid, p, mk, "fd")) if mk in BOOST_M.PARTS else None
+            team = bd.team_now(p, v.date) if m else None
+            if not team:
+                continue
+            out_now = {x for x, (tm, st) in self.listed.items() if tm == team and st in RP.OUTS}
+            f = self.judge(bd, rd, v.date, team, p, mk, m, out_now)
+            if f:
+                out.append(sig(gid, p, mk, f["side"], m[0], "fd", f["price"],
+                               note=f"proj={f['proj']:.1f}" if "proj" in f else f"p={f['p']:.3f}"))
+        return out
+
+
+class UNDER20P(UNDER20):
+    """UNDER20's pinged subset (NBA_UNDER_PREREG.md amendment 1): the under priced -150 or better, not threes."""
+    name = "UNDER20P"
+
+    def judge(self, bd, rd, date, team, p, mk, m, out_now):
+        f = UNDER_M.under20(bd, rd, date, team, p, mk, m[0], m[2], out_now)
+        return f if f and UNDER_M.pings(f, mk) else None
+
+
+class UNDERML(UNDER20):
+    """At tip - 30, FanDuel's main: T2's logistic model (no hindsight outs features, fit on 2023-24), either side at EV
+    >= 5%. Silent."""
+    name = "UNDERML"
+
+    def judge(self, bd, rd, date, team, p, mk, m, out_now):
+        return UNDER_M.underml(bd, rd, date, team, p, mk, m[0], m[1], m[2], out_now)
+
+
 # Amendment 8: the stores of box scores and tracking that the replay hands the rules as of each moment
 # (nba_replay.RuleStores). ROLE_GAMELOGS_DB holds past seasons only. Not part of any fingerprint: no rule changes.
 PIT_STORES = {"MATCHUP_DB": "matchup", "TRACKING_DB": "tracking"}
 
 RULES = (NULL_TIP30, NEWS_FD, NEWS_DK, DK_LAGS_FD, T4_TIP30, ENGINE_CARD, S1, DEPTH_NEXT, DEPTH_NEXT_TIP30, NEW_STARTER,
          LOST_START, ROLE_OPEN, RATIO_FGA, RATIO_PA, RATIO_RC, RATIO_PA28, PTS_DVP, RETURN_UNDER, FOUL_BIG, MIN_RESTRICT, EARLY_SURGE,
-         BOOST, BOOST_STEP, BOOST_PICKUP, BOOST_NH)
+         BOOST, BOOST_STEP, BOOST_PICKUP, BOOST_NH, UNDER20, UNDER20P, UNDERML)
 
 
 def fingerprint(cls):
@@ -891,4 +952,7 @@ REGISTRY = {                                             # name -> (registered a
     "BOOST_STEP": ("2026-10-28T23:00:00", "5ed40c5557"),
     "BOOST_PICKUP": ("2026-10-28T23:00:00", "4356b2332b"),
     "BOOST_NH": ("2026-10-28T23:00:00", "8c7915ffdb"),
+    "UNDER20": ("2026-10-29T00:00:00", "88c6acc802"),             # amendment 10 (NBA_UNDER_PREREG.md)
+    "UNDER20P": ("2026-10-29T00:00:00", "2ded6fa2a6"),            # its pinged subset (amendment 1)
+    "UNDERML": ("2026-10-29T00:00:00", "11b0b922b1"),
 }

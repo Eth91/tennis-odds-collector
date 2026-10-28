@@ -96,10 +96,13 @@ def test_live_tip30():
               lineups_db=tmp / "none.sqlite", index_json=tmp / "none.json", db=tmp / "role.sqlite", sender=lambda b: sent.append(b) or True)
     assert L.process(now="2026-11-01T16:00:00", **kw) == 0                               # install
     assert L.process(now="2026-11-01T23:20:00", **kw) == 0 and sent == []                # before tip - 30
-    assert L.process(now="2026-11-01T23:31:00", **kw) == 2 and len(sent) == 2            # RETURN and FOUL on B's points under
+    L.process(now="2026-11-01T23:31:00", **kw)
+    ideas = [b for b in sent if not b.startswith("🔵 UNDER")]                            # UNDER20 (NBA_UNDER_PREREG.md) also runs here
+    assert len(ideas) == 2, sent                                                         # RETURN and FOUL on B's points under
     assert any(b.startswith("🔻 RETURN Bee PTS u11.5") for b in sent) and any(b.startswith("🟠 FOUL Bee PTS u11.5") for b in sent)
     assert all(b.endswith("shadow") for b in sent)
-    assert L.process(now="2026-11-01T23:33:00", **kw) == 0 and len(sent) == 2            # once per game
+    n = len(sent)
+    assert L.process(now="2026-11-01T23:33:00", **kw) == 0 and len(sent) == n            # once per game
 
 
 def test_mutants():

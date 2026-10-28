@@ -23,6 +23,7 @@ import nba_replay as RP
 import nba_research as R
 import nba_ratio as RATIO
 import nba_role as ROLE
+import nba_under as UNDER
 
 HERE = Path(__file__).resolve().parent
 DB = HERE / "nba_role.sqlite"
@@ -160,7 +161,7 @@ def tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json,
         if book == "fd" and m:
             games[gid][(pid, market)] = (m, player)
             tips[gid] = tip
-    fired = 0
+    fired, bds = 0, {}
     for gid, props in sorted(games.items()):
         tip = RP.iso(tips[gid])
         if not (RP.minus(tip, 30) <= now < RP.minus(tip, 5)) or con.execute("SELECT 1 FROM tip30_done WHERE gid = ?", (gid,)).fetchone():
@@ -186,6 +187,26 @@ def tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json,
             opp = next((t for t in teams if t != team), None) if team else None
             if IDEAS.foul_bet(fd, dv.groups.get(p) or vd.group(p), p, opp, date):
                 bets += [("FOUL_BIG", p, mk, f"{fd.pf36(p, date):.1f} PF/36 vs {opp}") for mk in ("points", "rebounds")]
+        bd = bds.get(season) or bds.setdefault(season, BOOST.live_data(matchup_db, gamelogs_db, season))
+        for (p, mk), ((line, over, under), player) in sorted(props.items()):   # NBA_UNDER_PREREG.md
+            team = bd.team_now(p, date)
+            if not team or mk not in BOOST.PARTS:
+                continue
+            out_t = {x for x, (tm, st_) in listed.items() if tm == team and st_ in OUTS}
+            u20 = UNDER.under20(bd, rd, date, team, p, mk, line, under, out_t)
+            if u20:
+                cur = con.execute("INSERT OR IGNORE INTO idea_signals VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                                  ("UNDER20", gid, p, mk, line, under, f"proj {u20['proj']:.1f} min {u20['min']:.1f}", date, player, now, 0))
+                if cur.rowcount and UNDER.pings(u20, mk):   # pinged (SHADOW): -150 or better, not threes (amendment 1)
+                    ok = sender(f"🔵 UNDER {player} {ABBR.get(mk, mk.upper())} u{line:g} {american(under)} FD · proj {u20['proj']:.1f} "
+                                f"({u20['ratio']:.0%} of the line), {u20['min']:.0f} min · shadow")
+                    con.execute("UPDATE idea_signals SET pinged = ? WHERE rule = 'UNDER20' AND gid = ? AND pid = ? AND market = ?",
+                                (1 if ok else 0, gid, p, mk))
+                    fired += 1
+            ml = UNDER.underml(bd, rd, date, team, p, mk, line, over, under, out_t)
+            if ml:                                       # silent
+                con.execute("INSERT OR IGNORE INTO idea_signals VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                            ("UNDERML", gid, p, mk, line, ml["price"], f"{ml['side']} p {ml['p']:.3f} ev {ml['ev']:.3f}", date, player, now, 0))
         for rule, p, mk, note in bets:
             got = props.get((p, mk))
             if not got or not got[0][2]:

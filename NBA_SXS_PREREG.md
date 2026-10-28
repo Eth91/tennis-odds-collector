@@ -304,3 +304,13 @@ Both are registered at **2026-10-28T21:00:00 UTC**.
     - BOOST_STEP now runs on the MINUTES blend for all new starters (amendment 6). BOOST, BOOST_STEP, BOOST_PICKUP and BOOST_NH are re-registered at **2026-10-28T22:00:00 UTC**.
     - Re-registered at **2026-10-28T22:30:00 UTC**: the data now carries FTA and 3PA for the STEP ping's shot volume (`NBA_MINUTES_PREREG.md` amendment 5); no decision changes.
     - Re-registered at **2026-10-28T23:00:00 UTC**: STEP's 26-minute floor once NBA.com's lineup is posted (`NBA_BOOST_PREREG.md` amendment 7).
+
+# AMENDMENT 10: UNDER20 and UNDERML (2026-10-28, before they ran)
+26. **UNDER20** (`NBA_UNDER_PREREG.md`): at tip − 30, FanDuel's main, the under when our projection (ROLE1 v3 minutes ×
+    his rates) is under 80% of the line. Pinged (SHADOW).
+27. **UNDERML:** at tip − 30, `NBA_TESTS4_PREREG.md` T2's logistic model without the hindsight features (fit on
+    2023-24), either side at EV ≥ 5%. No pings.
+
+28. **UNDER20P:** UNDER20's pinged subset (under −150 or better, not threes; `NBA_UNDER_PREREG.md` amendment 1).
+
+All three are registered at **2026-10-29T00:00:00 UTC**.

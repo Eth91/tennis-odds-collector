@@ -39,3 +39,13 @@ bets: `nba_flags.LIVE_TIERS` stays empty.
 ## Judged
 - Like every rule, by the side-by-side's CLV and ROI, at ≥ 200 signals over ≥ 10 dates.
 - Registered at the deploy time in `nba_sxs_rules.py`.
+
+# AMENDMENT 1: which UNDER20 flags ping (2026-10-28, about 22:20 UTC, before deploy)
+- **Dry run on tonight's FanDuel board:** 930 props, 54 UNDER20 flags. Many were threes unders at −180 to −250.
+- **Backtest split (post-hoc, information):** UNDER20 under −150 or better made +7.3% / +6.9% (4,256 / 3,048); worse
+  than −150, +1.1% / −0.6%. Threes made +0.5% / +0.2%. Every other market was positive in both seasons.
+- **User:** ping only "−150 or better, no threes". **Everything is still recorded:**
+  - UNDER20 stays as registered (all flags);
+  - a second side-by-side rule, **UNDER20P**, is the pinged subset (under −150 or better, not threes), registered
+    with the others.
+  - The forward record shows whether the filter holds.
