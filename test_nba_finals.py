@@ -1,5 +1,5 @@
-"""Amendment 34: nba_finals stores new finals (not live games) and rebuilds the pages only when it stored one, on
-a fake schedule and feed (no network). MUTANTS in test_mutants()."""
+"""Amendment 34: nba_finals stores new finals and never asks for a live game, on a fake schedule and feed (no
+network). MUTANTS in test_mutants()."""
 import importlib
 import pathlib
 import sys
@@ -20,21 +20,15 @@ def check(mod):
         print(f"   {'ok ' if cond else 'BAD'} {label}")
     con = MU.connect(pathlib.Path(tempfile.mkdtemp()) / "m.sqlite")
     by = {b["gameId"]: scored(b) for b in BOXES}
-    asked, built = [], []
+    asked = []
     get = lambda g: asked.append(g) or by[g]
-    builder = lambda name, args: built.append(name) or (2 if name == "vs" else 0)
     sched = [{"gid": "0022300001", "status": 3}, {"gid": "0022300005", "status": 2}]       # one final, one live
-    res = mod.run(con, schedule=lambda: sched, get=get, builder=builder)
-    want(res == (1, 0, [("boxscore", 0), ("vs", 2), ("players", 0)]), f"a new final: stored, pages rebuilt in order {res}")
+    want(mod.run(con, schedule=lambda: sched, get=get) == (1, 0), "a new final is stored")
     want(asked == ["0022300001"], "a live game is not asked for")
-    built.clear()
-    res = mod.run(con, schedule=lambda: sched, get=get, builder=builder)
-    want(res == (0, 0, []) and built == [], "nothing new: no page rebuilt")
+    want(mod.run(con, schedule=lambda: sched, get=get) == (0, 0) and asked == ["0022300001"], "nothing new: nothing asked")
     sched.append({"gid": "0022300002", "status": 3})
-    res = mod.run(con, schedule=lambda: sched, get=get, builder=builder)
-    want(res[0] == 1 and built == ["boxscore", "vs", "players"], "the next final: rebuilt again")
-    want(all(a[0].endswith(".py") for _n, a in mod.PAGES) and [n for n, _a in mod.PAGES] == ["boxscore", "vs", "players"],
-         "the daily builders, in their daily order")
+    want(mod.run(con, schedule=lambda: sched, get=get) == (1, 0), "the next final is stored")
+    want(con.execute("SELECT COUNT(*) FROM playtypes").fetchone()[0] == 0, "no play-type snapshot")
     return ok
 
 
@@ -44,9 +38,7 @@ def test_finals():
 
 def test_mutants():
     src = pathlib.Path(F.__file__).read_text()
-    for tag, a, b in (("always rebuilds", " if stored else []", " if True else []"),
-                      ("never rebuilds", " if stored else []", " if False else []"),
-                      ("live games asked for", 'if g["status"] == 3]', "]")):
+    for tag, a, b in (("live games asked for", 'if g["status"] == 3]', "]"),):
         assert src.count(a) == 1, tag
         d = pathlib.Path(tempfile.mkdtemp())
         (d / "nba_finals_mut34.py").write_text(src.replace(a, b))
