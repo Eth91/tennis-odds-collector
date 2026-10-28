@@ -204,3 +204,51 @@ All flags: −11.3% and −2.2%.
   min · shadow".
 - **Forward bar:** as for every rule, CLV at ≥ 200 signals over ≥ 10 dates. At about one flag every 1–2 days that
   takes a season. A first look at 50 player-nights is information only.
+
+# AMENDMENT 4: starters and step-ins from the lineup tab (2026-10-28, about 20:20 UTC, before code)
+**User:** "your step ins are wrong though, it'll be Ayo Dosunmu, Anthony Black will step in for Suggs and da Silva
+for Banchero. The [props page's] expected starters in the lineup tab are the most accurate, so go off that."
+(Amendment 2's pick, the top bench player at the position by minutes, chose Jevon Carter and Jamal Cain. Black was
+excluded because he plays 26+ minutes, which made him a "starter".) Asked:
+- at the opener → **the lineup tab's projected five, then NBA.com's expected lineup when it posts**;
+- STEP → **only low-minute bench players** (projected under 24 minutes, raised to 24);
+- the starter who is out → **the lineup tab's usual five**.
+
+**Evidence behind the STEP choice** (backtest, amendment 2's step-in pick, no-history flags):
+
+| step-in player | 2023-24 | 2024-25 |
+|---|---|---|
+| raised to the 24-minute floor | 129, +11.3% | 102, +15.6% |
+| already projected 24+ | 269, −10.4% | 336, +6.3% |
+| not the step-in | 2,546, −12.5% | 2,484, −2.4% |
+
+**Live definitions (pinger and side-by-side).** They mirror `nba_research.py` (`lineups`, `projected_lineups`, at
+6597057306), copied rather than imported, so the page can change without moving the rule:
+1. **Usual five of team T:** the five players now on T with the most starts in T's last 10 games this season (ties:
+   more minutes), counting only players with a start. It needs 3 team games this season. Box-score starter flags
+   come from `nba_matchup` (this season and last).
+   - **Starters** (rules 2, 4, 8 and amendment 2) are the usual five.
+   - With fewer than 3 games, or no starter flags, rule 2's 26+ minutes applies. **The backtest always uses this**,
+     since the 2023-25 logs have no starter flags.
+2. **Tonight's five:**
+   - NBA.com's lineup when posted: the latest `nba_lineups` snapshot for the date fetched by the decision time, the
+     players with a position, Expected or Confirmed.
+   - Otherwise the projected five: the usual five minus anyone out (Out or Doubtful). Each missing usual starter u is
+     replaced, surest first, by the available player who maximizes, in order:
+     - the number of T's games (in the seasons u played for T) that u did not start and he did;
+     - whether his listed position shares a letter with u's;
+     - his starts, then his minutes, in T's last 10 games.
+3. **New starter:** in tonight's five but not the usual five. Each new starter is paired with a missing usual starter
+   by the same order, surest first. **The step-in player** for X is the new starter paired with X; none if there is
+   no pairing.
+   - The backtest keeps amendment 2's pick (the top bench player at X's position by minutes).
+4. **STEP flag:** unchanged (amendment 3). The step-in player's projected minutes were under 24 and raised to 24,
+   and the rest of rule 10 holds.
+5. **When:**
+   - At each book's opener, with tonight's five as of then (NBA.com if posted, else projected).
+   - Again for STEP only, at the first look after a player first appears as a new starter in NBA.com's lineup, for
+     each of his props whose opener came before that snapshot, at that prop's current main line. Live, that is the
+     first pinger run; in the side-by-side, it is that book's next observation.
+   - One flag per (rule, game, player, market). Nothing within 5 minutes of tip.
+6. **Re-registration:** all three rules change (the starters feed every one) and are re-fingerprinted. They are
+   registered at the deploy time, since 21:00 UTC will have passed.
