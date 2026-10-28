@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Pickz: a white P over sky blue and purple echoes. Full-bleed: iOS rounds the corners of the home screen icon.
+       icon-64/180/512.png are this file rendered at those sizes (headless Chrome). -->
+  <rect width="512" height="512" fill="#0d0f14"/>
+  <g transform="translate(-8,-8)" fill-rule="evenodd">
+    <path transform="translate(16,16)" fill="#8B5CF6" d="M121,92H273A118,118 0 0 1 273,328H209V420H121Z M209,164H269A46,46 0 0 1 269,256H209Z"/>
+    <path transform="translate(8,8)" fill="#38BDF8" d="M121,92H273A118,118 0 0 1 273,328H209V420H121Z M209,164H269A46,46 0 0 1 269,256H209Z"/>
+    <path fill="#ffffff" d="M121,92H273A118,118 0 0 1 273,328H209V420H121Z M209,164H269A46,46 0 0 1 269,256H209Z"/>
+  </g>
+</svg>
