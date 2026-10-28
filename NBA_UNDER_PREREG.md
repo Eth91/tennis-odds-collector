@@ -94,3 +94,22 @@ the same rows as T2's checks.)
 - The pings are "🔵 UNDER" (amendment 3's star is dropped, since every ping is now 30%+).
 - **UNDER3050** (the pinged subset) is added to the side-by-side. UNDER20, UNDER20P and UNDER30P stay, so the forward
   record compares them.
+
+# AMENDMENT 5: the same ranges for overs (2026-10-28, about 22:45 UTC; information)
+**User:** "test the same ranges for the overs." (`nba_over_grid.py`: the over when our projection is X% above the line,
+best FanDuel/DraftKings over, 2023-24 and 2024-25 tip lines; 46 ranges.)
+
+| overs −150 or better, not threes | 2023-24 | 2024-25 |
+|---|---|---|
+| 0–10% above | 25,259, −8.4% | 23,794, −5.7% |
+| 10–20% | −3.4% | −2.4% |
+| 20–25% / 25–30% / 30–35% | −1.8 / −2.3 / +0.9% | +0.6 / −1.7 / −4.9% |
+| 35–40% / 40–50% / 50–75% | −7.6 / −0.5 / +0.4% | −1.5 / −4.2 / −2.4% |
+| best range by the worse season (20–35%) | 7,442, −1.5% | 6,976, −1.2% |
+
+- With all overs (threes and heavy prices included), every range runs about −2% to −3%.
+- **No over range is positive in both seasons.**
+- **Reading:** the book's no-vig over runs above the actual over rate (49.2% against 47.3–48.5%), so overs carry the
+  public's shading on top of the vig. A projection far above the line is more often our miss. A projection far below
+  catches lines the book is slow to lower.
+- No over rule is added.
