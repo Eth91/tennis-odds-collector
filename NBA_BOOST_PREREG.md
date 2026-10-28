@@ -109,3 +109,30 @@ Everything reads only games before the date. "Team games" are team T's box score
 - **Side-by-side:** registered in `nba_sxs_rules.py` as BOOST with its fingerprint, so the nightly replay records
   its CLV and ROI on the same bars as the other rules (CLV at ≥ 200 signals over ≥ 10 dates).
 - Nothing is called an edge without the forward record.
+
+## Result (2026-10-28, about 19:45 UTC): FAIL
+`python3 nba_boost.py --json .projdata/boost_result.json`. The game logs hold regular seasons only, so the archive's
+playoff props have no box score and drop out.
+
+| | 2023-24 | 2024-25 |
+|---|---|---|
+| flags | 4,673 | 4,749 |
+| hit rate (book's no-vig) | 47.8% (49.7%) | 49.5% (49.6%) |
+| ROI (90% bootstrap) | **−9.0%** (−11.3%, −6.8%) | **−5.3%** (−7.6%, −3.1%) |
+| with history (the 80%+ rule) | 804, −11.1% | 1,016, −6.3% |
+| no history (position rules) | 3,869, −8.5% | 3,733, −5.0% |
+| absence game 1 / 2 / 3 | −9.0% / −10.1% / −7.3% | −1.5% / −14.8% / −3.4% |
+| irrelevant absence, 6+ games | 168, −24.6% | 204, +10.8% |
+
+By market, every market loses in both seasons (−2% to −13%).
+
+**Reading:**
+- The flags hit about as often as the book's own fair price says (48–50% against 49.6%), so the books priced these
+  bumps at tip, and the juice is the loss.
+- The user's exact framing, 80%+ of past without-X games beating tonight's line, hit 47% and 48%. Restricted to
+  100% histories: 319 flags, −5.2%, and 345, −15.1%.
+- Trade-deadline artifacts (the missing player next appears for another team, 4.9% of flags) do not change it:
+  without them −8.1% and −5.0%.
+- Volume: about 30 flags a day (5–6 with history) on 10–11 players.
+- The archive has tip lines only. Whether openers are stale before the injury news is priced is what the forward
+  test can show and this backtest cannot.
