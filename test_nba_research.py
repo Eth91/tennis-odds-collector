@@ -142,13 +142,69 @@ def built(now, sched=None, box_get=None):
     tr.execute("INSERT INTO tracking (date, player_id, potential_ast, reb_chances) VALUES ('2026-09-01', 1, 14, 9)")
     tr.execute("INSERT INTO tracking (date, player_id, potential_ast, reb_chances) VALUES ('2026-09-02', 1, 11, NULL)")
     tr.commit(); tr.close()
+    rl = sqlite3.connect(d / "role.sqlite")              # the engine's flags (nba_role.sqlite), as nba_role_open.py writes them
+    rl.execute("CREATE TABLE ratio_signals (rule TEXT, gid TEXT, pid INTEGER, market TEXT, book TEXT, line REAL, price REAL, "
+               "volume REAL, date TEXT, player TEXT, logged_at TEXT, pinged INTEGER, PRIMARY KEY (rule, gid, pid, market))")
+    rl.execute("CREATE TABLE idea_signals (rule TEXT, gid TEXT, pid INTEGER, market TEXT, line REAL, price REAL, note TEXT, "
+               "date TEXT, player TEXT, logged_at TEXT, pinged INTEGER, PRIMARY KEY (rule, gid, pid, market))")
+    rl.execute("CREATE TABLE signals (gid TEXT, pid INTEGER, market TEXT, side TEXT, book TEXT, line REAL, price REAL, ev REAL, "
+               "p REAL, mu REAL, out_pids TEXT, date TEXT, team TEXT, player TEXT, logged_at TEXT, pinged INTEGER, "
+               "PRIMARY KEY (gid, pid, market, side))")
+    rl.executemany("INSERT INTO ratio_signals VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", [
+        ("EARLY_SURGE", "G1", 1, "points", "fd", 24.5, 1.87, 18.0, GD, "Devin Booker", "2026-10-26T02:00:00", 1),
+        ("RATIO_PA28", "G0", 1, "assists", "fd", 5.5, 1.9, 10.0, "2026-10-20", "Devin Booker", "2026-10-20T02:00:00", 1)])
+    rl.executemany("INSERT INTO idea_signals VALUES (?,?,?,?,?,?,?,?,?,?,?)", [
+        ("UNDERML", "G1", 2, "points", 9.5, 1.9259, "under p 0.443 ev 0.073", GD, "Grayson Allen", "2026-10-26T23:30:00", 0),
+        ("UNDER20", "G1", 2, "rebounds", 3.5, 1.8, "proj 2.4 min 19.8", GD, "Grayson Allen", "2026-10-26T23:30:00", 1)])
+    rl.execute("INSERT INTO signals VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+               ("G1", 3, "rebounds", "under", "fd", 9.5, 2.0, 0.109, 0.55, 7.8, "[]", GD, "PHX", "Jusuf Nurkic", "2026-10-26T06:24:03", 1))
+    rl.commit(); rl.close()
     return RS.build(now=now, sched=sched or SCHED, lines=d / "lines.sqlite", news=d / "news.sqlite", shadow=d / "shadow.sqlite",
-                    matchup=d / "matchup.sqlite", index=d / "index.json", box_get=box_get or live_box, tracking=d / "tracking.sqlite")
+                    matchup=d / "matchup.sqlite", index=d / "index.json", box_get=box_get or live_box, tracking=d / "tracking.sqlite",
+                    role_db=d / "role.sqlite")
 
 
 @pytest.fixture(scope="module")
 def payload():
     return built(NOW)
+
+
+def test_flags_from_every_rule(payload):
+    # the slate's flags from the three tables, another date's left out: pinged first, then as logged; each rule's own
+    # number as text; UNDERML's side from its note; the team from the index
+    fl = payload["flags"]
+    assert [(f["rule"], f["pid"], f["market"], f["side"], f["pinged"]) for f in fl] == [
+        ("EARLY_SURGE", 1, "points", "over", 1), ("ROLE_OPEN", 3, "rebounds", "under", 1),
+        ("UNDER20", 2, "rebounds", "under", 1), ("UNDERML", 2, "points", "under", 0)]
+    assert [f["info"] for f in fl] == ["18.0 FGA a game", "proj 7.8 · ev +10.9%", "proj 2.4 · min 19.8", "p 0.44 · ev +7.3%"]
+    assert fl[0]["team"] == "PHX" and fl[0]["line"] == 24.5 and fl[0]["price"] == 1.87 and fl[0]["date"] == GD
+    assert fl[1]["at"] == "2026-10-26T06:24:03" and fl[1]["player"] == "Jusuf Nurkic"
+
+
+def test_role_flags_reader():
+    assert RS.role_flags(None, [GD]) == [] and RS.role_flags(sqlite3.connect(":memory:"), []) == []
+    rc = sqlite3.connect(":memory:")                     # only one table made yet: the others are skipped, not an error
+    rc.execute("CREATE TABLE ratio_signals (rule TEXT, gid TEXT, pid INTEGER, market TEXT, book TEXT, line REAL, price REAL, "
+               "volume REAL, date TEXT, player TEXT, logged_at TEXT, pinged INTEGER)")
+    rc.execute("INSERT INTO ratio_signals VALUES ('BOOST','G1',1,'points','fd',20.5,1.9,0.875,?,'A','2026-10-26T01:00:00',1)", (GD,))
+    rc.execute("INSERT INTO ratio_signals VALUES ('BOOST_NH','G1',2,'pra','fd',30.5,1.9,31.24,?,'B','2026-10-26T00:30:00',0)", (GD,))
+    assert [(f["rule"], f["info"]) for f in RS.role_flags(rc, [GD])] == [("BOOST", "hit 88% without the starter"),
+                                                                          ("BOOST_NH", "proj 31.2")]
+    assert RS._idea("UNDERML", "over p 0.6 ev -0.02") == ("over", "p 0.60 · ev -2.0%")
+    assert RS._idea("UNDER20", "proj 1.8 min 19.8") == ("under", "proj 1.8 · min 19.8")
+    assert RS._idea("FOUL_BIG", "2 fouls in Q1") == ("under", "2 fouls in Q1") and RS._vol("RATIO_PA28", 7.333) == "7.3 potential assists"
+    assert RS._vol("EARLY_SURGE", None) == ""
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_flag_grade():
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "core.js").write_text(UI.JS_CORE)
+    (d / "t.js").write_text("""const C = require('./core.js');
+console.log(JSON.stringify([['over', 5.5, 6], ['over', 5.5, 5], ['under', 5.5, 5], ['under', 5.5, 6], ['over', 6, 6], ['under', 6, 6],
+  ['over', 5.5, null]].map(a => C.flagGrade(a[0], a[1], a[2]))));""")
+    out = json.loads(subprocess.run([NODE, str(d / "t.js")], capture_output=True, text=True, check=True, cwd=d).stdout)
+    assert out == ["hit", "miss", "hit", "miss", "push", "push", None]
 
 
 def test_slate_holds_until_6am_et():
@@ -428,7 +484,15 @@ def test_page_controls_work_on_iphone():
     assert '(ST.iv === "lu" ? lineupsView() : ST.iv === "ro" ?' in html and "function luTeam(t, e)" in html and 'isNew(pid) ? " · NEW" : ""' in html
     # role changes (docs/player/roles.json), the Live tab (props under way from their closing boards: only there), game script
     assert 'fetch("player/roles.json")' in html and "function rolesView(" in html and 'data-iv="ro"' in html
-    assert 'const ALL_TABS = ["live", "trends", "movers"];' in html and "list = list.filter(p => !p.closed);" in html
+    assert 'const ALL_TABS = ["live", "trends", "movers", "flags"];' in html and "list = list.filter(p => !p.closed);" in html
+    # every rule's flag (D.flags): a Flags tab (pinged, then silent, SHADOW · NOT A BET, graded at its own line once
+    # final), a pinged one's chip on its prop's row, all of a prop's on its page; a tap opens the prop or the player
+    assert 'if (ST.market === "flags") { lst.innerHTML = flagsView(); return; }' in html and 'flags: "Flags"' in html
+    assert "${flagChips(p)}</div>" in html and 'const f = flagsOf(p.id).filter(x => x.pinged);' in html
+    assert 'sec("Pinged", fs.filter(f => f.pinged)) + sec("Silent", fs.filter(f => !f.pinged))' in html
+    assert "f.date === ST.date && (ST.gid === \"all\" || f.gid === ST.gid)" in html
+    assert 'g.state === "final" ? flagGrade(f.side, f.line, p.live.value) : null' in html
+    assert '${p ? `data-id="${esc(id)}"` : `data-vp="${f.pid}"`}' in html and html.count("SHADOW · NOT A BET") == 3
     assert "function liveRow(p)" in html and 'st = liveStatus(x.v, x.line, over, live)' in html
     assert 'if (f.blow === "b" && !(Math.abs(l.margin) >= 15)) return false;' in html and 'tchip("blow", "b", "Blowouts")' in html
     assert "function gameScript(p, g, logs, line, side)" in html and '<span class="gsp">' in html

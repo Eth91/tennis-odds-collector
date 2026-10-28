@@ -348,6 +348,11 @@ svg.shct{display:block;width:100%;height:auto;margin-top:6px}
 .gc em .gsp{display:block;margin-top:2px;color:var(--org);font-weight:700}
 /* role changes */
 .pr.ror{height:82px;contain-intrinsic-size:auto 82px;width:100%;text-align:left}
+/* the Flags tab: a row per rule's flag; silent ones dimmed */
+.tfl{background:rgba(255,255,255,.1);color:var(--l1)}
+.pr.flr{height:80px;contain-intrinsic-size:auto 80px;width:100%;text-align:left} .flr .who{right:92px} .flr .lin{font-size:13.6px;color:#b0b0b0}
+.frs{position:absolute;right:15.3px;top:12px;max-width:80px;text-align:right;font-size:12px;line-height:1.3} .frs i{font-style:normal;color:#8e8e8e}
+.frs b{font-size:12.5px} .frs .up{color:var(--grn)} .frs .dn{color:var(--red)} .pr.fq{opacity:.6}
 .ror .who{right:86px} .ror .lin{font-size:13.6px;color:#b0b0b0} .ror .lin b{color:#fff;font-weight:600} .ror small{font-size:11.5px;color:#7c7c7c}
 .ros{margin-top:2px;font-size:12.5px;color:#9a9a9a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .ros span{color:var(--org)}
 .rod{position:absolute;right:15.3px;top:18px;font-size:19px;font-weight:800;text-align:right} .rod.up{color:var(--grn)} .rod.dn{color:var(--red)}
@@ -919,7 +924,13 @@ function liveStage(state, v, line, over) {
   if (state === "final") return 2;
   return v > line ? 1 : 0;                         // an over past its line; an under past it (bust)
 }
-if (typeof module !== "undefined") module.exports = {statValue: statValue, hitSummary: hitSummary, seasonOf: seasonOf,
+// a flag graded at its own line, once the game is final: "hit", "miss" or "push"
+function flagGrade(side, line, v) {
+  if (v === null || v === undefined || line === null || line === undefined) return null;
+  if (v === line) return "push";
+  return (side === "under" ? v < line : v > line) ? "hit" : "miss";
+}
+if (typeof module !== "undefined") module.exports = {flagGrade: flagGrade, statValue: statValue, hitSummary: hitSummary, seasonOf: seasonOf,
   rowsToLogs: rowsToLogs, windowed: windowed, filterLogs: filterLogs, splitRows: splitRows, sideRate: sideRate,
   american: american, decimalOf: decimalOf, bestOver: bestOver, bestPrice: bestPrice, propRates: propRates,
   noVig: noVig, fairAt: fairAt, valueAt: valueAt, zscore: zscore, pmfGe: pmfGe, projProbs: projProbs, blendP: blendP,
@@ -1014,8 +1025,8 @@ function when(g) {
 }
 const vs = p => p.team ? (p.home ? "vs " : "@ ") + p.opp : "";
 // ── list ──
-const MKT_TABS = ["live", "trends", "movers", "points", "assists", "rebounds", "threes", "pra", "pts_reb", "pts_ast", "reb_ast"];
-const ALL_TABS = ["live", "trends", "movers"];  // tabs that span every market
+const MKT_TABS = ["live", "trends", "movers", "flags", "points", "assists", "rebounds", "threes", "pra", "pts_reb", "pts_ast", "reb_ast"];
+const ALL_TABS = ["live", "trends", "movers", "flags"];  // tabs that span every market
 // Trends (nba_research_score.trend_side): the L10 and L20 hit rates both 1+ SD from what the price implies, the same
 // way, 8+ games each. A plain 70% L10 put a third of the slate in Trends and ignored the price.
 const VIEWS = [["props", "Props"], ["markets", "Markets"], ["injuries", "Injuries"]];
@@ -1124,6 +1135,43 @@ function listProps() {
   if (ST.market === "trends") return list.map(p => [p, trend(p)]).filter(x => x[1] && x[1].side === ST.side).sort((a, b) => b[1].z - a[1].z).map(x => x[0]);
   return sortProps(list, ST.sort, ST.dir, logsOf, ST.side, D.season, ST.book);
 }
+// ── flags: every rule's flag for the slate (D.flags, nba_research.role_flags from nba_role.sqlite): SHADOW, never a
+// bet. The labels the pings use; a pinged one on its prop's row, all of them in the Flags tab and on the prop's page ──
+const FLAG_L = {BOOST: ["🟢", "BOOST"], BOOST_STEP: ["🟢", "BOOST STEP"], BOOST_PICKUP: ["⚪", "PICKUP"], BOOST_NH: ["⚪", "BOOST NH"],
+  EARLY_SURGE: ["🟡", "EARLY"], RATIO_PA28: ["🟣", "PA28"], RETURN_UNDER: ["🔻", "RETURN"], FOUL_BIG: ["🟠", "FOUL"],
+  UNDER20: ["🔵", "UNDER"], UNDERML: ["⚪", "ML"], ROLE_OPEN: ["🟢", "ROLE"]};
+const flagName = f => { const l = FLAG_L[f.rule] || ["⚪", f.rule];        // the two rules that flag either side say which
+  return l[0] + " " + l[1] + (f.rule === "ROLE_OPEN" || f.rule === "UNDERML" ? (f.side === "under" ? " U" : " O") : ""); };
+let FLAGS_D = null, FLAGS_BY = new Map(), PROP_BY = new Map();
+function flagsOf(id) {                                  // a prop's flags (and the props by id), rebuilt with each payload
+  if (FLAGS_D !== D) {
+    FLAGS_D = D; FLAGS_BY = new Map(); PROP_BY = new Map(D.props.map(p => [p.id, p]));
+    (D.flags || []).forEach(f => { const k = f.gid + "|" + f.pid + "|" + f.market; if (!FLAGS_BY.has(k)) FLAGS_BY.set(k, []); FLAGS_BY.get(k).push(f); });
+  }
+  return FLAGS_BY.get(id) || [];
+}
+const flagChips = p => { const f = flagsOf(p.id).filter(x => x.pinged);
+  return f.length ? `<span class="tg tfl">${esc(flagName(f[0]))}${f.length > 1 ? " +" + (f.length - 1) : ""}</span>` : ""; };
+const flagWhen = s => s ? iso(s).toLocaleString([], {weekday: "short", hour: "numeric", minute: "2-digit"}) : "";
+function flagRow(f) {                                   // a tap opens the prop, or his player page when no prop is up
+  const id = f.gid + "|" + f.pid + "|" + f.market, p = PROP_BY.get(id), g = gameOf(f.gid);
+  let res = `<i>${esc(flagWhen(f.at))}</i>`;
+  if (p && p.live && g && g.state !== "pregame") {
+    const r = g.state === "final" ? flagGrade(f.side, f.line, p.live.value) : null;
+    res = r ? `<b class="${r === "hit" ? "up" : r === "miss" ? "dn" : ""}">${r.toUpperCase()} ${p.live.value}</b>` : `<b>LIVE ${p.live.value}</b>`;
+  }
+  return `<button class="pr flr${f.pinged ? "" : " fq"}" ${p ? `data-id="${esc(id)}"` : `data-vp="${f.pid}"`}><span class="av">${head(f.pid)}</span>
+    <div class="who"><div class="nm">${esc(nameOf(f.player || ""))}<span class="cd">${esc(f.team || "")}</span><span class="tg tfl">${esc(flagName(f))}</span></div>
+    <div class="lin num">${f.side === "under" ? "Under" : "Over"} ${f.line} ${esc(unit(f.market))} · ${f.price ? american(f.price) : "–"}</div>
+    ${f.info ? `<div class="ros">${esc(f.info)}</div>` : ""}</div><div class="frs">${res}</div></button>`;
+}
+function flagsView() {                                  // the day's (and game's) flags: pinged, then silent, as logged
+  flagsOf("");
+  const fs = (D.flags || []).filter(f => f.date === ST.date && (ST.gid === "all" || f.gid === ST.gid));
+  const sec = (t, xs) => xs.length ? `<div class="lhd"><span>${t} · ${xs.length}</span></div>` + xs.map(flagRow).join("") : "";
+  return `<div class="lhd"><span><span class="tg tf" style="margin:0 6px 0 0">SHADOW · NOT A BET</span>every rule's flags, as logged</span></div>` +
+    (fs.length ? sec("Pinged", fs.filter(f => f.pinged)) + sec("Silent", fs.filter(f => !f.pinged)) : '<div class="empty"><b>No flags yet</b></div>');
+}
 function row(p) {
   const g = gameOf(p.gid), r = rates(p), c = p.ctx || {}, side = ST.side;
   const best = p.main === null ? null : bestPrice(p, p.main, ST.book, side), fs = fairSide(p, p.main, side), cs = chanceSide(p, p.main, side);
@@ -1134,7 +1182,7 @@ function row(p) {
   const live = p.live && g.state !== "pregame" ? `<span class="tg ${g.state === "live" ? "tl" : "tn"}">${g.state === "live" ? "LIVE" : "FINAL"} ${p.live.value}</span>` : "";
   const mv = moveOf(p);
   return `<button class="pr" data-id="${esc(p.id)}"><span class="av">${head(p.pid)}</span>
-    <div class="who"><div class="nm">${esc(nameOf(p.player))}<span class="cd">${esc(p.team || "")}</span>${injTag(p)}${live}${p.flag ? '<span class="tg tf">ENGINE</span>' : ""}</div>
+    <div class="who"><div class="nm">${esc(nameOf(p.player))}<span class="cd">${esc(p.team || "")}</span>${injTag(p)}${live}${p.flag ? '<span class="tg tf">ENGINE</span>' : ""}${flagChips(p)}</div>
     <div class="lin num">${ST.market === "movers" && mv ? `<span class="mvo">${r1(p.main - mv)} →</span> ${p.main} ${esc(unit(p.market))}<span class="mv ${mv > 0 ? "up" : "dn"}">${mv > 0 ? "▲" : "▼"}${Math.abs(mv)}</span>` : (p.main === null ? "alt lines" : p.main + " " + esc(unit(p.market))) + (ST.market === "movers" ? "" : `${p.proj ? `<span class="pjm" title="model projection (mean), not a book line">proj ${(+p.proj.mean).toFixed(1)}</span>` : ""}${mv ? `<span class="mv" aria-label="line ${mv > 0 ? "up" : "down"} ${Math.abs(mv)} since open">${mv > 0 ? "▲" : "▼"}${Math.abs(mv)}</span>` : ""}`)}</div></div>
     <div class="oc o"><i>ODDS</i><b class="num">${best ? american(best.odds) : "–"}</b></div>
     <div class="oc e"><i>VALUE</i><b class="num ${ev === null ? "" : ev > 0 ? "up" : "mu"}">${ev === null ? "–" : (ev > 0 ? "+" : "") + (ev * 100).toFixed(1) + "%"}</b></div>
@@ -1274,6 +1322,7 @@ function renderRows(ivFrom) {
     $$("[data-iv]", lst).forEach(b => b.onclick = () => { if (ST.iv !== b.dataset.iv) { const from = ST.iv; ST.iv = b.dataset.iv; save(); renderList(from); } });
     return;
   }
+  if (ST.market === "flags") { lst.innerHTML = flagsView(); return; }
   const onDate = D.props.filter(p => (gameOf(p.gid) || {}).date === ST.date), list = listProps();
   let body = null;
   if (!D.games.some(g => g.date === ST.date)) body = '<div class="empty"><b>No games</b></div>';
@@ -1747,7 +1796,7 @@ const TEAMS = {ATL: ["Atlanta Hawks", "#C8102E"], BOS: ["Boston Celtics", "#007A
 const POSN = {PG: "Point Guard", SG: "Shooting Guard", SF: "Small Forward", PF: "Power Forward", C: "Center", G: "Guard",
   F: "Forward", "G-F": "Guard-Forward", "F-G": "Forward-Guard", "F-C": "Forward-Center", "C-F": "Center-Forward"};
 const TAB_ORDER = ["points", "assists", "rebounds", "threes", "pts_ast", "pts_reb", "reb_ast", "pra"];
-const TAB = {live: "Live", trends: "Trends", movers: "Movers", points: "Points", rebounds: "Rebs", assists: "Assists", threes: "3PTM", pra: "PRA", pts_reb: "P+R", pts_ast: "P+A", reb_ast: "R+A"};
+const TAB = {live: "Live", trends: "Trends", movers: "Movers", flags: "Flags", points: "Points", rebounds: "Rebs", assists: "Assists", threes: "3PTM", pra: "PRA", pts_reb: "P+R", pts_ast: "P+A", reb_ast: "R+A"};
 const GRPN = {G: "guards", F: "forwards", C: "centers"};
 const ICON = {
   back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
@@ -2079,7 +2128,9 @@ function renderProp(mode) {
     <div class="end"></div>`;
   const stat = `<div class="sec2"><h3>Availability</h3><div class="box0">${arows.join("")}</div></div>
     ${rel ? `<div class="sec2"><h3>Related Props</h3><div class="rel" style="margin:0;padding:0">${rel}</div></div>` : ""}
-    ${p.flag ? `<div class="sec2"><h3>Engine</h3><div class="box0"><span class="tg tf" style="margin:0 6px 0 0">SHADOW · NOT A BET</span>${esc(p.flag.tier)} at ${p.flag.line} · ${p.flag.card === 1 ? "on the card" : "logged only" + (p.flag.why ? " (" + esc(p.flag.why.toLowerCase()) + ")" : "")}</div></div>` : ""}`;
+    ${p.flag ? `<div class="sec2"><h3>Engine</h3><div class="box0"><span class="tg tf" style="margin:0 6px 0 0">SHADOW · NOT A BET</span>${esc(p.flag.tier)} at ${p.flag.line} · ${p.flag.card === 1 ? "on the card" : "logged only" + (p.flag.why ? " (" + esc(p.flag.why.toLowerCase()) + ")" : "")}</div></div>` : ""}
+    ${flagsOf(p.id).length ? `<div class="sec2"><h3>Flags</h3><div class="box0"><span class="tg tf" style="margin:0 0 4px">SHADOW · NOT A BET</span>${flagsOf(p.id).map(f =>
+      `<div class="kv shr"><span>${esc(flagName(f))}${f.pinged ? "" : " · silent"}<small>${esc(f.info || "")}${f.at ? (f.info ? " · " : "") + esc(flagWhen(f.at)) : ""}</small></span><b>${f.side === "under" ? "Under" : "Over"} ${f.line} · ${f.price ? american(f.price) : "–"}</b></div>`).join("")}</div></div>` : ""}`;
   clearTimeout(PX && PX.lazy);
   PX = {p: p, g: g, logs: logs, c: c, without: without, wins: wins, stat: stat, statDone: false};
   $("#pg .bk").onclick = () => history.back();
