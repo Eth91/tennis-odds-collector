@@ -220,7 +220,7 @@ MAE (bias as model − actual):
 **Bets (2024-25 tip lines, confirmed starters):** v1 292 flags, +5.2%; v2 351, +3.9% (90%: −4.3%, +11.7%). In 2023-24
 both are −4.2%. The better minutes do not make better bets at tip lines. Nothing changes live until the user decides.
 
-# AMENDMENT 4: the error floor (2026-10-28, about 21:50 UTC; a bound, not a model)
+# AMENDMENT 4: the error floor (2026-10-28, about 21:35 UTC; a bound, not a model)
 **User:** "run a constant improvement loop until you get that minutes error under 3 minutes, and also make an FGA, FTA,
 3PA projection model for each of these players jumping into the lineup." Before any loop, the floor was measured on
 target A with confirmed starters (absence games 1–3).
@@ -244,7 +244,7 @@ target A with confirmed starters (absence games 1–3).
   and even in hindsight it is worth about 0.15.
 - Shot volume from his per-minute rate × v2 minutes is also at the oracle bound. Rates from his starts are no better.
 
-# AMENDMENT 5: shot volume in the STEP ping (2026-10-28, about 21:55 UTC)
+# AMENDMENT 5: shot volume in the STEP ping (2026-10-28, about 21:40 UTC)
 **User** (after the floor): "put FGA/FTA/3PA in the pings."
 - Each BOOST_STEP ping adds his projected FGA, FTA and 3PA: his per-minute rates (`nba_boost.rates`, last season worth 150
   minutes) × his STEP minutes. Amendment 4 shows that rate × minutes sits at the oracle bound.
