@@ -17,7 +17,7 @@ CSS = r"""
 --l3:rgba(235,235,245,.32);--sep:rgba(84,84,88,.6);--blue:#0a84ff;--grn:#30d158;--red:#ff453a;--org:#ff9f0a;--yel:#ffd60a;
 --hit5:#30d158;--hit4:rgba(48,209,88,.55);--hit3:rgba(120,120,128,.36);--hit2:rgba(255,69,58,.5);--hit1:#ff453a;
 --st:env(safe-area-inset-top);--sb:env(safe-area-inset-bottom)}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}   /* no double-tap zoom; pinch still zooms */
 html,body{margin:0;background:var(--bg);color:var(--l1);font-family:-apple-system,"SF Pro Text",system-ui,sans-serif;
 -webkit-text-size-adjust:100%;overscroll-behavior-y:none}
 body.lock{overflow:hidden}
