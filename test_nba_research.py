@@ -900,3 +900,10 @@ def test_player_page_has_last_seasons_window():
     # 2026 · H2H · L5 · L10 · L20 · 2025: last season's games at the far right ("last" in windowed: every game before this season)
     assert '["l20", "L20"], ["last", String(+D.season.slice(0, 4) - 1)]];' in html
     assert 'if (win === "last") return logs.filter(function (l) { return seasonOf(l.date) !== season; });' in html
+
+
+def test_matchup_shows_assist_and_rebound_zones_only_for_their_props():
+    html = UI.page()
+    assert 'const AST_M = new Set(["assists", "pts_ast", "reb_ast", "pra"]), REB_M = new Set(["rebounds", "pts_reb", "reb_ast", "pra"]);' in html
+    assert """${AST_M.has(p.market) ? '<div class="shc wg" id="asc"></div>' : ""}${REB_M.has(p.market) ? '<div class="shc wg" id="rbc"></div>' : ""}""" in html
+    assert 'if (AST_M.has(p.market)) zoneCard("ast");' in html and "fetch(`pbp/${encodeURIComponent(s)}.json`)" in html
