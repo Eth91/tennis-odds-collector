@@ -110,15 +110,15 @@ def parse_box(b):
     return game, teams, players
 
 
-def fetch(gids, con=None, get=None, workers=8):
-    """Cache the box scores of `gids` not cached yet. Returns (stored, not final / failed)."""
+def fetch(gids, con=None, get=None, workers=8, redo=()):
+    """Cache the box scores of `gids` not cached yet, and refetch those in `redo`. Returns (stored, not final / failed)."""
     con = con or connect()
     # a game cached before fg3m/stl/blk/tov were kept is fetched again; so is a current-season game cached before pf was
     have = {g for (g,) in con.execute("SELECT gid FROM games WHERE home_pts IS NOT NULL AND gid NOT IN "
                                       "(SELECT DISTINCT gid FROM player_games WHERE fg3m IS NULL OR fga IS NULL) AND gid NOT IN "
                                       "(SELECT DISTINCT p.gid FROM player_games p JOIN games g2 ON g2.gid = p.gid WHERE p.pf IS NULL "
                                       "AND g2.season = (SELECT MAX(season) FROM games))")}
-    todo = [g for g in gids if g not in have]
+    todo = [g for g in gids if g not in have or g in redo]
     if get is None:
         import nba_rosters as R
         get = lambda g: R._get(R.BOX.format(g))["game"]
@@ -323,8 +323,14 @@ if __name__ == "__main__":
         print(s, "stored %d, not final or failed %d" % fetch(regular_season_gids(s), con))
     if a.current:
         import nba_rosters as R
-        finals = [g["gid"] for g in R.schedule() if g["status"] == 3]      # this season's finished games only
-        print(season_of(dt.date.today().isoformat()), "stored %d, not final or failed %d" % fetch(finals, con))
+        from zoneinfo import ZoneInfo
+        sched = [g for g in R.schedule() if g["status"] == 3]              # this season's finished games only
+        # AMENDMENT 34: nba_finals.py stores a final minutes after the buzzer; this daily run refetches last night's,
+        # so a box corrected after that is stored as this run used to store it
+        last_night = (dt.datetime.now(ZoneInfo("America/New_York")).date() - dt.timedelta(days=1)).isoformat()
+        redo = {g["gid"] for g in sched if g["date_et"] == last_night}
+        print(season_of(dt.date.today().isoformat()), "stored %d, not final or failed %d" %
+              fetch([g["gid"] for g in sched], con, redo=redo))
         if a.last:
             cur = season_of(dt.date.today().isoformat())
             prev = f"{int(cur[:4]) - 1}-{cur[2:4]}"
