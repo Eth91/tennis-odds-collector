@@ -2267,7 +2267,8 @@ function schedCard(p, g, logs, line, side) {
 // the opponent gives up there a game, over the league's average for a team. This season once the opponent has 10 games ──
 const AST_M = new Set(["assists", "pts_ast", "reb_ast", "pra"]), REB_M = new Set(["rebounds", "pts_reb", "reb_ast", "pra"]);
 const PBP = new Map();
-const pbpLoad = s => { if (!PBP.has(s)) PBP.set(s, fetch(`pbp/${encodeURIComponent(s)}.json`).then(r => r.ok ? r.json() : null).catch(() => null)); return PBP.get(s); };
+const pbpLoad = s => { const t = Math.floor(Date.now() / 600000), k = s + "|" + t;      // new games within 10 minutes
+  if (!PBP.has(k)) PBP.set(k, fetch(`pbp/${encodeURIComponent(s)}.json?t=${t}`).then(r => r.ok ? r.json() : null).catch(() => null)); return PBP.get(k); };
 function zoneCard(kind) {
   const el = $(kind === "ast" ? "#asc" : "#rbc"); if (!el || !MUP) return;
   const p = MUP.p, key = kind + "Season", ast = kind === "ast";
@@ -2290,10 +2291,11 @@ function zoneCard(kind) {
     $$("[data-pbs]", el).forEach(b => b.onclick = () => { if (MUP[key] !== b.dataset.pbs) { MUP[key] = b.dataset.pbs; draw(true); } });
   });
   if (MUP[key]) { draw(); return; }
-  pbpLoad(D.season).then(j => {                          // this season once the opponent has 10 games, else last season
+  // this season once the opponent has 10 games, else last season, unless he has games this season and none last (a rookie)
+  Promise.all([pbpLoad(D.season), pbpLoad(prevSeason(D.season))]).then(([j, q]) => {
     if (!MUP || MUP.p !== p) return;
-    const t = j && j.teams[p.opp];
-    MUP[key] = t && t[0] >= 10 ? D.season : prevSeason(D.season);
+    const t = j && j.teams[p.opp], me = x => !!(x && x.players[String(p.pid)]);
+    MUP[key] = (t && t[0] >= 10) || (me(j) && !me(q)) ? D.season : prevSeason(D.season);
     draw();
   });
 }
