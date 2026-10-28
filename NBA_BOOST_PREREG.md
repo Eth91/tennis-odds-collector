@@ -258,3 +258,42 @@ unchanged (it has no starter flags or lineups, so it keeps the minutes-based def
 second check against NBA.com's 20:15 lineup sent one STEP ping: Kenrich Williams (OKC, in for Holmgren, game 2) P+R
 over 13.5 at −114, projected 15.7 at 24 minutes. Black (33.5 projected minutes), da Silva (28.1) and Dosunmu (33.1)
 already project 24+ minutes, so by the user's choice they are not STEP flags.
+
+# AMENDMENT 5: the step-in projection from his big-role games (2026-10-28, about 20:35 UTC, before code)
+**User:** "Jared McCain likely sees 25–30 minutes tonight and he averages 15.7 points in games where he plays 25+
+minutes, why is your projection 10.3? ... Huff and Walter ... Walter likely sees 27–30 minutes today and in games
+when he sees 27+ minutes he's over his line 67% of the time and averages 15.2 points."
+
+**Checked first** (nba_matchup, 2025-26 and 2026-27, any team):
+- McCain: 8.5 points in all games; 13.0 in his 4 starts (29.8 min); 15.8 in his 13 games of 25+ minutes.
+- Walter: 7.7 / 10.1 in 20 starts / 12.2 in 25+ min (13.1 in 27+).
+- Huff: 9.4 / 10.8 in 48 starts / 13.5 in 25+ min.
+- **The bias:** a 25+ minute game is partly chosen by how it went (a hot night, overtime, no foul trouble). For 91 bench
+  players (under 22 min a game, 30+ games, 5+ starts and 5+ games of 25+ min, 2025-26): 10.3 points when they
+  started (26.2 min) and 12.2 in their 25+ minute games (29.4 min).
+
+**Asked:**
+- baseline → **his starts, else his 25+ minute games shaded down 15%**;
+- games → **any team, this season and last**;
+- bar → **his baseline average 15%+ over tonight's line**;
+- bench guy → **under 24 minutes a game this season**.
+
+**The STEP projection (replaces amendment 2's 24-minute floor):**
+1. **Bench guy:** the step-in player's (amendment 4; in the backtest, amendment 2's pick) minutes per game this season,
+   any team, before the date. This season's games if 3+, else last season's if 10+. The bar is under 24.0.
+2. **Baseline,** from his games for any team this season and last, before the date:
+   - **starts:** his last 10 games with a starter flag of 1, if there are 3 or more; the per-game averages;
+   - **otherwise 25+ minutes:** his last 10 games of 25.0+ minutes, if 3 or more. Points, rebounds, assists and
+     threes are × 0.85; minutes are unshaded;
+   - otherwise none.
+   - The backtest has no starter flags, so it always uses the 25+ minute baseline.
+3. **The flag:** a step-in bench guy with a baseline, with no history (h < 3), X relevant to the market, the baseline
+   (summed for a combo) ≥ 1.15 × tonight's line, baseline minutes ≥ 20, and the price −150 or better. That is a STEP
+   flag.
+   - A step-in who is not a bench guy, or has no baseline, gets rule 10's redistribution with no floor (BOOST_NH if it
+     fires).
+   - The other players are unchanged.
+4. **Ping:** "· steps in, avg {proj} in his {n} starts" or "· steps in, {proj} in his {n} games of 25+ min (−15%)".
+
+**Check:** backtest on 2023-25, as before, STEP reported separately. As chosen earlier, it goes live whatever the
+result. All three rules are re-fingerprinted and registered at the deploy time.
