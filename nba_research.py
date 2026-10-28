@@ -44,7 +44,7 @@ LINES, NEWS, SHADOW = HERE / "nba_lines.sqlite", HERE / "nba_news.sqlite", HERE 
 INDEX = HERE / "nba_player_index.json"
 TRACKING = HERE / "nba_tracking.sqlite"
 PROJ_LOG = HERE / "nba_proj_log.sqlite"          # the projection engine's prospective record (prereg test C)
-ROLE = HERE / "nba_role.sqlite"                  # the engine's flag rules' log (nba_role_open.py, the VM cron); read-only
+ROLE = HERE / "nba_role.sqlite"                  # the engine's rules' log (nba_role_open.py, the VM cron); read-only
 LINEUPS = HERE / "nba_lineups.sqlite"            # NBA.com's daily lineups as seen (nba_lineups_poll.py, the VM cron)
 CLOSE_BOARDS = HERE / "nba_close_boards.json"    # each started game's last board before tip (closing_boards), cached
 SLATE_ROLL_H = 6     # the slate moves on to the next day at 6 AM ET (4 AM MT), not midnight: late games stay on it
@@ -407,66 +407,41 @@ def engine_flags(sh, game_dates):
     return out
 
 
-def _vol(rule, v):
-    """An opener rule's own number (ratio_signals.volume), as the page shows it."""
-    if v is None:
-        return ""
-    if rule == "BOOST":
-        return f"hit {v * 100:.0f}% without the starter"
-    if rule == "EARLY_SURGE":
-        return f"{v:.1f} FGA a game"
-    if rule == "RATIO_PA28":
-        return f"{v:.1f} potential assists"
-    return f"proj {v:.1f}"                                   # BOOST_STEP, BOOST_PICKUP, BOOST_NH
+UNDER_PRICE = 1 / 0.6                                    # −150 or better, decimal
+UNDER_BAND = (0.50, 0.70)                                # our projection over the line: 30–50% below it
 
 
-def _idea(rule, note):
-    """(side, text) of a tip - 30 rule's row: UNDERML's side leads its note ("under p 0.443 ev 0.073"); the rest are
-    unders ("proj 1.8 min 19.8")."""
-    w = (note or "").split()
-    if rule == "UNDERML" and w and w[0] in ("over", "under"):
-        kv = dict(zip(w[1::2], w[2::2]))
-        try:
-            return w[0], f"p {float(kv['p']):.2f} · ev {float(kv['ev']) * 100:+.1f}%"
-        except (KeyError, ValueError):
-            return w[0], " ".join(w[1:])
-    return "under", " · ".join(" ".join(w[i:i + 2]) for i in range(0, len(w), 2)) if w[:1] == ["proj"] else (note or "")
+def under_play(market, price, line, proj):
+    """A play that pings the phone (nba_under.pings on the VM): an under at −150 or better, not threes, with our
+    projection 30–50% below the line."""
+    return (market != "threes" and price is not None and price >= UNDER_PRICE and bool(line) and proj is not None
+            and UNDER_BAND[0] <= proj / line < UNDER_BAND[1])
 
 
-def role_flags(rc, game_dates):
-    """Every flag the engine's rules logged for the slate's dates (nba_role.sqlite, read-only), pinged first, then as
-    logged: [{rule, date, gid, pid, market, side, line, price (decimal), pinged, info, at (UTC), player}]. SHADOW flags:
-    none is a bet. ratio_signals: overs at the opener; idea_signals: tip - 30 on FanDuel; signals: ROLE_OPEN, either
-    side. One row per rule, game, player and market (the first book), as the engine keeps them."""
-    out = []
+def under_flags(rc, game_dates):
+    """The board's flags: the under plays in nba_role.sqlite's idea_signals (rule UNDER20, read-only) that meet the
+    ping criteria, whether or not the phone send went through, as logged: [{date, gid, pid, market, side, line, price
+    (decimal), proj, mins, at (UTC), player}]. SHADOW plays: none is a bet. The engine's other rules are tracked
+    silently and are not flags."""
     if rc is None or not game_dates:
-        return out
-    marks = ",".join("?" * len(game_dates))
-
-    def rows(sql):
+        return []
+    try:
+        rows = rc.execute("SELECT date, gid, pid, market, line, price, note, player, logged_at FROM idea_signals WHERE "
+                          f"rule = 'UNDER20' AND date IN ({','.join('?' * len(game_dates))}) ORDER BY logged_at",
+                          list(game_dates)).fetchall()
+    except sqlite3.OperationalError:                         # not made yet, or busy: no flags this build
+        return []
+    out = []
+    for d, gid, pid, mk, line, price, note, player, at in rows:
+        w = (note or "").split()                             # "proj 7.3 min 20.1"
+        kv = dict(zip(w[::2], w[1::2]))
         try:
-            return rc.execute(sql.format(marks), list(game_dates)).fetchall()
-        except sqlite3.OperationalError:                     # a table the engine has not made yet
-            return []
-    for rule, d, gid, pid, mk, line, price, vol, player, at, pinged in rows(
-            "SELECT rule, date, gid, pid, market, line, price, volume, player, logged_at, pinged FROM ratio_signals "
-            "WHERE date IN ({})"):
-        out.append({"rule": rule, "date": d, "gid": gid, "pid": pid, "market": mk, "side": "over", "line": line,
-                    "price": price, "pinged": int(bool(pinged)), "info": _vol(rule, vol), "at": at, "player": player})
-    for rule, d, gid, pid, mk, line, price, note, player, at, pinged in rows(
-            "SELECT rule, date, gid, pid, market, line, price, note, player, logged_at, pinged FROM idea_signals "
-            "WHERE date IN ({})"):
-        side, info = _idea(rule, note)
-        out.append({"rule": rule, "date": d, "gid": gid, "pid": pid, "market": mk, "side": side, "line": line,
-                    "price": price, "pinged": int(bool(pinged)), "info": info, "at": at, "player": player})
-    for d, gid, pid, mk, side, line, price, ev, mu, player, at, pinged in rows(
-            "SELECT date, gid, pid, market, side, line, price, ev, mu, player, logged_at, pinged FROM signals "
-            "WHERE date IN ({})"):
-        info = " · ".join(x for x in (f"proj {mu:.1f}" if mu is not None else "",
-                                      f"ev {ev * 100:+.1f}%" if ev is not None else "") if x)
-        out.append({"rule": "ROLE_OPEN", "date": d, "gid": gid, "pid": pid, "market": mk, "side": side, "line": line,
-                    "price": price, "pinged": int(bool(pinged)), "info": info, "at": at, "player": player})
-    out.sort(key=lambda f: (-f["pinged"], f["at"] or ""))
+            proj, mins = float(kv["proj"]), float(kv["min"]) if "min" in kv else None
+        except (KeyError, ValueError):
+            continue
+        if under_play(mk, price, line, proj):
+            out.append({"date": d, "gid": gid, "pid": pid, "market": mk, "side": "under", "line": line, "price": price,
+                        "proj": proj, "mins": mins, "at": at, "player": player})
     return out
 
 
@@ -1126,7 +1101,7 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
     official, teams_listed, report_meta = official_status(ncon, dates)
     news_by = news_items(ncon, dates)
     flags = engine_flags(sh, dates)
-    rflags = role_flags(_ro(role_db or ROLE), dates)
+    rflags = under_flags(_ro(role_db or ROLE), dates)
     for f in rflags:
         f["team"] = team_of.get(f["pid"])
     glines = game_lines(q, gids)

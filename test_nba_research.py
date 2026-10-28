@@ -155,7 +155,13 @@ def built(now, sched=None, box_get=None):
         ("RATIO_PA28", "G0", 1, "assists", "fd", 5.5, 1.9, 10.0, "2026-10-20", "Devin Booker", "2026-10-20T02:00:00", 1)])
     rl.executemany("INSERT INTO idea_signals VALUES (?,?,?,?,?,?,?,?,?,?,?)", [
         ("UNDERML", "G1", 2, "points", 9.5, 1.9259, "under p 0.443 ev 0.073", GD, "Grayson Allen", "2026-10-26T23:30:00", 0),
-        ("UNDER20", "G1", 2, "rebounds", 3.5, 1.8, "proj 2.4 min 19.8", GD, "Grayson Allen", "2026-10-26T23:30:00", 1)])
+        ("UNDER20", "G1", 2, "rebounds", 3.5, 1.8, "proj 2.1 min 19.8", GD, "Grayson Allen", "2026-10-26T23:30:01", 0),  # a failed send
+        ("UNDER20", "G1", 1, "points", 24.5, 1.7, "proj 15.9 min 30.2", GD, "Devin Booker", "2026-10-26T23:30:00", 1),
+        ("UNDER20", "G1", 1, "rebounds", 5.5, 1.7, "proj 3.9 min 30.2", GD, "Devin Booker", "2026-10-26T23:30:00", 0),   # 29% below
+        ("UNDER20", "G1", 1, "assists", 6.5, 1.6, "proj 3.5 min 30.2", GD, "Devin Booker", "2026-10-26T23:30:00", 0),    # −167
+        ("UNDER20", "G1", 1, "threes", 2.5, 1.9, "proj 1.5 min 30.2", GD, "Devin Booker", "2026-10-26T23:30:00", 0),     # threes
+        ("RETURN_UNDER", "G1", 2, "assists", 3.5, 1.8, "proj 2.0 min 18.0", GD, "Grayson Allen", "2026-10-26T23:30:00", 1),  # another rule
+        ("UNDER20", "G0", 1, "points", 24.5, 1.7, "proj 15.0 min 30.2", "2026-10-20", "Devin Booker", "2026-10-20T23:30:00", 1)])
     rl.execute("INSERT INTO signals VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                ("G1", 3, "rebounds", "under", "fd", 9.5, 2.0, 0.109, 0.55, 7.8, "[]", GD, "PHX", "Jusuf Nurkic", "2026-10-26T06:24:03", 1))
     rl.commit(); rl.close()
@@ -169,31 +175,28 @@ def payload():
     return built(NOW)
 
 
-def test_flags_from_every_rule(payload):
-    # the slate's flags from the three tables, another date's left out: pinged first, then as logged; each rule's own
-    # number as text; UNDERML's side from its note; the team from the index
+def test_flags_are_the_under_plays(payload):
+    # only the under plays that ping: UNDER20 rows at −150 or better, not threes, our projection 30–50% below the line,
+    # whether or not the send went through; another date's, the other rules', and UNDER20's other rows left out
     fl = payload["flags"]
-    assert [(f["rule"], f["pid"], f["market"], f["side"], f["pinged"]) for f in fl] == [
-        ("EARLY_SURGE", 1, "points", "over", 1), ("ROLE_OPEN", 3, "rebounds", "under", 1),
-        ("UNDER20", 2, "rebounds", "under", 1), ("UNDERML", 2, "points", "under", 0)]
-    assert [f["info"] for f in fl] == ["18.0 FGA a game", "proj 7.8 · ev +10.9%", "proj 2.4 · min 19.8", "p 0.44 · ev +7.3%"]
-    assert fl[0]["team"] == "PHX" and fl[0]["line"] == 24.5 and fl[0]["price"] == 1.87 and fl[0]["date"] == GD
-    assert fl[1]["at"] == "2026-10-26T06:24:03" and fl[1]["player"] == "Jusuf Nurkic"
+    assert [(f["pid"], f["market"], f["line"], f["proj"]) for f in fl] == [(1, "points", 24.5, 15.9), (2, "rebounds", 3.5, 2.1)]
+    assert all(f["side"] == "under" and f["date"] == GD for f in fl) and fl[0]["team"] == "PHX" and fl[0]["mins"] == 30.2
+    assert fl[0]["price"] == 1.7 and fl[0]["at"] == "2026-10-26T23:30:00" and fl[1]["player"] == "Grayson Allen"
 
 
-def test_role_flags_reader():
-    assert RS.role_flags(None, [GD]) == [] and RS.role_flags(sqlite3.connect(":memory:"), []) == []
-    rc = sqlite3.connect(":memory:")                     # only one table made yet: the others are skipped, not an error
-    rc.execute("CREATE TABLE ratio_signals (rule TEXT, gid TEXT, pid INTEGER, market TEXT, book TEXT, line REAL, price REAL, "
-               "volume REAL, date TEXT, player TEXT, logged_at TEXT, pinged INTEGER)")
-    rc.execute("INSERT INTO ratio_signals VALUES ('BOOST','G1',1,'points','fd',20.5,1.9,0.875,?,'A','2026-10-26T01:00:00',1)", (GD,))
-    rc.execute("INSERT INTO ratio_signals VALUES ('BOOST_NH','G1',2,'pra','fd',30.5,1.9,31.24,?,'B','2026-10-26T00:30:00',0)", (GD,))
-    assert [(f["rule"], f["info"]) for f in RS.role_flags(rc, [GD])] == [("BOOST", "hit 88% without the starter"),
-                                                                          ("BOOST_NH", "proj 31.2")]
-    assert RS._idea("UNDERML", "over p 0.6 ev -0.02") == ("over", "p 0.60 · ev -2.0%")
-    assert RS._idea("UNDER20", "proj 1.8 min 19.8") == ("under", "proj 1.8 · min 19.8")
-    assert RS._idea("FOUL_BIG", "2 fouls in Q1") == ("under", "2 fouls in Q1") and RS._vol("RATIO_PA28", 7.333) == "7.3 potential assists"
-    assert RS._vol("EARLY_SURGE", None) == ""
+def test_under_flags_reader():
+    assert RS.under_flags(None, [GD]) == [] and RS.under_flags(sqlite3.connect(":memory:"), []) == []
+    assert RS.under_flags(sqlite3.connect(":memory:"), [GD]) == []          # no table yet
+    U = RS.under_play
+    assert U("points", 1 / 0.6, 10, 6.99) and U("points", 1.6667, 10, 5.0) and not U("points", 1.66, 10, 6)   # −150 or better
+    assert not U("points", 1.9, 10, 7.0) and not U("points", 1.9, 10, 4.99) and not U("threes", 1.9, 2.5, 1.5)  # 30–50% below
+    assert not U("points", 1.9, 0, 0) and not U("points", None, 10, 6) and not U("pra", 1.9, 30.5, None)
+    rc = sqlite3.connect(":memory:")
+    rc.execute("CREATE TABLE idea_signals (rule TEXT, gid TEXT, pid INTEGER, market TEXT, line REAL, price REAL, note TEXT, "
+               "date TEXT, player TEXT, logged_at TEXT, pinged INTEGER)")
+    rc.execute("INSERT INTO idea_signals VALUES ('UNDER20','G1',1,'pra',30.5,1.8,'proj 18.0',?,'A','2026-10-26T23:30:00',0)", (GD,))
+    rc.execute("INSERT INTO idea_signals VALUES ('UNDER20','G1',2,'pra',30.5,1.8,'no projection',?,'B','2026-10-26T23:30:00',1)", (GD,))
+    assert [(f["pid"], f["proj"], f["mins"]) for f in RS.under_flags(rc, [GD])] == [(1, 18.0, None)]
 
 
 @pytest.mark.skipif(NODE is None, reason="node not installed")
@@ -459,7 +462,7 @@ def test_page_controls_work_on_iphone():
     # he sets (his average to the half below), no books; search finds any player; box score and Injuries rows open one
     assert "fetch(`player/${pid}.json`)" in html and 'fetch("player/index.json")' in html and "function propFor(id)" in html
     assert "line: p.v ? vLine(p) :" in html and "const mkts = p.v ? TAB_ORDER :" in html and 'if (p.v) { $("#pproj").innerHTML = ""; $("#pbk").innerHTML = ""; }' in html
-    assert 'String(gid).startsWith("none:")' in html and "if (ST.view !== \"injuries\" && q.length >= 2) searchPlayers(q);" in html
+    assert 'String(gid).startsWith("none:")' in html and "if (ST.view === \"props\" && q.length >= 2) searchPlayers(q);" in html
     assert '<tr data-vp="${r[0]}"' in html and 'data-vp="${e.pid}"' in html and "openPlayer(+v.dataset.vp)" in html
     assert "fetch(`vs/${encodeURIComponent(p.opp || \"\")}.json`)" in html and 'if (MUP) h.set("mu", "1");' in html
     assert 'if (MUP && !h.get("mu")) closeMatchup(swiped);' in html and "rows = all.slice(0, MUP.more ? 10 : 5)" in html
@@ -484,12 +487,15 @@ def test_page_controls_work_on_iphone():
     assert '(ST.iv === "lu" ? lineupsView() : ST.iv === "ro" ?' in html and "function luTeam(t, e)" in html and 'isNew(pid) ? " · NEW" : ""' in html
     # role changes (docs/player/roles.json), the Live tab (props under way from their closing boards: only there), game script
     assert 'fetch("player/roles.json")' in html and "function rolesView(" in html and 'data-iv="ro"' in html
-    assert 'const ALL_TABS = ["live", "trends", "movers", "flags"];' in html and "list = list.filter(p => !p.closed);" in html
-    # every rule's flag (D.flags): a Flags tab (pinged, then silent, SHADOW · NOT A BET, graded at its own line once
-    # final), a pinged one's chip on its prop's row, all of a prop's on its page; a tap opens the prop or the player
-    assert 'if (ST.market === "flags") { lst.innerHTML = flagsView(); return; }' in html and 'flags: "Flags"' in html
-    assert "${flagChips(p)}</div>" in html and 'const f = flagsOf(p.id).filter(x => x.pinged);' in html
-    assert 'sec("Pinged", fs.filter(f => f.pinged)) + sec("Silent", fs.filter(f => !f.pinged))' in html
+    assert 'const ALL_TABS = ["live", "trends", "movers"];' in html and "list = list.filter(p => !p.closed);" in html
+    # the flags (D.flags: the under plays that ping) are the bottom bar's Flags view, in place of Markets (a saved
+    # Markets view opens Props), SHADOW · NOT A BET, each graded at its own line once final; a chip on the prop's row
+    # and a line on its page; a tap opens the prop or the player. The props section has no Flags tab
+    assert 'const VIEWS = [["props", "Props"], ["flags", "Flags"], ["injuries", "Injuries"]];' in html and "mrow" not in html
+    assert 'if (["props", "flags", "injuries"].indexOf(ST.view) < 0) ST.view = "props";' in html and '"markets"' not in html
+    assert '  if (ST.view === "flags") { lst.innerHTML = flagsView(); return; }' in html and 'flags: "Flags"' not in html
+    assert 'if (ml) ml.style.display = ST.view === "props" ? "" : "none";' in html and 'if (ST.view === "props" && q.length >= 2)' in html
+    assert "${flagChips(p)}</div>" in html and "const flagChips = p => flagsOf(p.id).length ?" in html
     assert "f.date === ST.date && (ST.gid === \"all\" || f.gid === ST.gid)" in html
     assert 'g.state === "final" ? flagGrade(f.side, f.line, p.live.value) : null' in html
     assert '${p ? `data-id="${esc(id)}"` : `data-vp="${f.pid}"`}' in html and html.count("SHADOW · NOT A BET") == 3
@@ -1005,7 +1011,7 @@ def test_injury_beneficiaries_open_their_page():
     html = UI.page()
     # every box under an injury is a button: his prop on the slate, else his player page (openPlayer via data-vp)
     assert 'return `<button class="ijb"${p ? ` data-id="${esc(p.id)}"` : ` data-vp="${m.pid}"`}>' in html
-    assert 'e.target.closest(".pr[data-id],.mrw[data-id],.ijb[data-id],[data-vp]")' in html
+    assert 'e.target.closest(".pr[data-id],.ijb[data-id],[data-vp]")' in html
 
 
 def test_player_page_has_last_seasons_window():
