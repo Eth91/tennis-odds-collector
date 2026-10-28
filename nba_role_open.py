@@ -148,9 +148,10 @@ def step_checks(con, keys, now, n, matchup_db, gamelogs_db, lineups_db, sender, 
     return fired
 
 
-def tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json, sender):
+def tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json, sender, bds=None, rds=None, stat_cache=None):
     """NBA_IDEAS_PREREG.md amendment 1: at each game's first run at or after tip - 30 (before tip - 5), RETURN_UNDER and
-    FOUL_BIG on FanDuel's current board, with the decisions the side-by-side replays. Returns pings sent."""
+    FOUL_BIG on FanDuel's current board, with the decisions the side-by-side replays. Returns pings sent. The data
+    loaded for one game is shared with the others in the run (and with process's caches when given)."""
     import nba_ideas as IDEAS
     import nba_sxs_rules as SR
     from nba_ping import american
@@ -161,7 +162,7 @@ def tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json,
         if book == "fd" and m:
             games[gid][(pid, market)] = (m, player)
             tips[gid] = tip
-    fired, bds = 0, {}
+    fired, bds, rds, stat_cache, per = 0, {} if bds is None else bds, {} if rds is None else rds, {} if stat_cache is None else stat_cache, {}
     for gid, props in sorted(games.items()):
         tip = RP.iso(tips[gid])
         if not (RP.minus(tip, 30) <= now < RP.minus(tip, 5)) or con.execute("SELECT 1 FROM tip30_done WHERE gid = ?", (gid,)).fetchone():
@@ -169,11 +170,13 @@ def tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json,
         con.execute("INSERT INTO tip30_done VALUES (?, ?)", (gid, now))
         date = E._et_date(tips[gid])                     # the posted tip carries its offset; the naive one would read as local time
         season = ROLE.season_of(date)
-        rd = ROLE.RoleData(matchup_db, gamelogs_db, season)
-        vd = SR.VolumeData(lineups_db, matchup_db, index_json)
-        fd = IDEAS.FoulData(matchup_db, season)
-        dv = RATIO.DvpData(matchup_db, gamelogs_db, season)
-        listed = {p: (tm, st_) for p, (tm, st_, _nm) in statuses(n, date, now).items()}
+        rd = rds.get(season) or rds.setdefault(season, ROLE.RoleData(matchup_db, gamelogs_db, season))
+        if season not in per:                            # loaded once per run, not once per game
+            per[season] = (SR.VolumeData(lineups_db, matchup_db, index_json), IDEAS.FoulData(matchup_db, season),
+                           RATIO.DvpData(matchup_db, gamelogs_db, season))
+        vd, fd, dv = per[season]
+        st_all = stat_cache.get(date) or stat_cache.setdefault(date, statuses(n, date, now))
+        listed = {p: (tm, st_) for p, (tm, st_, _nm) in st_all.items()}
         team_of = {p: rd.team_of(p, date) for p, _mk in props}
         ha = q.execute("SELECT home, away FROM board WHERE gid = ? AND home IS NOT NULL LIMIT 1", (gid,)).fetchone()
         teams = sorted(ha) if ha else sorted({t for t in team_of.values() if t})
@@ -311,7 +314,7 @@ def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_ne
                 fired += 1
     if not first_run:
         fired += step_checks(con, keys, now, n, matchup_db, gamelogs_db, lineups_db, sender, bds, rds, stat_cache)
-        fired += tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json, sender)
+        fired += tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json, sender, bds, rds, stat_cache)
     if first_run:
         con.execute("INSERT OR REPLACE INTO meta VALUES ('installed', ?)", (now,))
     con.execute("INSERT OR REPLACE INTO meta VALUES ('markets', ?)", (",".join(BOOST.PARTS),))
