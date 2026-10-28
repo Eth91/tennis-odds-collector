@@ -417,7 +417,16 @@ def test_page_controls_work_on_iphone():
     assert "function mateSheet(" in html and "data-mk2=" in html and "with: ms.filter(m => x.with[m.key]), without: ms.filter(m => x.without[m.key])" in html
     assert html.count("bindMates(s, dr, upd);") == 2
     # chart filters on one scrolling row, nothing behind a More toggle; the row keeps its place when a chip re-renders it
-    assert ".fcs{display:flex;flex-wrap:nowrap" in html and 'id="more"' not in html and '$("#pcf .fcs").scrollLeft = fl;' in html
+    assert ".fcs{display:flex;flex-wrap:nowrap" in html and 'id="more"' not in html and '$$("#pcf .fcs").forEach((x, i) => x.scrollLeft = fl[i] || 0);' in html
+    # the With / Without button heads a row of its own just below the stat chips, before any open range slider
+    assert """<div class="fcs">${chips.join("")}</div>${mchips.length ? `<div class="fcs fcw">${mchips.join("")}</div>` : ""}${panels}""" in html
+    assert """if (ms.length) mchips.push(chip('id="mts\"""" in html and html.count("""chip('id="mts\"""") == 1
+    assert html.index("if (ms.length) mchips.push(") < html.index("without.filter(w => w.fresh).forEach(w => mchips.push(")
+    # another stat of the same player keeps his filters and window (only the line resets); a range his new stat has no
+    # use for (potential assists on points) stays set but neither filters nor draws until he is back on assists
+    assert "const same = was && who(CUR) === who(id);" in html and "fresh: null}, same ? {} : {" in html
+    assert "if (forMarket(k, p.market)) ranges[k] = x.ranges[k];" in html and "ranges: ranges, oppSets: oppSets" in html
+    assert "const ovOn = k => forMarket(k, p.market) && !!(DT.open[k] || DT.ranges[k]);" in html
     # the Injuries view is one list, most relevant first (minutes x the chance he sits); no Injuries tab among the Props tabs
     assert "injList().sort" not in html and "return out.sort((a, b) => injImpact(b) - injImpact(a));" in html
     # a Starter chip after the adjustable filters; a prop opens on this season's window; hit-rate boxes show a percentage
