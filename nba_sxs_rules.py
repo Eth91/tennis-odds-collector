@@ -753,7 +753,7 @@ BOOST_SPEC = [BOOST_M.STARTER_MIN, BOOST_M.BASE_THIS, BOOST_M.BASE_LAST, BOOST_M
               BOOST_M.MIN_H_IRRELEVANT, BOOST_M.HIT_AT, BOOST_M.MIN_AVG_MIN, BOOST_M.PROJ_AT, BOOST_M.BASE_N,
               BOOST_M.BASE_MIN_GAMES, BOOST_M.SAME_W, BOOST_M.PRICE_MIN, BOOST_M.TOP, BOOST_M.PARTS, BOOST_M.USUAL_GAMES,
               BOOST_M.USUAL_MIN, BOOST_M.STEP_K, BOOST_M.STEP_STARTS, BOOST_M.K_RATE, BOOST_M.PICK_SPLIT,
-              BOOST_M.MIN_FEATURES]
+              BOOST_M.MIN_FEATURES, BOOST_M.STEP_FLOOR]
 if BOOST_M.TREES_B.exists():                             # the fitted bench-pickup model is part of BOOST_PICKUP
     BOOST_SPEC.append(hashlib.sha256(BOOST_M.TREES_B.read_bytes()).hexdigest()[:16])
 
@@ -887,8 +887,8 @@ REGISTRY = {                                             # name -> (registered a
     "PTS_DVP": ("2026-10-27T13:00:00", "fc8387835f"),             # amendment 5
     "RATIO_PA28": ("2026-10-27T13:00:00", "2404e38806"),          # amendment 4
     "RATIO_RC": ("2026-10-27T13:00:00", "17e2e5ea3f"),
-    "BOOST": ("2026-10-28T22:30:00", "56cd0fe24b"),               # amendment 9 (NBA_BOOST_PREREG.md amendments 2-6)
-    "BOOST_STEP": ("2026-10-28T22:30:00", "a8ddd05bcb"),
-    "BOOST_PICKUP": ("2026-10-28T22:30:00", "8653682d1d"),
-    "BOOST_NH": ("2026-10-28T22:30:00", "61f221fabf"),
+    "BOOST": ("2026-10-28T23:00:00", "ba59b8228e"),               # amendment 9 (NBA_BOOST_PREREG.md amendments 2-7)
+    "BOOST_STEP": ("2026-10-28T23:00:00", "5ed40c5557"),
+    "BOOST_PICKUP": ("2026-10-28T23:00:00", "4356b2332b"),
+    "BOOST_NH": ("2026-10-28T23:00:00", "8c7915ffdb"),
 }

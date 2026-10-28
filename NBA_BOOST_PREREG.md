@@ -349,3 +349,14 @@ result. All three rules are re-fingerprinted and registered at the deploy time.
 **Registration:** BOOST, BOOST_NH, BOOST_STEP and BOOST_PICKUP are re-fingerprinted and registered at the deploy time.
 - **One ping per prop (added while building, before deploy):** a prop that already pinged as BOOST (history) records
   its STEP flag silently instead of pinging twice. The side-by-side keeps both records.
+
+# AMENDMENT 7: the 26-minute floor once NBA.com's lineup is posted (2026-10-28, about 22:10 UTC, before code)
+**User:** "turn on the 26 minute floor once lineups post."
+- **Change:** when the STEP judgement uses NBA.com's posted five (at an opener after it posts, or the second check),
+  the new starter's minutes are w × his last-10-starts mean + (1 − w) × max(V3, 26.0). This is `NBA_MINUTES_PREREG.md`
+  amendment 2's v2, which passed for confirmed starters: 4.99 / 5.02 against 5.33 / 5.20.
+- **Unchanged:** with the projected five (before NBA.com posts) the minutes stay the unfloored blend. There the floor
+  made them worse (5.85 / 5.55 against 5.54 / 5.27).
+- NBA.com's Expected lineups count as posted, as amendment 4 reads them. The backtest's lineups were the final
+  (Confirmed) ones.
+- All four BOOST rules are re-fingerprinted and registered at the deploy time.

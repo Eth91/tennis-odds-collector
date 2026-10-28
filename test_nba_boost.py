@@ -408,10 +408,13 @@ def check_lineups(mod):
     want(sm and sm[1] == 3 and abs(sm[0] - (0.5 * 28 + 0.5 * v3[N9])) < 1e-9, "N9's minutes: w = 3/6 on his 3 starts (28), the rest V3")
     rate = (18 + 27 / 84 * 150) / (72 + 150)
     f = step(N9, "rebounds", 4.5, posted)
-    want(f and mod.kind_of(f) == "step" and abs(f["proj"] - sm[0] * rate) < 1e-9 and f["n_starts"] == 3,
-         "NBA.com's five: N9 steps in, minutes x his rebounds per minute (last season worth 150 min), a STEP flag")
+    smf = mod.step_minutes(bd, rd, N9, "HOM", D, {X}, 26.0)
+    want(v3[N9] < 26 and abs(smf[0] - (0.5 * 28 + 0.5 * 26)) < 1e-9, "the floor: V3 raised to 26 before the blend")
+    want(f and mod.kind_of(f) == "step" and abs(f["proj_min"] - smf[0]) < 1e-9 and abs(f["proj"] - smf[0] * rate) < 1e-9
+         and f["n_starts"] == 3,
+         "NBA.com's five: N9 steps in on the floored minutes x his rebounds per minute (amendment 7), a STEP flag")
     rt = mod.rates(bd, N9, D)
-    want(f and all(abs(f["vol"][s] - sm[0] * rt[s]) < 1e-9 for s in ("fga", "fta", "fg3a")) and rt["fga"] > 0,
+    want(f and all(abs(f["vol"][s] - smf[0] * rt[s]) < 1e-9 for s in ("fga", "fta", "fg3a")) and rt["fga"] > 0,
          "the ping's shot volume: his FGA, FTA and 3PA per minute x his STEP minutes")
     want(step(N9, "assists", 0.5, posted) is None, "X is not a top-2 passer: no STEP flag on assists")
     want(mod.step_eval(bd, rd, D, "HOM", N9, "rebounds", 4.5, 1.6, {X}, posted) is None, "STEP skips overs worse than -150")
@@ -429,6 +432,10 @@ def check_lineups(mod):
     bd2 = mod.live_data(lineup_stores(tmp2, n9_started=True)["matchup"], tmp2 / "gamelogs.sqlite", "2026-27")
     want(bd2.tonight("HOM", D, {X})[1] == {N9: X},
          "projected five: N9 started last season's game X did not (no starts in the last 10), so he steps in")
+    rd2 = ROLE.RoleData(tmp2 / "matchup.sqlite", tmp2 / "gamelogs.sqlite", "2026-27")
+    sm2 = mod.step_minutes(bd2, rd2, N9, "HOM", D, {X})
+    f2 = mod.step_eval(bd2, rd2, D, "HOM", N9, "rebounds", 2.5, 1.9, {X}, None)
+    want(sm2 and sm2[2] < 26 and f2 and abs(f2["proj_min"] - sm2[0]) < 1e-9, "the projected five: no floor (V3 under 26 stays)")
     return ok
 
 
@@ -533,6 +540,8 @@ LINEUP_MUTANTS = (
     ("pickup for anyone", "if not pk or pk[0] != pid:", "if not pk:"),
     ("rates without last season", "+ lr * K_RATE) / (tm + K_RATE)", "+ 0) / (tm + 0)"),
     ("pickup without NBA.com", "    if not posted or price is None", "    if price is None"),
+    ("no floor once posted", "STEP_FLOOR if posted else None", "None"),
+    ("floor at the opener too", "STEP_FLOOR if posted else None", "STEP_FLOOR"),
     ("STEP without a price cap", "        return None\n    for x in sorted(bd.starters(team, date) & set(out_all)):\n        n = bd.absence_n(x, team, date)\n        if n > SPOT_MAX or bd.step_in",
      "        pass\n    for x in sorted(bd.starters(team, date) & set(out_all)):\n        n = bd.absence_n(x, team, date)\n        if n > SPOT_MAX or bd.step_in"),
 )
