@@ -523,7 +523,7 @@ transition:background-color .22s,border-color .22s,transform .16s}
 /* referees */
 .zft{margin-top:6px;font-size:11.5px;color:#9a9a9a}
 .shct.rdct{margin-top:8px}
-.rdct .rdv{font-size:14px;font-weight:700} .rdct .rds{font-size:9px;fill:#cfcfcf}
+.rdct .rdv{font-size:12px;font-weight:700} .rdct .rds{font-size:9px;fill:#cfcfcf}
 .shw small{display:block;margin-top:2px;font-size:11.5px;font-weight:400;color:#8e8e8e}
 .rft td{height:46px;line-height:1.15} .rft td small{display:block;margin-top:1px;font-size:11px;color:#8e8e8e}
 .rft td.up{color:var(--grn)} .rft td.dn{color:var(--red)} .rft tr.cr td{font-weight:700}
@@ -2281,7 +2281,7 @@ const pbpLoad = sideJson("pbp", new Map()), rebdLoad = sideJson("rebd", new Map(
 // the rebound rings (docs/rebd, NBA.com's tracking): where he secured his rebounds, 0-3 / 3-6 / 6-10 / 10+ ft from the
 // hoop, each shaded by his share against the players with rebound lines; a close-up of the court around the rim
 const RD_C = r => `M0,-${r}A${r},${r} 0 1 1 0,${r}A${r},${r} 0 1 1 0,-${r}Z`;
-const RD_PATH = [RD_C(30), RD_C(60) + RD_C(30), RD_C(100) + RD_C(60), `M-150,-47.5H150V170H-150Z` + RD_C(100)];
+const RD_PATH = [RD_C(30), RD_C(60) + RD_C(30), RD_C(100) + RD_C(60), `M-150,-47.5H150V115H-150Z` + RD_C(100)];
 const RD_X = [0, 44, 79, 125], RD_FT = ["0–3", "3–6", "6–10", "10+"];
 function rebRings(r, avg) {                            // r: [g, reb, oreb, contested, dist x4, shot x4, miss3]
   const sh = k => r[4 + k] / r[1], pc = x => Math.round(x * 100) + "%";
@@ -2290,7 +2290,7 @@ function rebRings(r, avg) {                            // r: [g, reb, oreb, cont
     : `<text x="0" y="25" class="rdv">${pc(sh(0))}</text><text x="0" y="-15" class="rds">0–3 ft</text>`).join("");
   const vs = (x, a) => `${pc(x)}<small>avg ${a == null ? "–" : pc(a)}</small>`;
   return `<h3 class="shw">How far from the hoop he grabs them<small>NBA.com tracking · shaded against the players with rebound lines</small></h3>
-    <svg class="shct rdct" viewBox="-150 -50 300 220" role="img" aria-label="rebounds by distance from the hoop"><defs><clipPath id="rdclip"><rect x="-150" y="-47.5" width="300" height="217.5"/></clipPath></defs>
+    <svg class="shct rdct" viewBox="-150 -50 300 165" role="img" aria-label="rebounds by distance from the hoop"><defs><clipPath id="rdclip"><rect x="-150" y="-47.5" width="300" height="162.5"/></clipPath></defs>
       <g clip-path="url(#rdclip)">${marks}${[30, 60, 100].map(x => `<path d="${RD_C(x)}" fill="none" class="shz"/>`).join("")}</g>
       <g class="shl"><path d="M-150,-47.5H150"/><path d="M-30,-7.5H30"/><circle cx="0" cy="0" r="7.5"/></g>${labs}</svg>
     <div class="kv shr"><span>Contested</span><b>${vs(r[3] / r[1], avg.contested)}</b></div>
