@@ -132,7 +132,7 @@ def live_box(gid):
             "awayTeam": {"score": 66, "players": []}}
 
 
-def built(now):
+def built(now, sched=None, box_get=None):
     d = pathlib.Path(tempfile.mkdtemp())
     stores(d)
     tr = sqlite3.connect(d / "tracking.sqlite")
@@ -141,8 +141,8 @@ def built(now):
     tr.execute("INSERT INTO tracking (date, player_id, potential_ast, reb_chances) VALUES ('2026-09-01', 1, 14, 9)")
     tr.execute("INSERT INTO tracking (date, player_id, potential_ast, reb_chances) VALUES ('2026-09-02', 1, 11, NULL)")
     tr.commit(); tr.close()
-    return RS.build(now=now, sched=SCHED, lines=d / "lines.sqlite", news=d / "news.sqlite", shadow=d / "shadow.sqlite",
-                    matchup=d / "matchup.sqlite", index=d / "index.json", box_get=live_box, tracking=d / "tracking.sqlite")
+    return RS.build(now=now, sched=sched or SCHED, lines=d / "lines.sqlite", news=d / "news.sqlite", shadow=d / "shadow.sqlite",
+                    matchup=d / "matchup.sqlite", index=d / "index.json", box_get=box_get or live_box, tracking=d / "tracking.sqlite")
 
 
 @pytest.fixture(scope="module")
@@ -805,3 +805,47 @@ def test_page_boots_from_its_last_copy_and_animates_swaps():
     # swaps rise in; Over / Under, the combo window and the Injuries switch slide their pills; Live's bars grow on entry
     assert html.count("swapIn(") >= 9 and '<span class="ou" role="group" aria-label="Side"><span class="pill2">' in html
     assert '<div class="seg cbw" role="group" aria-label="Games"><span class="pill2">' in html and ".lvin .lvbar i{" in html
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_slate_day_moves_on_once_the_night_is_over():
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "core.js").write_text(UI.JS_CORE)
+    (d / "t.js").write_text("""
+const C = require('./core.js'), D = ['2026-10-26', '2026-10-27'];
+const g = (gid, date, state) => ({gid, date, state}), p = (gid, closed) => ({gid, closed});
+const finals = [g('a', D[0], 'final'), g('b', D[0], 'final'), g('c', D[1], 'pregame')];
+const late = [g('a', D[0], 'final'), g('b', D[0], 'live'), g('c', D[1], 'pregame')];
+const props = [p('a', true), p('b', true), p('c', false)], noLines = [p('a', true), p('b', true)];
+console.log(JSON.stringify([
+  C.slateDay(D, finals, props, null), C.slateDay(D, finals, props, D[0]),      // the night is over, tomorrow has lines
+  C.slateDay(D, late, props, D[0]), C.slateDay(D, late, props, null),          // a late game still on: tonight stays
+  C.slateDay(D, finals, noLines, D[0]), C.slateDay(D, finals, noLines, null),  // over, but no lines for tomorrow yet
+  C.slateDay(D, finals, props, '2026-10-25'), C.slateDay(D, finals, props, D[1])]));
+""")
+    out = json.loads(subprocess.run([NODE, str(d / "t.js")], capture_output=True, text=True, check=True, cwd=d).stdout)
+    assert out == ["2026-10-27", "2026-10-27", "2026-10-26", "2026-10-26", "2026-10-26", "2026-10-26", "2026-10-27", "2026-10-27"]
+
+
+def test_page_names_days_by_the_phones_date_and_finished_slates_by_name():
+    html = UI.page()
+    assert "ST.date = slateDay(D.dates, D.games, D.props, AUTO_DAY ? ST.date : null);" in html and "AUTO_DAY = false; if (ST.date !== b.dataset.date)" in html
+    assert "if (HIDDEN_AT && Date.now() - HIDDEN_AT > 1800000) AUTO_DAY = true;" in html          # back after 30+ min: choose again
+    assert 'const lab = dayName(ST.date);' in html and '"Yesterday"' in html and 'm === "live" && !liveNow ? "Results"' in html
+    assert "<b>All games final</b>" in html and 'id="gonext"' in html
+
+
+def test_a_slate_leaves_when_its_last_game_ends():
+    # 7:30 PM ET, the night's one live game has just gone final (the other is postponed): the page moves on to the next
+    # slate at once, the 6 AM ET hold notwithstanding; while that game is still on, the night stays (as built(NOW))
+    final = [dict(g, status=3, status_text="Final") if g["gid"] == "G1" else g for g in SCHED]
+    def final_box(gid):
+        b = live_box(gid)
+        return dict(b, gameStatus=3, gameStatusText="Final")
+    over = built(NOW, final, final_box)
+    assert over["dates"] == ["2026-10-27", "2026-10-28"] and {g["gid"] for g in over["games"]} == {"G3"}
+    assert all(p["gid"] == "G3" for p in over["props"])
+    # the schedule still says live but the box score says final: the box wins, the night is over
+    lagging = built(NOW, SCHED, final_box)
+    assert lagging["dates"][0] == "2026-10-27"
+    assert built(NOW)["dates"][0] == GD                                            # still being played: the night stays
