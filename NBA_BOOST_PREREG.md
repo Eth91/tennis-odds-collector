@@ -297,3 +297,20 @@ when he sees 27+ minutes he's over his line 67% of the time and averages 15.2 po
 
 **Check:** backtest on 2023-25, as before, STEP reported separately. As chosen earlier, it goes live whatever the
 result. All three rules are re-fingerprinted and registered at the deploy time.
+
+**Amendment 5: run (2026-10-28, about 20:40 UTC). Not deployed: the user kept the 24-minute version.**
+
+| STEP flags (backtest) | 2023-24 | 2024-25 |
+|---|---|---|
+| amendment 2–3 (bench rate raised to 24 minutes) | 129, hit 57.4%, **+11.3%** | 102, hit 60.8%, **+15.6%** |
+| amendment 5 (25+ minute games, −15%) | 228, hit 44.3%, **−16.1%** | 128, hit 54.7%, **+3.8%** |
+
+- **Why:** the amendment-5 step-ins averaged 21.4 actual minutes, and only 30% played 25+. Projected 10.8, they scored
+  8.2. Their 25+ minute games show the big role, but a starter's absence did not reliably give it to them. The backtest's
+  step-in is amendment 2's minutes pick, not the real starter, and it cannot test the starts baseline (no starter
+  flags in 2023-25).
+- **Live dry run (not sent):** Jay Huff REB o4.5 (5.3 in his last 10 starts) and Kenrich Williams REB o4.5 / P+R o13.5
+  (8.0 / 20.3 in 3 starts) would have flagged. McCain would not: 13.0 in his starts and 15.8 in his 25+ minute games,
+  against a 17.5 points line.
+- **The user chose "old version only".** The live rules stay as deployed (d36ecff5be, amendment 4 with amendment 2–3's
+  24-minute projection; registered 20:30 UTC). The amendment-5 code is kept on branch `boost-a5`, not merged.
