@@ -142,13 +142,72 @@ def built(now, sched=None, box_get=None):
     tr.execute("INSERT INTO tracking (date, player_id, potential_ast, reb_chances) VALUES ('2026-09-01', 1, 14, 9)")
     tr.execute("INSERT INTO tracking (date, player_id, potential_ast, reb_chances) VALUES ('2026-09-02', 1, 11, NULL)")
     tr.commit(); tr.close()
+    rl = sqlite3.connect(d / "role.sqlite")              # the engine's flags (nba_role.sqlite), as nba_role_open.py writes them
+    rl.execute("CREATE TABLE ratio_signals (rule TEXT, gid TEXT, pid INTEGER, market TEXT, book TEXT, line REAL, price REAL, "
+               "volume REAL, date TEXT, player TEXT, logged_at TEXT, pinged INTEGER, PRIMARY KEY (rule, gid, pid, market))")
+    rl.execute("CREATE TABLE idea_signals (rule TEXT, gid TEXT, pid INTEGER, market TEXT, line REAL, price REAL, note TEXT, "
+               "date TEXT, player TEXT, logged_at TEXT, pinged INTEGER, PRIMARY KEY (rule, gid, pid, market))")
+    rl.execute("CREATE TABLE signals (gid TEXT, pid INTEGER, market TEXT, side TEXT, book TEXT, line REAL, price REAL, ev REAL, "
+               "p REAL, mu REAL, out_pids TEXT, date TEXT, team TEXT, player TEXT, logged_at TEXT, pinged INTEGER, "
+               "PRIMARY KEY (gid, pid, market, side))")
+    rl.executemany("INSERT INTO ratio_signals VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", [
+        ("EARLY_SURGE", "G1", 1, "points", "fd", 24.5, 1.87, 18.0, GD, "Devin Booker", "2026-10-26T02:00:00", 1),
+        ("RATIO_PA28", "G0", 1, "assists", "fd", 5.5, 1.9, 10.0, "2026-10-20", "Devin Booker", "2026-10-20T02:00:00", 1)])
+    rl.executemany("INSERT INTO idea_signals VALUES (?,?,?,?,?,?,?,?,?,?,?)", [
+        ("UNDERML", "G1", 2, "points", 9.5, 1.9259, "under p 0.443 ev 0.073", GD, "Grayson Allen", "2026-10-26T23:30:00", 0),
+        ("UNDER20", "G1", 2, "rebounds", 3.5, 1.8, "proj 2.1 min 19.8", GD, "Grayson Allen", "2026-10-26T23:30:01", 0),  # a failed send
+        ("UNDER20", "G1", 1, "points", 24.5, 1.7, "proj 15.9 min 30.2", GD, "Devin Booker", "2026-10-26T23:30:00", 1),
+        ("UNDER20", "G1", 1, "rebounds", 5.5, 1.7, "proj 3.9 min 30.2", GD, "Devin Booker", "2026-10-26T23:30:00", 0),   # 29% below
+        ("UNDER20", "G1", 1, "assists", 6.5, 1.6, "proj 3.5 min 30.2", GD, "Devin Booker", "2026-10-26T23:30:00", 0),    # −167
+        ("UNDER20", "G1", 1, "threes", 2.5, 1.9, "proj 1.5 min 30.2", GD, "Devin Booker", "2026-10-26T23:30:00", 0),     # threes
+        ("RETURN_UNDER", "G1", 2, "assists", 3.5, 1.8, "proj 2.0 min 18.0", GD, "Grayson Allen", "2026-10-26T23:30:00", 1),  # another rule
+        ("UNDER20", "G0", 1, "points", 24.5, 1.7, "proj 15.0 min 30.2", "2026-10-20", "Devin Booker", "2026-10-20T23:30:00", 1)])
+    rl.execute("INSERT INTO signals VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+               ("G1", 3, "rebounds", "under", "fd", 9.5, 2.0, 0.109, 0.55, 7.8, "[]", GD, "PHX", "Jusuf Nurkic", "2026-10-26T06:24:03", 1))
+    rl.commit(); rl.close()
     return RS.build(now=now, sched=sched or SCHED, lines=d / "lines.sqlite", news=d / "news.sqlite", shadow=d / "shadow.sqlite",
-                    matchup=d / "matchup.sqlite", index=d / "index.json", box_get=box_get or live_box, tracking=d / "tracking.sqlite")
+                    matchup=d / "matchup.sqlite", index=d / "index.json", box_get=box_get or live_box, tracking=d / "tracking.sqlite",
+                    role_db=d / "role.sqlite")
 
 
 @pytest.fixture(scope="module")
 def payload():
     return built(NOW)
+
+
+def test_flags_are_the_under_plays(payload):
+    # only the under plays that ping: UNDER20 rows at −150 or better, not threes, our projection 30–50% below the line,
+    # whether or not the send went through; another date's, the other rules', and UNDER20's other rows left out
+    fl = payload["flags"]
+    assert [(f["pid"], f["market"], f["line"], f["proj"]) for f in fl] == [(1, "points", 24.5, 15.9), (2, "rebounds", 3.5, 2.1)]
+    assert all(f["side"] == "under" and f["date"] == GD for f in fl) and fl[0]["team"] == "PHX" and fl[0]["mins"] == 30.2
+    assert fl[0]["price"] == 1.7 and fl[0]["at"] == "2026-10-26T23:30:00" and fl[1]["player"] == "Grayson Allen"
+
+
+def test_under_flags_reader():
+    assert RS.under_flags(None, [GD]) == [] and RS.under_flags(sqlite3.connect(":memory:"), []) == []
+    assert RS.under_flags(sqlite3.connect(":memory:"), [GD]) == []          # no table yet
+    U = RS.under_play
+    assert U("points", 1 / 0.6, 10, 6.99) and U("points", 1.6667, 10, 5.0) and not U("points", 1.66, 10, 6)   # −150 or better
+    assert not U("points", 1.9, 10, 7.0) and not U("points", 1.9, 10, 4.99) and not U("threes", 1.9, 2.5, 1.5)  # 30–50% below
+    assert not U("points", 1.9, 0, 0) and not U("points", None, 10, 6) and not U("pra", 1.9, 30.5, None)
+    rc = sqlite3.connect(":memory:")
+    rc.execute("CREATE TABLE idea_signals (rule TEXT, gid TEXT, pid INTEGER, market TEXT, line REAL, price REAL, note TEXT, "
+               "date TEXT, player TEXT, logged_at TEXT, pinged INTEGER)")
+    rc.execute("INSERT INTO idea_signals VALUES ('UNDER20','G1',1,'pra',30.5,1.8,'proj 18.0',?,'A','2026-10-26T23:30:00',0)", (GD,))
+    rc.execute("INSERT INTO idea_signals VALUES ('UNDER20','G1',2,'pra',30.5,1.8,'no projection',?,'B','2026-10-26T23:30:00',1)", (GD,))
+    assert [(f["pid"], f["proj"], f["mins"]) for f in RS.under_flags(rc, [GD])] == [(1, 18.0, None)]
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_flag_grade():
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "core.js").write_text(UI.JS_CORE)
+    (d / "t.js").write_text("""const C = require('./core.js');
+console.log(JSON.stringify([['over', 5.5, 6], ['over', 5.5, 5], ['under', 5.5, 5], ['under', 5.5, 6], ['over', 6, 6], ['under', 6, 6],
+  ['over', 5.5, null]].map(a => C.flagGrade(a[0], a[1], a[2]))));""")
+    out = json.loads(subprocess.run([NODE, str(d / "t.js")], capture_output=True, text=True, check=True, cwd=d).stdout)
+    assert out == ["hit", "miss", "hit", "miss", "push", "push", None]
 
 
 def test_slate_holds_until_6am_et():
@@ -403,7 +462,7 @@ def test_page_controls_work_on_iphone():
     # he sets (his average to the half below), no books; search finds any player; box score and Injuries rows open one
     assert "fetch(`player/${pid}.json`)" in html and 'fetch("player/index.json")' in html and "function propFor(id)" in html
     assert "line: p.v ? vLine(p) :" in html and "const mkts = p.v ? TAB_ORDER :" in html and 'if (p.v) { $("#pproj").innerHTML = ""; $("#pbk").innerHTML = ""; }' in html
-    assert 'String(gid).startsWith("none:")' in html and "if (ST.view !== \"injuries\" && q.length >= 2) searchPlayers(q);" in html
+    assert 'String(gid).startsWith("none:")' in html and "if (ST.view === \"props\" && q.length >= 2) searchPlayers(q);" in html
     assert '<tr data-vp="${r[0]}"' in html and 'data-vp="${e.pid}"' in html and "openPlayer(+v.dataset.vp)" in html
     assert "fetch(`vs/${encodeURIComponent(p.opp || \"\")}.json`)" in html and 'if (MUP) h.set("mu", "1");' in html
     assert 'if (MUP && !h.get("mu")) closeMatchup(swiped);' in html and "rows = all.slice(0, MUP.more ? 10 : 5)" in html
@@ -429,6 +488,17 @@ def test_page_controls_work_on_iphone():
     # role changes (docs/player/roles.json), the Live tab (props under way from their closing boards: only there), game script
     assert 'fetch("player/roles.json")' in html and "function rolesView(" in html and 'data-iv="ro"' in html
     assert 'const ALL_TABS = ["live", "trends", "movers"];' in html and "list = list.filter(p => !p.closed);" in html
+    # the flags (D.flags: the under plays that ping) are the bottom bar's Flags view, in place of Markets (a saved
+    # Markets view opens Props), SHADOW · NOT A BET, each graded at its own line once final; a chip on the prop's row
+    # and a line on its page; a tap opens the prop or the player. The props section has no Flags tab
+    assert 'const VIEWS = [["props", "Props"], ["flags", "Flags"], ["injuries", "Injuries"]];' in html and "mrow" not in html
+    assert 'if (["props", "flags", "injuries"].indexOf(ST.view) < 0) ST.view = "props";' in html and '"markets"' not in html
+    assert '  if (ST.view === "flags") { lst.innerHTML = flagsView(); return; }' in html and 'flags: "Flags"' not in html
+    assert 'if (ml) ml.style.display = ST.view === "props" ? "" : "none";' in html and 'if (ST.view === "props" && q.length >= 2)' in html
+    assert "${flagChips(p)}</div>" in html and "const flagChips = p => flagsOf(p.id).length ?" in html
+    assert "f.date === ST.date && (ST.gid === \"all\" || f.gid === ST.gid)" in html
+    assert 'g.state === "final" ? flagGrade(f.side, f.line, p.live.value) : null' in html
+    assert '${p ? `data-id="${esc(id)}"` : `data-vp="${f.pid}"`}' in html and html.count("SHADOW · NOT A BET") == 3
     assert "function liveRow(p)" in html and 'st = liveStatus(x.v, x.line, over, live)' in html
     assert 'if (f.blow === "b" && !(Math.abs(l.margin) >= 15)) return false;' in html and 'tchip("blow", "b", "Blowouts")' in html
     assert "function gameScript(p, g, logs, line, side)" in html and '<span class="gsp">' in html
@@ -941,7 +1011,7 @@ def test_injury_beneficiaries_open_their_page():
     html = UI.page()
     # every box under an injury is a button: his prop on the slate, else his player page (openPlayer via data-vp)
     assert 'return `<button class="ijb"${p ? ` data-id="${esc(p.id)}"` : ` data-vp="${m.pid}"`}>' in html
-    assert 'e.target.closest(".pr[data-id],.mrw[data-id],.ijb[data-id],[data-vp]")' in html
+    assert 'e.target.closest(".pr[data-id],.ijb[data-id],[data-vp]")' in html
 
 
 def test_player_page_has_last_seasons_window():

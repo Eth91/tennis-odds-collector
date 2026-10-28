@@ -44,6 +44,7 @@ LINES, NEWS, SHADOW = HERE / "nba_lines.sqlite", HERE / "nba_news.sqlite", HERE 
 INDEX = HERE / "nba_player_index.json"
 TRACKING = HERE / "nba_tracking.sqlite"
 PROJ_LOG = HERE / "nba_proj_log.sqlite"          # the projection engine's prospective record (prereg test C)
+ROLE = HERE / "nba_role.sqlite"                  # the engine's rules' log (nba_role_open.py, the VM cron); read-only
 LINEUPS = HERE / "nba_lineups.sqlite"            # NBA.com's daily lineups as seen (nba_lineups_poll.py, the VM cron)
 CLOSE_BOARDS = HERE / "nba_close_boards.json"    # each started game's last board before tip (closing_boards), cached
 SLATE_ROLL_H = 6     # the slate moves on to the next day at 6 AM ET (4 AM MT), not midnight: late games stay on it
@@ -403,6 +404,44 @@ def engine_flags(sh, game_dates):
         cur = out.get(k)
         if cur is None or (card == 1 and cur["card"] != 1):
             out[k] = {"tier": tier, "card": card, "why": why, "line": line}
+    return out
+
+
+UNDER_PRICE = 1 / 0.6                                    # −150 or better, decimal
+UNDER_BAND = (0.50, 0.70)                                # our projection over the line: 30–50% below it
+
+
+def under_play(market, price, line, proj):
+    """A play that pings the phone (nba_under.pings on the VM): an under at −150 or better, not threes, with our
+    projection 30–50% below the line."""
+    return (market != "threes" and price is not None and price >= UNDER_PRICE and bool(line) and proj is not None
+            and UNDER_BAND[0] <= proj / line < UNDER_BAND[1])
+
+
+def under_flags(rc, game_dates):
+    """The board's flags: the under plays in nba_role.sqlite's idea_signals (rule UNDER20, read-only) that meet the
+    ping criteria, whether or not the phone send went through, as logged: [{date, gid, pid, market, side, line, price
+    (decimal), proj, mins, at (UTC), player}]. SHADOW plays: none is a bet. The engine's other rules are tracked
+    silently and are not flags."""
+    if rc is None or not game_dates:
+        return []
+    try:
+        rows = rc.execute("SELECT date, gid, pid, market, line, price, note, player, logged_at FROM idea_signals WHERE "
+                          f"rule = 'UNDER20' AND date IN ({','.join('?' * len(game_dates))}) ORDER BY logged_at",
+                          list(game_dates)).fetchall()
+    except sqlite3.OperationalError:                         # not made yet, or busy: no flags this build
+        return []
+    out = []
+    for d, gid, pid, mk, line, price, note, player, at in rows:
+        w = (note or "").split()                             # "proj 7.3 min 20.1"
+        kv = dict(zip(w[::2], w[1::2]))
+        try:
+            proj, mins = float(kv["proj"]), float(kv["min"]) if "min" in kv else None
+        except (KeyError, ValueError):
+            continue
+        if under_play(mk, price, line, proj):
+            out.append({"date": d, "gid": gid, "pid": pid, "market": mk, "side": "under", "line": line, "price": price,
+                        "proj": proj, "mins": mins, "at": at, "player": player})
     return out
 
 
@@ -990,7 +1029,7 @@ def correlations(props, logs):
 
 # ── the payload ──────────────────────────────────────────────────────────────────────────────────────────
 def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None, index=None, box_get=None, tracking=None,
-          lineups_db=None):
+          lineups_db=None, role_db=None):
     import nba_matchup as MU
     now = now or dt.datetime.now(dt.timezone.utc)
     if sched is None:
@@ -1062,6 +1101,9 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
     official, teams_listed, report_meta = official_status(ncon, dates)
     news_by = news_items(ncon, dates)
     flags = engine_flags(sh, dates)
+    rflags = under_flags(_ro(role_db or ROLE), dates)
+    for f in rflags:
+        f["team"] = team_of.get(f["pid"])
     glines = game_lines(q, gids)
     # matchup context: point-in-time factors for this season (nba_matchup), per prop
     S = MU.Season(mcon, season, index_pos=pos) if mcon is not None else None
@@ -1182,6 +1224,7 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
                    **{k: v for k, v in live.get(g["gid"], {}).items() if k != "stats"}}
                   for g in sorted(games, key=lambda g: g["utc"])],
         "props": props, "players": {str(k): v for k, v in players.items()}, "injuries": injuries,
+        "flags": rflags,
         "absences": {f"{d}|{t}": [dict(a, name=next((n for (gg, pp), n in names.items() if pp == a["pid"]), None)
                                        or (idx.get(str(a["pid"])) or [None, None])[1]) for a in v]
                      for (d, t), v in absent.items()},
