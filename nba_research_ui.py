@@ -2289,7 +2289,7 @@ function rebRings(r, avg) {                            // r: [g, reb, oreb, cont
   const labs = RD_PATH.map((_, k) => k ? `<text x="-${RD_X[k]}" y="15" class="rdv">${pc(sh(k))}</text><text x="${RD_X[k]}" y="13" class="rds">${RD_FT[k]} ft</text>`
     : `<text x="0" y="25" class="rdv">${pc(sh(0))}</text><text x="0" y="-15" class="rds">0–3 ft</text>`).join("");
   const vs = (x, a) => `${pc(x)}<small>avg ${a == null ? "–" : pc(a)}</small>`;
-  return `<h3 class="shw">How far from the hoop he grabs them<small>NBA.com tracking · shaded against the players with rebound lines</small></h3>
+  return `<h3 class="shw">How far from the hoop he grabs them<small>NBA.com tracking · ${r[1]} boards · shaded against the players with rebound lines</small></h3>
     <svg class="shct rdct" viewBox="-150 -50 300 165" role="img" aria-label="rebounds by distance from the hoop"><defs><clipPath id="rdclip"><rect x="-150" y="-47.5" width="300" height="162.5"/></clipPath></defs>
       <g clip-path="url(#rdclip)">${marks}${[30, 60, 100].map(x => `<path d="${RD_C(x)}" fill="none" class="shz"/>`).join("")}</g>
       <g class="shl"><path d="M-150,-47.5H150"/><path d="M-30,-7.5H30"/><circle cx="0" cy="0" r="7.5"/></g>${labs}</svg>
