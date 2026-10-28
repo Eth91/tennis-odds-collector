@@ -521,6 +521,9 @@ transition:background-color .22s,border-color .22s,transform .16s}
 /* game cards: a team on a back-to-back */
 .gc .gt .b2t{color:var(--org)}
 /* referees */
+.zft{margin-top:6px;font-size:11.5px;color:#9a9a9a}
+.shct.rdct{margin-top:8px}
+.rdct .rdv{font-size:12px;font-weight:700} .rdct .rds{font-size:9px;fill:#cfcfcf}
 .shw small{display:block;margin-top:2px;font-size:11.5px;font-weight:400;color:#8e8e8e}
 .rft td{height:46px;line-height:1.15} .rft td small{display:block;margin-top:1px;font-size:11px;color:#8e8e8e}
 .rft td.up{color:var(--grn)} .rft td.dn{color:var(--red)} .rft tr.cr td{font-weight:700}
@@ -2271,57 +2274,86 @@ function schedCard(p, g, logs, line, side) {
 // the opponent gives up there a game, over the league's average for a team. This season once the opponent has 10 games ──
 const AST_M = new Set(["assists", "pts_ast", "reb_ast", "pra"]), REB_M = new Set(["rebounds", "pts_reb", "reb_ast", "pra"]);
 const SHOT_M = new Set(["points", "threes", "pts_reb", "pts_ast", "pra"]);     // the shot chart: props with points or threes in them
-const PBP = new Map();
-const pbpLoad = s => { const t = Math.floor(Date.now() / 600000), k = s + "|" + t;      // new games within 10 minutes
-  if (!PBP.has(k)) PBP.set(k, fetch(`pbp/${encodeURIComponent(s)}.json?t=${t}`).then(r => r.ok ? r.json() : null).catch(() => null)); return PBP.get(k); };
+// the side files a season at a time (docs/pbp, nba_pbp; docs/rebd, nba_rebd), fetched again every 10 minutes
+const sideJson = (dir, M) => s => { const t = Math.floor(Date.now() / 600000), k = s + "|" + t;
+  if (!M.has(k)) M.set(k, fetch(`${dir}/${encodeURIComponent(s)}.json?t=${t}`).then(r => r.ok ? r.json() : null).catch(() => null)); return M.get(k); };
+const pbpLoad = sideJson("pbp", new Map()), rebdLoad = sideJson("rebd", new Map());
+// the rebound rings (docs/rebd, NBA.com's tracking): where he secured his rebounds, 0-3 / 3-6 / 6-10 / 10+ ft from the
+// hoop, each shaded by his share against the players with rebound lines; a close-up of the court around the rim
+const RD_C = r => `M0,-${r}A${r},${r} 0 1 1 0,${r}A${r},${r} 0 1 1 0,-${r}Z`;
+const RD_PATH = [RD_C(30), RD_C(60) + RD_C(30), RD_C(100) + RD_C(60), `M-150,-47.5H150V115H-150Z` + RD_C(100)];
+const RD_X = [0, 44, 79, 125], RD_FT = ["0–3", "3–6", "6–10", "10+"];
+function rebRings(r, avg) {                            // r: [g, reb, oreb, contested, dist x4, shot x4, miss3]
+  const sh = k => r[4 + k] / r[1], pc = x => Math.round(x * 100) + "%";
+  const marks = RD_PATH.map((d, k) => `<path d="${d}" fill="${shFill(avg.dist[k] == null ? null : (sh(k) - avg.dist[k]) * 100)}" fill-rule="evenodd"/>`).join("");
+  const labs = RD_PATH.map((_, k) => k ? `<text x="-${RD_X[k]}" y="15" class="rdv">${pc(sh(k))}</text><text x="${RD_X[k]}" y="13" class="rds">${RD_FT[k]} ft</text>`
+    : `<text x="0" y="25" class="rdv">${pc(sh(0))}</text><text x="0" y="-15" class="rds">0–3 ft</text>`).join("");
+  const vs = (x, a) => `${pc(x)}<small>avg ${a == null ? "–" : pc(a)}</small>`;
+  return `<h3 class="shw">How far from the hoop he grabs them<small>NBA.com tracking · ${r[1]} boards · shaded against the players with rebound lines</small></h3>
+    <svg class="shct rdct" viewBox="-150 -50 300 165" role="img" aria-label="rebounds by distance from the hoop"><defs><clipPath id="rdclip"><rect x="-150" y="-47.5" width="300" height="162.5"/></clipPath></defs>
+      <g clip-path="url(#rdclip)">${marks}${[30, 60, 100].map(x => `<path d="${RD_C(x)}" fill="none" class="shz"/>`).join("")}</g>
+      <g class="shl"><path d="M-150,-47.5H150"/><path d="M-30,-7.5H30"/><circle cx="0" cy="0" r="7.5"/></g>${labs}</svg>
+    <div class="kv shr"><span>Contested</span><b>${vs(r[3] / r[1], avg.contested)}</b></div>
+    <div class="kv shr"><span>Off missed threes</span><b>${vs(r[12] / r[1], avg.miss3)}</b></div>`;
+}
+// the Assists and Rebounds cards: a court of the shot chart's six zones (a rebound by the zone of the miss it came off),
+// the player's view (his a game in each zone, shaded by his share there against the league's share) or the opponent's
+// (allowed a game, shaded against the league's average for a team, ranked: 1st = the fewest allowed, the toughest),
+// then the opponent's zones against the league as a list; rebounds add the rings and the opponent's missed threes
 function zoneCard(kind) {
   const el = $(kind === "ast" ? "#asc" : "#rbc"); if (!el || !MUP) return;
-  const p = MUP.p, key = kind + "Season", ast = kind === "ast";
+  const p = MUP.p, key = kind + "Season", vkey = kind + "View", ast = kind === "ast";
   const top = `<div class="shh"><span class="av">${head(p.pid)}</span><b>${ast ? "ASSISTS" : "REBOUNDS"}</b>${logo(p.opp, "shl0")}</div>`;
   if (!el.innerHTML) el.innerHTML = top + '<div class="vsk"><div class="sk"></div><div class="sk"></div></div>';
-  const draw = (fresh, view) => pbpLoad(MUP[key]).then(j => {
+  const draw = (fresh, view) => Promise.all([pbpLoad(MUP[key]), ast ? null : rebdLoad(MUP[key])]).then(([j, rd]) => {
     if (!MUP || MUP.p !== p) return;
     if (!j) { el.innerHTML = top + '<div class="empty"><b>Not available yet</b></div>'; return; }
-    const nz = j.zones.length, Z = ast ? j.zones : j.zones.concat(["Free Throw"]), off = ast ? 1 : 1 + nz, L = j.league;
+    const nz = j.zones.length, Z = ast ? j.zones : j.zones.concat(["Free Throw"]), off = ast ? 1 : 1 + nz, L = j.league, Lk = L[kind];
     const me = j.players[String(p.pid)], t = j.teams[p.opp], gp = me ? me[0] : 0;
     const mine = me ? Z.map((_, k) => me[off + k]) : null, tot = mine ? mine.reduce((a, b) => a + b, 0) : 0;
-    const rows = Z.map((nm, k) => ({nm: nm, k: k, a: t && t[0] ? t[off + k] / t[0] : null, d: t && t[0] && L.gp ? t[off + k] / t[0] - L[kind][k] / L.gp : null}))
+    const rows = Z.map((nm, k) => ({nm: nm, k: k, a: t && t[0] ? t[off + k] / t[0] : null, d: t && t[0] && L.gp ? t[off + k] / t[0] - Lk[k] / L.gp : null}))
       .filter(r => r.d !== null).sort((x, y) => y.d - x.d);
-    const def = ast && MUP.asView === "def";
+    const def = MUP[vkey] === "def";
     const sub = def ? (t && t[0] ? t[0] + " games" : "") : gp ? `${r1(tot / gp)} a game${ast ? "" : ` · ${r1(me[me.length - 1] / gp)} offensive`}` : "No games";
-    // the assists court, the shot chart's six zones: his assists a game in each, shaded by his share there against the
-    // league's share; or the opponent's assisted baskets allowed a game, shaded against the league's average for a team,
-    // ranked (1st = the fewest allowed, the toughest)
     const court = () => {
-      const all = Object.values(j.teams).filter(x => x[0]), lt = L.ast.reduce((a, b) => a + b, 0), none = {fill: shFill(null), t: "–", sub: ""};
+      const all = Object.values(j.teams).filter(x => x[0]), lt = Lk.reduce((a, b) => a + b, 0), none = {fill: shFill(null), t: "–", sub: ""};
       const zs = SH_Z.map(nm => {
         const k = j.zones.indexOf(nm);
         if (k < 0) return none;
         if (def) {
           if (!t || !t[0] || !L.gp) return none;
-          const a = t[1 + k] / t[0], la = L.ast[k] / L.gp;
-          return {fill: shFill(la ? (a / la - 1) * 50 : null), t: a.toFixed(1), sub: ord(1 + all.filter(x => x[1 + k] / x[0] < a).length)};
+          const a = t[off + k] / t[0], la = Lk[k] / L.gp;
+          return {fill: shFill(la ? (a / la - 1) * 50 : null), t: a.toFixed(1), sub: ord(1 + all.filter(x => x[off + k] / x[0] < a).length)};
         }
-        return tot ? {fill: shFill(lt ? (mine[k] / tot - L.ast[k] / lt) * 100 : null), t: (mine[k] / gp).toFixed(1), sub: Math.round(mine[k] / tot * 100) + "%"} : none;
+        return tot ? {fill: shFill(lt ? (mine[k] / tot - Lk[k] / lt) * 100 : null), t: (mine[k] / gp).toFixed(1), sub: Math.round(mine[k] / tot * 100) + "%"} : none;
       });
-      return `<svg class="shct" viewBox="-252 -50 504 352" role="img" aria-label="${def ? esc(p.opp) + " assisted baskets allowed" : esc(p.player) + " assists"} by zone, ${esc(MUP[key])}">${zoneMarks(zs)}</svg>
-        <div class="shk"><span>Below league ${def ? "avg" : "share"}</span><i></i><span>Above</span></div>`;
+      const what = ast ? (def ? "assisted baskets allowed" : "assists") : def ? "opponents' rebounds" : "rebounds by the miss's zone";
+      let extra = "";
+      if (!ast) {                                      // free throws have no zone on the court; then the rings, or the misses
+        extra = `<div class="zft">Off missed free throws: ${def ? (t && t[0] ? (t[off + nz] / t[0]).toFixed(1) + " a game" : "–") : tot ? (mine[nz] / gp).toFixed(1) + " a game · " + Math.round(mine[nz] / tot * 100) + "%" : "–"}</div>`;
+        const r = rd && rd.players[String(p.pid)];
+        if (!def) extra += r && r[1] ? rebRings(r, rd.avg) : '<div class="zft">How far from the hoop: not tracked for him yet</div>';
+        else if (t && t.length >= 1 + nz + 2 * Z.length && L.miss) {
+          const m3 = x => (x[off + Z.length + 3] + x[off + Z.length + 4] + x[off + Z.length + 5]) / x[0], lg = (L.miss[3] + L.miss[4] + L.miss[5]) / L.gp;
+          extra += `<div class="kv shr"><span>${esc(p.opp)}'s missed threes<small>long misses, long rebounds</small></span><b><em class="${m3(t) > lg ? "up" : "dn"}">${m3(t).toFixed(1)} a game</em><small>league ${lg.toFixed(1)}</small></b></div>`;
+        }
+      }
+      return `<svg class="shct" viewBox="-252 -50 504 352" role="img" aria-label="${def ? esc(p.opp) : esc(p.player)} ${what} by zone, ${esc(MUP[key])}">${zoneMarks(zs)}</svg>
+        <div class="shk"><span>Below league ${def ? "avg" : "share"}</span><i></i><span>Above</span></div>${extra}`;
     };
     if (view) { const v = $(".zcv", el); if (v) { v.innerHTML = court(); swapIn(v); } $(".shy > span", el).textContent = sub; return; }
-    el.innerHTML = top + (ast ? `<div class="seg" role="group" aria-label="View"><span class="pill2"></span>${[["player", esc(lastName(p.player))], ["def", esc(p.opp) + " Defense"]].map(([k, l]) =>
-        `<button data-asv="${k}" aria-pressed="${def === (k === "def")}">${l}</button>`).join("")}</div>` : "") +
-      `<div class="shy" role="group" aria-label="Season">${[D.season, prevSeason(D.season)].map(x => `<button class="chip" data-pbs="${x}" aria-pressed="${x === MUP[key]}">${x.slice(0, 4)}</button>`).join("")}<span>${esc(sub)}</span></div>
-      <div class="zbd">${ast ? `<div class="zcv">${court()}</div>` : ""}<h3 class="shw">${ast ? `Where ${esc(p.opp)} gives up assisted baskets` : `Where ${esc(p.opp)}'s opponents rebound`}<small>${ast ? "by where the basket was made" : "by where the missed shot came from"}</small></h3>
+    el.innerHTML = top + `<div class="seg" role="group" aria-label="View"><span class="pill2"></span>${[["player", esc(lastName(p.player))], ["def", esc(p.opp) + " Defense"]].map(([k, l]) =>
+        `<button data-zv="${k}" aria-pressed="${def === (k === "def")}">${l}</button>`).join("")}</div>
+      <div class="shy" role="group" aria-label="Season">${[D.season, prevSeason(D.season)].map(x => `<button class="chip" data-pbs="${x}" aria-pressed="${x === MUP[key]}">${x.slice(0, 4)}</button>`).join("")}<span>${esc(sub)}</span></div>
+      <div class="zbd"><div class="zcv">${court()}</div><h3 class="shw">${ast ? `Where ${esc(p.opp)} gives up assisted baskets` : `Where ${esc(p.opp)}'s opponents rebound`}<small>${ast ? "by where the basket was made" : "by where the missed shot came from"}</small></h3>
       ${rows.length ? rows.map(r => `<div class="kv shr"><span>${r.nm}<small>${tot ? Math.round(mine[r.k] / tot * 100) + `% of his ${ast ? "assists" : "rebounds"} · ` + (mine[r.k] / gp).toFixed(1) + "/g" : "none"}</small></span>
         <b><em class="${r.d > 0 ? "up" : "dn"}">${r.d > 0 ? "+" : ""}${r.d.toFixed(1)}/g</em><small>${r.a.toFixed(1)} a game</small></b></div>`).join("") : '<div class="empty"><b>No games yet</b></div>'}</div>`;
     if (fresh) swapIn($(".zbd", el));
     $$("[data-pbs]", el).forEach(b => b.onclick = () => { if (MUP[key] !== b.dataset.pbs) { MUP[key] = b.dataset.pbs; draw(true); } });
-    if (ast) {                                 // the view switch slides its pill and redraws the court alone
-      const seg = $(".seg", el);
-      slide(seg, true);
-      $$("[data-asv]", el).forEach(b => b.onclick = () => { if (MUP.asView === b.dataset.asv) return;
-        MUP.asView = b.dataset.asv; $$("[data-asv]", el).forEach(x => x.setAttribute("aria-pressed", x === b)); slide(seg); draw(false, true); });
-    }
+    const seg = $(".seg", el);                 // the view switch slides its pill and redraws the court alone
+    slide(seg, true);
+    $$("[data-zv]", el).forEach(b => b.onclick = () => { if (MUP[vkey] === b.dataset.zv) return;
+      MUP[vkey] = b.dataset.zv; $$("[data-zv]", el).forEach(x => x.setAttribute("aria-pressed", x === b)); slide(seg); draw(false, true); });
   });
   if (MUP[key]) { draw(); return; }
   // this season once the opponent has 10 games, else last season, unless he has games this season and none last (a rookie)
@@ -2537,7 +2569,7 @@ const initialName = n => { const i = String(n || "").indexOf(" "); return i > 0 
 function openMatchup(p, push) {
   if (!p) return;
   MUP = {p: p, grp: VS_GRP.some(g => g[0] === (p.ctx || {}).group) ? p.ctx.group : "G", mkt: p.market, more: false, rows: null,
-         shView: "player", shSeason: null, shMode: "shots", asView: "player"};
+         shView: "player", shSeason: null, shMode: "shots", astView: "player", rebView: "player"};
   if (push !== false) history.pushState({p: p.id, mu: 1, d: navDepth() + 1}, "", hashState());
   const mp = $("#mp");
   mp.hidden = false;

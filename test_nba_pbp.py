@@ -68,9 +68,10 @@ def test_fetch_and_build():
     # 2 stored games: BOS and MIA 2 games each; assisted makes allowed by zone: BOS gave up MIA's paint basket, MIA BOS's
     # left-corner three and rim basket; rebounds allowed: MIA's player got one off BOS's top-of-the-key miss, BOS's one off
     # MIA's mid miss
-    assert doc["league"] == {"gp": 4, "ast": [1, 1, 0, 1, 0, 0], "reb": [0, 0, 1, 0, 0, 1, 0]}
-    assert doc["teams"]["BOS"] == [2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]
-    assert doc["teams"]["MIA"] == [2, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0]
+    # misses: BOS's top-of-the-key miss (MIA's defensive board), MIA's mid miss (BOS's)
+    assert doc["league"] == {"gp": 4, "ast": [1, 1, 0, 1, 0, 0], "reb": [0, 0, 1, 0, 0, 1, 0], "miss": [0, 0, 1, 0, 0, 1, 0]}
+    assert doc["teams"]["BOS"] == [2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0] + [0, 0, 0, 0, 0, 1, 0]
+    assert doc["teams"]["MIA"] == [2, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0] + [0, 0, 1, 0, 0, 0, 0]
     # White: 2 games with minutes, assists at the rim and from the left corner; Smith: 2 games, a defensive rebound off a mid miss
     assert doc["players"]["2"] == [2, 1, 0, 0, 1, 0, 0] + [0] * 7 + [0] and doc["players"]["3"][0] == 2 and doc["players"]["3"][1 + 6 + 2] == 1
     assert "8" not in doc["players"]                       # no minutes in the box store: no per-game line, left out
@@ -92,3 +93,17 @@ def test_an_older_store_is_refilled():
     con.commit()
     con.close()
     assert PB.connect(path).execute("SELECT COUNT(*) FROM games").fetchone()[0] == 1          # a current store is kept
+
+
+def test_misses_go_to_the_shooters_team():
+    d = pathlib.Path(tempfile.mkdtemp())
+    m = MU.connect(d / "m.sqlite")
+    m.execute("INSERT INTO games (gid, season, date, home, away, home_pts, away_pts) VALUES ('g1', '2026-27', '2026-10-22', 'BOS', 'MIA', 100, 90)")
+    m.commit()
+    con = PB.connect(d / "p.sqlite")
+    con.execute("INSERT INTO games VALUES ('g1', '2026-27', '2026-10-22')")
+    # a Celtic's offensive board off a Celtics miss from the top; his defensive board off a Heat miss at the rim
+    con.executemany("INSERT INTO rebs VALUES (?,?,?,?,?,?)", [("g1", "BOS", "MIA", 3, "o", 5), ("g1", "BOS", "MIA", 3, "d", 0)])
+    doc = PB.build(con, m, "2026-27")
+    assert doc["teams"]["BOS"][-7:] == [0, 0, 0, 0, 0, 1, 0] and doc["teams"]["MIA"][-7:] == [1, 0, 0, 0, 0, 0, 0]
+    assert doc["teams"]["MIA"][1 + 6:1 + 6 + 7] == [1, 0, 0, 0, 0, 1, 0]      # both boards were Celtics': MIA allowed them
