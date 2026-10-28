@@ -26,10 +26,11 @@ def stores(tmp):
     p["tracking"] = tmp / "trk.sqlite"
     t = sqlite3.connect(p["tracking"])
     t.executescript("CREATE TABLE tracking (date TEXT, player_id INTEGER, potential_ast REAL, reb_chances REAL);"
-                    "CREATE TABLE fetched (date TEXT, measure TEXT)")
+                    "CREATE TABLE fetched (date TEXT, measure TEXT, rows INTEGER, fetched_at TEXT)")
     for i in range(4):
         d = f"2026-10-{27 + i:02d}"
-        t.executemany("INSERT INTO fetched VALUES (?, ?)", [(d, "Passing"), (d, "Rebounding")])
+        at = f"2026-10-{28 + i:02d}T11:20:00+00:00"                # stored the next morning, as the daily job did
+        t.executemany("INSERT INTO fetched VALUES (?, ?, 1, ?)", [(d, "Passing", at), (d, "Rebounding", at)])
         t.execute("INSERT INTO tracking VALUES (?, ?, 7.0, 13.0)", (d, T.B))
         if i < 2:                                            # C: 6 potential assists on 2 of 4 fetched dates -> 3.0 a game
             t.execute("INSERT INTO tracking VALUES (?, ?, 6.0, 0.0)", (d, T.C))

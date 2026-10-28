@@ -731,6 +731,10 @@ class EARLY_SURGE(Rule):
         return out
 
 
+# Amendment 8: the stores of box scores and tracking that the replay hands the rules as of each moment
+# (nba_replay.RuleStores). ROLE_GAMELOGS_DB holds past seasons only. Not part of any fingerprint: no rule changes.
+PIT_STORES = {"MATCHUP_DB": "matchup", "TRACKING_DB": "tracking"}
+
 RULES = (NULL_TIP30, NEWS_FD, NEWS_DK, DK_LAGS_FD, T4_TIP30, ENGINE_CARD, S1, DEPTH_NEXT, DEPTH_NEXT_TIP30, NEW_STARTER,
          LOST_START, ROLE_OPEN, RATIO_FGA, RATIO_PA, RATIO_RC, RATIO_PA28, PTS_DVP, RETURN_UNDER, FOUL_BIG, MIN_RESTRICT, EARLY_SURGE)
 
