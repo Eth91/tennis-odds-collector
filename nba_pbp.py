@@ -11,11 +11,12 @@ Zones: the shot chart's six, Restricted Area (4 ft), Paint, Mid-Range, Left Corn
 (+ Free Throw for rebounds), from the shot's legacy court position in tenths of a foot (basket at 0,0; a three with
 y <= 92 is a corner three; x < 0 the left corner, as stats.nba's LOC_X, which xLegacy matches shot for shot).
 
-File: {season, fetched_at, zones, league: {gp, ast: [6], reb: [7]}, teams: {TRI: [gp, ast allowed x6, reb allowed x7]},
-       players: {pid: [gp, ast x6, reb x7, oreb]}}
+File: {season, fetched_at, zones, league: {gp, ast: [6], reb: [7], miss: [7]},
+       teams: {TRI: [gp, ast allowed x6, reb allowed x7, misses x7]}, players: {pid: [gp, ast x6, reb x7, oreb]}}
   gp       a team's games, a player's games with minutes (nba_matchup.sqlite)
   ast      assisted makes by zone (a team: its opponents' assisted makes against it); reb: rebounds by the miss's zone
            (a team: its opponents' players' rebounds against it); league: all teams' totals, gp = team-games
+  misses   a team's own missed shots that a player rebounded, by zone (long misses make long rebounds)
 
     python3 nba_pbp.py --out /home/ubuntu/tennis-odds-collector/docs/pbp
 """
@@ -122,7 +123,7 @@ def build(con, mcon, season):
     nz, nr = len(ZONES), len(ZONES) + 1
     gids = {g for (g,) in con.execute("SELECT gid FROM games WHERE season=?", (season,))}
     teams, players = {}, {}
-    team = lambda t: teams.setdefault(t, [0] + [0] * nz + [0] * nr)
+    team = lambda t: teams.setdefault(t, [0] + [0] * nz + [0] * nr + [0] * nr)
     plyr = lambda p: players.setdefault(p, [0] + [0] * nz + [0] * nr + [0])
     for (gid, home, away) in mcon.execute("SELECT gid, home, away FROM games WHERE season=? AND home_pts IS NOT NULL", (season,)):
         if gid in gids:
@@ -132,8 +133,9 @@ def build(con, mcon, season):
     for opp, ast_pid, z in con.execute(f"SELECT opp, ast_pid, zone FROM makes WHERE ast_pid IS NOT NULL AND gid IN ({marks})", list(gids)):
         team(opp)[1 + z] += 1
         plyr(ast_pid)[1 + z] += 1
-    for opp, pid, kind, z in con.execute(f"SELECT opp, pid, kind, zone FROM rebs WHERE gid IN ({marks})", list(gids)):
+    for tm, opp, pid, kind, z in con.execute(f"SELECT team, opp, pid, kind, zone FROM rebs WHERE gid IN ({marks})", list(gids)):
         team(opp)[1 + nz + z] += 1
+        team(tm if kind == "o" else opp)[1 + nz + nr + z] += 1           # the shooter's team: his own miss, or theirs
         p = plyr(pid)
         p[1 + nz + z] += 1
         p[-1] += kind == "o"
@@ -143,7 +145,8 @@ def build(con, mcon, season):
             players[pid][0] = n
     league = {"gp": sum(t[0] for t in teams.values()),
               "ast": [sum(t[1 + z] for t in teams.values()) for z in range(nz)],
-              "reb": [sum(t[1 + nz + z] for t in teams.values()) for z in range(nr)]}
+              "reb": [sum(t[1 + nz + z] for t in teams.values()) for z in range(nr)],
+              "miss": [sum(t[1 + nz + nr + z] for t in teams.values()) for z in range(nr)]}
     return {"season": season, "fetched_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(),
             "zones": list(ZONES), "league": league, "teams": teams,
             "players": {str(p): v for p, v in players.items() if v[0]}}
