@@ -383,6 +383,9 @@ def test_page_controls_work_on_iphone():
     html = UI.page()
     # iOS Safari can't drag the thumb of a range input stacked under another, so the dual sliders are pointer-event widgets
     assert 'type="range"' not in html and "dualRange(" in html and "touch-action:pan-y" in html
+    # a double tap doesn't zoom the page (taps on the stat chips, pills and bars come quickly); a pinch still does
+    assert "*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}" in html
+    assert "user-scalable" not in html and "maximum-scale" not in html
     # chart bars show their game on tap (a <title> only appears on hover); the book prices switch Over / Under
     assert "data-ps=" in html
     # a tap on a bar opens that game's box score (docs/box/{gid}.json, nba_boxscore), his row and the prop's stats marked
