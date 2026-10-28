@@ -160,7 +160,7 @@ font-size:13px;font-weight:600;color:#fff}
 .seg button img{width:16px;height:16px} .seg button svg{width:14px;height:14px;fill:currentColor}
 /* chips: the chart filters' outline pills */
 .chips{display:flex;flex-wrap:wrap;gap:8.3px;margin-top:10px}
-.chips.rsw{flex-wrap:nowrap;overflow-x:auto;margin:2px 0 4px;padding:0 15.3px 8px;scrollbar-width:none} .rsw::-webkit-scrollbar{display:none} .rsw .chip{flex:none}
+.mt.rrl{margin:14px 15.3px 4px} .mt.rrl button{width:auto;padding:0 15px;white-space:nowrap} .mt.rrl button[aria-pressed="true"]{background:none}
 .chip{display:inline-flex;align-items:center;height:30px;padding:0 13px;border:1px solid rgba(255,255,255,.15);border-radius:15px;background:none;
 color:#fff;font-size:13px;font-weight:500}
 .chip[aria-pressed="true"]{border-color:rgba(255,255,255,.3);background:#2a2a2a}
@@ -327,7 +327,7 @@ svg.shct{display:block;width:100%;height:auto;margin-top:6px}
 .lus .av{position:relative;left:auto;top:auto;width:40px;height:40px}
 .lus .av .hs{left:-8px;top:1px;width:56px}
 .lus b{max-width:100%;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lus i{font-style:normal;font-size:10.5px;color:#9a9a9a} .lus.new i{color:var(--org);font-weight:700}
+.lus i{font-style:normal;font-size:10.5px;color:#9a9a9a} .lus.new i{color:var(--org);font-weight:700} .lus .lq{font-style:normal;color:var(--yel);font-weight:700}
 .lum{margin-top:9px;font-size:12.5px;color:#b0b0b0;line-height:1.7}
 .lum b{margin-right:6px;font-size:10.5px;letter-spacing:.3px;color:#8e8e8e;text-transform:uppercase}
 .lum button{padding:0;border:0;background:none;color:#e6e6e6;font-size:12.5px} .lum .tg{margin:0 0 0 4px}
@@ -491,6 +491,7 @@ background:#161616;overflow-x:auto;scrollbar-width:none}
 .fcs{display:flex;flex-wrap:nowrap;gap:8.3px;margin:17.2px -15.3px 0;padding:0 15.3px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .fcs::-webkit-scrollbar{display:none}
 .fcs .fc{flex:none}
+.fcs.fcw{margin-top:8.3px}
 .fc{display:inline-flex;align-items:center;gap:0;height:26.2px;padding:0 12px;border:1px solid rgba(255,255,255,.15);border-radius:13.1px;
 background:#141414;font-size:12.8px;letter-spacing:-.25px;color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.07);
 transition:background-color .22s,border-color .22s,transform .16s}
@@ -520,12 +521,17 @@ transition:background-color .22s,border-color .22s,transform .16s}
 /* game cards: a team on a back-to-back */
 .gc .gt .b2t{color:var(--org)}
 /* referees */
+.zft{margin-top:6px;font-size:11.5px;color:#9a9a9a}
+.shct.rdct{margin-top:8px}
+.rdct .rdv{font-size:12px;font-weight:700} .rdct .rds{font-size:9px;fill:#cfcfcf}
+.shw small{display:block;margin-top:2px;font-size:11.5px;font-weight:400;color:#8e8e8e}
 .rft td{height:46px;line-height:1.15} .rft td small{display:block;margin-top:1px;font-size:11px;color:#8e8e8e}
 .rft td.up{color:var(--grn)} .rft td.dn{color:var(--red)} .rft tr.cr td{font-weight:700}
 /* combo checker */
 .cbp{position:fixed;right:15.3px;bottom:calc(max(var(--sb),10px) + 74px);z-index:35;display:flex;align-items:center;gap:6px;height:40px;
 padding:0 14px 0 12px;border-radius:20px;color:#fff;font:inherit;font-size:14px;font-weight:600}
 .cbp[hidden]{display:none} .cbp svg{width:19px;height:19px}
+.empty .ebt{display:flex;justify-content:center;gap:10px;margin-top:14px} .empty .ebt .btn{margin:0;padding:0 18px;width:auto}
 .cbon .lst{padding-bottom:calc(var(--sb) + 160px)} .cbon .end{height:calc(var(--sb) + 80px)}
 .cbp b{min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#fff;color:#000;font-size:12px;line-height:20px;text-align:center}
 .cbl{display:flex;align-items:center;gap:10px;min-height:56px;border-bottom:.5px solid var(--sep)}
@@ -885,6 +891,21 @@ function comboStats(legs, win, season) {
 }
 // the Live tab's word for a prop: an over HIT / NEEDS n / MISS, an under n ROOM / NO ROOM / BUST / HIT, a push at
 // the final PUSH. NEEDS counts to the next whole number past the line; ROOM is what can still come and win
+// the slate to show: `cur` while it is a listed day with a game still to come or under way, or while no later day has
+// lines; else the first day with an unfinished game that has open props or a live game, else the first with props. A
+// finished slate gives way to the next one as soon as its lines are up
+function slateDay(dates, games, props, cur) {
+  var byGid = {};
+  games.forEach(function (g) { byGid[g.gid] = g; });
+  var done = function (d) { var gs = games.filter(function (g) { return g.date === d; });
+    return gs.length > 0 && gs.every(function (g) { return g.state === "final" || g.state === "postponed"; }); };
+  var on = function (p, d) { return byGid[p.gid] && byGid[p.gid].date === d; };
+  var open = function (d) { return props.some(function (p) { return !p.closed && on(p, d); }); };
+  var live = function (d) { return games.some(function (g) { return g.date === d && g.state === "live"; }); };
+  if (cur && dates.indexOf(cur) >= 0 && !(done(cur) && dates.some(function (d) { return d > cur && open(d); }))) return cur;
+  return dates.find(function (d) { return !done(d) && (open(d) || live(d)); }) ||
+    dates.find(function (d) { return props.some(function (p) { return on(p, d); }); }) || dates[0];
+}
 function liveStatus(v, line, over, live) {
   if (!live && v === line) return ["PUSH", ""];
   if (over) return v > line ? ["HIT", "up"] : live ? ["NEEDS " + (Math.floor(line) + 1 - v), ""] : ["MISS", "dn"];
@@ -902,7 +923,7 @@ if (typeof module !== "undefined") module.exports = {statValue: statValue, hitSu
   rowsToLogs: rowsToLogs, windowed: windowed, filterLogs: filterLogs, splitRows: splitRows, sideRate: sideRate,
   american: american, decimalOf: decimalOf, bestOver: bestOver, bestPrice: bestPrice, propRates: propRates,
   noVig: noVig, fairAt: fairAt, valueAt: valueAt, zscore: zscore, pmfGe: pmfGe, projProbs: projProbs, blendP: blendP,
-  filterProps: filterProps, sortProps: sortProps, liveStage: liveStage, liveStatus: liveStatus, comboStats: comboStats};
+  filterProps: filterProps, sortProps: sortProps, liveStage: liveStage, liveStatus: liveStatus, slateDay: slateDay, comboStats: comboStats};
 """
 
 JS_APP = r"""
@@ -1145,7 +1166,7 @@ function topRow() {
 }
 function cards() {
   const gs = D.games.filter(g => g.date === ST.date), i = D.dates.indexOf(ST.date);
-  const lab = i === 0 ? "Today" : i === 1 ? "Tomorrow" : ST.date.slice(5).replace("-", "/");
+  const lab = dayName(ST.date);
   return `<button class="gc0" id="dayb" aria-haspopup="dialog"><i>${lab}</i><i>${gs.length} GAME${gs.length === 1 ? "" : "S"}</i></button>` +
     gs.map(g => `<button class="gc" data-gid="${g.gid}" aria-pressed="${g.gid === ST.gid}" aria-label="${esc(g.away)} at ${esc(g.home)}"><span class="gt">${[g.away, g.home].map(t => `<span${b2(g, t) ? ' class="b2t"' : ""}>${logo(t, "")}${esc(t)}</span>`).join("")}</span><em>${g.state === "live" ? '<span class="lv">LIVE</span>' : g.state === "final" ? "Final" : g.state === "postponed" ? "PPD" : mt(g.tip).replace(" ", "\u200a")}${cardNote(g)}</em></button>`).join("");
 }
@@ -1176,7 +1197,12 @@ function render() {
     const r = $("#retry"); if (r) r.onclick = load;
     return;
   }
-  if (!ST.date || D.dates.indexOf(ST.date) < 0) ST.date = D.dates.find(d => D.props.some(p => (gameOf(p.gid) || {}).date === d)) || D.dates[0];
+  if (AUTO_DAY || !ST.date || D.dates.indexOf(ST.date) < 0) {
+    const was = ST.date;
+    ST.date = slateDay(D.dates, D.games, D.props, AUTO_DAY ? ST.date : null);
+    if (was && ST.date !== was && ST.market === "live" && !D.games.some(g => g.date === ST.date && (g.state === "live" || g.state === "final"))) ST.market = "points";
+    if (ST.date !== was) save();                               // the URL follows, so a reload or a shared link lands there too
+  }
   if (ST.gid !== "all" && !D.games.some(g => g.gid === ST.gid && g.date === ST.date)) ST.gid = "all";
   const mks = availMarkets();
   if (ALL_TABS.indexOf(ST.market) < 0 && mks.length && mks.indexOf(ST.market) < 0) ST.market = mks[0];
@@ -1185,8 +1211,8 @@ function render() {
       <nav class="gcs" id="gcs" aria-label="Games"></nav><div class="ldv"></div></header><div id="ban"></div><main class="lst" id="lst"></main>`;
     bindTop();
   }
-  const liveOn = D.games.some(g => g.date === ST.date && (g.state === "live" || g.state === "final"));
-  $("#mtl").innerHTML = '<span class="pill2"></span>' + MKT_TABS.filter(m => m === "live" ? liveOn || ST.market === "live" : ALL_TABS.indexOf(m) >= 0 || mks.indexOf(m) >= 0).map(m => `<button data-market="${m}" aria-pressed="${m === ST.market}">${TAB[m]}</button>`).join("");
+  const liveOn = D.games.some(g => g.date === ST.date && (g.state === "live" || g.state === "final")), liveNow = D.games.some(g => g.date === ST.date && g.state === "live");
+  $("#mtl").innerHTML = '<span class="pill2"></span>' + MKT_TABS.filter(m => m === "live" ? liveOn || ST.market === "live" : ALL_TABS.indexOf(m) >= 0 || mks.indexOf(m) >= 0).map(m => `<button data-market="${m}" aria-pressed="${m === ST.market}">${m === "live" && !liveNow ? "Results" : TAB[m]}</button>`).join("");
   $("#gcs").innerHTML = cards();
   $("#ban").innerHTML = banners();
   bindHead();
@@ -1254,14 +1280,21 @@ function renderRows(ivFrom) {
   else if (!onDate.length) body = '<div class="empty"><b>No props yet</b></div>';
   else if (ST.gid !== "all" && !onDate.some(p => p.gid === ST.gid)) body = '<div class="empty"><b>No props for this game yet</b></div>';
   else if (!list.length && ST.q.trim().length >= 2) body = '<div class="lhd"><span>No props</span></div>';
-  else if (!list.length && ST.market !== "live" && onDate.every(p => p.closed)) body = '<div class="empty"><b>Games under way</b><button class="btn" id="golive">Live</button></div>';
+  else if (!list.length && ST.market !== "live" && onDate.every(p => p.closed)) {
+    const allDone = D.games.filter(g => g.date === ST.date).every(g => g.state === "final" || g.state === "postponed");
+    const next = D.dates.find(d => d > ST.date && D.props.some(p => !p.closed && (gameOf(p.gid) || {}).date === d));
+    body = allDone ? `<div class="empty"><b>All games final</b><div class="ebt"><button class="btn" id="golive">Results</button>${next ? `<button class="btn pri" id="gonext" data-d="${next}">${esc(dayName(next))}'s props</button>` : ""}</div></div>`
+      : '<div class="empty"><b>Games under way</b><button class="btn" id="golive">Live</button></div>';
+  }
   else if (!list.length) body = ST.watch ? '<div class="empty"><b>Watchlist empty</b><button class="btn" id="reset2">Reset filters</button></div>'
     : ST.market === "trends" ? '<div class="empty"><b>No trends</b></div>'
     : ST.market === "movers" ? '<div class="empty"><b>No movers</b></div>'
     : ST.market === "live" ? '<div class="empty"><b>No games under way</b></div>'
     : '<div class="empty"><b>No matches</b><button class="btn" id="reset2">Reset filters</button></div>';
   if (body) { lst.innerHTML = body; const r2 = $("#reset2"); if (r2) r2.onclick = resetFilters;
-    const gl = $("#golive"); if (gl) gl.onclick = () => { ST.market = "live"; save(); render(); }; return; }
+    const gl = $("#golive"); if (gl) gl.onclick = () => { ST.market = "live"; save(); render(); swapIn($("#lst")); };
+    const gn = $("#gonext"); if (gn) gn.onclick = () => { AUTO_DAY = false; ST.date = gn.dataset.d; ST.gid = "all"; save(); render(); swapIn($("#lst")); };
+    return; }
   if (ST.view === "markets") {
     lst.innerHTML = '<div class="mhd"><span>PLAYER</span><span>FANDUEL</span><span>DRAFTKINGS</span></div>' + list.map(mrow).join("");
     return;
@@ -1323,9 +1356,9 @@ function injProp(pid) {                          // tonight's prop for a teammat
     .sort((a, b) => ORDER.indexOf(a.market) - ORDER.indexOf(b.market))[0] || null;
 }
 // a box: the teammate on top, what he took below (a start, from k of n games or "?" by position; or minutes a game)
-function injBox(m, val, cls) {
-  const p = injProp(m.pid), tag = p ? "button" : "div";
-  return `<${tag} class="ijb"${p ? ` data-id="${esc(p.id)}"` : ""}><i>${esc(m.name)}</i><b class="${cls}">${val}</b></${tag}>`;
+function injBox(m, val, cls) {                      // a tap opens his prop on this slate, else his player page
+  const p = injProp(m.pid);
+  return `<button class="ijb"${p ? ` data-id="${esc(p.id)}"` : ` data-vp="${m.pid}"`}><i>${esc(m.name)}</i><b class="${cls}">${val}</b></button>`;
 }
 function injRow(e) {
   const bx = [], s = e.starts;
@@ -1353,7 +1386,7 @@ let ROLES = null;
 // the Roles switch: [key, chip, unit after the numbers, label under the move]; ROLE_TH stands in for a file without
 // thresholds (nba_players.ROLE_MOVE)
 const ROLE_ST = [["min", "Minutes", "min", "MIN"], ["fga", "FGA", "FGA", "FGA"], ["fg3a", "3PTA", "3PA", "3PTA"],
-                 ["pot_ast", "Potential ast", "pot. ast", "POT AST"], ["reb_ch", "Reb chances", "reb ch.", "REB CH"]];
+                 ["pot_ast", "Potential Assists", "pot. ast", "POT AST"], ["reb_ch", "Rebound Chances", "reb ch.", "REB CH"]];
 const ROLE_TH = {min: 4, fga: 3, fg3a: 2, pot_ast: 2.5, reb_ch: 3};
 const rolesLoad = () => ROLES || (ROLES = fetch("player/roles.json").then(r => r.ok ? r.json() : null).catch(() => null));
 function rolesView(swap) {
@@ -1368,22 +1401,31 @@ function rolesView(swap) {
     const rows = ((j && j.rows) || []).filter(r => teams.has(r.team) && (ST.team === "all" || r.team === ST.team) && (!q || r.name.toLowerCase().indexOf(q) >= 0))
       .filter(r => { const v = stat(r); return v && Math.abs(v[0] - v[1]) >= th[k]; })
       .sort((a, b) => Math.abs(stat(b)[0] - stat(b)[1]) - Math.abs(stat(a)[0] - stat(a)[1]));
-    if (!$(".rsw", el)) {
-      el.innerHTML = `<div class="chips rsw" role="group" aria-label="Stat">${ROLE_ST.map(([x, lab]) => `<button class="chip" data-rs="${x}">${lab}</button>`).join("")}</div><div id="rol"></div>`;
+    // the stat rail: built once, like the market rail up top (a pill slides to the stat, the rail scrolls it into view)
+    if (!$(".rrl", el)) {
+      el.innerHTML = `<nav class="mt rrl" aria-label="Stat"><div class="mt-in" id="rsl"><span class="pill2"></span>${ROLE_ST.map(([x, lab]) => `<button data-rs="${x}">${lab}</button>`).join("")}</div></nav><div id="rol"></div>`;
       $$("[data-rs]", el).forEach(b => b.onclick = () => { if (b.dataset.rs !== (ST.rs || "min")) { ST.rs = b.dataset.rs === "min" ? "" : b.dataset.rs; save(); rolesView(true); } });
     }
-    press("[data-rs]", x => x.dataset.rs === k, el);
+    const rail = $("#rsl", el);
+    press("[data-rs]", x => x.dataset.rs === k, rail); slide(rail, !swap);
+    const on = $('[aria-pressed="true"]', rail);
+    if (on && (on.offsetLeft < rail.scrollLeft || on.offsetLeft + on.offsetWidth > rail.scrollLeft + rail.clientWidth))
+      rail.scrollTo({left: on.offsetLeft - (rail.clientWidth - on.offsetWidth) / 2, behavior: swap && !REDUCED ? "smooth" : "auto"});
     const rl = $("#rol", el);
     if (swap) swapIn(rl);
     if (!rows.length) { rl.innerHTML = `<div class="empty"><b>${k === "reb_ch" ? "None yet this season" : "No role changes"}</b></div>`; return; }
-    rl.innerHTML = `<div class="lhd"><span>${rows.length} players</span><span>Last 3 games</span></div>` + rows.map(r => {
-      const v = stat(r), dv = v[0] - v[1], up = dv > 0, was = r.starts[2] ? r.starts[1] / r.starts[2] : 0;
-      const why = [k !== "min" ? `${r.min[1]} → ${r.min[0]} min` : "",
-                   r.starts[0] === 3 && was < .5 ? "Now starting" : r.starts[0] === 0 && was >= .5 ? "Lost his start" : "",
+    // the comparison (nba_players.roles_mode): early on, his season so far against last season; later, his last 3 games
+    // against the rest of his season
+    const cmp = j && j.mode === "season" ? "This season vs last" : "Last 3 games vs season";
+    rl.innerHTML = `<div class="lhd"><span>${rows.length} players</span><span>${cmp}</span></div>` + rows.map(r => {
+      const v = stat(r), dv = v[0] - v[1], up = dv > 0, was = r.starts[2] ? r.starts[1] / r.starts[2] : 0, now = r.starts[0] / (r.starts[3] || 3);
+      const why = [r.was_team ? `<span>New team</span> (was ${esc(r.was_team)})` : "",
+                   k !== "min" ? `${r.min[1]} → ${r.min[0]} min` : "",
+                   now >= .8 && was < .5 ? "Now starting" : now <= .2 && was >= .5 ? "Lost his start" : "",
                    r.out.length ? `<span>${r.out.map(n => esc(lastName(n))).join(", ")} out</span>` : "",
                    r.usg[0] !== null && r.usg[1] !== null ? `USG ${Math.round(r.usg[1])} → ${Math.round(r.usg[0])}%` : ""].filter(Boolean);
       return `<button class="pr ir ir0 ror" data-vp="${r.pid}"><span class="av">${head(r.pid)}</span><div class="who"><div class="nm">${esc(nameOf(r.name))}<span class="cd">${esc(r.team)}</span></div>
-        <div class="lin">${v[1]} → <b>${v[0]}</b> ${sd[2]}${r.base === "last season" ? " <small>vs last season</small>" : ""}</div>
+        <div class="lin">${v[1]} → <b>${v[0]}</b> ${sd[2]}</div>
         <div class="ros">${why.join(" · ")}</div></div>
         <span class="rod ${up ? "up" : "dn"}">${up ? "▲" : "▼"}${Math.abs(dv).toFixed(1)}<i>${sd[3]}</i></span></button>`; }).join("");
   });
@@ -1399,13 +1441,18 @@ function lineupsView() {
 }
 function luTeam(t, e) {
   if (!e) return `<div class="lut"><div class="luth">${logo(t, "")}<b>${esc(t)}</b><span class="tg tn">NOT POSTED</span></div></div>`;
-  const usual = new Set(e.usual), isNew = pid => usual.size > 0 && !usual.has(pid);
-  const tiles = e.starters.map(([pid, name, pos]) => `<button class="lus${isNew(pid) ? " new" : ""}" data-vp="${pid}"><span class="av">${head(pid)}</span><b>${esc(lastName(name))}</b><i>${esc(pos)}${isNew(pid) ? " · NEW" : ""}</i></button>`).join("");
-  const miss = e.missing.length ? `<div class="lum"><b>Not starting</b>${e.missing.map(([pid, name, st]) => `<button data-vp="${pid}">${esc(nameOf(name))}</button>${st ? `<span class="tg ${INJ_C[st] || "tn"}">${INJ_S[st] || esc(String(st).toUpperCase())}</span>` : ""}`).join(", ")}</div>` : "";
+  const usual = new Set(e.usual), isNew = pid => usual.size > 0 && !usual.has(pid), proj = e.status === "Projected";
+  const tag = st => st ? `<span class="tg ${INJ_C[st] || "tn"}">${INJ_S[st] || esc(String(st).toUpperCase())}</span>` : "";
+  // a projected five (nba_research.projected_lineups): a Questionable starter carries his Q; who comes in for whom below
+  const tiles = e.starters.map(([pid, name, pos, st]) => `<button class="lus${isNew(pid) ? " new" : ""}" data-vp="${pid}"><span class="av">${head(pid)}</span><b>${esc(lastName(name))}</b><i>${esc(pos)}${isNew(pid) ? " · NEW" : ""}${proj && INJ_S[st] ? ` · <em class="lq">${INJ_S[st]}</em>` : ""}</i></button>`).join("");
+  const nm = pid => (e.starters.find(x => x[0] === pid) || [, ""])[1];
+  const subs = proj && (e.subs || []).length ? `<div class="lum"><b>In for</b>${e.subs.map(([pid, out, outName]) =>
+    `${esc(lastName(nm(pid)))} for <button data-vp="${out}">${esc(nameOf(outName))}</button>${tag((e.missing.find(m => m[0] === out) || [])[2])}`).join(", ")}</div>` : "";
+  const miss = !proj && e.missing.length ? `<div class="lum"><b>Not starting</b>${e.missing.map(([pid, name, st]) => `<button data-vp="${pid}">${esc(nameOf(name))}</button>${st ? `<span class="tg ${INJ_C[st] || "tn"}">${INJ_S[st] || esc(String(st).toUpperCase())}</span>` : ""}`).join(", ")}</div>` : "";
   const ina = e.inactive.length ? `<div class="lum"><b>Inactive</b>${e.inactive.map(([, name]) => esc(nameOf(name))).join(", ")}</div>` : "";
   const ok = e.status === "Confirmed";
-  return `<div class="lut"><div class="luth">${logo(t, "")}<b>${esc(t)}</b><span class="tg ${ok ? "tp" : "tq"}">${ok ? "CONFIRMED" : "EXPECTED"}</span>${ok && e.at ? `<em>${esc(mt(e.at))}</em>` : ""}</div>
-    <div class="lur">${tiles}</div>${miss}${ina}</div>`;
+  return `<div class="lut"><div class="luth">${logo(t, "")}<b>${esc(t)}</b><span class="tg ${ok ? "tp" : proj ? "tn" : "tq"}">${ok ? "CONFIRMED" : proj ? "PROJECTED" : "EXPECTED"}</span>${ok && e.at ? `<em>${esc(mt(e.at))}</em>` : ""}</div>
+    <div class="lur">${tiles}</div>${subs}${miss}${ina}</div>`;
 }
 function tabbar() {
   const tb = $("#tb"), fo = filtersOn();
@@ -1523,12 +1570,18 @@ function filterSheet() {
     upd();
   });
 }
+// Today / Tomorrow / Yesterday by the phone's calendar (the payload keeps last night's slate until 6 AM ET)
+function dayName(d) {
+  const t = new Date(), iso_ = x => `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`;
+  const off = k => { const x = new Date(t); x.setDate(x.getDate() + k); return iso_(x); };
+  return d === off(0) ? "Today" : d === off(1) ? "Tomorrow" : d === off(-1) ? "Yesterday" : d.slice(5).replace("-", "/");
+}
 function daySheet() {
   openSheet('<h2 id="sht">Day</h2>' + D.dates.filter(d => /^\d{4}-/.test(d)).map((d, i) => {
     const n = D.games.filter(g => g.date === d).length;
-    return `<button class="opt" data-date="${d}"><span>${i === 0 ? "Today" : i === 1 ? "Tomorrow" : d} · ${n} game${n === 1 ? "" : "s"}</span><span class="ck">${d === ST.date ? "✓" : ""}</span></button>`;
+    return `<button class="opt" data-date="${d}"><span>${dayName(d)} · ${n} game${n === 1 ? "" : "s"}</span><span class="ck">${d === ST.date ? "✓" : ""}</span></button>`;
   }).join(""), s => {
-    $$("[data-date]", s).forEach(b => b.onclick = () => { if (ST.date !== b.dataset.date) { ST.date = b.dataset.date; ST.gid = "all"; save(); render(); } closeSheet(); });
+    $$("[data-date]", s).forEach(b => b.onclick = () => { AUTO_DAY = false; if (ST.date !== b.dataset.date) { ST.date = b.dataset.date; ST.gid = "all"; save(); render(); swapIn($("#lst")); } closeSheet(); });
   });
 }
 // what the nightly replay (nba_research_score.py) found: each of the page's signals against what the price said
@@ -1644,11 +1697,12 @@ function openProp(id, push) {
   const p = propFor(id);
   if (!p) return;
   recentAdd(p);
-  const fresh = CUR !== id, was = !!CUR;
+  const fresh = CUR !== id, was = !!CUR, who = x => String(x).split("|").slice(0, 2).join("|");
+  const same = was && who(CUR) === who(id);              // another stat of the same player: his filters and window stay
   CUR = id;
-  if (fresh) Object.assign(DT, {line: p.v ? vLine(p) : p.main !== null ? p.main : allLines(p)[0],
+  if (fresh) Object.assign(DT, {line: p.v ? vLine(p) : p.main !== null ? p.main : allLines(p)[0], fresh: null}, same ? {} : {
                                  win: windowed(logsOf(p), "season", D.season).length ? "season" : "l10", home: null, starter: null, blow: null,
-                                 result: null, rest: null, ranges: {}, without: {}, with: {}, dvp: false, def: false, open: {}, fresh: null, ovs: []});
+                                 result: null, rest: null, ranges: {}, without: {}, with: {}, dvp: false, def: false, open: {}, ovs: []});
   if (push !== false) history.pushState({p: id, d: navDepth() + 1}, "", hashState());
   const pg = $("#pg");
   pg.hidden = false;                        // (off-screen until it slides in; it must lay out for the pills to measure)
@@ -1989,7 +2043,9 @@ function renderProp(mode) {
   const without = (D.absences[g.date + "|" + p.team] || []).map(a => ({key: String(a.pid), name: a.name || "teammate", played: a.played, since: a.since, team: p.team, status: a.status, fresh: a.fresh}));
   const mkts = p.v ? TAB_ORDER : TAB_ORDER.filter(m => D.props.some(x => x.gid === p.gid && x.pid === p.pid && x.market === m));
   const fav = favs().indexOf(p.pid) >= 0;
-  const wins = [["season", D.season.slice(0, 4)], ["h2h", "H2H"], ["l5", "L5"], ["l10", "L10"], ["l20", "L20"]];
+  // the games window: this season, head to head, the last 5 / 10 / 20, and last season at the end (every game before this
+  // season: the logs hold two seasons)
+  const wins = [["season", D.season.slice(0, 4)], ["h2h", "H2H"], ["l5", "L5"], ["l10", "L10"], ["l20", "L20"], ["last", String(+D.season.slice(0, 4) - 1)]];
   // availability
   const rpE = p.v && (((D.inj_report || {})[g.date + "|" + p.team] || {}).players || []).find(e => e.pid === p.pid);
   const inj = D.injuries[g.date + "|" + p.pid] || (rpE ? {official: {status: rpE.status, reason: rpE.reason}, listed_team: true} : {}), rep = D.sources.report[g.date];
@@ -2065,8 +2121,9 @@ function chartF(p, g, c, without, dr) {
     if (rkPrev.dvp && rkPrev.teams) s[prevS] = oppSet(rkPrev.dvp[c.group][p.market], dvpT, rkPrev.teams); oppSets.push(s); }
   if (x.def && defT) { const s = {}; s[D.season] = oppSet(rkCur.def, defT, rkCur.teams);
     if (rkPrev.def && rkPrev.teams) s[prevS] = oppSet(rkPrev.def, defT, rkPrev.teams); oppSets.push(s); }
-  const ms = matesAll(p, without);
-  return {home: x.home, starter: x.starter, blow: x.blow, result: x.result, rest: x.rest, ranges: x.ranges, oppSets: oppSets,
+  const ms = matesAll(p, without), ranges = {};
+  Object.keys(x.ranges).forEach(k => { if (forMarket(k, p.market)) ranges[k] = x.ranges[k]; });   // potential assists: kept, off on points
+  return {home: x.home, starter: x.starter, blow: x.blow, result: x.result, rest: x.rest, ranges: ranges, oppSets: oppSets,
           with: ms.filter(m => x.with[m.key]), without: ms.filter(m => x.without[m.key])};
 }
 function updateProp(mode) {
@@ -2083,7 +2140,7 @@ function updateProp(mode) {
   const fs = chanceSide(p, line, side), hr = hbox({n: s.n, rate: rate}, fs);
   const gr = grade(p, side);
   const opp = g.state === "none" ? "No game" : `<span class="vs">${p.home ? "vs" : "@"}</span>${esc(p.opp || "")}\u200a·\u200a${g.state === "pregame" ? mt(g.tip).replace(" ", "") : esc(g.state === "live" ? "LIVE" : g.state === "final" ? "Final" : g.label || "")}`;
-  const ovOn = k => !!(DT.open[k] || DT.ranges[k]);
+  const ovOn = k => forMarket(k, p.market) && !!(DT.open[k] || DT.ranges[k]);
   const ov = DT.ovs.slice().reverse().find(ovOn) || Object.keys(OVL).find(ovOn) || null;
   // cells
   if (!rest) $("#pcells").innerHTML = `<div class="cells">
@@ -2110,11 +2167,12 @@ function updateProp(mode) {
   slide($("#wcap"), first);
   $("#psr").textContent = `${side === "under" ? "Under" : "Over"} ${line}: ${rate === null ? "no games" : Math.round(rate * 100) + "% of " + s.n + " games"}.${ov ? " White boxes = " + OVL[ov] + "." : ""}`;
   }
-  // chart filter chips, one scrolling row: the adjustable ranges, Starter, Blowouts, DvP, Def Rank, teammates, then Home … B2B
+  // chart filter chips, one scrolling row: the adjustable ranges, Starter, Blowouts, DvP, Def Rank, then Home … B2B;
+  // the teammates on a row of their own just below: the With / Without button, then tonight's news and the ones set
   const on = (k, v) => DT[k] === v;
   const chip = (attrs, lab, active) => `<button class="fc${active ? " on" : ""}" ${attrs} aria-pressed="${!!active}">${lab}</button>`;
   const rangeOn = k => !!DT.ranges[k];
-  const chips = [];
+  const chips = [], mchips = [];
   const rchip = k => { if (!forMarket(k, p.market)) return; const b = bounds(logs, k), abbr = RANGES.find(r => r[0] === k)[2]; if (b && b[0] !== b[1]) chips.push(chip(`data-r="${k}"`, `${OVL[k] ? ICON.bars : ICON.pm}${abbr}`, rangeOn(k) || DT.open[k])); };
   const tchip = (k, v, lab) => chips.push(chip(`data-k="${k}" data-v="${v}"`, lab, on(k, v)));
   ["min", "fga", "fg3a", "fta", "usg", "pot_ast", "reb_ch"].forEach(rchip);   // the adjustable filters first
@@ -2122,13 +2180,12 @@ function updateProp(mode) {
   if (logs.some(l => Math.abs(l.margin) >= 15)) tchip("blow", "b", "Blowouts"); // only games decided by 15+
   if (c.dvp_rank) chips.push(chip('data-t="dvp"', `DvP <em class="${rankCls(c.dvp_rank, c.teams, side)}">${ord(c.dvp_rank)}</em>`, DT.dvp));
   if (c.def_rank) chips.push(chip('data-t="def"', `Def Rank <em class="${rankCls(c.def_rank, c.teams, side)}">${ord(c.def_rank)}</em>`, DT.def));
-  const wchip = w => chips.push(chip(`data-wo="${w.key}"`, (w.fresh ? "W/O " : "Without ") + esc(lastName(w.name)), DT.without[w.key]));
-  without.filter(w => w.fresh).forEach(wchip);                 // tonight's news: up front
-  // the With / Without filters set in the teammates sheet show as chips that are on (a tap clears one)
   const ms = matesAll(p, without), fresh = k => without.some(w => w.fresh && w.key === k);
-  ms.filter(m => DT.with[m.key]).forEach(m => chips.push(chip(`data-mw="${m.key}"`, "With " + esc(lastName(m.name)), true)));
-  ms.filter(m => DT.without[m.key] && !fresh(m.key)).forEach(m => chips.push(chip(`data-mo="${m.key}"`, "W/O " + esc(lastName(m.name)), true)));
-  if (ms.length) chips.push(chip('id="mts" aria-haspopup="dialog"', `${ICON.people}With / Without`, false));
+  if (ms.length) mchips.push(chip('id="mts" aria-haspopup="dialog"', `${ICON.people}With / Without`, false));
+  without.filter(w => w.fresh).forEach(w => mchips.push(chip(`data-wo="${w.key}"`, "W/O " + esc(lastName(w.name)), DT.without[w.key])));   // tonight's news
+  // the With / Without filters set in the teammates sheet show as chips that are on (a tap clears one)
+  ms.filter(m => DT.with[m.key]).forEach(m => mchips.push(chip(`data-mw="${m.key}"`, "With " + esc(lastName(m.name)), true)));
+  ms.filter(m => DT.without[m.key] && !fresh(m.key)).forEach(m => mchips.push(chip(`data-mo="${m.key}"`, "W/O " + esc(lastName(m.name)), true)));
   tchip("home", true, "Home"); tchip("home", false, "Away"); rchip("margin");
   tchip("result", "W", "Win"); tchip("result", "L", "Loss"); tchip("rest", "b2b", "B2B");
   const panels = RANGES.filter(([k]) => (DT.open[k] || rangeOn(k)) && forMarket(k, p.market)).map(([k, lab]) => {
@@ -2139,12 +2196,13 @@ function updateProp(mode) {
       <div class="rp-b"><span>${b[0]}</span><span>${b[1]}</span></div></div>`;
   }).join("");
   DT.fresh = null;
-  const anyF = DT.dvp || DT.def || DT.home !== null || DT.starter !== null || DT.blow !== null || DT.result !== null || DT.rest !== null || Object.keys(DT.ranges).length ||
-    Object.keys(DT.without).some(k => DT.without[k]) || Object.keys(DT.with).some(k => DT.with[k]) || Object.keys(DT.open).some(k => DT.open[k]);
-  if (!rest) { const fx = $("#pcf .fcs"), fl = fx ? fx.scrollLeft : 0;
+  const anyF = DT.dvp || DT.def || DT.home !== null || DT.starter !== null || DT.blow !== null || DT.result !== null || DT.rest !== null ||
+    Object.keys(DT.ranges).some(k => forMarket(k, p.market)) || Object.keys(DT.without).some(k => DT.without[k]) ||
+    Object.keys(DT.with).some(k => DT.with[k]) || Object.keys(DT.open).some(k => DT.open[k] && forMarket(k, p.market));
+  if (!rest) { const fl = $$("#pcf .fcs").map(x => x.scrollLeft);
     $("#pcf").innerHTML = `<div class="cf-h"><h3>Chart Filters</h3><button class="ca" id="clr"${anyF ? "" : " hidden"}>Clear All</button></div>
-      <div class="fcs">${chips.join("")}</div>${panels}`;
-    $("#pcf .fcs").scrollLeft = fl; }
+      <div class="fcs">${chips.join("")}</div>${mchips.length ? `<div class="fcs fcw">${mchips.join("")}</div>` : ""}${panels}`;
+    $$("#pcf .fcs").forEach((x, i) => x.scrollLeft = fl[i] || 0); }   // each row keeps its place when a chip re-renders it
   if (!rest) { $("#pgs").innerHTML = gameScript(p, g, logs, line, side); $("#psc").innerHTML = schedCard(p, g, logs, line, side); refsRow(p, g); }
   if (opening) { PX.lazy = setTimeout(() => { if (PX && PX.p === p) updateProp("rest"); }, 470); bindLive(p, logs, without); return; }
   if (!PX.statDone) { $("#pstat").innerHTML = PX.stat; PX.statDone = true; $$("[data-rel]", pg).forEach(b => b.onclick = () => openProp(b.dataset.rel)); }
@@ -2210,6 +2268,101 @@ function schedCard(p, g, logs, line, side) {
     <table class="gst"><thead><tr><th></th>${cols.map(c => `<th${c[0] === cur ? ' class="on"' : ""}>${c[1]}</th>`).join("")}</tr></thead><tbody>
     ${row("Games", xs => xs.length)}${row("Minutes", xs => avg(xs.map(l => l.min)))}${row(esc(NAME[p.market]), xs => avg(xs.map(st).filter(x => x !== null)))}
     ${row(`${side === "under" ? "Under" : "Over"} ${line}`, rate)}</tbody></table></div>`;
+}
+// ── assists and rebounds by court zone (docs/pbp/{season}.json, nba_pbp), on the Matchup page of a prop with assists or
+// rebounds in it: where his assists turn into baskets (or his rebounds come from: the zone of the miss) against how many
+// the opponent gives up there a game, over the league's average for a team. This season once the opponent has 10 games ──
+const AST_M = new Set(["assists", "pts_ast", "reb_ast", "pra"]), REB_M = new Set(["rebounds", "pts_reb", "reb_ast", "pra"]);
+const SHOT_M = new Set(["points", "threes", "pts_reb", "pts_ast", "pra"]);     // the shot chart: props with points or threes in them
+// the side files a season at a time (docs/pbp, nba_pbp; docs/rebd, nba_rebd), fetched again every 10 minutes
+const sideJson = (dir, M) => s => { const t = Math.floor(Date.now() / 600000), k = s + "|" + t;
+  if (!M.has(k)) M.set(k, fetch(`${dir}/${encodeURIComponent(s)}.json?t=${t}`).then(r => r.ok ? r.json() : null).catch(() => null)); return M.get(k); };
+const pbpLoad = sideJson("pbp", new Map()), rebdLoad = sideJson("rebd", new Map());
+// the rebound rings (docs/rebd, NBA.com's tracking): where he secured his rebounds, 0-3 / 3-6 / 6-10 / 10+ ft from the
+// hoop, each shaded by his share against the players with rebound lines; a close-up of the court around the rim
+const RD_C = r => `M0,-${r}A${r},${r} 0 1 1 0,${r}A${r},${r} 0 1 1 0,-${r}Z`;
+const RD_PATH = [RD_C(30), RD_C(60) + RD_C(30), RD_C(100) + RD_C(60), `M-150,-47.5H150V115H-150Z` + RD_C(100)];
+const RD_X = [0, 44, 79, 125], RD_FT = ["0–3", "3–6", "6–10", "10+"];
+function rebRings(r, avg) {                            // r: [g, reb, oreb, contested, dist x4, shot x4, miss3]
+  const sh = k => r[4 + k] / r[1], pc = x => Math.round(x * 100) + "%";
+  const marks = RD_PATH.map((d, k) => `<path d="${d}" fill="${shFill(avg.dist[k] == null ? null : (sh(k) - avg.dist[k]) * 100)}" fill-rule="evenodd"/>`).join("");
+  const labs = RD_PATH.map((_, k) => k ? `<text x="-${RD_X[k]}" y="15" class="rdv">${pc(sh(k))}</text><text x="${RD_X[k]}" y="13" class="rds">${RD_FT[k]} ft</text>`
+    : `<text x="0" y="25" class="rdv">${pc(sh(0))}</text><text x="0" y="-15" class="rds">0–3 ft</text>`).join("");
+  const vs = (x, a) => `${pc(x)}<small>avg ${a == null ? "–" : pc(a)}</small>`;
+  return `<h3 class="shw">How far from the hoop he grabs them<small>NBA.com tracking · ${r[1]} boards · shaded against the players with rebound lines</small></h3>
+    <svg class="shct rdct" viewBox="-150 -50 300 165" role="img" aria-label="rebounds by distance from the hoop"><defs><clipPath id="rdclip"><rect x="-150" y="-47.5" width="300" height="162.5"/></clipPath></defs>
+      <g clip-path="url(#rdclip)">${marks}${[30, 60, 100].map(x => `<path d="${RD_C(x)}" fill="none" class="shz"/>`).join("")}</g>
+      <g class="shl"><path d="M-150,-47.5H150"/><path d="M-30,-7.5H30"/><circle cx="0" cy="0" r="7.5"/></g>${labs}</svg>
+    <div class="kv shr"><span>Contested</span><b>${vs(r[3] / r[1], avg.contested)}</b></div>
+    <div class="kv shr"><span>Off missed threes</span><b>${vs(r[12] / r[1], avg.miss3)}</b></div>`;
+}
+// the Assists and Rebounds cards: a court of the shot chart's six zones (a rebound by the zone of the miss it came off),
+// the player's view (his a game in each zone, shaded by his share there against the league's share) or the opponent's
+// (allowed a game, shaded against the league's average for a team, ranked: 1st = the fewest allowed, the toughest),
+// then the opponent's zones against the league as a list; rebounds add the rings and the opponent's missed threes
+function zoneCard(kind) {
+  const el = $(kind === "ast" ? "#asc" : "#rbc"); if (!el || !MUP) return;
+  const p = MUP.p, key = kind + "Season", vkey = kind + "View", ast = kind === "ast";
+  const top = `<div class="shh"><span class="av">${head(p.pid)}</span><b>${ast ? "ASSISTS" : "REBOUNDS"}</b>${logo(p.opp, "shl0")}</div>`;
+  if (!el.innerHTML) el.innerHTML = top + '<div class="vsk"><div class="sk"></div><div class="sk"></div></div>';
+  const draw = (fresh, view) => Promise.all([pbpLoad(MUP[key]), ast ? null : rebdLoad(MUP[key])]).then(([j, rd]) => {
+    if (!MUP || MUP.p !== p) return;
+    if (!j) { el.innerHTML = top + '<div class="empty"><b>Not available yet</b></div>'; return; }
+    const nz = j.zones.length, Z = ast ? j.zones : j.zones.concat(["Free Throw"]), off = ast ? 1 : 1 + nz, L = j.league, Lk = L[kind];
+    const me = j.players[String(p.pid)], t = j.teams[p.opp], gp = me ? me[0] : 0;
+    const mine = me ? Z.map((_, k) => me[off + k]) : null, tot = mine ? mine.reduce((a, b) => a + b, 0) : 0;
+    const rows = Z.map((nm, k) => ({nm: nm, k: k, a: t && t[0] ? t[off + k] / t[0] : null, d: t && t[0] && L.gp ? t[off + k] / t[0] - Lk[k] / L.gp : null}))
+      .filter(r => r.d !== null).sort((x, y) => y.d - x.d);
+    const def = MUP[vkey] === "def";
+    const sub = def ? (t && t[0] ? t[0] + " games" : "") : gp ? `${r1(tot / gp)} a game${ast ? "" : ` · ${r1(me[me.length - 1] / gp)} offensive`}` : "No games";
+    const court = () => {
+      const all = Object.values(j.teams).filter(x => x[0]), lt = Lk.reduce((a, b) => a + b, 0), none = {fill: shFill(null), t: "–", sub: ""};
+      const zs = SH_Z.map(nm => {
+        const k = j.zones.indexOf(nm);
+        if (k < 0) return none;
+        if (def) {
+          if (!t || !t[0] || !L.gp) return none;
+          const a = t[off + k] / t[0], la = Lk[k] / L.gp;
+          return {fill: shFill(la ? (a / la - 1) * 50 : null), t: a.toFixed(1), sub: ord(1 + all.filter(x => x[off + k] / x[0] < a).length)};
+        }
+        return tot ? {fill: shFill(lt ? (mine[k] / tot - Lk[k] / lt) * 100 : null), t: (mine[k] / gp).toFixed(1), sub: Math.round(mine[k] / tot * 100) + "%"} : none;
+      });
+      const what = ast ? (def ? "assisted baskets allowed" : "assists") : def ? "opponents' rebounds" : "rebounds by the miss's zone";
+      let extra = "";
+      if (!ast) {                                      // free throws have no zone on the court; then the rings, or the misses
+        extra = `<div class="zft">Off missed free throws: ${def ? (t && t[0] ? (t[off + nz] / t[0]).toFixed(1) + " a game" : "–") : tot ? (mine[nz] / gp).toFixed(1) + " a game · " + Math.round(mine[nz] / tot * 100) + "%" : "–"}</div>`;
+        const r = rd && rd.players[String(p.pid)];
+        if (!def) extra += r && r[1] ? rebRings(r, rd.avg) : '<div class="zft">How far from the hoop: not tracked for him yet</div>';
+        else if (t && t.length >= 1 + nz + 2 * Z.length && L.miss) {
+          const m3 = x => (x[off + Z.length + 3] + x[off + Z.length + 4] + x[off + Z.length + 5]) / x[0], lg = (L.miss[3] + L.miss[4] + L.miss[5]) / L.gp;
+          extra += `<div class="kv shr"><span>${esc(p.opp)}'s missed threes<small>long misses, long rebounds</small></span><b><em class="${m3(t) > lg ? "up" : "dn"}">${m3(t).toFixed(1)} a game</em><small>league ${lg.toFixed(1)}</small></b></div>`;
+        }
+      }
+      return `<svg class="shct" viewBox="-252 -50 504 352" role="img" aria-label="${def ? esc(p.opp) : esc(p.player)} ${what} by zone, ${esc(MUP[key])}">${zoneMarks(zs)}</svg>
+        <div class="shk"><span>Below league ${def ? "avg" : "share"}</span><i></i><span>Above</span></div>${extra}`;
+    };
+    if (view) { const v = $(".zcv", el); if (v) { v.innerHTML = court(); swapIn(v); } $(".shy > span", el).textContent = sub; return; }
+    el.innerHTML = top + `<div class="seg" role="group" aria-label="View"><span class="pill2"></span>${[["player", esc(lastName(p.player))], ["def", esc(p.opp) + " Defense"]].map(([k, l]) =>
+        `<button data-zv="${k}" aria-pressed="${def === (k === "def")}">${l}</button>`).join("")}</div>
+      <div class="shy" role="group" aria-label="Season">${[D.season, prevSeason(D.season)].map(x => `<button class="chip" data-pbs="${x}" aria-pressed="${x === MUP[key]}">${x.slice(0, 4)}</button>`).join("")}<span>${esc(sub)}</span></div>
+      <div class="zbd"><div class="zcv">${court()}</div><h3 class="shw">${ast ? `Where ${esc(p.opp)} gives up assisted baskets` : `Where ${esc(p.opp)}'s opponents rebound`}<small>${ast ? "by where the basket was made" : "by where the missed shot came from"}</small></h3>
+      ${rows.length ? rows.map(r => `<div class="kv shr"><span>${r.nm}<small>${tot ? Math.round(mine[r.k] / tot * 100) + `% of his ${ast ? "assists" : "rebounds"} · ` + (mine[r.k] / gp).toFixed(1) + "/g" : "none"}</small></span>
+        <b><em class="${r.d > 0 ? "up" : "dn"}">${r.d > 0 ? "+" : ""}${r.d.toFixed(1)}/g</em><small>${r.a.toFixed(1)} a game</small></b></div>`).join("") : '<div class="empty"><b>No games yet</b></div>'}</div>`;
+    if (fresh) swapIn($(".zbd", el));
+    $$("[data-pbs]", el).forEach(b => b.onclick = () => { if (MUP[key] !== b.dataset.pbs) { MUP[key] = b.dataset.pbs; draw(true); } });
+    const seg = $(".seg", el);                 // the view switch slides its pill and redraws the court alone
+    slide(seg, true);
+    $$("[data-zv]", el).forEach(b => b.onclick = () => { if (MUP[vkey] === b.dataset.zv) return;
+      MUP[vkey] = b.dataset.zv; $$("[data-zv]", el).forEach(x => x.setAttribute("aria-pressed", x === b)); slide(seg); draw(false, true); });
+  });
+  if (MUP[key]) { draw(); return; }
+  // this season once the opponent has 10 games, else last season, unless he has games this season and none last (a rookie)
+  Promise.all([pbpLoad(D.season), pbpLoad(prevSeason(D.season))]).then(([j, q]) => {
+    if (!MUP || MUP.p !== p) return;
+    const t = j && j.teams[p.opp], me = x => !!(x && x.players[String(p.pid)]);
+    MUP[key] = (t && t[0] >= 10) || (me(j) && !me(q)) ? D.season : prevSeason(D.season);
+    draw();
+  });
 }
 // ── referees (docs/refs.json, nba_refs): tonight's crew and how each official's games have run against the league's,
 // both teams together a game: fouls, free throw attempts, points, possessions ──
@@ -2416,7 +2569,7 @@ const initialName = n => { const i = String(n || "").indexOf(" "); return i > 0 
 function openMatchup(p, push) {
   if (!p) return;
   MUP = {p: p, grp: VS_GRP.some(g => g[0] === (p.ctx || {}).group) ? p.ctx.group : "G", mkt: p.market, more: false, rows: null,
-         shView: "player", shSeason: null, shMode: "shots"};
+         shView: "player", shSeason: null, shMode: "shots", astView: "player", rebView: "player"};
   if (push !== false) history.pushState({p: p.id, mu: 1, d: navDepth() + 1}, "", hashState());
   const mp = $("#mp");
   mp.hidden = false;
@@ -2459,7 +2612,8 @@ function renderMatchup() {
     <div class="mpf"><span>Recent Games vs</span>${dd("grp", VS_GRP, MUP.grp)}${dd("mkt", TAB_ORDER.map(m => [m, NAME[m]]), MUP.mkt)}</div>
     <div id="vst"></div>
     <div class="shc wg" id="wgd"></div>
-    <div class="shc" id="shc"></div>
+    ${AST_M.has(p.market) ? '<div class="shc wg" id="asc"></div>' : ""}${REB_M.has(p.market) ? '<div class="shc wg" id="rbc"></div>' : ""}
+    ${SHOT_M.has(p.market) ? '<div class="shc" id="shc"></div>' : ""}
     <div class="shc wg" id="rfc"></div>`;
   $(".bk", mp).onclick = () => history.back();
   $(".ph", mp).onclick = e => { if (!e.target.closest("button")) mp.scrollTo({top: 0, behavior: REDUCED ? "auto" : "smooth"}); };
@@ -2473,8 +2627,10 @@ function renderMatchup() {
     <div class="kv"><span>1st</span><b>the toughest</b></div>
     <div class="acts"><button class="btn pri" id="mpi-ok">Done</button></div>`, s => { $("#mpi-ok", s).onclick = closeSheet; });
   guardCard();
+  if (AST_M.has(p.market)) zoneCard("ast");
+  if (REB_M.has(p.market)) zoneCard("reb");
   refCard();
-  shotLoad(D.season).then(j => {                       // this season once the opponent has 10 games, else last season
+  if (SHOT_M.has(p.market)) shotLoad(D.season).then(j => {   // this season once the opponent has 10 games, else last season
     if (!MUP || MUP.p !== p) return;
     const t = j && j.teams[p.opp];
     MUP.shSeason = t && t.gp >= 10 ? D.season : prevSeason(D.season);
@@ -2528,6 +2684,13 @@ const SH_PATH = [
   `M${SH_CX},${SH_B}H250V${SH_CY}H${SH_CX}Z`,
   `M-250,${SH_CY}H-${SH_CX}A${SH_R3},${SH_R3} 0 0 0 ${SH_CX},${SH_CY}H250V${SH_BOT}H-250Z`];
 const SH_LAB = [[0, 6], [0, 104], [0, 186], [-235, 40], [235, 40], [0, 268]];
+const SH_LINES = '<g class="shl"><path d="M-250,-47.5H250"/><path d="M-80,-47.5V142.5H80V-47.5"/><path d="M-60,142.5A60,60 0 0 0 60,142.5"/>' +
+  `<path d="M-${SH_CX},-47.5V${SH_CY}A${SH_R3},${SH_R3} 0 0 0 ${SH_CX},${SH_CY}V-47.5"/><path d="M-30,-7.5H30"/><circle cx="0" cy="0" r="7.5"/>` +
+  '<path d="M-40,0A40,40 0 0 0 40,0"/></g>';
+// the six zones shaded, the court's lines, each zone's number and the line under it; zs: [{fill, t, sub}] in SH_Z's order
+const zoneMarks = zs => zs.map((z, k) => `<path d="${SH_PATH[k]}" fill="${z.fill}" fill-rule="evenodd"/>`).join("") + SH_LINES +
+  zs.map((z, k) => `<text x="${SH_LAB[k][0]}" y="${SH_LAB[k][1]}" class="shv${k === 3 || k === 4 ? " sm" : ""}">${z.t}</text>` +
+    (z.sub ? `<text x="${SH_LAB[k][0]}" y="${SH_LAB[k][1] + (k === 3 || k === 4 ? 19 : 23)}" class="shs">${esc(z.sub)}</text>` : "")).join("");
 // each player's shots, for the dots (docs/shots/p/{pid}.json, nba_shots): {s: {season: [x, y, made, ...]}}
 const SHOTP = new Map();
 function shotDots(pid) {
@@ -2556,19 +2719,14 @@ function shotCard() {
       const z = def ? opp[k] : me && me[k], f = pctOf(z);
       return {f: f, d: f === null || lg[k] === null ? null : (f - lg[k]) * 100, sub: def ? (opp[k][1] ? ord(rk(k)) : "") : z && z[1] ? `${z[0]}/${z[1]}` : ""};
     });
-    const lines = '<g class="shl"><path d="M-250,-47.5H250"/><path d="M-80,-47.5V142.5H80V-47.5"/><path d="M-60,142.5A60,60 0 0 0 60,142.5"/>' +
-      `<path d="M-${SH_CX},-47.5V${SH_CY}A${SH_R3},${SH_R3} 0 0 0 ${SH_CX},${SH_CY}V-47.5"/><path d="M-30,-7.5H30"/><circle cx="0" cy="0" r="7.5"/>` +
-      '<path d="M-40,0A40,40 0 0 0 40,0"/></g>';
     // the dots: every shot he took, made (green) over missed (red rings); the zones keep only their faint lines
     const pts = dotsOn && dots && dots.s[season] || [];
     const dotSvg = () => { const miss = [], make = [];
       for (let i = 0; i + 2 < pts.length; i += 3) (pts[i + 2] ? make : miss).push(`<circle cx="${pts[i]}" cy="${pts[i + 1]}" r="4.6"/>`);
       return `<g class="shm">${miss.join("")}</g><g class="shk2">${make.join("")}</g>`; };
     const court = `<svg class="shct" viewBox="-252 -50 504 352" role="img" aria-label="${def ? esc(p.opp) + " defense" : esc(p.player)} ${dotsOn ? "shots" : "by zone"}, ${esc(season)}"><defs><clipPath id="shclip"><rect x="-250" y="-47.5" width="500" height="347.5"/></clipPath></defs>` +
-      (dotsOn ? `<rect x="-250" y="-47.5" width="500" height="347.5" fill="#131313"/>${SH_PATH.map(d => `<path d="${d}" fill="none" class="shz" fill-rule="evenodd"/>`).join("")}${lines}<g clip-path="url(#shclip)">${dotSvg()}</g>`
-      : zs.map((z, k) => `<path d="${SH_PATH[k]}" fill="${shFill(z.d)}" fill-rule="evenodd"/>`).join("") + lines +
-        zs.map((z, k) => `<text x="${SH_LAB[k][0]}" y="${SH_LAB[k][1]}" class="shv${k === 3 || k === 4 ? " sm" : ""}">${z.f === null ? "–" : Math.round(z.f * 100) + "%"}</text>` +
-          (z.sub ? `<text x="${SH_LAB[k][0]}" y="${SH_LAB[k][1] + (k === 3 || k === 4 ? 19 : 23)}" class="shs">${esc(z.sub)}</text>` : "")).join("")) + "</svg>";
+      (dotsOn ? `<rect x="-250" y="-47.5" width="500" height="347.5" fill="#131313"/>${SH_PATH.map(d => `<path d="${d}" fill="none" class="shz" fill-rule="evenodd"/>`).join("")}${SH_LINES}<g clip-path="url(#shclip)">${dotSvg()}</g>`
+      : zoneMarks(zs.map(z => ({fill: shFill(z.d), t: z.f === null ? "–" : Math.round(z.f * 100) + "%", sub: z.sub})))) + "</svg>";
     const made = (() => { let m = 0; for (let i = 2; i < pts.length; i += 3) m += pts[i]; return m; })(), att = pts.length / 3;
     // where the opponent gets scored on: points a game it allows in each zone over the league's average for a team
     const games = all.reduce((a, x) => a + x.gp, 0) || 1, mine = me ? me.reduce((a, z) => a + z[1], 0) : 0;
@@ -2717,7 +2875,9 @@ const sigOf = p => { const g = gameOf(p.gid) || {};
 const pageSig = id => { const p = propFor(id); if (!p) return ""; const g = gameOf(p.gid) || {};
   const around = JSON.stringify([D.injuries[g.date + "|" + p.pid] || null, (D.inj_report || {})[g.date + "|" + p.team] || null, D.absences[g.date + "|" + p.team] || null]);
   return p.v ? "v" + around : sigOf(p) + JSON.stringify(g) + around + JSON.stringify([D.related[p.id] || null, D.sources.books]); };
-let LOADED_AT = 0, PDOWN = false, REDRAW = false, FRESH = false, SAVED_AT = 0;
+let LOADED_AT = 0, PDOWN = false, REDRAW = false, FRESH = false, SAVED_AT = 0, HIDDEN_AT = 0;
+// the slate is chosen for the user (slateDay) at a launch and on a return after 30+ minutes away, until they pick a day
+let AUTO_DAY = true;
 // the last data this phone loaded (Cache Storage), drawn at once on a launch while the fresh copy downloads
 const CACHE = "pickz-data";
 function cacheRead() {
@@ -2748,7 +2908,7 @@ function load() {
   return fetch("nba_props.json?t=" + Date.now(), {cache: "no-store"}).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); })
     .then(text => {
       const j = JSON.parse(text);
-      FRESH = true; apply(j); cacheWrite(text);
+      FRESH = true; apply(j); cacheWrite(text); AUTO_DAY = false;
       if (boot) { busy(false); setTimeout(prefetch, 1500); }
       return true;
     })
@@ -2810,15 +2970,22 @@ document.addEventListener("DOMContentLoaded", () => {
   // the big headshot starts loading and decoding the moment a finger lands on a row, so it is ready when the page slides in
   const warm = new Set();
   $("#app").addEventListener("pointerdown", e => {
-    const b = e.target.closest(".pr[data-id],.mrw[data-id],.ijb[data-id]"), pid = b && b.dataset.id.split("|")[1];
+    const b = e.target.closest(".pr[data-id],.mrw[data-id],.ijb[data-id],[data-vp]"), pid = b && (b.dataset.vp || b.dataset.id.split("|")[1]);
     if (!pid || warm.has(pid)) return;
     warm.add(pid); const im = new Image(); im.src = heroSrc(pid); if (im.decode) im.decode().catch(() => {});
   }, {passive: true});
   load();
   setInterval(load, 120000);
   setInterval(() => { if (!D) return; const u = $("#upd"), l = $("#lupd"); if (u) u.textContent = ago(D.generated_at); if (l) l.textContent = ago(D.generated_at); }, 30000);
+  // a turned phone (or a resized window) re-measures every sliding pill, which sit where the buttons were laid out
+  let RZ = null;
+  window.addEventListener("resize", () => { clearTimeout(RZ); RZ = setTimeout(() => $$(".pill2").forEach(x => slide(x.parentElement, true)), 120); });
   // back from another app: the 2-minute timer was asleep, so catch up at once
-  document.addEventListener("visibilitychange", () => { if (!document.hidden && D && Date.now() - LOADED_AT > 45000) load(); });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) { HIDDEN_AT = Date.now(); return; }
+    if (HIDDEN_AT && Date.now() - HIDDEN_AT > 1800000) AUTO_DAY = true;          // away a while: the slate may have moved on
+    if (D && Date.now() - LOADED_AT > 45000) load().then(() => { AUTO_DAY = false; });
+  });
 });
 })();
 """

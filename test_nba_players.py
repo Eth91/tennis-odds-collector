@@ -35,7 +35,8 @@ def test_build_writes_each_player_with_games_and_the_index():
     assert not (d / "player" / "2.json").exists() and not list((d / "player").glob(".*.tmp"))
 
 
-def test_roles_finds_minute_jumps_and_why():
+def test_roles_last_3_games_once_the_season_has_games(monkeypatch):
+    monkeypatch.setattr(PL, "RECENT_FROM", 5)              # the median team has 8 games: past the switch to "recent"
     d = pathlib.Path(tempfile.mkdtemp())
     m = MU.connect(d / "m.sqlite")
     PG = "INSERT INTO player_games (gid, team, pid, pos, starter, min, pts, reb, ast, fg3m, stl, blk, tov, fga, fg3a, fta) " \
@@ -53,7 +54,10 @@ def test_roles_finds_minute_jumps_and_why():
             m.execute(PG, (gid, "MIN", 4, "", 0, 20 if i < 3 else 28, 8, 3, 1, 1, 0, 0, 1, 7, 2, 1))       # C: gone lately
         # E: the same 30 minutes, but 6 more shots, 3 more threes and (tracking) 4 more potential assists lately
         m.execute(PG, (gid, "MIN", 5, "G", 1, 30, 14, 3, 4, 2, 0, 0, 1, 16 if late else 10, 7 if late else 4, 2))
-        # F: new this season (3 games), so his baseline is last season's games for MIN
+        # G: 6 games, 10 -> 30 minutes: only 3 before his last 3, short of the 5 a "recent" comparison needs
+        if i >= 2:
+            m.execute(PG, (gid, "MIN", 7, "G", int(late), 30 if late else 10, 8, 2, 2, 1, 0, 0, 1, 8, 3, 1))
+        # F: new this season (3 games): too few of his own to compare his last 3 with (no last-season fallback here)
         if late:
             m.execute(PG, (gid, "MIN", 6, "F", 1, 30, 12, 9, 2, 1, 0, 0, 1, 12, 3, 2))
     for i in range(5):
@@ -70,22 +74,58 @@ def test_roles_finds_minute_jumps_and_why():
                    [(f"2026-10-{21 + i}", 6, 6, 18) for i in (5, 6, 7)])
     tr.commit()
     idx = {"1": ["MIN", "Aye One", "F"], "2": ["MIN", "Bee Two", "G"], "3": ["MIN", "Reg Three", "C"], "4": ["MIN", "Cee Four", "F"],
-           "5": ["MIN", "Eee Five", "G"], "6": ["MIN", "Eff Six", "F"]}
+           "5": ["MIN", "Eee Five", "G"], "6": ["MIN", "Eff Six", "F"], "7": ["MIN", "Gee Seven", "G"]}
     PL.build(m, d / "player", idx, "2026-27", tr)
     doc = json.loads((d / "player" / "roles.json").read_text())
     rows, th = doc["rows"], doc["thresholds"]
-    assert th == PL.ROLE_MOVE and [r["pid"] for r in rows] == [1, 6, 5]   # not B (steady), R (out lately), C (not lately)
+    assert doc["mode"] == "recent" and th == PL.ROLE_MOVE
+    assert [r["pid"] for r in rows] == [1, 5]          # not B (steady), R (out lately), C (not lately), F (3 games), G (6)
     moved = lambda k: [r["pid"] for r in rows if r["st"][k] and abs(r["st"][k][0] - r["st"][k][1]) >= th[k]]
-    assert moved("min") == [1, 6] and moved("fga") == [6, 5] and moved("fg3a") == [6, 5] and moved("pot_ast") == [6, 5] and moved("reb_ch") == []
-    f = next(r for r in rows if r["pid"] == 6)
-    # against last season: potential assists compare (the same count both seasons), rebound chances don't (counted differently now)
-    assert f["base"] == "last season" and f["st"]["pot_ast"] == [6.0, 2.0] and f["st"]["reb_ch"] is None
+    assert moved("min") == [1] and moved("fga") == [5] and moved("fg3a") == [5] and moved("pot_ast") == [5] and moved("reb_ch") == []
     e = next(r for r in rows if r["pid"] == 5)
     assert e["st"]["fga"] == [16.0, 10.0] and e["st"]["fg3a"] == [7.0, 4.0] and e["st"]["pot_ast"] == [9.0, 5.0] and e["st"]["reb_ch"] == [6.0, 6.0]
     assert rows[0]["st"]["pot_ast"] is None                                  # 1 tracked recent game: left out, not a move
     a = rows[0]
-    assert a["d_min"] == 15.0 and a["min"] == [30.0, 15.0] and a["starts"] == [3, 0, 5] and a["base"] == "this season"
-    assert a["out"] == ["Reg Three", "Cee Four"]      # the regulars who sat 2+ of the team's last 3
+    assert a["d_min"] == 15.0 and a["min"] == [30.0, 15.0] and a["starts"] == [3, 0, 5, 3] and a["base"] == "this season"
+    assert a["out"] == ["Reg Three", "Cee Four"] and a["was_team"] is None    # the regulars who sat 2+ of the team's last 3
+
+
+def test_roles_this_season_against_last_early_on():
+    d = pathlib.Path(tempfile.mkdtemp())
+    m = MU.connect(d / "m.sqlite")
+    PG = "INSERT INTO player_games (gid, team, pid, pos, starter, min, pts, reb, ast, fg3m, stl, blk, tov, fga, fg3a, fta) " \
+         "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+    G = "INSERT INTO games (gid, season, date, home, away, home_pts, away_pts) VALUES (?,?,?,?,?,100,90)"
+    for i in range(12):                                      # last season: 12 MIN games and 12 ATL games
+        m.execute(G, (f"m{i}", "2025-26", f"2026-01-{i + 1:02d}", "MIN", "WAS"))
+        m.execute(G, (f"a{i}", "2025-26", f"2026-02-{i + 1:02d}", "ATL", "BOS"))
+        m.execute(PG, (f"m{i}", "MIN", 1, "F", 0, 20, 8, 4, 2, 1, 0, 0, 1, 7, 2, 1))       # P1: a bench player last season
+        m.execute(PG, (f"a{i}", "ATL", 2, "G", 0, 15, 6, 2, 2, 1, 0, 0, 1, 5, 2, 1))       # P2: in Atlanta last season
+        m.execute(PG, (f"m{i}", "MIN", 3, "G", 1, 30, 15, 4, 4, 2, 0, 0, 1, 12, 5, 3))     # P3: the same 30 minutes
+        if i < 6:
+            m.execute(PG, (f"m{i}", "MIN", 4, "C", 0, 10, 4, 4, 0, 0, 0, 0, 0, 3, 0, 1))   # P4: 6 games: too few to compare
+    for i in range(4):                                       # this season: 4 games each, under the switch to "recent"
+        m.execute(G, (f"g{i}", "2026-27", f"2026-10-{21 + i}", "MIN", "WAS"))
+        m.execute(PG, (f"g{i}", "MIN", 1, "F", 1, 31, 15, 6, 3, 2, 0, 0, 1, 12, 4, 3))     # P1: starting, 31 minutes
+        m.execute(PG, (f"g{i}", "MIN", 2, "G", 1, 30, 14, 3, 5, 2, 0, 0, 1, 12, 5, 2))     # P2: a Timberwolf now
+        m.execute(PG, (f"g{i}", "MIN", 3, "G", 1, 30, 15, 4, 4, 2, 0, 0, 1, 12, 5, 3))
+        m.execute(PG, (f"g{i}", "MIN", 4, "C", 1, 28, 12, 9, 1, 0, 0, 1, 1, 9, 0, 3))
+    m.commit()
+    tr = sqlite3.connect(d / "trk.sqlite")
+    tr.execute("CREATE TABLE tracking (date TEXT, player_id INTEGER, potential_ast REAL, reb_chances REAL)")
+    tr.executemany("INSERT INTO tracking VALUES (?,?,?,?)", [(f"2026-01-{i + 1:02d}", 1, 3, 5) for i in range(12)] +
+                   [(f"2026-10-{21 + i}", 1, 8, 9) for i in range(4)])
+    tr.commit()
+    idx = {"1": ["MIN", "Pee One", "F"], "2": ["MIN", "Pee Two", "G"], "3": ["MIN", "Pee Three", "G"], "4": ["MIN", "Pee Four", "C"]}
+    PL.build(m, d / "player", idx, "2026-27", tr)
+    doc = json.loads((d / "player" / "roles.json").read_text())
+    rows = {r["pid"]: r for r in doc["rows"]}
+    assert doc["mode"] == "season" and sorted(rows) == [1, 2]        # not P3 (steady), not P4 (6 games last season)
+    p1, p2 = rows[1], rows[2]
+    assert p1["base"] == "last season" and p1["min"] == [31.0, 20.0] and p1["starts"] == [4, 0, 12, 4] and p1["was_team"] is None
+    # potential assists compare across seasons; rebound chances don't (the NBA counts them differently this season)
+    assert p1["st"]["pot_ast"] == [8.0, 3.0] and p1["st"]["reb_ch"] is None
+    assert p2["was_team"] == "ATL" and p2["st"]["min"] == [30.0, 15.0] and p2["st"]["fga"] == [12.0, 5.0]   # a new team
 
 
 def test_game_logs_drop_impossible_tracking_values():
@@ -105,3 +145,32 @@ def test_game_logs_drop_impossible_tracking_values():
     C = {c: k for k, c in enumerate(R.LOG_COLS)}
     logs = R.game_logs(m, [7], ("2026-27",), tr)[7]
     assert [(l[C["pot_ast"]], l[C["reb_ch"]]) for l in logs] == [(12, 14), (None, None), (4, 5)]   # 45 / 30 min > 1.4 too
+
+
+def test_roles_only_players_with_a_line_this_season():
+    d = pathlib.Path(tempfile.mkdtemp())
+    q = sqlite3.connect(d / "lines.sqlite")
+    q.execute("CREATE TABLE quotes (seen_at TEXT, book TEXT, gid TEXT, tip_utc TEXT, pid INTEGER, player TEXT, stat TEXT, "
+              "line REAL, side TEXT, odds REAL)")
+    q.executemany("INSERT INTO quotes VALUES (?, 'fd', 'g', '', ?, '', 'points', 10.5, 'over', 1.9)",
+                  [("2026-10-23T01:00:00", 1), ("2026-10-24T01:00:00", 1), ("2026-04-01T01:00:00", 2), ("2026-10-23T01:00:00", None)])
+    assert PL.lined_players(q, "2026-27") == {1}           # 2 only had lines last season; an unmatched quote is skipped
+    m = MU.connect(d / "m.sqlite")
+    PG = "INSERT INTO player_games (gid, team, pid, pos, starter, min, pts, reb, ast, fg3m, stl, blk, tov, fga, fg3a, fta) " \
+         "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+    for i in range(12):
+        m.execute("INSERT INTO games (gid, season, date, home, away, home_pts, away_pts) VALUES (?,?,?,?,?,100,90)",
+                  (f"m{i}", "2025-26", f"2026-01-{i + 1:02d}", "MIN", "WAS"))
+        for pid in (1, 2):
+            m.execute(PG, (f"m{i}", "MIN", pid, "F", 0, 15, 6, 3, 1, 1, 0, 0, 1, 6, 2, 1))
+    for i in range(4):
+        m.execute("INSERT INTO games (gid, season, date, home, away, home_pts, away_pts) VALUES (?,?,?,?,?,100,90)",
+                  (f"g{i}", "2026-27", f"2026-10-{21 + i}", "MIN", "WAS"))
+        for pid in (1, 2):
+            m.execute(PG, (f"g{i}", "MIN", pid, "F", 1, 30, 14, 6, 3, 2, 0, 0, 1, 12, 4, 3))     # both up 15 minutes
+    m.commit()
+    idx = {"1": ["MIN", "Has Line", "F"], "2": ["MIN", "No Line", "F"]}
+    PL.build(m, d / "player", idx, "2026-27", lined=PL.lined_players(q, "2026-27"))
+    assert [r["pid"] for r in json.loads((d / "player" / "roles.json").read_text())["rows"]] == [1]
+    PL.build(m, d / "player", idx, "2026-27")                                      # no lines store: everyone
+    assert sorted(r["pid"] for r in json.loads((d / "player" / "roles.json").read_text())["rows"]) == [1, 2]
