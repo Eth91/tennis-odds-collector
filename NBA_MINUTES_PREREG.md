@@ -219,3 +219,27 @@ MAE (bias as model − actual):
 
 **Bets (2024-25 tip lines, confirmed starters):** v1 292 flags, +5.2%; v2 351, +3.9% (90%: −4.3%, +11.7%). In 2023-24
 both are −4.2%. The better minutes do not make better bets at tip lines. Nothing changes live until the user decides.
+
+# AMENDMENT 4: the error floor (2026-10-28, about 21:50 UTC; a bound, not a model)
+**User:** "run a constant improvement loop until you get that minutes error under 3 minutes, and also make an FGA, FTA,
+3PA projection model for each of these players jumping into the lineup." Before any loop, the floor was measured on
+target A with confirmed starters (absence games 1–3).
+- **Oracle:** his mean over his next 10 starts this season, which uses future games that no model can know. This bounds
+  what perfect knowledge of his role would give.
+
+| MAE | 2023-24 | 2024-25 | 2025-26 |
+|---|---|---|---|
+| minutes, v2 (on rows with 3+ future starts) | 4.93 | 4.66 | 4.71 |
+| minutes, oracle | 4.97 | 4.69 | 4.70 |
+| minutes, established starters (20+ starts) against their own season mean, in-sample | 4.29 | 4.14 | 4.15 |
+| minutes, v2 + final margin + overtime + 5 fouls (hindsight, in-sample) | 5.15 (v2 5.29) | | |
+| FGA: his per-minute rate × v2 minutes / oracle | 2.96–3.06 / 3.10 | 3.06 / 3.10 | |
+| FTA | 1.64 / 1.63–1.67 | 1.64 / 1.67 | |
+| 3PA | 1.62 / 1.66 | 1.74 / 1.79 | |
+
+**Reading:**
+- A minutes MAE under 3 is below the floor: established starters themselves vary about 4.1–4.3 minutes around their own
+  mean.
+- v2 already equals the oracle on role. The game script, through the spread, is the only pre-game information left,
+  and even in hindsight it is worth about 0.15.
+- Shot volume from his per-minute rate × v2 minutes is also at the oracle bound. Rates from his starts are no better.
