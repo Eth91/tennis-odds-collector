@@ -293,5 +293,7 @@ but it changes live code.
     (`NBA_BOOST_PREREG.md`). All 8 markets. Pinged (SHADOW).
 23. **BOOST_NH:** the same rule's no-history flags (fewer than 3 such games; the position rules put him 15%+ over the
     line). No pings.
+24. **BOOST_STEP:** the no-history flags for the step-in player raised to 24 minutes (`NBA_BOOST_PREREG.md`
+    amendments 2–3), split out of BOOST_NH before either ran. Pinged (SHADOW).
 
 Both are registered at **2026-10-28T21:00:00 UTC**.

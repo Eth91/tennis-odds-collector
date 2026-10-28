@@ -201,14 +201,14 @@ def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_ne
             out_b = {x for x, (tm, s_, _nm) in st.items() if tm == bteam and s_ in OUTS}
             f = BOOST.boost_eval(bd, date, bteam, pid, market, m[0], m[1], out_b) if out_b else None
             if f:
-                rule = "BOOST" if f["kind"] == "history" else "BOOST_NH"
+                rule = {"history": "BOOST", "step": "BOOST_STEP", "no history": "BOOST_NH"}[BOOST.kind_of(f)]
                 cur = con.execute("INSERT OR IGNORE INTO ratio_signals VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
                                   (rule, gid, pid, market, book, m[0], m[1],
                                    round(f["hits"] / f["h"] if rule == "BOOST" else f["proj"], 3), date, player, now, 0))
-                if cur.rowcount and rule == "BOOST":     # amendment 1: only the history flags ping
+                if cur.rowcount and rule != "BOOST_NH":  # amendments 1 and 3: history and STEP flags ping
                     ok = sender(BOOST.body(player, market, m[0], m[1], BOOK[book], f, st[f["x"]][2] or str(f["x"])))
-                    con.execute("UPDATE ratio_signals SET pinged = ? WHERE rule = 'BOOST' AND gid = ? AND pid = ? AND market = ?",
-                                (1 if ok else 0, gid, pid, market))
+                    con.execute("UPDATE ratio_signals SET pinged = ? WHERE rule = ? AND gid = ? AND pid = ? AND market = ?",
+                                (1 if ok else 0, rule, gid, pid, market))
                     fired += 1
         if market not in ROLE.MARKET_STAT:
             continue

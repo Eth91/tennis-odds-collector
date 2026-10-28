@@ -22,6 +22,7 @@ from pathlib import Path
 STARTER_MIN, BASE_THIS, BASE_LAST, SPOT_MAX = 26.0, 3, 10, 3
 MIN_H, MIN_H_IRRELEVANT, HIT_AT, MIN_AVG_MIN = 3, 6, 0.80, 20.0
 PROJ_AT, BASE_N, BASE_MIN_GAMES, SAME_W, PRICE_MIN = 1.15, 10, 3, 3.0, 1 / 0.6   # -150 = decimal 1.6667
+STEP_MIN = 24.0                                          # amendment 2: the step-in player's minutes floor
 TOP = {"reb": ("reb", 2), "pts": ("fga", 3), "fg3m": ("fga", 3), "ast": ("ast", 2)}   # stat -> (ranked by, top n)
 PARTS = {"points": ("pts",), "rebounds": ("reb",), "assists": ("ast",), "threes": ("fg3m",), "pts_reb": ("pts", "reb"),
          "pts_ast": ("pts", "ast"), "reb_ast": ("reb", "ast"), "pra": ("pts", "reb", "ast")}
@@ -140,20 +141,33 @@ class BoostData:
     def roster(self, team, date):
         return {p for _d, _g, _s, b in self.before(team, date)[-3:] for p, r in b.items() if r["min"]}
 
-    def base_with(self, pid, x, team, date):
-        """Per-game averages over his last 10 games for the team in which X played; None under 3 such games."""
-        rs = [b[pid] for _d, _g, _s, b in self.before(team, date) if pid in b and b[pid]["min"] and x in b and b[x]["min"]][-BASE_N:]
+    def base_with(self, pid, x, team, date, others=()):
+        """Per-game averages over his last 10 games for the team in which X and the other starters playing tonight
+        (`others`) played: this season's if 3+, else last season's if 3+, else None (amendment 2)."""
+        rs = [(s, b[pid]) for _d, _g, s, b in self.before(team, date) if all(q in b and b[q]["min"] for q in (pid, x, *others))]
+        this = [r for s, r in rs if s == self.season]
+        rs = (this if len(this) >= BASE_MIN_GAMES else [r for s, r in rs if s != self.season])[-BASE_N:]
         if len(rs) < BASE_MIN_GAMES:
             return None
         return {s: sum(r[s] or 0 for r in rs) / len(rs) for s in ("min", "reb", "ast", "pts", "fg3m")}
 
+    def step_in(self, x, team, date, out_all):
+        """The active non-starter in X's position group with the most minutes per game over his base games (amendment 2)."""
+        gx = self.groups.get(x)
+        cands = [(pg["min"], p) for p in self.roster(team, date) - set(out_all) - self.starters(team, date)
+                 if gx and self.groups.get(p) == gx and (pg := self.per_game(p, team, date))]
+        return max(cands)[1] if cands else None
+
     def projection(self, b, x, team, date, out_all):
         """{stat: projection} for B with X's per-game numbers redistributed over the active roster, 3x to X's position
-        group (rule 10); None when B or X has no base."""
+        group (rule 10). Bases come from games with tonight's other starters, and the step-in player gets 24+ minutes
+        (amendment 2). None when B or X has no base."""
         k = ("proj", x, team, date, frozenset(out_all))
         if k not in self.cache:
             xs = self.per_game(x, team, date)
-            bases = {p: bw for p in self.roster(team, date) - set(out_all) if (bw := self.base_with(p, x, team, date))}
+            playing = self.starters(team, date) - set(out_all)
+            bases = {p: bw for p in self.roster(team, date) - set(out_all)
+                     if (bw := self.base_with(p, x, team, date, sorted(playing - {p})))}
             w = {p: SAME_W if self.groups.get(p) and self.groups.get(p) == self.groups.get(x) else 1.0 for p in bases}
             proj = {}
             for p, bw in bases.items():
@@ -161,6 +175,12 @@ class BoostData:
                 for s in bw:
                     tot = sum(bases[a][s] * w[a] for a in bases)
                     proj[p][s] = bw[s] + (xs[s] * bw[s] * w[p] / tot if xs and tot else 0.0)
+            step = self.step_in(x, team, date, out_all)
+            if step in proj and proj[step]["min"] < STEP_MIN and bases[step]["min"]:
+                add = STEP_MIN - proj[step]["min"]       # he starts: 24 minutes at least, at his own per-minute rates
+                for s in proj[step]:
+                    proj[step][s] += add * bases[step][s] / bases[step]["min"]
+                proj[step]["step"] = 1.0                 # amendment 3: a STEP flag
             self.cache[k] = proj if xs else {}
         return self.cache[k].get(b)
 
@@ -198,14 +218,20 @@ def boost_eval(bd, date, team, pid, market, line, price, out_all):
             if pr:
                 mu = sum(pr[s] for s in PARTS[market])
                 if mu >= PROJ_AT * line and pr["min"] >= MIN_AVG_MIN:
-                    cand = {"kind": "no history", "x": x, "n": n, "h": len(hist), "relevant": rel, "proj": mu, "proj_min": pr["min"]}
+                    cand = {"kind": "no history", "x": x, "n": n, "h": len(hist), "relevant": rel, "proj": mu, "proj_min": pr["min"],
+                            "step": bool(pr.get("step"))}
         if cand and (best is None or rank(cand) > rank(best)):
             best = cand
     return best
 
 
 def rank(c):
-    return (c["kind"] == "history", c["hits"] / c["h"] if c["kind"] == "history" else 0.0, c["h"])
+    return (c["kind"] == "history", c["hits"] / c["h"] if c["kind"] == "history" else 0.0, bool(c.get("step")), c["h"])
+
+
+def kind_of(f):
+    """The registered rule a flag belongs to (amendment 3)."""
+    return "history" if f["kind"] == "history" else "step" if f.get("step") else "no history"
 
 
 # ── live ──────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -233,10 +259,11 @@ def live_data(matchup_db, gamelogs_db, season):
 
 def body(player, market, line, price, book, f, x_name):
     from nba_ping import american
-    why = (f"{f['hits']}/{f['h']} beat {line:g} without him, avg {f['avg']:.1f}" if f["kind"] == "history"
-           else f"no history, proj {f['proj']:.1f}")
-    return (f"🟢 BOOST {player} {ABBR[market]} o{line:g} {american(price)} {book} · {x_name} out (game {f['n']}) · {why} "
-            f"· shadow")
+    k = kind_of(f)
+    why = (f"{f['hits']}/{f['h']} beat {line:g} without him, avg {f['avg']:.1f}" if k == "history"
+           else f"steps in, proj {f['proj']:.1f} at {STEP_MIN:g} min" if k == "step" else f"no history, proj {f['proj']:.1f}")
+    return (f"🟢 BOOST{' STEP' if k == 'step' else ''} {player} {ABBR[market]} o{line:g} {american(price)} {book} · {x_name} "
+            f"out (game {f['n']}) · {why} · shadow")
 
 
 # ── the backtest ──────────────────────────────────────────────────────────────────────────────────────────────────
@@ -329,7 +356,7 @@ def report(flags):
     for s in sorted({f["season"] for f in flags} | set(SEASONS)):
         fs = [f for f in flags if f["season"] == s]
         res[s] = {"all": summ(fs, boot=2000),
-                  "kind": {k: summ([f for f in fs if f["kind"] == k]) for k in ("history", "no history")},
+                  "kind": {k: summ([f for f in fs if kind_of(f) == k]) for k in ("history", "step", "no history")},
                   "market": {m: summ([f for f in fs if f["market"] == m]) for m in PARTS},
                   "absence_game": {n: summ([f for f in fs if f["n"] == n]) for n in (1, 2, 3)},
                   "relevance": {"relevant": summ([f for f in fs if f["relevant"]]),

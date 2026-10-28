@@ -8,12 +8,12 @@ import tempfile
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import nba_boost as BOOST
 
-X, S2, S6, B, G4, F5 = 1, 2, 6, 3, 4, 5           # X a big starter, S2 a guard starter, S6 a forward starter, B a big
-POS = {X: "C", S2: "G", S6: "F", B: "C-F", G4: "G", F5: "F"}
+X, S2, S6, B, G4, F5, N9 = 1, 2, 6, 3, 4, 5, 9   # X a big starter, S2 a guard starter, S6 a forward starter, B a big
+POS = {X: "C", S2: "G", S6: "F", B: "C-F", G4: "G", F5: "F", N9: "C"}
 BASE = {X: (30, 15, 1, 10, 3, 18), S2: (32, 18, 3, 4, 7, 22), S6: (28, 12, 2, 6, 2, 14), B: (24, 8, 0, 8, 1, 10),
-        G4: (22, 8, 2, 3, 4, 9), F5: (18, 5, 1, 4, 1, 6)}   # min, fga, fg3m, reb, ast, pts
+        G4: (22, 8, 2, 3, 4, 9), F5: (18, 5, 1, 4, 1, 6), N9: (12, 4, 0, 3, 0, 4)}   # min, fga, fg3m, reb, ast, pts
 BOX = ("min", "fga", "fg3m", "reb", "ast", "pts")
-NAME = {X: "Xavier Big", S2: "Sam Guard", S6: "Sid Forward", B: "Bee Big", G4: "Gus Guard", F5: "Fay Forward"}
+NAME = {X: "Xavier Big", S2: "Sam Guard", S6: "Sid Forward", B: "Bee Big", G4: "Gus Guard", F5: "Fay Forward", N9: "Ned Nine"}
 
 
 def game(season, gid, date, team, players, edits=None):
@@ -66,6 +66,25 @@ def scenario_c():
     return [r for i in range(1, 7) for r in game("2024-25", f"T{i}", f"2024-11-0{i}", "HOM", [X, S2, S6, B, G4, F5])]
 
 
+def scenario_d():
+    """This season only, no B: T1-T6 everyone. N9 (a 12-minute big) is the only bench big, so he steps in for X."""
+    return [r for i in range(1, 7) for r in game("2024-25", f"T{i}", f"2024-11-0{i}", "HOM", [X, S2, S6, G4, F5, N9])]
+
+
+def scenario_e():
+    """Last season: L1-L7 everyone (B 24 min, 10 points); L8-L10 S2 and S6 rest (B 30 min, 25 points). This season: T1
+    without B, T2-T4 everyone (B 14 points)."""
+    rows, everyone = [], [X, S2, S6, B, G4, F5]
+    for i in range(1, 11):
+        rest = i >= 8
+        rows += game("2023-24", f"L{i}", f"2024-03-{i:02d}", "HOM", [X, B, G4, F5] if rest else everyone,
+                     {B: {"min": 30, "pts": 25}} if rest else None)
+    rows += game("2024-25", "T1", "2024-11-01", "HOM", [X, S2, S6, G4, F5])
+    for i in (2, 3, 4):
+        rows += game("2024-25", f"T{i}", f"2024-11-0{i}", "HOM", everyone, {B: {"pts": 14}})
+    return rows
+
+
 def check(mod):
     ok = True
 
@@ -98,9 +117,27 @@ def check(mod):
     want(pr and abs(pr["reb"] - (8 + 10 * 24 / 41)) < 1e-9 and abs(pr["min"] - (24 + 30 * 72 / 172)) < 1e-9,
          "projection: X's 10 rebounds and 30 minutes split 3x to his group (B) over the active roster")
     f = ev(c, "2024-11-07", B, "rebounds", 11.5, 1.9, {X})
-    want(f and f["kind"] == "no history" and f["h"] == 0, "no history: 13.85 projected is 15%+ over 11.5")
+    want(f and f["kind"] == "no history" and f["h"] == 0 and not f["step"],
+         "no history: 13.85 projected is 15%+ over 11.5 (B steps in but needs no floor: not a STEP flag)")
     want(ev(c, "2024-11-07", B, "rebounds", 12.5, 1.9, {X}) is None, "13.85 is not 15% over 12.5")
     want(ev(c, "2024-11-07", B, "rebounds", 7.5, 1.9, {S2}) is None, "no history needs a relevant absence (the guard out)")
+
+    dd = mod.BoostData(scenario_d(), groups, "2024-25")
+    want(dd.step_in(X, "HOM", "2024-11-07", {X}) == N9, "the step-in player: the top bench player at X's position")
+    pr = dd.projection(N9, X, "HOM", "2024-11-07", {X})
+    m0 = 12 + 30 * 36 / 136
+    want(pr and abs(pr["min"] - 24.0) < 1e-9 and abs(pr["reb"] - (3 + 10 * 9 / 26 + (24 - m0) * 3 / 12)) < 1e-9,
+         "he projects to 19.9 minutes, raised to 24 with his own rebounds per minute")
+    f = ev(dd, "2024-11-07", N9, "rebounds", 5.5, 1.9, {X})
+    want(f and f["kind"] == "no history" and f["step"] and mod.kind_of(f) == "step",
+         "N9 at 24 minutes: 7.48 rebounds is 15%+ over 5.5, a STEP flag")
+
+    e = mod.BoostData(scenario_e(), groups, "2024-25")
+    be = e.base_with(B, X, "HOM", "2024-11-04", [S2, S6])
+    want(be and be["pts"] == 10.0 and be["min"] == 24.0,
+         "2 games this season: last season's, only those with the other starters (not the 25-point rest games)")
+    be = e.base_with(B, X, "HOM", "2024-11-05", [S2, S6])
+    want(be and be["pts"] == 14.0, "3 games this season: this season's only")
     return ok
 
 
@@ -140,7 +177,7 @@ N7 = 7                                                   # joined this season: n
 TIP, D = "2026-11-02T00:00:00+00:00", "2026-11-01"
 
 
-def live_stores(tmp):
+def live_stores(tmp, step=False):
     """This season (nba_matchup): T1-T6, everyone plays (N7 22 min, 6 rebounds). Last season (logs_full 2025-26): L1-L5
     everyone, X out L6-L10 with S2 and S6 in (B 26 min, 12, 11, 13, 10, 12 rebounds), L11-L13 everyone. Tonight X is Out
     on the 16:00 report."""
@@ -153,7 +190,7 @@ def live_stores(tmp):
         g = f"T{i}"
         m.execute("INSERT INTO games VALUES (?, '2026-27', ?, 'HOM', 'AWY', 100, 99)", (g, f"2026-10-2{i}"))
         m.executemany("INSERT INTO player_games (gid, team, pid, min, fga, fg3m, reb, ast, pts) VALUES (?, 'HOM', ?,?,?,?,?,?,?)",
-                      [(g, pid) + base[pid] for pid in (X, S2, S6, B, G4, F5, N7)])
+                      [(g, pid) + base[pid] for pid in ((X, S2, S6, G4, F5, N9) if step else (X, S2, S6, B, G4, F5, N7))])
     m.commit()
     gl = sqlite3.connect(p["gamelogs"])
     gl.execute("CREATE TABLE logs_full (season, game_id, date, team, player_id, player, min, fgm, fga, fg3m, fg3a, ftm, fta, oreb, dreb, "
@@ -171,6 +208,8 @@ def live_stores(tmp):
     gl.executemany("INSERT INTO logs_full (season, game_id, date, team, player_id, player, min, fga, fg3m, reb, ast, pts) "
                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", rows)
     gl.execute("CREATE TABLE positions (player_id, player, position)")
+    if step:
+        gl.execute("DELETE FROM logs_full")              # the step case: no last season, no history
     gl.executemany("INSERT INTO positions VALUES (?,?,?)", [(pid, NAME.get(pid, "Nate Seven"), v) for pid, v in {**POS, N7: "C"}.items()])
     gl.commit()
     n = sqlite3.connect(p["news"])
@@ -237,17 +276,35 @@ def check_new_markets(L):
         "🟢 BOOST Bee Big P+R o15.5 -111 FD · Xavier Big out (game 1) · 5/5 beat 15.5 without him, avg 21.6 · shadow"], sent
 
 
+def check_live_step(L):
+    """No B; N9, a 12-minute big, steps in for X at 24 minutes: his rebounds opener pings as a STEP flag."""
+    tmp = pathlib.Path(tempfile.mkdtemp())
+    p = live_stores(tmp, step=True)
+    sent = []
+    kw = dict(lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"], tracking_db=tmp / "t.sqlite",
+              lineups_db=tmp / "none.sqlite", index_json=tmp / "none.json", db=tmp / "role.sqlite", sender=lambda b: sent.append(b) or True)
+    L.process(now="2026-11-01T14:00:00", **kw)
+    post(p, "dk", "2026-11-01T16:10:00", ((N9, "Ned Nine", "rebounds", 5.5),))
+    L.process(now="2026-11-01T16:11:00", **kw)
+    assert [b for b in sent if "BOOST" in b] == [
+        "🟢 BOOST STEP Ned Nine REB o5.5 -111 DK · Xavier Big out (game 1) · steps in, proj 7.5 at 24 min · shadow"], sent
+    rows = sqlite3.connect(tmp / "role.sqlite").execute("SELECT rule, pinged FROM ratio_signals WHERE rule LIKE 'BOOST%'").fetchall()
+    assert rows == [("BOOST_STEP", 1)], rows
+
+
 def test_live():
     import nba_role_open as L
     check_live(L)
     check_new_markets(L)
+    check_live_step(L)
 
 
 def test_live_mutants():
     import nba_role_open as L
     src = pathlib.Path(L.__file__).read_text()
-    for tag, a, b in (("no-history flags ping", 'if cur.rowcount and rule == "BOOST":', "if cur.rowcount:"),
-                      ("no dedupe", 'if cur.rowcount and rule == "BOOST":', 'if rule == "BOOST":'),
+    for tag, a, b in (("no-history flags ping", 'if cur.rowcount and rule != "BOOST_NH":', "if cur.rowcount:"),
+                      ("no dedupe", 'if cur.rowcount and rule != "BOOST_NH":', 'if rule != "BOOST_NH":'),
+                      ("STEP flags silent", 'if cur.rowcount and rule != "BOOST_NH":', 'if cur.rowcount and rule == "BOOST":'),
                       ("new markets act at once", "if first_run or market not in installed or", "if first_run or")):
         assert src.count(a) == 1, tag
         d = pathlib.Path(tempfile.mkdtemp())
@@ -257,6 +314,7 @@ def test_live_mutants():
             mod = importlib.import_module("nba_role_open_bmut")
             check_live(mod)
             check_new_markets(mod)
+            check_live_step(mod)
         except AssertionError:
             continue
         finally:
@@ -283,6 +341,15 @@ MUTANTS = (
     ("no-history ignores relevance", "elif rel:", "else:"),
     ("no position weight", "SAME_W if self.groups.get(p) and self.groups.get(p) == self.groups.get(x) else 1.0", "1.0"),
     ("no 15% margin", "mu >= PROJ_AT * line", "mu >= line"),
+    ("bases ignore the other starters", "if all(q in b and b[q][\"min\"] for q in (pid, x, *others))]",
+     "if all(q in b and b[q][\"min\"] for q in (pid, x))]"),
+    ("bases mix the seasons", "(this if len(this) >= BASE_MIN_GAMES else [r for s, r in rs if s != self.season])",
+     "[r for s, r in rs]"),
+    ("bases from last season first", "(this if len(this) >= BASE_MIN_GAMES else [r for s, r in rs if s != self.season])",
+     "[r for s, r in rs if s != self.season]"),
+    ("no minutes floor", "if step in proj and proj[step][\"min\"] < STEP_MIN", "if False and proj[step][\"min\"] < STEP_MIN"),
+    ("step-in from any position", "if gx and self.groups.get(p) == gx and", "if gx and"),
+    ("STEP not marked", 'proj[step]["step"] = 1.0', "pass"),
 )
 
 

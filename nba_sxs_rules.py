@@ -745,11 +745,11 @@ def boost_data(season):
     return _BD[key]
 
 
-BOOST_DEPS = (boost_data, BOOST_M.live_data, BOOST_M.BoostData, BOOST_M.boost_eval, BOOST_M.rank, BOOST_M.stat_of,
-              BOOST_M.group, ROLE.season_of)
+BOOST_DEPS = (boost_data, BOOST_M.live_data, BOOST_M.BoostData, BOOST_M.boost_eval, BOOST_M.rank, BOOST_M.kind_of,
+              BOOST_M.stat_of, BOOST_M.group, ROLE.season_of)
 BOOST_SPEC = [BOOST_M.STARTER_MIN, BOOST_M.BASE_THIS, BOOST_M.BASE_LAST, BOOST_M.SPOT_MAX, BOOST_M.MIN_H,
               BOOST_M.MIN_H_IRRELEVANT, BOOST_M.HIT_AT, BOOST_M.MIN_AVG_MIN, BOOST_M.PROJ_AT, BOOST_M.BASE_N,
-              BOOST_M.BASE_MIN_GAMES, BOOST_M.SAME_W, BOOST_M.PRICE_MIN, BOOST_M.TOP, BOOST_M.PARTS]
+              BOOST_M.BASE_MIN_GAMES, BOOST_M.SAME_W, BOOST_M.PRICE_MIN, BOOST_M.TOP, BOOST_M.PARTS, BOOST_M.STEP_MIN]
 
 
 class BOOST(Rule):
@@ -784,14 +784,20 @@ class BOOST(Rule):
             if not team or not out_now:
                 continue
             f = BOOST_M.boost_eval(bd, v.date, team, p, mk, m[0], m[1], out_now)
-            if f and f["kind"] == self.flag_kind:
+            if f and BOOST_M.kind_of(f) == self.flag_kind:
                 why = f"{f['hits']}/{f['h']}" if f["kind"] == "history" else f"proj={f['proj']:.1f}"
                 out.append(sig(g, p, mk, "over", m[0], b, m[1], note=f"x={f['x']} n={f['n']} {why}"))
         return out
 
 
+class BOOST_STEP(BOOST):
+    """BOOST's no-history flags for the step-in player (the top bench player at the missing starter's position) projected
+    up to 24 minutes (NBA_BOOST_PREREG.md amendment 3)."""
+    name, flag_kind = "BOOST_STEP", "step"
+
+
 class BOOST_NH(BOOST):
-    """BOOST's no-history flags (fewer than 3 such games): the position rules alone put him 15%+ over the line."""
+    """BOOST's other no-history flags (fewer than 3 such games): the position rules alone put him 15%+ over the line."""
     name, flag_kind = "BOOST_NH", "no history"
 
 
@@ -801,7 +807,7 @@ PIT_STORES = {"MATCHUP_DB": "matchup", "TRACKING_DB": "tracking"}
 
 RULES = (NULL_TIP30, NEWS_FD, NEWS_DK, DK_LAGS_FD, T4_TIP30, ENGINE_CARD, S1, DEPTH_NEXT, DEPTH_NEXT_TIP30, NEW_STARTER,
          LOST_START, ROLE_OPEN, RATIO_FGA, RATIO_PA, RATIO_RC, RATIO_PA28, PTS_DVP, RETURN_UNDER, FOUL_BIG, MIN_RESTRICT, EARLY_SURGE,
-         BOOST, BOOST_NH)
+         BOOST, BOOST_STEP, BOOST_NH)
 
 
 def fingerprint(cls):
@@ -838,6 +844,7 @@ REGISTRY = {                                             # name -> (registered a
     "PTS_DVP": ("2026-10-27T13:00:00", "fc8387835f"),             # amendment 5
     "RATIO_PA28": ("2026-10-27T13:00:00", "2404e38806"),          # amendment 4
     "RATIO_RC": ("2026-10-27T13:00:00", "17e2e5ea3f"),
-    "BOOST": ("2026-10-28T21:00:00", "f533c2a355"),               # amendment 9 (NBA_BOOST_PREREG.md)
-    "BOOST_NH": ("2026-10-28T21:00:00", "fc3b753e55"),
+    "BOOST": ("2026-10-28T21:00:00", "87d002e0e6"),               # amendment 9 (NBA_BOOST_PREREG.md amendments 2-3)
+    "BOOST_STEP": ("2026-10-28T21:00:00", "d09f14b1cc"),
+    "BOOST_NH": ("2026-10-28T21:00:00", "7f9b0dcc5f"),
 }
