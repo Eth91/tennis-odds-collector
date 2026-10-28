@@ -63,3 +63,65 @@ passing rule only enters the side-by-side at the opener (registered then), to be
 forward record.
 
 **If nothing passes:** the report says which parts carry information (C's coefficients) and which don't.
+
+---
+
+## Results (2026-10-28, about 08:55 UTC; `nba_rebmatch.py`): nothing passes
+**Data:**
+- Last-season profiles fetched for all 777 players (390 for 2022-23, 387 for 2023-24); none empty.
+- 25,467 rebounds props: 13,275 in 2023-24 and 12,192 in 2024-25.
+- **Baseline at 20+ mpg:** overs lose (−9.0% \| −7.9%); unders are near even (+0.4% \| −1.4%).
+
+**A, the solver (over when xREB ≥ k × line).** Both seasons pick k = 1.36, which fails:
+- 2023-24: −1.9% on 429;
+- 2024-25: +4.3% on 399;
+- the neighbouring k are not positive in both seasons.
+
+The matchup adds nothing. At the same k, xREB (with the matchup) and xREB0 (without it) are within about a point of
+each other:
+
+| k | xREB, matchup | xREB0, no matchup |
+|---|---|---|
+| 1.2 | −3.7% \| −2.9% | −3.7% \| −2.1% |
+| 1.3 | −3.5% \| −2.1% | −3.8% \| +0.5% |
+
+xREB0's own picks also fail: 1.32 gives −3.2% → +0.8%, and 1.26 gives +2.2% → −3.5%.
+
+**B, fixed thresholds** (n, ROI; 2023-24 \| 2024-25). All four fail.
+
+| cell | result | baseline |
+|---|---|---|
+| B1 rim rebounder vs short misses, over | 518, −6.7% \| 395, −7.6% | overs −9.0% \| −7.9% |
+| B2 long rebounder vs long misses, over | 2,741, −8.9% \| 2,817, −8.7% | overs |
+| B3 rim rebounder vs few short misses, under | 536, +1.7% \| 386, −4.6% | unders +0.4% \| −1.4% |
+| B4 long rebounder vs few long misses, under | 2,729, −0.4% \| 2,845, −3.1% | unders |
+
+**C, logistic beyond the book.** It fails: held-out log loss is below the book's both ways, but only slightly, and
+the bets don't win in both seasons.
+
+| direction | log loss, model / book | bets |
+|---|---|---|
+| fit 2023-24 → test 2024-25 | 0.68469 / 0.68491 | 2,410 at −2.0% (2,341 unders) |
+| fit 2024-25 → test 2023-24 | 0.68749 / 0.68838 | 1,609 at +4.9% |
+
+Coefficients per SD (fit 2023-24 / fit 2024-25):
+- **Same sign both ways:**
+  - REB/g ÷ line: +0.068 / +0.036;
+  - opponent's long-miss factor: +0.018 / +0.005;
+  - minutes: +0.014 / +0.026;
+  - near: −0.005 / −0.026;
+  - intercept: −0.13 / −0.11 (overs are overpriced).
+- **Inconsistent:**
+  - M: −0.025 / +0.006;
+  - opponent's short misses: −0.004 / −0.041 (the wrong sign for the rim-rebounder idea);
+  - open: +0.002 / −0.036;
+  - own-team misses: −0.015 / +0.011.
+
+**Reading:**
+- **Where the misses come from, and how far out a player grabs them, add nothing reliable beyond the line.**
+- **As for points,** volume against the line (rebounds per game ÷ line) is the one consistent positive.
+- **Books overprice rebounds overs** (−8% to −9% at 20+ minutes); unders are near even.
+- **Not covered:** this test uses last season's profiles from a player's 6th game on, so the early-season window
+  is not covered.
+- **The chart is still useful as information:** where a player's rebounds come from, and how far out he grabs
+  them. It is not a betting signal.
