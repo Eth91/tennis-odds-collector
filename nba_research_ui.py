@@ -16,7 +16,7 @@ CSS = r"""
 :root{color-scheme:dark;--bg:#000;--g1:#1c1c1e;--g2:#2c2c2e;--g3:#3a3a3c;--l1:#fff;--l2:rgba(235,235,245,.62);
 --l3:rgba(235,235,245,.32);--sep:rgba(84,84,88,.6);--blue:#0a84ff;--grn:#30d158;--red:#ff453a;--org:#ff9f0a;--yel:#ffd60a;
 --hit5:#30d158;--hit4:rgba(48,209,88,.55);--hit3:rgba(120,120,128,.36);--hit2:rgba(255,69,58,.5);--hit1:#ff453a;
---st:env(safe-area-inset-top);--sb:env(safe-area-inset-bottom)}
+--st:calc(env(safe-area-inset-top) + 10px);--sb:env(safe-area-inset-bottom)}   /* the headers sit a touch below the status bar */
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}   /* no double-tap zoom; pinch still zooms */
 html,body{margin:0;background:var(--bg);color:var(--l1);font-family:-apple-system,"SF Pro Text",system-ui,sans-serif;
 -webkit-text-size-adjust:100%;overscroll-behavior-y:none}
@@ -3008,8 +3008,8 @@ PAGE = r"""<!doctype html>
 <meta name="apple-mobile-web-app-title" content="Pickz">
 <meta name="theme-color" content="#000000">
 <title>Pickz · NBA Props</title>
-<link rel="icon" href="icon-64.png">
-<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-64.png?v=2">
+<link rel="apple-touch-icon" href="icon-180.png?v=2">
 <style>__CSS__</style>
 </head>
 <body>
