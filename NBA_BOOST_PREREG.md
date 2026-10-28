@@ -151,3 +151,26 @@ By market, every market loses in both seasons (−2% to −13%).
 - **The combo markets are new to the live pinger** (it watched points, rebounds, assists and threes). On the first run
   after deploy, combo props already on the board are marked open without acting, as at install, so only true openers
   are judged.
+
+# AMENDMENT 2: the no-history projection, as the user asked (2026-10-28, before it was built or run)
+**Why:** live, Daniss Jenkins was projected 17.5 points on an 8.5 line. 8 of his last 10 games with Duren were last
+April's, when Detroit rested its starters and he played 33–37 minutes.
+
+**User:** "yes make that fix. You need to add likely minutes context: if a player jumps into the starting lineup
+they'll likely get 20–25+ mins, but look at games where they also play with other starters. Like Hartenstein with
+Shai." Asked: who steps in → **the top bench player at the missing starter's position**; his minutes → **at least
+24**.
+
+Changes to rule 10 only (the history rule 9 and everything else is unchanged):
+1. **base_s(A)** is A's per-game average over games for T in which A, X **and every other starter playing tonight**
+   (except A) played. This season's such games if there are 3 or more (the last 10), otherwise last season's if 3 or
+   more (the last 10), otherwise A has no base.
+2. **The step-in player:** among the active roster's non-starters in X's position group (G, F or C), the one with
+   the most minutes per game over his base games (rule 1). None if X has no listed group.
+3. **His minutes floor:** if his projected minutes are under 24.0, they become 24.0. Each of his stats then gains
+   (24.0 − projected minutes) × base_s ÷ base minutes, his own per-minute rate.
+4. The bar is unchanged: relevant, projection ≥ 1.15 × line, projected minutes ≥ 20.
+
+**Check:** rerun the backtest. Reported as before, with BOOST_NH old vs new. The user chose live pings either way,
+and BOOST_NH stays silent. Both rules are re-fingerprinted; if they are deployed before 21:00 UTC their registration
+time is unchanged, otherwise it moves to the deploy time.
