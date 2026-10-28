@@ -49,3 +49,22 @@ bets: `nba_flags.LIVE_TIERS` stays empty.
   - a second side-by-side rule, **UNDER20P**, is the pinged subset (under −150 or better, not threes), registered
     with the others.
   - The forward record shows whether the filter holds.
+
+# AMENDMENT 2: the cut swept, information (2026-10-28, about 22:35 UTC; post-hoc)
+**User:** "what if we run 25% or 30% or 35% or 40%, does the ROI increase?" (`nba_under_sweep.py`, 2023-24 tip lines;
+the same rows as T2's checks.)
+
+| unders −150 or better, no threes | 2023-24 | 2024-25 |
+|---|---|---|
+| 20%+ below (live) | 3,916, +7.7% | 2,819, +6.9% |
+| 25%+ below | 2,127, +8.7% | 1,469, +9.8% |
+| **30%+ below** | **1,181, +15.2%** (90%: +11.0%, +19.6%) | **765, +14.2%** (+9.0%, +19.3%) |
+| 35%+ below | 676, +14.8% | 395, +7.3% |
+| 40%+ below | 397, +15.8% | 191, +7.8% |
+
+- All flags (threes and heavy prices included) give +9.5% / +8.1% at 30%+.
+- The bands: 20–25% below, +6.4% / +3.8%; 25–30%, +0.6% / +5.1%; 30–40%, +14.9% / +16.3%.
+- **Reading:**
+  - ROI rises to about 30% below, then flattens while the count falls.
+  - Total profit is larger at 20%+ (2024-25: about 195 units against about 109).
+  - The cut was chosen after looking, from five tried, so the forward record decides. No live change without the user.
