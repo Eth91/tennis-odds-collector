@@ -906,4 +906,6 @@ def test_matchup_shows_assist_and_rebound_zones_only_for_their_props():
     html = UI.page()
     assert 'const AST_M = new Set(["assists", "pts_ast", "reb_ast", "pra"]), REB_M = new Set(["rebounds", "pts_reb", "reb_ast", "pra"]);' in html
     assert """${AST_M.has(p.market) ? '<div class="shc wg" id="asc"></div>' : ""}${REB_M.has(p.market) ? '<div class="shc wg" id="rbc"></div>' : ""}""" in html
-    assert 'if (AST_M.has(p.market)) zoneCard("ast");' in html and "fetch(`pbp/${encodeURIComponent(s)}.json`)" in html
+    assert 'if (AST_M.has(p.market)) zoneCard("ast");' in html and "fetch(`pbp/${encodeURIComponent(s)}.json?t=${t}`)" in html
+    # a rookie facing a team with few games this season still gets his own season, not last season's blank
+    assert "MUP[key] = (t && t[0] >= 10) || (me(j) && !me(q)) ? D.season : prevSeason(D.season);" in html
