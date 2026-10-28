@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS games (gid TEXT PRIMARY KEY, season TEXT, date TEXT, 
 CREATE TABLE IF NOT EXISTS team_games (gid TEXT, team TEXT, opp TEXT, fga REAL, fta REAL, oreb REAL, tov REAL,
     PRIMARY KEY (gid, team));
 CREATE TABLE IF NOT EXISTS player_games (gid TEXT, team TEXT, pid INTEGER, pos TEXT, starter INTEGER, min REAL,
-    pts REAL, reb REAL, ast REAL, fg3m REAL, stl REAL, blk REAL, tov REAL, fga REAL, fg3a REAL, fta REAL,
+    pts REAL, reb REAL, ast REAL, fg3m REAL, stl REAL, blk REAL, tov REAL, fga REAL, fg3a REAL, fta REAL, pf REAL,
     PRIMARY KEY (gid, pid));
 CREATE TABLE IF NOT EXISTS playtypes (snap TEXT, season TEXT, side TEXT, grouping TEXT, id INTEGER, abbr TEXT,
     play_type TEXT, poss_pct REAL, ppp REAL, pctile REAL, poss REAL, PRIMARY KEY (snap, side, grouping, id, play_type));
@@ -49,7 +49,8 @@ def connect(path=None):
     con = sqlite3.connect(path or DB, timeout=60)
     con.executescript(DDL)
     # added for the prop research page (threes; the attempt and game-result filters)
-    for table, cols in (("player_games", ("fg3m", "stl", "blk", "tov", "fga", "fg3a", "fta")),
+    # pf: personal fouls (NBA_IDEAS_PREREG.md amendment 1, FOUL_BIG)
+    for table, cols in (("player_games", ("fg3m", "stl", "blk", "tov", "fga", "fg3a", "fta", "pf")),
                         ("games", ("home_pts", "away_pts"))):
         have = {r[1] for r in con.execute(f"PRAGMA table_info({table})")}
         for col in cols:
@@ -105,16 +106,18 @@ def parse_box(b):
                             int(str(p.get("starter")) == "1"), round(mn, 2), s.get("points", 0),
                             s.get("reboundsTotal", 0), s.get("assists", 0), s.get("threePointersMade", 0),
                             s.get("steals", 0), s.get("blocks", 0), s.get("turnovers", 0), s.get("fieldGoalsAttempted", 0),
-                            s.get("threePointersAttempted", 0), s.get("freeThrowsAttempted", 0)))
+                            s.get("threePointersAttempted", 0), s.get("freeThrowsAttempted", 0), s.get("foulsPersonal", 0)))
     return game, teams, players
 
 
 def fetch(gids, con=None, get=None, workers=8):
     """Cache the box scores of `gids` not cached yet. Returns (stored, not final / failed)."""
     con = con or connect()
-    # a game cached before fg3m/stl/blk/tov were kept is fetched again
+    # a game cached before fg3m/stl/blk/tov were kept is fetched again; so is a current-season game cached before pf was
     have = {g for (g,) in con.execute("SELECT gid FROM games WHERE home_pts IS NOT NULL AND gid NOT IN "
-                                      "(SELECT DISTINCT gid FROM player_games WHERE fg3m IS NULL OR fga IS NULL)")}
+                                      "(SELECT DISTINCT gid FROM player_games WHERE fg3m IS NULL OR fga IS NULL) AND gid NOT IN "
+                                      "(SELECT DISTINCT p.gid FROM player_games p JOIN games g2 ON g2.gid = p.gid WHERE p.pf IS NULL "
+                                      "AND g2.season = (SELECT MAX(season) FROM games))")}
     todo = [g for g in gids if g not in have]
     if get is None:
         import nba_rosters as R
@@ -136,7 +139,7 @@ def fetch(gids, con=None, get=None, workers=8):
                         "VALUES (?,?,?,?,?,?,?)", game)
             con.executemany("INSERT OR REPLACE INTO team_games VALUES (?,?,?,?,?,?,?)", teams)
             con.executemany("INSERT OR REPLACE INTO player_games (gid, team, pid, pos, starter, min, pts, reb, ast, "
-                            "fg3m, stl, blk, tov, fga, fg3a, fta) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", players)
+                            "fg3m, stl, blk, tov, fga, fg3a, fta, pf) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", players)
             stored += 1
     con.commit()
     return stored, missed
