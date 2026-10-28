@@ -36,7 +36,7 @@ ODDS_MARKETS = {"player_points": "points", "player_rebounds": "rebounds", "playe
 SEASONS = ("2023-24", "2024-25")
 PREV = {"2023-24": "2022-23", "2024-25": "2023-24", "2025-26": "2024-25", "2026-27": "2025-26"}
 FDK = ("fanduel", "draftkings")
-COLS = ("season", "gid", "date", "team", "pid", "min", "fga", "fg3m", "reb", "ast", "pts")
+COLS = ("season", "gid", "date", "team", "pid", "min", "fga", "fg3m", "reb", "ast", "pts", "fta", "fg3a")
 
 
 def group(pos):
@@ -362,7 +362,7 @@ def rates(bd, pid, date):
     if tm + lm == 0:
         return None
     out = {}
-    for s in ("pts", "reb", "ast", "fg3m"):
+    for s in ("pts", "reb", "ast", "fg3m", "fga", "fta", "fg3a"):   # shot volume for the STEP ping (MINUTES amendment 5)
         lr = sum(r[s] or 0 for r in last) / lm if lm else None
         out[s] = (sum(r[s] or 0 for r in this) + lr * K_RATE) / (tm + K_RATE) if lr is not None else sum(r[s] or 0 for r in this) / tm
     return out
@@ -447,7 +447,8 @@ def step_eval(bd, rd, date, team, pid, market, line, price, out_all, posted=None
             return None
         proj = sm[0] * sum(rt[s] for s in PARTS[market])
         if proj >= PROJ_AT * line:
-            return {"kind": "step", "x": x, "n": n, "proj": proj, "proj_min": sm[0], "n_starts": sm[1]}
+            return {"kind": "step", "x": x, "n": n, "proj": proj, "proj_min": sm[0], "n_starts": sm[1],
+                    "vol": {s: sm[0] * rt[s] for s in ("fga", "fta", "fg3a")}}
     return None
 
 
@@ -488,11 +489,12 @@ def live_data(matchup_db, gamelogs_db, season):
     has = lambda c, t: c is not None and c.execute("SELECT 1 FROM sqlite_master WHERE name = ?", (t,)).fetchone()
     m, g = ro(matchup_db), ro(gamelogs_db)
     rows = [dict(zip(COLS + ("starter",), r)) for r in m.execute(
-        "SELECT gm.season, p.gid, gm.date, p.team, p.pid, p.min, p.fga, p.fg3m, p.reb, p.ast, p.pts, p.starter FROM player_games p "
+        "SELECT gm.season, p.gid, gm.date, p.team, p.pid, p.min, p.fga, p.fg3m, p.reb, p.ast, p.pts, p.fta, p.fg3a, p.starter "
+        "FROM player_games p "
         "JOIN games gm ON gm.gid = p.gid WHERE gm.season IN (?, ?)", (season, PREV.get(season, "")))] if has(m, "player_games") else []
     if has(g, "logs_full") and not any(r["season"] != season for r in rows):
         rows += [dict(zip(COLS, r)) for r in g.execute(
-            "SELECT season, game_id, date, team, player_id, min, fga, fg3m, reb, ast, pts FROM logs_full WHERE season = ?",
+            "SELECT season, game_id, date, team, player_id, min, fga, fg3m, reb, ast, pts, fta, fg3a FROM logs_full WHERE season = ?",
             (PREV.get(season, ""),))]
     for r in rows:
         r["min"] = r["min"] or 0.0
@@ -539,7 +541,8 @@ def body(player, market, line, price, book, f, x_name):
     from nba_ping import american
     k = kind_of(f)
     why = {"history": lambda: f"{f['hits']}/{f['h']} beat {line:g} without him, avg {f['avg']:.1f}",
-           "step": lambda: f"starts for him, {f['proj_min']:.0f} min ({f['n_starts']} starts), proj {f['proj']:.1f}",
+           "step": lambda: (f"starts for him, {f['proj_min']:.0f} min ({f['n_starts']} starts), proj {f['proj']:.1f} · "
+                            f"{f['vol']['fga']:.1f} FGA, {f['vol']['fta']:.1f} FTA, {f['vol']['fg3a']:.1f} 3PA"),
            "pickup": lambda: f"bench pickup, {f['proj_min']:.0f} min, proj {f['proj']:.1f}",
            "no history": lambda: f"no history, proj {f['proj']:.1f}"}[k]()
     tag = {"step": " STEP", "pickup": " PICKUP"}.get(k, "")
@@ -550,7 +553,7 @@ def body(player, market, line, price, book, f, x_name):
 # ── the backtest ──────────────────────────────────────────────────────────────────────────────────────────────────
 def load_rows(gamelogs_db, seasons):
     g = sqlite3.connect(f"file:{gamelogs_db}?mode=ro", uri=True)
-    q = ("SELECT season, game_id, date, team, player_id, min, fga, fg3m, reb, ast, pts FROM logs_full WHERE season IN (%s)"
+    q = ("SELECT season, game_id, date, team, player_id, min, fga, fg3m, reb, ast, pts, fta, fg3a FROM logs_full WHERE season IN (%s)"
          % ",".join("?" * len(seasons)))
     rows = [dict(zip(COLS, r)) for r in g.execute(q, seasons)]
     for r in rows:

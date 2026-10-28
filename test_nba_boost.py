@@ -147,8 +147,9 @@ def check_backtest(mod):
 
     tmp = pathlib.Path(tempfile.mkdtemp())
     g = sqlite3.connect(tmp / "g.sqlite")
-    g.execute("CREATE TABLE logs_full (season, game_id, date, team, player_id, player, min, fga, fg3m, reb, ast, pts)")
-    g.executemany("INSERT INTO logs_full VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+    g.execute("CREATE TABLE logs_full (season, game_id, date, team, player_id, player, min, fga, fg3m, reb, ast, pts, fta, fg3a)")
+    g.executemany("INSERT INTO logs_full (season, game_id, date, team, player_id, player, min, fga, fg3m, reb, ast, pts) "
+                  "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
                   [(r["season"], r["gid"], r["date"], r["team"], r["pid"], NAME[r['pid']], r["min"], r["fga"], r["fg3m"],
                     r["reb"], r["ast"], r["pts"]) for r in scenario_a()])
     g.execute("CREATE TABLE positions (player_id, player, position)")
@@ -286,7 +287,7 @@ def check_live_step(L):
     L.process(now="2026-11-01T16:11:00", **kw)
     boost = [b for b in sent if "BOOST" in b]
     assert len(boost) == 1 and re.fullmatch(r"🟢 BOOST STEP Ned Nine REB o2\.5 -111 DK · Xavier Big out \(game 1\) · starts for him, "
-                                            r"\d+ min \(0 starts\), proj [\d.]+ · shadow", boost[0]), sent
+                                            r"\d+ min \(0 starts\), proj [\d.]+ · [\d.]+ FGA, [\d.]+ FTA, [\d.]+ 3PA · shadow", boost[0]), sent
     rows = sqlite3.connect(tmp / "role.sqlite").execute("SELECT rule, pinged FROM ratio_signals WHERE rule LIKE 'BOOST%'").fetchall()
     assert rows == [("BOOST_STEP", 1)], rows
 
@@ -409,6 +410,9 @@ def check_lineups(mod):
     f = step(N9, "rebounds", 4.5, posted)
     want(f and mod.kind_of(f) == "step" and abs(f["proj"] - sm[0] * rate) < 1e-9 and f["n_starts"] == 3,
          "NBA.com's five: N9 steps in, minutes x his rebounds per minute (last season worth 150 min), a STEP flag")
+    rt = mod.rates(bd, N9, D)
+    want(f and all(abs(f["vol"][s] - sm[0] * rt[s]) < 1e-9 for s in ("fga", "fta", "fg3a")) and rt["fga"] > 0,
+         "the ping's shot volume: his FGA, FTA and 3PA per minute x his STEP minutes")
     want(step(N9, "assists", 0.5, posted) is None, "X is not a top-2 passer: no STEP flag on assists")
     want(mod.step_eval(bd, rd, D, "HOM", N9, "rebounds", 4.5, 1.6, {X}, posted) is None, "STEP skips overs worse than -150")
     smb = mod.step_minutes(bd, rd, B, "HOM", D, {X})
@@ -456,7 +460,7 @@ def check_live_lineup(L):
             BOOST._TREES["b"] = saved
     boost = [b for b in sent if "BOOST" in b]
     assert len(boost) == 1 and re.fullmatch(r"🟢 BOOST STEP Ned Nine REB o4\.5 -111 DK · Xavier Big out \(game 1\) · starts for him, "
-                                            r"\d+ min \(3 starts\), proj [\d.]+ · shadow", boost[0]), sent
+                                            r"\d+ min \(3 starts\), proj [\d.]+ · [\d.]+ FGA, [\d.]+ FTA, [\d.]+ 3PA · shadow", boost[0]), sent
     rows = sqlite3.connect(tmp / "role.sqlite").execute(
         "SELECT rule, pid, market, pinged FROM ratio_signals WHERE rule LIKE 'BOOST%' ORDER BY rule").fetchall()
     assert rows == [("BOOST_PICKUP", B, "assists", 0), ("BOOST_STEP", N9, "rebounds", 1)], rows

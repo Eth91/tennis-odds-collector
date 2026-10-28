@@ -243,3 +243,10 @@ target A with confirmed starters (absence games 1–3).
 - v2 already equals the oracle on role. The game script, through the spread, is the only pre-game information left,
   and even in hindsight it is worth about 0.15.
 - Shot volume from his per-minute rate × v2 minutes is also at the oracle bound. Rates from his starts are no better.
+
+# AMENDMENT 5: shot volume in the STEP ping (2026-10-28, about 21:55 UTC)
+**User** (after the floor): "put FGA/FTA/3PA in the pings."
+- Each BOOST_STEP ping adds his projected FGA, FTA and 3PA: his per-minute rates (`nba_boost.rates`, last season worth 150
+  minutes) × his STEP minutes. Amendment 4 shows that rate × minutes sits at the oracle bound.
+- This is information only: no flag decision changes. The four BOOST rules are re-registered at 2026-10-28T22:30 UTC,
+  because the data they load now carries FTA and 3PA.

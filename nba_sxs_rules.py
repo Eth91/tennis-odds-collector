@@ -887,8 +887,8 @@ REGISTRY = {                                             # name -> (registered a
     "PTS_DVP": ("2026-10-27T13:00:00", "fc8387835f"),             # amendment 5
     "RATIO_PA28": ("2026-10-27T13:00:00", "2404e38806"),          # amendment 4
     "RATIO_RC": ("2026-10-27T13:00:00", "17e2e5ea3f"),
-    "BOOST": ("2026-10-28T22:00:00", "63b290d65d"),               # amendment 9 (NBA_BOOST_PREREG.md amendments 2-6)
-    "BOOST_STEP": ("2026-10-28T22:00:00", "b81a5fe4bf"),
-    "BOOST_PICKUP": ("2026-10-28T22:00:00", "9ca17d7c70"),
-    "BOOST_NH": ("2026-10-28T22:00:00", "2ce3e8ed7d"),
+    "BOOST": ("2026-10-28T22:30:00", "56cd0fe24b"),               # amendment 9 (NBA_BOOST_PREREG.md amendments 2-6)
+    "BOOST_STEP": ("2026-10-28T22:30:00", "a8ddd05bcb"),
+    "BOOST_PICKUP": ("2026-10-28T22:30:00", "8653682d1d"),
+    "BOOST_NH": ("2026-10-28T22:30:00", "61f221fabf"),
 }
