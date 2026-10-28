@@ -124,3 +124,29 @@ no-vig price implied (51%).
 - Also new: with real starters as its step-ins, the live STEP rule's backtest is −8.6% and +5.6%, not the +11% and
   +16% it showed with the minutes-guessed step-ins. Its evidence is weaker than it looked.
 - Openers before the lineup is known cannot be tested with this archive.
+
+# AMENDMENT 1: the audit (2026-10-28, about 21:20 UTC, before it was run)
+**User:** "audit the new minutes model, dial it in even more, find the little nuances that it's missing right now."
+(The blend went live for STEP as BOOST amendment 6.)
+
+**Protocol:**
+1. **Explore on 2023-24 only,** the fit season. It is used only for the fitted model, and the blend has nothing fitted
+   but K = 3.
+   - **Target A, confirmed** (the live STEP case): residual = actual − blend, by bucket of each candidate nuance below.
+     Reported as mean residual (bias), MAE and n.
+   - **Target B:** the fitted model's 2023-24 residuals are in-sample, so B is explored with V3's residuals.
+2. **Candidate nuances:**
+   - **Known before the game:**
+     - how many starts he has, and from which season;
+     - whether he started before for this same X;
+     - X's minutes; position match with X;
+     - starters out (1 vs 2+); absence game n;
+     - rest days and long layoffs (back from his own injury);
+     - the game's index in the season (early season, April);
+     - home or away (from the lineups files);
+     - the team's starter minutes (how long its coach plays starters) and rotation size;
+     - each team's mean residual (coach habits).
+   - **Hindsight, to size what cannot be predicted:** the final margin (blowouts), overtime, and fouls (5+).
+3. **Then:** the findings go to the user with proposed refinements and choices. Nothing is changed before that.
+4. **Any adopted refinement** is written here as a v2 before it is run on 2024-25 and 2025-26. Same bars: v2's MAE must
+   be below the blend's (A) or the fitted model's (B) in both test seasons. Bets as before.
