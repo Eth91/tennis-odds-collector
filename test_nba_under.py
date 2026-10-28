@@ -68,7 +68,7 @@ def check_live(L, fake_model=True):
     tmp = pathlib.Path(tempfile.mkdtemp())
     p = TB.live_stores(tmp)
     sent = []
-    kw = dict(lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"], tracking_db=tmp / "t.sqlite",
+    kw = dict(phone=L.ALL_RULES, lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"], tracking_db=tmp / "t.sqlite",
               lineups_db=tmp / "none.sqlite", index_json=tmp / "none.json", db=tmp / "role.sqlite", sender=lambda b: sent.append(b) or True)
     saved = U._MODEL.get("m")
     U._MODEL["m"] = FAKE
@@ -101,6 +101,31 @@ def check_live(L, fake_model=True):
     assert sorted(u20) == sorted([(TB.B, "rebounds", 1), (TB.B, "threes", 0), (TB.G4, "assists", 0), (TB.B, "points", 0)]), rows
 
 
+def check_phone_default(L):
+    """With the default routing only UNDER20 reaches the phone: B's BOOST flag (DraftKings' rebounds opener, 5 of 5) is
+    recorded with pinged = 0 and sends nothing; the tip - 30 UNDER20 ping still goes out."""
+    import nba_boost as BOOST
+    import nba_role as ROLE
+    import nba_under as U
+    tmp = pathlib.Path(tempfile.mkdtemp())
+    p = TB.live_stores(tmp)
+    sent = []
+    kw = dict(lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"], tracking_db=tmp / "t.sqlite",
+              lineups_db=tmp / "none.sqlite", index_json=tmp / "none.json", db=tmp / "role.sqlite", sender=lambda b: sent.append(b) or True)
+    bd = BOOST.live_data(p["matchup"], p["gamelogs"], "2026-27")
+    rd = ROLE.RoleData(p["matchup"], p["gamelogs"], "2026-27")
+    reb_line = U.projection(bd, rd, TB.B, "HOM", TB.D, {TB.X}, "rebounds")[1] / 0.6
+    L.process(now="2026-11-01T14:00:00", **kw)
+    TB.post(p, "dk", "2026-11-01T16:10:00", ((TB.B, "Bee Big", "rebounds", 9.5),))
+    L.process(now="2026-11-01T16:11:00", **kw)
+    TB.post(p, "fd", "2026-11-01T23:00:00", ((TB.B, "Bee Big", "rebounds", reb_line),))
+    L.process(now="2026-11-01T23:31:00", **kw)
+    assert len(sent) == 1 and sent[0].startswith("🔵 UNDER Bee Big REB"), sent
+    c = sqlite3.connect(tmp / "role.sqlite")
+    assert c.execute("SELECT pinged FROM ratio_signals WHERE rule = 'BOOST' AND pid = ?", (TB.B,)).fetchall() == [(0,)]
+    assert c.execute("SELECT pinged FROM idea_signals WHERE rule = 'UNDER20' AND pid = ?", (TB.B,)).fetchall() == [(1,)]
+
+
 def check_replay(SR):
     """The side-by-side's UNDER20 at the tip - 30 tick: B's rebounds under; S2's points not."""
     tmp = pathlib.Path(tempfile.mkdtemp())
@@ -127,6 +152,7 @@ def test_under():
     assert check(UNDER)
     check_live(L)
     check_replay(SR)
+    check_phone_default(L)
 
 
 def test_mutants():

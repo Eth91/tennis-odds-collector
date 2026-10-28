@@ -235,7 +235,7 @@ def check_live(L):
     tmp = pathlib.Path(tempfile.mkdtemp())
     p = live_stores(tmp)
     sent = []
-    kw = dict(lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"], tracking_db=tmp / "t.sqlite",
+    kw = dict(phone=L.ALL_RULES + ("BOOST_NH", "BOOST_PICKUP"), lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"], tracking_db=tmp / "t.sqlite",
               lineups_db=tmp / "none.sqlite", index_json=tmp / "none.json", db=tmp / "role.sqlite", sender=lambda b: sent.append(b) or True)
     L.process(now="2026-11-01T14:00:00", **kw)                                          # install
     post(p, "dk", "2026-11-01T16:10:00", ((B, "Bee Big", "rebounds", 9.5), (N7, "Nate Seven", "rebounds", 7.5)))
@@ -262,7 +262,7 @@ def check_new_markets(L):
     con.execute("INSERT INTO meta VALUES ('installed', '2026-10-27T00:00:00')")
     con.commit()
     sent = []
-    kw = dict(lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"], tracking_db=tmp / "t.sqlite",
+    kw = dict(phone=L.ALL_RULES + ("BOOST_NH", "BOOST_PICKUP"), lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"], tracking_db=tmp / "t.sqlite",
               lineups_db=tmp / "none.sqlite", index_json=tmp / "none.json", db=tmp / "role.sqlite", sender=lambda b: sent.append(b) or True)
     post(p, "dk", "2026-11-01T16:10:00", ((B, "Bee Big", "pts_reb", 15.5), (B, "Bee Big", "rebounds", 9.5)))
     L.process(now="2026-11-01T16:11:00", **kw)
@@ -280,7 +280,7 @@ def check_live_step(L):
     tmp = pathlib.Path(tempfile.mkdtemp())
     p = live_stores(tmp, step=True)
     sent = []
-    kw = dict(lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"], tracking_db=tmp / "t.sqlite",
+    kw = dict(phone=L.ALL_RULES + ("BOOST_NH", "BOOST_PICKUP"), lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"], tracking_db=tmp / "t.sqlite",
               lineups_db=tmp / "none.sqlite", index_json=tmp / "none.json", db=tmp / "role.sqlite", sender=lambda b: sent.append(b) or True)
     L.process(now="2026-11-01T14:00:00", **kw)
     post(p, "dk", "2026-11-01T16:10:00", ((N9, "Ned Nine", "rebounds", 2.5),))
@@ -449,7 +449,7 @@ def check_live_lineup(L):
     tmp = pathlib.Path(tempfile.mkdtemp())
     p = lineup_stores(tmp)
     sent = []
-    kw = dict(lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"], tracking_db=tmp / "t.sqlite",
+    kw = dict(phone=L.ALL_RULES + ("BOOST_NH", "BOOST_PICKUP"), lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"], tracking_db=tmp / "t.sqlite",
               lineups_db=p["lineups"], index_json=tmp / "none.json", db=tmp / "role.sqlite", sender=lambda b: sent.append(b) or True)
     saved = BOOST._TREES.get("b")
     BOOST._TREES["b"] = BOOST.Trees(FAKE_30)
@@ -562,7 +562,7 @@ def test_lineup_mutants():
             sys.modules.pop("nba_boost_lmut", None)
     import nba_role_open as L
     lsrc = pathlib.Path(L.__file__).read_text()
-    a = "        fired += step_checks(con, keys, now, n, matchup_db, gamelogs_db, lineups_db, sender, bds, rds, stat_cache)\n"
+    a = "        fired += step_checks(con, keys, now, n, matchup_db, gamelogs_db, lineups_db, sender, bds, rds, stat_cache, phone)\n"
     assert lsrc.count(a) == 1
     d = pathlib.Path(tempfile.mkdtemp())
     (d / "nba_role_open_lmut.py").write_text(lsrc.replace(a, ""))

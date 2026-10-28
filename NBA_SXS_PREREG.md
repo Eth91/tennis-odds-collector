@@ -318,3 +318,10 @@ Both are registered at **2026-10-28T21:00:00 UTC**.
 30. **UNDER3050:** UNDER20's pinged flags, 30–50% below the line, −150 or better, not threes (`NBA_UNDER_PREREG.md` amendment 4). The pings move here from UNDER20P/UNDER30P.
 
 All five are registered at **2026-10-29T00:00:00 UTC**.
+
+# NOTE: phone routing (2026-10-28, about 23:00 UTC; no rule changes)
+**User:** "only flag the under pings we were just working on, only shadow track the other pings."
+- `nba_role_open.PHONE = ("UNDER20",)`: only UNDER20's pings (30–50% below, −150 or better, not threes) reach the phone.
+- BOOST, BOOST_STEP, EARLY_SURGE, RATIO_PA28, ROLE_OPEN, RETURN_UNDER and FOUL_BIG are still judged and recorded the
+  same way, but with pinged = 0 and no message.
+- No decision, fingerprint or registration changes. The side-by-side scores every rule as before.

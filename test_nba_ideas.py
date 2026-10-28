@@ -92,7 +92,7 @@ def test_live_tip30():
                                                         for s, o in (("over", 1.85), ("under", 1.95))])
     q.commit()
     sent = []
-    kw = dict(lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"], tracking_db=tmp / "t.sqlite",
+    kw = dict(phone=L.ALL_RULES, lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"], tracking_db=tmp / "t.sqlite",
               lineups_db=tmp / "none.sqlite", index_json=tmp / "none.json", db=tmp / "role.sqlite", sender=lambda b: sent.append(b) or True)
     assert L.process(now="2026-11-01T16:00:00", **kw) == 0                               # install
     assert L.process(now="2026-11-01T23:20:00", **kw) == 0 and sent == []                # before tip - 30
@@ -201,7 +201,7 @@ def check_live_early(L):
               "pid INTEGER, player TEXT, stat TEXT, line REAL, side TEXT, odds REAL)")
     q.commit()
     sent = []
-    kw = dict(lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"], tracking_db=tmp / "t.sqlite",
+    kw = dict(phone=L.ALL_RULES, lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"], tracking_db=tmp / "t.sqlite",
               lineups_db=tmp / "none.sqlite", index_json=tmp / "none.json", db=tmp / "role.sqlite", sender=lambda b: sent.append(b) or True)
     assert L.process(now="2026-11-01T14:00:00", **kw) == 0                               # install
     q.executemany("INSERT INTO board (book, collected_at, gid, tip_utc, home, away, pid, player, stat, line, side, odds) "
@@ -225,7 +225,8 @@ def test_live_early_ping():
 def test_live_early_mutants():
     src = pathlib.Path(sys.modules["nba_role_open"].__file__).read_text()
     for tag, a, b in (("no surge check", "            if EARLY.early_surge(ed, pid, date, m[0]):", "            if ed.last.get(pid):"),
-                      ("no dedupe", "                if cur.rowcount:\n                    ok = sender(early_body(", "                if True:\n                    ok = sender(early_body(")):
+                      ("no dedupe", "                if cur.rowcount:\n                    ok = notify(sender, \"EARLY_SURGE\", early_body(",
+                       "                if True:\n                    ok = notify(sender, \"EARLY_SURGE\", early_body(")):
         assert src.count(a) == 1, tag
         d = pathlib.Path(tempfile.mkdtemp())
         (d / "nba_role_open_emut.py").write_text(src.replace(a, b))

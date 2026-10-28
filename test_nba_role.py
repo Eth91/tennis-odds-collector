@@ -124,7 +124,7 @@ def test_live_pinger():
     tmp = pathlib.Path(tempfile.mkdtemp())
     p = day_stores(tmp)
     sent = []
-    kw = dict(lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"], db=tmp / "role.sqlite",
+    kw = dict(phone=L.ALL_RULES, lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"], db=tmp / "role.sqlite",
               sender=lambda b: sent.append(b) or True)
     q = sqlite3.connect(p["lines"])
     q.execute("CREATE TABLE board (book TEXT, collected_at TEXT, gid TEXT, tip_utc TEXT, event TEXT, home TEXT, away TEXT, "

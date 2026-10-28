@@ -41,6 +41,15 @@ DDL = ["CREATE TABLE IF NOT EXISTS opened (gid TEXT, pid INTEGER, market TEXT, b
        "CREATE TABLE IF NOT EXISTS ratio_signals (rule TEXT, gid TEXT, pid INTEGER, market TEXT, book TEXT, line REAL, "
        "price REAL, volume REAL, date TEXT, player TEXT, logged_at TEXT, pinged INTEGER, PRIMARY KEY (rule, gid, pid, market))"]
 PINGED_RATIOS = ("RATIO_PA28",)                          # NBA_RATIO_PREREG.md amendment 3: the ratio rules that ping
+PHONE = ("UNDER20",)            # the user, 2026-10-28: only the under pings reach the phone; every other rule is recorded
+ALL_RULES = ("UNDER20", "BOOST", "BOOST_STEP", "EARLY_SURGE", "RATIO_PA28", "ROLE_OPEN", "RETURN_UNDER", "FOUL_BIG")
+
+
+def notify(sender, rule, text, phone=PHONE):
+    """Send a ping only for the rules routed to the phone; the others are recorded silently (pinged = 0)."""
+    return bool(sender(text)) if rule in phone else False
+
+
 DDL.append("CREATE TABLE IF NOT EXISTS idea_signals (rule TEXT, gid TEXT, pid INTEGER, market TEXT, line REAL, price REAL, "
            "note TEXT, date TEXT, player TEXT, logged_at TEXT, pinged INTEGER, PRIMARY KEY (rule, gid, pid, market))")
 DDL.append("CREATE TABLE IF NOT EXISTS tip30_done (gid TEXT PRIMARY KEY, done_at TEXT)")
@@ -90,7 +99,7 @@ def ratio_body(rule, player, market, line, price, book, vol):
             f"· pot. ast {vol:.1f} ({vol / line:.1f}x) · shadow")
 
 
-def boost_signal(con, sender, f, gid, pid, market, book, line, price, date, player, x_name, now):
+def boost_signal(con, sender, f, gid, pid, market, book, line, price, date, player, x_name, now, phone=PHONE):
     """Record a BOOST flag, one per (rule, game, player, market) across books; ping BOOST and BOOST_STEP (BOOST_NH and
     BOOST_PICKUP are silent). Returns pings."""
     rule = {"history": "BOOST", "step": "BOOST_STEP", "pickup": "BOOST_PICKUP", "no history": "BOOST_NH"}[BOOST.kind_of(f)]
@@ -100,14 +109,14 @@ def boost_signal(con, sender, f, gid, pid, market, book, line, price, date, play
     dup = rule == "BOOST_STEP" and con.execute("SELECT 1 FROM ratio_signals WHERE rule = 'BOOST' AND gid = ? AND pid = ? "
                                                "AND market = ? AND pinged = 1", (gid, pid, market)).fetchone()
     if cur.rowcount and rule in ("BOOST", "BOOST_STEP") and not dup:   # amendments 1, 6: history and STEP ping, once a prop
-        ok = sender(BOOST.body(player, market, line, price, BOOK[book], f, x_name))
+        ok = notify(sender, rule, BOOST.body(player, market, line, price, BOOK[book], f, x_name), phone)
         con.execute("UPDATE ratio_signals SET pinged = ? WHERE rule = ? AND gid = ? AND pid = ? AND market = ?",
                     (1 if ok else 0, rule, gid, pid, market))
         return 1
     return 0
 
 
-def step_checks(con, keys, now, n, matchup_db, gamelogs_db, lineups_db, sender, bds, rds, stat_cache):
+def step_checks(con, keys, now, n, matchup_db, gamelogs_db, lineups_db, sender, bds, rds, stat_cache, phone=PHONE):
     """NBA_BOOST_PREREG.md amendments 4 and 6: at the first run after a player first appears as a new starter in
     NBA.com's lineup (or as that starter's bench pickup), his props that opened before that snapshot are judged for
     STEP (or PICKUP) at their current main line. Returns pings."""
@@ -144,11 +153,12 @@ def step_checks(con, keys, now, n, matchup_db, gamelogs_db, lineups_db, sender, 
                     f = judge(bd, rd, date, team, p, market, m[0], m[1], out, five)
                     if f:
                         fired += boost_signal(con, sender, f, gid, p, market, book, m[0], m[1], date, player,
-                                              st[f["x"]][2] or str(f["x"]), now)
+                                              st[f["x"]][2] or str(f["x"]), now, phone)
     return fired
 
 
-def tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json, sender, bds=None, rds=None, stat_cache=None):
+def tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json, sender, bds=None, rds=None, stat_cache=None,
+          phone=PHONE):
     """NBA_IDEAS_PREREG.md amendment 1: at each game's first run at or after tip - 30 (before tip - 5), RETURN_UNDER and
     FOUL_BIG on FanDuel's current board, with the decisions the side-by-side replays. Returns pings sent. The data
     loaded for one game is shared with the others in the run (and with process's caches when given)."""
@@ -201,8 +211,8 @@ def tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json,
                 cur = con.execute("INSERT OR IGNORE INTO idea_signals VALUES (?,?,?,?,?,?,?,?,?,?,?)",
                                   ("UNDER20", gid, p, mk, line, under, f"proj {u20['proj']:.1f} min {u20['min']:.1f}", date, player, now, 0))
                 if cur.rowcount and UNDER.pings(u20, mk):   # pinged (SHADOW): 30-50% below, -150 or better, not threes
-                    ok = sender(f"🔵 UNDER {player} {ABBR.get(mk, mk.upper())} u{line:g} {american(under)} FD · proj {u20['proj']:.1f} "
-                                f"({u20['ratio']:.0%} of the line), {u20['min']:.0f} min · shadow")
+                    ok = notify(sender, "UNDER20", f"🔵 UNDER {player} {ABBR.get(mk, mk.upper())} u{line:g} {american(under)} FD · proj {u20['proj']:.1f} "
+                                f"({u20['ratio']:.0%} of the line), {u20['min']:.0f} min · shadow", phone)
                     con.execute("UPDATE idea_signals SET pinged = ? WHERE rule = 'UNDER20' AND gid = ? AND pid = ? AND market = ?",
                                 (1 if ok else 0, gid, p, mk))
                     fired += 1
@@ -219,7 +229,7 @@ def tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json,
                               (rule, gid, p, mk, line, under, note, date, player, now, 0))
             if cur.rowcount:
                 tag = {"RETURN_UNDER": "🔻 RETURN", "FOUL_BIG": "🟠 FOUL"}[rule]
-                ok = sender(f"{tag} {player} {ABBR.get(mk, mk.upper())} u{line:g} {american(under)} FD · {note} · shadow")
+                ok = notify(sender, rule, f"{tag} {player} {ABBR.get(mk, mk.upper())} u{line:g} {american(under)} FD · {note} · shadow", phone)
                 con.execute("UPDATE idea_signals SET pinged = ? WHERE rule = ? AND gid = ? AND pid = ? AND market = ?",
                             (1 if ok else 0, rule, gid, p, mk))
                 fired += 1
@@ -228,7 +238,7 @@ def tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json,
 
 def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_news.sqlite", matchup_db=HERE / "nba_matchup.sqlite",
             gamelogs_db=HERE / "nba_gamelogs.sqlite", tracking_db=HERE / "nba_tracking.sqlite", lineups_db=HERE / "nba_lineups.sqlite",
-            index_json=HERE / "nba_player_index.json", db=DB, sender=None):
+            index_json=HERE / "nba_player_index.json", db=DB, sender=None, phone=PHONE):
     import nba_ping as PING
     sender = sender or PING.send
     now = now or dt.datetime.now(dt.timezone.utc).replace(tzinfo=None, microsecond=0).isoformat()
@@ -261,7 +271,7 @@ def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_ne
                 cur = con.execute("INSERT OR IGNORE INTO ratio_signals VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
                                   (rule, gid, pid, market, book, m[0], m[1], round(vol, 2), date, player, now, 0))
                 if cur.rowcount:
-                    ok = sender(ratio_body(rule, player, market, m[0], m[1], book, vol))
+                    ok = notify(sender, rule, ratio_body(rule, player, market, m[0], m[1], book, vol), phone)
                     con.execute("UPDATE ratio_signals SET pinged = ? WHERE rule = ? AND gid = ? AND pid = ? AND market = ?",
                                 (1 if ok else 0, rule, gid, pid, market))
                     fired += 1
@@ -273,7 +283,7 @@ def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_ne
                 cur = con.execute("INSERT OR IGNORE INTO ratio_signals VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
                                   ("EARLY_SURGE", gid, pid, market, book, m[0], m[1], round(fga, 2), date, player, now, 0))
                 if cur.rowcount:
-                    ok = sender(early_body(player, m[0], m[1], book, fga, ed.last[pid]))
+                    ok = notify(sender, "EARLY_SURGE", early_body(player, m[0], m[1], book, fga, ed.last[pid]), phone)
                     con.execute("UPDATE ratio_signals SET pinged = ? WHERE rule = 'EARLY_SURGE' AND gid = ? AND pid = ? AND market = ?",
                                 (1 if ok else 0, gid, pid, market))
                     fired += 1
@@ -291,7 +301,7 @@ def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_ne
                           BOOST.pickup_eval(bd, rd, date, bteam, pid, market, m[0], m[1], out_b, five)):
                     if f:
                         fired += boost_signal(con, sender, f, gid, pid, market, book, m[0], m[1], date, player,
-                                              st[f["x"]][2] or str(f["x"]), now)
+                                              st[f["x"]][2] or str(f["x"]), now, phone)
         if market not in ROLE.MARKET_STAT:
             continue
         rd = rds.get(season) or rds.setdefault(season, ROLE.RoleData(matchup_db, gamelogs_db, season))
@@ -308,13 +318,13 @@ def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_ne
                               (gid, pid, market, e["side"], book, m[0], e["price"], round(e["ev"], 4), round(e["p"], 4),
                                round(e["mu"], 2), ",".join(map(str, sorted(e["spots"]))), date, team, player, now, 0))
             if cur.rowcount:
-                ok = sender(body(e, team, player, market, m[0], book, xs))
+                ok = notify(sender, "ROLE_OPEN", body(e, team, player, market, m[0], book, xs), phone)
                 con.execute("UPDATE signals SET pinged = ? WHERE gid = ? AND pid = ? AND market = ? AND side = ?",
                             (1 if ok else 0, gid, pid, market, e["side"]))
                 fired += 1
     if not first_run:
-        fired += step_checks(con, keys, now, n, matchup_db, gamelogs_db, lineups_db, sender, bds, rds, stat_cache)
-        fired += tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json, sender, bds, rds, stat_cache)
+        fired += step_checks(con, keys, now, n, matchup_db, gamelogs_db, lineups_db, sender, bds, rds, stat_cache, phone)
+        fired += tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json, sender, bds, rds, stat_cache, phone)
     if first_run:
         con.execute("INSERT OR REPLACE INTO meta VALUES ('installed', ?)", (now,))
     con.execute("INSERT OR REPLACE INTO meta VALUES ('markets', ?)", (",".join(BOOST.PARTS),))

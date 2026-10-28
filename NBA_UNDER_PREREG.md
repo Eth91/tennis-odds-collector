@@ -113,3 +113,7 @@ best FanDuel/DraftKings over, 2023-24 and 2024-25 tip lines; 46 ranges.)
   public's shading on top of the vig. A projection far above the line is more often our miss. A projection far below
   catches lines the book is slow to lower.
 - No over rule is added.
+
+# AMENDMENT 6: the only pings (2026-10-28, about 23:00 UTC)
+The user made UNDER20's pinged flags (amendment 4) the only rule that pings the phone; every other rule is shadow-tracked
+(`NBA_SXS_PREREG.md`, note on phone routing).
