@@ -205,3 +205,17 @@ can foresee them.
   coefficient; the next 150 test it.
 - **Pass:** a STEP projection with the spread term has lower MAE than v2's on the new starters in the test games.
   With few step-ins there, starters as a whole are reported too.
+
+**Amendment 2: run (2026-10-28, about 21:40 UTC). PASS for confirmed starters; WORSE for the projected five.**
+MAE (bias as model − actual):
+
+| A | 2024-25 | 2025-26 | first-time starters 2024-25 / 2025-26 |
+|---|---|---|---|
+| confirmed, v1 → **v2** | 5.33 (−1.3) → **4.99** (−0.0) | 5.20 (−1.1) → **5.02** (+0.0) | 8.72 → 5.26 / 8.87 → 5.56 |
+| projected, v1 → v2 | 5.54 (+1.5) → 5.85 (+2.2) | 5.27 (+1.1) → 5.55 (+1.8) | n 4 / n 5 |
+
+- With the projected five, the pick sometimes does not start, so a 26-minute floor over-projects.
+- The floor belongs only to confirmed starters (NBA.com's lineup posted).
+
+**Bets (2024-25 tip lines, confirmed starters):** v1 292 flags, +5.2%; v2 351, +3.9% (90%: −4.3%, +11.7%). In 2023-24
+both are −4.2%. The better minutes do not make better bets at tip lines. Nothing changes live until the user decides.
