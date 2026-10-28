@@ -154,3 +154,148 @@ The rules:
 - The verdicts are the same as every other rule here: CLV first, at ≥ 200 signals and ≥ 10 dates.
 - The development replay covers 2026-10-22..26. The lineup log starts on the evening of 2026-10-26, so
   NEW_STARTER and LOST_START have one night of development data.
+
+---
+
+# AMENDMENT 2: ROLE_OPEN, elevated roles at the opener (2026-10-27, before it was run on live data)
+**Specified in `NBA_ROLE1_PREREG.md`.** This is the user's thesis: injury news, an elevated role, the first 1–3
+games of the absence, and speed at the opener.
+
+12. **ROLE_OPEN.**
+    - **The moment:** a book's opener for a prop in points, rebounds, assists or threes. That is the first
+      observation of the prop with a two-sided main rung (FanDuel or DraftKings).
+    - **The spot:**
+      - X averaged ≥ 17 min this season for the player's team (≥ 3 games);
+      - X is listed Out or Doubtful on a report published before the observation;
+      - this is X's absence game 1–3;
+      - the player is on the active roster.
+    - **The price:**
+      - the ROLE1 v2 model gives the player's mean;
+      - a negative binomial (r per market, `nba_role.NB_R`) gives P(side) at the opener's line;
+      - that P is calibrated toward the opener's no-vig with β = 0.09.
+    - **The signal:** EV′ = P′ × price − 1 ≥ 0.05. The bet is that side at the opener's price.
+    - **Registered at 2026-10-27T13:00:00 UTC.** Its fingerprint covers `nba_role`'s model, pricing and data
+      helpers.
+    - **Verdict:** the same bars as every rule here.
+    - **Live:** `nba_role_open.py --process` runs every minute on the VM with the same evaluation. It pings
+      the phone (SHADOW) when it fires, and logs to `nba_role.sqlite`.
+
+---
+
+# AMENDMENT 3: the user's volume-to-line ratios at the opener (2026-10-27, before they ran on live data)
+**Specified in `NBA_RATIO_PREREG.md`.** At a book's opener (its first observation of the prop with a two-sided
+main rung, up to tip − 5), with ≥ 3 games this season:
+
+13. **RATIO_FGA:** the points over when his FGA per game this season (box scores) ≥ the points line.
+14. **RATIO_PA:** the assists over when his potential assists per game this season (nba_tracking) ≥ 2 × the
+    assists line.
+15. **RATIO_RC:** the rebounds over when his rebound chances per game this season (nba_tracking) ≥ 2 × the
+    rebounds line.
+
+In nba_tracking, a missing row on a fetched date counts as 0. **Registered at 2026-10-27T13:00:00 UTC**, with
+fingerprints covering `nba_ratio`'s data helper. The same bars as every rule. Phone pings only for rules whose
+backtest passes (NBA_RATIO_PREREG.md).
+
+# AMENDMENT 4: RATIO_PA28 (2026-10-27, before it ran live)
+16. **RATIO_PA28:** RATIO_PA at 2.8× instead of 2× (`NBA_RATIO_PREREG.md` amendment 3). This threshold was
+    chosen in sample, so only forward counts. Registered at **2026-10-27T13:00:00 UTC**. It pings (SHADOW).
+
+# AMENDMENT 5: PTS_DVP (2026-10-27, before it ran)
+17. **PTS_DVP:** as `NBA_RATIO_PREREG.md` amendment 5. It fires from about mid-November, when opponents reach 10
+    games. Registered at **2026-10-27T13:00:00 UTC**; no pings.
+
+# AMENDMENT 6: the six ideas' forward rules (2026-10-27, before they ran)
+**As in `NBA_IDEAS_PREREG.md` amendment 1:**
+18. **RETURN_UNDER** (idea 4, passed): at tip − 30, unders for the teammates of a cleared returning rotation
+    player. Pinged (SHADOW).
+19. **FOUL_BIG** (idea 2, passed): at tip − 30, unders for foul-prone bigs against teams that draw free throws.
+    Pinged (SHADOW); it fires once teams have 10 games and nba_matchup has this season's personal fouls.
+20. **MIN_RESTRICT** (idea 5, forward only): at FanDuel's next look after an X/Bluesky item reports a minutes
+    restriction, unders. No pings.
+
+All three are registered at **2026-10-27T13:00:00 UTC**.
+
+# AMENDMENT 7: EARLY_SURGE (2026-10-27, before it ran)
+21. **EARLY_SURGE:** the early-season volume surge at the opener (`NBA_EARLY_PREREG.md` amendment 1). Registered at
+    **2026-10-27T13:00:00 UTC**; no pings.
+    - Later the same day, the user turned on SHADOW pings at the opener (`NBA_EARLY_PREREG.md` amendment 2). The rule is unchanged.
+
+# AMENDMENT 8: box scores and tracking as known at the decision (2026-10-28, apparatus only)
+Written before any code for it and before its effect on any signal was measured.
+
+**Why.**
+- The replay hands a rule every box score dated before the game's ET date. On a back-to-back, FanDuel often posts
+  the next day's openers at about 03:00–06:00 UTC (21:00–00:00 MT), while the previous night's games are still on.
+  The replay then counts a game that had not finished at the decision time t. `NBA_SPEED_PREREG.md` amendment 34
+  named this as a known limit.
+- Tracking has the same problem, and a larger one. The league posts a night's tracking 1–2 days later, but the
+  replay reads every tracked date before the game date, whenever it was fetched.
+- Live, a rule sees a final only once `nba_finals.py` stores it, about 15 minutes after the buzzer. It sees tracking
+  only once `nba_tracking.py` stores it.
+
+**The rule.** For a replayed decision at time t:
+1. **A game counts only if it was final by t.** This is on top of "before the date", which stays: a game on the
+   date itself still never counts.
+   - No store records when a game went final. `nba_matchup.sqlite` keeps the game's ET date only (`games`: gid,
+     season, date, teams, scores). `nba_season_boxes.json` keeps {date, players}. Neither keeps the tip.
+   - So **the final time is the tip + 3 hours.** The tip is the schedule's `gameDateTimeUTC` as `nba_lines` stored
+     it: the latest `quotes.tip_utc` for the game, the same tip the replay already uses for the day's own games.
+   - **Without a tip on the game's ET date** (no quotes, or the game was moved), the final time is the end of its ET
+     date + 3 hours (03:00 ET the next day). That is the latest it can be.
+   - **Why 3 hours:** a regulation game takes about 2¼ hours from tip, and an overtime adds about 20 minutes. Live
+     sees a final about 15 minutes after the buzzer. So the replay can trail live by up to about 45 minutes after a
+     typical game, and leads it only if a game runs past 3 hours.
+2. **A tracking date counts only if it was stored by t.** Every row for that date in `nba_tracking`'s `fetched`
+   table must have `fetched_at` ≤ t. That stored time exists, so it is used. Otherwise the date counts as not
+   fetched: no potential assists or rebound chances come from it, as live.
+3. **Scope:** everything a replayed rule reads from box scores or tracking.
+   - The View's appearances (`team_of`, `last10_min`, from `nba_gamelogs` logs and `nba_matchup`).
+   - The data helpers built from the rules' matchup and tracking stores: RoleData, RatioData, DvpData, EarlyData,
+     FoulData and VolumeData.
+   - The replay applies the rule to the stores, not to the rules. At each moment it gives the rules the matchup
+     and tracking stores without the games and dates not yet known, and filters the View's history the same way.
+
+**What does not change.**
+- **No rule, threshold, helper or View code changes.** A REGISTRY fingerprint hashes the rule's class source, the
+  shared helpers, the View, its deps and its spec, and none of those is edited. Every fingerprint and registration
+  stays valid, and no forward clock restarts.
+- **Why that is honest:** this prereg defines a rule as "a function of what was known at time t". The replay broke
+  that contract by handing rules games and tracking that were not known yet. The fix makes the tool match its own
+  contract and the live pinger. No rule's text or code changes.
+- Grading is unchanged. Results still come from the box score, the close from FanDuel's board.
+- Lineups, injury reports, news items and boards were already read as of t.
+
+**Recomputing.**
+- `nba_sxs.py` keys a stored day by rule fingerprint, so on its own it would never recompute the older days. It
+  now also keys a day by an apparatus version (8), so the first run after deploy recomputes every day from
+  2026-10-22.
+- The forward record so far (from 2026-10-27 12:00 UTC, at most a night or two) is replaced by its recomputation.
+  No rule can have a verdict yet (a verdict needs 10 dates), so no verdict changes.
+- A recomputed day is now also stable: data that arrives later no longer changes it.
+
+**Tests (with mutants that must fail).**
+- A synthetic back-to-back: last night's game ends after an overnight opener. The opener rules must not see it,
+  and the tip − 30 rules must.
+- Tracking fetched after t is not read.
+- Mutants: the game counts from its tip; the as-of filter dropped from the stores or from the View's history; an
+  unknown tip counts; `fetched_at` ignored.
+
+**Measured after this is written (reported, never used to change it):** on read-only copies of the VM's stores
+from 2026-10-22, how many graded signals change for each rule (added, removed, or different), and each rule's
+development CLV and ROI before and after.
+
+**Not done here:** storing when `nba_finals.py` stored each final. That would give the exact time live saw a game,
+but it changes live code.
+
+# AMENDMENT 9: BOOST and BOOST_NH (2026-10-28, before they ran)
+22. **BOOST:** a starter (26+ min/g) out in absence game 1–3; at a book's opener, a teammate's over (−150 or better)
+    when 80%+ of his past games without that starter but with tonight's other starters beat the line
+    (`NBA_BOOST_PREREG.md`). All 8 markets. Pinged (SHADOW).
+23. **BOOST_NH:** the same rule's no-history flags (fewer than 3 such games; the position rules put him 15%+ over the
+    line). No pings.
+24. **BOOST_STEP:** the no-history flags for the step-in player raised to 24 minutes (`NBA_BOOST_PREREG.md`
+    amendments 2–3), split out of BOOST_NH before either ran. Pinged (SHADOW).
+    - Re-registered at **2026-10-28T20:30:00 UTC**, before any of the three ran: the starters and step-ins now come
+      from the lineup tab (`NBA_BOOST_PREREG.md` amendment 4).
+
+Both are registered at **2026-10-28T21:00:00 UTC**.

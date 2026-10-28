@@ -7,6 +7,7 @@ import json
 import math
 import pathlib
 import random
+import re
 import shutil
 import sqlite3
 import subprocess
@@ -347,10 +348,46 @@ def test_page_scripts_parse():
     assert "__" not in html.split("<style>")[0] and "__TEAM_ID__" not in html and "1610612756" in html
 
 
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_rebound_rings_both_views():
+    html = UI.page()
+    line = lambda pre: html[html.index(pre): html.index("\n", html.index(pre))]
+    cut = lambda pre: html[html.index(pre): html.index("\n}\n", html.index(pre)) + 3]
+    src = "\n".join([line("const esc = s =>"), line("const ord = n =>"), cut("function shFill(d)"), cut("const RD_C = r =>")])
+    d = pathlib.Path(tempfile.mkdtemp())
+    # three teams, 10 games each: their opponents' rebounds against them, [g, reb, oreb, contested, dist x4, shot x4, miss3]
+    (d / "t.js").write_text(src + """
+const T = {BOS: [10, 380, 90, 160, 100, 150, 60, 70, 0, 0, 0, 0, 120], NYK: [10, 360, 80, 108, 120, 150, 60, 30, 0, 0, 0, 0, 100],
+           ATL: [10, 380, 70, 190, 80, 150, 100, 50, 0, 0, 0, 0, 110], NOP: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]};
+const me = [5, 50, 10, 20, 20, 15, 10, 5, 10, 10, 10, 20, 15], avg = {dist: [.4, .3, .2, .1], shot: [], contested: .5, miss3: .25};
+console.log(JSON.stringify({def: rebRings(T.BOS, avg, T, "BOS"), me: rebRings(me, avg, null, "BOS"),
+  fills: [shFill(0), shFill((6 / (220 / 30) - 1) * 50), shFill((7 / 5 - 1) * 50)]}));
+""")
+    out = json.loads(subprocess.run([NODE, str(d / "t.js")], capture_output=True, text=True, check=True).stdout)
+    texts = lambda h, c: re.findall(f'class="{c}">([^<]+)<', h)
+    fills = lambda h: re.findall(r'fill="([^"]+)" fill-rule', h)
+    f0, f2, f3 = out["fills"]
+    # the defense view: a game against them in each ring (10, 15, 6, 7), shaded against the league's a team-game
+    # (10, 15, 7.33, 5; a team with no games left out), ranked 1st = the fewest (ties share the better rank)
+    assert texts(out["def"], "rdv") == ["10.0", "15.0", "6.0", "7.0"] and fills(out["def"]) == [f0, f0, f2, f3]
+    assert [x for x in texts(out["def"], "rds") if "ft" not in x] == ["2nd", "1st", "1st", "3rd"]
+    assert "BOS's opponents grab them" in out["def"] and "10 games" in out["def"] and "Off missed threes" not in out["def"]
+    assert "42%<small>league 41%</small>" in out["def"]                # contested: 160 of 380, the league 458 of 1120
+    # his view: shares of his boards against the players with rebound lines, no ranks
+    assert texts(out["me"], "rdv") == ["40%", "30%", "20%", "10%"] and fills(out["me"]) == [f0] * 4
+    assert texts(out["me"], "rds") == ["0–3 ft", "3–6 ft", "6–10 ft", "10+ ft"] and "50 boards" in out["me"]
+    assert "40%<small>avg 50%</small>" in out["me"] and "30%<small>avg 25%</small>" in out["me"]
+
+
 def test_page_controls_work_on_iphone():
     html = UI.page()
     # iOS Safari can't drag the thumb of a range input stacked under another, so the dual sliders are pointer-event widgets
     assert 'type="range"' not in html and "dualRange(" in html and "touch-action:pan-y" in html
+    # a double tap doesn't zoom the page (taps on the stat chips, pills and bars come quickly); a pinch still does
+    assert "*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}" in html
+    assert "user-scalable" not in html and "maximum-scale" not in html
+    # the Pickz P (docs/icon.svg; icon-small.svg for the 64 px tab icon), versioned so a phone fetches the new one
+    assert '<link rel="icon" href="icon-64.png?v=2">' in html and '<link rel="apple-touch-icon" href="icon-180.png?v=2">' in html
     # the headers (list, player and Matchup pages, all through --st) start 10 px below each iPhone's status bar /
     # Dynamic Island: its own safe-area inset, plus a gap
     assert "--st:calc(env(safe-area-inset-top) + 10px);" in html and html.count("env(safe-area-inset-top)") == 1
@@ -934,8 +971,11 @@ def test_matchup_shows_assist_and_rebound_zones_only_for_their_props():
     # rebounds: free throws (no zone on the court) as a line; the player's rings, 0-3 / 3-6 / 6-10 / 10+ ft from the hoop
     # (docs/rebd), shaded against the players with rebound lines; the defense view's missed threes against the league
     assert "NBA.com tracking · ${r[1]} boards ·" in html                 # the sample: early in a season a ring is a board or two
-    assert "Off missed free throws: " in html and "extra += r && r[1] ? rebRings(r, rd.avg)" in html and "function rebRings(r, avg)" in html
-    assert "shFill(avg.dist[k] == null ? null : (sh(k) - avg.dist[k]) * 100)" in html and 'RD_FT = ["0–3", "3–6", "6–10", "10+"]' in html
+    # rebounds: the rings in both views, the opponent's from its opponents' rebounds against it (rd.teams; drawn in
+    # test_rebound_rings_both_views)
+    assert "Off missed free throws: " in html and "extra += r && r[1] ? rebRings(r, rd.avg, def ? rd.teams : null, p.opp)" in html
+    assert "const r = rd && (def ? rd.teams && rd.teams[p.opp] : rd.players[String(p.pid)]);" in html and 'RD_FT = ["0–3", "3–6", "6–10", "10+"]' in html
+    assert "if (def && t && t.length >= 1 + nz + 2 * Z.length && L.miss) {" in html
     assert "const m3 = x => (x[off + Z.length + 3] + x[off + Z.length + 4] + x[off + Z.length + 5]) / x[0], lg = (L.miss[3] + L.miss[4] + L.miss[5]) / L.gp;" in html
     # a rookie facing a team with few games this season still gets his own season, not last season's blank
     assert "MUP[key] = (t && t[0] >= 10) || (me(j) && !me(q)) ? D.season : prevSeason(D.season);" in html
