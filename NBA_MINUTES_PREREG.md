@@ -83,3 +83,44 @@ page's projected five) and who is out (the box score, hindsight as in BOOST's ba
   - **Pass:** ROI > 0 in 2024-25 with ≥ 100 flags, and above the live STEP rule's ROI on the same 2024-25 spots
     (the 24-minute version, with confirmed starters as its step-ins).
 - **Either way** the user decides what goes live. Nothing is deployed from this file without asking.
+
+## Result (2026-10-28, about 21:00 UTC)
+`python3 nba_minutes.py --json .projdata/minutes_result.json` (68 s). Spots in absence games 1–3; MAE in minutes (bias).
+
+| target, knowledge | season | actual | L5 | V3 (live) | blend | fitted |
+|---|---|---|---|---|---|---|
+| A new starter, confirmed | 2024-25 (1,403) | 28.4 | 8.26 (−6.7) | 6.32 (−1.8) | **5.33** (−1.3) | 5.11 (+0.1) |
+| | 2025-26 (1,437) | 28.1 | 7.71 (−6.0) | 6.19 (−1.3) | **5.20** (−1.1) | 5.27 (+0.3) |
+| A new starter, projected | 2024-25 (896) | 26.7 | 6.68 | 5.81 | **5.54** | 5.42 |
+| | 2025-26 (844) | 26.3 | 6.47 | 5.69 | **5.27** | 5.21 |
+| B bench pickup, confirmed | 2024-25 (1,451) | 20.3 | 6.53 | 6.28 | 6.25 | **5.67** |
+| | 2025-26 (1,453) | 19.9 | 6.32 | 6.00 | 6.09 | **5.63** |
+| B bench pickup, projected | 2024-25 (1,466) | 21.3 | 6.95 | 6.01 | 6.84 | 6.14 |
+| | 2025-26 (1,465) | 21.7 | 6.75 | 5.89 | 7.11 | 5.95 |
+
+**Minutes:**
+- **A, confirmed: PASS, the blend.** It is 16% below V3's error. The fitted model is not 0.25 better in both seasons.
+- **A, projected: PASS, the blend.**
+- **B, confirmed: PASS, the fitted model.** The blend fails 2025-26.
+- **B, projected: FAIL.** Nothing beats V3.
+- **The headline:** a real new starter plays about 28 minutes (26–27 for the projected pick). Last-5 misses by 6–7
+  minutes low, and V3 by 1–2.
+- The fitted models' 2023-24 errors (about 2) are in-sample fits, not evidence.
+
+**Bets (projection ≥ 1.15 × line, −150 or better):**
+
+| | 2023-24 (minutes in-sample) | 2024-25 (held out) |
+|---|---|---|
+| new model, all | 708, +19.3% | **549, +0.5%** (90%: −5.8%, +7.0%) |
+| A (blend) | 220, −4.2% | 292, +5.2% |
+| B (fitted) | 488, +29.8% (fitted on this season: not evidence) | 257, −4.8% |
+| live STEP, confirmed starters as step-ins | 113, −8.6% | **109, +5.6%** |
+
+**Bets: FAIL.** 2024-25 is +0.5%, below the live STEP's +5.6% on the same spots. Both hit about what the book's
+no-vig price implied (51%).
+
+**Reading:**
+- The better minutes are real, but at tip lines (with confirmed lineups) the books price the starter's bigger role.
+- Also new: with real starters as its step-ins, the live STEP rule's backtest is −8.6% and +5.6%, not the +11% and
+  +16% it showed with the minutes-guessed step-ins. Its evidence is weaker than it looked.
+- Openers before the lineup is known cannot be tested with this archive.
