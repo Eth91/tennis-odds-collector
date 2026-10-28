@@ -314,3 +314,36 @@ result. All three rules are re-fingerprinted and registered at the deploy time.
   against a 17.5 points line.
 - **The user chose "old version only".** The live rules stay as deployed (d36ecff5be, amendment 4 with amendment 2–3's
   24-minute projection; registered 20:30 UTC). The amendment-5 code is kept on branch `boost-a5`, not merged.
+
+# AMENDMENT 6: STEP on the new minutes model; bench pickups tracked (2026-10-28, about 21:15 UTC, before code)
+**User:** "yes switch it to the new minutes model" (`NBA_MINUTES_PREREG.md`). Asked:
+- ping → **all new starters** (no under-24-minutes condition);
+- bench pickup → **tracked silently**;
+- timing → **switch now; update after the audit**, which restarts that rule's record.
+
+**BOOST_STEP (pinged), replacing amendments 2–3's 24-minute floor and amendment 4's STEP condition:**
+1. **When:** a usual starter X is out in absence game 1–3, and S is the step-in paired with X (amendment 4: the
+   projected five at the opener, NBA.com's five once posted, with the second check).
+2. **S's minutes,** the study's blend for target A:
+   - w × his mean minutes over his last 10 starts (any team, this season and last) + (1 − w) × V3;
+   - w = n_starts / (n_starts + 3);
+   - V3 is ROLE1 v3's minutes (`nba_role.project`, mode v3, every out rotation player absent, the active roster
+     less the outs). No V3 means no flag.
+3. **His rates:** per minute, his games this season and last (any team), with last season's rate worth 150 minutes
+   (ROLE1's K). The projection is minutes × rate, summed for a combo.
+4. **The flag:** projection ≥ 1.15 × tonight's line, X relevant to the market (rule 6), the over −150 or better. It is
+   independent of the history rule, so the same prop may also carry a BOOST flag.
+5. **Ping:** "🟢 BOOST STEP {player} {market} o{line} {price} {book} · {X} out (game n) · starts for him, {minutes} min
+   ({k} starts), proj {proj} · shadow".
+
+**BOOST_PICKUP (silent):**
+- **When:** for S above, the bench pickup R (the study's target B: history, else position), only once NBA.com's five
+  is posted, since the projected-five model failed.
+- **R's minutes:** the study's fitted model for B under confirmed starters, fit on 2023-24. It is exported as its
+  trees (`nba_minutes_b.json`) and evaluated in numpy, because the VM has no scikit-learn. It must equal scikit-learn's
+  predictions.
+- **Rates, bar, price:** as for STEP, every market.
+
+**BOOST_NH:** loses amendment 2's 24-minute floor. Its no-history flags use rule 10's redistribution only.
+
+**Registration:** BOOST, BOOST_NH, BOOST_STEP and BOOST_PICKUP are re-fingerprinted and registered at the deploy time.
