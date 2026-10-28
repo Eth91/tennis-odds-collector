@@ -174,3 +174,33 @@ Changes to rule 10 only (the history rule 9 and everything else is unchanged):
 **Check:** rerun the backtest. Reported as before, with BOOST_NH old vs new. The user chose live pings either way,
 and BOOST_NH stays silent. Both rules are re-fingerprinted; if they are deployed before 21:00 UTC their registration
 time is unchanged, otherwise it moves to the deploy time.
+
+**Amendment 2: run (2026-10-28, about 19:50 UTC). Still FAIL.** History flags are unchanged (804, −11.1%; 1,016,
+−6.3%).
+
+| no-history flags | 2023-24 | 2024-25 |
+|---|---|---|
+| before (amendment 1) | 3,869, −8.5% | 3,733, −5.0% |
+| after | 2,944, **−11.3%** | 2,922, **−0.7%** |
+| of which the step-in player at the 24-minute floor | 129, hit 57.4% (no-vig 49.1%), **+11.3%** | 102, hit 60.8% (49.6%), **+15.6%** |
+
+All flags: −11.3% and −2.2%.
+
+**The step-in subset, found after looking, so not a pass:**
+- 231 flags but only 95 player-nights, since several markets share one night. Per player-night: +12.0%, 90% bootstrap
+  (−3.7%, +27.2%).
+- 54 players; at most 19 flags from one (Moritz Wagner). Positive in 7 of 8 markets (assists −11%, n 17).
+- They averaged 21.7 actual minutes, and only 40% played 24+. The floor overshoots their minutes, yet they beat the line.
+- No clean season is left in the archive (it starts 2023-05), so only the forward record can test it.
+
+# AMENDMENT 3: the step-in flags as their own rule, pinged (2026-10-28, before it ran)
+**User:** after seeing the subset above, chose "own rule, ping it".
+- **STEP flag:** a no-history flag (rule 10) where the flagged player is the step-in player (amendment 2) and his
+  projected minutes were raised to the 24-minute floor.
+- **Preference (rule 12):** a history flag, then the higher hit rate, then a STEP flag, then more history games.
+- **Three registered rules** (`NBA_SXS_PREREG.md` amendment 9): BOOST (history, pinged), BOOST_STEP (pinged) and
+  BOOST_NH (the other no-history flags, silent).
+- **Ping:** "🟢 BOOST STEP {player} {market} o{line} {price} {book} · {X} out (game n) · steps in, proj {proj} at 24
+  min · shadow".
+- **Forward bar:** as for every rule, CLV at ≥ 200 signals over ≥ 10 dates. At about one flag every 1–2 days that
+  takes a season. A first look at 50 player-nights is information only.
