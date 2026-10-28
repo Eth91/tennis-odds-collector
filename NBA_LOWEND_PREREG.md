@@ -63,3 +63,42 @@ Everything reads only games before the date, for any team, this season and last.
   - E is fit on 2023-24;
   - live use would need FGM and FTM, which `nba_matchup` does not store, so it needs a data change before it could run
     live.
+
+## Result (2026-10-28, about 22:05 UTC): FAIL at both depths, for both populations
+`python3 nba_lowend.py --json .projdata/lowend_result.json` (26 s).
+
+**Errors E (2023-24 MAE):**
+
+| | minutes | FGA | 3PA | FTA | REB | AST |
+|---|---|---|---|---|---|---|
+| STEP | 5.48 | 2.90 | 1.56 | 1.63 | 2.12 | 1.49 |
+| every player | 4.54 | 2.98 | 1.61 | 1.85 | 2.04 | 1.53 |
+
+**Flags:**
+
+| (population, k) | 2023-24 | 2024-25 |
+|---|---|---|
+| STEP, k = 1 | 77, hit 46.8% (no-vig 51.1%), −13.7% | 71, 43.7% (50.3%), −17.2% |
+| STEP, k = 0.5 | 384, 46.9% (50.8%), −13.2% | 408, 53.4% (50.3%), +1.0% |
+| every player, k = 1 | 1,983, 51.8% (50.9%), −3.4% | 1,971, 52.8% (50.6%), −0.8% |
+| every player, k = 0.5 | 10,293, 51.1% (50.4%), −3.9% | 9,388, 52.3% (50.2%), −1.1% |
+
+- No (population, k) passes. STEP at k = 1 is too rare (77 / 71) to pass anyway, and it lost.
+- Every market loses or is flat in 2023-24. In 2024-25 the best are P+R (k = 0.5, +2.2%) and points (STEP k = 0.5, +5.5%,
+  n 104). Within noise.
+
+**Margin buckets** (every player, k = 0.5; information, sliced after the result):
+
+| low end over the line | 2023-24 | 2024-25 |
+|---|---|---|
+| 0–10% | 6,371, −4.6% | 5,933, −1.7% |
+| 10–25% | 2,799, −4.5% | 2,664, −0.3% |
+| 25–50% | 866, hit 56.0% (no-vig 51.9%), +2.4% | 671, 54.4% (51.4%), +0.7% |
+| 50%+ | 257, −0.3% | 120, −2.6% |
+
+**Reading:**
+- The margin does sort sides a little. The hit rate rises from about 50–52% to 54–56% at 25–50% over, but so does the
+  book's own no-vig price. The book partly agrees, and the juice takes the rest.
+- At 50%+ over it stops improving: the biggest gaps are where the book knows something.
+- The 25–50% bucket is slightly positive in both seasons (+2.4%, +0.7%), but it was found after looking and sits inside
+  noise (about ±3.5% at these counts). It is not a pass.
