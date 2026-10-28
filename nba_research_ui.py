@@ -3000,8 +3000,8 @@ PAGE = r"""<!doctype html>
 <meta name="apple-mobile-web-app-title" content="Pickz">
 <meta name="theme-color" content="#000000">
 <title>Pickz · NBA Props</title>
-<link rel="icon" href="icon-64.png">
-<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-64.png?v=2">
+<link rel="apple-touch-icon" href="icon-180.png?v=2">
 <style>__CSS__</style>
 </head>
 <body>
