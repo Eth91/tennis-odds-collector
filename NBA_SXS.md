@@ -8,7 +8,7 @@ Our backtests knew who sat from the box score, bet at one archived tip snapshot,
 on 30+ times. The replay reads only what the logs held at each moment:
 - each book's board at its latest poll;
 - the injury reports published so far;
-- box scores from before the date.
+- box scores from before the date, of games final by then, and tracking stored by then (amendment 8).
 
 The nightly run executes the same code over each finished day, so a rule's replay and its live record are the
 same thing.
@@ -20,6 +20,8 @@ same thing.
    - `on_tick(v, gid, minutes)`: tip − 30 or tip − 5.
 
    It returns signals: game, player, market, side, line, book, price.
+   A rule module that reads box scores or tracking from its own store paths lists them in `PIT_STORES`
+   (as `nba_sxs_rules` does). The replay then points them at copies as of each moment (amendment 8).
 2. Replay it for a development record:
    `python3 nba_replay.py --rule nba_sxs_rules:MY_RULE --from 2026-10-22 --to 2026-11-15`.
 3. To make it count, pre-register it in `NBA_SXS_PREREG.md` (an amendment). Add it to `RULES` and add its

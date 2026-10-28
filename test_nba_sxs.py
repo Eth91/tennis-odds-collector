@@ -136,7 +136,7 @@ def test_no_lookahead():
     tmp = pathlib.Path(tempfile.mkdtemp())
     p = stores(tmp)
     h = RP.History(p["gamelogs"], p["matchup"])
-    assert all(d < D for d, _t, _m in h.before(B, D))                     # the day's own box score is excluded
+    assert all(d < D for d, *_ in h.before(B, D))                         # the day's own box score is excluded
     v = RP.View(RP.Day(D, p["lines"], p["news"], p["matchup"], h))
     assert v.last10_min(B) == (25.0, 10) and not hasattr(v, "box")
     sig, p2 = replay()
