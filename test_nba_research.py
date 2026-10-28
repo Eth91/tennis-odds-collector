@@ -897,6 +897,6 @@ def test_injury_beneficiaries_open_their_page():
 
 def test_player_page_has_last_seasons_window():
     html = UI.page()
-    # 2026 · 2025 · H2H · L5 · L10 · L20: last season's games ("last" in windowed: every game before this season)
-    assert '["season", D.season.slice(0, 4)], ["last", String(+D.season.slice(0, 4) - 1)], ["h2h", "H2H"]' in html
+    # 2026 · H2H · L5 · L10 · L20 · 2025: last season's games at the far right ("last" in windowed: every game before this season)
+    assert '["l20", "L20"], ["last", String(+D.season.slice(0, 4) - 1)]];' in html
     assert 'if (win === "last") return logs.filter(function (l) { return seasonOf(l.date) !== season; });' in html
