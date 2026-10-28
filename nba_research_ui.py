@@ -2279,27 +2279,35 @@ const sideJson = (dir, M) => s => { const t = Math.floor(Date.now() / 600000), k
   if (!M.has(k)) M.set(k, fetch(`${dir}/${encodeURIComponent(s)}.json?t=${t}`).then(r => r.ok ? r.json() : null).catch(() => null)); return M.get(k); };
 const pbpLoad = sideJson("pbp", new Map()), rebdLoad = sideJson("rebd", new Map());
 // the rebound rings (docs/rebd, NBA.com's tracking): where he secured his rebounds, 0-3 / 3-6 / 6-10 / 10+ ft from the
-// hoop, each shaded by his share against the players with rebound lines; a close-up of the court around the rim
+// hoop, each shaded by his share against the players with rebound lines; a close-up of the court around the rim. The
+// defense view (teams: every team's row): where the opponent's opponents secured theirs, a game, shaded against the
+// league's average for a team and ranked (1st = the fewest allowed, as the court)
 const RD_C = r => `M0,-${r}A${r},${r} 0 1 1 0,${r}A${r},${r} 0 1 1 0,-${r}Z`;
 const RD_PATH = [RD_C(30), RD_C(60) + RD_C(30), RD_C(100) + RD_C(60), `M-150,-47.5H150V115H-150Z` + RD_C(100)];
 const RD_X = [0, 44, 79, 125], RD_FT = ["0–3", "3–6", "6–10", "10+"];
-function rebRings(r, avg) {                            // r: [g, reb, oreb, contested, dist x4, shot x4, miss3]
-  const sh = k => r[4 + k] / r[1], pc = x => Math.round(x * 100) + "%";
-  const marks = RD_PATH.map((d, k) => `<path d="${d}" fill="${shFill(avg.dist[k] == null ? null : (sh(k) - avg.dist[k]) * 100)}" fill-rule="evenodd"/>`).join("");
-  const labs = RD_PATH.map((_, k) => k ? `<text x="-${RD_X[k]}" y="15" class="rdv">${pc(sh(k))}</text><text x="${RD_X[k]}" y="13" class="rds">${RD_FT[k]} ft</text>`
-    : `<text x="0" y="25" class="rdv">${pc(sh(0))}</text><text x="0" y="-15" class="rds">0–3 ft</text>`).join("");
-  const vs = (x, a) => `${pc(x)}<small>avg ${a == null ? "–" : pc(a)}</small>`;
-  return `<h3 class="shw">How far from the hoop he grabs them<small>NBA.com tracking · ${r[1]} boards · shaded against the players with rebound lines</small></h3>
-    <svg class="shct rdct" viewBox="-150 -50 300 165" role="img" aria-label="rebounds by distance from the hoop"><defs><clipPath id="rdclip"><rect x="-150" y="-47.5" width="300" height="162.5"/></clipPath></defs>
+function rebRings(r, avg, teams, opp) {                // r: [g, reb, oreb, contested, dist x4, shot x4, miss3]
+  const def = !!teams, pc = x => Math.round(x * 100) + "%", all = def ? Object.values(teams).filter(x => x[0]) : [];
+  const sum = i => all.reduce((a, x) => a + x[i], 0), gp = sum(0), v = k => r[4 + k] / (def ? r[0] : r[1]);
+  const fill = k => def ? shFill(gp && sum(4 + k) ? (v(k) / (sum(4 + k) / gp) - 1) * 50 : null)
+    : shFill(avg.dist[k] == null ? null : (v(k) - avg.dist[k]) * 100);
+  const t = k => def ? v(k).toFixed(1) : pc(v(k)), rk = (k, x, y) => def ? `<text x="${x}" y="${y}" class="rds">${ord(1 + all.filter(q => q[4 + k] / q[0] < v(k)).length)}</text>` : "";
+  const marks = RD_PATH.map((d, k) => `<path d="${d}" fill="${fill(k)}" fill-rule="evenodd"/>`).join("");
+  const labs = RD_PATH.map((_, k) => k ? `<text x="-${RD_X[k]}" y="${def ? 11 : 15}" class="rdv">${t(k)}</text>${rk(k, -RD_X[k], 23)}<text x="${RD_X[k]}" y="13" class="rds">${RD_FT[k]} ft</text>`
+    : `<text x="0" y="${def ? 18 : 25}" class="rdv">${t(0)}</text>${rk(0, 0, 27)}<text x="0" y="-15" class="rds">0–3 ft</text>`).join("");
+  const vs = (x, a) => `${pc(x)}<small>${def ? "league" : "avg"} ${a == null ? "–" : pc(a)}</small>`;
+  const head = def ? `How far from the hoop ${esc(opp)}'s opponents grab them<small>NBA.com tracking · ${r[0]} games · a game, shaded against the league's average for a team · 1st = the fewest</small>`
+    : `How far from the hoop he grabs them<small>NBA.com tracking · ${r[1]} boards · shaded against the players with rebound lines</small>`;
+  return `<h3 class="shw">${head}</h3>
+    <svg class="shct rdct" viewBox="-150 -50 300 165" role="img" aria-label="${def ? esc(opp) + "'s opponents' rebounds" : "rebounds"} by distance from the hoop"><defs><clipPath id="rdclip"><rect x="-150" y="-47.5" width="300" height="162.5"/></clipPath></defs>
       <g clip-path="url(#rdclip)">${marks}${[30, 60, 100].map(x => `<path d="${RD_C(x)}" fill="none" class="shz"/>`).join("")}</g>
       <g class="shl"><path d="M-150,-47.5H150"/><path d="M-30,-7.5H30"/><circle cx="0" cy="0" r="7.5"/></g>${labs}</svg>
-    <div class="kv shr"><span>Contested</span><b>${vs(r[3] / r[1], avg.contested)}</b></div>
-    <div class="kv shr"><span>Off missed threes</span><b>${vs(r[12] / r[1], avg.miss3)}</b></div>`;
+    <div class="kv shr"><span>Contested</span><b>${vs(r[3] / r[1], def ? (sum(1) ? sum(3) / sum(1) : null) : avg.contested)}</b></div>
+    ${def ? "" : `<div class="kv shr"><span>Off missed threes</span><b>${vs(r[12] / r[1], avg.miss3)}</b></div>`}`;
 }
 // the Assists and Rebounds cards: a court of the shot chart's six zones (a rebound by the zone of the miss it came off),
 // the player's view (his a game in each zone, shaded by his share there against the league's share) or the opponent's
 // (allowed a game, shaded against the league's average for a team, ranked: 1st = the fewest allowed, the toughest),
-// then the opponent's zones against the league as a list; rebounds add the rings and the opponent's missed threes
+// then the opponent's zones against the league as a list; rebounds add the rings (both views) and the opponent's missed threes
 function zoneCard(kind) {
   const el = $(kind === "ast" ? "#asc" : "#rbc"); if (!el || !MUP) return;
   const p = MUP.p, key = kind + "Season", vkey = kind + "View", ast = kind === "ast";
@@ -2331,9 +2339,9 @@ function zoneCard(kind) {
       let extra = "";
       if (!ast) {                                      // free throws have no zone on the court; then the rings, or the misses
         extra = `<div class="zft">Off missed free throws: ${def ? (t && t[0] ? (t[off + nz] / t[0]).toFixed(1) + " a game" : "–") : tot ? (mine[nz] / gp).toFixed(1) + " a game · " + Math.round(mine[nz] / tot * 100) + "%" : "–"}</div>`;
-        const r = rd && rd.players[String(p.pid)];
-        if (!def) extra += r && r[1] ? rebRings(r, rd.avg) : '<div class="zft">How far from the hoop: not tracked for him yet</div>';
-        else if (t && t.length >= 1 + nz + 2 * Z.length && L.miss) {
+        const r = rd && (def ? rd.teams && rd.teams[p.opp] : rd.players[String(p.pid)]);
+        extra += r && r[1] ? rebRings(r, rd.avg, def ? rd.teams : null, p.opp) : `<div class="zft">How far from the hoop: not tracked for ${def ? esc(p.opp) : "him"} yet</div>`;
+        if (def && t && t.length >= 1 + nz + 2 * Z.length && L.miss) {
           const m3 = x => (x[off + Z.length + 3] + x[off + Z.length + 4] + x[off + Z.length + 5]) / x[0], lg = (L.miss[3] + L.miss[4] + L.miss[5]) / L.gp;
           extra += `<div class="kv shr"><span>${esc(p.opp)}'s missed threes<small>long misses, long rebounds</small></span><b><em class="${m3(t) > lg ? "up" : "dn"}">${m3(t).toFixed(1)} a game</em><small>league ${lg.toFixed(1)}</small></b></div>`;
         }

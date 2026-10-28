@@ -8,6 +8,8 @@ One ET game date at a time, events in time order:
   tick    a game reached tip - 30 or tip - 5 (the board is then each book's latest observation).
 Before each event every quote with seen_at <= t is applied. A rule sees a View: the boards, the reports and the
 box scores from BEFORE the date - never the day's results, which only the grader reads.
+Amendment 8: of those, only games final by t (AsOf), in the View's history and in the rules' own matchup and tracking
+stores, which the replay swaps for copies as of t (a rule module's PIT_STORES).
 
     python3 nba_replay.py --rule nba_sxs_rules:NEWS_FD --from 2026-10-22 --to 2026-10-26
 """
@@ -17,8 +19,13 @@ import argparse
 import datetime as dt
 import importlib
 import json
+import shutil
+import sqlite3
+import sys
+import tempfile
 from collections import defaultdict
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import numpy as np
 
@@ -31,6 +38,8 @@ MARKETS = ("points", "rebounds", "assists", "threes", "pts_reb", "pts_ast", "reb
 FULL_POLL = ("ok", "partial")
 OUTS = ("Out", "Doubtful")
 TICKS = (30, 5)                                         # minutes before tip
+GAME_HOURS = 3                                          # amendment 8: a game is final by its tip + 3 h (no final time is stored)
+ET = ZoneInfo("America/New_York")
 
 
 def iso(t):
@@ -54,20 +63,131 @@ class History:
     """Every appearance (minutes > 0) before any date: last season's logs and this season's box scores."""
 
     def __init__(self, gamelogs_db, matchup_db):
-        self.apps = defaultdict(list)                   # pid -> [(date, team, min)]
+        self.apps = defaultdict(list)                   # pid -> [(date, team, min, gid)]
         g, m = PD._ro(gamelogs_db), PD._ro(matchup_db)
         if g is not None:
-            for d, team, pid, mn in g.execute("SELECT date, team, player_id, min FROM logs WHERE min > 0"):
-                self.apps[pid].append((d, team, mn))
+            for d, team, pid, mn, gid in g.execute("SELECT date, team, player_id, min, game_id FROM logs WHERE min > 0"):
+                self.apps[pid].append((d, team, mn, gid))
         if m is not None:
-            for d, team, pid, mn in m.execute("SELECT gm.date, p.team, p.pid, p.min FROM player_games p "
-                                              "JOIN games gm ON gm.gid = p.gid WHERE p.min > 0"):
-                self.apps[pid].append((d, team, mn))
+            for d, team, pid, mn, gid in m.execute("SELECT gm.date, p.team, p.pid, p.min, p.gid FROM player_games p "
+                                                   "JOIN games gm ON gm.gid = p.gid WHERE p.min > 0"):
+                self.apps[pid].append((d, team, mn, gid))
         for v in self.apps.values():
             v.sort()
 
     def before(self, pid, date):
         return [a for a in self.apps.get(pid, ()) if a[0] < date]
+
+
+def plus(t, minutes):
+    return (dt.datetime.fromisoformat(t) + dt.timedelta(minutes=minutes)).isoformat()
+
+
+class AsOf:
+    """Amendment 8: which games and tracking dates before the date a decision at t may read. A game counts once final:
+    its tip (the schedule's, the latest nba_lines stored) + GAME_HOURS, or without a tip on its ET date, the end of that
+    date + GAME_HOURS. A tracking date counts once every fetched row of it was stored (fetched_at <= t)."""
+
+    def __init__(self, date, lines):
+        self.date, self.q = date, lines                # lines: a connection to the lines store, or None
+        self.tips, self.bounds, self.stores = {}, {}, {}
+
+    def bound(self, date):
+        """The latest a game on this ET date can be final: midnight ET after it + GAME_HOURS."""
+        if date not in self.bounds:
+            nxt = dt.datetime.combine(dt.date.fromisoformat(date) + dt.timedelta(days=1), dt.time(), ET)
+            self.bounds[date] = plus(iso(nxt.isoformat()), 60 * GAME_HOURS)
+        return self.bounds[date]
+
+    def final(self, gid, date, t):
+        if self.bound(date) <= t:
+            return True
+        if gid not in self.tips:
+            row = self.q.execute("SELECT MAX(tip_utc) FROM quotes WHERE gid = ?", (gid,)).fetchone() if self.q is not None else None
+            self.tips[gid] = row[0] if row else None
+        tip = self.tips[gid]
+        return bool(tip) and E._et_date(tip) == date and plus(iso(tip), 60 * GAME_HOURS) <= t
+
+    def unknown(self, kind, src, t):
+        """The games ("matchup") or tracking dates ("tracking") in store `src`, dated before the date, not known at t."""
+        k = (kind, str(src))
+        if k not in self.stores:                        # newest first, so a scan stops at the first one known
+            c, rows = PD._ro(src), []
+            has = lambda tb: c is not None and c.execute("SELECT 1 FROM sqlite_master WHERE name = ?", (tb,)).fetchone()
+            if kind == "matchup" and has("games"):
+                rows = sorted(((d, g) for g, d in c.execute("SELECT gid, date FROM games") if d < self.date), reverse=True)
+            elif kind == "tracking" and has("fetched"):
+                last = defaultdict(str)
+                col = "fetched_at" if "fetched_at" in {r[1] for r in c.execute("PRAGMA table_info(fetched)")} else "NULL"
+                for d, at in c.execute(f"SELECT date, {col} FROM fetched"):
+                    last[d] = max(last[d], iso(at) if at else "9999")      # no stored time: never known
+                rows = sorted(((at, d) for d, at in last.items() if d < self.date), reverse=True)
+            self.stores[k] = rows
+        out = set()
+        for a, b in self.stores[k]:
+            if kind == "matchup":
+                if self.bound(a) <= t:
+                    break
+                if not self.final(b, a, t):
+                    out.add(b)
+            elif a > t:
+                out.add(b)
+            else:
+                break
+        return frozenset(out)
+
+
+class Known:
+    """The View's history as known at the day's clock (amendment 8): appearances in games final by then."""
+
+    def __init__(self, history, day):
+        self.history, self.day = history, day
+
+    def before(self, pid, date):
+        return [a for a in self.history.before(pid, date) if self.day.asof.final(a[3], a[0], self.day.clock)]
+
+
+class RuleStores:
+    """Amendment 8: each rule module's box-score and tracking stores (PIT_STORES = {attribute: "matchup" or "tracking"})
+    as they stood at t. Where something before the date was not known yet, the attribute points at a copy without it
+    (a new file each time, so the rules' caches, keyed by path, rebuild); the originals come back at the end."""
+
+    def __init__(self, day, rules):
+        self.day, self.tmp, self.n = day, None, 0
+        mods = {m.__name__: m for m in (sys.modules.get(type(r).__module__) for r in rules) if getattr(m, "PIT_STORES", None)}
+        self.orig = {(m, a): (kind, getattr(m, a)) for m in mods.values() for a, kind in m.PIT_STORES.items()}
+        self.cur = {}                                   # (module, attribute) -> (what is left out, copy)
+
+    def at(self, t):
+        for (m, a), (kind, src) in self.orig.items():
+            drop = self.day.asof.unknown(kind, src, t)
+            key, path = self.cur.get((m, a), (frozenset(), src))
+            if drop != key:                             # old copies stay until close: a cached helper may still read one
+                path = self.copy(kind, src, drop) if drop else src
+                self.cur[(m, a)] = (drop, path)
+            setattr(m, a, path)
+
+    def copy(self, kind, src, drop):
+        self.tmp = self.tmp or Path(tempfile.mkdtemp(prefix="nba_asof_"))
+        self.n += 1
+        dst = self.tmp / f"{kind}_{self.n}.sqlite"
+        s, d = sqlite3.connect(f"file:{src}?mode=ro", uri=True), sqlite3.connect(dst)
+        s.backup(d)
+        s.close()
+        col, tables = ("gid", ("games", "team_games", "player_games")) if kind == "matchup" else ("date", ("tracking", "fetched"))
+        have = {n for (n,) in d.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
+        for tb in tables:
+            if tb in have:
+                d.execute(f"DELETE FROM {tb} WHERE {col} IN ({','.join('?' * len(drop))})", sorted(drop))
+        d.commit()
+        d.close()
+        return dst
+
+    def close(self):
+        for (m, a), (_kind, src) in self.orig.items():
+            setattr(m, a, src)
+        if self.tmp:
+            shutil.rmtree(self.tmp, ignore_errors=True)
 
 
 class View:
@@ -107,7 +227,7 @@ class Day:
     """One ET game date's logs: final games whose tip falls on the date, their quotes, polls and reports."""
 
     def __init__(self, date, lines_db, news_db, matchup_db, history):
-        self.date, self.history = date, history
+        self.date = date
         q, n, m = PD._ro(lines_db), PD._ro(news_db), PD._ro(matchup_db)
         sched = {g: (h, a) for g, h, a in m.execute("SELECT gid, home, away FROM games WHERE date = ? AND home_pts IS NOT NULL",
                                                      (date,))}
@@ -145,6 +265,10 @@ class Day:
                                                 "AND pid IS NOT NULL", (date,)):
                 self.reports[iso(pub)].append((team, int(pid), st))
         self.boards, self.keys_by_gid, self.status, self.teams_seen = {}, defaultdict(set), {}, set()
+        # amendment 8: the history a rule reads is what was known at the clock (each event's time, from the first)
+        self.asof, self.history = AsOf(date, q), Known(history, self)
+        ev = self.events()
+        self.clock = ev[0][0] if ev else iso(dt.datetime.combine(dt.date.fromisoformat(date), dt.time(), ET).isoformat())
 
     def events(self):
         ev = [(ts, 0, "obs", (book, seen)) for ts, book, seen in self.polls]
@@ -153,9 +277,9 @@ class Day:
         return sorted(ev, key=lambda e: (e[0], e[1]))
 
 
-def run_day(day, rules):
-    """Replay one day through `rules` (objects with start_day / on_obs / on_report / on_tick). -> [signal dicts]."""
+def _events(day, rules, stores):
     v = View(day)
+    stores.at(day.clock)                                # amendment 8: the rules' stores as of the clock
     for r in rules:
         r.start_day(v)
     out, i, rows = [], 0, day.rows
@@ -173,6 +297,8 @@ def run_day(day, rules):
             changed.add(k)
             i += 1
         v.t, v.changed = t, changed
+        day.clock = t
+        stores.at(t)
         if kind == "report":                            # rules see the report applied, plus what came before it
             prev = {pid: day.status.get(pid) for _tm, pid, _st in payload}
             seen_before = set(day.teams_seen)
@@ -189,6 +315,16 @@ def run_day(day, rules):
                 out.append(dict(s, rule=r.name, t=t))
         if kind == "report":
             day.teams_seen.update(tm for tm, _pid, _st in payload)
+    return out
+
+
+def run_day(day, rules):
+    """Replay one day through `rules` (objects with start_day / on_obs / on_report / on_tick). -> [signal dicts]."""
+    stores = RuleStores(day, rules)
+    try:
+        out = _events(day, rules, stores)
+    finally:
+        stores.close()
     seen, uniq = set(), []
     for s in out:                                       # one per (rule, game, player, market, side): the first
         k = (s["rule"], s["gid"], s["pid"], s["market"], s["side"])
