@@ -930,6 +930,7 @@ def test_matchup_shows_assist_and_rebound_zones_only_for_their_props():
     assert 'if (view) { const v = $(".zcv", el);' in html and 'astView: "player", rebView: "player"};' in html and 'vkey = kind + "View"' in html
     # rebounds: free throws (no zone on the court) as a line; the player's rings, 0-3 / 3-6 / 6-10 / 10+ ft from the hoop
     # (docs/rebd), shaded against the players with rebound lines; the defense view's missed threes against the league
+    assert "NBA.com tracking · ${r[1]} boards ·" in html                 # the sample: early in a season a ring is a board or two
     assert "Off missed free throws: " in html and "extra += r && r[1] ? rebRings(r, rd.avg)" in html and "function rebRings(r, avg)" in html
     assert "shFill(avg.dist[k] == null ? null : (sh(k) - avg.dist[k]) * 100)" in html and 'RD_FT = ["0–3", "3–6", "6–10", "10+"]' in html
     assert "const m3 = x => (x[off + Z.length + 3] + x[off + Z.length + 4] + x[off + Z.length + 5]) / x[0], lg = (L.miss[3] + L.miss[4] + L.miss[5]) / L.gp;" in html
