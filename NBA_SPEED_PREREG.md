@@ -1477,3 +1477,8 @@ changes.
 **Known limit (not changed here).** The replay counts the night-before game even when a book's opener for the
 next day was posted before that game ended. That happens on a back-to-back with an overnight opener. It is a small
 look-ahead in the side-by-side for those spots, and fixing it needs its own amendment.
+
+**Amendment 34, revised before its first run (2026-10-28 ~06:40 UTC).** At 06:31 UTC the props-page session moved
+nba_boxscore, nba_vs and nba_players to every 20 minutes, each under its own lock. Running them from
+`nba_finals.py` as well would race those jobs, so `nba_finals.py` only stores finals. The page jobs pick the new
+finals up within 20 minutes. Everything else in amendment 34 is unchanged.
