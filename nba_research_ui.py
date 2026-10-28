@@ -491,6 +491,7 @@ background:#161616;overflow-x:auto;scrollbar-width:none}
 .fcs{display:flex;flex-wrap:nowrap;gap:8.3px;margin:17.2px -15.3px 0;padding:0 15.3px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .fcs::-webkit-scrollbar{display:none}
 .fcs .fc{flex:none}
+.fcs.fcw{margin-top:8.3px}
 .fc{display:inline-flex;align-items:center;gap:0;height:26.2px;padding:0 12px;border:1px solid rgba(255,255,255,.15);border-radius:13.1px;
 background:#141414;font-size:12.8px;letter-spacing:-.25px;color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.07);
 transition:background-color .22s,border-color .22s,transform .16s}
@@ -1693,11 +1694,12 @@ function openProp(id, push) {
   const p = propFor(id);
   if (!p) return;
   recentAdd(p);
-  const fresh = CUR !== id, was = !!CUR;
+  const fresh = CUR !== id, was = !!CUR, who = x => String(x).split("|").slice(0, 2).join("|");
+  const same = was && who(CUR) === who(id);              // another stat of the same player: his filters and window stay
   CUR = id;
-  if (fresh) Object.assign(DT, {line: p.v ? vLine(p) : p.main !== null ? p.main : allLines(p)[0],
+  if (fresh) Object.assign(DT, {line: p.v ? vLine(p) : p.main !== null ? p.main : allLines(p)[0], fresh: null}, same ? {} : {
                                  win: windowed(logsOf(p), "season", D.season).length ? "season" : "l10", home: null, starter: null, blow: null,
-                                 result: null, rest: null, ranges: {}, without: {}, with: {}, dvp: false, def: false, open: {}, fresh: null, ovs: []});
+                                 result: null, rest: null, ranges: {}, without: {}, with: {}, dvp: false, def: false, open: {}, ovs: []});
   if (push !== false) history.pushState({p: id, d: navDepth() + 1}, "", hashState());
   const pg = $("#pg");
   pg.hidden = false;                        // (off-screen until it slides in; it must lay out for the pills to measure)
@@ -2116,8 +2118,9 @@ function chartF(p, g, c, without, dr) {
     if (rkPrev.dvp && rkPrev.teams) s[prevS] = oppSet(rkPrev.dvp[c.group][p.market], dvpT, rkPrev.teams); oppSets.push(s); }
   if (x.def && defT) { const s = {}; s[D.season] = oppSet(rkCur.def, defT, rkCur.teams);
     if (rkPrev.def && rkPrev.teams) s[prevS] = oppSet(rkPrev.def, defT, rkPrev.teams); oppSets.push(s); }
-  const ms = matesAll(p, without);
-  return {home: x.home, starter: x.starter, blow: x.blow, result: x.result, rest: x.rest, ranges: x.ranges, oppSets: oppSets,
+  const ms = matesAll(p, without), ranges = {};
+  Object.keys(x.ranges).forEach(k => { if (forMarket(k, p.market)) ranges[k] = x.ranges[k]; });   // potential assists: kept, off on points
+  return {home: x.home, starter: x.starter, blow: x.blow, result: x.result, rest: x.rest, ranges: ranges, oppSets: oppSets,
           with: ms.filter(m => x.with[m.key]), without: ms.filter(m => x.without[m.key])};
 }
 function updateProp(mode) {
@@ -2134,7 +2137,7 @@ function updateProp(mode) {
   const fs = chanceSide(p, line, side), hr = hbox({n: s.n, rate: rate}, fs);
   const gr = grade(p, side);
   const opp = g.state === "none" ? "No game" : `<span class="vs">${p.home ? "vs" : "@"}</span>${esc(p.opp || "")}\u200a·\u200a${g.state === "pregame" ? mt(g.tip).replace(" ", "") : esc(g.state === "live" ? "LIVE" : g.state === "final" ? "Final" : g.label || "")}`;
-  const ovOn = k => !!(DT.open[k] || DT.ranges[k]);
+  const ovOn = k => forMarket(k, p.market) && !!(DT.open[k] || DT.ranges[k]);
   const ov = DT.ovs.slice().reverse().find(ovOn) || Object.keys(OVL).find(ovOn) || null;
   // cells
   if (!rest) $("#pcells").innerHTML = `<div class="cells">
@@ -2161,11 +2164,12 @@ function updateProp(mode) {
   slide($("#wcap"), first);
   $("#psr").textContent = `${side === "under" ? "Under" : "Over"} ${line}: ${rate === null ? "no games" : Math.round(rate * 100) + "% of " + s.n + " games"}.${ov ? " White boxes = " + OVL[ov] + "." : ""}`;
   }
-  // chart filter chips, one scrolling row: the adjustable ranges, Starter, Blowouts, DvP, Def Rank, teammates, then Home … B2B
+  // chart filter chips, one scrolling row: the adjustable ranges, Starter, Blowouts, DvP, Def Rank, then Home … B2B;
+  // the teammates on a row of their own just below: the With / Without button, then tonight's news and the ones set
   const on = (k, v) => DT[k] === v;
   const chip = (attrs, lab, active) => `<button class="fc${active ? " on" : ""}" ${attrs} aria-pressed="${!!active}">${lab}</button>`;
   const rangeOn = k => !!DT.ranges[k];
-  const chips = [];
+  const chips = [], mchips = [];
   const rchip = k => { if (!forMarket(k, p.market)) return; const b = bounds(logs, k), abbr = RANGES.find(r => r[0] === k)[2]; if (b && b[0] !== b[1]) chips.push(chip(`data-r="${k}"`, `${OVL[k] ? ICON.bars : ICON.pm}${abbr}`, rangeOn(k) || DT.open[k])); };
   const tchip = (k, v, lab) => chips.push(chip(`data-k="${k}" data-v="${v}"`, lab, on(k, v)));
   ["min", "fga", "fg3a", "fta", "usg", "pot_ast", "reb_ch"].forEach(rchip);   // the adjustable filters first
@@ -2173,13 +2177,12 @@ function updateProp(mode) {
   if (logs.some(l => Math.abs(l.margin) >= 15)) tchip("blow", "b", "Blowouts"); // only games decided by 15+
   if (c.dvp_rank) chips.push(chip('data-t="dvp"', `DvP <em class="${rankCls(c.dvp_rank, c.teams, side)}">${ord(c.dvp_rank)}</em>`, DT.dvp));
   if (c.def_rank) chips.push(chip('data-t="def"', `Def Rank <em class="${rankCls(c.def_rank, c.teams, side)}">${ord(c.def_rank)}</em>`, DT.def));
-  const wchip = w => chips.push(chip(`data-wo="${w.key}"`, (w.fresh ? "W/O " : "Without ") + esc(lastName(w.name)), DT.without[w.key]));
-  without.filter(w => w.fresh).forEach(wchip);                 // tonight's news: up front
-  // the With / Without filters set in the teammates sheet show as chips that are on (a tap clears one)
   const ms = matesAll(p, without), fresh = k => without.some(w => w.fresh && w.key === k);
-  ms.filter(m => DT.with[m.key]).forEach(m => chips.push(chip(`data-mw="${m.key}"`, "With " + esc(lastName(m.name)), true)));
-  ms.filter(m => DT.without[m.key] && !fresh(m.key)).forEach(m => chips.push(chip(`data-mo="${m.key}"`, "W/O " + esc(lastName(m.name)), true)));
-  if (ms.length) chips.push(chip('id="mts" aria-haspopup="dialog"', `${ICON.people}With / Without`, false));
+  if (ms.length) mchips.push(chip('id="mts" aria-haspopup="dialog"', `${ICON.people}With / Without`, false));
+  without.filter(w => w.fresh).forEach(w => mchips.push(chip(`data-wo="${w.key}"`, "W/O " + esc(lastName(w.name)), DT.without[w.key])));   // tonight's news
+  // the With / Without filters set in the teammates sheet show as chips that are on (a tap clears one)
+  ms.filter(m => DT.with[m.key]).forEach(m => mchips.push(chip(`data-mw="${m.key}"`, "With " + esc(lastName(m.name)), true)));
+  ms.filter(m => DT.without[m.key] && !fresh(m.key)).forEach(m => mchips.push(chip(`data-mo="${m.key}"`, "W/O " + esc(lastName(m.name)), true)));
   tchip("home", true, "Home"); tchip("home", false, "Away"); rchip("margin");
   tchip("result", "W", "Win"); tchip("result", "L", "Loss"); tchip("rest", "b2b", "B2B");
   const panels = RANGES.filter(([k]) => (DT.open[k] || rangeOn(k)) && forMarket(k, p.market)).map(([k, lab]) => {
@@ -2190,12 +2193,13 @@ function updateProp(mode) {
       <div class="rp-b"><span>${b[0]}</span><span>${b[1]}</span></div></div>`;
   }).join("");
   DT.fresh = null;
-  const anyF = DT.dvp || DT.def || DT.home !== null || DT.starter !== null || DT.blow !== null || DT.result !== null || DT.rest !== null || Object.keys(DT.ranges).length ||
-    Object.keys(DT.without).some(k => DT.without[k]) || Object.keys(DT.with).some(k => DT.with[k]) || Object.keys(DT.open).some(k => DT.open[k]);
-  if (!rest) { const fx = $("#pcf .fcs"), fl = fx ? fx.scrollLeft : 0;
+  const anyF = DT.dvp || DT.def || DT.home !== null || DT.starter !== null || DT.blow !== null || DT.result !== null || DT.rest !== null ||
+    Object.keys(DT.ranges).some(k => forMarket(k, p.market)) || Object.keys(DT.without).some(k => DT.without[k]) ||
+    Object.keys(DT.with).some(k => DT.with[k]) || Object.keys(DT.open).some(k => DT.open[k] && forMarket(k, p.market));
+  if (!rest) { const fl = $$("#pcf .fcs").map(x => x.scrollLeft);
     $("#pcf").innerHTML = `<div class="cf-h"><h3>Chart Filters</h3><button class="ca" id="clr"${anyF ? "" : " hidden"}>Clear All</button></div>
-      <div class="fcs">${chips.join("")}</div>${panels}`;
-    $("#pcf .fcs").scrollLeft = fl; }
+      <div class="fcs">${chips.join("")}</div>${mchips.length ? `<div class="fcs fcw">${mchips.join("")}</div>` : ""}${panels}`;
+    $$("#pcf .fcs").forEach((x, i) => x.scrollLeft = fl[i] || 0); }   // each row keeps its place when a chip re-renders it
   if (!rest) { $("#pgs").innerHTML = gameScript(p, g, logs, line, side); $("#psc").innerHTML = schedCard(p, g, logs, line, side); refsRow(p, g); }
   if (opening) { PX.lazy = setTimeout(() => { if (PX && PX.p === p) updateProp("rest"); }, 470); bindLive(p, logs, without); return; }
   if (!PX.statDone) { $("#pstat").innerHTML = PX.stat; PX.statDone = true; $$("[data-rel]", pg).forEach(b => b.onclick = () => openProp(b.dataset.rel)); }
