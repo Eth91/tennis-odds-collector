@@ -520,6 +520,7 @@ transition:background-color .22s,border-color .22s,transform .16s}
 /* game cards: a team on a back-to-back */
 .gc .gt .b2t{color:var(--org)}
 /* referees */
+.shw small{display:block;margin-top:2px;font-size:11.5px;font-weight:400;color:#8e8e8e}
 .rft td{height:46px;line-height:1.15} .rft td small{display:block;margin-top:1px;font-size:11px;color:#8e8e8e}
 .rft td.up{color:var(--grn)} .rft td.dn{color:var(--red)} .rft tr.cr td{font-weight:700}
 /* combo checker */
@@ -2261,6 +2262,43 @@ function schedCard(p, g, logs, line, side) {
     ${row("Games", xs => xs.length)}${row("Minutes", xs => avg(xs.map(l => l.min)))}${row(esc(NAME[p.market]), xs => avg(xs.map(st).filter(x => x !== null)))}
     ${row(`${side === "under" ? "Under" : "Over"} ${line}`, rate)}</tbody></table></div>`;
 }
+// ── assists and rebounds by court zone (docs/pbp/{season}.json, nba_pbp), on the Matchup page of a prop with assists or
+// rebounds in it: where his assists turn into baskets (or his rebounds come from: the zone of the miss) against how many
+// the opponent gives up there a game, over the league's average for a team. This season once the opponent has 10 games ──
+const AST_M = new Set(["assists", "pts_ast", "reb_ast", "pra"]), REB_M = new Set(["rebounds", "pts_reb", "reb_ast", "pra"]);
+const PBP = new Map();
+const pbpLoad = s => { const t = Math.floor(Date.now() / 600000), k = s + "|" + t;      // new games within 10 minutes
+  if (!PBP.has(k)) PBP.set(k, fetch(`pbp/${encodeURIComponent(s)}.json?t=${t}`).then(r => r.ok ? r.json() : null).catch(() => null)); return PBP.get(k); };
+function zoneCard(kind) {
+  const el = $(kind === "ast" ? "#asc" : "#rbc"); if (!el || !MUP) return;
+  const p = MUP.p, key = kind + "Season", ast = kind === "ast";
+  const top = `<div class="shh"><span class="av">${head(p.pid)}</span><b>${ast ? "ASSISTS" : "REBOUNDS"}</b>${logo(p.opp, "shl0")}</div>`;
+  if (!el.innerHTML) el.innerHTML = top + '<div class="vsk"><div class="sk"></div><div class="sk"></div></div>';
+  const draw = (fresh) => pbpLoad(MUP[key]).then(j => {
+    if (!MUP || MUP.p !== p) return;
+    if (!j) { el.innerHTML = top + '<div class="empty"><b>Not available yet</b></div>'; return; }
+    const nz = j.zones.length, Z = ast ? j.zones : j.zones.concat(["Free Throw"]), off = ast ? 1 : 1 + nz, L = j.league;
+    const me = j.players[String(p.pid)], t = j.teams[p.opp], gp = me ? me[0] : 0;
+    const mine = me ? Z.map((_, k) => me[off + k]) : null, tot = mine ? mine.reduce((a, b) => a + b, 0) : 0;
+    const rows = Z.map((nm, k) => ({nm: nm, k: k, a: t && t[0] ? t[off + k] / t[0] : null, d: t && t[0] && L.gp ? t[off + k] / t[0] - L[kind][k] / L.gp : null}))
+      .filter(r => r.d !== null).sort((x, y) => y.d - x.d);
+    const sub = gp ? `${r1(tot / gp)} a game${ast ? "" : ` · ${r1(me[me.length - 1] / gp)} offensive`}` : "No games";
+    el.innerHTML = top + `<div class="shy" role="group" aria-label="Season">${[D.season, prevSeason(D.season)].map(x => `<button class="chip" data-pbs="${x}" aria-pressed="${x === MUP[key]}">${x.slice(0, 4)}</button>`).join("")}<span>${esc(sub)}</span></div>
+      <h3 class="shw">${ast ? `Where ${esc(p.opp)} gives up assisted baskets` : `Where ${esc(p.opp)}'s opponents rebound`}<small>${ast ? "by where the basket was made" : "by where the missed shot came from"}</small></h3>
+      ${rows.length ? rows.map(r => `<div class="kv shr"><span>${r.nm}<small>${tot ? Math.round(mine[r.k] / tot * 100) + `% of his ${ast ? "assists" : "rebounds"} · ` + r1(mine[r.k] / gp) + "/g" : "none"}</small></span>
+        <b><em class="${r.d > 0 ? "up" : "dn"}">${r.d > 0 ? "+" : ""}${r.d.toFixed(1)}/g</em><small>${r1(r.a)} a game</small></b></div>`).join("") : '<div class="empty"><b>No games yet</b></div>'}`;
+    if (fresh) swapIn(el.querySelector(".shy").nextElementSibling);
+    $$("[data-pbs]", el).forEach(b => b.onclick = () => { if (MUP[key] !== b.dataset.pbs) { MUP[key] = b.dataset.pbs; draw(true); } });
+  });
+  if (MUP[key]) { draw(); return; }
+  // this season once the opponent has 10 games, else last season, unless he has games this season and none last (a rookie)
+  Promise.all([pbpLoad(D.season), pbpLoad(prevSeason(D.season))]).then(([j, q]) => {
+    if (!MUP || MUP.p !== p) return;
+    const t = j && j.teams[p.opp], me = x => !!(x && x.players[String(p.pid)]);
+    MUP[key] = (t && t[0] >= 10) || (me(j) && !me(q)) ? D.season : prevSeason(D.season);
+    draw();
+  });
+}
 // ── referees (docs/refs.json, nba_refs): tonight's crew and how each official's games have run against the league's,
 // both teams together a game: fouls, free throw attempts, points, possessions ──
 let REFS = null;
@@ -2509,6 +2547,7 @@ function renderMatchup() {
     <div class="mpf"><span>Recent Games vs</span>${dd("grp", VS_GRP, MUP.grp)}${dd("mkt", TAB_ORDER.map(m => [m, NAME[m]]), MUP.mkt)}</div>
     <div id="vst"></div>
     <div class="shc wg" id="wgd"></div>
+    ${AST_M.has(p.market) ? '<div class="shc wg" id="asc"></div>' : ""}${REB_M.has(p.market) ? '<div class="shc wg" id="rbc"></div>' : ""}
     <div class="shc" id="shc"></div>
     <div class="shc wg" id="rfc"></div>`;
   $(".bk", mp).onclick = () => history.back();
@@ -2523,6 +2562,8 @@ function renderMatchup() {
     <div class="kv"><span>1st</span><b>the toughest</b></div>
     <div class="acts"><button class="btn pri" id="mpi-ok">Done</button></div>`, s => { $("#mpi-ok", s).onclick = closeSheet; });
   guardCard();
+  if (AST_M.has(p.market)) zoneCard("ast");
+  if (REB_M.has(p.market)) zoneCard("reb");
   refCard();
   shotLoad(D.season).then(j => {                       // this season once the opponent has 10 games, else last season
     if (!MUP || MUP.p !== p) return;
