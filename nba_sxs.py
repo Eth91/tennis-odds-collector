@@ -3,7 +3,8 @@
 Research only: nothing is bet and nothing is shown as a pick.
 
     python3 nba_sxs.py --run OUT_JSON           # nightly on the VM, after the box scores
-Signals are stored in nba_sxs.sqlite; a day is recomputed when a rule's fingerprint changes, or for the last 3 days.
+Signals are stored in nba_sxs.sqlite; a day is recomputed when a rule's fingerprint or the APPARATUS changes, or for
+the last 3 days.
 """
 from __future__ import annotations
 
@@ -24,6 +25,7 @@ SINCE = "2026-10-22"
 NEED_CLV, NEED_ROI, RECOMPUTE_DAYS = 200, 500, 3
 NEED_CLV_DATES, NEED_ROI_DATES = 10, 20                 # a date-clustered interval needs dates, not just signals
 NULL_BAND = (-0.08, 0.0)
+APPARATUS = 8                                           # the replay's version (amendment 8: games final by t, tracking stored by t)
 COLS = ("rule", "fp", "phase", "date", "t", "gid", "pid", "market", "side", "line", "book", "odds", "note", "result",
         "actual", "profit", "q_close", "clv")
 DDL = [f"CREATE TABLE IF NOT EXISTS signals ({', '.join(COLS)})",
@@ -65,12 +67,14 @@ def run(out_json=None, db=HERE / "nba_sxs.sqlite", since=SINCE, until=None, stor
     con = sqlite3.connect(db)
     for s in DDL:
         con.execute(s)
+    if "apparatus" not in {r[1] for r in con.execute("PRAGMA table_info(days)")}:
+        con.execute("ALTER TABLE days ADD COLUMN apparatus INTEGER")       # days run before amendment 8 are redone
     rules = [cls() for cls in SR.RULES]
     fps = {cls.name: SR.fingerprint(cls) for cls in SR.RULES}
     history = None
     for d in RP.dates(stores["matchup"], stores["lines"], since, until):
         todo = [r for r in rules if d >= recent or not con.execute(
-            "SELECT 1 FROM days WHERE rule = ? AND fp = ? AND date = ?", (r.name, fps[r.name], d)).fetchone()]
+            "SELECT 1 FROM days WHERE rule = ? AND fp = ? AND date = ? AND apparatus = ?", (r.name, fps[r.name], d, APPARATUS)).fetchone()]
         if not todo:
             continue
         history = history or RP.History(stores["gamelogs"], stores["matchup"])
@@ -88,7 +92,8 @@ def run(out_json=None, db=HERE / "nba_sxs.sqlite", since=SINCE, until=None, stor
                         [tuple(dict(s, fp=fps[s["rule"]], phase=phase(s["rule"], fps[s["rule"]], s["t"])).get(c) for c in COLS)
                          for s in sig])
         now = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
-        con.executemany("INSERT OR REPLACE INTO days VALUES (?, ?, ?, ?)", [(n, fps[n], d, now) for n in names])
+        con.executemany("INSERT OR REPLACE INTO days (rule, fp, date, ran_at, apparatus) VALUES (?, ?, ?, ?, ?)",
+                        [(n, fps[n], d, now, APPARATUS) for n in names])
         con.commit()
     return scoreboard(con, fps, out_json)
 

@@ -40,6 +40,7 @@ from curl_cffi import requests as cr
 HERE = Path(__file__).resolve().parent
 DB = HERE / "nba_tracking.sqlite"
 LOGS = HERE / "nba_gamelogs.sqlite"
+BOXES = HERE / "nba_season_boxes.json"                      # nba_rosters' box-score cache: who played each date
 H = {"Referer": "https://www.nba.com/", "Origin": "https://www.nba.com", "Accept": "application/json",
      "x-nba-stats-origin": "stats", "x-nba-stats-token": "true"}
 URL = ("https://stats.nba.com/stats/leaguedashptstats?Season={season}&SeasonType=Regular%20Season"
@@ -118,11 +119,29 @@ def current_dates(today_et=None):
     import json
     from zoneinfo import ZoneInfo
     today_et = today_et or dt.datetime.now(dt.timezone.utc).astimezone(ZoneInfo("America/New_York")).date().isoformat()
-    cache = HERE / "nba_season_boxes.json"
-    if not cache.exists():
+    if not BOXES.exists():
         return []
-    dates = {g["date"] for g in json.loads(cache.read_text()).values() if g.get("date")}
+    dates = {g["date"] for g in json.loads(BOXES.read_text()).values() if g.get("date")}
     return sorted((d, season_of(d)) for d in dates if d < today_et)
+
+
+def played(path=None):
+    """{date: {team: {pid}}} of who played, from the box-score cache ({} without it)."""
+    import json
+    path = path or BOXES
+    out = {}
+    if path.exists():
+        for g in json.loads(path.read_text()).values():
+            for p in g.get("players") or ():
+                out.setdefault(g.get("date"), {}).setdefault(p["team"], set()).add(int(p["pid"]))
+    return out
+
+
+def missing_teams(rs, teams):
+    """AMENDMENT 34: the teams that played that date with no player in this response, i.e. a date posted part way."""
+    ix = {h: k for k, h in enumerate(rs["headers"])}
+    ids = {int(r[ix["PLAYER_ID"]]) for r in rs["rowSet"]}
+    return sorted(t for t, pids in teams.items() if not pids & ids)
 
 
 def fetch(seasons, current=False, dates=()):
@@ -139,7 +158,7 @@ def fetch(seasons, current=False, dates=()):
     todo = [(ds, ms) for ds, ms in todo if ms]
     n = sum(len(ms) for _, ms in todo)
     print(f"{n} (date, measure) calls to make", flush=True)
-    t0, i, rejected = time.time(), 0, []
+    t0, i, rejected, who = time.time(), 0, [], played()
     for (d, season), measures in todo:
         got = {}
         for measure in measures:
@@ -156,6 +175,11 @@ def fetch(seasons, current=False, dates=()):
         if bad:
             print(f"  REJECTED {d} {bad[0][0]}: {bad[0][1]} · nothing stored, stays pending", flush=True)
             rejected.append(d)
+            continue
+        short = {m: miss for m, rs in got.items() if rs["rowSet"] and (miss := missing_teams(rs, who.get(d, {})))}
+        if short:                                    # posted part way: storing it would mark the date done for good
+            m, miss = next(iter(short.items()))
+            print(f"  INCOMPLETE {d} {m}: no rows yet for {', '.join(miss)} · nothing stored, stays pending", flush=True)
             continue
         for measure, rs in got.items():
             ix = {h: k for k, h in enumerate(rs["headers"])}

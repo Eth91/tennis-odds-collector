@@ -111,6 +111,29 @@ def test_annotate30_information_only():
     assert f["proj"] == 20.0 and f["margin"] == 5.5 and "pace_f" not in pr               # nothing else changes
 
 
+def scored(b):
+    """A box with final scores: a game cached without them is fetched again on every run."""
+    return dict(b, homeTeam=dict(b["homeTeam"], score=100), awayTeam=dict(b["awayTeam"], score=99))
+
+
+def check_redo(mod):
+    """Amendment 34: a cached final is refetched only when it is in `redo` (the daily run's last night)."""
+    con = mod.connect(pathlib.Path(tempfile.mkdtemp()) / "m.sqlite")
+    g = scored(BOXES[1])
+    mod.fetch([g["gameId"]], con, get=lambda _g: g, workers=1)
+    fixed = dict(g, homeTeam=dict(g["homeTeam"], players=[dict(g["homeTeam"]["players"][0], statistics=dict(
+        g["homeTeam"]["players"][0]["statistics"], points=23))] + g["homeTeam"]["players"][1:]))
+    pts = lambda: con.execute("SELECT pts FROM player_games WHERE gid = ? AND pid = 5", (g["gameId"],)).fetchone()[0]
+    mod.fetch([g["gameId"]], con, get=lambda _g: fixed, workers=1)
+    kept = pts() == 20
+    mod.fetch([g["gameId"]], con, get=lambda _g: fixed, workers=1, redo={g["gameId"]})
+    return kept and pts() == 23
+
+
+def test_redo():
+    assert check_redo(MU)
+
+
 def test_mutants():
     src = pathlib.Path(MU.__file__).read_text()
     for tag, a, b in (
@@ -119,19 +142,22 @@ def test_mutants():
             ("no shrinkage", "pace = (n * (poss / n) + K_SHRINK * lg_poss) / (n + K_SHRINK) / lg_poss",
              "pace = (poss / n) / lg_poss"),
             ("own team, not the opponent", "            defender = a if team == h else h\n", "            defender = team\n"),
-            ("possessions without turnovers", "fga + 0.44 * fta - oreb + tov", "fga + 0.44 * fta - oreb")):
+            ("possessions without turnovers", "fga + 0.44 * fta - oreb + tov", "fga + 0.44 * fta - oreb"),
+            ("redo ignored", "todo = [g for g in gids if g not in have or g in redo]", "todo = [g for g in gids if g not in have]"),
+            ("everything refetched", "todo = [g for g in gids if g not in have or g in redo]", "todo = list(gids)")):
         assert src.count(a) == 1, tag
         d = pathlib.Path(tempfile.mkdtemp())
         (d / "nba_matchup_mut30.py").write_text(src.replace(a, b))
         sys.path.insert(0, str(d))
         try:
             print(f"MUTANT ({tag}) — must fail:")
-            assert not check(importlib.import_module("nba_matchup_mut30")), tag
+            m = importlib.import_module("nba_matchup_mut30")
+            assert not (check(m) and check_redo(m)), tag
         finally:
             sys.path.remove(str(d))
             sys.modules.pop("nba_matchup_mut30", None)
 
 
 if __name__ == "__main__":
-    test_factors(); test_scheme_cell(); test_mutants()
+    test_factors(); test_scheme_cell(); test_redo(); test_mutants()
     print("test_nba_matchup: OK")
