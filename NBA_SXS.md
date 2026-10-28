@@ -51,3 +51,16 @@ have only one night of lineups so far. Forward, they all start at 2026-10-27 12:
 **The control reads about the vig, as it should.** Two rules are positive on CLV, both "DraftKings is slower than
 FanDuel" ideas: DK_LAGS_FD and T4_TIP30. Four nights tell us nothing about profit. The forward record starts
 with games after 2026-10-27 12:00 UTC.
+
+## Amendment 8: what the look-ahead fix changed (measured 2026-10-28, after the code)
+Replayed 2026-10-22..27 on read-only copies of the VM's stores, old replay vs new. Fingerprints are identical.
+- **Box scores (games final by t): no signal changed.** Of 19 back-to-back team spots (10-24..27), every prop was
+  first quoted at least an hour after the previous game's tip + 3 h. The look-ahead had not happened yet.
+- **Tracking (dates stored by t): 71 graded signals changed, all in the development record, none forward.**
+  - Tracking landed 2–3 days after the games: 10-20 and 10-21 on 10-24 at 08:01 UTC, 10-23 and 10-24 on 10-26 at
+    11:20, 10-25 on 10-27 at 11:20. The old replay read all of them at openers posted before they were stored.
+  - RATIO_PA: 11 removed, 10 added, 2 different. RATIO_RC: 21, 19, 1. RATIO_PA28: 2 removed, 8 added.
+  - Development ROI moved from +8.3% to −2.8% (RATIO_PA), from +5.0% to −11.6% (RATIO_RC), and from +26.1% (4
+    signals) to +6.0% (9) for RATIO_PA28. These are small development records, not verdicts.
+- **Every other rule:** identical.
+- **Cost:** 16 s instead of 13 s for the six days on the Mac, with peak memory 456 MB instead of 441 MB.
