@@ -17,7 +17,8 @@ import nba_boost as BOOST
 
 RATIO_AT, EV_AT = 0.80, 0.05
 PING_PRICE_MIN, PING_SKIP = 1 / 0.6, ("threes",)         # amendment 1: pinged when -150 or better, not threes
-STRONG_AT = 0.70                                         # amendment 3: a star when the projection is under 70% of the line
+STRONG_AT = 0.70                                         # amendment 3: under 70% of the line (UNDER30P)
+PING_FLOOR = 0.50                                        # amendment 4: pinged 30-50% below the line (ratio 0.50-0.70)
 MARKETS = tuple(BOOST.PARTS)
 FEATURES = ("logit_q", "line", "proj/line", "min_change", "season_mpg", "recent", "rest", "b2b", "game_index") + \
     tuple(f"mk_{m}" for m in MARKETS)
@@ -44,9 +45,14 @@ def under20(bd, rd, date, team, pid, market, line, under_price, out_all):
     return None
 
 
-def pings(f, market):
-    """Amendment 1: an UNDER20 flag pings when the under is -150 or better and the market is not threes (UNDER20P)."""
+def eligible(f, market):
+    """Amendment 1: the under is -150 or better and the market is not threes (UNDER20P)."""
     return f["price"] >= PING_PRICE_MIN - 1e-9 and market not in PING_SKIP
+
+
+def pings(f, market):
+    """Amendment 4: an UNDER20 flag pings when eligible and 30-50% below the line (UNDER3050)."""
+    return eligible(f, market) and PING_FLOOR <= f["ratio"] < STRONG_AT
 
 
 def strong(f):

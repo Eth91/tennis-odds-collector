@@ -848,8 +848,8 @@ class BOOST_NH(BOOST):
 import nba_under as UNDER_M                               # noqa: E402
 
 UNDER_DEPS = (boost_data, role_data, UNDER_M.projection, UNDER_M.under20, UNDER_M.features, UNDER_M.predict,
-              UNDER_M.underml, UNDER_M.pings, UNDER_M.strong, BOOST_M.v3_minutes, BOOST_M.rates, BOOST_M.live_data, BOOST_M.BoostData, ROLE.season_of) + ROLE_DEPS
-UNDER_SPEC = [UNDER_M.RATIO_AT, UNDER_M.EV_AT, list(UNDER_M.FEATURES), UNDER_M.PING_PRICE_MIN, list(UNDER_M.PING_SKIP), UNDER_M.STRONG_AT]
+              UNDER_M.underml, UNDER_M.eligible, UNDER_M.pings, UNDER_M.strong, BOOST_M.v3_minutes, BOOST_M.rates, BOOST_M.live_data, BOOST_M.BoostData, ROLE.season_of) + ROLE_DEPS
+UNDER_SPEC = [UNDER_M.RATIO_AT, UNDER_M.EV_AT, list(UNDER_M.FEATURES), UNDER_M.PING_PRICE_MIN, list(UNDER_M.PING_SKIP), UNDER_M.STRONG_AT, UNDER_M.PING_FLOOR]
 if UNDER_M.MODEL_PY.exists():                            # the fitted model is part of UNDERML
     UNDER_SPEC.append(hashlib.sha256(UNDER_M.MODEL_PY.read_bytes()).hexdigest()[:16])
 
@@ -893,7 +893,7 @@ class UNDER20P(UNDER20):
 
     def judge(self, bd, rd, date, team, p, mk, m, out_now):
         f = UNDER_M.under20(bd, rd, date, team, p, mk, m[0], m[2], out_now)
-        return f if f and UNDER_M.pings(f, mk) else None
+        return f if f and UNDER_M.eligible(f, mk) else None
 
 
 class UNDER30P(UNDER20):
@@ -902,7 +902,16 @@ class UNDER30P(UNDER20):
 
     def judge(self, bd, rd, date, team, p, mk, m, out_now):
         f = UNDER_M.under20(bd, rd, date, team, p, mk, m[0], m[2], out_now)
-        return f if f and UNDER_M.pings(f, mk) and UNDER_M.strong(f) else None
+        return f if f and UNDER_M.eligible(f, mk) and UNDER_M.strong(f) else None
+
+
+class UNDER3050(UNDER20):
+    """UNDER20's pinged flags (NBA_UNDER_PREREG.md amendment 4): eligible and 30-50% below the line."""
+    name = "UNDER3050"
+
+    def judge(self, bd, rd, date, team, p, mk, m, out_now):
+        f = UNDER_M.under20(bd, rd, date, team, p, mk, m[0], m[2], out_now)
+        return f if f and UNDER_M.pings(f, mk) else None
 
 
 class UNDERML(UNDER20):
@@ -920,7 +929,7 @@ PIT_STORES = {"MATCHUP_DB": "matchup", "TRACKING_DB": "tracking"}
 
 RULES = (NULL_TIP30, NEWS_FD, NEWS_DK, DK_LAGS_FD, T4_TIP30, ENGINE_CARD, S1, DEPTH_NEXT, DEPTH_NEXT_TIP30, NEW_STARTER,
          LOST_START, ROLE_OPEN, RATIO_FGA, RATIO_PA, RATIO_RC, RATIO_PA28, PTS_DVP, RETURN_UNDER, FOUL_BIG, MIN_RESTRICT, EARLY_SURGE,
-         BOOST, BOOST_STEP, BOOST_PICKUP, BOOST_NH, UNDER20, UNDER20P, UNDER30P, UNDERML)
+         BOOST, BOOST_STEP, BOOST_PICKUP, BOOST_NH, UNDER20, UNDER20P, UNDER30P, UNDER3050, UNDERML)
 
 
 def fingerprint(cls):
@@ -961,8 +970,9 @@ REGISTRY = {                                             # name -> (registered a
     "BOOST_STEP": ("2026-10-28T23:00:00", "5ed40c5557"),
     "BOOST_PICKUP": ("2026-10-28T23:00:00", "4356b2332b"),
     "BOOST_NH": ("2026-10-28T23:00:00", "8c7915ffdb"),
-    "UNDER20": ("2026-10-29T00:00:00", "dd2159fd47"),             # amendment 10 (NBA_UNDER_PREREG.md)
-    "UNDER20P": ("2026-10-29T00:00:00", "3e5404a3fc"),            # its pinged subset (amendment 1)
-    "UNDER30P": ("2026-10-29T00:00:00", "7548775af6"),            # the starred subset (amendment 3)
-    "UNDERML": ("2026-10-29T00:00:00", "72123e6124"),
+    "UNDER20": ("2026-10-29T00:00:00", "e2e43773b0"),             # amendment 10 (NBA_UNDER_PREREG.md)
+    "UNDER20P": ("2026-10-29T00:00:00", "352fb78046"),            # -150 or better, not threes (amendment 1)
+    "UNDER30P": ("2026-10-29T00:00:00", "231aeea8d3"),            # ... and 30%+ below (amendment 3)
+    "UNDER3050": ("2026-10-29T00:00:00", "7ec3b3d6b7"),           # ... and 30-50% below: the pings (amendment 4)
+    "UNDERML": ("2026-10-29T00:00:00", "420fd8c7cf"),
 }

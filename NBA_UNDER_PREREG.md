@@ -74,3 +74,23 @@ the same rows as T2's checks.)
   the rest stay "🔵 UNDER". No flag is added or removed.
 - **The side-by-side tracks UNDER30P:** UNDER20P's flags with projection < 0.70 × the line. It is registered at the
   deploy time, so the 30% cut's own forward record starts clean.
+
+# AMENDMENT 4: ping only 30–50% below (2026-10-28, about 22:30 UTC, before code)
+**User:** "only ping when it's 30%+ below ... is there an optimal range, say 30–50% below? test all ranges."
+`nba_under_grid.py` (post-hoc; −150 or better, not threes; 35 ranges tried).
+
+| % below the line | 2023-24 | 2024-25 |
+|---|---|---|
+| 20–25 / 25–30 | +6.4% / +0.6% | +3.8% / +5.1% |
+| 30–35 / 35–40 / 40–45 / 45–50 | +15.7 / +13.3 / +15.9 / +36.7% | +21.5 / +6.7 / +2.9 / +20.5% |
+| 50–60 / 60+ | +6.4% (n 101) / n < 40 | +2.2% (n 50) / n < 30 |
+| **30–50** | **1,022, +16.8%** | **710, +15.0%** (90%: +9.3%, +20.9%) |
+| 30–max | 1,181, +15.2% | 765, +14.2% |
+| 25–50 | 1,968, +9.0% | 1,414, +10.1% |
+
+- **Reading:** the 30% floor is what matters. The cap barely does; past 50% below is weaker and rare, likely where our
+  projection is off.
+- **User:** ping 30–50% below (−150 or better, not threes). Every other flag is recorded silently.
+- The pings are "🔵 UNDER" (amendment 3's star is dropped, since every ping is now 30%+).
+- **UNDER3050** (the pinged subset) is added to the side-by-side. UNDER20, UNDER20P and UNDER30P stay, so the forward
+  record compares them.

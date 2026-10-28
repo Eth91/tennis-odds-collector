@@ -197,8 +197,8 @@ def tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json,
             if u20:
                 cur = con.execute("INSERT OR IGNORE INTO idea_signals VALUES (?,?,?,?,?,?,?,?,?,?,?)",
                                   ("UNDER20", gid, p, mk, line, under, f"proj {u20['proj']:.1f} min {u20['min']:.1f}", date, player, now, 0))
-                if cur.rowcount and UNDER.pings(u20, mk):   # pinged (SHADOW): -150 or better, not threes (amendment 1)
-                    ok = sender(f"🔵{'⭐' if UNDER.strong(u20) else ''} UNDER {player} {ABBR.get(mk, mk.upper())} u{line:g} {american(under)} FD · proj {u20['proj']:.1f} "
+                if cur.rowcount and UNDER.pings(u20, mk):   # pinged (SHADOW): 30-50% below, -150 or better, not threes
+                    ok = sender(f"🔵 UNDER {player} {ABBR.get(mk, mk.upper())} u{line:g} {american(under)} FD · proj {u20['proj']:.1f} "
                                 f"({u20['ratio']:.0%} of the line), {u20['min']:.0f} min · shadow")
                     con.execute("UPDATE idea_signals SET pinged = ? WHERE rule = 'UNDER20' AND gid = ? AND pid = ? AND market = ?",
                                 (1 if ok else 0, gid, p, mk))

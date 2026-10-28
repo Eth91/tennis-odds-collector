@@ -37,7 +37,10 @@ def check(mod):
     want(f and f["side"] == "under" and abs(f["ratio"] - 0.79) < 1e-9, "79% of the line: an UNDER20 flag")
     want(mod.under20(bd, rd, TB.D, "HOM", TB.B, "rebounds", proj / 0.81, 1.9, {TB.X}) is None, "81% of the line: none")
     want(not mod.strong(f) and mod.strong(mod.under20(bd, rd, TB.D, "HOM", TB.B, "rebounds", proj / 0.69, 1.9, {TB.X})),
-         "a star under 70% of the line (69%), not at 79%")
+         "under 70% of the line (69%), not at 79%")
+    pg = lambda ratio, price=1.9, mk="rebounds": mod.pings({"ratio": ratio, "price": price}, mk)
+    want(pg(0.6) and pg(0.5) and not pg(0.49) and not pg(0.7) and not pg(0.6, 1.5) and not pg(0.6, mk="threes"),
+         "pings: 30-50% below (ratio 0.50-0.70), -150 or better, not threes")
     want(mod.under20(bd, rd, TB.D, "HOM", TB.B, "rebounds", line, 1.9, {TB.X, TB.B}) is None, "a player listed out is not judged")
     x = mod.features(bd, rd, TB.D, "HOM", TB.B, "rebounds", line, 0.5, {TB.X})
     want(x[0] == 0.0 and x[2] == 0.79 and x[UNDER.FEATURES.index("mk_rebounds")] == 1.0, "features: logit(q), proj/line, the market")
@@ -57,9 +60,10 @@ def check(mod):
 
 
 def check_live(L, fake_model=True):
-    """FanDuel posts B's rebounds at 30.5 (far above his projection), S2's points at 5.5, B's threes at 2.5 and G4's
-    assists at 20.5 with the under at -200, at 23:00. The 23:31 run (tip - 29) records UNDER20 for B's rebounds, B's
-    threes and G4's assists but pings only B's rebounds (amendment 1); UNDERML is recorded silently."""
+    """At 23:00 FanDuel posts B's rebounds with his projection at 60% of the line, B's points at 60.5 (far over: under
+    50%), S2's points at 5.5, B's threes at 2.5 and G4's assists at 20.5 with the under at -200. The 23:31 run (tip - 29)
+    records UNDER20 for all but S2's points and pings only B's rebounds (30-50% below, -150 or better, not threes:
+    amendment 4); UNDERML is recorded silently."""
     import nba_under as U
     tmp = pathlib.Path(tempfile.mkdtemp())
     p = TB.live_stores(tmp)
@@ -70,8 +74,13 @@ def check_live(L, fake_model=True):
     U._MODEL["m"] = FAKE
     try:
         L.process(now="2026-11-01T14:00:00", **kw)
-        TB.post(p, "fd", "2026-11-01T23:00:00", ((TB.B, "Bee Big", "rebounds", 30.5), (TB.S2, "Sam Guard", "points", 5.5),
-                                                  (TB.B, "Bee Big", "threes", 2.5)))
+        import nba_boost as BOOST
+        import nba_role as ROLE
+        bd = BOOST.live_data(p["matchup"], p["gamelogs"], "2026-27")
+        rd = ROLE.RoleData(p["matchup"], p["gamelogs"], "2026-27")
+        reb_line = U.projection(bd, rd, TB.B, "HOM", TB.D, {TB.X}, "rebounds")[1] / 0.6
+        TB.post(p, "fd", "2026-11-01T23:00:00", ((TB.B, "Bee Big", "rebounds", reb_line), (TB.S2, "Sam Guard", "points", 5.5),
+                                                  (TB.B, "Bee Big", "threes", 2.5), (TB.B, "Bee Big", "points", 60.5)))
         q = sqlite3.connect(p["lines"])                  # G4's assists: under 80% of the line, but the under is -200
         q.executemany("INSERT INTO board (book, collected_at, gid, tip_utc, home, away, pid, player, stat, line, side, odds) "
                       "VALUES ('fd', '2026-11-01T23:00:00', 'G1', ?, 'HOM', 'AWY', ?, 'Gus Guard', 'assists', 20.5, ?, ?)",
@@ -84,12 +93,12 @@ def check_live(L, fake_model=True):
         if saved:
             U._MODEL["m"] = saved
     under = [b for b in sent if "UNDER" in b]
-    assert len(under) == 1 and re.fullmatch(r"🔵⭐ UNDER Bee Big REB u30\.5 -111 FD · proj [\d.]+ \(\d+% of the line\), \d+ min · shadow",
-                                            under[0]), sent                       # far under 70% of the line: a star
+    assert len(under) == 1 and re.fullmatch(r"🔵 UNDER Bee Big REB u[\d.]+ -111 FD · proj [\d.]+ \(60% of the line\), \d+ min · shadow",
+                                            under[0]), sent
     rows = sqlite3.connect(tmp / "role.sqlite").execute(
         "SELECT rule, pid, market, pinged FROM idea_signals WHERE rule LIKE 'UNDER%' ORDER BY rule, pid").fetchall()
     u20 = [(r[1], r[2], r[3]) for r in rows if r[0] == "UNDER20"]
-    assert sorted(u20) == sorted([(TB.B, "rebounds", 1), (TB.B, "threes", 0), (TB.G4, "assists", 0)]), rows   # recorded; one pings
+    assert sorted(u20) == sorted([(TB.B, "rebounds", 1), (TB.B, "threes", 0), (TB.G4, "assists", 0), (TB.B, "points", 0)]), rows
 
 
 def check_replay(SR):
@@ -125,6 +134,8 @@ def test_mutants():
     for tag, a, b in (("the 80% cut", "if pr and pr[1] < RATIO_AT * line:", "if pr and pr[1] < line:"),
                       ("a missing input is 0", "v = med if v != v else v", "v = 0.0 if v != v else v"),
                       ("no star cut", 'return f["ratio"] < STRONG_AT', 'return f["ratio"] < RATIO_AT'),
+                      ("no 50% floor on pings", "PING_FLOOR <= f[\"ratio\"] < STRONG_AT", "f[\"ratio\"] < STRONG_AT"),
+                      ("pings at 20%+", "PING_FLOOR <= f[\"ratio\"] < STRONG_AT", "PING_FLOOR <= f[\"ratio\"] < RATIO_AT"),
                       ("no EV bar", 'if p * over - 1 >= EV_AT:\n        return {"side": "over"', 'if p * over - 1 >= -1:\n        return {"side": "over"')):
         assert src.count(a) == 1, tag
         d = pathlib.Path(tempfile.mkdtemp())

@@ -315,4 +315,6 @@ Both are registered at **2026-10-28T21:00:00 UTC**.
 
 29. **UNDER30P:** UNDER20P's flags under 70% of the line, the starred pings (`NBA_UNDER_PREREG.md` amendment 3).
 
-All four are registered at **2026-10-29T00:00:00 UTC**.
+30. **UNDER3050:** UNDER20's pinged flags, 30–50% below the line, −150 or better, not threes (`NBA_UNDER_PREREG.md` amendment 4). The pings move here from UNDER20P/UNDER30P.
+
+All five are registered at **2026-10-29T00:00:00 UTC**.
