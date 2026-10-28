@@ -2037,8 +2037,9 @@ function renderProp(mode) {
   const without = (D.absences[g.date + "|" + p.team] || []).map(a => ({key: String(a.pid), name: a.name || "teammate", played: a.played, since: a.since, team: p.team, status: a.status, fresh: a.fresh}));
   const mkts = p.v ? TAB_ORDER : TAB_ORDER.filter(m => D.props.some(x => x.gid === p.gid && x.pid === p.pid && x.market === m));
   const fav = favs().indexOf(p.pid) >= 0;
-  // the games window: this season, last season (every game before it: the logs hold two seasons), head to head, the last 5 / 10 / 20
-  const wins = [["season", D.season.slice(0, 4)], ["last", String(+D.season.slice(0, 4) - 1)], ["h2h", "H2H"], ["l5", "L5"], ["l10", "L10"], ["l20", "L20"]];
+  // the games window: this season, head to head, the last 5 / 10 / 20, and last season at the end (every game before this
+  // season: the logs hold two seasons)
+  const wins = [["season", D.season.slice(0, 4)], ["h2h", "H2H"], ["l5", "L5"], ["l10", "L10"], ["l20", "L20"], ["last", String(+D.season.slice(0, 4) - 1)]];
   // availability
   const rpE = p.v && (((D.inj_report || {})[g.date + "|" + p.team] || {}).players || []).find(e => e.pid === p.pid);
   const inj = D.injuries[g.date + "|" + p.pid] || (rpE ? {official: {status: rpE.status, reason: rpE.reason}, listed_team: true} : {}), rep = D.sources.report[g.date];
