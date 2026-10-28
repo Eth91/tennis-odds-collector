@@ -351,6 +351,9 @@ def test_page_controls_work_on_iphone():
     html = UI.page()
     # iOS Safari can't drag the thumb of a range input stacked under another, so the dual sliders are pointer-event widgets
     assert 'type="range"' not in html and "dualRange(" in html and "touch-action:pan-y" in html
+    # the headers (list, player and Matchup pages, all through --st) start 10 px below each iPhone's status bar /
+    # Dynamic Island: its own safe-area inset, plus a gap
+    assert "--st:calc(env(safe-area-inset-top) + 10px);" in html and html.count("env(safe-area-inset-top)") == 1
     # chart bars show their game on tap (a <title> only appears on hover); the book prices switch Over / Under
     assert "data-ps=" in html
     # a tap on a bar opens that game's box score (docs/box/{gid}.json, nba_boxscore), his row and the prop's stats marked
