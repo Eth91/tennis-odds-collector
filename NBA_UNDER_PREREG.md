@@ -286,7 +286,7 @@ user says so.
   - The two forward records compare the filter.
 - **Expected, from the backtest (2024-25):** 64.6% hits and +20% on 500 bets, against 62.0% and +15% on 710.
 
-# AMENDMENT 10: flagging earlier than tip − 30 (2026-10-29, about 21:40 UTC, before code)
+# AMENDMENT 10: flagging earlier than tip − 30 (2026-10-29, about 21:35 UTC, before code)
 **User:** "have we tested the accuracy of flagging plays an hour or 2 or 3 or 4 or 5 hours ahead of tip?" No:
 2023-25's odds were captured once per game, at about tip − 30. "Yes run the replay and set up the tracking."
 
