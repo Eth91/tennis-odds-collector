@@ -138,3 +138,27 @@ the starters from NBA.com's final lineups (live: the lineup tab).
 **Reported:** count and ROI (90% bootstrap interval) with each excluded and with only them, per season, at the best
 FanDuel/DraftKings price and at FanDuel's own. Post-hoc, so a split that looks better is a candidate for the forward
 record, not a live change. No live change without the user.
+
+**Result (2026-10-29, about 01:50 UTC).** Best FanDuel/DraftKings price, 2023-24 | 2024-25:
+
+| 30–50% unders | excluded | only these |
+|---|---|---|
+| all | 1,022, +16.8% \| 710, +15.0% | |
+| B1 new starter | 413, +14.3% \| 338, +11.1% | 609, +18.4% \| 372, +18.5% |
+| B2 starter out | 330, +11.6% \| 221, +14.3% | 692, +19.2% \| 489, +15.3% |
+| B3 same-position teammate out | 499, +12.4% \| 323, +12.3% | 523, +20.9% \| 387, +17.3% |
+| B4 projection +3 min | 771, +14.1% \| 532, +15.4% | 251, +25.1% \| 178, +13.9% |
+| any of B1–B3 | 229, +15.6% \| 124, +25.8% | 793, +17.1% \| 586, +12.7% |
+| hindsight: played 5+ over his last-10 | 524, +35.9% \| 385, +37.8% | 498, −3.4% \| 325, −12.0% |
+
+- At FanDuel's own price (417 | 403 flags) the picture is the same: new starters +11.9% | +13.9% against +12.3% | +13.5%
+  without them; any bump +11.5% | +9.5% against +13.6% | +31.9% without (n 124 | 76).
+- **Reading:**
+  - Most of the ping set (78–83%) is injury-bump flags: the book raises the line when a teammate sits, and our
+    projection does not follow it all the way.
+  - Those flags won about as well as the rest. New starters (Capela's case) and same-position fill-ins did *better* in
+    both seasons. Only "any of B1–B3" differs by season, and it flips (+1.5 points one year, −13 the other). Every
+    interval overlaps.
+  - The real risk is the jump actually happening (5+ minutes over his norm: −3% | −12%), but none of the tip-time
+    signals picks those nights out.
+  - Dropping the bumps would cut the pings about 80% without a consistent gain. No live change; the user decides.
