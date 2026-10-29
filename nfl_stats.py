@@ -122,7 +122,7 @@ def pbp_rows(season, cur):
     return {c: i for i, c in enumerate(hdr)}, rd
 
 
-PBP_CACHE_V = 2               # bump when from_pbp's output changes: a cached past season is rebuilt
+PBP_CACHE_V = 3               # bump when from_pbp's output changes: a cached past season is rebuilt
 
 
 def from_pbp_cached(season, cur, posmap=None, ftn=None):
@@ -174,6 +174,8 @@ def from_pbp(season, cur, posmap=None, ftn=None):
     tg = defaultdict(lambda: defaultdict(float))                    # (offense, gid) -> counters
     qbb = defaultdict(lambda: {"b": [0] * 7, "n": [0] * 7})         # passer -> blitz / none: [db, att, comp, yds, td, int, sack]
     pexp = defaultdict(lambda: defaultdict(int))                    # pid -> rec20 / rush10 / rush20
+    rbl = defaultdict(lambda: {"b": [0] * 4, "n": [0] * 4, "team": None})   # receiver -> blitz / none: [tgt, rec, yds, td]
+    tbl = defaultdict(lambda: {"b": 0, "n": 0})                     # offense -> charted targets blitzed / not
     ix, rd = pbp_rows(season, cur)
     g = lambda r, c: r[ix[c]] if c in ix else ""            # a column an older file lacks reads as blank
     per = defaultdict(lambda: {"long_comp": None, "long_rush": None, "long_rec": None, "rz_tgt": 0, "rz_rush": 0, "deep_tgt": 0})
@@ -273,6 +275,15 @@ def from_pbp(season, cur, posmap=None, ftn=None):
                                 z[3] += td
                 if comp and yds >= 20:
                     pexp[rcv]["rec20"] += 1
+                if ch is not None:                       # a charted target: against the blitz or not
+                    bk = "b" if ch[0] > 0 else "n"
+                    s4 = rbl[rcv][bk]
+                    s4[0] += 1
+                    s4[1] += 1 if comp else 0
+                    s4[2] += yds if comp else 0
+                    s4[3] += 1 if g(r, "pass_touchdown") == "1" else 0
+                    rbl[rcv]["team"] = pos_t
+                    tbl[pos_t][bk] += 1
         elif g(r, "rush_attempt") == "1" and rush is not None:
             p = per[(rush, gid)]
             p["long_rush"] = max(p["long_rush"], yds) if p["long_rush"] is not None else yds
@@ -293,7 +304,8 @@ def from_pbp(season, cur, posmap=None, ftn=None):
                         c[2] += td
     extra = {"zone": {f"{d}|{gp}": dict(v) for (d, gp), v in zone.items()},
              "tg": {f"{t_}|{gd}": dict(v) for (t_, gd), v in tg.items()},
-             "qbb": {str(k): v for k, v in qbb.items()}, "pexp": {str(k): dict(v) for k, v in pexp.items()}}
+             "qbb": {str(k): v for k, v in qbb.items()}, "pexp": {str(k): dict(v) for k, v in pexp.items()},
+             "rbl": {str(k): v for k, v in rbl.items()}, "tbl": dict(tbl)}
     return per, team, rdir, tree, extra
 
 
@@ -467,6 +479,10 @@ def advanced(season, cur, extra, games, rows, roster):
             a.update(sep=_r(_n(n.get("avg_separation")), 2), cush=_r(_n(n.get("avg_cushion")), 2),
                      yacoe=_r(_n(n.get("avg_yac_above_expectation")), 2), iay_r=_r(_n(n.get("avg_intended_air_yards"))),
                      ay_sh=_r(_n(n.get("percent_share_of_intended_air_yards"))))
+        rb = (extra.get("rbl") or {}).get(str(pid))
+        if rb and rb["b"][0] + rb["n"][0] >= 10:
+            tb = (extra.get("tbl") or {}).get(rb["team"]) or {"b": 0, "n": 0}
+            a["rblitz"] = {"b": rb["b"], "n": rb["n"], "tb": tb["b"], "tn": tb["n"]}
         e = (extra.get("pexp") or {}).get(str(pid))
         if e:
             a.update(rec20=e.get("rec20", 0), rush10=e.get("rush10", 0), rush20=e.get("rush20", 0))
@@ -490,6 +506,74 @@ def advanced(season, cur, extra, games, rows, roster):
         t, grp = key.split("|")
         zones[(t, grp)] = {"g": int(dfn[t]["g"]), "cells": cells}
     return teams, players, zones
+
+
+COV_V = 1                     # bump when coverage_splits' output changes
+COV_MIN_ROUTES = 20           # a player's splits are kept once he has run 20 routes
+COV_KIND = {"MAN_COVERAGE": "man", "ZONE_COVERAGE": "zone"}
+
+
+def coverage_splits(season, cur, roster):
+    """({pid: {"man": [routes, tgt, rec, yds, td], "zone": [...], "rt": [routes, team dropbacks]}}, {team: {"man": n,
+    "zone": n}}) from nflverse's participation file (who was on the field each play, and the defense's coverage),
+    joined to the play by play. A "route" is a dropback with him on the field: close to his routes for a receiver, an
+    overcount for a tight end or back who stays in to block. The file comes out after a season, so this season has
+    none until then: ({}, {}) without it."""
+    try:
+        part = C.cached(f"pbp_participation/pbp_participation_{season}.csv", _age(season, cur))
+    except Exception:                                               # noqa: BLE001 — not published yet
+        return {}, {}
+    f = C.CACHE / f"derived_cov_{season}.json"
+    try:
+        j = json.loads(f.read_text())
+        if j.get("mtime") == part.stat().st_mtime and j.get("v") == COV_V:
+            return {int(k): v for k, v in j["players"].items()}, j["teams"]
+    except (OSError, ValueError, KeyError):
+        pass
+    ix, rd = pbp_rows(season, cur)
+    g = lambda r, c: r[ix[c]] if c in ix else ""
+    plays = {}                                                      # (gid, play_id) -> (offense, defense, receiver, comp, yds, td)
+    for r in rd:
+        if g(r, "qb_dropback") != "1" or g(r, "two_point_attempt") == "1" or g(r, "play_type") not in ("pass", "run"):
+            continue
+        rcv = C.pid_of(g(r, "receiver_player_id")) if g(r, "pass_attempt") == "1" and g(r, "sack") != "1" else None
+        comp = g(r, "complete_pass") == "1"
+        plays[(g(r, "game_id"), str(g(r, "play_id")).split(".")[0])] = (
+            C.team(g(r, "posteam")), C.team(g(r, "defteam")), rcv, comp, _z(g(r, "yards_gained")) if comp else 0,
+            1 if g(r, "pass_touchdown") == "1" else 0)
+    skill = {pid for pid, x in roster.items() if x.get("pos") in ("WR", "TE", "RB", "FB")}
+    P = defaultdict(lambda: {"man": [0] * 5, "zone": [0] * 5, "rt": [0, 0]})
+    T = defaultdict(lambda: {"man": 0, "zone": 0})
+    team_db, on = defaultdict(int), defaultdict(int)                # (team, gid) dropbacks; (pid, team, gid) routes
+    for r in C.iter_rows(f"pbp_participation/pbp_participation_{season}.csv", _age(season, cur)):
+        d = plays.get((r.get("nflverse_game_id"), str(r.get("play_id")).split(".")[0]))
+        if d is None:
+            continue
+        off_t, def_t, rcv, comp, yds, td = d
+        gid = r.get("nflverse_game_id")
+        team_db[(off_t, gid)] += 1
+        cov = COV_KIND.get(r.get("defense_man_zone_type"))
+        if cov and def_t:
+            T[def_t][cov] += 1
+        for gs in (r.get("offense_players") or "").split(";"):
+            pid = C.pid_of(gs)
+            if pid not in skill:
+                continue
+            on[(pid, off_t, gid)] += 1
+            if cov:
+                c = P[pid][cov]
+                c[0] += 1
+                if pid == rcv:
+                    c[1] += 1
+                    c[2] += 1 if comp else 0
+                    c[3] += yds
+                    c[4] += td
+    for (pid, t, gid), n in on.items():
+        P[pid]["rt"][0] += n
+        P[pid]["rt"][1] += team_db[(t, gid)]
+    out = {pid: v for pid, v in P.items() if v["rt"][0] >= COV_MIN_ROUTES}
+    f.write_text(json.dumps({"mtime": part.stat().st_mtime, "v": COV_V, "players": {str(k): v for k, v in out.items()}, "teams": dict(T)}))
+    return out, dict(T)
 
 
 def snap_map(season, cur, roster):
@@ -608,12 +692,19 @@ def build(seasons=None, db=DB, now=None):
             con.execute("INSERT OR REPLACE INTO tgt_tree VALUES (?,?,?)", (season, pid, json.dumps(dict(cells))))
         meta[f"logs_{season}"] = {"rows": len(rows), "last_week": last_wk}
         tadv, padv, zones = advanced(season, cur, extra, games, rows, roster)
+        vcov, dcov = coverage_splits(season, cur, roster)
+        for pid, v in vcov.items():                          # man / zone and route rates (seasons with the file)
+            rec = roster.get(pid) or {}
+            padv.setdefault(pid, {"team": rec.get("team"), "pos": rec.get("pos") or "", "g": 0})["vcov"] = v
+        for t, v in dcov.items():
+            if t in tadv and v["man"] + v["zone"]:
+                tadv[t]["def"]["man_pct"] = round(100 * v["man"] / (v["man"] + v["zone"]), 1)
         con.executemany("INSERT OR REPLACE INTO team_adv VALUES (?,?,?)", [(season, t, json.dumps(v)) for t, v in tadv.items()])
         con.executemany("INSERT OR REPLACE INTO player_adv VALUES (?,?,?,?,?)",
                         [(season, pid, v.pop("team", None), v.pop("pos", None), json.dumps(v)) for pid, v in padv.items()])
         con.executemany("INSERT OR REPLACE INTO def_zone VALUES (?,?,?,?)",
                         [(season, t, grp, json.dumps(v)) for (t, grp), v in zones.items()])
-        meta[f"adv_{season}"] = {"teams": len(tadv), "players": len(padv), "zones": len(zones),
+        meta[f"adv_{season}"] = {"teams": len(tadv), "players": len(padv), "zones": len(zones), "coverage": len(vcov),
                                  "charted": sum(1 for v in tadv.values() if v["off"].get("blitz_pct") is not None)}
     for pid, r in players.items():
         con.execute("INSERT OR REPLACE INTO players VALUES (?,?,?,?,?,?,?,?,?)",

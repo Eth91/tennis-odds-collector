@@ -887,6 +887,22 @@ def adv_payload(scon, season, slate_teams, want_pids, names, inj):
                                                       c["int"], c["rat"], c["adot"], c["g"], (inj.get(pid) or {}).get("status")])
     for t in out["cover"]:
         out["cover"][t] = sorted(out["cover"][t], key=lambda r: -r[3])[:COVER_TOP]
+    # man vs zone: nflverse publishes coverage calls after a season, so this season's splits come from last season's
+    # file until then; "season" says which. The props' players' splits and route rates, the slate's defenses' man rates
+    for k, e in out["players"].items():
+        if e.get("vcov"):
+            e["vcov_season"] = season_str(season)
+    for pid, js in scon.execute("SELECT pid, js FROM player_adv WHERE season=? AND js LIKE '%vcov%'", (season - 1,)):
+        if pid in want_pids:
+            e = out["players"].setdefault(str(pid), {})
+            if not e.get("vcov"):
+                e.update(vcov=json.loads(js)["vcov"], vcov_season=season_str(season - 1))
+    for s_ in (season, season - 1):
+        man = {t: v["def"].get("man_pct") for (sx, t), v in T.items() if sx == s_ and v["def"].get("man_pct") is not None}
+        if man:
+            out["man"] = {"season": season_str(s_), "lg": round(sum(man.values()) / len(man), 1),
+                          "teams": {t: man[t] for t in slate_teams if t in man}}
+            break
     return out
 
 
