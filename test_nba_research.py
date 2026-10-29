@@ -242,12 +242,20 @@ def test_under_flags_reader():
     assert U("points", 1 / 0.6, 10, 6.99) and U("points", 1.6667, 10, 5.0) and not U("points", 1.66, 10, 6)   # −150 or better
     assert not U("points", 1.9, 10, 7.0) and not U("points", 1.9, 10, 4.99) and not U("threes", 1.9, 2.5, 1.5)  # 30–50% below
     assert not U("points", 1.9, 0, 0) and not U("points", None, 10, 6) and not U("pra", 1.9, 30.5, None)
+    # amendment 9: not when the line is 6-42% over his last-5 average, (lo, hi]; no ratio keeps the play
+    lo, hi = RS.UNDER_L5
+    assert U("points", 1.9, 10, 6, None) and U("points", 1.9, 10, 6, lo) and not U("points", 1.9, 10, 6, lo + 1e-9)
+    assert not U("points", 1.9, 10, 6, 1.2) and not U("points", 1.9, 10, 6, hi) and U("points", 1.9, 10, 6, hi + 1e-9)
+    assert U("points", 1.9, 10, 6, 0.8) and U("points", 1.9, 10, 6, 2.0)
     rc = sqlite3.connect(":memory:")
     rc.execute("CREATE TABLE idea_signals (rule TEXT, gid TEXT, pid INTEGER, market TEXT, line REAL, price REAL, note TEXT, "
                "date TEXT, player TEXT, logged_at TEXT, pinged INTEGER)")
     rc.execute("INSERT INTO idea_signals VALUES ('UNDER20','G1',1,'pra',30.5,1.8,'proj 18.0',?,'A','2026-10-26T23:30:00',0)", (GD,))
     rc.execute("INSERT INTO idea_signals VALUES ('UNDER20','G1',2,'pra',30.5,1.8,'no projection',?,'B','2026-10-26T23:30:00',1)", (GD,))
-    assert [(f["pid"], f["proj"], f["mins"]) for f in RS.under_flags(rc, [GD])] == [(1, 18.0, None)]
+    rc.execute("INSERT INTO idea_signals VALUES ('UNDER20','G1',3,'pra',30.5,1.8,'proj 18.0 min 30.1 l5 1.234567',?,'C','2026-10-26T23:31:00',0)", (GD,))
+    rc.execute("INSERT INTO idea_signals VALUES ('UNDER20','G1',4,'pra',30.5,1.8,'proj 18.0 min 30.1 l5 1.5',?,'D','2026-10-26T23:31:00',1)", (GD,))
+    rc.execute("INSERT INTO idea_signals VALUES ('UNDER20','G1',5,'pra',30.5,1.8,'proj 18.0 min 30.1 l5 x',?,'E','2026-10-26T23:31:00',1)", (GD,))
+    assert [(f["pid"], f["proj"], f["mins"]) for f in RS.under_flags(rc, [GD])] == [(1, 18.0, None), (4, 18.0, 30.1), (5, 18.0, 30.1)]
 
 
 @pytest.mark.skipif(NODE is None, reason="node not installed")
@@ -495,7 +503,9 @@ def test_page_controls_work_on_iphone():
     # most every 8 s, and downloads it in the background only when the server wrote a new one; the same file again
     # (generated_at unchanged) is not redrawn
     assert 'document.addEventListener("click", freshen, true);' in html and "setInterval(freshen, 30000);" in html
-    assert 'fetch("nba_props.json?t=" + Date.now(), {method: "HEAD", cache: "no-store"})' in html
+    # the file each sport reads (the league button switches: nba_props.json / nfl_props.json)
+    assert 'fetch(dataUrl() + "?t=" + Date.now(), {method: "HEAD", cache: "no-store"})' in html
+    assert 'const dataUrl = sp => (sp || SPORT) === "nfl" ? "nfl_props.json" : "nba_props.json";' in html
     assert "return m && m !== LAST_MOD ? load() : null;" in html and 'LAST_MOD = r.headers.get("Last-Modified") || LAST_MOD;' in html
     assert "Date.now() - CHECK_AT < 8000" in html and "if (D) { CHECK_AT = 0; freshen(); }" in html
     assert "if (D && FRESH && !AUTO_DAY && j.generated_at === D.generated_at) { LOADED_AT = Date.now(); return true; }" in html
@@ -513,7 +523,7 @@ def test_page_controls_work_on_iphone():
     assert "data-ps=" in html
     # a tap on a bar opens that game's box score (docs/box/{gid}.json, nba_boxscore), his row and the prop's stats marked
     assert 'if (gb) boxSheet(gb.dataset.gid, gb.dataset.tm, p);' in html and 'data-gid="${esc(l.gid)}"' in html
-    assert "fetch(`box/${encodeURIComponent(gid)}.json`)" in html and "barTip(" not in html and ".tip{" not in html
+    assert 'fetch(`${SPORT === "nfl" ? "nflbox" : "box"}/${encodeURIComponent(gid)}.json`)' in html and "barTip(" not in html and ".tip{" not in html
     # the gauge opens the Matchup page (a page of its own in the history), with the opponent's recent games vs a position
     # group from docs/vs/{TEAM}.json (nba_vs): 5 rows, More / Less to 10, a row opens that game's box score
     assert '$("#mub", pg).onclick = () => { if (p.opp) openMatchup(p); };' in html and "function matchupSheet(" not in html
@@ -543,14 +553,14 @@ def test_page_controls_work_on_iphone():
     # Movers (a line moved since open, or the books disagree: the move first), Lineups beside Injuries (NEW starters, the usual
     # five not starting), who guards him on the Matchup page (docs/matchups/{pid}.json, nba_defmatch)
     assert 'if (ST.market === "movers") return list.map(p => [p, mover(p)])' in html and "k: Math.abs(mv) * 100 + gap" in html
-    assert '(ST.iv === "lu" ? lineupsView() : ST.iv === "ro" ?' in html and "function luTeam(t, e)" in html and 'isNew(pid) ? " · NEW" : ""' in html
+    assert '(ST.iv === "lu" ? (SPORT === "nfl" ? depthView() : lineupsView()) : ST.iv === "ro" ?' in html and "function luTeam(t, e)" in html and 'isNew(pid) ? " · NEW" : ""' in html
     # role changes (docs/player/roles.json), the Live tab (props under way from their closing boards: only there), game script
     assert 'fetch("player/roles.json")' in html and "function rolesView(" in html and 'data-iv="ro"' in html
     assert 'const ALL_TABS = ["live", "trends", "movers"];' in html and "list = list.filter(p => !p.closed);" in html
     # the flags (D.flags: the under plays that ping) are the bottom bar's Flags view, in place of Markets (a saved
     # Markets view opens Props), SHADOW · NOT A BET, each graded at its own line once final; a chip on the prop's row
     # and a line on its page; a tap opens the prop or the player. The props section has no Flags tab
-    assert 'const VIEWS = [["props", "Props"], ["flags", "Flags"], ["injuries", "Injuries"]];' in html and "mrow" not in html
+    assert 'let VIEWS = [["props", "Props"], ["flags", "Flags"], ["injuries", "Injuries"]];' in html and "mrow" not in html
     assert 'if (["props", "flags", "injuries"].indexOf(ST.view) < 0) ST.view = "props";' in html and '"markets"' not in html
     assert '  if (ST.view === "flags") { lst.innerHTML = flagsView(); return; }' in html and 'flags: "Flags"' not in html
     assert 'if (ml) ml.style.display = ST.view === "props" ? "" : "none";' in html and 'if (ST.view === "props" && q.length >= 2)' in html
@@ -567,7 +577,7 @@ def test_page_controls_work_on_iphone():
     assert 'fetch("refs.json?t="' in html and '<div class="shc wg" id="rfc"></div>' in html and "refCard();" in html and "refsRow(p, g);" in html
     assert "d: r && r[1] >= 10 ?" in html
     # the combo checker: kept on the phone, opened from the floating button, the math in the shared core
-    assert 'localStorage.getItem("pickz_combo")' in html and "comboStats(L, CMB_W, D.season)" in html and 'id="cmb"' in html and "comboPill();" in html
+    assert 'localStorage.getItem(LS("pickz_combo"))' in html and "comboStats(L, CMB_W, D.season)" in html and 'id="cmb"' in html and "comboPill();" in html
     assert "fetch(`matchups/${pid}.json`)" in html and '<div class="shc wg" id="wgd"></div>' in html and "guardCard();" in html
     # the floating header fades what scrolls under it (no text under its title)
     assert '.ph::before{content:"";position:absolute;' in html
@@ -606,10 +616,10 @@ def test_page_controls_work_on_iphone():
     # motion runs as Web Animations with a timer fallback, and nothing is fetched from a font CDN
     assert ".animate([" in html and "setTimeout(done" in html and "fonts.googleapis" not in html
     # every range chip but Margin draws its stat on the chart as white outline boxes (Margin can be negative: filter only)
-    assert ('const OVL = {min: "min", fga: "FGA", fg3a: "3PTA", fta: "FTA", usg: "usage %", pot_ast: "potential assists", '
+    assert ('let OVL = {min: "min", fga: "FGA", fg3a: "3PTA", fta: "FTA", usg: "usage %", pot_ast: "potential assists", '
             'reb_ch: "rebound chances"}') in html and "l[ov]" in html
     # the adjustable filters come first; potential assists / rebound chances only on the props they bear on
-    assert '["min", "fga", "fg3a", "fta", "usg", "pot_ast", "reb_ch"].forEach(rchip)' in html
+    assert '(SPORT === "nfl" ? NFL_RCHIPS : ["min", "fga", "fg3a", "fta", "usg", "pot_ast", "reb_ch"]).forEach(rchip)' in html
     assert html.index('.forEach(rchip);') < html.index("if (c.dvp_rank) chips.push(") < html.index('rchip("margin");')
     assert 'pot_ast: ["assists", "pra", "pts_ast", "reb_ast"], reb_ch: ["rebounds", "pra", "pts_reb", "reb_ast"]' in html
     # no explanatory prose: notes are status only, empty states are titles only
@@ -977,9 +987,9 @@ def test_page_boots_from_its_last_copy_and_animates_swaps():
     # no pull to refresh (the user found it bad); the 2-minute refresh and the back-from-another-app refresh stay
     assert "pullRefresh" not in html and ".ptr" not in html and "setInterval(load, 120000)" not in html and '"visibilitychange"' in html
     # a launch draws the phone's last copy (Cache Storage) while the fresh one downloads; no "Feed delayed" off a stale copy
-    assert 'caches.open(CACHE).then(c => c.match("nba_props.json"))' in html and "if (j && !D && !FRESH) apply(j);" in html
+    assert 'caches.open(CACHE).then(c => c.match(dataUrl()))' in html and "if (j && !D && !FRESH) apply(j);" in html
     assert 'if (FRESH && (Date.now() - iso(D.generated_at).getTime()) / 60000 > 10) out.push("Feed delayed");' in html
-    assert "function prefetch() { refsLoad(); rolesLoad(); playerIndex(); }" in html and "setTimeout(prefetch, 1500)" in html
+    assert "function prefetch() { if (SPORT === \"nba\") { refsLoad(); rolesLoad(); playerIndex(); } prefetchOther(); }" in html and "setTimeout(prefetch, 1500)" in html
     # swaps rise in; Over / Under, the combo window and the Injuries switch slide their pills; Live's bars grow on entry
     assert html.count("swapIn(") >= 9 and '<span class="ou" role="group" aria-label="Side"><span class="pill2">' in html
     assert '<div class="seg cbw" role="group" aria-label="Games"><span class="pill2">' in html and ".lvin .lvbar i{" in html
