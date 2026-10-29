@@ -12,6 +12,7 @@ CUTS = {
     "B3 same-position teammate out": lambda f: f["b3"],
     "B4 our projection +3 min": lambda f: f["b4"],
     "any of B1-B3 (injury bump)": lambda f: f["b1"] or f["b2"] or f["b3"],
+    "B5 Capela-type (post-hoc)": lambda f: f["b5"],
     "hindsight: played 5+ over his last-10": lambda f: f["hind"],
 }
 
@@ -41,7 +42,8 @@ for s in rows:
         last10 = r["min"] - r["ctx"]["min_change"]
         tags = {"b1": bool(r["new_starter"]), "b2": r["n_out"] >= 1,
                 "b3": any((pg := bd.per_game(x, team, d)) and pg["min"] >= 20 and bd.letters(x) & bd.letters(p) for x in out_all),
-                "b4": r["ctx"]["min_change"] >= 3, "hind": r["box"]["min"] >= last10 + 5}
+                "b4": r["ctx"]["min_change"] >= 3,
+                "b5": bool(r["new_starter"]) or any(bd.letters(x) & bd.letters(p) for x in out_all & starters), "hind": r["box"]["min"] >= last10 + 5}
         flags[s] += [{**c, **tags} for c in cand]
 
 

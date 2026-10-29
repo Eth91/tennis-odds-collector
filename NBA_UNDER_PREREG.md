@@ -162,3 +162,15 @@ record, not a live change. No live change without the user.
   - The real risk is the jump actually happening (5+ minutes over his norm: −3% | −12%), but none of the tip-time
     signals picks those nights out.
   - Dropping the bumps would cut the pings about 80% without a consistent gain. No live change; the user decides.
+
+**Check after the result (2026-10-29, about 02:10 UTC; post-hoc).** The user asked why so few flags have no bump.
+- **Base rates, all players with a line:** a usual starter out on his team 42% | 49%; any of B1–B3 51% | 57%; a new
+  starter 10% | 11%. In the ping set those are 68% | 69%, 78% | 83% and 60% | 52%. A teammate sitting raises the line
+  more than our projection rises, which puts the player 30–50% below. Spot checks of 24 flags read correctly
+  (Valanciunas with Sabonis out, Bitadze with Carter out, Eubanks with Nurkić out).
+- **"Any bump" was loose:** B2 counts any usual starter, even one who doesn't touch his stat. That left a small, noisy
+  no-bump group (229 | 124).
+- **B5, Capela-type** (a new starter, or a usual starter sharing his position letter is out; defined after the result):
+  with B5 +18.3% | +16.8% (703 | 467); without B5 +13.5% | +11.5% (319 | 243). B5 is better in both seasons.
+- **A research-only gap:** before a player plays for his new team, he can show as out for his old one (Hartenstein for
+  the Knicks on 2024-10-25). It touches only teams' first 3 games: 28 | 48 flags. Live outs come from the injury report.
