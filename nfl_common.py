@@ -108,31 +108,44 @@ def fetch(url, timeout=120):
 CACHE_S = 3 * 3600
 
 
-def release(path, max_age=CACHE_S):
-    """The bytes of an nflverse release file ("schedules/games.csv"), from the cache when it is younger than max_age
-    seconds. A failed download falls back to the cached copy, however old; with none it raises."""
+def cached(path, max_age=CACHE_S):
+    """The local copy of an nflverse release file ("schedules/games.csv"), downloaded again (streamed to disk, never
+    held whole in memory: the VM has 1 GB) when older than max_age seconds. A failed download falls back to the cached
+    copy, however old; with none it raises."""
+    import shutil
     CACHE.mkdir(parents=True, exist_ok=True)
     f = CACHE / path.replace("/", "__")
     if f.exists() and time.time() - f.stat().st_mtime < max_age:
-        return f.read_bytes()
+        return f
+    tmp = f.with_name(f.name + ".part")
     try:
-        b = fetch(f"{REL}/{path}")
+        req = urllib.request.Request(f"{REL}/{path}", headers={"User-Agent": UA})
+        with urllib.request.urlopen(req, context=_ctx(), timeout=180) as r, open(tmp, "wb") as out:
+            shutil.copyfileobj(r, out, 1 << 20)
     except Exception:
         if f.exists():
-            return f.read_bytes()
+            return f
         raise
-    tmp = f.with_name(f.name + ".part")
-    tmp.write_bytes(b)
     os.replace(tmp, f)
-    return b
+    return f
+
+
+def release(path, max_age=CACHE_S):
+    """The bytes of an nflverse release file (see cached)."""
+    return cached(path, max_age).read_bytes()
+
+
+def iter_rows(path, max_age=CACHE_S):
+    """An nflverse csv (or csv.gz) streamed as dicts, a row at a time."""
+    f = cached(path, max_age)
+    with (gzip.open(f, "rt", encoding="utf-8-sig", newline="") if path.endswith(".gz")
+          else open(f, encoding="utf-8-sig", newline="")) as fh:
+        yield from csv.DictReader(fh)
 
 
 def rows(path, max_age=CACHE_S):
     """An nflverse csv (or csv.gz) as a list of dicts."""
-    b = release(path, max_age)
-    if path.endswith(".gz"):
-        b = gzip.decompress(b)
-    return list(csv.DictReader(io.StringIO(b.decode("utf-8-sig"))))
+    return list(iter_rows(path, max_age))
 
 
 def season_of(date):
@@ -160,7 +173,7 @@ def schedule(season=None, max_age=CACHE_S):
     home_score, spread (nflverse spread_line: the home team's margin the line expects, + = home favored), total, roof,
     surface, temp, wind, away_rest, home_rest, div, stadium, espn}]."""
     out = []
-    for r in rows("schedules/games.csv", max_age):
+    for r in iter_rows("schedules/games.csv", max_age):
         if season is not None and str(r["season"]) != str(season):
             continue
         h, a = team(r["home_team"]), team(r["away_team"])
@@ -194,7 +207,7 @@ def rosters(season, max_age=CACHE_S):
     """{pid: {"name", "team", "pos", "depth_pos", "status", "headshot", "espn", "pfr", "jersey", "week"}} from the
     season's weekly rosters, each player's latest week."""
     out = {}
-    for r in rows(f"weekly_rosters/roster_weekly_{season}.csv", max_age):
+    for r in iter_rows(f"weekly_rosters/roster_weekly_{season}.csv", max_age):
         pid = pid_of(r.get("gsis_id"))
         if pid is None:
             continue

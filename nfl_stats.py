@@ -85,20 +85,59 @@ def _age(season, cur):
     return CUR_MAX_AGE if season == cur else OLD_MAX_AGE
 
 
+WEEKLY_KEEP = ("player_id", "player_display_name", "player_name", "position", "position_group", "season_type", "game_id",
+               "team", "completions", "attempts", "passing_yards", "passing_tds", "passing_interceptions", "sacks_suffered",
+               "carries", "rushing_yards", "rushing_tds", "receptions", "targets", "receiving_yards", "receiving_tds",
+               "receiving_air_yards", "receiving_yards_after_catch", "target_share", "air_yards_share", "special_teams_tds",
+               "fg_made", "fg_att", "pat_made", "def_sacks", "def_tackles_solo", "def_tackle_assists")
+
+
 def weekly(season, cur):
-    """nflverse weekly player stats (renamed stats_player in 2025; the old player_stats file serves earlier seasons)."""
+    """nflverse weekly player stats, only the columns used (renamed stats_player in 2025; the old player_stats file
+    serves earlier seasons)."""
     try:
-        return C.rows(f"stats_player/stats_player_week_{season}.csv", _age(season, cur))
+        it = C.iter_rows(f"stats_player/stats_player_week_{season}.csv", _age(season, cur))
+        first = next(it)
     except Exception:
-        return C.rows(f"player_stats/player_stats_{season}.csv", _age(season, cur))
+        it = C.iter_rows(f"player_stats/player_stats_{season}.csv", _age(season, cur))
+        first = next(it)
+    keep = lambda r: {k: r.get(k) for k in WEEKLY_KEEP}
+    return [keep(first)] + [keep(r) for r in it]
 
 
 def pbp_rows(season, cur):
-    """(header index, rows) of a season's play by play, read with csv.reader (DictReader over 372 columns is slow)."""
-    b = gzip.decompress(C.release(f"pbp/play_by_play_{season}.csv.gz", _age(season, cur)))
-    rd = csv.reader(io.StringIO(b.decode("utf-8-sig")))
+    """(header index, rows) of a season's play by play, streamed from the gzip with csv.reader (DictReader over 372
+    columns is slow; the whole file decompressed in memory cost the VM 600 MB)."""
+    f = C.cached(f"pbp/play_by_play_{season}.csv.gz", _age(season, cur))
+    fh = gzip.open(f, "rt", encoding="utf-8-sig", newline="")
+    rd = csv.reader(fh)
     hdr = next(rd)
     return {c: i for i, c in enumerate(hdr)}, rd
+
+
+def from_pbp_cached(season, cur):
+    """from_pbp, with a past season's results kept in the cache beside its file (a finished season's file changes
+    rarely; its parse is most of a build's minute)."""
+    if season == cur:
+        return from_pbp(season, cur)
+    src = C.cached(f"pbp/play_by_play_{season}.csv.gz", _age(season, cur))
+    f = C.CACHE / f"derived_pbp_{season}.json"
+    try:
+        j = json.loads(f.read_text())
+        if j.get("mtime") == src.stat().st_mtime:
+            per = {(int(k.split("|")[0]), k.split("|")[1]): v for k, v in j["per"].items()}
+            team = {(k.split("|")[0], k.split("|")[1]): v for k, v in j["team"].items()}
+            rdir = {(k.split("|")[0], k.split("|")[1]): v for k, v in j["rdir"].items()}
+            tree = {int(k): v for k, v in j["tree"].items()}
+            return per, team, rdir, tree
+    except (OSError, ValueError, KeyError):
+        pass
+    per, team, rdir, tree = from_pbp(season, cur)
+    f.write_text(json.dumps({"mtime": src.stat().st_mtime, "per": {f"{a}|{b}": v for (a, b), v in per.items()},
+                             "team": {f"{a}|{b}": v for (a, b), v in team.items()},
+                             "rdir": {f"{a}|{b}": {d: c for d, c in v.items()} for (a, b), v in rdir.items()},
+                             "tree": {str(k): dict(v) for k, v in tree.items()}}))
+    return per, team, rdir, tree
 
 
 def from_pbp(season, cur):
@@ -187,7 +226,7 @@ def snap_map(season, cur, roster):
     for pid, r in roster.items():
         by_name[(C.nosfx(C.fold(r["name"])), r["team"])].add(pid)
     out = {}
-    for r in C.rows(f"snap_counts/snap_counts_{season}.csv", _age(season, cur)):
+    for r in C.iter_rows(f"snap_counts/snap_counts_{season}.csv", _age(season, cur)):
         pid = by_pfr.get(r.get("pfr_player_id"))
         if pid is None:
             hit = by_name.get((C.nosfx(C.fold(r.get("player"))), C.team(r.get("team"))), set())
@@ -217,7 +256,7 @@ def build(seasons=None, db=DB, now=None):
         if season == cur:
             players = roster
         snaps = snap_map(season, cur, roster)
-        per, team, rdir, tree = from_pbp(season, cur)
+        per, team, rdir, tree = from_pbp_cached(season, cur)
         stats = weekly(season, cur)
         team_carries = defaultdict(int)
         for r in stats:
