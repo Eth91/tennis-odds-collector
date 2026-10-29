@@ -925,6 +925,47 @@ class UNDER3050L(UNDER20):
         return f if f and UNDER_M.pings_l5(f, mk, UNDER_M.last5_ratio(bd, p, date, mk, m[0])) else None
 
 
+class UNDER3050L_E60(UNDER3050L):
+    """NBA_UNDER_PREREG.md amendment 10: UNDER3050L judged at FanDuel's first observation at or after tip - k minutes
+    (and before tip - k + 30), not at the tip - 30 tick: flagging earlier. Silent."""
+    name, early = "UNDER3050L_E60", 60
+    deps = UNDER3050L.deps + (RP.minus,)
+
+    def start_day(self, v):
+        super().start_day(v)
+        self.done = set()
+
+    def on_obs(self, v, book, seen):
+        if book != "fd":
+            return ()
+        out, games = [], v.games()
+        for gid in sorted(seen):
+            g = games.get(gid)
+            if g and gid not in self.done and RP.minus(g["tip"], self.early) <= v.t < RP.minus(g["tip"], self.early - 30):
+                self.done.add(gid)
+                out += UNDER20.on_tick(self, v, gid, 30)          # the board and report as of this observation
+        return out
+
+    def on_tick(self, v, gid, minutes):
+        return ()
+
+
+class UNDER3050L_E120(UNDER3050L_E60):
+    name, early = "UNDER3050L_E120", 120
+
+
+class UNDER3050L_E180(UNDER3050L_E60):
+    name, early = "UNDER3050L_E180", 180
+
+
+class UNDER3050L_E240(UNDER3050L_E60):
+    name, early = "UNDER3050L_E240", 240
+
+
+class UNDER3050L_E300(UNDER3050L_E60):
+    name, early = "UNDER3050L_E300", 300
+
+
 class UNDERML(UNDER20):
     """At tip - 30, FanDuel's main: T2's logistic model (no hindsight outs features, fit on 2023-24), either side at EV
     >= 5%. Silent."""
@@ -940,7 +981,8 @@ PIT_STORES = {"MATCHUP_DB": "matchup", "TRACKING_DB": "tracking"}
 
 RULES = (NULL_TIP30, NEWS_FD, NEWS_DK, DK_LAGS_FD, T4_TIP30, ENGINE_CARD, S1, DEPTH_NEXT, DEPTH_NEXT_TIP30, NEW_STARTER,
          LOST_START, ROLE_OPEN, RATIO_FGA, RATIO_PA, RATIO_RC, RATIO_PA28, PTS_DVP, RETURN_UNDER, FOUL_BIG, MIN_RESTRICT, EARLY_SURGE,
-         BOOST, BOOST_STEP, BOOST_PICKUP, BOOST_NH, UNDER20, UNDER20P, UNDER30P, UNDER3050, UNDER3050L, UNDERML)
+         BOOST, BOOST_STEP, BOOST_PICKUP, BOOST_NH, UNDER20, UNDER20P, UNDER30P, UNDER3050, UNDER3050L, UNDER3050L_E60, UNDER3050L_E120,
+         UNDER3050L_E180, UNDER3050L_E240, UNDER3050L_E300, UNDERML)
 
 
 def fingerprint(cls):
@@ -986,5 +1028,10 @@ REGISTRY = {                                             # name -> (registered a
     "UNDER30P": ("2026-10-29T00:00:00", "231aeea8d3"),            # ... and 30%+ below (amendment 3)
     "UNDER3050": ("2026-10-29T00:00:00", "7ec3b3d6b7"),           # ... and 30-50% below: the pings (amendment 4)
     "UNDER3050L": ("2026-10-29T07:00:00", "4fdf132a53"),          # ... less line 6-42% over his last 5: the pings (amendment 9)
+    "UNDER3050L_E60": ("2026-10-29T22:30:00", "e76088b673"),      # UNDER3050L judged at tip - 60 ... tip - 300 (amendment 10)
+    "UNDER3050L_E120": ("2026-10-29T22:30:00", "ac25356b54"),
+    "UNDER3050L_E180": ("2026-10-29T22:30:00", "b9a1fb53f8"),
+    "UNDER3050L_E240": ("2026-10-29T22:30:00", "1328805737"),
+    "UNDER3050L_E300": ("2026-10-29T22:30:00", "3382790997"),
     "UNDERML": ("2026-10-29T00:00:00", "420fd8c7cf"),
 }

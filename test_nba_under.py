@@ -204,6 +204,44 @@ def check_replay_l5(SR, l5):
     return got == {"UNDER3050": want, "UNDER3050L": [] if l5 is not None else want}
 
 
+def check_early(SR):
+    """Amendment 10: UNDER3050L_E60 fires at FanDuel's first observation in [tip - 60, tip - 30): not before, not on a
+    DraftKings observation, once per game, never at the tip - 30 tick; UNDER3050L_E300's window ends at tip - 270."""
+    import nba_boost as BOOST
+    import nba_role as ROLE
+    import nba_under as U
+    tmp = pathlib.Path(tempfile.mkdtemp())
+    p = TB.live_stores(tmp)
+    saved = SR.MATCHUP_DB, SR.ROLE_GAMELOGS_DB
+    SR.MATCHUP_DB, SR.ROLE_GAMELOGS_DB = p["matchup"], p["gamelogs"]
+    SR._RD.clear()
+    try:
+        bd = BOOST.live_data(p["matchup"], p["gamelogs"], "2026-27")
+        rd = ROLE.RoleData(p["matchup"], p["gamelogs"], "2026-27")
+        line = round(U.projection(bd, rd, TB.B, "HOM", TB.D, {TB.X}, "rebounds")[1] / 0.6, 4)
+        v = TB.FakeView({("G1", TB.B, "rebounds", "fd"): {(line, "over"): 1.9, (line, "under"): 1.9}})
+
+        def run(cls, steps):
+            r = cls()
+            r.start_day(v)
+            r.on_report(v, "2026-11-01T16:00:04", [("HOM", TB.X, "Out")], {}, set())
+            got = []
+            for t, kind, arg in steps:
+                v.t = t
+                got.append([(s["pid"], s["market"]) for s in (r.on_obs(v, arg, {"G1"}) if kind == "obs" else r.on_tick(v, "G1", arg))])
+            return got
+        e60 = run(SR.UNDER3050L_E60, [("2026-11-01T22:59:00", "obs", "fd"), ("2026-11-01T23:00:30", "obs", "dk"),
+                                      ("2026-11-01T23:01:00", "obs", "fd"), ("2026-11-01T23:05:00", "obs", "fd"),
+                                      ("2026-11-01T23:30:00", "tick", 30)])
+        e300 = run(SR.UNDER3050L_E300, [("2026-11-01T19:30:00", "obs", "fd")])
+        e300b = run(SR.UNDER3050L_E300, [("2026-11-01T19:29:59", "obs", "fd")])
+    finally:
+        SR.MATCHUP_DB, SR.ROLE_GAMELOGS_DB = saved
+        SR._RD.clear()
+    b = [(TB.B, "rebounds")]
+    return e60 == [[], [], b, [], []] and e300 == [[]] and e300b == [b]
+
+
 def test_under():
     import nba_role_open as L
     import nba_sxs_rules as SR
@@ -214,6 +252,10 @@ def test_under():
     assert check_replay_l5(SR, None) and check_replay_l5(SR, 1.2)
     check_phone_default(L)
     assert SR.REGISTRY["UNDER3050L"][1] == SR.fingerprint(SR.UNDER3050L)
+    assert check_early(SR)
+    for k in (60, 120, 180, 240, 300):
+        rule = getattr(SR, f"UNDER3050L_E{k}")
+        assert rule.early == k and SR.REGISTRY[rule.name][1] == SR.fingerprint(rule), rule.name
 
 
 def test_mutants():
@@ -282,6 +324,20 @@ def test_mutants():
     finally:
         sys.path.remove(str(d))
         sys.modules.pop("nba_sxs_rules_umut", None)
+    for tag, a, b in (("early: any book", '        if book != "fd":\n            return ()\n        out, games = [], v.games()\n        for gid in sorted(seen):\n            g = games.get(gid)\n            if g and gid not in self.done',
+                       '        out, games = [], v.games()\n        for gid in sorted(seen):\n            g = games.get(gid)\n            if g and gid not in self.done'),
+                      ("early: no window end", " <= v.t < RP.minus(g[\"tip\"], self.early - 30):", " <= v.t:"),
+                      ("early: every observation", "if g and gid not in self.done and", "if g and"),
+                      ("early: also at the tick", "    def on_tick(self, v, gid, minutes):\n        return ()\n\n\nclass UNDER3050L_E120", "\n\nclass UNDER3050L_E120")):
+        assert ssrc.count(a) == 1, tag
+        d = pathlib.Path(tempfile.mkdtemp())
+        (d / "nba_sxs_rules_umut.py").write_text(ssrc.replace(a, b))
+        sys.path.insert(0, str(d))
+        try:
+            assert not check_early(importlib.import_module("nba_sxs_rules_umut")), f"mutant survived: {tag}"
+        finally:
+            sys.path.remove(str(d))
+            sys.modules.pop("nba_sxs_rules_umut", None)
 
 if __name__ == "__main__":
     test_under()

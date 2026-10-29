@@ -285,3 +285,30 @@ user says so.
   - **UNDER3050L**, the new pings, is registered at the deploy time.
   - The two forward records compare the filter.
 - **Expected, from the backtest (2024-25):** 64.6% hits and +20% on 500 bets, against 62.0% and +15% on 710.
+
+# AMENDMENT 10: flagging earlier than tip − 30 (2026-10-29, about 21:35 UTC, before code)
+**User:** "have we tested the accuracy of flagging plays an hour or 2 or 3 or 4 or 5 hours ahead of tip?" No:
+2023-25's odds were captured once per game, at about tip − 30. "Yes run the replay and set up the tracking."
+
+**Rules: UNDER3050L_E60, _E120, _E180, _E240, _E300.**
+- Each is UNDER3050L's ping set (amendment 9), judged at FanDuel's first observation (a full or targeted poll) at or
+  after tip − k minutes and before tip − k + 30. With no observation in that window, none.
+- Each uses FanDuel's board and the official report as of that moment, as UNDER20 does at its tick.
+- They are side-by-side rules that fire on observations, so `nba_replay.TICKS` and every registered fingerprint stay
+  as they are.
+- Silent: nothing pings.
+
+**Development replay (information):**
+- 2026-10-22 to 2026-10-28, from the logged quotes and reports, every early rule plus UNDER3050L at tip − 30, run on
+  the Mac from copies of the VM's stores.
+- **Reported per rule:**
+  - flags, and their overlap with tip − 30's;
+  - CLV at FanDuel's close (the closing no-vig × our price − 1);
+  - the share whose line closed lower or whose under got pricier, against higher or cheaper;
+  - wins and ROI.
+- It is about 57 games, so the hit rates are anecdotes and CLV is the measure.
+
+**Forward:**
+- Registered at the deploy time and replayed nightly with every rule. Judged like every rule (CLV and ROI, 200+
+  signals over 10+ dates) against UNDER3050L.
+- No change to the live pings without the user.
