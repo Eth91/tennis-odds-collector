@@ -27,5 +27,15 @@ if [ $rc -eq 0 ]; then
   [ $rc -ne 0 ] && out="$out · ship to VM failed rc=$rc"
 fi
 printf '%s rc=%s %s\n' "$(date -u +%FT%TZ)" "$rc" "$(echo "$out" | tr '\n' ' ' | tail -c 300 | iconv -c -f UTF-8 -t UTF-8 2>/dev/null)" >>"$LOG"
+# NFL (nfl_lines.py): the same send for DraftKings' NFL board, after the NBA one; the receiver writes an NFL-marked
+# snapshot to its own file. Logged on its own line; it never changes this script's exit code.
+NSNAP=/tmp/nfl_dk_snapshot.json
+nout=$(/usr/bin/perl -e 'alarm shift; exec @ARGV' 90 "$PY" nfl_lines.py --snapshot dk "$NSNAP" 2>&1); nrc=$?
+if [ $nrc -eq 0 ]; then
+  nrecv=$(/usr/bin/perl -e 'alarm shift; exec @ARGV' 45 ssh -i "$KEY" -o ConnectTimeout=15 -o BatchMode=yes "$VM" \
+    'python3 nba-engine/nba_dk_receive.py' < "$NSNAP" 2>&1); nrc=$?
+  nout="$nout · VM: $nrecv"
+fi
+printf '%s nfl rc=%s %s\n' "$(date -u +%FT%TZ)" "$nrc" "$(echo "$nout" | tr '\n' ' ' | tail -c 300 | iconv -c -f UTF-8 -t UTF-8 2>/dev/null)" >>"$LOG"
 [ -f "$LOG" ] && tail -n 4000 "$LOG" > "$LOG.tmp" && mv "$LOG.tmp" "$LOG"
 exit $rc
