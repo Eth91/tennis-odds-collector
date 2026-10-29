@@ -120,7 +120,8 @@ The user made UNDER20's pinged flags (amendment 4) the only rule that pings the 
 
 # AMENDMENT 7: the pinged unders without injury minutes bumps (2026-10-29, about 01:50 UTC, before code; information)
 **User:** "what happens if you don't include those who are getting a jump in minutes due to injury, like Capela did
-tonight?" (Capela: a backup center who started with Sengun and Adams out; our projection gave him 11 minutes.)
+tonight?" (Capela: a backup center with Sengun and Adams out; our projection gave him 11 minutes. He came off the bench
+and played 22.)
 
 `nba_under_inj.py`, on amendment 4's rows: 2023-24 and 2024-25 tip lines, under −150 or better, not threes, 30–50%
 below the line (the live ping set). The backtest reads tonight's outs from the box score (live: the injury report) and
