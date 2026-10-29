@@ -1,4 +1,4 @@
-# PRE-REGISTRATION: does the NBA under finding hold in the NFL? (2026-10-29, about 22:05 UTC, before code or data)
+# PRE-REGISTRATION: does the NBA under finding hold in the NFL? (2026-10-29, about 21:50 UTC, before code or data)
 
 **User:** "test if the nba under finding works for nfl."
 
