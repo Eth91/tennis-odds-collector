@@ -250,3 +250,47 @@ target A with confirmed starters (absence games 1–3).
   minutes) × his STEP minutes. Amendment 4 shows that rate × minutes sits at the oracle bound.
 - This is information only: no flag decision changes. The four BOOST rules are re-registered at 2026-10-28T22:30 UTC,
   because the data they load now carries FTA and 3PA.
+
+# AMENDMENT 6: minutes for backups whose position-mate is out (2026-10-29, about 05:45 UTC, before code)
+**Why:**
+- On 2026-10-28, V3 gave Clint Capela 11.1 minutes with Alperen Sengun out. He played 22 (Oscar Tshiebwe, F-C, 14);
+  his two under pings lost.
+- **The cause:** `nba_role.project` spreads an absent rotation player's minutes over the whole active roster by base
+  minutes, with only 3× weight on his position group. A team's one or two backups at his spot get far less than they play.
+- **User:** "fix the minutes projection for guys like Capela": test both fixes and keep the better one. The under
+  pings move to it only if the under backtest holds.
+
+**Rows:** every player who played in 2023-24 and 2024-25, with V3 as in `nba_tests4.player_games` (outs from the box
+score, absent = `ROLE.Season.absences`). The truth is his minutes.
+
+**Target nights ("Capela-type"):** he is not in his team's usual five, and an absent rotation player shares a position
+letter with him (G, F, C; "F-C" has both).
+
+**Fix S, position slots:** a share α of each absent X's minutes goes to the active players sharing a position letter
+with X, split by base minutes × V3's share factor. The rest is spread as V3 does now, so α = 0 is V3.
+- α per X's position group (G, F, C), from {0, 0.1, …, 1}.
+- Fit on 2023-24 by coordinate descent (two passes), on the MAE over every player-game on nights with an absent rotation
+  player.
+
+**Fix H, his history without X:**
+- His team's games this season and last, before tonight, in which every absent X was on the team and sat and he
+  played; his mean minutes over the last 10 at most, n games.
+- Minutes = (1 − w) × the model's + w × that mean, w = n / (n + K), with K from {1, 2, 3, 5, 8} fit on 2023-24.
+
+**Candidates:** S, H, and S then H. The pick is the lowest 2024-25 MAE on target nights (α and K from 2023-24 only).
+
+**Gate 1, minutes:** the pick cuts 2024-25 target-night MAE by ≥ 0.3 minutes against V3 and raises 2024-25 overall MAE
+by no more than 0.05. Else FAIL and nothing changes.
+
+**Gate 2, unders (the user's condition):**
+- UNDER20's ping set (30–50% below, under −150 or better, not threes, best FanDuel/DraftKings at tip), with the
+  projection = the pick's minutes × the same rates.
+- Its 2024-25 ROI must be at least V3's (+15.0%) − 1 point. 2023-24 is shown, in-sample for α and K.
+- **If both pass:** the under pings move to the new minutes, deployed after the user's OK, and a new side-by-side rule
+  tracks them.
+- **If only gate 1 passes:** the new minutes are shadow-tracked only.
+
+**Also reported:**
+- Capela on 2026-10-28 under the pick.
+- MAE on all absence nights and for starters.
+- Out of scope: V3 counts X as absent only after 3 games this season, so the first games of a season redistribute nothing.
