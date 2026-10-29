@@ -427,8 +427,520 @@ class LOST_START(Rule):
         return out
 
 
+# ── AMENDMENT 2: ROLE_OPEN (NBA_ROLE1_PREREG.md) ─────────────────────────────────────────────────────────────
+import nba_role as ROLE                                  # noqa: E402
+
+ROLE_GAMELOGS_DB = RP.HERE / "nba_gamelogs.sqlite"
+_RD = {}
+
+
+def role_data(season):
+    key = (str(MATCHUP_DB), str(ROLE_GAMELOGS_DB), season)
+    if key not in _RD:
+        _RD.clear()
+        _RD[key] = ROLE.RoleData(MATCHUP_DB, ROLE_GAMELOGS_DB, season)
+    return _RD[key]
+
+
+ROLE_DEPS = (role_data, ROLE.RoleData, ROLE.role_eval, ROLE.project, ROLE.Season, ROLE.Priors, ROLE.ewma, ROLE.group,
+             ROLE.p_over, ROLE.p_side, ROLE.calibrated, ROLE.logit, ROLE.season_of)
+
+
+class ROLE_OPEN(Rule):
+    """A book's opener for a player whose role is elevated (a rotation teammate out, absence game 1-3): the side whose
+    calibrated EV (ROLE1 v2, beta 0.09) is >= 5%, at the opener's price."""
+    name, deps = "ROLE_OPEN", ROLE_DEPS
+
+    def start_day(self, v):
+        self.listed, self.opened = {}, set()             # pid -> (team, latest status); keys already opened
+
+    def on_report(self, v, t, rows, prev, seen_before):
+        for team, pid, st in rows:
+            self.listed[pid] = (team, st)
+        return ()
+
+    def on_obs(self, v, book, seen):
+        out, rd = [], None
+        for k in sorted(v.changed):
+            g, p, mk, b = k
+            if b != book or g not in seen or mk not in ROLE.MARKET_STAT or k in self.opened:
+                continue
+            m = RP.main_of(v.board(*k))
+            if not m:
+                continue
+            self.opened.add(k)                           # the opener: the first observation with a two-sided main
+            if v.t > RP.minus(v.games()[g]["tip"], 5):
+                continue
+            team = v.team_of(p)
+            out_now = {x for x, (tm, st) in self.listed.items() if tm == team and st in RP.OUTS}
+            if not team or not out_now:
+                continue
+            rd = rd or role_data(ROLE.season_of(v.date))
+            for e in ROLE.role_eval(rd, v.date, team, p, mk, m[0], m[1], m[2], out_now):
+                out.append(sig(g, p, mk, e["side"], m[0], b, e["price"], note=f"ev={e['ev']:.3f} mu={e['mu']:.1f}"))
+        return out
+
+
+# ── AMENDMENT 3: the user's volume-to-line ratios (NBA_RATIO_PREREG.md) ───────────────────────────────────────
+import nba_ratio as RATIO                                # noqa: E402
+
+TRACKING_DB = RP.HERE / "nba_tracking.sqlite"
+_RT = {}
+
+
+def ratio_data(season):
+    key = (str(MATCHUP_DB), str(TRACKING_DB), season)
+    if key not in _RT:
+        _RT.clear()
+        _RT[key] = RATIO.RatioData(MATCHUP_DB, TRACKING_DB, season)
+    return _RT[key]
+
+
+RATIO_DEPS = (ratio_data, RATIO.RatioData, RATIO.ratio_eval, ROLE.season_of)
+
+
+class _RatioOpen(Rule):
+    """At a book's opener (first two-sided main), the over when this season's volume clears the rule's multiple of the line.
+    Each rule carries its own spec (market, volume, multiple), so the fingerprint covers the threshold."""
+    deps, spec = RATIO_DEPS, None
+
+    def start_day(self, v):
+        self.opened = set()
+
+    def on_obs(self, v, book, seen):
+        mk, out = self.spec[0], []
+        for k in sorted(v.changed):
+            g, p, m_, b = k
+            if b != book or g not in seen or m_ != mk or k in self.opened:
+                continue
+            m = RP.main_of(v.board(*k))
+            if not m:
+                continue
+            self.opened.add(k)
+            if v.t <= RP.minus(v.games()[g]["tip"], 5) and RATIO.ratio_eval(ratio_data(ROLE.season_of(v.date)), self.spec, p, v.date, mk, m[0]):
+                out.append(sig(g, p, mk, "over", m[0], b, m[1], note=self.name))
+        return out
+
+
+class RATIO_FGA(_RatioOpen):
+    name, spec = "RATIO_FGA", RATIO.FORWARD["RATIO_FGA"]
+
+
+class RATIO_PA(_RatioOpen):
+    name, spec = "RATIO_PA", RATIO.FORWARD["RATIO_PA"]
+
+
+class RATIO_RC(_RatioOpen):
+    name, spec = "RATIO_RC", RATIO.FORWARD["RATIO_RC"]
+
+
+_DV = {}
+
+
+def dvp_data(season):
+    key = (str(MATCHUP_DB), str(ROLE_GAMELOGS_DB), season)
+    if key not in _DV:
+        _DV.clear()
+        _DV[key] = RATIO.DvpData(MATCHUP_DB, ROLE_GAMELOGS_DB, season)
+    return _DV[key]
+
+
+class PTS_DVP(Rule):
+    """Amendment 5: at the opener, the points over when FGA >= the line, 20+ minutes, and the opponent gives his position
+    group more points than the 2023-24 median (DvP > 1.0036, the opponent with >= 10 games)."""
+    name, spec = "PTS_DVP", ("points", "fga", 1.0, 20.0, 1.0036)
+    deps = RATIO_DEPS + (RATIO.DvpData, dvp_data)
+
+    def start_day(self, v):
+        self.opened = set()
+
+    def on_obs(self, v, book, seen):
+        mk, k, mpg, cut = self.spec[0], self.spec[2], self.spec[3], self.spec[4]
+        out = []
+        for key in sorted(v.changed):
+            g, p, m_, b = key
+            if b != book or g not in seen or m_ != mk or key in self.opened:
+                continue
+            m = RP.main_of(v.board(*key))
+            if not m:
+                continue
+            self.opened.add(key)
+            if v.t > RP.minus(v.games()[g]["tip"], 5):
+                continue
+            season = ROLE.season_of(v.date)
+            vol = ratio_data(season).volume(p, v.date)
+            if not vol or vol["fga"] < k * m[0] or vol["mpg"] < mpg:
+                continue
+            team, gm = v.team_of(p), v.games()[g]
+            opp = gm["away"] if team == gm["home"] else gm["home"] if team == gm["away"] else None
+            dv = dvp_data(season)
+            d = dv.dvp(opp, dv.groups.get(p), v.date) if opp else None
+            if d is not None and d > cut:
+                out.append(sig(g, p, mk, "over", m[0], b, m[1], note=f"dvp={d:.3f}"))
+        return out
+
+
+class RATIO_PA28(_RatioOpen):
+    """Amendment 4: potential assists >= 2.8x the assists line at the opener (in-sample threshold; pinged, SHADOW)."""
+    name, spec = "RATIO_PA28", RATIO.FORWARD["RATIO_PA28"]
+
+
+# ── AMENDMENT 6: the six ideas' forward rules (NBA_IDEAS_PREREG.md) ─────────────────────────────────────────────
+import nba_ideas as IDEAS                                # noqa: E402
+
+NEWS_DB = RP.HERE / "nba_news.sqlite"
+_FD = {}
+
+
+def foul_data(season):
+    key = (str(MATCHUP_DB), season)
+    if key not in _FD:
+        _FD.clear()
+        _FD[key] = IDEAS.FoulData(MATCHUP_DB, season)
+    return _FD[key]
+
+
+def cleared_returners(rd, vd, team, date, t, listed):
+    """Absent rotation players not listed Out/Doubtful (and Active in the lineup when one is posted for the team)."""
+    lu = vd.lineup(date, t).get(team)
+    out = set()
+    history = [b for _d, _g, b in rd.season.before(team, date)]
+    seen = {p for b in history for p in b}
+    for x in seen:
+        if history and x in history[-1] and history[-1][x]["min"]:
+            continue                                     # played the team's last game: not returning
+        st = listed.get(x, (None, None))[1]
+        if st in RP.OUTS or (lu and x not in lu["active"]):
+            continue
+        out.add(x)
+    return out
+
+
+IDEA_DEPS = (role_data, ROLE.RoleData, ROLE.Season, volume_data, VolumeData, IDEAS.return_bets, IDEAS._returning,
+             cleared_returners, foul_data, IDEAS.FoulData, IDEAS.foul_bet, IDEAS.restricted, ROLE.season_of)
+
+
+class RETURN_UNDER(Rule):
+    """Idea 4: at tip - 30, a rotation player who missed >= 2 straight games is cleared -> unders on the teammates whose
+    minutes rose >= 4 while he was out (points, rebounds, assists, PRA at FanDuel's main)."""
+    name, deps = "RETURN_UNDER", IDEA_DEPS
+
+    def start_day(self, v):
+        self.listed = {}
+
+    def on_report(self, v, t, rows, prev, seen_before):
+        for team, pid, st in rows:
+            self.listed[pid] = (team, st)
+        return ()
+
+    def on_tick(self, v, gid, minutes):
+        if minutes != 30:
+            return ()
+        rd, vd, g, out = role_data(ROLE.season_of(v.date)), volume_data(), v.games()[gid], []
+        for team in (g["home"], g["away"]):
+            boards = {p for p, mk in v.props(gid, "fd") if v.team_of(p) == team}
+            history = [{p: r["min"] for p, r in b.items() if r["min"]} for _d, _g, b in rd.season.before(team, v.date)]
+            cleared = cleared_returners(rd, vd, team, v.date, v.t, self.listed)
+            for b in sorted(IDEAS.return_bets(history, cleared, boards)):
+                out += side_bets(v, gid, b, "under", note="teammate returns")
+        return out
+
+
+class FOUL_BIG(Rule):
+    """Idea 2: at tip - 30, an F/C fouling >= 4.5 per 36 vs a team drawing > 23.5 FTA a game -> points and rebounds unders."""
+    name, deps = "FOUL_BIG", IDEA_DEPS
+
+    def on_tick(self, v, gid, minutes):
+        if minutes != 30:
+            return ()
+        season = ROLE.season_of(v.date)
+        fd, dv, vd, g, out = foul_data(season), dvp_data(season), volume_data(), v.games()[gid], []
+        for p in sorted({p for p, mk in v.props(gid, "fd")}):
+            team = v.team_of(p)
+            opp = g["away"] if team == g["home"] else g["home"] if team == g["away"] else None
+            if IDEAS.foul_bet(fd, dv.groups.get(p) or vd.group(p), p, opp, v.date):
+                for mk in ("points", "rebounds"):
+                    m = RP.main_of(v.board(gid, p, mk, "fd"))
+                    if m and m[2]:
+                        out.append(sig(gid, p, mk, "under", m[0], "fd", m[2], note="foul-prone big"))
+        return out
+
+
+class MIN_RESTRICT(Rule):
+    """Idea 5: an X/Bluesky item says he is on a minutes restriction -> at FanDuel's next look (within 15 min), unders in
+    points, rebounds, assists and PRA."""
+    name, deps, window = "MIN_RESTRICT", IDEA_DEPS, 15
+
+    def start_day(self, v):
+        n = PD._ro(NEWS_DB)
+        self.items = sorted((RP.iso(at), int(pid)) for at, pid, h, b in (n.execute(
+            "SELECT detected_at, pid, headline, body FROM news_items WHERE game_date = ? AND pid IS NOT NULL", (v.date,))
+            if n is not None and n.execute("SELECT 1 FROM sqlite_master WHERE name = 'news_items'").fetchone() else ())
+            if IDEAS.restricted(f"{h} {b}"))
+        self.done = set()
+
+    def on_obs(self, v, book, seen):
+        if book != "fd":
+            return ()
+        out, games = [], v.games()
+        for at, pid in self.items:
+            if at > v.t or pid in self.done or RP.minus(v.t, self.window) > at:
+                continue
+            g = next((g_ for g_ in seen if g_ in games and any(p == pid for p, _mk in v.props(g_, "fd"))), None)
+            if g is None or v.t > RP.minus(games[g]["tip"], 5):
+                continue
+            self.done.add(pid)
+            out += side_bets(v, g, pid, "under", note="minutes restriction")
+        return out
+
+
+# ── AMENDMENT 7: EARLY_SURGE (NBA_EARLY_PREREG.md) ─────────────────────────────────────────────────────────────
+import nba_early as EARLY                                # noqa: E402
+
+_ED = {}
+
+
+def early_data(season):
+    key = (str(MATCHUP_DB), str(ROLE_GAMELOGS_DB), season)
+    if key not in _ED:
+        _ED.clear()
+        _ED[key] = EARLY.EarlyData(MATCHUP_DB, ROLE_GAMELOGS_DB, season)
+    return _ED[key]
+
+
+class EARLY_SURGE(Rule):
+    """In a player's games 2-5, at the points opener: the over when his FGA/g is >= 1.2x last season's, he plays 20+ minutes,
+    and his FGA/g is >= 0.8x the line (the books' lines lag a new role early in the season)."""
+    name, deps, spec = "EARLY_SURGE", (early_data, EARLY.EarlyData, EARLY.early_surge, ROLE.season_of), (1.2, 20.0, 0.8, 1, 4)
+
+    def start_day(self, v):
+        self.opened = set()
+
+    def on_obs(self, v, book, seen):
+        out = []
+        for k in sorted(v.changed):
+            g, p, mk, b = k
+            if b != book or g not in seen or mk != "points" or k in self.opened:
+                continue
+            m = RP.main_of(v.board(*k))
+            if not m:
+                continue
+            self.opened.add(k)
+            if v.t <= RP.minus(v.games()[g]["tip"], 5) and EARLY.early_surge(early_data(ROLE.season_of(v.date)), p, v.date, m[0]):
+                out.append(sig(g, p, mk, "over", m[0], b, m[1], note="early volume surge"))
+        return out
+
+
+# ── AMENDMENT 9: BOOST and BOOST_NH (NBA_BOOST_PREREG.md) ──────────────────────────────────────────────────────
+import nba_boost as BOOST_M                               # noqa: E402
+
+_BD = {}
+
+
+def boost_data(season):
+    key = (str(MATCHUP_DB), str(ROLE_GAMELOGS_DB), season)
+    if key not in _BD:
+        _BD.clear()
+        _BD[key] = BOOST_M.live_data(MATCHUP_DB, ROLE_GAMELOGS_DB, season)
+    return _BD[key]
+
+
+BOOST_DEPS = (boost_data, role_data, BOOST_M.live_data, BOOST_M.BoostData, BOOST_M.boost_eval, BOOST_M.step_eval,
+              BOOST_M.pickup_eval, BOOST_M.step_minutes, BOOST_M.minutes_features, BOOST_M.v3_minutes, BOOST_M.rates,
+              BOOST_M.Trees, BOOST_M.rank, BOOST_M.kind_of, BOOST_M.stat_of, BOOST_M.group, BOOST_M.posted_fives,
+              ROLE.season_of) + ROLE_DEPS
+BOOST_SPEC = [BOOST_M.STARTER_MIN, BOOST_M.BASE_THIS, BOOST_M.BASE_LAST, BOOST_M.SPOT_MAX, BOOST_M.MIN_H,
+              BOOST_M.MIN_H_IRRELEVANT, BOOST_M.HIT_AT, BOOST_M.MIN_AVG_MIN, BOOST_M.PROJ_AT, BOOST_M.BASE_N,
+              BOOST_M.BASE_MIN_GAMES, BOOST_M.SAME_W, BOOST_M.PRICE_MIN, BOOST_M.TOP, BOOST_M.PARTS, BOOST_M.USUAL_GAMES,
+              BOOST_M.USUAL_MIN, BOOST_M.STEP_K, BOOST_M.STEP_STARTS, BOOST_M.K_RATE, BOOST_M.PICK_SPLIT,
+              BOOST_M.MIN_FEATURES, BOOST_M.STEP_FLOOR]
+if BOOST_M.TREES_B.exists():                             # the fitted bench-pickup model is part of BOOST_PICKUP
+    BOOST_SPEC.append(hashlib.sha256(BOOST_M.TREES_B.read_bytes()).hexdigest()[:16])
+
+
+class BOOST(Rule):
+    """A usual starter out, absence game 1-3: at a book's opener, a teammate's over (-150 or better) when 80%+ of his
+    past games without that starter but with tonight's other starters beat the line (3+ games, 6+ when the starter's
+    own numbers make him irrelevant to the market; 20+ minutes on average)."""
+    name, deps, spec, flag_kind = "BOOST", BOOST_DEPS, BOOST_SPEC, "history"
+
+    def start_day(self, v):
+        self.listed, self.opened, self.step_seen = {}, {}, set()   # pid -> (team, status); key -> opened at; (pid, book)
+
+    def on_report(self, v, t, rows, prev, seen_before):
+        for team, pid, st in rows:
+            self.listed[pid] = (team, st)
+        return ()
+
+    def judge(self, bd, date, team, p, mk, m, out_now, five):
+        """This rule's flag for one prop, or None (NBA_BOOST_PREREG.md amendments 1-6)."""
+        if self.flag_kind in ("history", "no history"):
+            f = BOOST_M.boost_eval(bd, date, team, p, mk, m[0], m[1], out_now)
+            return f if f and BOOST_M.kind_of(f) == self.flag_kind else None
+        rd = role_data(ROLE.season_of(date))
+        if self.flag_kind == "step":
+            return BOOST_M.step_eval(bd, rd, date, team, p, mk, m[0], m[1], out_now, five)
+        return BOOST_M.pickup_eval(bd, rd, date, team, p, mk, m[0], m[1], out_now, five)
+
+    def on_obs(self, v, book, seen):
+        out, bd = [], None
+        at, fives = BOOST_M.posted_fives(LINEUPS_DB, v.date, v.t)   # amendment 4: NBA.com's lineup as of t
+        for k in sorted(v.changed):
+            g, p, mk, b = k
+            if b != book or g not in seen or mk not in BOOST_M.PARTS or k in self.opened:
+                continue
+            m = RP.main_of(v.board(*k))
+            if not m:
+                continue
+            self.opened[k] = v.t                         # the opener: the first observation with a two-sided main
+            if v.t > RP.minus(v.games()[g]["tip"], 5):
+                continue
+            bd = bd or boost_data(ROLE.season_of(v.date))
+            team = bd.team_now(p, v.date)
+            out_now = {x for x, (tm, st) in self.listed.items() if tm == team and st in RP.OUTS}
+            if not team or not out_now:
+                continue
+            f = self.judge(bd, v.date, team, p, mk, m, out_now, fives.get(team))
+            if f:
+                why = f"{f['hits']}/{f['h']}" if f["kind"] == "history" else f"proj={f['proj']:.1f} min={f.get('proj_min', 0):.1f}"
+                out.append(sig(g, p, mk, "over", m[0], b, m[1], note=f"x={f['x']} n={f['n']} {why}"))
+        if self.flag_kind in ("step", "pickup") and fives:   # amendment 4: at this book's next look after NBA.com's
+            bd = bd or boost_data(ROLE.season_of(v.date))   # lineup, the new starter's (or pickup's) earlier props
+            for team, five in sorted(fives.items()):
+                g = v.game_of(team)
+                if bd.usual_five(team, v.date) is None or g not in seen or v.t > RP.minus(v.games()[g]["tip"], 5):
+                    continue
+                out_now = {x for x, (tm, st) in self.listed.items() if tm == team and st in RP.OUTS}
+                tfive, pairs = bd.tonight(team, v.date, out_now, five)
+                who = sorted(pairs) if self.flag_kind == "step" else \
+                    sorted({pk[0] for s_ in pairs if (pk := bd.pickup(team, v.date, s_, tfive, out_now))})
+                for p in who:
+                    if (p, book) in self.step_seen:
+                        continue
+                    self.step_seen.add((p, book))
+                    for p2, mk in sorted(v.props(g, book)):
+                        k = (g, p, mk, book)
+                        m = RP.main_of(v.board(*k)) if p2 == p and mk in BOOST_M.PARTS and self.opened.get(k, at) < at else None
+                        f = m and self.judge(bd, v.date, team, p, mk, m, out_now, five)
+                        if f:
+                            out.append(sig(g, p, mk, "over", m[0], book, m[1], note=f"x={f['x']} n={f['n']} lineup"))
+        return out
+
+
+class BOOST_STEP(BOOST):
+    """The new starter for an out usual starter: his minutes from the MINUTES blend (his last 10 starts and ROLE1 v3)
+    x his rates, 15%+ over the line (NBA_BOOST_PREREG.md amendment 6). Pinged."""
+    name, flag_kind = "BOOST_STEP", "step"
+
+
+class BOOST_PICKUP(BOOST):
+    """The bench pickup for that new starter, once NBA.com's lineup is posted: the fitted minutes model x his rates,
+    15%+ over the line (amendment 6). Silent."""
+    name, flag_kind = "BOOST_PICKUP", "pickup"
+
+
+class BOOST_NH(BOOST):
+    """BOOST's no-history flags (fewer than 3 such games): the position rules alone put him 15%+ over the line."""
+    name, flag_kind = "BOOST_NH", "no history"
+
+
+# ── AMENDMENT 10: UNDER20 and UNDERML (NBA_UNDER_PREREG.md) ────────────────────────────────────────────────────────
+import nba_under as UNDER_M                               # noqa: E402
+
+UNDER_DEPS = (boost_data, role_data, UNDER_M.projection, UNDER_M.under20, UNDER_M.features, UNDER_M.predict,
+              UNDER_M.underml, UNDER_M.eligible, UNDER_M.pings, UNDER_M.strong, BOOST_M.v3_minutes, BOOST_M.rates, BOOST_M.live_data, BOOST_M.BoostData, ROLE.season_of) + ROLE_DEPS
+UNDER_SPEC = [UNDER_M.RATIO_AT, UNDER_M.EV_AT, list(UNDER_M.FEATURES), UNDER_M.PING_PRICE_MIN, list(UNDER_M.PING_SKIP), UNDER_M.STRONG_AT, UNDER_M.PING_FLOOR]
+if UNDER_M.MODEL_PY.exists():                            # the fitted model is part of UNDERML
+    UNDER_SPEC.append(hashlib.sha256(UNDER_M.MODEL_PY.read_bytes()).hexdigest()[:16])
+
+
+class UNDER20(Rule):
+    """At tip - 30, FanDuel's main: the under when our projection (ROLE1 v3 minutes x his rates) is under 80% of the line."""
+    name, deps, spec = "UNDER20", UNDER_DEPS, UNDER_SPEC
+
+    def start_day(self, v):
+        self.listed = {}
+
+    def on_report(self, v, t, rows, prev, seen_before):
+        for team, pid, st in rows:
+            self.listed[pid] = (team, st)
+        return ()
+
+    def judge(self, bd, rd, date, team, p, mk, m, out_now):
+        return UNDER_M.under20(bd, rd, date, team, p, mk, m[0], m[2], out_now)
+
+    def on_tick(self, v, gid, minutes):
+        if minutes != 30:
+            return ()
+        season = ROLE.season_of(v.date)
+        bd, rd, out = boost_data(season), role_data(season), []
+        for p, mk in sorted(set(v.props(gid, "fd"))):
+            m = RP.main_of(v.board(gid, p, mk, "fd")) if mk in BOOST_M.PARTS else None
+            team = bd.team_now(p, v.date) if m else None
+            if not team:
+                continue
+            out_now = {x for x, (tm, st) in self.listed.items() if tm == team and st in RP.OUTS}
+            f = self.judge(bd, rd, v.date, team, p, mk, m, out_now)
+            if f:
+                out.append(sig(gid, p, mk, f["side"], m[0], "fd", f["price"],
+                               note=f"proj={f['proj']:.1f}" if "proj" in f else f"p={f['p']:.3f}"))
+        return out
+
+
+class UNDER20P(UNDER20):
+    """UNDER20's pinged subset (NBA_UNDER_PREREG.md amendment 1): the under priced -150 or better, not threes."""
+    name = "UNDER20P"
+
+    def judge(self, bd, rd, date, team, p, mk, m, out_now):
+        f = UNDER_M.under20(bd, rd, date, team, p, mk, m[0], m[2], out_now)
+        return f if f and UNDER_M.eligible(f, mk) else None
+
+
+class UNDER30P(UNDER20):
+    """UNDER20P's flags under 70% of the line, the starred pings (NBA_UNDER_PREREG.md amendment 3)."""
+    name = "UNDER30P"
+
+    def judge(self, bd, rd, date, team, p, mk, m, out_now):
+        f = UNDER_M.under20(bd, rd, date, team, p, mk, m[0], m[2], out_now)
+        return f if f and UNDER_M.eligible(f, mk) and UNDER_M.strong(f) else None
+
+
+class UNDER3050(UNDER20):
+    """UNDER20's pinged flags (NBA_UNDER_PREREG.md amendment 4): eligible and 30-50% below the line."""
+    name = "UNDER3050"
+
+    def judge(self, bd, rd, date, team, p, mk, m, out_now):
+        f = UNDER_M.under20(bd, rd, date, team, p, mk, m[0], m[2], out_now)
+        return f if f and UNDER_M.pings(f, mk) else None
+
+
+class UNDER3050L(UNDER20):
+    """The pings from NBA_UNDER_PREREG.md amendment 9: UNDER3050 less the flags whose line is 6-42% over his last-5
+    average."""
+    name = "UNDER3050L"
+    deps, spec = UNDER_DEPS + (UNDER_M.last5_ratio, UNDER_M.pings_l5), UNDER_SPEC + [list(UNDER_M.L5_ZONE)]
+
+    def judge(self, bd, rd, date, team, p, mk, m, out_now):
+        f = UNDER_M.under20(bd, rd, date, team, p, mk, m[0], m[2], out_now)
+        return f if f and UNDER_M.pings_l5(f, mk, UNDER_M.last5_ratio(bd, p, date, mk, m[0])) else None
+
+
+class UNDERML(UNDER20):
+    """At tip - 30, FanDuel's main: T2's logistic model (no hindsight outs features, fit on 2023-24), either side at EV
+    >= 5%. Silent."""
+    name = "UNDERML"
+
+    def judge(self, bd, rd, date, team, p, mk, m, out_now):
+        return UNDER_M.underml(bd, rd, date, team, p, mk, m[0], m[1], m[2], out_now)
+
+
+# Amendment 8: the stores of box scores and tracking that the replay hands the rules as of each moment
+# (nba_replay.RuleStores). ROLE_GAMELOGS_DB holds past seasons only. Not part of any fingerprint: no rule changes.
+PIT_STORES = {"MATCHUP_DB": "matchup", "TRACKING_DB": "tracking"}
+
 RULES = (NULL_TIP30, NEWS_FD, NEWS_DK, DK_LAGS_FD, T4_TIP30, ENGINE_CARD, S1, DEPTH_NEXT, DEPTH_NEXT_TIP30, NEW_STARTER,
-         LOST_START)
+         LOST_START, ROLE_OPEN, RATIO_FGA, RATIO_PA, RATIO_RC, RATIO_PA28, PTS_DVP, RETURN_UNDER, FOUL_BIG, MIN_RESTRICT, EARLY_SURGE,
+         BOOST, BOOST_STEP, BOOST_PICKUP, BOOST_NH, UNDER20, UNDER20P, UNDER30P, UNDER3050, UNDER3050L, UNDERML)
 
 
 def fingerprint(cls):
@@ -436,6 +948,8 @@ def fingerprint(cls):
     parts = [inspect.getsource(c) for c in cls.__mro__ if c is not object and c.__module__ == __name__]
     parts += [inspect.getsource(f) for f in (newly_out, teammates, fd_vs_dk, sig)] + [inspect.getsource(RP.View)]
     parts += [inspect.getsource(f) for f in getattr(cls, "deps", ())]
+    if getattr(cls, "spec", None) is not None:           # a rule's own threshold, wherever it is defined
+        parts.append(json.dumps(cls.spec))
     parts.append(json.dumps([REG_MIN, REG_APPS, NEWS_MARKETS, NULL_MARKETS, FLAG_MARKET, RP.OUTS, RP.TICKS], sort_keys=True))
     return hashlib.sha256("\n".join(parts).encode()).hexdigest()[:10]
 
@@ -453,4 +967,24 @@ REGISTRY = {                                             # name -> (registered a
     "DEPTH_NEXT_TIP30": (REGISTERED_AT, "726d7f5e54"),
     "NEW_STARTER": (REGISTERED_AT, "5e5996fb1a"),
     "LOST_START": (REGISTERED_AT, "134f9fb1e9"),
+    "ROLE_OPEN": ("2026-10-27T13:00:00", "fce63818bc"),           # amendment 2 (NBA_ROLE1_PREREG.md)
+    "RATIO_FGA": ("2026-10-27T13:00:00", "7931edb259"),           # amendment 3 (NBA_RATIO_PREREG.md)
+    "RATIO_PA": ("2026-10-27T13:00:00", "738f3b6032"),
+    "EARLY_SURGE": ("2026-10-27T13:00:00", "4fe0ca2d33"),         # amendment 7 (NBA_EARLY_PREREG.md)
+    "RETURN_UNDER": ("2026-10-27T13:00:00", "c099fdf615"),        # amendment 6 (NBA_IDEAS_PREREG.md)
+    "FOUL_BIG": ("2026-10-27T13:00:00", "08df997f93"),
+    "MIN_RESTRICT": ("2026-10-27T13:00:00", "4ee15c815c"),
+    "PTS_DVP": ("2026-10-27T13:00:00", "fc8387835f"),             # amendment 5
+    "RATIO_PA28": ("2026-10-27T13:00:00", "2404e38806"),          # amendment 4
+    "RATIO_RC": ("2026-10-27T13:00:00", "17e2e5ea3f"),
+    "BOOST": ("2026-10-28T23:00:00", "ba59b8228e"),               # amendment 9 (NBA_BOOST_PREREG.md amendments 2-7)
+    "BOOST_STEP": ("2026-10-28T23:00:00", "5ed40c5557"),
+    "BOOST_PICKUP": ("2026-10-28T23:00:00", "4356b2332b"),
+    "BOOST_NH": ("2026-10-28T23:00:00", "8c7915ffdb"),
+    "UNDER20": ("2026-10-29T00:00:00", "e2e43773b0"),             # amendment 10 (NBA_UNDER_PREREG.md)
+    "UNDER20P": ("2026-10-29T00:00:00", "352fb78046"),            # -150 or better, not threes (amendment 1)
+    "UNDER30P": ("2026-10-29T00:00:00", "231aeea8d3"),            # ... and 30%+ below (amendment 3)
+    "UNDER3050": ("2026-10-29T00:00:00", "7ec3b3d6b7"),           # ... and 30-50% below: the pings (amendment 4)
+    "UNDER3050L": ("2026-10-29T07:00:00", "4fdf132a53"),          # ... less line 6-42% over his last 5: the pings (amendment 9)
+    "UNDERML": ("2026-10-29T00:00:00", "420fd8c7cf"),
 }

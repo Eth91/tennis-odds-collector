@@ -94,3 +94,7 @@ points −4.80% → −7.32%, rebounds −8.12% → −3.60%, assists +6.81% →
 
 **Consequence:** no `priced_trk` tier. The tracking data stays (`nba_tracking.sqlite`), and is ready for a
 differently-designed test if one is pre-registered.
+
+---
+**Note, 2026-10-28:** the VM's schedule for the current-season fetch (daily → hourly) and a completeness guard are
+recorded in `NBA_SPEED_PREREG.md` amendment 34. Nothing above is changed.
