@@ -3299,7 +3299,7 @@ function nflMatchup() {
     <div class="mpf"><span>Last games vs</span>${dd("grp", VS_GRP, MUP.grp)}${dd("mkt", mks.map(m => [m, NAME[m]]), MUP.mkt)}</div>
     <div id="vst"></div>
     <div class="shc wg" id="nzc"></div><div class="shc wg" id="nbg"></div><div class="shc wg" id="npr"></div>
-    <div class="shc wg" id="ncv"></div><div class="shc wg" id="nrd"></div><div class="shc wg" id="ncl"></div>`;
+    <div class="shc wg" id="ncv"></div><div class="shc wg" id="nmz"></div><div class="shc wg" id="nrd"></div><div class="shc wg" id="ncl"></div>`;
   $(".bk", mp).onclick = () => history.back();
   $(".ph", mp).onclick = e => { if (!e.target.closest("button")) mp.scrollTo({top: 0, behavior: REDUCED ? "auto" : "smooth"}); };
   $("#mpm", mp).onclick = leagueSheet;
@@ -3372,8 +3372,15 @@ function pressureCard(p, side) {
                  t3("Blitz rate", per(o.def.blitz_pct) + "%", "", `${ord(o.ranks.def.blitz_pct)} · avg ${per(advLg("def", "blitz_pct"))}%`)];
   if (q.db) tiles.push(t3(`${name} pressured`, per(q.press_pct) + "%", "", m ? `line ${ord(m.ranks.off.press_pct)}` : ""),
                        t3("Bad throws", per(q.bad_pct) + "%", "", "of attempts"), t3("Time to throw", q.ttt ? per(q.ttt, 2) + "s" : "–", "", q.aggr ? `${per(q.aggr)}% tight` : ""));
+  const rb = (advP(p.pid) || {}).rblitz;
+  if (rb && (advP(p.pid) || {}).pos !== "QB") {                  // a receiver: his share of the targets, blitzed or not
+    const heavy = o.def.blitz_pct !== null && o.def.blitz_pct > (advLg("def", "blitz_pct") || 0), nm = esc(lastName(p.player));
+    const t = (lab, c, tm, on) => t3(lab, tm ? Math.round(100 * c[0] / tm) + "%" : "–", "", `of tgts · ${c[0] ? per(c[2] / c[0]) : "–"} yds/tgt`, on);
+    tiles.push(t(`${nm} blitzed`, rb.b, rb.tb, heavy), t(`${nm} not`, rb.n, rb.tn, !heavy),
+               t3("Catch rate", rb.b[0] ? Math.round(100 * rb.b[1] / rb.b[0]) + "%" : "–", "", `not ${rb.n[0] ? Math.round(100 * rb.n[1] / rb.n[0]) + "%" : "–"}`));
+  }
   const vb = q.vs_blitz;
-  if (vb && vb.b[0] + vb.n[0] >= 30) {
+  if (vb && vb.b[0] + vb.n[0] >= 30 && !(rb && (advP(p.pid) || {}).pos !== "QB")) {
     const heavy = o.def.blitz_pct !== null && o.def.blitz_pct > (advLg("def", "blitz_pct") || 0);
     const t = (lab, s, on) => t3(lab, s[1] ? per(s[3] / s[1]) : "–", "", `YPA · ${s[1] ? Math.round(s[2] / s[1] * 100) : "–"}% · ${s[4]}-${s[5]}`, on);
     tiles.push(t(`${name} blitzed`, vb.b, heavy), t(`${name} not`, vb.n, !heavy),
@@ -3390,6 +3397,23 @@ function coverCard(p, side) {
   return card(`Who covers · ${esc(p.opp)}`, "this season · targeted as the defender",
     `<table class="vs cov"><colgroup><col style="width:46%"><col><col><col></colgroup><thead><tr><th>DEFENDER</th><th>TGT</th><th>YDS/T</th><th>RTG</th></tr></thead><tbody>${rows.map(r =>
     `<tr${r[11] === "Out" || r[11] === "Doubtful" ? ' class="out"' : ""}><td>${esc(initialName(r[1]))} <small>${esc(r[2] || "")}</small>${st(r[11])}</td><td>${r[3]}</td><td>${r[3] ? per(r[5] / r[3]) : "–"}</td><td><b class="${rc(r[8])}">${r[8] === null ? "–" : Math.round(r[8])}</b></td></tr>`).join("")}</tbody></table>`);
+}
+// 5b · man vs zone (nflverse's coverage calls, out after a season: last season's until then): his yards and targets a
+// route against each, how often he runs a route, and how much man the defense plays. The coverage the defense leans
+// to is outlined in blue; his number there is green when it is his better one (for an over; red for an under)
+function manZoneCard(p, side) {
+  const a = advP(p.pid) || {}, v = a.vcov, M = (D.adv || {}).man || {}, om = (M.teams || {})[p.opp];
+  if (!v || v.man[0] + v.zone[0] < 60) return "";
+  const nm = esc(lastName(p.player)), yprr = c => c[0] ? c[3] / c[0] : null, tprr = c => c[0] ? c[1] / c[0] : null;
+  const ym = yprr(v.man), yz = yprr(v.zone), lean = om === undefined || M.lg === undefined ? null : om > M.lg ? "man" : "zone";
+  const better = ym === null || yz === null ? null : ym > yz ? "man" : "zone";
+  const tone = k => lean === k && better ? ((better === k) === (side !== "under") ? "up" : "dn") : "";
+  const t = (k, lab) => { const c = v[k]; return t3(`${nm} vs ${lab}`, per(yprr(c), 2), tone(k), `yds/rt · ${per(tprr(c), 2)} tgt/rt`, lean === k); };
+  const tiles = [t("man", "man"), t("zone", "zone"), t3("Route rate", v.rt[1] ? Math.round(100 * v.rt[0] / v.rt[1]) + "%" : "–", "", "of dropbacks")];
+  if (om !== undefined) tiles.push(t3(`${esc(p.opp)} man`, per(om) + "%", "", `avg ${per(M.lg)}%`, lean === "man"), t3(`${esc(p.opp)} zone`, per(100 - om) + "%", "", `avg ${per(100 - M.lg)}%`, lean === "zone"),
+    t3("TDs", `${v.man[4]} · ${v.zone[4]}`, "", "vs man · zone"));
+  const ss = (a.vcov_season || "").slice(0, 4), ms = (M.season || "").slice(0, 4);
+  return card("Man vs zone", `${ss} · ${v.man[0] + v.zone[0]} routes${ms && ms !== ss ? ` · ${esc(p.opp)} ${ms}` : ""} · out after each season`, t3s(tiles));
 }
 // 6 · the run defense: yards a carry at each gap against the league's, stacked boxes, contact; his own contact
 function runCard(p, side, od) {
@@ -3428,6 +3452,7 @@ function nflAdvCards(p, mp) {
   }
   if (m !== "kick_pts" && m !== "fg_made" && m !== "sacks") put("nbg", bigCard(p, side));
   if (rec || pass) { put("npr", pressureCard(p, side)); put("ncv", coverCard(p, side)); }
+  if (rec || (td && grp0 !== "QB")) put("nmz", manZoneCard(p, side));
   if (rush || (td && grp0 === "RB")) put("nrd", runCard(p, side, ((D.rush_dir || {}).d || {})[p.opp]));
   put("ncl", callCard(p));
 }

@@ -361,6 +361,9 @@ def test_pbp_extras_zones_big_plays_blitz_proe(monkeypatch):
     assert t["xn"] == 5 and t["pp"] == 3 and abs(t["xp"] - 2.5) < 1e-9          # 3 dropbacks vs 2.5 expected: +10%
     assert ex["qbb"]["1"] == {"b": [2, 1, 1, 31, 1, 0, 1], "n": [1, 1, 0, 0, 0, 0, 0]}   # blitzed: the TD and the sack
     assert ex["pexp"]["2"]["rec20"] == 2 and ex["pexp"]["3"]["rush10"] == 1
+    # receivers against the blitz: charted targets only (plays 7 and 8 have no charting)
+    assert ex["rbl"]["2"]["b"] == [1, 1, 31, 1] and ex["rbl"]["2"]["n"] == [0, 0, 0, 0] and ex["rbl"]["4"]["n"] == [1, 0, 0, 0]
+    assert ex["tbl"]["GB"] == {"b": 1, "n": 1}
 
 
 def test_passer_rating():
@@ -416,3 +419,59 @@ def test_adv_payload_ranks_zones_and_cover(tmp_path):
     assert out["zones"]["CHI"]["WR"]["cells"]["dpl"] == [2.0, 1.0, 30.0, 0.0] and out["zones"]["lg"]["WR"]["dpl"] == [1.0, 0.5, 15.0, 0.0]
     assert out["cover"]["CHI"] == [[9, "Cee Bee", "CB", 20, 12, 150, 1, 1, 80.0, 9.0, 5, "Questionable"]]
     assert out["players"]["7"]["rec20"] == 3 and "9" not in out["players"]
+
+
+
+def test_coverage_splits_man_zone_and_routes(monkeypatch, tmp_path):
+    # who was on the field each dropback (nflverse participation) joined to the play by play: routes, targets, catches,
+    # yards and TDs against man and against zone, the route rate over his games, each defense's man / zone counts
+    W, T, Q = "00-0000002", "00-0000004", "00-0000001"
+    plays = [_aplay(play_id=pid, game_id="2026_01_GB_CHI", play_type="pass", pass_attempt=1, qb_dropback=1, passer_player_id=Q,
+                    receiver_player_id=rc, complete_pass=cp, yards_gained=y, pass_touchdown=td)
+             for pid, rc, cp, y, td in ((1, W, 1, 25, 1), (2, T, 1, 8, 0), (3, W, 0, 0, 0), (4, "", 0, 0, 0))]
+    plays.append(_aplay(play_id=5, game_id="2026_01_GB_CHI", play_type="run", rush_attempt=1, rusher_player_id="00-0000003"))
+    part = [{"nflverse_game_id": "2026_01_GB_CHI", "play_id": str(i), "defense_man_zone_type": cov, "offense_players": on}
+            for i, cov, on in ((1, "MAN_COVERAGE", f"{W};{T};{Q}"), (2, "ZONE_COVERAGE", f"{W};{T};{Q}"), (3, "MAN_COVERAGE", f"{W};{Q}"),
+                               (4, "", f"{W};{T};{Q}"), (5, "ZONE_COVERAGE", f"{W};{T};{Q}"))]
+    f = tmp_path / "part.csv"
+    f.write_text("x")
+    monkeypatch.setattr(NS, "pbp_rows", lambda s, c: ({k: i for i, k in enumerate(ADV_COLS)}, iter(plays)))
+    monkeypatch.setattr(NS.C, "cached", lambda path, max_age=0: f)
+    monkeypatch.setattr(NS.C, "iter_rows", lambda path, max_age=0: iter(part))
+    monkeypatch.setattr(NS.C, "CACHE", tmp_path)
+    monkeypatch.setattr(NS, "COV_MIN_ROUTES", 1)
+    players, teams = NS.coverage_splits(2026, 2026, {2: {"pos": "WR"}, 4: {"pos": "TE"}, 1: {"pos": "QB"}})
+    assert players[2] == {"man": [2, 2, 1, 25, 1], "zone": [1, 0, 0, 0, 0], "rt": [4, 4]}     # the run (play 5) is no route
+    assert players[4] == {"man": [1, 0, 0, 0, 0], "zone": [1, 1, 1, 8, 0], "rt": [3, 4]}
+    assert 1 not in players and teams == {"CHI": {"man": 2, "zone": 1}}
+    # cached by the file's mtime: a second call reads the cache, not the files
+    monkeypatch.setattr(NS, "pbp_rows", lambda s, c: (_ for _ in ()).throw(AssertionError("parsed again")))
+    assert NS.coverage_splits(2026, 2026, {})[0][2]["man"] == [2, 2, 1, 25, 1]
+    # no file published (this season, until it ends): nothing
+    monkeypatch.setattr(NS.C, "cached", lambda path, max_age=0: (_ for _ in ()).throw(OSError("404")))
+    assert NS.coverage_splits(2027, 2027, {}) == ({}, {})
+
+
+def test_adv_payload_man_zone_from_last_season(tmp_path):
+    db = tmp_path / "s.sqlite"
+    con = sqlite3.connect(db)
+    con.executescript(NS.DDL)
+    side = {"games": 5, "big_pass_pg": 2.0, "big_run_pg": 1.0, "press_pct": 20.0, "sack_pct": 5.0, "blitz_pct": 30.0, "box8_pct": 8.0,
+            "ybc": 2.0, "proe": 0.0, "long_pass": 40, "long_run": 20, "db_pg": 40}
+    for s_, t, man in ((2026, "CHI", None), (2026, "GB", None), (2025, "CHI", 20.0), (2025, "GB", 40.0)):
+        d = dict(side, **({"man_pct": man} if man is not None else {}))
+        con.execute("INSERT INTO team_adv VALUES (?, ?, ?)", (s_, t, json.dumps({"off": side, "def": d})))
+    v = {"man": [100, 20, 14, 200, 2], "zone": [200, 30, 20, 220, 1], "rt": [300, 320]}
+    con.execute("INSERT INTO player_adv VALUES (2025, 7, 'GB', 'WR', ?)", (json.dumps({"g": 17, "vcov": v}),))
+    con.execute("INSERT INTO player_adv VALUES (2026, 7, 'GB', 'WR', ?)", (json.dumps({"g": 5, "rec20": 2}),))
+    con.commit()
+    out = R.adv_payload(con, 2026, ["GB", "CHI"], {7}, {}, {})
+    assert out["players"]["7"]["vcov"] == v and out["players"]["7"]["vcov_season"] == "2025-26" and out["players"]["7"]["rec20"] == 2
+    assert out["man"] == {"season": "2025-26", "lg": 30.0, "teams": {"CHI": 20.0, "GB": 40.0}}
+    # once a season's own file is out its splits win; a player with no prop on the slate is left out
+    v26 = {"man": [50, 9, 6, 80, 1], "zone": [90, 12, 9, 100, 0], "rt": [140, 150]}
+    con.execute("UPDATE player_adv SET js=? WHERE season=2026 AND pid=7", (json.dumps({"g": 5, "vcov": v26}),))
+    con.execute("INSERT INTO player_adv VALUES (2025, 8, 'GB', 'TE', ?)", (json.dumps({"g": 17, "vcov": v}),))
+    con.commit()
+    out = R.adv_payload(con, 2026, ["GB", "CHI"], {7}, {}, {})
+    assert out["players"]["7"]["vcov"] == v26 and out["players"]["7"]["vcov_season"] == "2026-27" and "8" not in out["players"]
