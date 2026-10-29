@@ -117,3 +117,24 @@ best FanDuel/DraftKings over, 2023-24 and 2024-25 tip lines; 46 ranges.)
 # AMENDMENT 6: the only pings (2026-10-28, about 23:00 UTC)
 The user made UNDER20's pinged flags (amendment 4) the only rule that pings the phone; every other rule is shadow-tracked
 (`NBA_SXS_PREREG.md`, note on phone routing).
+
+# AMENDMENT 7: the pinged unders without injury minutes bumps (2026-10-29, about 01:50 UTC, before code; information)
+**User:** "what happens if you don't include those who are getting a jump in minutes due to injury, like Capela did
+tonight?" (Capela: a backup center who started with Sengun and Adams out; our projection gave him 11 minutes.)
+
+`nba_under_inj.py`, on amendment 4's rows: 2023-24 and 2024-25 tip lines, under −150 or better, not threes, 30–50%
+below the line (the live ping set). The backtest reads tonight's outs from the box score (live: the injury report) and
+the starters from NBA.com's final lineups (live: the lineup tab).
+
+**The bump, four ways, each reported alone (a flag can be in several):**
+- **B1, new starter:** he starts tonight and is not in his team's usual five.
+- **B2, starter out:** one of his team's usual five (not him) is out.
+- **B3, same-position teammate out:** an out teammate who averages 20+ minutes shares a position letter with him.
+- **B4, our projection gives him more:** V3 minutes ≥ his last-10 mean + 3.
+- **Any of B1–B3** ("an injury bump").
+
+**Also shown, hindsight only (not usable live):** he played 5+ minutes over his last-10 mean.
+
+**Reported:** count and ROI (90% bootstrap interval) with each excluded and with only them, per season, at the best
+FanDuel/DraftKings price and at FanDuel's own. Post-hoc, so a split that looks better is a candidate for the forward
+record, not a live change. No live change without the user.
