@@ -228,3 +228,43 @@ record, not a live change. No live change without the user.
 
 **After:** a pass is reported with bootstrap intervals, to be shadow-tracked first. The live pings change only if the
 user says so.
+
+**Result (2026-10-29, about 06:30 UTC).** Discovery: 3,916 bets, +7.7%. Held-out 2024-25: 2,819, +6.9%; ping set
+710, +15.0%.
+- **Why they lose (information):** about 2 in 3 losses fit each of the first two patterns, and about a third fit both.
+  - Losses: he played 6–7 minutes over V3 (5+ over in 65% | 58%), and his per-minute production beat our rate by a
+    median 38% (25%+ over in 66% | 70%).
+  - Wins: +2 minutes over V3 and 0.81× our rate.
+  - Even the winners outplayed V3's minutes. A projection far below the line selects players whose V3 minutes run low.
+- **Candidates (2023-24):**
+  - Line ÷ last-5 average, 1.06–1.42: −1.4% against +12.2%.
+  - % below the line, 23–29%: +0.7%. The ping set's 30% floor already drops it, so it fails rule 1.
+  - Team game index > 56: +2.1%.
+  - The combined model's top weights: line ÷ last-5 +0.33, this season's share of the rate +0.25, V3 − last-10 +0.20.
+- **Held-out (2024-25), dropping the bin:**
+
+| | ping set kept | ping set dropped | 20%+ kept | 20%+ dropped | |
+|---|---|---|---|---|---|
+| line ÷ last-5 avg 1.06–1.42 | 498, +20.2% | 212, +2.7% | +10.0% | 982, +1.1% | **PASS** |
+| % below 23–29% | 710, +15.0% | 0 | +8.8% | 997, +3.4% | FAIL (rule 1) |
+| team game index > 56 | 441, +20.1% | 269, +6.6% | +10.5% | 1,115, +1.4% | **PASS** |
+| combined model, lowest third | 354, +18.8% | 356, +11.3% | +9.6% | 1,387, +4.1% | FAIL |
+
+- **Shapes (after the result, both seasons, ping set):**
+  - **Line ÷ last-5 average:**
+    - The steady losing zone is 1.2–1.42 (the line 20–42% above his last 5): −11.9% | −7.2%, and the 20%+ set
+      +1.2% | −1.4%.
+    - 1.06–1.2 flips (−5.2% | +20.1%).
+    - At or below his last 5 the unders win (+13–29%); 1.7+ wins most (+36% | +22%).
+  - **Game index:**
+    - The losses sit in the last stretch, games 67+: ping set +5.4% | +1.0%, 20%+ set −3.4% | +2.6%.
+    - Games 57–66 were fine in the ping sets (+16.9% | +16.4%).
+- **Both filters together:** the ping set keeps 527, +24.0% | 306, +22.6%. The dropped bets still made +9.1% | +9.2%,
+  so profit falls (+171 → +126 units | +107 → +69).
+- **Nothing else separated wins from losses:**
+  - game script (implied total and spread), the opponent's defense against his position, rest, starting, a bump;
+  - the market (points +2.8% and assists +4.6% trail rebounds and PRA, about +12%, below the 8-point cut);
+  - low-pace games (+2.4% against +10%, just under the cut);
+  - other books above our line (−9.1%, but only 69 bets).
+- 26 features and about 80 bins were screened, so the two passes are candidates, not proof. They go to the forward
+  record first; the live pings change only if the user says so.
