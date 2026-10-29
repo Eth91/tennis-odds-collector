@@ -19,7 +19,7 @@ def espn_players(league, year):
     out = set()
     n_ev = 0
     try:
-        u = ("https://site.api.espn.com/apis/site/v2/sports/golf/%s/scoreboard?dates=%d"
+        u = ("https://site.web.api.espn.com/apis/site/v2/sports/golf/%s/scoreboard?dates=%d"
              % (league, year))
         j = json.load(urllib.request.urlopen(urllib.request.Request(u, headers=UA), timeout=40))
     except Exception as e:                                          # noqa: BLE001

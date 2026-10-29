@@ -39,7 +39,11 @@ def main():
     h = b.get("hash", "")
     if STATE.exists() and STATE.read_text().strip() == h:
         return                                          # this publish already ingested
-    con = sqlite3.connect(DB)
+    # fd_collect writes this DB continuously, so a bare connect() loses the race and dies
+    # with "database is locked" -- which is the WRITER BEING ALIVE, not a failure. Same
+    # busy_timeout lines_ingest.py already uses. Without it DK silently never ingests.
+    con = sqlite3.connect(DB, timeout=120)
+    con.execute("PRAGMA busy_timeout=120000")
     con.execute("""CREATE TABLE IF NOT EXISTS fd_lines(
         collected_at TEXT, sport TEXT, event TEXT, player TEXT, stat TEXT,
         line REAL, side TEXT, odds REAL, book TEXT)""")

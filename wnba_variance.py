@@ -28,7 +28,7 @@ MIN_GAMES = 6
 
 
 def per_game(stat):
-    tc, pc = {"points": ("pts", "pts_with"), "rebounds": ("reb", "reb_with")}[stat]
+    tc, pc = {"points": ("pts", "pts_with"), "rebounds": ("reb", "reb_with"), "assists": ("ast", "ast_with")}[stat]
     c = sqlite3.connect(f"file:{STINT}?mode=ro", uri=True)
     ok = {e for (e,) in c.execute("SELECT event_id FROM games WHERE status='ok'")}
     on = {}
@@ -83,9 +83,9 @@ def main():
     con.close()
     players = W.players()
 
-    for stat in ("points", "rebounds"):
+    for stat in ("assists",):
         on, pair = per_game(stat)
-        key = {"rebounds": "reb", "points": "pts"}[stat]
+        key = {"rebounds": "reb", "points": "pts", "assists": "ast"}[stat]
         rows = []
         for day in days:
             R._ASOF["day"] = day

@@ -276,6 +276,17 @@ collectors(){
   # fix for a fast board = stop committing the 81MB DB to git each cycle (push a small JSON, like TT).
   # DK lines arrive via the Mac's residential IP (dk_publish.py -> dk_board.json, git-pulled
   # each cycle); ingest lights up book-aware prices everywhere. Local-only, cheap, idempotent.
+  # DK BOARD REFRESH (2026-08-18). dk_board.json reaches this box ONLY through git, and the
+  # loop's `git pull --rebase --autostash` silently failed to land it for 4 DAYS (406 dirty
+  # files, stderr to /dev/null). dk_ingest then correctly refused the stale board every cycle
+  # and exited 0, so nothing was ever logged and DraftKings prices simply vanished from the
+  # model -- worth +3.31pp of ROI in line shopping. Write the file straight from origin: no
+  # checkout, no index, no rebase, so it cannot conflict with the working tree.
+  if timeout 60 git fetch -q origin main 2>/dev/null; then
+    if git show FETCH_HEAD:dk_board.json > /tmp/dk_board.new 2>/dev/null && [ -s /tmp/dk_board.new ]; then
+      cp /tmp/dk_board.new dk_board.json
+    fi
+  fi
   timeout 180 python3 dk_ingest.py >/dev/null 2>&1 || echo "dk_ingest fail $(date -Is)" >>$HOME/loop_fail.log
   # dk_collect DISABLED on the VM (2026-07-16): DraftKings Akamai-blocks the Oracle datacenter
   # IP -> it 403s EVERY cycle (never once landed a row from here), but still spawns a curl_cffi

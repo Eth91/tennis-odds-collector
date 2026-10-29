@@ -153,6 +153,72 @@ def _fd():
     return ("OK" if age <= 25 else "FAIL"), f"{n:,} quotes/2h, newest {age:.0f} min old (expect <=25)"
 
 
+@check("dk.lines")
+def _dk():
+    """DraftKings prices are worth +3.31pp of ROI via line shopping, and they vanished for FOUR
+    DAYS with nothing reporting it.
+
+    The chain is long and every link failed quietly: the Mac collects DK on a residential IP
+    (DraftKings Akamai-blocks the datacenter), commits dk_board.json, and the VM git-pulls it and
+    runs dk_ingest. The loop's rebase-pull silently stopped landing the file, dk_ingest correctly
+    refused the stale board -- and EXITED 0, so "skip" never reached loop_fail.log. Meanwhile
+    fanduel.fd_lines stayed green the whole time, because FanDuel was fine. A per-source probe is
+    the only thing that can see one book die while the other is healthy.
+
+    SKIP, never FAIL, when there is no slate: absence of DK quotes at 4am is not a fault.
+    """
+    import time as _t
+    db = os.environ.get("FD_DB") or str(HERE / "wnba_lines.sqlite")
+    if not Path(db).exists():
+        return "FAIL", f"{Path(db).name} missing"
+    row = None
+    for _try in range(4):
+        try:
+            con = sqlite3.connect(f"file:{db}?mode=ro", uri=True, timeout=45)
+            con.execute("PRAGMA busy_timeout=45000")
+            row = con.execute(
+                "SELECT MAX(CASE WHEN book='dk' THEN collected_at END), "
+                "       SUM(CASE WHEN book='dk' THEN 1 ELSE 0 END), "
+                "       MAX(CASE WHEN book!='dk' THEN collected_at END) "
+                "FROM fd_lines WHERE sport='wnba' "
+                "AND collected_at > datetime('now','-6 hours')").fetchone()
+            con.close()
+            break
+        except sqlite3.OperationalError:
+            _t.sleep(3)
+    if row is None:
+        return "SKIP", "DB locked -- the writer is active; fd_lines probe owns that verdict"
+    dk_newest, dk_n, other_newest = row
+    if not other_newest:
+        return "SKIP", "no wnba quotes at all in 6h (off-hours or no slate)"
+    # ⚠️ SCOPE TO THE SELECTION WINDOW. dk_publish SKIPS on quiet hours by design, and DK sits
+    # inside FRESH_MIN 97.9% of the time from 20:00-24:00 UTC but only ~45-49% overnight/midday.
+    # This probe fired repeatedly into loop_fail.log on 2026-08-28 for exactly that expected
+    # staleness. Judging DK when no tip is near reports a design choice as a failure.
+    try:
+        import wnba_tonight as _T
+        _tips = _T.tip_times() or {}
+        _now = dt.datetime.now(dt.timezone.utc)
+        _fut = []
+        for _w in _tips.values():
+            _w = _w if isinstance(_w, dt.datetime) else dt.datetime.fromisoformat(str(_w))
+            if _w.tzinfo is None:
+                _w = _w.replace(tzinfo=dt.timezone.utc)
+            _fut.append((_w - _now).total_seconds() / 3600.0)
+        _up = [x for x in _fut if x > -0.25]
+        if not _up or min(_up) > 8:
+            return "SKIP", "no tip within 8h — DK quiet hours are by design, not a fault"
+    except Exception:                                                 # noqa: BLE001
+        return "SKIP", "tip times unavailable — cannot scope DK freshness, refusing to judge"
+    if not dk_newest:
+        return "FAIL", ("NO DraftKings quotes in 6h while FanDuel is live -- line shopping "
+                        "(+3.31pp ROI) is silently off. Check dk_board.json freshness on this "
+                        "box, then the Mac's com.pickz.dkpublish timer.")
+    age = (dt.datetime.utcnow() - dt.datetime.fromisoformat(dk_newest)).total_seconds() / 60
+    return (("OK" if age <= 60 else "FAIL"),
+            f"{dk_n:,} dk quotes/6h, newest {age:.0f} min old (expect <=60)")
+
+
 # ── injury feed ───────────────────────────────────────────────────────────────
 @check("injuries.feed")
 def _inj():

@@ -23,7 +23,8 @@ BOX = "/home/ubuntu/tennis-odds-collector/wnba_boxscores.sqlite"
 PROPS = "/home/ubuntu/tennis-odds-collector/wnba_props_2025.sqlite"
 MIN_APART_GAME, MIN_GAMES = 4.0, 6
 SPEC = {"points": ("pts", "pts_with", "player_points", "pts"),
-        "rebounds": ("reb", "reb_with", "player_rebounds", "reb")}
+        "rebounds": ("reb", "reb_with", "player_rebounds", "reb"),
+        "assists": ("ast", "ast_with", "player_assists", "ast")}
 
 
 def per_game(stat):
@@ -65,9 +66,9 @@ def profile(on, pair, player, mate, before):
 def main():
     b = sqlite3.connect(f"file:{BOX}?mode=ro", uri=True)
     log, team_of, appeared, tdates = defaultdict(list), {}, defaultdict(set), defaultdict(set)
-    for gid, d, tm, pl, mn, pts, reb in b.execute(
-            "SELECT game_id,game_date,team,player,min,pts,reb FROM box WHERE min IS NOT NULL"):
-        log[pl].append({"d": d, "gid": gid, "min": mn or 0, "pts": pts or 0, "reb": reb or 0})
+    for gid, d, tm, pl, mn, pts, reb, ast in b.execute(
+            "SELECT game_id,game_date,team,player,min,pts,reb,ast FROM box WHERE min IS NOT NULL"):
+        log[pl].append({"d": d, "gid": gid, "min": mn or 0, "pts": pts or 0, "reb": reb or 0, "ast": ast or 0})
         team_of[pl] = tm; tdates[tm].add(d)
         if (mn or 0) > 0:
             appeared[(d, tm)].add(pl)
@@ -78,7 +79,7 @@ def main():
         roster[tm].add(pl)
     pmap = W.players()
 
-    for stat in ("points", "rebounds"):
+    for stat in ("assists",):
         _tc, _pc, mk, key = SPEC[stat]
         p = sqlite3.connect(f"file:{PROPS}?mode=ro", uri=True)
         L = defaultdict(lambda: defaultdict(dict))

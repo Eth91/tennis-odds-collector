@@ -30,6 +30,9 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0, str(ROOT))
 DB = HERE / "pr002_shadow.sqlite"
+from collections import Counter
+
+FUNNEL = Counter()
 LEAD_LO, LEAD_HI = 7.0, 13.0          # the window PR-002 is about
 BUCKETS = ((11.0, 13.0, "t12"), (9.0, 11.0, "t10"), (7.0, 9.0, "t8"))
 
@@ -46,7 +49,10 @@ def _db():
     return c
 
 
-def capture():
+def capture(diag=False):
+    """diag=True reports the funnel WITHOUT the tip-window filter and WITHOUT writing a row.
+    It exists because a capture arm that silently yields nothing is indistinguishable from a
+    capture arm that is merely waiting -- and the second one is what you assume by default."""
     import wnba_tonight as T
     import wnba_wowy as W
     import wnba_stint_wowy as SW
@@ -69,7 +75,7 @@ def capture():
             hrs = (t - now).total_seconds() / 3600.0
         except Exception:                                            # noqa: BLE001
             continue
-        if LEAD_LO <= hrs <= LEAD_HI:
+        if diag or (LEAD_LO <= hrs <= LEAD_HI):
             live[team] = hrs
     if not live:
         print("no team inside the 7-13h window"); return 0
@@ -96,6 +102,8 @@ def capture():
     wrote = 0
     for team, hrs in live.items():
         bucket = next((b for lo, hi, b in BUCKETS if lo <= hrs < hi), None)
+        if diag:
+            bucket = bucket or "DIAG"
         if not bucket or team not in outs_by:
             continue
         for outp in outs_by[team]:
@@ -107,8 +115,15 @@ def capture():
                 if ben not in starters:
                     continue                                  # PR-002 inherits the starter gate
                 nwo, _, _ = SW.game_level_n_without(mem, ben, outp, slate)
-                if nwo >= 2:
-                    continue                                  # production already covers this
+                if nwo < 2:
+                    continue         # ⚠️ MUST MATCH PRODUCTION'S UNIVERSE, NOT ITS COMPLEMENT.
+                    # This read `if nwo >= 2: continue` for its first two days and logged ZERO
+                    # rows, because that captures the n_without<2 shadow-only tier -- the exact
+                    # candidates production never acts on. PR-002 is a claim about WHEN to price
+                    # a candidate, not about WHICH candidates. Testing it requires production's
+                    # own universe (n_without >= 2) observed at T-8h..T-13h. With the inverted
+                    # gate the arm would have sat at 0 rows forever while its n>=40 bar was
+                    # "pending".
                 try:
                     props = T.posted_props(ben) or {}
                 except Exception:                                    # noqa: BLE001
@@ -128,6 +143,9 @@ def capture():
                             continue
                         ev = est["p_over"] * float(dec) - 1.0
                         if ev < 0.0:
+                            continue
+                        if diag:
+                            FUNNEL["would log"] += 1
                             continue
                         try:
                             con.execute(
@@ -176,7 +194,10 @@ def grade():
 
 
 if __name__ == "__main__":
-    if "--grade" in sys.argv:
+    if "--diag" in sys.argv:
+        capture(diag=True)
+        print("FUNNEL:", dict(FUNNEL) or "EMPTY -- nothing would ever be captured")
+    elif "--grade" in sys.argv:
         grade()
     else:
         capture()

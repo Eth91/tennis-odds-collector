@@ -55,7 +55,7 @@ print("=" * 74)
 print("C. ESPN — other golf leagues on the endpoint we already crawl?")
 import urllib.request
 for lg in ("pga", "eur", "champions-tour", "korn-ferry", "lpga"):
-    u = ("https://site.api.espn.com/apis/site/v2/sports/golf/%s/scoreboard?dates=2025" % lg)
+    u = ("https://site.web.api.espn.com/apis/site/v2/sports/golf/%s/scoreboard?dates=2025" % lg)
     try:
         j = json.load(urllib.request.urlopen(urllib.request.Request(
             u, headers={"User-Agent": "Mozilla/5.0"}), timeout=25))

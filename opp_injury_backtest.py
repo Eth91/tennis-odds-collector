@@ -31,7 +31,7 @@ def _scoreboard(dates):
     """{(date10, team_abbr): margin} from ESPN finals."""
     margin = {}
     for d in sorted(dates):
-        url = ("https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard?dates="
+        url = ("https://site.web.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard?dates="
                + d.replace("-", ""))
         try:
             j = json.load(urllib.request.urlopen(

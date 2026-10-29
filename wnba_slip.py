@@ -743,6 +743,46 @@ def current_selection(rows, commit=False):
         spaced += keep_r
         dropped += [(x, "ladder rung too close (min-gap rule)") for x in rr if id(x) not in keep_ids]
     kept = spaced
+
+    # 5. BASE-RUNG ONLY — epoch 2026-08-26, operator-authorised (PR-005 trial, 1 week).
+    # Within a (date, player, stat) group keep ONLY the rung nearest even money; the extra ladder
+    # rungs come off the board, the alert and the record together. Forward evidence: base rungs
+    # 20-11 / +26.3% ROI vs ladder rungs 8-14 / -28.3%.
+    #
+    # ⚠️ EPOCH-GATED ON PURPOSE. It applies only from BASE_RUNG_EPOCH forward, so every historical
+    # row keeps counting exactly as it always did — the record is a NEW EPOCH, not a restatement.
+    # Silently re-scoring history would make the old and new selection rules average together and
+    # destroy comparability with every number previously reported.
+    #
+    # ⚠️ SELECTS FROM THE POST-MIN-GAP SURVIVORS, deliberately. min-gap runs first (step 4) and is
+    # being kept as-is by operator decision, so the base rung is the best-priced rung that SURVIVED
+    # min-gap — not the best-priced rung overall. Those differ: on 2026-08-26 min-gap suppressed
+    # Burke 10.5 @ 2.04 and this picks 9.5 @ 1.87 instead.
+    #
+    # ⚠️ THE DROPPED RUNGS ARE NOT DELETED. They stay in `predictions` and keep grading, so the
+    # ladder is still tracked in the background for comparison. Only the SELECTION excludes them.
+    # This runs BEFORE the `forced` re-add, so a bet the user actually placed still bypasses it.
+    # 2026-08-29 operator decision: THE FORWARD RECORD IS BASE-RUNG ONLY. Moved from
+    # 2026-08-26 back to the 7/31 freeze so the whole forward window is counted on one
+    # rule. This SUPERSEDES the 2026-08-26 "new epoch, pooled history kept" choice: the
+    # forward window is now RESTATED, not split. Pre-freeze history is still untouched.
+    # Played-bet marks still bypass this (the filter runs before the `forced` re-add), so
+    # a ladder rung with real money on it keeps counting.
+    BASE_RUNG_EPOCH = "2026-07-31"
+    _bygrp2 = defaultdict(list)
+    for r in kept:
+        _bygrp2[(r.get("pred_date"), r.get("player"), r["stat"])].append(r)
+    _based = []
+    for _gk, _rr in _bygrp2.items():
+        if str(_gk[0] or "") < BASE_RUNG_EPOCH or len(_rr) == 1:
+            _based += _rr
+            continue
+        _b = min(_rr, key=lambda r: (abs(float(r["odds"]) - 2.0), float(r["line"])))
+        _based.append(_b)
+        dropped += [(x, "ladder rung (base-rung epoch %s)" % BASE_RUNG_EPOCH)
+                    for x in _rr if x is not _b]
+    kept = _based
+
     if forced:
         _k, _d = kept, dropped
         return forced + list(_k), _d

@@ -33,12 +33,12 @@ if 'leagues=("pga", "eur")' in s:
 else:
     s = s.replace(old, new, 1)
     old_loop = '''    for yr in seasons:
-        d = _get("https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard?dates=%d" % yr)
+        d = _get("https://site.web.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard?dates=%d" % yr)
         n = 0'''
     new_loop = '''    for yr in seasons:
       for _lg in leagues:
         try:
-            d = _get("https://site.api.espn.com/apis/site/v2/sports/golf/%s/scoreboard?dates=%d"
+            d = _get("https://site.web.api.espn.com/apis/site/v2/sports/golf/%s/scoreboard?dates=%d"
                      % (_lg, yr))
         except Exception:                                          # noqa: BLE001
             continue                                               # a tour missing a season is fine
