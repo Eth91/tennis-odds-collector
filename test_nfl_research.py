@@ -263,10 +263,15 @@ def test_build_small(monkeypatch, tmp_path):
     assert ab[0]["played"] == ["2025_09_GB_CHI", "2026_01_GB_CHI", "2026_02_DET_GB"]
     assert pl["depth"]["GB"]["WR"] == [[100, "Wes Wideout"]] and pl["heads"]["100"] == "1001"
     assert pl["players"]["100"]["logs"][0][COLS.index("rec_yds")] == 60
-    assert "_boxes" in pl and "2026_01_GB_CHI" in pl["_boxes"]
-    R.write(tmp_path / "docs", pl, today=dt.date(2026, 10, 29))
-    assert (tmp_path / "docs" / "nfl_props.json").exists() and (tmp_path / "docs" / "nflbox" / "2026_01_GB_CHI.json").exists()
-    assert "_boxes" not in json.loads((tmp_path / "docs" / "nfl_props.json").read_text())
+    assert "2026_01_GB_CHI" in pl["_boxes"](None) and pl["_box_dates"]["2026_01_GB_CHI"] == "2026-09-13"
+    docs, old = tmp_path / "docs", tmp_path / "docs" / "nflbox" / "2025_09_GB_CHI.json"
+    old.parent.mkdir(parents=True)
+    old.write_text("kept")                                                  # a past game's box is never rewritten
+    R.write(docs, dict(pl), today=dt.date(2026, 10, 29))
+    assert (docs / "nfl_props.json").exists() and json.loads((docs / "nflbox" / "2026_01_GB_CHI.json").read_text())["teams"][1]["tri"] == "GB"
+    assert old.read_text() == "kept"
+    body = json.loads((docs / "nfl_props.json").read_text())
+    assert "_boxes" not in body and "_box_dates" not in body
 
 
 # ── the page ──────────────────────────────────────────────────────────────────────────────────────────────────
