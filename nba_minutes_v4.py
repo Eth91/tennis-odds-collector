@@ -26,20 +26,24 @@ GATE_MIN, GATE_ALL, GATE_ROI = 0.3, 0.05, 0.01
 OUT = Path(__file__).resolve().parent / ".projdata" / "minutes_v4_result.json"
 
 
-def project_s(season, priors, groups, team, date, active, absent, slots=None, letters=None):
+def project_s(season, priors, groups, team, date, active, absent, slots=None, letters=None, wt=None):
     """Fix S: {pid: minutes} from ROLE.project's v3 path (its minutes only) with a share a = slots[X's group] of each
     absent X's minutes to the active players sharing a position letter with him, by base x V3's share factor. Kept here
-    so nba_role.py, and the side-by-side's fingerprints, stay as registered; slots None is V3's minutes exactly."""
+    so nba_role.py, and the side-by-side's fingerprints, stay as registered; slots None is V3's minutes exactly.
+    wt (gid -> weight): amendment 7's fix B, the base as a weighted mean (the plain mean if every weight is 0)."""
     prior = season.before(team, date)
     if not prior or not active:
         return {}
     played = lambda b, q: q in b and b[q]["min"]
     base, share = {}, {}
     for p in active:
-        last = [b for _d, _g, b in prior if played(b, p)][-ROLE.LAST_N:]
-        base[p] = sum(b[p]["min"] for b in last) / len(last) if last else 0.0
+        last = [(g_, b) for _d, g_, b in prior if played(b, p)][-ROLE.LAST_N:]
+        base[p] = sum(b[p]["min"] for _g, b in last) / len(last) if last else 0.0
+        ws = [wt(g_) for g_, _b in last] if wt and last else []
+        if sum(ws):
+            base[p] = sum(w * b[p]["min"] for w, (_g, b) in zip(ws, last)) / sum(ws)
         for x in absent:
-            share[(p, x)] = sum(1 for b in last if played(b, x)) / len(last) if last else 1.0
+            share[(p, x)] = sum(1 for _g, b in last if played(b, x)) / len(last) if last else 1.0
     x_min = {x: ROLE.ewma([b[x]["min"] for _d, _g, b in prior if played(b, x)]) or 0.0 for x in absent}
     bump = dict.fromkeys(active, 0.0)
     for x, mx in x_min.items():
@@ -156,6 +160,28 @@ def fit_k(ns, base):
     return min(KS, key=lambda k: mae(ns, lambda i, p: with_hist(base(i, p), ns[i]["hist"][p], k), absent_night)[0])
 
 
+def under_set(rows, lines, markets, ns, f):
+    """(n, ROI) of UNDER20's ping set (30-50% below, under -150 or better, not threes, best FD/DK at tip) with the
+    projection = f(night index, pid) minutes x the backtest row's rates."""
+    idx = {(n["date"], n["team"]): i for i, n in enumerate(ns)}
+    us = []
+    for r in rows:
+        i = idx.get((r["date"], r["team"]))
+        if i is None or r["pid"] not in ns[i]["act"]:
+            continue
+        m = f(i, r["pid"])
+        for mk in markets:
+            ln = lines.get((r["date"], r["pid"], mk))
+            if not ln or mk == "threes":
+                continue
+            line, _o, under, _q = ln
+            act = BOOST.stat_of(r["box"], mk)
+            below = 1 - m * sum(r["rt"][x] for x in BOOST.PARTS[mk]) / line
+            if act != line and under >= 1 / 0.6 - 1e-9 and 0.30 <= below < 0.50:
+                us.append(under - 1 if act < line else -1.0)
+    return len(us), (float(np.mean(us)) if us else float("nan"))
+
+
 def main():
     sys.path.insert(0, ".")
     g = {}
@@ -203,26 +229,7 @@ def main():
     # gate 2: UNDER20's ping set with each candidate's minutes x the same rates
     unders = {}
     for s in ("2023-24", "2024-25"):
-        idx = {(n["date"], n["team"]): i for i, n in enumerate(ns[s])}
-        pk = picks(s)
-        unders[s] = {}
-        for name, f in pk.items():
-            us = []
-            for r in rows[s]:
-                i = idx.get((r["date"], r["team"]))
-                if i is None or r["pid"] not in ns[s][i]["act"]:
-                    continue
-                m = f(i, r["pid"])
-                for mk in T.MARKETS:
-                    ln = lines.get((r["date"], r["pid"], mk))
-                    if not ln or mk == "threes":
-                        continue
-                    line, _o, under, _q = ln
-                    act = BOOST.stat_of(r["box"], mk)
-                    below = 1 - m * sum(r["rt"][x] for x in BOOST.PARTS[mk]) / line
-                    if act != line and under >= 1 / 0.6 - 1e-9 and 0.30 <= below < 0.50:
-                        us.append(under - 1 if act < line else -1.0)
-            unders[s][name] = (len(us), float(np.mean(us)) if us else float("nan"))
+        unders[s] = {name: under_set(rows[s], lines, T.MARKETS, ns[s], f) for name, f in picks(s).items()}
         print(f"\n{s} UNDER20 ping set (30-50% below, -150 or better, not threes): " +
               "  ".join(f"{k} n {v[0]} ROI {v[1]:+.3f}" for k, v in unders[s].items()))
     gate2 = unders["2024-25"][pick][1] >= unders["2024-25"]["V3"][1] - GATE_ROI

@@ -114,3 +114,45 @@ def test_mutants():
                       ("hist uncapped", "    ms = ms[-HIST_N:]\n", ""),
                       ("hist blend unweighted", "w = n / (n + k) if n else 0.0", "w = 1.0 if n else 0.0")):
         assert not mutant(V4.__file__, "nba_minutes_v4_mut", a, b, check_hist), tag
+
+
+def check_weights(mod=V4):
+    """Amendment 7's fix B: pid 3 played 20 in g4 (a blowout), 34 otherwise. Down-weighting g4 raises his base; weights
+    all 1 are V3; all 0 fall back to the plain mean."""
+    rs = TR.rows()
+    for r in rs:
+        if r["pid"] == 3 and r["gid"] == "g4":
+            r["min"] = 20.0
+    se, pr = ROLE.Season(rs), ROLE.Priors([], TR.GROUPS)
+    active = se.roster("HOM", D) - {1}
+    run = lambda **kw: mod.project_s(se, pr, TR.GROUPS, "HOM", D, active, {1}, **kw)
+    v3 = {p: v["min"] for p, v in ROLE.project(se, pr, TR.GROUPS, "HOM", D, active, {1}, mode="v3").items()}
+    ok = run(wt=lambda g: 1.0) == v3 and run(wt=lambda g: 0.0) == v3
+    up = run(wt=lambda g: 0.0 if g == "g4" else 1.0)
+    ok &= up[3] > v3[3] + 1.0 and up[4] < v3[4]                 # his base 34, not 31.2; the 240 total takes it from others
+    return bool(ok)
+
+
+def check_margins(mod=None):
+    import nba_blowout as B
+    mod = mod or B
+    rows_db = {"s": [{"gid": "a", "team": "HOM", "pts": 50.0}, {"gid": "a", "team": "HOM", "pts": 40.0},
+                     {"gid": "a", "team": "AWY", "pts": 110.0}, {"gid": "b", "team": "HOM", "pts": 99.0}]}
+    mg = mod.margins(rows_db)
+    w = mod.weight(mg, 15, 0.25)
+    return mg == {"a": 20.0} and w("a") == 0.25 and w("b") == 1.0 and mod.weight(mg, 25, 0.25)("a") == 1.0
+
+
+def test_weights():
+    assert check_weights() and check_margins()
+
+
+def test_mutants_b():
+    import nba_blowout as B
+    for tag, a, b in (("weights ignored", "        if sum(ws):\n", "        if False:\n"),
+                      ("no plain-mean fallback", "        if sum(ws):\n            base[p] = sum(w * b[p][\"min\"] for w, (_g, b) in zip(ws, last)) / sum(ws)",
+                       "        if ws:\n            base[p] = sum(w * b[p][\"min\"] for w, (_g, b) in zip(ws, last)) / (sum(ws) or 1)")):
+        assert not mutant(V4.__file__, "nba_minutes_v4_mut", a, b, check_weights), tag
+    for tag, a, b in (("margin signed", "{g: abs(t[a] - t[b])", "{g: (t[a] - t[b])"),
+                      ("blowout below M", "w if mg.get(gid, 0) >= m else 1.0", "w if mg.get(gid, 0) <= m else 1.0")):
+        assert not mutant(B.__file__, "nba_blowout_mut", a, b, check_margins), tag

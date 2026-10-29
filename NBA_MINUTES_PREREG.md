@@ -360,3 +360,23 @@ by no more than 0.05. Else FAIL and nothing changes.
 **Also reported:**
 - MAE for starters whose last 5 include a blowout.
 - Curry on 2026-10-28 under fix B.
+
+**Result (2026-10-29, about 06:20 UTC): gate 1 FAIL. Nothing changes.**
+- **The 2023-24 fit:** every weight was worse than V3 (4.7890).
+  - M 10: w 0 4.994, w 0.25 4.835, w 0.5 4.800, w 0.75 4.790.
+  - M 15: 4.924, 4.827, 4.799, 4.790.
+  - M 20: 4.863, 4.816, 4.798, 4.791.
+  - The pick, M 10 / w 0.75, is the one closest to V3.
+- **2024-25:**
+  - Overall 4.763 against V3's 4.761.
+  - Starters 4.433 against 4.430; bench 5.002 against 5.000.
+  - Starters with a blowout in their last 5 (9,886 of 10,234): 4.439 against 4.435.
+- **Gate 2 (information):** UNDER20's ping set 1,051, +16.1% | 722, +14.3% (V3 +16.8% | +15.0%).
+- **Reading:**
+  - Blowouts carry information: about as many games ahead will be blowouts, and the plain mean already prices that mix.
+  - Dropping them makes the base a close-game number, which runs high on the nights that turn into blowouts.
+  - What would help is tonight's expected margin (amendment 3's spread test), not a different average of the past.
+- **Curry on 2026-10-28** (the VM's data after the game; outs = tonight's non-players):
+  - V3 25.9; fix B (M 10, w 0.75) 25.9; M 15 / w 0.5 26.2; every blowout dropped (M 10, w 0) 27.5.
+  - He played 32.
+  - At tip − 30 V3 had said 23.2, with the report's outs, before the night's non-players were known.
