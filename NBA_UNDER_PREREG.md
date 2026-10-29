@@ -312,3 +312,27 @@ user says so.
 - Registered at the deploy time and replayed nightly with every rule. Judged like every rule (CLV and ROI, 200+
   signals over 10+ dates) against UNDER3050L.
 - No change to the live pings without the user.
+
+**Development replay result (2026-10-29, about 21:50 UTC; 2026-10-22 to 2026-10-28; information, before registration).**
+- **The check:** the replay reproduces 2026-10-28's 5 live pings exactly (UNDER3050: the same players, lines, prices
+  and projections).
+  - UNDER3050L keeps 2 of them, Capela REB (a loss) and Sanders PTS (a win).
+  - It drops Capela P+R (l5 1.368, a loss), Curry AST (1.406, a loss) and K. Williams REB (1.375, a win).
+
+| rule | flags | also at tip − 30 | close toward / same / away | CLV (95%) | W–L | ROI |
+|---|---|---|---|---|---|---|
+| UNDER3050L (tip − 30) | 43 | — | 28 / 7 / 8 | −2.0% [−4.6, +5.6] | 22–21 | −4.5% |
+| E60 | 34 | 33 (10 of tip − 30's missing) | 17 / 9 / 8 | −3.6% [−5.4, +3.3] | 16–18 | −12.4% |
+| E120 | 31 | 26 (17 missing) | 12 / 9 / 10 | −5.0% [−7.2, −2.6] | 13–18 | −23.0% |
+| E180 | 28 | 26 (17 missing) | 14 / 3 / 11 | −3.2% [−4.6, +0.4] | 11–17 | −28.9% |
+| E240 | 25 | 23 (20 missing) | 13 / 3 / 9 | −4.3% [−6.5, 0.0] | 12–13 | −14.0% |
+| E300 | 30 | 25 (18 missing) | 18 / 2 / 10 | −4.2% [−6.1, +0.3] | 15–15 | −9.4% |
+
+- **Reading:**
+  - In this small sample nothing earlier beats tip − 30: its CLV and ROI are the best of the six.
+  - Earlier runs flag fewer of the eventual plays (props not posted yet, outs not yet reported) and add a few that
+    tip − 30 drops.
+  - By the close, the line had moved toward our under on about 2 of 3 tip − 30 flags, but by less than the vig
+    (CLV −2%).
+  - The 7-night tip − 30 record (22–21) is far below the backtest's +20%, but 43 bets carry about ±15 points of noise.
+  - The forward record decides.
