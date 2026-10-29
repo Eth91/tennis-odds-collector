@@ -47,3 +47,42 @@ in at least 2 of the 3 seasons. Else it does not hold.
   against the near-kickoff no-vig at the same line.
 - The NBA's line filter (skip when the line ÷ his last-5 average is in (1.0565, 1.4167]) on the ping set.
 - Passing TDs and interceptions, apart.
+
+## Result (2026-10-29, about 22:00 UTC): DOES NOT HOLD
+- **Matching:** 852 of 855 games, and 37,888 of 39,454 near-kickoff FanDuel/DraftKings props graded (34,529 headline).
+- **The book's no-vig over against the actual over rate:**
+  - 2023 49.5% against 49.6%; 2024 49.4% against 48.1%; 2025 49.3% against 46.5%.
+  - The overs are shaded in two of three seasons.
+
+| headline markets | 2023 | 2024 | 2025 | pooled |
+|---|---|---|---|---|
+| UNDER20 (any price) | 1,402, −3.2% | 1,780, −1.1% | 1,414, +1.8% | 4,596, 54.1% hits, −0.8% |
+| 20%+ set | 1,242, −2.9% | 1,556, −1.2% | 1,269, +1.5% | 4,067, 52.9%, −0.9% |
+| **ping set** | 458, 49.1%, −7.2% | 605, 52.1%, −1.9% | 501, 55.1%, +3.0% | **1,564, 52.2%, −1.9% [−6.0, +2.0]** |
+
+**The test:** the pooled interval's low end is below 0, and the ping set is positive in 1 of 3 seasons, so it does not
+hold. The NBA's ping set made +16.8% | +15.0%.
+
+**Information (post-hoc splits, 8 markets tried):**
+
+| by market | ping set | 20%+ set |
+|---|---|---|
+| rush + rec yards | 164, +15.3% [+3.8, +26.5] | 412, +8.1% [+0.8, +15.4] |
+| rush attempts | 212, +5.4% | 544, +8.2% [+1.5, +14.8] |
+| rush yards | 234, +3.3% | 617, +3.5% |
+| receptions | 362, −4.8% | 880, −2.3% |
+| receiving yards | 355, −11.4% [−19.5, −3.1] | 907, −5.4% |
+| passing yards, attempts, completions | 71–85 each, −4% to −10% | 227–241 each, −7% to −13% |
+
+- The rushing markets lean positive and receiving and passing lean negative. That was found after looking, so it is
+  a lead to track forward, not a result.
+- **The NBA's line filter:** kept −1.2%, dropped −3.5%, so no help.
+- **Passing TDs and interceptions:** 20%+ set 340, −4.8%.
+- **Two days out (2023-24 and 2024-25):**
+  - 20%+ set 1,202, −5.7%; ping set 439, −7.0%.
+  - The CLV of those prices against the near-kickoff no-vig at the same line is −5.4% | −5.7%: early NFL unders
+    get worse prices.
+- **Why it may differ:**
+  - The NFL projection is a plain average with no role or injury context (the NBA's V3 knew who was out).
+  - There are fewer games for a rate.
+  - The volume (targets, carries) swings with game script.
