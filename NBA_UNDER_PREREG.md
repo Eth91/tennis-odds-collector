@@ -176,7 +176,7 @@ record, not a live change. No live change without the user.
 - **A research-only gap:** before a player plays for his new team, he can show as out for his old one (Hartenstein for
   the Knicks on 2024-10-25). It touches only teams' first 3 games: 28 | 48 flags. Live outs come from the injury report.
 
-# AMENDMENT 8: why the unders lose, a search for missing context (2026-10-29, about 06:35 UTC, before code)
+# AMENDMENT 8: why the unders lose, a search for missing context (2026-10-29, about 06:15 UTC, before code)
 **User:** "test all other things to get it better ... figure out why we're losing the bets in the backtest."
 
 **Design:** look for losing patterns on 2023-24, then test the few best on 2024-25 only. `nba_under_losses.py`.
