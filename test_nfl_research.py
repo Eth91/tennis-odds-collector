@@ -93,7 +93,7 @@ def test_from_pbp(monkeypatch):
         _play(play_type="run", rush_attempt=1, rusher_player_id=B, yards_gained=40, qb_scramble=0, season_type="PRE"),
     ]
     monkeypatch.setattr(NS, "pbp_rows", lambda s, c: ({k: i for i, k in enumerate(PBP_COLS)}, iter(plays)))
-    per, team, rdir, tree = NS.from_pbp(2026, 2026)
+    per, team, rdir, tree, extra = NS.from_pbp(2026, 2026)
     g = "2026_01_A_B"
     assert per[(1, g)]["long_comp"] == 31
     assert per[(2, g)]["long_rec"] == 31 and per[(2, g)]["rz_tgt"] == 1 and per[(2, g)]["deep_tgt"] == 2
@@ -313,3 +313,101 @@ def test_every_nfl_filter_draws_its_boxes():
     assert 'const OWN_OV = new Set(["snap_pct", "tgt_share", "spr", "tot", "margin"]), SIGNED_OV = new Set(["spr", "margin"]);' in UI.JS_APP
     assert "ym = own ? v => B - Math.abs(v) / (oMax / .86) * (B - T) : y;" in UI.JS_APP
     assert all(k in NS.LOG_COLS for k in ranges)                       # each is a column of every log row
+
+
+# ── the Matchup page's football: nfl_stats.from_pbp extras, advanced(), nfl_research.adv_payload ─────────────────
+ADV_COLS = PBP_COLS + ["play_id", "xpass", "pass", "pass_touchdown", "interception"]
+
+
+def _aplay(**kw):
+    base = {c: "" for c in ADV_COLS}
+    base.update(season_type="REG", game_id="2026_01_GB_CHI", posteam="GB", defteam="CHI", wp=".5", qtr="1",
+                two_point_attempt="0", aborted_play="0", sack="0", touchdown="0", qb_scramble="0", pass_touchdown="0",
+                interception="0")
+    base.update({k: str(v) for k, v in kw.items()})
+    return [base[c] for c in ADV_COLS]
+
+
+def test_pbp_extras_zones_big_plays_blitz_proe(monkeypatch):
+    P, W, T, B = "00-0000001", "00-0000002", "00-0000004", "00-0000003"
+    plays = [
+        _aplay(play_id=1, play_type="pass", pass_attempt=1, qb_dropback=1, **{"pass": 1}, passer_player_id=P, receiver_player_id=W,
+               complete_pass=1, yards_gained=31, air_yards=22, pass_location="left", xpass=.6, pass_touchdown=1),
+        _aplay(play_id=2, play_type="pass", pass_attempt=1, qb_dropback=1, **{"pass": 1}, passer_player_id=P, receiver_player_id=T,
+               complete_pass=0, yards_gained=0, air_yards=5, pass_location="middle", xpass=.5),
+        _aplay(play_id=3, play_type="pass", pass_attempt=1, qb_dropback=1, **{"pass": 1}, passer_player_id=P, sack=1, yards_gained=-7, xpass=.7),
+        _aplay(play_id=4, play_type="run", rush_attempt=1, rusher_player_id=B, yards_gained=10, run_location="middle", xpass=.3),
+        _aplay(play_id=6, play_type="run", rush_attempt=1, rusher_player_id=B, yards_gained=9, run_location="middle"),       # one short
+        _aplay(play_id=7, play_type="pass", pass_attempt=1, qb_dropback=1, **{"pass": 1}, passer_player_id=P, receiver_player_id=W,
+               complete_pass=1, yards_gained=20, air_yards=12, pass_location="right"),
+        _aplay(play_id=8, play_type="pass", pass_attempt=1, qb_dropback=1, **{"pass": 1}, passer_player_id=P, receiver_player_id=W,
+               complete_pass=1, yards_gained=19, air_yards=12, pass_location="right"),
+        _aplay(play_id=5, play_type="run", rush_attempt=1, rusher_player_id=B, yards_gained=3, run_location="left", run_gap="end", xpass=.4),
+    ]
+    ftn = {("2026_01_GB_CHI", "1"): (2, 6), ("2026_01_GB_CHI", "2"): (0, 6), ("2026_01_GB_CHI", "3"): (1, 6),
+           ("2026_01_GB_CHI", "4"): (0, 8), ("2026_01_GB_CHI", "5"): (0, 7)}
+    monkeypatch.setattr(NS, "pbp_rows", lambda s, c: ({k: i for i, k in enumerate(ADV_COLS)}, iter(plays)))
+    *_, ex = NS.from_pbp(2026, 2026, posmap={2: "WR", 4: "TE", 3: "RB"}, ftn=ftn)
+    assert ex["zone"]["CHI|all"] == {"dpl": [1, 1, 31, 1], "shm": [1, 0, 0, 0], "inr": [2, 2, 39, 0]}
+    assert ex["zone"]["CHI|WR"] == {"dpl": [1, 1, 31, 1], "inr": [2, 2, 39, 0]} and ex["zone"]["CHI|TE"] == {"shm": [1, 0, 0, 0]}
+    t = ex["tg"]["GB|2026_01_GB_CHI"]
+    assert t["db"] == 5 and t["sacks"] == 1 and t["cdb"] == 3 and t["blitz"] == 2 and t["crun"] == 2 and t["box8"] == 1
+    assert t["big_pass"] == 2 and t["long_pass"] == 31 and t["big_run"] == 1 and t["long_run"] == 10   # 20 and 10 count, 19 and 9 do not
+    assert t["xn"] == 5 and t["pp"] == 3 and abs(t["xp"] - 2.5) < 1e-9          # 3 dropbacks vs 2.5 expected: +10%
+    assert ex["qbb"]["1"] == {"b": [2, 1, 1, 31, 1, 0, 1], "n": [1, 1, 0, 0, 0, 0, 0]}   # blitzed: the TD and the sack
+    assert ex["pexp"]["2"]["rec20"] == 2 and ex["pexp"]["3"]["rush10"] == 1
+
+
+def test_passer_rating():
+    assert NS.passer_rating(0, 0, 0, 0, 0) is None
+    assert NS.passer_rating(10, 10, 300, 5, 0) == 158.3                       # the ceiling
+    assert NS.passer_rating(30, 20, 230, 2, 1) == round((min(2.375, (20 / 30 - .3) * 5) + (230 / 30 - 3) * .25 + 2 / 30 * 20 + (2.375 - 25 / 30)) / 6 * 100, 1)
+
+
+def test_advanced_team_sides_and_coverage(monkeypatch, tmp_path):
+    games = {"g1": {"gid": "g1", "season": 2026, "home": "GB", "away": "CHI"}, "g2": {"gid": "g2", "season": 2026, "home": "DET", "away": "GB"}}
+    extra = {"tg": {"GB|g1": {"db": 40, "sacks": 2, "cdb": 40, "blitz": 10, "crun": 20, "box8": 4, "big_pass": 3, "big_run": 2,
+                              "long_pass": 50, "long_run": 20, "xn": 60, "xp": 33, "pp": 36},
+                    "CHI|g1": {"db": 30, "sacks": 3, "cdb": 30, "blitz": 6, "crun": 25, "box8": 5, "big_pass": 1, "big_run": 4,
+                               "long_pass": 25, "long_run": 40, "xn": 55, "xp": 30, "pp": 27}},
+             "zone": {"CHI|WR": {"dpl": [2, 1, 30, 0]}}, "qbb": {}, "pexp": {"9": {"rec20": 1}}}
+    monkeypatch.setattr(NS, "pfr_rows", lambda season, cur, kind: iter({
+        "pass": [{"team": "GB", "opponent": "CHI", "times_pressured": "8", "pfr_player_id": "QBX"}],
+        "def": [{"team": "CHI", "pfr_player_id": "CBX", "def_targets": "6", "def_completions_allowed": "4", "def_yards_allowed": "60",
+                 "def_receiving_td_allowed": "1", "def_ints": "0", "def_adot": "10"}],
+        "rush": [], "rec": []}[kind]))
+    monkeypatch.setattr(NS, "ngs_season", lambda kind, season, cur: {})
+    roster = {9: {"pfr": "CBX", "pos": "DB", "depth_pos": "CB", "team": "CHI"}, 1: {"pfr": "QBX", "pos": "QB", "team": "GB"}}
+    logs9 = [(2026, 9, "DB") + tuple(_log(gid="g1", team="CHI", opp="GB", tackles=5))]    # his own line too: still a CB
+    teams, players, zones = NS.advanced(2026, 2026, extra, games, logs9, roster)
+    assert teams["GB"]["off"]["press_pct"] == 20.0 and teams["CHI"]["def"]["press_pct"] == 20.0     # 8 of GB's 40 dropbacks
+    assert teams["CHI"]["def"]["big_pass_pg"] == 3.0 and teams["CHI"]["def"]["long_pass"] == 50       # what GB did to CHI
+    assert teams["GB"]["off"]["proe"] == 5.0 and teams["CHI"]["def"]["proe"] == 5.0
+    assert teams["GB"]["def"]["blitz_pct"] == 20.0 and teams["GB"]["def"]["box8_pct"] == 20.0          # CHI's offense faced
+    c = players[9]
+    assert c["pos"] == "CB" and c["team"] == "CHI" and c["cov"]["tgt"] == 6 and c["cov"]["rat"] == NS.passer_rating(6, 4, 60, 1, 0)
+    assert zones[("CHI", "WR")] == {"g": 1, "cells": {"dpl": [2, 1, 30, 0]}}
+
+
+def test_adv_payload_ranks_zones_and_cover(tmp_path):
+    db = tmp_path / "s.sqlite"
+    con = sqlite3.connect(db)
+    con.executescript(NS.DDL)
+    side = lambda big, press: {"games": 5, "big_pass_pg": big, "big_run_pg": 1.0, "press_pct": press, "sack_pct": 5.0, "blitz_pct": 30.0,
+                               "box8_pct": 8.0, "ybc": 2.0, "proe": 0.0, "long_pass": 40, "long_run": 20, "db_pg": 40}
+    for t, big, press in (("GB", 1.0, 30.0), ("CHI", 3.0, 20.0), ("DET", 2.0, 25.0)):
+        con.execute("INSERT INTO team_adv VALUES (2026, ?, ?)", (t, json.dumps({"off": side(big, press), "def": side(big, press)})))
+    con.execute("INSERT INTO team_adv VALUES (2026, 'MIN', ?)", (json.dumps({"off": dict(side(9, 9), games=1), "def": dict(side(9, 9), games=1)}),))
+    con.execute("INSERT INTO team_adv VALUES (2025, 'MIN', ?)", (json.dumps({"off": side(0.5, 40.0), "def": side(0.5, 40.0)}),))
+    con.execute("INSERT INTO def_zone VALUES (2026, 'CHI', 'WR', ?)", (json.dumps({"g": 2, "cells": {"dpl": [4, 2, 60, 0]}}),))
+    con.execute("INSERT INTO def_zone VALUES (2026, 'GB', 'WR', ?)", (json.dumps({"g": 2, "cells": {"dpl": [0, 0, 0, 0]}}),))
+    con.execute("INSERT INTO player_adv VALUES (2026, 9, 'CHI', 'CB', ?)", (json.dumps({"g": 5, "cov": {"tgt": 20, "cmp": 12, "yds": 150, "td": 1, "int": 1, "rat": 80.0, "adot": 9.0, "g": 5}}),))
+    con.execute("INSERT INTO player_adv VALUES (2026, 7, 'GB', 'WR', ?)", (json.dumps({"g": 5, "rec20": 3}),))
+    con.commit()
+    out = R.adv_payload(con, 2026, ["GB", "CHI", "MIN"], {7}, {9: "Cee Bee"}, {9: {"status": "Questionable"}})
+    assert out["n"] == 4 and out["teams"]["MIN"]["season"] == "2025-26"         # 1 game: last season stands in
+    assert out["teams"]["MIN"]["ranks"]["def"]["big_pass_pg"] == 1 and out["teams"]["CHI"]["ranks"]["def"]["big_pass_pg"] == 4
+    assert out["teams"]["GB"]["ranks"]["def"]["press_pct"] == 2                  # 1st = the most pressure (MIN 40%)
+    assert out["zones"]["CHI"]["WR"]["cells"]["dpl"] == [2.0, 1.0, 30.0, 0.0] and out["zones"]["lg"]["WR"]["dpl"] == [1.0, 0.5, 15.0, 0.0]
+    assert out["cover"]["CHI"] == [[9, "Cee Bee", "CB", 20, 12, 150, 1, 1, 80.0, 9.0, 5, "Questionable"]]
+    assert out["players"]["7"]["rec20"] == 3 and "9" not in out["players"]

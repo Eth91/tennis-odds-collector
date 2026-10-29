@@ -73,6 +73,16 @@ body{background:#0f0f0f;--red:#ff090c;--grn:#28da8e}
 .dcr{grid-template-columns:repeat(4,1fr)} .lus.bk2{opacity:.78}
 .wgh{margin:14px 0 8px;font-size:15px;font-weight:600}
 .vs tr.lga td{color:#8e8e8e}
+.zsg{margin:0 0 10px} .zsg button{flex:1}
+.zg{display:grid;grid-template-columns:52px repeat(3,1fr);gap:5px;align-items:stretch}
+.zh{font-size:11px;color:#8e8e8e;text-align:center} .zr{display:flex;align-items:center;font-size:11.5px;color:#8e8e8e}
+.zc{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:56px;border-radius:9px;border:1px solid #232323}
+.zc b{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums} .zc small{font-size:10px;color:rgba(255,255,255,.75);text-align:center}
+.zc em{position:absolute;top:3px;right:5px;font-style:normal;font-size:9.5px;color:#38bdf8}
+.bsp{margin-top:10px} .bsp td,.bsp th{text-align:right} .bsp td:first-child,.bsp th:first-child{text-align:left}
+.cov{table-layout:fixed;width:100%} .cov td:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bgp td,.bgp th{text-align:right} .bgp td:first-child{text-align:left} .bgp .rk{margin-left:3px}
+.cov td small{font-size:10.5px;color:#8e8e8e;margin-right:4px} .cov tr.out td{opacity:.55} .cov .tg{margin-left:2px}
 
 .mt.ml{margin-top:9px}
 .sx{position:relative;flex:1;min-width:0;display:flex;align-items:center;height:42.8px;padding:0 16px;border-radius:21.4px;
@@ -3297,7 +3307,8 @@ function nflMatchup() {
     <h2 class="mpt">${esc(p.opp || "")} Team Defense</h2>
     <div class="mpf"><span>Last games vs</span>${dd("grp", VS_GRP, MUP.grp)}${dd("mkt", mks.map(m => [m, NAME[m]]), MUP.mkt)}</div>
     <div id="vst"></div>
-    <div class="shc wg" id="nrd"></div>`;
+    <div class="shc wg" id="nzc"></div><div class="shc wg" id="nbg"></div><div class="shc wg" id="npr"></div>
+    <div class="shc wg" id="ncv"></div><div class="shc wg" id="nrd"></div><div class="shc wg" id="ncl"></div>`;
   $(".bk", mp).onclick = () => history.back();
   $(".ph", mp).onclick = e => { if (!e.target.closest("button")) mp.scrollTo({top: 0, behavior: REDUCED ? "auto" : "smooth"}); };
   $("#mpm", mp).onclick = leagueSheet;
@@ -3315,11 +3326,130 @@ function nflMatchup() {
     $("span", sel.parentNode).textContent = sel.options[sel.selectedIndex].text;
     vsTable();
   });
-  const od = ((D.rush_dir || {}).d || {})[p.opp];
-  if (od && RUSH_M.indexOf(p.market) >= 0) $("#nrd", mp).innerHTML = oppRushCard(od, (D.rush_dir || {}).lg, p.opp);
+  nflAdvCards(p, mp);
   vsTable();
 }
 // where the defense gives up yards on the ground: yards a carry by gap against the league's
+// ── the Matchup page's football (D.adv, nfl_research.adv_payload; nfl_stats.advanced): where the defense gives up
+// yards through the air, big plays, pressure and the blitz, who covers, the run defense, and how both teams call it.
+// Ranks: 1st = the toughest for the offense (the fewest allowed, the most pressure, the most stacked boxes) ──
+const advT = t => ((D.adv || {}).teams || {})[t], advP = pid => ((D.adv || {}).players || {})[String(pid)];
+const advN = () => (D.adv || {}).n || 32, advLg = (side, k) => (((D.adv || {}).lg || {})[side] || {})[k];
+// a rank chip colored for the side (green = soft for this side); neutral for the ones that are no edge either way
+const rkA = (r, side, neutral) => r ? `<span class="rk ${neutral ? "n" : rankCls(r, advN(), side) === "good" ? "g" : rankCls(r, advN(), side) === "bad" ? "r" : "n"}">${ord(r)}</span>` : "";
+const per = (v, d) => v === null || v === undefined ? "–" : fx(v, d === undefined ? 1 : d);
+const wgBox = (title, sub, body) => `<h3 class="wgh">${title}${sub ? ` <small class="hs2">${sub}</small>` : ""}</h3>${body}`;
+// 1 · where the defense gives up yards through the air: depth (behind the line to 20+) by side, a game, against the
+// league's average defense; his own share of targets in each zone in the corner
+const ZROWS = [["dp", "Deep 20+"], ["in", "10–19"], ["sh", "0–9"], ["bl", "Behind"]], ZCOLS = [["l", "Left"], ["m", "Middle"], ["r", "Right"]];
+function zoneCard(p, grp) {
+  const Z = (D.adv || {}).zones || {}, z = (Z[p.opp] || {})[grp], lg = (Z.lg || {})[grp] || {};
+  if (!z) return "";
+  const tt = (D.tgt_tree || {})[String(p.pid)], ttot = tt ? Object.values(tt).reduce((a, c) => a + c[0], 0) : 0;
+  const cell = k => {
+    const c = z.cells[k] || [0, 0, 0, 0], l = lg[k] || [0, 0, 0, 0], d = (c[2] - l[2]) / Math.max(l[2], 4), a = Math.min(1, Math.abs(d));
+    const bg = d >= 0 ? `rgba(40,218,142,${(.06 + a * .5).toFixed(2)})` : `rgba(255,69,58,${(.06 + a * .45).toFixed(2)})`;
+    const mine = tt && ttot && tt[k] ? `<em>${Math.round(tt[k][0] / ttot * 100)}%</em>` : "";
+    return `<div class="zc" style="background:${bg}">${mine}<b>${per(c[2])}</b><small>${c[0] ? Math.round(c[1] / c[0] * 100) + "% · " : ""}${per(c[0])} tgt${c[3] >= .1 ? ` · ${per(c[3], 2)} TD` : ""}</small></div>`;
+  };
+  const tot = Object.values(z.cells).reduce((a, c) => a + c[2], 0), ltot = Object.values(lg).reduce((a, c) => a + c[2], 0);
+  const segs = [["all", "All"], ["WR", "WR"], ["TE", "TE"], ["RB", "RB"]].filter(([k]) => Z[p.opp] && Z[p.opp][k]);
+  return wgBox(`Where ${esc(p.opp)} gives up yards`, `receiving yards a game by zone · ${z.g} games`,
+    `<div class="seg zsg" role="group" aria-label="Targets to">${segs.map(([k, l]) => `<button data-zg="${k}" aria-pressed="${k === grp}">${l}</button>`).join("")}</div>
+    <div class="zg"><span></span>${ZCOLS.map(c => `<span class="zh">${c[1]}</span>`).join("")}
+    ${ZROWS.map(([r, lab]) => `<span class="zr">${lab}</span>${ZCOLS.map(([c]) => cell(r + c)).join("")}`).join("")}</div>
+    <div class="kv"><span>To ${grp === "all" ? "everyone" : esc(GRPN[grp] || grp)}</span><b>${per(tot)} yds a game <small class="mut">league ${per(ltot)}</small></b></div>
+    ${tt && ttot ? '<div class="kv"><span>Corner %</span><b class="mut">his share of his own targets</b></div>' : ""}`);
+}
+// 3 · big plays: 20+ yard completions and 10+ yard runs, allowed by the defense and made by his offense, and his own
+function bigCard(p, side) {
+  const o = advT(p.opp), m = advT(p.team), a = advP(p.pid) || {};
+  if (!o) return "";
+  const g = a.g || 0, mine = g && (a.rec20 !== undefined || a.rush10 !== undefined);
+  const row = (lab, x, y) => `<tr><td>${lab}</td><td>${x}</td><td>${y}</td></tr>`;
+  return wgBox("Big plays", `a game · ${o.season === D.season ? "this season" : "last season"} · 1st = allows the fewest`,
+    `<table class="gst bgp"><thead><tr><th></th><th>20+ yd catches</th><th>10+ yd runs</th></tr></thead><tbody>
+    ${row(`${esc(p.opp)} allows`, `${per(o.def.big_pass_pg, 2)} ${rkA(o.ranks.def.big_pass_pg, side)}`, `${per(o.def.big_run_pg, 2)} ${rkA(o.ranks.def.big_run_pg, side)}`)}
+    ${m ? row(`${esc(p.team)} makes`, per(m.off.big_pass_pg, 2), per(m.off.big_run_pg, 2)) : ""}
+    ${mine ? row(esc(lastName(p.player)), per((a.rec20 || 0) / g, 2), per((a.rush10 || 0) / g, 2)) : ""}
+    ${row("Longest allowed", o.def.long_pass, o.def.long_run)}</tbody></table>`);
+}
+// 4 · pressure and the blitz: how often the defense gets home and sends extra, his line's pressure allowed, and his
+// quarterback against the blitz and without it
+function pressureCard(p, side) {
+  const o = advT(p.opp), m = advT(p.team);
+  if (!o) return "";
+  const qbId = (advP(p.pid) || {}).pos === "QB" ? p.pid : ((((D.depth || {})[p.team] || {}).QB || [])[0] || [])[0], q = advP(qbId) || {};
+  const qn = (((D.depth || {})[p.team] || {}).QB || [[0, ""]]).find(x => x[0] === qbId), name = qn ? lastName(qn[1]) : "QB";
+  const rows = [`<div class="kv"><span>${esc(p.opp)} pressure rate</span><b>${per(o.def.press_pct)}% ${rkA(o.ranks.def.press_pct, side)} <small class="mut">lg ${per(advLg("def", "press_pct"))}%</small></b></div>`,
+    `<div class="kv"><span>${esc(p.opp)} sack rate</span><b>${per(o.def.sack_pct)}% ${rkA(o.ranks.def.sack_pct, side)}</b></div>`,
+    `<div class="kv"><span>${esc(p.opp)} blitz rate</span><b>${per(o.def.blitz_pct)}% ${rkA(o.ranks.def.blitz_pct, side, true)} <small class="mut">lg ${per(advLg("def", "blitz_pct"))}%</small></b></div>`];
+  if (m) rows.push(`<div class="kv"><span>${esc(p.team)} line allows pressure</span><b>${per(m.off.press_pct)}% ${m.ranks.off.press_pct ? `<span class="rk n">${ord(m.ranks.off.press_pct)}</span>` : ""}</b></div>`);
+  if (q.db) rows.push(`<div class="kv"><span>${esc(name)} pressured</span><b>${per(q.press_pct)}% <small class="mut">bad throws ${per(q.bad_pct)}%</small></b></div>`);
+  if (q.ttt) rows.push(`<div class="kv"><span>${esc(name)} time to throw</span><b>${per(q.ttt, 2)} s <small class="mut">tight windows ${per(q.aggr)}%</small></b></div>`);
+  let split = "";
+  const vb = q.vs_blitz;
+  if (vb && vb.b[0] + vb.n[0] >= 30) {
+    const heavy = o.def.blitz_pct !== null && o.def.blitz_pct > (advLg("def", "blitz_pct") || 0);
+    const line = (lab, s, on) => `<tr${on ? ' class="on"' : ""}><td>${lab}</td><td>${s[0]}</td><td>${s[1] ? Math.round(s[2] / s[1] * 100) + "%" : "–"}</td><td>${s[1] ? per(s[3] / s[1]) : "–"}</td><td>${s[4]}-${s[5]}</td><td>${s[0] ? per(s[6] / s[0] * 100) + "%" : "–"}</td></tr>`;
+    split = `<table class="gst bsp"><thead><tr><th>${esc(name)}</th><th>DB</th><th>CMP</th><th>YPA</th><th>TD-INT</th><th>SACK</th></tr></thead><tbody>
+      ${line("Blitzed", vb.b, heavy)}${line("Not", vb.n, !heavy)}</tbody></table>`;
+  }
+  return wgBox("Pressure", `${o.season === D.season ? "this season" : "last season"} · PFR pressures, FTN blitzes`, `<div class="box0">${rows.join("")}${split}</div>`);
+}
+// 5 · who covers: the defense's most targeted defenders, what they allowed (PFR coverage), tonight's status
+function coverCard(p) {
+  const rows = ((D.adv || {}).cover || {})[p.opp] || [];
+  if (!rows.length) return "";
+  const st = s => s ? `<span class="tg ${INJ_C[s] || "tn"}">${INJ_S[s] || esc(s)}</span>` : "";
+  return wgBox(`Who covers · ${esc(p.opp)}`, "this season · targets when he was the defender", `<table class="vs cov"><colgroup><col style="width:43%"><col><col><col><col><col></colgroup><thead><tr><th>DEFENDER</th><th>TGT</th><th>CMP</th><th>YDS</th><th>TD</th><th>RTG</th></tr></thead><tbody>${rows.map(r =>
+    `<tr${r[11] === "Out" || r[11] === "Doubtful" ? ' class="out"' : ""}><td>${esc(initialName(r[1]))} <small>${esc(r[2] || "")}</small>${st(r[11])}</td><td>${r[3]}</td><td>${r[3] ? Math.round(r[4] / r[3] * 100) + "%" : "–"}</td><td>${r[5]}</td><td>${r[6]}</td><td>${r[8] === null ? "–" : Math.round(r[8])}</td></tr>`).join("")}</tbody></table>`);
+}
+// 6 · the run defense: by gap (rush_dir), stacked boxes and yards before contact allowed; his own contact and
+// yards over expected
+function runCard(p, side, od) {
+  const o = advT(p.opp), a = advP(p.pid) || {};
+  let html = od ? oppRushCard(od, (D.rush_dir || {}).lg, p.opp) : "";
+  if (!o) return html;
+  const nm = esc(lastName(p.player)), has = a.ybc !== undefined || a.box8 !== undefined;
+  const tr = (lab, x, y, z) => `<tr><td>${lab}</td><td>${x}</td><td>${y}</td><td>${z}</td></tr>`;
+  const rows = [`<table class="gst bgp"><thead><tr><th></th><th>Before contact</th><th>After</th><th>8+ in box</th></tr></thead><tbody>
+    ${tr(`${esc(p.opp)} allows`, `${per(o.def.ybc, 2)} ${rkA(o.ranks.def.ybc, side)}`, "–", `${per(o.def.box8_pct)}% ${rkA(o.ranks.def.box8_pct, side)}`)}
+    ${tr("League", per(advLg("def", "ybc"), 2), "–", per(advLg("def", "box8_pct")) + "%")}
+    ${has ? tr(nm, per(a.ybc, 2), per(a.yac_r, 2), a.box8 === undefined || a.box8 === null ? "–" : per(a.box8) + "%") : ""}</tbody></table>`];
+  if (a.ryoe !== undefined && a.ryoe !== null) rows.push(`<div class="kv"><span>${nm} over expected</span><b>${a.ryoe > 0 ? "+" : ""}${per(a.ryoe, 2)} yds a carry</b></div>`);
+  if (a.brk_r) rows.push(`<div class="kv"><span>${nm} broken tackles</span><b>${a.brk_r}</b></div>`);
+  return html + `<div class="box0" style="margin-top:8px">${rows.join("")}</div>`;
+}
+// 7 · play calling: pass rate over expected (nflverse's xpass), neutral-script pass rate, pace — both teams
+function callCard(p) {
+  const A = advT(p.team), B = advT(p.opp), Ta = (D.teams || {})[p.team] || {}, Tb = (D.teams || {})[p.opp] || {};
+  if (!A || !B) return "";
+  const sg = v => v === null || v === undefined ? "–" : (v > 0 ? "+" : "") + per(v) + "%";
+  const row = (lab, a, b) => `<tr><td>${lab}</td><td>${a}</td><td>${b}</td></tr>`;
+  return wgBox("Play calling", "this season", `<table class="gst"><thead><tr><th></th><th>${esc(p.team)}</th><th>${esc(p.opp)}</th></tr></thead><tbody>
+    ${row("Pass rate over expected", `${sg(A.off.proe)} ${rkA(A.ranks.off.proe, "over", true)}`, `${sg(B.off.proe)} ${rkA(B.ranks.off.proe, "over", true)}`)}
+    ${row("Neutral pass rate", Ta.neutral_pass ? Math.round(Ta.neutral_pass * 100) + "%" : "–", Tb.neutral_pass ? Math.round(Tb.neutral_pass * 100) + "%" : "–")}
+    ${row("Dropbacks a game", per(A.off.db_pg), per(B.off.db_pg))}
+    ${row("Plays a game", per(Ta.plays), per(Tb.plays))}
+    ${row("Seconds a play", per(Ta.sec_play), per(Tb.sec_play))}
+    ${row("Offenses vs them, over expected", sg(A.def.proe), sg(B.def.proe))}</tbody></table>`);
+}
+function nflAdvCards(p, mp) {
+  const side = ST.side, m = p.market, rec = REC_M.indexOf(m) >= 0 && m !== "anytime_td", pass = PASS_M.indexOf(m) >= 0,
+        rush = RUSH_M.indexOf(m) >= 0 && m !== "anytime_td" && m !== "pass_rush_yds", td = m === "anytime_td";
+  const grp0 = (p.ctx || {}).group, zgrp = pass ? "all" : ["WR", "TE", "RB"].indexOf(grp0) >= 0 ? grp0 : "all";
+  const put = (id, html) => { const el = $("#" + id, mp); if (el) el.innerHTML = html || ""; };
+  if (rec || pass || (td && grp0 !== "RB")) {
+    MUP.zg = MUP.zg || zgrp;
+    put("nzc", zoneCard(p, MUP.zg));
+    $$("[data-zg]", mp).forEach(b => b.onclick = () => { MUP.zg = b.dataset.zg; nflAdvCards(p, mp); });
+  }
+  if (m !== "kick_pts" && m !== "fg_made" && m !== "sacks") put("nbg", bigCard(p, side));
+  if (rec || pass) { put("npr", pressureCard(p, side)); put("ncv", coverCard(p)); }
+  if (rush || (td && grp0 === "RB")) put("nrd", runCard(p, side, ((D.rush_dir || {}).d || {})[p.opp]));
+  put("ncl", callCard(p));
+}
 function oppRushCard(od, lg, opp) {
   const cols = DIRS.map(([k, lab]) => { const c = od[k] || [0, 0, 0], y = c[0] ? c[1] / c[0] : null, l = lg && lg[k] ? lg[k][1] / Math.max(lg[k][0], 1) : null;
     const d = y === null || l === null ? null : y - l, tone = d === null ? "" : d >= .6 ? "up" : d <= -.6 ? "dn" : "";

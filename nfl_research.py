@@ -801,6 +801,7 @@ def build(now=None, sched=None, lines=None, stats=None, get=None, official=None)
         "rush_dir": rush, "tgt_tree": tree, "usage": usage, "teams": teams_info,
         "roles": roles(logs, pos, players, set(slate_teams), season, absent_names),
         "vs": vs_rows(logs, pos, slate_teams, all_names),
+        "adv": adv_payload(scon, season, slate_teams, pids, all_names, inj),
         "heads": {},
     }
     # every player the page may show a face for (injury lists, depth charts, usage, the vs table): his ESPN id
@@ -812,6 +813,74 @@ def build(now=None, sched=None, lines=None, stats=None, get=None, official=None)
     for c in (q, scon):
         if c is not None:
             c.close()
+    return out
+
+
+# the Matchup page's football (nfl_stats.advanced): which way each team metric ranks. "asc": 1st = the lowest (a
+# defense allowing the fewest), "desc": 1st = the highest (the most pressure, the most stacked boxes, the most passing)
+ADV_RANK = {"def": {"big_pass_pg": "asc", "big_run_pg": "asc", "press_pct": "desc", "sack_pct": "desc", "blitz_pct": "desc",
+                    "box8_pct": "desc", "ybc": "asc", "proe": "desc"},
+            "off": {"proe": "desc", "press_pct": "asc", "sack_pct": "asc", "big_pass_pg": "desc", "big_run_pg": "desc"}}
+ADV_MIN_G = 3                # a team's line counts once it has 3 games this season (else last season's stands in)
+COVER_TOP = 10               # defenders in a team's coverage table, the most targeted first
+
+
+def adv_payload(scon, season, slate_teams, want_pids, names, inj):
+    """The Matchup page's football for the slate: {"teams": {team: {"off", "def", "season", "ranks": {"off", "def"}}},
+    "lg": league averages, "n": teams ranked, "zones": {defense: {group: {"g", "cells": {zone: [tgt, comp, yds, td] a
+    game}}}, "lg": {group: {zone: [...] a game}}}, "players": {pid: advanced line}, "cover": {team: [[pid, name, pos,
+    tgt, cmp, yds, td, int, rating, aDOT, games, status], ...]}}. This season's numbers; a team with fewer than
+    ADV_MIN_G games shows last season's (marked by "season")."""
+    out = {"teams": {}, "lg": {}, "n": 0, "zones": {"lg": {}}, "players": {}, "cover": {}}
+    if scon is None:
+        return out
+    try:
+        T = {(s_, t): json.loads(js) for s_, t, js in scon.execute("SELECT season, team, js FROM team_adv WHERE season IN (?,?)",
+                                                                   (season, season - 1))}
+    except sqlite3.OperationalError:                       # a store from before the advanced tables
+        return out
+    cur = {t: v for (s_, t), v in T.items() if s_ == season}
+    use = {t: (cur[t], season) if (cur.get(t) or {}).get("def", {}).get("games", 0) >= ADV_MIN_G or (season - 1, t) not in T
+           else (T[(season - 1, t)], season - 1) for t in set(cur) | {t for s_, t in T if s_ == season - 1}}
+    ranks = {}
+    for side, ks in ADV_RANK.items():
+        for k, how in ks.items():
+            vals = {t: v[side].get(k) for t, (v, _) in use.items() if v[side].get(k) is not None}
+            order = sorted(vals.values(), reverse=how == "desc")
+            ranks[(side, k)] = {t: 1 + order.index(x) for t, x in vals.items()}
+            out["lg"].setdefault(side, {})[k] = round(sum(vals.values()) / len(vals), 2) if vals else None
+    out["n"] = len(use)
+    for t in slate_teams:
+        if t not in use:
+            continue
+        v, s_ = use[t]
+        out["teams"][t] = {"off": v["off"], "def": v["def"], "season": season_str(s_),
+                           "ranks": {side: {k: ranks[(side, k)].get(t) for k in ks} for side, ks in ADV_RANK.items()}}
+    # passing allowed by field zone, a game: the slate's defenses, and the league's average defense
+    lg = defaultdict(lambda: defaultdict(lambda: [0.0, 0.0, 0.0, 0.0]))
+    lg_g = defaultdict(int)
+    for t, grp, js in scon.execute("SELECT team, grp, js FROM def_zone WHERE season=?", (season,)):
+        z = json.loads(js)
+        if not z["g"]:
+            continue
+        lg_g[grp] += z["g"]
+        for k, c in z["cells"].items():
+            for i in range(4):
+                lg[grp][k][i] += c[i]
+        if t in slate_teams:
+            out["zones"].setdefault(t, {})[grp] = {"g": z["g"], "cells": {k: [round(x / z["g"], 2) for x in c] for k, c in z["cells"].items()}}
+    out["zones"]["lg"] = {grp: {k: [round(x / lg_g[grp], 2) for x in c] for k, c in cells.items()} for grp, cells in lg.items() if lg_g[grp]}
+    # players: the props' players and each slate team's passers; defenders in the coverage tables
+    for pid, team, pos, js in scon.execute("SELECT pid, team, pos, js FROM player_adv WHERE season=?", (season,)):
+        a = json.loads(js)
+        if pid in want_pids or (pos == "QB" and team in slate_teams):
+            out["players"][str(pid)] = dict({k: v for k, v in a.items() if k != "cov"}, pos=pos, team=team)
+        c = a.get("cov")
+        if c and team in slate_teams:
+            out["cover"].setdefault(team, []).append([pid, names.get(pid) or str(pid), pos, c["tgt"], c["cmp"], c["yds"], c["td"],
+                                                      c["int"], c["rat"], c["adot"], c["g"], (inj.get(pid) or {}).get("status")])
+    for t in out["cover"]:
+        out["cover"][t] = sorted(out["cover"][t], key=lambda r: -r[3])[:COVER_TOP]
     return out
 
 
