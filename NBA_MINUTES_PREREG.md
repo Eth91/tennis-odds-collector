@@ -295,7 +295,7 @@ by no more than 0.05. Else FAIL and nothing changes.
 - MAE on all absence nights and for starters.
 - Out of scope: V3 counts X as absent only after 3 games this season, so the first games of a season redistribute nothing.
 
-**Result (2026-10-29, about 06:15 UTC): gate 1 FAIL. Nothing changes.**
+**Result (2026-10-29, about 05:50 UTC): gate 1 FAIL. Nothing changes.**
 - **Fit on 2023-24:** S's α is G 0, F 0, C 0.2; H's K is 8 (the largest offered); S+H's K is 8.
 
 | 2024-25 minutes MAE | all | absence nights | target (Capela-type) | starters |
@@ -327,7 +327,7 @@ by no more than 0.05. Else FAIL and nothing changes.
   - S at α_C = 0.2 gives 15.4 (he was the only active center), at 0.5 gives 23.8. He played 22.
   - So S helps when one backup is the only one left at the spot, but across the league it averages out.
 
-# AMENDMENT 7: blowouts in the minutes base (2026-10-29, about 06:30 UTC, before code)
+# AMENDMENT 7: blowouts in the minutes base (2026-10-29, about 06:10 UTC, before code)
 **Why:**
 - On 2026-10-28, V3 gave Stephen Curry 23.2 minutes and he played 32. His three games this season were 21 minutes (a
   22-point loss), 30 and 27 (a 20-point win).
