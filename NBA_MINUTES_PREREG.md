@@ -326,3 +326,37 @@ by no more than 0.05. Else FAIL and nothing changes.
   - On the VM's data after the game (outs Sengun and Adams), V3 gives 9.8 minutes.
   - S at α_C = 0.2 gives 15.4 (he was the only active center), at 0.5 gives 23.8. He played 22.
   - So S helps when one backup is the only one left at the spot, but across the league it averages out.
+
+# AMENDMENT 7: blowouts in the minutes base (2026-10-29, about 06:30 UTC, before code)
+**Why:**
+- On 2026-10-28, V3 gave Stephen Curry 23.2 minutes and he played 32. His three games this season were 21 minutes (a
+  22-point loss), 30 and 27 (a 20-point win).
+- V3's base is the plain mean of his last 5 games this season, so blowouts, where starters sit the fourth quarter and
+  the bench plays, pull it down for starters and up for the bench.
+- **User:** "yes run the blowout test."
+
+**Fix B:**
+- In V3's base (the mean of his last 5 games played), a game whose final margin is M+ points counts with weight w;
+  every other game counts 1.
+- If every weight in his last 5 is 0, the plain mean.
+- Everything else (the absent players' minutes, the share factor, WOWY, the 240-minute total) is as in V3.
+- M from {10, 15, 20} and w from {0, 0.25, 0.5, 0.75} (w = 1 is V3), fit on 2023-24 by the MAE over every player-game.
+- The margin comes from the box scores: the sum of each team's points.
+
+**Rows:** as amendment 6 (every player who played in 2023-24 and 2024-25; outs from the box score; the truth is his minutes).
+
+**Gate 1, minutes (2024-25, held out):**
+- MAE over every player-game is ≥ 0.05 minutes better than V3.
+- Neither starters (usual five) nor the bench is more than 0.02 worse.
+- Else FAIL and nothing changes.
+
+**Gate 2, unders (the user's standing condition):**
+- UNDER20's ping set (30–50% below, under −150 or better, not threes, best FanDuel/DraftKings at tip) with fix B's
+  minutes × the same rates.
+- Its 2024-25 ROI must be at least V3's (+15.0%) − 1 point.
+- **If both pass:** the under pings move to fix B after the user's OK, as a new function; `nba_role.py` stays as
+  registered.
+
+**Also reported:**
+- MAE for starters whose last 5 include a blowout.
+- Curry on 2026-10-28 under fix B.
