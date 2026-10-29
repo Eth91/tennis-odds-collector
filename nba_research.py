@@ -416,13 +416,16 @@ def engine_flags(sh, game_dates):
 
 UNDER_PRICE = 1 / 0.6                                    # −150 or better, decimal
 UNDER_BAND = (0.50, 0.70)                                # our projection over the line: 30–50% below it
+# amendment 9 (nba_under.L5_ZONE): no ping when the line over his last-5 average is in (lo, hi], 6-42% over it
+UNDER_L5 = (1.0564788482047636, 1.4166666666666667)
 
 
-def under_play(market, price, line, proj):
-    """A play that pings the phone (nba_under.pings on the VM): an under at −150 or better, not threes, with our
-    projection 30–50% below the line."""
+def under_play(market, price, line, proj, l5=None):
+    """A play that pings the phone (nba_under.pings_l5 on the VM): an under at −150 or better, not threes, with our
+    projection 30–50% below the line, and the line not 6–42% over his last-5 average (l5 = line / that average; None,
+    as on rows logged before 10/29 or with no games, keeps the play)."""
     return (market != "threes" and price is not None and price >= UNDER_PRICE and bool(line) and proj is not None
-            and UNDER_BAND[0] <= proj / line < UNDER_BAND[1])
+            and UNDER_BAND[0] <= proj / line < UNDER_BAND[1] and not (l5 is not None and UNDER_L5[0] < l5 <= UNDER_L5[1]))
 
 
 def under_flags(rc, game_dates):
@@ -440,13 +443,17 @@ def under_flags(rc, game_dates):
         return []
     out = []
     for d, gid, pid, mk, line, price, note, player, at in rows:
-        w = (note or "").split()                             # "proj 7.3 min 20.1"
+        w = (note or "").split()                             # "proj 7.3 min 20.1 l5 1.234567"
         kv = dict(zip(w[::2], w[1::2]))
         try:
             proj, mins = float(kv["proj"]), float(kv["min"]) if "min" in kv else None
         except (KeyError, ValueError):
             continue
-        if under_play(mk, price, line, proj):
+        try:
+            l5 = float(kv["l5"]) if "l5" in kv else None
+        except ValueError:
+            l5 = None
+        if under_play(mk, price, line, proj, l5):
             out.append({"date": d, "gid": gid, "pid": pid, "market": mk, "side": "under", "line": line, "price": price,
                         "proj": proj, "mins": mins, "at": at, "player": player})
     return out

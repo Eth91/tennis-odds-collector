@@ -242,12 +242,20 @@ def test_under_flags_reader():
     assert U("points", 1 / 0.6, 10, 6.99) and U("points", 1.6667, 10, 5.0) and not U("points", 1.66, 10, 6)   # −150 or better
     assert not U("points", 1.9, 10, 7.0) and not U("points", 1.9, 10, 4.99) and not U("threes", 1.9, 2.5, 1.5)  # 30–50% below
     assert not U("points", 1.9, 0, 0) and not U("points", None, 10, 6) and not U("pra", 1.9, 30.5, None)
+    # amendment 9: not when the line is 6-42% over his last-5 average, (lo, hi]; no ratio keeps the play
+    lo, hi = RS.UNDER_L5
+    assert U("points", 1.9, 10, 6, None) and U("points", 1.9, 10, 6, lo) and not U("points", 1.9, 10, 6, lo + 1e-9)
+    assert not U("points", 1.9, 10, 6, 1.2) and not U("points", 1.9, 10, 6, hi) and U("points", 1.9, 10, 6, hi + 1e-9)
+    assert U("points", 1.9, 10, 6, 0.8) and U("points", 1.9, 10, 6, 2.0)
     rc = sqlite3.connect(":memory:")
     rc.execute("CREATE TABLE idea_signals (rule TEXT, gid TEXT, pid INTEGER, market TEXT, line REAL, price REAL, note TEXT, "
                "date TEXT, player TEXT, logged_at TEXT, pinged INTEGER)")
     rc.execute("INSERT INTO idea_signals VALUES ('UNDER20','G1',1,'pra',30.5,1.8,'proj 18.0',?,'A','2026-10-26T23:30:00',0)", (GD,))
     rc.execute("INSERT INTO idea_signals VALUES ('UNDER20','G1',2,'pra',30.5,1.8,'no projection',?,'B','2026-10-26T23:30:00',1)", (GD,))
-    assert [(f["pid"], f["proj"], f["mins"]) for f in RS.under_flags(rc, [GD])] == [(1, 18.0, None)]
+    rc.execute("INSERT INTO idea_signals VALUES ('UNDER20','G1',3,'pra',30.5,1.8,'proj 18.0 min 30.1 l5 1.234567',?,'C','2026-10-26T23:31:00',0)", (GD,))
+    rc.execute("INSERT INTO idea_signals VALUES ('UNDER20','G1',4,'pra',30.5,1.8,'proj 18.0 min 30.1 l5 1.5',?,'D','2026-10-26T23:31:00',1)", (GD,))
+    rc.execute("INSERT INTO idea_signals VALUES ('UNDER20','G1',5,'pra',30.5,1.8,'proj 18.0 min 30.1 l5 x',?,'E','2026-10-26T23:31:00',1)", (GD,))
+    assert [(f["pid"], f["proj"], f["mins"]) for f in RS.under_flags(rc, [GD])] == [(1, 18.0, None), (4, 18.0, 30.1), (5, 18.0, 30.1)]
 
 
 @pytest.mark.skipif(NODE is None, reason="node not installed")
