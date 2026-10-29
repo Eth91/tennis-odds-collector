@@ -51,6 +51,7 @@ DEF_GROUPS = {"DL", "LB", "DB"}
 DDL = f"""
 DROP TABLE IF EXISTS logs; DROP TABLE IF EXISTS players; DROP TABLE IF EXISTS team_games;
 DROP TABLE IF EXISTS rush_dir; DROP TABLE IF EXISTS tgt_tree; DROP TABLE IF EXISTS meta; DROP TABLE IF EXISTS names;
+DROP TABLE IF EXISTS team_adv; DROP TABLE IF EXISTS player_adv; DROP TABLE IF EXISTS def_zone;
 CREATE TABLE logs (season INTEGER, pid INTEGER, pos TEXT, {", ".join(c + (" TEXT" if c in ("date", "gid", "team", "opp") else " REAL") for c in LOG_COLS)},
                    PRIMARY KEY (pid, gid));
 CREATE INDEX logs_season ON logs (season, team);
@@ -63,6 +64,12 @@ CREATE TABLE rush_dir (season INTEGER, kind TEXT, key TEXT, cells TEXT, PRIMARY 
 CREATE TABLE tgt_tree (season INTEGER, pid INTEGER, cells TEXT, PRIMARY KEY (season, pid));
 CREATE TABLE meta (k TEXT PRIMARY KEY, v TEXT);
 CREATE TABLE names (pid INTEGER PRIMARY KEY, name TEXT, pos TEXT);   -- everyone in the logs, gone or not
+-- the Matchup page's football: per team its offense and defense (big plays, pressure, blitzes, stacked boxes, contact,
+-- pass rate over expected), per player his advanced lines (pressure, blitz splits, contact, separation, coverage), and
+-- each defense's passing allowed by field zone (depth x side) to each group of receivers
+CREATE TABLE team_adv (season INTEGER, team TEXT, js TEXT, PRIMARY KEY (season, team));
+CREATE TABLE player_adv (season INTEGER, pid INTEGER, team TEXT, pos TEXT, js TEXT, PRIMARY KEY (season, pid));
+CREATE TABLE def_zone (season INTEGER, team TEXT, grp TEXT, js TEXT, PRIMARY KEY (season, team, grp));
 """
 
 
@@ -115,37 +122,60 @@ def pbp_rows(season, cur):
     return {c: i for i, c in enumerate(hdr)}, rd
 
 
-def from_pbp_cached(season, cur):
+PBP_CACHE_V = 2               # bump when from_pbp's output changes: a cached past season is rebuilt
+
+
+def from_pbp_cached(season, cur, posmap=None, ftn=None):
     """from_pbp, with a past season's results kept in the cache beside its file (a finished season's file changes
     rarely; its parse is most of a build's minute)."""
     if season == cur:
-        return from_pbp(season, cur)
+        return from_pbp(season, cur, posmap, ftn)
     src = C.cached(f"pbp/play_by_play_{season}.csv.gz", _age(season, cur))
     f = C.CACHE / f"derived_pbp_{season}.json"
     try:
         j = json.loads(f.read_text())
-        if j.get("mtime") == src.stat().st_mtime:
+        if j.get("mtime") == src.stat().st_mtime and j.get("v") == PBP_CACHE_V:
             per = {(int(k.split("|")[0]), k.split("|")[1]): v for k, v in j["per"].items()}
             team = {(k.split("|")[0], k.split("|")[1]): v for k, v in j["team"].items()}
             rdir = {(k.split("|")[0], k.split("|")[1]): v for k, v in j["rdir"].items()}
             tree = {int(k): v for k, v in j["tree"].items()}
-            return per, team, rdir, tree
+            return per, team, rdir, tree, j["extra"]
     except (OSError, ValueError, KeyError):
         pass
-    per, team, rdir, tree = from_pbp(season, cur)
-    f.write_text(json.dumps({"mtime": src.stat().st_mtime, "per": {f"{a}|{b}": v for (a, b), v in per.items()},
+    per, team, rdir, tree, extra = from_pbp(season, cur, posmap, ftn)
+    f.write_text(json.dumps({"mtime": src.stat().st_mtime, "v": PBP_CACHE_V, "extra": extra, "per": {f"{a}|{b}": v for (a, b), v in per.items()},
                              "team": {f"{a}|{b}": v for (a, b), v in team.items()},
                              "rdir": {f"{a}|{b}": {d: c for d, c in v.items()} for (a, b), v in rdir.items()},
                              "tree": {str(k): dict(v) for k, v in tree.items()}}))
-    return per, team, rdir, tree
+    return per, team, rdir, tree, extra
 
 
-def from_pbp(season, cur):
+ZONE_GRP = {"WR": "WR", "TE": "TE", "RB": "RB", "FB": "RB"}
+
+
+def zone_of(ay, loc):
+    """A pass's field zone: depth (behind the line, 0-9, 10-19, 20+ air yards) + side (l / m / r), or None."""
+    loc = {"left": "l", "middle": "m", "right": "r"}.get(loc)
+    if ay is None or not loc:
+        return None
+    return ("bl" if ay < 0 else "sh" if ay < 10 else "in" if ay < 20 else "dp") + loc
+
+
+def from_pbp(season, cur, posmap=None, ftn=None):
     """Per (pid, gid): longest completion / rush / reception, red-zone targets and carries, deep targets; per team-game:
     plays, passes, runs, the neutral pass rate (win probability 20-80%, quarters 1-3) and seconds a play; per season:
-    each rusher's and each defense's carries by direction, each receiver's target tree."""
+    each rusher's and each defense's carries by direction, each receiver's target tree. And `extra`, for the Matchup
+    page: each defense's passing allowed by field zone and receiver group (posmap: pid -> position), each offense's
+    big plays (20+ yard completions, 10+ yard runs), longest plays, dropbacks, sacks and pass rate over expected
+    (nflverse's xpass), and with FTN's charting (ftn: (gid, play_id) -> (blitzers, men in the box)) blitzes and
+    stacked boxes it faced, each passer's line against the blitz and without it, each player's big plays."""
+    posmap, ftn = posmap or {}, ftn or {}
+    zone = defaultdict(lambda: defaultdict(lambda: [0, 0, 0, 0]))   # (defense, group) -> zone -> [tgt, comp, yds, td]
+    tg = defaultdict(lambda: defaultdict(float))                    # (offense, gid) -> counters
+    qbb = defaultdict(lambda: {"b": [0] * 7, "n": [0] * 7})         # passer -> blitz / none: [db, att, comp, yds, td, int, sack]
+    pexp = defaultdict(lambda: defaultdict(int))                    # pid -> rec20 / rush10 / rush20
     ix, rd = pbp_rows(season, cur)
-    g = lambda r, c: r[ix[c]]
+    g = lambda r, c: r[ix[c]] if c in ix else ""            # a column an older file lacks reads as blank
     per = defaultdict(lambda: {"long_comp": None, "long_rush": None, "long_rec": None, "rz_tgt": 0, "rz_rush": 0, "deep_tgt": 0})
     team = defaultdict(lambda: {"plays": 0, "pass": 0, "rush": 0, "npass": 0, "nplays": 0, "secs": 0.0, "nsec": 0})
     rdir = defaultdict(lambda: defaultdict(lambda: [0, 0, 0]))       # (kind, key) -> dir -> [att, yds, td]
@@ -162,6 +192,40 @@ def from_pbp(season, cur):
             continue
         yl, yds = _n(g(r, "yardline_100")), _z(g(r, "yards_gained"))
         is_pass = g(r, "pass_attempt") == "1" or g(r, "qb_dropback") == "1"
+        x = tg[(pos_t, gid)]
+        xp = _n(g(r, "xpass"))
+        if xp is not None:                                   # pass rate over expected: dropbacks less nflverse's xpass
+            x["xn"] += 1
+            x["xp"] += xp
+            x["pp"] += 1 if g(r, "pass") == "1" else 0
+        ch = ftn.get((gid, g(r, "play_id")))
+        sack = g(r, "sack") == "1"
+        if g(r, "qb_dropback") == "1":
+            x["db"] += 1
+            x["sacks"] += 1 if sack else 0
+            if ch is not None:
+                x["cdb"] += 1
+                x["blitz"] += 1 if ch[0] > 0 else 0
+            passer0 = C.pid_of(g(r, "passer_player_id"))
+            if passer0 is not None and ch is not None:
+                s7 = qbb[passer0]["b" if ch[0] > 0 else "n"]
+                s7[0] += 1
+                if g(r, "pass_attempt") == "1" and not sack:
+                    s7[1] += 1
+                    s7[2] += 1 if g(r, "complete_pass") == "1" else 0
+                    s7[3] += yds if g(r, "complete_pass") == "1" else 0
+                    s7[4] += 1 if g(r, "pass_touchdown") == "1" else 0
+                    s7[5] += 1 if g(r, "interception") == "1" else 0
+                s7[6] += 1 if sack else 0
+        elif g(r, "rush_attempt") == "1" and ch is not None and g(r, "qb_scramble") != "1":
+            x["crun"] += 1
+            x["box8"] += 1 if ch[1] >= 8 else 0
+        if g(r, "pass_attempt") == "1" and not sack and g(r, "complete_pass") == "1":
+            x["long_pass"] = max(x["long_pass"], yds)
+            x["big_pass"] += 1 if yds >= 20 else 0
+        elif g(r, "rush_attempt") == "1":
+            x["long_run"] = max(x["long_run"], yds)
+            x["big_run"] += 1 if yds >= 10 else 0
         t = team[(pos_t, gid)]
         t["plays"] += 1
         t["pass" if is_pass else "rush"] += 1
@@ -191,17 +255,29 @@ def from_pbp(season, cur):
                 ay = _n(g(r, "air_yards"))
                 if ay is not None and ay >= 20:
                     p["deep_tgt"] += 1
-                loc = {"left": "l", "middle": "m", "right": "r"}.get(g(r, "pass_location"))
-                if ay is not None and loc:
-                    d = "bl" if ay < 0 else "sh" if ay < 10 else "in" if ay < 20 else "dp"
-                    c = tree[rcv][d + loc]
+                zk = zone_of(ay, g(r, "pass_location"))
+                if zk:
+                    c = tree[rcv][zk]
                     c[0] += 1
                     if comp:
                         c[1] += 1
                         c[2] += yds
+                    if def_t:
+                        td = 1 if g(r, "pass_touchdown") == "1" else 0
+                        for grp in ("all", ZONE_GRP.get(posmap.get(rcv))):
+                            if grp:
+                                z = zone[(def_t, grp)][zk]
+                                z[0] += 1
+                                z[1] += 1 if comp else 0
+                                z[2] += yds if comp else 0
+                                z[3] += td
+                if comp and yds >= 20:
+                    pexp[rcv]["rec20"] += 1
         elif g(r, "rush_attempt") == "1" and rush is not None:
             p = per[(rush, gid)]
             p["long_rush"] = max(p["long_rush"], yds) if p["long_rush"] is not None else yds
+            pexp[rush]["rush10"] += 1 if yds >= 10 else 0
+            pexp[rush]["rush20"] += 1 if yds >= 20 else 0
             if yl is not None and yl <= 20:
                 p["rz_rush"] += 1
             if g(r, "qb_scramble") != "1":
@@ -215,7 +291,205 @@ def from_pbp(season, cur):
                         c[0] += 1
                         c[1] += yds
                         c[2] += td
-    return per, team, rdir, tree
+    extra = {"zone": {f"{d}|{gp}": dict(v) for (d, gp), v in zone.items()},
+             "tg": {f"{t_}|{gd}": dict(v) for (t_, gd), v in tg.items()},
+             "qbb": {str(k): v for k, v in qbb.items()}, "pexp": {str(k): dict(v) for k, v in pexp.items()}}
+    return per, team, rdir, tree, extra
+
+
+# ── the Matchup page's advanced data: FTN's charting, Pro Football Reference's advanced stats, Next Gen Stats ──────
+def ftn_plays(season, cur):
+    """{(gid, play_id): (blitzers, men in the box)} from FTN's charting (every play, a few days behind); {} without it."""
+    out = {}
+    try:
+        for r in C.iter_rows(f"ftn_charting/ftn_charting_{season}.csv", _age(season, cur)):
+            out[(r.get("nflverse_game_id"), str(r.get("nflverse_play_id")).split(".")[0])] = (int(_z(r.get("n_blitzers"))), int(_z(r.get("n_defense_box"))))
+    except Exception:                                               # noqa: BLE001 — a season FTN has not charted
+        pass
+    return out
+
+
+def pfr_rows(season, cur, kind):
+    """Pro Football Reference's weekly advanced stats (pass / rush / rec / def), streamed; nothing without the file."""
+    try:
+        yield from C.iter_rows(f"pfr_advstats/advstats_week_{kind}_{season}.csv", _age(season, cur))
+    except Exception:                                               # noqa: BLE001
+        return
+
+
+def ngs_season(kind, season, cur):
+    """{pid: row} — Next Gen Stats' season-to-date line (week 0 in nflverse's file) for passing / rushing / receiving."""
+    out = {}
+    try:
+        for r in C.iter_rows(f"nextgen_stats/ngs_{kind}.csv.gz", CUR_MAX_AGE if season == cur else OLD_MAX_AGE):
+            if r.get("season") == str(season) and r.get("season_type") == "REG" and r.get("week") == "0":
+                pid = C.pid_of(r.get("player_gsis_id"))
+                if pid is not None:
+                    out[pid] = r
+    except Exception:                                               # noqa: BLE001
+        pass
+    return out
+
+
+def passer_rating(att, comp, yds, td, ints):
+    """The NFL passer rating from totals (None with no attempts)."""
+    if not att:
+        return None
+    cl = lambda x: max(0.0, min(2.375, x))
+    a, b, c, d = cl((comp / att - .3) * 5), cl((yds / att - 3) * .25), cl(td / att * 20), cl(2.375 - ints / att * 25)
+    return round((a + b + c + d) / 6 * 100, 1)
+
+
+def _r(x, d=1):
+    return None if x is None else round(x, d)
+
+
+def advanced(season, cur, extra, games, rows, roster):
+    """({team: {"off", "def"}}, {pid: {...}}, {(defense, group): zone cells}) for one season.
+    team off / def: games, 20+ yard completions and 10+ yard runs a game (made / allowed), the longest of each, sacks
+    and pressures a dropback (PFR's pressures on the passer), blitzes a charted dropback and 8+ men in the box a
+    charted run (FTN), yards before contact a carry (PFR), pass rate over expected (nflverse's xpass: the offense's,
+    and offenses' against the defense).
+    player: a passer's pressure and bad throws (PFR), his line against the blitz and without it (FTN), time to throw
+    and aggressiveness (NGS); a runner's yards before / after contact and broken tackles (PFR), yards over expected and
+    stacked boxes faced (NGS); a receiver's drops, broken tackles and passer rating when targeted (PFR), separation,
+    cushion and YAC over expected (NGS); everyone's 20+ catches and 10+ / 20+ runs; a defender's coverage (targets,
+    completions, yards, TDs, passer rating allowed), pressures, sacks and missed tackles (PFR)."""
+    by_pfr = {r["pfr"]: pid for pid, r in roster.items() if r.get("pfr")}
+    col = {c: i for i, c in enumerate(LOG_COLS)}
+    logs = defaultdict(list)
+    for r in rows:                                          # (season, pid, pos, *LOG_COLS)
+        logs[r[1]].append(r[3:])
+    off, dfn = defaultdict(lambda: defaultdict(float)), defaultdict(lambda: defaultdict(float))
+    for key, v in extra.get("tg", {}).items():
+        tm, gid = key.split("|")
+        g = games.get(gid)
+        if not g or g["season"] != season or tm not in (g["home"], g["away"]):
+            continue
+        opp = g["away"] if tm == g["home"] else g["home"]
+        for agg in (off[tm], dfn[opp]):
+            agg["g"] += 1
+            for k in ("db", "sacks", "cdb", "blitz", "crun", "box8", "big_pass", "big_run", "xn", "xp", "pp"):
+                agg[k] += v.get(k, 0)
+            agg["long_pass"] = max(agg["long_pass"], v.get("long_pass", 0))
+            agg["long_run"] = max(agg["long_run"], v.get("long_run", 0))
+    P = defaultdict(lambda: defaultdict(float))             # pid -> PFR sums
+    tw = defaultdict(float)                                 # pid -> targets behind the rating average
+    tgt_of = {(pid, r[col["gid"]]): r[col["targets"]] or 0 for pid, rs in logs.items() for r in rs}
+    pid_of = lambda r: by_pfr.get(r.get("pfr_player_id"))
+    for r in pfr_rows(season, cur, "pass"):
+        tm, op = C.team(r.get("team")), C.team(r.get("opponent"))
+        pr = _z(r.get("times_pressured"))
+        off[tm]["pressured"] += pr
+        dfn[op]["pressured"] += pr
+        pid = pid_of(r)
+        if pid is not None:
+            for k in ("times_pressured", "times_blitzed", "times_hurried", "times_hit", "passing_bad_throws", "times_sacked"):
+                P[pid][k] += _z(r.get(k))
+    for r in pfr_rows(season, cur, "rush"):
+        op = C.team(r.get("opponent"))
+        dfn[op]["ybc"] += _z(r.get("rushing_yards_before_contact"))
+        dfn[op]["pfr_car"] += _z(r.get("carries"))
+        pid = pid_of(r)
+        if pid is not None:
+            for k in ("carries", "rushing_yards_before_contact", "rushing_yards_after_contact", "rushing_broken_tackles"):
+                P[pid][k] += _z(r.get(k))
+    for r in pfr_rows(season, cur, "rec"):
+        pid = pid_of(r)
+        if pid is None:
+            continue
+        P[pid]["receiving_drop"] += _z(r.get("receiving_drop"))
+        P[pid]["receiving_broken_tackles"] += _z(r.get("receiving_broken_tackles"))
+        rat, t = _n(r.get("receiving_rat")), tgt_of.get((pid, r.get("game_id")), 0)
+        if rat is not None and t:
+            P[pid]["rat_w"] += rat * t
+            tw[pid] += t
+    cov = defaultdict(lambda: defaultdict(float))
+    cov_team = {}
+    for r in pfr_rows(season, cur, "def"):
+        pid = pid_of(r)
+        if pid is None:
+            continue
+        c = cov[pid]
+        cov_team[pid] = C.team(r.get("team"))
+        c["g"] += 1
+        for k in ("def_targets", "def_completions_allowed", "def_yards_allowed", "def_receiving_td_allowed", "def_ints",
+                  "def_air_yards_completed", "def_yards_after_catch", "def_times_blitzed", "def_pressures", "def_sacks",
+                  "def_missed_tackles", "def_tackles_combined"):
+            c[k] += _z(r.get(k))
+        if _n(r.get("def_adot")) is not None and _z(r.get("def_targets")):
+            c["adot_w"] += _n(r.get("def_adot")) * _z(r.get("def_targets"))
+    ngs = {k: ngs_season(k, season, cur) for k in ("passing", "rushing", "receiving")}
+    teams = {}
+    for t in set(off) | set(dfn):
+        o, d = off[t], dfn[t]
+        pct = lambda a, b: _r(100 * a / b) if b else None
+        side = lambda x: {"games": int(x["g"]), "big_pass_pg": _r(x["big_pass"] / x["g"], 2) if x["g"] else None,
+                          "big_run_pg": _r(x["big_run"] / x["g"], 2) if x["g"] else None, "long_pass": int(x["long_pass"]),
+                          "long_run": int(x["long_run"]), "sack_pct": pct(x["sacks"], x["db"]), "press_pct": pct(x["pressured"], x["db"]),
+                          "blitz_pct": pct(x["blitz"], x["cdb"]), "box8_pct": pct(x["box8"], x["crun"]),
+                          "proe": _r(100 * (x["pp"] - x["xp"]) / x["xn"]) if x["xn"] else None, "db_pg": _r(x["db"] / x["g"]) if x["g"] else None}
+        dd = side(d)
+        dd["ybc"] = _r(d["ybc"] / d["pfr_car"], 2) if d["pfr_car"] else None
+        teams[t] = {"off": side(o), "def": dd}
+    players = {}
+    for pid, rs in logs.items():
+        rec = roster.get(pid) or {}
+        pos = rec.get("pos") or ""
+        g = len(rs)
+        a = {"team": rs[-1][col["team"]], "pos": pos, "g": g}
+        x = P.get(pid, {})
+        db = sum((r[col["pass_att"]] or 0) + (r[col["sacked"]] or 0) for r in rs)
+        if pos == "QB" and db:
+            att = sum(r[col["pass_att"]] or 0 for r in rs)
+            a.update(db=db, press_pct=_r(100 * x.get("times_pressured", 0) / db), bad_pct=_r(100 * x.get("passing_bad_throws", 0) / att) if att else None,
+                     hit=int(x.get("times_hit", 0)), blitzed=int(x.get("times_blitzed", 0)))
+            b = (extra.get("qbb") or {}).get(str(pid))
+            if b:
+                a["vs_blitz"] = b                                # [dropbacks, att, comp, yds, td, int, sacks] blitzed / not
+            n = ngs["passing"].get(pid)
+            if n:
+                a.update(ttt=_r(_n(n.get("avg_time_to_throw")), 2), aggr=_r(_n(n.get("aggressiveness"))),
+                         cpoe=_r(_n(n.get("completion_percentage_above_expectation"))), iay=_r(_n(n.get("avg_intended_air_yards"))))
+        if x.get("carries"):
+            a.update(ybc=_r(x["rushing_yards_before_contact"] / x["carries"], 2), yac_r=_r(x["rushing_yards_after_contact"] / x["carries"], 2),
+                     brk_r=int(x["rushing_broken_tackles"]))
+        n = ngs["rushing"].get(pid)
+        if n:
+            a.update(ryoe=_r(_n(n.get("rush_yards_over_expected_per_att")), 2), box8=_r(_n(n.get("percent_attempts_gte_eight_defenders"))),
+                     eff=_r(_n(n.get("efficiency")), 2))
+        tg = sum(r[col["targets"]] or 0 for r in rs)
+        if tg:
+            a.update(drops=int(x.get("receiving_drop", 0)), brk_c=int(x.get("receiving_broken_tackles", 0)),
+                     rat=_r(x["rat_w"] / tw[pid]) if tw.get(pid) else None)
+        n = ngs["receiving"].get(pid)
+        if n:
+            a.update(sep=_r(_n(n.get("avg_separation")), 2), cush=_r(_n(n.get("avg_cushion")), 2),
+                     yacoe=_r(_n(n.get("avg_yac_above_expectation")), 2), iay_r=_r(_n(n.get("avg_intended_air_yards"))),
+                     ay_sh=_r(_n(n.get("percent_share_of_intended_air_yards"))))
+        e = (extra.get("pexp") or {}).get(str(pid))
+        if e:
+            a.update(rec20=e.get("rec20", 0), rush10=e.get("rush10", 0), rush20=e.get("rush20", 0))
+        if len(a) > 3:
+            players[pid] = a
+    for pid, c in cov.items():                              # defenders (their own logs or not)
+        if not c["def_targets"]:
+            continue
+        rec = roster.get(pid) or {}
+        a = players.setdefault(pid, {"team": cov_team.get(pid) or rec.get("team"), "pos": rec.get("depth_pos") or rec.get("pos") or "",
+                                     "g": int(c["g"])})
+        if rec.get("depth_pos"):
+            a["pos"] = rec["depth_pos"]                     # CB / FS / SS / OLB, not the roster's DB / LB
+        a["cov"] = {"g": int(c["g"]), "tgt": int(c["def_targets"]), "cmp": int(c["def_completions_allowed"]), "yds": int(c["def_yards_allowed"]),
+                    "td": int(c["def_receiving_td_allowed"]), "int": int(c["def_ints"]),
+                    "rat": passer_rating(c["def_targets"], c["def_completions_allowed"], c["def_yards_allowed"], c["def_receiving_td_allowed"], c["def_ints"]),
+                    "adot": _r(c["adot_w"] / c["def_targets"]), "yac": int(c["def_yards_after_catch"]),
+                    "press": int(c["def_pressures"]), "sacks": c["def_sacks"], "missed": int(c["def_missed_tackles"])}
+    zones = {}
+    for key, cells in (extra.get("zone") or {}).items():
+        t, grp = key.split("|")
+        zones[(t, grp)] = {"g": int(dfn[t]["g"]), "cells": cells}
+    return teams, players, zones
 
 
 def snap_map(season, cur, roster):
@@ -256,7 +530,8 @@ def build(seasons=None, db=DB, now=None):
         if season == cur:
             players = roster
         snaps = snap_map(season, cur, roster)
-        per, team, rdir, tree = from_pbp_cached(season, cur)
+        posmap = {pid: r["pos"] for pid, r in roster.items()}
+        per, team, rdir, tree, extra = from_pbp_cached(season, cur, posmap, ftn_plays(season, cur))
         stats = weekly(season, cur)
         team_carries = defaultdict(int)
         for r in stats:
@@ -332,6 +607,14 @@ def build(seasons=None, db=DB, now=None):
         for pid, cells in tree.items():
             con.execute("INSERT OR REPLACE INTO tgt_tree VALUES (?,?,?)", (season, pid, json.dumps(dict(cells))))
         meta[f"logs_{season}"] = {"rows": len(rows), "last_week": last_wk}
+        tadv, padv, zones = advanced(season, cur, extra, games, rows, roster)
+        con.executemany("INSERT OR REPLACE INTO team_adv VALUES (?,?,?)", [(season, t, json.dumps(v)) for t, v in tadv.items()])
+        con.executemany("INSERT OR REPLACE INTO player_adv VALUES (?,?,?,?,?)",
+                        [(season, pid, v.pop("team", None), v.pop("pos", None), json.dumps(v)) for pid, v in padv.items()])
+        con.executemany("INSERT OR REPLACE INTO def_zone VALUES (?,?,?,?)",
+                        [(season, t, grp, json.dumps(v)) for (t, grp), v in zones.items()])
+        meta[f"adv_{season}"] = {"teams": len(tadv), "players": len(padv), "zones": len(zones),
+                                 "charted": sum(1 for v in tadv.values() if v["off"].get("blitz_pct") is not None)}
     for pid, r in players.items():
         con.execute("INSERT OR REPLACE INTO players VALUES (?,?,?,?,?,?,?,?,?)",
                     (pid, r["name"], r["team"], r["pos"], r["headshot"], r["espn"], r["jersey"], r["depth_pos"], r["status"]))
