@@ -475,3 +475,38 @@ def test_adv_payload_man_zone_from_last_season(tmp_path):
     con.commit()
     out = R.adv_payload(con, 2026, ["GB", "CHI"], {7}, {}, {})
     assert out["players"]["7"]["vcov"] == v26 and out["players"]["7"]["vcov_season"] == "2026-27" and "8" not in out["players"]
+
+
+def test_page_has_no_duplicate_function_names():
+    # a second `function x` in the page's script silently replaces the first: the NFL Matchup page's zoneCard once
+    # replaced the NBA's (the assists and rebounds zone cards went blank). Every name once, and no const/let clashes
+    for js in (UI.JS_APP, UI.JS_CORE):
+        fns = re.findall(r"^\s*(?:async\s+)?function\s+(\w+)\s*\(", js, re.M)
+        assert len(fns) == len(set(fns)), sorted({f for f in fns if fns.count(f) > 1})
+        top = re.findall(r"^(?:const|let|var)\s+(\w+)\s*=", js, re.M)
+        assert not set(top) & set(fns) and len(top) == len(set(top))
+
+
+def test_field_payload_per_game_league_and_ranks(tmp_path):
+    db = tmp_path / "s.sqlite"
+    con = sqlite3.connect(db)
+    con.executescript(NS.DDL)
+    for t, g, yds in (("CHI", 2, 60), ("GB", 4, 40), ("DET", 2, 20)):
+        con.execute("INSERT INTO def_zone VALUES (2026, ?, 'all', ?)", (t, json.dumps({"g": g, "cells": {"dpl": [4, 2, yds, 0]}})))
+        con.execute("INSERT INTO def_zone VALUES (2026, ?, 'WR', ?)", (t, json.dumps({"g": g, "cells": {"dpl": [2, 1, yds / 2, 0]}})))
+    for t, att, yds in (("CHI", 10, 60), ("GB", 10, 30), ("DET", 4, 40)):         # DET: too few carries to rank
+        con.execute("INSERT INTO rush_dir VALUES (2026, 'd', ?, ?)", (t, json.dumps({"le": [att, yds, 0]})))
+    con.execute("INSERT INTO rush_dir VALUES (2026, 'p', '7', ?)", (json.dumps({"le": [5, 25, 1]}),))
+    con.execute("INSERT INTO tgt_tree VALUES (2026, 7, ?)", (json.dumps({"dpl": [3, 2, 50]}),))
+    con.execute("INSERT INTO pass_tree VALUES (2026, 9, ?)", (json.dumps({"dpl": [6, 3, 90, 1, 0]}),))
+    con.commit()
+    logs = {7: [_log(date="2026-09-14"), _log(date="2026-09-21")], 9: [_log(date="2026-09-14")]}
+    f = R.field_payload(con, 2026, ["CHI", "GB"], {7, 9}, logs)
+    s = f["2026-27"]
+    assert f["seasons"] == ["2026-27", "2025-26"] and "2025-26" not in f                 # no rows last season: no block
+    assert s["def"]["CHI"]["g"] == 2 and s["def"]["CHI"]["pass"]["all"]["dpl"] == [2.0, 1.0, 30.0, 0.0]
+    assert s["lg"]["pass"]["all"]["dpl"] == [1.5, 0.75, 15.0, 0.0]                     # 120 yds over 8 team-games
+    assert s["rank"]["pass"]["all"]["dpl"] == {"CHI": 3, "GB": 1}                        # DET 10 a game, GB 10 (a tie shares 1st), CHI 30
+    assert s["def"]["GB"]["rush"] == {"le": [10, 30, 0]} and s["rank"]["rush"]["le"] == {"CHI": 2, "GB": 1}
+    assert s["lg"]["rush"]["le"] == [8.0, 43.3, 0.0]
+    assert s["p"]["7"] == {"recv": {"dpl": [3, 2, 50]}, "rush": {"le": [5, 25, 1]}, "g": 2} and s["p"]["9"]["pass"]["dpl"][2] == 90

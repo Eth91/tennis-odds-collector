@@ -51,7 +51,7 @@ DEF_GROUPS = {"DL", "LB", "DB"}
 DDL = f"""
 DROP TABLE IF EXISTS logs; DROP TABLE IF EXISTS players; DROP TABLE IF EXISTS team_games;
 DROP TABLE IF EXISTS rush_dir; DROP TABLE IF EXISTS tgt_tree; DROP TABLE IF EXISTS meta; DROP TABLE IF EXISTS names;
-DROP TABLE IF EXISTS team_adv; DROP TABLE IF EXISTS player_adv; DROP TABLE IF EXISTS def_zone;
+DROP TABLE IF EXISTS team_adv; DROP TABLE IF EXISTS player_adv; DROP TABLE IF EXISTS def_zone; DROP TABLE IF EXISTS pass_tree;
 CREATE TABLE logs (season INTEGER, pid INTEGER, pos TEXT, {", ".join(c + (" TEXT" if c in ("date", "gid", "team", "opp") else " REAL") for c in LOG_COLS)},
                    PRIMARY KEY (pid, gid));
 CREATE INDEX logs_season ON logs (season, team);
@@ -70,6 +70,7 @@ CREATE TABLE names (pid INTEGER PRIMARY KEY, name TEXT, pos TEXT);   -- everyone
 CREATE TABLE team_adv (season INTEGER, team TEXT, js TEXT, PRIMARY KEY (season, team));
 CREATE TABLE player_adv (season INTEGER, pid INTEGER, team TEXT, pos TEXT, js TEXT, PRIMARY KEY (season, pid));
 CREATE TABLE def_zone (season INTEGER, team TEXT, grp TEXT, js TEXT, PRIMARY KEY (season, team, grp));
+CREATE TABLE pass_tree (season INTEGER, pid INTEGER, cells TEXT, PRIMARY KEY (season, pid));   -- a passer's throws by zone
 """
 
 
@@ -122,7 +123,7 @@ def pbp_rows(season, cur):
     return {c: i for i, c in enumerate(hdr)}, rd
 
 
-PBP_CACHE_V = 3               # bump when from_pbp's output changes: a cached past season is rebuilt
+PBP_CACHE_V = 4               # bump when from_pbp's output changes: a cached past season is rebuilt
 
 
 def from_pbp_cached(season, cur, posmap=None, ftn=None):
@@ -176,6 +177,7 @@ def from_pbp(season, cur, posmap=None, ftn=None):
     pexp = defaultdict(lambda: defaultdict(int))                    # pid -> rec20 / rush10 / rush20
     rbl = defaultdict(lambda: {"b": [0] * 4, "n": [0] * 4, "team": None})   # receiver -> blitz / none: [tgt, rec, yds, td]
     tbl = defaultdict(lambda: {"b": 0, "n": 0})                     # offense -> charted targets blitzed / not
+    ptree = defaultdict(lambda: defaultdict(lambda: [0, 0, 0, 0, 0]))   # passer -> zone -> [att, comp, yds, td, int]
     ix, rd = pbp_rows(season, cur)
     g = lambda r, c: r[ix[c]] if c in ix else ""            # a column an older file lacks reads as blank
     per = defaultdict(lambda: {"long_comp": None, "long_rush": None, "long_rec": None, "rz_tgt": 0, "rz_rush": 0, "deep_tgt": 0})
@@ -245,6 +247,14 @@ def from_pbp(season, cur, posmap=None, ftn=None):
         passer, rcv, rush = (C.pid_of(g(r, c)) for c in ("passer_player_id", "receiver_player_id", "rusher_player_id"))
         if g(r, "pass_attempt") == "1" and g(r, "sack") != "1":
             comp = g(r, "complete_pass") == "1"
+            zp = zone_of(_n(g(r, "air_yards")), g(r, "pass_location"))
+            if passer is not None and zp:                    # his throws by zone (a throwaway has no zone)
+                c = ptree[passer][zp]
+                c[0] += 1
+                c[1] += 1 if comp else 0
+                c[2] += yds if comp else 0
+                c[3] += 1 if g(r, "pass_touchdown") == "1" else 0
+                c[4] += 1 if g(r, "interception") == "1" else 0
             if passer is not None and comp:
                 p = per[(passer, gid)]
                 p["long_comp"] = max(p["long_comp"] or 0, yds) if p["long_comp"] is not None else yds
@@ -305,7 +315,8 @@ def from_pbp(season, cur, posmap=None, ftn=None):
     extra = {"zone": {f"{d}|{gp}": dict(v) for (d, gp), v in zone.items()},
              "tg": {f"{t_}|{gd}": dict(v) for (t_, gd), v in tg.items()},
              "qbb": {str(k): v for k, v in qbb.items()}, "pexp": {str(k): dict(v) for k, v in pexp.items()},
-             "rbl": {str(k): v for k, v in rbl.items()}, "tbl": dict(tbl)}
+             "rbl": {str(k): v for k, v in rbl.items()}, "tbl": dict(tbl),
+             "ptree": {str(k): dict(v) for k, v in ptree.items()}}
     return per, team, rdir, tree, extra
 
 
@@ -702,6 +713,8 @@ def build(seasons=None, db=DB, now=None):
         con.executemany("INSERT OR REPLACE INTO team_adv VALUES (?,?,?)", [(season, t, json.dumps(v)) for t, v in tadv.items()])
         con.executemany("INSERT OR REPLACE INTO player_adv VALUES (?,?,?,?,?)",
                         [(season, pid, v.pop("team", None), v.pop("pos", None), json.dumps(v)) for pid, v in padv.items()])
+        con.executemany("INSERT OR REPLACE INTO pass_tree VALUES (?,?,?)",
+                        [(season, int(pid), json.dumps(cells)) for pid, cells in (extra.get("ptree") or {}).items()])
         con.executemany("INSERT OR REPLACE INTO def_zone VALUES (?,?,?,?)",
                         [(season, t, grp, json.dumps(v)) for (t, grp), v in zones.items()])
         meta[f"adv_{season}"] = {"teams": len(tadv), "players": len(padv), "zones": len(zones), "coverage": len(vcov),
