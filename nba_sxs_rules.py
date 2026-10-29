@@ -914,6 +914,17 @@ class UNDER3050(UNDER20):
         return f if f and UNDER_M.pings(f, mk) else None
 
 
+class UNDER3050L(UNDER20):
+    """The pings from NBA_UNDER_PREREG.md amendment 9: UNDER3050 less the flags whose line is 6-42% over his last-5
+    average."""
+    name = "UNDER3050L"
+    deps, spec = UNDER_DEPS + (UNDER_M.last5_ratio, UNDER_M.pings_l5), UNDER_SPEC + [list(UNDER_M.L5_ZONE)]
+
+    def judge(self, bd, rd, date, team, p, mk, m, out_now):
+        f = UNDER_M.under20(bd, rd, date, team, p, mk, m[0], m[2], out_now)
+        return f if f and UNDER_M.pings_l5(f, mk, UNDER_M.last5_ratio(bd, p, date, mk, m[0])) else None
+
+
 class UNDERML(UNDER20):
     """At tip - 30, FanDuel's main: T2's logistic model (no hindsight outs features, fit on 2023-24), either side at EV
     >= 5%. Silent."""
@@ -929,7 +940,7 @@ PIT_STORES = {"MATCHUP_DB": "matchup", "TRACKING_DB": "tracking"}
 
 RULES = (NULL_TIP30, NEWS_FD, NEWS_DK, DK_LAGS_FD, T4_TIP30, ENGINE_CARD, S1, DEPTH_NEXT, DEPTH_NEXT_TIP30, NEW_STARTER,
          LOST_START, ROLE_OPEN, RATIO_FGA, RATIO_PA, RATIO_RC, RATIO_PA28, PTS_DVP, RETURN_UNDER, FOUL_BIG, MIN_RESTRICT, EARLY_SURGE,
-         BOOST, BOOST_STEP, BOOST_PICKUP, BOOST_NH, UNDER20, UNDER20P, UNDER30P, UNDER3050, UNDERML)
+         BOOST, BOOST_STEP, BOOST_PICKUP, BOOST_NH, UNDER20, UNDER20P, UNDER30P, UNDER3050, UNDER3050L, UNDERML)
 
 
 def fingerprint(cls):
@@ -974,5 +985,6 @@ REGISTRY = {                                             # name -> (registered a
     "UNDER20P": ("2026-10-29T00:00:00", "352fb78046"),            # -150 or better, not threes (amendment 1)
     "UNDER30P": ("2026-10-29T00:00:00", "231aeea8d3"),            # ... and 30%+ below (amendment 3)
     "UNDER3050": ("2026-10-29T00:00:00", "7ec3b3d6b7"),           # ... and 30-50% below: the pings (amendment 4)
+    "UNDER3050L": ("2026-10-29T07:00:00", "4fdf132a53"),          # ... less line 6-42% over his last 5: the pings (amendment 9)
     "UNDERML": ("2026-10-29T00:00:00", "420fd8c7cf"),
 }

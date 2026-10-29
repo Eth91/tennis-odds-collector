@@ -38,6 +38,17 @@ def check(mod):
     want(mod.under20(bd, rd, TB.D, "HOM", TB.B, "rebounds", proj / 0.81, 1.9, {TB.X}) is None, "81% of the line: none")
     want(not mod.strong(f) and mod.strong(mod.under20(bd, rd, TB.D, "HOM", TB.B, "rebounds", proj / 0.69, 1.9, {TB.X})),
          "under 70% of the line (69%), not at 79%")
+    import types
+    rs = [{"reb": 20.0}] * 5 + [{"reb": float(r)} for r in (2, 4, 6, 8, 10)]   # his last 5 rebounds average 6
+    fake = types.SimpleNamespace(his=lambda pid, date: rs)
+    want(abs(mod.last5_ratio(fake, 1, TB.D, "rebounds", 9.0) - 1.5) < 1e-12, "last-5 ratio: the line over his last 5 games' average")
+    want(mod.last5_ratio(types.SimpleNamespace(his=lambda pid, date: []), 1, TB.D, "rebounds", 9.0) is None and
+         mod.last5_ratio(types.SimpleNamespace(his=lambda pid, date: [{"reb": 0.0}]), 1, TB.D, "rebounds", 9.0) is None,
+         "no games or a zero average: no ratio")
+    lo, hi = mod.L5_ZONE
+    p5 = lambda l5, ratio=0.6: mod.pings_l5({"ratio": ratio, "price": 1.9}, "rebounds", l5)
+    want(p5(None) and p5(lo) and not p5(lo + 1e-9) and not p5(1.2) and not p5(hi) and p5(hi + 1e-9) and p5(2.0) and not p5(2.0, 0.75),
+         "pings_l5: skipped when the line is in (1.0565, 1.4167] times his last 5; no ratio: kept; outside the band: never")
     pg = lambda ratio, price=1.9, mk="rebounds": mod.pings({"ratio": ratio, "price": price}, mk)
     want(pg(0.6) and pg(0.5) and not pg(0.49) and not pg(0.7) and not pg(0.6, 1.5) and not pg(0.6, mk="threes"),
          "pings: 30-50% below (ratio 0.50-0.70), -150 or better, not threes")
@@ -59,7 +70,7 @@ def check(mod):
     return ok
 
 
-def check_live(L, fake_model=True):
+def check_live(L, fake_model=True, l5=None):
     """At 23:00 FanDuel posts B's rebounds with his projection at 60% of the line, B's points at 60.5 (far over: under
     50%), S2's points at 5.5, B's threes at 2.5 and G4's assists at 20.5 with the under at -200. The 23:31 run (tip - 29)
     records UNDER20 for all but S2's points and pings only B's rebounds (30-50% below, -150 or better, not threes:
@@ -70,8 +81,10 @@ def check_live(L, fake_model=True):
     sent = []
     kw = dict(phone=L.ALL_RULES, lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"], tracking_db=tmp / "t.sqlite",
               lineups_db=tmp / "none.sqlite", index_json=tmp / "none.json", db=tmp / "role.sqlite", sender=lambda b: sent.append(b) or True)
-    saved = U._MODEL.get("m")
+    saved, real_l5 = U._MODEL.get("m"), U.last5_ratio
     U._MODEL["m"] = FAKE
+    if l5 is not None:                                  # amendment 9: B's rebounds line sits l5 x his last 5
+        U.last5_ratio = lambda *a: l5
     try:
         L.process(now="2026-11-01T14:00:00", **kw)
         import nba_boost as BOOST
@@ -90,9 +103,21 @@ def check_live(L, fake_model=True):
         L.process(now="2026-11-01T23:40:00", **kw)
     finally:
         U._MODEL.pop("m", None)
+        U.last5_ratio = real_l5
         if saved:
             U._MODEL["m"] = saved
     under = [b for b in sent if "UNDER" in b]
+    notes = dict(((r[0], r[1]), r[2]) for r in sqlite3.connect(tmp / "role.sqlite").execute(
+        "SELECT pid, market, note FROM idea_signals WHERE rule = 'UNDER20'"))
+    if l5 is not None:                                  # in the zone: recorded with its ratio, not pinged
+        assert under == [] and notes[(TB.B, "rebounds")].endswith(f" l5 {l5:.6f}"), (sent, notes)
+        assert sqlite3.connect(tmp / "role.sqlite").execute(
+            "SELECT pinged FROM idea_signals WHERE rule = 'UNDER20' AND pid = ? AND market = 'rebounds'", (TB.B,)).fetchall() == [(0,)]
+        return
+    stored = sqlite3.connect(tmp / "role.sqlite").execute(
+        "SELECT line FROM idea_signals WHERE rule = 'UNDER20' AND pid = ? AND market = 'rebounds'", (TB.B,)).fetchone()[0]
+    r5 = U.last5_ratio(bd, TB.B, TB.D, "rebounds", stored)
+    assert r5 is not None and not (U.L5_ZONE[0] < r5 <= U.L5_ZONE[1]) and notes[(TB.B, "rebounds")].endswith(f" l5 {r5:.6f}"), (r5, notes)
     assert len(under) == 1 and re.fullmatch(r"🔵 UNDER Bee Big REB u[\d.]+ -111 FD · proj [\d.]+ \(60% of the line\), \d+ min · shadow",
                                             under[0]), sent
     rows = sqlite3.connect(tmp / "role.sqlite").execute(
@@ -146,13 +171,49 @@ def check_replay(SR):
     assert none == () and [(s["pid"], s["market"], s["side"], s["line"]) for s in got] == [(TB.B, "rebounds", "under", 30.5)], got
 
 
+def check_replay_l5(SR, l5):
+    """UNDER3050 and UNDER3050L at the tip - 30 tick, B's rebounds at 60% of the line: both fire unless the line sits in
+    amendment 9's zone over his last 5 (l5), when only UNDER3050 does."""
+    import nba_boost as BOOST
+    import nba_role as ROLE
+    import nba_under as U
+    tmp = pathlib.Path(tempfile.mkdtemp())
+    p = TB.live_stores(tmp)
+    saved, real = (SR.MATCHUP_DB, SR.ROLE_GAMELOGS_DB), U.last5_ratio
+    SR.MATCHUP_DB, SR.ROLE_GAMELOGS_DB = p["matchup"], p["gamelogs"]
+    SR._RD.clear()
+    if l5 is not None:
+        U.last5_ratio = lambda *a: l5
+    try:
+        bd = BOOST.live_data(p["matchup"], p["gamelogs"], "2026-27")
+        rd = ROLE.RoleData(p["matchup"], p["gamelogs"], "2026-27")
+        line = round(U.projection(bd, rd, TB.B, "HOM", TB.D, {TB.X}, "rebounds")[1] / 0.6, 4)
+        got = {}
+        for cls in (SR.UNDER3050, SR.UNDER3050L):
+            v = TB.FakeView({("G1", TB.B, "rebounds", "fd"): {(line, "over"): 1.9, (line, "under"): 1.9}})
+            r = cls()
+            r.start_day(v)
+            r.on_report(v, "2026-11-01T16:00:04", [("HOM", TB.X, "Out")], {}, set())
+            v.t = "2026-11-01T23:30:00"
+            got[cls.name] = [(s["pid"], s["market"]) for s in r.on_tick(v, "G1", 30)]
+    finally:
+        SR.MATCHUP_DB, SR.ROLE_GAMELOGS_DB = saved
+        U.last5_ratio = real
+        SR._RD.clear()
+    want = [(TB.B, "rebounds")]
+    return got == {"UNDER3050": want, "UNDER3050L": [] if l5 is not None else want}
+
+
 def test_under():
     import nba_role_open as L
     import nba_sxs_rules as SR
     assert check(UNDER)
     check_live(L)
+    check_live(L, l5=1.2)
     check_replay(SR)
+    assert check_replay_l5(SR, None) and check_replay_l5(SR, 1.2)
     check_phone_default(L)
+    assert SR.REGISTRY["UNDER3050L"][1] == SR.fingerprint(SR.UNDER3050L)
 
 
 def test_mutants():
@@ -162,7 +223,12 @@ def test_mutants():
                       ("no star cut", 'return f["ratio"] < STRONG_AT', 'return f["ratio"] < RATIO_AT'),
                       ("no 50% floor on pings", "PING_FLOOR <= f[\"ratio\"] < STRONG_AT", "f[\"ratio\"] < STRONG_AT"),
                       ("pings at 20%+", "PING_FLOOR <= f[\"ratio\"] < STRONG_AT", "PING_FLOOR <= f[\"ratio\"] < RATIO_AT"),
-                      ("no EV bar", 'if p * over - 1 >= EV_AT:\n        return {"side": "over"', 'if p * over - 1 >= -1:\n        return {"side": "over"')):
+                      ("no EV bar", 'if p * over - 1 >= EV_AT:\n        return {"side": "over"', 'if p * over - 1 >= -1:\n        return {"side": "over"'),
+                      ("zone ignored", "return pings(f, market) and not (l5 is not None and L5_ZONE[0] < l5 <= L5_ZONE[1])", "return pings(f, market)"),
+                      ("zone's low edge closed", "L5_ZONE[0] < l5 <= L5_ZONE[1]", "L5_ZONE[0] <= l5 <= L5_ZONE[1]"),
+                      ("zone's high edge open", "L5_ZONE[0] < l5 <= L5_ZONE[1]", "L5_ZONE[0] < l5 < L5_ZONE[1]"),
+                      ("no ratio skipped", "not (l5 is not None and L5_ZONE", "l5 is not None and not (L5_ZONE"),
+                      ("last 10 games", "l5 = bd.his(pid, date)[-5:]", "l5 = bd.his(pid, date)[-10:]")):
         assert src.count(a) == 1, tag
         d = pathlib.Path(tempfile.mkdtemp())
         (d / "nba_under_mut.py").write_text(src.replace(a, b))
@@ -176,7 +242,7 @@ def test_mutants():
     # (UNDER20's dedupe is not mutated: tip30_done already runs each game once, so it cannot be told apart.)
     import nba_role_open as L
     lsrc = pathlib.Path(L.__file__).read_text()
-    a = "if cur.rowcount and UNDER.pings(u20, mk):"
+    a = "if cur.rowcount and UNDER.pings_l5(u20, mk, l5):"
     assert lsrc.count(a) == 1
     d = pathlib.Path(tempfile.mkdtemp())
     (d / "nba_role_open_umut.py").write_text(lsrc.replace(a, "if cur.rowcount:"))
@@ -190,6 +256,32 @@ def test_mutants():
     finally:
         sys.path.remove(str(d))
         sys.modules.pop("nba_role_open_umut", None)
+    a = "if cur.rowcount and UNDER.pings_l5(u20, mk, l5):"           # amendment 9: the zone ignored live
+    assert lsrc.count(a) == 1
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "nba_role_open_umut.py").write_text(lsrc.replace(a, "if cur.rowcount and UNDER.pings(u20, mk):"))
+    sys.path.insert(0, str(d))
+    try:
+        check_live(importlib.import_module("nba_role_open_umut"), l5=1.2)
+    except AssertionError:
+        pass
+    else:
+        raise AssertionError("mutant survived: the line filter is ignored live")
+    finally:
+        sys.path.remove(str(d))
+        sys.modules.pop("nba_role_open_umut", None)
+    import nba_sxs_rules as SR                         # UNDER3050L without the zone
+    ssrc = pathlib.Path(SR.__file__).read_text()
+    a = "return f if f and UNDER_M.pings_l5(f, mk, UNDER_M.last5_ratio(bd, p, date, mk, m[0])) else None"
+    assert ssrc.count(a) == 1
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "nba_sxs_rules_umut.py").write_text(ssrc.replace(a, "return f if f and UNDER_M.pings(f, mk) else None"))
+    sys.path.insert(0, str(d))
+    try:
+        assert not check_replay_l5(importlib.import_module("nba_sxs_rules_umut"), 1.2), "mutant survived: UNDER3050L ignores the zone"
+    finally:
+        sys.path.remove(str(d))
+        sys.modules.pop("nba_sxs_rules_umut", None)
 
 if __name__ == "__main__":
     test_under()

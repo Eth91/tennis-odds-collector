@@ -210,9 +210,12 @@ def tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json,
             out_t = {x for x, (tm, st_) in listed.items() if tm == team and st_ in OUTS}
             u20 = UNDER.under20(bd, rd, date, team, p, mk, line, under, out_t)
             if u20:
+                l5 = UNDER.last5_ratio(bd, p, date, mk, line)
+                note = f"proj {u20['proj']:.1f} min {u20['min']:.1f}" + (f" l5 {l5:.6f}" if l5 is not None else "")
                 cur = con.execute("INSERT OR IGNORE INTO idea_signals VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-                                  ("UNDER20", gid, p, mk, line, under, f"proj {u20['proj']:.1f} min {u20['min']:.1f}", date, player, now, 0))
-                if cur.rowcount and UNDER.pings(u20, mk):   # pinged (SHADOW): 30-50% below, -150 or better, not threes
+                                  ("UNDER20", gid, p, mk, line, under, note, date, player, now, 0))
+                if cur.rowcount and UNDER.pings_l5(u20, mk, l5):   # pinged (SHADOW): 30-50% below, -150 or better, not threes,
+                    # and the line not 6-42% over his last-5 average (NBA_UNDER_PREREG.md amendment 9)
                     ok = notify(sender, "UNDER20", f"🔵 UNDER {player} {ABBR.get(mk, mk.upper())} u{line:g} {american(under)} FD · proj {u20['proj']:.1f} "
                                 f"({u20['ratio']:.0%} of the line), {u20['min']:.0f} min · shadow", phone)
                     con.execute("UPDATE idea_signals SET pinged = ? WHERE rule = 'UNDER20' AND gid = ? AND pid = ? AND market = ?",

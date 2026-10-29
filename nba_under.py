@@ -19,6 +19,7 @@ RATIO_AT, EV_AT = 0.80, 0.05
 PING_PRICE_MIN, PING_SKIP = 1 / 0.6, ("threes",)         # amendment 1: pinged when -150 or better, not threes
 STRONG_AT = 0.70                                         # amendment 3: under 70% of the line (UNDER30P)
 PING_FLOOR = 0.50                                        # amendment 4: pinged 30-50% below the line (ratio 0.50-0.70)
+L5_ZONE = (1.0564788482047636, 1.4166666666666667)       # amendment 9: not pinged when line / his last-5 avg is in (lo, hi]
 MARKETS = tuple(BOOST.PARTS)
 FEATURES = ("logit_q", "line", "proj/line", "min_change", "season_mpg", "recent", "rest", "b2b", "game_index") + \
     tuple(f"mk_{m}" for m in MARKETS)
@@ -53,6 +54,19 @@ def eligible(f, market):
 def pings(f, market):
     """Amendment 4: an UNDER20 flag pings when eligible and 30-50% below the line (UNDER3050)."""
     return eligible(f, market) and PING_FLOOR <= f["ratio"] < STRONG_AT
+
+
+def last5_ratio(bd, pid, date, market, line):
+    """Amendment 9: the line / his average of the market's stats over his last 5 games (any team, this season and last),
+    or None without games or with a zero average."""
+    l5 = bd.his(pid, date)[-5:]
+    avg = sum(BOOST.stat_of(r, market) for r in l5) / len(l5) if l5 else 0.0
+    return line / avg if avg else None
+
+
+def pings_l5(f, market, l5):
+    """Amendment 9: the pings (amendment 4) less the flags whose line is 6-42% over his last-5 average (UNDER3050L)."""
+    return pings(f, market) and not (l5 is not None and L5_ZONE[0] < l5 <= L5_ZONE[1])
 
 
 def strong(f):
