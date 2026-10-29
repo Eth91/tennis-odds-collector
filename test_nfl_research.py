@@ -510,3 +510,16 @@ def test_field_payload_per_game_league_and_ranks(tmp_path):
     assert s["def"]["GB"]["rush"] == {"le": [10, 30, 0]} and s["rank"]["rush"]["le"] == {"CHI": 2, "GB": 1}
     assert s["lg"]["rush"]["le"] == [8.0, 43.3, 0.0]
     assert s["p"]["7"] == {"recv": {"dpl": [3, 2, 50]}, "rush": {"le": [5, 25, 1]}, "g": 2} and s["p"]["9"]["pass"]["dpl"][2] == 90
+
+
+def test_nfl_matchup_page_scrolls_up_and_down_only_and_shows_the_props_cards():
+    css = UI.CSS
+    assert ':root[data-sp="nfl"] #mp{overflow-x:hidden;touch-action:pan-y;overscroll-behavior-x:none}' in css
+    assert ':root[data-sp="nfl"] #pg{overflow-x:hidden;overscroll-behavior-x:none}' in css
+    js = UI.JS_APP
+    # a rushing prop: no coverage, no man / zone, no pressure; a catch prop: no run defense
+    assert 'if (["rush_yds", "rush_att", "long_rush"].indexOf(m) >= 0) return ["field", "big", "run"]' in js
+    assert 'if (["rec", "rec_yds", "long_rec"].indexOf(m) >= 0) return ["field", "big", "pressure", "cover", "manzone"]' in js
+    assert 'if (m === "kick_pts" || m === "fg_made" || m === "sacks") return [];' in js
+    # the field chart opens on the Matchup view, with the two-line read
+    assert 'MUP.fv = MUP.fv || "m";' in js and "gives up the most:</em>" in js and "most:</em>" in js
