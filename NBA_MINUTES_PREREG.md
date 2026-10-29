@@ -294,3 +294,35 @@ by no more than 0.05. Else FAIL and nothing changes.
 - Capela on 2026-10-28 under the pick.
 - MAE on all absence nights and for starters.
 - Out of scope: V3 counts X as absent only after 3 games this season, so the first games of a season redistribute nothing.
+
+**Result (2026-10-29, about 06:15 UTC): gate 1 FAIL. Nothing changes.**
+- **Fit on 2023-24:** S's α is G 0, F 0, C 0.2; H's K is 8 (the largest offered); S+H's K is 8.
+
+| 2024-25 minutes MAE | all | absence nights | target (Capela-type) | starters |
+|---|---|---|---|---|
+| V3 | 4.761 | 5.107 | 5.535 (n 6,641) | 4.430 |
+| S | 4.756 | 5.099 | 5.526 | 4.424 |
+| H | 4.754 | 5.096 | 5.588 | 4.349 |
+| S+H | 4.750 | 5.091 | 5.582 | 4.345 |
+
+- **The pick, S:** target nights 0.008 better (the gate needed 0.3). H helps starters (−0.08) but hurts target nights.
+- **Gate 2 (information, since gate 1 failed):**
+  - UNDER20's ping set with S's minutes: 1,010, +16.1% | 700, +15.5% (V3: 1,022, +16.8% | 710, +15.0%).
+  - With H: +16.3% | +11.1%. With S+H: +15.8% | +12.4%.
+- **Why it fails (after the result; backups with a 25+ mpg player of his own group out):**
+
+| actual − projected | n | V3 bias | V3 MAE | V3 low by 8+ | all to position: bias, MAE |
+|---|---|---|---|---|---|
+| C 2023-24 / 2024-25 | 181 / 215 | +2.24 / +0.87 | 6.08 / 6.05 | 20% / 18% | −2.25, 8.16 / −3.04, 7.52 |
+| F | 1,361 / 1,588 | −0.52 / −0.57 | 5.88 / 5.59 | 12% / 11% | −0.87, 6.12 / −1.32, 5.97 |
+| G | 1,820 / 2,191 | +0.01 / −0.03 | 5.99 / 6.00 | 15% / 14% | −0.49, 6.19 / −0.45, 6.19 |
+
+  - V3 is not low on average for these backups, except a little for centers. The misses are spread both ways: who
+    absorbs the minutes varies night to night (a forward slides to the 5, a third-stringer plays).
+  - Giving the position-mates all the minutes overshoots.
+  - A Capela-sized miss (8+ low) happens on about 1 in 7 of these nights, 1 in 5 for centers, with nothing in the box
+    scores marking which.
+- **Capela on 2026-10-28:**
+  - On the VM's data after the game (outs Sengun and Adams), V3 gives 9.8 minutes.
+  - S at α_C = 0.2 gives 15.4 (he was the only active center), at 0.5 gives 23.8. He played 22.
+  - So S helps when one backup is the only one left at the spot, but across the league it averages out.
