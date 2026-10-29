@@ -52,12 +52,27 @@ body{background:#0f0f0f;--red:#ff090c;--grn:#28da8e}
 .dcr{grid-template-columns:repeat(4,1fr)} .lus.bk2{opacity:.78}
 .wgh{margin:14px 0 8px;font-size:15px;font-weight:600}
 .vs tr.lga td{color:#8e8e8e}
+/* the NFL Matchup page scrolls up and down only (nothing on it scrolls sideways) */
+:root[data-sp="nfl"] #mp{overflow-x:hidden;touch-action:pan-y;overscroll-behavior-x:none}
+:root[data-sp="nfl"] #pg{overflow-x:hidden;overscroll-behavior-x:none}
+:root[data-sp="nfl"] .mpf{min-width:0} :root[data-sp="nfl"] .mpf .dd{min-width:0;max-width:38vw} :root[data-sp="nfl"] .mpf .dd span{overflow:hidden;text-overflow:ellipsis}
 /* the field chart: the shot chart's football twin */
+.fld .fcl{font-size:10.5px;fill:#9a9a9a;font-weight:700;text-anchor:middle;letter-spacing:.04em} .fld .fcl.s{font-size:9px;letter-spacing:0}
+.fld .frl{font-size:10px;fill:#9a9a9a;font-weight:700;text-anchor:end} .fld .frl.s{font-size:8.5px;font-weight:500;fill:#6e6e6e}
+.fld .fs.up{fill:var(--grn)} .fld .fs.dn{fill:var(--red)} .fld .fst{font-size:15px;fill:#ffd60a;text-anchor:end}
+.frd{margin:10px 0 0;padding:10px 12px;border-radius:10px;background:#1c1c1c;font-size:13.5px;line-height:19px;color:#e5e5e5}
+.frd>b{display:block;margin-bottom:4px;font-size:13px;font-weight:700;color:#cfcfcf}
+.frd.v-g>b{color:var(--grn)} .frd.v-r>b{color:var(--red)}
+.frd p{margin:4px 0 0} .frd em{font-style:normal;font-weight:600;color:#fff}
+.fkey{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:8px 0 0;font-size:11.5px;color:#9a9a9a}
+.fkey.s{margin-top:4px;font-size:11px;color:#7c7c7c}
+.fkey i{display:inline-block;width:10px;height:10px;margin-right:5px;border-radius:3px;vertical-align:-1px}
+.fkey i.kg{background:rgba(40,218,142,.55)} .fkey i.kr{background:rgba(255,69,58,.5)} .fkey i.kb{border:2px solid #38bdf8;width:8px;height:8px}
 .fld{display:block;width:100%;height:auto;margin:10px 0 2px}
 .fld .fyl{stroke:#232323;stroke-width:1} .fld .fy10{stroke:#353535} .fld .fhash{fill:none;stroke:#3a3a3a;stroke-width:1.2;stroke-dasharray:3 5}
 .fld .flos{stroke:#9a9a9a;stroke-width:2} .fld .fhi{stroke:#38bdf8;stroke-width:2}
 .fld text{font-family:-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
-.fld .fyn{font-size:10px;fill:#6e6e6e;font-weight:600} .fld .fgl{font-size:10.5px;fill:#9a9a9a;font-weight:700;text-anchor:middle}
+.fld .fyn{font-size:10px;fill:#6e6e6e;font-weight:600}
 .fld .fv{font-size:22px;font-weight:700;fill:#fff;text-anchor:middle} .fld .fv.sm{font-size:14px} .fld .fv.rs{font-size:17px}
 .fld .fs{font-size:11.5px;fill:#d0d0d0;text-anchor:middle} .fld .fs.sm{font-size:9.5px} .fld .fs.rs{font-size:10.5px}
 .fld .fol{fill:#2c2c2e;stroke:#5a5a5e;stroke-width:1} .fld .fot{font-size:9px;font-weight:700;fill:#d0d0d0;text-anchor:middle}
@@ -3033,7 +3048,7 @@ const NFL_CFG = {
          MLB: "Middle Linebacker", CB: "Cornerback", S: "Safety", SS: "Safety", FS: "Safety", DB: "Defensive Back", DL: "Defensive Line"},
   GRPN: {QB: "quarterbacks", RB: "running backs", WR: "wide receivers", TE: "tight ends", K: "kickers"},
   MU_GROUP: pos => ({QB: "QB", RB: "RB", FB: "RB", WR: "WR", TE: "TE", K: "K"})[pos],
-  VS_GRP: [["QB", "Quarterbacks"], ["RB", "Running Backs"], ["WR", "Wide Receivers"], ["TE", "Tight Ends"]],
+  VS_GRP: [["QB", "QBs"], ["RB", "RBs"], ["WR", "WRs"], ["TE", "TEs"]],
   ROLE_ST: [["snap_pct", "Snaps", "% snaps", "SNAP%"], ["targets", "Targets", "tgt", "TGT"], ["rush_att", "Carries", "car", "CAR"],
             ["tgt_share", "Target Share", "% tgt", "TGT%"], ["rz", "Red Zone", "rz looks", "RZ"]],
   ROLE_TH: {snap_pct: 12, targets: 2.5, rush_att: 4, tgt_share: 7, rz: 1.5},
@@ -3273,7 +3288,7 @@ function nflMatchup() {
         <button class="cb" id="mpi" aria-label="How the ranks are built">${ICON.info}</button><button class="cb" id="mpsh" aria-label="Share">${ICON.share}</button></div>
     </div>
     <h2 class="mpt">${esc(p.opp || "")} Team Defense</h2>
-    <div class="mpf"><span>Last games vs</span>${dd("grp", VS_GRP, MUP.grp)}${dd("mkt", mks.map(m => [m, NAME[m]]), MUP.mkt)}</div>
+    <div class="mpf"><span>Last games vs</span>${dd("grp", VS_GRP, MUP.grp)}${dd("mkt", mks.map(m => [m, TAB[m] || NAME[m]]), MUP.mkt)}</div>
     <div id="vst"></div>
     <div class="shc" id="nfc"></div><div class="shc wg" id="nbg"></div><div class="shc wg" id="npr"></div>
     <div class="shc wg" id="ncv"></div><div class="shc wg" id="nmz"></div><div class="shc wg" id="nrd"></div><div class="shc wg" id="ncl"></div>`;
@@ -3300,47 +3315,49 @@ function nflMatchup() {
 // where the defense gives up yards on the ground: yards a carry by gap against the league's
 // ── the field chart (D.field, nfl_research.field_payload): the NBA shot chart's football twin, on the Matchup page.
 // Passing and receiving: the field past the line of scrimmage in twelve zones (behind the line, 0-9, 10-19, 20+ yards
-// downfield; left, middle, right of the hashes). Rushing: the line with its five linemen and the seven gaps. The player
-// (where his targets, throws or carries go, a blue heat) or the opponent's defense (what it gives up there against the
-// league's average defense: green = more, good for an over; red = less), this season or last ──
-const ZN = {dp: "Deep", in: "10–19", sh: "Short", bl: "Behind"}, SN = {l: "left", m: "middle", r: "right"};
-const GN = {le: "Left end", lt: "Left tackle", lg: "Left guard", m: "Middle", rg: "Right guard", rt: "Right tackle", re: "Right end"};
-// the pass field to scale-ish: rows top (deep) to bottom (behind the line), the line of scrimmage at y 252
-const FROWS = [["dp", 12, 108], ["in", 108, 180], ["sh", 180, 252], ["bl", 252, 292]], FCOLS = [["l", 0], ["m", 120], ["r", 240]];
+// downfield; left, middle, right as the quarterback looks). Rushing: the line with its five linemen and seven gaps.
+// Three views: Matchup (the default: where he gets the ball, on top of where the defense gives up yards, the spots
+// where both are true starred, and a sentence that says which), the player alone, the defense alone; this season or last ──
+const ZN = {dp: "deep", in: "intermediate", sh: "short", bl: "behind the line"}, SN = {l: "left", m: "middle", r: "right"};
+const GN = {le: "left end", lt: "left tackle", lg: "left guard", m: "middle", rg: "right guard", rt: "right tackle", re: "right end"};
+const zoneName = z => z.slice(0, 2) === "bl" ? `behind the line on the ${SN[z[2]]}` : `the ${ZN[z.slice(0, 2)]} ${SN[z[2]]}`;
+// the pass field: a gutter for the row names, rows deep to behind the line, the line of scrimmage at y 264
+const FX0 = 52, FW = 102, FROWS = [["dp", 24, 120, "DEEP", "20+ yds"], ["in", 120, 192, "10–19", "yds"], ["sh", 192, 264, "0–9", "yds"], ["bl", 264, 304, "BEHIND", "LOS"]],
+      FCOLS = [["l", FX0, "LEFT"], ["m", FX0 + FW, "MIDDLE"], ["r", FX0 + 2 * FW, "RIGHT"]];
 const fBlue = a => `rgba(56,189,248,${(.06 + .62 * Math.min(1, a)).toFixed(3)})`;
-function fGreenRed(d, side) {                          // d: how far over the league (-1 to 1), coloured for the side
+function fGreenRed(d, side, soft) {                    // d: how far over the league (-1 to 1), coloured for the side
   if (d === null) return "#191919";
-  const good = (d >= 0) === (side !== "under"), a = Math.min(1, Math.abs(d));
-  return good ? `rgba(40,218,142,${(.1 + .5 * a).toFixed(3)})` : `rgba(255,69,58,${(.1 + .5 * a).toFixed(3)})`;
+  const good = (d >= 0) === (side !== "under"), a = Math.min(1, Math.abs(d)) * (soft ? .7 : 1);
+  return good ? `rgba(40,218,142,${(.08 + .5 * a).toFixed(3)})` : `rgba(255,69,58,${(.08 + .5 * a).toFixed(3)})`;
 }
-// zs: {zone: {fill, t, sub, hi}} -> the pass field
+// one zone: its fill, the big number (t), the line under it (sub, coloured by subCls), his zone (hi: blue outline), a star
+const zoneMark = (z, x, y, w, h, small, narrow) => {
+  const cx = x + w / 2, cy = y + h / 2;
+  return `<rect x="${x + 1}" y="${y + 1}" width="${w - 2}" height="${h - 2}" rx="6" fill="${z.fill}"${z.hi ? ' class="fhi"' : ""}/>` +
+    (z.star ? `<text x="${x + w - 8}" y="${y + 17}" class="fst">★</text>` : "") +
+    `<text x="${cx}" y="${cy + (small ? 1 : z.sub ? -1 : 7)}" class="fv${small ? " sm" : narrow ? " rs" : ""}">${z.t}</text>` +
+    (z.sub ? `<text x="${cx}" y="${cy + (small ? 14 : 18)}" class="fs${small ? " sm" : narrow ? " rs" : ""}${z.subCls ? " " + z.subCls : ""}">${esc(z.sub)}</text>` : "");
+};
 function passFieldSvg(zs, label) {
-  const lines = [216, 180, 144, 108, 72, 36].map((y, i) => `<path d="M0,${y}H360" class="fyl${i === 1 || i === 3 ? " fy10" : ""}"/>`).join("");
-  const nums = [[180, "10"], [108, "20"]].map(([y, t]) => `<text x="7" y="${y - 4}" class="fyn">${t}</text><text x="353" y="${y - 4}" class="fyn" text-anchor="end">${t}</text>`).join("");
-  const cells = FROWS.map(([r, y0, y1]) => FCOLS.map(([c, x0]) => {
-    const z = zs[r + c] || {fill: "#191919", t: "–"}, cx = x0 + 60, cy = (y0 + y1) / 2, small = r === "bl";
-    return `<rect x="${x0 + 1}" y="${y0 + 1}" width="118" height="${y1 - y0 - 2}" rx="5" fill="${z.fill}"${z.hi ? ' class="fhi"' : ""}/>` +
-      `<text x="${cx}" y="${cy + (small ? 2 : z.sub ? -1 : 7)}" class="fv${small ? " sm" : ""}">${z.t}</text>` +
-      (z.sub && !small ? `<text x="${cx}" y="${cy + 18}" class="fs">${esc(z.sub)}</text>` : "") +
-      (z.sub && small ? `<text x="${cx}" y="${cy + 15}" class="fs sm">${esc(z.sub)}</text>` : "");
-  }).join("")).join("");
-  return `<svg class="fld" viewBox="0 0 360 312" role="img" aria-label="${esc(label)}"><rect x="0" y="0" width="360" height="312" rx="10" fill="#101010"/>
-    ${lines}${cells}<path d="M120,8V292M240,8V292" class="fhash"/><path d="M0,252H360" class="flos"/>${nums}
-    <text x="7" y="248" class="fyn">LOS</text><circle cx="180" cy="302" r="7" class="fqb"/></svg>`;
+  const W = FX0 + 3 * FW + 4;
+  const rows = FROWS.map(([r, y0, y1, a, b]) => `<text x="${FX0 - 6}" y="${(y0 + y1) / 2 - 2}" class="frl">${a}</text><text x="${FX0 - 6}" y="${(y0 + y1) / 2 + 10}" class="frl s">${b}</text>` +
+    FCOLS.map(([c, x0]) => zoneMark(zs[r + c] || {fill: "#191919", t: "–"}, x0, y0, FW, y1 - y0, r === "bl")).join("")).join("");
+  return `<svg class="fld" viewBox="0 0 ${W} 330" role="img" aria-label="${esc(label)}"><rect x="${FX0 - 2}" y="18" width="${3 * FW + 4}" height="292" rx="10" fill="#101010"/>
+    ${FCOLS.map(([, x0, lab]) => `<text x="${x0 + FW / 2}" y="12" class="fcl">${lab}</text>`).join("")}
+    ${[228, 192, 156, 120, 84, 48].map(y => `<path d="M${FX0},${y}H${FX0 + 3 * FW}" class="fyl"/>`).join("")}${rows}
+    <path d="M${FX0 + FW},20V306M${FX0 + 2 * FW},20V306" class="fhash"/><path d="M${FX0 - 2},264H${FX0 + 3 * FW + 2}" class="flos"/>
+    <circle cx="${FX0 + 1.5 * FW}" cy="320" r="8" class="fqb"/><text x="${FX0 + 1.5 * FW}" y="323.5" class="fot">QB</text></svg>`;
 }
-// the rush field: seven gaps between and outside the linemen (LT, LG, C, RG, RT), the line of scrimmage at y 232
-const RGAPS = ["le", "lt", "lg", "m", "rg", "rt", "re"], RLAB = ["LE", "LT", "LG", "MID", "RG", "RT", "RE"];
+// the rush field: the seven gaps between and outside the linemen (LT, LG, C, RG, RT), the line of scrimmage at y 236
+const RGAPS = ["le", "lt", "lg", "m", "rg", "rt", "re"], RLAB = ["L END", "L TKL", "L GRD", "MID", "R GRD", "R TKL", "R END"];
 function rushFieldSvg(zs, label) {
   const w = 360 / 7;
-  const cols = RGAPS.map((k, i) => { const z = zs[k] || {fill: "#191919", t: "–"}, cx = i * w + w / 2;
-    return `<rect x="${i * w + 1}" y="22" width="${w - 2}" height="208" rx="5" fill="${z.fill}"${z.hi ? ' class="fhi"' : ""}/>` +
-      `<text x="${cx}" y="16" class="fgl">${RLAB[i]}</text><text x="${cx}" y="122" class="fv rs">${z.t}</text>` +
-      (z.sub ? `<text x="${cx}" y="140" class="fs rs">${esc(z.sub)}</text>` : ""); }).join("");
+  const cols = RGAPS.map((k, i) => `<text x="${i * w + w / 2}" y="12" class="fcl s">${RLAB[i]}</text>` + zoneMark(zs[k] || {fill: "#191919", t: "–"}, i * w, 20, w, 214, false, true)).join("");
   const ol = [[1, "LT"], [2, "LG"], [3.5, "C"], [5, "RG"], [6, "RT"]].map(([b, t]) =>
-    `<rect x="${b * w - 13}" y="223" width="26" height="18" rx="5" class="fol"/><text x="${b * w}" y="236" class="fot">${t}</text>`).join("");
-  return `<svg class="fld" viewBox="0 0 360 272" role="img" aria-label="${esc(label)}"><rect x="0" y="0" width="360" height="272" rx="10" fill="#101010"/>
-    ${[66, 110, 154, 198].map(y => `<path d="M0,${y}H360" class="fyl"/>`).join("")}${cols}<path d="M0,232H360" class="flos"/>${ol}
-    <circle cx="180" cy="258" r="8" class="fqb"/><text x="180" y="262" class="fot">RB</text></svg>`;
+    `<rect x="${b * w - 13}" y="227" width="26" height="18" rx="5" class="fol"/><text x="${b * w}" y="240" class="fot">${t}</text>`).join("");
+  return `<svg class="fld" viewBox="0 0 360 276" role="img" aria-label="${esc(label)}"><rect x="0" y="18" width="360" height="236" rx="10" fill="#101010"/>
+    ${[70, 114, 158, 202].map(y => `<path d="M0,${y}H360" class="fyl"/>`).join("")}${cols}<path d="M0,236H360" class="flos"/>${ol}
+    <circle cx="180" cy="263" r="9" class="fqb"/><text x="180" y="266.5" class="fot">RB</text></svg>`;
 }
 function fieldKinds(p) {                                // which fields bear on the market
   const m = p.market, pos = (p.ctx || {}).pos || "", rb = pos === "RB" || pos === "FB";
@@ -3350,56 +3367,78 @@ function fieldKinds(p) {                                // which fields bear on 
   if (RUSH_M.indexOf(m) >= 0 && m !== "anytime_td") return ["rush"];
   return ["recv"];
 }
+const HOT_SHARE = .15, HOT_GAP_SHARE = .18, HOT_D = .2;           // "his" zone; how far over the league is "soft"
 function fieldCard(p) {
-  const F = D.field || {}, kinds = fieldKinds(p), side = ST.side;
+  const F = D.field || {}, kinds = fieldKinds(p), side = ST.side, over = side !== "under";
   if (!F.seasons) return "";
   MUP.fk = kinds.indexOf(MUP.fk) >= 0 ? MUP.fk : kinds[0];
-  MUP.fv = MUP.fv || "p";
+  MUP.fv = MUP.fv || "m";
   MUP.fs = MUP.fs || F.seasons.find(s => ((F[s] || {}).p || {})[String(p.pid)]) || F.seasons[0];
-  const k = MUP.fk, def = MUP.fv === "d", S = F[MUP.fs] || {}, me = (S.p || {})[String(p.pid)] || {}, od = (S.def || {})[p.opp] || {};
-  const grp0 = (p.ctx || {}).group, grp = k === "pass" ? "all" : MUP.fg || (["WR", "TE", "RB"].indexOf(grp0) >= 0 ? grp0 : "all");
-  const nm = lastName(p.player), g = me.g || 0, seasonLab = MUP.fs.slice(0, 4);
-  let svg = "", rows = "", legend = "";
+  const k = MUP.fk, v = MUP.fv, S = F[MUP.fs] || {}, me = (S.p || {})[String(p.pid)] || {}, od = (S.def || {})[p.opp] || {};
+  const grp0 = (p.ctx || {}).group, grp = k === "pass" ? "all" : v === "d" && MUP.fg ? MUP.fg : (["WR", "TE", "RB"].indexOf(grp0) >= 0 ? grp0 : "all");
+  const nm = lastName(p.player), opp = p.opp, g = me.g || 0, seasonLab = MUP.fs.slice(0, 4), noun = k === "pass" ? "throws" : k === "rush" ? "carries" : "targets";
+  // per zone: his share of his throws / targets / carries; the defense's number, the league's, and how far apart (d)
+  let keys, share, dv = {}, rank = {}, val = {}, lgv = {}, n = 0, unit, tree = {};
   if (k === "rush") {
-    const mine = me.rush || {}, n = RGAPS.reduce((a, x) => a + ((mine[x] || [0])[0] || 0), 0), lg = (S.lg || {}).rush || {}, R = od.rush || {};
-    const share = x => n ? ((mine[x] || [0])[0] || 0) / n : 0, mx = Math.max(...RGAPS.map(share), .01);
-    const zs = {};
-    RGAPS.forEach(x => {
-      if (!def) { const c = mine[x] || [0, 0, 0]; zs[x] = {fill: c[0] ? fBlue(share(x) / mx) : "#191919", t: c[0] ? Math.round(share(x) * 100) + "%" : "–", sub: c[0] ? fx(c[1] / c[0], 1) + " ypc" : ""}; }
-      else { const c = R[x], y = c && c[0] ? c[1] / c[0] : null, l = lg[x] && lg[x][0] ? lg[x][1] / lg[x][0] : null, rk = ((S.rank || {}).rush || {})[x] || {};
-        zs[x] = {fill: fGreenRed(y === null || l === null ? null : (y - l) / 1.5, side), t: y === null ? "–" : fx(y, 1), sub: rk[p.opp] ? ord(rk[p.opp]) : "", hi: share(x) >= .2}; }
-    });
-    svg = rushFieldSvg(zs, def ? `${p.opp} run defense by gap, ${seasonLab}` : `${p.player} carries by gap, ${seasonLab}`);
-    if (def) {
-      const list = RGAPS.map(x => { const c = R[x], l = lg[x]; return c && c[0] >= FIELD_MIN && l && l[0] ? {x: x, d: c[1] / c[0] - l[1] / l[0]} : null; }).filter(Boolean).sort((a, b) => b.d - a.d).slice(0, 3);
-      rows = list.map(r => `<div class="kv shr"><span>${GN[r.x]}<small>${n ? Math.round(share(r.x) * 100) + "% of his carries" : "no carries"}</small></span><b><em class="${r.d > 0 ? "up" : "dn"}">${r.d > 0 ? "+" : ""}${r.d.toFixed(1)} ypc</em><small>${(R[r.x] || [0])[0]} carries</small></b></div>`).join("");
-    }
-    legend = def ? "" : `${n} carries${g ? ` in ${g} games` : ""} · share of his carries`;
+    const mine = me.rush || {}, lg = (S.lg || {}).rush || {}, R = od.rush || {};
+    keys = RGAPS; n = keys.reduce((a, x) => a + ((mine[x] || [0])[0] || 0), 0);
+    share = x => n ? ((mine[x] || [0])[0] || 0) / n : 0;
+    keys.forEach(x => { const c = R[x], y = c && c[0] >= FIELD_MIN ? c[1] / c[0] : null, l = lg[x] && lg[x][0] ? lg[x][1] / lg[x][0] : null;
+      val[x] = y; lgv[x] = l; dv[x] = y === null || l === null ? null : (y - l) / 1.5; rank[x] = (((S.rank || {}).rush || {})[x] || {})[opp]; });
+    unit = "yds a carry";
   } else {
-    const tree = (k === "pass" ? me.pass : me.recv) || {}, n = Object.values(tree).reduce((a, c) => a + c[0], 0), pg = (S.def ? od.pass || {} : {})[grp] || {}, lg = (((S.lg || {}).pass || {})[grp]) || {};
-    const share = z => n ? ((tree[z] || [0])[0] || 0) / n : 0, mx = Math.max(...Object.keys(tree).map(share), .01), zs = {};
-    FROWS.forEach(([r]) => FCOLS.forEach(([c]) => { const z = r + c;
-      if (!def) { const t = tree[z]; zs[z] = !t || !t[0] ? {fill: "#191919", t: "–"} : {fill: fBlue(share(z) / mx), t: g ? fx(t[2] / g, 1) : t[2], sub: `${t[1]}/${t[0]} · ${Math.round(share(z) * 100)}%`}; }
-      else { const v = (pg[z] || [0, 0, 0, 0])[2], l = (lg[z] || [0, 0, 0, 0])[2], rk = (((S.rank || {}).pass || {})[grp] || {})[z] || {};
-        zs[z] = {fill: fGreenRed(l || v ? (v - l) / Math.max(l, 4) : null, side), t: fx(v, 1), sub: rk[p.opp] ? ord(rk[p.opp]) : "", hi: k === "recv" && share(z) >= .15}; }
-    }));
-    svg = passFieldSvg(zs, def ? `${p.opp} passing allowed by zone, ${seasonLab}` : `${p.player} ${k === "pass" ? "throws" : "targets"} by zone, ${seasonLab}`);
-    if (def) {
-      const list = Object.keys(lg).map(z => ({z: z, d: (pg[z] || [0, 0, 0, 0])[2] - lg[z][2]})).sort((a, b) => b.d - a.d).slice(0, 3);
-      rows = list.map(r => `<div class="kv shr"><span>${ZN[r.z.slice(0, 2)]} ${SN[r.z[2]]}<small>${n ? Math.round(share(r.z) * 100) + `% of his ${k === "pass" ? "throws" : "targets"}` : `no ${k === "pass" ? "throws" : "targets"}`}</small></span><b><em class="${r.d > 0 ? "up" : "dn"}">${r.d > 0 ? "+" : ""}${r.d.toFixed(1)} yds/g</em><small>${fx((pg[r.z] || [0])[0], 1)} tgt a game</small></b></div>`).join("");
-    }
-    legend = def ? "" : `${n} ${k === "pass" ? "throws" : "targets"}${g ? ` in ${g} games` : ""} · yards a game · ${k === "pass" ? "completions/attempts" : "catches/targets"} · share`;
+    tree = (k === "pass" ? me.pass : me.recv) || {};
+    const pg = (od.pass || {})[grp] || {}, lg = (((S.lg || {}).pass || {})[grp]) || {};
+    keys = FROWS.flatMap(([r]) => FCOLS.map(([c]) => r + c)); n = Object.values(tree).reduce((a, c) => a + c[0], 0);
+    share = z => n ? ((tree[z] || [0])[0] || 0) / n : 0;
+    keys.forEach(z => { const y = (pg[z] || [0, 0, 0, 0])[2], l = (lg[z] || [0, 0, 0, 0])[2];
+      val[z] = od.pass ? y : null; lgv[z] = l; dv[z] = !od.pass || (!l && !y) ? null : (y - l) / Math.max(l, 4); rank[z] = ((((S.rank || {}).pass || {})[grp] || {})[z] || {})[opp]; });
+    unit = "yds a game";
   }
+  const his = x => share(x) >= (k === "rush" ? HOT_GAP_SHARE : HOT_SHARE);
+  // the read, both halves of the matchup in two lines: where the defense gives up the most (and how much he goes
+  // there), and where he goes the most (and what the defense gives up there); above them a verdict for the side shown
+  const fit = x => dv[x] === null ? null : (over ? dv[x] : -dv[x]);
+  const verb = {pass: "throws", recv: "gets the ball", rush: "runs"}[k];
+  const softest = keys.filter(x => dv[x] !== null && val[x] !== null).sort((a, b) => dv[b] - dv[a])[0];
+  const busiest = n ? keys.slice().sort((a, b) => share(b) - share(a))[0] : null;
+  const stars = new Set(keys.filter(x => his(x) && fit(x) !== null && fit(x) >= HOT_D));
+  const place = x => k === "rush" ? `the ${GN[x]}` : zoneName(x);
+  const amt = x => `${fx(val[x], 1)} ${unit}${k !== "rush" && grp !== "all" ? ` to ${GRPN[grp] || grp}` : ""}`;
+  const diff = x => { const d = val[x] - lgv[x]; return `${d >= 0 ? "+" : "−"}${fx(Math.abs(d), 1)} vs avg`; };
+  const pct_ = x => Math.round(share(x) * 100) + "%";
+  let verdict = {c: "n", t: "No clear edge"};
+  if (!n) verdict = {c: "n", t: `No ${noun} for ${esc(nm)} in ${seasonLab}`};
+  else if (busiest && fit(busiest) !== null && fit(busiest) >= HOT_D) verdict = {c: "g", t: `★ He ${verb} where ${esc(opp)} ${over ? "gives up yards" : "shuts it down"}`};
+  else if (stars.size) verdict = {c: "g", t: `★ One of his spots is ${over ? "soft" : "tough"} for ${esc(opp)}`};
+  else if (busiest && fit(busiest) !== null && fit(busiest) <= -HOT_D) verdict = {c: "r", t: `⚠ His main spot is one ${esc(opp)} ${over ? "defends well" : "gives up yards in"}`};
+  const reads = [`<div class="frd v-${verdict.c}"><b>${verdict.t}</b>` +
+    (softest ? `<p><em>${esc(opp)} gives up the most:</em> ${place(softest)}, ${amt(softest)} (${diff(softest)}${rank[softest] ? `, ${ord(rank[softest])}` : ""}).${n ? ` ${esc(nm)}: ${pct_(softest)} of his ${noun} there.` : ""}</p>` : "") +
+    (busiest && share(busiest) ? `<p><em>${esc(nm)} ${verb} most:</em> ${place(busiest)}, ${pct_(busiest)} of his ${noun}.${val[busiest] !== null ? ` ${esc(opp)} there: ${amt(busiest)} (${diff(busiest)}).` : ""}</p>` : "") + "</div>"];
+  // the zones, for the view
+  const zs = {}, mx = Math.max(...keys.map(share), .01);
+  keys.forEach(x => {
+    const sh = share(x), dTxt = val[x] === null ? "" : diff(x).replace(" vs avg", ""), dCls = dv[x] === null || Math.abs(dv[x]) < .1 ? "" : (dv[x] >= 0) === over ? "up" : "dn";
+    if (v === "m") zs[x] = {fill: fGreenRed(dv[x], side, true), t: n ? Math.round(sh * 100) + "%" : "–", sub: dTxt, subCls: dCls, hi: his(x), star: stars.has(x)};
+    else if (v === "p") {
+      if (k === "rush") { const c = (me.rush || {})[x] || [0, 0, 0]; zs[x] = {fill: c[0] ? fBlue(sh / mx) : "#191919", t: c[0] ? Math.round(sh * 100) + "%" : "–", sub: c[0] ? fx(c[1] / c[0], 1) + " ypc" : ""}; }
+      else { const c = tree[x]; zs[x] = !c || !c[0] ? {fill: "#191919", t: "–"} : {fill: fBlue(sh / mx), t: g ? fx(c[2] / g, 1) : c[2], sub: `${c[1]}/${c[0]} · ${Math.round(sh * 100)}%`}; }
+    } else zs[x] = {fill: fGreenRed(dv[x], side), t: val[x] === null ? "–" : fx(val[x], 1), sub: rank[x] ? ord(rank[x]) : "", hi: his(x)};
+  });
+  const lab = {m: `${nm} vs ${opp}`, p: nm, d: `${opp} D`}[v];
+  const svg = k === "rush" ? rushFieldSvg(zs, `${lab}, carries by gap, ${seasonLab}`) : passFieldSvg(zs, `${lab}, by zone, ${seasonLab}`);
+  const key = v === "m" ? `<div class="fkey"><span><i class="kg"></i>${esc(opp)} gives up more than avg</span><span><i class="kr"></i>less</span><span><i class="kb"></i>his spot (${k === "rush" ? "18" : "15"}%+ of his ${noun})</span><span>★ both</span></div>
+      <div class="fkey s">Big number: his share of ${noun} · small: ${esc(opp)}'s ${unit} vs the average defense${k !== "rush" && grp !== "all" ? `, to ${GRPN[grp] || grp}` : ""}</div>`
+    : v === "p" ? `<div class="fkey s">${n} ${noun}${g ? ` in ${g} games` : ""} · ${k === "rush" ? "share of his carries, yards a carry" : `yards a game, ${k === "pass" ? "completions/attempts" : "catches/targets"}, share`}</div>`
+    : `<div class="fkey"><span><i class="kg"></i>more than avg</span><span><i class="kr"></i>less</span><span><i class="kb"></i>his spot</span></div><div class="fkey s">${unit} allowed${k !== "rush" && grp !== "all" ? ` to ${GRPN[grp] || grp}` : ""} · rank: 1st = allows the fewest</div>`;
   const kindLab = {pass: "Passing", recv: "Receiving", rush: "Rushing"};
-  const grps = def && k === "recv" ? [["all", "All"], ["WR", "WR"], ["TE", "TE"], ["RB", "RB"]] : [];
-  return `<div class="shh"><span class="av">${head(p.pid)}</span><b>FIELD CHART</b>${logo(p.opp, "shl0")}</div>
-    <div class="seg" role="group" aria-label="View"><span class="pill2"></span><button data-fv="p" aria-pressed="${!def}">${esc(nm)}</button><button data-fv="d" aria-pressed="${def}">${esc(p.opp)} Defense</button></div>
+  const grps = v === "d" && k === "recv" ? [["all", "All"], ["WR", "WR"], ["TE", "TE"], ["RB", "RB"]] : [];
+  return `<div class="shh"><span class="av">${head(p.pid)}</span><b>FIELD CHART</b>${logo(opp, "shl0")}</div>
+    <div class="seg" role="group" aria-label="View"><span class="pill2"></span>${[["m", "Matchup"], ["p", nm], ["d", opp + " D"]].map(([x, l]) => `<button data-fv="${x}" aria-pressed="${v === x}">${esc(l)}</button>`).join("")}</div>
     <div class="shy" role="group" aria-label="Season">${F.seasons.map(s => `<button class="chip" data-fs="${s}" aria-pressed="${s === MUP.fs}">${s.slice(0, 4)}</button>`).join("")}
-      ${kinds.length > 1 ? `<span class="fkk">${kinds.map(x => `<button class="chip" data-fk="${x}" aria-pressed="${x === k}">${kindLab[x]}</button>`).join("")}</span>` : `<span>${kindLab[k]}${def && od.g ? ` · ${od.g} games` : ""}</span>`}</div>
-    ${grps.length ? `<div class="shy fgp">${grps.map(([x, l]) => `<button class="chip" data-fg="${x}" aria-pressed="${x === grp}">${l}</button>`).join("")}<span>to ${grp === "all" ? "everyone" : esc(GRPN[grp] || grp)}</span></div>` : ""}
-    ${svg}
-    ${def ? `<div class="shk"><span>${side === "under" ? "More allowed" : "Less allowed"}</span><i></i><span>${side === "under" ? "Less" : "More"} · blue = his zones</span></div>` : `<div class="shk fbk"><span>${esc(legend)}</span></div>`}
-    ${rows ? `<h3 class="shw">Where ${esc(p.opp)} gives up the most<small>${k === "rush" ? "yards a carry" : "receiving yards a game"} over the league's average, ${seasonLab}</small></h3>${rows}` : ""}`;
+      ${kinds.length > 1 ? `<span class="fkk">${kinds.map(x => `<button class="chip" data-fk="${x}" aria-pressed="${x === k}">${kindLab[x]}</button>`).join("")}</span>` : `<span>${kindLab[k]}${od.g ? ` · ${esc(opp)} ${od.g} games` : ""}</span>`}</div>
+    ${grps.length ? `<div class="shy fgp">${grps.map(([x, l]) => `<button class="chip" data-fg="${x}" aria-pressed="${x === grp}">${l}</button>`).join("")}</div>` : ""}
+    ${v === "m" ? reads.join("") : ""}${svg}${key}`;
 }
 const FIELD_MIN = 5;
 function bindField(p, mp) {
@@ -3424,15 +3463,20 @@ const card = (title, sub, body) => `<h3 class="wgh">${title}${sub ? ` <small cla
 const sznOf = o => o.season === D.season ? "this season" : "last season";
 // 3 · big plays: 20+ yard catches and 10+ yard runs a game, allowed by the defense, made by his offense and by him
 function bigCard(p, side) {
-  const o = advT(p.opp), m = advT(p.team), a = advP(p.pid) || {}, g = a.g || 0, run = RUSH_M.indexOf(p.market) >= 0 && p.market !== "anytime_td";
+  const o = advT(p.opp), m = advT(p.team), a = advP(p.pid) || {}, g = a.g || 0, nm = esc(lastName(p.player)), k = fieldKinds(p);
   if (!o) return "";
-  const tiles = [t3("20+ catches allowed", per(o.def.big_pass_pg, 2), rcls(o.ranks.def.big_pass_pg, side), ord(o.ranks.def.big_pass_pg)),
-                 t3("10+ runs allowed", per(o.def.big_run_pg, 2), rcls(o.ranks.def.big_run_pg, side), ord(o.ranks.def.big_run_pg)),
-                 t3("Longest allowed", o.def.long_pass, "", `run ${o.def.long_run}`)];
-  if (m) tiles.push(t3(`${esc(p.team)} 20+ catches`, per(m.off.big_pass_pg, 2), "", "a game"), t3(`${esc(p.team)} 10+ runs`, per(m.off.big_run_pg, 2), "", "a game"));
-  if (g && a.pos !== "QB") tiles.push(run ? t3(`${esc(lastName(p.player))} 10+ runs`, per((a.rush10 || 0) / g, 2), "", `${a.rush20 || 0} of 20+`)
-                        : t3(`${esc(lastName(p.player))} 20+ catches`, per((a.rec20 || 0) / g, 2), "", `${a.rec20 || 0} in ${g} games`));
-  return card("Big plays", `a game · ${sznOf(o)} · 1st = allows the fewest`, t3s(tiles));
+  const air = k.indexOf("recv") >= 0 || k.indexOf("pass") >= 0, ground = k.indexOf("rush") >= 0, tiles = [];
+  if (air) {
+    tiles.push(t3("20+ catches allowed", per(o.def.big_pass_pg, 2), rcls(o.ranks.def.big_pass_pg, side), `${ord(o.ranks.def.big_pass_pg)} · a game`),
+               t3("Longest catch allowed", o.def.long_pass, "", "this season"));
+    tiles.push(a.pos === "QB" || !g ? t3(`${esc(p.team)} 20+ catches`, m ? per(m.off.big_pass_pg, 2) : "–", "", "a game") : t3(`${nm} 20+ catches`, per((a.rec20 || 0) / g, 2), "", `${a.rec20 || 0} in ${g} games`));
+  }
+  if (ground) {
+    tiles.push(t3("10+ runs allowed", per(o.def.big_run_pg, 2), rcls(o.ranks.def.big_run_pg, side), `${ord(o.ranks.def.big_run_pg)} · a game`),
+               t3("Longest run allowed", o.def.long_run, "", "this season"));
+    tiles.push(a.pos === "QB" || !g ? t3(`${esc(p.team)} 10+ runs`, m ? per(m.off.big_run_pg, 2) : "–", "", "a game") : t3(`${nm} 10+ runs`, per((a.rush10 || 0) / g, 2), "", `${a.rush20 || 0} went 20+`));
+  }
+  return card("Big plays", `${sznOf(o)} · 1st = allows the fewest`, t3s(tiles));
 }
 // 4 · pressure and the blitz: the defense's rates, his line's, his quarterback's, and the quarterback blitzed and not
 // (the one the defense leans to outlined in blue)
@@ -3444,7 +3488,8 @@ function pressureCard(p, side) {
   const tiles = [t3("Pressure rate", per(o.def.press_pct) + "%", rcls(o.ranks.def.press_pct, side), `${ord(o.ranks.def.press_pct)} · avg ${per(advLg("def", "press_pct"))}%`),
                  t3("Sack rate", per(o.def.sack_pct) + "%", rcls(o.ranks.def.sack_pct, side), ord(o.ranks.def.sack_pct)),
                  t3("Blitz rate", per(o.def.blitz_pct) + "%", "", `${ord(o.ranks.def.blitz_pct)} · avg ${per(advLg("def", "blitz_pct"))}%`)];
-  if (q.db) tiles.push(t3(`${name} pressured`, per(q.press_pct) + "%", "", m ? `line ${ord(m.ranks.off.press_pct)}` : ""),
+  const rcvr = (advP(p.pid) || {}).pos !== "QB" && PASS_M.indexOf(p.market) < 0;
+  if (q.db && !rcvr) tiles.push(t3(`${name} pressured`, per(q.press_pct) + "%", "", m ? `line ${ord(m.ranks.off.press_pct)}` : ""),
                        t3("Bad throws", per(q.bad_pct) + "%", "", "of attempts"), t3("Time to throw", q.ttt ? per(q.ttt, 2) + "s" : "–", "", q.aggr ? `${per(q.aggr)}% tight` : ""));
   const rb = (advP(p.pid) || {}).rblitz;
   if (rb && (advP(p.pid) || {}).pos !== "QB") {                  // a receiver: his share of the targets, blitzed or not
@@ -3512,17 +3557,28 @@ function callCard(p) {
     ${row("Plays a game", per(Ta.plays), per(Tb.plays))}
     ${row("Seconds a play", per(Ta.sec_play), per(Tb.sec_play))}</tbody></table>`);
 }
+// the cards each market shows: only the ones that bear on it (a rushing prop: no coverage, a catch prop: no run defense)
+function advCardsFor(p) {
+  const m = p.market, pos = (p.ctx || {}).pos || "", rb = pos === "RB" || pos === "FB";
+  if (m === "kick_pts" || m === "fg_made" || m === "sacks") return [];
+  if (["rec", "rec_yds", "long_rec"].indexOf(m) >= 0) return ["field", "big", "pressure", "cover", "manzone"].concat(m === "long_rec" ? [] : ["call"]);
+  if (["rush_yds", "rush_att", "long_rush"].indexOf(m) >= 0) return ["field", "big", "run"].concat(m === "long_rush" ? [] : ["call"]);
+  if (m === "rush_rec_yds") return ["field", "big", "run", "manzone", "call"];
+  if (m === "pass_rush_yds") return ["field", "big", "pressure", "call"];
+  if (PASS_M.indexOf(m) >= 0) return ["field", "big", "pressure", "cover"].concat(m === "long_comp" ? [] : ["call"]);
+  if (m === "anytime_td") return pos === "QB" ? ["field"] : rb ? ["field", "big", "run"] : ["field", "big", "cover", "manzone"];
+  return ["field"];
+}
 function nflAdvCards(p, mp) {
-  const side = ST.side, m = p.market, rec = REC_M.indexOf(m) >= 0 && m !== "anytime_td", pass = PASS_M.indexOf(m) >= 0,
-        rush = RUSH_M.indexOf(m) >= 0 && m !== "anytime_td" && m !== "pass_rush_yds", td = m === "anytime_td";
-  const grp0 = (p.ctx || {}).group;
+  const side = ST.side, cards = advCardsFor(p), on = k => cards.indexOf(k) >= 0;
   const put = (id, html) => { const el = $("#" + id, mp); if (el) el.innerHTML = html || ""; };
-  if (m !== "kick_pts" && m !== "fg_made" && m !== "sacks") bindField(p, mp);
-  if (m !== "kick_pts" && m !== "fg_made" && m !== "sacks") put("nbg", bigCard(p, side));
-  if (rec || pass) { put("npr", pressureCard(p, side)); put("ncv", coverCard(p, side)); }
-  if (rec || (td && grp0 !== "QB")) put("nmz", manZoneCard(p, side));
-  if (rush || (td && grp0 === "RB")) put("nrd", runCard(p, side));
-  put("ncl", callCard(p));
+  if (on("field")) bindField(p, mp);
+  if (on("big")) put("nbg", bigCard(p, side));
+  if (on("pressure")) put("npr", pressureCard(p, side));
+  if (on("cover")) put("ncv", coverCard(p, side));
+  if (on("manzone")) put("nmz", manZoneCard(p, side));
+  if (on("run")) put("nrd", runCard(p, side));
+  if (on("call")) put("ncl", callCard(p));
 }
 function nflVsTable() {
   const el = $("#vst");
