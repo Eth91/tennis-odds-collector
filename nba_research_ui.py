@@ -1221,7 +1221,7 @@ function flagRow(f) {                                   // a tap opens the prop,
 function flagsView() {                                  // the day's (and game's) plays, as logged
   flagsOf("");
   const fs = (D.flags || []).filter(f => f.date === ST.date && (ST.gid === "all" || f.gid === ST.gid));
-  return `<div class="lhd"><span><span class="tg tf" style="margin:0 6px 0 0">SHADOW · NOT A BET</span>unders 30–50% below our projection · −150 or better · no threes</span></div>` +
+  return `<div class="lhd"><span><span class="tg tf" style="margin:0 6px 0 0">SHADOW · NOT A BET</span>unders 30–50% below our projection · −150 or better · no threes · not 6–42% over L5</span></div>` +
     (fs.length ? `<div class="lhd"><span>${fs.length} ${fs.length === 1 ? "play" : "plays"}</span></div>` + fs.map(flagRow).join("")
       : '<div class="empty"><b>No flags yet</b><div>Checked 30 minutes before each tip</div></div>');
 }
