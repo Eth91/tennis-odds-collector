@@ -107,3 +107,6 @@ nba_matchup.sqlite
 nba_proj_cache.pkl
 nba_proj_cache.pkl.tmp
 nba_proj_log.sqlite
+nfl_cache/
+nfl_lines.sqlite
+nfl_dk_snapshot.json

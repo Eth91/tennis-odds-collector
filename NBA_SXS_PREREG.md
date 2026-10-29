@@ -286,3 +286,42 @@ development CLV and ROI before and after.
 
 **Not done here:** storing when `nba_finals.py` stored each final. That would give the exact time live saw a game,
 but it changes live code.
+
+# AMENDMENT 9: BOOST and BOOST_NH (2026-10-28, before they ran)
+22. **BOOST:** a starter (26+ min/g) out in absence game 1–3; at a book's opener, a teammate's over (−150 or better)
+    when 80%+ of his past games without that starter but with tonight's other starters beat the line
+    (`NBA_BOOST_PREREG.md`). All 8 markets. Pinged (SHADOW).
+23. **BOOST_NH:** the same rule's no-history flags (fewer than 3 such games; the position rules put him 15%+ over the
+    line). No pings.
+24. **BOOST_STEP:** the no-history flags for the step-in player raised to 24 minutes (`NBA_BOOST_PREREG.md`
+    amendments 2–3), split out of BOOST_NH before either ran. Pinged (SHADOW).
+    - Re-registered at **2026-10-28T20:30:00 UTC**, before any of the three ran: the starters and step-ins now come
+      from the lineup tab (`NBA_BOOST_PREREG.md` amendment 4).
+
+Both are registered at **2026-10-28T21:00:00 UTC**.
+
+25. **BOOST_PICKUP** (`NBA_BOOST_PREREG.md` amendment 6): the bench pickup for a new starter once NBA.com's lineup is posted, on the MINUTES study's fitted model. No pings.
+    - BOOST_STEP now runs on the MINUTES blend for all new starters (amendment 6). BOOST, BOOST_STEP, BOOST_PICKUP and BOOST_NH are re-registered at **2026-10-28T22:00:00 UTC**.
+    - Re-registered at **2026-10-28T22:30:00 UTC**: the data now carries FTA and 3PA for the STEP ping's shot volume (`NBA_MINUTES_PREREG.md` amendment 5); no decision changes.
+    - Re-registered at **2026-10-28T23:00:00 UTC**: STEP's 26-minute floor once NBA.com's lineup is posted (`NBA_BOOST_PREREG.md` amendment 7).
+
+# AMENDMENT 10: UNDER20 and UNDERML (2026-10-28, before they ran)
+26. **UNDER20** (`NBA_UNDER_PREREG.md`): at tip − 30, FanDuel's main, the under when our projection (ROLE1 v3 minutes ×
+    his rates) is under 80% of the line. Pinged (SHADOW).
+27. **UNDERML:** at tip − 30, `NBA_TESTS4_PREREG.md` T2's logistic model without the hindsight features (fit on
+    2023-24), either side at EV ≥ 5%. No pings.
+
+28. **UNDER20P:** UNDER20's pinged subset (under −150 or better, not threes; `NBA_UNDER_PREREG.md` amendment 1).
+
+29. **UNDER30P:** UNDER20P's flags under 70% of the line, the starred pings (`NBA_UNDER_PREREG.md` amendment 3).
+
+30. **UNDER3050:** UNDER20's pinged flags, 30–50% below the line, −150 or better, not threes (`NBA_UNDER_PREREG.md` amendment 4). The pings move here from UNDER20P/UNDER30P.
+
+All five are registered at **2026-10-29T00:00:00 UTC**.
+
+# NOTE: phone routing (2026-10-28, about 23:00 UTC; no rule changes)
+**User:** "only flag the under pings we were just working on, only shadow track the other pings."
+- `nba_role_open.PHONE = ("UNDER20",)`: only UNDER20's pings (30–50% below, −150 or better, not threes) reach the phone.
+- BOOST, BOOST_STEP, EARLY_SURGE, RATIO_PA28, ROLE_OPEN, RETURN_UNDER and FOUL_BIG are still judged and recorded the
+  same way, but with pinged = 0 and no message.
+- No decision, fingerprint or registration changes. The side-by-side scores every rule as before.

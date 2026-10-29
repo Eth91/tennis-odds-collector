@@ -44,6 +44,7 @@ LINES, NEWS, SHADOW = HERE / "nba_lines.sqlite", HERE / "nba_news.sqlite", HERE 
 INDEX = HERE / "nba_player_index.json"
 TRACKING = HERE / "nba_tracking.sqlite"
 PROJ_LOG = HERE / "nba_proj_log.sqlite"          # the projection engine's prospective record (prereg test C)
+ROLE = HERE / "nba_role.sqlite"                  # the engine's rules' log (nba_role_open.py, the VM cron); read-only
 LINEUPS = HERE / "nba_lineups.sqlite"            # NBA.com's daily lineups as seen (nba_lineups_poll.py, the VM cron)
 CLOSE_BOARDS = HERE / "nba_close_boards.json"    # each started game's last board before tip (closing_boards), cached
 SLATE_ROLL_H = 6     # the slate moves on to the next day at 6 AM ET (4 AM MT), not midnight: late games stay on it
@@ -111,13 +112,20 @@ def hit_summary(values, line):
 def pearson(xs, ys):
     """Pearson r over aligned pairs (both present), or None with < 3 pairs or no variance."""
     pairs = [(x, y) for x, y in zip(xs, ys) if x is not None and y is not None]
-    if len(pairs) < 3:
+    n = len(pairs)
+    if n < 3:
         return None
-    mx = sum(x for x, _ in pairs) / len(pairs)
-    my = sum(y for _, y in pairs) / len(pairs)
-    sxy = sum((x - mx) * (y - my) for x, y in pairs)
-    sxx = sum((x - mx) ** 2 for x, _ in pairs)
-    syy = sum((y - my) ** 2 for _, y in pairs)
+    sx = sy = 0                                       # two passes, not five: the page build runs it ~15k times
+    for x, y in pairs:
+        sx += x
+        sy += y
+    mx, my = sx / n, sy / n
+    sxy = sxx = syy = 0
+    for x, y in pairs:
+        dx, dy = x - mx, y - my
+        sxy += dx * dy
+        sxx += dx * dx
+        syy += dy * dy
     if sxx <= 0 or syy <= 0:
         return None
     return sxy / math.sqrt(sxx * syy)
@@ -207,7 +215,7 @@ HIST_MAX = 40
 _r3 = lambda x: None if x is None else round(x, 3)
 
 
-def line_history(q, gids):
+def line_history(q, gids, markets=None):
     """{(gid, pid, stat): {book: [[seen_at, line, over, under], ...]}} — each book's main rung every time it changed
     (the first entry = the open), from the change log. Long histories keep the first, the last and an even sample."""
     out = defaultdict(dict)
@@ -216,7 +224,8 @@ def line_history(q, gids):
     rows = q.execute(f"SELECT seen_at, book, gid, pid, stat, line, side, odds FROM quotes WHERE gid IN "
                      f"({','.join('?' * len(gids))}) AND pid IS NOT NULL ORDER BY seen_at", list(gids))
     tl = defaultdict(list)
-    for t, changed in replay(r for r in rows if r[4] in MARKETS):
+    markets = MARKETS if markets is None else markets
+    for t, changed in replay(r for r in rows if r[4] in markets):
         for k, st_ in changed.items():
             m = main_of(st_)
             if m is None:
@@ -244,7 +253,7 @@ def _ro(path):
     return sqlite3.connect(f"file:{path}?mode=ro", uri=True) if path.exists() else None
 
 
-def book_quotes(q, gids):
+def book_quotes(q, gids, markets=None):
     """{(gid, pid, market): {book: {"updated", "rungs": [[line, over, under]], "main"}}}, {(gid, pid): name},
     {book: newest collected_at}. nba_lines.board holds each book's latest board."""
     out = defaultdict(dict)
@@ -257,7 +266,7 @@ def book_quotes(q, gids):
     for book, at, gid, pid, player, stat, line, side, odds in q.execute(
             f"SELECT book, collected_at, gid, pid, player, stat, line, side, odds FROM board WHERE gid IN ({marks}) "
             f"AND pid IS NOT NULL", list(gids)):
-        if stat not in MARKETS or odds is None:
+        if stat not in (MARKETS if markets is None else markets) or odds is None:
             continue
         k = (gid, int(pid), stat, book)
         raw[k][round(float(line), 1)][0 if side == "over" else 1] = round(float(odds), 4)
@@ -403,6 +412,51 @@ def engine_flags(sh, game_dates):
         cur = out.get(k)
         if cur is None or (card == 1 and cur["card"] != 1):
             out[k] = {"tier": tier, "card": card, "why": why, "line": line}
+    return out
+
+
+UNDER_PRICE = 1 / 0.6                                    # −150 or better, decimal
+UNDER_BAND = (0.50, 0.70)                                # our projection over the line: 30–50% below it
+# amendment 9 (nba_under.L5_ZONE): no ping when the line over his last-5 average is in (lo, hi], 6-42% over it
+UNDER_L5 = (1.0564788482047636, 1.4166666666666667)
+
+
+def under_play(market, price, line, proj, l5=None):
+    """A play that pings the phone (nba_under.pings_l5 on the VM): an under at −150 or better, not threes, with our
+    projection 30–50% below the line, and the line not 6–42% over his last-5 average (l5 = line / that average; None,
+    as on rows logged before 10/29 or with no games, keeps the play)."""
+    return (market != "threes" and price is not None and price >= UNDER_PRICE and bool(line) and proj is not None
+            and UNDER_BAND[0] <= proj / line < UNDER_BAND[1] and not (l5 is not None and UNDER_L5[0] < l5 <= UNDER_L5[1]))
+
+
+def under_flags(rc, game_dates):
+    """The board's flags: the under plays in nba_role.sqlite's idea_signals (rule UNDER20, read-only) that meet the
+    ping criteria, whether or not the phone send went through, as logged: [{date, gid, pid, market, side, line, price
+    (decimal), proj, mins, at (UTC), player}]. SHADOW plays: none is a bet. The engine's other rules are tracked
+    silently and are not flags."""
+    if rc is None or not game_dates:
+        return []
+    try:
+        rows = rc.execute("SELECT date, gid, pid, market, line, price, note, player, logged_at FROM idea_signals WHERE "
+                          f"rule = 'UNDER20' AND date IN ({','.join('?' * len(game_dates))}) ORDER BY logged_at",
+                          list(game_dates)).fetchall()
+    except sqlite3.OperationalError:                         # not made yet, or busy: no flags this build
+        return []
+    out = []
+    for d, gid, pid, mk, line, price, note, player, at in rows:
+        w = (note or "").split()                             # "proj 7.3 min 20.1 l5 1.234567"
+        kv = dict(zip(w[::2], w[1::2]))
+        try:
+            proj, mins = float(kv["proj"]), float(kv["min"]) if "min" in kv else None
+        except (KeyError, ValueError):
+            continue
+        try:
+            l5 = float(kv["l5"]) if "l5" in kv else None
+        except ValueError:
+            l5 = None
+        if under_play(mk, price, line, proj, l5):
+            out.append({"date": d, "gid": gid, "pid": pid, "market": mk, "side": "under", "line": line, "price": price,
+                        "proj": proj, "mins": mins, "at": at, "player": player})
     return out
 
 
@@ -577,7 +631,7 @@ def schedule_spots(sched, gids):
     return out
 
 
-def closing_boards(q, gids, cache=CLOSE_BOARDS):
+def closing_boards(q, gids, cache=CLOSE_BOARDS, markets=None):
     """The books pull a game's props at tip, so the board loses them; the Live tab still wants them. -> ({(gid, pid,
     stat): {book: {"updated", "rungs", "main"}}}, {(gid, pid): name}) from each prop's last board before tip
     (nba_research_score.boards_before_tip), for started games. Cached per game in `cache`: a past board never changes."""
@@ -598,7 +652,7 @@ def closing_boards(q, gids, cache=CLOSE_BOARDS):
             nm.setdefault(gid, {})[str(int(pid))] = player
         for gid in todo:
             cached[gid] = {"names": nm.get(gid, {}), "boards": {}}
-        for (gid, pid, stat, book), rec in RSC.boards_before_tip(q, todo).items():
+        for (gid, pid, stat, book), rec in RSC.boards_before_tip(q, todo, markets).items():
             rr = rungs_of(rec["close"] or {})
             if rr:
                 cached[gid]["boards"][f"{pid}|{stat}|{book}"] = rr
@@ -968,7 +1022,8 @@ def correlations(props, logs):
     by_game = defaultdict(list)
     for p in props:
         by_game[p["gid"]].append(p)
-    out = {}
+    out, pair = {}, {}                                # pair: (n, r) of each pair once (r is symmetric); the team too,
+                                                      # as the shared games are the ones played for it
     for p in props:
         mine = series[p["id"]]
         res = []
@@ -977,20 +1032,22 @@ def correlations(props, logs):
                 continue
             if o["pid"] != p["pid"] and o["team"] != p["team"]:
                 continue                                   # same team only: shared games mean the same games
-            theirs = series[o["id"]]
-            shared = [g for g in mine.keys() & theirs.keys() if mine[g][0] == theirs[g][0] == p["team"]]
-            if len(shared) < CORR_MIN_N:
-                continue
-            r = pearson([mine[g][1] for g in shared], [theirs[g][1] for g in shared])
+            k = (p["id"], o["id"], p["team"]) if p["id"] < o["id"] else (o["id"], p["id"], p["team"])
+            if k not in pair:
+                theirs = series[o["id"]]
+                shared = [g for g in mine.keys() & theirs.keys() if mine[g][0] == theirs[g][0] == p["team"]]
+                pair[k] = (len(shared), pearson([mine[g][1] for g in shared], [theirs[g][1] for g in shared])
+                           if len(shared) >= CORR_MIN_N else None)
+            n, r = pair[k]
             if r is not None:
-                res.append({"id": o["id"], "r": round(r, 2), "n": len(shared)})
+                res.append({"id": o["id"], "r": round(r, 2), "n": n})
         out[p["id"]] = sorted(res, key=lambda x: (-abs(x["r"]), x["id"]))[:CORR_TOP]
     return out
 
 
 # ── the payload ──────────────────────────────────────────────────────────────────────────────────────────
 def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None, index=None, box_get=None, tracking=None,
-          lineups_db=None):
+          lineups_db=None, role_db=None):
     import nba_matchup as MU
     now = now or dt.datetime.now(dt.timezone.utc)
     if sched is None:
@@ -1062,6 +1119,9 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
     official, teams_listed, report_meta = official_status(ncon, dates)
     news_by = news_items(ncon, dates)
     flags = engine_flags(sh, dates)
+    rflags = under_flags(_ro(role_db or ROLE), dates)
+    for f in rflags:
+        f["team"] = team_of.get(f["pid"])
     glines = game_lines(q, gids)
     # matchup context: point-in-time factors for this season (nba_matchup), per prop
     S = MU.Season(mcon, season, index_pos=pos) if mcon is not None else None
@@ -1182,6 +1242,7 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
                    **{k: v for k, v in live.get(g["gid"], {}).items() if k != "stats"}}
                   for g in sorted(games, key=lambda g: g["utc"])],
         "props": props, "players": {str(k): v for k, v in players.items()}, "injuries": injuries,
+        "flags": rflags,
         "absences": {f"{d}|{t}": [dict(a, name=next((n for (gg, pp), n in names.items() if pp == a["pid"]), None)
                                        or (idx.get(str(a["pid"])) or [None, None])[1]) for a in v]
                      for (d, t), v in absent.items()},
