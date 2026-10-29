@@ -1876,13 +1876,18 @@ function chart2(logs, market, line, ov, grow) {
   if (!n) return '<div class="empty" style="padding:40px 0"><b>No games</b>Nothing matches this window and these filters.</div>';
   const vals = logs.map(l => statValue(l, market)), ovs = ov ? logs.map(l => l[ov]) : [];
   const num = x => x !== null && x !== undefined;
-  const top = Math.max(line, ...vals.filter(num), ...ovs.filter(num), 1);
+  // the white boxes share the bars' scale when their numbers are like the stat's (targets on receptions, minutes on
+  // points); NFL overlays on another scale (snap %, target share, the spread, the total, the margin, or volume far off
+  // the stat's size) get their own: the tallest box near the top, each box labelled with its own value (signed ones by size)
+  const stTop = Math.max(line, ...vals.filter(num), 1), oMax = Math.max(0, ...ovs.filter(num).map(Math.abs));
+  const own = SPORT === "nfl" && !!ov && oMax > 0 && (OWN_OV.has(ov) || oMax > stTop * 1.25 || oMax < stTop * .35);
+  const top = own ? stTop : Math.max(stTop, ...ovs.filter(num));
   // measured from the reference: bars start 35 pt in and the plot is 144.6 pt tall; a slot is a fifth of the width until
   // there are more than 5 games (5 or fewer: 69 pt slots, 8.3 pt gaps; 10: 34 pt, 3 pt; 20 scroll sideways)
   const W0 = Math.min(window.innerWidth, 520) - 30.6, AX = 35, ne = Math.max(n, 5);
   const gap = Math.max(2.4, 8.3 - (ne - 5) * 1.06), slot = Math.max(30, (W0 - AX + gap) / ne);
   const W = Math.max(W0, AX + n * slot - gap), T = 8, B = T + 144.6, H = B + 38;
-  const y = v => B - v / top * (B - T);
+  const y = v => B - v / top * (B - T), ym = own ? v => B - Math.abs(v) / (oMax / .86) * (B - T) : y;
   const oname = ov ? OVL[ov] : "";
   const o = [`<svg class="c2${grow ? " grow" : ""}" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="group" aria-label="${esc(NAME[market])}${ov ? " and " + oname : ""} by game, ${n} games, line ${line}">`];
   // the top label stays off when the line sits at the top: its own label is there
@@ -1900,20 +1905,21 @@ function chart2(logs, market, line, ov, grow) {
     // the stat's label: inside the bar's foot when it fits, else just above the bar
     let vy = hv >= 18 ? B - 3.5 : B - hv - 4, vin = hv >= 18;
     if (num(m)) {
-      const hm = B - y(m);
-      g += hm > 0 ? `<rect class="bm" x="${x + .65}" y="${y(m) + .65}" width="${w - 1.3}" height="${Math.max(0, hm - .65)}" fill="none" stroke="#fff" stroke-width="1.1"/>`
+      const hm = B - ym(m);
+      g += hm > 0 ? `<rect class="bm" x="${x + .65}" y="${ym(m) + .65}" width="${w - 1.3}" height="${Math.max(0, hm - .65)}" fill="none" stroke="#fff" stroke-width="1.1"/>`
         : `<line class="bm" x1="${x}" x2="${x + w}" y1="${B - .55}" y2="${B - .55}" stroke="#fff" stroke-width="1.1"/>`;
       // its label: inside the box's top when the box clears the bar by 34+, else just above the box's top
-      let my = hm - hv >= 34 ? y(m) + 18 : y(m) - 5;
-      if (hm < hv && hm >= 34) my = y(m) + 17;           // a tall box inside the bar: its label at its top, the stat's at the foot
+      let my = hm - hv >= 34 ? ym(m) + 18 : ym(m) - 5;
+      if (hm < hv && hm >= 34) my = ym(m) + 17;           // a tall box inside the bar: its label at its top, the stat's at the foot
       else if (hm < hv && vin) {                         // a short box would cover the stat's label at the foot:
         if (hv >= 40) {                                  // move that label to the bar's top, and this one inside its box
           vy = B - hv + 16;                              // when the box fits it (else just above, below the stat's)
-          my = hm >= 16 ? y(m) + 14 : Math.max(y(m) - 5, vy + 13);
+          my = hm >= 16 ? ym(m) + 14 : Math.max(ym(m) - 5, vy + 13);
         } else if (my > B - 20) my = B - hv - 5;         // or, in a short bar, put this one above the bar
       }
       if (!vin && Math.abs(my - vy) < 13) my = Math.min(my, vy) - 13;   // both above a short bar: stack them
-      g += `<text class="mn" x="${cx}" y="${my}" text-anchor="middle">${ov === "min" || ov === "usg" ? r1(m) : Math.round(m * 10) / 10}</text>`;
+      my = Math.max(my, T + 9);                                          // never above the plot
+      g += `<text class="mn" x="${cx}" y="${my}" text-anchor="middle">${ov === "min" || ov === "usg" ? r1(m) : SIGNED_OV.has(ov) && m > 0 ? "+" + r1(m) : r1(m)}</text>`;
     }
     if (v !== null) g += `<text class="${vin ? "vv" : "vw"}" x="${cx}" y="${vy}" text-anchor="middle">${v}</text>`;
     g += `<text class="xl" x="${cx}" y="${B + 17.4}" text-anchor="middle">${d}</text><text class="xl" x="${cx}" y="${B + 30.5}" text-anchor="middle">${l.home ? "" : "@"}${esc(l.opp)}</text></g>`;
@@ -2881,7 +2887,7 @@ function guardCard() {
 // ── player filters ──
 function activeFilters(without) {
   const out = [];
-  SEGS.forEach(([k, , opts]) => { if (DT[k] !== null) out.push({key: k, label: opts.find(o => o[0] === DT[k])[1] + (k === "rest" ? " rest" : "")}); });
+  SEGS.forEach(([k, , opts]) => { if (DT[k] !== null) out.push({key: k, label: opts.find(o => o[0] === DT[k])[1] + (k === "rest" && SPORT !== "nfl" ? " rest" : "")}); });
   RANGES.forEach(([k, , abbr]) => { const r = DT.ranges[k]; if (r) out.push({key: "r:" + k, label: `${abbr} ${r[0]}–${r[1]}`}); });
   without.forEach(w => { if (DT.without[w.key]) out.push({key: "w:" + w.key, label: "Without " + w.name.split(" ").slice(-1)[0]}); });
   return out;
@@ -3011,7 +3017,8 @@ const NFL_CFG = {
            ["tgt_share", "Target share %", "Tgt%"], ["air_yds", "Air yards", "Air Yds"], ["rz_tgt", "Red-zone targets", "RZ Tgt"],
            ["rz_rush", "Red-zone carries", "RZ Car"], ["spr", "Team spread", "Spread"], ["tot", "Game total", "Total"], ["margin", "Team margin", "Margin"]],
   // overlays on the chart: the volume behind the stat (snap % and target share run to 100, so they only filter)
-  OVL: {targets: "targets", rush_att: "carries", pass_att: "pass attempts", air_yds: "air yards", rz_tgt: "red-zone targets", rz_rush: "red-zone carries"},
+  OVL: {snap_pct: "snap %", targets: "targets", rush_att: "carries", pass_att: "pass attempts", tgt_share: "target share %", air_yds: "air yards",
+        rz_tgt: "red-zone targets", rz_rush: "red-zone carries", spr: "spread", tot: "total", margin: "margin"},
   RANGE_FOR: {targets: REC_M, tgt_share: REC_M, air_yds: REC_M, rz_tgt: REC_M, rush_att: RUSH_M, rz_rush: RUSH_M, pass_att: PASS_M},
   SEGS: [["home", "Location", [[null, "Any"], [true, "Home"], [false, "Away"]]], ["result", "Result", [[null, "Any"], ["W", "Win"], ["L", "Loss"]]],
          ["rest", "Rest", [[null, "Any"], ["short", "Short week"], ["bye", "Off bye"]]]],
@@ -3031,6 +3038,8 @@ const NFL_CFG = {
   head: pid => { const s = nflHead(pid); return `<img class="hs" alt="" loading="lazy" src="${esc(s)}" onerror="this.style.visibility='hidden'"${s ? "" : ' style="visibility:hidden"'}>`; },
 };
 const NFL_RCHIPS = ["snap_pct", "targets", "rush_att", "pass_att", "tgt_share", "air_yds", "rz_tgt", "rz_rush"];
+// overlays always on their own scale (percentages, betting lines, the margin), and the signed ones (labelled +/-)
+const OWN_OV = new Set(["snap_pct", "tgt_share", "spr", "tot", "margin"]), SIGNED_OV = new Set(["spr", "margin"]);
 function useSport(sp) {
   const c = sp === "nfl" ? NFL_CFG : NBA_CFG;
   ({ORDER, NAME, RANGES, OVL, RANGE_FOR, SEGS, logo, heroSrc, head, MKT_TABS, VIEWS, TEAMS, POSN, TAB_ORDER, TAB, GRPN, MU_GROUP, VS_GRP, ROLE_ST, ROLE_TH} = c);
