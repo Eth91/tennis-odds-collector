@@ -403,14 +403,18 @@ def def_tables(tg, season, before=None):
 def pos_ranks(logs, pos, season, min_games=3):
     """{grp: {market: [(a game, pid), ...] best first}} this season (players with min_games games)."""
     out = defaultdict(dict)
+    by_grp = defaultdict(list)                          # each player's games this season, as dicts once (not per market)
+    for pid, rows in logs.items():
+        grp = GROUP.get(pos.get(pid))
+        if grp in DVP_MARKETS:
+            cur = [dict(zip(LOG_COLS, r)) for r in rows if NR.season_of(r[COL["date"]]) == season_str(season)]
+            if len(cur) >= min_games:
+                by_grp[grp].append((pid, cur))
     for grp, mks in DVP_MARKETS.items():
         for m in mks:
             lst = []
-            for pid, rows in logs.items():
-                if GROUP.get(pos.get(pid)) != grp:
-                    continue
-                vals = [stat_value(dict(zip(LOG_COLS, r)), m) for r in rows if NR.season_of(r[COL["date"]]) == season_str(season)]
-                vals = [v for v in vals if v is not None]
+            for pid, cur in by_grp[grp]:
+                vals = [v for v in (stat_value(r, m) for r in cur) if v is not None]
                 if len(vals) >= min_games:
                     lst.append((round(st.mean(vals), 2), pid))
             out[grp][m] = sorted(lst, reverse=True)
@@ -809,7 +813,9 @@ def build(now=None, sched=None, lines=None, stats=None, get=None, official=None)
     shown |= {pid for d in depth.values() for v in d.values() for pid in v[:6]} | {e["pid"] for v in usage.values() for e in v}
     shown |= {r["pid"] for r in out["roles"]["rows"]} | {r[3] for v in out["vs"].values() for r in v} | {m["pid"] for v in mates.values() for m in v["mates"]}
     out["heads"] = {str(pid): (players.get(pid) or {}).get("espn") for pid in shown if (players.get(pid) or {}).get("espn")}
-    out["_boxes"] = box_files(logs, pos, all_names, sched, seasons)
+    # box scores are built in write(), for the files missing or recent only (a past game's box never changes)
+    out["_boxes"] = lambda want: box_files(logs, pos, all_names, sched, seasons, want)
+    out["_box_dates"] = {r[COL["gid"]]: r[COL["date"]] for v in logs.values() for r in v}
     for c in (q, scon):
         if c is not None:
             c.close()
@@ -914,12 +920,15 @@ BOX_COLS = ("snap_pct", "pass_comp", "pass_att", "pass_yds", "pass_tds", "pass_i
             "long_rush", "targets", "rec", "rec_yds", "rec_tds", "long_rec", "fg_made", "fg_att", "pat_made", "sacks", "tackles")
 
 
-def box_files(logs, pos, names, sched, seasons):
-    """{gid: box} for every game in the logs: each team's players with a stat line (BOX_COLS), the score."""
+def box_files(logs, pos, names, sched, seasons, want=None):
+    """{gid: box} for every game in the logs (or only the gids in `want`): each team's players with a stat line
+    (BOX_COLS), the score."""
     games = {g["gid"]: g for g in sched if g["season"] in seasons}
     by = defaultdict(lambda: defaultdict(list))
     for pid, rows in logs.items():
         for r in rows:
+            if want is not None and r[COL["gid"]] not in want:
+                continue
             by[r[COL["gid"]]][r[COL["team"]]].append([pid, names.get(pid) or str(pid), pos.get(pid) or ""] + [r[COL[c]] for c in BOX_COLS])
     out = {}
     for gid, teams in by.items():
@@ -981,14 +990,15 @@ def write(out_dir, payload, today=None):
     again). The page itself is written by nba_research."""
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    boxes = payload.pop("_boxes", {}) or {}
+    make, dates = payload.pop("_boxes", None), payload.pop("_box_dates", {}) or {}
     bd = out_dir / "nflbox"
     bd.mkdir(exist_ok=True)
     today = today or dt.date.today()
+    want = {gid for gid, d in dates.items()
+            if not (bd / f"{gid}.json").exists() or (today - dt.date.fromisoformat(d)).days <= BOX_FRESH_DAYS}
+    boxes = make(want) if make and want else {}
     for gid, b in boxes.items():
         f = bd / f"{gid}.json"
-        if f.exists() and (today - dt.date.fromisoformat(b["date"])).days > BOX_FRESH_DAYS:
-            continue
         tmp = bd / f".{gid}.json.tmp"
         tmp.write_text(json.dumps(b, separators=(",", ":")))
         os.replace(tmp, f)
