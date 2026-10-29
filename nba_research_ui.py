@@ -33,6 +33,47 @@ body{background:#0f0f0f;--red:#ff090c;--grn:#28da8e}
 .cd,.oc,.bkh,.cells,svg.c2{font-family:system-ui,-apple-system,"Roboto Condensed",sans-serif;font-stretch:66%}
 .lh-r{display:flex;align-items:center;gap:8.3px;height:calc(var(--st) + 42.8px);padding:var(--st) 15.3px 0}
 .cb.tx{font-size:13.2px;font-weight:400}
+/* ── the league switch: the label rolls NBA <-> NFL in place (html[data-sp]) ── */
+.spb{overflow:hidden;position:relative}
+.spw{display:block;height:17px;line-height:17px;overflow:hidden;pointer-events:none}
+.spw b{display:block;font-weight:inherit;letter-spacing:.02em;transition:transform .46s cubic-bezier(.32,.72,0,1)}
+:root[data-sp="nfl"] .spw b{transform:translateY(-100%)}
+@media (prefers-reduced-motion:reduce){.spw b{transition:none}}
+/* ── the NFL's cards ── */
+.hs2{font-size:11.5px;font-weight:400;color:var(--l3);margin-left:6px}
+.mut{font-weight:400;color:#8e8e8e;font-size:12px;margin-left:4px}
+.uts{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.ut{display:flex;flex-direction:column;gap:2px;padding:9px 10px;border:1px solid #2a2a2a;border-radius:12px;background:#141414;min-width:0}
+.ut i{font-style:normal;font-size:10.5px;letter-spacing:.04em;color:#8e8e8e}
+.ut b{font-size:19px;font-weight:600;font-variant-numeric:tabular-nums}
+.ut em{font-style:normal;font-size:11.5px;font-variant-numeric:tabular-nums}
+.ut em.up{color:var(--grn)} .ut em.dn{color:var(--red)}
+.ut small{font-size:11px;color:#7c7c7c;font-variant-numeric:tabular-nums}
+.usd{padding:6px 12px}
+.usr{display:grid;grid-template-columns:minmax(0,38%) 1fr 42px;align-items:center;gap:10px;width:100%;min-height:36px;padding:0;border:0;background:none;color:#fff;text-align:left;font-size:14px}
+.usr span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap} .usr span i{font-style:normal;color:#7c7c7c;font-size:11.5px}
+.usb{display:block;height:8px;border-radius:4px;background:#232323;overflow:hidden} .usb i{display:block;height:100%;border-radius:4px;background:#4b4b4f}
+.usr.me .usb i{background:#38bdf8} .usr.me b{color:#38bdf8}
+.usr b{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.rdw{padding:12px 8px}
+.rdg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.rdc{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+.rdb{display:flex;align-items:flex-end;width:70%;height:64px;border-radius:6px;background:#1c1c1c;overflow:hidden}
+.rdb i{display:block;width:100%;background:#38bdf8;border-radius:6px 6px 0 0}
+.rdb i.up{background:var(--grn)} .rdb i.dn{background:var(--red)}
+.rdc b{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums} .rdc b.up{color:var(--grn)} .rdc b.dn{color:var(--red)}
+.rdc small{font-size:10.5px;color:#8e8e8e;white-space:nowrap}
+.rdc em{font-style:normal;font-size:12px;font-variant-numeric:tabular-nums;color:#cfcfcf} .rdc em.up{color:var(--grn)} .rdc em.dn{color:var(--red)}
+.rdc span{font-size:10px;color:#7c7c7c;white-space:nowrap}
+.ttg{display:grid;grid-template-columns:52px repeat(3,1fr);gap:5px;align-items:stretch}
+.tth{font-size:11px;color:#8e8e8e;text-align:center} .ttr{display:flex;align-items:center;font-size:11.5px;color:#8e8e8e}
+.ttc{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:52px;border-radius:9px}
+.ttc b{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums} .ttc small{font-size:10.5px;color:rgba(255,255,255,.72)}
+.dvv{font-style:normal;color:#cfcfcf;font-variant-numeric:tabular-nums;margin-right:10px}
+.dcr{grid-template-columns:repeat(4,1fr)} .lus.bk2{opacity:.78}
+.wgh{margin:14px 0 8px;font-size:15px;font-weight:600}
+.vs tr.lga td{color:#8e8e8e}
+
 .mt.ml{margin-top:9px}
 .sx{position:relative;flex:1;min-width:0;display:flex;align-items:center;height:42.8px;padding:0 16px;border-radius:21.4px;
 border:1px solid rgba(255,255,255,.1);background:#101010;box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
@@ -705,6 +746,8 @@ function filterLogs(logs, f) {
     if (f.rest === "b2b" && l.rest !== 0) return false;
     if (f.rest === "1" && l.rest !== 1) return false;
     if (f.rest === "2+" && !(l.rest >= 2)) return false;
+    if (f.rest === "short" && !(l.rest !== null && l.rest !== undefined && l.rest <= 4)) return false;   // NFL: 4 days or fewer
+    if (f.rest === "bye" && !(l.rest >= 10)) return false;                                              // NFL: off a bye
     for (var j = 0; j < (f.oppSets || []).length; j++) {       // {season: [opponents]}: the tier chips
       var ss = f.oppSets[j][seasonOf(l.date)];
       if (!ss || ss.indexOf(l.opp) < 0) return false;
@@ -929,8 +972,8 @@ if (typeof module !== "undefined") module.exports = {flagGrade: flagGrade, statV
 JS_APP = r"""
 (function () {
 const TEAM_ID = __TEAM_ID__;
-const ORDER = ["points", "rebounds", "assists", "threes", "pra", "pts_reb", "pts_ast", "reb_ast"];
-const NAME = {points: "Points", rebounds: "Rebounds", assists: "Assists", threes: "3-Pointers", pra: "Pts+Reb+Ast",
+let ORDER = ["points", "rebounds", "assists", "threes", "pra", "pts_reb", "pts_ast", "reb_ast"];
+let NAME = {points: "Points", rebounds: "Rebounds", assists: "Assists", threes: "3-Pointers", pra: "Pts+Reb+Ast",
               pts_reb: "Pts+Reb", pts_ast: "Pts+Ast", reb_ast: "Reb+Ast"};
 const SORTS = [["value", "Value"], ["hit10", "L10 hit rate"], ["hit5", "L5 hit rate"], ["hit20", "L20 hit rate"], ["h2h", "Head-to-head hit rate"],
                ["szn", "Season hit rate"], ["avgdiff", "L10 avg vs line"], ["line", "Line"], ["odds", "Best price"],
@@ -939,18 +982,18 @@ let D = null, ERR = null, LOADING = true, CUR = null;
 // on a touchscreen, moving focus by script only draws a ring (and focusing a <select> can pop its picker)
 const TOUCH = matchMedia("(pointer: coarse)").matches;
 const ST = {date: null, gid: "all", market: "points", side: "over", q: "", sort: "hit10", dir: "desc", team: "all",
-            book: "all", lmin: "", lmax: "", omin: "", omax: "", watch: "", view: "props", iv: "", rs: ""};
+            book: "all", lmin: "", lmax: "", omin: "", omax: "", watch: "", view: "props", iv: "", rs: "", sp: ""};
 const DT = {line: null, win: "l10", home: null, starter: null, blow: null, result: null, rest: null, ranges: {}, without: {}, with: {},
             dvp: false, def: false, open: {}, fresh: null, ovs: []};
-const RANGES = [["min", "Minutes", "Minutes"], ["fga", "Field goal attempts", "FGA"], ["fg3a", "3-point attempts", "3PTA"],
+let RANGES = [["min", "Minutes", "Minutes"], ["fga", "Field goal attempts", "FGA"], ["fg3a", "3-point attempts", "3PTA"],
                 ["fta", "Free throw attempts", "FTA"], ["usg", "Usage %", "Usage%"], ["pot_ast", "Potential assists", "Potential Assists"],
                 ["reb_ch", "Rebound chances", "Rebound Chances"], ["margin", "Team margin", "Margin"]];
 // the range chips that also draw their stat on the chart, as white outline boxes (margin can be negative, so it only filters)
-const OVL = {min: "min", fga: "FGA", fg3a: "3PTA", fta: "FTA", usg: "usage %", pot_ast: "potential assists", reb_ch: "rebound chances"};
+let OVL = {min: "min", fga: "FGA", fg3a: "3PTA", fta: "FTA", usg: "usage %", pot_ast: "potential assists", reb_ch: "rebound chances"};
 // tracking stats only on the props they bear on
-const RANGE_FOR = {pot_ast: ["assists", "pra", "pts_ast", "reb_ast"], reb_ch: ["rebounds", "pra", "pts_reb", "reb_ast"]};
+let RANGE_FOR = {pot_ast: ["assists", "pra", "pts_ast", "reb_ast"], reb_ch: ["rebounds", "pra", "pts_reb", "reb_ast"]};
 const forMarket = (k, m) => !RANGE_FOR[k] || RANGE_FOR[k].indexOf(m) >= 0;
-const SEGS = [["home", "Location", [[null, "Any"], [true, "Home"], [false, "Away"]]],
+let SEGS = [["home", "Location", [[null, "Any"], [true, "Home"], [false, "Away"]]],
               ["starter", "Role", [[null, "Any"], [true, "Starter"], [false, "Bench"]]],
               ["result", "Result", [[null, "Any"], ["W", "Win"], ["L", "Loss"]]],
               ["rest", "Rest", [[null, "Any"], ["b2b", "B2B"], ["1", "1 day"], ["2+", "2+ days"]]]];
@@ -960,9 +1003,9 @@ const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&": "&am
 const iso = s => new Date(/Z|[+-]\d\d:\d\d$/.test(s) ? s : s + "Z");
 const mt = (s, day) => s ? iso(s).toLocaleString("en-US", Object.assign({timeZone: "America/Denver", hour: "numeric", minute: "2-digit"}, day ? {weekday: "short"} : {})) : "—";
 const ago = s => { if (!s) return "never"; const m = (Date.now() - iso(s).getTime()) / 60000; return m < 1 ? "just now" : m < 60 ? Math.round(m) + "m ago" : Math.round(m / 60) + "h ago"; };
-const logo = (t, c) => TEAM_ID[t] ? `<img class="${c || "lg"}" alt="" decoding="async" src="https://cdn.nba.com/logos/nba/${TEAM_ID[t]}/global/D/logo.svg">` : "";
-const heroSrc = pid => `https://cdn.nba.com/headshots/nba/latest/1040x760/${pid}.png`;
-const head = pid => `<img class="hs" alt="" loading="lazy" src="https://cdn.nba.com/headshots/nba/latest/260x190/${pid}.png" onerror="this.style.visibility='hidden'">`;
+let logo = (t, c) => TEAM_ID[t] ? `<img class="${c || "lg"}" alt="" decoding="async" src="https://cdn.nba.com/logos/nba/${TEAM_ID[t]}/global/D/logo.svg">` : "";
+let heroSrc = pid => `https://cdn.nba.com/headshots/nba/latest/1040x760/${pid}.png`;
+let head = pid => `<img class="hs" alt="" loading="lazy" src="https://cdn.nba.com/headshots/nba/latest/260x190/${pid}.png" onerror="this.style.visibility='hidden'">`;
 const short = m => (D.markets || {})[m] || m;
 const gameOf = gid => D.games.find(g => g.gid === gid) ||
   (String(gid).startsWith("none:") ? {gid: gid, date: D.dates[0], home: gid.slice(5), away: "", state: "none", tip: null} : undefined);
@@ -985,13 +1028,17 @@ function hashState() {
 }
 // how the list was last set up (tab, view, side, sort, book), for a launch from the home screen with no hash: not the
 // day, game, team, search or line filters, which would hide the next slate
-const PREF = ["view", "market", "side", "sort", "dir", "book", "iv", "rs"];
+const PREF = ["view", "market", "side", "sort", "dir", "book", "iv", "rs", "sp"];
 function readHash() {
   const h = new URLSearchParams(location.hash.slice(1));
   if (![...h.keys()].length) { try { const pf = JSON.parse(localStorage.getItem("pickz_pref") || "{}") || {}; PREF.forEach(k => { if (typeof pf[k] === "string") ST[k] = pf[k]; }); } catch (e) {} }
   Object.keys(ST).forEach(k => { if (h.has(k)) ST[k] = h.get(k); });
   if (ST.view === "watch") Object.assign(ST, {view: "props", watch: "1"});    // the old Watchlist tab, now a filter
   if (["props", "flags", "injuries"].indexOf(ST.view) < 0) ST.view = "props";
+  if (ST.sp !== "nfl") ST.sp = "";
+  useSport(ST.sp || "nba");
+  if (!VIEWS.some(v => v[0] === ST.view)) ST.view = "props";
+  if (MKT_TABS.indexOf(ST.market) < 0) ST.market = ORDER[0];
   return h.get("p");
 }
 // entries the app pushed above the list (pages, the Matchup page), kept in each entry's state
@@ -1014,11 +1061,11 @@ function when(g) {
 }
 const vs = p => p.team ? (p.home ? "vs " : "@ ") + p.opp : "";
 // ── list ──
-const MKT_TABS = ["live", "trends", "movers", "points", "assists", "rebounds", "threes", "pra", "pts_reb", "pts_ast", "reb_ast"];
+let MKT_TABS = ["live", "trends", "movers", "points", "assists", "rebounds", "threes", "pra", "pts_reb", "pts_ast", "reb_ast"];
 const ALL_TABS = ["live", "trends", "movers"];  // tabs that span every market
 // Trends (nba_research_score.trend_side): the L10 and L20 hit rates both 1+ SD from what the price implies, the same
 // way, 8+ games each. A plain 70% L10 put a third of the slate in Trends and ignored the price.
-const VIEWS = [["props", "Props"], ["flags", "Flags"], ["injuries", "Injuries"]];
+let VIEWS = [["props", "Props"], ["flags", "Flags"], ["injuries", "Injuries"]];
 const unit = m => (D.markets || {})[m] || m;
 // long names shorten to an initial, as on the reference ("M. Diabaté")
 const nameOf = n => n.length > 13 && n.indexOf(" ") > 0 ? n[0] + ". " + n.slice(n.indexOf(" ") + 1) : n;
@@ -1089,7 +1136,9 @@ function mover(p) {
 function liveOf(p) {
   const g = gameOf(p.gid) || {}, lv = p.live || {}, v = lv.value === null || lv.value === undefined ? 0 : lv.value, mn = lv.min || 0;
   const line = p.main !== null ? p.main : allLines(p)[0], last = logsOf(p).slice(-10), exp = last.length ? last.reduce((a, l) => a + (l.min || 0), 0) / last.length : null;
-  const pace = mn >= 4 && exp ? v / mn * Math.max(exp, mn) : null, over = ST.side !== "under";
+  const fr = lv.frac || 0;
+  // NFL: the stat over the share of the game played (a longest play or a TD has no pace)
+  const pace = SPORT === "nfl" ? (fr >= .12 && fr < 1 && !/^long_|^anytime_td$|^sacks$/.test(p.market) ? v / fr : null) : mn >= 4 && exp ? v / mn * Math.max(exp, mn) : null, over = ST.side !== "under";
   return {v: v, mn: mn, line: line, pace: pace, fin: liveStage(g.state, v, line, over), hit: over ? v > line : v < line,
           k: over ? (line ? v / line : 0) : (line ? 1 - v / line : 0)};
 }
@@ -1102,7 +1151,7 @@ function liveRow(p) {
       <div class="lin">${over ? "Over" : "Under"} ${x.line} ${esc(unit(p.market))} · ${live ? esc(g.label || "Live") : "Final"}</div></div>
     <span class="lvs ${st[1]}">${st[0]}</span>
     <div class="lvb"><div class="lvbar"><i class="${bar}" style="width:${x.line ? Math.min(100, x.v / x.line * 100).toFixed(1) : 0}%"></i></div>
-      <div class="lvt"><span><b>${x.v}</b> / ${x.line}</span><span>${x.mn ? Math.round(x.mn) + " min" : "not in yet"}${x.pace !== null && live ? " · pace " + r1(x.pace) : ""}</span></div></div></button>`;
+      <div class="lvt"><span><b>${x.v}</b> / ${x.line}</span><span>${SPORT === "nfl" ? (live && x.pace !== null ? "pace " + r1(x.pace) : "") : (x.mn ? Math.round(x.mn) + " min" : "not in yet") + (x.pace !== null && live ? " · pace " + r1(x.pace) : "")}</span></div></div></button>`;
 }
 function availMarkets() {
   const m = {};
@@ -1182,7 +1231,7 @@ function banners() {
   return out.map(t => `<div class="ban" role="status">${esc(t)}</div>`).join("");
 }
 function topRow() {
-  return `<div class="lh-r"><button class="cb tx" id="lgb" aria-haspopup="dialog" aria-label="League and data">NBA</button>
+  return `<div class="lh-r">${sportBtn()}
     <label class="sx${ST.q ? " has" : ""}">${ICON.search}<span class="ph3" aria-hidden="true">Search <b>Pickz</b></span><input id="q" type="search" enterkeyhint="search" aria-label="Search players or teams" autocomplete="off" autocorrect="off" spellcheck="false" value="${esc(ST.q)}"><button class="clr" id="qx" aria-label="Clear search"${ST.q ? "" : " hidden"}>×</button></label>
     <button class="cb tx" id="dvpb" aria-haspopup="dialog" aria-label="Defense vs position">DvP</button></div>`;
 }
@@ -1213,7 +1262,7 @@ function press(sel, test, root) { $$(sel, root).forEach(b => b.setAttribute("ari
 function render() {
   const app = $("#app");
   if (!D) {
-    app.innerHTML = '<header class="lh"><div class="lh-r"><button class="cb tx">NBA</button><div class="sx"><span class="ph3">Search <b>Pickz</b></span></div><button class="cb tx">DvP</button></div></header>' +
+    app.innerHTML = '<header class="lh"><div class="lh-r">' + sportBtn() + '<div class="sx"><span class="ph3">Search <b>Pickz</b></span></div><button class="cb tx">DvP</button></div></header>' +
       (LOADING ? '<main class="lst" aria-busy="true">' + '<div class="sk"></div>'.repeat(7) + "</main>"
       : '<div class="empty" role="alert"><b>Couldn\'t load props</b>' + esc(ERR) + '<br><button class="btn pri" id="retry">Try again</button></div>');
     const r = $("#retry"); if (r) r.onclick = load;
@@ -1249,9 +1298,9 @@ function renderList(ivFrom) {
   if (ST.view === "props" && q.length >= 2) searchPlayers(q);
 }
 // the players a search finds, prop or not, under the props it finds; a tap opens his prop or his player page
-const recents = () => { try { return JSON.parse(localStorage.getItem("pickz_recent") || "[]") || []; } catch (e) { return []; } };
+const recents = () => { try { return JSON.parse(localStorage.getItem(LS("pickz_recent")) || "[]") || []; } catch (e) { return []; } };
 function recentAdd(p) {
-  try { const r = recents().filter(x => x[0] !== p.pid); r.unshift([p.pid, p.player, p.team || ""]); localStorage.setItem("pickz_recent", JSON.stringify(r.slice(0, 8))); } catch (e) {}
+  try { const r = recents().filter(x => x[0] !== p.pid); r.unshift([p.pid, p.player, p.team || ""]); localStorage.setItem(LS("pickz_recent"), JSON.stringify(r.slice(0, 8))); } catch (e) {}
 }
 function recentShow(on) {
   const old = $("#rcn"); if (old) old.remove();
@@ -1284,8 +1333,8 @@ function renderRows(ivFrom) {
   const lst = $("#lst"), ml = $(".ml");
   if (ml) ml.style.display = ST.view === "props" ? "" : "none";
   if (ST.view === "injuries") {
-    lst.innerHTML = `<div class="seg ivs" role="group" aria-label="Show"><span class="pill2"></span><button data-iv="" aria-pressed="${ST.iv !== "lu" && ST.iv !== "ro"}">Injuries</button><button data-iv="lu" aria-pressed="${ST.iv === "lu"}">Lineups</button><button data-iv="ro" aria-pressed="${ST.iv === "ro"}">Roles</button></div>` +
-      (ST.iv === "lu" ? lineupsView() : ST.iv === "ro" ? '<div id="rov"><div class="vsk"><div class="sk"></div><div class="sk"></div></div></div>' : injView());
+    lst.innerHTML = `<div class="seg ivs" role="group" aria-label="Show"><span class="pill2"></span><button data-iv="" aria-pressed="${ST.iv !== "lu" && ST.iv !== "ro"}">Injuries</button><button data-iv="lu" aria-pressed="${ST.iv === "lu"}">${SPORT === "nfl" ? "Depth" : "Lineups"}</button><button data-iv="ro" aria-pressed="${ST.iv === "ro"}">Roles</button></div>` +
+      (ST.iv === "lu" ? (SPORT === "nfl" ? depthView() : lineupsView()) : ST.iv === "ro" ? '<div id="rov"><div class="vsk"><div class="sk"></div><div class="sk"></div></div></div>' : injView());
     if (ST.iv === "ro") rolesView();
     const ivs = $(".ivs", lst);
     if (ivFrom !== undefined) {                               // the pill slides from the view it left; the body rises in
@@ -1321,7 +1370,7 @@ function renderRows(ivFrom) {
   // rows are built once per prop and side, then reused: re-sorting or switching tabs never re-decodes the headshots
   const frag = document.createDocumentFragment(), h = document.createElement("div");
   h.className = "lhd";
-  h.innerHTML = `<span>${list.length} props${ST.market === "live" ? ` · <span id="lupd">${ago(D.generated_at)}</span>` : ""}</span><span class="lhr">${ALL_TABS.indexOf(ST.market) >= 0 ? '<button class="lk" id="scb">Scorecard ›</button>' : ""}<span class="ou" role="group" aria-label="Side"><span class="pill2"></span><button data-side="over" aria-pressed="${ST.side !== "under"}">Over</button><button data-side="under" aria-pressed="${ST.side === "under"}">Under</button></span></span>`;
+  h.innerHTML = `<span>${list.length} props${ST.market === "live" ? ` · <span id="lupd">${ago(D.generated_at)}</span>` : ""}</span><span class="lhr">${ALL_TABS.indexOf(ST.market) >= 0 && SPORT === "nba" ? '<button class="lk" id="scb">Scorecard ›</button>' : ""}<span class="ou" role="group" aria-label="Side"><span class="pill2"></span><button data-side="over" aria-pressed="${ST.side !== "under"}">Over</button><button data-side="under" aria-pressed="${ST.side === "under"}">Under</button></span></span>`;
   const sc = $("#scb", h); if (sc) sc.onclick = scoreSheet;
   $$("[data-side]", h).forEach(b => b.onclick = () => { if (ST.side !== b.dataset.side) { OU_FROM = ST.side; ST.side = b.dataset.side; save(); renderList(); tabbar(); } });
   frag.appendChild(h);
@@ -1350,13 +1399,14 @@ const INJ_C = {Out: "to", Doubtful: "to", Questionable: "tq"};
 const INJ_S = {Out: "OUT", Doubtful: "DOUBT", Questionable: "Q"};
 const INJ_P = {Out: 1, Doubtful: .9, Questionable: .4};          // the chance he sits, until the report has a record
 const injReason = r => String(r || "").replace(/^Injury\/Illness\s*-\s*/i, "").replace(/^G League\s*-\s*/i, "G League · ").replace(/;\s*/g, " ");
-const injRot = e => e.mpg !== null && e.mpg >= 10;
+const injRot = e => e.mpg !== null && e.mpg >= (SPORT === "nfl" ? 30 : 10);    // NFL: 30% of the snaps
 function injSits(status) {                       // how often players listed so have sat since 10/22 (proj_meta.availability)
   const a = ((D.proj_meta || {}).availability || {})[status];
   return status === "Out" ? 1 : a && a[1] >= 10 ? 1 - (a[0] + 1) / (a[1] + 2) : INJ_P[status] || 0;
 }
 // relevance: minutes a game x the chance he sits, halved when he has no game this season (the team is used to it)
-const injImpact = e => (e.mpg || 0) * injSits(e.status) * (e.season === D.season ? 1 : .5);
+const injImpact = e => (e.mpg || 0) * injSits(e.status) * (e.season === D.season ? 1 : .5) *
+  (SPORT === "nfl" && !/^(QB|RB|FB|WR|TE)$/.test(e.pos || "") ? .5 : 1);         // NFL: the ball carriers and catchers first
 function injList() {
   const q = ST.q.trim().toLowerCase(), out = [];
   D.games.filter(g => g.date === ST.date && (ST.gid === "all" || g.gid === ST.gid)).forEach(g => [g.away, g.home].forEach(t => {
@@ -1381,12 +1431,12 @@ function injBox(m, val, cls) {                      // a tap opens his prop on t
 }
 function injRow(e) {
   const bx = [], s = e.starts;
-  if (s) bx.push(injBox(s, s.how === "games" ? `Starts <small>${s.k}/${s.n}</small>` : "Starts?", s.how === "games" ? "" : "sm"));
-  e.minutes.filter(m => !s || m.pid !== s.pid).forEach(m => bx.push(injBox(m, "+" + m.gain.toFixed(1) + " <small>min</small>", "up")));   // one box a player
+  if (s) bx.push(injBox(s, s.how === "games" ? `Starts <small>${s.k}/${s.n}</small>` : s.how === "depth" ? "Next up" : "Starts?", s.how === "games" ? "" : "sm"));
+  e.minutes.filter(m => !s || m.pid !== s.pid).forEach(m => bx.push(injBox(m, "+" + m.gain.toFixed(1) + ` <small>${SPORT === "nfl" ? "opp" : "min"}</small>`, "up")));   // one box a player (NFL: targets + carries a game)
   const tags = `<span class="tg ${INJ_C[e.status]}">${INJ_S[e.status]}</span>${e.fresh ? '<span class="tg tf">NEW</span>' : ""}`;
   return `<div class="pr ir${bx.length ? "" : " ir0"}" data-vp="${e.pid}"><span class="av">${head(e.pid)}</span>
     <div class="who"><div class="nm">${esc(nameOf(e.name))}<span class="cd">${esc(e.team)}</span>${tags}</div>
-    <div class="lin">${e.starter ? "Starter" : "Bench"}${e.reason ? " · " + esc(injReason(e.reason)) : ""}</div></div>
+    <div class="lin">${SPORT === "nfl" ? esc(e.pos || "") + " · " : ""}${e.starter ? "Starter" : SPORT === "nfl" ? "Reserve" : "Bench"}${e.reason ? " · " + esc(injReason(e.reason)) : ""}</div>${e.practice ? `<div class="ros">Practice: ${esc(e.practice)}</div>` : ""}</div>
     <div class="oc o ocv"><b class="num">${e.mpg.toFixed(1)}</b>${e.season && e.season !== D.season ? `<i>${esc(e.season.slice(2))}</i>` : ""}</div>
     <div class="oc e ocv"><b class="num">${e.missed}</b></div>
     ${bx.length ? `<div class="bx4">${bx.slice(0, 4).join("")}</div>` : ""}</div>`;
@@ -1396,7 +1446,7 @@ function injView() {
   const rep = (D.sources.report || {})[ST.date];
   if (!rep) return '<div class="empty"><b>No injury report yet</b></div>';
   const list = injList();
-  return `<div class="lhd lcol"><span>${list.length} players · ${esc(mt(rep.published, true))}</span><i class="o">MPG</i><i class="e">MISSED</i></div>` +
+  return `<div class="lhd lcol"><span>${list.length} players · ${esc(mt(rep.published, true))}</span><i class="o">${SPORT === "nfl" ? "SNAP%" : "MPG"}</i><i class="e">MISSED</i></div>` +
     (list.length ? list.map(injRow).join("") : '<div class="empty"><b>No injuries</b></div>');
 }
 // ── role changes (docs/player/roles.json, nba_players.roles): the slate's players whose minutes moved 4+ a game over their
@@ -1404,10 +1454,10 @@ function injView() {
 let ROLES = null;
 // the Roles switch: [key, chip, unit after the numbers, label under the move]; ROLE_TH stands in for a file without
 // thresholds (nba_players.ROLE_MOVE)
-const ROLE_ST = [["min", "Minutes", "min", "MIN"], ["fga", "FGA", "FGA", "FGA"], ["fg3a", "3PTA", "3PA", "3PTA"],
+let ROLE_ST = [["min", "Minutes", "min", "MIN"], ["fga", "FGA", "FGA", "FGA"], ["fg3a", "3PTA", "3PA", "3PTA"],
                  ["pot_ast", "Potential Assists", "pot. ast", "POT AST"], ["reb_ch", "Rebound Chances", "reb ch.", "REB CH"]];
-const ROLE_TH = {min: 4, fga: 3, fg3a: 2, pot_ast: 2.5, reb_ch: 3};
-const rolesLoad = () => ROLES || (ROLES = fetch("player/roles.json").then(r => r.ok ? r.json() : null).catch(() => null));
+let ROLE_TH = {min: 4, fga: 3, fg3a: 2, pot_ast: 2.5, reb_ch: 3};
+const rolesLoad = () => SPORT === "nfl" ? Promise.resolve(D.roles || null) : ROLES || (ROLES = fetch("player/roles.json").then(r => r.ok ? r.json() : null).catch(() => null));
 function rolesView(swap) {
   rolesLoad().then(j => {
     const el = $("#rov");
@@ -1415,7 +1465,7 @@ function rolesView(swap) {
     const teams = new Set(D.games.filter(g => g.date === ST.date && (ST.gid === "all" || g.gid === ST.gid)).flatMap(g => [g.away, g.home]));
     const q = ST.q.trim().toLowerCase();
     // the stat the list is about (the switch): its now and before a game, listed if it moved its threshold, biggest move first
-    const k = ROLE_ST.some(x => x[0] === ST.rs) ? ST.rs : "min", sd = ROLE_ST.find(x => x[0] === k), th = (j && j.thresholds) || ROLE_TH;
+    const k = ROLE_ST.some(x => x[0] === ST.rs) ? ST.rs : ROLE_ST[0][0], sd = ROLE_ST.find(x => x[0] === k), th = (j && j.thresholds) || ROLE_TH;
     const stat = r => r.st ? r.st[k] : k === "min" ? [r.min[0], r.min[1]] : null;     // a file from before the switch: minutes only
     const rows = ((j && j.rows) || []).filter(r => teams.has(r.team) && (ST.team === "all" || r.team === ST.team) && (!q || r.name.toLowerCase().indexOf(q) >= 0))
       .filter(r => { const v = stat(r); return v && Math.abs(v[0] - v[1]) >= th[k]; })
@@ -1423,7 +1473,7 @@ function rolesView(swap) {
     // the stat rail: built once, like the market rail up top (a pill slides to the stat, the rail scrolls it into view)
     if (!$(".rrl", el)) {
       el.innerHTML = `<nav class="mt rrl" aria-label="Stat"><div class="mt-in" id="rsl"><span class="pill2"></span>${ROLE_ST.map(([x, lab]) => `<button data-rs="${x}">${lab}</button>`).join("")}</div></nav><div id="rol"></div>`;
-      $$("[data-rs]", el).forEach(b => b.onclick = () => { if (b.dataset.rs !== (ST.rs || "min")) { ST.rs = b.dataset.rs === "min" ? "" : b.dataset.rs; save(); rolesView(true); } });
+      $$("[data-rs]", el).forEach(b => b.onclick = () => { if (b.dataset.rs !== (ST.rs || ROLE_ST[0][0])) { ST.rs = b.dataset.rs === ROLE_ST[0][0] ? "" : b.dataset.rs; save(); rolesView(true); } });
     }
     const rail = $("#rsl", el);
     press("[data-rs]", x => x.dataset.rs === k, rail); slide(rail, !swap);
@@ -1435,11 +1485,11 @@ function rolesView(swap) {
     if (!rows.length) { rl.innerHTML = `<div class="empty"><b>${k === "reb_ch" ? "None yet this season" : "No role changes"}</b></div>`; return; }
     // the comparison (nba_players.roles_mode): early on, his season so far against last season; later, his last 3 games
     // against the rest of his season
-    const cmp = j && j.mode === "season" ? "This season vs last" : "Last 3 games vs season";
+    const cmp = j && j.mode === "season" ? "This season vs last" : SPORT === "nfl" ? "Last 3 games vs the rest" : "Last 3 games vs season";
     rl.innerHTML = `<div class="lhd"><span>${rows.length} players</span><span>${cmp}</span></div>` + rows.map(r => {
       const v = stat(r), dv = v[0] - v[1], up = dv > 0, was = r.starts[2] ? r.starts[1] / r.starts[2] : 0, now = r.starts[0] / (r.starts[3] || 3);
       const why = [r.was_team ? `<span>New team</span> (was ${esc(r.was_team)})` : "",
-                   k !== "min" ? `${r.min[1]} → ${r.min[0]} min` : "",
+                   k !== ROLE_ST[0][0] && r.min[0] !== null ? `${r.min[1]} → ${r.min[0]} ${SPORT === "nfl" ? "% snaps" : "min"}` : "",
                    now >= .8 && was < .5 ? "Now starting" : now <= .2 && was >= .5 ? "Lost his start" : "",
                    r.out.length ? `<span>${r.out.map(n => esc(lastName(n))).join(", ")} out</span>` : "",
                    r.usg[0] !== null && r.usg[1] !== null ? `USG ${Math.round(r.usg[1])} → ${Math.round(r.usg[0])}%` : ""].filter(Boolean);
@@ -1490,7 +1540,7 @@ function bindTop() {
   q.onfocus = () => recentShow(true);
   q.onblur = () => setTimeout(() => { if (document.activeElement !== q) recentShow(false); }, 250);
   qx.onclick = e => { e.preventDefault(); q.value = ""; q.oninput(); };
-  $("#lgb").onclick = leagueSheet;
+  bindSport($("#lgb"));
   $("#dvpb").onclick = () => dvpSheet();
 }
 function bindHead() {
@@ -1593,6 +1643,7 @@ function filterSheet() {
 function dayName(d) {
   const t = new Date(), iso_ = x => `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`;
   const off = k => { const x = new Date(t); x.setDate(x.getDate() + k); return iso_(x); };
+  if (SPORT === "nfl" && d !== off(0) && d !== off(1)) return iso(d + "T12:00:00Z").toLocaleDateString("en-US", {weekday: "short", timeZone: "UTC"}) + " " + (+d.slice(5, 7)) + "/" + (+d.slice(8));
   return d === off(0) ? "Today" : d === off(1) ? "Tomorrow" : d === off(-1) ? "Yesterday" : d.slice(5).replace("-", "/");
 }
 function daySheet() {
@@ -1621,6 +1672,7 @@ function scoreSheet() {
   }).catch(e => fill(`<div class="note" style="font-size:14px">Couldn't load the scorecard (${esc(e.message || e)}).</div><div class="acts stk"><button class="btn pri" id="sc-ok">Done</button></div>`));
 }
 function leagueSheet() {
+  if (SPORT === "nfl") return nflLeagueSheet();
   const b = D.sources.books, bk = k => b[k] ? (b[k].stale ? `${Math.round(b[k].age_min)} min old` : "live") : "—";
   openSheet(`<h2 id="sht">Pickz</h2><div class="kv"><span>League</span><b>NBA ✓</b></div>
     <div class="kv"><span>Props updated</span><b id="upd">${ago(D.generated_at)}</b></div>
@@ -1635,14 +1687,15 @@ function leagueSheet() {
 }
 function dvpSheet(grp, mkt) {
   const rk = (D.ranks || {})[ST.date] || {}, tbl = rk.dvp || {}, n = rk.teams || 0;
-  grp = grp || "G";
+  grp = grp || DVP_GRPS()[0][0];
   const mks = ORDER.filter(m => tbl[grp] && tbl[grp][m]);
   mkt = mkt && mks.indexOf(mkt) >= 0 ? mkt : mks.indexOf(ST.market) >= 0 ? ST.market : mks[0];
   const t = (tbl[grp] || {})[mkt] || {}, order = Object.keys(t).sort((a, b) => t[b] - t[a]);
   const rows = order.map(team => { const r = t[team], cl = {good: "up", bad: "dn", mid: "md"}[rankCls(r, n, "over")];
-    return `<div class="dvt"><b class="${cl}">${ord(r)}</b><span>${logo(team, "").replace("<img ", '<img loading="lazy" ')}${esc((TEAMS[team] || [team])[0])}</span><span>${team}</span></div>`; }).join("");
+    const val = ((rk.val || {})[grp] || {})[mkt] || {};
+    return `<div class="dvt"><b class="${cl}">${ord(r)}</b><span>${logo(team, "").replace("<img ", '<img loading="lazy" ')}${esc((TEAMS[team] || [team])[0])}</span><span>${val[team] !== undefined ? `<em class="dvv">${r1(val[team])}</em>` : ""}${team}</span></div>`; }).join("");
   const html = `<h2 id="sht">Defense vs Position</h2>
-    <div class="seg" role="group" aria-label="Position">${[["G", "Guards"], ["F", "Forwards"], ["C", "Centers"]].map(([k, l]) => `<button data-dg="${k}" aria-pressed="${k === grp}">${l}</button>`).join("")}</div>
+    <div class="seg" role="group" aria-label="Position">${DVP_GRPS().map(([k, l]) => `<button data-dg="${k}" aria-pressed="${k === grp}">${l}</button>`).join("")}</div>
     <div class="chips">${mks.map(m => `<button class="chip" data-dm="${m}" aria-pressed="${m === mkt}">${TAB[m]}</button>`).join("")}</div>
     ${rows || '<div class="empty"><b>No games</b></div>'}<div class="acts stk"><button class="btn pri" id="dv-ok">Done</button></div>`;
   const bind = s => {
@@ -1665,10 +1718,12 @@ function allLines(p) {
 const VPL = new Map();
 let PIDX = null, VP = new Map(), SRCH_N = 0;
 function playerIndex() {
+  if (SPORT === "nfl") return Promise.resolve(nflIndex());
   if (!PIDX) PIDX = fetch("player/index.json").then(r => r.ok ? r.json() : null).catch(() => null).then(j => j ? j.players : []);
   return PIDX;
 }
 function playerLoad(pid) {
+  if (SPORT === "nfl") return nflPlayerLoad(pid);
   if (VPL.has(pid)) return Promise.resolve(VPL.get(pid));
   return fetch(`player/${pid}.json`).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }).then(j => { VPL.set(pid, j); return j; });
 }
@@ -1698,7 +1753,7 @@ function vLine(p) {
 }
 // open a player: his prop on the slate's date (this stat, else his first), else his player page
 function openPlayer(pid, market) {
-  const m = market || (NAME[ST.market] ? ST.market : "points");
+  const m = market || (NAME[ST.market] ? ST.market : defaultMarket(pid));
   const ps = D.props.filter(p => p.pid === pid && (gameOf(p.gid) || {}).date === ST.date);
   const real = ps.find(p => p.market === m) || ps.sort((a, b) => ORDER.indexOf(a.market) - ORDER.indexOf(b.market))[0];
   const go = () => openProp(real ? real.id : `v|${pid}|${m}`);
@@ -1753,7 +1808,7 @@ function closeProp(instant) {
   const id = CUR; CUR = null;
   const b = !TOUCH && id && document.querySelector(`.pr[data-id="${CSS.escape(id)}"]`); if (b) b.focus({preventScroll: true});
 }
-const TEAMS = {ATL: ["Atlanta Hawks", "#C8102E"], BOS: ["Boston Celtics", "#007A33"], BKN: ["Brooklyn Nets", "#2a2a2a"],
+let TEAMS = {ATL: ["Atlanta Hawks", "#C8102E"], BOS: ["Boston Celtics", "#007A33"], BKN: ["Brooklyn Nets", "#2a2a2a"],
   CHA: ["Charlotte Hornets", "#00788C"], CHI: ["Chicago Bulls", "#CE1141"], CLE: ["Cleveland Cavaliers", "#860038"],
   DAL: ["Dallas Mavericks", "#00538C"], DEN: ["Denver Nuggets", "#0E2240"], DET: ["Detroit Pistons", "#C8102E"],
   GSW: ["Golden State Warriors", "#1D428A"], HOU: ["Houston Rockets", "#CE1141"], IND: ["Indiana Pacers", "#002D62"],
@@ -1763,11 +1818,11 @@ const TEAMS = {ATL: ["Atlanta Hawks", "#C8102E"], BOS: ["Boston Celtics", "#007A
   ORL: ["Orlando Magic", "#0077C0"], PHI: ["Philadelphia 76ers", "#006BB6"], PHX: ["Phoenix Suns", "#1D1160"],
   POR: ["Portland Trail Blazers", "#E03A3E"], SAC: ["Sacramento Kings", "#5A2D81"], SAS: ["San Antonio Spurs", "#2b2b2b"],
   TOR: ["Toronto Raptors", "#CE1141"], UTA: ["Utah Jazz", "#4B2C82"], WAS: ["Washington Wizards", "#002B5C"]};
-const POSN = {PG: "Point Guard", SG: "Shooting Guard", SF: "Small Forward", PF: "Power Forward", C: "Center", G: "Guard",
+let POSN = {PG: "Point Guard", SG: "Shooting Guard", SF: "Small Forward", PF: "Power Forward", C: "Center", G: "Guard",
   F: "Forward", "G-F": "Guard-Forward", "F-G": "Forward-Guard", "F-C": "Forward-Center", "C-F": "Center-Forward"};
-const TAB_ORDER = ["points", "assists", "rebounds", "threes", "pts_ast", "pts_reb", "reb_ast", "pra"];
-const TAB = {live: "Live", trends: "Trends", movers: "Movers", points: "Points", rebounds: "Rebs", assists: "Assists", threes: "3PTM", pra: "PRA", pts_reb: "P+R", pts_ast: "P+A", reb_ast: "R+A"};
-const GRPN = {G: "guards", F: "forwards", C: "centers"};
+let TAB_ORDER = ["points", "assists", "rebounds", "threes", "pts_ast", "pts_reb", "reb_ast", "pra"];
+let TAB = {live: "Live", trends: "Trends", movers: "Movers", points: "Points", rebounds: "Rebs", assists: "Assists", threes: "3PTM", pra: "PRA", pts_reb: "P+R", pts_ast: "P+A", reb_ast: "R+A"};
+let GRPN = {G: "guards", F: "forwards", C: "centers"};
 const ICON = {
   back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
   share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M21 3 3 10.5l7 2.5 2.5 7L21 3Z"/><path d="m10 13 4.5-4.5"/></svg>',
@@ -1784,9 +1839,9 @@ const ICON = {
   info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 10.5v8"/><circle cx="12" cy="6.2" r=".9" fill="currentColor" stroke="none"/></svg>',
   combo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="13" height="14" rx="3"/><path d="M8 3h10a3 3 0 0 1 3 3v10"/><path d="M9.5 11v6M6.5 14h6"/></svg>',
   down: '<svg viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m2 2 4 4 4-4"/></svg>'};
-const favs = () => { try { return JSON.parse(localStorage.getItem("pickz_fav") || "[]"); } catch (e) { return []; } };
+const favs = () => { try { return JSON.parse(localStorage.getItem(LS("pickz_fav")) || "[]"); } catch (e) { return []; } };
 function toggleFav(pid) {
-  try { const f = favs(), i = f.indexOf(pid); if (i >= 0) f.splice(i, 1); else f.push(pid); localStorage.setItem("pickz_fav", JSON.stringify(f)); } catch (e) {}
+  try { const f = favs(), i = f.indexOf(pid); if (i >= 0) f.splice(i, 1); else f.push(pid); localStorage.setItem(LS("pickz_fav"), JSON.stringify(f)); } catch (e) {}
 }
 // tier of a rank among n teams: thirds (1 = the toughest defense)
 const tierOf = (r, n) => !r || !n ? null : r <= Math.ceil(n / 3) ? "tough" : r > n - Math.ceil(n / 3) ? "soft" : "mid";
@@ -1838,7 +1893,7 @@ function chart2(logs, market, line, ov, grow) {
     const fill = res === "over" ? "var(--grn)" : res === "under" ? "var(--red)" : "#8e8e93";
     const d = iso(l.date + "T12:00:00Z").toLocaleDateString("en-US", {month: "numeric", day: "numeric", timeZone: "UTC"});
     const ovTxt = ov && num(m) ? `, ${r1(m)} ${oname}` : "";
-    const desc = `${d} ${l.home ? "vs" : "at"} ${l.opp}: ${v === null ? "no value" : v} ${short(market)}${ovTxt || ` in ${l.min} minutes`}, ${res} ${line}`;
+    const desc = `${d} ${l.home ? "vs" : "at"} ${l.opp}: ${v === null ? "no value" : v} ${short(market)}${ovTxt || (SPORT === "nfl" ? (l.snap_pct !== null && l.snap_pct !== undefined ? `, ${l.snap_pct}% of snaps` : "") : ` in ${l.min} minutes`)}, ${res} ${line}`;
     let g = `<g class="br" tabindex="0" role="button" aria-label="${esc(desc)}, box score" data-gid="${esc(l.gid)}" data-tm="${esc(l.team)}" style="--d:${Math.min(i, 19) * 14}ms"><title>${esc(desc)}</title>`;
     const hv = v !== null && v > 0 ? B - y(v) : 0;
     if (hv) g += `<rect class="bv" x="${x}" y="${y(v)}" width="${w}" height="${hv}" fill="${fill}"/>`;
@@ -1858,7 +1913,7 @@ function chart2(logs, market, line, ov, grow) {
         } else if (my > B - 20) my = B - hv - 5;         // or, in a short bar, put this one above the bar
       }
       if (!vin && Math.abs(my - vy) < 13) my = Math.min(my, vy) - 13;   // both above a short bar: stack them
-      g += `<text class="mn" x="${cx}" y="${my}" text-anchor="middle">${ov === "min" || ov === "usg" ? r1(m) : m}</text>`;
+      g += `<text class="mn" x="${cx}" y="${my}" text-anchor="middle">${ov === "min" || ov === "usg" ? r1(m) : Math.round(m * 10) / 10}</text>`;
     }
     if (v !== null) g += `<text class="${vin ? "vv" : "vw"}" x="${cx}" y="${vy}" text-anchor="middle">${v}</text>`;
     g += `<text class="xl" x="${cx}" y="${B + 17.4}" text-anchor="middle">${d}</text><text class="xl" x="${cx}" y="${B + 30.5}" text-anchor="middle">${l.home ? "" : "@"}${esc(l.opp)}</text></g>`;
@@ -1984,6 +2039,7 @@ const BX_HI = {points: ["PTS"], rebounds: ["REB"], assists: ["AST"], threes: ["3
 const bxRow = r => [r[3], r[4], r[5], r[6], r[7] + "-" + r[8], r[9] + "-" + r[10], r[11] + "-" + r[12], r[13], r[14], r[15], r[16], (r[17] > 0 ? "+" : "") + r[17]];
 const bxTot = t => ["", t[0], t[1], t[2], t[3] + "-" + t[4], t[5] + "-" + t[6], t[7] + "-" + t[8], t[9], t[10], t[11], t[12], ""];
 function bxTable(t, p) {
+  if (SPORT === "nfl") return nflBxTable(t, p);
   const hi = BX_HI[p.market] || [], td = (v, i) => `<td${hi.indexOf(BXC[i]) >= 0 ? ' class="hi"' : ""}>${v}</td>`;
   const row = r => `<tr data-vp="${r[0]}"${r[0] === p.pid ? ' class="me"' : ""}><td>${esc(nameOf(r[1]))}</td>${bxRow(r).map(td).join("")}</tr>`;
   const st = t.players.filter(r => r[2]), bn = t.players.filter(r => !r[2]);
@@ -1996,7 +2052,7 @@ function bxTable(t, p) {
 // fetched while the page is idle, so a tap usually finds the box already here
 const BOXC = new Map();
 function boxGet(gid) {
-  if (!BOXC.has(gid)) BOXC.set(gid, fetch(`box/${encodeURIComponent(gid)}.json`)
+  if (!BOXC.has(gid)) BOXC.set(gid, fetch(`${SPORT === "nfl" ? "nflbox" : "box"}/${encodeURIComponent(gid)}.json`)
     .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
     .catch(e => { BOXC.delete(gid); throw e; }));
   return BOXC.get(gid);
@@ -2068,14 +2124,17 @@ function renderProp(mode) {
   // availability
   const rpE = p.v && (((D.inj_report || {})[g.date + "|" + p.team] || {}).players || []).find(e => e.pid === p.pid);
   const inj = D.injuries[g.date + "|" + p.pid] || (rpE ? {official: {status: rpE.status, reason: rpE.reason}, listed_team: true} : {}), rep = D.sources.report[g.date];
+  const prac = SPORT === "nfl" && inj.official && inj.official.practice ? `<div class="kv"><span>Practice</span><b>${esc(inj.official.practice)}</b></div>` : "";
   const arows = [`<div class="kv"><span>Injury report${rep ? ` <small>${mt((inj.official || {}).published || rep.published, true)}</small>` : ""}</span><b>${inj.official ? esc(inj.official.status) + (inj.official.reason ? " · " + esc(inj.official.reason.replace("Injury/Illness - ", "")) : "") : rep ? (inj.listed_team ? "Not listed" : "Team not listed yet") : "Not out yet"}</b></div>`];
+  if (prac) arows.push(prac);
+  if (SPORT === "nfl") arows.push(nflDepthRow(p));
   (inj.news || []).forEach(n => arows.push(`<div class="kv"><span>News · ${esc(n.source)}</span><b>${esc(n.headline || n.status || "")} · ${mt(n.detected)}</b></div>`));
   if (without.length) arows.push(`<div class="kv"><span>Teammates out</span><b>${without.map(w => esc(w.name) + (w.status === "Out" ? "" : " (" + esc(w.status) + ")")).join(", ")}</b></div>`);
   const rel = (D.related[p.id] || []).map(r => {
     const o = D.props.find(x => x.id === r.id); if (!o) return "";
     return `<button class="rc" data-rel="${esc(o.id)}"><div class="nm">${esc(o.player.split(" ").slice(-1)[0])} ${esc(short(o.market))}</div><div class="sub">${o.main === null ? "alt lines" : "O/U " + o.main}</div></button>`;
   }).join("");
-  const live = p.live && g.state !== "pregame" ? `<div class="box0" style="margin:12px 15.3px 0" role="status"><div class="live"><span class="tg ${g.state === "live" ? "tl" : "tn"}">${g.state === "live" ? "LIVE" : "FINAL"}</span>${p.live.value} ${esc(short(p.market))} in ${p.live.min} min</div><div class="note">${esc(g.label || "")}${g.score ? " · " + esc(g.away) + " " + g.score[0] + " – " + esc(g.home) + " " + g.score[1] : ""} · box score ${ago(g.updated)}</div></div>` : "";
+  const live = p.live && g.state !== "pregame" ? `<div class="box0" style="margin:12px 15.3px 0" role="status"><div class="live"><span class="tg ${g.state === "live" ? "tl" : "tn"}">${g.state === "live" ? "LIVE" : "FINAL"}</span>${p.live.value} ${esc(short(p.market))}${SPORT === "nfl" ? "" : ` in ${p.live.min} min`}</div><div class="note">${esc(g.label || "")}${g.score ? " · " + esc(g.away) + " " + g.score[0] + " – " + esc(g.home) + " " + g.score[1] : ""} · box score ${ago(g.updated)}</div></div>` : "";
   pg.innerHTML = `<div class="ph"><button class="cb bk" aria-label="Back">${ICON.back}</button>
       <div class="ph-t"><b>${esc(p.player)}</b><span>${esc(team[0])}</span></div><span class="sp2"></span>
       ${p.v ? "" : `<button class="cb" id="cmb" aria-label="Add to combo" aria-pressed="${inCombo(p.id)}">${ICON.combo}</button>`}<button class="cb" id="shr" aria-label="Share">${ICON.share}</button><button class="cb${fav ? " fav" : ""}" id="fav" aria-label="Favorite" aria-pressed="${fav}">${ICON.star}</button></div>
@@ -2196,7 +2255,7 @@ function updateProp(mode) {
   const chips = [], mchips = [];
   const rchip = k => { if (!forMarket(k, p.market)) return; const b = bounds(logs, k), abbr = RANGES.find(r => r[0] === k)[2]; if (b && b[0] !== b[1]) chips.push(chip(`data-r="${k}"`, `${OVL[k] ? ICON.bars : ICON.pm}${abbr}`, rangeOn(k) || DT.open[k])); };
   const tchip = (k, v, lab) => chips.push(chip(`data-k="${k}" data-v="${v}"`, lab, on(k, v)));
-  ["min", "fga", "fg3a", "fta", "usg", "pot_ast", "reb_ch"].forEach(rchip);   // the adjustable filters first
+  (SPORT === "nfl" ? NFL_RCHIPS : ["min", "fga", "fg3a", "fta", "usg", "pot_ast", "reb_ch"]).forEach(rchip);   // the adjustable filters first
   if (logs.some(l => l.starter === 1)) tchip("starter", true, "Starter");     // only the games he started
   if (logs.some(l => Math.abs(l.margin) >= 15)) tchip("blow", "b", "Blowouts"); // only games decided by 15+
   if (c.dvp_rank) chips.push(chip('data-t="dvp"', `DvP <em class="${rankCls(c.dvp_rank, c.teams, side)}">${ord(c.dvp_rank)}</em>`, DT.dvp));
@@ -2208,7 +2267,9 @@ function updateProp(mode) {
   ms.filter(m => DT.with[m.key]).forEach(m => mchips.push(chip(`data-mw="${m.key}"`, "With " + esc(lastName(m.name)), true)));
   ms.filter(m => DT.without[m.key] && !fresh(m.key)).forEach(m => mchips.push(chip(`data-mo="${m.key}"`, "W/O " + esc(lastName(m.name)), true)));
   tchip("home", true, "Home"); tchip("home", false, "Away"); rchip("margin");
-  tchip("result", "W", "Win"); tchip("result", "L", "Loss"); tchip("rest", "b2b", "B2B");
+  tchip("result", "W", "Win"); tchip("result", "L", "Loss");
+  if (SPORT === "nfl") { rchip("spr"); rchip("tot"); if (logs.some(l => l.rest !== null && l.rest <= 4)) tchip("rest", "short", "Short wk"); if (logs.some(l => l.rest >= 10)) tchip("rest", "bye", "Off bye"); }
+  else tchip("rest", "b2b", "B2B");
   const panels = RANGES.filter(([k]) => (DT.open[k] || rangeOn(k)) && forMarket(k, p.market)).map(([k, lab]) => {
     const b = bounds(logs, k); if (!b || b[0] === b[1]) return "";
     const cur = DT.ranges[k] || b;
@@ -2224,7 +2285,7 @@ function updateProp(mode) {
     $("#pcf").innerHTML = `<div class="cf-h"><h3>Chart Filters</h3><button class="ca" id="clr"${anyF ? "" : " hidden"}>Clear All</button></div>
       <div class="fcs">${chips.join("")}</div>${mchips.length ? `<div class="fcs fcw">${mchips.join("")}</div>` : ""}${panels}`;
     $$("#pcf .fcs").forEach((x, i) => x.scrollLeft = fl[i] || 0); }   // each row keeps its place when a chip re-renders it
-  if (!rest) { $("#pgs").innerHTML = gameScript(p, g, logs, line, side); $("#psc").innerHTML = schedCard(p, g, logs, line, side); refsRow(p, g); }
+  if (!rest) { $("#pgs").innerHTML = gameScript(p, g, logs, line, side); $("#psc").innerHTML = schedCard(p, g, logs, line, side); if (SPORT === "nba") refsRow(p, g); }
   if (opening) { PX.lazy = setTimeout(() => { if (PX && PX.p === p) updateProp("rest"); }, 470); bindLive(p, logs, without); return; }
   if (!PX.statDone) { $("#pstat").innerHTML = PX.stat; PX.statDone = true; $$("[data-rel]", pg).forEach(b => b.onclick = () => openProp(b.dataset.rel)); }
   if (p.v) { $("#pproj").innerHTML = ""; $("#pbk").innerHTML = ""; }      // a player page: no line posted, no books
@@ -2240,7 +2301,7 @@ function updateProp(mode) {
     return `<div class="bkr2${here ? "" : " alt"}"><span>${name}${D.sources.books[b] && D.sources.books[b].stale ? ' <span class="tg tq">STALE</span>' : ""}</span><button class="bl" data-pl="${l}" aria-label="Use line ${l}">${l === null ? "—" : l}</button>${px("over", 1)}${px("under", 2)}</div>`;
   }).join("");
   const fr = fair.p === null ? "" : `<div class="bkr2 fr"><span>Fair</span><span class="bl">${line}</span><span>${american(1 / fair.p)}</span><span>${american(1 / (1 - fair.p))}</span></div>`;
-  $("#pproj").innerHTML = projCard(p, line, side);
+  $("#pproj").innerHTML = SPORT === "nfl" ? nflUsageCard(p, win) : projCard(p, line, side);
   $("#pbk").innerHTML = `<div class="bkh"><span>BOOKS</span><button class="lnp" id="lnp" aria-haspopup="dialog" aria-label="Line ${line}">LINE${ICON.down}</button><span>OVER</span><span>UNDER</span></div>${bk}${fr}
     <div class="sec2"><h3>Alt Lines · ${side === "under" ? "Under" : "Over"}</h3>${ladder(p, win, side, line, (wins.find(w => w[0] === DT.win) || ["", "L10"])[1])}</div>
     <div class="sec2"><h3>Line Movement</h3>${histChart(p)}</div>`;
@@ -2248,14 +2309,16 @@ function updateProp(mode) {
   // game log
   const logRows = win.slice().reverse().map(l => {
     const v = statValue(l, p.market), r = v === null ? "–" : v > line ? '<span class="ov">O</span>' : v < line ? '<span class="un">U</span>' : '<span class="pu">P</span>';
-    return `<tr><td>${esc(l.date.slice(5).replace("-", "/"))}</td><td>${l.home ? "" : "@"}${esc(l.opp)}${l.team !== p.team ? " <span style='color:var(--l3)'>(" + esc(l.team) + ")</span>" : ""}</td><td class="r">${l.min}</td><td class="r">${l.fga ?? "–"}</td><td class="r"><b>${v === null ? "–" : v}</b></td><td class="r">${r}</td></tr>`;
+    const lc = logCols(p);
+    return `<tr><td>${esc(l.date.slice(5).replace("-", "/"))}</td><td>${l.home ? "" : "@"}${esc(l.opp)}${l.team !== p.team ? " <span style='color:var(--l3)'>(" + esc(l.team) + ")</span>" : ""}</td><td class="r">${lc[0][1](l) ?? "–"}</td><td class="r">${lc[1][1](l) ?? "–"}</td><td class="r"><b>${v === null ? "–" : v}</b></td><td class="r">${r}</td></tr>`;
   }).join("");
   const lg = $("#plog"), wasOpen = !!$("details", lg) && $("details", lg).open;
-  lg.innerHTML = `<details class="log"${wasOpen ? " open" : ""}><summary>Game Log · ${win.length}</summary><table><thead><tr><th>Date</th><th>Opp</th><th class="r">Min</th><th class="r">FGA</th><th class="r">${esc(short(p.market))}</th><th class="r">${line}</th></tr></thead><tbody>${logRows || '<tr><td colspan="6">No games.</td></tr>'}</tbody></table></details>`;
+  lg.innerHTML = `<details class="log"${wasOpen ? " open" : ""}><summary>Game Log · ${win.length}</summary><table><thead><tr><th>Date</th><th>Opp</th><th class="r">${logCols(p)[0][0]}</th><th class="r">${logCols(p)[1][0]}</th><th class="r">${esc(short(p.market))}</th><th class="r">${line}</th></tr></thead><tbody>${logRows || '<tr><td colspan="6">No games.</td></tr>'}</tbody></table></details>`;
   bindLive(p, logs, without);
 }
 // game script: tonight's spread (FanDuel) and how he does in lopsided games: a final margin of 15+ against 10 or less
 function gameScript(p, g, logs, line, side) {
+  if (SPORT === "nfl") return nflGameScript(p, g, logs, line, side);
   const L = g.lines || {}, sh = L.spread_home;
   if (sh === undefined || sh === null || !p.team) return "";
   const st = l => statValue(l, p.market), avg = xs => xs.length ? r1(xs.reduce((a, b) => a + b, 0) / xs.length) : "–";
@@ -2277,6 +2340,7 @@ function spotText(s) {
   return a.join(" · ");
 }
 function schedCard(p, g, logs, line, side) {
+  if (SPORT === "nfl") return nflSchedCard(p, g, logs, line, side);
   const S = g.spots || {}, me = S[p.team], op = S[p.opp];
   if (!me) return "";
   const st = l => statValue(l, p.market), avg = xs => xs.length ? r1(xs.reduce((a, b) => a + b, 0) / xs.length) : "–";
@@ -2434,9 +2498,9 @@ function refCard() {
 // ── combo checker: 2-4 props kept on the phone (pickz_combo: [{id, side, line}]), how often they all hit together ──
 const COMBO_MAX = 4;
 let CMB_W = "l10";
-const comboLegs = () => { try { return (JSON.parse(localStorage.getItem("pickz_combo") || "[]") || []).filter(l => D && propFor(l.id)); } catch (e) { return []; } };
+const comboLegs = () => { try { return (JSON.parse(localStorage.getItem(LS("pickz_combo")) || "[]") || []).filter(l => D && propFor(l.id)); } catch (e) { return []; } };
 const inCombo = id => comboLegs().some(l => l.id === id);
-function comboSave(legs) { try { localStorage.setItem("pickz_combo", JSON.stringify(legs)); } catch (e) {} comboPill(); }
+function comboSave(legs) { try { localStorage.setItem(LS("pickz_combo"), JSON.stringify(legs)); } catch (e) {} comboPill(); }
 // add the open prop at the line and side on screen, or take it out: true added, false removed, null full
 function comboToggle(p) {
   const legs = comboLegs(), i = legs.findIndex(l => l.id === p.id);
@@ -2570,7 +2634,7 @@ function dualRange(el, lo, hi, cur, inset, paint, done) {
   });
   show();
 }
-const MU_GROUP = pos => ({PG: "G", SG: "G", G: "G", SF: "F", PF: "F", F: "F", C: "C"})[pos] || ({G: "G", F: "F", C: "C"})[(pos || "")[0]];
+let MU_GROUP = pos => ({PG: "G", SG: "G", G: "G", SF: "F", PF: "F", F: "F", C: "C"})[pos] || ({G: "G", F: "F", C: "C"})[(pos || "")[0]];
 function lineSheet(p) {
   const lines = allLines(p);
   const rows = lines.map(l => {
@@ -2584,7 +2648,8 @@ function lineSheet(p) {
     let v = DT.line;
     const set = x => { v = Math.max(0.5, Math.round(x * 2) / 2); $("#ls-v", s).textContent = v; };
     const done = () => { closeSheet(); if (DT.line !== v) { DT.line = v; updateProp(); } };
-    $("#ls-m", s).onclick = () => set(v - .5); $("#ls-p", s).onclick = () => set(v + .5);
+    const stp = SPORT === "nfl" && /yds/.test(p.market) && v >= 20 ? 5 : .5;
+    $("#ls-m", s).onclick = () => set(v - stp); $("#ls-p", s).onclick = () => set(v + stp);
     $$("[data-l]", s).forEach(b => b.onclick = () => { set(+b.dataset.l); done(); });
     $("#ls-ok", s).onclick = done;
   });
@@ -2593,7 +2658,7 @@ function lineSheet(p) {
 // against players of a position group, each with his result, closing line and over price (docs/vs/{TEAM}.json, nba_vs);
 // a row opens that game's box score ──
 let MUP = null;
-const VS_GRP = [["G", "Guards"], ["F", "Forwards"], ["C", "Centers"]];
+let VS_GRP = [["G", "Guards"], ["F", "Forwards"], ["C", "Centers"]];
 const initialName = n => { const i = String(n || "").indexOf(" "); return i > 0 ? n[0] + ". " + n.slice(i + 1) : n || ""; };
 function openMatchup(p, push) {
   if (!p) return;
@@ -2604,7 +2669,7 @@ function openMatchup(p, push) {
   mp.hidden = false;
   renderMatchup();
   mp.scrollTop = 0;
-  fetch(`vs/${encodeURIComponent(p.opp || "")}.json`).then(r => r.ok ? r.json() : null).catch(() => null)
+  (SPORT === "nfl" ? Promise.resolve({rows: (D.vs || {})[p.opp] || []}) : fetch(`vs/${encodeURIComponent(p.opp || "")}.json`).then(r => r.ok ? r.json() : null).catch(() => null))
     .then(j => { if (MUP && MUP.p === p) { MUP.rows = j && j.rows || []; vsTable(); } });
   const go = () => {
     if (!MUP || mp.classList.contains("on")) return;
@@ -2621,6 +2686,7 @@ function closeMatchup(instant) {
   else { mp.animate([{transform: "none"}, {transform: "translateX(100%)"}], {duration: 380, easing: EASE}).finished.then(done, done); setTimeout(done, 440); }
 }
 function renderMatchup() {
+  if (SPORT === "nfl") return nflMatchup();
   const p = MUP.p, c = p.ctx || {}, g = gameOf(p.gid), side = ST.side, gr = grade(p, side), mp = $("#mp");
   const rk = (r, n) => r ? `<span class="rk ${rankCls(r, n, side) === "good" ? "g" : rankCls(r, n, side) === "bad" ? "r" : "n"}">${ord(r)}</span>` : "—";
   const dd = (k, opts, cur) => `<label class="dd"><span>${esc((opts.find(o => o[0] === cur) || opts[0])[1])}</span>${ICON.down}
@@ -2673,6 +2739,7 @@ function renderMatchup() {
   vsTable();
 }
 function vsTable() {
+  if (SPORT === "nfl") return nflVsTable();
   const el = $("#vst");
   if (!el || !MUP) return;
   if (!MUP.rows) { el.innerHTML = '<div class="vsk">' + '<div class="sk"></div>'.repeat(5) + "</div>"; return; }
@@ -2896,6 +2963,389 @@ function playerFilters(p, logs, without) {
     upd();
   });
 }
+// ── two sports, one page: the league button switches between the NBA (nba_props.json, nba_research) and the NFL
+// (nfl_props.json, nfl_research). Each sport's tables (markets, filters, teams, faces) are bound by useSport; each keeps
+// where you were in it, and its data stays in memory, so a switch back is instant ──
+let SPORT = "nba", SWITCHING = false, HASH_USED = false;
+const DATA = {nba: null, nfl: null}, LASTMOD = {}, SPORT_ST = {};
+const dataUrl = sp => (sp || SPORT) === "nfl" ? "nfl_props.json" : "nba_props.json";
+const LS = k => SPORT === "nfl" ? k + "_nfl" : k;            // favorites, recents and combos are kept per sport
+const NBA_CFG = {ORDER, NAME, RANGES, OVL, RANGE_FOR, SEGS, logo, heroSrc, head, MKT_TABS, VIEWS, TEAMS, POSN, TAB_ORDER, TAB,
+                 GRPN, MU_GROUP, VS_GRP, ROLE_ST, ROLE_TH, MARKET_PARTS};
+// code: [name, color, ESPN's code]
+const NFL_TEAMS = {ARI: ["Arizona Cardinals", "#97233F", "ari"], ATL: ["Atlanta Falcons", "#A71930", "atl"], BAL: ["Baltimore Ravens", "#241773", "bal"],
+  BUF: ["Buffalo Bills", "#00338D", "buf"], CAR: ["Carolina Panthers", "#0085CA", "car"], CHI: ["Chicago Bears", "#0B162A", "chi"],
+  CIN: ["Cincinnati Bengals", "#FB4F14", "cin"], CLE: ["Cleveland Browns", "#311D00", "cle"], DAL: ["Dallas Cowboys", "#003594", "dal"],
+  DEN: ["Denver Broncos", "#FB4F14", "den"], DET: ["Detroit Lions", "#0076B6", "det"], GB: ["Green Bay Packers", "#203731", "gb"],
+  HOU: ["Houston Texans", "#03202F", "hou"], IND: ["Indianapolis Colts", "#002C5F", "ind"], JAX: ["Jacksonville Jaguars", "#006778", "jax"],
+  KC: ["Kansas City Chiefs", "#E31837", "kc"], LV: ["Las Vegas Raiders", "#000000", "lv"], LAC: ["Los Angeles Chargers", "#0080C6", "lac"],
+  LAR: ["Los Angeles Rams", "#003594", "lar"], MIA: ["Miami Dolphins", "#008E97", "mia"], MIN: ["Minnesota Vikings", "#4F2683", "min"],
+  NE: ["New England Patriots", "#002244", "ne"], NO: ["New Orleans Saints", "#9F8958", "no"], NYG: ["New York Giants", "#0B2265", "nyg"],
+  NYJ: ["New York Jets", "#125740", "nyj"], PHI: ["Philadelphia Eagles", "#004C54", "phi"], PIT: ["Pittsburgh Steelers", "#101820", "pit"],
+  SF: ["San Francisco 49ers", "#AA0000", "sf"], SEA: ["Seattle Seahawks", "#002244", "sea"], TB: ["Tampa Bay Buccaneers", "#D50A0A", "tb"],
+  TEN: ["Tennessee Titans", "#4B92DB", "ten"], WAS: ["Washington Commanders", "#5A1414", "wsh"]};
+const NFL_ORDER = ["pass_yds", "rush_yds", "rec_yds", "rec", "anytime_td", "pass_tds", "rush_rec_yds", "pass_att", "pass_comp", "pass_int",
+                   "rush_att", "long_rec", "long_rush", "long_comp", "pass_rush_yds", "kick_pts", "fg_made", "sacks"];
+const REC_M = ["rec", "rec_yds", "long_rec", "rush_rec_yds", "anytime_td"], RUSH_M = ["rush_yds", "rush_att", "long_rush", "rush_rec_yds", "anytime_td", "pass_rush_yds"],
+      PASS_M = ["pass_yds", "pass_tds", "pass_att", "pass_comp", "pass_int", "long_comp", "pass_rush_yds"];
+const espnHead = (id, big) => id ? (big ? `https://a.espncdn.com/i/headshots/nfl/players/full/${id}.png`
+  : `https://a.espncdn.com/combiner/i?img=/i/headshots/nfl/players/full/${id}.png&w=130&h=95`) : "";
+function nflHead(pid, big) {                                  // ESPN's photo by his ESPN id, else nflverse's
+  const pl = D && D.players[String(pid)], id = (pl && pl.espn) || (D && D.heads && D.heads[String(pid)]);
+  return id ? espnHead(id, big) : (pl && pl.headshot) || "";
+}
+const NFL_CFG = {
+  ORDER: NFL_ORDER, TAB_ORDER: NFL_ORDER, MKT_TABS: ["live", "trends", "movers"].concat(NFL_ORDER),
+  NAME: {pass_yds: "Passing Yards", pass_tds: "Passing TDs", pass_att: "Pass Attempts", pass_comp: "Completions", pass_int: "Interceptions",
+         long_comp: "Longest Completion", rush_yds: "Rushing Yards", rush_att: "Rush Attempts", long_rush: "Longest Rush", rec: "Receptions",
+         rec_yds: "Receiving Yards", long_rec: "Longest Reception", rush_rec_yds: "Rush + Rec Yards", pass_rush_yds: "Pass + Rush Yards",
+         anytime_td: "Anytime TD", kick_pts: "Kicking Points", fg_made: "Field Goals Made", sacks: "Sacks"},
+  TAB: {live: "Live", trends: "Trends", movers: "Movers", pass_yds: "Pass Yds", pass_tds: "Pass TD", pass_att: "Pass Att", pass_comp: "Comp",
+        pass_int: "INT", long_comp: "Long Comp", rush_yds: "Rush Yds", rush_att: "Carries", long_rush: "Long Rush", rec: "Rec", rec_yds: "Rec Yds",
+        long_rec: "Long Rec", rush_rec_yds: "Rush+Rec", pass_rush_yds: "Pass+Rush", anytime_td: "TD", kick_pts: "Kick Pts", fg_made: "FG", sacks: "Sacks"},
+  MARKET_PARTS: {pass_yds: ["pass_yds"], pass_tds: ["pass_tds"], pass_att: ["pass_att"], pass_comp: ["pass_comp"], pass_int: ["pass_int"],
+                 long_comp: ["long_comp"], rush_yds: ["rush_yds"], rush_att: ["rush_att"], long_rush: ["long_rush"], rec: ["rec"], rec_yds: ["rec_yds"],
+                 long_rec: ["long_rec"], rush_rec_yds: ["rush_yds", "rec_yds"], pass_rush_yds: ["pass_yds", "rush_yds"], anytime_td: ["td"],
+                 kick_pts: ["kick_pts"], fg_made: ["fg_made"], sacks: ["sacks"]},
+  RANGES: [["snap_pct", "Snap %", "Snap%"], ["targets", "Targets", "Targets"], ["rush_att", "Carries", "Carries"], ["pass_att", "Pass attempts", "Pass Att"],
+           ["tgt_share", "Target share %", "Tgt%"], ["air_yds", "Air yards", "Air Yds"], ["rz_tgt", "Red-zone targets", "RZ Tgt"],
+           ["rz_rush", "Red-zone carries", "RZ Car"], ["spr", "Team spread", "Spread"], ["tot", "Game total", "Total"], ["margin", "Team margin", "Margin"]],
+  // overlays on the chart: the volume behind the stat (snap % and target share run to 100, so they only filter)
+  OVL: {targets: "targets", rush_att: "carries", pass_att: "pass attempts", air_yds: "air yards", rz_tgt: "red-zone targets", rz_rush: "red-zone carries"},
+  RANGE_FOR: {targets: REC_M, tgt_share: REC_M, air_yds: REC_M, rz_tgt: REC_M, rush_att: RUSH_M, rz_rush: RUSH_M, pass_att: PASS_M},
+  SEGS: [["home", "Location", [[null, "Any"], [true, "Home"], [false, "Away"]]], ["result", "Result", [[null, "Any"], ["W", "Win"], ["L", "Loss"]]],
+         ["rest", "Rest", [[null, "Any"], ["short", "Short week"], ["bye", "Off bye"]]]],
+  VIEWS: [["props", "Props"], ["injuries", "Injuries"]],
+  TEAMS: NFL_TEAMS,
+  POSN: {QB: "Quarterback", RB: "Running Back", FB: "Fullback", WR: "Wide Receiver", TE: "Tight End", K: "Kicker", P: "Punter",
+         DE: "Defensive End", DT: "Defensive Tackle", NT: "Nose Tackle", LB: "Linebacker", OLB: "Outside Linebacker", ILB: "Inside Linebacker",
+         MLB: "Middle Linebacker", CB: "Cornerback", S: "Safety", SS: "Safety", FS: "Safety", DB: "Defensive Back", DL: "Defensive Line"},
+  GRPN: {QB: "quarterbacks", RB: "running backs", WR: "wide receivers", TE: "tight ends", K: "kickers"},
+  MU_GROUP: pos => ({QB: "QB", RB: "RB", FB: "RB", WR: "WR", TE: "TE", K: "K"})[pos],
+  VS_GRP: [["QB", "Quarterbacks"], ["RB", "Running Backs"], ["WR", "Wide Receivers"], ["TE", "Tight Ends"]],
+  ROLE_ST: [["snap_pct", "Snaps", "% snaps", "SNAP%"], ["targets", "Targets", "tgt", "TGT"], ["rush_att", "Carries", "car", "CAR"],
+            ["tgt_share", "Target Share", "% tgt", "TGT%"], ["rz", "Red Zone", "rz looks", "RZ"]],
+  ROLE_TH: {snap_pct: 12, targets: 2.5, rush_att: 4, tgt_share: 7, rz: 1.5},
+  logo: (t, c) => NFL_TEAMS[t] ? `<img class="${c || "lg"}" alt="" decoding="async" src="https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/${NFL_TEAMS[t][2]}.png&w=80&h=80">` : "",
+  heroSrc: pid => nflHead(pid, true),
+  head: pid => { const s = nflHead(pid); return `<img class="hs" alt="" loading="lazy" src="${esc(s)}" onerror="this.style.visibility='hidden'"${s ? "" : ' style="visibility:hidden"'}>`; },
+};
+const NFL_RCHIPS = ["snap_pct", "targets", "rush_att", "pass_att", "tgt_share", "air_yds", "rz_tgt", "rz_rush"];
+function useSport(sp) {
+  const c = sp === "nfl" ? NFL_CFG : NBA_CFG;
+  ({ORDER, NAME, RANGES, OVL, RANGE_FOR, SEGS, logo, heroSrc, head, MKT_TABS, VIEWS, TEAMS, POSN, TAB_ORDER, TAB, GRPN, MU_GROUP, VS_GRP, ROLE_ST, ROLE_TH} = c);
+  MARKET_PARTS = c.MARKET_PARTS;
+  SPORT = sp;
+  document.documentElement.dataset.sp = sp;
+  document.title = `Pickz · ${sp.toUpperCase()} Props`;
+}
+const DVP_GRPS = () => SPORT === "nfl" ? [["QB", "QB"], ["RB", "RB"], ["WR", "WR"], ["TE", "TE"], ["K", "K"]] : [["G", "Guards"], ["F", "Forwards"], ["C", "Centers"]];
+// the game log's two columns before the stat: minutes and shots (NBA); snaps and the volume behind the stat (NFL)
+function logCols(p) {
+  if (SPORT !== "nfl") return [["Min", l => l.min], ["FGA", l => l.fga]];
+  const m = p.market, vol = m === "anytime_td" || m === "rush_rec_yds" ? ["Tch", l => (l.targets || 0) + (l.rush_att || 0)]
+    : REC_M.indexOf(m) >= 0 ? ["Tgt", l => l.targets] : RUSH_M.indexOf(m) >= 0 ? ["Car", l => l.rush_att] : PASS_M.indexOf(m) >= 0 ? ["Att", l => l.pass_att]
+    : m === "sacks" ? ["Tkl", l => l.tackles] : ["FGA", l => l.fg_att];
+  return [["Snap%", l => l.snap_pct], vol];
+}
+function defaultMarket(pid) {                                 // a player page with no market asked for: his position's
+  if (SPORT !== "nfl") return "points";
+  const pos = ((D.players[String(pid)] || {}).pos) || "";
+  return {QB: "pass_yds", RB: "rush_yds", FB: "rush_yds", WR: "rec_yds", TE: "rec_yds", K: "kick_pts"}[pos] || "rec_yds";
+}
+// ── the switch: the label rolls over in place, the slate slides out one way and the other sport's slides in ──
+const sportBtn = () => `<button class="cb tx spb" id="lgb" aria-label="${SPORT === "nfl" ? "NFL" : "NBA"}. Tap to switch to ${SPORT === "nfl" ? "the NBA" : "the NFL"}, hold for data">` +
+  '<span class="spw" aria-hidden="true"><b>NBA</b><b>NFL</b></span></button>';
+function bindSport(b) {
+  let t = null, held = false;
+  b.onpointerdown = () => { held = false; clearTimeout(t); t = setTimeout(() => { held = true; if (navigator.vibrate) navigator.vibrate(8); leagueSheet(); }, 480); };
+  ["pointerup", "pointercancel", "pointerleave"].forEach(k => b.addEventListener(k, () => clearTimeout(t)));
+  b.oncontextmenu = e => e.preventDefault();
+  b.onclick = e => { e.preventDefault(); if (held) { held = false; return; } switchSport(); };
+}
+function switchSport() {
+  if (SWITCHING || (!D && !ERR)) return;
+  const to = SPORT === "nba" ? "nfl" : "nba", dir = to === "nfl" ? 1 : -1, btn = $("#lgb");
+  SWITCHING = true;
+  if (!$("#sheet").hidden) closeSheet();
+  document.documentElement.dataset.sp = to;                    // the label rolls (CSS) while the slate leaves
+  if (btn) { btn.setAttribute("aria-label", `${to.toUpperCase()}. Tap to switch to ${to === "nfl" ? "the NBA" : "the NFL"}, hold for data`);
+    if (!REDUCED) btn.animate([{transform: "scale(1)"}, {transform: "scale(.88)"}, {transform: "scale(1)"}], {duration: 360, easing: EASE}); }
+  const parts = () => ["#mtl", "#gcs", "#ban", "#lst", "#tb"].map(s => $(s)).filter(Boolean);
+  const outs = REDUCED || document.hidden ? [] : parts().map(el => el.animate([{opacity: 1, transform: "none"},
+    {opacity: 0, transform: `translateX(${-28 * dir}px)`}], {duration: 170, easing: "cubic-bezier(.4,0,1,1)", fill: "forwards"}));
+  const swap = () => {
+    SPORT_ST[SPORT] = {market: ST.market, date: ST.date, gid: ST.gid, team: ST.team, sort: ST.sort, dir: ST.dir, view: ST.view, iv: ST.iv, rs: ST.rs, auto: AUTO_DAY};
+    LASTMOD[SPORT] = LAST_MOD;
+    useSport(to);
+    const back = SPORT_ST[to];
+    Object.assign(ST, {sp: to === "nfl" ? "nfl" : "", gid: "all", team: "all", q: "", iv: "", rs: "", market: ORDER[0], date: null}, back || {});
+    delete ST.auto;
+    if (!VIEWS.some(v => v[0] === ST.view)) ST.view = "props";
+    if (MKT_TABS.indexOf(ST.market) < 0) ST.market = ORDER[0];
+    AUTO_DAY = back ? back.auto : true;
+    LAST_MOD = LASTMOD[to] || null; FRESH = !!DATA[to]; RATES = new Map(); ROWS = new Map(); VP = new Map(); VPL.clear(); FLAGS_D = null;
+    const q = $("#q"); if (q) { q.value = ""; q.closest(".sx").classList.remove("has"); $("#qx").hidden = true; }
+    const tb = $("#tb"); tb.innerHTML = ""; delete tb.dataset.on;
+    save();
+    D = DATA[to];
+    if (D) render();
+    else {                                                      // first time here: the slate's skeleton until it lands
+      $("#mtl").innerHTML = ""; $("#gcs").innerHTML = ""; $("#ban").innerHTML = "";
+      $("#lst").innerHTML = '<div aria-busy="true">' + '<div class="sk"></div>'.repeat(7) + "</div>";
+      tabbar();
+    }
+    outs.forEach(a => a.cancel());
+    window.scrollTo(0, 0);
+    if (!REDUCED && !document.hidden) parts().forEach((el, i) => el.animate([{opacity: 0, transform: `translateX(${32 * dir}px)`}, {opacity: 1, transform: "none"}],
+      {duration: 340, delay: i * 18, easing: EASE, fill: "backwards"}));
+    SWITCHING = false;
+    load();
+  };
+  if (outs.length) Promise.all(outs.map(a => a.finished)).then(swap, swap); else swap();
+}
+// the other sport's file, fetched once the page is idle, so the first switch is instant too (not on Low Data Mode)
+let OTHER_T = 0;
+function prefetchOther() {
+  clearTimeout(OTHER_T);
+  const other = SPORT === "nba" ? "nfl" : "nba";
+  if (DATA[other] || (navigator.connection && navigator.connection.saveData)) return;
+  OTHER_T = setTimeout(() => fetch(dataUrl(other) + "?t=" + Date.now(), {cache: "no-store"})
+    .then(r => r.ok ? r.json() : null).then(j => { if (j && !DATA[other] && other !== SPORT) DATA[other] = j; }).catch(() => {}), 4000);
+}
+// ── NFL: players and pages from the payload (every slate player's logs are in it) ──
+function nflIndex() {
+  return Object.keys(D.players).map(k => { const pl = D.players[k], lg = pl.logs[pl.logs.length - 1];
+    return [+k, pl.name, lg ? lg[D.log_cols.indexOf("team")] : "", pl.pos]; });
+}
+function nflPlayerLoad(pid) {
+  const pl = D.players[String(pid)];
+  if (!pl) return Promise.reject(new Error("not on this slate"));
+  const lg = pl.logs[pl.logs.length - 1];
+  const v = {name: pl.name, pos: pl.pos, logs: pl.logs, team: lg ? lg[D.log_cols.indexOf("team")] : ""};
+  VPL.set(pid, v);
+  return Promise.resolve(v);
+}
+function nflLeagueSheet() {
+  const b = D.sources.books, bk = k => b[k] ? (b[k].stale ? `${Math.round(b[k].age_min)} min old` : "live") : "—";
+  openSheet(`<h2 id="sht">Pickz</h2><div class="kv"><span>League</span><b>NFL ✓ · Week ${esc(D.week)}</b></div>
+    <div class="kv"><span>Props updated</span><b id="upd">${ago(D.generated_at)}</b></div>
+    <div class="kv"><span>FanDuel prices</span><b>${bk("fd")}</b></div><div class="kv"><span>DraftKings prices</span><b>${bk("dk")}</b></div>
+    <div class="kv"><span>Box scores through</span><b>${esc((D.sources.logs || {}).through || "—")}</b></div>
+    <div class="kv"><span>Seasons</span><b>${esc(((D.sources.logs || {}).seasons || []).map(x => x.slice(0, 4)).join(" · "))}</b></div>
+    <div class="kv"><span>Projection model</span><b>None for the NFL</b></div>
+    <div class="kv"><span>Picks or bets</span><b><span class="tg tf" style="margin:0">NONE · RESEARCH ONLY</span></b></div>
+    <div class="acts"><a class="btn" href="index.html" style="display:flex;align-items:center;justify-content:center;text-decoration:none">Back to Pickz</a><button class="btn pri" id="lg-ok">Done</button></div>`, s => { $("#lg-ok", s).onclick = closeSheet; });
+}
+// his spot on ESPN's depth chart (WR2, RB1)
+function nflDepthRow(p) {
+  const dc = (D.depth || {})[p.team] || {};
+  for (const k of ["QB", "RB", "WR", "TE", "K"]) {
+    const i = (dc[k] || []).findIndex(x => x[0] === p.pid);
+    if (i >= 0) return `<div class="kv"><span>Depth chart <small>ESPN</small></span><b>${k}${i + 1}${i === 0 ? " · starter" : ""}</b></div>`;
+  }
+  return "";
+}
+const avgOf = (xs, f) => { const v = xs.map(f).filter(x => x !== null && x !== undefined); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+const fx = (v, d) => v === null || v === undefined ? "–" : (Math.round(v * Math.pow(10, d || 0)) / Math.pow(10, d || 0)).toFixed(d || 0);
+// ── usage: the volume behind the stat in this window against the season, his team's shares, and for a back where his
+// carries go, for a receiver where his targets go ──
+function nflUsageCard(p, win) {
+  const logs = logsOf(p), cur = logs.filter(l => seasonOf(l.date) === D.season), grpR = REC_M.indexOf(p.market) >= 0 && p.market !== "anytime_td",
+        grpU = RUSH_M.indexOf(p.market) >= 0 && p.market !== "anytime_td" && p.market !== "pass_rush_yds", grpP = PASS_M.indexOf(p.market) >= 0;
+  const tile = (lab, f, d, unit) => { const a = avgOf(win, f), b = avgOf(cur, f);
+    const dl = a !== null && b !== null && Math.abs(a - b) >= (d ? .05 : .5) ? `<em class="${a > b ? "up" : "dn"}">${a > b ? "▲" : "▼"}${fx(Math.abs(a - b), d)}</em>` : "";
+    return `<div class="ut"><i>${lab}</i><b>${fx(a, d)}${unit || ""}</b>${dl}<small>season ${fx(b, d)}${unit || ""}</small></div>`; };
+  const ts = [tile("SNAPS", l => l.snap_pct, 0, "%")];
+  if (grpP) ts.push(tile("ATT", l => l.pass_att, 1), tile("COMP", l => l.pass_comp, 1), tile("SACKED", l => l.sacked, 1), tile("LONG", l => l.long_comp, 0), tile("CARRIES", l => l.rush_att, 1));
+  else if (p.market === "kick_pts" || p.market === "fg_made") ts.push(tile("FGA", l => l.fg_att, 1), tile("XP", l => l.pat_made, 1));
+  else if (p.market === "sacks") ts.push(tile("TACKLES", l => l.tackles, 1));
+  else {
+    if (!grpU || p.market === "rush_rec_yds") ts.push(tile("TARGETS", l => l.targets, 1), tile("TGT SHARE", l => l.tgt_share, 0, "%"), tile("AIR YDS", l => l.air_yds, 0));
+    if (grpU || p.market === "anytime_td" || p.market === "rush_rec_yds") ts.push(tile("CARRIES", l => l.rush_att, 1), tile("RUSH SHARE", l => l.rush_share, 0, "%"));
+    ts.push(tile("RZ LOOKS", l => (l.rz_tgt || 0) + (l.rz_rush || 0), 1));
+    if (grpR) ts.push(tile("DEEP TGT", l => l.deep_tgt, 1));
+  }
+  let html = `<h3>Usage <small class="hs2">${win.length} games in view · this season below</small></h3><div class="uts">${ts.join("")}</div>`;
+  // the team's shares: targets and carries this season, him first among them
+  const U = ((D.usage || {})[p.team] || []).filter(e => e.now), key = grpU ? "car" : "tgt", lab = grpU ? "carries" : "targets";
+  if (U.length) {
+    const top = U.slice().sort((a, b) => b.share[key] - a.share[key]).slice(0, 6), mx = Math.max(...top.map(e => e.share[key]), 1);
+    html += `<h3 style="margin-top:14px">${esc(p.team)} ${lab} share <small class="hs2">this season</small></h3><div class="box0 usd">${top.map(e =>
+      `<button class="usr${e.pid === p.pid ? " me" : ""}" data-vp="${e.pid}"><span>${esc(lastName(e.name))} <i>${esc(e.pos || "")}</i></span><span class="usb"><i style="width:${(e.share[key] / mx * 100).toFixed(1)}%"></i></span><b>${e.share[key]}%</b></button>`).join("")}</div>`;
+  }
+  const rd = ((D.rush_dir || {}).p || {})[String(p.pid)];
+  if (grpU && rd) html += rushChart(rd, ((D.rush_dir || {}).d || {})[p.opp], (D.rush_dir || {}).lg, p.opp);
+  const tt = (D.tgt_tree || {})[String(p.pid)];
+  if ((grpR || p.market === "anytime_td") && tt) html += treeChart(tt);
+  return html;
+}
+// where his carries went (seven gaps, left end to right end): his share of carries and yards a carry there, and what
+// tonight's defense allows a carry there against the league
+const DIRS = [["le", "L end"], ["lt", "L tackle"], ["lg", "L guard"], ["m", "Middle"], ["rg", "R guard"], ["rt", "R tackle"], ["re", "R end"]];
+function rushChart(me, opp, lg, oppT) {
+  const n = DIRS.reduce((a, [k]) => a + ((me[k] || [0])[0] || 0), 0);
+  if (!n) return "";
+  const ypc = c => c && c[0] ? c[1] / c[0] : null;
+  const cols = DIRS.map(([k, lab]) => {
+    const c = me[k] || [0, 0, 0], sh = c[0] / n, my = ypc(c), oy = opp ? ypc(opp[k]) : null, ly = lg && lg[k] ? lg[k][1] / Math.max(lg[k][0], 1) : null;
+    const tone = oy === null || ly === null ? "" : oy - ly >= .6 ? "up" : oy - ly <= -.6 ? "dn" : "";
+    return `<div class="rdc"><div class="rdb"><i style="height:${Math.max(4, sh * 100 * 1.6).toFixed(0)}%"></i></div><b>${Math.round(sh * 100)}%</b><small>${fx(my, 1)} ypc</small>
+      <em class="${tone}">${oy === null ? "–" : fx(oy, 1)}</em><span>${lab}</span></div>`;
+  }).join("");
+  return `<h3 style="margin-top:14px">Rushing direction <small class="hs2">${n} carries · his share · his ypc · ${esc(oppT || "opp")} allows</small></h3><div class="box0 rdw"><div class="rdg">${cols}</div></div>`;
+}
+// his targets by depth (behind the line, 0-9, 10-19, 20+ air yards) and side, with catches and yards
+function treeChart(t) {
+  const rows = [["dp", "20+"], ["in", "10–19"], ["sh", "0–9"], ["bl", "Behind"]], cols = [["l", "Left"], ["m", "Middle"], ["r", "Right"]];
+  const tot = Object.values(t).reduce((a, c) => a + c[0], 0);
+  if (!tot) return "";
+  const mx = Math.max(...Object.values(t).map(c => c[0]), 1);
+  const cell = k => { const c = t[k] || [0, 0, 0], a = c[0] / mx;
+    return `<div class="ttc" style="background:rgba(56,189,248,${(.08 + a * .55).toFixed(2)})"><b>${c[0]}</b><small>${c[1]} rec · ${c[2]} yds</small></div>`; };
+  return `<h3 style="margin-top:14px">Target tree <small class="hs2">this season · ${tot} targets</small></h3><div class="box0"><div class="ttg">
+    <span></span>${cols.map(c => `<span class="tth">${c[1]}</span>`).join("")}
+    ${rows.map(([r, lab]) => `<span class="ttr">${lab}</span>${cols.map(([c]) => cell(r + c)).join("")}`).join("")}</div></div>`;
+}
+// ── game script: the spread and total, and his stat as a favorite against as an underdog, in close games and blowouts ──
+function nflGameScript(p, g, logs, line, side) {
+  const L = g.lines || {}, sh = L.spread_home;
+  if (!p.team) return "";
+  const st = l => statValue(l, p.market), avg = xs => { const v = xs.map(st).filter(x => x !== null); return v.length ? r1(v.reduce((a, b) => a + b, 0) / v.length) : "–"; };
+  const rate = xs => { const v = xs.map(st).filter(x => x !== null); return v.length ? Math.round(v.filter(x => side === "under" ? x < line : x > line).length / v.length * 100) + "%" : "–"; };
+  const mine = sh === undefined || sh === null ? null : p.home ? sh : -sh;
+  const cols = [["Favored", l => l.spr !== null && l.spr < 0, mine !== null && mine < 0], ["Underdog", l => l.spr !== null && l.spr > 0, mine !== null && mine > 0],
+                ["Close ≤8", l => l.margin !== null && Math.abs(l.margin) <= 8, false], ["Blowout 17+", l => l.margin !== null && Math.abs(l.margin) >= 17, false]];
+  const grp = cols.map(c => logs.filter(c[1]));
+  const row = (lab, f) => `<tr><td>${lab}</td>${grp.map((xs, i) => `<td${cols[i][2] ? ' class="on"' : ""}>${f(xs)}</td>`).join("")}</tr>`;
+  const W = g.weather, venue = [g.stadium, g.roof === "dome" || g.roof === "closed" || g.indoor ? "Indoors" : g.roof ? "Outdoors" : "", g.surface ? g.surface.replace("grass", "Grass").replace(/turf|fieldturf|matrixturf|sportturf|a_turf|astroturf/i, "Turf") : "",
+                 W && W.temp != null && !(g.roof === "dome" || g.indoor) ? `${W.temp}° ${W.text || ""}` : ""].filter(Boolean).join(" · ");
+  const big = mine !== null && Math.abs(mine) >= 7;
+  return `<h3>Game Script${big ? ` <span class="tg tf">${mine < 0 ? "BIG FAVORITE" : "BIG UNDERDOG"}</span>` : ""}</h3><div class="box0">
+    ${mine !== null ? `<div class="kv"><span>Spread</span><b>${esc(p.team)} ${mine > 0 ? "+" : mine < 0 ? "−" : ""}${mine === 0 ? "PK" : Math.abs(mine)}${L.total ? " · Total " + L.total : ""}</b></div>` : ""}
+    ${L.total && mine !== null ? `<div class="kv"><span>Implied points</span><b>${esc(p.team)} ${r1(L.total / 2 - mine / 2)} · ${esc(p.opp)} ${r1(L.total / 2 + mine / 2)}</b></div>` : ""}
+    ${venue ? `<div class="kv"><span>Venue</span><b>${esc(venue)}</b></div>` : ""}
+    <table class="gst"><thead><tr><th></th>${cols.map(c => `<th${c[2] ? ' class="on"' : ""}>${c[0]}</th>`).join("")}</tr></thead><tbody>
+    ${row("Games", xs => xs.length)}${row("Snap %", xs => { const v = avgOf(xs, l => l.snap_pct); return v === null ? "–" : Math.round(v); })}${row(esc(NAME[p.market]), avg)}
+    ${row(`${side === "under" ? "Under" : "Over"} ${line}`, rate)}</tbody></table></div>`;
+}
+const nflSpot = s => !s || s.rest === null ? "—" : s.short ? `Short week · ${s.rest} days` : s.bye ? `Off a bye · ${s.rest} days` : `${s.rest} days rest`;
+function nflSchedCard(p, g, logs, line, side) {
+  const S = g.spots || {}, me = S[p.team], op = S[p.opp];
+  if (!me) return "";
+  const st = l => statValue(l, p.market), avg = xs => { const v = xs.map(st).filter(x => x !== null); return v.length ? r1(v.reduce((a, b) => a + b, 0) / v.length) : "–"; };
+  const rate = xs => { const v = xs.map(st).filter(x => x !== null); return v.length ? Math.round(v.filter(x => side === "under" ? x < line : x > line).length / v.length * 100) + "%" : "–"; };
+  const cols = [["s", "Short week", l => l.rest !== null && l.rest <= 4], ["n", "Normal", l => l.rest > 4 && l.rest < 10], ["b", "Off bye", l => l.rest >= 10]];
+  const cur = me.short ? "s" : me.bye ? "b" : "n", grp = cols.map(c => logs.filter(c[2]));
+  const row = (lab, f) => `<tr><td>${lab}</td>${grp.map((xs, i) => `<td${cols[i][0] === cur ? ' class="on"' : ""}>${f(xs)}</td>`).join("")}</tr>`;
+  return `<h3>Schedule${me.short ? ' <span class="tg tf">SHORT WEEK</span>' : me.bye ? ' <span class="tg tn">OFF A BYE</span>' : ""}</h3><div class="box0">
+    <div class="kv"><span>${esc(p.team)}</span><b>${nflSpot(me)}</b></div>${op ? `<div class="kv"><span>${esc(p.opp)}</span><b>${nflSpot(op)}</b></div>` : ""}
+    <table class="gst"><thead><tr><th></th>${cols.map(c => `<th${c[0] === cur ? ' class="on"' : ""}>${c[1]}</th>`).join("")}</tr></thead><tbody>
+    ${row("Games", xs => xs.length)}${row(esc(NAME[p.market]), avg)}${row(`${side === "under" ? "Under" : "Over"} ${line}`, rate)}</tbody></table></div>`;
+}
+// ── the box score: passing, rushing, receiving and kicking columns (docs/nflbox/{gid}.json, nfl_research.box_files) ──
+const NBX = [["SNAP%", r => r.snap_pct], ["C/ATT", r => r.pass_att ? r.pass_comp + "/" + r.pass_att : ""], ["PYD", r => r.pass_att ? r.pass_yds : ""],
+             ["PTD", r => r.pass_att ? r.pass_tds : ""], ["INT", r => r.pass_att ? r.pass_int : ""], ["CAR", r => r.rush_att || ""], ["RYD", r => r.rush_att ? r.rush_yds : ""],
+             ["RTD", r => r.rush_tds || ""], ["TGT", r => r.targets || ""], ["REC", r => r.targets ? r.rec : ""], ["YDS", r => r.targets ? r.rec_yds : ""],
+             ["RCTD", r => r.rec_tds || ""], ["FG", r => r.fg_att ? r.fg_made + "/" + r.fg_att : ""]];
+const NBX_HI = {pass_yds: ["PYD"], pass_tds: ["PTD"], pass_att: ["C/ATT"], pass_comp: ["C/ATT"], pass_int: ["INT"], long_comp: ["PYD"], rush_yds: ["RYD"],
+                rush_att: ["CAR"], long_rush: ["RYD"], rec: ["REC"], rec_yds: ["YDS"], long_rec: ["YDS"], rush_rec_yds: ["RYD", "YDS"], pass_rush_yds: ["PYD", "RYD"],
+                anytime_td: ["RTD", "RCTD"], kick_pts: ["FG"], fg_made: ["FG"], sacks: []};
+function nflBxTable(t, p) {
+  const B = BOX_COLS_OF(t), hi = NBX_HI[p.market] || [];
+  const rows = t.players.map(x => { const r = {}; B.forEach((c, i) => r[c] = x[3 + i]); return [x, r]; })
+    .filter(([, r]) => r.pass_att || r.rush_att || r.targets || r.fg_att);
+  const td = (lab, v) => `<td${hi.indexOf(lab) >= 0 ? ' class="hi"' : ""}>${v === null || v === undefined ? "" : v}</td>`;
+  return `<div class="bxw"><table class="bx"><thead><tr><th>PLAYER</th>${NBX.map(([c]) => `<th${hi.indexOf(c) >= 0 ? ' class="hi"' : ""}>${c}</th>`).join("")}</tr></thead>
+    <tbody>${rows.map(([x, r]) => `<tr data-vp="${x[0]}"${x[0] === p.pid ? ' class="me"' : ""}><td>${esc(nameOf(x[1]))} <small style="color:var(--l3)">${esc(x[2])}</small></td>${NBX.map(([c, f]) => td(c, f(r))).join("")}</tr>`).join("")}</tbody></table></div>`;
+}
+let BOX_COLS_OF = () => ["snap_pct", "pass_comp", "pass_att", "pass_yds", "pass_tds", "pass_int", "rush_att", "rush_yds", "rush_tds", "long_rush", "targets", "rec",
+                         "rec_yds", "rec_tds", "long_rec", "fg_made", "fg_att", "pat_made", "sacks", "tackles"];
+// ── the Matchup page, football's: the grade and its parts, the game around it, the defense's last games against his
+// group (D.vs), and for a back where the defense gives up yards ──
+function nflMatchup() {
+  const p = MUP.p, c = p.ctx || {}, g = gameOf(p.gid), side = ST.side, gr = grade(p, side), mp = $("#mp"), rkT = (D.ranks || {})[g.date] || {};
+  const rk = (r, n) => r ? `<span class="rk ${rankCls(r, n, side) === "good" ? "g" : rankCls(r, n, side) === "bad" ? "r" : "n"}">${ord(r)}</span>` : "—";
+  const dd = (k, opts, cur) => `<label class="dd"><span>${esc((opts.find(o => o[0] === cur) || opts[0])[1])}</span>${ICON.down}
+    <select data-dd="${k}" aria-label="${k === "grp" ? "Position" : "Stat"}">${opts.map(([v, t]) => `<option value="${v}"${v === cur ? " selected" : ""}>${esc(t)}</option>`).join("")}</select></label>`;
+  const L = g.lines || {}, mine = L.spread_home === undefined || L.spread_home === null ? null : p.home ? L.spread_home : -L.spread_home;
+  const T = (D.teams || {})[p.opp] || {}, Tm = (D.teams || {})[p.team] || {};
+  const mks = (MUP.grp && rkT.dvp && rkT.dvp[MUP.grp] ? Object.keys(rkT.dvp[MUP.grp]) : []).filter(m => NAME[m]);
+  if (mks.indexOf(MUP.mkt) < 0) MUP.mkt = mks[0] || p.market;
+  mp.innerHTML = `<div class="ph"><button class="cb bk" aria-label="Back">${ICON.back}</button>
+      <div class="ph-t"><b>${esc(p.player)} vs ${esc(p.opp || "")}</b><span>Matchup</span></div><span class="sp2"></span>
+      <button class="cb" id="mpm" aria-label="Menu">${ICON.ham}</button></div>
+    <div class="mpc">
+      <div class="mpg">${gauge(gr)}<div><b>${gr ? "Grade " + gr.g : "Not graded yet"}</b><span>${esc(NAME[p.market])} · ${side === "under" ? "Under" : "Over"} ${DT.line === null ? "" : DT.line}</span></div></div>
+      <div class="kv"><span>DvP · ${esc(short(p.market))} to ${GRPN[c.group] || "his position"}</span><b>${rk(c.dvp_rank, c.teams)}${c.allow !== undefined ? ` <small class="mut">${r1(c.allow)} a game · league ${r1(c.lg)}</small>` : ""}</b></div>
+      <div class="kv"><span>Points allowed</span><b>${rk(c.def_rank, c.teams)}${T.pa ? ` <small class="mut">${r1(T.pa)} a game</small>` : ""}</b></div>
+      <div class="kv"><span>${esc(p.opp)} pace</span><b>${c.pace_rank ? ord(c.pace_rank) + " most plays" : "—"}${T.plays ? ` <small class="mut">${r1(T.plays)} a game</small>` : ""}</b></div>
+      <div class="kv"><span>${esc(p.team)} offense</span><b>${Tm.pts ? r1(Tm.pts) + " pts" : "—"}${Tm.neutral_pass ? ` · ${Math.round(Tm.neutral_pass * 100)}% pass` : ""}${Tm.sec_play ? ` · ${Math.round(Tm.sec_play)}s/play` : ""}</b></div>
+      ${mine !== null ? `<div class="kv"><span>Game</span><b>${esc(p.team)} ${mine > 0 ? "+" : mine < 0 ? "−" : ""}${mine === 0 ? "PK" : Math.abs(mine)}${L.total ? " · Total " + L.total : ""}</b></div>` : ""}
+      <div class="mpft"><div><span>Regular Season</span><b>${esc(D.season.slice(0, 4))}</b></div>
+        <button class="cb" id="mpi" aria-label="How the ranks are built">${ICON.info}</button><button class="cb" id="mpsh" aria-label="Share">${ICON.share}</button></div>
+    </div>
+    <h2 class="mpt">${esc(p.opp || "")} Team Defense</h2>
+    <div class="mpf"><span>Last games vs</span>${dd("grp", VS_GRP, MUP.grp)}${dd("mkt", mks.map(m => [m, NAME[m]]), MUP.mkt)}</div>
+    <div id="vst"></div>
+    <div class="shc wg" id="nrd"></div>`;
+  $(".bk", mp).onclick = () => history.back();
+  $(".ph", mp).onclick = e => { if (!e.target.closest("button")) mp.scrollTo({top: 0, behavior: REDUCED ? "auto" : "smooth"}); };
+  $("#mpm", mp).onclick = leagueSheet;
+  $("#mpsh", mp).onclick = () => { const url = location.href; if (navigator.share) navigator.share({title: `${p.player} vs ${p.opp}`, url: url}).catch(() => {}); else if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => toast("Link copied")); };
+  $("#mpi", mp).onclick = () => openSheet(`<h2 id="sht">Ranks</h2>
+    <div class="kv"><span>Teams ranked</span><b>${c.teams || "—"}</b></div>
+    <div class="kv"><span>${esc(p.opp || "")} games this season</span><b>${c.rank_n != null ? c.rank_n : c.opp_games || 0}</b></div>
+    <div class="kv"><span>DvP</span><b>what the defense allowed that position a game, all its players summed</b></div>
+    <div class="kv"><span>Before 3 games</span><b>last season's rank stands in</b></div>
+    <div class="kv"><span>1st</span><b>the toughest</b></div>
+    <div class="acts"><button class="btn pri" id="mpi-ok">Done</button></div>`, s => { $("#mpi-ok", s).onclick = closeSheet; });
+  $$("[data-dd]", mp).forEach(sel => sel.onchange = () => {
+    MUP[sel.dataset.dd] = sel.value; MUP.more = false;
+    if (sel.dataset.dd === "grp") { renderMatchup(); return; }
+    $("span", sel.parentNode).textContent = sel.options[sel.selectedIndex].text;
+    vsTable();
+  });
+  const od = ((D.rush_dir || {}).d || {})[p.opp];
+  if (od && RUSH_M.indexOf(p.market) >= 0) $("#nrd", mp).innerHTML = oppRushCard(od, (D.rush_dir || {}).lg, p.opp);
+  vsTable();
+}
+// where the defense gives up yards on the ground: yards a carry by gap against the league's
+function oppRushCard(od, lg, opp) {
+  const cols = DIRS.map(([k, lab]) => { const c = od[k] || [0, 0, 0], y = c[0] ? c[1] / c[0] : null, l = lg && lg[k] ? lg[k][1] / Math.max(lg[k][0], 1) : null;
+    const d = y === null || l === null ? null : y - l, tone = d === null ? "" : d >= .6 ? "up" : d <= -.6 ? "dn" : "";
+    return `<div class="rdc"><div class="rdb"><i class="${tone}" style="height:${y === null ? 4 : Math.max(4, Math.min(100, y / 8 * 100)).toFixed(0)}%"></i></div><b class="${tone}">${fx(y, 1)}</b><small>${c[0]} car</small><span>${lab}</span></div>`; }).join("");
+  return `<h3 class="wgh">${esc(opp)} run defense by gap <small class="hs2">yards a carry · green = 0.6+ over the league</small></h3><div class="box0 rdw"><div class="rdg">${cols}</div></div>`;
+}
+function nflVsTable() {
+  const el = $("#vst");
+  if (!el || !MUP) return;
+  const rows0 = MUP.rows || [], mk = MUP.mkt, all = rows0.filter(r => r[5] === MUP.grp && r[6][mk] !== null && r[6][mk] !== undefined);
+  const rows = all.slice(0, MUP.more ? 24 : 8);
+  if (!rows.length) { el.innerHTML = '<div class="empty"><b>No games</b></div>'; return; }
+  const lgv = (((D.ranks || {})[gameOf(MUP.p.gid).date] || {}).lg || {})[MUP.grp] || {};
+  el.innerHTML = `<table class="vs"><colgroup><col style="width:44%"><col style="width:18%"><col style="width:16%"><col></colgroup>
+    <thead><tr><th>PLAYER</th><th>${esc((TAB[mk] || mk).toUpperCase())}</th><th>WEEK</th><th>DATE</th></tr></thead><tbody>${lgv[mk] !== undefined ? `<tr class="lga"><td>League avg</td><td>${r1(lgv[mk])}</td><td></td><td class="cd">a game</td></tr>` : ""}${rows.map(r => {
+      const d = r[0].slice(5).split("-").map(Number).join("/"), wk = r[1].split("_")[1];
+      return `<tr data-g="${esc(r[1])}" data-t="${esc(r[2])}" data-pid="${r[3]}"><td>${esc(initialName(r[4]))}</td><td>${r[6][mk]}</td><td>${+wk}</td><td class="cd"><b>${esc(r[2])}</b> ${d}</td></tr>`; }).join("")}</tbody></table>
+
+    ${all.length > 8 ? `<button class="vsm" id="vsm" aria-expanded="${MUP.more}">${MUP.more ? "Less Results" : "More Results"}${ICON.down}</button>` : ""}`;
+  const m = $("#vsm", el); if (m) m.onclick = () => { MUP.more = !MUP.more; vsTable(); };
+  $$("tr[data-g]", el).forEach(t => { t.onclick = () => boxSheet(t.dataset.g, t.dataset.t, {market: mk, pid: +t.dataset.pid});
+    t.onpointerdown = () => boxGet(t.dataset.g).catch(() => {}); });
+}
+// ── depth charts (ESPN, via nfl_research.depth_charts): each slate team's QB, RBs, WRs, TE and K, the starters first,
+// a listed player tagged with his status; a tap opens the player ──
+function depthView() {
+  const gs = D.games.filter(g => g.date === ST.date && (ST.gid === "all" || g.gid === ST.gid)), DC = D.depth || {};
+  if (!gs.length) return '<div class="empty"><b>No games</b></div>';
+  const stat = (t, pid) => { const e = (((D.inj_report || {})[ST.date + "|" + t] || {}).players || []).find(x => x.pid === pid); return e ? e.status : null; };
+  const team = t => { const d = DC[t] || {};
+    const row = (k, n) => (d[k] || []).slice(0, n).map(([pid, name], i) => { const st = stat(t, pid);
+      return `<button class="lus${i === 0 ? "" : " bk2"}" data-vp="${pid}"><span class="av">${head(pid)}</span><b>${esc(lastName(name))}</b><i>${k}${i + 1}${st ? ` · <em class="lq">${INJ_S[st] || esc(st)}</em>` : ""}</i></button>`; }).join("");
+    return `<div class="lut"><div class="luth">${logo(t, "")}<b>${esc(t)}</b><span class="tg tn">ESPN</span></div><div class="lur dcr">${row("QB", 2)}${row("RB", 3)}${row("WR", 5)}${row("TE", 2)}${row("K", 1)}</div></div>`; };
+  return gs.map(g => `<div class="lug"><div class="lugh"><span>${esc(g.away)} @ ${esc(g.home)}</span><span>${when(g)}</span></div>${[g.away, g.home].map(team).join("")}</div>`).join("");
+}
 // ── data ──
 // what a row, a prop's rates and an open page are built from: on a refresh, props whose signature did not move keep
 // their built rows and rates (no headshot re-decoded, no rate recomputed), and an open page re-renders only if its own did
@@ -2910,16 +3360,17 @@ let AUTO_DAY = true;
 // the last data this phone loaded (Cache Storage), drawn at once on a launch while the fresh copy downloads
 const CACHE = "pickz-data";
 function cacheRead() {
-  try { return caches.open(CACHE).then(c => c.match("nba_props.json")).then(r => r ? r.json() : null).catch(() => null); }
+  try { return caches.open(CACHE).then(c => c.match(dataUrl())).then(r => r ? r.json() : null).catch(() => null); }
   catch (e) { return Promise.resolve(null); }
 }
 function cacheWrite(text) {
   if (Date.now() - SAVED_AT < 600000) return;               // at most every 10 minutes: it is 4-5 MB
   SAVED_AT = Date.now();
-  try { caches.open(CACHE).then(c => c.put("nba_props.json", new Response(text, {headers: {"Content-Type": "application/json"}}))).catch(() => {}); } catch (e) {}
+  const u = dataUrl();
+  try { caches.open(CACHE).then(c => c.put(u, new Response(text, {headers: {"Content-Type": "application/json"}}))).catch(() => {}); } catch (e) {}
 }
 // once the fresh data is in: what the other views read, so they open without a wait
-function prefetch() { refsLoad(); rolesLoad(); playerIndex(); }
+function prefetch() { if (SPORT === "nba") { refsLoad(); rolesLoad(); playerIndex(); } prefetchOther(); }
 function redrawPage() {
   if (PDOWN) { REDRAW = true; return; }                  // mid-drag or mid-tap: after the finger lifts
   REDRAW = false;
@@ -2934,10 +3385,13 @@ function load() {
   if (!D) { LOADING = true; render(); }
   const boot = !FRESH;
   if (boot) { busy(true); cacheRead().then(j => { if (j && !D && !FRESH) apply(j); }); }
-  return fetch("nba_props.json?t=" + Date.now(), {cache: "no-store"}).then(r => { if (!r.ok) throw new Error("HTTP " + r.status);
-      LAST_MOD = r.headers.get("Last-Modified") || LAST_MOD; return r.text(); })
+  const sp = SPORT;
+  return fetch(dataUrl() + "?t=" + Date.now(), {cache: "no-store"}).then(r => { if (!r.ok) throw new Error("HTTP " + r.status);
+      if (sp === SPORT) LAST_MOD = r.headers.get("Last-Modified") || LAST_MOD; return r.text(); })
     .then(text => {
       const j = JSON.parse(text);
+      if (sp !== SPORT) { DATA[sp] = j; return true; }              // switched sports while it downloaded: keep it for later
+      DATA[sp] = j;
       if (D && FRESH && !AUTO_DAY && j.generated_at === D.generated_at) { LOADED_AT = Date.now(); return true; }   // nothing new: no redraw
       FRESH = true; apply(j); cacheWrite(text); AUTO_DAY = false;
       if (boot) { busy(false); setTimeout(prefetch, 1500); }
@@ -2952,14 +3406,15 @@ let LAST_MOD = null, CHECK_AT = 0, CHECKING = false;
 function freshen() {
   if (!D || !FRESH || CHECKING || document.hidden || Date.now() - CHECK_AT < 8000) return;
   CHECKING = true; CHECK_AT = Date.now();
-  fetch("nba_props.json?t=" + Date.now(), {method: "HEAD", cache: "no-store"})
+  fetch(dataUrl() + "?t=" + Date.now(), {method: "HEAD", cache: "no-store"})
     .then(r => { const m = r.ok ? r.headers.get("Last-Modified") : null; return m && m !== LAST_MOD ? load() : null; })
     .catch(() => null).then(() => { CHECKING = false; });
 }
 // a payload onto the page (the cached copy at a launch, then each fresh one)
 function apply(j) {
+  if ((j.sport || "nba") !== SPORT) { DATA[j.sport || "nba"] = j; return; }   // the other sport's (a switch mid-download)
   const first = !D, was = D ? new Map(D.props.map(p => [p.id, sigOf(p)])) : null, pg0 = CUR && D ? pageSig(CUR) : null;
-  D = j; ERR = null; LOADING = false; LOADED_AT = Date.now(); VP = new Map(); REFS = null; ROLES = null;
+  D = j; DATA[SPORT] = j; ERR = null; LOADING = false; LOADED_AT = Date.now(); VP = new Map(); REFS = null; ROLES = null;
   if (was) {
     const now = new Map(D.props.map(p => [p.id, p])), memo = new Map();
     const same = k => { const id = k.split("|").slice(0, 3).join("|");
@@ -2970,7 +3425,7 @@ function apply(j) {
   render(); if (!first) window.scrollTo(0, y);
   if (CUR && pageSig(CUR) !== pg0) redrawPage();
   $("#live").textContent = "Props updated";
-  if (first && HASH_P) { history.replaceState(null, "", hashState()); openProp(HASH_P); }
+  if (first && HASH_P && !HASH_USED) { HASH_USED = true; history.replaceState(null, "", hashState()); openProp(HASH_P); }
 }
 // a thin bar across the top while something a tap asked for is loading
 let BUSY = 0, OPEN_N = 0;
