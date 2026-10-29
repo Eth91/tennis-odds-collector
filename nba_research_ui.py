@@ -52,7 +52,17 @@ body{background:#0f0f0f;--red:#ff090c;--grn:#28da8e}
 .dcr{grid-template-columns:repeat(4,1fr)} .lus.bk2{opacity:.78}
 .wgh{margin:14px 0 8px;font-size:15px;font-weight:600}
 .vs tr.lga td{color:#8e8e8e}
-.zsg{margin:0 0 10px} .zsg button{flex:1}
+/* the field chart: the shot chart's football twin */
+.fld{display:block;width:100%;height:auto;margin:10px 0 2px}
+.fld .fyl{stroke:#232323;stroke-width:1} .fld .fy10{stroke:#353535} .fld .fhash{fill:none;stroke:#3a3a3a;stroke-width:1.2;stroke-dasharray:3 5}
+.fld .flos{stroke:#9a9a9a;stroke-width:2} .fld .fhi{stroke:#38bdf8;stroke-width:2}
+.fld text{font-family:-apple-system,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+.fld .fyn{font-size:10px;fill:#6e6e6e;font-weight:600} .fld .fgl{font-size:10.5px;fill:#9a9a9a;font-weight:700;text-anchor:middle}
+.fld .fv{font-size:22px;font-weight:700;fill:#fff;text-anchor:middle} .fld .fv.sm{font-size:14px} .fld .fv.rs{font-size:17px}
+.fld .fs{font-size:11.5px;fill:#d0d0d0;text-anchor:middle} .fld .fs.sm{font-size:9.5px} .fld .fs.rs{font-size:10.5px}
+.fld .fol{fill:#2c2c2e;stroke:#5a5a5e;stroke-width:1} .fld .fot{font-size:9px;font-weight:700;fill:#d0d0d0;text-anchor:middle}
+.fld .fqb{fill:#2c2c2e;stroke:#8e8e8e;stroke-width:1.2}
+.fkk{display:flex;gap:6px} .fgp{margin-top:0} .fbk span{margin-left:0!important}
 /* the football cards' tile: the hit-rate box's look (a dark rounded tile, a small label, one bold number) */
 .t3s{display:grid;grid-template-columns:repeat(3,1fr);gap:6.1px}
 .t3s.c7{grid-template-columns:repeat(7,1fr);gap:4px}
@@ -65,8 +75,6 @@ body{background:#0f0f0f;--red:#ff090c;--grn:#28da8e}
 .t3.hi{box-shadow:inset 0 0 0 1.5px #38bdf8} .t3.hi i{color:#38bdf8}
 .c7 .t3{min-height:50px} .c7 .t3 b{font-size:13.4px} .c7 .t3 small{font-size:9px}
 .cov b.up{color:var(--grn)} .cov b.dn{color:var(--red)} .cov b{font-weight:600}
-.zg{display:grid;grid-template-columns:52px repeat(3,1fr);gap:5px;align-items:stretch}
-.zh{font-size:11px;color:#8e8e8e;text-align:center} .zr{display:flex;align-items:center;font-size:11.5px;color:#8e8e8e}
 .cov{table-layout:fixed;width:100%} .cov td:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cov td small{font-size:10.5px;color:#8e8e8e;margin-right:4px} .cov tr.out td{opacity:.55} .cov .tg{margin-left:2px}
 
@@ -3184,38 +3192,7 @@ function nflUsageCard(p, win) {
     html += `<h3 style="margin-top:18px">${esc(p.team)} ${lab} share <small class="hs2">this season</small></h3><div class="box0 usd">${top.map(e =>
       `<button class="usr${e.pid === p.pid ? " me" : ""}" data-vp="${e.pid}"><span>${esc(lastName(e.name))} <i>${esc(e.pos || "")}</i></span><span class="usb"><i style="width:${(e.share[key] / mx * 100).toFixed(1)}%"></i></span><b>${e.share[key]}%</b></button>`).join("")}</div>`;
   }
-  const rd = ((D.rush_dir || {}).p || {})[String(p.pid)];
-  if (grpU && rd) html += rushChart(rd, ((D.rush_dir || {}).d || {})[p.opp], (D.rush_dir || {}).lg, p.opp);
-  const tt = (D.tgt_tree || {})[String(p.pid)];
-  if ((grpR || p.market === "anytime_td") && tt) html += treeChart(tt);
   return html;
-}
-// the seven gaps, left end to right end
-const DIRS = [["le", "LE"], ["lt", "LT"], ["lg", "LG"], ["m", "MID"], ["rg", "RG"], ["rt", "RT"], ["re", "RE"]];
-const ypcOf = c => c && c[0] ? c[1] / c[0] : null, lgYpc = (lg, k) => lg && lg[k] ? lg[k][1] / Math.max(lg[k][0], 1) : null;
-// a defense's yards a carry at a gap against the league's there: green 0.6+ over (soft for an over), red 0.6+ under
-const gapCls = (y, l, side) => y === null || l === null || Math.abs(y - l) < .6 ? "" : (y > l) === (side !== "under") ? "up" : "dn";
-// where his carries went: his share of them at each gap (his favourite in blue), and what tonight's defense allows a carry there
-function rushChart(me, opp, lg, oppT) {
-  const n = DIRS.reduce((a, [k]) => a + ((me[k] || [0])[0] || 0), 0);
-  if (!n) return "";
-  const top = DIRS.reduce((b, [k]) => ((me[k] || [0])[0] > ((me[b] || [0])[0]) ? k : b), "m");
-  const mine = DIRS.map(([k, lab]) => { const c = me[k] || [0, 0, 0]; return t3(lab, Math.round(c[0] / n * 100) + "%", "", fx(ypcOf(c), 1) + " ypc", k === top); });
-  const theirs = opp ? DIRS.map(([k, lab]) => t3(lab, fx(ypcOf(opp[k]), 1), gapCls(ypcOf(opp[k]), lgYpc(lg, k), ST.side), "lg " + fx(lgYpc(lg, k), 1))) : [];
-  return `<h3 style="margin-top:18px">Where he runs <small class="hs2">${n} carries this season · his share</small></h3>${t3s(mine, 7)}` +
-    (theirs.length ? `<h3 style="margin-top:12px">${esc(oppT || "")} allows there <small class="hs2">yards a carry</small></h3>${t3s(theirs, 7)}` : "");
-}
-// his targets by depth and side: targets in each zone, catches and yards under, his busiest zones in blue
-const ZROWS = [["dp", "Deep"], ["in", "10–19"], ["sh", "0–9"], ["bl", "Behind"]], ZCOLS = [["l", "Left"], ["m", "Middle"], ["r", "Right"]];
-const zoneGrid = cell => `<div class="zg"><span></span>${ZCOLS.map(c => `<span class="zh">${c[1]}</span>`).join("")}
-  ${ZROWS.map(([r, lab]) => `<span class="zr">${lab}</span>${ZCOLS.map(([c]) => cell(r + c)).join("")}`).join("")}</div>`;
-function treeChart(t) {
-  const tot = Object.values(t).reduce((a, c) => a + c[0], 0);
-  if (!tot) return "";
-  return `<h3 style="margin-top:18px">Where he's targeted <small class="hs2">${tot} targets this season</small></h3>` + zoneGrid(k => {
-    const c = t[k] || [0, 0, 0];
-    return t3(Math.round(c[0] / tot * 100) + "%", c[0], "", `${c[1]} rec · ${c[2]} yds`, c[0] / tot >= .15).replace("<i>", '<i class="pc">');
-  });
 }
 // ── game script: the spread and total, and his stat as a favorite against as an underdog, in close games and blowouts ──
 function nflGameScript(p, g, logs, line, side) {
@@ -3298,7 +3275,7 @@ function nflMatchup() {
     <h2 class="mpt">${esc(p.opp || "")} Team Defense</h2>
     <div class="mpf"><span>Last games vs</span>${dd("grp", VS_GRP, MUP.grp)}${dd("mkt", mks.map(m => [m, NAME[m]]), MUP.mkt)}</div>
     <div id="vst"></div>
-    <div class="shc wg" id="nzc"></div><div class="shc wg" id="nbg"></div><div class="shc wg" id="npr"></div>
+    <div class="shc" id="nfc"></div><div class="shc wg" id="nbg"></div><div class="shc wg" id="npr"></div>
     <div class="shc wg" id="ncv"></div><div class="shc wg" id="nmz"></div><div class="shc wg" id="nrd"></div><div class="shc wg" id="ncl"></div>`;
   $(".bk", mp).onclick = () => history.back();
   $(".ph", mp).onclick = e => { if (!e.target.closest("button")) mp.scrollTo({top: 0, behavior: REDUCED ? "auto" : "smooth"}); };
@@ -3321,6 +3298,121 @@ function nflMatchup() {
   vsTable();
 }
 // where the defense gives up yards on the ground: yards a carry by gap against the league's
+// ── the field chart (D.field, nfl_research.field_payload): the NBA shot chart's football twin, on the Matchup page.
+// Passing and receiving: the field past the line of scrimmage in twelve zones (behind the line, 0-9, 10-19, 20+ yards
+// downfield; left, middle, right of the hashes). Rushing: the line with its five linemen and the seven gaps. The player
+// (where his targets, throws or carries go, a blue heat) or the opponent's defense (what it gives up there against the
+// league's average defense: green = more, good for an over; red = less), this season or last ──
+const ZN = {dp: "Deep", in: "10–19", sh: "Short", bl: "Behind"}, SN = {l: "left", m: "middle", r: "right"};
+const GN = {le: "Left end", lt: "Left tackle", lg: "Left guard", m: "Middle", rg: "Right guard", rt: "Right tackle", re: "Right end"};
+// the pass field to scale-ish: rows top (deep) to bottom (behind the line), the line of scrimmage at y 252
+const FROWS = [["dp", 12, 108], ["in", 108, 180], ["sh", 180, 252], ["bl", 252, 292]], FCOLS = [["l", 0], ["m", 120], ["r", 240]];
+const fBlue = a => `rgba(56,189,248,${(.06 + .62 * Math.min(1, a)).toFixed(3)})`;
+function fGreenRed(d, side) {                          // d: how far over the league (-1 to 1), coloured for the side
+  if (d === null) return "#191919";
+  const good = (d >= 0) === (side !== "under"), a = Math.min(1, Math.abs(d));
+  return good ? `rgba(40,218,142,${(.1 + .5 * a).toFixed(3)})` : `rgba(255,69,58,${(.1 + .5 * a).toFixed(3)})`;
+}
+// zs: {zone: {fill, t, sub, hi}} -> the pass field
+function passFieldSvg(zs, label) {
+  const lines = [216, 180, 144, 108, 72, 36].map((y, i) => `<path d="M0,${y}H360" class="fyl${i === 1 || i === 3 ? " fy10" : ""}"/>`).join("");
+  const nums = [[180, "10"], [108, "20"]].map(([y, t]) => `<text x="7" y="${y - 4}" class="fyn">${t}</text><text x="353" y="${y - 4}" class="fyn" text-anchor="end">${t}</text>`).join("");
+  const cells = FROWS.map(([r, y0, y1]) => FCOLS.map(([c, x0]) => {
+    const z = zs[r + c] || {fill: "#191919", t: "–"}, cx = x0 + 60, cy = (y0 + y1) / 2, small = r === "bl";
+    return `<rect x="${x0 + 1}" y="${y0 + 1}" width="118" height="${y1 - y0 - 2}" rx="5" fill="${z.fill}"${z.hi ? ' class="fhi"' : ""}/>` +
+      `<text x="${cx}" y="${cy + (small ? 2 : z.sub ? -1 : 7)}" class="fv${small ? " sm" : ""}">${z.t}</text>` +
+      (z.sub && !small ? `<text x="${cx}" y="${cy + 18}" class="fs">${esc(z.sub)}</text>` : "") +
+      (z.sub && small ? `<text x="${cx}" y="${cy + 15}" class="fs sm">${esc(z.sub)}</text>` : "");
+  }).join("")).join("");
+  return `<svg class="fld" viewBox="0 0 360 312" role="img" aria-label="${esc(label)}"><rect x="0" y="0" width="360" height="312" rx="10" fill="#101010"/>
+    ${lines}${cells}<path d="M120,8V292M240,8V292" class="fhash"/><path d="M0,252H360" class="flos"/>${nums}
+    <text x="7" y="248" class="fyn">LOS</text><circle cx="180" cy="302" r="7" class="fqb"/></svg>`;
+}
+// the rush field: seven gaps between and outside the linemen (LT, LG, C, RG, RT), the line of scrimmage at y 232
+const RGAPS = ["le", "lt", "lg", "m", "rg", "rt", "re"], RLAB = ["LE", "LT", "LG", "MID", "RG", "RT", "RE"];
+function rushFieldSvg(zs, label) {
+  const w = 360 / 7;
+  const cols = RGAPS.map((k, i) => { const z = zs[k] || {fill: "#191919", t: "–"}, cx = i * w + w / 2;
+    return `<rect x="${i * w + 1}" y="22" width="${w - 2}" height="208" rx="5" fill="${z.fill}"${z.hi ? ' class="fhi"' : ""}/>` +
+      `<text x="${cx}" y="16" class="fgl">${RLAB[i]}</text><text x="${cx}" y="122" class="fv rs">${z.t}</text>` +
+      (z.sub ? `<text x="${cx}" y="140" class="fs rs">${esc(z.sub)}</text>` : ""); }).join("");
+  const ol = [[1, "LT"], [2, "LG"], [3.5, "C"], [5, "RG"], [6, "RT"]].map(([b, t]) =>
+    `<rect x="${b * w - 13}" y="223" width="26" height="18" rx="5" class="fol"/><text x="${b * w}" y="236" class="fot">${t}</text>`).join("");
+  return `<svg class="fld" viewBox="0 0 360 272" role="img" aria-label="${esc(label)}"><rect x="0" y="0" width="360" height="272" rx="10" fill="#101010"/>
+    ${[66, 110, 154, 198].map(y => `<path d="M0,${y}H360" class="fyl"/>`).join("")}${cols}<path d="M0,232H360" class="flos"/>${ol}
+    <circle cx="180" cy="258" r="8" class="fqb"/><text x="180" y="262" class="fot">RB</text></svg>`;
+}
+function fieldKinds(p) {                                // which fields bear on the market
+  const m = p.market, pos = (p.ctx || {}).pos || "", rb = pos === "RB" || pos === "FB";
+  if (PASS_M.indexOf(m) >= 0) return m === "pass_rush_yds" ? ["pass", "rush"] : ["pass"];
+  if (m === "rush_rec_yds" || (m === "anytime_td" && rb)) return ["rush", "recv"];
+  if (m === "anytime_td" && pos === "QB") return ["pass", "rush"];
+  if (RUSH_M.indexOf(m) >= 0 && m !== "anytime_td") return ["rush"];
+  return ["recv"];
+}
+function fieldCard(p) {
+  const F = D.field || {}, kinds = fieldKinds(p), side = ST.side;
+  if (!F.seasons) return "";
+  MUP.fk = kinds.indexOf(MUP.fk) >= 0 ? MUP.fk : kinds[0];
+  MUP.fv = MUP.fv || "p";
+  MUP.fs = MUP.fs || F.seasons.find(s => ((F[s] || {}).p || {})[String(p.pid)]) || F.seasons[0];
+  const k = MUP.fk, def = MUP.fv === "d", S = F[MUP.fs] || {}, me = (S.p || {})[String(p.pid)] || {}, od = (S.def || {})[p.opp] || {};
+  const grp0 = (p.ctx || {}).group, grp = k === "pass" ? "all" : MUP.fg || (["WR", "TE", "RB"].indexOf(grp0) >= 0 ? grp0 : "all");
+  const nm = lastName(p.player), g = me.g || 0, seasonLab = MUP.fs.slice(0, 4);
+  let svg = "", rows = "", legend = "";
+  if (k === "rush") {
+    const mine = me.rush || {}, n = RGAPS.reduce((a, x) => a + ((mine[x] || [0])[0] || 0), 0), lg = (S.lg || {}).rush || {}, R = od.rush || {};
+    const share = x => n ? ((mine[x] || [0])[0] || 0) / n : 0, mx = Math.max(...RGAPS.map(share), .01);
+    const zs = {};
+    RGAPS.forEach(x => {
+      if (!def) { const c = mine[x] || [0, 0, 0]; zs[x] = {fill: c[0] ? fBlue(share(x) / mx) : "#191919", t: c[0] ? Math.round(share(x) * 100) + "%" : "–", sub: c[0] ? fx(c[1] / c[0], 1) + " ypc" : ""}; }
+      else { const c = R[x], y = c && c[0] ? c[1] / c[0] : null, l = lg[x] && lg[x][0] ? lg[x][1] / lg[x][0] : null, rk = ((S.rank || {}).rush || {})[x] || {};
+        zs[x] = {fill: fGreenRed(y === null || l === null ? null : (y - l) / 1.5, side), t: y === null ? "–" : fx(y, 1), sub: rk[p.opp] ? ord(rk[p.opp]) : "", hi: share(x) >= .2}; }
+    });
+    svg = rushFieldSvg(zs, def ? `${p.opp} run defense by gap, ${seasonLab}` : `${p.player} carries by gap, ${seasonLab}`);
+    if (def) {
+      const list = RGAPS.map(x => { const c = R[x], l = lg[x]; return c && c[0] >= FIELD_MIN && l && l[0] ? {x: x, d: c[1] / c[0] - l[1] / l[0]} : null; }).filter(Boolean).sort((a, b) => b.d - a.d).slice(0, 3);
+      rows = list.map(r => `<div class="kv shr"><span>${GN[r.x]}<small>${n ? Math.round(share(r.x) * 100) + "% of his carries" : "no carries"}</small></span><b><em class="${r.d > 0 ? "up" : "dn"}">${r.d > 0 ? "+" : ""}${r.d.toFixed(1)} ypc</em><small>${(R[r.x] || [0])[0]} carries</small></b></div>`).join("");
+    }
+    legend = def ? "" : `${n} carries${g ? ` in ${g} games` : ""} · share of his carries`;
+  } else {
+    const tree = (k === "pass" ? me.pass : me.recv) || {}, n = Object.values(tree).reduce((a, c) => a + c[0], 0), pg = (S.def ? od.pass || {} : {})[grp] || {}, lg = (((S.lg || {}).pass || {})[grp]) || {};
+    const share = z => n ? ((tree[z] || [0])[0] || 0) / n : 0, mx = Math.max(...Object.keys(tree).map(share), .01), zs = {};
+    FROWS.forEach(([r]) => FCOLS.forEach(([c]) => { const z = r + c;
+      if (!def) { const t = tree[z]; zs[z] = !t || !t[0] ? {fill: "#191919", t: "–"} : {fill: fBlue(share(z) / mx), t: g ? fx(t[2] / g, 1) : t[2], sub: `${t[1]}/${t[0]} · ${Math.round(share(z) * 100)}%`}; }
+      else { const v = (pg[z] || [0, 0, 0, 0])[2], l = (lg[z] || [0, 0, 0, 0])[2], rk = (((S.rank || {}).pass || {})[grp] || {})[z] || {};
+        zs[z] = {fill: fGreenRed(l || v ? (v - l) / Math.max(l, 4) : null, side), t: fx(v, 1), sub: rk[p.opp] ? ord(rk[p.opp]) : "", hi: k === "recv" && share(z) >= .15}; }
+    }));
+    svg = passFieldSvg(zs, def ? `${p.opp} passing allowed by zone, ${seasonLab}` : `${p.player} ${k === "pass" ? "throws" : "targets"} by zone, ${seasonLab}`);
+    if (def) {
+      const list = Object.keys(lg).map(z => ({z: z, d: (pg[z] || [0, 0, 0, 0])[2] - lg[z][2]})).sort((a, b) => b.d - a.d).slice(0, 3);
+      rows = list.map(r => `<div class="kv shr"><span>${ZN[r.z.slice(0, 2)]} ${SN[r.z[2]]}<small>${n ? Math.round(share(r.z) * 100) + `% of his ${k === "pass" ? "throws" : "targets"}` : `no ${k === "pass" ? "throws" : "targets"}`}</small></span><b><em class="${r.d > 0 ? "up" : "dn"}">${r.d > 0 ? "+" : ""}${r.d.toFixed(1)} yds/g</em><small>${fx((pg[r.z] || [0])[0], 1)} tgt a game</small></b></div>`).join("");
+    }
+    legend = def ? "" : `${n} ${k === "pass" ? "throws" : "targets"}${g ? ` in ${g} games` : ""} · yards a game · ${k === "pass" ? "completions/attempts" : "catches/targets"} · share`;
+  }
+  const kindLab = {pass: "Passing", recv: "Receiving", rush: "Rushing"};
+  const grps = def && k === "recv" ? [["all", "All"], ["WR", "WR"], ["TE", "TE"], ["RB", "RB"]] : [];
+  return `<div class="shh"><span class="av">${head(p.pid)}</span><b>FIELD CHART</b>${logo(p.opp, "shl0")}</div>
+    <div class="seg" role="group" aria-label="View"><span class="pill2"></span><button data-fv="p" aria-pressed="${!def}">${esc(nm)}</button><button data-fv="d" aria-pressed="${def}">${esc(p.opp)} Defense</button></div>
+    <div class="shy" role="group" aria-label="Season">${F.seasons.map(s => `<button class="chip" data-fs="${s}" aria-pressed="${s === MUP.fs}">${s.slice(0, 4)}</button>`).join("")}
+      ${kinds.length > 1 ? `<span class="fkk">${kinds.map(x => `<button class="chip" data-fk="${x}" aria-pressed="${x === k}">${kindLab[x]}</button>`).join("")}</span>` : `<span>${kindLab[k]}${def && od.g ? ` · ${od.g} games` : ""}</span>`}</div>
+    ${grps.length ? `<div class="shy fgp">${grps.map(([x, l]) => `<button class="chip" data-fg="${x}" aria-pressed="${x === grp}">${l}</button>`).join("")}<span>to ${grp === "all" ? "everyone" : esc(GRPN[grp] || grp)}</span></div>` : ""}
+    ${svg}
+    ${def ? `<div class="shk"><span>${side === "under" ? "More allowed" : "Less allowed"}</span><i></i><span>${side === "under" ? "Less" : "More"} · blue = his zones</span></div>` : `<div class="shk fbk"><span>${esc(legend)}</span></div>`}
+    ${rows ? `<h3 class="shw">Where ${esc(p.opp)} gives up the most<small>${k === "rush" ? "yards a carry" : "receiving yards a game"} over the league's average, ${seasonLab}</small></h3>${rows}` : ""}`;
+}
+const FIELD_MIN = 5;
+function bindField(p, mp) {
+  const el = $("#nfc", mp);
+  if (!el) return;
+  el.innerHTML = fieldCard(p);
+  const seg = $(".seg", el); if (seg) slide(seg, true);
+  const re = () => { bindField(p, mp); };
+  $$("[data-fv]", el).forEach(b => b.onclick = () => { if (MUP.fv !== b.dataset.fv) { MUP.fv = b.dataset.fv; re(); } });
+  $$("[data-fs]", el).forEach(b => b.onclick = () => { if (MUP.fs !== b.dataset.fs) { MUP.fs = b.dataset.fs; re(); } });
+  $$("[data-fk]", el).forEach(b => b.onclick = () => { if (MUP.fk !== b.dataset.fk) { MUP.fk = b.dataset.fk; re(); } });
+  $$("[data-fg]", el).forEach(b => b.onclick = () => { if (MUP.fg !== b.dataset.fg) { MUP.fg = b.dataset.fg; re(); } });
+}
 // ── the Matchup page's football (D.adv, nfl_research.adv_payload; nfl_stats.advanced), in the same tiles: where the
 // defense gives up yards through the air, big plays, pressure and the blitz, who covers, the run defense, play calling.
 // A number is green when it favours the side shown (Over / Under), red when it hurts it; ranks: 1st = the toughest ──
@@ -3330,24 +3422,6 @@ const rcls = (r, side) => { const c = r ? rankCls(r, advN(), side) : "mid"; retu
 const per = (v, d) => v === null || v === undefined ? "–" : fx(v, d === undefined ? 1 : d);
 const card = (title, sub, body) => `<h3 class="wgh">${title}${sub ? ` <small class="hs2">${sub}</small>` : ""}</h3>${body}`;
 const sznOf = o => o.season === D.season ? "this season" : "last season";
-// 1 · where the defense gives up yards through the air: receiving yards a game in each zone, green where it allows
-// 20%+ more than the league's average defense, red 20%+ less; his busiest zones outlined in blue
-function zoneCard(p, grp) {
-  const Z = (D.adv || {}).zones || {}, z = (Z[p.opp] || {})[grp], lg = (Z.lg || {})[grp] || {};
-  if (!z) return "";
-  const tt = (D.tgt_tree || {})[String(p.pid)], ttot = tt ? Object.values(tt).reduce((a, c) => a + c[0], 0) : 0, over = ST.side !== "under";
-  const cell = k => {
-    const v = (z.cells[k] || [0, 0, 0, 0])[2], l = (lg[k] || [0, 0, 0, 0])[2], d = v - l;
-    const cls = Math.abs(d) < Math.max(2, l * .2) ? "" : (d > 0) === over ? "up" : "dn";
-    return t3(tt && ttot && tt[k] ? `his ${Math.round(tt[k][0] / ttot * 100)}%` : "&nbsp;", per(v), cls, `${d >= 0 ? "+" : "−"}${per(Math.abs(d))} vs avg`,
-              !!(tt && ttot && (tt[k] || [0])[0] / ttot >= .15));
-  };
-  const tot = Object.values(z.cells).reduce((a, c) => a + c[2], 0), ltot = Object.values(lg).reduce((a, c) => a + c[2], 0);
-  const segs = [["all", "All"], ["WR", "WR"], ["TE", "TE"], ["RB", "RB"]].filter(([k]) => Z[p.opp] && Z[p.opp][k]);
-  return card(`Where ${esc(p.opp)} gives up yards`, `receiving yards a game · ${z.g} games`,
-    `<div class="seg zsg" role="group" aria-label="Targets to">${segs.map(([k, l]) => `<button data-zg="${k}" aria-pressed="${k === grp}">${l}</button>`).join("")}</div>
-    ${zoneGrid(cell)}<div class="kv"><span>To ${grp === "all" ? "everyone" : esc(GRPN[grp] || grp)}</span><b>${per(tot)} a game <small class="mut">avg ${per(ltot)}</small></b></div>`);
-}
 // 3 · big plays: 20+ yard catches and 10+ yard runs a game, allowed by the defense, made by his offense and by him
 function bigCard(p, side) {
   const o = advT(p.opp), m = advT(p.team), a = advP(p.pid) || {}, g = a.g || 0, run = RUSH_M.indexOf(p.market) >= 0 && p.market !== "anytime_td";
@@ -3356,7 +3430,7 @@ function bigCard(p, side) {
                  t3("10+ runs allowed", per(o.def.big_run_pg, 2), rcls(o.ranks.def.big_run_pg, side), ord(o.ranks.def.big_run_pg)),
                  t3("Longest allowed", o.def.long_pass, "", `run ${o.def.long_run}`)];
   if (m) tiles.push(t3(`${esc(p.team)} 20+ catches`, per(m.off.big_pass_pg, 2), "", "a game"), t3(`${esc(p.team)} 10+ runs`, per(m.off.big_run_pg, 2), "", "a game"));
-  if (g) tiles.push(run ? t3(`${esc(lastName(p.player))} 10+ runs`, per((a.rush10 || 0) / g, 2), "", `${a.rush20 || 0} of 20+`)
+  if (g && a.pos !== "QB") tiles.push(run ? t3(`${esc(lastName(p.player))} 10+ runs`, per((a.rush10 || 0) / g, 2), "", `${a.rush20 || 0} of 20+`)
                         : t3(`${esc(lastName(p.player))} 20+ catches`, per((a.rec20 || 0) / g, 2), "", `${a.rec20 || 0} in ${g} games`));
   return card("Big plays", `a game · ${sznOf(o)} · 1st = allows the fewest`, t3s(tiles));
 }
@@ -3415,18 +3489,16 @@ function manZoneCard(p, side) {
   const ss = (a.vcov_season || "").slice(0, 4), ms = (M.season || "").slice(0, 4);
   return card("Man vs zone", `${ss} · ${v.man[0] + v.zone[0]} routes${ms && ms !== ss ? ` · ${esc(p.opp)} ${ms}` : ""} · out after each season`, t3s(tiles));
 }
-// 6 · the run defense: yards a carry at each gap against the league's, stacked boxes, contact; his own contact
-function runCard(p, side, od) {
-  const o = advT(p.opp), a = advP(p.pid) || {}, lg = (D.rush_dir || {}).lg, nm = esc(lastName(p.player));
-  let html = od ? card(`${esc(p.opp)} run defense`, "yards a carry by gap · against the league",
-                       t3s(DIRS.map(([k, lab]) => t3(lab, per(ypcOf(od[k])), gapCls(ypcOf(od[k]), lgYpc(lg, k), side), `${(od[k] || [0])[0]} car`)), 7)) : "";
-  if (!o) return html;
+// 6 · the run defense (by gap: the field chart): stacked boxes, contact; his own contact
+function runCard(p, side) {
+  const o = advT(p.opp), a = advP(p.pid) || {}, nm = esc(lastName(p.player));
+  if (!o) return "";
   const tiles = [t3("8+ in the box", per(o.def.box8_pct) + "%", rcls(o.ranks.def.box8_pct, side), `${ord(o.ranks.def.box8_pct)} · avg ${per(advLg("def", "box8_pct"))}%`),
                  t3("Before contact", per(o.def.ybc, 2), rcls(o.ranks.def.ybc, side), `${ord(o.ranks.def.ybc)} · avg ${per(advLg("def", "ybc"), 2)}`),
                  t3("10+ runs allowed", per(o.def.big_run_pg, 2), rcls(o.ranks.def.big_run_pg, side), ord(o.ranks.def.big_run_pg))];
   if (a.ybc !== undefined) tiles.push(t3(`${nm} before`, per(a.ybc, 2), "", "contact"), t3(`${nm} after`, per(a.yac_r, 2), "", `${a.brk_r || 0} broken`));
   if (a.ryoe !== undefined && a.ryoe !== null) tiles.push(t3("Over expected", (a.ryoe > 0 ? "+" : "") + per(a.ryoe, 2), "", `${per(a.box8)}% vs 8+ box`));
-  return html + `<div style="margin-top:8px">${t3s(tiles)}</div>`;
+  return card(`${esc(p.opp)} run defense`, `${sznOf(o)} · 1st = the toughest`, t3s(tiles));
 }
 // 7 · play calling: both teams' pass rate over expected (nflverse's xpass), neutral pass rate, plays and pace
 function callCard(p) {
@@ -3443,17 +3515,13 @@ function callCard(p) {
 function nflAdvCards(p, mp) {
   const side = ST.side, m = p.market, rec = REC_M.indexOf(m) >= 0 && m !== "anytime_td", pass = PASS_M.indexOf(m) >= 0,
         rush = RUSH_M.indexOf(m) >= 0 && m !== "anytime_td" && m !== "pass_rush_yds", td = m === "anytime_td";
-  const grp0 = (p.ctx || {}).group, zgrp = pass ? "all" : ["WR", "TE", "RB"].indexOf(grp0) >= 0 ? grp0 : "all";
+  const grp0 = (p.ctx || {}).group;
   const put = (id, html) => { const el = $("#" + id, mp); if (el) el.innerHTML = html || ""; };
-  if (rec || pass || (td && grp0 !== "RB")) {
-    MUP.zg = MUP.zg || zgrp;
-    put("nzc", zoneCard(p, MUP.zg));
-    $$("[data-zg]", mp).forEach(b => b.onclick = () => { MUP.zg = b.dataset.zg; nflAdvCards(p, mp); });
-  }
+  if (m !== "kick_pts" && m !== "fg_made" && m !== "sacks") bindField(p, mp);
   if (m !== "kick_pts" && m !== "fg_made" && m !== "sacks") put("nbg", bigCard(p, side));
   if (rec || pass) { put("npr", pressureCard(p, side)); put("ncv", coverCard(p, side)); }
   if (rec || (td && grp0 !== "QB")) put("nmz", manZoneCard(p, side));
-  if (rush || (td && grp0 === "RB")) put("nrd", runCard(p, side, ((D.rush_dir || {}).d || {})[p.opp]));
+  if (rush || (td && grp0 === "RB")) put("nrd", runCard(p, side));
   put("ncl", callCard(p));
 }
 function nflVsTable() {

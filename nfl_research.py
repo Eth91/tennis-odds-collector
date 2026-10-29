@@ -806,6 +806,7 @@ def build(now=None, sched=None, lines=None, stats=None, get=None, official=None)
         "roles": roles(logs, pos, players, set(slate_teams), season, absent_names),
         "vs": vs_rows(logs, pos, slate_teams, all_names),
         "adv": adv_payload(scon, season, slate_teams, pids, all_names, inj),
+        "field": field_payload(scon, season, slate_teams, pids, logs),
         "heads": {},
     }
     # every player the page may show a face for (injury lists, depth charts, usage, the vs table): his ESPN id
@@ -903,6 +904,82 @@ def adv_payload(scon, season, slate_teams, want_pids, names, inj):
             out["man"] = {"season": season_str(s_), "lg": round(sum(man.values()) / len(man), 1),
                           "teams": {t: man[t] for t in slate_teams if t in man}}
             break
+    return out
+
+
+FIELD_MIN_CAR = 5            # a defense's gap is ranked once it has faced 5 carries there
+
+
+def field_payload(scon, season, slate_teams, pids, logs):
+    """The Matchup page's field chart, this season and last: {"seasons", "<season>": {"def": {team: {"g", "pass": {group:
+    zone cells a game [tgt, comp, yds, td]}, "rush": {gap: [att, yds, td]}}}, "lg": {"pass": {group: cells a team-game},
+    "rush": {gap: [att, yds, td] a team}}, "rank": {"pass": {group: {zone: {team: rank by yards a game}}}, "rush": {gap:
+    {team: rank by yards a carry}}} (1st = the fewest), "p": {pid: {"g", "recv": zone [tgt, rec, yds], "pass": zone
+    [att, comp, yds, td, int], "rush": gap [att, yds, td]}}}}. Slate defenses and the props' players only."""
+    out = {"seasons": [season_str(season), season_str(season - 1)]}
+    if scon is None:
+        return out
+    try:
+        scon.execute("SELECT 1 FROM pass_tree LIMIT 1")
+    except sqlite3.OperationalError:
+        return out
+    games = defaultdict(int)
+    for pid, rows in logs.items():
+        for r in rows:
+            games[(pid, NR.season_of(r[COL["date"]]))] += 1
+    for s_ in (season, season - 1):
+        ss = season_str(s_)
+        Z = {(t, grp): json.loads(js) for t, grp, js in scon.execute("SELECT team, grp, js FROM def_zone WHERE season=?", (s_,))}
+        if not Z:
+            continue
+        d = out[ss] = {"def": {}, "lg": {"pass": {}, "rush": {}}, "rank": {"pass": {}, "rush": {}}, "p": {}}
+        g_of = {t: z["g"] for (t, grp), z in Z.items() if grp == "all"}
+        for grp in ("all", "WR", "TE", "RB"):
+            per_g = {t: {k: [x / z["g"] for x in c] for k, c in z["cells"].items()} for (t, gp), z in Z.items() if gp == grp and z["g"]}
+            tot_g = sum(z["g"] for (t, gp), z in Z.items() if gp == grp)
+            lg = defaultdict(lambda: [0.0] * 4)
+            for (t, gp), z in Z.items():
+                if gp == grp:
+                    for k, c in z["cells"].items():
+                        for i in range(4):
+                            lg[k][i] += c[i]
+            d["lg"]["pass"][grp] = {k: [round(x / tot_g, 2) for x in c] for k, c in lg.items()} if tot_g else {}
+            ranks = {}
+            for k in {k for v in per_g.values() for k in v}:
+                vals = {t: (v.get(k) or [0, 0, 0, 0])[2] for t, v in per_g.items()}
+                order = sorted(vals.values())
+                ranks[k] = {t: 1 + order.index(vals[t]) for t in slate_teams if t in vals}
+            d["rank"]["pass"][grp] = ranks
+            for t in slate_teams:
+                if t in per_g:
+                    d["def"].setdefault(t, {"g": g_of.get(t, 0), "pass": {}, "rush": {}})["pass"][grp] = \
+                        {k: [round(x, 2) for x in c] for k, c in per_g[t].items()}
+        R_ = {key: json.loads(c) for key, c in scon.execute("SELECT key, cells FROM rush_dir WHERE season=? AND kind='d'", (s_,))}
+        lg = defaultdict(lambda: [0, 0, 0])
+        for c in R_.values():
+            for k, v in c.items():
+                for i in range(3):
+                    lg[k][i] += v[i]
+        d["lg"]["rush"] = {k: [round(v[0] / max(len(R_), 1), 1), round(v[1] / max(len(R_), 1), 1), round(v[2] / max(len(R_), 1), 2)] for k, v in lg.items()}
+        for k in lg:
+            ypc = {t: c[k][1] / c[k][0] for t, c in R_.items() if k in c and c[k][0] >= FIELD_MIN_CAR}
+            order = sorted(ypc.values())
+            d["rank"]["rush"][k] = {t: 1 + order.index(ypc[t]) for t in slate_teams if t in ypc}
+        for t in slate_teams:
+            if t in R_:
+                d["def"].setdefault(t, {"g": g_of.get(t, 0), "pass": {}, "rush": {}})["rush"] = R_[t]
+        want = list(pids)
+        if want:
+            marks = ",".join("?" * len(want))
+            for pid, cells in scon.execute(f"SELECT pid, cells FROM tgt_tree WHERE season=? AND pid IN ({marks})", [s_] + want):
+                d["p"].setdefault(str(pid), {})["recv"] = json.loads(cells)
+            for pid, cells in scon.execute(f"SELECT pid, cells FROM pass_tree WHERE season=? AND pid IN ({marks})", [s_] + want):
+                d["p"].setdefault(str(pid), {})["pass"] = json.loads(cells)
+            for key, cells in scon.execute(f"SELECT key, cells FROM rush_dir WHERE season=? AND kind='p' AND key IN ({marks})",
+                                           [s_] + [str(x) for x in want]):
+                d["p"].setdefault(key, {})["rush"] = json.loads(cells)
+        for k, e in d["p"].items():
+            e["g"] = games.get((int(k), ss), 0)
     return out
 
 
