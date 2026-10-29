@@ -52,6 +52,8 @@ THIN_EV = 0.35
 # revive. Any future MLB work should be TIMING (openers/scratches/lineups), never a public-data
 # model, which is now disproven three separate ways.
 MLB_LIVE = False
+NCAAF_LIVE = True      # 2026-09-05: NCAAF paper picks (P2 under + totals) fed by ncaaf_board.json
+PGA_LIVE = False       # dropped from the dashboard 2026-09-03 (operator); renderer kept, flip to re-add
 # local 96px copies (docs/logos/, fetched from ESPN once) — no hotlinking 100KB+ originals
 LOGO = "logos/{}.png"
 # MLB logos: docs/logos/mlb_{team_id}.svg (fetched from mlbstatic 2026-07-25, id-keyed to avoid
@@ -984,6 +986,141 @@ def _recent_dd(days):
             f'<div class="ddbody">{inner}</div></details>')
 
 
+
+def _tennis_section():
+    """Three tennis sections from docs/tennis_board.json, written by tennis_board.py on the VM.
+
+    LOGGED     the pre-match record: what was flagged, at what price, how it finished.
+    PLACEABLE  re-priced against Pinnacle RIGHT NOW, match not started. A logged edge decays -
+               three DK bets were quarantined for quotes up to 52 minutes stale - so this list
+               is recomputed live rather than copied from the ledger.
+    LIVE       in-play state and price. MONITORING ONLY: there is no live model, and the
+               obvious pattern loses (favourite down 2 sets to 1 recovers 35.0%, n=1055,
+               against the 54.6% a 1.83 needs).
+    """
+    import html as _h
+    f = HERE / "docs" / "tennis_board.json"
+    if not f.exists():
+        return '<p class="muted">No tennis board yet.</p>'
+    try:
+        d = json.loads(f.read_text())
+    except Exception:
+        return '<p class="muted">Tennis board unreadable.</p>'
+
+    fresh = (d.get("notes") or {}).get("freshness") or {}
+    rec = (d.get("notes") or {}).get("record") or {}
+    age = fresh.get("pinnacle_min")
+    stale = age is None or age > 40
+    o = []
+    o.append('<div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px">')
+    for lbl, v, warn in (("Pinnacle", fresh.get("pinnacle_min"), 40),
+                         ("FanDuel", fresh.get("fanduel_min"), 40),
+                         ("DraftKings", fresh.get("draftkings_min"), 18)):
+        bad = v is None or v > warn
+        col = "#f97066" if bad else "#12b76a"
+        o.append('<span style="font-size:11px;padding:3px 8px;border-radius:999px;'
+                 'border:1px solid %s33;color:%s;background:%s14">%s %s</span>'
+                 % (col, col, col, _h.escape(lbl),
+                    "stale" if v is None else ("%dm" % v)))
+    o.append('</div>')
+    if stale:
+        o.append('<p style="color:#f97066;font-size:13px;margin:0 0 14px">'
+                 'Prices are stale — nothing here is safe to act on until the board refreshes.</p>')
+
+    # ---------- 2. PLACEABLE (first: it is the only actionable one) ----------
+    pl = d.get("placeable") or []
+    o.append('<h2 style="margin:18px 0 4px">Place now <span style="font-weight:400;'
+             'color:#8b98a9;font-size:13px">· price live, match not started</span></h2>')
+    if not pl:
+        o.append('<p class="muted" style="margin:0 0 16px">Nothing on the board beats '
+                 'Pinnacle\u2019s fair price by 2%% right now. That is the expected state — '
+                 'FanDuel beat the sharp price on 0 of 208 quotes when measured.</p>')
+    else:
+        for b in pl[:20]:
+            o.append(_ten_card(b, live=True))
+
+    # ---------- 1. LOGGED ----------
+    lgd = d.get("logged") or []
+    o.append('<h2 style="margin:22px 0 4px">Logged <span style="font-weight:400;'
+             'color:#8b98a9;font-size:13px">· the record</span></h2>')
+    if rec:
+        o.append('<p class="muted" style="margin:0 0 10px">%d graded · %d won · %+.2fu · '
+                 '%d open</p>' % (rec.get("graded", 0), rec.get("won", 0),
+                                  rec.get("units", 0.0), rec.get("open", 0)))
+    if not lgd:
+        o.append('<p class="muted">Nothing logged yet.</p>')
+    else:
+        for b in sorted(lgd, key=lambda x: str(x.get("start") or ""), reverse=True)[:40]:
+            o.append(_ten_card(b, live=False))
+
+    # ---------- 3. LIVE ----------
+    lv = d.get("live") or []
+    o.append('<h2 style="margin:22px 0 4px">Live <span style="font-weight:400;'
+             'color:#8b98a9;font-size:13px">· monitoring, not plays</span></h2>')
+    o.append('<p class="muted" style="margin:0 0 10px">No live model yet. A best-of-5 '
+             'favourite one set down recovers 69% (fair 1.45) — but down two sets to one '
+             'only 49.5% (fair 2.02), so 1.83 there is about \u22129% EV.</p>')
+    if not lv:
+        o.append('<p class="muted">Nothing in progress.</p>')
+    else:
+        for m in lv[:20]:
+            o.append(_ten_live_card(m))
+    return "\n".join(o)
+
+
+def _ten_card(b, live):
+    import html as _h
+    edge = b.get("edge") or 0
+    res = b.get("result")
+    col = "#12b76a" if (res == "W") else ("#f97066" if res == "L" else "#8b98a9")
+    badge = ("WON" if res == "W" else "LOST" if res == "L" else
+             ("LIVE" if live else "pending"))
+    bg = "#12b76a" if live else col
+    return (
+        '<div style="border:1px solid #1f2836;border-radius:12px;padding:12px 14px;'
+        'margin:0 0 10px;background:#0e131c">'
+        '<div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline">'
+        '<div style="font-weight:600">%s</div>'
+        '<span style="font-size:11px;color:%s;border:1px solid %s33;background:%s14;'
+        'padding:2px 7px;border-radius:999px">%s</span></div>'
+        '<div style="color:#8b98a9;font-size:13px;margin:2px 0 8px">%s</div>'
+        '<div style="display:flex;gap:14px;flex-wrap:wrap;font-variant-numeric:tabular-nums">'
+        '<span><b style="font-size:17px">%.2f</b> <span style="color:#8b98a9;font-size:12px">%s</span></span>'
+        '<span style="color:#8b98a9;font-size:13px">Pinnacle %.2f</span>'
+        '<span style="color:%s;font-size:13px">%+.1f%%</span></div></div>'
+        % (_h.escape(str(b.get("pick") or "")), bg, bg, bg, badge,
+           _h.escape(((str(b.get("tour")) + " \u00b7 ") if b.get("tour") in ("ITF", "CH") else "")
+                     + str(b.get("event") or "")), b.get("odds") or 0,
+           _h.escape(str(b.get("book") or "")), b.get("pin") or 0,
+           "#12b76a" if edge > 0 else "#8b98a9", 100 * edge))
+
+
+def _ten_live_card(m):
+    import html as _h
+    s = m.get("sets") or [None, None]
+    g = m.get("games") or [None, None]
+    pts = m.get("points") or ["", ""]
+    o1, o2 = (m.get("odds") or [0, 0])[:2]
+    def _n(x):
+        return "-" if x is None else str(x)
+    return (
+        '<div style="border:1px solid #1f2836;border-radius:12px;padding:12px 14px;'
+        'margin:0 0 10px;background:#0e131c">'
+        '<div style="display:flex;justify-content:space-between;gap:10px">'
+        '<div style="font-weight:600">%s</div>'
+        '<span style="font-size:11px;color:#8b98a9">%s · bo%s</span></div>'
+        '<div style="margin-top:8px;font-variant-numeric:tabular-nums;font-size:14px">'
+        '<div style="display:flex;justify-content:space-between"><span>%s</span>'
+        '<span>sets %s · games %s · pts %s &nbsp; <b>%.2f</b></span></div>'
+        '<div style="display:flex;justify-content:space-between;color:#8b98a9"><span>%s</span>'
+        '<span>sets %s · games %s · pts %s &nbsp; <b>%.2f</b></span></div></div></div>'
+        % (_h.escape(str(m.get("comp") or m.get("event") or "")),
+           _h.escape(str(m.get("state") or "")), m.get("best_of") or "?",
+           _h.escape(str(m.get("p1") or "")), _n(s[0]), _n(g[0]), _h.escape(str(pts[0] or "-")),
+           o1 or 0,
+           _h.escape(str(m.get("p2") or "")), _n(s[1]), _n(g[1]), _h.escape(str(pts[1] or "-")),
+           o2 or 0))
+
 def _tracker_panel(wnba_rec, tt_json):
     """Tracker tab — live record / hit rate / units, flat 1u, updated as each event settles.
     Order (user 2026-07-22): WNBA · MLB · TT Elite · WNBA parlays. CLV + calibration were REMOVED
@@ -1160,7 +1297,7 @@ def _tracker_panel(wnba_rec, tt_json):
             f'<div class="tbox"><div class="tk">Units</div><div class="tv {_uc}">{ru_st:+.2f}u</div></div>'
             '</div></div>')
 
-    return wnba_card + mlb_card + tt_card + parlay_card + ladder_card
+    return tt_card                       # 2026-10-23: TT only (WNBA/MLB retired with their collectors)
 
 def _tt_ladder(lad, play_to, zone):
     """Tap-to-expand hit-rate ladder: the raw H2H hit rate of the FLAGGED SIDE at every line
@@ -1806,6 +1943,62 @@ def _pga_panel():
     return f'<div class="starwatch">{head}{body}</div>'
 
 
+
+
+def _ncaaf_panel():
+    """NCAAF paper board — render-only, fed by ncaaf_board.json (shipped from the Mac every 10 min).
+    Two blocks: player-prop UNDERS (P2 rule; underdog arm marked) and totals (dispersion rule).
+    PAPER chip until the money gate passes; no diagnostics on the page."""
+    f = HERE / "ncaaf_board.json"
+    if not f.exists():
+        return ""
+    try:
+        d = json.loads(f.read_text())
+    except (ValueError, OSError):
+        return ""
+    def _rec(r):
+        w, l, u = r.get("w", 0), r.get("l", 0), float(r.get("units", 0.0))
+        if not (w or l or u):
+            return ""
+        return f'<span class="pgarec">{w}-{l} <b class="{"pos" if u >= 0 else "neg"}">{u:+.1f}u</b></span>'
+    p2 = d.get("p2") or {}
+    head = (f'<div class="pgahead"><span class="pgatitle">NCAAF props \u00b7 unders</span>'
+            f'<span class="pgapaper">PAPER</span><span class="pgasp"></span>{_rec(p2.get("record") or {})}</div>')
+    body = ""
+    for o in (p2.get("open") or []):
+        try:
+            od = float(o.get("odds") or 0)
+        except (TypeError, ValueError):
+            od = 0
+        if not od:
+            continue
+        dog = ' <span class="pgapaper">DOG</span>' if o.get("underdog") else ""
+        body += (f'<div class="pgabet"><div class="pgatop">'
+                 f'<span class="pgasel">{html.escape(o.get("player") or "")} u{o.get("line")} {html.escape(o.get("market") or "")}</span>{dog}'
+                 f'<span class="pgasp"></span><span title="{od:.2f} decimal">'
+                 f'<span class="podds fd">{html.escape(_am(od))}</span><img class="bklogo" src="book-fd.png" alt="FD"></span>'
+                 f'</div><div class="pgasub">{html.escape(o.get("kick") or "")}</div></div>')
+    if not body:
+        body = '<div class="swo">No qualifying unders yet \u2014 players need 4 games (\u2248 Week 5).</div>'
+    t = d.get("totals") or {}
+    thead = (f'<div class="pgahead" style="margin-top:18px"><span class="pgatitle">NCAAF totals</span>'
+             f'<span class="pgapaper">PAPER</span><span class="pgasp"></span>{_rec(t.get("record") or {})}</div>')
+    tbody = ""
+    for o in (t.get("open") or []):
+        try:
+            od = float(o.get("odds") or 0)
+        except (TypeError, ValueError):
+            od = 0
+        if not od:
+            continue
+        tbody += (f'<div class="pgabet"><div class="pgatop">'
+                  f'<span class="pgasel">{html.escape(o.get("matchup") or "")} {html.escape((o.get("side") or "")[:1])}{o.get("line")}</span>'
+                  f'<span class="pgasp"></span><span title="{od:.2f} decimal">'
+                  f'<span class="podds fd">{html.escape(_am(od))}</span><img class="bklogo" src="book-fd.png" alt="FD"></span>'
+                  f'</div><div class="pgasub">{html.escape(o.get("kick") or "")}</div></div>')
+    if not tbody:
+        tbody = '<div class="swo">Nothing in the 15\u201345 min window.</div>'
+    return f'<div class="starwatch">{head}{body}{thead}{tbody}</div>'
 
 
 def _tt_panel(data):
@@ -2731,6 +2924,21 @@ def _ladders_html(rows):
         return ""
 
 
+def _nba_panel():
+    """NBA tab (2026-10-23): the engine's SHADOW flags, rendered by ~/nba-engine/nba_board.py (in
+    git, tested). Loaded by PATH so this process's sys.path, which resolves this checkout's own
+    module copies, is untouched. A failure renders a visible warning, never a silent empty tab."""
+    try:
+        import importlib.util as _ilu
+        _sp = _ilu.spec_from_file_location("_nba_board_live", "/home/ubuntu/nba-engine/nba_board.py")
+        _m = _ilu.module_from_spec(_sp)
+        _sp.loader.exec_module(_m)
+        return _m.html(_m.board())
+    except Exception as e:                                           # noqa: BLE001
+        return ('<h2>NBA</h2><div class="mlbwarn">NBA FEED ERROR · '
+                + html.escape(f"{type(e).__name__}: {e}")[:160] + '</div>')
+
+
 def build():
     now = dt.datetime.now(dt.timezone.utc).astimezone(MT)   # MT for the displayed clock only
     # the BOARD's slate day is ET (matches pred_date the scanner stamps) — using MT hid plays during
@@ -2916,7 +3124,12 @@ def build():
     tt_json = _load_tt()
     _feed_health_ping(tt_json)                             # once/day ntfy if TT/WNBA is broken (not quiet)
     tt_html = _tt_panel(tt_json)
-    pga_html = _pga_panel()
+    ncaaf_html = _ncaaf_panel() if NCAAF_LIVE else ""
+    ncaaf_pane = ('<div class="panel hidden" id="ncaaf"><h2>NCAAF \u00b7 FanDuel \u00b7 paper</h2>'
+                  + ncaaf_html + "</div>") if NCAAF_LIVE else ""
+    pga_html = _pga_panel() if PGA_LIVE else ""
+    pga_pane = ('<div class="panel hidden" id="pga"><h2>PGA Tour \u00b7 FanDuel</h2>'
+                + pga_html + "</div>") if PGA_LIVE else ""
     # outs-model plays card BENCHED 2026-07-25 (user: only K-COMPASS flags on the MLB tab).
     # k_paper keeps logging outs bets silently; the tracker-tab record card stays for history.
     mlb_html = ""
@@ -3194,7 +3407,11 @@ def build():
     # drop the nav tab too, or it points at an empty pane
     mlb_tab = ('<div class="tab" data-tab="mlb" onclick="showTab(\'mlb\')">'
                f'{ICON_MLB}<span>MLB</span></div>' if MLB_LIVE else "")
+    pga_tab = ('<div class="tab" data-tab="pga" onclick="showTab(\'pga\')">'
+               f'{ICON_PGA}<span>PGA</span></div>' if PGA_LIVE else "")
+    tennis_html = _tennis_section()
     tracker_html = _tracker_panel((w, l, u), tt_json)
+    nba_html = _nba_panel()
     # Client-side LIVE pre-match totals: refetch fd_board.json (the VM's FanDuel.ca board) from the
     # raw URL every 60s and re-render #tt-totals, so the totals update on their own between the
     # ~30-min dashboard rebakes. Injected as an f-string field so its JS braces stay literal.
@@ -3246,6 +3463,11 @@ def build():
     ICON_TT = (f'<svg {_ic}><circle cx="9.6" cy="9.6" r="5.6"/><path d="M13.6 13.6l4.6 5"/>'
                '<circle cx="16.4" cy="6.6" r="1.35" fill="currentColor" stroke="none"/></svg>')
     # flagstick + pennant + ball, drawn on the same 24x24 grid and stroke as the others
+    ICON_TEN = (f'<svg {_ic}><circle cx="12" cy="12" r="8.6"/><path d="M4.2 6.2c4.2 2.4 5.6 8.6 3.2 13.4M19.8 6.2c-4.2 2.4-5.6 8.6-3.2 13.4"/></svg>')
+    ICON_CFB = (f'<svg {_ic}><ellipse cx="12" cy="12" rx="9.5" ry="6"/>'
+                f'<path d="M9.5 12h5M12 9.8v4.4"/></svg>')
+    ncaaf_tab = ('<div class="tab" data-tab="ncaaf" onclick="showTab(\'ncaaf\')">'
+                 f'{ICON_CFB}<span>NCAAF</span></div>' if NCAAF_LIVE else "")
     ICON_PGA = (f'<svg {_ic}><path d="M7.4 20.4V3.6l8.4 3-8.4 3"/>'
                 '<circle cx="16.2" cy="17.8" r="2.1"/><path d="M3.6 20.4h16.8"/></svg>')
     ICON_TRK = f'<svg {_ic}><path d="M4 4v16h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/></svg>'
@@ -4741,32 +4963,16 @@ def build():
   </header>
   <div class="tabs">
     <div class="tabthumb" id="tabthumb"></div>
-    <div class="tab active" data-tab="wnba" onclick="showTab('wnba')">{ICON_WNBA}<span>WNBA</span></div>
+    <div class="tab active" data-tab="nba" onclick="showTab('nba')">{ICON_WNBA}<span>NBA</span></div>
     <div class="tab" data-tab="tt" onclick="showTab('tt')">{ICON_TT}<span>TT</span></div>
-    <div class="tab" data-tab="pga" onclick="showTab('pga')">{ICON_PGA}<span>PGA</span></div>
-    {mlb_tab}
     <div class="tab" data-tab="tracker" onclick="showTab('tracker')">{ICON_TRK}<span>Tracker</span></div>
   </div>
-  <div class="panel" id="wnba">
-    <div id="games">{cards}</div>
-    {tier_legend}
-    {slip_html}
-    {wl_html}
-    {injury_html}
-    {considered_html}
-    {extras_html}
+  <div class="panel" id="nba">
+    {nba_html}
   </div>
   <div class="panel hidden" id="tt">
     <h2>Table tennis · real FD lines</h2>
     {tt_html}
-  </div>
-  <div class="panel hidden" id="pga">
-    <h2>PGA Tour · FanDuel</h2>
-    {pga_html}
-  </div>
-  <div class="panel hidden" id="mlb">
-    <h2>MLB pitcher props · best book</h2>
-    {mlb_html}
   </div>
   <div class="panel hidden" id="tracker">
     <h2>Live record</h2>
@@ -4837,6 +5043,7 @@ def build():
   }})();
 
   function showTab(t) {{
+    if (!document.getElementById(t)) t = 'nba';
     document.querySelectorAll('.panel').forEach(p => p.classList.toggle('hidden', p.id !== t));
     document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
     _thumb();
