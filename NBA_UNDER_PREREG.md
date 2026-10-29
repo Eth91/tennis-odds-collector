@@ -175,3 +175,56 @@ record, not a live change. No live change without the user.
   with B5 +18.3% | +16.8% (703 | 467); without B5 +13.5% | +11.5% (319 | 243). B5 is better in both seasons.
 - **A research-only gap:** before a player plays for his new team, he can show as out for his old one (Hartenstein for
   the Knicks on 2024-10-25). It touches only teams' first 3 games: 28 | 48 flags. Live outs come from the injury report.
+
+# AMENDMENT 8: why the unders lose, a search for missing context (2026-10-29, about 06:35 UTC, before code)
+**User:** "test all other things to get it better ... figure out why we're losing the bets in the backtest."
+
+**Design:** look for losing patterns on 2023-24, then test the few best on 2024-25 only. `nba_under_losses.py`.
+- **Discovery set:** 2023-24 UNDER20 flags 20%+ below the line, under −150 or better, not threes (3,916 bets,
+  +7.7%). It is wider than the ping set, for power.
+- **Held-out:** 2024-25, both the ping set (30–50% below, 710 bets) and the 20%+ set (2,819).
+- **Prices and outcomes:** as amendment 4 (best FanDuel/DraftKings under at tip).
+
+**Information first:**
+- For each bet: the minutes miss (actual − V3) and the rate miss (actual per minute ÷ our rate).
+- The share of losses where he played 5+ minutes over V3, against the share where his per-minute production beat our
+  rate by 25%+.
+
+**Features (known at tip − 30; the starter flag comes from NBA.com's final five, the lineup tab live):**
+- **A, minutes and role:**
+  - A1 V3 − his last-10 mean minutes; A2 his last game's minutes − V3; A3 his last-3 mean − V3;
+  - A4 the spread (sd) of his last-10 minutes; A5 his games this season; A6 he starts tonight; A7 a Capela-type bump
+    (amendment 7's B5).
+- **B, rates and form:**
+  - B1 this season's share of his rate (this-season minutes ÷ (that + 150));
+  - B2 his last-5 production per minute in the market's stats ÷ our rate;
+  - B3 the line ÷ his season average of the stat (this season with 3+ games, else last season);
+  - B4 the line ÷ his last-5 average; B5 his under rate at this line over his last 10 games.
+- **C, market:**
+  - C1 the under price; C2 the book's no-vig over (FanDuel, else DraftKings);
+  - C3 BetMGM's and Caesars' main line (the rung with prices nearest even) − ours, their mean;
+  - C4 the % below the line; C5 the line; C6 the market (points, rebounds, assists, the combos).
+- **D, game:**
+  - D1 his team's implied points (the sum of its players' points lines at tip); D2 the implied spread (his team's
+    sum − the opponent's); D3 its size;
+  - D4 rest days and back-to-back; D5 the team's game index.
+- **E, opponent:**
+  - E1 what the opponent allowed per game in the market's stats to his position group this season before tonight
+    (5+ games), ÷ the league's average;
+  - E2 both teams' shot volume per game (FGA + 0.44 FTA, this season before tonight).
+
+**Choosing candidates (2023-24 only):**
+- Each numeric feature is cut at its terciles; binary and categorical features by value.
+- A bin is a candidate when its ROI is 8+ points below the rest's and the bootstrap (1,000) puts that gap above 0 in
+  95%+ of draws.
+- The 5 largest gaps go to the held-out test.
+- **Plus one combined model:** a logistic regression of "the under wins" on every feature (standardized, median-filled,
+  C = 1) fit on the discovery set. It drops the bets in its lowest predicted third, with the cut point taken from
+  2023-24.
+
+**Held-out test (2024-25):** a candidate passes when dropping its bin
+1. on the ping set leaves the kept bets 2+ points above all bets, and the dropped bets 8+ points below the kept; and
+2. on the 20%+ set leaves the dropped bets 4+ points below the kept.
+
+**After:** a pass is reported with bootstrap intervals, to be shadow-tracked first. The live pings change only if the
+user says so.
