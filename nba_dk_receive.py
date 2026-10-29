@@ -15,6 +15,8 @@ THE RULES
   - each row is [event, player, stat, line, side, odds]: short strings, a numeric line, side over/under,
     decimal odds in (1, 1000);
   - a snapshot NOT NEWER than the one on disk is refused, so two senders can never step it backwards.
+THE NFL SNAPSHOT (nfl_lines.py --snapshot dk) comes through the same key and the same rules, marked "league": "nfl";
+it is written to nfl_dk_snapshot.json instead, so it never touches the NBA file. Any other league is refused.
 Exit 0 = written (or already newer on disk); 2 = refused. One line of output either way.
 """
 from __future__ import annotations
@@ -27,6 +29,8 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 OUT = HERE / "dk_snapshot.json"
+OUT_NFL = HERE / "nfl_dk_snapshot.json"
+LEAGUES = (None, "nfl")                  # no league key = the NBA snapshot
 MAX_BYTES, MAX_ROWS = 8_000_000, 60_000
 MAX_AGE_S, MAX_AHEAD_S = 900, 120
 
@@ -45,6 +49,8 @@ def validate(raw, now):
         return None, "not JSON"
     if not isinstance(snap, dict) or snap.get("book") != "dk":
         return None, "not a DraftKings snapshot"
+    if snap.get("league") not in LEAGUES:
+        return None, "unknown league"
     try:
         at = dt.datetime.fromisoformat(snap.get("fetched_at", ""))
     except (TypeError, ValueError):
@@ -65,25 +71,31 @@ def validate(raw, now):
     detail = snap.get("detail", "")
     if not isinstance(detail, str) or len(detail) > 500:
         return None, "bad detail"
-    return {"book": "dk", "fetched_at": snap["fetched_at"], "rows": rows, "detail": detail}, None
+    out = {"book": "dk", "fetched_at": snap["fetched_at"], "rows": rows, "detail": detail}
+    if snap.get("league"):
+        out["league"] = snap["league"]
+    return out, None
 
 
-def receive(raw, now, out=OUT):
-    """Validate and write; returns (exit code, message)."""
+def receive(raw, now, out=OUT, out_nfl=OUT_NFL):
+    """Validate and write (an NFL snapshot to out_nfl); returns (exit code, message)."""
     snap, err = validate(raw, now)
     if err:
         return 2, f"refused: {err}"
+    tag = ""
+    if snap.get("league") == "nfl":
+        out, tag = out_nfl, "nfl "
     if out.exists():
         try:
             cur = json.loads(out.read_text()).get("fetched_at", "")
         except ValueError:
             cur = ""
         if cur and snap["fetched_at"] <= cur:
-            return 0, f"kept: the snapshot on disk ({cur}) is not older than {snap['fetched_at']}"
+            return 0, f"{tag}kept: the snapshot on disk ({cur}) is not older than {snap['fetched_at']}"
     tmp = out.with_name(out.name + ".part")
     tmp.write_text(json.dumps(snap))
     tmp.replace(out)
-    return 0, f"ok: {len(snap['rows'])} rows fetched {snap['fetched_at']}"
+    return 0, f"{tag}ok: {len(snap['rows'])} rows fetched {snap['fetched_at']}"
 
 
 if __name__ == "__main__":

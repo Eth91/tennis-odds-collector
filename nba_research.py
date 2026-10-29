@@ -215,7 +215,7 @@ HIST_MAX = 40
 _r3 = lambda x: None if x is None else round(x, 3)
 
 
-def line_history(q, gids):
+def line_history(q, gids, markets=None):
     """{(gid, pid, stat): {book: [[seen_at, line, over, under], ...]}} — each book's main rung every time it changed
     (the first entry = the open), from the change log. Long histories keep the first, the last and an even sample."""
     out = defaultdict(dict)
@@ -224,7 +224,8 @@ def line_history(q, gids):
     rows = q.execute(f"SELECT seen_at, book, gid, pid, stat, line, side, odds FROM quotes WHERE gid IN "
                      f"({','.join('?' * len(gids))}) AND pid IS NOT NULL ORDER BY seen_at", list(gids))
     tl = defaultdict(list)
-    for t, changed in replay(r for r in rows if r[4] in MARKETS):
+    markets = MARKETS if markets is None else markets
+    for t, changed in replay(r for r in rows if r[4] in markets):
         for k, st_ in changed.items():
             m = main_of(st_)
             if m is None:
@@ -252,7 +253,7 @@ def _ro(path):
     return sqlite3.connect(f"file:{path}?mode=ro", uri=True) if path.exists() else None
 
 
-def book_quotes(q, gids):
+def book_quotes(q, gids, markets=None):
     """{(gid, pid, market): {book: {"updated", "rungs": [[line, over, under]], "main"}}}, {(gid, pid): name},
     {book: newest collected_at}. nba_lines.board holds each book's latest board."""
     out = defaultdict(dict)
@@ -265,7 +266,7 @@ def book_quotes(q, gids):
     for book, at, gid, pid, player, stat, line, side, odds in q.execute(
             f"SELECT book, collected_at, gid, pid, player, stat, line, side, odds FROM board WHERE gid IN ({marks}) "
             f"AND pid IS NOT NULL", list(gids)):
-        if stat not in MARKETS or odds is None:
+        if stat not in (MARKETS if markets is None else markets) or odds is None:
             continue
         k = (gid, int(pid), stat, book)
         raw[k][round(float(line), 1)][0 if side == "over" else 1] = round(float(odds), 4)
@@ -623,7 +624,7 @@ def schedule_spots(sched, gids):
     return out
 
 
-def closing_boards(q, gids, cache=CLOSE_BOARDS):
+def closing_boards(q, gids, cache=CLOSE_BOARDS, markets=None):
     """The books pull a game's props at tip, so the board loses them; the Live tab still wants them. -> ({(gid, pid,
     stat): {book: {"updated", "rungs", "main"}}}, {(gid, pid): name}) from each prop's last board before tip
     (nba_research_score.boards_before_tip), for started games. Cached per game in `cache`: a past board never changes."""
@@ -644,7 +645,7 @@ def closing_boards(q, gids, cache=CLOSE_BOARDS):
             nm.setdefault(gid, {})[str(int(pid))] = player
         for gid in todo:
             cached[gid] = {"names": nm.get(gid, {}), "boards": {}}
-        for (gid, pid, stat, book), rec in RSC.boards_before_tip(q, todo).items():
+        for (gid, pid, stat, book), rec in RSC.boards_before_tip(q, todo, markets).items():
             rr = rungs_of(rec["close"] or {})
             if rr:
                 cached[gid]["boards"][f"{pid}|{stat}|{book}"] = rr
