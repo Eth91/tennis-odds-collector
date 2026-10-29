@@ -268,3 +268,20 @@ user says so.
   - other books above our line (−9.1%, but only 69 bets).
 - 26 features and about 80 bins were screened, so the two passes are candidates, not proof. They go to the forward
   record first; the live pings change only if the user says so.
+
+# AMENDMENT 9: the line filter goes live (2026-10-29, about 06:40 UTC, before code)
+**User:** "make it live" (amendment 8's line filter, as tested).
+
+- **The pings:** amendment 4's set (30–50% below, −150 or better, not threes), less every flag whose line ÷ his
+  last-5 average is in (1.0564788482047636, 1.4166666666666667].
+  - Those are the 2023-24 tercile edges from amendment 8, unrounded.
+  - His last 5 are his last 5 games played, any team, this season and last (`nba_boost.BoostData.his`), summed over
+    the market's stats.
+  - With no games or a zero average, the flag is not skipped (as in the test, where a missing value was never dropped).
+- **Recorded:** every UNDER20 flag, as now. Its note gains "l5 R" (the ratio, 6 decimals) so the Pickz board can apply
+  the same rule.
+- **Side-by-side:**
+  - UNDER3050 stays as registered: the unfiltered pings, now shadow.
+  - **UNDER3050L**, the new pings, is registered at the deploy time.
+  - The two forward records compare the filter.
+- **Expected, from the backtest (2024-25):** 64.6% hits and +20% on 500 bets, against 62.0% and +15% on 710.
