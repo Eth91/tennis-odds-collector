@@ -1,4 +1,4 @@
-# PRE-REGISTRATION: an NFL projection model (2026-10-29, about 22:10 UTC, before code)
+# PRE-REGISTRATION: an NFL projection model (2026-10-29, about 22:00 UTC, before code)
 
 **User:** "build a real nfl projection model and test it." The NBA rule failed on a plain per-game average
 (`NFL_UNDER_PREREG.md`). This model is volume × share × efficiency, with the game's script, the injury report and the
