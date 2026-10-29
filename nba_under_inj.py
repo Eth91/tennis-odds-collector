@@ -42,8 +42,8 @@ for s in rows:
         last10 = r["min"] - r["ctx"]["min_change"]
         tags = {"b1": bool(r["new_starter"]), "b2": r["n_out"] >= 1,
                 "b3": any((pg := bd.per_game(x, team, d)) and pg["min"] >= 20 and bd.letters(x) & bd.letters(p) for x in out_all),
-                "b4": r["ctx"]["min_change"] >= 3,
-                "b5": bool(r["new_starter"]) or any(bd.letters(x) & bd.letters(p) for x in out_all & starters), "hind": r["box"]["min"] >= last10 + 5}
+                "b4": r["ctx"]["min_change"] >= 3, "hind": r["box"]["min"] >= last10 + 5,
+                "b5": bool(r["new_starter"]) or any(bd.letters(x) & bd.letters(p) for x in out_all & starters)}
         flags[s] += [{**c, **tags} for c in cand]
 
 
