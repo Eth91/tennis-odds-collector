@@ -300,3 +300,16 @@ def test_page_scripts_parse():
         (d / f"s{i}.js").write_text(js)
         r = subprocess.run([NODE, "--check", str(d / f"s{i}.js")], capture_output=True, text=True)
         assert r.returncode == 0, r.stderr
+
+
+def test_every_nfl_filter_draws_its_boxes():
+    # every NFL range filter (chip and sheet) has white boxes on the chart; percentages, lines and the margin on their
+    # own scale, the signed ones labelled +/-
+    cfg = UI.JS_APP[UI.JS_APP.index("const NFL_CFG = {"):]
+    ranges = re.findall(r'\["(\w+)", "[^"]+", "[^"]+"\]', re.search(r"RANGES: \[(.*?)\]\],", cfg, re.S).group(1))
+    ovl = re.findall(r"(\w+): \"", re.search(r"OVL: \{(.*?)\},\n", cfg, re.S).group(1))
+    chips = re.findall(r'"(\w+)"', re.search(r"const NFL_RCHIPS = \[(.*?)\];", UI.JS_APP).group(1))
+    assert set(ranges) == set(ovl) and set(chips) <= set(ranges) and {"spr", "tot", "margin"} <= set(ranges)
+    assert 'const OWN_OV = new Set(["snap_pct", "tgt_share", "spr", "tot", "margin"]), SIGNED_OV = new Set(["spr", "margin"]);' in UI.JS_APP
+    assert "ym = own ? v => B - Math.abs(v) / (oMax / .86) * (B - T) : y;" in UI.JS_APP
+    assert all(k in NS.LOG_COLS for k in ranges)                       # each is a column of every log row
