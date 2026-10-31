@@ -119,3 +119,50 @@ TEST A slots, unchanged:
     after looking at both regular seasons.
 - **TEST A is now spent for the under family.** Any new candidate built from the projection ratio carries what
   these results showed, so slots 4–5 must be chosen on TRAIN/VALIDATE and their overlap with UNDER20P reported.
+
+## E7: the engine's projection in the market-anchored model (2026-10-31, about 11:00 UTC; TRAIN / VALIDATE only)
+- **Why:** the idea was on the list before TEST A was graded. E2's model only had a naive projection (L5/L10 minutes ×
+  rate). The engine's ROLE1 v3 projection is what drives the under rules' regular-season edge.
+- **What changed:** three features, from `nba_q15_proj.py` (engine at 0d328161ae):
+  - the log of (projection + 0.5) ÷ (line + 0.5);
+  - its negative part;
+  - the projected minutes.
+  
+  Coverage: 97.6% TRAIN, 97.0% VALIDATE. Same walk-forward and same logistic model (C = 0.05).
+- **Log loss, model vs market:** 0.68602 vs 0.68751 (TRAIN), 0.68610 vs 0.68751 (VALIDATE). That is about 3.5×
+  E2's gain. LightGBM: 0.68764 / 0.68660, worse again.
+- **Unders, model EV ≥ τ, 12+ projected minutes, better of FanDuel and DraftKings at the consensus line:**
+
+| τ | TRAIN | VALIDATE | VALIDATE halves | VALIDATE bets a day |
+|---|---|---|---|---|
+| 6% | 10,617, +8.1% | 6,878, +6.9% | +10.4%, +4.0% | 43 |
+| **8%** | 6,821, +9.7% [+6.7, +12.5] | **3,640, +12.1%** [+8.5, +15.9] | +16.3%, +8.4% | 23 |
+| **10%** | 4,244, +10.2% [+6.7, +14.1] | **1,907, +18.4%** [+13.1, +23.4] | +22.8%, +14.6% | 12 |
+| 12% | 2,634, +11.0% | 1,007, +19.5% | +25.4%, +13.9% | 7 |
+
+- **At τ 8%, both seasons:**
+  - **By market,** every market is positive:
+    - TRAIN: points +10.9%, rebounds +8.8%, threes +7.3%, assists +6.7%.
+    - VALIDATE: points +7.4%, rebounds +10.5%, threes +12.8%, assists +14.9%.
+    - The combos make +9% to +19%.
+  - **By price,** every band from −150 to +110 and up is positive.
+- **Overlap with UNDER20P:** only 28% (TRAIN) / 30% (VALIDATE) of the τ 8% bets have the projection under 80% of the
+  line. The other bets make +9.0% / +11.0% on their own. This is a broader signal than the under rules, not a copy.
+- **Overs:** −1% to +2% on TRAIN at every τ. Left out.
+
+## TEST A slots 4–5, registered before grading (2026-10-31, about 11:10 UTC)
+Code: `nba_q15_model.py` and `nba_q15_proj.py`, in the commit that adds this entry. `validate` reproduces the table above.
+4. **Q15_LR8:** E7's logistic model, unders only, EV ≥ 8%, 12+ projected minutes. VALIDATE +12.1%, halves +16.3% /
+   +8.4%.
+5. **Q15_LR10:** the same at EV ≥ 10%. VALIDATE +18.4%, halves +22.8% / +14.6%.
+
+- **The model for each postseason** is fit on the regular-season props dated before it: 2024 on TRAIN, 2025 on
+  TRAIN + VALIDATE. No postseason outcome is used for fitting. The 2023 postseason has no earlier props (prices start
+  2023-05-03), so it uses the TRAIN fit, from games after it. This is said wherever its number is shown.
+- **Prices:** the better of FanDuel and DraftKings at the consensus line (primary). Also reported: FanDuel only.
+- **The bar is unchanged:** ROI ≥ 15%, ≥ 300 bets, > 0 in each postseason, lower bound > 0 at α = 0.01. Both meet
+  the VALIDATE condition.
+- **Caveat stated before grading:** the people choosing these had seen UNDER20P's TEST A result, and about 30% of
+  these bets share its signal. The share of TEST A bets with the projection under 80% of the line is reported, so
+  the overlap can be judged.
+- **This fills all 5 slots.** TEST A is closed after this run.
