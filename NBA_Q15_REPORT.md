@@ -122,13 +122,14 @@ TRAIN / VALIDATE:
    players. The injury report almost always knows those by tip, but it is an assumption until the model runs live.
 
 ## TEST B: what has been measured live
-- **The model isn't live yet.** The 2026-27 games so far only grade the old under rules, and those are about
-  break-even, as the leak predicted.
+- **The model has run forward since 2026-10-31** (registered 16:00 UTC), as Q15_LR10 and Q15_LR8 in the nightly
+  side-by-side (`NBA_SXS_PREREG.md` amendment 11). Shadow only. Before that, the 2026-27 games only graded the old
+  under rules, and those are about break-even, as the leak predicted.
 - **CLV is unmeasured historically.** Live, the under rules' CLV against FanDuel's close is −4% to −7%, the same as
   the control (every over: −5.6%). There is no sign of beating the close at tip − 30.
 
 ## What to do next (in order)
-1. **Run Q15_LR10 as a forward shadow test** (FanDuel / DraftKings version):
+1. **Run Q15_LR10 as a forward shadow test** (FanDuel / DraftKings version). Running since 2026-10-31:
    - log the picks at tip − 30 with the price posted then, and grade them against the box score and FanDuel's close;
    - at about 3 a night, 200 bets takes about 2 months;
    - it is validated only at ≥ 10% with positive CLV.
