@@ -110,3 +110,4 @@ nba_proj_log.sqlite
 nfl_cache/
 nfl_lines.sqlite
 nfl_dk_snapshot.json
+.q15cache/
