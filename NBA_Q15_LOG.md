@@ -254,3 +254,29 @@ Code: `nba_q15_model.py` and `nba_q15_proj.py`, in the commit that adds this ent
 
 - **Reading:** the edge doesn't need the other two books, so it can be run live. In the regular season it is +7% to
   +10% at τ 8–10%, with VALIDATE's +17% at τ 10% on 491 bets the high end.
+
+## E10: a small look-ahead in our own features, fixed (2026-10-31, about 12:15 UTC)
+- **The bug:** the new tests (`test_nba_q15.py`) found it. For a player with no last season, the shrinkage prior for
+  his per-minute rate was the league's rate over **all** box scores, later games included.
+  - It is now the league's rate over every game before the date.
+  - The team normalizers (pace, allowed rates) are also all-data constants. They only rescale a feature, which
+    standardization absorbs exactly, so they are left as they are.
+- **The rebuild changed nothing material** (rot projection):
+
+| | before the fix | after |
+|---|---|---|
+| Q15_LR8 VALIDATE | +8.1% | +8.0% |
+| Q15_LR8 TEST A | +21.7% | +21.2% |
+| Q15_LR10 VALIDATE | +12.1% | +12.5% |
+| Q15_LR10 TEST A | +29.1% | +29.5% |
+| E9 τ 10% VALIDATE | +17.0% | +17.4% |
+
+- **Mutation check:** 12 of 12 mutants killed. They covered:
+  - dropping each shift(1);
+  - the league prior;
+  - push grading;
+  - the consensus-line price check;
+  - the split boundary;
+  - the 12-minute and under-side filters;
+  - the engine features.
+- **Reproduce:** `nba_q15_model.py --market fd_dk` reproduces E9.

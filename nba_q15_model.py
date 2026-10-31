@@ -9,7 +9,8 @@ engine projects the player for 12+ minutes (bettable under the 2026-10-16 restri
     python3 nba_q15_model.py test-a [--json OUT]        # TEST A slots 4-5, graded once (NBA_Q15_LOG.md)
 
 --proj picks the projection file (nba_q15_proj.py --mode; e7_proj.pkl is --mode box, which leaks the final margin,
-NBA_Q15_LOG.md E8). --no-vacated drops the box-score "teammates out tonight" features too.
+NBA_Q15_LOG.md E8). --no-vacated drops the box-score "teammates out tonight" features too. --market fd_dk rebuilds
+the line and the market's inputs from FanDuel and DraftKings only, as the live system sees them (E9; validate only).
 """
 from __future__ import annotations
 
@@ -47,6 +48,33 @@ def load(proj=Q.CACHE / "e7_proj.pkl", vacated=True):
         return with_engine(d, X, pickle.load(f))
 
 
+def fd_dk_market(d, X):
+    """E9: the line is FanDuel's main line, else DraftKings'; the market is their no-vig at that line; book count, line
+    gap, hold and FanDuel-vs-market from those two only. Props neither posts are dropped."""
+    nv = lambda o, u: (1 / o) / (1 / o + 1 / u)
+    fd_ok, dk_ok = d["fd_o"].notna() & d["fd_u"].notna(), d["dk_o"].notna() & d["dk_u"].notna()
+    line = pd.Series(np.where(fd_ok, d["fd_line"], np.where(dk_ok, d["dk_line"], np.nan)), index=d.index, dtype=float)
+    at_fd, at_dk = fd_ok & (d["fd_line"] == line), dk_ok & (d["dk_line"] == line)
+    p = pd.concat([nv(d["fd_o"], d["fd_u"]).where(at_fd), nv(d["dk_o"], d["dk_u"]).where(at_dk)], axis=1).mean(axis=1)
+    keep = line.notna() & p.notna()
+    d, X, at_fd, at_dk = d[keep].copy(), X[keep].copy(), at_fd[keep], at_dk[keep]
+    d["line"], d["p_mkt"] = line[keep], p[keep]
+    d["y"] = np.where(d["actual"] > d["line"], 1.0, np.where(d["actual"] < d["line"], 0.0, np.nan))
+    f = Q.features(d)
+    for c in ("logit_p", "r_proj", "r_l5", "r_l10", "r_med10", "r_savg", "log_line"):
+        X[c] = f[c]
+    X["n_books"] = at_fd.astype(int) + at_dk.astype(int)
+    X["disp"] = (d["fd_line"] - d["dk_line"]).abs().where(d["fd_o"].notna() & d["dk_o"].notna(), 0.0)
+    X["hold"] = pd.concat([(1 / d["fd_o"] + 1 / d["fd_u"] - 1).where(at_fd), (1 / d["dk_o"] + 1 / d["dk_u"] - 1).where(at_dk)],
+                          axis=1).mean(axis=1)
+    X["fd_vs_mkt"] = (nv(d["fd_o"], d["fd_u"]) - d["p_mkt"]).where(at_fd)
+    X["e_r"] = np.log((d["e_proj"] + 0.5) / (d["line"] + 0.5))
+    X["e_r_neg"] = X["e_r"].clip(upper=0)
+    for bk in ("mgm", "czr"):                                # priced at FanDuel / DraftKings only
+        d[bk + "_line"] = np.nan
+    return d, X
+
+
 def under_bets(d, p, tau):
     b = Q.bets(d, p, tau, sides=("under",))
     return b[b["e_min"] >= MIN_AT] if len(b) else b
@@ -68,8 +96,10 @@ def summarize(b):
     return s
 
 
-def validate(**kw):
+def validate(market="all", **kw):
     d, X = load(**kw)
+    if market == "fd_dk":
+        d, X = fd_dk_market(d, X)
     tv = d["split"].isin(["TRAIN", "VALIDATE"])
     p = Q.walk_forward(d, X, Q.fit_logistic)
     out = {"scores": {sp: Q.scores(d, p, d["split"] == sp) for sp in ("TRAIN", "VALIDATE")}}
@@ -121,9 +151,10 @@ def main():
     ap.add_argument("--json")
     ap.add_argument("--proj", default=str(Q.CACHE / "e7_proj.pkl"))
     ap.add_argument("--no-vacated", action="store_true")
+    ap.add_argument("--market", choices=("all", "fd_dk"), default="all")
     a = ap.parse_args()
     kw = {"proj": Path(a.proj), "vacated": not a.no_vacated}
-    out = validate(**kw) if a.what == "validate" else test_a(**kw)
+    out = validate(market=a.market, **kw) if a.what == "validate" else test_a(**kw)
     s = json.dumps(out, indent=1, default=str)
     print(s)
     if a.json:

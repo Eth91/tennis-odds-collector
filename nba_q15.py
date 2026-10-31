@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import sqlite3
 import sys
 from collections import defaultdict
@@ -24,7 +25,7 @@ HERE = Path(__file__).resolve().parent
 ODDS = HERE / "basketball_nba_odds_hist.sqlite"
 GAMELOGS = HERE / "nba_gamelogs.sqlite"
 POST = HERE / "nba_postseason.sqlite"
-CACHE = Path("/private/tmp/claude-501/-Users-ethandown-dev/6bcda0e4-ceef-45a9-9890-c43eb7a756a4/scratchpad/q15")
+CACHE = Path(os.environ.get("NBA_Q15_CACHE", HERE / ".q15cache"))     # the dataset and projections (not in git)
 
 TEAM = {"Atlanta Hawks": "ATL", "Boston Celtics": "BOS", "Brooklyn Nets": "BKN", "Charlotte Hornets": "CHA",
         "Chicago Bulls": "CHI", "Cleveland Cavaliers": "CLE", "Dallas Mavericks": "DAL", "Denver Nuggets": "DEN",
@@ -106,9 +107,11 @@ def player_features(b):
     nxt = {s: order[i + 1] for i, s in enumerate(order[:-1])}
     tot["season"] = tot["season"].map(nxt)
     out = out.merge(tot.dropna(subset=["season"]), on=["pid", "season"], how="left")
-    league = {m: b["s_" + m].sum() / b["min"].sum() for m in PARTS}
+    # the league's per-minute rate over every game before the date (the prior for a player with no last season)
+    cum = b.groupby("date")[["min"] + ["s_" + m for m in PARTS]].sum().sort_index().cumsum().shift(1).bfill()
     for m in PARTS:
-        prev_rate = (out[f"l_{m}"] / out["lmin"]).where(out["lmin"] > 0, league[m])
+        league = out["date"].map(cum["s_" + m] / cum["min"])
+        prev_rate = (out[f"l_{m}"] / out["lmin"]).where(out["lmin"] > 0, league)
         out[f"{m}_rate"] = (out[f"{m}_season_sum"] + RATE_K * prev_rate) / (out["min_season_sum"] + RATE_K)
         out[f"{m}_season_avg"] = (out[f"{m}_season_sum"] / out["gp_season"]).where(out["gp_season"] > 0)
     out["min_season_avg"] = (out["min_season_sum"] / out["gp_season"]).where(out["gp_season"] > 0)
