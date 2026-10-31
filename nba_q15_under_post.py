@@ -8,7 +8,10 @@ imported from a read-only checkout of that commit (ENGINE). The one change is th
 Run first on the regular seasons, it must reproduce amendment 4's counts (the harness check).
 
     git worktree add --detach ~/nba-engine-ro 0d328161ae      # and link its .projdata to the data
-    python3 nba_q15_under_post.py [--engine ~/nba-engine-ro] [--json OUT]
+    python3 nba_q15_under_post.py [--engine ~/nba-engine-ro] [--json OUT] [--proj FILE]
+
+--proj replaces the engine's projection with a file from nba_q15_proj.py (--mode rot / lag: without the final-margin
+leak, NBA_Q15_LOG.md E8).
 """
 from __future__ import annotations
 
@@ -49,7 +52,7 @@ def fd_unders(T, BOOST, M):
             for d, pl, m, line, pr in o.execute(q, tuple(BOOST.ODDS_MARKETS)) if MR.norm(pl) in name2pid}
 
 
-def flags(T, BOOST, U, season, lines, dates):
+def flags(T, BOOST, U, season, lines, dates, proj=None):
     """Every UNDER20 flag on the given dates: (date, pid, market, line, under price, ratio, l5, actual)."""
     out = []
     for r in T.player_games(season):
@@ -60,7 +63,12 @@ def flags(T, BOOST, U, season, lines, dates):
             if not ln:
                 continue
             line, over, under, q = ln
-            ratio = T.proj(r, mk) / line
+            if proj is not None:
+                pm = proj.get((r["date"], int(r["pid"]), mk))
+                if pm is None:
+                    continue
+                r = dict(r, min=pm[1])
+            ratio = (pm[0] if proj is not None else T.proj(r, mk)) / line
             if ratio >= U.RATIO_AT:
                 continue
             l5 = U.last5_ratio(season.bd, r["pid"], r["date"], mk, line)
@@ -106,7 +114,13 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--engine", default=str(Path.home() / "nba-engine-ro"))
     ap.add_argument("--json")
+    ap.add_argument("--proj")
     a = ap.parse_args()
+    proj = None
+    if a.proj:
+        import pickle
+        with open(a.proj, "rb") as f:
+            proj = pickle.load(f)
     sys.path.insert(0, a.engine)
     import nba_boost as BOOST
     import nba_lowend as LO
@@ -126,7 +140,7 @@ def main():
     for s in ("2023-24", "2024-25"):
         season = M.Season(s, rows, pos, five)
         dates = {r["date"] for r in rows[s]}
-        fs = flags(T, BOOST, U, season, lines, dates)
+        fs = flags(T, BOOST, U, season, lines, dates, proj)
         mid = sorted(dates)[len(dates) // 2]
         res["RS " + s] = {k: summ([f for f in fs if rules(f, U)[k]], boot=0) for k in ("UNDER20P", "UNDER3050", "UNDER3050L")}
         for k in ("UNDER20P", "UNDER3050", "UNDER3050L"):
@@ -140,7 +154,7 @@ def main():
         rs = dict(rows)
         rs[s] = sorted(rows.get(s, []) + post[s], key=lambda r: (r["date"], r["gid"]))
         season = M.Season(s, rs, pos, five)
-        fs = flags(T, BOOST, U, season, lines, post_dates[s])
+        fs = flags(T, BOOST, U, season, lines, post_dates[s], proj)
         for f in fs:
             f["post"] = s
         allf += fs

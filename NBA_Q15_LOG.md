@@ -166,3 +166,91 @@ Code: `nba_q15_model.py` and `nba_q15_proj.py`, in the commit that adds this ent
   these bets share its signal. The share of TEST A bets with the projection under 80% of the line is reported, so
   the overlap can be judged.
 - **This fills all 5 slots.** TEST A is closed after this run.
+
+## TEST A, slots 4–5: graded once, then found to be leaking (2026-10-31, about 11:20 UTC)
+- **As registered** (projection `e7_proj.pkl`):
+  - Q15_LR8: 1,360 bets, +26.7%.
+  - Q15_LR10: 738 bets, +30.2%.
+  - Both are positive in every postseason, with lower bounds of +17.9% / +19.0%.
+- **That is twice VALIDATE.** That is a reason to look for a bug before believing it. Checked and clean:
+  - **Box scores:** the three Finals clinchers match the real scores (DEN 94–89, BOS 106–88, OKC 103–91), and team
+    minutes sum to 240.
+  - **Snapshots:** 19–39 minutes before the scheduled tip in the playoffs, none after.
+  - **Our features:** every rolling stat is shifted one game, and season sums run up to the night before.
+- **The leak, in the engine's backtest projection** (`nba_tests4.player_games` → `nba_minutes.Season.v3` →
+  `nba_role.project`):
+  - **How it works:** the projection rescales the team's minutes to 240 over the players it treats as active. Active
+    means: from the team's last 3 games, and logged minutes tonight. So a deep-bench player who gets a DNP-CD in a
+    close game drops out, and his minutes go to everyone else. In a blowout he plays garbage time and stays in.
+  - **The result:** the projection knows the final margin. Against a version where only rotation players can be out,
+    it adds 2.1 minutes in games decided by 0–5 and 0.6 in games decided by 30+. The correlation with the margin is
+    −0.32 (playoffs: 2.6 vs 0.45, −0.34).
+  - **Who has it:** blowouts cut starters' minutes, so the leak flatters unders. It is in every under backtest built
+    on this projection, slots 1–5 and NBA_UNDER_PREREG's amendments included.
+  - **Who doesn't:** the live engine builds "out tonight" from the injury report, so the live pings don't have it.
+
+## E8: every slot re-graded without the leak (2026-10-31, about 11:40 UTC)
+`nba_q15_proj.py --mode`, with the same frozen rules and thresholds. Nothing was re-chosen.
+- **rot:** only rotation players (the engine's own absences filter, 17+ minutes over 3+ games) can be out tonight.
+  The deep bench is always active.
+- **lag:** rot, and only players who also missed the previous game. No first-night absence, which leans against
+  unders.
+- **lag, no vacated:** lag, with our own box-score "teammates out" features dropped too.
+
+**The under rules** (engine port, RS 2023-24 / RS 2024-25 / TEST A):
+
+| rule | as backtested (leaky) | rot | lag |
+|---|---|---|---|
+| UNDER20P | +7.7% / +6.9% / +15.0% (461) | +2.0% / −1.2% / +6.4% (1,393, lower bound −2.6%) | +1.5% / −3.2% / +6.3% |
+| UNDER3050 | +16.8% / +15.0% / +19.2% (88) | +4.1% / +6.0% / +22.5% (214, lower bound +1.5%) | +2.9% / −3.4% / +12.3% |
+| UNDER3050L | +24.5% / +20.2% / +15.8% (54) | +10.5% / +9.7% / +25.7% (134, lower bound +3.9%) | +6.1% / 0.0% / +13.2% |
+
+- Without the leak the projections are lower, so a fixed ratio threshold flags more props. These numbers are the rules
+  as written, not re-tuned.
+- **Most of the under family's regular-season edge was the leak.**
+
+**The model** (logistic + the leak-free projection):
+
+| version | log loss VALIDATE (market 0.68751) | Q15_LR8: TRAIN / VALIDATE / TEST A | Q15_LR10: TRAIN / VALIDATE / TEST A |
+|---|---|---|---|
+| leaky (as registered) | 0.68610 | +9.7% / +12.1% / +26.7% (1,360) | +10.2% / +18.4% / +30.2% (738) |
+| rot | 0.68681 | +7.3% (4,599) / +8.1% (1,497) / **+21.7% (557)** | +6.0% (2,478) / +12.1% (618) / **+29.1% (209)** |
+| lag | 0.68707 | +8.4% / +5.6% / +23.2% (541) | +7.9% / +10.2% / +30.5% (199) |
+| lag, no vacated | 0.68729 | +8.9% / +3.5% / +25.7% (377) | +9.0% / +8.7% / +31.8% (142) |
+
+- **rot, TEST A in detail:**
+  - Q15_LR8: 90% CI [+13.7, +29.4], lower bound +10.0%. By postseason: +14.6% (149), +21.6% (315), +33.5% (93).
+  - Q15_LR10: lower bound +10.6%. By postseason: +22.2% (56), +32.5% (126), +27.7% (27).
+  - VALIDATE halves: LR8 +11.3% / +5.5%; LR10 +9.6% / +14.3%.
+- **Blanket unders, priced props only** (the baseline):
+  - TEST A: +3.1% / +0.4% / +2.2% by postseason (overs hit 45.7% / 47.2% / 45.4% against 49.9% / 49.6% / 49.5%
+    no-vig).
+  - TRAIN −1.7%, VALIDATE −3.9%.
+  - The playoffs lean under by about 2 points of ROI. The model adds about 20 more.
+- **Verdict on the bar, leak-free:**
+  - Q15_LR8 fails 5 (VALIDATE +8.1% < 10%).
+  - Q15_LR10 fails 2 (209 < 300 bets).
+  - The under rules fail on VALIDATE and on bets.
+  - **Nothing passes.**
+- **What survives:**
+  - A real edge from the engine's projection: half of E7's log-loss gain is left, still twice E2's.
+  - Selected unders make +6% to +12% in the regular season.
+  - In three postseasons they make +22% to +32% in every leak-free version, with a lower bound near +10% after the
+    5-way Bonferroni.
+  - The leak fix was prompted by the TEST A result, and 3 versions were graded on it. They all agree.
+
+## E9: FanDuel and DraftKings only, as the live system sees the market (2026-10-31, about 11:55 UTC; TRAIN / VALIDATE)
+- **The setup** (rot projection, unders, 12+ projected minutes):
+  - The line: FanDuel's main line, else DraftKings'.
+  - The market: their no-vig at that line.
+  - n_books, line gap and hold from those two only.
+  - Bet at the better of the two.
+
+| τ | TRAIN | VALIDATE | VALIDATE halves | VALIDATE bets a day |
+|---|---|---|---|---|
+| 8% | 4,509, +8.5% [+5.0, +11.8] | 1,254, +7.4% [+1.1, +13.2] | +6.5%, +8.5% | 7.7 |
+| 10% | 2,382, +10.1% [+5.7, +14.8] | 491, **+17.0%** [+7.6, +25.9], lower bound +4.2% | +22.2%, +11.2% | 3.0 |
+| 12% | 1,239, +10.0% | 195, +23.3% | +25.5%, +21.4% | 1.2 |
+
+- **Reading:** the edge doesn't need the other two books, so it can be run live. In the regular season it is +7% to
+  +10% at τ 8–10%, with VALIDATE's +17% at τ 10% on 491 bets the high end.

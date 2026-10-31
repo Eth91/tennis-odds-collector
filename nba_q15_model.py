@@ -7,6 +7,9 @@ engine projects the player for 12+ minutes (bettable under the 2026-10-16 restri
     python3 nba_q15_proj.py CACHE/e7_proj.pkl          # step 1, the engine's projections
     python3 nba_q15_model.py validate [--json OUT]      # walk-forward by month, TRAIN / VALIDATE
     python3 nba_q15_model.py test-a [--json OUT]        # TEST A slots 4-5, graded once (NBA_Q15_LOG.md)
+
+--proj picks the projection file (nba_q15_proj.py --mode; e7_proj.pkl is --mode box, which leaks the final margin,
+NBA_Q15_LOG.md E8). --no-vacated drops the box-score "teammates out tonight" features too.
 """
 from __future__ import annotations
 
@@ -36,9 +39,11 @@ def with_engine(d, X, proj):
     return d, X
 
 
-def load(cache=Q.CACHE):
+def load(proj=Q.CACHE / "e7_proj.pkl", vacated=True):
     d, X = Q.frame(Q.load())
-    with open(cache / "e7_proj.pkl", "rb") as f:
+    if not vacated:
+        X = X.drop(columns=["vac_min", "vac_n"])
+    with open(proj, "rb") as f:
         return with_engine(d, X, pickle.load(f))
 
 
@@ -63,8 +68,8 @@ def summarize(b):
     return s
 
 
-def validate():
-    d, X = load()
+def validate(**kw):
+    d, X = load(**kw)
     tv = d["split"].isin(["TRAIN", "VALIDATE"])
     p = Q.walk_forward(d, X, Q.fit_logistic)
     out = {"scores": {sp: Q.scores(d, p, d["split"] == sp) for sp in ("TRAIN", "VALIDATE")}}
@@ -74,10 +79,10 @@ def validate():
     return out
 
 
-def test_a():
+def test_a(**kw):
     """Each postseason predicted by a model fit on the regular-season props before it. The 2023 postseason has none
     (prices start 2023-05-03), so it uses the TRAIN fit, from games after it."""
-    d, X = load()
+    d, X = load(**kw)
     rs = d["split"].isin(["TRAIN", "VALIDATE"]) & d["y"].notna()
     post = d["split"] == "TEST_A"
     p = pd.Series(np.nan, index=d.index)
@@ -114,8 +119,11 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("what", choices=("validate", "test-a"))
     ap.add_argument("--json")
+    ap.add_argument("--proj", default=str(Q.CACHE / "e7_proj.pkl"))
+    ap.add_argument("--no-vacated", action="store_true")
     a = ap.parse_args()
-    out = validate() if a.what == "validate" else test_a()
+    kw = {"proj": Path(a.proj), "vacated": not a.no_vacated}
+    out = validate(**kw) if a.what == "validate" else test_a(**kw)
     s = json.dumps(out, indent=1, default=str)
     print(s)
     if a.json:
