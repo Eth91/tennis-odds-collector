@@ -120,25 +120,39 @@ def player_features(b):
     return out
 
 
-def team_features(b):
-    """Per (team, game): pace and what the opponent allows, over games before tonight (last 20)."""
-    t = b.groupby(["game_id", "date", "team", "opp", "post"]).agg(
+def team_totals(b):
+    """Per (team, game): the possession parts and each stat, summed over the box."""
+    return b.groupby(["game_id", "date", "team", "opp", "post"]).agg(
         fga=("fga", "sum"), fta=("fta", "sum"), tov=("tov", "sum"), oreb=("oreb", "sum"),
         **{"s_" + m: ("s_" + m, "sum") for m in PARTS}).reset_index()
+
+
+def team_league(t):
+    """The normalizers: the mean team-game possessions and each stat allowed (constants; frozen for the live model)."""
+    t = with_allowed(t)
+    return {c: float(t[c].mean()) for c in ["poss"] + ["a_" + m for m in PARTS]}
+
+
+def with_allowed(t):
+    t = t.copy()
     t["poss"] = t["fga"] + 0.44 * t["fta"] + t["tov"] - t["oreb"]
-    t = t.sort_values(["date", "game_id"])
-    # what each team allowed: the opponent's row in the same game
     allowed = t[["game_id", "team"] + ["s_" + m for m in PARTS] + ["poss"]].rename(
         columns={"team": "opp", **{"s_" + m: "a_" + m for m in PARTS}, "poss": "a_poss"})
-    t = t.merge(allowed, on=["game_id", "opp"], how="left")
-    t = t.sort_values(["team", "date", "game_id"])
+    return t.merge(allowed, on=["game_id", "opp"], how="left")
+
+
+def team_features(b, league=None, t=None):
+    """Per (team, game): pace and what the opponent allows, over games before tonight (last 20). `t` (team_totals) and
+    `league` (team_league) may be given: the live model passes its own box's totals and the training normalizers."""
+    t = team_totals(b) if t is None else t
+    league = league or team_league(t)
+    t = with_allowed(t).sort_values(["team", "date", "game_id"])
     g = t.groupby("team", sort=False)
     roll = lambda c: g[c].transform(lambda s: s.shift(1).rolling(20, min_periods=5).mean())
     f = t[["game_id", "date", "team", "opp"]].copy()
     f["pace"] = roll("poss")
     for m in PARTS:
         f["allow_" + m] = roll("a_" + m)
-    league = {c: t[c].mean() for c in ["poss"] + ["a_" + m for m in PARTS]}
     f["pace_r"] = f["pace"] / league["poss"]
     for m in PARTS:
         f["allow_r_" + m] = f["allow_" + m] / league["a_" + m]

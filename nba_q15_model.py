@@ -7,6 +7,7 @@ engine projects the player for 12+ minutes (bettable under the 2026-10-16 restri
     python3 nba_q15_proj.py CACHE/e7_proj.pkl          # step 1, the engine's projections
     python3 nba_q15_model.py validate [--json OUT]      # walk-forward by month, TRAIN / VALIDATE
     python3 nba_q15_model.py test-a [--json OUT]        # TEST A slots 4-5, graded once (NBA_Q15_LOG.md)
+    python3 nba_q15_model.py export --proj CACHE/e8_proj_rot.pkl   # the frozen TEST B model -> nba_q15_lr_model.py
 
 --proj picks the projection file (nba_q15_proj.py --mode; e7_proj.pkl is --mode box, which leaks the final margin,
 NBA_Q15_LOG.md E8). --no-vacated drops the box-score "teammates out tonight" features too. --market fd_dk rebuilds
@@ -23,6 +24,8 @@ import numpy as np
 import pandas as pd
 
 import nba_q15 as Q
+
+HERE = Path(__file__).resolve().parent
 
 MIN_AT = 12.0                      # projected minutes, the books' restriction
 SLOTS = {"Q15_LR8": 0.08, "Q15_LR10": 0.10}
@@ -145,15 +148,51 @@ def fd_only(d, b):
     return g
 
 
+def predict(model, X):
+    """The exported model's P(over): impute with the training medians, standardize, logistic. X: columns in any order."""
+    Z = X[model["features"]].to_numpy(dtype=float)
+    Z = np.where(np.isnan(Z), np.asarray(model["median"]), Z)
+    z = ((Z - np.asarray(model["mean"])) / np.asarray(model["scale"])) @ np.asarray(model["coef"]) + model["intercept"]
+    return 1 / (1 + np.exp(-z))
+
+
+def export(proj, out=HERE / "nba_q15_lr_model.py"):
+    """TEST B's frozen model: E9's FanDuel / DraftKings version, fit on every decided regular-season prop (TRAIN +
+    VALIDATE, as the 2025 postseason's TEST A fit), written as plain numbers (the VM has no scikit-learn)."""
+    from sklearn.impute import SimpleImputer
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.pipeline import make_pipeline
+    from sklearn.preprocessing import StandardScaler
+    d, X = load(proj=proj)
+    d, X = fd_dk_market(d, X)
+    tr = d["split"].isin(["TRAIN", "VALIDATE"]) & d["y"].notna()
+    m = make_pipeline(SimpleImputer(strategy="median"), StandardScaler(), LogisticRegression(C=0.05, max_iter=2000))
+    m.fit(X[tr], d.loc[tr, "y"])
+    imp, sc, lr = (x for _n, x in m.steps)
+    model = {"features": list(X.columns), "median": imp.statistics_.tolist(), "mean": sc.mean_.tolist(),
+             "scale": sc.scale_.tolist(), "coef": lr.coef_[0].tolist(), "intercept": float(lr.intercept_[0]),
+             "team_league": Q.team_league(Q.team_totals(Q.load_box())), "slots": SLOTS, "min_at": MIN_AT,
+             "fit": {"props": int(tr.sum()), "from": d.loc[tr, "date"].min(), "until": d.loc[tr, "date"].max(),
+                     "proj": Path(proj).name}}
+    gap = float(np.max(np.abs(predict(model, X[tr]) - m.predict_proba(X[tr])[:, 1])))
+    assert gap < 1e-9, gap
+    out.write_text('"""NBA_Q15 TEST B: the frozen Q15_LR model (nba_q15_model.export; NBA_Q15_LOG.md). Do not edit:\n'
+                   'its hash is part of the rules\' fingerprint."""\nMODEL = ' + json.dumps(model, indent=1) + "\n")
+    return {"props": model["fit"]["props"], "features": len(model["features"]), "gap": gap}
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("what", choices=("validate", "test-a"))
+    ap.add_argument("what", choices=("validate", "test-a", "export"))
     ap.add_argument("--json")
     ap.add_argument("--proj", default=str(Q.CACHE / "e7_proj.pkl"))
     ap.add_argument("--no-vacated", action="store_true")
     ap.add_argument("--market", choices=("all", "fd_dk"), default="all")
     a = ap.parse_args()
     kw = {"proj": Path(a.proj), "vacated": not a.no_vacated}
+    if a.what == "export":
+        print(export(Path(a.proj)))
+        return
     out = validate(market=a.market, **kw) if a.what == "validate" else test_a(**kw)
     s = json.dumps(out, indent=1, default=str)
     print(s)
