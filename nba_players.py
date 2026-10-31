@@ -36,9 +36,11 @@ TRACKED = ("pot_ast", "reb_ch")
 SAME_SEASON_ONLY = ("reb_ch",)
 # early in a season there is too little of it to judge a player's last 3 games against: until the median team has
 # played RECENT_FROM games, Roles compares his season so far with last season (LAST_MIN_GP+ games there, any team); from
-# then on, his last 3 games with the rest of his season (5+ games). The file says which ("mode")
-RECENT_FROM = 10
+# then on, his last 3 games with his season average (SEASON_MIN_GP+ games, the last 3 among them: the average the
+# player's page shows). The file says which ("mode")
+RECENT_FROM = 5
 LAST_MIN_GP = 10
+SEASON_MIN_GP = 5
 
 
 def lined_players(q, season):
@@ -57,9 +59,10 @@ REG_MPG = 18.0      # a teammate this regular (minutes a game this season, 3+ ga
 def roles(logs, idx, season, team_games, lined=None):
     """Players whose minutes, shots (FGA, 3PTA), potential assists or rebound chances a game moved by at least
     ROLE_MOVE, in roles_mode's comparison: "season" (his games this season for his team against all of last season's,
-    "was_team" set when he played most of them elsewhere) or "recent" (his last 3 games against the rest of his season).
-    Each with every stat now and before ("st", None where tracking has too few games or the stat does not compare across
-    seasons), his usage and starts then and now ([starts now, starts before, games before, games now]), and the regular
+    "was_team" set when he played most of them elsewhere) or "recent" (his last 3 games against his season average, the
+    last 3 included). Each with every stat now and before ("st", None where tracking has too few games or the stat does
+    not compare across seasons), his usage, his starts ([starts now, starts before, games before, games now]: "before" is
+    the games ahead of his last 3, so a new starter reads as one), and the regular
     teammates who sat 2 of his team's last 3 games. logs: {pid: LOG_COLS rows}; team_games: {team: [gid, ...] this
     season, oldest first}; lined: lined_players (None: everyone). Biggest minutes move first."""
     C = {c: k for k, c in enumerate(R.LOG_COLS)}
@@ -81,12 +84,12 @@ def roles(logs, idx, season, team_games, lined=None):
             continue                                         # not playing lately: a return or an absence, not a role
         was_team = None
         if mode == "recent":
-            recent, base, frm = cur[-3:], cur[:-3], "this season"
-            if len(base) < 5:
+            recent, base, before, frm = cur[-3:], cur, cur[:-3], "this season"
+            if len(cur) < SEASON_MIN_GP:
                 continue
         else:
             recent, frm = cur, "last season"
-            base = [r for r in rows if R.season_of(r[C["date"]]) == last]
+            base = before = [r for r in rows if R.season_of(r[C["date"]]) == last]
             if len(base) < LAST_MIN_GP:
                 continue
             top = Counter(r[C["team"]] for r in base).most_common(1)[0][0]
@@ -114,7 +117,7 @@ def roles(logs, idx, season, team_games, lined=None):
         out.append({"pid": pid, "name": info[1], "team": team, "d_min": round(d, 1),
                     "min": [round(mean([r[C["min"]] for r in recent]), 1), round(mean([r[C["min"]] for r in base]), 1)],
                     "usg": [None if us(recent) is None else round(us(recent), 1), None if us(base) is None else round(us(base), 1)],
-                    "starts": [sum(r[C["starter"]] or 0 for r in recent), sum(r[C["starter"]] or 0 for r in base), len(base), len(recent)],
+                    "starts": [sum(r[C["starter"]] or 0 for r in recent), sum(r[C["starter"]] or 0 for r in before), len(before), len(recent)],
                     "base": frm, "was_team": was_team, "out": regs, "st": st})
     return sorted(out, key=lambda e: -abs(e["d_min"]))
 
