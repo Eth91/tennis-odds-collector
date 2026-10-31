@@ -82,3 +82,40 @@ TEST A slots, unchanged:
 - Also reported, without changing the verdict: the 12+ minute (bettable now) subset, and FanDuel-only prices.
 - Slots 4–5 stay open.
 
+
+## TEST A, slots 1–3: graded once (2026-10-31, about 10:40 UTC)
+`nba_q15_under_post.py`, engine at 0d328161ae.
+- **Harness check:** on the regular seasons the port gives amendment 4's numbers exactly (UNDER3050: 1,022 at
+  +16.8% and 710 at +15.0%).
+- **Data limits:**
+  - The 2023 postseason starts on 2023-05-03, the first date with prices, so its first round is missing.
+  - "12+ min" means 12+ projected (ROLE1 v3) minutes: the bettable subset under the 2026-10-16 restriction.
+  - FanDuel-only results are the bets where FanDuel posted the chosen line.
+
+| | UNDER20P | UNDER3050 | UNDER3050L |
+|---|---|---|---|
+| TEST A bets, ROI | **461, +15.0%** (+14.99%) | 88, +19.2% | 54, +15.8% |
+| win / break-even | 62.5% / 54.4% | 64.8% / 54.2% | 63.0% / 54.1% |
+| units, max drawdown | +69.1, 13.5 | +16.9, 8.5 | +8.5, 6.3 |
+| 90% / 95% CI | [+5.0, +25.4] / [+3.1, +27.3] | [−2.6, +40.1] / [−6.7, +44.1] | [−10.9, +41.4] / [−16.4, +46.1] |
+| one-sided lower bound, α = 0.01 | **+1.2%** | −11.1% | −22.6% |
+| 2023 / 2024 / 2025 postseason | +43.9% (52) / +9.9% (211) / +12.8% (198) | +37.0% (18) / **−5.7%** (34) / +33.9% (36) | +46.7% (14) / +1.3% (23) / +10.1% (17) |
+| 12+ projected minutes | 426, +16.1% (lower bound +0.7%) | 69, +30.6% | 41, +30.0% |
+| FanDuel only | 265, +18.1% | 40, +24.9% | 22, +18.6% |
+| VALIDATE (2024-25 RS), halves | +6.9% (+9.0%, +5.7%) | +15.0% (+16.9%, +13.8%) | +20.2% (+16.4%, +22.5%) |
+| TRAIN (2023-24 RS) | +7.7% (3,916) | +16.8% (1,022) | +24.5% (786) |
+| **verdict** | **fails** 1 (by 0.01 points) and 5 (VALIDATE < 10%) | **fails** 2, 3, 4 | **fails** 2, 4 |
+
+- **TEST A by market (UNDER20P, read only, not used to choose anything):**
+  - rebounds +18.0% (137), P+R +14.1% (69), R+A +21.9% (48), P+R+A +21.9% (49), assists +21.3% (39);
+  - points +7.7% (69), P+A −0.3% (50).
+- **Reading:**
+  - Nothing passes the pre-registered bar.
+  - **UNDER20P is the first rule in these studies with a significant edge on data no one had looked at:** 461
+    postseason bets, positive in all three postseasons, and a lower bound above 0 after the 5-way Bonferroni.
+  - Its edge is about +7% in the regular seasons and +15% in the playoffs. A fair expectation for a full season is
+    the regular-season figure, high single digits, not 15%.
+  - The 30–50% band has the higher ROI everywhere, but too few playoff bets to tell it from luck. Its band was chosen
+    after looking at both regular seasons.
+- **TEST A is now spent for the under family.** Any new candidate built from the projection ratio carries what
+  these results showed, so slots 4–5 must be chosen on TRAIN/VALIDATE and their overlap with UNDER20P reported.
