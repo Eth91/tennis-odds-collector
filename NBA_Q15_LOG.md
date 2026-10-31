@@ -280,3 +280,38 @@ Code: `nba_q15_model.py` and `nba_q15_proj.py`, in the commit that adds this ent
   - the 12-minute and under-side filters;
   - the engine features.
 - **Reproduce:** `nba_q15_model.py --market fd_dk` reproduces E9.
+
+## TEST B: registered forward (2026-10-31)
+- **The model:** `nba_q15_lr_model.py`, E9's FanDuel / DraftKings version.
+  - Fit on all 203,630 decided regular-season props, 2023-10-24 to 2025-04-13, with the rot projection.
+  - 35 features; plain numbers, because the VM has no scikit-learn.
+  - The numpy scorer matches scikit-learn exactly (gap 0.0).
+- **The live path** (`nba_q15_live.py`) builds tonight's features with nba_q15's own code:
+  - each player who may play gets a placeholder box row, and every feature is shifted one game;
+  - the team normalizers are frozen from training.
+  - **Parity:** on five past dates (2024-01-15, 2024-03-02, 2025-01-15, 2025-02-27, 2025-04-09), it reproduces the
+    training predictions for every prop (992 / 436 / 855 / 414 / 614) within 1.1e-16.
+  - **Mutation check:** 6 of 7 mutants on the live path killed. The survivor, the placeholder's minutes value, is
+    equivalent: nothing reads it.
+- **On the VM:** a replayed night takes about 15 minutes, 2 to 6 of them the rule's own (the night's features take
+  about 100 seconds). `Night.frame` reads only tonight's teams' rows (the same features on 31 test games), and Q15_LR8
+  reuses Q15_LR10's scoring of each game.
+- **Development record** (replayed before registration; never part of the verdict):
+  - 10/29: LR10 none; LR8 1 (won).
+  - 10/30: LR10 and LR8 the same 2 (both lost; CLV −13% and +1%).
+  - **Coverage on 10/30:** all 958 FanDuel / DraftKings props in 10 games were scored, 94% with the engine's
+    projection, all of those 12+ minutes. The model leans under the market (0.48 against 0.49), as in training.
+    Only 3 unders reached 8% EV, and one of them (10.2%) had no engine projection, so it wasn't a bet.
+  - **For scale:** walk-forward, the first two weeks of each past season averaged 2.4 LR10 and 5.6 LR8 bets a night.
+- **The rules:** Q15_LR10 and Q15_LR8 in the side-by-side (`NBA_SXS_PREREG.md` amendment 11), at tip − 30.
+  - Absences come from the injury report.
+  - The projection is the engine's live ROLE1 v3, with no leak.
+  - The price is the better of FanDuel and DraftKings at that moment.
+  - CLV is against FanDuel's close.
+  - No pings, nothing bet.
+- **The verdict, as pre-registered:**
+  - at least 200 forward bets;
+  - ROI ≥ +10%;
+  - mean CLV > 0.
+  
+  Until then it is "accumulating", whatever the record looks like.

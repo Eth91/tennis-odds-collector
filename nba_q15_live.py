@@ -14,6 +14,7 @@ box cannot change them). The team normalizers are the training ones, frozen in t
 from __future__ import annotations
 
 import sqlite3
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -27,8 +28,14 @@ BOX_COLS = ("pts", "reb", "ast", "fg3m", "fga", "fg3a", "fta", "tov", "oreb")
 
 def box_from_matchup(matchup_db, seasons, before):
     """(player rows as nba_q15.load_box gives them, team totals as nba_q15.team_totals gives them) for the seasons'
-    games before the date, from nba_matchup. Team possessions come from team_games (player_games has no oreb)."""
+    games before the date, from nba_matchup. Team possessions come from team_games (player_games has no oreb).
+    (None, None) when the store lacks those tables."""
+    if not Path(matchup_db).exists():
+        return None, None
     c = sqlite3.connect(f"file:{matchup_db}?mode=ro", uri=True)
+    if not {"games", "player_games", "team_games"} <= {r[0] for r in c.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}:
+        c.close()
+        return None, None
     marks = ",".join("?" * len(seasons))
     b = pd.read_sql(f"SELECT g.season, p.gid AS game_id, g.date, p.team, p.pid, p.min, p.pts, p.reb, p.ast, p.fg3m, p.fga, "
                     f"p.fg3a, p.fta, p.tov, g.home, g.away FROM player_games p JOIN games g ON g.gid = p.gid "
@@ -64,16 +71,18 @@ class Night:
         for c in ("fga", "fta", "oreb", "tov"):
             tt[c] = 0.0
         self.tf = Q.team_features(None, league=MODEL["team_league"], t=pd.concat([t, tt], ignore_index=True))
+        self.tonight = self.pf[(self.pf["date"] == date).to_numpy()]
 
     def frame(self, players):
         """{pid: features} for players [(pid, team, opp, gid)] who may play tonight (not Out / Doubtful). The absent
-        rotation players are whoever is missing from it, which is what nba_q15.vacated reads."""
+        rotation players are whoever is missing from it, which is what nba_q15.vacated reads (from the teams' own rows,
+        all it looks up)."""
         teams = {tm for _p, tm, _o, _g in players}
         bb = pd.concat([self.b[self.b["team"].isin(teams)], placeholders(players, self.date, self.season)], ignore_index=True)
-        vac, missed = Q.vacated(bb, self.pf)
+        vac, missed = Q.vacated(bb, self.pf[self.pf["team"].isin(teams).to_numpy()])
         keys = {(int(p), tm) for p, tm, _o, _g in players}
-        mine = np.array([(int(p), tm) in keys for p, tm in zip(self.pf["pid"], self.pf["team"])], dtype=bool)
-        pf = self.pf[(self.pf["date"] == self.date).to_numpy() & mine].copy()
+        pf = self.tonight
+        pf = pf[np.array([(int(p), tm) in keys for p, tm in zip(pf["pid"], pf["team"])], dtype=bool)].copy()
         pf["vac_min"] = [vac.get((tm, g), (0, 0))[0] for tm, g in zip(pf["team"], pf["game_id"])]
         pf["vac_n"] = [vac.get((tm, g), (0, 0))[1] for tm, g in zip(pf["team"], pf["game_id"])]
         pf["missed"] = [missed.get((p, g), -1) for p, g in zip(pf["pid"], pf["game_id"])]

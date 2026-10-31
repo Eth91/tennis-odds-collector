@@ -145,3 +145,11 @@ def test_props_take_fanduels_main_line_else_draftkings_and_score_in_range():
     assert list(d["line"]) == [24.5, 4.5]
     pr, who = Q.price_at(d, "under", ("fd", "dk"))
     assert list(pr) == [1.9, 1.9] and list(who) == ["fd", "dk"]          # DraftKings' 25.5 is not FanDuel's line
+
+
+def test_a_store_without_the_tables_gives_no_box(tmp_path):
+    assert L.box_from_matchup(tmp_path / "none.sqlite", ("2026-27",), "2026-11-01") == (None, None)
+    import sqlite3
+    db = tmp_path / "m.sqlite"
+    sqlite3.connect(db).executescript("CREATE TABLE games (gid); CREATE TABLE player_games (gid);").close()
+    assert L.box_from_matchup(db, ("2026-27",), "2026-11-01") == (None, None)
