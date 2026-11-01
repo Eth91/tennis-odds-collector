@@ -174,6 +174,48 @@ def test_live_state_maps_espn_by_teams():
     assert out["2026_08_LAC_LA"]["state"] == "pregame" and out["2026_08_LAC_LA"]["espn"] == "10"   # LA = LAR
 
 
+def _event(eid, away, home, state):
+    return {"id": eid, "competitions": [{"competitors": [{"homeAway": "away", "score": "20", "team": {"abbreviation": away}},
+                                                          {"homeAway": "home", "score": "24", "team": {"abbreviation": home}}],
+                                          "status": {"type": {"state": state, "name": "STATUS_X"}}}]}
+
+
+def test_live_state_asks_espn_one_day_at_a_time():
+    # ESPN answers a range of dates (20261029-20261102) with a 400 since 2026-10: each slate day is its own scoreboard
+    games = [{"gid": "2026_08_CAR_GB", "date": "2026-10-29", "away": "CAR", "home": "GB"},
+             {"gid": "2026_08_BAL_BUF", "date": "2026-11-01", "away": "BAL", "home": "BUF"},
+             {"gid": "2026_08_CHI_SEA", "date": "2026-11-02", "away": "CHI", "home": "SEA"}]
+    days = {"20261029": [_event("1", "CAR", "GB", "post")], "20261101": [_event("2", "BAL", "BUF", "pre")],
+            "20261102": [_event("3", "CHI", "SEA", "pre")]}
+    asked = []
+
+    def get(u):
+        asked.append(u)
+        q = u.split("dates=")[1].split("&")[0]
+        if q not in days:
+            raise OSError("HTTP Error 400: Bad Request")
+        return json.dumps({"events": days[q]}).encode()
+    with tempfile.TemporaryDirectory() as d:
+        C.CACHE = pathlib.Path(d)
+        out = R.live_state(games, get)
+    assert len(asked) == 3
+    assert out["2026_08_CAR_GB"]["state"] == "final" and out["2026_08_CAR_GB"]["score"] == [20, 24]
+    assert out["2026_08_BAL_BUF"]["espn"] == "2" and out["2026_08_CHI_SEA"]["espn"] == "3"
+
+
+def test_live_state_a_game_espn_leaves_out_is_final_with_nflverse_score():
+    games = [{"gid": "2026_08_CAR_GB", "date": "2026-10-29", "away": "CAR", "home": "GB", "away_score": 16.0,
+              "home_score": 23.0, "espn": "401"},
+             {"gid": "2026_08_BAL_BUF", "date": "2026-11-01", "away": "BAL", "home": "BUF", "away_score": None,
+              "home_score": None, "espn": "402"}]
+    with tempfile.TemporaryDirectory() as d:
+        C.CACHE = pathlib.Path(d)
+        out = R.live_state(games, lambda u: (_ for _ in ()).throw(OSError("HTTP Error 400: Bad Request")))
+    assert out["2026_08_CAR_GB"]["state"] == "final" and out["2026_08_CAR_GB"]["score"] == [16, 23]
+    assert out["2026_08_CAR_GB"]["espn"] == "401"                                 # its box score still loads
+    assert out["2026_08_BAL_BUF"] == {"state": "pregame"}                          # no score yet: left pending
+
+
 def test_gains_reads_the_games_without_him():
     gl = [(f"2026-09-{d:02d}", f"g{i}") for i, d in enumerate((7, 14, 21, 28, 5), 1)]
     gl[-1] = ("2026-10-05", "g5")
