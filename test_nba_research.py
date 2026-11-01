@@ -551,9 +551,17 @@ def test_page_controls_work_on_iphone():
     assert 'const ALL_TABS = ["live", "trends", "movers"];' in html and "list = list.filter(p => !p.closed);" in html
     # the flags (D.flags: the under plays that ping) are the bottom bar's Flags view, in place of Markets (a saved
     # Markets view opens Props), SHADOW · NOT A BET, each graded at its own line once final; a chip on the prop's row
-    # and a line on its page; a tap opens the prop or the player. The props section has no Flags tab
-    assert 'let VIEWS = [["props", "Props"], ["flags", "Flags"], ["injuries", "Injuries"]];' in html and "mrow" not in html
-    assert 'if (["props", "flags", "injuries"].indexOf(ST.view) < 0) ST.view = "props";' in html and '"markets"' not in html
+    # and a line on its page; a tap opens the prop or the player. The props section has no Flags tab. WOWY (nba_onoff's
+    # on/off splits) sits between Flags and Injuries, the bar four wide
+    assert 'let VIEWS = [["props", "Props"], ["flags", "Flags"], ["wowy", "WOWY"], ["injuries", "Injuries"]];' in html and "mrow" not in html
+    assert 'if (["props", "flags", "wowy", "injuries"].indexOf(ST.view) < 0) ST.view = "props";' in html and '"markets"' not in html
+    assert '.tbc[data-n="4"]{width:272px}' in html and "fetch(`onoff/${t}.json?t=${Date.now()}`" in html
+    # the With / Without sheet's shortcut: each teammate's On/off link opens WOWY on his team with that teammate off the
+    # court and the prop's stat, the prop's player marked; only where the sport has the WOWY view
+    assert 'VIEWS.some(v => v[0] === "wowy") ? ` · <button class="lk wyk" data-wy="${m.key}">On/off ›</button>` : ""' in html
+    assert '$$("[data-wy]", s).forEach(b => b.onclick = () => toWowy(PX.p, +b.dataset.wy));' in html
+    assert 'Object.assign(ST, {wt: p.team, wo: String(off), q: ""}, WOWY_STATS.some(x => x[0] === p.market) ? {ws: p.market} : {});' in html
+    assert '${r.p === WOWY_ME ? " wme" : ""}' in html and 'setTimeout(() => { ST.view = "wowy"; save(); render(); window.scrollTo(0, 0); }, 480);' in html
     assert '  if (ST.view === "flags") { lst.innerHTML = flagsView(); return; }' in html and 'flags: "Flags"' not in html
     assert 'if (ml) ml.style.display = ST.view === "props" ? "" : "none";' in html and 'if (ST.view === "props" && q.length >= 2)' in html
     assert "${flagChips(p)}</div>" in html and "const flagChips = p => flagsOf(p.id).length ?" in html

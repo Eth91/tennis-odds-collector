@@ -406,6 +406,14 @@ svg.shct{display:block;width:100%;height:auto;margin-top:6px}
 .ros{margin-top:2px;font-size:12.5px;color:#9a9a9a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .ros span{color:var(--org)}
 .rod{position:absolute;right:15.3px;top:18px;font-size:19px;font-weight:800;text-align:right} .rod.up{color:var(--grn)} .rod.dn{color:var(--red)}
 .rod i{display:block;font-style:normal;font-size:10.5px;font-weight:600;color:#8e8e8e}
+/* WOWY */
+.tbc[data-n="4"]{width:272px}
+.wtg{width:18px;height:18px;margin-right:6px;vertical-align:-4px}
+.wyp{display:flex;gap:8px;overflow-x:auto;padding:10px 15.3px 2px;scrollbar-width:none} .wyp::-webkit-scrollbar{display:none}
+.wyp .lus{flex:0 0 68px} .wyp .lus[aria-pressed="true"]{border-color:#fff;background:#262626}
+.wyh{padding:10px 15.3px 0;font-size:12.5px;color:#9a9a9a} .wyh b{color:#fff;font-weight:600}
+.ror.wys{opacity:.45} .ror.wme{background:#262626;box-shadow:inset 3px 0 0 #fff;opacity:1}
+.mrn small .wyk{font-size:12px;color:#fff;font-weight:600}
 .seg.ivs button{font-size:12.5px}
 /* the Movers tab: the line from its open */
 .lin .mvo{color:#9a9a9a} .lin .mv.up{color:var(--grn)} .lin .mv.dn{color:var(--red)}
@@ -981,7 +989,24 @@ function flagGrade(side, line, v) {
   if (v === line) return "push";
   return (side === "under" ? v < line : v > line) ? "hit" : "miss";
 }
-if (typeof module !== "undefined") module.exports = {flagGrade: flagGrade, statValue: statValue, hitSummary: hitSummary, seasonOf: seasonOf,
+// WOWY (nba_onoff, docs/onoff/{team}.json): a team's lineups [[five], seconds, team pts, opp pts, [[stat x n] x5]]
+// summed for each player with the chosen teammate `y` on the court and off it: players {pid: {on: [seconds, [stat x n]],
+// off: [...]}} (y's own time all "on") and the team's {on: [seconds, pts, opp pts], off: [...]}
+function wowySplit(lineups, y, n) {
+  var zeros = function () { var z = []; for (var k = 0; k < n; k++) z.push(0); return z; };
+  var players = {}, team = {on: [0, 0, 0], off: [0, 0, 0]};
+  for (var i = 0; i < lineups.length; i++) {
+    var L = lineups[i], side = L[0].indexOf(y) >= 0 ? "on" : "off";
+    team[side][0] += L[1]; team[side][1] += L[2]; team[side][2] += L[3];
+    for (var j = 0; j < L[0].length; j++) {
+      var p = L[0][j], o = players[p] || (players[p] = {on: [0, zeros()], off: [0, zeros()]}), s = o[side];
+      s[0] += L[1];
+      for (var k = 0; k < n; k++) s[1][k] += L[4][j][k] || 0;
+    }
+  }
+  return {players: players, team: team};
+}
+if (typeof module !== "undefined") module.exports = {wowySplit: wowySplit, flagGrade: flagGrade, statValue: statValue, hitSummary: hitSummary, seasonOf: seasonOf,
   rowsToLogs: rowsToLogs, windowed: windowed, filterLogs: filterLogs, splitRows: splitRows, sideRate: sideRate,
   american: american, decimalOf: decimalOf, bestOver: bestOver, bestPrice: bestPrice, propRates: propRates,
   noVig: noVig, fairAt: fairAt, valueAt: valueAt, zscore: zscore, pmfGe: pmfGe, projProbs: projProbs, blendP: blendP,
@@ -1001,7 +1026,7 @@ let D = null, ERR = null, LOADING = true, CUR = null;
 // on a touchscreen, moving focus by script only draws a ring (and focusing a <select> can pop its picker)
 const TOUCH = matchMedia("(pointer: coarse)").matches;
 const ST = {date: null, gid: "all", market: "points", side: "over", q: "", sort: "hit10", dir: "desc", team: "all",
-            book: "all", lmin: "", lmax: "", omin: "", omax: "", watch: "", view: "props", iv: "", rs: "", sp: ""};
+            book: "all", lmin: "", lmax: "", omin: "", omax: "", watch: "", view: "props", iv: "", rs: "", sp: "", wt: "", wo: "", ws: ""};
 const DT = {line: null, win: "l10", home: null, starter: null, blow: null, result: null, rest: null, ranges: {}, without: {}, with: {},
             dvp: false, def: false, open: {}, fresh: null, ovs: []};
 let RANGES = [["min", "Minutes", "Minutes"], ["fga", "Field goal attempts", "FGA"], ["fg3a", "3-point attempts", "3PTA"],
@@ -1047,13 +1072,13 @@ function hashState() {
 }
 // how the list was last set up (tab, view, side, sort, book), for a launch from the home screen with no hash: not the
 // day, game, team, search or line filters, which would hide the next slate
-const PREF = ["view", "market", "side", "sort", "dir", "book", "iv", "rs", "sp"];
+const PREF = ["view", "market", "side", "sort", "dir", "book", "iv", "rs", "sp", "ws"];
 function readHash() {
   const h = new URLSearchParams(location.hash.slice(1));
   if (![...h.keys()].length) { try { const pf = JSON.parse(localStorage.getItem("pickz_pref") || "{}") || {}; PREF.forEach(k => { if (typeof pf[k] === "string") ST[k] = pf[k]; }); } catch (e) {} }
   Object.keys(ST).forEach(k => { if (h.has(k)) ST[k] = h.get(k); });
   if (ST.view === "watch") Object.assign(ST, {view: "props", watch: "1"});    // the old Watchlist tab, now a filter
-  if (["props", "flags", "injuries"].indexOf(ST.view) < 0) ST.view = "props";
+  if (["props", "flags", "wowy", "injuries"].indexOf(ST.view) < 0) ST.view = "props";
   if (ST.sp !== "nfl") ST.sp = "";
   useSport(ST.sp || "nba");
   if (!VIEWS.some(v => v[0] === ST.view)) ST.view = "props";
@@ -1084,7 +1109,7 @@ let MKT_TABS = ["live", "trends", "movers", "points", "assists", "rebounds", "th
 const ALL_TABS = ["live", "trends", "movers"];  // tabs that span every market
 // Trends (nba_research_score.trend_side): the L10 and L20 hit rates both 1+ SD from what the price implies, the same
 // way, 8+ games each. A plain 70% L10 put a third of the slate in Trends and ignored the price.
-let VIEWS = [["props", "Props"], ["flags", "Flags"], ["injuries", "Injuries"]];
+let VIEWS = [["props", "Props"], ["flags", "Flags"], ["wowy", "WOWY"], ["injuries", "Injuries"]];
 const unit = m => (D.markets || {})[m] || m;
 // long names shorten to an initial, as on the reference ("M. Diabaté")
 const nameOf = n => n.length > 13 && n.indexOf(" ") > 0 ? n[0] + ". " + n.slice(n.indexOf(" ") + 1) : n;
@@ -1365,6 +1390,7 @@ function renderRows(ivFrom) {
     return;
   }
   if (ST.view === "flags") { lst.innerHTML = flagsView(); return; }
+  if (ST.view === "wowy") { if (!$("#wov", lst)) lst.innerHTML = '<div id="wov"><div class="vsk"><div class="sk"></div><div class="sk"></div></div></div>'; wowyView(); return; }
   const onDate = D.props.filter(p => (gameOf(p.gid) || {}).date === ST.date), list = listProps();
   let body = null;
   if (!D.games.some(g => g.date === ST.date)) body = '<div class="empty"><b>No games</b></div>';
@@ -1544,12 +1570,102 @@ function luTeam(t, e) {
 }
 function tabbar() {
   const tb = $("#tb"), fo = filtersOn();
-  if (!$(".tbc", tb)) tb.innerHTML = `<div class="tbc glass" role="group" aria-label="Views" data-pw="72"><span class="pill2"></span>${VIEWS.map(([k, l]) => `<button data-view="${k}" aria-pressed="${ST.view === k}">${ICON[k]}<span>${l}</span></button>`).join("")}</div><button class="tbf glass" id="filtb" aria-haspopup="dialog" aria-label="Sort and filter"></button>`;
+  if (!$(".tbc", tb)) tb.innerHTML = `<div class="tbc glass" role="group" aria-label="Views" data-n="${VIEWS.length}" data-pw="${VIEWS.length > 3 ? 64 : 72}"><span class="pill2"></span>${VIEWS.map(([k, l]) => `<button data-view="${k}" aria-pressed="${ST.view === k}">${ICON[k]}<span>${l}</span></button>`).join("")}</div><button class="tbf glass" id="filtb" aria-haspopup="dialog" aria-label="Sort and filter"></button>`;
   press("[data-view]", b => b.dataset.view === ST.view, tb);
   $("#filtb").innerHTML = ICON.menu + (fo ? `<b>${fo}</b>` : "");
   $$("[data-view]", tb).forEach(b => b.onclick = () => { if (ST.view === b.dataset.view) { window.scrollTo({top: 0, behavior: "smooth"}); return; } ST.view = b.dataset.view; save(); tabbar(); renderList(); window.scrollTo(0, 0); swapIn($("#lst")); });
   $("#filtb").onclick = filterSheet;
   slide($(".tbc", tb), !tb.dataset.on); tb.dataset.on = 1;
+}
+// ── WOWY (nba_onoff, docs/onoff/{TEAM}.json): with or without you. A teammate's production per 36 minutes with the
+// chosen player on the court and off it, this season, from every lineup the team has played: for a player who has not
+// missed a game, the only "without" there is. The team (the slate's), the player off (tonight's Out first, else the
+// most minutes) and the stat are the view's own (ST.wt, ST.wo, ST.ws); a tap on a teammate opens his page ──
+const WOWY = new Map();
+const WOWY_MIN = 1200;                    // seconds apart (20 min) before a teammate's split is shown as more than a small sample
+const WOWY_STATS = [["points", "Points"], ["rebounds", "Rebounds"], ["assists", "Assists"], ["threes", "3PM"], ["pra", "PRA"],
+                    ["pts_reb", "P+R"], ["pts_ast", "P+A"], ["reb_ast", "R+A"], ["fga", "FGA"]];
+let WOWY_ME = null, WOWY_GO = false;     // the player whose prop page sent us here (toWowy): his row marked, scrolled to once
+// the With / Without sheet's shortcut: WOWY for his team with that teammate off the court, the prop's stat
+function toWowy(p, off) {
+  const g = gameOf(p.gid);
+  closeSheet();
+  Object.assign(ST, {wt: p.team, wo: String(off), q: ""}, WOWY_STATS.some(x => x[0] === p.market) ? {ws: p.market} : {});
+  if (g && (ST.date !== g.date || (ST.gid !== "all" && ST.gid !== p.gid))) { ST.date = g.date; ST.gid = "all"; AUTO_DAY = false; }
+  WOWY_ME = p.pid; WOWY_GO = true;
+  history.go(-Math.max(1, navDepth()));
+  setTimeout(() => { ST.view = "wowy"; save(); render(); window.scrollTo(0, 0); }, 480);
+}
+function wowyLoad(t) {                    // a team's file, again after 10 minutes (it is rebuilt every 20)
+  const c = WOWY.get(t);
+  if (c && Date.now() - c.at < 600000) return c.p;
+  const p = fetch(`onoff/${t}.json?t=${Date.now()}`, {cache: "no-store"}).then(r => r.ok ? r.json() : null).catch(() => null);
+  WOWY.set(t, {at: Date.now(), p: p});
+  return p;
+}
+function wowyView(swap) {
+  const el = $("#wov");
+  if (!el) return;
+  const teams = D.games.filter(g => g.date === ST.date && (ST.gid === "all" || g.gid === ST.gid)).flatMap(g => [g.away, g.home]);
+  if (!teams.length) { el.innerHTML = '<div class="empty"><b>No games</b></div>'; return; }
+  const t = teams.indexOf(ST.wt) >= 0 ? ST.wt : teams.indexOf(ST.team) >= 0 ? ST.team : teams[0];
+  Promise.all([wowyLoad(t), playerIndex()]).then(([doc, idx]) => {
+    const el = $("#wov");
+    if (!el || ST.view !== "wowy") return;
+    const rail = $(".wyp", el), sx = rail ? rail.scrollLeft : 0;
+    const who = new Map((idx || []).map(r => [r[0], r]));
+    const nm = p => (who.get(p) || [, "#" + p])[1];
+    const out = p => { const i = D.injuries[ST.date + "|" + p], s = i && i.official && i.official.status; return s === "Out" || s === "Doubtful"; };
+    const mins = new Map();
+    ((doc && doc.lineups) || []).forEach(L => L[0].forEach(p => mins.set(p, (mins.get(p) || 0) + L[1])));
+    // his team now (a player traded away keeps his lineups, not a place on the list), 30+ minutes, most first
+    const roster = [...mins.keys()].filter(p => (!who.get(p) || who.get(p)[2] === t) && mins.get(p) >= 1800).sort((a, b) => mins.get(b) - mins.get(a));
+    const y = roster.indexOf(+ST.wo) >= 0 ? +ST.wo : roster.find(out) || roster[0];
+    const ws = WOWY_STATS.some(x => x[0] === ST.ws) ? ST.ws : WOWY_STATS.some(x => x[0] === ST.market) ? ST.market : "points";
+    const lab = WOWY_STATS.find(x => x[0] === ws)[1], parts = ws === "fga" ? ["fga"] : MARKET_PARTS[ws];
+    const mpg = p => doc.gp && doc.gp[p] ? Math.round(mins.get(p) / 60 / doc.gp[p]) + " mpg" : Math.round(mins.get(p) / 60) + " min";
+    el.innerHTML = `<nav class="mt rrl" aria-label="Team"><div class="mt-in" id="wtl"><span class="pill2"></span>${teams.map(x => `<button data-wt="${x}">${logo(x, "wtg")}${esc(x)}</button>`).join("")}</div></nav>` +
+      (roster.length ? `<div class="wyp" role="group" aria-label="Off the court">${roster.map(p => `<button class="lus" data-wo="${p}" aria-pressed="${p === y}"><span class="av">${head(p)}</span><b>${esc(lastName(nm(p)))}</b><i>${out(p) ? '<em class="lq">OUT</em>' : mpg(p)}</i></button>`).join("")}</div>
+        <nav class="mt rrl" aria-label="Stat"><div class="mt-in" id="wsl"><span class="pill2"></span>${WOWY_STATS.map(([k, l]) => `<button data-ws="${k}">${l}</button>`).join("")}</div></nav>` : "") +
+      `<div id="wol"></div>`;
+    $$("[data-wt]", el).forEach(b => b.onclick = () => { if (b.dataset.wt !== t) { ST.wt = b.dataset.wt; ST.wo = ""; WOWY_ME = null; save(); wowyView(true); } });
+    $$("[data-wo]", el).forEach(b => b.onclick = () => { if (+b.dataset.wo !== y) { ST.wo = b.dataset.wo; save(); wowyView(true); } });
+    $$("[data-ws]", el).forEach(b => b.onclick = () => { if (b.dataset.ws !== ws) { ST.ws = b.dataset.ws; save(); wowyView(true); } });
+    [["#wtl", "[data-wt]", b => b.dataset.wt === t], ["#wsl", "[data-ws]", b => b.dataset.ws === ws]].forEach(([r, sel, on]) => {
+      const rl = $(r, el); if (!rl) return;
+      press(sel, on, rl); slide(rl, true);
+      const b = $('[aria-pressed="true"]', rl);
+      if (b && (b.offsetLeft < rl.scrollLeft || b.offsetLeft + b.offsetWidth > rl.scrollLeft + rl.clientWidth)) rl.scrollLeft = b.offsetLeft - (rl.clientWidth - b.offsetWidth) / 2;
+    });
+    const wy = $(".wyp", el);
+    if (wy) { wy.scrollLeft = sx; const b = $('[aria-pressed="true"]', wy);
+      if (b && (b.offsetLeft < wy.scrollLeft || b.offsetLeft + b.offsetWidth > wy.scrollLeft + wy.clientWidth)) wy.scrollLeft = b.offsetLeft - (wy.clientWidth - b.offsetWidth) / 2; }
+    const wl = $("#wol", el);
+    if (swap) swapIn(wl);
+    if (!doc || !roster.length) { wl.innerHTML = '<div class="empty"><b>No lineups yet</b></div>'; return; }
+    const at = {}; doc.stats.forEach((k, i) => { at[k] = i; });
+    const sp = wowySplit(doc.lineups, y, doc.stats.length);
+    const rate = s => s[0] ? parts.reduce((a, k) => a + s[1][at[k]], 0) / s[0] * 2160 : null;
+    const net = s => s[0] ? (s[1] - s[2]) / s[0] * 2880 : null, sgn = v => (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(1);
+    const mm = s => Math.round(s / 60).toLocaleString();
+    const q = ST.q.trim().toLowerCase();
+    const rows = roster.filter(p => p !== y && sp.players[p] && (!q || nm(p).toLowerCase().indexOf(q) >= 0)).map(p => {
+      const o = sp.players[p], on = rate(o.on), off = rate(o.off);
+      return {p: p, on: on, off: off, onS: o.on[0], offS: o.off[0], d: on !== null && off !== null ? off - on : null};
+    });
+    const sure = r => r.d !== null && r.offS >= WOWY_MIN && r.onS >= WOWY_MIN;
+    rows.sort((a, b) => (sure(b) - sure(a)) || (sure(a) ? b.d - a.d : b.offS - a.offS));
+    const T = sp.team, last = esc(lastName(nm(y)));
+    wl.innerHTML = `<div class="wyh"><b>${esc(nameOf(nm(y)))}</b> off the court ${mm(T.off[0])} min, on ${mm(T.on[0])}${net(T.on) !== null && net(T.off) !== null ? ` · ${esc(t)} ${sgn(net(T.on))} with him, ${sgn(net(T.off))} without (net per 48)` : ""}</div>
+      <div class="lhd"><span>${rows.length} teammates · ${esc(lab)} per 36</span><span>With → without ${last}</span></div>` +
+      (rows.length ? rows.map(r => `<button class="pr ir ir0 ror${sure(r) ? "" : " wys"}${r.p === WOWY_ME ? " wme" : ""}" data-vp="${r.p}"><span class="av">${head(r.p)}</span><div class="who"><div class="nm">${esc(nameOf(nm(r.p)))}<span class="cd">${esc(t)}</span></div>
+        <div class="lin">${r.on === null ? "—" : r.on.toFixed(1)} → <b>${r.off === null ? "—" : r.off.toFixed(1)}</b> ${esc(lab.toLowerCase())}</div>
+        <div class="ros">${r.offS ? `${mm(r.offS)} min without · ${mm(r.onS)} with` : `Never on the court without ${last}`}${sure(r) || !r.offS ? "" : " · small sample"}</div></div>
+        ${r.d === null ? "" : `<span class="rod ${r.d >= 0 ? "up" : "dn"}">${r.d >= 0 ? "▲" : "▼"}${Math.abs(r.d).toFixed(1)}<i>PER 36</i></span>`}</button>`).join("")
+      : '<div class="empty"><b>No teammates</b></div>');
+    const me = $(".wme", wl);
+    if (me && WOWY_GO) { WOWY_GO = false; requestAnimationFrame(() => me.scrollIntoView({block: "center", behavior: REDUCED ? "auto" : "smooth"})); }
+  });
 }
 function bindTop() {
   const q = $("#q"), sx = q.closest(".sx"), qx = $("#qx");
@@ -1853,6 +1969,7 @@ const ICON = {
   props: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8.5 5.5H21M8.5 12H21M8.5 18.5H21"/><circle cx="3.6" cy="5.5" r=".6" fill="currentColor"/><circle cx="3.6" cy="12" r=".6" fill="currentColor"/><circle cx="3.6" cy="18.5" r=".6" fill="currentColor"/></svg>',
   flags: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 21V3.5"/><path d="M5.5 4h12l-2.6 4.5L17.5 13h-12"/></svg>',
   people: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9" r="2.6"/><path d="M15.8 14.2c2.6-.3 4.3 1.3 4.8 4.3"/></svg>',
+  wowy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="8.8" cy="12" r="6.3"/><circle cx="15.2" cy="12" r="6.3"/></svg>',
   injuries: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2.5" y="2.5" width="19" height="19" rx="5"/><path d="M10 6.5h4V10h3.5v4H14v3.5h-4V14H6.5v-4H10z"/></svg>',
   ham: '<svg viewBox="0 0 22 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M2 2.5h18M2 8h18M2 13.5h18"/></svg>',
   info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 10.5v8"/><circle cx="12" cy="6.2" r=".9" fill="currentColor" stroke="none"/></svg>',
@@ -2927,12 +3044,13 @@ function mateRows(p, logs, without, dr) {
     const e = rep.find(x => x.pid === +m.key), v = dr.with[m.key] ? "w" : dr.without[m.key] ? "o" : "";
     const nw = mine.filter(l => m.played.indexOf(l.gid) >= 0).length, no = mine.filter(l => l.date >= m.since && m.played.indexOf(l.gid) < 0).length;
     return `<div class="mrr"><span class="av mav">${head(+m.key)}</span><div class="mrn"><b>${esc(m.name)}${e && INJ_C[e.status] ? `<span class="tg ${INJ_C[e.status]}">${INJ_S[e.status]}</span>` : ""}</b>
-      <small>${m.mpg != null ? (+m.mpg).toFixed(1) + " MPG · " : ""}${nw} with · ${no} w/o</small></div>
+      <small>${m.mpg != null ? (+m.mpg).toFixed(1) + " MPG · " : ""}${nw} with · ${no} w/o${VIEWS.some(v => v[0] === "wowy") ? ` · <button class="lk wyk" data-wy="${m.key}">On/off ›</button>` : ""}</small></div>
       <div class="seg mseg" role="group" aria-label="${esc(m.name)}">${[["", "Any"], ["w", "With"], ["o", "W/O"]].map(([k, t]) =>
         `<button data-mk2="${m.key}" data-mv="${k}" aria-pressed="${v === k}">${t}</button>`).join("")}</div></div>`;
   }).join("");
 }
 function bindMates(s, dr, upd) {
+  $$("[data-wy]", s).forEach(b => b.onclick = () => toWowy(PX.p, +b.dataset.wy));
   $$("[data-mk2]", s).forEach(b => b.onclick = () => {
     const k = b.dataset.mk2, v = b.dataset.mv;
     delete dr.with[k]; delete dr.without[k];
