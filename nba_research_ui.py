@@ -412,7 +412,8 @@ svg.shct{display:block;width:100%;height:auto;margin-top:6px}
 .wyp{display:flex;gap:8px;overflow-x:auto;padding:10px 15.3px 2px;scrollbar-width:none} .wyp::-webkit-scrollbar{display:none}
 .wyp .lus{flex:0 0 68px} .wyp .lus[aria-pressed="true"]{border-color:#fff;background:#262626}
 .wyh{padding:10px 15.3px 0;font-size:12.5px;color:#9a9a9a} .wyh b{color:#fff;font-weight:600}
-.ror.wys{opacity:.45}
+.ror.wys{opacity:.45} .ror.wme{background:#262626;box-shadow:inset 3px 0 0 #fff;opacity:1}
+.mrn small .wyk{font-size:12px;color:#fff;font-weight:600}
 .seg.ivs button{font-size:12.5px}
 /* the Movers tab: the line from its open */
 .lin .mvo{color:#9a9a9a} .lin .mv.up{color:var(--grn)} .lin .mv.dn{color:var(--red)}
@@ -1584,6 +1585,17 @@ const WOWY = new Map();
 const WOWY_MIN = 1200;                    // seconds apart (20 min) before a teammate's split is shown as more than a small sample
 const WOWY_STATS = [["points", "Points"], ["rebounds", "Rebounds"], ["assists", "Assists"], ["threes", "3PM"], ["pra", "PRA"],
                     ["pts_reb", "P+R"], ["pts_ast", "P+A"], ["reb_ast", "R+A"], ["fga", "FGA"]];
+let WOWY_ME = null, WOWY_GO = false;     // the player whose prop page sent us here (toWowy): his row marked, scrolled to once
+// the With / Without sheet's shortcut: WOWY for his team with that teammate off the court, the prop's stat
+function toWowy(p, off) {
+  const g = gameOf(p.gid);
+  closeSheet();
+  Object.assign(ST, {wt: p.team, wo: String(off), q: ""}, WOWY_STATS.some(x => x[0] === p.market) ? {ws: p.market} : {});
+  if (g && (ST.date !== g.date || (ST.gid !== "all" && ST.gid !== p.gid))) { ST.date = g.date; ST.gid = "all"; AUTO_DAY = false; }
+  WOWY_ME = p.pid; WOWY_GO = true;
+  history.go(-Math.max(1, navDepth()));
+  setTimeout(() => { ST.view = "wowy"; save(); render(); window.scrollTo(0, 0); }, 480);
+}
 function wowyLoad(t) {                    // a team's file, again after 10 minutes (it is rebuilt every 20)
   const c = WOWY.get(t);
   if (c && Date.now() - c.at < 600000) return c.p;
@@ -1616,7 +1628,7 @@ function wowyView(swap) {
       (roster.length ? `<div class="wyp" role="group" aria-label="Off the court">${roster.map(p => `<button class="lus" data-wo="${p}" aria-pressed="${p === y}"><span class="av">${head(p)}</span><b>${esc(lastName(nm(p)))}</b><i>${out(p) ? '<em class="lq">OUT</em>' : mpg(p)}</i></button>`).join("")}</div>
         <nav class="mt rrl" aria-label="Stat"><div class="mt-in" id="wsl"><span class="pill2"></span>${WOWY_STATS.map(([k, l]) => `<button data-ws="${k}">${l}</button>`).join("")}</div></nav>` : "") +
       `<div id="wol"></div>`;
-    $$("[data-wt]", el).forEach(b => b.onclick = () => { if (b.dataset.wt !== t) { ST.wt = b.dataset.wt; ST.wo = ""; save(); wowyView(true); } });
+    $$("[data-wt]", el).forEach(b => b.onclick = () => { if (b.dataset.wt !== t) { ST.wt = b.dataset.wt; ST.wo = ""; WOWY_ME = null; save(); wowyView(true); } });
     $$("[data-wo]", el).forEach(b => b.onclick = () => { if (+b.dataset.wo !== y) { ST.wo = b.dataset.wo; save(); wowyView(true); } });
     $$("[data-ws]", el).forEach(b => b.onclick = () => { if (b.dataset.ws !== ws) { ST.ws = b.dataset.ws; save(); wowyView(true); } });
     [["#wtl", "[data-wt]", b => b.dataset.wt === t], ["#wsl", "[data-ws]", b => b.dataset.ws === ws]].forEach(([r, sel, on]) => {
@@ -1646,11 +1658,13 @@ function wowyView(swap) {
     const T = sp.team, last = esc(lastName(nm(y)));
     wl.innerHTML = `<div class="wyh"><b>${esc(nameOf(nm(y)))}</b> off the court ${mm(T.off[0])} min, on ${mm(T.on[0])}${net(T.on) !== null && net(T.off) !== null ? ` · ${esc(t)} ${sgn(net(T.on))} with him, ${sgn(net(T.off))} without (net per 48)` : ""}</div>
       <div class="lhd"><span>${rows.length} teammates · ${esc(lab)} per 36</span><span>With → without ${last}</span></div>` +
-      (rows.length ? rows.map(r => `<button class="pr ir ir0 ror${sure(r) ? "" : " wys"}" data-vp="${r.p}"><span class="av">${head(r.p)}</span><div class="who"><div class="nm">${esc(nameOf(nm(r.p)))}<span class="cd">${esc(t)}</span></div>
+      (rows.length ? rows.map(r => `<button class="pr ir ir0 ror${sure(r) ? "" : " wys"}${r.p === WOWY_ME ? " wme" : ""}" data-vp="${r.p}"><span class="av">${head(r.p)}</span><div class="who"><div class="nm">${esc(nameOf(nm(r.p)))}<span class="cd">${esc(t)}</span></div>
         <div class="lin">${r.on === null ? "—" : r.on.toFixed(1)} → <b>${r.off === null ? "—" : r.off.toFixed(1)}</b> ${esc(lab.toLowerCase())}</div>
         <div class="ros">${r.offS ? `${mm(r.offS)} min without · ${mm(r.onS)} with` : `Never on the court without ${last}`}${sure(r) || !r.offS ? "" : " · small sample"}</div></div>
         ${r.d === null ? "" : `<span class="rod ${r.d >= 0 ? "up" : "dn"}">${r.d >= 0 ? "▲" : "▼"}${Math.abs(r.d).toFixed(1)}<i>PER 36</i></span>`}</button>`).join("")
       : '<div class="empty"><b>No teammates</b></div>');
+    const me = $(".wme", wl);
+    if (me && WOWY_GO) { WOWY_GO = false; requestAnimationFrame(() => me.scrollIntoView({block: "center", behavior: REDUCED ? "auto" : "smooth"})); }
   });
 }
 function bindTop() {
@@ -3030,12 +3044,13 @@ function mateRows(p, logs, without, dr) {
     const e = rep.find(x => x.pid === +m.key), v = dr.with[m.key] ? "w" : dr.without[m.key] ? "o" : "";
     const nw = mine.filter(l => m.played.indexOf(l.gid) >= 0).length, no = mine.filter(l => l.date >= m.since && m.played.indexOf(l.gid) < 0).length;
     return `<div class="mrr"><span class="av mav">${head(+m.key)}</span><div class="mrn"><b>${esc(m.name)}${e && INJ_C[e.status] ? `<span class="tg ${INJ_C[e.status]}">${INJ_S[e.status]}</span>` : ""}</b>
-      <small>${m.mpg != null ? (+m.mpg).toFixed(1) + " MPG · " : ""}${nw} with · ${no} w/o</small></div>
+      <small>${m.mpg != null ? (+m.mpg).toFixed(1) + " MPG · " : ""}${nw} with · ${no} w/o${VIEWS.some(v => v[0] === "wowy") ? ` · <button class="lk wyk" data-wy="${m.key}">On/off ›</button>` : ""}</small></div>
       <div class="seg mseg" role="group" aria-label="${esc(m.name)}">${[["", "Any"], ["w", "With"], ["o", "W/O"]].map(([k, t]) =>
         `<button data-mk2="${m.key}" data-mv="${k}" aria-pressed="${v === k}">${t}</button>`).join("")}</div></div>`;
   }).join("");
 }
 function bindMates(s, dr, upd) {
+  $$("[data-wy]", s).forEach(b => b.onclick = () => toWowy(PX.p, +b.dataset.wy));
   $$("[data-mk2]", s).forEach(b => b.onclick = () => {
     const k = b.dataset.mk2, v = b.dataset.mv;
     delete dr.with[k]; delete dr.without[k];
