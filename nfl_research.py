@@ -27,6 +27,7 @@ import json
 import os
 import sqlite3
 import statistics as st
+import sys
 import urllib.request
 from collections import defaultdict
 from pathlib import Path
@@ -115,15 +116,17 @@ def espn_json(path, max_age, get=None):
 def live_state(games, get=None):
     """{gid: {"state": pregame/live/final/postponed, "label", "score": [away, home], "updated", "frac" (share of the
     game played), "espn", "weather", "stats": {pid: {log col: value}}}} from ESPN's scoreboard and, for games under
-    way or over, its box score."""
+    way or over, its box score. A game ESPN leaves out is final once nflverse has its score, so a played slate never
+    stays pending."""
     out = {g["gid"]: {"state": "pregame"} for g in games}
-    if not games:
-        return out
-    d0 = min(g["date"] for g in games).replace("-", "")
-    d1 = max(g["date"] for g in games).replace("-", "")
-    sb = espn_json(f"scoreboard?dates={d0}-{d1}&limit=40", 50, get) or {}
     by_teams = {(g["away"], g["home"]): g["gid"] for g in games}
-    for e in sb.get("events", []):
+    events = []
+    for day in sorted({g["date"] for g in games}):     # one day a scoreboard: ESPN answers a range of dates with a 400
+        sb = espn_json(f"scoreboard?dates={day.replace('-', '')}&limit=40", 50, get)
+        if sb is None:
+            print(f"nfl_research: no ESPN scoreboard for {day}", file=sys.stderr)
+        events += (sb or {}).get("events", [])
+    for e in events:
         c = (e.get("competitions") or [{}])[0]
         side = {x.get("homeAway"): x for x in c.get("competitors", [])}
         a, h = (C.team(((side.get(k) or {}).get("team") or {}).get("abbreviation")) for k in ("away", "home"))
@@ -144,6 +147,10 @@ def live_state(games, get=None):
                     "updated": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(), "frac": round(frac, 3),
                     "weather": {"text": w.get("displayValue"), "temp": w.get("temperature")} if w else None,
                     "indoor": bool((c.get("venue") or {}).get("indoor"))}
+    for g in games:
+        if "espn" not in out[g["gid"]] and g.get("home_score") is not None and g.get("away_score") is not None:
+            out[g["gid"]] = {"state": "final", "label": "Final", "espn": g.get("espn"), "frac": 1.0,
+                             "score": [int(g["away_score"]), int(g["home_score"])]}
     return out
 
 
