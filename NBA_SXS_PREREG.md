@@ -325,3 +325,38 @@ All five are registered at **2026-10-29T00:00:00 UTC**.
 - BOOST, BOOST_STEP, EARLY_SURGE, RATIO_PA28, ROLE_OPEN, RETURN_UNDER and FOUL_BIG are still judged and recorded the
   same way, but with pinged = 0 and no message.
 - No decision, fingerprint or registration changes. The side-by-side scores every rule as before.
+
+# AMENDMENT 11: Q15_LR10 and Q15_LR8 (2026-10-31, before they ran forward)
+These are TEST B of `NBA_Q15_PREREG.md`: the strongest model from that study, run forward as frozen.
+
+31. **Q15_LR10:** the frozen Q15_LR model (`nba_q15_lr_model.py`, fit on the 2023-24 and 2024-25 regular seasons;
+    `NBA_Q15_LOG.md` E8–E9).
+    - **When and what:** at tip − 30, every FanDuel or DraftKings prop in the 8 markets for a player not Out or
+      Doubtful on the report at that moment.
+    - **The model's inputs:**
+      - the market's no-vig at FanDuel's main line (else DraftKings');
+      - his box scores before tonight;
+      - his teammates who are Out or Doubtful;
+      - the engine's ROLE1 v3 projection from that report.
+    - **The signal:** the under, when all three hold:
+      - (1 − p) × the better of the two books' under prices at that line − 1 ≥ 10%;
+      - the under's EV is at least the over's;
+      - the projection gives him 12+ minutes.
+    - **The price:** that book's at that moment.
+    - **No pings.**
+32. **Q15_LR8:** the same at EV ≥ 8%.
+
+- **The live inputs reproduce the training data exactly** on past dates when given the same absences:
+  `NBA_Q15_LOG.md` TEST B. The deliberate differences:
+  - absences come from the report, where the backtest used the box score (a rotation player's DNP-CD counted as out);
+  - a player debuting tonight has no history and is skipped.
+- **A failure skips the game, never the other rules.** If the rule errors on a game (its code or its data), the error
+  goes to `sxs.log` with the date and game, and that game has no signal from it.
+- **Registered at 2026-10-31T16:00:00 UTC**, before the first tip − 30 of the night (18:30 UTC). Fingerprints:
+  Q15_LR10 `b8f3015b9e`, Q15_LR8 `890b018e3c`. Signals before then are a development record.
+- **The verdict is NBA_Q15_PREREG's TEST B:**
+  - at least 200 forward bets;
+  - ROI ≥ +10%;
+  - mean CLV against FanDuel's close > 0.
+  
+  The side-by-side's own verdict lines are reported as well.

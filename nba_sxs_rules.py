@@ -6,6 +6,8 @@ from __future__ import annotations
 import hashlib
 import inspect
 import json
+import sys
+import traceback
 
 import nba_proj_data as PD
 import nba_replay as RP
@@ -975,6 +977,97 @@ class UNDERML(UNDER20):
         return UNDER_M.underml(bd, rd, date, team, p, mk, m[0], m[1], m[2], out_now)
 
 
+# ── AMENDMENT 11: Q15_LR10 and Q15_LR8 (NBA_Q15_LOG.md, TEST B) ─────────────────────────────────────────────────────
+import nba_q15 as Q15_Q                                   # noqa: E402
+import nba_q15_live as Q15                                # noqa: E402
+import nba_q15_model as Q15_M                             # noqa: E402
+
+_Q15 = {}
+
+
+def q15_candidates(bd, v, gid, team):
+    """Everyone who might play for the team tonight: anyone in its earlier games still on it, and anyone with a
+    FanDuel or DraftKings prop in the game whose last team it is."""
+    have = {p for bk in ("fd", "dk") for p, _mk in v.props(gid, bk) if bd.team_now(p, v.date) == team}
+    return set(bd.on_team_tonight(team, v.date)) | have
+
+
+def q15_night(v, season, bd):
+    """nba_q15_live.Night for the date: box scores before it (this season and last, nba_matchup), every candidate in
+    the date's games. Built at the day's first tip - 30, when every earlier game is final; later finals are today's.
+    None when there are no box scores."""
+    if v.date not in _Q15:
+        _Q15.clear()
+        b, t = Q15.box_from_matchup(MATCHUP_DB, (season, BOOST_M.PREV.get(season, "")), v.date)
+        cands = [(p, team, opp, gid) for gid, g in sorted(v.games().items())
+                 for team, opp in ((g["home"], g["away"]), (g["away"], g["home"])) for p in sorted(q15_candidates(bd, v, gid, team))]
+        _Q15[v.date] = Q15.Night(b, t, v.date, cands, season) if b is not None and len(b) else None
+    return _Q15[v.date]
+
+
+Q15_DEPS = (q15_candidates, q15_night, boost_data, role_data, UNDER_M.projection, BOOST_M.v3_minutes, BOOST_M.rates,
+            BOOST_M.live_data, BOOST_M.BoostData, ROLE.season_of, Q15.box_from_matchup, Q15.Night, Q15.placeholders,
+            Q15.props_frame, Q15.score, Q15.picks, Q15_M.with_engine, Q15_M.fd_dk_market, Q15_M.under_bets,
+            Q15_M.predict, Q15_Q.features, Q15_Q.player_features, Q15_Q.team_features, Q15_Q.team_totals, Q15_Q.team_league,
+            Q15_Q.with_allowed, Q15_Q.vacated, Q15_Q.bets, Q15_Q.price_at, Q15_Q.grade, Q15_Q.logit) + ROLE_DEPS
+Q15_SPEC = [Q15_M.MIN_AT, list(Q15_Q.PARTS), Q15_Q.RATE_K, Q15_Q.ROT_MIN, list(Q15.BOX_COLS),
+            hashlib.sha256((RP.HERE / "nba_q15_lr_model.py").read_bytes()).hexdigest()[:16]]
+
+
+class Q15_LR10(UNDER20):
+    """At tip - 30: the frozen Q15_LR model (NBA_Q15_LOG.md TEST B) on FanDuel's and DraftKings' main lines; the under
+    at EV >= 10%, 12+ projected minutes, at the better of the two books at FanDuel's main line (else DraftKings').
+    Tonight's absences from the injury report. Silent."""
+    name, tau, deps = "Q15_LR10", 0.10, Q15_DEPS
+    spec = Q15_SPEC + [0.10]
+
+    def start_day(self, v):
+        super().start_day(v)
+        _Q15.clear()
+
+    def on_tick(self, v, gid, minutes):
+        if minutes != 30:
+            return ()
+        try:
+            return self.judge_game(v, gid)
+        except Exception:                                 # amendment 11: a failure skips the game, never the other rules
+            traceback.print_exc()
+            print(f"{self.name}: {v.date} {gid} skipped", file=sys.stderr)
+            return ()
+
+    def judge_game(self, v, gid):
+        season = ROLE.season_of(v.date)
+        bd, rd = boost_data(season), role_data(season)
+        g = v.games()[gid]
+        night = q15_night(v, season, bd)
+        if night is None:
+            return ()
+        outs = {tm: {x for x, (t2, st) in self.listed.items() if t2 == tm and st in RP.OUTS} for tm in (g["home"], g["away"])}
+        key = ("scored", gid, v.t, frozenset(outs[g["home"]]), frozenset(outs[g["away"]]))
+        if key not in _Q15:                               # Q15_LR10 and Q15_LR8 score the same game at the same moment
+            players = [(p, team, opp, gid) for team, opp in ((g["home"], g["away"]), (g["away"], g["home"]))
+                       for p in sorted(q15_candidates(bd, v, gid, team) - outs[team])]
+            pf = night.frame(players)
+            props, proj = [], {}
+            for p, mk in sorted(set(v.props(gid, "fd")) | set(v.props(gid, "dk"))):
+                if p not in pf or mk not in Q15_Q.PARTS:
+                    continue
+                pr = UNDER_M.projection(bd, rd, p, pf[p]["team"], v.date, outs[pf[p]["team"]], mk)
+                if pr:
+                    proj[(v.date, p, mk)] = (pr[1], pr[0])
+                props.append((p, mk, RP.main_of(v.board(gid, p, mk, "fd")), RP.main_of(v.board(gid, p, mk, "dk"))))
+            _Q15[key] = Q15.score(Q15.props_frame(pf, props, {gid: g["home"]}, v.date), proj)
+        d, prob = _Q15[key]
+        return [sig(gid, p, mk, "under", ln, bk, price, note=f"p_under={pu:.3f} ev={ev:.3f}")
+                for p, mk, ln, bk, price, pu, ev in Q15.picks(d, prob, self.tau)]
+
+
+class Q15_LR8(Q15_LR10):
+    """Q15_LR10 at EV >= 8% (NBA_Q15_LOG.md TEST A slot 4). Silent."""
+    name, tau = "Q15_LR8", 0.08
+    spec = Q15_SPEC + [0.08]
+
+
 # Amendment 8: the stores of box scores and tracking that the replay hands the rules as of each moment
 # (nba_replay.RuleStores). ROLE_GAMELOGS_DB holds past seasons only. Not part of any fingerprint: no rule changes.
 PIT_STORES = {"MATCHUP_DB": "matchup", "TRACKING_DB": "tracking"}
@@ -982,7 +1075,7 @@ PIT_STORES = {"MATCHUP_DB": "matchup", "TRACKING_DB": "tracking"}
 RULES = (NULL_TIP30, NEWS_FD, NEWS_DK, DK_LAGS_FD, T4_TIP30, ENGINE_CARD, S1, DEPTH_NEXT, DEPTH_NEXT_TIP30, NEW_STARTER,
          LOST_START, ROLE_OPEN, RATIO_FGA, RATIO_PA, RATIO_RC, RATIO_PA28, PTS_DVP, RETURN_UNDER, FOUL_BIG, MIN_RESTRICT, EARLY_SURGE,
          BOOST, BOOST_STEP, BOOST_PICKUP, BOOST_NH, UNDER20, UNDER20P, UNDER30P, UNDER3050, UNDER3050L, UNDER3050L_E60, UNDER3050L_E120,
-         UNDER3050L_E180, UNDER3050L_E240, UNDER3050L_E300, UNDERML)
+         UNDER3050L_E180, UNDER3050L_E240, UNDER3050L_E300, UNDERML, Q15_LR10, Q15_LR8)
 
 
 def fingerprint(cls):
@@ -1034,4 +1127,6 @@ REGISTRY = {                                             # name -> (registered a
     "UNDER3050L_E240": ("2026-10-29T22:30:00", "1328805737"),
     "UNDER3050L_E300": ("2026-10-29T22:30:00", "3382790997"),
     "UNDERML": ("2026-10-29T00:00:00", "420fd8c7cf"),
+    "Q15_LR10": ("2026-10-31T16:00:00", "b8f3015b9e"),            # NBA_Q15 TEST B: the frozen Q15_LR model (amendment 11)
+    "Q15_LR8": ("2026-10-31T16:00:00", "890b018e3c"),
 }

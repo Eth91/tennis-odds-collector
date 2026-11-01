@@ -35,8 +35,8 @@ def test_build_writes_each_player_with_games_and_the_index():
     assert not (d / "player" / "2.json").exists() and not list((d / "player").glob(".*.tmp"))
 
 
-def test_roles_last_3_games_once_the_season_has_games(monkeypatch):
-    monkeypatch.setattr(PL, "RECENT_FROM", 5)              # the median team has 8 games: past the switch to "recent"
+def test_roles_last_3_games_against_the_season_average_once_the_season_has_games():
+    # the median team has 8 games: past the switch to "recent" (RECENT_FROM); each last 3 against his season average
     d = pathlib.Path(tempfile.mkdtemp())
     m = MU.connect(d / "m.sqlite")
     PG = "INSERT INTO player_games (gid, team, pid, pos, starter, min, pts, reb, ast, fg3m, stl, blk, tov, fga, fg3a, fta) " \
@@ -52,11 +52,15 @@ def test_roles_last_3_games_once_the_season_has_games(monkeypatch):
             m.execute(PG, (gid, "MIN", 3, "C", 1, 32, 18, 10, 2, 0, 1, 2, 2, 13, 0, 5))                   # R: out lately
         if i < 6:
             m.execute(PG, (gid, "MIN", 4, "", 0, 20 if i < 3 else 28, 8, 3, 1, 1, 0, 0, 1, 7, 2, 1))       # C: gone lately
-        # E: the same 30 minutes, but 6 more shots, 3 more threes and (tracking) 4 more potential assists lately
-        m.execute(PG, (gid, "MIN", 5, "G", 1, 30, 14, 3, 4, 2, 0, 0, 1, 16 if late else 10, 7 if late else 4, 2))
-        # G: 6 games, 10 -> 30 minutes: only 3 before his last 3, short of the 5 a "recent" comparison needs
-        if i >= 2:
+        # E: the same 30 minutes, but 8 more shots, 4 more threes and (tracking) 4 more potential assists lately
+        m.execute(PG, (gid, "MIN", 5, "G", 1, 30, 14, 3, 4, 2, 0, 0, 1, 18 if late else 10, 8 if late else 4, 2))
+        # G: 4 games, 10 -> 30 minutes: short of the SEASON_MIN_GP a season average needs. H: 5 games, the same: enough
+        if i >= 4:
             m.execute(PG, (gid, "MIN", 7, "G", int(late), 30 if late else 10, 8, 2, 2, 1, 0, 0, 1, 8, 3, 1))
+        if i >= 3:
+            m.execute(PG, (gid, "MIN", 8, "G", int(late), 30 if late else 10, 8, 2, 2, 1, 0, 0, 1, 8, 3, 1))
+        # D: 20 -> 26 minutes: 6 over the games before his last 3, but 3.75 over his season average (22.25): not listed
+        m.execute(PG, (gid, "MIN", 9, "F", 0, 26 if late else 20, 8, 3, 1, 1, 0, 0, 1, 7, 2, 1))
         # F: new this season (3 games): too few of his own to compare his last 3 with (no last-season fallback here)
         if late:
             m.execute(PG, (gid, "MIN", 6, "F", 1, 30, 12, 9, 2, 1, 0, 0, 1, 12, 3, 2))
@@ -74,20 +78,25 @@ def test_roles_last_3_games_once_the_season_has_games(monkeypatch):
                    [(f"2026-10-{21 + i}", 6, 6, 18) for i in (5, 6, 7)])
     tr.commit()
     idx = {"1": ["MIN", "Aye One", "F"], "2": ["MIN", "Bee Two", "G"], "3": ["MIN", "Reg Three", "C"], "4": ["MIN", "Cee Four", "F"],
-           "5": ["MIN", "Eee Five", "G"], "6": ["MIN", "Eff Six", "F"], "7": ["MIN", "Gee Seven", "G"]}
+           "5": ["MIN", "Eee Five", "G"], "6": ["MIN", "Eff Six", "F"], "7": ["MIN", "Gee Seven", "G"],
+           "8": ["MIN", "Aitch Eight", "G"], "9": ["MIN", "Dee Nine", "F"]}
     PL.build(m, d / "player", idx, "2026-27", tr)
     doc = json.loads((d / "player" / "roles.json").read_text())
     rows, th = doc["rows"], doc["thresholds"]
     assert doc["mode"] == "recent" and th == PL.ROLE_MOVE
-    assert [r["pid"] for r in rows] == [1, 5]          # not B (steady), R (out lately), C (not lately), F (3 games), G (6)
+    # not B (steady), R (out lately), C (not lately), F (3 games), G (4 games), D (under 4 over his season average)
+    assert [r["pid"] for r in rows] == [1, 8, 5]
     moved = lambda k: [r["pid"] for r in rows if r["st"][k] and abs(r["st"][k][0] - r["st"][k][1]) >= th[k]]
-    assert moved("min") == [1] and moved("fga") == [5] and moved("fg3a") == [5] and moved("pot_ast") == [5] and moved("reb_ch") == []
+    assert moved("min") == [1, 8] and moved("fga") == [5] and moved("fg3a") == [5] and moved("pot_ast") == [5] and moved("reb_ch") == []
     e = next(r for r in rows if r["pid"] == 5)
-    assert e["st"]["fga"] == [16.0, 10.0] and e["st"]["fg3a"] == [7.0, 4.0] and e["st"]["pot_ast"] == [9.0, 5.0] and e["st"]["reb_ch"] == [6.0, 6.0]
+    assert e["st"]["fga"] == [18.0, 13.0] and e["st"]["fg3a"] == [8.0, 5.5] and e["st"]["pot_ast"] == [9.0, 5.0] and e["st"]["reb_ch"] == [6.0, 6.0]
     assert rows[0]["st"]["pot_ast"] is None                                  # 1 tracked recent game: left out, not a move
     a = rows[0]
-    assert a["d_min"] == 15.0 and a["min"] == [30.0, 15.0] and a["starts"] == [3, 0, 5, 3] and a["base"] == "this season"
+    # 30 a game lately against 20.6 over his 8 (15 x 5, 30 x 3); his starts against the 5 games before his last 3
+    assert a["d_min"] == 9.4 and a["min"] == [30.0, 20.6] and a["starts"] == [3, 0, 5, 3] and a["base"] == "this season"
     assert a["out"] == ["Reg Three", "Cee Four"] and a["was_team"] is None    # the regulars who sat 2+ of the team's last 3
+    h = rows[1]
+    assert h["min"] == [30.0, 22.0] and h["d_min"] == 8.0 and h["starts"] == [3, 0, 2, 3]
 
 
 def test_roles_this_season_against_last_early_on():
@@ -174,3 +183,9 @@ def test_roles_only_players_with_a_line_this_season():
     assert [r["pid"] for r in json.loads((d / "player" / "roles.json").read_text())["rows"]] == [1]
     PL.build(m, d / "player", idx, "2026-27")                                      # no lines store: everyone
     assert sorted(r["pid"] for r in json.loads((d / "player" / "roles.json").read_text())["rows"]) == [1, 2]
+
+
+def test_roles_switch_to_the_last_3_games_when_the_median_team_has_5():
+    assert PL.roles_mode({"MIN": list(range(5)), "WAS": list(range(5)), "ATL": list(range(4))}) == "recent"
+    assert PL.roles_mode({"MIN": list(range(4)), "WAS": list(range(4)), "ATL": list(range(5))}) == "season"
+    assert PL.roles_mode({}) == "season"

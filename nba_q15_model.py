@@ -1,0 +1,204 @@
+#!/usr/bin/env python3
+"""NBA_Q15 E7: the market-anchored logistic model (nba_q15) with the engine's ROLE1 v3 projection added, unders only.
+
+A bet: the under, when the model's EV at the better of FanDuel and DraftKings at the consensus line is >= TAU, and the
+engine projects the player for 12+ minutes (bettable under the 2026-10-16 restriction).
+
+    python3 nba_q15_proj.py CACHE/e7_proj.pkl          # step 1, the engine's projections
+    python3 nba_q15_model.py validate [--json OUT]      # walk-forward by month, TRAIN / VALIDATE
+    python3 nba_q15_model.py test-a [--json OUT]        # TEST A slots 4-5, graded once (NBA_Q15_LOG.md)
+    python3 nba_q15_model.py export --proj CACHE/e8_proj_rot.pkl   # the frozen TEST B model -> nba_q15_lr_model.py
+
+--proj picks the projection file (nba_q15_proj.py --mode; e7_proj.pkl is --mode box, which leaks the final margin,
+NBA_Q15_LOG.md E8). --no-vacated drops the box-score "teammates out tonight" features too. --market fd_dk rebuilds
+the line and the market's inputs from FanDuel and DraftKings only, as the live system sees them (E9; validate only).
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import pickle
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+
+import nba_q15 as Q
+
+HERE = Path(__file__).resolve().parent
+
+MIN_AT = 12.0                      # projected minutes, the books' restriction
+SLOTS = {"Q15_LR8": 0.08, "Q15_LR10": 0.10}
+POSTS = {"2022-23": "2023", "2023-24": "2024", "2024-25": "2025"}
+
+
+def with_engine(d, X, proj):
+    """The engine's projection against the line, and its minutes, as three more features."""
+    key = list(zip(d["date"], d["pid"].astype(int), d["market"]))
+    d["e_proj"] = [proj.get(k, (np.nan, np.nan))[0] for k in key]
+    d["e_min"] = [proj.get(k, (np.nan, np.nan))[1] for k in key]
+    X["e_r"] = np.log((d["e_proj"] + 0.5) / (d["line"].astype(float) + 0.5))
+    X["e_r_neg"] = X["e_r"].clip(upper=0)
+    X["e_min"] = d["e_min"]
+    return d, X
+
+
+def load(proj=Q.CACHE / "e7_proj.pkl", vacated=True):
+    d, X = Q.frame(Q.load())
+    if not vacated:
+        X = X.drop(columns=["vac_min", "vac_n"])
+    with open(proj, "rb") as f:
+        return with_engine(d, X, pickle.load(f))
+
+
+def fd_dk_market(d, X):
+    """E9: the line is FanDuel's main line, else DraftKings'; the market is their no-vig at that line; book count, line
+    gap, hold and FanDuel-vs-market from those two only. Props neither posts are dropped."""
+    nv = lambda o, u: (1 / o) / (1 / o + 1 / u)
+    fd_ok, dk_ok = d["fd_o"].notna() & d["fd_u"].notna(), d["dk_o"].notna() & d["dk_u"].notna()
+    line = pd.Series(np.where(fd_ok, d["fd_line"], np.where(dk_ok, d["dk_line"], np.nan)), index=d.index, dtype=float)
+    at_fd, at_dk = fd_ok & (d["fd_line"] == line), dk_ok & (d["dk_line"] == line)
+    p = pd.concat([nv(d["fd_o"], d["fd_u"]).where(at_fd), nv(d["dk_o"], d["dk_u"]).where(at_dk)], axis=1).mean(axis=1)
+    keep = line.notna() & p.notna()
+    d, X, at_fd, at_dk = d[keep].copy(), X[keep].copy(), at_fd[keep], at_dk[keep]
+    d["line"], d["p_mkt"] = line[keep], p[keep]
+    d["y"] = np.where(d["actual"] > d["line"], 1.0, np.where(d["actual"] < d["line"], 0.0, np.nan))
+    f = Q.features(d)
+    for c in ("logit_p", "r_proj", "r_l5", "r_l10", "r_med10", "r_savg", "log_line"):
+        X[c] = f[c]
+    X["n_books"] = at_fd.astype(int) + at_dk.astype(int)
+    X["disp"] = (d["fd_line"] - d["dk_line"]).abs().where(d["fd_o"].notna() & d["dk_o"].notna(), 0.0)
+    X["hold"] = pd.concat([(1 / d["fd_o"] + 1 / d["fd_u"] - 1).where(at_fd), (1 / d["dk_o"] + 1 / d["dk_u"] - 1).where(at_dk)],
+                          axis=1).mean(axis=1)
+    X["fd_vs_mkt"] = (nv(d["fd_o"], d["fd_u"]) - d["p_mkt"]).where(at_fd)
+    X["e_r"] = np.log((d["e_proj"] + 0.5) / (d["line"] + 0.5))
+    X["e_r_neg"] = X["e_r"].clip(upper=0)
+    for bk in ("mgm", "czr"):                                # priced at FanDuel / DraftKings only
+        d[bk + "_line"] = np.nan
+    return d, X
+
+
+def under_bets(d, p, tau):
+    b = Q.bets(d, p, tau, sides=("under",))
+    return b[b["e_min"] >= MIN_AT] if len(b) else b
+
+
+def lower_bound(u, keys, q=0.01, boot=4000, seed=7):
+    """One-sided bootstrap lower bound on ROI, resampling player-games (alpha 0.05 / 5 at q = 0.01)."""
+    cl = pd.Series(np.asarray(u, float)).groupby(np.asarray(keys)).agg(["sum", "size"]).to_numpy()
+    idx = np.random.default_rng(seed).integers(0, len(cl), size=(boot, len(cl)))
+    return round(float(np.quantile(cl[idx, 0].sum(1) / cl[idx, 1].sum(1), q)), 4)
+
+
+def summarize(b):
+    if not len(b):
+        return {"n": 0}
+    keys = b["date"] + b["pid"].astype(str)
+    s = Q.summary(b["u"], b["win"], b["price"], keys)
+    s["lb_bonf"] = lower_bound(b["u"], keys)
+    return s
+
+
+def validate(market="all", **kw):
+    d, X = load(**kw)
+    if market == "fd_dk":
+        d, X = fd_dk_market(d, X)
+    tv = d["split"].isin(["TRAIN", "VALIDATE"])
+    p = Q.walk_forward(d, X, Q.fit_logistic)
+    out = {"scores": {sp: Q.scores(d, p, d["split"] == sp) for sp in ("TRAIN", "VALIDATE")}}
+    for name, tau in SLOTS.items():
+        b = under_bets(d[tv], p[tv], tau)
+        out[name] = {sp: summarize(g) for sp, g in b.groupby("split")}
+    return out
+
+
+def test_a(**kw):
+    """Each postseason predicted by a model fit on the regular-season props before it. The 2023 postseason has none
+    (prices start 2023-05-03), so it uses the TRAIN fit, from games after it."""
+    d, X = load(**kw)
+    rs = d["split"].isin(["TRAIN", "VALIDATE"]) & d["y"].notna()
+    post = d["split"] == "TEST_A"
+    p = pd.Series(np.nan, index=d.index)
+    fits = {}
+    for s in POSTS:
+        m = post & (d["season"] == s)
+        first = d.loc[m, "date"].min()
+        tr = rs & (d["date"] < first)
+        if not tr.any():
+            tr = rs & (d["split"] == "TRAIN")
+        fits[s] = {"first": first, "fit_n": int(tr.sum()), "fit_until": d.loc[tr, "date"].max()}
+        p[m] = Q.fit_logistic(X[tr], d.loc[tr, "y"])(X[m])
+    out = {"fits": fits, "scores": Q.scores(d, p, post)}
+    for name, tau in SLOTS.items():
+        b = under_bets(d[post], p[post], tau)
+        b["ratio"] = b["e_proj"] / b["line"].astype(float)
+        out[name] = {"all": summarize(b),
+                     "by_post": {POSTS[s]: summarize(g) for s, g in b.groupby("season")},
+                     "fanduel": summarize(fd_only(d, b)),
+                     "by_market": {m: summarize(g) for m, g in b.groupby("market")},
+                     "ratio_lt80": summarize(b[b["ratio"] < 0.8]), "ratio_ge80": summarize(b[b["ratio"] >= 0.8])}
+    return out
+
+
+def fd_only(d, b):
+    """The same bets at FanDuel's under price, where FanDuel posted the consensus line."""
+    g = b[(b["fd_line"] == b["line"]) & b["fd_u"].notna()].copy()
+    g["price"] = g["fd_u"]
+    g["u"], g["win"] = Q.grade(g, "under", g["price"].to_numpy())
+    return g
+
+
+def predict(model, X):
+    """The exported model's P(over): impute with the training medians, standardize, logistic. X: columns in any order."""
+    Z = X[model["features"]].to_numpy(dtype=float)
+    Z = np.where(np.isnan(Z), np.asarray(model["median"]), Z)
+    z = ((Z - np.asarray(model["mean"])) / np.asarray(model["scale"])) @ np.asarray(model["coef"]) + model["intercept"]
+    return 1 / (1 + np.exp(-z))
+
+
+def export(proj, out=HERE / "nba_q15_lr_model.py"):
+    """TEST B's frozen model: E9's FanDuel / DraftKings version, fit on every decided regular-season prop (TRAIN +
+    VALIDATE, as the 2025 postseason's TEST A fit), written as plain numbers (the VM has no scikit-learn)."""
+    from sklearn.impute import SimpleImputer
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.pipeline import make_pipeline
+    from sklearn.preprocessing import StandardScaler
+    d, X = load(proj=proj)
+    d, X = fd_dk_market(d, X)
+    tr = d["split"].isin(["TRAIN", "VALIDATE"]) & d["y"].notna()
+    m = make_pipeline(SimpleImputer(strategy="median"), StandardScaler(), LogisticRegression(C=0.05, max_iter=2000))
+    m.fit(X[tr], d.loc[tr, "y"])
+    imp, sc, lr = (x for _n, x in m.steps)
+    model = {"features": list(X.columns), "median": imp.statistics_.tolist(), "mean": sc.mean_.tolist(),
+             "scale": sc.scale_.tolist(), "coef": lr.coef_[0].tolist(), "intercept": float(lr.intercept_[0]),
+             "team_league": Q.team_league(Q.team_totals(Q.load_box())), "slots": SLOTS, "min_at": MIN_AT,
+             "fit": {"props": int(tr.sum()), "from": d.loc[tr, "date"].min(), "until": d.loc[tr, "date"].max(),
+                     "proj": Path(proj).name}}
+    gap = float(np.max(np.abs(predict(model, X[tr]) - m.predict_proba(X[tr])[:, 1])))
+    assert gap < 1e-9, gap
+    out.write_text('"""NBA_Q15 TEST B: the frozen Q15_LR model (nba_q15_model.export; NBA_Q15_LOG.md). Do not edit:\n'
+                   'its hash is part of the rules\' fingerprint."""\nMODEL = ' + json.dumps(model, indent=1) + "\n")
+    return {"props": model["fit"]["props"], "features": len(model["features"]), "gap": gap}
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap.add_argument("what", choices=("validate", "test-a", "export"))
+    ap.add_argument("--json")
+    ap.add_argument("--proj", default=str(Q.CACHE / "e7_proj.pkl"))
+    ap.add_argument("--no-vacated", action="store_true")
+    ap.add_argument("--market", choices=("all", "fd_dk"), default="all")
+    a = ap.parse_args()
+    kw = {"proj": Path(a.proj), "vacated": not a.no_vacated}
+    if a.what == "export":
+        print(export(Path(a.proj)))
+        return
+    out = validate(market=a.market, **kw) if a.what == "validate" else test_a(**kw)
+    s = json.dumps(out, indent=1, default=str)
+    print(s)
+    if a.json:
+        Path(a.json).write_text(s)
+
+
+if __name__ == "__main__":
+    main()

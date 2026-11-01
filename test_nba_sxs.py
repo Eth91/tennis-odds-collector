@@ -209,3 +209,14 @@ def test_mutants():
             sys.path.remove(str(d))
             for k in ("nba_replay_mut", "nba_sxs_rules_mut"):
                 sys.modules.pop(k, None)
+
+
+def test_q15_a_failing_game_is_skipped_not_raised(capsys):
+    """Amendment 11: an error in Q15_LR10 on one game is logged and skips that game; the other rules keep running."""
+    class Boom(SR.Q15_LR10):
+        def judge_game(self, v, gid):
+            raise ValueError("boom")
+
+    v = type("V", (), {"date": "2026-11-01"})()
+    assert Boom().on_tick(v, "g1", 30) == () and Boom().on_tick(v, "g1", 60) == ()
+    assert "boom" in capsys.readouterr().err
