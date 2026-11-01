@@ -27,8 +27,9 @@ import json
 import os
 import sqlite3
 import statistics as st
+import time
 import urllib.request
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 
 import nfl_common as C
@@ -38,6 +39,7 @@ HERE = Path(__file__).resolve().parent
 LINES = Path(os.environ.get("NFL_LINES_DB", HERE / "nfl_lines.sqlite"))
 STATS = Path(os.environ.get("NFL_STATS_DB", HERE / "nfl_stats.sqlite"))
 CLOSE_BOARDS = HERE / "nfl_close_boards.json"
+LINED = HERE / "nfl_lined.json"
 ESPN = "https://site.api.espn.com/apis/site/v2/sports/football/nfl"
 # market -> (label, log columns summed). The books' NFL player props (nfl_lines' stat keys)
 MARKETS = {"pass_yds": ("PASS YDS", ("pass_yds",)), "pass_tds": ("PASS TD", ("pass_tds",)), "pass_att": ("ATT", ("pass_att",)),
@@ -92,7 +94,6 @@ def espn_json(path, max_age, get=None):
     """An ESPN site API document, cached for max_age seconds (a failure falls back to the cache, however old)."""
     C.CACHE.mkdir(parents=True, exist_ok=True)
     f = C.CACHE / ("espn__" + path.replace("/", "_").replace("?", "_").replace("&", "_").replace("=", "-"))
-    import time
     if f.exists() and (max_age is None or time.time() - f.stat().st_mtime < max_age):
         try:
             return json.loads(f.read_text())
@@ -484,34 +485,116 @@ def team_usage(logs, pos, team, season, roster_team):
     return sorted(out, key=lambda e: -(e["tgt"] + e["car"]))
 
 
+# Roles (the page's Injuries › Roles), nba_players.roles over a football season: how far a stat a game must move over
+# his last 2 games off his season average for him to be listed on it
 ROLE_KEYS = (("snap_pct", 12), ("targets", 2.5), ("rush_att", 4), ("tgt_share", 7), ("rz", 1.5))
+ROLE_RECENT = 2              # his last 2 games (the NBA's last 3: a football season is 17 games, not 82)
+# early in a season there is too little of it to judge his last 2 games against: until the median team has played
+# ROLE_RECENT_FROM games, Roles compares his season so far with last season (ROLE_LAST_MIN+ games there, any team); from
+# then on, his last 2 games with his season average (ROLE_SEASON_MIN+ games, the last 2 among them)
+ROLE_RECENT_FROM = 4
+ROLE_LAST_MIN = 6
+ROLE_SEASON_MIN = 4
+ROLE_REG_SNAP = 50           # a teammate this regular (snap % this season, 2+ games) who missed one of the last 2 is named
+QB_START_SNAP = 50           # a quarterback's start: half his team's snaps or more
 
 
-def roles(logs, pos, players, teams, season, absent_names):
-    """The slate's players whose volume moved over their last 3 games (this season, 5+ games), against the rest of
-    their season: snaps %, targets, carries, target share, red-zone looks — {"rows": [...], "thresholds", "mode"}."""
+def lined_players(q, season, cache=None, max_age=3600):
+    """Players a book (FanDuel or DraftKings) has posted a prop line for this season: Roles lists only these, not players
+    no one can bet (None without the lines store). Kept in `cache` for an hour: it reads the whole store, on a VM that
+    swaps."""
+    if q is None:
+        return None
+    if cache is not None and cache.exists() and time.time() - cache.stat().st_mtime < max_age:
+        try:
+            return set(json.loads(cache.read_text()))
+        except ValueError:
+            pass
+    out = {int(pid) for (pid,) in q.execute("SELECT DISTINCT pid FROM quotes WHERE seen_at >= ? AND pid IS NOT NULL",
+                                            (f"{season}-08-01",))}
+    if cache is not None:
+        tmp = cache.with_name(cache.name + ".tmp")
+        tmp.write_text(json.dumps(sorted(out)))
+        os.replace(tmp, cache)
+    return out
+
+
+def roles_mode(team_gids):
+    gp = sorted(len(v) for v in team_gids.values())
+    return "recent" if gp and gp[len(gp) // 2] >= ROLE_RECENT_FROM else "season"
+
+
+def roles(logs, pos, players, teams, season, lined=None):
+    """The slate's QBs, RBs, WRs and TEs whose snaps %, targets, carries, target share or red-zone looks a game moved by
+    at least ROLE_KEYS, in roles_mode's comparison: "season" (his games this season for his team against all of last
+    season's, "was_team" set when he played most of them elsewhere) or "recent" (his last 2 games against his season
+    average, the last 2 included). Each with every stat now and before ("st"), a quarterback's starts ([starts now,
+    starts before, games before, games now]: "before" is the games ahead of his last 2, so a new starter reads as one),
+    and the regular teammates who missed one of his team's last 2 games. lined: players a book has posted a prop for
+    this season (None: everyone). {"rows": [...] biggest snaps move first, "thresholds", "mode"}."""
+    cur_s, last_s = season_str(season), season_str(season - 1)
+    played, gids = defaultdict(set), defaultdict(set)        # (team, gid) -> pids who played; team -> this season's games
+    for pid, rows in logs.items():
+        for r in rows:
+            played[(r[COL["team"]], r[COL["gid"]])].add(pid)
+            if NR.season_of(r[COL["date"]]) == cur_s:
+                gids[r[COL["team"]]].add((r[COL["date"]], r[COL["gid"]]))
+    team_gids = {t: [g for _, g in sorted(v)] for t, v in gids.items()}
+    mode = roles_mode(team_gids)
+
+    def avg(rs, k):
+        vals = [(r[COL["rz_tgt"]] or 0) + (r[COL["rz_rush"]] or 0) if k == "rz" else r[COL[k]] for r in rs]
+        return [v for v in vals if v is not None]
+
+    def mean(vals, k):
+        return round(sum(vals) / len(vals)) if k in ("snap_pct", "tgt_share") else round(sum(vals) / len(vals), 1)
+
+    skill = lambda pid: GROUP.get(pos.get(pid)) in ("QB", "RB", "WR", "TE")
     rows_out = []
     for pid, rows in logs.items():
-        if GROUP.get(pos.get(pid)) not in ("QB", "RB", "WR", "TE"):
-            continue
         pl = players.get(pid) or {}
-        if pl.get("team") not in teams:
+        team = pl.get("team")
+        if not skill(pid) or team not in teams or (lined is not None and pid not in lined):
             continue
-        cur = [r for r in rows if NR.season_of(r[COL["date"]]) == season_str(season) and r[COL["team"]] == pl["team"]]
-        if len(cur) < 5:
+        cur = [r for r in rows if NR.season_of(r[COL["date"]]) == cur_s and r[COL["team"]] == team]
+        last3 = (team_gids.get(team) or [])[-(ROLE_RECENT + 1):]
+        if len(cur) < ROLE_RECENT or any(r[COL["gid"]] not in last3 for r in cur[-ROLE_RECENT:]):
+            continue                                         # not playing lately: a return or an absence, not a role
+        was_team = None
+        if mode == "recent":
+            if len(cur) < ROLE_SEASON_MIN:
+                continue
+            recent, base, before = cur[-ROLE_RECENT:], cur, cur[:-ROLE_RECENT]
+        else:
+            recent = cur
+            base = before = [r for r in rows if NR.season_of(r[COL["date"]]) == last_s]
+            if len(base) < ROLE_LAST_MIN:
+                continue
+            top = Counter(r[COL["team"]] for r in base).most_common(1)[0][0]
+            was_team = top if top != team else None          # a new team: the biggest role change of all
+        stt = {}
+        for k, _ in ROLE_KEYS:
+            now, was = avg(recent, k), avg(base, k)
+            stt[k] = [mean(now, k), mean(was, k)] if len(now) >= ROLE_RECENT and len(was) >= 3 else None
+        if not any(v and abs(v[0] - v[1]) >= th for (k, th) in ROLE_KEYS for v in [stt[k]]):
             continue
-        now, before = cur[-3:], cur[:-3]
-        def avg(rs, k):
-            vals = [(r[COL["rz_tgt"]] or 0) + (r[COL["rz_rush"]] or 0) if k == "rz" else r[COL[k]] for r in rs]
-            vals = [v for v in vals if v is not None]
-            return (round(sum(vals) / len(vals)) if k in ("snap_pct", "tgt_share") else round(sum(vals) / len(vals), 1)) if vals else None
-        stt = {k: [avg(now, k), avg(before, k)] for k, _ in ROLE_KEYS}
-        if not any(a is not None and b is not None and abs(a - b) >= th for (k, th) in ROLE_KEYS for a, b in [stt[k]]):
-            continue
-        rows_out.append({"pid": pid, "name": pl.get("name"), "team": pl["team"], "pos": pos.get(pid), "st": stt,
-                         "min": stt["snap_pct"], "usg": [None, None], "out": absent_names.get(pl["team"], [])[:3],
-                         "starts": [0, 0, 0, 3], "was_team": None})
-    return {"rows": rows_out, "thresholds": dict(ROLE_KEYS), "mode": "recent"}
+        qb = GROUP.get(pos.get(pid)) == "QB"
+        starts = lambda rs: sum(1 for r in rs if qb and (r[COL["snap_pct"]] or 0) >= QB_START_SNAP)
+        recent_g = (team_gids.get(team) or [])[-ROLE_RECENT:]
+        regs = []
+        for mate, mrows in logs.items():
+            if mate == pid or not skill(mate) or (players.get(mate) or {}).get("team") != team:
+                continue
+            snaps = [r[COL["snap_pct"]] for r in mrows if NR.season_of(r[COL["date"]]) == cur_s and r[COL["team"]] == team
+                     and r[COL["gid"]] not in recent_g and r[COL["snap_pct"]] is not None]
+            if len(snaps) >= 2 and sum(snaps) / len(snaps) >= ROLE_REG_SNAP and \
+                    any(mate not in played.get((team, g), ()) for g in recent_g):
+                regs.append((-sum(snaps) / len(snaps), (players.get(mate) or {}).get("name") or ""))
+        rows_out.append({"pid": pid, "name": pl.get("name"), "team": team, "pos": pos.get(pid), "st": stt,
+                         "min": stt["snap_pct"] or [None, None], "usg": [None, None], "out": [n for _, n in sorted(regs)],
+                         "starts": [starts(recent), starts(before), len(before), len(recent)], "was_team": was_team})
+    rows_out.sort(key=lambda e: -abs(e["min"][0] - e["min"][1]) if e["min"][0] is not None else 0)
+    return {"rows": rows_out, "thresholds": dict(ROLE_KEYS), "mode": mode}
 
 
 # ── the payload ────────────────────────────────────────────────────────────────────────────────────────────────
@@ -653,7 +736,6 @@ def build(now=None, sched=None, lines=None, stats=None, get=None, official=None)
     published = max((e.get("published") or "" for e in inj.values()), default="") or None
     report_meta = {d: {"published": published} for d in dates} if inj else {}
     injuries_out, absences, inj_report = {}, {}, {}
-    absent_names = defaultdict(list)
     cur_s = season_str(season)
     for g in games:
         for t in (g["home"], g["away"]):
@@ -695,8 +777,6 @@ def build(now=None, sched=None, lines=None, stats=None, get=None, official=None)
                     since = mine[0][COL["date"]] if mine else None
                     ab.append({"pid": pid, "played": played, "since": since, "status": e["status"], "fresh": fresh,
                                "name": (players.get(pid) or {}).get("name")})
-                    if fresh:
-                        absent_names[t].append((players.get(pid) or {}).get("name") or "")
             order = ("Out", "Doubtful", "Questionable")
             listed.sort(key=lambda x: (order.index(x["status"]), -(x["mpg"] or 0)))
             inj_report[f"{g['date']}|{t}"] = {"listed": True, "published": published, "players": listed}
@@ -803,7 +883,7 @@ def build(now=None, sched=None, lines=None, stats=None, get=None, official=None)
                   for t, d in depth.items()},
         "ranks": ranks, "proj_players": {}, "proj_meta": {"none": True},
         "rush_dir": rush, "tgt_tree": tree, "usage": usage, "teams": teams_info,
-        "roles": roles(logs, pos, players, set(slate_teams), season, absent_names),
+        "roles": roles(logs, pos, players, set(slate_teams), season, lined_players(q, season, LINED if lines is None else None)),
         "vs": vs_rows(logs, pos, slate_teams, all_names),
         "adv": adv_payload(scon, season, slate_teams, pids, all_names, inj),
         "field": field_payload(scon, season, slate_teams, pids, logs),
