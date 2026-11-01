@@ -1468,8 +1468,9 @@ function injView() {
   return `<div class="lhd lcol"><span>${list.length} players · ${esc(mt(rep.published, true))}</span><i class="o">${SPORT === "nfl" ? "SNAP%" : "MPG"}</i><i class="e">MISSED</i></div>` +
     (list.length ? list.map(injRow).join("") : '<div class="empty"><b>No injuries</b></div>');
 }
-// ── role changes (docs/player/roles.json, nba_players.roles): the slate's players whose minutes moved 4+ a game over their
-// last 3 games against their season average, biggest first: minutes and usage now against before, starts, and the regulars who sat (the likely why) ──
+// ── role changes (docs/player/roles.json, nba_players.roles; the NFL's in its payload, nfl_research.roles): the slate's
+// players whose minutes moved 4+ a game over their last 3 games (the NFL's snaps, targets, carries over the last 2)
+// against their season average, biggest first: minutes and usage now against before, starts, and the regulars who sat (the likely why) ──
 let ROLES = null;
 // the Roles switch: [key, chip, unit after the numbers, label under the move]; ROLE_TH stands in for a file without
 // thresholds (nba_players.ROLE_MOVE)
@@ -1502,9 +1503,9 @@ function rolesView(swap) {
     const rl = $("#rol", el);
     if (swap) swapIn(rl);
     if (!rows.length) { rl.innerHTML = `<div class="empty"><b>${k === "reb_ch" ? "None yet this season" : "No role changes"}</b></div>`; return; }
-    // the comparison (nba_players.roles_mode): early on, his season so far against last season; later, his last 3 games
-    // against his season average (the NFL's: against the rest of his season)
-    const cmp = j && j.mode === "season" ? "This season vs last" : SPORT === "nfl" ? "Last 3 games vs the rest" : "Last 3 games vs season avg";
+    // the comparison (nba_players.roles_mode, nfl_research.roles_mode): early on, his season so far against last season;
+    // later, his last 3 games (the NFL's last 2) against his season average
+    const cmp = j && j.mode === "season" ? "This season vs last" : SPORT === "nfl" ? "Last 2 games vs season avg" : "Last 3 games vs season avg";
     rl.innerHTML = `<div class="lhd"><span>${rows.length} players</span><span>${cmp}</span></div>` + rows.map(r => {
       const v = stat(r), dv = v[0] - v[1], up = dv > 0, was = r.starts[2] ? r.starts[1] / r.starts[2] : 0, now = r.starts[0] / (r.starts[3] || 3);
       const why = [r.was_team ? `<span>New team</span> (was ${esc(r.was_team)})` : "",

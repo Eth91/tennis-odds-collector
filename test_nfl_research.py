@@ -565,3 +565,77 @@ def test_nfl_matchup_page_scrolls_up_and_down_only_and_shows_the_props_cards():
     assert 'if (m === "kick_pts" || m === "fg_made" || m === "sacks") return [];' in js
     # the field chart opens on the Matchup view, with the two-line read
     assert 'MUP.fv = MUP.fv || "m";' in js and "gives up the most:</em>" in js and "most:</em>" in js
+
+
+def _season(team, n, start="2026-09-13", **per_game):
+    """n weekly games of one team this season: [(date, gid)], oldest first."""
+    d0 = dt.date.fromisoformat(start)
+    return [((d0 + dt.timedelta(weeks=i)).isoformat(), f"2026_{i + 1:02d}_{team}") for i in range(n)]
+
+
+def _team_logs(team, weeks, pid0=900):
+    """Filler regulars on a team so its games exist: one player a game, never on the slate's Roles (no position)."""
+    return {pid0: [_log(date=d, gid=g, team=team, snap_pct=60) for d, g in weeks]}
+
+
+def test_roles_last_2_games_against_the_season_average():
+    weeks = _season("GB", 6)
+    tg = (4, 4, 4, 4, 10, 10)
+    logs = {1: [_log(date=d, gid=g, targets=t, snap_pct=70) for (d, g), t in zip(weeks, tg)], **_team_logs("GB", weeks)}
+    out = R.roles(logs, {1: "WR"}, {1: {"team": "GB", "name": "A"}}, {"GB"}, 2026)
+    assert out["mode"] == "recent"
+    r = out["rows"][0]
+    assert r["st"]["targets"] == [10.0, 6.0]                    # the last 2 (10, 10) against all 6 games (6.0), not the rest (4.0)
+    assert r["starts"] == [0, 0, 4, 2] and r["was_team"] is None
+    # 3.5 targets more than the season average is listed; 1 game of 10 among 4s is not (last 2: 7.0 against 5.0)
+    logs[1] = [_log(date=d, gid=g, targets=t, snap_pct=70) for (d, g), t in zip(weeks, (4, 4, 4, 4, 4, 10))]
+    assert R.roles(logs, {1: "WR"}, {1: {"team": "GB", "name": "A"}}, {"GB"}, 2026)["rows"] == []
+
+
+def test_roles_skips_a_player_not_playing_lately_and_one_without_a_line():
+    weeks = _season("GB", 6)
+    logs = {1: [_log(date=d, gid=g, targets=t) for (d, g), t in zip(weeks[:4], (2, 2, 9, 9))], **_team_logs("GB", weeks)}
+    pl = {1: {"team": "GB", "name": "A"}}
+    assert R.roles(logs, {1: "WR"}, pl, {"GB"}, 2026)["rows"] == []           # missed the team's last 2 games: an absence
+    logs[1] += [_log(date=d, gid=g, targets=12) for d, g in weeks[4:]]
+    assert len(R.roles(logs, {1: "WR"}, pl, {"GB"}, 2026)["rows"]) == 1
+    assert R.roles(logs, {1: "WR"}, pl, {"GB"}, 2026, lined={2})["rows"] == []  # no book has a prop for him
+
+
+def test_roles_names_the_regular_who_sat_and_a_new_starting_quarterback():
+    weeks = _season("GB", 6)
+    starter = [_log(date=d, gid=g, snap_pct=100, pass_att=35) for d, g in weeks[:5]]          # missed the last game
+    backup = [_log(date=d, gid=g, snap_pct=s, pass_att=a) for (d, g), s, a in
+              zip(weeks, (3, 2, 4, 3, 100, 100), (0, 0, 1, 0, 30, 33))]
+    depth = [_log(date=d, gid=g, snap_pct=20) for d, g in weeks]                             # under 50% snaps: not a regular
+    pl = {1: {"team": "GB", "name": "Starter QB"}, 2: {"team": "GB", "name": "Backup QB"}, 3: {"team": "GB", "name": "Depth WR"}}
+    out = R.roles({1: starter, 2: backup, 3: depth}, {1: "QB", 2: "QB", 3: "WR"}, pl, {"GB"}, 2026)
+    r = next(x for x in out["rows"] if x["pid"] == 2)
+    assert r["starts"] == [2, 0, 4, 2]                          # now starting: 2 of the last 2, none of the 4 before
+    assert r["out"] == ["Starter QB"] and r["st"]["snap_pct"] == [100, 35]
+
+
+def test_roles_early_in_the_season_compares_with_last_season_and_marks_a_new_team():
+    weeks = _season("GB", 3)
+    last = [_log(date=f"2025-{9 + i // 4:02d}-{1 + 7 * (i % 4):02d}", gid=f"2025_{i:02d}_NYJ", team="NYJ", targets=3, snap_pct=40)
+            for i in range(8)]
+    logs = {1: last + [_log(date=d, gid=g, targets=8, snap_pct=85) for d, g in weeks], **_team_logs("GB", weeks)}
+    out = R.roles(logs, {1: "WR"}, {1: {"team": "GB", "name": "A"}}, {"GB"}, 2026)
+    assert out["mode"] == "season"
+    r = out["rows"][0]
+    assert r["was_team"] == "NYJ" and r["st"]["targets"] == [8.0, 3.0] and r["st"]["snap_pct"] == [85, 40]
+
+
+def test_lined_players_reads_this_season_and_keeps_it_an_hour(tmp_path):
+    q = sqlite3.connect(":memory:")
+    q.execute("CREATE TABLE quotes (seen_at TEXT, book TEXT, gid TEXT, tip_utc TEXT, pid INTEGER, player TEXT, stat TEXT, "
+              "line REAL, side TEXT, odds REAL)")
+    q.executemany("INSERT INTO quotes (seen_at, gid, pid) VALUES (?, ?, ?)",
+                  [("2026-10-29T12:00:00", "2026_08_CAR_GB", 1), ("2026-10-30T12:00:00", "2026_08_BAL_BUF", 2),
+                   ("2026-01-04T12:00:00", "2025_18_X_Y", 3), ("2026-10-30T12:00:00", "2026_08_BAL_BUF", None)])
+    f = tmp_path / "lined.json"
+    assert R.lined_players(q, 2026, f) == {1, 2}                 # last season's player and an unresolved name: not lined
+    q.execute("INSERT INTO quotes (seen_at, gid, pid) VALUES ('2026-10-31T12:00:00', '2026_08_KC_DEN', 4)")
+    assert R.lined_players(q, 2026, f) == {1, 2}                 # within the hour: the kept set
+    assert R.lined_players(q, 2026, f, max_age=0) == {1, 2, 4}
+    assert R.lined_players(None, 2026, f) is None
