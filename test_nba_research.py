@@ -551,9 +551,11 @@ def test_page_controls_work_on_iphone():
     assert 'const ALL_TABS = ["live", "trends", "movers"];' in html and "list = list.filter(p => !p.closed);" in html
     # the flags (D.flags: the under plays that ping) are the bottom bar's Flags view, in place of Markets (a saved
     # Markets view opens Props), SHADOW · NOT A BET, each graded at its own line once final; a chip on the prop's row
-    # and a line on its page; a tap opens the prop or the player. The props section has no Flags tab
-    assert 'let VIEWS = [["props", "Props"], ["flags", "Flags"], ["injuries", "Injuries"]];' in html and "mrow" not in html
-    assert 'if (["props", "flags", "injuries"].indexOf(ST.view) < 0) ST.view = "props";' in html and '"markets"' not in html
+    # and a line on its page; a tap opens the prop or the player. The props section has no Flags tab. WOWY (nba_onoff's
+    # on/off splits) sits between Flags and Injuries, the bar four wide
+    assert 'let VIEWS = [["props", "Props"], ["flags", "Flags"], ["wowy", "WOWY"], ["injuries", "Injuries"]];' in html and "mrow" not in html
+    assert 'if (["props", "flags", "wowy", "injuries"].indexOf(ST.view) < 0) ST.view = "props";' in html and '"markets"' not in html
+    assert '.tbc[data-n="4"]{width:272px}' in html and "fetch(`onoff/${t}.json?t=${Date.now()}`" in html
     assert '  if (ST.view === "flags") { lst.innerHTML = flagsView(); return; }' in html and 'flags: "Flags"' not in html
     assert 'if (ml) ml.style.display = ST.view === "props" ? "" : "none";' in html and 'if (ST.view === "props" && q.length >= 2)' in html
     assert "${flagChips(p)}</div>" in html and "const flagChips = p => flagsOf(p.id).length ?" in html
