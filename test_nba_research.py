@@ -679,6 +679,59 @@ def test_write_is_atomic(payload):
     RS.write(d, payload)
     assert json.loads((d / "nba_props.json").read_text())["props"] and (d / "nba_props.html").read_text().startswith("<!doctype")
     assert not list(d.glob(".*.tmp"))
+    # the page's worker beside it, the same version as the page (a launch opens from the phone's copy)
+    b = UI.build_id()
+    assert f'BUILD = "{b}"' in (d / "nba_props.html").read_text() and f'const BUILD = "{b}"' in (d / "pickz-sw.js").read_text()
+
+
+def test_page_launches_from_the_phones_copy():
+    html, b = UI.page(), UI.build_id()
+    # one version a code change: the page and its worker carry it, and it moves with any part of the page's code
+    assert html.count(f'BUILD = "{b}"') == 1 and "__BUILD__" not in html and "__BUILD__" not in UI.sw() and len(b) == 12
+    UI.CSS, css = UI.CSS + " ", UI.CSS
+    try:
+        assert UI.build_id() != b
+    finally:
+        UI.CSS = css
+    # registered for the page alone; a new version loads only when the page goes to the background, not under a finger,
+    # and never on the first install (no worker had the page before it)
+    assert 'navigator.serviceWorker.register("pickz-sw.js", {scope: "./nba_props.html"})' in html
+    assert 'addEventListener("controllerchange", () => { if (had) SW_NEW = true; });' in html
+    assert "if (document.hidden && SW_NEW) { location.reload(); return; }" in html and "r && r.update()" in html
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_service_worker_serves_only_the_page():
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "t.js").write_text("""const H = {}, store = {}, deleted = [];
+const self = {registration: {scope: "https://x.test/nba_props.html"}, addEventListener: (k, f) => { H[k] = f; },
+  skipWaiting: () => Promise.resolve(), clients: {claim: () => Promise.resolve()}};
+let PAGE_TEXT = "";
+const fetch = (u, o) => Promise.resolve({ok: true, status: 200, url: String(u.url || u), clone() { return {text: () => Promise.resolve(PAGE_TEXT)}; }, net: true});
+const caches = {open: k => Promise.resolve({put: (u, r) => { store[k] = r; return Promise.resolve(); }, match: u => Promise.resolve(store[k] || undefined)}),
+  keys: () => Promise.resolve(Object.keys(store).concat(["pickz-data", "pickz-shell-old"])), delete: k => { deleted.push(k); return Promise.resolve(true); }};
+""" + UI.SW.replace("__BUILD__", "b1") + """
+const ev = r => { const e = {request: r, waitUntil(p) { this.p = p; }, respondWith(p) { this.res = p; }}; return e; };
+(async () => {
+  const out = {};
+  PAGE_TEXT = 'const CACHE = "pickz-data", BUILD = "b0";';                     // the page isn't this version yet
+  let e = ev(); H.install(e); out.stale = await e.p.then(() => "installed", () => "refused");
+  PAGE_TEXT = 'const CACHE = "pickz-data", BUILD = "b1";';
+  e = ev(); H.install(e); out.fresh = await e.p.then(() => "installed", () => "refused");
+  e = ev(); H.activate(e); await e.p; out.deleted = deleted;
+  out.cached = !!store["pickz-shell-b1"]; store["pickz-shell-b1"] = {copy: true};
+  const nav = ev({mode: "navigate", url: "https://x.test/nba_props.html?t=1"}); H.fetch(nav);
+  out.nav = nav.res ? (await nav.res).copy ? "copy" : "network" : "untouched";
+  for (const [k, r] of [["data", {mode: "cors", url: "https://x.test/nba_props.json"}], ["other page", {mode: "navigate", url: "https://x.test/index.html"}]]) {
+    const x = ev(r); H.fetch(x); out[k] = x.res ? "intercepted" : "untouched"; }
+  console.log(JSON.stringify(out));
+})();
+""")
+    out = json.loads(subprocess.run([NODE, str(d / "t.js")], capture_output=True, text=True, check=True).stdout)
+    # a worker caches its own version of the page or none; old copies go, the data's cache stays
+    assert out["stale"] == "refused" and out["fresh"] == "installed" and out["deleted"] == ["pickz-shell-old"]
+    # the page opens from the copy; the data files and the other pages are left to the network
+    assert out["cached"] and out["nav"] == "copy" and out["data"] == "untouched" and out["other page"] == "untouched"
 
 
 # ── prices, the change log, blended ranks, fresh absences (research+ 2026-10-26) ──────────────────────────────
@@ -1038,6 +1091,19 @@ def test_prop_page_lays_out_once_a_tap():
     assert 'PX.lazy = setTimeout(() => idle(() => { if (PX && PX.p === p) updateProp("rest"); }), 500);' in html
     # headshots decode off the main thread; WOWY's minutes without toLocaleString (slow, a row at a time)
     assert html.count('<img class="hs" alt="" loading="lazy" decoding="async" src=') == 3 and "Math.round(s / 60).toLocaleString()" not in html
+
+
+def test_page_fits_the_phone():
+    html = UI.page()
+    # the canvas is the page's colour: a view shorter than the screen (WOWY, a quiet NFL board) ends without a black band
+    assert "html,body{background:#0f0f0f}" in html and '<meta name="theme-color" content="#0f0f0f">' in html
+    # a scrolling chart keeps its labels: a strip over the screen's edge (sticky against the content edge, so -15.3)
+    assert "const pin = W > W0;" in html and "if (!pin) o.push(axis);" in html
+    assert '<div class="c2s"><svg class="c2 c2y" width="${AX + 15.3}"' in html
+    assert ".c2s svg.c2y{position:sticky;left:-15.3px;" in html and "margin:0 -35px 0 -15.3px" in html
+    # an NFL injury row with a practice line is taller, so the line isn't cut; two tabs, a narrower capsule
+    assert '${e.practice ? " irp" : ""}' in html and ".pr.irp{height:130px;" in html and '.tbc[data-n="2"]{width:168px}' in html
+    assert '<div class="kv nws"><span>News · ${esc(n.source)}' in html
 
 
 @pytest.mark.skipif(NODE is None, reason="node not installed")
