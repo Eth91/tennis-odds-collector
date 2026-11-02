@@ -133,7 +133,7 @@ def live_box(gid):
             "awayTeam": {"score": 66, "players": []}}
 
 
-def built(now, sched=None, box_get=None):
+def built(now, sched=None, box_get=None, cup=None):
     d = pathlib.Path(tempfile.mkdtemp())
     stores(d)
     tr = sqlite3.connect(d / "tracking.sqlite")
@@ -167,7 +167,7 @@ def built(now, sched=None, box_get=None):
     rl.commit(); rl.close()
     return RS.build(now=now, sched=sched or SCHED, lines=d / "lines.sqlite", news=d / "news.sqlite", shadow=d / "shadow.sqlite",
                     matchup=d / "matchup.sqlite", index=d / "index.json", box_get=box_get or live_box, tracking=d / "tracking.sqlite",
-                    role_db=d / "role.sqlite")
+                    role_db=d / "role.sqlite", cup=cup)
 
 
 @pytest.fixture(scope="module")
@@ -1257,3 +1257,99 @@ def test_matchup_shows_assist_and_rebound_zones_only_for_their_props():
     assert "const m3 = x => (x[off + Z.length + 3] + x[off + Z.length + 4] + x[off + Z.length + 5]) / x[0], lg = (L.miss[3] + L.miss[4] + L.miss[5]) / L.gp;" in html
     # a rookie facing a team with few games this season still gets his own season, not last season's blank
     assert "MUP[key] = (t && t[0] >= 10) || (me(j) && !me(q)) ? D.season : prevSeason(D.season);" in html
+
+
+def test_nba_cup_games_reach_the_page(payload):
+    # a test build never fetches: no Cup map unless one is given, and the one given is passed through as is
+    assert payload["cup"] == {}
+    g0 = payload["players"]["1"]["logs"][0][RS.LOG_COLS.index("gid")]
+    assert built(NOW, cup={g0: "West Group B"})["cup"] == {g0: "West Group B"}
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_nba_cup_filter(payload):
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "core.js").write_text(UI.JS_CORE)
+    logs = [dict(zip(RS.LOG_COLS, r)) for r in payload["players"]["1"]["logs"]]
+    cup = {logs[0]["gid"]: "West Group B", logs[-1]["gid"]: "Quarterfinal", "0062600001": "Championship"}
+    (d / "t.js").write_text("""
+const C = require('./core.js'), inp = JSON.parse(require('fs').readFileSync(process.argv[2]));
+console.log(JSON.stringify([C.filterLogs(inp.logs, {cup: inp.cup}).map(l => l.gid), C.filterLogs(inp.logs, {cup: null}).length,
+  C.filterLogs(inp.logs, {cup: inp.cup, home: inp.logs[0].home === 1}).map(l => l.gid), C.filterLogs(inp.logs, {cup: {}}).length]));
+""")
+    (d / "in.json").write_text(json.dumps({"logs": logs, "cup": cup}))
+    only, off, both, none = json.loads(subprocess.run([NODE, str(d / "t.js"), str(d / "in.json")], capture_output=True,
+                                                      text=True, check=True, cwd=d).stdout)
+    assert only == [logs[0]["gid"], logs[-1]["gid"]]           # his Cup games, oldest first; the final is in no log
+    assert off == len(logs) and none == 0
+    assert both == [l["gid"] for l in (logs[0], logs[-1]) if l["home"] == logs[0]["home"]]   # with the other filters
+
+
+def test_nba_cup_toggle_on_the_page():
+    html = UI.page()
+    # a chip first in the Chart Filters row, for a player with a Cup game, and a Games row in his filter sheet (NBA only)
+    assert """if (hasCup(logs)) chips.push(chip('data-k="cup" data-v="true"', `${ICON.cup}NBA Cup`, on("cup", true)));""" in html
+    assert 'const hasCup = logs => !!D.cup && logs.some(l => D.cup[l.gid]);' in html
+    assert '["cup", "Games", [[null, "All"], [true, "NBA Cup"]]]];' in html
+    assert 'SEGS.filter(([k]) => k !== "cup" || hasCup(logs))' in html and "cup: DT.cup, ranges:" in html
+    assert "cup: x.cup && D.cup ? D.cup : null," in html and "|| !!DT.cup ||" in html
+    # each way it turns on or off (the chip, Clear All, the sheet's Reset and Show) goes through the window rule
+    assert html.count("const was = DT.cup;") == 3 and html.count("cupWindow(was);") == 4
+    assert '? {win: "l20", cupWin: DT.win} : w;' in html and '{win: DT.win === "l20" ? DT.cupWin : DT.win, cupWin: null}' in html
+    assert "const cupWindow = was => Object.assign(DT, cupWin(was, DT.cup));" in html
+    # the filter sheet's Show button counts the games in the window the chart will use
+    assert "without, dr)), cupWin(DT.cup, dr.cup).win, D.season, p.opp).length;" in html
+    # a new player starts with it off; the NFL and NHL keep their own sheet rows (no Cup)
+    assert "rest: null, cup: null, cupWin: null, ranges: {}" in html
+    for cfg in ("NFL_CFG", "NHL_CFG"):
+        i = html.index(f"const {cfg} = {{"); seg = html[html.index("SEGS:", i):html.index("]]]]", html.index("SEGS:", i))]
+        assert '"cup"' not in seg
+    # a Cup night on the game card
+    assert 'D.cup && D.cup[g.gid] ? "Cup" : ""' in html
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_nba_cup_sort():
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "core.js").write_text(UI.JS_CORE)
+    pts = {1: [30, 10, 25, 22, 18], 2: [25, 5, 5], 3: [15, 25, 30], 4: [40, 40], 5: [30]}
+    logs = {pid: [{"gid": f"{pid}-{i}", "pts": v} for i, v in enumerate(vs)] for pid, vs in pts.items()}
+    cup = {"1-0": "West Group B", "1-2": "West Group B", "1-3": "Quarterfinal", "2-0": "East Group A",
+           "3-0": "East Group C", "3-1": "East Group C", "5-0": "Semifinal"}
+    props = [{"id": f"p{pid}", "pid": pid, "player": f"P{pid}", "market": "points", "main": 20.5} for pid in (4, 5, 3, 2, 1)]
+    props[1]["main"] = None                                     # alt lines only
+    (d / "t.js").write_text("""
+const C = require('./core.js'), inp = JSON.parse(require('fs').readFileSync(process.argv[2]));
+const logsOf = p => inp.logs[p.pid], ids = xs => xs.map(p => p.id);
+console.log(JSON.stringify([ids(C.sortProps(inp.props, 'cup', 'desc', logsOf, 'over', '2026-27', 'all', inp.cup)),
+  ids(C.sortProps(inp.props, 'cup', 'asc', logsOf, 'over', '2026-27', 'all', inp.cup)),
+  ids(C.sortProps(inp.props, 'cup', 'desc', logsOf, 'under', '2026-27', 'all', inp.cup)),
+  ids(C.sortProps(inp.props, 'cup', 'desc', logsOf, 'over', '2026-27', 'all', null)),
+  inp.props.map(p => C.cupRate(p, logsOf(p), 'over', inp.cup))]));
+""")
+    (d / "in.json").write_text(json.dumps({"logs": logs, "cup": cup, "props": props}))
+    desc, asc, under, nocup, rates = json.loads(subprocess.run([NODE, str(d / "t.js"), str(d / "in.json")], capture_output=True,
+                                                               text=True, check=True, cwd=d).stdout)
+    # 3 of 3 and 1 of 1 tie at 100%: more Cup games first; 1 of 2 next; no Cup game, or no main line, last
+    assert desc == ["p1", "p2", "p3", "p4", "p5"]
+    assert asc == ["p3", "p1", "p2", "p4", "p5"]
+    assert under == ["p3", "p1", "p2", "p4", "p5"]
+    assert nocup == [p["id"] for p in props]                    # no Cup games on file: the order as it came
+    assert rates == [None, None, {"n": 2, "rate": 0.5, "avg": 20}, {"n": 1, "rate": 1, "avg": 25},
+                     {"n": 3, "rate": 1, "avg": 25.67}]
+
+
+def test_nba_cup_sort_on_the_page():
+    html = UI.page()
+    # a sort chip while the payload names Cup games; a Cup sort carried to a league without them sorts by L10
+    assert '["cup", "NBA Cup hit rate"]' in html
+    assert "const cupSort = () => !!D && !!D.cup && Object.keys(D.cup).length > 0;" in html
+    assert 'const sortKey = k => k === "cup" && !cupSort() ? "hit10" : k;' in html
+    assert 'SORTS.filter(([k]) => k !== "cup" || cupSort()).map(' in html
+    assert "sortProps(list, sortKey(ST.sort), ST.dir, logsOf, ST.side, D.season, ST.book, D.cup);" in html
+    assert "const dr = Object.assign({}, ST, {sort: sortKey(ST.sort)}), teams = {};" in html
+    assert "dr.sort, dr.dir, logsOf, dr.side, D.season, dr.book, D.cup).length;" in html
+    # sorted by the Cup, each row shows its Cup hit rate where DvP sits, and keeps that row apart from the DvP one
+    assert 'const cup = sortKey(ST.sort) === "cup" ? hbox(cupRate(p, logsOf(p), side, D.cup), cs) : null;' in html
+    assert '${cup ? `<div><i>CUP</i><b class="${cup.c}">${cup.t}</b></div>` : `<div><i>DvP</i>${dv}</div>`}' in html
+    assert '(sortKey(ST.sort) === "cup" ? "|cup" : "")' in html
