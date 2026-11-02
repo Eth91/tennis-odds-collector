@@ -357,7 +357,7 @@ def test_every_nfl_filter_draws_its_boxes():
     ovl = re.findall(r"(\w+): \"", re.search(r"OVL: \{(.*?)\},\n", cfg, re.S).group(1))
     chips = re.findall(r'"(\w+)"', re.search(r"const NFL_RCHIPS = \[(.*?)\];", UI.JS_APP).group(1))
     assert set(ranges) == set(ovl) and set(chips) <= set(ranges) and {"spr", "tot", "margin"} <= set(ranges)
-    assert 'const OWN_OV = new Set(["snap_pct", "tgt_share", "spr", "tot", "margin"]), SIGNED_OV = new Set(["spr", "margin"]);' in UI.JS_APP
+    assert 'const OWN_OV = new Set(["snap_pct", "tgt_share", "spr", "tot", "margin", "shot_share", "pp_share"]), SIGNED_OV = new Set(["spr", "margin"]);' in UI.JS_APP
     assert "ym = own ? v => B - Math.abs(v) / (oMax / .86) * (B - T) : y;" in UI.JS_APP
     assert all(k in NS.LOG_COLS for k in ranges)                       # each is a column of every log row
 
