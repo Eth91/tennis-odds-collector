@@ -129,7 +129,7 @@ user.
   - Not checked: limits (NHL props are low-limit), and whether the prices at about 30 minutes before puck drop were
     really available.
 
-## Amendment 1 (2026-11-02, before code): context the base model leaves out
+## Amendment 1 (2026-11-02, 09:22 UTC, before code): context the base model leaves out
 **User:** "why not test edge data too on one season then see if it improves the next, try line combos, d zone and o
 zone starts at home and on the road, injuries, gamescript. But for hockey home and away are important as last change is
 in effect so the home team gets preferable matchups." `nhl_sog_ctx.py`, Mac only. The base model above is unchanged.
