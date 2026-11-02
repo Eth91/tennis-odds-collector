@@ -27,7 +27,8 @@ button{cursor:pointer}
 .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .num{font-variant-numeric:tabular-nums}
 /* ── list page: measured from the user's reference (iPhone 16 Pro, 402 pt wide; 1 pt = 2.29 px) ── */
-body{background:#0f0f0f;--red:#ff090c;--grn:#28da8e}
+html,body{background:#0f0f0f}   /* the canvas too: a view shorter than the screen ended in a black band */
+body{--red:#ff090c;--grn:#28da8e}
 @supports (color:color(display-p3 1 0 0)){body{--red:color(display-p3 1 .035 .047);--grn:color(display-p3 .157 .855 .557)}}
 /* the reference's numbers are Apple's condensed system face (SF Pro at ~66% width), which Safari reaches through font-stretch */
 .cd,.oc,.bkh,.cells,svg.c2{font-family:system-ui,-apple-system,"Roboto Condensed",sans-serif;font-stretch:66%}
@@ -172,6 +173,9 @@ line-height:12px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ell
 .ijb b.sm{color:#8e8e8e;font-weight:500}
 .ijb small{font-size:11px;font-weight:500;color:#9a9a9a}
 .pr.ir0{height:62px;contain-intrinsic-size:auto 62px}
+.pr.irp{height:130px;contain-intrinsic-size:auto 130px}   /* a practice line (the NFL): the boxes a line lower */
+.pr.irp .bx4{top:78.3px}
+.pr.ir0.irp{height:79px;contain-intrinsic-size:auto 79px}
 .empty b{display:block;margin-bottom:6px;color:var(--l1);font-size:18px}
 .empty button{margin-top:16px}
 .btn{height:46px;padding:0 20px;border:1px solid rgba(255,255,255,.15);border-radius:23px;background:none;color:#fff;font-size:16px;font-weight:600}
@@ -412,11 +416,12 @@ svg.shct{display:block;width:100%;height:auto;margin-top:6px}
 .rod i{display:block;font-style:normal;font-size:10.5px;font-weight:600;color:#8e8e8e}
 /* WOWY */
 .tbc[data-n="4"]{width:272px}
+.tbc[data-n="2"]{width:168px}
 .wtg{width:18px;height:18px;margin-right:6px;vertical-align:-4px}
 .wyp{display:flex;gap:8px;overflow-x:auto;padding:10px 15.3px 2px;scrollbar-width:none} .wyp::-webkit-scrollbar{display:none}
 .wyp .lus{flex:0 0 68px} .wyp .lus[aria-pressed="true"]{border-color:#fff;background:#262626}
 .wyh{padding:10px 15.3px 0;font-size:12.5px;color:#9a9a9a} .wyh b{color:#fff;font-weight:600}
-.ror.wys{opacity:.45} .ror.wme{background:#262626;box-shadow:inset 3px 0 0 #fff;opacity:1}
+.ror.wys{opacity:.6} .ror.wme{background:#262626;box-shadow:inset 3px 0 0 #fff;opacity:1}
 .mrn .wyk{display:block;margin-top:3px;font-size:12px;color:#fff;font-weight:600}
 .seg.ivs button{font-size:12.5px}
 /* the Movers tab: the line from its open */
@@ -450,8 +455,8 @@ text-overflow:ellipsis;text-align:left;background:#141414;color:#fff;font-stretc
 .bx tr.tot td{font-weight:700;color:#fff}
 .bxn{margin:10px 2px 0;font-size:13px;color:#9a9a9a;line-height:1.5}
 .bxn b{margin-right:6px;font-size:11.5px;color:var(--l1)}
-.sheet .acts.stk{position:sticky;z-index:3;bottom:calc(-16px - var(--sb));margin:0 -16px;padding:12px 16px calc(var(--sb) + 16px);background:#0c0c0c;
-box-shadow:0 -1px 0 #262626}
+.sheet .acts.stk{position:sticky;z-index:3;bottom:calc(-16px - var(--sb));margin:0 -16px calc(-16px - var(--sb));padding:12px 16px calc(var(--sb) + 16px);background:#0c0c0c;
+box-shadow:0 -1px 0 #262626}   /* it takes the sheet's bottom padding too, so its Done sits where every sheet's does */
 .kv{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:44px;border-bottom:.5px solid var(--sep);
 font-size:15px}
 .kv:last-child{border-bottom:0}
@@ -531,6 +536,9 @@ width:94.4px;height:79.5px;padding:0;border:1px solid #2a2a2a;border-radius:13px
 .c2w{position:relative;margin-top:11px;padding:0 15.3px;overflow-x:auto;scrollbar-width:none}
 .c2w::-webkit-scrollbar{display:none}
 svg.c2{display:block}
+.c2s{display:flex;width:max-content}
+.c2s svg.c2y{position:sticky;left:-15.3px;z-index:1;flex:none;margin:0 -35px 0 -15.3px;overflow:visible;   /* sticks at the screen's edge (the scroller's content edge, less its margin) */
+background:linear-gradient(90deg,#0f0f0f 80%,rgba(15,15,15,0))}
 svg.c2 .ax{fill:#9a9a9a;font-size:14.5px}
 svg.c2 .lx{fill:#fff;font-size:14.9px}
 svg.c2 .mn{fill:#fff;font-size:15.5px;font-weight:600}
@@ -571,11 +579,14 @@ transition:background-color .22s,border-color .22s,transform .16s}
 .dual2{position:relative;height:35px;margin-top:13.5px;border:1px solid #2a2a2a;border-radius:17.5px;background:#141414}
 .dual2 .fil{position:absolute;top:4px;height:25px;border-radius:12.5px;background:linear-gradient(#3d3d3d,#333)}
 .dual2 .th{position:absolute;top:3.5px;width:26px;height:26px;margin-left:-13px;border-radius:50%}
+.dual2 .th::after{content:"";position:absolute;left:12px;top:7px;width:2px;height:12px;border-radius:1px;background:#777}   /* a grip: the ends drag */
 .rp-b{display:flex;justify-content:space-between;margin:2px 10px 0 13px;font-size:15px;line-height:17px;font-variant-numeric:tabular-nums}
 .sec2{margin:28px 15.3px 0}
 .sec2 h3{margin:0 0 10px;font-size:13.1px;font-weight:600}
 .box0{padding:12px;border:1px solid #2a2a2a;border-radius:13px;background:#141414;font-size:14px}
 .box0 .kv{font-size:14px;min-height:40px}
+.kv.nws{display:block;padding:10px 0}
+.kv.nws p{margin:4px 0 0;font-size:14px;line-height:19px;color:#fff}
 .gst{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
 .gst th{height:32px;font-size:12px;font-weight:500;color:#8e8e8e;text-align:right;border-bottom:.5px solid var(--sep)}
 .gst th small{font-size:11px;color:#5f5f5f}
@@ -1500,7 +1511,7 @@ function injRow(e) {
   if (s) bx.push(injBox(s, s.how === "games" ? `Starts <small>${s.k}/${s.n}</small>` : s.how === "depth" ? "Next up" : "Starts?", s.how === "games" ? "" : "sm"));
   e.minutes.filter(m => !s || m.pid !== s.pid).forEach(m => bx.push(injBox(m, "+" + m.gain.toFixed(1) + ` <small>${SPORT === "nfl" ? "opp" : "min"}</small>`, "up")));   // one box a player (NFL: targets + carries a game)
   const tags = `<span class="tg ${INJ_C[e.status]}">${INJ_S[e.status]}</span>${e.fresh ? '<span class="tg tf">NEW</span>' : ""}`;
-  return `<div class="pr ir${bx.length ? "" : " ir0"}" data-vp="${e.pid}"><span class="av">${head(e.pid)}</span>
+  return `<div class="pr ir${bx.length ? "" : " ir0"}${e.practice ? " irp" : ""}" data-vp="${e.pid}"><span class="av">${head(e.pid)}</span>
     <div class="who"><div class="nm">${esc(nameOf(e.name))}<span class="cd">${esc(e.team)}</span>${tags}</div>
     <div class="lin">${SPORT !== "nba" ? esc(e.pos || "") + " · " : ""}${e.starter ? (SPORT === "nhl" ? "Regular" : "Starter") : SPORT === "nfl" ? "Reserve" : SPORT === "nhl" ? "Depth" : "Bench"}${e.reason ? " · " + esc(injReason(e.reason)) : ""}</div>${e.practice ? `<div class="ros">Practice: ${esc(e.practice)}</div>` : ""}</div>
     <div class="oc o ocv"><b class="num">${e.mpg.toFixed(1)}</b>${e.season && e.season !== D.season ? `<i>${esc(e.season.slice(2))}</i>` : ""}</div>
@@ -2071,7 +2082,9 @@ function chart2(logs, market, line, ov, grow) {
   const oname = ov ? OVL[ov] : "";
   const o = [`<svg class="c2${grow ? " grow" : ""}" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="group" aria-label="${esc(NAME[market])}${ov ? " and " + oname : ""} by game, ${n} games, line ${line}">`];
   // the top label stays off when the line sits at the top: its own label is there
-  o.push(`${y(line) - y(top) < 14 ? "" : `<text class="ax" x="0" y="${y(top) + 7.1}">${r1(top)}</text>`}<text class="ax" x="0" y="${B - 3.5}">0</text>`);
+  const axis = `${y(line) - y(top) < 14 ? "" : `<text class="ax" x="0" y="${y(top) + 7.1}">${r1(top)}</text>`}<text class="ax" x="0" y="${B - 3.5}">0</text>`;
+  const pin = W > W0;                                   // it scrolls: the labels go in a strip that stays put
+  if (!pin) o.push(axis);
   logs.forEach((l, i) => {
     const v = vals[i], m = ov ? ovs[i] : null, x = AX + i * slot, w = slot - gap, cx = x + w / 2;
     const res = v === null ? "none" : v > line ? "over" : v < line ? "under" : "push";
@@ -2106,8 +2119,11 @@ function chart2(logs, market, line, ov, grow) {
     o.push(g);
   });
   o.push(`<line x1="0" x2="${W}" y1="${y(line)}" y2="${y(line)}" stroke="#fff" stroke-width=".9"/>`);
-  o.push(`<text class="lx" x="0" y="${y(line) - 5.2}">${line}</text></svg>`);
-  return o.join("");
+  const lab = `<text class="lx" x="0" y="${y(line) - 5.2}">${line}</text>`;
+  if (!pin) { o.push(lab + "</svg>"); return o.join(""); }
+  o.push("</svg>");
+  // the strip covers the scroller's side margin too (15.3), so nothing scrolls past on its left
+  return `<div class="c2s"><svg class="c2 c2y" width="${AX + 15.3}" height="${H}" aria-hidden="true"><g transform="translate(15.3 0)">${axis}<line x1="0" x2="${AX}" y1="${y(line)}" y2="${y(line)}" stroke="#fff" stroke-width=".9"/>${lab}</g></svg>${o.join("")}</div>`;
 }
 // every rung either book posts: the hit rate there (this window and filters), the fair price, each book's price on
 // the side. Tap a rung to use it. Green = better than fair; the HIT colors follow the list's rule (hbox).
@@ -2316,7 +2332,7 @@ function renderProp(mode) {
   if (prac) arows.push(prac);
   if (SPORT === "nfl") arows.push(nflDepthRow(p));
   if (SPORT === "nhl") arows.push(nhlDepthRow(p));
-  (inj.news || []).forEach(n => arows.push(`<div class="kv"><span>News · ${esc(n.source)}</span><b>${esc(n.headline || n.status || "")} · ${mt(n.detected)}</b></div>`));
+  (inj.news || []).forEach(n => arows.push(`<div class="kv nws"><span>News · ${esc(n.source)} <small>${mt(n.detected)}</small></span><p>${esc(n.headline || n.status || "")}</p></div>`));
   if (without.length) arows.push(`<div class="kv"><span>Teammates out</span><b>${without.map(w => esc(w.name) + (w.status === "Out" ? "" : " (" + esc(w.status) + ")")).join(", ")}</b></div>`);
   const rel = (D.related[p.id] || []).map(r => {
     const o = D.props.find(x => x.id === r.id); if (!o) return "";
@@ -3524,8 +3540,8 @@ function nflMatchup() {
   $("#mpi", mp).onclick = () => openSheet(`<h2 id="sht">Ranks</h2>
     <div class="kv"><span>Teams ranked</span><b>${c.teams || "—"}</b></div>
     <div class="kv"><span>${esc(p.opp || "")} games this season</span><b>${c.rank_n != null ? c.rank_n : c.opp_games || 0}</b></div>
-    <div class="kv"><span>DvP</span><b>what the defense allowed that position a game, all its players summed</b></div>
-    <div class="kv"><span>Before 3 games</span><b>last season's rank stands in</b></div>
+    <div class="kv"><span>DvP</span><b>total allowed to the position, a game</b></div>
+    <div class="kv"><span>Before 3 games</span><b>last season's rank</b></div>
     <div class="kv"><span>1st</span><b>the toughest</b></div>
     <div class="acts"><button class="btn pri" id="mpi-ok">Done</button></div>`, s => { $("#mpi-ok", s).onclick = closeSheet; });
   $$("[data-dd]", mp).forEach(sel => sel.onchange = () => {
@@ -3956,8 +3972,8 @@ function nhlMatchup() {
   $("#mpi", mp).onclick = () => openSheet(`<h2 id="sht">Ranks</h2>
     <div class="kv"><span>Teams ranked</span><b>${c.teams || "—"}</b></div>
     <div class="kv"><span>${esc(p.opp || "")} games this season</span><b>${c.rank_n != null ? c.rank_n : c.opp_games || 0}</b></div>
-    <div class="kv"><span>DvP</span><b>what the defense allowed that position a game, all its players summed</b></div>
-    <div class="kv"><span>Before 5 games</span><b>last season's rank stands in</b></div>
+    <div class="kv"><span>DvP</span><b>total allowed to the position, a game</b></div>
+    <div class="kv"><span>Before 5 games</span><b>last season's rank</b></div>
     <div class="kv"><span>1st</span><b>the toughest</b></div>
     <div class="acts"><button class="btn pri" id="mpi-ok">Done</button></div>`, s => { $("#mpi-ok", s).onclick = closeSheet; });
   $$("[data-dd]", mp).forEach(sel => sel.onchange = () => {
@@ -4013,7 +4029,7 @@ let LOADED_AT = 0, PDOWN = false, REDRAW = false, FRESH = false, SAVED_AT = 0, H
 // the slate is chosen for the user (slateDay) at a launch and on a return after 30+ minutes away, until they pick a day
 let AUTO_DAY = true;
 // the last data this phone loaded (Cache Storage), drawn at once on a launch while the fresh copy downloads
-const CACHE = "pickz-data";
+const CACHE = "pickz-data", BUILD = "__BUILD__";   // BUILD: this code's version (build_id), the worker's too
 function cacheRead() {
   try { return caches.open(CACHE).then(c => c.match(dataUrl())).then(r => r ? r.json() : null).catch(() => null); }
   catch (e) { return Promise.resolve(null); }
@@ -4134,9 +4150,19 @@ document.addEventListener("DOMContentLoaded", () => {
   // a turned phone (or a resized window) re-measures every sliding pill, which sit where the buttons were laid out
   let RZ = null;
   window.addEventListener("resize", () => { clearTimeout(RZ); RZ = setTimeout(() => $$(".pill2").forEach(x => slide(x.parentElement, true)), 120); });
+  // the phone's copy of the page (pickz-sw.js): a launch opens at once, with no wait on the tunnel. A new version,
+  // once its worker has taken over, loads the next time the page goes to the background (never under a finger)
+  let SW_NEW = false;
+  if ("serviceWorker" in navigator && window.isSecureContext) {
+    const had = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.register("pickz-sw.js", {scope: "./nba_props.html"}).catch(() => {});
+    navigator.serviceWorker.addEventListener("controllerchange", () => { if (had) SW_NEW = true; });
+  }
   // back from another app: the 2-minute timer was asleep, so catch up at once
   document.addEventListener("visibilitychange", () => {
+    if (document.hidden && SW_NEW) { location.reload(); return; }
     if (document.hidden) { HIDDEN_AT = Date.now(); return; }
+    if (navigator.serviceWorker) navigator.serviceWorker.getRegistration("./nba_props.html").then(r => r && r.update()).catch(() => {});
     if (HIDDEN_AT && Date.now() - HIDDEN_AT > 1800000) AUTO_DAY = true;          // away a while: the slate may have moved on
     if (D) { CHECK_AT = 0; freshen(); }
   });
@@ -4152,7 +4178,7 @@ PAGE = r"""<!doctype html>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Pickz">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#0f0f0f">
 <title>Pickz · NBA Props</title>
 <link rel="icon" href="icon-64.png?v=2">
 <link rel="apple-touch-icon" href="icon-180.png?v=2">
@@ -4174,6 +4200,42 @@ PAGE = r"""<!doctype html>
 """
 
 
+# the page's service worker (docs/pickz-sw.js, written beside it by nba_research): the page opens from the phone's copy
+SW = r"""// Pickz's service worker: the page opens from the phone's copy at once, with no wait on the tunnel. Each code version
+// (BUILD) is its own worker: a new one caches its page as it installs, takes over, and the open page reloads to it the
+// next time it goes to the background. Nothing else is touched: the data files, the pictures and the other pages go
+// to the network as before (the page keeps its own copy of the data). To turn it off, delete pickz-sw.js: a 404 on
+// the browser's update check unregisters it.
+const BUILD = "__BUILD__", SHELL = "pickz-shell-" + BUILD, PAGE = new URL("nba_props.html", self.registration.scope).href;
+self.addEventListener("install", e => e.waitUntil(
+  fetch(PAGE, {cache: "no-store"}).then(r => {
+    if (!r.ok) throw new Error("page " + r.status);
+    return r.clone().text().then(t => {
+      if (t.indexOf('BUILD = "' + BUILD + '"') < 0) throw new Error("the page isn't this version yet");   // retried later
+      return caches.open(SHELL).then(c => c.put(PAGE, r));
+    });
+  }).then(() => self.skipWaiting())));
+self.addEventListener("activate", e => e.waitUntil(caches.keys()
+  .then(ks => Promise.all(ks.filter(k => k.startsWith("pickz-shell-") && k !== SHELL).map(k => caches.delete(k))))
+  .then(() => self.clients.claim())));
+self.addEventListener("fetch", e => {
+  const r = e.request;
+  if (r.mode !== "navigate" || new URL(r.url).pathname !== new URL(PAGE).pathname) return;   // the network, untouched
+  e.respondWith(caches.open(SHELL).then(c => c.match(PAGE)).then(hit => hit || fetch(r)).catch(() => fetch(r)));
+});
+"""
+
+
+def build_id():
+    """The page's version: a hash of its code, shared by the page and its worker (a new one replaces the phone's copy)."""
+    import hashlib
+    return hashlib.sha1("\0".join([PAGE, CSS, JS_CORE, JS_APP, SW, json.dumps(TEAM_ID)]).encode()).hexdigest()[:12]
+
+
 def page():
     return (PAGE.replace("__CSS__", CSS).replace("__CORE__", JS_CORE)
-            .replace("__APP__", JS_APP.replace("__TEAM_ID__", json.dumps(TEAM_ID))))
+            .replace("__APP__", JS_APP.replace("__TEAM_ID__", json.dumps(TEAM_ID)).replace("__BUILD__", build_id())))
+
+
+def sw():
+    return SW.replace("__BUILD__", build_id())

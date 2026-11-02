@@ -1262,12 +1262,12 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
 
 
 def write(out_dir, payload):
-    """Atomic writes of nba_props.json and nba_props.html (the board server serves docs/ as is)."""
+    """Atomic writes of nba_props.json, nba_props.html and its worker (the board server serves docs/ as is)."""
     import nba_research_ui as UI
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     for name, body in (("nba_props.json", json.dumps(payload, separators=(",", ":"), default=str)),
-                       ("nba_props.html", UI.page())):
+                       ("nba_props.html", UI.page()), ("pickz-sw.js", UI.sw())):     # the worker after its page
         tmp = out_dir / f".{name}.tmp"
         tmp.write_text(body)
         os.replace(tmp, out_dir / name)
