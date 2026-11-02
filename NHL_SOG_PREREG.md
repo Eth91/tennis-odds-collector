@@ -84,7 +84,7 @@ tests on NHL shots on goal: ice time by strength × shot-attempt rate by strengt
 A pass on C is a candidate for the forward record (NHL 2026-27, shadow), not a betting edge. No live change without the
 user.
 
-## Result (2026-11-02, about 09:50 UTC): A PASS, B PASS, C PASS, D DOES NOT HOLD
+## Result (2026-11-02, 09:12 UTC): A PASS, B PASS, C PASS, D DOES NOT HOLD
 - **Fit on 2023-24:**
   - Minutes (1, last game, last 5, season mean): even 0.10 + 0.11 + 0.38 + 0.50; power play 0.02 + 0.08 + 0.36 +
     0.52; short-handed 0.03 + 0.05 + 0.43 + 0.48.
