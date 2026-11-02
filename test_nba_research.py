@@ -506,7 +506,7 @@ def test_page_controls_work_on_iphone():
     # the file each sport reads (the league button steps through them: nba_props.json / nfl_props.json / nhl_props.json)
     assert 'fetch(dataUrl() + "?t=" + Date.now(), {method: "HEAD", cache: "no-store"})' in html
     assert 'const dataUrl = sp => (sp || SPORT) + "_props.json";' in html and 'const SPORTS = ["nba", "nfl", "nhl"]' in html
-    assert "return m && m !== LAST_MOD ? load() : null;" in html and 'LAST_MOD = r.headers.get("Last-Modified") || LAST_MOD;' in html
+    assert "return sp === SPORT && m && m !== LAST_MOD ? load() : null;" in html and 'LAST_MOD = r.headers.get("Last-Modified") || LAST_MOD;' in html
     assert "Date.now() - CHECK_AT < 8000" in html and "if (D) { CHECK_AT = 0; freshen(); }" in html
     assert "if (D && FRESH && !AUTO_DAY && j.generated_at === D.generated_at) { LOADED_AT = Date.now(); return true; }" in html
     # iOS Safari can't drag the thumb of a range input stacked under another, so the dual sliders are pointer-event widgets
@@ -610,7 +610,7 @@ def test_page_controls_work_on_iphone():
     assert "function mateSheet(" in html and "data-mk2=" in html and "with: ms.filter(m => x.with[m.key]), without: ms.filter(m => x.without[m.key])" in html
     assert html.count("bindMates(s, dr, upd);") == 2
     # chart filters on one scrolling row, nothing behind a More toggle; the row keeps its place when a chip re-renders it
-    assert ".fcs{display:flex;flex-wrap:nowrap" in html and 'id="more"' not in html and '$$("#pcf .fcs").forEach((x, i) => x.scrollLeft = fl[i] || 0);' in html
+    assert ".fcs{display:flex;flex-wrap:nowrap" in html and 'id="more"' not in html and 'afterWrites(() => fx.forEach((x, i) => { x.scrollLeft = fl[i] || 0; }));' in html
     # the With / Without button heads a row of its own just below the stat chips, before any open range slider
     assert """<div class="fcs">${chips.join("")}</div>${mchips.length ? `<div class="fcs fcw">${mchips.join("")}</div>` : ""}${panels}""" in html
     assert """if (ms.length) mchips.push(chip('id="mts\"""" in html and html.count("""chip('id="mts\"""") == 1
@@ -1007,6 +1007,65 @@ def test_page_boots_from_its_last_copy_and_animates_swaps():
     # swaps rise in; Over / Under, the combo window and the Injuries switch slide their pills; Live's bars grow on entry
     assert html.count("swapIn(") >= 9 and '<span class="ou" role="group" aria-label="Side"><span class="pill2">' in html
     assert '<div class="seg cbw" role="group" aria-label="Games"><span class="pill2">' in html and ".lvin .lvbar i{" in html
+
+
+def test_league_switch_checks_before_it_downloads():
+    html = UI.page()
+    # the next sport's file, prefetched: its Last-Modified kept, parsed once the page is idle; a switch to a sport in
+    # hand asks with a HEAD and downloads only a newer file (no 2-5 MB parse on every tap of the league button)
+    assert 'const m = r.headers.get("Last-Modified"); return r.text().then(t => [t, m]);' in html
+    assert "DATA[other] = JSON.parse(x[0]); LASTMOD[other] = x[1] || LASTMOD[other];" in html and "x && idle(() =>" in html
+    assert "if (D && LAST_MOD) { CHECK_AT = 0; freshen(); } else load();" in html
+    assert "const sp = SPORT;\n  fetch(dataUrl() + \"?t=\" + Date.now(), {method: \"HEAD\"" in html   # a HEAD from before a switch: dropped
+    assert "CHECKING = false; if (sp !== SPORT) { CHECK_AT = 0; freshen(); }" in html     # ... and the new sport's asked for
+    # back to a sport: its rows as built, when its data is the same (not rebuilt and re-decoded every switch); the one
+    # after it prefetched
+    assert "KEPT[SPORT] = [D, ROWS, RATES];" in html and "const kept = KEPT[to] && KEPT[to][0] === DATA[to] ? KEPT[to] : null;" in html
+    assert "ROWS = kept ? kept[1] : new Map(); RATES = kept ? kept[2] : new Map();" in html
+    assert "else load();   // in hand: a HEAD for it, the download only when newer\n    prefetchOther();" in html
+
+
+def test_prop_page_lays_out_once_a_tap():
+    html = UI.page()
+    # the scroll positions read before any write, set after them; the charts read the width kept on a resize, not
+    # innerWidth (a forced layout after the writes before them)
+    assert "const cw = $(\"#chw\"), sl = first ? 0 : cw.scrollLeft, atEnd = first || sl + cw.clientWidth >= cw.scrollWidth - 4;" in html
+    assert 'renderProp(was ? undefined : "open"); afterWrites(() => { pg.scrollTop = 0; });' in html
+    assert "afterWrites(() => { cw.scrollLeft = atEnd ? cw.scrollWidth : sl; });" in html and "window.innerWidth, 520" not in html
+    assert html.count("Math.min(VW, 520)") == 3 and 'window.addEventListener("resize", () => { VW = window.innerWidth; });' in html
+    # an opening page draws what shows; the game script, the schedule and the rest once it has slid in, when idle
+    assert 'if (!opening) { $("#pgs").innerHTML = gameScript(' in html
+    assert 'PX.lazy = setTimeout(() => idle(() => { if (PX && PX.p === p) updateProp("rest"); }), 500);' in html
+    # headshots decode off the main thread; WOWY's minutes without toLocaleString (slow, a row at a time)
+    assert html.count('<img class="hs" alt="" loading="lazy" decoding="async" src=') == 3 and "Math.round(s / 60).toLocaleString()" not in html
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_pills_measure_after_the_writes():
+    html = UI.page()
+    cut = lambda pre, end: html[html.index(pre): html.index(end, html.index(pre)) + len(end)]
+    src = cut("const SLIDES = [], AFTER = [];", "AFTER.splice(0).forEach(f => f());\n}\n")
+    mm = cut("const mm = s =>", ";")
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "t.js").write_text("""const window = {innerWidth: 390, addEventListener() {}};
+const log = [];
+const btn = (n, x, w) => ({isConnected: true, get offsetWidth() { log.push("r"); return w; }, get offsetHeight() { log.push("r"); return 30; },
+  get offsetLeft() { log.push("r"); return x; }, get offsetTop() { log.push("r"); return 2; }});
+const box = (b, pw) => { const st = {}, pill = {style: new Proxy(st, {set(t, k, v) { log.push("w"); t[k] = v; return true; }}),
+  get offsetWidth() { log.push("f"); return 0; }}; return {dataset: pw ? {pw: pw} : {}, st: st, q: {".pill2": pill, '[aria-pressed="true"]': b}}; };
+const $ = (s, r) => r.q[s];
+""" + src + "\n" + mm + """
+const A = box(btn("a", 10, 40)), B = box(btn("b", 100, 60), 50);
+slide(A, true); slide(B); afterWrites(() => log.push("after")); log.push("sync");
+setTimeout(() => console.log(JSON.stringify({log: log, a: A.st, b: B.st, mm: [0, 999, 1234, 1234567].map(v => mm(v * 60))})), 0);
+""")
+    out = json.loads(subprocess.run([NODE, str(d / "t.js")], capture_output=True, text=True, check=True).stdout)
+    L = out["log"]
+    # nothing measured in the tap's own code; then every read before the first write (one layout), the after-work last
+    assert L[0] == "sync" and L.index("w") > max(i for i, x in enumerate(L) if x == "r") and L[-1] == "after"
+    assert out["a"]["transform"] == "translate(10px,2px)" and out["a"]["width"] == "40px" and out["a"]["transition"] == ""
+    assert out["b"]["transform"] == "translate(105px,2px)" and out["b"]["width"] == "50px" and "transition" not in out["b"]
+    assert out["mm"] == ["0", "999", "1,234", "1,234,567"]
 
 
 @pytest.mark.skipif(NODE is None, reason="node not installed")
