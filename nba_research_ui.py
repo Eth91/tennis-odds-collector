@@ -1053,7 +1053,7 @@ const mt = (s, day) => s ? iso(s).toLocaleString("en-US", Object.assign({timeZon
 const ago = s => { if (!s) return "never"; const m = (Date.now() - iso(s).getTime()) / 60000; return m < 1 ? "just now" : m < 60 ? Math.round(m) + "m ago" : Math.round(m / 60) + "h ago"; };
 let logo = (t, c) => TEAM_ID[t] ? `<img class="${c || "lg"}" alt="" decoding="async" src="https://cdn.nba.com/logos/nba/${TEAM_ID[t]}/global/D/logo.svg">` : "";
 let heroSrc = pid => `https://cdn.nba.com/headshots/nba/latest/1040x760/${pid}.png`;
-let head = pid => `<img class="hs" alt="" loading="lazy" src="https://cdn.nba.com/headshots/nba/latest/260x190/${pid}.png" onerror="this.style.visibility='hidden'">`;
+let head = pid => `<img class="hs" alt="" loading="lazy" decoding="async" src="https://cdn.nba.com/headshots/nba/latest/260x190/${pid}.png" onerror="this.style.visibility='hidden'">`;
 const short = m => (D.markets || {})[m] || m;
 const gameOf = gid => D.games.find(g => g.gid === gid) ||
   (String(gid).startsWith("none:") ? {gid: gid, date: D.dates[0], home: gid.slice(5), away: "", state: "none", tip: null} : undefined);
@@ -1295,16 +1295,33 @@ function cardNote(g) {
   const n = [g.lines && Math.abs(g.lines.spread_home) >= 10 ? "±" + Math.abs(g.lines.spread_home) : "", b2(g, g.away) || b2(g, g.home) ? "B2B" : ""].filter(Boolean);
   return n.length ? `<span class="gsp">${n.join(" · ")}</span>` : "";
 }
-// a pill under the pressed button of a capsule, moved with a transform so a tap slides it across
+// a pill under the pressed button of a capsule, moved with a transform so a tap slides it across. Measured once the
+// caller's writes are done (a microtask), every pill of the tap in one pass, all reads then all writes: the page lays
+// out once, not once a pill (each read after a write is a full layout of the list)
+const SLIDES = [], AFTER = [];
+// the window's width, kept on a resize: reading innerWidth after a write lays the page out (the charts read it)
+let VW = window.innerWidth;
+window.addEventListener("resize", () => { VW = window.innerWidth; });
+const flushSoon = () => { if (!SLIDES.length && !AFTER.length) queueMicrotask(slideAll); };
 function slide(box, instant) {
   const pill = box && $(".pill2", box), b = box && $('[aria-pressed="true"]', box);
   if (!pill) return;
   if (!b) { pill.style.opacity = 0; return; }
-  if (instant) pill.style.transition = "none";
-  const w = +box.dataset.pw || b.offsetWidth;
-  pill.style.width = w + "px"; pill.style.height = b.offsetHeight + "px";
-  pill.style.transform = `translate(${b.offsetLeft + (b.offsetWidth - w) / 2}px,${b.offsetTop}px)`; pill.style.opacity = 1;
-  if (instant) { void pill.offsetWidth; pill.style.transition = ""; }
+  flushSoon(); SLIDES.push([box, pill, b, instant]);
+}
+// work that reads the layout (a scroll position kept or set) after the caller's writes, in the pills' pass
+function afterWrites(f) { flushSoon(); AFTER.push(f); }
+function slideAll() {
+  const xs = SLIDES.splice(0).filter(x => x[2].isConnected).map(([box, pill, b, instant]) =>
+    [pill, instant, +box.dataset.pw || b.offsetWidth, b.offsetWidth, b.offsetHeight, b.offsetLeft, b.offsetTop]);
+  xs.forEach(([pill, instant, w, bw, bh, bl, bt]) => {
+    if (instant) pill.style.transition = "none";
+    pill.style.width = w + "px"; pill.style.height = bh + "px";
+    pill.style.transform = `translate(${bl + (bw - w) / 2}px,${bt}px)`; pill.style.opacity = 1;
+  });
+  const snap = xs.filter(x => x[1]);
+  if (snap.length) { void snap[0][0].offsetWidth; snap.forEach(x => { x[0].style.transition = ""; }); }
+  AFTER.splice(0).forEach(f => f());
 }
 function press(sel, test, root) { $$(sel, root).forEach(b => b.setAttribute("aria-pressed", test(b))); }
 function render() {
@@ -1654,15 +1671,15 @@ function wowyView(swap) {
     $$("[data-wt]", el).forEach(b => b.onclick = () => { if (b.dataset.wt !== t) { ST.wt = b.dataset.wt; ST.wo = ""; WOWY_ME = null; save(); wowyView(true); } });
     $$("[data-wo]", el).forEach(b => b.onclick = () => { if (+b.dataset.wo !== y) { ST.wo = b.dataset.wo; save(); wowyView(true); } });
     $$("[data-ws]", el).forEach(b => b.onclick = () => { if (b.dataset.ws !== ws) { ST.ws = b.dataset.ws; save(); wowyView(true); } });
+    // each rail scrolled to its pressed button, once the list below is written too (one layout)
+    const centre = (rl, x0) => { const b = $('[aria-pressed="true"]', rl), x = x0 === undefined ? rl.scrollLeft : x0;
+      rl.scrollLeft = b && (b.offsetLeft < x || b.offsetLeft + b.offsetWidth > x + rl.clientWidth) ? b.offsetLeft - (rl.clientWidth - b.offsetWidth) / 2 : x; };
     [["#wtl", "[data-wt]", b => b.dataset.wt === t], ["#wsl", "[data-ws]", b => b.dataset.ws === ws]].forEach(([r, sel, on]) => {
       const rl = $(r, el); if (!rl) return;
-      press(sel, on, rl); slide(rl, true);
-      const b = $('[aria-pressed="true"]', rl);
-      if (b && (b.offsetLeft < rl.scrollLeft || b.offsetLeft + b.offsetWidth > rl.scrollLeft + rl.clientWidth)) rl.scrollLeft = b.offsetLeft - (rl.clientWidth - b.offsetWidth) / 2;
+      press(sel, on, rl); slide(rl, true); afterWrites(() => centre(rl));
     });
     const wy = $(".wyp", el);
-    if (wy) { wy.scrollLeft = sx; const b = $('[aria-pressed="true"]', wy);
-      if (b && (b.offsetLeft < wy.scrollLeft || b.offsetLeft + b.offsetWidth > wy.scrollLeft + wy.clientWidth)) wy.scrollLeft = b.offsetLeft - (wy.clientWidth - b.offsetWidth) / 2; }
+    if (wy) afterWrites(() => centre(wy, sx));
     const wl = $("#wol", el);
     if (swap) swapIn(wl);
     if (!doc || !roster.length) { wl.innerHTML = '<div class="empty"><b>No lineups yet</b></div>'; return; }
@@ -1671,7 +1688,7 @@ function wowyView(swap) {
     const rate = s => s[0] ? parts.reduce((a, k) => a + s[1][at[k]], 0) / s[0] * (hk ? 3600 : 2160) : null;      // per 36 (NHL: per 60)
     const net = s => s[0] ? (s[1] - s[2]) / s[0] * (hk ? 3600 : 2880) : null, sgn = v => (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(1);
     const per = hk ? "per 60" : "per 36", PER = hk ? "PER 60" : "PER 36", ice = hk ? "ice" : "court";
-    const mm = s => Math.round(s / 60).toLocaleString();
+    const mm = s => String(Math.round(s / 60)).replace(/\B(?=(\d{3})+$)/g, ",");   // 1,234 (toLocaleString is slow a row)
     const q = ST.q.trim().toLowerCase(), si = doc.stats.indexOf("saves");
     // the NHL: the skaters' stats list the skaters, saves the goalies (a goalie not on the slate: his saves say so)
     const gk = p => (who.get(p) || [])[3] === "G" || (si >= 0 && !!doc.toi && !!doc.toi[p] && doc.toi[p][1][si] > 0);
@@ -1942,7 +1959,7 @@ function openProp(id, push) {
   if (push !== false) history.pushState({p: id, d: navDepth() + 1}, "", hashState());
   const pg = $("#pg");
   pg.hidden = false;                        // (off-screen until it slides in; it must lay out for the pills to measure)
-  if (fresh) { renderProp(was ? undefined : "open"); pg.scrollTop = 0; }
+  if (fresh) { renderProp(was ? undefined : "open"); afterWrites(() => { pg.scrollTop = 0; }); }
   if (was) return;
   // the page lays out off-screen for a frame, then slides in as a Web Animation (on the compositor, no forced layout);
   // the timer covers a background tab, where no frames come
@@ -2047,7 +2064,7 @@ function chart2(logs, market, line, ov, grow) {
   const top = own ? stTop : Math.max(stTop, ...ovs.filter(num));
   // measured from the reference: bars start 35 pt in and the plot is 144.6 pt tall; a slot is a fifth of the width until
   // there are more than 5 games (5 or fewer: 69 pt slots, 8.3 pt gaps; 10: 34 pt, 3 pt; 20 scroll sideways)
-  const W0 = Math.min(window.innerWidth, 520) - 30.6, AX = 35, ne = Math.max(n, 5);
+  const W0 = Math.min(VW, 520) - 30.6, AX = 35, ne = Math.max(n, 5);
   const gap = Math.max(2.4, 8.3 - (ne - 5) * 1.06), slot = Math.max(30, (W0 - AX + gap) / ne);
   const W = Math.max(W0, AX + n * slot - gap), T = 8, B = T + 144.6, H = B + 38;
   const y = v => B - v / top * (B - T), ym = own ? v => B - Math.abs(v) / (oMax / .86) * (B - T) : y;
@@ -2118,7 +2135,7 @@ function projCard(p, line, side) {
   if (M.error || !pr) return head + `<div class="box0 pj"><div class="note" style="margin:0">${esc(M.error ? "Unavailable" : "Not projected yet")}</div></div>`;
   const at = projAt(p, line, side), sd = side === "under" ? "Under" : "Over";
   // the pmf as bars, the selected line marked
-  const vals = pr.pmf[1], start = pr.pmf[0], mx = Math.max(...vals), W = Math.min(window.innerWidth, 520) - 56, H = 54;
+  const vals = pr.pmf[1], start = pr.pmf[0], mx = Math.max(...vals), W = Math.min(VW, 520) - 56, H = 54;
   const bw = W / vals.length, xL = (line - start + .5) * bw;
   const bars = vals.map((v, i) => { const k = start + i, h = mx ? v / mx * (H - 4) : 0, win = side === "under" ? k < line : k > line;
     return `<rect x="${(i * bw).toFixed(2)}" y="${(H - h).toFixed(2)}" width="${Math.max(bw - 1, .6).toFixed(2)}" height="${h.toFixed(2)}" fill="${win ? "#4a8f6f" : "#3a3a3c"}"/>`; }).join("");
@@ -2178,7 +2195,7 @@ function histChart(p) {
   const vals = books.flatMap(([b]) => H[b].map(x => x[1]));
   let lo = Math.min(...vals), hi = Math.max(...vals);
   if (hi - lo < 1) { lo -= .5; hi += .5; }
-  const W = Math.min(window.innerWidth, 520) - 30.6, Hh = 92, AX = 30, x = t => AX + (W - AX - 6) * (ms(t) - t0) / Math.max(1, end - t0);
+  const W = Math.min(VW, 520) - 30.6, Hh = 92, AX = 30, x = t => AX + (W - AX - 6) * (ms(t) - t0) / Math.max(1, end - t0);
   const y = v => 10 + (Hh - 22) * (hi - v) / (hi - lo);
   const o = [`<svg class="hc" width="${W}" height="${Hh}" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Main line over time">`];
   [hi, lo].forEach(v => o.push(`<text x="0" y="${y(v) + 4}">${v}</text><line x1="${AX}" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="#262626"/>`));
@@ -2381,6 +2398,8 @@ function updateProp(mode) {
   if (!PX) return;
   const first = !!mode && mode !== "rest", opening = mode === "open", rest = mode === "rest";
   const {p, g, logs, c, without, wins} = PX, pg = $("#pg"), line = DT.line, side = ST.side;
+  const cw = $("#chw"), sl = first ? 0 : cw.scrollLeft, atEnd = first || sl + cw.clientWidth >= cw.scrollWidth - 4;   // reads, before any write
+  const fl = $$("#pcf .fcs").map(x => x.scrollLeft);
   const f = chartF(p, g, c, without);
   const base = filterLogs(logs, f);
   const win = windowed(base, DT.win, D.season, p.opp);
@@ -2404,9 +2423,8 @@ function updateProp(mode) {
       <button class="muc" id="mub">${gauge(gr)}<span>Matchup <span class="cv">›</span></span></button>`;
   // chart
   if (!rest) {
-  const cw = $("#chw"), sl = cw.scrollLeft, atEnd = first || sl + cw.clientWidth >= cw.scrollWidth - 4;
   cw.innerHTML = chart2(win, p.market, line, ov, !first);
-  cw.scrollLeft = atEnd ? cw.scrollWidth : sl;
+  afterWrites(() => { cw.scrollLeft = atEnd ? cw.scrollWidth : sl; });
   boxWarm(win);
   // window capsule
   wins.forEach(([k]) => {
@@ -2452,12 +2470,13 @@ function updateProp(mode) {
   const anyF = DT.dvp || DT.def || DT.home !== null || DT.starter !== null || DT.blow !== null || DT.result !== null || DT.rest !== null ||
     Object.keys(DT.ranges).some(k => forMarket(k, p.market)) || Object.keys(DT.without).some(k => DT.without[k]) ||
     Object.keys(DT.with).some(k => DT.with[k]) || Object.keys(DT.open).some(k => DT.open[k] && forMarket(k, p.market));
-  if (!rest) { const fl = $$("#pcf .fcs").map(x => x.scrollLeft);
+  if (!rest) {
     $("#pcf").innerHTML = `<div class="cf-h"><h3>Chart Filters</h3><button class="ca" id="clr"${anyF ? "" : " hidden"}>Clear All</button></div>
       <div class="fcs">${chips.join("")}</div>${mchips.length ? `<div class="fcs fcw">${mchips.join("")}</div>` : ""}${panels}`;
-    $$("#pcf .fcs").forEach((x, i) => x.scrollLeft = fl[i] || 0); }   // each row keeps its place when a chip re-renders it
-  if (!rest) { $("#pgs").innerHTML = gameScript(p, g, logs, line, side); $("#psc").innerHTML = schedCard(p, g, logs, line, side); if (SPORT === "nba") refsRow(p, g); }
-  if (opening) { PX.lazy = setTimeout(() => { if (PX && PX.p === p) updateProp("rest"); }, 470); bindLive(p, logs, without); return; }
+    const fx = $$("#pcf .fcs"); afterWrites(() => fx.forEach((x, i) => { x.scrollLeft = fl[i] || 0; })); }   // each row keeps its place when a chip re-renders it
+  // below the fold: drawn once the page has slid in (opening), so the tap's frame holds only what shows
+  if (!opening) { $("#pgs").innerHTML = gameScript(p, g, logs, line, side); $("#psc").innerHTML = schedCard(p, g, logs, line, side); if (SPORT === "nba") refsRow(p, g); }
+  if (opening) { PX.lazy = setTimeout(() => idle(() => { if (PX && PX.p === p) updateProp("rest"); }), 500); bindLive(p, logs, without); return; }
   if (!PX.statDone) { $("#pstat").innerHTML = PX.stat; PX.statDone = true; $$("[data-rel]", pg).forEach(b => b.onclick = () => openProp(b.dataset.rel)); }
   if (p.v) { $("#pproj").innerHTML = ""; $("#pbk").innerHTML = ""; }      // a player page: no line posted, no books
   else {
@@ -3144,7 +3163,7 @@ function playerFilters(p, logs, without) {
 // is instant ──
 let SPORT = "nba", SWITCHING = false, HASH_USED = false;
 const SPORTS = ["nba", "nfl", "nhl"], nextSport = sp => SPORTS[(SPORTS.indexOf(sp) + 1) % SPORTS.length];
-const DATA = {nba: null, nfl: null, nhl: null}, LASTMOD = {}, SPORT_ST = {};
+const DATA = {nba: null, nfl: null, nhl: null}, LASTMOD = {}, SPORT_ST = {}, KEPT = {};   // KEPT: a sport's [data, rows, rates] while away
 const dataUrl = sp => (sp || SPORT) + "_props.json";
 const LS = k => SPORT === "nba" ? k : k + "_" + SPORT;      // favorites, recents and combos are kept per sport
 const NBA_CFG = {ORDER, NAME, RANGES, OVL, RANGE_FOR, SEGS, logo, heroSrc, head, MKT_TABS, VIEWS, TEAMS, POSN, TAB_ORDER, TAB,
@@ -3206,7 +3225,7 @@ const NFL_CFG = {
   ROLE_TH: {snap_pct: 12, targets: 2.5, rush_att: 4, tgt_share: 7, rz: 1.5},
   logo: (t, c) => NFL_TEAMS[t] ? `<img class="${c || "lg"}" alt="" decoding="async" src="https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/${NFL_TEAMS[t][2]}.png&w=80&h=80">` : "",
   heroSrc: pid => nflHead(pid, true),
-  head: pid => { const s = nflHead(pid); return `<img class="hs" alt="" loading="lazy" src="${esc(s)}" onerror="this.style.visibility='hidden'"${s ? "" : ' style="visibility:hidden"'}>`; },
+  head: pid => { const s = nflHead(pid); return `<img class="hs" alt="" loading="lazy" decoding="async" src="${esc(s)}" onerror="this.style.visibility='hidden'"${s ? "" : ' style="visibility:hidden"'}>`; },
 };
 const NFL_RCHIPS = ["snap_pct", "targets", "rush_att", "pass_att", "tgt_share", "air_yds", "rz_tgt", "rz_rush"];
 // ── the NHL (nhl_props.json, nhl_research): hockey's tables. Its players and pages come from the payload, as the NFL's;
@@ -3251,7 +3270,7 @@ const NHL_CFG = {
   ROLE_TH: {min: 2.5, pp_min: 1, shots: 1, attempts: 1.5, pp_share: 20},
   logo: (t, c) => NHL_TEAMS[t] ? `<img class="${c || "lg"}" alt="" decoding="async" src="https://assets.nhle.com/logos/nhl/svg/${t}_dark.svg">` : "",
   heroSrc: pid => nhlHead(pid),
-  head: pid => { const s = nhlHead(pid); return `<img class="hs" alt="" loading="lazy" src="${esc(s)}" onerror="this.style.visibility='hidden'"${s ? "" : ' style="visibility:hidden"'}>`; },
+  head: pid => { const s = nhlHead(pid); return `<img class="hs" alt="" loading="lazy" decoding="async" src="${esc(s)}" onerror="this.style.visibility='hidden'"${s ? "" : ' style="visibility:hidden"'}>`; },
 };
 const NHL_RCHIPS = ["min", "pp_min", "shots", "attempts", "shifts", "shot_share", "pp_share", "sa"];
 // overlays always on their own scale (percentages, betting lines, the margin), and the signed ones (labelled +/-)
@@ -3304,7 +3323,7 @@ function switchSport() {
     {opacity: 0, transform: `translateX(${-28 * dir}px)`}], {duration: 170, easing: "cubic-bezier(.4,0,1,1)", fill: "forwards"}));
   const swap = () => {
     SPORT_ST[SPORT] = {market: ST.market, date: ST.date, gid: ST.gid, team: ST.team, sort: ST.sort, dir: ST.dir, view: ST.view, iv: ST.iv, rs: ST.rs, auto: AUTO_DAY};
-    LASTMOD[SPORT] = LAST_MOD;
+    LASTMOD[SPORT] = LAST_MOD; KEPT[SPORT] = [D, ROWS, RATES];
     useSport(to);
     const back = SPORT_ST[to];
     Object.assign(ST, {sp: to === "nba" ? "" : to, gid: "all", team: "all", q: "", iv: "", rs: "", market: ORDER[0], date: null}, back || {});
@@ -3312,7 +3331,9 @@ function switchSport() {
     if (!VIEWS.some(v => v[0] === ST.view)) ST.view = "props";
     if (MKT_TABS.indexOf(ST.market) < 0) ST.market = ORDER[0];
     AUTO_DAY = back ? back.auto : true;
-    LAST_MOD = LASTMOD[to] || null; FRESH = !!DATA[to]; RATES = new Map(); ROWS = new Map(); VP = new Map(); VPL.clear(); FLAGS_D = null;
+    LAST_MOD = LASTMOD[to] || null; FRESH = !!DATA[to]; VP = new Map(); VPL.clear(); FLAGS_D = null;
+    const kept = KEPT[to] && KEPT[to][0] === DATA[to] ? KEPT[to] : null;   // its rows, built for the data still in hand
+    ROWS = kept ? kept[1] : new Map(); RATES = kept ? kept[2] : new Map();
     const q = $("#q"); if (q) { q.value = ""; q.closest(".sx").classList.remove("has"); $("#qx").hidden = true; }
     const tb = $("#tb"); tb.innerHTML = ""; delete tb.dataset.on;
     save();
@@ -3328,18 +3349,22 @@ function switchSport() {
     if (!REDUCED && !document.hidden) parts().forEach((el, i) => el.animate([{opacity: 0, transform: `translateX(${32 * dir}px)`}, {opacity: 1, transform: "none"}],
       {duration: 340, delay: i * 18, easing: EASE, fill: "backwards"}));
     SWITCHING = false;
-    load();
+    if (D && LAST_MOD) { CHECK_AT = 0; freshen(); } else load();   // in hand: a HEAD for it, the download only when newer
+    prefetchOther();                                            // and the one after it, so the next tap is instant too
   };
   if (outs.length) Promise.all(outs.map(a => a.finished)).then(swap, swap); else swap();
 }
 // the next sport's file, fetched once the page is idle, so the first switch is instant too (not on Low Data Mode)
 let OTHER_T = 0;
+const idle = f => window.requestIdleCallback ? requestIdleCallback(f, {timeout: 2000}) : setTimeout(f, 50);
 function prefetchOther() {
   clearTimeout(OTHER_T);
   const other = nextSport(SPORT);
   if (DATA[other] || (navigator.connection && navigator.connection.saveData)) return;
   OTHER_T = setTimeout(() => fetch(dataUrl(other) + "?t=" + Date.now(), {cache: "no-store"})
-    .then(r => r.ok ? r.json() : null).then(j => { if (j && !DATA[other] && other !== SPORT) DATA[other] = j; }).catch(() => {}), 4000);
+    .then(r => { if (!r.ok) return null; const m = r.headers.get("Last-Modified"); return r.text().then(t => [t, m]); })
+    .then(x => x && idle(() => { if (DATA[other] || other === SPORT) return; DATA[other] = JSON.parse(x[0]); LASTMOD[other] = x[1] || LASTMOD[other]; }))
+    .catch(() => {}), 4000);
 }
 // ── NFL: players and pages from the payload (every slate player's logs are in it) ──
 function nflIndex() {
@@ -4036,9 +4061,10 @@ let LAST_MOD = null, CHECK_AT = 0, CHECKING = false;
 function freshen() {
   if (!D || !FRESH || CHECKING || document.hidden || Date.now() - CHECK_AT < 8000) return;
   CHECKING = true; CHECK_AT = Date.now();
+  const sp = SPORT;
   fetch(dataUrl() + "?t=" + Date.now(), {method: "HEAD", cache: "no-store"})
-    .then(r => { const m = r.ok ? r.headers.get("Last-Modified") : null; return m && m !== LAST_MOD ? load() : null; })
-    .catch(() => null).then(() => { CHECKING = false; });
+    .then(r => { const m = r.ok ? r.headers.get("Last-Modified") : null; return sp === SPORT && m && m !== LAST_MOD ? load() : null; })
+    .catch(() => null).then(() => { CHECKING = false; if (sp !== SPORT) { CHECK_AT = 0; freshen(); } });   // the league tapped mid-check: the new one's
 }
 // a payload onto the page (the cached copy at a launch, then each fresh one)
 function apply(j) {
