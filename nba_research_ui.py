@@ -774,7 +774,8 @@ function windowed(logs, win, season, opp) {
 // player-page filters: home / starter = true, false or null (any); result = "W" / "L"; rest = "b2b" / "1" / "2+";
 // oppSets = [{season: [teams]}] (the opponent must be in each);
 // ranges = {min|fga|fg3a|fta|margin: [lo, hi]} inclusive (a game missing that stat is out); without = [{played, since, team}]
-// (his games for that team since the teammate's first there, the teammate out); with = [{played, team}] (both played)
+// (his games for that team since the teammate's first there, the teammate out); with = [{played, team}] (both played);
+// cup = {gid: label} (NBA Cup games only)
 function filterLogs(logs, f) {
   f = f || {};
   return logs.filter(function (l) {
@@ -790,6 +791,7 @@ function filterLogs(logs, f) {
     if (f.rest === "2+" && !(l.rest >= 2)) return false;
     if (f.rest === "short" && !(l.rest !== null && l.rest !== undefined && l.rest <= 4)) return false;   // NFL: 4 days or fewer
     if (f.rest === "bye" && !(l.rest >= 10)) return false;                                              // NFL: off a bye
+    if (f.cup && !f.cup[l.gid]) return false;
     for (var j = 0; j < (f.oppSets || []).length; j++) {       // {season: [opponents]}: the tier chips
       var ss = f.oppSets[j][seasonOf(l.date)];
       if (!ss || ss.indexOf(l.opp) < 0) return false;
@@ -1042,8 +1044,8 @@ let D = null, ERR = null, LOADING = true, CUR = null;
 const TOUCH = matchMedia("(pointer: coarse)").matches;
 const ST = {date: null, gid: "all", market: "points", side: "over", q: "", sort: "hit10", dir: "desc", team: "all",
             book: "all", lmin: "", lmax: "", omin: "", omax: "", watch: "", view: "props", iv: "", rs: "", sp: "", wt: "", wo: "", ws: ""};
-const DT = {line: null, win: "l10", home: null, starter: null, blow: null, result: null, rest: null, ranges: {}, without: {}, with: {},
-            dvp: false, def: false, open: {}, fresh: null, ovs: []};
+const DT = {line: null, win: "l10", home: null, starter: null, blow: null, result: null, rest: null, cup: null, cupWin: null, ranges: {},
+            without: {}, with: {}, dvp: false, def: false, open: {}, fresh: null, ovs: []};
 let RANGES = [["min", "Minutes", "Minutes"], ["fga", "Field goal attempts", "FGA"], ["fg3a", "3-point attempts", "3PTA"],
                 ["fta", "Free throw attempts", "FTA"], ["usg", "Usage %", "Usage%"], ["pot_ast", "Potential assists", "Potential Assists"],
                 ["reb_ch", "Rebound chances", "Rebound Chances"], ["margin", "Team margin", "Margin"]];
@@ -1055,7 +1057,8 @@ const forMarket = (k, m) => !RANGE_FOR[k] || RANGE_FOR[k].indexOf(m) >= 0;
 let SEGS = [["home", "Location", [[null, "Any"], [true, "Home"], [false, "Away"]]],
               ["starter", "Role", [[null, "Any"], [true, "Starter"], [false, "Bench"]]],
               ["result", "Result", [[null, "Any"], ["W", "Win"], ["L", "Loss"]]],
-              ["rest", "Rest", [[null, "Any"], ["b2b", "B2B"], ["1", "1 day"], ["2+", "2+ days"]]]];
+              ["rest", "Rest", [[null, "Any"], ["b2b", "B2B"], ["1", "1 day"], ["2+", "2+ days"]]],
+              ["cup", "Games", [[null, "All"], [true, "NBA Cup"]]]];
 const $ = (s, r) => (r || document).querySelector(s);
 const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
@@ -1300,10 +1303,10 @@ function cards() {
   return `<button class="gc0" id="dayb" aria-haspopup="dialog"><i>${lab}</i><i>${gs.length} GAME${gs.length === 1 ? "" : "S"}</i></button>` +
     gs.map(g => `<button class="gc" data-gid="${g.gid}" aria-pressed="${g.gid === ST.gid}" aria-label="${esc(g.away)} at ${esc(g.home)}"><span class="gt">${[g.away, g.home].map(t => `<span${b2(g, t) ? ' class="b2t"' : ""}>${logo(t, "")}${esc(t)}</span>`).join("")}</span><em>${g.state === "live" ? '<span class="lv">LIVE</span>' : g.state === "final" ? "Final" : g.state === "postponed" ? "PPD" : mt(g.tip).replace(" ", "\u200a")}${cardNote(g)}</em></button>`).join("");
 }
-// a card's second line under the tip: a spread of 10+ and a team on a back-to-back (its abbreviation in orange)
+// a card's second line under the tip: an NBA Cup game, a spread of 10+ and a team on a back-to-back (its abbreviation in orange)
 const b2 = (g, t) => !!((g.spots || {})[t] || {}).b2b;
 function cardNote(g) {
-  const n = [g.lines && Math.abs(g.lines.spread_home) >= 10 ? "±" + Math.abs(g.lines.spread_home) : "", b2(g, g.away) || b2(g, g.home) ? "B2B" : ""].filter(Boolean);
+  const n = [D.cup && D.cup[g.gid] ? "Cup" : "", g.lines && Math.abs(g.lines.spread_home) >= 10 ? "±" + Math.abs(g.lines.spread_home) : "", b2(g, g.away) || b2(g, g.home) ? "B2B" : ""].filter(Boolean);
   return n.length ? `<span class="gsp">${n.join(" · ")}</span>` : "";
 }
 // a pill under the pressed button of a capsule, moved with a transform so a tap slides it across. Measured once the
@@ -1966,7 +1969,8 @@ function openProp(id, push) {
   CUR = id;
   if (fresh) Object.assign(DT, {line: p.v ? vLine(p) : p.main !== null ? p.main : allLines(p)[0], fresh: null}, same ? {} : {
                                  win: windowed(logsOf(p), "season", D.season).length ? "season" : "l10", home: null, starter: null, blow: null,
-                                 result: null, rest: null, ranges: {}, without: {}, with: {}, dvp: false, def: false, open: {}, ovs: []});
+                                 result: null, rest: null, cup: null, cupWin: null, ranges: {}, without: {}, with: {}, dvp: false, def: false,
+                                 open: {}, ovs: []});
   if (push !== false) history.pushState({p: id, d: navDepth() + 1}, "", hashState());
   const pg = $("#pg");
   pg.hidden = false;                        // (off-screen until it slides in; it must lay out for the pills to measure)
@@ -2018,6 +2022,7 @@ const ICON = {
   share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M21 3 3 10.5l7 2.5 2.5 7L21 3Z"/><path d="m10 13 4.5-4.5"/></svg>',
   star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/></svg>',
   pm: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 1.5v8M4 5.5h8M4 14h8"/></svg>',
+  cup: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h10V9a5 5 0 0 1-10 0V3.5Z"/><path d="M7 5.5H3.5a3.5 3.5 0 0 0 4 4.4M17 5.5h3.5a3.5 3.5 0 0 1-4 4.4M12 14v4.5M8 20.5h8"/></svg>',
   bars: '<svg viewBox="0 0 18 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M1.5 1.5v13h15"/><path stroke-width="2.2" d="M5.5 11.5v-4M9 11.5v-7M12.5 11.5v-5M16 11.5V9"/></svg>',
   menu: '<svg viewBox="0 0 22 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 3h18M5 8h12M8 13h6"/></svg>',
   search: '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="7.5" cy="7.5" r="5.5"/><path d="m12 12 4.5 4.5"/></svg>',
@@ -2408,8 +2413,23 @@ function chartF(p, g, c, without, dr) {
   const ms = matesAll(p, without), ranges = {};
   Object.keys(x.ranges).forEach(k => { if (forMarket(k, p.market)) ranges[k] = x.ranges[k]; });   // potential assists: kept, off on points
   return {home: x.home, starter: x.starter, blow: x.blow, result: x.result, rest: x.rest, ranges: ranges, oppSets: oppSets,
-          with: ms.filter(m => x.with[m.key]), without: ms.filter(m => x.without[m.key])};
+          cup: x.cup && D.cup ? D.cup : null, with: ms.filter(m => x.with[m.key]), without: ms.filter(m => x.without[m.key])};
 }
+// the NBA Cup filter: shown for a player with a Cup game in his logs (D.cup: {gid: group or round}, NBA only)
+const hasCup = logs => !!D.cup && logs.some(l => D.cup[l.gid]);
+// his Cup games are few and span two seasons, so turning the filter on widens a window that would hide some of them to
+// L20 (every Cup game he has), and turning it off puts that window back: the window ({win, cupWin}) after the filter
+// goes from was to now. A sheet counts its games with it, so its Show button says what the chart will show
+function cupWin(was, now) {
+  const w = {win: DT.win, cupWin: DT.cupWin};
+  if (!PX || !was === !now) return w;
+  if (now) {
+    const all = filterLogs(PX.logs, {cup: D.cup});
+    return windowed(all, DT.win, D.season, PX.p.opp).length < all.length ? {win: "l20", cupWin: DT.win} : w;
+  }
+  return DT.cupWin ? {win: DT.win === "l20" ? DT.cupWin : DT.win, cupWin: null} : w;
+}
+const cupWindow = was => Object.assign(DT, cupWin(was, DT.cup));
 function updateProp(mode) {
   if (!PX) return;
   const first = !!mode && mode !== "rest", opening = mode === "open", rest = mode === "rest";
@@ -2450,9 +2470,9 @@ function updateProp(mode) {
     v.textContent = h.t; v.className = h.c;
   });
   slide($("#wcap"), first);
-  $("#psr").textContent = `${side === "under" ? "Under" : "Over"} ${line}: ${rate === null ? "no games" : Math.round(rate * 100) + "% of " + s.n + " games"}.${ov ? " White boxes = " + OVL[ov] + "." : ""}`;
+  $("#psr").textContent = `${side === "under" ? "Under" : "Over"} ${line}: ${rate === null ? "no games" : Math.round(rate * 100) + "% of " + s.n + (s.n === 1 ? " game" : " games")}.${ov ? " White boxes = " + OVL[ov] + "." : ""}`;
   }
-  // chart filter chips, one scrolling row: the adjustable ranges, Starter, Blowouts, DvP, Def Rank, then Home … B2B;
+  // chart filter chips, one scrolling row: NBA Cup, the adjustable ranges, Starter, Blowouts, DvP, Def Rank, then Home … B2B;
   // the teammates on a row of their own just below: the With / Without button, then tonight's news and the ones set
   const on = (k, v) => DT[k] === v;
   const chip = (attrs, lab, active) => `<button class="fc${active ? " on" : ""}" ${attrs} aria-pressed="${!!active}">${lab}</button>`;
@@ -2460,7 +2480,8 @@ function updateProp(mode) {
   const chips = [], mchips = [];
   const rchip = k => { if (!forMarket(k, p.market)) return; const b = bounds(logs, k), abbr = RANGES.find(r => r[0] === k)[2]; if (b && b[0] !== b[1]) chips.push(chip(`data-r="${k}"`, `${OVL[k] ? ICON.bars : ICON.pm}${abbr}`, rangeOn(k) || DT.open[k])); };
   const tchip = (k, v, lab) => chips.push(chip(`data-k="${k}" data-v="${v}"`, lab, on(k, v)));
-  (SPORT === "nfl" ? NFL_RCHIPS : SPORT === "nhl" ? NHL_RCHIPS : ["min", "fga", "fg3a", "fta", "usg", "pot_ast", "reb_ch"]).forEach(rchip);   // the adjustable filters first
+  if (hasCup(logs)) chips.push(chip('data-k="cup" data-v="true"', `${ICON.cup}NBA Cup`, on("cup", true)));   // his NBA Cup games only
+  (SPORT === "nfl" ? NFL_RCHIPS : SPORT === "nhl" ? NHL_RCHIPS : ["min", "fga", "fg3a", "fta", "usg", "pot_ast", "reb_ch"]).forEach(rchip);   // then the adjustable filters
   if (logs.some(l => l.starter === 1)) tchip("starter", true, "Starter");     // only the games he started
   if (logs.some(l => Math.abs(l.margin) >= 15)) tchip("blow", "b", "Blowouts"); // only games decided by 15+
   if (c.dvp_rank) chips.push(chip('data-t="dvp"', `DvP <em class="${rankCls(c.dvp_rank, c.teams, side)}">${ord(c.dvp_rank)}</em>`, DT.dvp));
@@ -2483,7 +2504,7 @@ function updateProp(mode) {
       <div class="rp-b"><span>${b[0]}</span><span>${b[1]}</span></div></div>`;
   }).join("");
   DT.fresh = null;
-  const anyF = DT.dvp || DT.def || DT.home !== null || DT.starter !== null || DT.blow !== null || DT.result !== null || DT.rest !== null ||
+  const anyF = DT.dvp || DT.def || DT.home !== null || DT.starter !== null || DT.blow !== null || DT.result !== null || DT.rest !== null || !!DT.cup ||
     Object.keys(DT.ranges).some(k => forMarket(k, p.market)) || Object.keys(DT.without).some(k => DT.without[k]) ||
     Object.keys(DT.with).some(k => DT.with[k]) || Object.keys(DT.open).some(k => DT.open[k] && forMarket(k, p.market));
   if (!rest) {
@@ -2769,7 +2790,7 @@ function bindLive(p, logs, without) {
     if (DT.ranges[k] || DT.open[k]) { delete DT.ranges[k]; DT.open[k] = false; } else { DT.open[k] = true; DT.fresh = k; if (OVL[k]) DT.ovs.push(k); }
     updateProp(); keep(`[data-r="${k}"]`);
   });
-  $$("[data-k]", pg).forEach(b => b.onclick = () => { const k = b.dataset.k, raw = b.dataset.v, v = raw === "true" ? true : raw === "false" ? false : raw; DT[k] = DT[k] === v ? null : v; updateProp(); keep(`[data-k="${k}"][data-v="${raw}"]`); });
+  $$("[data-k]", pg).forEach(b => b.onclick = () => { const k = b.dataset.k, raw = b.dataset.v, v = raw === "true" ? true : raw === "false" ? false : raw, was = DT.cup; DT[k] = DT[k] === v ? null : v; cupWindow(was); updateProp(); keep(`[data-k="${k}"][data-v="${raw}"]`); });
   $$("[data-wo]", pg).forEach(b => b.onclick = () => { const k = b.dataset.wo; DT.without[k] = !DT.without[k]; if (DT.without[k]) delete DT.with[k]; updateProp(); keep(`[data-wo="${k}"]`); });
   $$("[data-mw]", pg).forEach(b => b.onclick = () => { delete DT.with[b.dataset.mw]; updateProp(); });
   $$("[data-mo]", pg).forEach(b => b.onclick = () => { delete DT.without[b.dataset.mo]; updateProp(); });
@@ -2783,7 +2804,7 @@ function bindLive(p, logs, without) {
   });
   $$("button.bl", pg).forEach(b => b.onclick = () => { const l = parseFloat(b.dataset.pl); if (isFinite(l) && DT.line !== l) { DT.line = l; updateProp(); } });
   $$("[data-ll]", pg).forEach(b => b.onclick = () => { const l = +b.dataset.ll; if (DT.line !== l) { DT.line = l; updateProp(); keep(`[data-ll="${l}"]`); } });
-  const clr = $("#clr", pg); if (clr) clr.onclick = () => { Object.assign(DT, {home: null, starter: null, blow: null, result: null, rest: null, ranges: {}, without: {}, with: {}, dvp: false, def: false, open: {}, ovs: []}); updateProp(); };
+  const clr = $("#clr", pg); if (clr) clr.onclick = () => { const was = DT.cup; Object.assign(DT, {home: null, starter: null, blow: null, result: null, rest: null, cup: null, ranges: {}, without: {}, with: {}, dvp: false, def: false, open: {}, ovs: []}); cupWindow(was); updateProp(); };
   $("#lnb", pg).onclick = () => lineSheet(p);
   const lnp = $("#lnp", pg); if (lnp) lnp.onclick = () => lineSheet(p);
   $("#psb", pg).onclick = () => openSheet(`<h2 id="sht">Position rank</h2>${c.pos_rank
@@ -3138,9 +3159,9 @@ function mateSheet(p, logs, without) {
   });
 }
 function playerFilters(p, logs, without) {
-  const dr = {home: DT.home, starter: DT.starter, result: DT.result, rest: DT.rest, ranges: Object.assign({}, DT.ranges),
+  const dr = {home: DT.home, starter: DT.starter, result: DT.result, rest: DT.rest, cup: DT.cup, ranges: Object.assign({}, DT.ranges),
               without: Object.assign({}, DT.without), with: Object.assign({}, DT.with)};
-  const count = () => windowed(filterLogs(logs, chartF(p, gameOf(p.gid), p.ctx || {}, without, dr)), DT.win, D.season, p.opp).length;
+  const count = () => windowed(filterLogs(logs, chartF(p, gameOf(p.gid), p.ctx || {}, without, dr)), cupWin(DT.cup, dr.cup).win, D.season, p.opp).length;
   const rng = RANGES.filter(([k]) => forMarket(k, p.market)).map(([k, lab]) => {
     const b = bounds(logs, k);
     if (!b || b[0] === b[1]) return "";
@@ -3148,7 +3169,7 @@ function playerFilters(p, logs, without) {
     return `<div class="rg" data-rk="${k}" data-lo="${b[0]}" data-hi="${b[1]}"><div class="rg-h"><span>${lab}</span><b class="rv">${cur[0]} – ${cur[1]}</b></div>
       <div class="dual2"><div class="fil"></div>${thumbs(lab, b)}</div><div class="rp-b"><span>${b[0]}</span><span>${b[1]}</span></div></div>`;
   }).join("");
-  const segs = SEGS.map(([k, lab, opts]) => `<div class="sg"><span>${lab}</span><div class="seg" role="group" aria-label="${lab}">${opts.map(([v, t]) =>
+  const segs = SEGS.filter(([k]) => k !== "cup" || hasCup(logs)).map(([k, lab, opts]) => `<div class="sg"><span>${lab}</span><div class="seg" role="group" aria-label="${lab}">${opts.map(([v, t]) =>
     `<button data-sk="${k}" data-sv="${v === null ? "" : v}" aria-pressed="${dr[k] === v}">${t}</button>`).join("")}</div></div>`).join("");
   const mr = mateRows(p, logs, without, dr), wo = mr ? `<div class="sg"><span>With / Without</span></div>${mr}` : "";
   openSheet(`<h2 id="sht">Filter ${esc(p.player.split(" ").slice(-1)[0])}'s games</h2>${rng}${segs}${wo}
@@ -3168,8 +3189,8 @@ function playerFilters(p, logs, without) {
       dr[k] = v; $$(`[data-sk="${k}"]`, s).forEach(x => x.setAttribute("aria-pressed", x === b)); upd();
     });
     bindMates(s, dr, upd);
-    $("#pf-reset", s).onclick = () => { Object.assign(DT, {home: null, starter: null, blow: null, result: null, rest: null, ranges: {}, without: {}, with: {}, dvp: false, def: false, open: {}, ovs: []}); closeSheet(); updateProp(); };
-    $("#pf-ok", s).onclick = () => { Object.assign(DT, {home: dr.home, starter: dr.starter, result: dr.result, rest: dr.rest, ranges: dr.ranges, without: dr.without, with: dr.with}); closeSheet(); updateProp(); };
+    $("#pf-reset", s).onclick = () => { const was = DT.cup; Object.assign(DT, {home: null, starter: null, blow: null, result: null, rest: null, cup: null, ranges: {}, without: {}, with: {}, dvp: false, def: false, open: {}, ovs: []}); cupWindow(was); closeSheet(); updateProp(); };
+    $("#pf-ok", s).onclick = () => { const was = DT.cup; Object.assign(DT, {home: dr.home, starter: dr.starter, result: dr.result, rest: dr.rest, cup: dr.cup, ranges: dr.ranges, without: dr.without, with: dr.with}); cupWindow(was); closeSheet(); updateProp(); };
     upd();
   });
 }

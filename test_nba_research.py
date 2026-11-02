@@ -133,7 +133,7 @@ def live_box(gid):
             "awayTeam": {"score": 66, "players": []}}
 
 
-def built(now, sched=None, box_get=None):
+def built(now, sched=None, box_get=None, cup=None):
     d = pathlib.Path(tempfile.mkdtemp())
     stores(d)
     tr = sqlite3.connect(d / "tracking.sqlite")
@@ -167,7 +167,7 @@ def built(now, sched=None, box_get=None):
     rl.commit(); rl.close()
     return RS.build(now=now, sched=sched or SCHED, lines=d / "lines.sqlite", news=d / "news.sqlite", shadow=d / "shadow.sqlite",
                     matchup=d / "matchup.sqlite", index=d / "index.json", box_get=box_get or live_box, tracking=d / "tracking.sqlite",
-                    role_db=d / "role.sqlite")
+                    role_db=d / "role.sqlite", cup=cup)
 
 
 @pytest.fixture(scope="module")
@@ -1257,3 +1257,52 @@ def test_matchup_shows_assist_and_rebound_zones_only_for_their_props():
     assert "const m3 = x => (x[off + Z.length + 3] + x[off + Z.length + 4] + x[off + Z.length + 5]) / x[0], lg = (L.miss[3] + L.miss[4] + L.miss[5]) / L.gp;" in html
     # a rookie facing a team with few games this season still gets his own season, not last season's blank
     assert "MUP[key] = (t && t[0] >= 10) || (me(j) && !me(q)) ? D.season : prevSeason(D.season);" in html
+
+
+def test_nba_cup_games_reach_the_page(payload):
+    # a test build never fetches: no Cup map unless one is given, and the one given is passed through as is
+    assert payload["cup"] == {}
+    g0 = payload["players"]["1"]["logs"][0][RS.LOG_COLS.index("gid")]
+    assert built(NOW, cup={g0: "West Group B"})["cup"] == {g0: "West Group B"}
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_nba_cup_filter(payload):
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "core.js").write_text(UI.JS_CORE)
+    logs = [dict(zip(RS.LOG_COLS, r)) for r in payload["players"]["1"]["logs"]]
+    cup = {logs[0]["gid"]: "West Group B", logs[-1]["gid"]: "Quarterfinal", "0062600001": "Championship"}
+    (d / "t.js").write_text("""
+const C = require('./core.js'), inp = JSON.parse(require('fs').readFileSync(process.argv[2]));
+console.log(JSON.stringify([C.filterLogs(inp.logs, {cup: inp.cup}).map(l => l.gid), C.filterLogs(inp.logs, {cup: null}).length,
+  C.filterLogs(inp.logs, {cup: inp.cup, home: inp.logs[0].home === 1}).map(l => l.gid), C.filterLogs(inp.logs, {cup: {}}).length]));
+""")
+    (d / "in.json").write_text(json.dumps({"logs": logs, "cup": cup}))
+    only, off, both, none = json.loads(subprocess.run([NODE, str(d / "t.js"), str(d / "in.json")], capture_output=True,
+                                                      text=True, check=True, cwd=d).stdout)
+    assert only == [logs[0]["gid"], logs[-1]["gid"]]           # his Cup games, oldest first; the final is in no log
+    assert off == len(logs) and none == 0
+    assert both == [l["gid"] for l in (logs[0], logs[-1]) if l["home"] == logs[0]["home"]]   # with the other filters
+
+
+def test_nba_cup_toggle_on_the_page():
+    html = UI.page()
+    # a chip first in the Chart Filters row, for a player with a Cup game, and a Games row in his filter sheet (NBA only)
+    assert """if (hasCup(logs)) chips.push(chip('data-k="cup" data-v="true"', `${ICON.cup}NBA Cup`, on("cup", true)));""" in html
+    assert 'const hasCup = logs => !!D.cup && logs.some(l => D.cup[l.gid]);' in html
+    assert '["cup", "Games", [[null, "All"], [true, "NBA Cup"]]]];' in html
+    assert 'SEGS.filter(([k]) => k !== "cup" || hasCup(logs))' in html and "cup: DT.cup, ranges:" in html
+    assert "cup: x.cup && D.cup ? D.cup : null," in html and "|| !!DT.cup ||" in html
+    # each way it turns on or off (the chip, Clear All, the sheet's Reset and Show) goes through the window rule
+    assert html.count("const was = DT.cup;") == 3 and html.count("cupWindow(was);") == 4
+    assert '? {win: "l20", cupWin: DT.win} : w;' in html and '{win: DT.win === "l20" ? DT.cupWin : DT.win, cupWin: null}' in html
+    assert "const cupWindow = was => Object.assign(DT, cupWin(was, DT.cup));" in html
+    # the filter sheet's Show button counts the games in the window the chart will use
+    assert "without, dr)), cupWin(DT.cup, dr.cup).win, D.season, p.opp).length;" in html
+    # a new player starts with it off; the NFL and NHL keep their own sheet rows (no Cup)
+    assert "rest: null, cup: null, cupWin: null, ranges: {}" in html
+    for cfg in ("NFL_CFG", "NHL_CFG"):
+        i = html.index(f"const {cfg} = {{"); seg = html[html.index("SEGS:", i):html.index("]]]]", html.index("SEGS:", i))]
+        assert '"cup"' not in seg
+    # a Cup night on the game card
+    assert 'D.cup && D.cup[g.gid] ? "Cup" : ""' in html

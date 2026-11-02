@@ -17,7 +17,8 @@ LIMITS (shown on the page where they apply):
             what those feeds carry. No steals / blocks / turnovers props are collected, so none are listed.
   freshness each book's board refreshes about every 10 min (every 2 near tip); older than BOOK_STALE_MIN = "stale".
             The page is rebuilt every 2 min on the VM (cron); live box scores are fetched at each rebuild.
-  logs      regular-season box scores, this season and last (nba_matchup.sqlite). No playoff games.
+  logs      regular-season box scores, this season and last (nba_matchup.sqlite). No playoff games. NBA Cup games are
+            marked by NBA.com's schedule (nba_cup); the Cup championship is not a regular-season game, so it is not in them.
   matchup   ranks blend this season with last (rank_tables_blend, BLEND_K games); pace is this season only; no
             defense-vs-position factor for threes.
   injuries  the official report as stored by nba_injury_report; news items are third-party, labeled as such.
@@ -1047,7 +1048,7 @@ def correlations(props, logs):
 
 # ── the payload ──────────────────────────────────────────────────────────────────────────────────────────
 def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None, index=None, box_get=None, tracking=None,
-          lineups_db=None, role_db=None):
+          lineups_db=None, role_db=None, cup=None):
     import nba_matchup as MU
     now = now or dt.datetime.now(dt.timezone.utc)
     if sched is None:
@@ -1110,6 +1111,9 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
     trk = _ro(tracking or TRACKING)
     lcon = _ro(lineups_db or LINEUPS)
     logs = game_logs(mcon, pids, (prev_season(season), season), trk)
+    if cup is None:                                     # {gid: group or round} of the NBA Cup games (nba_cup's cache)
+        import nba_cup as NC
+        cup = NC.games((prev_season(season), season), now) if lines is None else {}
     for p in props:                                     # a player with no index entry: his latest box team
         if p["team"] is None and logs.get(p["pid"]):
             t = logs[p["pid"]][-1][2]
@@ -1254,6 +1258,7 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
         # as of the slate date, last season's as it finished
         "ranks": {k: v for k, v in ranks.items()},
         "proj_players": proj_players, "proj_meta": proj_meta,
+        "cup": cup,                                      # the page's NBA Cup filter: {gid: "West Group B" | "Quarterfinal" ...}
     }
     for c in (q, ncon, sh, mcon, trk, lcon):
         if c is not None:
