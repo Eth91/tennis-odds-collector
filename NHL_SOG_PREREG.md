@@ -203,3 +203,38 @@ in effect so the home team gets preferable matchups." `nhl_sog_ctx.py`, Mac only
   - Team summary: goals for and against.
 - **EDGE**, per player and season, for 2022-23 to 2024-25: zone time, shot location, shot speed, skating speed.
 - **Shift charts** for every game 2022-23 to 2025-26. A game without one has no line data.
+
+## Amendment 1 result (2026-11-02): only H (home ice and last change) adds; the full model fails (a)+(b), so the base stays
+- **Data:**
+  - 228 report windows.
+  - Shift charts for 5,592 games (57 empty).
+  - EDGE for 9,436 player-seasons (40 failed calls).
+  - Coverage: EDGE 94–96% of player-games, last game's linemates 96–100%, everything else 100%.
+- **Held-out results** (log-likelihood per player-game and prop log loss, each against the base; 2024-25 | 2025-26):
+
+| Variant | (a) log-likelihood vs base | (b) prop log loss vs base | C pooled (information) | Adds |
+|---|---|---|---|---|
+| +E EDGE | +0.00030 \| −0.00006 | +0.00002 \| −0.00004 | +5.5% on 1,196 | no |
+| **+H home ice** | **+0.00015 \| +0.00051** | **−0.00003 \| −0.00032** | +6.2% [+2.4] on 2,051 | **yes** |
+| +Z zone starts | +0.00010 \| +0.00011 | +0.00006 \| +0.00004 | +6.5% on 1,429 | no |
+| +L lineup | +0.00011 \| +0.00007 | −0.00001 \| +0.00000 | +6.2% on 1,402 | no |
+| +S game script | +0.00010 \| +0.00017 | +0.00001 \| −0.00005 | +6.1% on 1,531 | no |
+| +C last game's lines | −0.00028 \| +0.00037 | +0.00007 \| −0.00002 | +7.3% on 1,690 | no |
+| full (all six) | +0.00061 \| +0.00061 | +0.00005 \| −0.00044 | +5.8% [+1.8] on 2,019 | no |
+| +T tonight's lines (information) | +0.00012 \| +0.00061 | +0.00006 \| −0.00015 | +5.9% on 2,184 | no |
+
+- **The full model** passes the original A, B and C (+5.8% in both seasons), but fails (b) in 2024-25. **The base stays the
+  forward candidate**; H is noted for a later amendment.
+- **Coefficients in the full model** (log scale, per standard deviation; 0.01 ≈ 1% more shots):
+  - Home +0.017; home × projected even-strength minutes +0.012.
+  - Shot speed +0.020.
+  - Last game's linemates' points per hour +0.025, their attempts −0.011.
+  - Game script +0.011.
+  - Defensive-zone starts −0.010.
+  - Freed power-play minutes +0.007.
+  - Everything else under 0.007 in size.
+- **Reading:**
+  - Every group moves the shot forecast the expected way, but by 1–2% per standard deviation (about 0.04 shots).
+    Almost none of it sharpens the prices: the books have it.
+  - Home ice is the exception: the home team's top lines get a little more, as the user expected from last change.
+  - EDGE adds nothing out of sample. Its season-level values mostly repeat what the per-game rates already say.
