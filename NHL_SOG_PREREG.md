@@ -128,3 +128,78 @@ user.
     shadow, no bets).
   - Not checked: limits (NHL props are low-limit), and whether the prices at about 30 minutes before puck drop were
     really available.
+
+## Amendment 1 (2026-11-02, before code): context the base model leaves out
+**User:** "why not test edge data too on one season then see if it improves the next, try line combos, d zone and o
+zone starts at home and on the road, injuries, gamescript. But for hockey home and away are important as last change is
+in effect so the home team gets preferable matchups." `nhl_sog_ctx.py`, Mac only. The base model above is unchanged.
+
+**How each group is tested:**
+- **Second stage:** a Poisson regression with a log link, using log(the base projection) as a fixed offset. One
+  regression per variant: the base plus one group, and the base plus all six (the full model).
+  - Fit on every 2023-24 skater-game with a projection. 2024-25 and 2025-26 stay held out.
+  - Each feature is a z-score using 2023-24's mean and spread. A missing value is set to 0 (the mean) and given a
+    missing flag where noted.
+- **Per variant, refit on 2023-24:** the negative binomial size, and the recalibration with the book. The A, B and C
+  machinery is unchanged.
+
+**The groups:**
+- **E, EDGE, last season's** (the end-of-season regular-season values, known before the season starts):
+  - His offensive-zone time share (all strengths) and his offensive-zone start share.
+  - The share of his shots on goal from long range, and from high danger.
+  - His average shot speed.
+  - His speed bursts over 20 mph per game.
+  - A player without last season's EDGE gets 0s and a missing flag. 2023-24 uses 2022-23's EDGE; 2024-25 uses
+    2023-24's; 2025-26 uses 2024-25's.
+- **H, home ice and last change:**
+  - Home (1/0).
+  - Home × his projected even-strength minutes, as a z-score within his group (the home coach gets his top lines the
+    matchups).
+  - **His venue split:** log of (his attempts per hour at tonight's venue ÷ his attempts per hour overall).
+    - The venue rate is shrunk toward his overall rate by 3 hours.
+    - Both use this season before the date and last season worth 20 games.
+- **Z, zone starts by venue:**
+  - From the NHL's per-game possession report (offensive, defensive and neutral-zone start shares), weighted by his 5v5
+    minutes. This season before the date, last season worth 20 games.
+  - His offensive-zone start share at tonight's venue, shrunk toward his all-venue share by 100 5v5 minutes, minus his
+    group's 2023-24 average.
+  - His defensive-zone start share, the same way.
+- **L, lineup (injuries):** the NHL has no historical injury report, so this uses who dressed tonight. Scratches are
+  known at warmups, about 40 minutes before puck drop and before the snapshot; a later scratch leaks a little.
+  - **Freed even-strength minutes in his group:** his team's regulars in his group (played 3+ of the team's last 5
+    games) who didn't dress tonight. Their last-5 mean even-strength minutes, summed, ÷ the number of his group who
+    dressed.
+  - **Freed power-play minutes:** absent regulars' last-5 mean power-play minutes, summed.
+  - **Back from a layoff:** he missed 3+ of his team's games right before tonight (1/0).
+- **S, game script** (no historical moneylines, so a proxy): his team's goal differential per game minus the
+  opponent's. This season before the date, last season worth 20 games.
+- **C, line combos, his last game's** (from the NHL's shift charts):
+  - **His linemates:** the two forwards (for a forward) or the one defenseman (for a defenseman) of his team with the
+    most shift overlap with him in his last game.
+  - Their points per hour and shot attempts per hour, this season before the date and last season worth 20 games.
+  - Missing (no shift chart) gets 0s and a missing flag.
+- **T, tonight's opening lines** (information only, not a test):
+  - The same linemate features from tonight's first-period overlap, a stand-in for the lines announced at morning
+    skate. It peeks at tonight's game.
+  - Plus the change in linemates' points per hour from last game (a promotion or demotion).
+
+**Pass rules (held out: 2024-25 and 2025-26):**
+- **A group adds** if the base plus that group beats the base on both of these, in both seasons:
+  - (a) the negative binomial log-likelihood per player-game, on all held-out player-games;
+  - (b) the recalibrated log loss on graded main-line props.
+- **The full model replaces the base as the forward candidate** if it passes the original A, B and C, and also (a) and
+  (b) against the base.
+  - Otherwise the base stays the candidate, and any group that adds is noted for a later amendment.
+- **Six groups are tested,** so one passing by luck is possible. Requiring both seasons on both measures limits that.
+- **Also (information):**
+  - Every variant's C bets.
+  - The fitted coefficients.
+  - T's (a) and (b).
+
+**Data (pulled on the Mac):**
+- **Per-game reports:**
+  - Possession: zone starts and 5v5 minutes.
+  - Skater summary: goals, assists, points.
+  - Team summary: goals for and against.
+- **EDGE**, per player and season, for 2022-23 to 2024-25: zone time, shot location, shot speed, skating speed.
+- **Shift charts** for every game 2022-23 to 2025-26. A game without one has no line data.
