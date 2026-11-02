@@ -204,7 +204,7 @@ in effect so the home team gets preferable matchups." `nhl_sog_ctx.py`, Mac only
 - **EDGE**, per player and season, for 2022-23 to 2024-25: zone time, shot location, shot speed, skating speed.
 - **Shift charts** for every game 2022-23 to 2025-26. A game without one has no line data.
 
-## Amendment 1 result (2026-11-02): only H (home ice and last change) adds; the full model fails (a)+(b), so the base stays
+## Amendment 1 result (2026-11-02, 09:45 UTC): only H (home ice and last change) adds; the full model fails (a)+(b), so the base stays
 - **Data:**
   - 228 report windows.
   - Shift charts for 5,592 games (57 empty).
