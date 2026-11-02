@@ -503,9 +503,9 @@ def test_page_controls_work_on_iphone():
     # most every 8 s, and downloads it in the background only when the server wrote a new one; the same file again
     # (generated_at unchanged) is not redrawn
     assert 'document.addEventListener("click", freshen, true);' in html and "setInterval(freshen, 30000);" in html
-    # the file each sport reads (the league button switches: nba_props.json / nfl_props.json)
+    # the file each sport reads (the league button steps through them: nba_props.json / nfl_props.json / nhl_props.json)
     assert 'fetch(dataUrl() + "?t=" + Date.now(), {method: "HEAD", cache: "no-store"})' in html
-    assert 'const dataUrl = sp => (sp || SPORT) === "nfl" ? "nfl_props.json" : "nba_props.json";' in html
+    assert 'const dataUrl = sp => (sp || SPORT) + "_props.json";' in html and 'const SPORTS = ["nba", "nfl", "nhl"]' in html
     assert "return m && m !== LAST_MOD ? load() : null;" in html and 'LAST_MOD = r.headers.get("Last-Modified") || LAST_MOD;' in html
     assert "Date.now() - CHECK_AT < 8000" in html and "if (D) { CHECK_AT = 0; freshen(); }" in html
     assert "if (D && FRESH && !AUTO_DAY && j.generated_at === D.generated_at) { LOADED_AT = Date.now(); return true; }" in html
@@ -523,7 +523,9 @@ def test_page_controls_work_on_iphone():
     assert "data-ps=" in html
     # a tap on a bar opens that game's box score (docs/box/{gid}.json, nba_boxscore), his row and the prop's stats marked
     assert 'if (gb) boxSheet(gb.dataset.gid, gb.dataset.tm, p);' in html and 'data-gid="${esc(l.gid)}"' in html
-    assert 'fetch(`${SPORT === "nfl" ? "nflbox" : "box"}/${encodeURIComponent(gid)}.json`)' in html and "barTip(" not in html and ".tip{" not in html
+    # a box already loaded: the sheet is a box sheet (its team switch positioned) before the switch's pill is measured
+    assert 's => { s.dataset.kind = "box"; bind(s, b); }' in html
+    assert 'fetch(`${SPORT === "nfl" ? "nflbox" : SPORT === "nhl" ? "nhlbox" : "box"}/${encodeURIComponent(gid)}.json`)' in html and "barTip(" not in html and ".tip{" not in html
     # the gauge opens the Matchup page (a page of its own in the history), with the opponent's recent games vs a position
     # group from docs/vs/{TEAM}.json (nba_vs): 5 rows, More / Less to 10, a row opens that game's box score
     assert '$("#mub", pg).onclick = () => { if (p.opp) openMatchup(p); };' in html and "function matchupSheet(" not in html
@@ -553,7 +555,7 @@ def test_page_controls_work_on_iphone():
     # Movers (a line moved since open, or the books disagree: the move first), Lineups beside Injuries (NEW starters, the usual
     # five not starting), who guards him on the Matchup page (docs/matchups/{pid}.json, nba_defmatch)
     assert 'if (ST.market === "movers") return list.map(p => [p, mover(p)])' in html and "k: Math.abs(mv) * 100 + gap" in html
-    assert '(ST.iv === "lu" ? (SPORT === "nfl" ? depthView() : lineupsView()) : ST.iv === "ro" ?' in html and "function luTeam(t, e)" in html and 'isNew(pid) ? " · NEW" : ""' in html
+    assert '(ST.iv === "lu" ? (SPORT === "nfl" ? depthView() : SPORT === "nhl" ? nhlLinesView() : lineupsView()) : ST.iv === "ro" ?' in html and "function luTeam(t, e)" in html and 'isNew(pid) ? " · NEW" : ""' in html
     # role changes (docs/player/roles.json), the Live tab (props under way from their closing boards: only there), game script
     assert 'fetch("player/roles.json")' in html and "function rolesView(" in html and 'data-iv="ro"' in html
     assert 'const ALL_TABS = ["live", "trends", "movers"];' in html and "list = list.filter(p => !p.closed);" in html
@@ -563,12 +565,16 @@ def test_page_controls_work_on_iphone():
     # on/off splits) sits between Flags and Injuries, the bar four wide
     assert 'let VIEWS = [["props", "Props"], ["flags", "Flags"], ["wowy", "WOWY"], ["injuries", "Injuries"]];' in html and "mrow" not in html
     assert 'if (["props", "flags", "wowy", "injuries"].indexOf(ST.view) < 0) ST.view = "props";' in html and '"markets"' not in html
-    assert '.tbc[data-n="4"]{width:272px}' in html and "fetch(`onoff/${t}.json?t=${Date.now()}`" in html
+    assert '.tbc[data-n="4"]{width:272px}' in html and 'fetch(`${SPORT === "nhl" ? "nhlonoff" : "onoff"}/${t}.json?t=${Date.now()}`' in html
     # the With / Without sheet's shortcut: each teammate's On/off link opens WOWY on his team with that teammate off the
     # court and the prop's stat, the prop's player marked; only where the sport has the WOWY view
-    assert 'VIEWS.some(v => v[0] === "wowy") ? ` · <button class="lk wyk" data-wy="${m.key}">On/off ›</button>` : ""' in html
+    assert '${no} w/o</small>${VIEWS.some(v => v[0] === "wowy") ? `<button class="lk wyk" data-wy="${m.key}">On/off ›</button>` : ""}' in html
+    assert ".mrn .wyk{display:block;" in html, "its own line: the stats line's ellipsis would hide it on a phone"
     assert '$$("[data-wy]", s).forEach(b => b.onclick = () => toWowy(PX.p, +b.dataset.wy));' in html
-    assert 'Object.assign(ST, {wt: p.team, wo: String(off), q: ""}, WOWY_STATS.some(x => x[0] === p.market) ? {ws: p.market} : {});' in html
+    assert 'Object.assign(ST, {wt: p.team, wo: String(off), q: ""}, wowyStats().some(x => x[0] === p.market) ? {ws: p.market} : {});' in html
+    # the NHL's WOWY: a skater's stat lists the skaters, saves the goalies; ice time a game is TOI
+    assert '(!hk || gk(p) === (ws === "saves"))' in html and '(hk ? " TOI" : " mpg")' in html
+    assert 'SPORT === "nhl" && r.pos === "G" ? `Started ${r.starts[0]} of the last ${r.starts[3]}, ${r.starts[1]} of ${r.starts[2]} before`' in html
     assert '${r.p === WOWY_ME ? " wme" : ""}' in html and 'setTimeout(() => { ST.view = "wowy"; save(); render(); window.scrollTo(0, 0); }, 480);' in html
     assert '  if (ST.view === "flags") { lst.innerHTML = flagsView(); return; }' in html and 'flags: "Flags"' not in html
     assert 'if (ml) ml.style.display = ST.view === "props" ? "" : "none";' in html and 'if (ST.view === "props" && q.length >= 2)' in html
@@ -627,7 +633,7 @@ def test_page_controls_work_on_iphone():
     assert ('let OVL = {min: "min", fga: "FGA", fg3a: "3PTA", fta: "FTA", usg: "usage %", pot_ast: "potential assists", '
             'reb_ch: "rebound chances"}') in html and "l[ov]" in html
     # the adjustable filters come first; potential assists / rebound chances only on the props they bear on
-    assert '(SPORT === "nfl" ? NFL_RCHIPS : ["min", "fga", "fg3a", "fta", "usg", "pot_ast", "reb_ch"]).forEach(rchip)' in html
+    assert '(SPORT === "nfl" ? NFL_RCHIPS : SPORT === "nhl" ? NHL_RCHIPS : ["min", "fga", "fg3a", "fta", "usg", "pot_ast", "reb_ch"]).forEach(rchip)' in html
     assert html.index('.forEach(rchip);') < html.index("if (c.dvp_rank) chips.push(") < html.index('rchip("margin");')
     assert 'pot_ast: ["assists", "pra", "pts_ast", "reb_ast"], reb_ch: ["rebounds", "pra", "pts_reb", "reb_ast"]' in html
     # no explanatory prose: notes are status only, empty states are titles only

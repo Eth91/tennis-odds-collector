@@ -16,7 +16,8 @@ THE RULES
     decimal odds in (1, 1000);
   - a snapshot NOT NEWER than the one on disk is refused, so two senders can never step it backwards.
 THE NFL SNAPSHOT (nfl_lines.py --snapshot dk) comes through the same key and the same rules, marked "league": "nfl";
-it is written to nfl_dk_snapshot.json instead, so it never touches the NBA file. Any other league is refused.
+it is written to nfl_dk_snapshot.json instead, so it never touches the NBA file. THE NHL SNAPSHOT (nhl_lines.py
+--snapshot dk) likewise, marked "league": "nhl", to nhl_dk_snapshot.json. Any other league is refused.
 Exit 0 = written (or already newer on disk); 2 = refused. One line of output either way.
 """
 from __future__ import annotations
@@ -30,7 +31,8 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 OUT = HERE / "dk_snapshot.json"
 OUT_NFL = HERE / "nfl_dk_snapshot.json"
-LEAGUES = (None, "nfl")                  # no league key = the NBA snapshot
+OUT_NHL = HERE / "nhl_dk_snapshot.json"
+LEAGUES = (None, "nfl", "nhl")           # no league key = the NBA snapshot
 MAX_BYTES, MAX_ROWS = 8_000_000, 60_000
 MAX_AGE_S, MAX_AHEAD_S = 900, 120
 
@@ -77,14 +79,16 @@ def validate(raw, now):
     return out, None
 
 
-def receive(raw, now, out=OUT, out_nfl=OUT_NFL):
-    """Validate and write (an NFL snapshot to out_nfl); returns (exit code, message)."""
+def receive(raw, now, out=OUT, out_nfl=OUT_NFL, out_nhl=OUT_NHL):
+    """Validate and write (an NFL snapshot to out_nfl, an NHL one to out_nhl); returns (exit code, message)."""
     snap, err = validate(raw, now)
     if err:
         return 2, f"refused: {err}"
     tag = ""
     if snap.get("league") == "nfl":
         out, tag = out_nfl, "nfl "
+    elif snap.get("league") == "nhl":
+        out, tag = out_nhl, "nhl "
     if out.exists():
         try:
             cur = json.loads(out.read_text()).get("fetched_at", "")

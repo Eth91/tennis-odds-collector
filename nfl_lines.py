@@ -382,8 +382,9 @@ DEFAULT_BOOKS = tuple(b for b in os.environ.get("NFL_BOOKS", "fd,dk").split(",")
 
 
 # ── matching ────────────────────────────────────────────────────────────────────────────────────────────
-def match_event(event, upcoming):
-    """A book's 'Away @ Home' -> the not-yet-started schedule game with those two teams (the nearest kickoff)."""
+def match_event(event, upcoming, C=C):
+    """A book's 'Away @ Home' -> the not-yet-started schedule game with those two teams (the nearest kickoff). C: the
+    league's common module (nfl_common, nhl_common)."""
     if "@" not in event:
         return None
     a, h = (C.team_of_name(x) for x in event.split("@", 1))
@@ -391,7 +392,7 @@ def match_event(event, upcoming):
     return min(hits, key=lambda g: g["utc"]) if hits else None
 
 
-def is_team(player, g):
+def is_team(player, g, C=C):
     """A row whose 'player' is one of the game's teams ("GB Packers") or a defense ("Arizona Defense", "GB D/ST"):
     a team market, not a player prop."""
     f = C.fold(player)
@@ -417,12 +418,12 @@ def name_tries(player):
     return out
 
 
-def store_game_lines(con, page, upcoming, ts, book="fd"):
+def store_game_lines(con, page, upcoming, ts, book="fd", C=C):
     """The page's game lines that CHANGED, for games not yet kicked off. Sides home / away (spread, moneyline),
     over / under (total). Returns rows written."""
     n = 0
     for event, kind, runner, line, odds in fd_game_lines(page):
-        g = match_event(event, upcoming)
+        g = match_event(event, upcoming, C)
         if g is None:
             continue
         rt = C.team_of_name(runner)
@@ -437,21 +438,32 @@ def store_game_lines(con, page, upcoming, ts, book="fd"):
 
 
 # ── one cycle ───────────────────────────────────────────────────────────────────────────────────────────
-def cycle(books=None, now=None, sched=None, roster=None, fetchers=None, db=None):
+class League:
+    """What a cycle needs from its league: the common module (schedule, rosters, teams), the stat keys, the store, the
+    books, FanDuel's last league page and a label. The NFL's is this module's own; nhl_lines passes the NHL's."""
+
+    def __init__(self, C, stats, db, books, default_books, last_page, label):
+        self.C, self.stats, self.db, self.books, self.default_books, self.last_page, self.label = \
+            C, stats, db, books, default_books, last_page, label
+
+
+def cycle(books=None, now=None, sched=None, roster=None, fetchers=None, db=None, lg=None):
     """One refresh of each book. A book whose fetch fails leaves its board untouched and is returned in the failed
-    list (exit 2). sched / roster / fetchers / db: for tests."""
-    books = books or DEFAULT_BOOKS
-    fetchers = fetchers or BOOKS
+    list (exit 2). sched / roster / fetchers / db: for tests. lg: another league's League (the NFL's by default)."""
+    lg = lg or League(C, STATS, DB, BOOKS, DEFAULT_BOOKS, LAST_FD_PAGE, "nfl")
+    C_, DB_ = lg.C, lg.db
+    books = books or lg.default_books
+    fetchers = fetchers or lg.books
     now = now or dt.datetime.now(dt.timezone.utc)
     ts = now.replace(microsecond=0, tzinfo=None).isoformat()
     naive = now.astimezone(dt.timezone.utc).replace(tzinfo=None)
-    season = C.season_of(naive.date())
+    season = C_.season_of(naive.date())
     if sched is None:
-        sched = C.schedule(season)
+        sched = C_.schedule(season)
     upcoming = [g for g in sched if g["home_score"] is None and dt.datetime.fromisoformat(g["utc"]) > naive]
     if roster is None:
-        roster = C.rosters(season)
-    res, cache = C.Resolver(roster), {}
+        roster = C_.rosters(season)
+    res, cache = C_.Resolver(roster), {}
 
     def resolve(player, g):
         k = (player, g["gid"])
@@ -460,7 +472,7 @@ def cycle(books=None, now=None, sched=None, roster=None, fetchers=None, db=None)
                              if (pid := res.resolve(n, (g["away"], g["home"]))) is not None), None)
         return cache[k]
 
-    con = sqlite3.connect(db or DB, timeout=60)
+    con = sqlite3.connect(db or DB_, timeout=60)
     con.executescript(DDL)
     report, failed = [], []
     for book in books:
@@ -469,9 +481,9 @@ def cycle(books=None, now=None, sched=None, roster=None, fetchers=None, db=None)
             got = fetchers[book]()
             rows, detail = got[0], got[1]
             bts = got[2] if len(got) > 2 else ts             # a snapshot keeps its own fetch time
-            if book == "fd" and LAST_FD_PAGE.get("page"):
+            if book == "fd" and lg.last_page.get("page"):
                 try:
-                    store_game_lines(con, LAST_FD_PAGE.pop("page"), upcoming, ts)
+                    store_game_lines(con, lg.last_page.pop("page"), upcoming, ts, C=C_)
                 except Exception as e:                                       # noqa: BLE001
                     report.append(f"game lines: {type(e).__name__}")
         except Stale as e:
@@ -488,7 +500,7 @@ def cycle(books=None, now=None, sched=None, roster=None, fetchers=None, db=None)
         # keep the better one, or the board flips between them and logs moves that never happened
         best = {}
         for r in rows:
-            if r[2] not in STATS:
+            if r[2] not in lg.stats:
                 continue
             k = (r[1], r[2], round(float(r[3]), 1), r[4])
             if k not in best or r[5] > best[k][5]:
@@ -499,14 +511,14 @@ def cycle(books=None, now=None, sched=None, roster=None, fetchers=None, db=None)
             report.append(f"{book}=unchanged (snapshot {bts} already ingested)")
             continue
         events = {r[0] for r in rows}
-        gm = {e: match_event(e, upcoming) for e in events}
+        gm = {e: match_event(e, upcoming, C_) for e in events}
         unmatched = sorted(e for e, g in gm.items() if g is None)
         board, unresolved, team_rows = [], set(), 0
         for event, player, stat, line, side, odds in rows:
             g = gm.get(event)
             if g is None:
                 continue
-            if is_team(player, g):
+            if is_team(player, g, C_):
                 team_rows += 1
                 continue
             pid = resolve(player, g)
@@ -547,9 +559,9 @@ def cycle(books=None, now=None, sched=None, roster=None, fetchers=None, db=None)
             report.append(f"   {book} unresolved names: {sorted(unresolved)[:8]}")
     con.commit()
     con.close()
-    print(f"[{ts}] nfl lines -> {Path(db or DB).name}")
+    print(f"[{ts}] {lg.label} lines -> {Path(db or DB_).name}")
     for line in report:
-        print("  NFLLINES " + line if not line.startswith("   ") else line)
+        print(f"  {lg.label.upper()}LINES " + line if not line.startswith("   ") else line)
     return failed
 
 
