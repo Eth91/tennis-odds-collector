@@ -1,4 +1,4 @@
-# PRE-REGISTRATION: an NHL shots-on-goal model (2026-11-02, about 09:00 UTC, before code)
+# PRE-REGISTRATION: an NHL shots-on-goal model (2026-11-02, 08:55 UTC, before code)
 
 **User:** "yes run the test", after asking whether NHL SOG props are modelable and beatable, and about NHL EDGE data.
 The NBA and NFL books priced public box scores well (`NFL_MODEL_PREREG.md`: A, B, C all fail). This is the same three
