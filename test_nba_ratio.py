@@ -113,7 +113,7 @@ def test_pa28_replay_and_live():
     q.execute("CREATE TABLE board (book TEXT, collected_at TEXT, gid TEXT, tip_utc TEXT, event TEXT, home TEXT, away TEXT, "
               "pid INTEGER, player TEXT, stat TEXT, line REAL, side TEXT, odds REAL)")
     sent = []
-    kw = dict(lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"],
+    kw = dict(phone=L.ALL_RULES, lines_db=p["lines"], news_db=p["news"], matchup_db=p["matchup"], gamelogs_db=p["gamelogs"],
               tracking_db=p["tracking"], db=tmp / "role.sqlite", sender=lambda b: sent.append(b) or True)
     assert L.process(now="2026-11-01T15:00:00", **kw) == 0                               # install
     for pid, nm, ln in ((T.B, "Bee", 2.5), (T.C, "Cee", 3.5)):

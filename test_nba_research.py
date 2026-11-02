@@ -7,6 +7,7 @@ import json
 import math
 import pathlib
 import random
+import re
 import shutil
 import sqlite3
 import subprocess
@@ -141,13 +142,131 @@ def built(now, sched=None, box_get=None):
     tr.execute("INSERT INTO tracking (date, player_id, potential_ast, reb_chances) VALUES ('2026-09-01', 1, 14, 9)")
     tr.execute("INSERT INTO tracking (date, player_id, potential_ast, reb_chances) VALUES ('2026-09-02', 1, 11, NULL)")
     tr.commit(); tr.close()
+    rl = sqlite3.connect(d / "role.sqlite")              # the engine's flags (nba_role.sqlite), as nba_role_open.py writes them
+    rl.execute("CREATE TABLE ratio_signals (rule TEXT, gid TEXT, pid INTEGER, market TEXT, book TEXT, line REAL, price REAL, "
+               "volume REAL, date TEXT, player TEXT, logged_at TEXT, pinged INTEGER, PRIMARY KEY (rule, gid, pid, market))")
+    rl.execute("CREATE TABLE idea_signals (rule TEXT, gid TEXT, pid INTEGER, market TEXT, line REAL, price REAL, note TEXT, "
+               "date TEXT, player TEXT, logged_at TEXT, pinged INTEGER, PRIMARY KEY (rule, gid, pid, market))")
+    rl.execute("CREATE TABLE signals (gid TEXT, pid INTEGER, market TEXT, side TEXT, book TEXT, line REAL, price REAL, ev REAL, "
+               "p REAL, mu REAL, out_pids TEXT, date TEXT, team TEXT, player TEXT, logged_at TEXT, pinged INTEGER, "
+               "PRIMARY KEY (gid, pid, market, side))")
+    rl.executemany("INSERT INTO ratio_signals VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", [
+        ("EARLY_SURGE", "G1", 1, "points", "fd", 24.5, 1.87, 18.0, GD, "Devin Booker", "2026-10-26T02:00:00", 1),
+        ("RATIO_PA28", "G0", 1, "assists", "fd", 5.5, 1.9, 10.0, "2026-10-20", "Devin Booker", "2026-10-20T02:00:00", 1)])
+    rl.executemany("INSERT INTO idea_signals VALUES (?,?,?,?,?,?,?,?,?,?,?)", [
+        ("UNDERML", "G1", 2, "points", 9.5, 1.9259, "under p 0.443 ev 0.073", GD, "Grayson Allen", "2026-10-26T23:30:00", 0),
+        ("UNDER20", "G1", 2, "rebounds", 3.5, 1.8, "proj 2.1 min 19.8", GD, "Grayson Allen", "2026-10-26T23:30:01", 0),  # a failed send
+        ("UNDER20", "G1", 1, "points", 24.5, 1.7, "proj 15.9 min 30.2", GD, "Devin Booker", "2026-10-26T23:30:00", 1),
+        ("UNDER20", "G1", 1, "rebounds", 5.5, 1.7, "proj 3.9 min 30.2", GD, "Devin Booker", "2026-10-26T23:30:00", 0),   # 29% below
+        ("UNDER20", "G1", 1, "assists", 6.5, 1.6, "proj 3.5 min 30.2", GD, "Devin Booker", "2026-10-26T23:30:00", 0),    # −167
+        ("UNDER20", "G1", 1, "threes", 2.5, 1.9, "proj 1.5 min 30.2", GD, "Devin Booker", "2026-10-26T23:30:00", 0),     # threes
+        ("RETURN_UNDER", "G1", 2, "assists", 3.5, 1.8, "proj 2.0 min 18.0", GD, "Grayson Allen", "2026-10-26T23:30:00", 1),  # another rule
+        ("UNDER20", "G0", 1, "points", 24.5, 1.7, "proj 15.0 min 30.2", "2026-10-20", "Devin Booker", "2026-10-20T23:30:00", 1)])
+    rl.execute("INSERT INTO signals VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+               ("G1", 3, "rebounds", "under", "fd", 9.5, 2.0, 0.109, 0.55, 7.8, "[]", GD, "PHX", "Jusuf Nurkic", "2026-10-26T06:24:03", 1))
+    rl.commit(); rl.close()
     return RS.build(now=now, sched=sched or SCHED, lines=d / "lines.sqlite", news=d / "news.sqlite", shadow=d / "shadow.sqlite",
-                    matchup=d / "matchup.sqlite", index=d / "index.json", box_get=box_get or live_box, tracking=d / "tracking.sqlite")
+                    matchup=d / "matchup.sqlite", index=d / "index.json", box_get=box_get or live_box, tracking=d / "tracking.sqlite",
+                    role_db=d / "role.sqlite")
 
 
 @pytest.fixture(scope="module")
 def payload():
     return built(NOW)
+
+
+def _corr_reference(props, logs):
+    """correlations as first written (every pair both ways, five-pass Pearson): the fast one must match it exactly."""
+    def pearson(xs, ys):
+        pairs = [(x, y) for x, y in zip(xs, ys) if x is not None and y is not None]
+        if len(pairs) < 3:
+            return None
+        mx = sum(x for x, _ in pairs) / len(pairs)
+        my = sum(y for _, y in pairs) / len(pairs)
+        sxy = sum((x - mx) * (y - my) for x, y in pairs)
+        sxx = sum((x - mx) ** 2 for x, _ in pairs)
+        syy = sum((y - my) ** 2 for _, y in pairs)
+        return None if sxx <= 0 or syy <= 0 else sxy / math.sqrt(sxx * syy)
+    series = {p["id"]: {r[1]: (r[2], RS.stat_value(dict(zip(RS.LOG_COLS, r)), p["market"])) for r in logs.get(p["pid"], [])} for p in props}
+    out = {}
+    for p in props:
+        mine, res = series[p["id"]], []
+        for o in props:
+            if o["gid"] != p["gid"] or o["id"] == p["id"] or (o["pid"] == p["pid"] and o["market"] == p["market"]):
+                continue
+            if o["pid"] != p["pid"] and o["team"] != p["team"]:
+                continue
+            theirs = series[o["id"]]
+            shared = [g for g in mine.keys() & theirs.keys() if mine[g][0] == theirs[g][0] == p["team"]]
+            if len(shared) < RS.CORR_MIN_N:
+                continue
+            r = pearson([mine[g][1] for g in shared], [theirs[g][1] for g in shared])
+            if r is not None:
+                res.append({"id": o["id"], "r": round(r, 2), "n": len(shared)})
+        out[p["id"]] = sorted(res, key=lambda x: (-abs(x["r"]), x["id"]))[:RS.CORR_TOP]
+    return out
+
+
+def test_correlations_match_the_reference():
+    # each pair computed once now (r is symmetric): the same lists as computing both ways, on random teams and logs,
+    # a player's props on two teams (one unresolved) included
+    for seed in range(4):
+        rnd = random.Random(seed)
+        props, logs = [], {}
+        for g in range(4):
+            for t in ("A", "B"):
+                for pid in range(g * 100 + (0 if t == "A" else 50), g * 100 + (0 if t == "A" else 50) + 6):
+                    logs[pid] = [[{"date": f"2026-0{1 + k % 9}-{10 + k % 18}", "gid": f"g{k}", "team": t if rnd.random() < 0.95 else "Z",
+                                   "min": 30.0, "pts": rnd.randint(0, 40), "reb": rnd.randint(0, 15), "ast": rnd.randint(0, 12),
+                                   "fg3m": rnd.randint(0, 6)}.get(c) for c in RS.LOG_COLS] for k in range(40 if pid % 3 else 12)
+                                  if rnd.random() < 0.8]                       # some with few games: under the minimum
+                    for m in rnd.sample(["points", "rebounds", "assists", "threes", "pra", "pts_reb"], 3):
+                        props.append({"id": f"G{g}|{pid}|{m}", "gid": f"G{g}", "pid": pid, "market": m, "team": t if rnd.random() < 0.95 else None})
+        assert RS.correlations(props, logs) == _corr_reference(props, logs)
+    assert RS.pearson([1, 2, 3, None, 4], [2, 4, 6.5, 1, 8]) == pytest.approx(0.99586, abs=1e-5) and RS.pearson([1, 1, 1], [1, 2, 3]) is None
+
+
+def test_flags_are_the_under_plays(payload):
+    # only the under plays that ping: UNDER20 rows at −150 or better, not threes, our projection 30–50% below the line,
+    # whether or not the send went through; another date's, the other rules', and UNDER20's other rows left out
+    fl = payload["flags"]
+    assert [(f["pid"], f["market"], f["line"], f["proj"]) for f in fl] == [(1, "points", 24.5, 15.9), (2, "rebounds", 3.5, 2.1)]
+    assert all(f["side"] == "under" and f["date"] == GD for f in fl) and fl[0]["team"] == "PHX" and fl[0]["mins"] == 30.2
+    assert fl[0]["price"] == 1.7 and fl[0]["at"] == "2026-10-26T23:30:00" and fl[1]["player"] == "Grayson Allen"
+
+
+def test_under_flags_reader():
+    assert RS.under_flags(None, [GD]) == [] and RS.under_flags(sqlite3.connect(":memory:"), []) == []
+    assert RS.under_flags(sqlite3.connect(":memory:"), [GD]) == []          # no table yet
+    U = RS.under_play
+    assert U("points", 1 / 0.6, 10, 6.99) and U("points", 1.6667, 10, 5.0) and not U("points", 1.66, 10, 6)   # −150 or better
+    assert not U("points", 1.9, 10, 7.0) and not U("points", 1.9, 10, 4.99) and not U("threes", 1.9, 2.5, 1.5)  # 30–50% below
+    assert not U("points", 1.9, 0, 0) and not U("points", None, 10, 6) and not U("pra", 1.9, 30.5, None)
+    # amendment 9: not when the line is 6-42% over his last-5 average, (lo, hi]; no ratio keeps the play
+    lo, hi = RS.UNDER_L5
+    assert U("points", 1.9, 10, 6, None) and U("points", 1.9, 10, 6, lo) and not U("points", 1.9, 10, 6, lo + 1e-9)
+    assert not U("points", 1.9, 10, 6, 1.2) and not U("points", 1.9, 10, 6, hi) and U("points", 1.9, 10, 6, hi + 1e-9)
+    assert U("points", 1.9, 10, 6, 0.8) and U("points", 1.9, 10, 6, 2.0)
+    rc = sqlite3.connect(":memory:")
+    rc.execute("CREATE TABLE idea_signals (rule TEXT, gid TEXT, pid INTEGER, market TEXT, line REAL, price REAL, note TEXT, "
+               "date TEXT, player TEXT, logged_at TEXT, pinged INTEGER)")
+    rc.execute("INSERT INTO idea_signals VALUES ('UNDER20','G1',1,'pra',30.5,1.8,'proj 18.0',?,'A','2026-10-26T23:30:00',0)", (GD,))
+    rc.execute("INSERT INTO idea_signals VALUES ('UNDER20','G1',2,'pra',30.5,1.8,'no projection',?,'B','2026-10-26T23:30:00',1)", (GD,))
+    rc.execute("INSERT INTO idea_signals VALUES ('UNDER20','G1',3,'pra',30.5,1.8,'proj 18.0 min 30.1 l5 1.234567',?,'C','2026-10-26T23:31:00',0)", (GD,))
+    rc.execute("INSERT INTO idea_signals VALUES ('UNDER20','G1',4,'pra',30.5,1.8,'proj 18.0 min 30.1 l5 1.5',?,'D','2026-10-26T23:31:00',1)", (GD,))
+    rc.execute("INSERT INTO idea_signals VALUES ('UNDER20','G1',5,'pra',30.5,1.8,'proj 18.0 min 30.1 l5 x',?,'E','2026-10-26T23:31:00',1)", (GD,))
+    assert [(f["pid"], f["proj"], f["mins"]) for f in RS.under_flags(rc, [GD])] == [(1, 18.0, None), (4, 18.0, 30.1), (5, 18.0, 30.1)]
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_flag_grade():
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "core.js").write_text(UI.JS_CORE)
+    (d / "t.js").write_text("""const C = require('./core.js');
+console.log(JSON.stringify([['over', 5.5, 6], ['over', 5.5, 5], ['under', 5.5, 5], ['under', 5.5, 6], ['over', 6, 6], ['under', 6, 6],
+  ['over', 5.5, null]].map(a => C.flagGrade(a[0], a[1], a[2]))));""")
+    out = json.loads(subprocess.run([NODE, str(d / "t.js")], capture_output=True, text=True, check=True, cwd=d).stdout)
+    assert out == ["hit", "miss", "hit", "miss", "push", "push", None]
 
 
 def test_slate_holds_until_6am_et():
@@ -347,15 +466,64 @@ def test_page_scripts_parse():
     assert "__" not in html.split("<style>")[0] and "__TEAM_ID__" not in html and "1610612756" in html
 
 
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_rebound_rings_both_views():
+    html = UI.page()
+    line = lambda pre: html[html.index(pre): html.index("\n", html.index(pre))]
+    cut = lambda pre: html[html.index(pre): html.index("\n}\n", html.index(pre)) + 3]
+    src = "\n".join([line("const esc = s =>"), line("const ord = n =>"), cut("function shFill(d)"), cut("const RD_C = r =>")])
+    d = pathlib.Path(tempfile.mkdtemp())
+    # three teams, 10 games each: their opponents' rebounds against them, [g, reb, oreb, contested, dist x4, shot x4, miss3]
+    (d / "t.js").write_text(src + """
+const T = {BOS: [10, 380, 90, 160, 100, 150, 60, 70, 0, 0, 0, 0, 120], NYK: [10, 360, 80, 108, 120, 150, 60, 30, 0, 0, 0, 0, 100],
+           ATL: [10, 380, 70, 190, 80, 150, 100, 50, 0, 0, 0, 0, 110], NOP: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]};
+const me = [5, 50, 10, 20, 20, 15, 10, 5, 10, 10, 10, 20, 15], avg = {dist: [.4, .3, .2, .1], shot: [], contested: .5, miss3: .25};
+console.log(JSON.stringify({def: rebRings(T.BOS, avg, T, "BOS"), me: rebRings(me, avg, null, "BOS"),
+  fills: [shFill(0), shFill((6 / (220 / 30) - 1) * 50), shFill((7 / 5 - 1) * 50)]}));
+""")
+    out = json.loads(subprocess.run([NODE, str(d / "t.js")], capture_output=True, text=True, check=True).stdout)
+    texts = lambda h, c: re.findall(f'class="{c}">([^<]+)<', h)
+    fills = lambda h: re.findall(r'fill="([^"]+)" fill-rule', h)
+    f0, f2, f3 = out["fills"]
+    # the defense view: a game against them in each ring (10, 15, 6, 7), shaded against the league's a team-game
+    # (10, 15, 7.33, 5; a team with no games left out), ranked 1st = the fewest (ties share the better rank)
+    assert texts(out["def"], "rdv") == ["10.0", "15.0", "6.0", "7.0"] and fills(out["def"]) == [f0, f0, f2, f3]
+    assert [x for x in texts(out["def"], "rds") if "ft" not in x] == ["2nd", "1st", "1st", "3rd"]
+    assert "BOS's opponents grab them" in out["def"] and "10 games" in out["def"] and "Off missed threes" not in out["def"]
+    assert "42%<small>league 41%</small>" in out["def"]                # contested: 160 of 380, the league 458 of 1120
+    # his view: shares of his boards against the players with rebound lines, no ranks
+    assert texts(out["me"], "rdv") == ["40%", "30%", "20%", "10%"] and fills(out["me"]) == [f0] * 4
+    assert texts(out["me"], "rds") == ["0–3 ft", "3–6 ft", "6–10 ft", "10+ ft"] and "50 boards" in out["me"]
+    assert "40%<small>avg 50%</small>" in out["me"] and "30%<small>avg 25%</small>" in out["me"]
+
+
 def test_page_controls_work_on_iphone():
     html = UI.page()
+    # every tap (and every 30 s, and a return to the app) checks the data file's Last-Modified with a bodiless HEAD, at
+    # most every 8 s, and downloads it in the background only when the server wrote a new one; the same file again
+    # (generated_at unchanged) is not redrawn
+    assert 'document.addEventListener("click", freshen, true);' in html and "setInterval(freshen, 30000);" in html
+    # the file each sport reads (the league button switches: nba_props.json / nfl_props.json)
+    assert 'fetch(dataUrl() + "?t=" + Date.now(), {method: "HEAD", cache: "no-store"})' in html
+    assert 'const dataUrl = sp => (sp || SPORT) === "nfl" ? "nfl_props.json" : "nba_props.json";' in html
+    assert "return m && m !== LAST_MOD ? load() : null;" in html and 'LAST_MOD = r.headers.get("Last-Modified") || LAST_MOD;' in html
+    assert "Date.now() - CHECK_AT < 8000" in html and "if (D) { CHECK_AT = 0; freshen(); }" in html
+    assert "if (D && FRESH && !AUTO_DAY && j.generated_at === D.generated_at) { LOADED_AT = Date.now(); return true; }" in html
     # iOS Safari can't drag the thumb of a range input stacked under another, so the dual sliders are pointer-event widgets
     assert 'type="range"' not in html and "dualRange(" in html and "touch-action:pan-y" in html
+    # a double tap doesn't zoom the page (taps on the stat chips, pills and bars come quickly); a pinch still does
+    assert "*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}" in html
+    assert "user-scalable" not in html and "maximum-scale" not in html
+    # the Pickz P (docs/icon.svg; icon-small.svg for the 64 px tab icon), versioned so a phone fetches the new one
+    assert '<link rel="icon" href="icon-64.png?v=2">' in html and '<link rel="apple-touch-icon" href="icon-180.png?v=2">' in html
+    # the headers (list, player and Matchup pages, all through --st) start 10 px below each iPhone's status bar /
+    # Dynamic Island: its own safe-area inset, plus a gap
+    assert "--st:calc(env(safe-area-inset-top) + 10px);" in html and html.count("env(safe-area-inset-top)") == 1
     # chart bars show their game on tap (a <title> only appears on hover); the book prices switch Over / Under
     assert "data-ps=" in html
     # a tap on a bar opens that game's box score (docs/box/{gid}.json, nba_boxscore), his row and the prop's stats marked
     assert 'if (gb) boxSheet(gb.dataset.gid, gb.dataset.tm, p);' in html and 'data-gid="${esc(l.gid)}"' in html
-    assert "fetch(`box/${encodeURIComponent(gid)}.json`)" in html and "barTip(" not in html and ".tip{" not in html
+    assert 'fetch(`${SPORT === "nfl" ? "nflbox" : "box"}/${encodeURIComponent(gid)}.json`)' in html and "barTip(" not in html and ".tip{" not in html
     # the gauge opens the Matchup page (a page of its own in the history), with the opponent's recent games vs a position
     # group from docs/vs/{TEAM}.json (nba_vs): 5 rows, More / Less to 10, a row opens that game's box score
     assert '$("#mub", pg).onclick = () => { if (p.opp) openMatchup(p); };' in html and "function matchupSheet(" not in html
@@ -363,7 +531,7 @@ def test_page_controls_work_on_iphone():
     # he sets (his average to the half below), no books; search finds any player; box score and Injuries rows open one
     assert "fetch(`player/${pid}.json`)" in html and 'fetch("player/index.json")' in html and "function propFor(id)" in html
     assert "line: p.v ? vLine(p) :" in html and "const mkts = p.v ? TAB_ORDER :" in html and 'if (p.v) { $("#pproj").innerHTML = ""; $("#pbk").innerHTML = ""; }' in html
-    assert 'String(gid).startsWith("none:")' in html and "if (ST.view !== \"injuries\" && q.length >= 2) searchPlayers(q);" in html
+    assert 'String(gid).startsWith("none:")' in html and "if (ST.view === \"props\" && q.length >= 2) searchPlayers(q);" in html
     assert '<tr data-vp="${r[0]}"' in html and 'data-vp="${e.pid}"' in html and "openPlayer(+v.dataset.vp)" in html
     assert "fetch(`vs/${encodeURIComponent(p.opp || \"\")}.json`)" in html and 'if (MUP) h.set("mu", "1");' in html
     assert 'if (MUP && !h.get("mu")) closeMatchup(swiped);' in html and "rows = all.slice(0, MUP.more ? 10 : 5)" in html
@@ -385,10 +553,21 @@ def test_page_controls_work_on_iphone():
     # Movers (a line moved since open, or the books disagree: the move first), Lineups beside Injuries (NEW starters, the usual
     # five not starting), who guards him on the Matchup page (docs/matchups/{pid}.json, nba_defmatch)
     assert 'if (ST.market === "movers") return list.map(p => [p, mover(p)])' in html and "k: Math.abs(mv) * 100 + gap" in html
-    assert '(ST.iv === "lu" ? lineupsView() : ST.iv === "ro" ?' in html and "function luTeam(t, e)" in html and 'isNew(pid) ? " · NEW" : ""' in html
+    assert '(ST.iv === "lu" ? (SPORT === "nfl" ? depthView() : lineupsView()) : ST.iv === "ro" ?' in html and "function luTeam(t, e)" in html and 'isNew(pid) ? " · NEW" : ""' in html
     # role changes (docs/player/roles.json), the Live tab (props under way from their closing boards: only there), game script
     assert 'fetch("player/roles.json")' in html and "function rolesView(" in html and 'data-iv="ro"' in html
     assert 'const ALL_TABS = ["live", "trends", "movers"];' in html and "list = list.filter(p => !p.closed);" in html
+    # the flags (D.flags: the under plays that ping) are the bottom bar's Flags view, in place of Markets (a saved
+    # Markets view opens Props), SHADOW · NOT A BET, each graded at its own line once final; a chip on the prop's row
+    # and a line on its page; a tap opens the prop or the player. The props section has no Flags tab
+    assert 'let VIEWS = [["props", "Props"], ["flags", "Flags"], ["injuries", "Injuries"]];' in html and "mrow" not in html
+    assert 'if (["props", "flags", "injuries"].indexOf(ST.view) < 0) ST.view = "props";' in html and '"markets"' not in html
+    assert '  if (ST.view === "flags") { lst.innerHTML = flagsView(); return; }' in html and 'flags: "Flags"' not in html
+    assert 'if (ml) ml.style.display = ST.view === "props" ? "" : "none";' in html and 'if (ST.view === "props" && q.length >= 2)' in html
+    assert "${flagChips(p)}</div>" in html and "const flagChips = p => flagsOf(p.id).length ?" in html
+    assert "f.date === ST.date && (ST.gid === \"all\" || f.gid === ST.gid)" in html
+    assert 'g.state === "final" ? flagGrade(f.side, f.line, p.live.value) : null' in html
+    assert '${p ? `data-id="${esc(id)}"` : `data-vp="${f.pid}"`}' in html and html.count("SHADOW · NOT A BET") == 3
     assert "function liveRow(p)" in html and 'st = liveStatus(x.v, x.line, over, live)' in html
     assert 'if (f.blow === "b" && !(Math.abs(l.margin) >= 15)) return false;' in html and 'tchip("blow", "b", "Blowouts")' in html
     assert "function gameScript(p, g, logs, line, side)" in html and '<span class="gsp">' in html
@@ -398,7 +577,7 @@ def test_page_controls_work_on_iphone():
     assert 'fetch("refs.json?t="' in html and '<div class="shc wg" id="rfc"></div>' in html and "refCard();" in html and "refsRow(p, g);" in html
     assert "d: r && r[1] >= 10 ?" in html
     # the combo checker: kept on the phone, opened from the floating button, the math in the shared core
-    assert 'localStorage.getItem("pickz_combo")' in html and "comboStats(L, CMB_W, D.season)" in html and 'id="cmb"' in html and "comboPill();" in html
+    assert 'localStorage.getItem(LS("pickz_combo"))' in html and "comboStats(L, CMB_W, D.season)" in html and 'id="cmb"' in html and "comboPill();" in html
     assert "fetch(`matchups/${pid}.json`)" in html and '<div class="shc wg" id="wgd"></div>' in html and "guardCard();" in html
     # the floating header fades what scrolls under it (no text under its title)
     assert '.ph::before{content:"";position:absolute;' in html
@@ -437,10 +616,10 @@ def test_page_controls_work_on_iphone():
     # motion runs as Web Animations with a timer fallback, and nothing is fetched from a font CDN
     assert ".animate([" in html and "setTimeout(done" in html and "fonts.googleapis" not in html
     # every range chip but Margin draws its stat on the chart as white outline boxes (Margin can be negative: filter only)
-    assert ('const OVL = {min: "min", fga: "FGA", fg3a: "3PTA", fta: "FTA", usg: "usage %", pot_ast: "potential assists", '
+    assert ('let OVL = {min: "min", fga: "FGA", fg3a: "3PTA", fta: "FTA", usg: "usage %", pot_ast: "potential assists", '
             'reb_ch: "rebound chances"}') in html and "l[ov]" in html
     # the adjustable filters come first; potential assists / rebound chances only on the props they bear on
-    assert '["min", "fga", "fg3a", "fta", "usg", "pot_ast", "reb_ch"].forEach(rchip)' in html
+    assert '(SPORT === "nfl" ? NFL_RCHIPS : ["min", "fga", "fg3a", "fta", "usg", "pot_ast", "reb_ch"]).forEach(rchip)' in html
     assert html.index('.forEach(rchip);') < html.index("if (c.dvp_rank) chips.push(") < html.index('rchip("margin");')
     assert 'pot_ast: ["assists", "pra", "pts_ast", "reb_ast"], reb_ch: ["rebounds", "pra", "pts_reb", "reb_ast"]' in html
     # no explanatory prose: notes are status only, empty states are titles only
@@ -806,11 +985,11 @@ def test_page_navigation_guards():
 def test_page_boots_from_its_last_copy_and_animates_swaps():
     html = UI.page()
     # no pull to refresh (the user found it bad); the 2-minute refresh and the back-from-another-app refresh stay
-    assert "pullRefresh" not in html and ".ptr" not in html and "setInterval(load, 120000)" in html and '"visibilitychange"' in html
+    assert "pullRefresh" not in html and ".ptr" not in html and "setInterval(load, 120000)" not in html and '"visibilitychange"' in html
     # a launch draws the phone's last copy (Cache Storage) while the fresh one downloads; no "Feed delayed" off a stale copy
-    assert 'caches.open(CACHE).then(c => c.match("nba_props.json"))' in html and "if (j && !D && !FRESH) apply(j);" in html
+    assert 'caches.open(CACHE).then(c => c.match(dataUrl()))' in html and "if (j && !D && !FRESH) apply(j);" in html
     assert 'if (FRESH && (Date.now() - iso(D.generated_at).getTime()) / 60000 > 10) out.push("Feed delayed");' in html
-    assert "function prefetch() { refsLoad(); rolesLoad(); playerIndex(); }" in html and "setTimeout(prefetch, 1500)" in html
+    assert "function prefetch() { if (SPORT === \"nba\") { refsLoad(); rolesLoad(); playerIndex(); } prefetchOther(); }" in html and "setTimeout(prefetch, 1500)" in html
     # swaps rise in; Over / Under, the combo window and the Injuries switch slide their pills; Live's bars grow on entry
     assert html.count("swapIn(") >= 9 and '<span class="ou" role="group" aria-label="Side"><span class="pill2">' in html
     assert '<div class="seg cbw" role="group" aria-label="Games"><span class="pill2">' in html and ".lvin .lvbar i{" in html
@@ -901,7 +1080,7 @@ def test_injury_beneficiaries_open_their_page():
     html = UI.page()
     # every box under an injury is a button: his prop on the slate, else his player page (openPlayer via data-vp)
     assert 'return `<button class="ijb"${p ? ` data-id="${esc(p.id)}"` : ` data-vp="${m.pid}"`}>' in html
-    assert 'e.target.closest(".pr[data-id],.mrw[data-id],.ijb[data-id],[data-vp]")' in html
+    assert 'e.target.closest(".pr[data-id],.ijb[data-id],[data-vp]")' in html
 
 
 def test_player_page_has_last_seasons_window():
@@ -931,8 +1110,11 @@ def test_matchup_shows_assist_and_rebound_zones_only_for_their_props():
     # rebounds: free throws (no zone on the court) as a line; the player's rings, 0-3 / 3-6 / 6-10 / 10+ ft from the hoop
     # (docs/rebd), shaded against the players with rebound lines; the defense view's missed threes against the league
     assert "NBA.com tracking · ${r[1]} boards ·" in html                 # the sample: early in a season a ring is a board or two
-    assert "Off missed free throws: " in html and "extra += r && r[1] ? rebRings(r, rd.avg)" in html and "function rebRings(r, avg)" in html
-    assert "shFill(avg.dist[k] == null ? null : (sh(k) - avg.dist[k]) * 100)" in html and 'RD_FT = ["0–3", "3–6", "6–10", "10+"]' in html
+    # rebounds: the rings in both views, the opponent's from its opponents' rebounds against it (rd.teams; drawn in
+    # test_rebound_rings_both_views)
+    assert "Off missed free throws: " in html and "extra += r && r[1] ? rebRings(r, rd.avg, def ? rd.teams : null, p.opp)" in html
+    assert "const r = rd && (def ? rd.teams && rd.teams[p.opp] : rd.players[String(p.pid)]);" in html and 'RD_FT = ["0–3", "3–6", "6–10", "10+"]' in html
+    assert "if (def && t && t.length >= 1 + nz + 2 * Z.length && L.miss) {" in html
     assert "const m3 = x => (x[off + Z.length + 3] + x[off + Z.length + 4] + x[off + Z.length + 5]) / x[0], lg = (L.miss[3] + L.miss[4] + L.miss[5]) / L.gp;" in html
     # a rookie facing a team with few games this season still gets his own season, not last season's blank
     assert "MUP[key] = (t && t[0] >= 10) || (me(j) && !me(q)) ? D.season : prevSeason(D.season);" in html

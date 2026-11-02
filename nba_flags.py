@@ -159,8 +159,9 @@ CANDS_DDL = """CREATE TABLE IF NOT EXISTS cands (game_date TEXT, x_pid INTEGER, 
 
 
 def _shadow(path):
-    """Open the shadow table, migrating a pre-`ev` table in place (idempotent)."""
-    sh = sqlite3.connect(path)
+    """Open the shadow table, migrating a pre-`ev` table in place (idempotent). Waits up to 30 s for a lock: other jobs
+    read or write nba_shadow too, and the 5 s default failed six cycles on 2026-10-28 ("database is locked")."""
+    sh = sqlite3.connect(path, timeout=30)
     sh.execute(SHADOW_DDL)
     sh.execute(CANDS_DDL)
     sh.execute(TIPCARD_DDL)

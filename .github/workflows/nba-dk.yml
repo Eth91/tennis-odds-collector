@@ -59,6 +59,8 @@ jobs:
             nba_lines.py
             nba_rosters.py
             dk_collect.py
+            nfl_lines.py
+            nfl_common.py
           sparse-checkout-cone-mode: false
 
       - uses: actions/setup-python@v5
@@ -79,10 +81,13 @@ jobs:
           echo "155.248.217.149 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPzbro129cAdTBijf5TdwJE5ijq17y+9CsqCLiYbXuSb" > ~/.ssh/known_hosts
 
       - name: fetch DraftKings and ship to the VM every 3 min
+        # NFL (nfl_lines.py) rides the same loop AFTER the NBA send: same key, same receiver (it writes an NFL-marked
+        # snapshot to its own file). Its failures are counted apart and never fail the job; a hung NFL fetch is cut
+        # at 90 s, inside the 3-min tick.
         run: |
           in_window() { h=$((10#$(date -u +%H))); [ "$h" -ge "$WINDOW_START_UTC" ] || [ "$h" -lt "$WINDOW_END_UTC" ]; }
           stop=$(( $(date +%s) + 330 * 60 ))
-          ok=0; bad=0
+          ok=0; bad=0; nfl_ok=0; nfl_bad=0
           while [ "$(date +%s)" -lt "$stop" ] && in_window; do
             if timeout 120 python nba_lines.py --snapshot dk /tmp/dk.json \
                && timeout 60 ssh -i ~/.ssh/nba_dk -o BatchMode=yes -o ConnectTimeout=15 \
@@ -92,9 +97,17 @@ jobs:
               bad=$((bad + 1))
               echo "cycle failed at $(date -u +%T)"
             fi
+            if timeout 90 python nfl_lines.py --snapshot dk /tmp/dk_nfl.json \
+               && timeout 45 ssh -i ~/.ssh/nba_dk -o BatchMode=yes -o ConnectTimeout=15 \
+                    -o StrictHostKeyChecking=yes "$VM" < /tmp/dk_nfl.json; then
+              nfl_ok=$((nfl_ok + 1))
+            else
+              nfl_bad=$((nfl_bad + 1))
+              echo "nfl cycle failed at $(date -u +%T)"
+            fi
             sleep $(( 180 - $(date +%s) % 180 ))
           done
-          echo "cycles ok=$ok failed=$bad"
+          echo "cycles ok=$ok failed=$bad · nfl ok=$nfl_ok failed=$nfl_bad"
           [ "$ok" -gt 0 ] || [ "$bad" -eq 0 ]
 
       - name: re-dispatch while the window is open

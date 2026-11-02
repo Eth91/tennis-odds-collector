@@ -30,18 +30,26 @@ LOG="$LOG_DIR/nba_cycle.log"
 LOCK="/tmp/nba-cycle.lock"
 stamp(){ date -u +%FT%TZ; }
 
-# one cycle at a time; a lock older than 30 min is a crashed run, not a live one
+# --- lock: one cycle at a time; a lock older than 30 min is a crashed run, not a live one
 # a plain FILE at the lock path is stray (amendment 17): the lock is a directory
+# wait up to LOCK_WAIT_S for a per-minute nba_watch run (the reaction follow) to let go, rather than skipping at once:
+# on 2026-10-28 every :03/:13/... cycle lost to it, so DraftKings (refreshed only here) went stale
 [ -e "$LOCK" ] && [ ! -d "$LOCK" ] && rm -f "$LOCK"
-if ! mkdir "$LOCK" 2>/dev/null; then
+LOCK_WAIT_S=${LOCK_WAIT_S:-120}
+got=""
+for _ in $(seq 1 $((LOCK_WAIT_S / 2))); do
+  if mkdir "$LOCK" 2>/dev/null; then got=1; break; fi
   if [ -n "$(find "$LOCK" -maxdepth 0 -mmin +30 2>/dev/null)" ]; then
-    rm -rf "$LOCK"; mkdir "$LOCK" || exit 0
-    echo "$(stamp) cleared a stale lock" >>"$LOG"
-  else
-    echo "$(stamp) previous cycle still running — skipped" >>"$LOG"; exit 0
+    rm -rf "$LOCK"
+    if mkdir "$LOCK" 2>/dev/null; then got=1; echo "$(stamp) cleared a stale lock" >>"$LOG"; break; fi
   fi
+  sleep 2
+done
+if [ -z "$got" ]; then
+  echo "$(stamp) previous cycle still running after ${LOCK_WAIT_S}s — skipped" >>"$LOG"; exit 0
 fi
 trap 'rm -rf "$LOCK"' EXIT
+# --- end lock
 cd "$REPO" || { echo "$(stamp) FATAL: no $REPO" >>"$LOG"; exit 1; }
 
 worst=0

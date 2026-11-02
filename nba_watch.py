@@ -41,6 +41,7 @@ import datetime as dt
 import io
 import json
 import os
+import signal
 import sqlite3
 import sys
 import time
@@ -393,7 +394,15 @@ def once():
     return 0
 
 
+def _exit_on_signal(signum, _frame):
+    """nba_watch.sh's 170 s perl alarm (SIGALRM) or a stop (SIGTERM): leave through the finally blocks, so cycle_lock
+    removes /tmp/nba-cycle.lock instead of orphaning it for 30 minutes (2026-10-28: three orphans, 22:02-23:06 UTC)."""
+    raise SystemExit(128 + signum)
+
+
 if __name__ == "__main__":
+    for _sig in (signal.SIGALRM, signal.SIGTERM):
+        signal.signal(_sig, _exit_on_signal)
     ap = argparse.ArgumentParser()
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--x-fast", action="store_true", help="daemon: fire the moment the X log grows")

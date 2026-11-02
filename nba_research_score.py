@@ -31,7 +31,7 @@ MIN_N, HELP_Z = 100, 2.0
 TOO_FEW = 50
 
 
-def boards_before_tip(q, gids):
+def boards_before_tip(q, gids, markets=None):
     """{(gid, pid, stat, book): {"open": main (line, o, u) at the first two-sided board, "close": {(line, side):
     odds} as of the last change before tip}} from the change log."""
     out = {}
@@ -41,7 +41,8 @@ def boards_before_tip(q, gids):
     tips = dict(q.execute(f"SELECT gid, MIN(tip_utc) FROM quotes WHERE gid IN ({marks}) GROUP BY gid", list(gids)))
     rows = q.execute(f"SELECT seen_at, book, gid, pid, stat, line, side, odds FROM quotes WHERE gid IN ({marks}) "
                      f"AND pid IS NOT NULL ORDER BY seen_at", list(gids))
-    for t, changed in R.replay(r for r in rows if r[4] in R.MARKETS):
+    markets = R.MARKETS if markets is None else markets
+    for t, changed in R.replay(r for r in rows if r[4] in markets):
         for k, st_ in changed.items():
             tip = (tips.get(k[0]) or "")[:19]
             if not tip or t >= tip:

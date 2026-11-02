@@ -15,6 +15,7 @@ import sqlite3
 from collections import defaultdict
 from pathlib import Path
 
+import nba_boost as BOOST
 import nba_early as EARLY
 import nba_proj_data as PD
 import nba_proj_eval as E
@@ -22,13 +23,15 @@ import nba_replay as RP
 import nba_research as R
 import nba_ratio as RATIO
 import nba_role as ROLE
+import nba_under as UNDER
 
 HERE = Path(__file__).resolve().parent
 DB = HERE / "nba_role.sqlite"
 TOO_LATE_MIN = 5
 OUTS = ("Out", "Doubtful")
 BOOK = {"fd": "FD", "dk": "DK"}
-ABBR = {"points": "PTS", "rebounds": "REB", "assists": "AST", "threes": "3PM", "pra": "PRA"}
+ABBR = {"points": "PTS", "rebounds": "REB", "assists": "AST", "threes": "3PM", "pra": "PRA", "pts_reb": "P+R", "pts_ast": "P+A",
+        "reb_ast": "R+A"}
 DDL = ["CREATE TABLE IF NOT EXISTS opened (gid TEXT, pid INTEGER, market TEXT, book TEXT, opened_at TEXT, "
        "PRIMARY KEY (gid, pid, market, book))",
        "CREATE TABLE IF NOT EXISTS signals (gid TEXT, pid INTEGER, market TEXT, side TEXT, book TEXT, line REAL, price REAL, "
@@ -38,9 +41,19 @@ DDL = ["CREATE TABLE IF NOT EXISTS opened (gid TEXT, pid INTEGER, market TEXT, b
        "CREATE TABLE IF NOT EXISTS ratio_signals (rule TEXT, gid TEXT, pid INTEGER, market TEXT, book TEXT, line REAL, "
        "price REAL, volume REAL, date TEXT, player TEXT, logged_at TEXT, pinged INTEGER, PRIMARY KEY (rule, gid, pid, market))"]
 PINGED_RATIOS = ("RATIO_PA28",)                          # NBA_RATIO_PREREG.md amendment 3: the ratio rules that ping
+PHONE = ("UNDER20",)            # the user, 2026-10-28: only the under pings reach the phone; every other rule is recorded
+ALL_RULES = ("UNDER20", "BOOST", "BOOST_STEP", "EARLY_SURGE", "RATIO_PA28", "ROLE_OPEN", "RETURN_UNDER", "FOUL_BIG")
+
+
+def notify(sender, rule, text, phone=PHONE):
+    """Send a ping only for the rules routed to the phone; the others are recorded silently (pinged = 0)."""
+    return bool(sender(text)) if rule in phone else False
+
+
 DDL.append("CREATE TABLE IF NOT EXISTS idea_signals (rule TEXT, gid TEXT, pid INTEGER, market TEXT, line REAL, price REAL, "
            "note TEXT, date TEXT, player TEXT, logged_at TEXT, pinged INTEGER, PRIMARY KEY (rule, gid, pid, market))")
 DDL.append("CREATE TABLE IF NOT EXISTS tip30_done (gid TEXT PRIMARY KEY, done_at TEXT)")
+DDL.append("CREATE TABLE IF NOT EXISTS step_seen (date TEXT, pid INTEGER, seen_at TEXT, PRIMARY KEY (date, pid))")
 
 
 def current_boards(q, markets=("points", "rebounds", "assists", "threes")):
@@ -86,9 +99,71 @@ def ratio_body(rule, player, market, line, price, book, vol):
             f"· pot. ast {vol:.1f} ({vol / line:.1f}x) · shadow")
 
 
-def tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json, sender):
+def boost_signal(con, sender, f, gid, pid, market, book, line, price, date, player, x_name, now, phone=PHONE):
+    """Record a BOOST flag, one per (rule, game, player, market) across books; ping BOOST and BOOST_STEP (BOOST_NH and
+    BOOST_PICKUP are silent). Returns pings."""
+    rule = {"history": "BOOST", "step": "BOOST_STEP", "pickup": "BOOST_PICKUP", "no history": "BOOST_NH"}[BOOST.kind_of(f)]
+    cur = con.execute("INSERT OR IGNORE INTO ratio_signals VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                      (rule, gid, pid, market, book, line, price, round(f["hits"] / f["h"] if rule == "BOOST" else f["proj"], 3),
+                       date, player, now, 0))
+    dup = rule == "BOOST_STEP" and con.execute("SELECT 1 FROM ratio_signals WHERE rule = 'BOOST' AND gid = ? AND pid = ? "
+                                               "AND market = ? AND pinged = 1", (gid, pid, market)).fetchone()
+    if cur.rowcount and rule in ("BOOST", "BOOST_STEP") and not dup:   # amendments 1, 6: history and STEP ping, once a prop
+        ok = notify(sender, rule, BOOST.body(player, market, line, price, BOOK[book], f, x_name), phone)
+        con.execute("UPDATE ratio_signals SET pinged = ? WHERE rule = ? AND gid = ? AND pid = ? AND market = ?",
+                    (1 if ok else 0, rule, gid, pid, market))
+        return 1
+    return 0
+
+
+def step_checks(con, keys, now, n, matchup_db, gamelogs_db, lineups_db, sender, bds, rds, stat_cache, phone=PHONE):
+    """NBA_BOOST_PREREG.md amendments 4 and 6: at the first run after a player first appears as a new starter in
+    NBA.com's lineup (or as that starter's bench pickup), his props that opened before that snapshot are judged for
+    STEP (or PICKUP) at their current main line. Returns pings."""
+    by = defaultdict(list)                               # (date, pid) -> [(gid, market, book, board, tip, player)]
+    for (gid, pid, market, book), (board, tip, player, seen) in keys.items():
+        if tip and seen <= now:
+            by[(E._et_date(tip), pid)].append((gid, market, book, board, tip, player))
+    late = (dt.datetime.fromisoformat(now) + dt.timedelta(minutes=TOO_LATE_MIN)).isoformat()
+    fired = 0
+    for date in sorted({d for d, _p in by}):
+        at, fives = BOOST.posted_fives(lineups_db, date, now)
+        key = f"step_snap {date}"
+        if not fives or (con.execute("SELECT value FROM meta WHERE key = ?", (key,)).fetchone() or (None,))[0] == at:
+            continue                                     # no lineup, or this snapshot was already checked: load nothing
+        con.execute("INSERT OR REPLACE INTO meta VALUES (?, ?)", (key, at))
+        season = ROLE.season_of(date)
+        bd = bds.get(season) or bds.setdefault(season, BOOST.live_data(matchup_db, gamelogs_db, season))
+        rd = rds.get(season) or rds.setdefault(season, ROLE.RoleData(matchup_db, gamelogs_db, season))
+        st = stat_cache.get(date) or stat_cache.setdefault(date, statuses(n, date, now))
+        for team, five in sorted(fives.items()):
+            if bd.usual_five(team, date) is None:
+                continue
+            out = {x for x, (tm, s_, _nm) in st.items() if tm == team and s_ in OUTS}
+            tfive, pairs = bd.tonight(team, date, out, five)
+            who = [(p, BOOST.step_eval) for p in sorted(pairs)]
+            who += [(pk[0], BOOST.pickup_eval) for s_ in sorted(pairs) if (pk := bd.pickup(team, date, s_, tfive, out))]
+            for p, judge in who:
+                if not con.execute("INSERT OR IGNORE INTO step_seen VALUES (?, ?, ?)", (date, p, now)).rowcount:
+                    continue                             # checked when he first appeared
+                for gid, market, book, board, tip, player in by.get((date, p), ()):
+                    op = con.execute("SELECT opened_at FROM opened WHERE gid = ? AND pid = ? AND market = ? AND book = ?",
+                                     (gid, p, market, book)).fetchone()
+                    m = R.main_of(board)
+                    if not op or op[0][:19] >= at or not m or RP.iso(tip) <= late:
+                        continue                         # judged at its opener with this lineup, or too late
+                    f = judge(bd, rd, date, team, p, market, m[0], m[1], out, five)
+                    if f:
+                        fired += boost_signal(con, sender, f, gid, p, market, book, m[0], m[1], date, player,
+                                              st[f["x"]][2] or str(f["x"]), now, phone)
+    return fired
+
+
+def tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json, sender, bds=None, rds=None, stat_cache=None,
+          phone=PHONE):
     """NBA_IDEAS_PREREG.md amendment 1: at each game's first run at or after tip - 30 (before tip - 5), RETURN_UNDER and
-    FOUL_BIG on FanDuel's current board, with the decisions the side-by-side replays. Returns pings sent."""
+    FOUL_BIG on FanDuel's current board, with the decisions the side-by-side replays. Returns pings sent. The data
+    loaded for one game is shared with the others in the run (and with process's caches when given)."""
     import nba_ideas as IDEAS
     import nba_sxs_rules as SR
     from nba_ping import american
@@ -99,7 +174,7 @@ def tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json,
         if book == "fd" and m:
             games[gid][(pid, market)] = (m, player)
             tips[gid] = tip
-    fired = 0
+    fired, bds, rds, stat_cache, per = 0, {} if bds is None else bds, {} if rds is None else rds, {} if stat_cache is None else stat_cache, {}
     for gid, props in sorted(games.items()):
         tip = RP.iso(tips[gid])
         if not (RP.minus(tip, 30) <= now < RP.minus(tip, 5)) or con.execute("SELECT 1 FROM tip30_done WHERE gid = ?", (gid,)).fetchone():
@@ -107,11 +182,13 @@ def tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json,
         con.execute("INSERT INTO tip30_done VALUES (?, ?)", (gid, now))
         date = E._et_date(tips[gid])                     # the posted tip carries its offset; the naive one would read as local time
         season = ROLE.season_of(date)
-        rd = ROLE.RoleData(matchup_db, gamelogs_db, season)
-        vd = SR.VolumeData(lineups_db, matchup_db, index_json)
-        fd = IDEAS.FoulData(matchup_db, season)
-        dv = RATIO.DvpData(matchup_db, gamelogs_db, season)
-        listed = {p: (tm, st_) for p, (tm, st_, _nm) in statuses(n, date, now).items()}
+        rd = rds.get(season) or rds.setdefault(season, ROLE.RoleData(matchup_db, gamelogs_db, season))
+        if season not in per:                            # loaded once per run, not once per game
+            per[season] = (SR.VolumeData(lineups_db, matchup_db, index_json), IDEAS.FoulData(matchup_db, season),
+                           RATIO.DvpData(matchup_db, gamelogs_db, season))
+        vd, fd, dv = per[season]
+        st_all = stat_cache.get(date) or stat_cache.setdefault(date, statuses(n, date, now))
+        listed = {p: (tm, st_) for p, (tm, st_, _nm) in st_all.items()}
         team_of = {p: rd.team_of(p, date) for p, _mk in props}
         ha = q.execute("SELECT home, away FROM board WHERE gid = ? AND home IS NOT NULL LIMIT 1", (gid,)).fetchone()
         teams = sorted(ha) if ha else sorted({t for t in team_of.values() if t})
@@ -125,6 +202,29 @@ def tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json,
             opp = next((t for t in teams if t != team), None) if team else None
             if IDEAS.foul_bet(fd, dv.groups.get(p) or vd.group(p), p, opp, date):
                 bets += [("FOUL_BIG", p, mk, f"{fd.pf36(p, date):.1f} PF/36 vs {opp}") for mk in ("points", "rebounds")]
+        bd = bds.get(season) or bds.setdefault(season, BOOST.live_data(matchup_db, gamelogs_db, season))
+        for (p, mk), ((line, over, under), player) in sorted(props.items()):   # NBA_UNDER_PREREG.md
+            team = bd.team_now(p, date)
+            if not team or mk not in BOOST.PARTS:
+                continue
+            out_t = {x for x, (tm, st_) in listed.items() if tm == team and st_ in OUTS}
+            u20 = UNDER.under20(bd, rd, date, team, p, mk, line, under, out_t)
+            if u20:
+                l5 = UNDER.last5_ratio(bd, p, date, mk, line)
+                note = f"proj {u20['proj']:.1f} min {u20['min']:.1f}" + (f" l5 {l5:.6f}" if l5 is not None else "")
+                cur = con.execute("INSERT OR IGNORE INTO idea_signals VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                                  ("UNDER20", gid, p, mk, line, under, note, date, player, now, 0))
+                if cur.rowcount and UNDER.pings_l5(u20, mk, l5):   # pinged (SHADOW): 30-50% below, -150 or better, not threes,
+                    # and the line not 6-42% over his last-5 average (NBA_UNDER_PREREG.md amendment 9)
+                    ok = notify(sender, "UNDER20", f"🔵 UNDER {player} {ABBR.get(mk, mk.upper())} u{line:g} {american(under)} FD · proj {u20['proj']:.1f} "
+                                f"({u20['ratio']:.0%} of the line), {u20['min']:.0f} min · shadow", phone)
+                    con.execute("UPDATE idea_signals SET pinged = ? WHERE rule = 'UNDER20' AND gid = ? AND pid = ? AND market = ?",
+                                (1 if ok else 0, gid, p, mk))
+                    fired += 1
+            ml = UNDER.underml(bd, rd, date, team, p, mk, line, over, under, out_t)
+            if ml:                                       # silent
+                con.execute("INSERT OR IGNORE INTO idea_signals VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                            ("UNDERML", gid, p, mk, line, ml["price"], f"{ml['side']} p {ml['p']:.3f} ev {ml['ev']:.3f}", date, player, now, 0))
         for rule, p, mk, note in bets:
             got = props.get((p, mk))
             if not got or not got[0][2]:
@@ -134,7 +234,7 @@ def tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json,
                               (rule, gid, p, mk, line, under, note, date, player, now, 0))
             if cur.rowcount:
                 tag = {"RETURN_UNDER": "🔻 RETURN", "FOUL_BIG": "🟠 FOUL"}[rule]
-                ok = sender(f"{tag} {player} {ABBR.get(mk, mk.upper())} u{line:g} {american(under)} FD · {note} · shadow")
+                ok = notify(sender, rule, f"{tag} {player} {ABBR.get(mk, mk.upper())} u{line:g} {american(under)} FD · {note} · shadow", phone)
                 con.execute("UPDATE idea_signals SET pinged = ? WHERE rule = ? AND gid = ? AND pid = ? AND market = ?",
                             (1 if ok else 0, rule, gid, p, mk))
                 fired += 1
@@ -143,7 +243,7 @@ def tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json,
 
 def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_news.sqlite", matchup_db=HERE / "nba_matchup.sqlite",
             gamelogs_db=HERE / "nba_gamelogs.sqlite", tracking_db=HERE / "nba_tracking.sqlite", lineups_db=HERE / "nba_lineups.sqlite",
-            index_json=HERE / "nba_player_index.json", db=DB, sender=None):
+            index_json=HERE / "nba_player_index.json", db=DB, sender=None, phone=PHONE):
     import nba_ping as PING
     sender = sender or PING.send
     now = now or dt.datetime.now(dt.timezone.utc).replace(tzinfo=None, microsecond=0).isoformat()
@@ -152,18 +252,19 @@ def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_ne
         con.execute(s_)
     q, n = PD._ro(lines_db), PD._ro(news_db)
     first_run = con.execute("SELECT value FROM meta WHERE key = 'installed'").fetchone() is None
-    keys = current_boards(q, markets=("points", "rebounds", "assists", "threes", "pra"))
+    keys = current_boards(q, markets=tuple(BOOST.PARTS))
+    installed = set((con.execute("SELECT value FROM meta WHERE key = 'markets'").fetchone() or (",".join(ROLE.MARKET_STAT),))[0].split(","))
     done = {(g, p, m, b) for g, p, m, b in con.execute("SELECT gid, pid, market, book FROM opened")}
-    rds, rts, eds, stat_cache, fired = {}, {}, {}, {}, 0
+    rds, rts, eds, bds, stat_cache, fives_of, fired = {}, {}, {}, {}, {}, {}, 0
     for (gid, pid, market, book), (board, tip, player, seen) in sorted(keys.items()):
-        if market not in ROLE.MARKET_STAT or (gid, pid, market, book) in done or seen > now:
+        if market not in BOOST.PARTS or (gid, pid, market, book) in done or seen > now:
             continue
         m = R.main_of(board)
         if not m:
             continue
         con.execute("INSERT OR IGNORE INTO opened VALUES (?, ?, ?, ?, ?)", (gid, pid, market, book, seen))
-        if first_run or not tip or RP.iso(tip) <= (dt.datetime.fromisoformat(now) + dt.timedelta(minutes=TOO_LATE_MIN)).isoformat():
-            continue                                     # install: mark what is already open; never act near or after tip
+        if first_run or market not in installed or not tip or RP.iso(tip) <= (dt.datetime.fromisoformat(now) + dt.timedelta(minutes=TOO_LATE_MIN)).isoformat():
+            continue                                     # install (or a market new here): mark what is open; never act near tip
         date = E._et_date(tip)
         season = ROLE.season_of(date)
         for rule in PINGED_RATIOS:                       # the same decision the side-by-side's RATIO_PA28 replays
@@ -175,7 +276,7 @@ def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_ne
                 cur = con.execute("INSERT OR IGNORE INTO ratio_signals VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
                                   (rule, gid, pid, market, book, m[0], m[1], round(vol, 2), date, player, now, 0))
                 if cur.rowcount:
-                    ok = sender(ratio_body(rule, player, market, m[0], m[1], book, vol))
+                    ok = notify(sender, rule, ratio_body(rule, player, market, m[0], m[1], book, vol), phone)
                     con.execute("UPDATE ratio_signals SET pinged = ? WHERE rule = ? AND gid = ? AND pid = ? AND market = ?",
                                 (1 if ok else 0, rule, gid, pid, market))
                     fired += 1
@@ -187,10 +288,27 @@ def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_ne
                 cur = con.execute("INSERT OR IGNORE INTO ratio_signals VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
                                   ("EARLY_SURGE", gid, pid, market, book, m[0], m[1], round(fga, 2), date, player, now, 0))
                 if cur.rowcount:
-                    ok = sender(early_body(player, m[0], m[1], book, fga, ed.last[pid]))
+                    ok = notify(sender, "EARLY_SURGE", early_body(player, m[0], m[1], book, fga, ed.last[pid]), phone)
                     con.execute("UPDATE ratio_signals SET pinged = ? WHERE rule = 'EARLY_SURGE' AND gid = ? AND pid = ? AND market = ?",
                                 (1 if ok else 0, gid, pid, market))
                     fired += 1
+        bd = bds.get(season) or bds.setdefault(season, BOOST.live_data(matchup_db, gamelogs_db, season))
+        bteam = bd.team_now(pid, date)                   # NBA_BOOST_PREREG.md: a starter out, the teammate's over
+        if bteam:
+            st = stat_cache.get(date) or stat_cache.setdefault(date, statuses(n, date, now))
+            out_b = {x for x, (tm, s_, _nm) in st.items() if tm == bteam and s_ in OUTS}
+            fv = fives_of.get(date) or fives_of.setdefault(date, BOOST.posted_fives(lineups_db, date, now))
+            if out_b:                                    # amendment 6: STEP and PICKUP beside BOOST / BOOST_NH
+                rd = rds.get(season) or rds.setdefault(season, ROLE.RoleData(matchup_db, gamelogs_db, season))
+                five = fv[1].get(bteam)
+                for f in (BOOST.boost_eval(bd, date, bteam, pid, market, m[0], m[1], out_b),
+                          BOOST.step_eval(bd, rd, date, bteam, pid, market, m[0], m[1], out_b, five),
+                          BOOST.pickup_eval(bd, rd, date, bteam, pid, market, m[0], m[1], out_b, five)):
+                    if f:
+                        fired += boost_signal(con, sender, f, gid, pid, market, book, m[0], m[1], date, player,
+                                              st[f["x"]][2] or str(f["x"]), now, phone)
+        if market not in ROLE.MARKET_STAT:
+            continue
         rd = rds.get(season) or rds.setdefault(season, ROLE.RoleData(matchup_db, gamelogs_db, season))
         team = rd.team_of(pid, date)
         if team is None:
@@ -205,14 +323,16 @@ def process(now=None, lines_db=HERE / "nba_lines.sqlite", news_db=HERE / "nba_ne
                               (gid, pid, market, e["side"], book, m[0], e["price"], round(e["ev"], 4), round(e["p"], 4),
                                round(e["mu"], 2), ",".join(map(str, sorted(e["spots"]))), date, team, player, now, 0))
             if cur.rowcount:
-                ok = sender(body(e, team, player, market, m[0], book, xs))
+                ok = notify(sender, "ROLE_OPEN", body(e, team, player, market, m[0], book, xs), phone)
                 con.execute("UPDATE signals SET pinged = ? WHERE gid = ? AND pid = ? AND market = ? AND side = ?",
                             (1 if ok else 0, gid, pid, market, e["side"]))
                 fired += 1
     if not first_run:
-        fired += tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json, sender)
+        fired += step_checks(con, keys, now, n, matchup_db, gamelogs_db, lineups_db, sender, bds, rds, stat_cache, phone)
+        fired += tip30(con, q, keys, now, n, matchup_db, gamelogs_db, lineups_db, index_json, sender, bds, rds, stat_cache, phone)
     if first_run:
         con.execute("INSERT OR REPLACE INTO meta VALUES ('installed', ?)", (now,))
+    con.execute("INSERT OR REPLACE INTO meta VALUES ('markets', ?)", (",".join(BOOST.PARTS),))
     con.commit()
     print(f"nba_role_open {now}: {len(keys)} props on the board, {fired} fired{' (install: marked open, no pings)' if first_run else ''}")
     return fired
