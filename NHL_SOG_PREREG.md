@@ -83,3 +83,48 @@ tests on NHL shots on goal: ice time by strength × shot-attempt rate by strengt
 
 A pass on C is a candidate for the forward record (NHL 2026-27, shadow), not a betting edge. No live change without the
 user.
+
+## Result (2026-11-02, about 09:50 UTC): A PASS, B PASS, C PASS, D DOES NOT HOLD
+- **Fit on 2023-24:**
+  - Minutes (1, last game, last 5, season mean): even 0.10 + 0.11 + 0.38 + 0.50; power play 0.02 + 0.08 + 0.36 +
+    0.52; short-handed 0.03 + 0.05 + 0.43 + 0.48.
+  - Negative binomial size 18.6.
+  - The calibration puts 0.28 on the model and 0.71 on the book, intercept −0.07 (toward the under).
+- **Matching:** 60,401 main-line props; 59,102 matched (1,299 players not found, every event found).
+
+| | 2023-24 (fit) | 2024-25 | 2025-26 |
+|---|---|---|---|
+| **A** MAE, model / plain average / the line | 1.289 / 1.306 / 1.328 | 1.253 / 1.265 / 1.282 | 1.239 / 1.247 / 1.272 |
+| **B** log loss, model / book | 0.68112 / 0.68306 | 0.68148 / 0.68283 | 0.68239 / 0.68241 |
+| **C** EV ≥ 5% bets | — | 833, 50.7%, +8.3% | 570, 50.0%, +5.5% |
+
+- **C pooled:** 1,403 bets, +7.1% [+2.5, +11.7]. 1,397 are unders.
+  - By line: 1.5 +6.5% (479), 2.5 +10.3% (700), 3.5+ −1.2% (224).
+  - By group: forwards +9.8% (999), defense +0.6% (404).
+  - Regular season +7.8% (1,064), playoffs +5.0% (339).
+- **D:** 45 pings, +21.6% [−1.5, +43.1]. Positive in all 3 seasons (+15.0% on 14, +0.3% on 11, +37.9% on 20), but the
+  low end is below 0: does not hold.
+- **Information:**
+  - The attempts split adds nothing. The plain shots-on-goal rate variant has the same MAE and makes +6.0% on 1,396
+    bets.
+  - The line's MAE isn't a fair comparison: a half-number line is always at least 0.5 from the count.
+  - The book's no-vig over against the actual over rate: 0.507 / 0.479, 0.504 / 0.484, 0.504 / 0.499.
+- **Checks (after the result):**
+  - **The book alone**, recalibrated on 2023-24 (an under lean): +2.7% [−1.4, +6.9] on 1,801 bets. That's +6.6% in
+    2024-25 and −2.8% in 2025-26, as the over lean shrank.
+    - Model bets the book alone doesn't make: +8.2% [+1.9, +14.5] on 752.
+    - Model bets it also makes: +5.9% on 651.
+    - So the model adds more than the books' over lean.
+  - **One book's prices** (bet only where that book has the main line):
+    - DraftKings: +6.7% [+1.7, +11.8] on 1,242 (+7.9%, +5.1%).
+    - FanDuel: +16.6% [+5.6, +27.8] on 260 (+14.7%, +22.7%). FanDuel has the main line less often.
+  - **Same-game bets as linked** (resampling the 852 games): 90% [+2.5, +11.8], unchanged.
+- **Reading:**
+  - The first public-data model that beats a book's closing number out of sample here, in two held-out seasons. The NBA
+    and NFL models failed.
+  - The edge is unders on forwards at 1.5 and 2.5. It's thin: 2025-26 alone is +5.5% with a low end below 0, and B's
+    2025-26 margin is 0.00002.
+  - Two seasons of backtest is not a betting edge. Per the plan it's a candidate for the forward record (NHL 2026-27,
+    shadow, no bets).
+  - Not checked: limits (NHL props are low-limit), and whether the prices at about 30 minutes before puck drop were
+    really available.
