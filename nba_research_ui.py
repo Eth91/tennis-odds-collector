@@ -900,6 +900,12 @@ function propRates(prop, logs, side, season) {
   });
   return out;
 }
+// the side's hit rate in his NBA Cup games (cup = {gid: label}), both seasons in the logs; null with none
+function cupRate(prop, logs, side, cup) {
+  if (!cup || prop.main === null || prop.main === undefined) return null;
+  var s = hitSummary(filterLogs(logs, {cup: cup}).map(function (l) { return statValue(l, prop.market); }), prop.main);
+  return s.n ? {n: s.n, rate: sideRate(s, side), avg: s.avg} : null;
+}
 function l10(prop, logsOf) {
   if (prop.main === null || prop.main === undefined) return null;
   return hitSummary(logsOf(prop).slice(-10).map(function (l) { return statValue(l, prop.market); }), prop.main);
@@ -927,14 +933,17 @@ function filterProps(props, st, gameOf, logsOf) {
     return true;
   });
 }
-// keys: hit5 / hit10 / hit20 / h2h / szn (the side's hit rate), avgdiff (L10 average minus the line, signed by side),
-// line, odds (the side's best price), value (that price against the books' fair price), player; avg10 kept for old links
-function sortProps(list, key, dir, logsOf, side, season, book) {
+// keys: hit5 / hit10 / hit20 / h2h / szn (the side's hit rate), cup (in his NBA Cup games, cup = {gid: label}; a tie
+// goes to more Cup games), avgdiff (L10 average minus the line, signed by side), line, odds (the side's best price),
+// value (that price against the books' fair price), player; avg10 kept for old links
+function sortProps(list, key, dir, logsOf, side, season, book, cup) {
   var sgn = dir === "asc" ? 1 : -1;
   side = side || "over"; book = book || "all";
-  var W = {hit5: "l5", hit10: "l10", hit20: "l20", h2h: "h2h", szn: "season"};
+  var W = {hit5: "l5", hit10: "l10", hit20: "l20", h2h: "h2h", szn: "season"}, T = 0;
   function val(p) {
+    T = 0;
     if (key === "player") return p.player.toLowerCase();
+    if (key === "cup") { var c = cupRate(p, logsOf(p), side, cup); T = c ? c.n : 0; return c ? c.rate : null; }
     if (key === "line") return p.main;
     if (key === "odds") { var b = p.main === null ? null : bestPrice(p, p.main, book, side); return b ? b.odds : null; }
     if (key === "value") { var v = p.main === null ? null : valueAt(p, p.main, side, book); return v ? v.ev : null; }
@@ -945,13 +954,13 @@ function sortProps(list, key, dir, logsOf, side, season, book) {
     if (key === "avgdiff") return (side === "under" ? -1 : 1) * (s.avg - p.main);
     return null;
   }
-  return list.map(function (p, i) { return {p: p, v: val(p), i: i}; }).sort(function (a, b) {
+  return list.map(function (p, i) { var v = val(p); return {p: p, v: v, t: T, i: i}; }).sort(function (a, b) {
     if (a.v === null && b.v === null) return a.i - b.i;          // stable; missing values always last
     if (a.v === null) return 1;
     if (b.v === null) return -1;
     if (a.v < b.v) return -sgn;
     if (a.v > b.v) return sgn;
-    return a.i - b.i;
+    return (b.t - a.t) || (a.i - b.i);
   }).map(function (x) { return x.p; });
 }
 // the combo checker: how often every leg hit in the games all the legs' players played. legs [{logs: [{gid, date, v}],
@@ -1025,7 +1034,7 @@ function wowySplit(lineups, y, n) {
 }
 if (typeof module !== "undefined") module.exports = {wowySplit: wowySplit, flagGrade: flagGrade, statValue: statValue, hitSummary: hitSummary, seasonOf: seasonOf,
   rowsToLogs: rowsToLogs, windowed: windowed, filterLogs: filterLogs, splitRows: splitRows, sideRate: sideRate,
-  american: american, decimalOf: decimalOf, bestOver: bestOver, bestPrice: bestPrice, propRates: propRates,
+  american: american, decimalOf: decimalOf, bestOver: bestOver, bestPrice: bestPrice, propRates: propRates, cupRate: cupRate,
   noVig: noVig, fairAt: fairAt, valueAt: valueAt, zscore: zscore, pmfGe: pmfGe, projProbs: projProbs, blendP: blendP,
   filterProps: filterProps, sortProps: sortProps, liveStage: liveStage, liveStatus: liveStatus, slateDay: slateDay, comboStats: comboStats};
 """
@@ -1037,9 +1046,13 @@ let ORDER = ["points", "rebounds", "assists", "threes", "pra", "pts_reb", "pts_a
 let NAME = {points: "Points", rebounds: "Rebounds", assists: "Assists", threes: "3-Pointers", pra: "Pts+Reb+Ast",
               pts_reb: "Pts+Reb", pts_ast: "Pts+Ast", reb_ast: "Reb+Ast"};
 const SORTS = [["value", "Value"], ["hit10", "L10 hit rate"], ["hit5", "L5 hit rate"], ["hit20", "L20 hit rate"], ["h2h", "Head-to-head hit rate"],
-               ["szn", "Season hit rate"], ["avgdiff", "L10 avg vs line"], ["line", "Line"], ["odds", "Best price"],
+               ["szn", "Season hit rate"], ["cup", "NBA Cup hit rate"], ["avgdiff", "L10 avg vs line"], ["line", "Line"], ["odds", "Best price"],
                ["player", "Player name"]];
 let D = null, ERR = null, LOADING = true, CUR = null;
+// the NBA Cup sort, offered while the payload names Cup games (NBA only); a Cup sort carried to a league without
+// them sorts by L10
+const cupSort = () => !!D && !!D.cup && Object.keys(D.cup).length > 0;
+const sortKey = k => k === "cup" && !cupSort() ? "hit10" : k;
 // on a touchscreen, moving focus by script only draws a ring (and focusing a <select> can pop its picker)
 const TOUCH = matchMedia("(pointer: coarse)").matches;
 const ST = {date: null, gid: "all", market: "points", side: "over", q: "", sort: "hit10", dir: "desc", team: "all",
@@ -1233,7 +1246,7 @@ function listProps() {
   if (ST.market === "movers") return list.map(p => [p, mover(p)]).filter(x => x[1]).sort((a, b) => b[1].k - a[1].k).map(x => x[0]);
   // Trends: strongest first
   if (ST.market === "trends") return list.map(p => [p, trend(p)]).filter(x => x[1] && x[1].side === ST.side).sort((a, b) => b[1].z - a[1].z).map(x => x[0]);
-  return sortProps(list, ST.sort, ST.dir, logsOf, ST.side, D.season, ST.book);
+  return sortProps(list, sortKey(ST.sort), ST.dir, logsOf, ST.side, D.season, ST.book, D.cup);
 }
 // ── flags: the under plays that ping (D.flags, nba_research.under_flags from nba_role.sqlite): an under at −150 or
 // better, not threes, our projection 30–50% below the line. SHADOW, never a bet. In the Flags view (the bottom bar),
@@ -1273,6 +1286,8 @@ function row(p) {
   const best = p.main === null ? null : bestPrice(p, p.main, ST.book, side), fs = fairSide(p, p.main, side), cs = chanceSide(p, p.main, side);
   const cell = (lab, k) => { const h = hbox(r[k], cs); return `<div><i>${lab}</i><b class="${h.c}">${h.t}</b></div>`; };
   const dv = c.dvp_rank ? `<b class="${{good: "up", bad: "dn", mid: "md"}[rankCls(c.dvp_rank, c.teams, side)]}">${ord(c.dvp_rank)}</b>` : "<b>–</b>";
+  // sorted by the NBA Cup: his Cup hit rate where the DvP rank sits
+  const cup = sortKey(ST.sort) === "cup" ? hbox(cupRate(p, logsOf(p), side, D.cup), cs) : null;
   // VALUE: the price shown against the books' fair price for that side (positive only when one book beats the other)
   const ev = best && fs !== null ? best.odds * fs - 1 : null;
   const live = p.live && g.state !== "pregame" ? `<span class="tg ${g.state === "live" ? "tl" : "tn"}">${g.state === "live" ? "LIVE" : "FINAL"} ${p.live.value}</span>` : "";
@@ -1282,7 +1297,7 @@ function row(p) {
     <div class="lin num">${ST.market === "movers" && mv ? `<span class="mvo">${r1(p.main - mv)} →</span> ${p.main} ${esc(unit(p.market))}<span class="mv ${mv > 0 ? "up" : "dn"}">${mv > 0 ? "▲" : "▼"}${Math.abs(mv)}</span>` : (p.main === null ? "alt lines" : p.main + " " + esc(unit(p.market))) + (ST.market === "movers" ? "" : `${p.proj ? `<span class="pjm" title="model projection (mean), not a book line">proj ${(+p.proj.mean).toFixed(1)}</span>` : ""}${mv ? `<span class="mv" aria-label="line ${mv > 0 ? "up" : "down"} ${Math.abs(mv)} since open">${mv > 0 ? "▲" : "▼"}${Math.abs(mv)}</span>` : ""}`)}</div></div>
     <div class="oc o"><i>ODDS</i><b class="num">${best ? american(best.odds) : "–"}</b></div>
     <div class="oc e"><i>VALUE</i><b class="num ${ev === null ? "" : ev > 0 ? "up" : "mu"}">${ev === null ? "–" : (ev > 0 ? "+" : "") + (ev * 100).toFixed(1) + "%"}</b></div>
-    <div class="bx6 num" aria-label="Hit rates">${cell(D.season.slice(0, 4), "season")}${cell("H2H", "h2h")}<div><i>DvP</i>${dv}</div>${cell("L5", "l5")}${cell("L10", "l10")}${cell("L20", "l20")}</div></button>`;
+    <div class="bx6 num" aria-label="Hit rates">${cell(D.season.slice(0, 4), "season")}${cell("H2H", "h2h")}${cup ? `<div><i>CUP</i><b class="${cup.c}">${cup.t}</b></div>` : `<div><i>DvP</i>${dv}</div>`}${cell("L5", "l5")}${cell("L10", "l10")}${cell("L20", "l20")}</div></button>`;
 }
 function banners() {
   const out = [], b = D.sources.books;
@@ -1456,7 +1471,7 @@ function renderRows(ivFrom) {
   frag.appendChild(h);
   list.forEach(p => {
     if (ST.market === "live") { const t = document.createElement("template"); t.innerHTML = liveRow(p).trim(); frag.appendChild(t.content.firstChild); return; }
-    const k = p.id + "|" + ST.side + "|" + ST.book + (ST.market === "movers" ? "|mv" : "");
+    const k = p.id + "|" + ST.side + "|" + ST.book + (ST.market === "movers" ? "|mv" : "") + (sortKey(ST.sort) === "cup" ? "|cup" : "");
     let e = ROWS.get(k);
     if (!e) { const t = document.createElement("template"); t.innerHTML = row(p).trim(); e = t.content.firstChild; ROWS.set(k, e); }
     frag.appendChild(e);
@@ -1802,13 +1817,13 @@ function sheetDrag() {
   s.addEventListener("touchend", end); s.addEventListener("touchcancel", end);
 }
 function filterSheet() {
-  const dr = Object.assign({}, ST), teams = {};
+  const dr = Object.assign({}, ST, {sort: sortKey(ST.sort)}), teams = {};
   D.props.forEach(p => { if ((gameOf(p.gid) || {}).date === ST.date && p.team) teams[p.team] = 1; });
   const opt = (v, lab, cur) => `<option value="${v}"${v === cur ? " selected" : ""}>${esc(lab)}</option>`;
   openSheet(`<h2 id="sht">Sort &amp; filter</h2>
     <div class="sg"><span>Side</span><div class="seg" role="group" aria-label="Side"><button data-sd="over" aria-pressed="${dr.side === "over"}">Over</button><button data-sd="under" aria-pressed="${dr.side === "under"}">Under</button></div></div>
     <div class="sg"><span>Show</span><div class="seg" role="group" aria-label="Show"><button data-wl="" aria-pressed="${!dr.watch}">All</button><button data-wl="1" aria-pressed="${!!dr.watch}">${ICON.star}Watchlist</button></div></div>
-    <div class="sg"><span>Sort by</span><div class="chips">${SORTS.map(([k, lab]) => `<button class="chip" data-sort="${k}" aria-pressed="${k === dr.sort}">${lab.replace(" hit rate", "").replace("Head-to-head", "H2H")}<span class="ar">${k === dr.sort ? (dr.dir === "desc" ? " ↓" : " ↑") : ""}</span></button>`).join("")}</div></div>
+    <div class="sg"><span>Sort by</span><div class="chips">${SORTS.filter(([k]) => k !== "cup" || cupSort()).map(([k, lab]) => `<button class="chip" data-sort="${k}" aria-pressed="${k === dr.sort}">${lab.replace(" hit rate", "").replace("Head-to-head", "H2H")}<span class="ar">${k === dr.sort ? (dr.dir === "desc" ? " ↓" : " ↑") : ""}</span></button>`).join("")}</div></div>
     <label class="fl"><span>Team</span><select id="f-team">${opt("all", "All teams", dr.team)}${Object.keys(teams).sort().map(t => opt(t, t, dr.team)).join("")}</select></label>
     <label class="fl"><span>Sportsbook</span><select id="f-book">${opt("all", "Both", dr.book)}${opt("fd", "FanDuel", dr.book)}${opt("dk", "DraftKings", dr.book)}</select></label>
     <div class="two"><label class="fl"><span>Line from</span><input id="f-lmin" type="number" inputmode="decimal" step="0.5" value="${esc(dr.lmin)}"></label>
@@ -1817,7 +1832,7 @@ function filterSheet() {
     <label class="fl"><span>Odds to</span><input id="f-omax" type="number" inputmode="numeric" placeholder="+150" value="${esc(dr.omax)}"></label></div>
     <div class="acts stk"><button class="btn" id="f-reset">Reset</button><button class="btn pri" id="f-ok"></button></div>`, s => {
     const read = () => { dr.team = $("#f-team", s).value; dr.book = $("#f-book", s).value; ["lmin", "lmax", "omin", "omax"].forEach(k => dr[k] = $("#f-" + k, s).value); };
-    const upd = () => { read(); const f = favs(), n = sortProps(filterProps(D.props, Object.assign({}, dr, {market: ALL_TABS.indexOf(dr.market) >= 0 ? "all" : dr.market}), gameOf, logsOf).filter(p => !dr.watch || f.indexOf(p.pid) >= 0), dr.sort, dr.dir, logsOf, dr.side, D.season, dr.book).length; $("#f-ok", s).textContent = ALL_TABS.indexOf(ST.market) >= 0 ? "Apply" : `Show ${n} prop${n === 1 ? "" : "s"}`; };
+    const upd = () => { read(); const f = favs(), n = sortProps(filterProps(D.props, Object.assign({}, dr, {market: ALL_TABS.indexOf(dr.market) >= 0 ? "all" : dr.market}), gameOf, logsOf).filter(p => !dr.watch || f.indexOf(p.pid) >= 0), dr.sort, dr.dir, logsOf, dr.side, D.season, dr.book, D.cup).length; $("#f-ok", s).textContent = ALL_TABS.indexOf(ST.market) >= 0 ? "Apply" : `Show ${n} prop${n === 1 ? "" : "s"}`; };
     $$("[data-sd]", s).forEach(b => b.onclick = () => { dr.side = b.dataset.sd; press("[data-sd]", x => x === b, s); upd(); });
     $$("[data-wl]", s).forEach(b => b.onclick = () => { dr.watch = b.dataset.wl; press("[data-wl]", x => x === b, s); upd(); });
     $$("[data-sort]", s).forEach(b => b.onclick = () => {
