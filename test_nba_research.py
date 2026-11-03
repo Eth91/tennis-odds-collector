@@ -1339,6 +1339,13 @@ console.log(JSON.stringify([ids(C.sortProps(inp.props, 'cup', 'desc', logsOf, 'o
                      {"n": 3, "rate": 1, "avg": 25.67}]
 
 
+
+def test_times_on_the_phones_own_clock():
+    # tip times follow the phone's zone (Alberta stays on UTC-6 since Nov 2026); no zone is fixed on the page
+    html = UI.page()
+    assert 'const mt = (s, day) => s ? iso(s).toLocaleString("en-US", Object.assign({hour: "numeric", minute: "2-digit"}' in html
+    assert "America/Denver" not in html and "America/Edmonton" not in html
+
 def test_nba_cup_sort_on_the_page():
     html = UI.page()
     # a sort chip while the payload names Cup games; a Cup sort carried to a league without them sorts by L10
