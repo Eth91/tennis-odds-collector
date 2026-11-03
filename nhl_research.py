@@ -972,3 +972,7 @@ if __name__ == "__main__":
     write(a.out, pl)
     print(f"nhl_research: {', '.join(pl['dates'])} · {len(pl['props'])} props · {len(pl['games'])} games · "
           f"{len(pl['players'])} players · {time.time() - t_:.0f}s -> {a.out}")
+    # skip the interpreter's teardown: on the swapping VM, freeing every object read its pages back in and held the
+    # build's lock for minutes after the page was written (2026-11-02)
+    sys.stdout.flush()
+    os._exit(0)

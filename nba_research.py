@@ -36,6 +36,8 @@ import os
 import re
 import sqlite3
 import statistics as st
+import sys
+import time
 from collections import defaultdict
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -249,9 +251,14 @@ def main_line(rungs):
 
 
 # ── sources ──────────────────────────────────────────────────────────────────────────────────────────────
+# how long a read waits out a writer's lock. The engine stores are in rollback-journal mode, so a writer's commit
+# shuts readers out; at game time on the loaded VM that runs past sqlite's 5 s, and a build that gave up wrote no page
+RO_WAIT_S = 60
+
+
 def _ro(path):
     path = Path(path)
-    return sqlite3.connect(f"file:{path}?mode=ro", uri=True) if path.exists() else None
+    return sqlite3.connect(f"file:{path}?mode=ro", uri=True, timeout=RO_WAIT_S) if path.exists() else None
 
 
 def book_quotes(q, gids, markets=None):
@@ -1282,6 +1289,12 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=os.environ.get("NBA_RESEARCH_OUT", str(HERE / "docs")))
     a = ap.parse_args()
+    t_ = time.time()
     pl = build()
     write(a.out, pl)
-    print(f"nba_research: {len(pl['props'])} props · {len(pl['games'])} games · {len(pl['players'])} players -> {a.out}")
+    print(f"nba_research: {len(pl['props'])} props · {len(pl['games'])} games · {len(pl['players'])} players · "
+          f"{time.time() - t_:.0f}s -> {a.out}")
+    # skip the interpreter's teardown: on the swapping VM, freeing every object read its pages back in and held the
+    # build's lock for minutes after the page was written (2026-11-02)
+    sys.stdout.flush()
+    os._exit(0)

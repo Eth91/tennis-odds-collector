@@ -1340,6 +1340,37 @@ console.log(JSON.stringify([ids(C.sortProps(inp.props, 'cup', 'desc', logsOf, 'o
 
 
 
+
+def test_a_read_waits_out_a_writers_lock(tmp_path, monkeypatch):
+    import sqlite3, threading, time
+    db = tmp_path / "lines.sqlite"
+    w = sqlite3.connect(db, check_same_thread=False)
+    w.execute("CREATE TABLE quotes (x)"); w.execute("INSERT INTO quotes VALUES (1)"); w.commit()
+
+    def held(s):                                         # a writer holds the database for s seconds
+        w.execute("BEGIN EXCLUSIVE")
+        threading.Timer(s, w.commit).start()
+    assert RS.RO_WAIT_S >= 30                            # longer than a commit at game time
+    monkeypatch.setattr(RS, "RO_WAIT_S", 0.2)
+    held(1.0)
+    with pytest.raises(sqlite3.OperationalError, match="locked"):
+        RS._ro(db).execute("SELECT x FROM quotes").fetchall()
+    time.sleep(1.2)
+    monkeypatch.setattr(RS, "RO_WAIT_S", 5)
+    held(1.0)
+    t0 = time.time()
+    assert RS._ro(db).execute("SELECT x FROM quotes").fetchall() == [(1,)]
+    assert time.time() - t0 >= 0.8
+
+
+def test_builds_exit_once_the_page_is_written():
+    # no interpreter teardown after the write: on the swapping VM it held the build's lock for minutes
+    for f in ("nba_research.py", "nfl_research.py", "nhl_research.py"):
+        src = (pathlib.Path(__file__).resolve().parent / f).read_text()
+        main = src[src.index('if __name__ == "__main__":'):]
+        assert main.rstrip().endswith("sys.stdout.flush()\n    os._exit(0)"), f
+        assert main.index("write(a.out, pl)") < main.index("print(") < main.index("os._exit(0)"), f
+
 def test_times_on_the_phones_own_clock():
     # tip times follow the phone's zone (Alberta stays on UTC-6 since Nov 2026); no zone is fixed on the page
     html = UI.page()
