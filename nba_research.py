@@ -36,6 +36,8 @@ import os
 import re
 import sqlite3
 import statistics as st
+import sys
+import time
 from collections import defaultdict
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -1287,6 +1289,12 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=os.environ.get("NBA_RESEARCH_OUT", str(HERE / "docs")))
     a = ap.parse_args()
+    t_ = time.time()
     pl = build()
     write(a.out, pl)
-    print(f"nba_research: {len(pl['props'])} props · {len(pl['games'])} games · {len(pl['players'])} players -> {a.out}")
+    print(f"nba_research: {len(pl['props'])} props · {len(pl['games'])} games · {len(pl['players'])} players · "
+          f"{time.time() - t_:.0f}s -> {a.out}")
+    # skip the interpreter's teardown: on the swapping VM, freeing every object read its pages back in and held the
+    # build's lock for minutes after the page was written (2026-11-02)
+    sys.stdout.flush()
+    os._exit(0)
