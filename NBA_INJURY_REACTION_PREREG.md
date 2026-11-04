@@ -113,3 +113,24 @@ descriptive and makes no bets. `nba_injury_reaction.py`, Mac only.
   points.
 - **Pass:** primary and secondary. ROI is reported. An ROI whose 95% interval sits wholly below 0 is a fail on its own.
 - **No live change without the user.**
+
+## Result (2026-11-04 02:55 UTC, after the analysis; the report is `NBA_INJURY_REACTION.md`)
+- **Events:** 61 qualifying (from 646 fresh Outs). 42 had lines at the report; the other 19 were next-day games not yet
+  posted. 32 games, 9 dates.
+- **WINDOW: NO-GO.**
+  - stale at +5 among movers 47.0% (passes);
+  - median points/PRA main-line move 1.0 (passes);
+  - teammates' moved-by-close rate 44.5% vs control 30.3%, 1.47× (fails 2×).
+- **DK-LAG: NO-GO.**
+  - DraftKings stale after FanDuel's move in 38.5% (passes);
+  - median FanDuel-fair EV −5.7% on 87 measurable (fails).
+  - 88 lags with a line gap couldn't be valued: FanDuel almost never has a two-sided rung at DraftKings' line. That's
+    a flaw in this measure, noted, and the verdict isn't changed for it.
+- **Exploratory, not part of the verdict:**
+  - teammates changed 18% / 32% / 48% by 5 / 15 / 60 min on FanDuel, against 1% / 4% / 14% for the control;
+  - FanDuel teammate overs still stale at FanDuel's first check gained line value on FanDuel's close (points-type
+    +0.24, interval +0.07 to +0.46);
+  - DraftKings' stale line after FanDuel moved ended behind DraftKings' own close (+0.37, interval +0.24 to +0.47).
+  - Neither is netted against the vig.
+- **Next step:** a pre-registered amendment (Step 2a) that prices line value, then re-scores those two candidates, then
+  the forward 200-flag test above for any survivor.
