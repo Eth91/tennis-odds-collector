@@ -134,3 +134,79 @@ descriptive and makes no bets. `nba_injury_reaction.py`, Mac only.
   - Neither is netted against the vig.
 - **Next step:** a pre-registered amendment (Step 2a) that prices line value, then re-scores those two candidates, then
   the forward 200-flag test above for any survivor.
+
+## Amendment 1: Step 2a, pricing line value and re-scoring the two candidates (written before any of it is run)
+**Written:** 2026-11-04, before the conversion is fitted and before any candidate's converted CLV is computed. Only
+schemas and row counts were looked at: matched FanDuel and DraftKings main lines run about 7–15k per market per season
+for 2023-24 and 2024-25, and every historical line is a half-point. `nba_injury_step2a.py`, Mac only, read-only.
+
+**User:** "Step 2a is the right next step, with one important safeguard: pre-register the amendment before examining
+the converted results."
+
+### The conversion: what one line point is worth
+- **Data:**
+  - `basketball_nba_odds_hist.sqlite` (the about −29 min snapshot), FanDuel and DraftKings two-sided main lines,
+    matched to box scores by `nba_proj_data.load_hist_lines`;
+  - regular seasons only;
+  - 8 markets: points, rebounds, assists, threes, PRA, P+R, P+A, R+A.
+- **Model:**
+  - **The shape:** the stat X is negative binomial with mean μ and size k, where log k = a_m + b_m · log μ. That's two
+    parameters per market m.
+  - **The mean:** for a prop with main line L and no-vig over p, μ solves P(X > L) = p.
+  - **Whole-number lines:** P(over) = P(X > L) / (1 − P(X = L)), so a push is excluded.
+- **Fit:** a_m and b_m by maximum likelihood of the actual outcomes, on 2023-24 only. They're then frozen and recorded
+  in the result.
+- **Validation gate:** on 2024-25, per market, for line offsets d = −1 and +1:
+  - **Predicted step:** the mean of P(X > L + d) − p.
+  - **Realized step:** the share with X > L + d, minus the share with X > L.
+  - **Usable:** the two steps agree within 1.5 points.
+  - **Failure:** a market that fails either offset is **not evaluable**, and its bets are excluded and counted. A
+    candidate with more than half its bets in failed markets is not evaluable at all.
+  - **Reported, not gated:** d = ±2, and the conversion compared with the books' own no-vig prices where the
+    2026-27 change log has a second two-sided rung.
+- **Full CLV of a bet** (book, line Lb, side, decimal odds o), against the same book's close:
+  - μ comes from the close main line and its no-vig over (Step 1's close);
+  - CLV = P_conv(side at Lb) × o − 1. On the same line this is the close's own no-vig price;
+  - **excluded and counted:** bets on props pulled at the close, and bets with no close.
+  - This replaces the base pre-registration's "nearest two-sided rung" fallback for every CLV below and in any forward
+    test of these candidates.
+
+### The two candidates (decision-time rules; Step 1's events, teammates, checks, baselines and stale/moved definitions)
+- **C, the primary: DraftKings stale after FanDuel moved its line.**
+  - **Setup:** for a teammate prop with both books' baselines, tF is FanDuel's first check after the report whose
+    two-sided main line differs from FanDuel's baseline main line.
+  - **Flag:** DraftKings' first check after tF (before tip) is stale against DraftKings' baseline.
+  - **The bet:** DraftKings at that check, at its main line and price. Over if FanDuel's line at tF is above
+    FanDuel's baseline line, under if below.
+  - **One flag per (event, player, market).** FanDuel's close is never used to pick the bet.
+- **B, the secondary: FanDuel teammate overs, still stale.**
+  - **Setup:** a teammate prop in points, PRA, P+R or P+A with a FanDuel baseline.
+  - **Flag:** FanDuel's first check after the report comes within 15 min of it, and the prop is stale there.
+  - **The bet:** FanDuel's over at that check's main line and over price. One flag per (event, player, market).
+
+### Nulls (same times, control props as Step 1 defines them)
+- **For B:**
+  - control props in the same 4 markets;
+  - stale at FanDuel's first check after the same report, if that check comes within 15 min;
+  - the over at that check.
+- **For C:**
+  - control DraftKings props stale at each check time where C flagged;
+  - each prop counts the mean of its over and under.
+
+### Survival (in-sample, so it can only rule a candidate out)
+- **Survives only if both:**
+  - its mean full CLV > 0;
+  - its mean full CLV is at least its null's + 3.0 points.
+- **Reported for each:** a 95% game-clustered bootstrap interval (4,000 resamples, seed 7).
+- **A dropped candidate stays dropped.** No variant of it is scored on this backup.
+- **Reported as information only, not eligible to survive:**
+  - C split by the size of FanDuel's line move (1 vs 2+);
+  - C with FanDuel price-only moves (same line, 3+ no-vig points, side by the no-vig direction);
+  - B split by news before the report.
+- **A survivor goes to the forward test** under the base pre-registration's pass/fail:
+  - data after the 2026-11-03 09:56 UTC backup only;
+  - 200+ flags over 10+ dates;
+  - the rule exactly as written here;
+  - CLV as defined here, with the frozen conversion;
+  - the null as defined here.
+  - Shadow only; nothing live without the user.
