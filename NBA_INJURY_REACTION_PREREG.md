@@ -211,7 +211,7 @@ the converted results."
   - the null as defined here.
   - Shadow only; nothing live without the user.
 
-### Amendment 1 result (2026-11-04, after the run; the report is `NBA_INJURY_STEP2A.md`)
+### Amendment 1 result (2026-11-04 03:03 UTC, commit 7da9e0597e, after the run; the report is `NBA_INJURY_STEP2A.md`)
 - **Conversion gate:** every market passed. The ±1 predicted and realized steps on 2024-25 agree within 0.65 points.
 - **C: dropped.**
   - 179 flags scored, mean full CLV −5.4%, interval [−6.8, −4.1];
