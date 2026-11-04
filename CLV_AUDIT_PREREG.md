@@ -1,7 +1,7 @@
 # PRE-REGISTRATION: one CLV yardstick across the paper-betting systems
 
-**Written:** 2026-11-04, before any strategy-level CLV is computed or read for this audit. `clv_audit.py`, Mac only,
-read-only.
+**Written:** 2026-11-04, before any strategy-level CLV is computed or read for this audit. Committed and pushed as
+7d2f5b2379 at 03:32 UTC (21:32 CST on 11/3). `clv_audit.py`, Mac only, read-only.
 
 **User:** "Before examining strategy-level results, document and commit a clear analysis methodology to prevent
 hindsight-driven selection." Nothing here bets, pings or changes a live system. CLV alone is never called profit.
