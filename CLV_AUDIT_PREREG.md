@@ -180,3 +180,11 @@ Inconsistencies are listed as found.
 - **ROI** is shown with its interval as information.
 - **Recommendations** are only about which strategies merit further shadow testing, and each follows from its tier.
 - **No live change.**
+
+## Result (written 2026-11-04, after the run; see `CLV_AUDIT.md`)
+- **Strong:** tennis Pinnacle-referenced, +1.5% [+0.8, +2.3] CLV on 816 bets over 41 dates, against the book's own close.
+- **Promising:** DK_LAGS_FD, +1.3% [+0.6, +1.8] on 943 bets. It had only 7 forward dates; the pre-known candidate.
+- **No evidence:** NFL alt-tails.
+- **Loses to the close:** 15 strategies.
+- **Insufficient:** everything else.
+- **Deviations** are listed in the report. None changes a tier.

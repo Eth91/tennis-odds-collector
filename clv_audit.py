@@ -678,6 +678,11 @@ class ML:
         op, oo = self.price(eid, pick, t), self.price(eid, opp, t)
         return None if op is None or oo is None else nv(op, oo)
 
+    def close_any(self, eid, pick, opp):
+        """Sensitivity for change-only stores: the last stored price before the start, at any age."""
+        q = self.q_at(eid, pick, opp, self.start[eid] - dt.timedelta(seconds=1))
+        return (None, "no price before the start") if q is None else (q, None)
+
     def close(self, eid, pick, opp):
         start = self.start[eid]
         i = bisect.bisect_left(self.runs, start) - 1
@@ -723,7 +728,7 @@ def tennis_bets(path):
     return out
 
 
-def score_tennis(bets, books):
+def score_tennis(bets, books, any_age=False):
     for b in bets:
         bk = books[b["book"]]
         date = utc_date(b["start"])
@@ -737,7 +742,7 @@ def score_tennis(bets, books):
             finish(b, date, False, "logged after the start")
             continue
         finish(b, date, True)
-        q, b["why"] = bk.close(eid, b["player"], b["opp"])
+        q, b["why"] = (bk.close_any if any_age else bk.close)(eid, b["player"], b["opp"])
         if q is None:
             continue
         b["clv"] = q * b["odds"] - 1
@@ -1105,11 +1110,42 @@ def write_tables(res, path):
     path.write_text("\n".join(L) + "\n")
 
 
+def sens(stamp, out_dir):
+    """Sensitivity reads, information only (never tiered): tennis closes read as change-only (the last stored price
+    before the start at any age); NFL with every rung kept (the unit dedupes rungs of one player); NCAAF and NBA line
+    moves of every eligible bet with a close, scored or not."""
+    out = {}
+    books = tennis_books(STORES["tennis_fd"])
+    tb, _ = dedupe(tennis_bets(STORES["tennis_ml"]))
+    rows = score_tennis(tb, books, any_age=True)
+    for sysm in ("tennis_ml", "tennis_pin"):
+        out[f"{sysm} change-only close"] = summarize([r for r in rows if r["system"] == sysm])
+    nf = score_nfl(nfl_bets(STORES["nfl_v2"]), Snap(STORES["nfl_fd"], tuple(NFL_MARKET.values())), {})
+    out["nfl_v2 every rung"] = summarize(nf)
+    moves = defaultdict(list)
+    with open(out_dir / f"bets.{stamp}.csv") as f:
+        for r in csv.DictReader(f):
+            if r["eligible"] == "True" and r["phase"] == "forward" and r["move"] not in ("", None):
+                moves[f"{r['system']}|{r['strategy']}"].append((float(r["move"]), r["clv"] != ""))
+    out["line moves"] = {k: {"n": len(v), "toward": float(np.mean([m > 0 for m, _ in v])),
+                             "away": float(np.mean([m < 0 for m, _ in v])),
+                             "unchanged": float(np.mean([m == 0 for m, _ in v])),
+                             "mean_toward": float(np.mean([m for m, _ in v])),
+                             "unscored_n": sum(not s_ for _, s_ in v)} for k, v in sorted(moves.items()) if len(v) >= 20}
+    (out_dir / f"sens.{stamp}.json").write_text(json.dumps(out, indent=1, default=str))
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--stamp", default="20261104")
     ap.add_argument("--out", default=str(HERE / "audit/clv_audit"))
+    ap.add_argument("--sens", action="store_true", help="only the sensitivity reads (after a full run)")
     a = ap.parse_args()
+    if a.sens:
+        for k, v in sens(a.stamp, Path(a.out)).items():
+            print(k, {x: v[x] for x in ("n", "coverage", "dates", "clv", "excess") if x in v} if "n" in v and "clv" in v else v)
+        return
     res = run(a.stamp, Path(a.out))
     for s in sorted(res["strategies"].values(), key=lambda s: (s["phase"] != "forward", s["system"], -s["n"])):
         if s["phase"] == "forward":
