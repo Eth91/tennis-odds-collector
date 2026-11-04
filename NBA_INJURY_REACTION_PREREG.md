@@ -114,7 +114,7 @@ descriptive and makes no bets. `nba_injury_reaction.py`, Mac only.
 - **Pass:** primary and secondary. ROI is reported. An ROI whose 95% interval sits wholly below 0 is a fail on its own.
 - **No live change without the user.**
 
-## Result (2026-11-04 02:55 UTC, after the analysis; the report is `NBA_INJURY_REACTION.md`)
+## Result (2026-11-04 02:48 UTC, commit 36f0d21afa, after the analysis; the report is `NBA_INJURY_REACTION.md`)
 - **Events:** 61 qualifying (from 646 fresh Outs). 42 had lines at the report; the other 19 were next-day games not yet
   posted. 32 games, 9 dates.
 - **WINDOW: NO-GO.**
