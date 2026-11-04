@@ -1,0 +1,3805 @@
+{
+ "stamp": "20261103",
+ "events": 61,
+ "fresh_outs": 646,
+ "drops": {
+  "fd props: posted after the report": 454,
+  "dk props: posted after the report": 461,
+  "dk props: not two-sided at the report": 273,
+  "fd props: not two-sided at the report": 120,
+  "fd: events with the game not posted at the report": 19,
+  "fd props: no observation": 992,
+  "dk: events with the game not posted at the report": 19,
+  "dk props: no observation": 984,
+  "dk: events with no observation in the 30 min before": 1,
+  "fd: no close": 40,
+  "fd: events with no observation in the 30 min before": 1
+ },
+ "fresh_out_reasons": {
+  "no earlier team game this season": 4,
+  "missed his team's last game (not absence game 1)": 525,
+  "tips < 30 min after the report": 24,
+  "under 15 min average or < 2 games": 21,
+  "QUALIFIES": 72
+ },
+ "cadence": {
+  "fd": {
+   "median_gap_30min_after": 1.0,
+   "median_first_obs_after_report": 1.25,
+   "first_obs_within_1min": 0.4426229508196721,
+   "first_obs_within_5min": 0.6065573770491803,
+   "first_obs_within_15min": 0.6557377049180327,
+   "first_obs_within_30min": 0.6885245901639344,
+   "events_observed_after": 61
+  },
+  "dk": {
+   "median_gap_30min_after": 5.983333333333333,
+   "median_first_obs_after_report": 14.933333333333334,
+   "first_obs_within_1min": 0.0,
+   "first_obs_within_5min": 0.21311475409836064,
+   "first_obs_within_15min": 0.5245901639344263,
+   "first_obs_within_30min": 0.5901639344262295,
+   "events_observed_after": 61
+  }
+ },
+ "teammates": {
+  "fd": {
+   "n": 1327,
+   "with_close": 1287,
+   "close": {
+    "stale": 671,
+    "moved": 557,
+    "pulled": 59
+   },
+   "movers": 557,
+   "up_share": 0.6552962298025135,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.7235188509874326,
+   "median_abs_p_when_line_same": 0.04300859588774533,
+   "latency_U_median": 15.266666666666667,
+   "latency_L_median": 5.866666666666666,
+   "moved_by": {
+    "1": 0.05026929982046679,
+    "2": 0.11669658886894076,
+    "5": 0.3016157989228007,
+    "10": 0.4488330341113106,
+    "15": 0.4991023339317774,
+    "30": 0.6373429084380611,
+    "60": 0.7594254937163375
+   },
+   "stale_at": {
+    "1": {
+     "stale": 434,
+     "moved": 28,
+     "unknown": 95
+    },
+    "5": {
+     "stale": 301,
+     "moved": 168,
+     "unknown": 88
+    },
+    "15": {
+     "stale": 244,
+     "moved": 278,
+     "unknown": 35
+    }
+   },
+   "moved_rate": 0.43278943278943277
+  },
+  "dk": {
+   "n": 1160,
+   "with_close": 1160,
+   "close": {
+    "moved": 531,
+    "stale": 572,
+    "pulled": 57
+   },
+   "movers": 531,
+   "up_share": 0.583804143126177,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.7532956685499058,
+   "median_abs_p_when_line_same": 0.04324494949494939,
+   "latency_U_median": 20.933333333333334,
+   "latency_L_median": 0.0,
+   "moved_by": {
+    "1": 0.0,
+    "2": 0.0,
+    "5": 0.2015065913370998,
+    "10": 0.3427495291902072,
+    "15": 0.4934086629001883,
+    "30": 0.615819209039548,
+    "60": 0.7984934086629002
+   },
+   "stale_at": {
+    "1": {
+     "stale": 221,
+     "moved": 0,
+     "unknown": 310
+    },
+    "5": {
+     "stale": 210,
+     "moved": 107,
+     "unknown": 214
+    },
+    "15": {
+     "stale": 183,
+     "moved": 262,
+     "unknown": 86
+    }
+   },
+   "moved_rate": 0.45775862068965517
+  },
+  "both": {
+   "n": 2487,
+   "with_close": 2447,
+   "close": {
+    "stale": 1243,
+    "moved": 1088,
+    "pulled": 116
+   },
+   "movers": 1088,
+   "up_share": 0.6204044117647058,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.7380514705882353,
+   "median_abs_p_when_line_same": 0.043240599674734426,
+   "latency_U_median": 15.3,
+   "latency_L_median": 3.0,
+   "moved_by": {
+    "1": 0.025735294117647058,
+    "2": 0.05974264705882353,
+    "5": 0.25275735294117646,
+    "10": 0.39705882352941174,
+    "15": 0.4963235294117647,
+    "30": 0.6268382352941176,
+    "60": 0.7784926470588235
+   },
+   "stale_at": {
+    "1": {
+     "stale": 655,
+     "moved": 28,
+     "unknown": 405
+    },
+    "5": {
+     "stale": 511,
+     "moved": 275,
+     "unknown": 302
+    },
+    "15": {
+     "stale": 427,
+     "moved": 540,
+     "unknown": 121
+    }
+   },
+   "moved_rate": 0.4446260727421332
+  }
+ },
+ "control": {
+  "fd": {
+   "n": 15706,
+   "with_close": 15706,
+   "close": {
+    "moved": 4622,
+    "stale": 10471,
+    "pulled": 613
+   },
+   "movers": 4622,
+   "up_share": 0.44850713976633494,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.6864993509303332,
+   "median_abs_p_when_line_same": 0.04237654062536356,
+   "latency_U_median": 107.74166666666667,
+   "latency_L_median": 98.9,
+   "moved_by": {
+    "1": 0.007788836001730853,
+    "2": 0.010817827780181739,
+    "5": 0.024015577672003463,
+    "10": 0.05581999134573778,
+    "15": 0.07875378623972307,
+    "30": 0.14777152747728256,
+    "60": 0.2996538295110342
+   },
+   "stale_at": {
+    "1": {
+     "stale": 4262,
+     "moved": 36,
+     "unknown": 324
+    },
+    "5": {
+     "stale": 4228,
+     "moved": 111,
+     "unknown": 283
+    },
+    "15": {
+     "stale": 3963,
+     "moved": 364,
+     "unknown": 295
+    }
+   },
+   "moved_rate": 0.2942824398319114
+  },
+  "dk": {
+   "n": 14248,
+   "with_close": 14248,
+   "close": {
+    "stale": 9397,
+    "moved": 4453,
+    "pulled": 398
+   },
+   "movers": 4453,
+   "up_share": 0.4084886593307882,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.7835167302941837,
+   "median_abs_p_when_line_same": 0.0395913655201581,
+   "latency_U_median": 83.93333333333334,
+   "latency_L_median": 74.93333333333334,
+   "moved_by": {
+    "1": 0.0,
+    "2": 0.0,
+    "5": 0.01549517179429598,
+    "10": 0.034134291488883896,
+    "15": 0.09431843700875814,
+    "30": 0.20570401976195823,
+    "60": 0.3835616438356164
+   },
+   "stale_at": {
+    "1": {
+     "stale": 3905,
+     "moved": 0,
+     "unknown": 548
+    },
+    "5": {
+     "stale": 3859,
+     "moved": 69,
+     "unknown": 525
+    },
+    "15": {
+     "stale": 3582,
+     "moved": 420,
+     "unknown": 451
+    }
+   },
+   "moved_rate": 0.3125350926445817
+  },
+  "both": {
+   "n": 29954,
+   "with_close": 29954,
+   "close": {
+    "moved": 9075,
+    "stale": 19868,
+    "pulled": 1011
+   },
+   "movers": 9075,
+   "up_share": 0.428870523415978,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.7341046831955923,
+   "median_abs_p_when_line_same": 0.04090106265074034,
+   "latency_U_median": 94.91666666666667,
+   "latency_L_median": 86.93333333333334,
+   "moved_by": {
+    "1": 0.003966942148760331,
+    "2": 0.005509641873278237,
+    "5": 0.019834710743801654,
+    "10": 0.045179063360881545,
+    "15": 0.08639118457300275,
+    "30": 0.176198347107438,
+    "60": 0.34082644628099174
+   },
+   "stale_at": {
+    "1": {
+     "stale": 8167,
+     "moved": 36,
+     "unknown": 872
+    },
+    "5": {
+     "stale": 8087,
+     "moved": 180,
+     "unknown": 808
+    },
+    "15": {
+     "stale": 7545,
+     "moved": 784,
+     "unknown": 746
+    }
+   },
+   "moved_rate": 0.3029645456366429
+  }
+ },
+ "by_market": {
+  "fd points": {
+   "n": 197,
+   "with_close": 191,
+   "close": {
+    "moved": 95,
+    "stale": 90,
+    "pulled": 6
+   },
+   "movers": 95,
+   "up_share": 0.6105263157894737,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.8736842105263158,
+   "median_abs_p_when_line_same": 0.040886748301353526,
+   "latency_U_median": 22.083333333333332,
+   "latency_L_median": 8.083333333333334,
+   "moved_by": {
+    "1": 0.031578947368421054,
+    "2": 0.08421052631578947,
+    "5": 0.23157894736842105,
+    "10": 0.37894736842105264,
+    "15": 0.42105263157894735,
+    "30": 0.6105263157894737,
+    "60": 0.6947368421052632
+   },
+   "stale_at": {
+    "1": {
+     "stale": 73,
+     "moved": 3,
+     "unknown": 19
+    },
+    "5": {
+     "stale": 52,
+     "moved": 22,
+     "unknown": 21
+    },
+    "15": {
+     "stale": 45,
+     "moved": 40,
+     "unknown": 10
+    }
+   },
+   "moved_rate": 0.4973821989528796
+  },
+  "fd rebounds": {
+   "n": 191,
+   "with_close": 185,
+   "close": {
+    "stale": 116,
+    "moved": 63,
+    "pulled": 6
+   },
+   "movers": 63,
+   "up_share": 0.746031746031746,
+   "median_abs_line": 0.0,
+   "line_changed_share": 0.3968253968253968,
+   "median_abs_p_when_line_same": 0.05296483991659359,
+   "latency_U_median": 14.383333333333333,
+   "latency_L_median": 8.05,
+   "moved_by": {
+    "1": 0.0,
+    "2": 0.06349206349206349,
+    "5": 0.30158730158730157,
+    "10": 0.47619047619047616,
+    "15": 0.5079365079365079,
+    "30": 0.6666666666666666,
+    "60": 0.7777777777777778
+   },
+   "stale_at": {
+    "1": {
+     "stale": 54,
+     "moved": 0,
+     "unknown": 9
+    },
+    "5": {
+     "stale": 38,
+     "moved": 19,
+     "unknown": 6
+    },
+    "15": {
+     "stale": 29,
+     "moved": 32,
+     "unknown": 2
+    }
+   },
+   "moved_rate": 0.34054054054054056
+  },
+  "fd assists": {
+   "n": 145,
+   "with_close": 141,
+   "close": {
+    "stale": 74,
+    "moved": 56,
+    "pulled": 11
+   },
+   "movers": 56,
+   "up_share": 0.7321428571428571,
+   "median_abs_line": 0.0,
+   "line_changed_share": 0.32142857142857145,
+   "median_abs_p_when_line_same": 0.050386702035268044,
+   "latency_U_median": 21.016666666666666,
+   "latency_L_median": 14.641666666666666,
+   "moved_by": {
+    "1": 0.03571428571428571,
+    "2": 0.10714285714285714,
+    "5": 0.21428571428571427,
+    "10": 0.4107142857142857,
+    "15": 0.4642857142857143,
+    "30": 0.5714285714285714,
+    "60": 0.7321428571428571
+   },
+   "stale_at": {
+    "1": {
+     "stale": 45,
+     "moved": 2,
+     "unknown": 9
+    },
+    "5": {
+     "stale": 36,
+     "moved": 12,
+     "unknown": 8
+    },
+    "15": {
+     "stale": 28,
+     "moved": 26,
+     "unknown": 2
+    }
+   },
+   "moved_rate": 0.3971631205673759
+  },
+  "fd threes": {
+   "n": 151,
+   "with_close": 145,
+   "close": {
+    "stale": 114,
+    "moved": 24,
+    "pulled": 7
+   },
+   "movers": 24,
+   "up_share": 0.4166666666666667,
+   "median_abs_line": 0.0,
+   "line_changed_share": 0.125,
+   "median_abs_p_when_line_same": 0.038023550747320056,
+   "latency_U_median": 56.53333333333333,
+   "latency_L_median": 47.84166666666667,
+   "moved_by": {
+    "1": 0.041666666666666664,
+    "2": 0.08333333333333333,
+    "5": 0.16666666666666666,
+    "10": 0.20833333333333334,
+    "15": 0.3333333333333333,
+    "30": 0.3333333333333333,
+    "60": 0.5416666666666666
+   },
+   "stale_at": {
+    "1": {
+     "stale": 22,
+     "moved": 1,
+     "unknown": 1
+    },
+    "5": {
+     "stale": 18,
+     "moved": 4,
+     "unknown": 2
+    },
+    "15": {
+     "stale": 16,
+     "moved": 8,
+     "unknown": 0
+    }
+   },
+   "moved_rate": 0.16551724137931034
+  },
+  "fd pra": {
+   "n": 160,
+   "with_close": 156,
+   "close": {
+    "moved": 88,
+    "stale": 65,
+    "pulled": 3
+   },
+   "movers": 88,
+   "up_share": 0.6363636363636364,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.9090909090909091,
+   "median_abs_p_when_line_same": 0.0402181608334532,
+   "latency_U_median": 11.858333333333334,
+   "latency_L_median": 4.866666666666667,
+   "moved_by": {
+    "1": 0.09090909090909091,
+    "2": 0.1590909090909091,
+    "5": 0.32954545454545453,
+    "10": 0.5,
+    "15": 0.5340909090909091,
+    "30": 0.6931818181818182,
+    "60": 0.8295454545454546
+   },
+   "stale_at": {
+    "1": {
+     "stale": 64,
+     "moved": 8,
+     "unknown": 16
+    },
+    "5": {
+     "stale": 44,
+     "moved": 29,
+     "unknown": 15
+    },
+    "15": {
+     "stale": 36,
+     "moved": 47,
+     "unknown": 5
+    }
+   },
+   "moved_rate": 0.5641025641025641
+  },
+  "fd pts_reb": {
+   "n": 188,
+   "with_close": 182,
+   "close": {
+    "moved": 93,
+    "stale": 84,
+    "pulled": 5
+   },
+   "movers": 93,
+   "up_share": 0.6559139784946236,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.9354838709677419,
+   "median_abs_p_when_line_same": 0.039678255593264905,
+   "latency_U_median": 9.333333333333334,
+   "latency_L_median": 3.0,
+   "moved_by": {
+    "1": 0.06451612903225806,
+    "2": 0.12903225806451613,
+    "5": 0.3655913978494624,
+    "10": 0.5053763440860215,
+    "15": 0.5698924731182796,
+    "30": 0.7204301075268817,
+    "60": 0.8172043010752689
+   },
+   "stale_at": {
+    "1": {
+     "stale": 69,
+     "moved": 6,
+     "unknown": 18
+    },
+    "5": {
+     "stale": 41,
+     "moved": 34,
+     "unknown": 18
+    },
+    "15": {
+     "stale": 33,
+     "moved": 53,
+     "unknown": 7
+    }
+   },
+   "moved_rate": 0.510989010989011
+  },
+  "fd pts_ast": {
+   "n": 151,
+   "with_close": 147,
+   "close": {
+    "moved": 76,
+    "stale": 60,
+    "pulled": 11
+   },
+   "movers": 76,
+   "up_share": 0.6447368421052632,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.9078947368421053,
+   "median_abs_p_when_line_same": 0.043240599674734426,
+   "latency_U_median": 12.016666666666666,
+   "latency_L_median": 3.6833333333333336,
+   "moved_by": {
+    "1": 0.09210526315789473,
+    "2": 0.17105263157894737,
+    "5": 0.3684210526315789,
+    "10": 0.4868421052631579,
+    "15": 0.5394736842105263,
+    "30": 0.631578947368421,
+    "60": 0.7894736842105263
+   },
+   "stale_at": {
+    "1": {
+     "stale": 54,
+     "moved": 7,
+     "unknown": 15
+    },
+    "5": {
+     "stale": 36,
+     "moved": 28,
+     "unknown": 12
+    },
+    "15": {
+     "stale": 31,
+     "moved": 41,
+     "unknown": 4
+    }
+   },
+   "moved_rate": 0.5170068027210885
+  },
+  "fd reb_ast": {
+   "n": 144,
+   "with_close": 140,
+   "close": {
+    "stale": 68,
+    "moved": 62,
+    "pulled": 10
+   },
+   "movers": 62,
+   "up_share": 0.6935483870967742,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.6129032258064516,
+   "median_abs_p_when_line_same": 0.03919046405710519,
+   "latency_U_median": 13.808333333333334,
+   "latency_L_median": 9.191666666666666,
+   "moved_by": {
+    "1": 0.016129032258064516,
+    "2": 0.0967741935483871,
+    "5": 0.3225806451612903,
+    "10": 0.45161290322580644,
+    "15": 0.5,
+    "30": 0.6290322580645161,
+    "60": 0.7258064516129032
+   },
+   "stale_at": {
+    "1": {
+     "stale": 53,
+     "moved": 1,
+     "unknown": 8
+    },
+    "5": {
+     "stale": 36,
+     "moved": 20,
+     "unknown": 6
+    },
+    "15": {
+     "stale": 26,
+     "moved": 31,
+     "unknown": 5
+    }
+   },
+   "moved_rate": 0.44285714285714284
+  },
+  "dk points": {
+   "n": 198,
+   "with_close": 198,
+   "close": {
+    "stale": 91,
+    "moved": 97,
+    "pulled": 10
+   },
+   "movers": 97,
+   "up_share": 0.6597938144329897,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.8865979381443299,
+   "median_abs_p_when_line_same": 0.0383213971604473,
+   "latency_U_median": 14.933333333333334,
+   "latency_L_median": 0.0,
+   "moved_by": {
+    "1": 0.0,
+    "2": 0.0,
+    "5": 0.2268041237113402,
+    "10": 0.35051546391752575,
+    "15": 0.5567010309278351,
+    "30": 0.6701030927835051,
+    "60": 0.8350515463917526
+   },
+   "stale_at": {
+    "1": {
+     "stale": 36,
+     "moved": 0,
+     "unknown": 61
+    },
+    "5": {
+     "stale": 34,
+     "moved": 22,
+     "unknown": 41
+    },
+    "15": {
+     "stale": 28,
+     "moved": 54,
+     "unknown": 15
+    }
+   },
+   "moved_rate": 0.4898989898989899
+  },
+  "dk rebounds": {
+   "n": 184,
+   "with_close": 184,
+   "close": {
+    "stale": 99,
+    "moved": 77,
+    "pulled": 8
+   },
+   "movers": 77,
+   "up_share": 0.5064935064935064,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.5064935064935064,
+   "median_abs_p_when_line_same": 0.04650287185581317,
+   "latency_U_median": 29.633333333333333,
+   "latency_L_median": 2.95,
+   "moved_by": {
+    "1": 0.0,
+    "2": 0.0,
+    "5": 0.18181818181818182,
+    "10": 0.3116883116883117,
+    "15": 0.37662337662337664,
+    "30": 0.5064935064935064,
+    "60": 0.7662337662337663
+   },
+   "stale_at": {
+    "1": {
+     "stale": 39,
+     "moved": 0,
+     "unknown": 38
+    },
+    "5": {
+     "stale": 38,
+     "moved": 14,
+     "unknown": 25
+    },
+    "15": {
+     "stale": 36,
+     "moved": 29,
+     "unknown": 12
+    }
+   },
+   "moved_rate": 0.41847826086956524
+  },
+  "dk assists": {
+   "n": 147,
+   "with_close": 147,
+   "close": {
+    "moved": 65,
+    "stale": 75,
+    "pulled": 7
+   },
+   "movers": 65,
+   "up_share": 0.6,
+   "median_abs_line": 0.0,
+   "line_changed_share": 0.46153846153846156,
+   "median_abs_p_when_line_same": 0.05204991087344024,
+   "latency_U_median": 17.95,
+   "latency_L_median": 0.0,
+   "moved_by": {
+    "1": 0.0,
+    "2": 0.0,
+    "5": 0.2153846153846154,
+    "10": 0.4,
+    "15": 0.49230769230769234,
+    "30": 0.6307692307692307,
+    "60": 0.8153846153846154
+   },
+   "stale_at": {
+    "1": {
+     "stale": 24,
+     "moved": 0,
+     "unknown": 41
+    },
+    "5": {
+     "stale": 23,
+     "moved": 14,
+     "unknown": 28
+    },
+    "15": {
+     "stale": 19,
+     "moved": 32,
+     "unknown": 14
+    }
+   },
+   "moved_rate": 0.4421768707482993
+  },
+  "dk threes": {
+   "n": 159,
+   "with_close": 159,
+   "close": {
+    "moved": 40,
+    "stale": 109,
+    "pulled": 10
+   },
+   "movers": 40,
+   "up_share": 0.5,
+   "median_abs_line": 0.0,
+   "line_changed_share": 0.175,
+   "median_abs_p_when_line_same": 0.04855144855144844,
+   "latency_U_median": 38.94166666666666,
+   "latency_L_median": 29.65833333333333,
+   "moved_by": {
+    "1": 0.0,
+    "2": 0.0,
+    "5": 0.225,
+    "10": 0.275,
+    "15": 0.35,
+    "30": 0.45,
+    "60": 0.7
+   },
+   "stale_at": {
+    "1": {
+     "stale": 22,
+     "moved": 0,
+     "unknown": 18
+    },
+    "5": {
+     "stale": 22,
+     "moved": 9,
+     "unknown": 9
+    },
+    "15": {
+     "stale": 21,
+     "moved": 14,
+     "unknown": 5
+    }
+   },
+   "moved_rate": 0.25157232704402516
+  },
+  "dk pra": {
+   "n": 149,
+   "with_close": 149,
+   "close": {
+    "stale": 61,
+    "moved": 81,
+    "pulled": 7
+   },
+   "movers": 81,
+   "up_share": 0.6049382716049383,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.9506172839506173,
+   "median_abs_p_when_line_same": 0.033326316987143,
+   "latency_U_median": 23.933333333333334,
+   "latency_L_median": 0.0,
+   "moved_by": {
+    "1": 0.0,
+    "2": 0.0,
+    "5": 0.16049382716049382,
+    "10": 0.2962962962962963,
+    "15": 0.48148148148148145,
+    "30": 0.5802469135802469,
+    "60": 0.7777777777777778
+   },
+   "stale_at": {
+    "1": {
+     "stale": 36,
+     "moved": 0,
+     "unknown": 45
+    },
+    "5": {
+     "stale": 34,
+     "moved": 13,
+     "unknown": 34
+    },
+    "15": {
+     "stale": 30,
+     "moved": 39,
+     "unknown": 12
+    }
+   },
+   "moved_rate": 0.5436241610738255
+  },
+  "dk pts_reb": {
+   "n": 178,
+   "with_close": 178,
+   "close": {
+    "stale": 76,
+    "moved": 95,
+    "pulled": 7
+   },
+   "movers": 95,
+   "up_share": 0.5473684210526316,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.9157894736842105,
+   "median_abs_p_when_line_same": 0.03603217158176947,
+   "latency_U_median": 14.866666666666667,
+   "latency_L_median": 0.0,
+   "moved_by": {
+    "1": 0.0,
+    "2": 0.0,
+    "5": 0.24210526315789474,
+    "10": 0.4105263157894737,
+    "15": 0.6,
+    "30": 0.7263157894736842,
+    "60": 0.8421052631578947
+   },
+   "stale_at": {
+    "1": {
+     "stale": 33,
+     "moved": 0,
+     "unknown": 62
+    },
+    "5": {
+     "stale": 30,
+     "moved": 23,
+     "unknown": 42
+    },
+    "15": {
+     "stale": 24,
+     "moved": 57,
+     "unknown": 14
+    }
+   },
+   "moved_rate": 0.5337078651685393
+  },
+  "dk pts_ast": {
+   "n": 145,
+   "with_close": 145,
+   "close": {
+    "stale": 61,
+    "moved": 76,
+    "pulled": 8
+   },
+   "movers": 76,
+   "up_share": 0.618421052631579,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.9736842105263158,
+   "median_abs_p_when_line_same": 0.033964539007092176,
+   "latency_U_median": 19.433333333333334,
+   "latency_L_median": 0.0,
+   "moved_by": {
+    "1": 0.0,
+    "2": 0.0,
+    "5": 0.15789473684210525,
+    "10": 0.3157894736842105,
+    "15": 0.4868421052631579,
+    "30": 0.631578947368421,
+    "60": 0.7894736842105263
+   },
+   "stale_at": {
+    "1": {
+     "stale": 31,
+     "moved": 0,
+     "unknown": 45
+    },
+    "5": {
+     "stale": 29,
+     "moved": 12,
+     "unknown": 35
+    },
+    "15": {
+     "stale": 25,
+     "moved": 37,
+     "unknown": 14
+    }
+   },
+   "moved_rate": 0.5241379310344828
+  },
+  "dk reb_ast": {
+   "n": 0,
+   "with_close": 0,
+   "close": {},
+   "movers": 0
+  }
+ },
+ "splits": {
+  "fd star (28+ min)": {
+   "n": 574,
+   "with_close": 534,
+   "close": {
+    "stale": 249,
+    "moved": 259,
+    "pulled": 26
+   },
+   "movers": 259,
+   "up_share": 0.6525096525096525,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.749034749034749,
+   "median_abs_p_when_line_same": 0.043240599674734426,
+   "latency_U_median": 14.383333333333333,
+   "latency_L_median": 3.7333333333333334,
+   "moved_by": {
+    "1": 0.07722007722007722,
+    "2": 0.17374517374517376,
+    "5": 0.3667953667953668,
+    "10": 0.4555984555984556,
+    "15": 0.5444015444015444,
+    "30": 0.7142857142857143,
+    "60": 0.8262548262548263
+   },
+   "stale_at": {
+    "1": {
+     "stale": 207,
+     "moved": 20,
+     "unknown": 32
+    },
+    "5": {
+     "stale": 127,
+     "moved": 95,
+     "unknown": 37
+    },
+    "15": {
+     "stale": 97,
+     "moved": 141,
+     "unknown": 21
+    }
+   },
+   "moved_rate": 0.4850187265917603
+  },
+  "fd rotation (15-28 min)": {
+   "n": 753,
+   "with_close": 753,
+   "close": {
+    "pulled": 33,
+    "moved": 298,
+    "stale": 422
+   },
+   "movers": 298,
+   "up_share": 0.6577181208053692,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.7013422818791947,
+   "median_abs_p_when_line_same": 0.04277659210075624,
+   "latency_U_median": 18.966666666666665,
+   "latency_L_median": 12.108333333333334,
+   "moved_by": {
+    "1": 0.026845637583892617,
+    "2": 0.06711409395973154,
+    "5": 0.24496644295302014,
+    "10": 0.4429530201342282,
+    "15": 0.4597315436241611,
+    "30": 0.5704697986577181,
+    "60": 0.7013422818791947
+   },
+   "stale_at": {
+    "1": {
+     "stale": 227,
+     "moved": 8,
+     "unknown": 63
+    },
+    "5": {
+     "stale": 174,
+     "moved": 73,
+     "unknown": 51
+    },
+    "15": {
+     "stale": 147,
+     "moved": 137,
+     "unknown": 14
+    }
+   },
+   "moved_rate": 0.39575033200531207
+  },
+  "fd news before the report": {
+   "n": 713,
+   "with_close": 713,
+   "close": {
+    "pulled": 43,
+    "moved": 280,
+    "stale": 390
+   },
+   "movers": 280,
+   "up_share": 0.5714285714285714,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.75,
+   "median_abs_p_when_line_same": 0.04257050014049654,
+   "latency_U_median": 29.85,
+   "latency_L_median": 27.516666666666666,
+   "moved_by": {
+    "1": 0.02142857142857143,
+    "2": 0.04642857142857143,
+    "5": 0.16428571428571428,
+    "10": 0.3392857142857143,
+    "15": 0.3607142857142857,
+    "30": 0.5142857142857142,
+    "60": 0.7214285714285714
+   },
+   "stale_at": {
+    "1": {
+     "stale": 231,
+     "moved": 6,
+     "unknown": 43
+    },
+    "5": {
+     "stale": 197,
+     "moved": 46,
+     "unknown": 37
+    },
+    "15": {
+     "stale": 154,
+     "moved": 101,
+     "unknown": 25
+    }
+   },
+   "moved_rate": 0.39270687237026647
+  },
+  "fd no news before": {
+   "n": 614,
+   "with_close": 574,
+   "close": {
+    "stale": 281,
+    "moved": 277,
+    "pulled": 16
+   },
+   "movers": 277,
+   "up_share": 0.740072202166065,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.6967509025270758,
+   "median_abs_p_when_line_same": 0.046367777779303204,
+   "latency_U_median": 5.783333333333333,
+   "latency_L_median": 1.95,
+   "moved_by": {
+    "1": 0.07942238267148015,
+    "2": 0.18772563176895307,
+    "5": 0.4404332129963899,
+    "10": 0.5595667870036101,
+    "15": 0.6389891696750902,
+    "30": 0.7617328519855595,
+    "60": 0.7978339350180506
+   },
+   "stale_at": {
+    "1": {
+     "stale": 203,
+     "moved": 22,
+     "unknown": 52
+    },
+    "5": {
+     "stale": 104,
+     "moved": 122,
+     "unknown": 51
+    },
+    "15": {
+     "stale": 90,
+     "moved": 177,
+     "unknown": 10
+    }
+   },
+   "moved_rate": 0.48257839721254353
+  },
+  "fd game today": {
+   "n": 1327,
+   "with_close": 1287,
+   "close": {
+    "stale": 671,
+    "moved": 557,
+    "pulled": 59
+   },
+   "movers": 557,
+   "up_share": 0.6552962298025135,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.7235188509874326,
+   "median_abs_p_when_line_same": 0.04300859588774533,
+   "latency_U_median": 15.266666666666667,
+   "latency_L_median": 5.866666666666666,
+   "moved_by": {
+    "1": 0.05026929982046679,
+    "2": 0.11669658886894076,
+    "5": 0.3016157989228007,
+    "10": 0.4488330341113106,
+    "15": 0.4991023339317774,
+    "30": 0.6373429084380611,
+    "60": 0.7594254937163375
+   },
+   "stale_at": {
+    "1": {
+     "stale": 434,
+     "moved": 28,
+     "unknown": 95
+    },
+    "5": {
+     "stale": 301,
+     "moved": 168,
+     "unknown": 88
+    },
+    "15": {
+     "stale": 244,
+     "moved": 278,
+     "unknown": 35
+    }
+   },
+   "moved_rate": 0.43278943278943277
+  },
+  "fd game tomorrow": {
+   "n": 0,
+   "with_close": 0,
+   "close": {},
+   "movers": 0
+  },
+  "fd prior not listed": {
+   "n": 510,
+   "with_close": 510,
+   "close": {
+    "stale": 221,
+    "moved": 253,
+    "pulled": 36
+   },
+   "movers": 253,
+   "up_share": 0.7470355731225297,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.7035573122529645,
+   "median_abs_p_when_line_same": 0.0460408838137944,
+   "latency_U_median": 10.2,
+   "latency_L_median": 3.6333333333333333,
+   "moved_by": {
+    "1": 0.07114624505928854,
+    "2": 0.18972332015810275,
+    "5": 0.36363636363636365,
+    "10": 0.4980237154150198,
+    "15": 0.5889328063241107,
+    "30": 0.6877470355731226,
+    "60": 0.7154150197628458
+   },
+   "stale_at": {
+    "1": {
+     "stale": 192,
+     "moved": 18,
+     "unknown": 43
+    },
+    "5": {
+     "stale": 109,
+     "moved": 92,
+     "unknown": 52
+    },
+    "15": {
+     "stale": 87,
+     "moved": 149,
+     "unknown": 17
+    }
+   },
+   "moved_rate": 0.49607843137254903
+  },
+  "fd prior Available": {
+   "n": 0,
+   "with_close": 0,
+   "close": {},
+   "movers": 0
+  },
+  "fd prior Probable": {
+   "n": 0,
+   "with_close": 0,
+   "close": {},
+   "movers": 0
+  },
+  "fd prior Questionable": {
+   "n": 553,
+   "with_close": 513,
+   "close": {
+    "stale": 300,
+    "moved": 199,
+    "pulled": 14
+   },
+   "movers": 199,
+   "up_share": 0.5879396984924623,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.7085427135678392,
+   "median_abs_p_when_line_same": 0.0410417328265828,
+   "latency_U_median": 17.066666666666666,
+   "latency_L_median": 9.333333333333334,
+   "moved_by": {
+    "1": 0.04522613065326633,
+    "2": 0.08040201005025126,
+    "5": 0.35175879396984927,
+    "10": 0.47738693467336685,
+    "15": 0.48743718592964824,
+    "30": 0.6683417085427136,
+    "60": 0.8190954773869347
+   },
+   "stale_at": {
+    "1": {
+     "stale": 157,
+     "moved": 9,
+     "unknown": 33
+    },
+    "5": {
+     "stale": 112,
+     "moved": 70,
+     "unknown": 17
+    },
+    "15": {
+     "stale": 98,
+     "moved": 97,
+     "unknown": 4
+    }
+   },
+   "moved_rate": 0.38791423001949316
+  },
+  "fd prior Doubtful": {
+   "n": 264,
+   "with_close": 264,
+   "close": {
+    "pulled": 9,
+    "stale": 150,
+    "moved": 105
+   },
+   "movers": 105,
+   "up_share": 0.5619047619047619,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.8,
+   "median_abs_p_when_line_same": 0.04670661830415812,
+   "latency_U_median": 40.18333333333333,
+   "latency_L_median": 37.166666666666664,
+   "moved_by": {
+    "1": 0.009523809523809525,
+    "2": 0.009523809523809525,
+    "5": 0.05714285714285714,
+    "10": 0.2761904761904762,
+    "15": 0.3047619047619048,
+    "30": 0.45714285714285713,
+    "60": 0.7523809523809524
+   },
+   "stale_at": {
+    "1": {
+     "stale": 85,
+     "moved": 1,
+     "unknown": 19
+    },
+    "5": {
+     "stale": 80,
+     "moved": 6,
+     "unknown": 19
+    },
+    "15": {
+     "stale": 59,
+     "moved": 32,
+     "unknown": 14
+    }
+   },
+   "moved_rate": 0.3977272727272727
+  },
+  "dk star (28+ min)": {
+   "n": 499,
+   "with_close": 499,
+   "close": {
+    "moved": 276,
+    "stale": 196,
+    "pulled": 27
+   },
+   "movers": 276,
+   "up_share": 0.5181159420289855,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.7681159420289855,
+   "median_abs_p_when_line_same": 0.04658252523009354,
+   "latency_U_median": 14.933333333333334,
+   "latency_L_median": 0.0,
+   "moved_by": {
+    "1": 0.0,
+    "2": 0.0,
+    "5": 0.23550724637681159,
+    "10": 0.40217391304347827,
+    "15": 0.5289855072463768,
+    "30": 0.6594202898550725,
+    "60": 0.8478260869565217
+   },
+   "stale_at": {
+    "1": {
+     "stale": 92,
+     "moved": 0,
+     "unknown": 184
+    },
+    "5": {
+     "stale": 83,
+     "moved": 65,
+     "unknown": 128
+    },
+    "15": {
+     "stale": 69,
+     "moved": 146,
+     "unknown": 61
+    }
+   },
+   "moved_rate": 0.5531062124248497
+  },
+  "dk rotation (15-28 min)": {
+   "n": 661,
+   "with_close": 661,
+   "close": {
+    "pulled": 30,
+    "moved": 255,
+    "stale": 376
+   },
+   "movers": 255,
+   "up_share": 0.6549019607843137,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.7372549019607844,
+   "median_abs_p_when_line_same": 0.04124113475177288,
+   "latency_U_median": 23.933333333333334,
+   "latency_L_median": 2.933333333333333,
+   "moved_by": {
+    "1": 0.0,
+    "2": 0.0,
+    "5": 0.16470588235294117,
+    "10": 0.2784313725490196,
+    "15": 0.4549019607843137,
+    "30": 0.5686274509803921,
+    "60": 0.7450980392156863
+   },
+   "stale_at": {
+    "1": {
+     "stale": 129,
+     "moved": 0,
+     "unknown": 126
+    },
+    "5": {
+     "stale": 127,
+     "moved": 42,
+     "unknown": 86
+    },
+    "15": {
+     "stale": 114,
+     "moved": 116,
+     "unknown": 25
+    }
+   },
+   "moved_rate": 0.3857791225416036
+  },
+  "dk news before the report": {
+   "n": 584,
+   "with_close": 584,
+   "close": {
+    "pulled": 39,
+    "moved": 249,
+    "stale": 296
+   },
+   "movers": 249,
+   "up_share": 0.5903614457831325,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.7710843373493976,
+   "median_abs_p_when_line_same": 0.04103703703703698,
+   "latency_U_median": 14.95,
+   "latency_L_median": 5.933333333333334,
+   "moved_by": {
+    "1": 0.0,
+    "2": 0.0,
+    "5": 0.1927710843373494,
+    "10": 0.43373493975903615,
+    "15": 0.5020080321285141,
+    "30": 0.5381526104417671,
+    "60": 0.751004016064257
+   },
+   "stale_at": {
+    "1": {
+     "stale": 135,
+     "moved": 0,
+     "unknown": 114
+    },
+    "5": {
+     "stale": 126,
+     "moved": 48,
+     "unknown": 75
+    },
+    "15": {
+     "stale": 115,
+     "moved": 125,
+     "unknown": 9
+    }
+   },
+   "moved_rate": 0.4263698630136986
+  },
+  "dk no news before": {
+   "n": 576,
+   "with_close": 576,
+   "close": {
+    "moved": 282,
+    "stale": 276,
+    "pulled": 18
+   },
+   "movers": 282,
+   "up_share": 0.5780141843971631,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.7375886524822695,
+   "median_abs_p_when_line_same": 0.04595419320368613,
+   "latency_U_median": 20.933333333333334,
+   "latency_L_median": 0.0,
+   "moved_by": {
+    "1": 0.0,
+    "2": 0.0,
+    "5": 0.20921985815602837,
+    "10": 0.2624113475177305,
+    "15": 0.4858156028368794,
+    "30": 0.6843971631205674,
+    "60": 0.8404255319148937
+   },
+   "stale_at": {
+    "1": {
+     "stale": 86,
+     "moved": 0,
+     "unknown": 196
+    },
+    "5": {
+     "stale": 84,
+     "moved": 59,
+     "unknown": 139
+    },
+    "15": {
+     "stale": 68,
+     "moved": 137,
+     "unknown": 77
+    }
+   },
+   "moved_rate": 0.4895833333333333
+  },
+  "dk game today": {
+   "n": 1160,
+   "with_close": 1160,
+   "close": {
+    "moved": 531,
+    "stale": 572,
+    "pulled": 57
+   },
+   "movers": 531,
+   "up_share": 0.583804143126177,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.7532956685499058,
+   "median_abs_p_when_line_same": 0.04324494949494939,
+   "latency_U_median": 20.933333333333334,
+   "latency_L_median": 0.0,
+   "moved_by": {
+    "1": 0.0,
+    "2": 0.0,
+    "5": 0.2015065913370998,
+    "10": 0.3427495291902072,
+    "15": 0.4934086629001883,
+    "30": 0.615819209039548,
+    "60": 0.7984934086629002
+   },
+   "stale_at": {
+    "1": {
+     "stale": 221,
+     "moved": 0,
+     "unknown": 310
+    },
+    "5": {
+     "stale": 210,
+     "moved": 107,
+     "unknown": 214
+    },
+    "15": {
+     "stale": 183,
+     "moved": 262,
+     "unknown": 86
+    }
+   },
+   "moved_rate": 0.45775862068965517
+  },
+  "dk game tomorrow": {
+   "n": 0,
+   "with_close": 0,
+   "close": {},
+   "movers": 0
+  },
+  "dk prior not listed": {
+   "n": 410,
+   "with_close": 410,
+   "close": {
+    "stale": 163,
+    "moved": 214,
+    "pulled": 33
+   },
+   "movers": 214,
+   "up_share": 0.677570093457944,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.7710280373831776,
+   "median_abs_p_when_line_same": 0.045864517367108115,
+   "latency_U_median": 11.95,
+   "latency_L_median": 0.0,
+   "moved_by": {
+    "1": 0.0,
+    "2": 0.0,
+    "5": 0.20093457943925233,
+    "10": 0.4252336448598131,
+    "15": 0.6588785046728972,
+    "30": 0.6682242990654206,
+    "60": 0.7476635514018691
+   },
+   "stale_at": {
+    "1": {
+     "stale": 59,
+     "moved": 0,
+     "unknown": 155
+    },
+    "5": {
+     "stale": 59,
+     "moved": 43,
+     "unknown": 112
+    },
+    "15": {
+     "stale": 58,
+     "moved": 141,
+     "unknown": 15
+    }
+   },
+   "moved_rate": 0.5219512195121951
+  },
+  "dk prior Available": {
+   "n": 0,
+   "with_close": 0,
+   "close": {},
+   "movers": 0
+  },
+  "dk prior Probable": {
+   "n": 0,
+   "with_close": 0,
+   "close": {},
+   "movers": 0
+  },
+  "dk prior Questionable": {
+   "n": 505,
+   "with_close": 505,
+   "close": {
+    "moved": 225,
+    "stale": 268,
+    "pulled": 12
+   },
+   "movers": 225,
+   "up_share": 0.5466666666666666,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.7511111111111111,
+   "median_abs_p_when_line_same": 0.04422194424349585,
+   "latency_U_median": 23.933333333333334,
+   "latency_L_median": 0.0,
+   "moved_by": {
+    "1": 0.0,
+    "2": 0.0,
+    "5": 0.21333333333333335,
+    "10": 0.25333333333333335,
+    "15": 0.37777777777777777,
+    "30": 0.6355555555555555,
+    "60": 0.8311111111111111
+   },
+   "stale_at": {
+    "1": {
+     "stale": 104,
+     "moved": 0,
+     "unknown": 121
+    },
+    "5": {
+     "stale": 93,
+     "moved": 48,
+     "unknown": 84
+    },
+    "15": {
+     "stale": 70,
+     "moved": 85,
+     "unknown": 70
+    }
+   },
+   "moved_rate": 0.44554455445544555
+  },
+  "dk prior Doubtful": {
+   "n": 245,
+   "with_close": 245,
+   "close": {
+    "stale": 141,
+    "moved": 92,
+    "pulled": 12
+   },
+   "movers": 92,
+   "up_share": 0.45652173913043476,
+   "median_abs_line": 1.0,
+   "line_changed_share": 0.717391304347826,
+   "median_abs_p_when_line_same": 0.03851396019217293,
+   "latency_U_median": 41.93333333333333,
+   "latency_L_median": 29.95,
+   "moved_by": {
+    "1": 0.0,
+    "2": 0.0,
+    "5": 0.17391304347826086,
+    "10": 0.3695652173913043,
+    "15": 0.391304347826087,
+    "30": 0.44565217391304346,
+    "60": 0.8369565217391305
+   },
+   "stale_at": {
+    "1": {
+     "stale": 58,
+     "moved": 0,
+     "unknown": 34
+    },
+    "5": {
+     "stale": 58,
+     "moved": 16,
+     "unknown": 18
+    },
+    "15": {
+     "stale": 55,
+     "moved": 36,
+     "unknown": 1
+    }
+   },
+   "moved_rate": 0.37551020408163266
+  }
+ },
+ "dk_lags_fd": {
+  "leader_movers_with_baseline": 455,
+  "lag": 175,
+  "no_lag": 274,
+  "unknown": 6,
+  "lag_rate": 0.38461538461538464,
+  "median_ev_fair": -0.056849994721841046,
+  "ev_n": 87,
+  "ev_missing": 88,
+  "share_ev_ge_3": 0.09195402298850575,
+  "share_ev_ge_5": 0.04597701149425287,
+  "median_abs_line_gap": 1.0,
+  "median_lag_after_lead_min": 2.9,
+  "lagger_close": {
+   "n": 175,
+   "games": 26,
+   "line_better": 0.35428571428571426,
+   "line_worse": 0.04,
+   "mean_line_value": 0.3657142857142857,
+   "same_line": 107,
+   "mean_price_clv_same_line": -0.043021419820240055,
+   "beat_close": 0.4514285714285714
+  }
+ },
+ "fd_lags_dk": {
+  "leader_movers_with_baseline": 511,
+  "lag": 253,
+  "no_lag": 233,
+  "unknown": 25,
+  "lag_rate": 0.49510763209393344,
+  "median_ev_fair": -0.04407310704960843,
+  "ev_n": 95,
+  "ev_missing": 158,
+  "share_ev_ge_3": 0.06315789473684211,
+  "share_ev_ge_5": 0.031578947368421054,
+  "median_abs_line_gap": 0.0,
+  "median_lag_after_lead_min": 1.0,
+  "lagger_close": {
+   "n": 251,
+   "games": 26,
+   "line_better": 0.2788844621513944,
+   "line_worse": 0.02390438247011952,
+   "mean_line_value": 0.3187250996015936,
+   "same_line": 175,
+   "mean_price_clv_same_line": -0.0377709560666515,
+   "beat_close": 0.36254980079681276
+  }
+ },
+ "exploratory": {
+  "reacted_by": {
+   "teammates fd": {
+    "5": 0.18337218337218336,
+    "15": 0.32245532245532244,
+    "60": 0.48329448329448327
+   },
+   "teammates dk": {
+    "5": 0.15344827586206897,
+    "15": 0.3560344827586207,
+    "60": 0.5681034482758621
+   },
+   "control fd": {
+    "5": 0.011906277855596586,
+    "15": 0.03711957213803642,
+    "60": 0.1365720106965491
+   },
+   "control dk": {
+    "5": 0.01031723750701853,
+    "15": 0.05123526108927569,
+    "60": 0.1965188096574958
+   }
+  },
+  "stale_bets": {
+   "teammates fd over all": {
+    "n": 1101,
+    "games": 28,
+    "line_better": 0.2089009990917348,
+    "line_worse": 0.10172570390554042,
+    "mean_line_value": 0.1553133514986376,
+    "same_line": 759,
+    "mean_price_clv_same_line": -0.05096141543901684,
+    "beat_close": 0.296094459582198
+   },
+   "control fd over all": {
+    "n": 12802,
+    "games": 71,
+    "line_better": 0.09693797844086861,
+    "line_worse": 0.11115450710826433,
+    "mean_line_value": -0.004921106077175441,
+    "same_line": 10162,
+    "mean_price_clv_same_line": -0.06311919275500479,
+    "beat_close": 0.13505702234025935
+   },
+   "teammates fd over points/PRA/P+R/P+A": {
+    "n": 564,
+    "games": 28,
+    "line_better": 0.3173758865248227,
+    "line_worse": 0.1595744680851064,
+    "mean_line_value": 0.2429078014184397,
+    "same_line": 295,
+    "mean_price_clv_same_line": -0.053291557605058784,
+    "beat_close": 0.34929078014184395
+   },
+   "control fd over points/PRA/P+R/P+A": {
+    "n": 6714,
+    "games": 71,
+    "line_better": 0.14894250819183796,
+    "line_worse": 0.17456061960083408,
+    "mean_line_value": -0.009234435507893953,
+    "same_line": 4566,
+    "mean_price_clv_same_line": -0.06289784858355664,
+    "beat_close": 0.1656240691093238
+   },
+   "teammates fd over reb/ast/threes/R+A": {
+    "n": 537,
+    "games": 28,
+    "line_better": 0.09497206703910614,
+    "line_worse": 0.040968342644320296,
+    "mean_line_value": 0.0633147113594041,
+    "same_line": 464,
+    "mean_price_clv_same_line": -0.04947996729465837,
+    "beat_close": 0.24022346368715083
+   },
+   "control fd over reb/ast/threes/R+A": {
+    "n": 6088,
+    "games": 71,
+    "line_better": 0.03958607095926413,
+    "line_worse": 0.04122864651773982,
+    "mean_line_value": -0.000164257555847569,
+    "same_line": 5596,
+    "mean_price_clv_same_line": -0.06329979630876419,
+    "beat_close": 0.10134691195795006
+   },
+   "teammates fd over no news before the report": {
+    "n": 465,
+    "games": 16,
+    "line_better": 0.26666666666666666,
+    "line_worse": 0.07096774193548387,
+    "mean_line_value": 0.25161290322580643,
+    "same_line": 308,
+    "mean_price_clv_same_line": -0.045021538029831235,
+    "beat_close": 0.37849462365591396
+   },
+   "teammates fd over news before the report": {
+    "n": 636,
+    "games": 17,
+    "line_better": 0.16666666666666666,
+    "line_worse": 0.12421383647798742,
+    "mean_line_value": 0.08490566037735849,
+    "same_line": 451,
+    "mean_price_clv_same_line": -0.055017917084314444,
+    "beat_close": 0.2358490566037736
+   },
+   "teammates fd over star Out (28+ min)": {
+    "n": 462,
+    "games": 15,
+    "line_better": 0.23809523809523808,
+    "line_worse": 0.11471861471861472,
+    "mean_line_value": 0.21212121212121213,
+    "same_line": 299,
+    "mean_price_clv_same_line": -0.05176775363013053,
+    "beat_close": 0.3246753246753247
+   },
+   "teammates fd over game today": {
+    "n": 1101,
+    "games": 28,
+    "line_better": 0.2089009990917348,
+    "line_worse": 0.10172570390554042,
+    "mean_line_value": 0.1553133514986376,
+    "same_line": 759,
+    "mean_price_clv_same_line": -0.05096141543901684,
+    "beat_close": 0.296094459582198
+   },
+   "teammates fd under all": {
+    "n": 1101,
+    "games": 28,
+    "line_better": 0.10172570390554042,
+    "line_worse": 0.2089009990917348,
+    "mean_line_value": -0.1553133514986376,
+    "same_line": 759,
+    "mean_price_clv_same_line": -0.06574228030444487,
+    "beat_close": 0.15077202543142598
+   },
+   "control fd under all": {
+    "n": 12802,
+    "games": 71,
+    "line_better": 0.11115450710826433,
+    "line_worse": 0.09693797844086861,
+    "mean_line_value": 0.004921106077175441,
+    "same_line": 10162,
+    "mean_price_clv_same_line": -0.056526051828081104,
+    "beat_close": 0.16325574129042336
+   },
+   "teammates fd under points/PRA/P+R/P+A": {
+    "n": 564,
+    "games": 28,
+    "line_better": 0.1595744680851064,
+    "line_worse": 0.3173758865248227,
+    "mean_line_value": -0.2429078014184397,
+    "same_line": 295,
+    "mean_price_clv_same_line": -0.06656088681022347,
+    "beat_close": 0.18262411347517732
+   },
+   "control fd under points/PRA/P+R/P+A": {
+    "n": 6714,
+    "games": 71,
+    "line_better": 0.17456061960083408,
+    "line_worse": 0.14894250819183796,
+    "mean_line_value": 0.009234435507893953,
+    "same_line": 4566,
+    "mean_price_clv_same_line": -0.05859255697495529,
+    "beat_close": 0.19973190348525469
+   },
+   "teammates fd under reb/ast/threes/R+A": {
+    "n": 537,
+    "games": 28,
+    "line_better": 0.040968342644320296,
+    "line_worse": 0.09497206703910614,
+    "mean_line_value": -0.0633147113594041,
+    "same_line": 464,
+    "mean_price_clv_same_line": -0.0652218300475381,
+    "beat_close": 0.11731843575418995
+   },
+   "control fd under reb/ast/threes/R+A": {
+    "n": 6088,
+    "games": 71,
+    "line_better": 0.04122864651773982,
+    "line_worse": 0.03958607095926413,
+    "mean_line_value": 0.000164257555847569,
+    "same_line": 5596,
+    "mean_price_clv_same_line": -0.054839907707168935,
+    "beat_close": 0.12302890932982917
+   },
+   "teammates fd under no news before the report": {
+    "n": 465,
+    "games": 16,
+    "line_better": 0.07096774193548387,
+    "line_worse": 0.26666666666666666,
+    "mean_line_value": -0.25161290322580643,
+    "same_line": 308,
+    "mean_price_clv_same_line": -0.07262034262150442,
+    "beat_close": 0.12258064516129032
+   },
+   "teammates fd under news before the report": {
+    "n": 636,
+    "games": 17,
+    "line_better": 0.12421383647798742,
+    "line_worse": 0.16666666666666666,
+    "mean_line_value": -0.08490566037735849,
+    "same_line": 451,
+    "mean_price_clv_same_line": -0.0610450670147456,
+    "beat_close": 0.17138364779874213
+   },
+   "teammates fd under star Out (28+ min)": {
+    "n": 462,
+    "games": 15,
+    "line_better": 0.11471861471861472,
+    "line_worse": 0.23809523809523808,
+    "mean_line_value": -0.21212121212121213,
+    "same_line": 299,
+    "mean_price_clv_same_line": -0.0639310393786496,
+    "beat_close": 0.16666666666666666
+   },
+   "teammates fd under game today": {
+    "n": 1101,
+    "games": 28,
+    "line_better": 0.10172570390554042,
+    "line_worse": 0.2089009990917348,
+    "mean_line_value": -0.1553133514986376,
+    "same_line": 759,
+    "mean_price_clv_same_line": -0.06574228030444487,
+    "beat_close": 0.15077202543142598
+   },
+   "teammates dk over all": {
+    "n": 558,
+    "games": 23,
+    "line_better": 0.08243727598566308,
+    "line_worse": 0.11469534050179211,
+    "mean_line_value": -0.04659498207885305,
+    "same_line": 448,
+    "mean_price_clv_same_line": -0.06926016414534952,
+    "beat_close": 0.10931899641577061
+   },
+   "control dk over all": {
+    "n": 9271,
+    "games": 72,
+    "line_better": 0.08747707906374717,
+    "line_worse": 0.13083809729263293,
+    "mean_line_value": -0.044978966670262105,
+    "same_line": 7281,
+    "mean_price_clv_same_line": -0.06747141926930611,
+    "beat_close": 0.10451946931291123
+   },
+   "teammates dk over points/PRA/P+R/P+A": {
+    "n": 300,
+    "games": 21,
+    "line_better": 0.12333333333333334,
+    "line_worse": 0.16666666666666666,
+    "mean_line_value": -0.07,
+    "same_line": 213,
+    "mean_price_clv_same_line": -0.06599409046423578,
+    "beat_close": 0.13
+   },
+   "control dk over points/PRA/P+R/P+A": {
+    "n": 5324,
+    "games": 72,
+    "line_better": 0.1252817430503381,
+    "line_worse": 0.18144252441773104,
+    "mean_line_value": -0.05897821187077385,
+    "same_line": 3725,
+    "mean_price_clv_same_line": -0.06573887780176171,
+    "beat_close": 0.13392186326070624
+   },
+   "teammates dk over reb/ast/threes/R+A": {
+    "n": 258,
+    "games": 23,
+    "line_better": 0.03488372093023256,
+    "line_worse": 0.05426356589147287,
+    "mean_line_value": -0.01937984496124031,
+    "same_line": 235,
+    "mean_price_clv_same_line": -0.07222047773716746,
+    "beat_close": 0.08527131782945736
+   },
+   "control dk over reb/ast/threes/R+A": {
+    "n": 3947,
+    "games": 71,
+    "line_better": 0.036483405117810994,
+    "line_worse": 0.06257917405624525,
+    "mean_line_value": -0.026095768938434252,
+    "same_line": 3556,
+    "mean_price_clv_same_line": -0.06928630030603342,
+    "beat_close": 0.06485938687610844
+   },
+   "teammates dk over no news before the report": {
+    "n": 197,
+    "games": 11,
+    "line_better": 0.08629441624365482,
+    "line_worse": 0.06598984771573604,
+    "mean_line_value": 0.015228426395939087,
+    "same_line": 167,
+    "mean_price_clv_same_line": -0.06350144538180648,
+    "beat_close": 0.12690355329949238
+   },
+   "teammates dk over news before the report": {
+    "n": 361,
+    "games": 13,
+    "line_better": 0.08033240997229917,
+    "line_worse": 0.14127423822714683,
+    "mean_line_value": -0.08033240997229917,
+    "same_line": 281,
+    "mean_price_clv_same_line": -0.07268260554574697,
+    "beat_close": 0.0997229916897507
+   },
+   "teammates dk over star Out (28+ min)": {
+    "n": 172,
+    "games": 9,
+    "line_better": 0.09302325581395349,
+    "line_worse": 0.13953488372093023,
+    "mean_line_value": -0.06976744186046512,
+    "same_line": 132,
+    "mean_price_clv_same_line": -0.0735468357079237,
+    "beat_close": 0.11627906976744186
+   },
+   "teammates dk over game today": {
+    "n": 558,
+    "games": 23,
+    "line_better": 0.08243727598566308,
+    "line_worse": 0.11469534050179211,
+    "mean_line_value": -0.04659498207885305,
+    "same_line": 448,
+    "mean_price_clv_same_line": -0.06926016414534952,
+    "beat_close": 0.10931899641577061
+   },
+   "teammates dk under all": {
+    "n": 558,
+    "games": 23,
+    "line_better": 0.11469534050179211,
+    "line_worse": 0.08243727598566308,
+    "mean_line_value": 0.04659498207885305,
+    "same_line": 448,
+    "mean_price_clv_same_line": -0.05595401626669647,
+    "beat_close": 0.16666666666666666
+   },
+   "control dk under all": {
+    "n": 9271,
+    "games": 72,
+    "line_better": 0.13083809729263293,
+    "line_worse": 0.08747707906374717,
+    "mean_line_value": 0.044978966670262105,
+    "same_line": 7281,
+    "mean_price_clv_same_line": -0.05924587667347544,
+    "beat_close": 0.16416783518498543
+   },
+   "teammates dk under points/PRA/P+R/P+A": {
+    "n": 300,
+    "games": 21,
+    "line_better": 0.16666666666666666,
+    "line_worse": 0.12333333333333334,
+    "mean_line_value": 0.07,
+    "same_line": 213,
+    "mean_price_clv_same_line": -0.05946365011468075,
+    "beat_close": 0.18333333333333332
+   },
+   "control dk under points/PRA/P+R/P+A": {
+    "n": 5324,
+    "games": 72,
+    "line_better": 0.18144252441773104,
+    "line_worse": 0.1252817430503381,
+    "mean_line_value": 0.05897821187077385,
+    "same_line": 3725,
+    "mean_price_clv_same_line": -0.060588163866846956,
+    "beat_close": 0.1960931630353118
+   },
+   "teammates dk under reb/ast/threes/R+A": {
+    "n": 258,
+    "games": 23,
+    "line_better": 0.05426356589147287,
+    "line_worse": 0.03488372093023256,
+    "mean_line_value": 0.01937984496124031,
+    "same_line": 235,
+    "mean_price_clv_same_line": -0.05277294388533198,
+    "beat_close": 0.14728682170542637
+   },
+   "control dk under reb/ast/threes/R+A": {
+    "n": 3947,
+    "games": 71,
+    "line_better": 0.06257917405624525,
+    "line_worse": 0.036483405117810994,
+    "mean_line_value": 0.026095768938434252,
+    "same_line": 3556,
+    "mean_price_clv_same_line": -0.057839796866020164,
+    "beat_close": 0.12110463643273373
+   },
+   "teammates dk under no news before the report": {
+    "n": 197,
+    "games": 11,
+    "line_better": 0.06598984771573604,
+    "line_worse": 0.08629441624365482,
+    "mean_line_value": -0.015228426395939087,
+    "same_line": 167,
+    "mean_price_clv_same_line": -0.061312457088406165,
+    "beat_close": 0.1116751269035533
+   },
+   "teammates dk under news before the report": {
+    "n": 361,
+    "games": 13,
+    "line_better": 0.14127423822714683,
+    "line_worse": 0.08033240997229917,
+    "mean_line_value": 0.08033240997229917,
+    "same_line": 281,
+    "mean_price_clv_same_line": -0.0527694624687409,
+    "beat_close": 0.19667590027700832
+   },
+   "teammates dk under star Out (28+ min)": {
+    "n": 172,
+    "games": 9,
+    "line_better": 0.13953488372093023,
+    "line_worse": 0.09302325581395349,
+    "mean_line_value": 0.06976744186046512,
+    "same_line": 132,
+    "mean_price_clv_same_line": -0.04968218400925262,
+    "beat_close": 0.21511627906976744
+   },
+   "teammates dk under game today": {
+    "n": 558,
+    "games": 23,
+    "line_better": 0.11469534050179211,
+    "line_worse": 0.08243727598566308,
+    "mean_line_value": 0.04659498207885305,
+    "same_line": 448,
+    "mean_price_clv_same_line": -0.05595401626669647,
+    "beat_close": 0.16666666666666666
+   }
+  },
+  "first_change": {
+   "fd pulled": 144,
+   "dk moved": 592,
+   "dk never": 306,
+   "fd moved": 689,
+   "fd never": 494,
+   "dk pulled": 262
+  }
+ },
+ "go_no_go": {
+  "insufficient": false,
+  "window": {
+   "stale_at_5_share": 0.4696691176470588,
+   "median_line_move_pts_pra": 1.0,
+   "median_line_move_pts_pra_when_changed": 1.0,
+   "pts_pra_movers": 361,
+   "pts_pra_line_changed": 326,
+   "median_p_move_pts_pra_when_line_same": 0.038663106476792775,
+   "moved_rate_teammates": 0.4446260727421332,
+   "moved_rate_control": 0.3029645456366429,
+   "go": false
+  },
+  "dk_lag_go": false
+ },
+ "per_event": [
+  {
+   "report": "2026-10-24T13:00",
+   "team": "PHI",
+   "gid": "0022600106",
+   "outs": [
+    [
+     "LeBron James",
+     33.6,
+     "Questionable"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "today",
+   "n": 60,
+   "movers": 42,
+   "moved_rate": 0.7,
+   "latency_U_median": 2.033333333333333,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 1,
+    "moved": 25,
+    "unknown": 16
+   }
+  },
+  {
+   "report": "2026-10-24T13:00",
+   "team": "HOU",
+   "gid": "0022600107",
+   "outs": [
+    [
+     "Fred VanVleet",
+     30.5,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "today",
+   "n": 51,
+   "movers": 23,
+   "moved_rate": 0.45098039215686275,
+   "latency_U_median": 317.06666666666666,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 23,
+    "moved": 0,
+    "unknown": 0
+   }
+  },
+  {
+   "report": "2026-10-24T13:15",
+   "team": "ORL",
+   "gid": "0022600114",
+   "outs": [
+    [
+     "Paolo Banchero",
+     33.8,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "tomorrow",
+   "n": 0,
+   "movers": 0,
+   "moved_rate": null,
+   "latency_U_median": null,
+   "median_abs_line": null,
+   "stale5": null
+  },
+  {
+   "report": "2026-10-24T14:15",
+   "team": "DAL",
+   "gid": "0022600109",
+   "outs": [
+    [
+     "Cooper Flagg",
+     25.0,
+     "not listed"
+    ]
+   ],
+   "news_first": true,
+   "horizon": "today",
+   "n": 66,
+   "movers": 39,
+   "moved_rate": 0.5909090909090909,
+   "latency_U_median": 5.933333333333334,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 3,
+    "moved": 16,
+    "unknown": 20
+   }
+  },
+  {
+   "report": "2026-10-24T15:00",
+   "team": "NOP",
+   "gid": "0022600110",
+   "outs": [
+    [
+     "Yves Missi",
+     19.6,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "today",
+   "n": 56,
+   "movers": 13,
+   "moved_rate": 0.23214285714285715,
+   "latency_U_median": 67.0,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 7,
+    "moved": 6,
+    "unknown": 0
+   }
+  },
+  {
+   "report": "2026-10-24T16:00",
+   "team": "GSW",
+   "gid": "0022600111",
+   "outs": [
+    [
+     "Stephen Curry",
+     25.5,
+     "not listed"
+    ],
+    [
+     "Al Horford",
+     18.3,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "today",
+   "n": 15,
+   "movers": 11,
+   "moved_rate": 0.7333333333333333,
+   "latency_U_median": 2.95,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 4,
+    "moved": 7,
+    "unknown": 0
+   }
+  },
+  {
+   "report": "2026-10-24T16:00",
+   "team": "DET",
+   "gid": "0022600117",
+   "outs": [
+    [
+     "Jalen Duren",
+     19.1,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "tomorrow",
+   "n": 0,
+   "movers": 0,
+   "moved_rate": null,
+   "latency_U_median": null,
+   "median_abs_line": null,
+   "stale5": null
+  },
+  {
+   "report": "2026-10-24T18:45",
+   "team": "DAL",
+   "gid": "0022600109",
+   "outs": [
+    [
+     "Kyrie Irving",
+     24.3,
+     "Doubtful"
+    ]
+   ],
+   "news_first": true,
+   "horizon": "today",
+   "n": 88,
+   "movers": 39,
+   "moved_rate": 0.4431818181818182,
+   "latency_U_median": 42.916666666666664,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 31,
+    "moved": 3,
+    "unknown": 5
+   }
+  },
+  {
+   "report": "2026-10-24T19:45",
+   "team": "HOU",
+   "gid": "0022600107",
+   "outs": [
+    [
+     "Marcus Smart",
+     23.9,
+     "Questionable"
+    ]
+   ],
+   "news_first": true,
+   "horizon": "today",
+   "n": 58,
+   "movers": 8,
+   "moved_rate": 0.13793103448275862,
+   "latency_U_median": 16.95,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 8,
+    "moved": 0,
+    "unknown": 0
+   }
+  },
+  {
+   "report": "2026-10-24T20:15",
+   "team": "MEM",
+   "gid": "0022600118",
+   "outs": [
+    [
+     "Zach Edey",
+     21.8,
+     "not listed"
+    ]
+   ],
+   "news_first": true,
+   "horizon": "tomorrow",
+   "n": 0,
+   "movers": 0,
+   "moved_rate": null,
+   "latency_U_median": null,
+   "median_abs_line": null,
+   "stale5": null
+  },
+  {
+   "report": "2026-10-24T20:30",
+   "team": "GSW",
+   "gid": "0022600111",
+   "outs": [
+    [
+     "Draymond Green",
+     26.1,
+     "Doubtful"
+    ]
+   ],
+   "news_first": true,
+   "horizon": "today",
+   "n": 60,
+   "movers": 25,
+   "moved_rate": 0.4166666666666667,
+   "latency_U_median": 65.03333333333333,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 25,
+    "moved": 0,
+    "unknown": 0
+   }
+  },
+  {
+   "report": "2026-10-25T13:00",
+   "team": "PHI",
+   "gid": "0022600117",
+   "outs": [
+    [
+     "Joel Embiid",
+     34.7,
+     "not listed"
+    ]
+   ],
+   "news_first": true,
+   "horizon": "today",
+   "n": 60,
+   "movers": 25,
+   "moved_rate": 0.4166666666666667,
+   "latency_U_median": 242.95,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 22,
+    "moved": 0,
+    "unknown": 3
+   }
+  },
+  {
+   "report": "2026-10-25T13:15",
+   "team": "BKN",
+   "gid": "0022600113",
+   "outs": [
+    [
+     "Mikel Brown Jr.",
+     19.9,
+     "not listed"
+    ]
+   ],
+   "news_first": true,
+   "horizon": "today",
+   "n": 35,
+   "movers": 11,
+   "moved_rate": 0.3142857142857143,
+   "latency_U_median": 97.98333333333333,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 11,
+    "moved": 0,
+    "unknown": 0
+   }
+  },
+  {
+   "report": "2026-10-25T16:15",
+   "team": "DAL",
+   "gid": "0022600122",
+   "outs": [
+    [
+     "Naji Marshall",
+     27.7,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "tomorrow",
+   "n": 0,
+   "movers": 0,
+   "moved_rate": null,
+   "latency_U_median": null,
+   "median_abs_line": null,
+   "stale5": null
+  },
+  {
+   "report": "2026-10-25T18:00",
+   "team": "TOR",
+   "gid": "0022600115",
+   "outs": [
+    [
+     "Kawhi Leonard",
+     25.8,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "today",
+   "n": 68,
+   "movers": 52,
+   "moved_rate": 0.7647058823529411,
+   "latency_U_median": 6.0,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 5,
+    "moved": 14,
+    "unknown": 33
+   }
+  },
+  {
+   "report": "2026-10-25T18:00",
+   "team": "DET",
+   "gid": "0022600117",
+   "outs": [
+    [
+     "Ausar Thompson",
+     26.3,
+     "Questionable"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "today",
+   "n": 44,
+   "movers": 13,
+   "moved_rate": 0.29545454545454547,
+   "latency_U_median": 2.0166666666666666,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 3,
+    "moved": 10,
+    "unknown": 0
+   }
+  },
+  {
+   "report": "2026-10-25T18:45",
+   "team": "PHI",
+   "gid": "0022600117",
+   "outs": [
+    [
+     "VJ Edgecombe",
+     32.6,
+     "Questionable"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "today",
+   "n": 51,
+   "movers": 28,
+   "moved_rate": 0.5490196078431373,
+   "latency_U_median": 14.933333333333334,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 18,
+    "moved": 7,
+    "unknown": 3
+   }
+  },
+  {
+   "report": "2026-10-25T19:00",
+   "team": "SAC",
+   "gid": "0022600118",
+   "outs": [
+    [
+     "Keegan Murray",
+     27.2,
+     "Doubtful"
+    ]
+   ],
+   "news_first": true,
+   "horizon": "today",
+   "n": 58,
+   "movers": 17,
+   "moved_rate": 0.29310344827586204,
+   "latency_U_median": 72.96666666666667,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 16,
+    "moved": 0,
+    "unknown": 1
+   }
+  },
+  {
+   "report": "2026-10-26T14:15",
+   "team": "IND",
+   "gid": "0022600123",
+   "outs": [
+    [
+     "Ivica Zubac",
+     21.4,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "today",
+   "n": 53,
+   "movers": 25,
+   "moved_rate": 0.4716981132075472,
+   "latency_U_median": 263.0833333333333,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 22,
+    "moved": 1,
+    "unknown": 2
+   }
+  },
+  {
+   "report": "2026-10-26T14:15",
+   "team": "OKC",
+   "gid": "0022600124",
+   "outs": [
+    [
+     "Chet Holmgren",
+     29.9,
+     "not listed"
+    ],
+    [
+     "Cason Wallace",
+     16.3,
+     "not listed"
+    ],
+    [
+     "Jalen Williams",
+     31.6,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "today",
+   "n": 44,
+   "movers": 25,
+   "moved_rate": 0.5681818181818182,
+   "latency_U_median": 2.0,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 2,
+    "moved": 15,
+    "unknown": 8
+   }
+  },
+  {
+   "report": "2026-10-26T19:00",
+   "team": "IND",
+   "gid": "0022600123",
+   "outs": [
+    [
+     "Andrew Nembhard",
+     31.9,
+     "Questionable"
+    ]
+   ],
+   "news_first": true,
+   "horizon": "today",
+   "n": 60,
+   "movers": 25,
+   "moved_rate": 0.4166666666666667,
+   "latency_U_median": 11.95,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 14,
+    "moved": 4,
+    "unknown": 7
+   }
+  },
+  {
+   "report": "2026-10-26T20:00",
+   "team": "UTA",
+   "gid": "0022600126",
+   "outs": [
+    [
+     "Jaxson Hayes",
+     23.8,
+     "Questionable"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "today",
+   "n": 78,
+   "movers": 27,
+   "moved_rate": 0.34615384615384615,
+   "latency_U_median": 18.083333333333332,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 18,
+    "moved": 8,
+    "unknown": 1
+   }
+  },
+  {
+   "report": "2026-10-27T12:00",
+   "team": "ORL",
+   "gid": "0022600136",
+   "outs": [
+    [
+     "Jalen Suggs",
+     33.4,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "tomorrow",
+   "n": 0,
+   "movers": 0,
+   "moved_rate": null,
+   "latency_U_median": null,
+   "median_abs_line": null,
+   "stale5": null
+  },
+  {
+   "report": "2026-10-27T16:15",
+   "team": "HOU",
+   "gid": "0022600138",
+   "outs": [
+    [
+     "Alperen Sengun",
+     33.9,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "tomorrow",
+   "n": 0,
+   "movers": 0,
+   "moved_rate": null,
+   "latency_U_median": null,
+   "median_abs_line": null,
+   "stale5": null
+  },
+  {
+   "report": "2026-10-27T16:45",
+   "team": "WAS",
+   "gid": "0022600133",
+   "outs": [
+    [
+     "Justin Champagnie",
+     18.3,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "tomorrow",
+   "n": 0,
+   "movers": 0,
+   "moved_rate": null,
+   "latency_U_median": null,
+   "median_abs_line": null,
+   "stale5": null
+  },
+  {
+   "report": "2026-10-27T17:30",
+   "team": "OKC",
+   "gid": "0022600142",
+   "outs": [
+    [
+     "Alex Caruso",
+     18.9,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "tomorrow",
+   "n": 0,
+   "movers": 0,
+   "moved_rate": null,
+   "latency_U_median": null,
+   "median_abs_line": null,
+   "stale5": null
+  },
+  {
+   "report": "2026-10-27T19:00",
+   "team": "UTA",
+   "gid": "0022600141",
+   "outs": [
+    [
+     "Jaren Jackson Jr.",
+     26.1,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "tomorrow",
+   "n": 0,
+   "movers": 0,
+   "moved_rate": null,
+   "latency_U_median": null,
+   "median_abs_line": null,
+   "stale5": null
+  },
+  {
+   "report": "2026-10-27T20:00",
+   "team": "LAC",
+   "gid": "0022600143",
+   "outs": [
+    [
+     "Rui Hachimura",
+     31.2,
+     "not listed"
+    ]
+   ],
+   "news_first": true,
+   "horizon": "tomorrow",
+   "n": 0,
+   "movers": 0,
+   "moved_rate": null,
+   "latency_U_median": null,
+   "median_abs_line": null,
+   "stale5": null
+  },
+  {
+   "report": "2026-10-27T20:45",
+   "team": "MIN",
+   "gid": "0022600139",
+   "outs": [
+    [
+     "Anthony Edwards",
+     33.7,
+     "Questionable"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "tomorrow",
+   "n": 0,
+   "movers": 0,
+   "moved_rate": null,
+   "latency_U_median": null,
+   "median_abs_line": null,
+   "stale5": null
+  },
+  {
+   "report": "2026-10-28T16:00",
+   "team": "LAL",
+   "gid": "0022600143",
+   "outs": [
+    [
+     "Luka Don\u010di\u0107",
+     35.5,
+     "not listed"
+    ],
+    [
+     "Ziaire Williams",
+     28.4,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "today",
+   "n": 29,
+   "movers": 26,
+   "moved_rate": 0.896551724137931,
+   "latency_U_median": 2.933333333333333,
+   "median_abs_line": 2.0,
+   "stale5": {
+    "stale": 9,
+    "moved": 17,
+    "unknown": 0
+   }
+  },
+  {
+   "report": "2026-10-28T18:00",
+   "team": "IND",
+   "gid": "0022600135",
+   "outs": [
+    [
+     "Tyrese Haliburton",
+     33.0,
+     "Questionable"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "today",
+   "n": 80,
+   "movers": 26,
+   "moved_rate": 0.65,
+   "latency_U_median": 29.633333333333333,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 0,
+    "moved": 0,
+    "unknown": 26
+   }
+  },
+  {
+   "report": "2026-10-28T18:15",
+   "team": "WAS",
+   "gid": "0022600133",
+   "outs": [
+    [
+     "Tre Johnson",
+     22.6,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "today",
+   "n": 82,
+   "movers": 11,
+   "moved_rate": 0.13414634146341464,
+   "latency_U_median": 14.866666666666667,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 0,
+    "moved": 0,
+    "unknown": 11
+   }
+  },
+  {
+   "report": "2026-10-28T18:45",
+   "team": "GSW",
+   "gid": "0022600139",
+   "outs": [
+    [
+     "Gui Santos",
+     23.9,
+     "Questionable"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "today",
+   "n": 35,
+   "movers": 10,
+   "moved_rate": 0.2857142857142857,
+   "latency_U_median": 32.75,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 5,
+    "moved": 0,
+    "unknown": 5
+   }
+  },
+  {
+   "report": "2026-10-28T20:15",
+   "team": "UTA",
+   "gid": "0022600141",
+   "outs": [
+    [
+     "Lauri Markkanen",
+     28.6,
+     "Questionable"
+    ]
+   ],
+   "news_first": true,
+   "horizon": "today",
+   "n": 69,
+   "movers": 19,
+   "moved_rate": 0.2753623188405797,
+   "latency_U_median": 24.566666666666666,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 15,
+    "moved": 0,
+    "unknown": 4
+   }
+  },
+  {
+   "report": "2026-10-29T16:30",
+   "team": "BKN",
+   "gid": "0022600017",
+   "outs": [
+    [
+     "Egor D\u00ebmin",
+     21.8,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "tomorrow",
+   "n": 0,
+   "movers": 0,
+   "moved_rate": null,
+   "latency_U_median": null,
+   "median_abs_line": null,
+   "stale5": null
+  },
+  {
+   "report": "2026-10-29T16:30",
+   "team": "HOU",
+   "gid": "0022600021",
+   "outs": [
+    [
+     "Reed Sheppard",
+     23.3,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "tomorrow",
+   "n": 0,
+   "movers": 0,
+   "moved_rate": null,
+   "latency_U_median": null,
+   "median_abs_line": null,
+   "stale5": null
+  },
+  {
+   "report": "2026-10-29T18:15",
+   "team": "NOP",
+   "gid": "0022600145",
+   "outs": [
+    [
+     "Dejounte Murray",
+     32.3,
+     "not listed"
+    ],
+    [
+     "Jordan Poole",
+     15.9,
+     "Doubtful"
+    ]
+   ],
+   "news_first": true,
+   "horizon": "today",
+   "n": 57,
+   "movers": 43,
+   "moved_rate": 0.7543859649122807,
+   "latency_U_median": 5.5,
+   "median_abs_line": 2.0,
+   "stale5": {
+    "stale": 8,
+    "moved": 16,
+    "unknown": 19
+   }
+  },
+  {
+   "report": "2026-10-29T21:00",
+   "team": "POR",
+   "gid": "0022600146",
+   "outs": [
+    [
+     "Robert Williams III",
+     18.1,
+     "Doubtful"
+    ]
+   ],
+   "news_first": true,
+   "horizon": "today",
+   "n": 86,
+   "movers": 11,
+   "moved_rate": 0.12790697674418605,
+   "latency_U_median": 40.18333333333333,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 10,
+    "moved": 1,
+    "unknown": 0
+   }
+  },
+  {
+   "report": "2026-10-30T16:45",
+   "team": "CLE",
+   "gid": "0022600151",
+   "outs": [
+    [
+     "Jaylon Tyson",
+     20.7,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "tomorrow",
+   "n": 0,
+   "movers": 0,
+   "moved_rate": null,
+   "latency_U_median": null,
+   "median_abs_line": null,
+   "stale5": null
+  },
+  {
+   "report": "2026-10-30T17:45",
+   "team": "PHI",
+   "gid": "0022600018",
+   "outs": [
+    [
+     "Jaylen Brown",
+     36.3,
+     "Doubtful"
+    ]
+   ],
+   "news_first": true,
+   "horizon": "today",
+   "n": 84,
+   "movers": 24,
+   "moved_rate": 0.2857142857142857,
+   "latency_U_median": 8.933333333333334,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 11,
+    "moved": 2,
+    "unknown": 11
+   }
+  },
+  {
+   "report": "2026-10-30T18:45",
+   "team": "IND",
+   "gid": "0022600020",
+   "outs": [
+    [
+     "Obi Toppin",
+     22.9,
+     "Questionable"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "today",
+   "n": 66,
+   "movers": 28,
+   "moved_rate": 0.42424242424242425,
+   "latency_U_median": 2.933333333333333,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 9,
+    "moved": 18,
+    "unknown": 1
+   }
+  },
+  {
+   "report": "2026-10-30T19:15",
+   "team": "POR",
+   "gid": "0022600147",
+   "outs": [
+    [
+     "Ja Morant",
+     25.8,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "tomorrow",
+   "n": 0,
+   "movers": 0,
+   "moved_rate": null,
+   "latency_U_median": null,
+   "median_abs_line": null,
+   "stale5": null
+  },
+  {
+   "report": "2026-10-31T13:00",
+   "team": "PHI",
+   "gid": "0022600148",
+   "outs": [
+    [
+     "Joel Embiid",
+     35.1,
+     "not listed"
+    ],
+    [
+     "LeBron James",
+     33.5,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "today",
+   "n": 30,
+   "movers": 17,
+   "moved_rate": 0.5666666666666667,
+   "latency_U_median": 0.43333333333333335,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 0,
+    "moved": 17,
+    "unknown": 0
+   }
+  },
+  {
+   "report": "2026-10-31T13:00",
+   "team": "HOU",
+   "gid": "0022600153",
+   "outs": [
+    [
+     "Fred VanVleet",
+     30.4,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "today",
+   "n": 57,
+   "movers": 18,
+   "moved_rate": 0.3157894736842105,
+   "latency_U_median": 2.933333333333333,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 5,
+    "moved": 12,
+    "unknown": 1
+   }
+  },
+  {
+   "report": "2026-10-31T15:45",
+   "team": "GSW",
+   "gid": "0022600156",
+   "outs": [
+    [
+     "Stephen Curry",
+     28.0,
+     "not listed"
+    ],
+    [
+     "Draymond Green",
+     28.5,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "tomorrow",
+   "n": 0,
+   "movers": 0,
+   "moved_rate": null,
+   "latency_U_median": null,
+   "median_abs_line": null,
+   "stale5": null
+  },
+  {
+   "report": "2026-10-31T17:00",
+   "team": "BKN",
+   "gid": "0022600155",
+   "outs": [
+    [
+     "Mikel Brown Jr.",
+     22.6,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "tomorrow",
+   "n": 0,
+   "movers": 0,
+   "moved_rate": null,
+   "latency_U_median": null,
+   "median_abs_line": null,
+   "stale5": null
+  },
+  {
+   "report": "2026-10-31T18:15",
+   "team": "MIN",
+   "gid": "0022600152",
+   "outs": [
+    [
+     "Rudy Gobert",
+     29.9,
+     "Questionable"
+    ]
+   ],
+   "news_first": true,
+   "horizon": "today",
+   "n": 84,
+   "movers": 26,
+   "moved_rate": 0.30952380952380953,
+   "latency_U_median": 39.93333333333333,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 16,
+    "moved": 8,
+    "unknown": 2
+   }
+  },
+  {
+   "report": "2026-11-01T10:15",
+   "team": "BOS",
+   "gid": "0022600154",
+   "outs": [
+    [
+     "Mitchell Robinson",
+     20.1,
+     "Questionable"
+    ]
+   ],
+   "news_first": true,
+   "horizon": "today",
+   "n": 71,
+   "movers": 32,
+   "moved_rate": 0.4507042253521127,
+   "latency_U_median": 257.60833333333335,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 29,
+    "moved": 3,
+    "unknown": 0
+   }
+  },
+  {
+   "report": "2026-11-01T17:00",
+   "team": "ATL",
+   "gid": "0022600160",
+   "outs": [
+    [
+     "Jock Landale",
+     15.3,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "tomorrow",
+   "n": 0,
+   "movers": 0,
+   "moved_rate": null,
+   "latency_U_median": null,
+   "median_abs_line": null,
+   "stale5": null
+  },
+  {
+   "report": "2026-11-01T21:15",
+   "team": "ATL",
+   "gid": "0022600160",
+   "outs": [
+    [
+     "Kingston Flemings",
+     20.3,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "tomorrow",
+   "n": 0,
+   "movers": 0,
+   "moved_rate": null,
+   "latency_U_median": null,
+   "median_abs_line": null,
+   "stale5": null
+  },
+  {
+   "report": "2026-11-02T12:00",
+   "team": "ORL",
+   "gid": "0022600162",
+   "outs": [
+    [
+     "Anthony Black",
+     27.9,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "today",
+   "n": 45,
+   "movers": 21,
+   "moved_rate": 0.4666666666666667,
+   "latency_U_median": 5.783333333333333,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 10,
+    "moved": 0,
+    "unknown": 11
+   }
+  },
+  {
+   "report": "2026-11-02T13:00",
+   "team": "IND",
+   "gid": "0022600160",
+   "outs": [
+    [
+     "Andrew Nembhard",
+     32.7,
+     "not listed"
+    ],
+    [
+     "Aaron Nesmith",
+     23.1,
+     "not listed"
+    ],
+    [
+     "Pascal Siakam",
+     32.1,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "today",
+   "n": 15,
+   "movers": 8,
+   "moved_rate": 0.5333333333333333,
+   "latency_U_median": 1.95,
+   "median_abs_line": 4.5,
+   "stale5": {
+    "stale": 0,
+    "moved": 8,
+    "unknown": 0
+   }
+  },
+  {
+   "report": "2026-11-02T13:00",
+   "team": "WAS",
+   "gid": "0022600162",
+   "outs": [
+    [
+     "Alex Sarr",
+     25.4,
+     "Questionable"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "today",
+   "n": 75,
+   "movers": 47,
+   "moved_rate": 0.6266666666666667,
+   "latency_U_median": 23.933333333333334,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 21,
+    "moved": 1,
+    "unknown": 25
+   }
+  },
+  {
+   "report": "2026-11-02T14:00",
+   "team": "BOS",
+   "gid": "0022600167",
+   "outs": [
+    [
+     "Paul George",
+     31.0,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "today",
+   "n": 51,
+   "movers": 41,
+   "moved_rate": 0.803921568627451,
+   "latency_U_median": 14.933333333333334,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 7,
+    "moved": 1,
+    "unknown": 33
+   }
+  },
+  {
+   "report": "2026-11-02T16:00",
+   "team": "GSW",
+   "gid": "0022600170",
+   "outs": [
+    [
+     "Al Horford",
+     18.7,
+     "not listed"
+    ],
+    [
+     "Gui Santos",
+     20.1,
+     "not listed"
+    ]
+   ],
+   "news_first": true,
+   "horizon": "today",
+   "n": 71,
+   "movers": 27,
+   "moved_rate": 0.38028169014084506,
+   "latency_U_median": 104.95,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 17,
+    "moved": 1,
+    "unknown": 9
+   }
+  },
+  {
+   "report": "2026-11-02T16:00",
+   "team": "LAC",
+   "gid": "0022600171",
+   "outs": [
+    [
+     "Rui Hachimura",
+     30.0,
+     "not listed"
+    ],
+    [
+     "Derrick Jones Jr.",
+     28.7,
+     "not listed"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "today",
+   "n": 35,
+   "movers": 31,
+   "moved_rate": 0.8857142857142857,
+   "latency_U_median": 32.93333333333333,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 13,
+    "moved": 4,
+    "unknown": 14
+   }
+  },
+  {
+   "report": "2026-11-02T18:00",
+   "team": "ATL",
+   "gid": "0022600160",
+   "outs": [
+    [
+     "Jalen Johnson",
+     32.6,
+     "Questionable"
+    ]
+   ],
+   "news_first": true,
+   "horizon": "today",
+   "n": 78,
+   "movers": 43,
+   "moved_rate": 0.5512820512820513,
+   "latency_U_median": 2.95,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 14,
+    "moved": 24,
+    "unknown": 5
+   }
+  },
+  {
+   "report": "2026-11-02T18:00",
+   "team": "IND",
+   "gid": "0022600160",
+   "outs": [
+    [
+     "Larry Nance Jr.",
+     16.3,
+     "Doubtful"
+    ]
+   ],
+   "news_first": true,
+   "horizon": "today",
+   "n": 55,
+   "movers": 36,
+   "moved_rate": 0.6545454545454545,
+   "latency_U_median": 5.283333333333333,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 13,
+    "moved": 16,
+    "unknown": 7
+   }
+  },
+  {
+   "report": "2026-11-02T18:30",
+   "team": "MIN",
+   "gid": "0022600166",
+   "outs": [
+    [
+     "Terrence Shannon Jr",
+     22.0,
+     "Questionable"
+    ]
+   ],
+   "news_first": true,
+   "horizon": "today",
+   "n": 79,
+   "movers": 34,
+   "moved_rate": 0.43037974683544306,
+   "latency_U_median": 53.11666666666667,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 28,
+    "moved": 0,
+    "unknown": 6
+   }
+  },
+  {
+   "report": "2026-11-02T18:45",
+   "team": "DAL",
+   "gid": "0022600164",
+   "outs": [
+    [
+     "Kyrie Irving",
+     28.6,
+     "Doubtful"
+    ]
+   ],
+   "news_first": true,
+   "horizon": "today",
+   "n": 78,
+   "movers": 45,
+   "moved_rate": 0.5769230769230769,
+   "latency_U_median": 53.95,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 32,
+    "moved": 0,
+    "unknown": 13
+   }
+  },
+  {
+   "report": "2026-11-02T20:30",
+   "team": "GSW",
+   "gid": "0022600170",
+   "outs": [
+    [
+     "Brandon Williams",
+     17.3,
+     "Questionable"
+    ]
+   ],
+   "news_first": false,
+   "horizon": "today",
+   "n": 70,
+   "movers": 16,
+   "moved_rate": 0.22857142857142856,
+   "latency_U_median": 2.966666666666667,
+   "median_abs_line": 1.0,
+   "stale5": {
+    "stale": 6,
+    "moved": 10,
+    "unknown": 0
+   }
+  }
+ ],
+ "per_teammate": [
+  [
+   "Tyrese Maxey",
+   "fd",
+   40,
+   16,
+   0.4
+  ],
+  [
+   "Tyrese Maxey",
+   "dk",
+   35,
+   16,
+   0.45714285714285713
+  ],
+  [
+   "Yaxel Lendeborg",
+   "dk",
+   35,
+   9,
+   0.2571428571428571
+  ],
+  [
+   "VJ Edgecombe",
+   "fd",
+   32,
+   9,
+   0.28125
+  ],
+  [
+   "Yaxel Lendeborg",
+   "fd",
+   32,
+   12,
+   0.375
+  ],
+  [
+   "Pascal Siakam",
+   "fd",
+   32,
+   11,
+   0.4583333333333333
+  ],
+  [
+   "Kelly Oubre Jr.",
+   "fd",
+   30,
+   19,
+   0.8636363636363636
+  ],
+  [
+   "Kelly Oubre Jr.",
+   "dk",
+   29,
+   11,
+   0.3793103448275862
+  ],
+  [
+   "VJ Edgecombe",
+   "dk",
+   28,
+   9,
+   0.32142857142857145
+  ],
+  [
+   "Pascal Siakam",
+   "dk",
+   28,
+   19,
+   0.6785714285714286
+  ],
+  [
+   "Jaylen Brown",
+   "fd",
+   24,
+   20,
+   0.8333333333333334
+  ],
+  [
+   "Kevin Durant",
+   "fd",
+   24,
+   0,
+   0.0
+  ],
+  [
+   "Naji Marshall",
+   "fd",
+   24,
+   19,
+   0.7916666666666666
+  ],
+  [
+   "De'Anthony Melton",
+   "fd",
+   24,
+   16,
+   0.6666666666666666
+  ],
+  [
+   "LeBron James",
+   "fd",
+   24,
+   12,
+   0.5
+  ],
+  [
+   "Andrew Nembhard",
+   "fd",
+   24,
+   0,
+   0.0
+  ],
+  [
+   "Jarace Walker",
+   "fd",
+   23,
+   12,
+   0.8
+  ],
+  [
+   "Jaylen Brown",
+   "dk",
+   21,
+   17,
+   0.8095238095238095
+  ],
+  [
+   "Alperen Sengun",
+   "fd",
+   21,
+   8,
+   0.38095238095238093
+  ],
+  [
+   "Amen Thompson",
+   "fd",
+   21,
+   8,
+   0.38095238095238093
+  ],
+  [
+   "Kevin Durant",
+   "dk",
+   21,
+   5,
+   0.23809523809523808
+  ],
+  [
+   "P.J. Washington",
+   "fd",
+   21,
+   7,
+   0.3333333333333333
+  ],
+  [
+   "Max Christie",
+   "fd",
+   21,
+   10,
+   0.47619047619047616
+  ],
+  [
+   "Naji Marshall",
+   "dk",
+   21,
+   16,
+   0.7619047619047619
+  ],
+  [
+   "LeBron James",
+   "dk",
+   21,
+   10,
+   0.47619047619047616
+  ]
+ ]
+}
