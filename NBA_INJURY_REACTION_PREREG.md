@@ -210,3 +210,13 @@ the converted results."
   - CLV as defined here, with the frozen conversion;
   - the null as defined here.
   - Shadow only; nothing live without the user.
+
+### Amendment 1 result (2026-11-04, after the run; the report is `NBA_INJURY_STEP2A.md`)
+- **Conversion gate:** every market passed. The ±1 predicted and realized steps on 2024-25 agree within 0.65 points.
+- **C: dropped.**
+  - 179 flags scored, mean full CLV −5.4%, interval [−6.8, −4.1];
+  - the null is −6.4%, so C is +1.0 points over it.
+- **B: dropped.**
+  - 564 flags scored, mean −4.0%, interval [−5.7, −2.1];
+  - the null is −6.3%, so B is +2.3 points over it.
+- **Neither goes to a forward test,** and no variant is re-scored on this backup.
