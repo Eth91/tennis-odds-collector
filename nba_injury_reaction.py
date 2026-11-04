@@ -343,7 +343,8 @@ def controls(events, boards, fresh_teams, team_of):
                         continue
                     tr = track(boards, book, gid, pid, stat, ev["pub"])
                     if tr is not None and tr["close_t"] is not None:
-                        out.append({"book": book, "gid": gid, "pid": pid, "stat": stat, "pub": ev["pub"], **tr})
+                        out.append({"book": book, "gid": gid, "pid": pid, "stat": stat, "pub": ev["pub"],
+                                    "mark": ev["mark"], "date": ev["date"], **tr})
     return out
 
 
