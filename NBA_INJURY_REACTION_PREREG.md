@@ -136,7 +136,7 @@ descriptive and makes no bets. `nba_injury_reaction.py`, Mac only.
   the forward 200-flag test above for any survivor.
 
 ## Amendment 1: Step 2a, pricing line value and re-scoring the two candidates (written before any of it is run)
-**Written:** 2026-11-04, before the conversion is fitted and before any candidate's converted CLV is computed. Only
+**Written:** 2026-11-04 02:55 UTC (commit 3a2ddec3cb), before the conversion is fitted and before any candidate's converted CLV is computed. Only
 schemas and row counts were looked at: matched FanDuel and DraftKings main lines run about 7–15k per market per season
 for 2023-24 and 2024-25, and every historical line is a half-point. `nba_injury_step2a.py`, Mac only, read-only.
 
