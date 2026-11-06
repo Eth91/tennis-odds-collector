@@ -298,16 +298,23 @@ def features(mu, n_hist, rest, cfg):
     return np.concatenate([f, extra], axis=-1)
 
 
+# a block's distance table at most this big. 512 targets against the 53,116-game pool made a 139 MB table and its
+# temporaries (+265 MB at peak) every forecast run on the 1 GB VM (2026-11-05); in blocks of 18, +39 MB. Each row
+# comes out the same: same neighbors, same order, bit-identical probabilities on the VM, both configs
+NB_BLOCK_BYTES = 8_000_000
+
+
 def neighbors(tf, pf, K, scale):
     """Indexes of the K nearest pool rows (Euclidean on standardized features) for each target row."""
     tf, pf = tf / scale, pf / scale
     K = min(K, len(pf))
     out = np.empty((len(tf), K), dtype=np.int64)
     pn = (pf * pf).sum(1)
-    for a in range(0, len(tf), 512):
-        b = tf[a:a + 512]
+    step = max(1, min(512, NB_BLOCK_BYTES // (8 * max(1, len(pf)))))
+    for a in range(0, len(tf), step):
+        b = tf[a:a + step]
         d = (b * b).sum(1)[:, None] + pn[None, :] - 2.0 * b @ pf.T
-        out[a:a + 512] = np.argpartition(d, K - 1, axis=1)[:, :K]
+        out[a:a + step] = np.argpartition(d, K - 1, axis=1)[:, :K]
     return out
 
 
