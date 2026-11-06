@@ -551,7 +551,7 @@ def test_page_controls_work_on_iphone():
     # the shot dots (docs/shots/p/{pid}.json): every shot on a to-scale court (the corner line 22 ft out, so a dot lands
     # in its zone), made green over missed red rings, Shots by default for the player, Zones as before; defense: zones
     assert "const SH_R3 = 237.5, SH_CX = 220," in html and "fetch(`shots/p/${pid}.json`)" in html
-    assert 'shView: "player", shSeason: null, shMode: "shots"' in html and 'const dotsOn = MUP.shView !== "def" && MUP.shMode !== "zones";' in html
+    assert 'shView: "m", shSeason: null, shMode: "shots"' in html and 'const dotsOn = view === "player" && MUP.shMode !== "zones";' in html
     # Movers (a line moved since open, or the books disagree: the move first), Lineups beside Injuries (NEW starters, the usual
     # five not starting), who guards him on the Matchup page (docs/matchups/{pid}.json, nba_defmatch)
     assert 'if (ST.market === "movers") return list.map(p => [p, mover(p)])' in html and "k: Math.abs(mv) * 100 + gap" in html
@@ -1241,11 +1241,11 @@ def test_matchup_shows_assist_and_rebound_zones_only_for_their_props():
     # the assists and rebounds courts: the shot chart's six zones (one shared drawing; a rebound by its miss's zone), his a
     # game shaded by his share against the league's, or the opponent's allowed a game shaded against the league and ranked;
     # a view switch redraws the court alone, each card keeping its own view
-    assert "const zoneMarks = zs =>" in html and html.count("zoneMarks(") == 2 and html.count('<g class="shl">') == 2
+    assert "const zoneMarks = zs =>" in html and html.count("zoneMarks(") == 4 and html.count('<g class="shl">') == 2
     assert "fill: shFill(lt ? (mine[k] / tot - Lk[k] / lt) * 100 : null)" in html and "fill: shFill(la ? (a / la - 1) * 50 : null)" in html
     assert "const a = t[off + k] / t[0], la = Lk[k] / L.gp;" in html and "off = ast ? 1 : 1 + nz, L = j.league, Lk = L[kind];" in html
     assert "sub: ord(1 + all.filter(x => x[off + k] / x[0] < a).length)" in html and "const k = j.zones.indexOf(nm);" in html
-    assert 'if (view) { const v = $(".zcv", el);' in html and 'astView: "player", rebView: "player"};' in html and 'vkey = kind + "View"' in html
+    assert 'if (view) { const v = $(".zcv", el);' in html and 'astView: "m", rebView: "m"};' in html and 'vkey = kind + "View"' in html
     # rebounds: free throws (no zone on the court) as a line; the player's rings, 0-3 / 3-6 / 6-10 / 10+ ft from the hoop
     # (docs/rebd), shaded against the players with rebound lines; the defense view's missed threes against the league
     assert "NBA.com tracking · ${r[1]} boards ·" in html                 # the sample: early in a season a ring is a board or two
@@ -1391,3 +1391,134 @@ def test_nba_cup_sort_on_the_page():
     assert 'const cup = sortKey(ST.sort) === "cup" ? hbox(cupRate(p, logsOf(p), side, D.cup), cs) : null;' in html
     assert '${cup ? `<div><i>CUP</i><b class="${cup.c}">${cup.t}</b></div>` : `<div><i>DvP</i>${dv}</div>`}' in html
     assert '(sortKey(ST.sort) === "cup" ? "|cup" : "")' in html
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_court_read_stars_his_spots_where_he_does_well_and_the_defense_gives_up():
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "core.js").write_text(UI.JS_CORE)
+    Z = lambda sh, me, dd, z: {"sh": sh, "me": me, "d": dd, "z": z}
+    cases = {
+        # his busiest zone: he shoots over the league there and the defense allows 3 points more, 1.5 errors clear
+        "main": [Z(.40, .05, 3, 1.5), Z(.10, .10, 5, 3), Z(.20, -.02, 4, 2), Z(.15, 0, 2, 1), Z(.15, None, 4, 3), Z(0, None, None, None)],
+        # the under: his zone where he is under the league and the defense allows less
+        "under": [Z(.30, -.03, -3, -2), Z(.50, .02, -3, -2), Z(.20, -.01, 1, .5)],
+        # his busiest zone is one the defense locks down, nothing starred
+        "warn": [Z(.60, .02, -3, -2), Z(.40, .01, 1, 1)],
+        # a star off his busiest zone; the gap is big but inside its noise in the other
+        "one": [Z(.50, .02, 1, .5), Z(.30, .01, 2.5, 1.2), Z(.20, .03, 6, .99)],
+        "empty": [Z(0, None, 3, 2), Z(0, None, None, None)],
+        # his busiest zone looks locked down but the gap is inside its noise: no warning
+        "noisy": [Z(.60, .02, -3, -.5), Z(.40, .01, 1, 1)],
+    }
+    (d / "t.js").write_text("""
+const C = require('./core.js'), inp = JSON.parse(require('fs').readFileSync(process.argv[2]));
+const out = {}; for (const k in inp) out[k] = C.courtRead(inp[k], k === 'under' ? 'under' : 'over', 2, 1);
+out.under_as_over = C.courtRead(inp.under, 'over', 2, 1); out.main_as_under = C.courtRead(inp.main, 'under', 2, 1);
+console.log(JSON.stringify(out));
+""")
+    (d / "in.json").write_text(json.dumps(cases))
+    r = json.loads(subprocess.run([NODE, str(d / "t.js"), str(d / "in.json")], capture_output=True, text=True, check=True,
+                                  cwd=d).stdout)
+    m = r["main"]
+    assert m["his"] == [True, False, True, True, True, False]            # 15% of his or more
+    # starred: his spot, he's at or over the league, the gap 2+ and 1+ errors (both inclusive); not a zone he rarely
+    # uses (z1), not one he shoots under the league in (z2), not one with too few of his shots to judge (z4)
+    assert m["star"] == [True, False, False, True, False, False] and m["busiest"] == 0 and m["verdict"] == "main"
+    assert m["softest"] == 1                                              # the defense's biggest gap, his or not
+    u = r["under"]
+    assert u["star"] == [True, False, False] and u["busiest"] == 1 and u["verdict"] == "one"
+    assert r["under_as_over"]["star"] == [False, False, False] and r["main_as_under"]["star"] == [False] * 6
+    assert r["main_as_under"]["verdict"] == "warn"            # his busiest is soft: a warning for the under
+    assert r["warn"]["star"] == [False, False] and r["warn"]["verdict"] == "warn"
+    assert r["one"]["star"] == [False, True, False] and r["one"]["verdict"] == "one" and r["one"]["softest"] == 2
+    assert r["noisy"]["verdict"] == "none" and r["noisy"]["star"] == [False, False]
+    assert r["empty"]["verdict"] == "empty" and r["empty"]["busiest"] is None and r["empty"]["star"] == [False, False]
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_court_matchup_marks_his_spots_and_stars():
+    html = UI.page()
+    line = lambda pre: html[html.index(pre): html.index("\n", html.index(pre))]
+    upto = lambda pre, end: html[html.index(pre): html.index(end, html.index(pre))]
+    src = "\n".join([line("const esc = s =>"), line("const ord = n =>"), upto("const SH_Z = [", "// each player's shots")])
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "t.js").write_text(src + """
+const R = {his: [true, true, false, false, false, true], star: [true, false, false, false, false, false], busiest: 0, softest: 2, verdict: "main"};
+const zs = [0, 1, 2, 3, 4, 5].map(k => ({fill: "#111", t: k + "%", sub: "+" + k, subCls: k === 2 ? "up" : "", hi: R.his[k], star: R.star[k]}));
+const lines = {verb: "shoots most", soft: k => SH_PLACE[k] + " soft", busy: k => SH_PLACE[k] + " busy"};
+console.log(JSON.stringify({svg: zoneMarks(zs), plain: zoneMarks(zs.map(z => ({fill: z.fill, t: z.t, sub: z.sub}))),
+  over: courtBox(R, true, "BOS", "Brown", lines, "No shots"), under: courtBox(Object.assign({}, R, {verdict: "warn"}), false, "BOS", "Brown", lines, "x"),
+  underMain: courtBox(R, false, "BOS", "Brown", lines, "x"),
+  same: courtBox(Object.assign({}, R, {softest: 0}), true, "BOS", "Brown", lines, "x"),
+  empty: courtBox({busiest: null, softest: null, verdict: "empty"}, true, "BOS", "Brown", lines, "No shots for Brown in 2026"),
+  key: courtKey(false, "BOS", "shots", "small")}));
+""")
+    o = json.loads(subprocess.run([NODE, str(d / "t.js")], capture_output=True, text=True, check=True).stdout)
+    # his spots outlined (over the court's lines), one star by its zone's number, the coloured line under a number
+    assert o["svg"].count('class="shhi"') == 3 and o["svg"].index('class="shl"') < o["svg"].index('class="shhi"')
+    assert o["svg"].count('class="shst">★<') == 1 and '<text x="0" y="-17" class="shst">' in o["svg"]
+    assert 'class="shs up">+2<' in o["svg"] and 'class="shs">+1<' in o["svg"]
+    # the other views draw as before: no outlines, no stars
+    assert "shhi" not in o["plain"] and "shst" not in o["plain"] and o["plain"].count('class="shs">') == 6
+    assert '<div class="frd v-g"><b>★ His main spot is soft for BOS</b>' in o["over"]
+    assert "<p><em>BOS gives up the most:</em> mid-range soft</p><p><em>Brown shoots most:</em> the restricted area busy</p>" in o["over"]
+    assert '<div class="frd v-r"><b>⚠ His main spot is soft for BOS</b>' in o["under"]       # the under reads it the other way
+    assert '<div class="frd v-g"><b>★ BOS defends his main spot well</b>' in o["underMain"]
+    assert "shoots most" not in o["same"] and "restricted area soft" in o["same"]   # one line when they're the same zone
+    assert '<div class="frd v-n"><b>No shots for Brown in 2026</b></div>' == o["empty"]
+    assert "BOS gives up less than avg" in o["key"] and "15%+ of his shots" in o["key"] and "below avg there too" in o["key"]
+
+
+def test_zone_cards_open_on_the_matchup_view():
+    html = UI.page()
+    # the shot chart, assists and rebounds open on Matchup; the player and the defense a tap away
+    assert 'shView: "m", shSeason: null, shMode: "shots", astView: "m", rebView: "m"};' in html
+    assert '${[["m", "Matchup"], ["player", last], ["def", p.opp + " D"]].map(([k, l]) => `<button data-shv="${k}" aria-pressed="${view === k}">' in html
+    assert '${[["m", "Matchup"], ["player", esc(lastName(p.player))], ["def", esc(p.opp) + " D"]].map(([k, l]) =>' in html
+    assert 'const zv = MUP[vkey] || "m", def = zv === "def", mu = zv === "m", over = ST.side !== "under";' in html
+    # draw(fresh, view): its second argument is the redraw-the-court-alone flag, so nothing in it may shadow `view`
+    i = html.index("function zoneCard(kind) {"); body = html[i:html.index("\n}\n", i)]
+    assert "const draw = (fresh, view) =>" in body and not re.search(r"(const|let|var)\s+view\b", body)
+    # the shot chart's star: his FG% against the league's on SH_MIN+ shots, the FG% allowed against the league's over
+    # its standard error; the assists' and rebounds': his share against the league's, the allowed a game over a count's
+    assert "const SH_MIN = 15, SH_SOFT = 2;" in html and "const R = courtRead(rd, ST.side, SH_SOFT, 1)" in html
+    assert "z: ok ? (f - l) / Math.sqrt(l * (1 - l) / opp[k][1]) : null" in html and "me: m && m[1] >= SH_MIN && mf !== null && l !== null ? mf - l : null" in html
+    assert "const ZN_SOFT = .15, ZN_Z = 1.5;" in html and "const R = courtRead(rd, ST.side, ZN_SOFT, ZN_Z)" in html
+    assert "z: ok && la ? (t[off + k] - la * t[0]) / Math.sqrt(la * t[0]) : null" in html and "me: tot && lt ? sh - Lk[k] / lt : null" in html
+    # the shading follows the side shown (green: good for it), as the NFL field
+    assert "fill: shFill(z.d === null ? null : over ? z.d : -z.d)" in html and "fill: shFill(z.d === null ? null : (over ? z.d : -z.d) * 50)" in html
+    assert "var COURT_HOT = .15;" in html
+
+
+def test_recent_games_vs_the_five_positions():
+    html = UI.page()
+    # NBA: the five positions (box-score starting slots, nba_vs); the list opens on his own, else the first in his group
+    assert 'let VS_GRP = [["PG", "Point Guards"], ["SG", "Shooting Guards"], ["SF", "Small Forwards"], ["PF", "Power Forwards"], ["C", "Centers"]];' in html
+    assert "MUP = {p: p, grp: vsOwn(p.ctx || {})," in html
+    # its button shows the letters (PF) so the stat's button still fits on a phone; the list has the names
+    assert '${dd("grp", VS_GRP, MUP.grp, true)}${dd("mkt", TAB_ORDER.map(m => [m, NAME[m]]), MUP.mkt)}' in html
+    assert "const dd = (k, opts, cur, code) =>" in html and html.count("const dd = (k, opts, cur) =>") == 2   # NFL, NHL as before
+    assert '$("span", sel.parentNode).textContent = sel.dataset.dd === "grp" ? sel.value : sel.options[sel.selectedIndex].text;' in html
+    assert ("const vsOwn = c => VS_GRP.some(g => g[0] === c.pos) ? c.pos : VS_GRP.some(g => g[0] === c.group) ? c.group\n"
+            "  : ((c.group && VS_GRP.find(g => MU_GROUP(g[0]) === c.group)) || VS_GRP[0])[0];") in html
+    # the NFL and the NHL keep their groups
+    assert 'VS_GRP: [["QB", "QBs"], ["RB", "RBs"], ["WR", "WRs"], ["TE", "TEs"]],' in html
+    assert 'VS_GRP: [["C", "Centers"], ["W", "Wingers"], ["D", "Defensemen"], ["G", "Goalies"]],' in html
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_vs_own_position():
+    html = UI.page()
+    line = lambda pre: html[html.index(pre): html.index("\n", html.index(pre))]
+    upto = lambda pre, end: html[html.index(pre): html.index(end, html.index(pre))]
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "t.js").write_text("\n".join([line("let MU_GROUP = pos =>"), upto("let VS_GRP = [", "const initialName")]) + """
+const nhl = [["C", "Centers"], ["W", "Wingers"], ["D", "Defensemen"], ["G", "Goalies"]];
+const a = [{pos: "SG", group: "G"}, {pos: "G", group: "G"}, {group: "F"}, {group: "C"}, {}].map(vsOwn);
+VS_GRP = nhl; MU_GROUP = pos => ({C: "C", L: "W", R: "W", D: "D", G: "G"})[pos];
+console.log(JSON.stringify([a, [{pos: "L", group: "W"}, {pos: "D", group: "D"}, {}].map(vsOwn)]));
+""")
+    nba, nhl = json.loads(subprocess.run([NODE, str(d / "t.js")], capture_output=True, text=True, check=True).stdout)
+    assert nba == ["SG", "PG", "SF", "C", "PG"]            # his slot; a bare G or F: the first of his group
+    assert nhl == ["W", "D", "C"]                          # the NHL's groups as before

@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 """Opponent tables for the props page's Matchup page: docs/vs/{TEAM}.json, one per team — its last N_GAMES games and,
-in each, the other team's players (MIN_MIN+ minutes) with their position group (G / F / C), stat line and, where the
-board had one, their closing main line and over price per market (FanDuel, else DraftKings). The page lists "Recent
-games vs <group> <market>" from it.
+in each, the other team's players (MIN_MIN+ minutes) with their position (PG / SG / SF / PF / C), stat line and, where
+the board had one, their closing main line and over price per market (FanDuel, else DraftKings). The page lists "Recent
+games vs <position> <market>" from it.
 
-Box rows come from docs/box/{gid}.json (nba_boxscore); groups from nba_matchup, point in time (his most frequent start
-before that game that season, else the index); closing lines from nba_lines (nba_research_score.boards_before_tip),
+Box rows come from docs/box/{gid}.json (nba_boxscore); positions from the starting slots NBA.com lists in its box scores
+(nba_matchup's player_games), point in time: his most frequent start before that game that season, else in his latest
+earlier season, else the index's when it says C. A player who never started is no position (None): a bench guard could be
+either guard. Closing lines from nba_lines (nba_research_score.boards_before_tip),
 cached per game in nba_vs_close.json, since a final game's closing board never changes. The board starts 2026-10-22,
 so older games have results and no line.
 
-File: {team, rows: [[date, gid, team, pid, name, group, min, pts, reb, ast, fg3m, {market: [line, over, book]}]]},
+File: {team, rows: [[date, gid, team, pid, name, position, min, pts, reb, ast, fg3m, {market: [line, over, book]}]]},
 newest game first, the most minutes first within a game.
 
     python3 nba_vs.py --box /home/ubuntu/tennis-odds-collector/docs/box --out /home/ubuntu/tennis-odds-collector/docs/vs
@@ -20,7 +22,7 @@ import argparse
 import json
 import os
 import sqlite3
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 
 import nba_matchup as MU
@@ -47,8 +49,33 @@ def closing_mains(q, gids):
     return out
 
 
+def slots(mcon, idx_pos):
+    """slot(pid, date) -> his position (PG / SG / SF / PF / C) as of `date`: his most frequent starting slot before it
+    that season, else in his latest earlier season with a start, else "C" when the index says C, else None."""
+    starts = defaultdict(lambda: defaultdict(list))         # pid -> season -> [(date, slot)], oldest first
+    for pid, season, date, pos in mcon.execute(
+            "SELECT p.pid, g.season, g.date, p.pos FROM player_games p JOIN games g ON g.gid = p.gid "
+            "WHERE p.starter = 1 AND p.pos IN ('PG', 'SG', 'SF', 'PF', 'C') ORDER BY g.date, g.gid"):
+        starts[pid][season].append((date, pos))
+
+    def mode(xs):                                          # most frequent; a tie goes to the most recent of them
+        n = Counter(xs)
+        return max(n, key=lambda k: (n[k], max(i for i, x in enumerate(xs) if x == k)))
+
+    def slot(pid, date):
+        season, by = R.season_of(date), starts.get(pid) or {}
+        now = [x for d, x in by.get(season, []) if d < date]
+        if now:
+            return mode(now)
+        past = sorted(s for s in by if s < season)
+        if past:
+            return mode([x for _, x in by[past[-1]]])
+        return "C" if idx_pos.get(pid) == "C" else None
+    return slot
+
+
 def team_rows(team, games, boxes, group, lines):
-    """The rows of `team`'s file. games: [(gid, date)] newest first; boxes: {gid: box}; group(pid, date) -> G/F/C;
+    """The rows of `team`'s file. games: [(gid, date)] newest first; boxes: {gid: box}; group(pid, date) -> position;
     lines: {gid: {"pid|stat": [line, over, book]}}."""
     rows = []
     for gid, date in games:
@@ -99,14 +126,7 @@ def build(mcon, q, box_dir, out_dir, cache=CACHE, idx=None):
             idx = json.loads(R.INDEX.read_text()).get("players", {})
         except (OSError, ValueError):
             idx = {}
-    pos = {int(k): v[2] for k, v in idx.items()}
-    seasons = {}
-
-    def group(pid, date):
-        s = R.season_of(date)
-        if s not in seasons:
-            seasons[s] = MU.Season(mcon, s, index_pos=pos)
-        return seasons[s].group(pid, date)
+    group = slots(mcon, {int(k): v[2] for k, v in idx.items()})
     n = 0
     for team, games in by_team.items():
         rows = team_rows(team, [(g, d) for g, d, _ in games], boxes, group, cached)
