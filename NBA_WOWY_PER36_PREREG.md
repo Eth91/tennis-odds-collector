@@ -270,3 +270,24 @@ The user: "what about for the wowy over 40-50+% above or below the line"
 
 **Already seen:** amendment 1 up to 30%. There, overs lost at every threshold. Points and rebounds unders with engine
 minutes won in both seasons.
+
+### Amendment 2 result (2026-11-06; `audit/wowy_per36/nba_wowy_per36_big.py`)
+**3 PASS of 96.** About 5 were expected by chance.
+
+| PASS | 2023-24 | 2024-25 | Pooled (95%) |
+|---|---|---|---|
+| WOWY × last 5, points under, 50%+ below | 47, +42.9% | 58, +9.4% | +24.4% (+6.5%, +42.5%) |
+| plain × last 5, points under, 50%+ below | 32, +50.6% | 57, +17.5% | +29.4% (+13.2%, +47.5%) |
+| plain × engine, assists under, 50%+ below | 6, +57.3% | 7, +54.7% | 13 bets: no weight |
+
+**Overs:**
+- No WOWY over passes at 40% or 50%.
+- WOWY points overs at 40-50% made −2.8% to −9.2% pooled, except WOWY × engine at 50%, which made +0.1%.
+- The rest sat between −8% and +5%.
+
+**Read:**
+- **Fewer PASSes than chance:** 3 against about 5 expected, and one rests on 13 bets.
+- **The two points-under PASSes are mostly the same bets,** with and without WOWY. Both are players whose last-5
+  minutes put him at half his line or less, so the minutes are doing the work.
+- **They shrank from one season to the next:** about +45% in 2023-24, +9% to +18% in 2024-25.
+- **No support for WOWY at 40-50%,** on either side.
