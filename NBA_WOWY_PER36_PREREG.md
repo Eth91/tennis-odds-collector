@@ -217,3 +217,39 @@ under the line depending on if youre playing an over or under"
 **Already seen:** the absolute-threshold results above, on both seasons. A percentage gap is close to an absolute one
 at a given line, so this test isn't blind. The best-looking absolute rules were rebounds and points unders with
 engine minutes.
+
+### Amendment 1 result (2026-11-06; `audit/wowy_per36/nba_wowy_per36_pct.py`)
+**Discovery (2023-24).** 90 combos qualified; the top 3 carried.
+
+| Carried combo | 2023-24 | 2024-25 (95%) | Verdict |
+|---|---|---|---|
+| WOWY × engine, assists under, 30%+ below | 129, +18.3% | 148, −0.8% (−14.0%, +12.8%) | FAIL |
+| plain per-36 × engine, assists under, 30%+ below | 106, +11.9% | 95, +17.7% (+0.5%, +34.8%) | PASS |
+| WOWY × engine, points under, 30%+ below | 104, +11.8% | 135, +1.9% (−12.3%, +17.4%) | FAIL |
+
+**WOWY-rate overs:** all 60 lost in 2023-24, and 54 of 60 in 2024-25. The 6 winners made at most +2.9%.
+
+**Unders with the engine's minutes:** points and rebounds are positive in both seasons at every threshold from 10%
+to 30%, with the WOWY rate and with the plain rate alike.
+
+| Rule (WOWY × engine) | 2023-24 | 2024-25 |
+|---|---|---|
+| Points under, 20%+ below | 298, +6.1% | 371, +6.9% |
+| Rebounds under, 20%+ below | 395, +10.7% | 359, +6.9% |
+| Rebounds under, 25%+ below | 239, +9.9% | 202, +9.5% |
+
+Assists unders flip negative in 2024-25 at every threshold below 30%.
+
+**Read:**
+- **The PASS is weak.**
+  - It is one combo of 240, on 95 bets, and its interval's lower end is +0.5%.
+  - It uses the plain per-36, not WOWY. The WOWY version of the same rule lost 0.8%.
+  - The assists unders at 10-25% lost in 2024-25.
+  - So it is most likely the one lucky combo that 240 tries produce.
+- **The steady pattern is the earlier one:** points and rebounds unders where the engine-minutes projection is well
+  below the line.
+  - It holds at every threshold and in both seasons, with or without WOWY.
+  - It wasn't in the top 3 of discovery, so under the rules it carries no verdict.
+- **Overs lose.** The x%-over rule loses at every threshold, every minutes source and every stat.
+- **Next step:** under the rules, a PASS earns only a forward shadow, with nothing bet and its own
+  pre-registration. It needs the user's OK. Same hindsight note as above: who is out comes from who played.

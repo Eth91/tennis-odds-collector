@@ -1,0 +1,140 @@
+discovery qualifying 90
+  disc WxE ast under 30%          23-24 {'n': 129, 'hit': 0.667, 'roi': 0.183}  | 24-25 {'n': 148, 'hit': 0.574, 'roi': -0.008}
+  disc OxE ast under 30%          23-24 {'n': 106, 'hit': 0.642, 'roi': 0.119}  | 24-25 {'n': 95, 'hit': 0.674, 'roi': 0.177}
+  disc WxE pts under 30%          23-24 {'n': 104, 'hit': 0.596, 'roi': 0.118}  | 24-25 {'n': 135, 'hit': 0.548, 'roi': 0.019}
+  disc WxL5 pts under 30%         23-24 {'n': 262, 'hit': 0.592, 'roi': 0.111}  | 24-25 {'n': 349, 'hit': 0.53, 'roi': -0.014}
+  disc WxL3 ast under 30%         23-24 {'n': 265, 'hit': 0.623, 'roi': 0.11}  | 24-25 {'n': 287, 'hit': 0.537, 'roi': -0.053}
+  disc WxE reb under 15%          23-24 {'n': 649, 'hit': 0.615, 'roi': 0.109}  | 24-25 {'n': 621, 'hit': 0.573, 'roi': 0.014}
+  disc WxE reb under 30%          23-24 {'n': 140, 'hit': 0.614, 'roi': 0.108}  | 24-25 {'n': 113, 'hit': 0.602, 'roi': 0.054}
+  disc WxWO reb under 30%         23-24 {'n': 297, 'hit': 0.606, 'roi': 0.108}  | 24-25 {'n': 317, 'hit': 0.511, 'roi': -0.08}
+  disc WxE reb under 20%          23-24 {'n': 395, 'hit': 0.615, 'roi': 0.107}  | 24-25 {'n': 359, 'hit': 0.61, 'roi': 0.069}
+  disc OxE reb under 10%          23-24 {'n': 850, 'hit': 0.613, 'roi': 0.105}  | 24-25 {'n': 778, 'hit': 0.586, 'roi': 0.028}
+CARRIED WxE ast under 30% {'2023-24': {'n': 129, 'hit': 0.667, 'roi': 0.183}, '2024-25': {'n': 148, 'hit': 0.574, 'roi': -0.008, 'ci': [-0.14, 0.128]}, 'verdict': 'FAIL'}
+CARRIED OxE ast under 30% {'2023-24': {'n': 106, 'hit': 0.642, 'roi': 0.119}, '2024-25': {'n': 95, 'hit': 0.674, 'roi': 0.177, 'ci': [0.005, 0.348]}, 'verdict': 'PASS'}
+CARRIED WxE pts under 30% {'2023-24': {'n': 104, 'hit': 0.596, 'roi': 0.118}, '2024-25': {'n': 135, 'hit': 0.548, 'roi': 0.019, 'ci': [-0.123, 0.174]}, 'verdict': 'FAIL'}
+pts over
+   WxE pts over 10%           23-24 n  2391 roi -0.057 | 24-25 n  2659 roi -0.025
+   WxE pts over 15%           23-24 n  1823 roi -0.051 | 24-25 n  2002 roi -0.029
+   WxE pts over 20%           23-24 n  1381 roi -0.056 | 24-25 n  1472 roi -0.029
+   WxE pts over 25%           23-24 n   978 roi -0.048 | 24-25 n  1065 roi -0.021
+   WxE pts over 30%           23-24 n   691 roi -0.060 | 24-25 n   732 roi -0.025
+   WxWO pts over 10%          23-24 n  1345 roi -0.055 | 24-25 n  1604 roi -0.039
+   WxWO pts over 15%          23-24 n   963 roi -0.089 | 24-25 n  1180 roi -0.029
+   WxWO pts over 20%          23-24 n   692 roi -0.091 | 24-25 n   826 roi -0.066
+   WxWO pts over 25%          23-24 n   485 roi -0.078 | 24-25 n   611 roi -0.045
+   WxWO pts over 30%          23-24 n   372 roi -0.039 | 24-25 n   443 roi -0.048
+   WxL3 pts over 10%          23-24 n  1613 roi -0.076 | 24-25 n  1786 roi -0.036
+   WxL3 pts over 15%          23-24 n  1127 roi -0.074 | 24-25 n  1228 roi -0.045
+   WxL3 pts over 20%          23-24 n   784 roi -0.044 | 24-25 n   827 roi -0.043
+   WxL3 pts over 25%          23-24 n   532 roi -0.049 | 24-25 n   529 roi -0.081
+   WxL3 pts over 30%          23-24 n   362 roi -0.017 | 24-25 n   345 roi -0.139
+   WxL5 pts over 10%          23-24 n  1534 roi -0.074 | 24-25 n  1646 roi -0.049
+   WxL5 pts over 15%          23-24 n  1062 roi -0.066 | 24-25 n  1122 roi -0.060
+   WxL5 pts over 20%          23-24 n   712 roi -0.060 | 24-25 n   713 roi -0.107
+   WxL5 pts over 25%          23-24 n   465 roi -0.032 | 24-25 n   458 roi -0.110
+   WxL5 pts over 30%          23-24 n   303 roi -0.023 | 24-25 n   302 roi -0.103
+pts under
+   WxE pts under 10%          23-24 n   835 roi +0.009 | 24-25 n  1002 roi +0.034
+   WxE pts under 15%          23-24 n   482 roi +0.016 | 24-25 n   610 roi +0.025
+   WxE pts under 20%          23-24 n   298 roi +0.061 | 24-25 n   371 roi +0.069
+   WxE pts under 25%          23-24 n   174 roi +0.104 | 24-25 n   231 roi +0.038
+   WxE pts under 30%          23-24 n   104 roi +0.118 | 24-25 n   135 roi +0.019
+   WxWO pts under 10%         23-24 n  1117 roi +0.019 | 24-25 n  1482 roi -0.041
+   WxWO pts under 15%         23-24 n   816 roi +0.032 | 24-25 n  1077 roi -0.015
+   WxWO pts under 20%         23-24 n   582 roi +0.049 | 24-25 n   768 roi +0.024
+   WxWO pts under 25%         23-24 n   402 roi +0.057 | 24-25 n   556 roi +0.013
+   WxWO pts under 30%         23-24 n   281 roi +0.082 | 24-25 n   392 roi +0.022
+   WxL3 pts under 10%         23-24 n  1417 roi -0.020 | 24-25 n  1717 roi -0.003
+   WxL3 pts under 15%         23-24 n   943 roi -0.009 | 24-25 n  1190 roi -0.017
+   WxL3 pts under 20%         23-24 n   632 roi -0.014 | 24-25 n   825 roi +0.004
+   WxL3 pts under 25%         23-24 n   408 roi -0.005 | 24-25 n   558 roi +0.018
+   WxL3 pts under 30%         23-24 n   264 roi +0.031 | 24-25 n   357 roi +0.003
+   WxL5 pts under 10%         23-24 n  1408 roi -0.008 | 24-25 n  1728 roi -0.032
+   WxL5 pts under 15%         23-24 n   957 roi +0.001 | 24-25 n  1178 roi -0.019
+   WxL5 pts under 20%         23-24 n   627 roi +0.041 | 24-25 n   793 roi -0.029
+   WxL5 pts under 25%         23-24 n   414 roi +0.044 | 24-25 n   538 roi -0.003
+   WxL5 pts under 30%         23-24 n   262 roi +0.111 | 24-25 n   349 roi -0.014
+reb over
+   WxE reb over 10%           23-24 n  2430 roi -0.048 | 24-25 n  2735 roi -0.064
+   WxE reb over 15%           23-24 n  1906 roi -0.054 | 24-25 n  2190 roi -0.051
+   WxE reb over 20%           23-24 n  1499 roi -0.040 | 24-25 n  1687 roi -0.031
+   WxE reb over 25%           23-24 n  1097 roi -0.035 | 24-25 n  1259 roi -0.022
+   WxE reb over 30%           23-24 n   807 roi -0.034 | 24-25 n   935 roi -0.013
+   WxWO reb over 10%          23-24 n  1358 roi -0.045 | 24-25 n  1670 roi -0.056
+   WxWO reb over 15%          23-24 n  1034 roi -0.031 | 24-25 n  1242 roi -0.051
+   WxWO reb over 20%          23-24 n   790 roi -0.007 | 24-25 n   892 roi -0.052
+   WxWO reb over 25%          23-24 n   572 roi -0.003 | 24-25 n   641 roi -0.020
+   WxWO reb over 30%          23-24 n   429 roi -0.034 | 24-25 n   460 roi -0.026
+   WxL3 reb over 10%          23-24 n  1698 roi -0.075 | 24-25 n  1946 roi -0.075
+   WxL3 reb over 15%          23-24 n  1237 roi -0.072 | 24-25 n  1440 roi -0.058
+   WxL3 reb over 20%          23-24 n   861 roi -0.073 | 24-25 n  1025 roi -0.045
+   WxL3 reb over 25%          23-24 n   598 roi -0.091 | 24-25 n   704 roi -0.042
+   WxL3 reb over 30%          23-24 n   396 roi -0.079 | 24-25 n   489 roi -0.006
+   WxL5 reb over 10%          23-24 n  1598 roi -0.065 | 24-25 n  1865 roi -0.052
+   WxL5 reb over 15%          23-24 n  1152 roi -0.052 | 24-25 n  1328 roi -0.042
+   WxL5 reb over 20%          23-24 n   803 roi -0.087 | 24-25 n   936 roi -0.035
+   WxL5 reb over 25%          23-24 n   562 roi -0.086 | 24-25 n   619 roi -0.040
+   WxL5 reb over 30%          23-24 n   365 roi -0.087 | 24-25 n   429 roi -0.049
+reb under
+   WxE reb under 10%          23-24 n  1006 roi +0.086 | 24-25 n   987 roi +0.029
+   WxE reb under 15%          23-24 n   649 roi +0.109 | 24-25 n   621 roi +0.014
+   WxE reb under 20%          23-24 n   395 roi +0.107 | 24-25 n   359 roi +0.069
+   WxE reb under 25%          23-24 n   239 roi +0.099 | 24-25 n   202 roi +0.095
+   WxE reb under 30%          23-24 n   140 roi +0.108 | 24-25 n   113 roi +0.054
+   WxWO reb under 10%         23-24 n  1271 roi +0.044 | 24-25 n  1316 roi -0.037
+   WxWO reb under 15%         23-24 n   918 roi +0.068 | 24-25 n   948 roi -0.072
+   WxWO reb under 20%         23-24 n   628 roi +0.071 | 24-25 n   691 roi -0.059
+   WxWO reb under 25%         23-24 n   432 roi +0.096 | 24-25 n   469 roi -0.071
+   WxWO reb under 30%         23-24 n   297 roi +0.108 | 24-25 n   317 roi -0.080
+   WxL3 reb under 10%         23-24 n  1588 roi +0.047 | 24-25 n  1566 roi -0.002
+   WxL3 reb under 15%         23-24 n  1095 roi +0.038 | 24-25 n  1082 roi -0.002
+   WxL3 reb under 20%         23-24 n   738 roi +0.021 | 24-25 n   751 roi +0.007
+   WxL3 reb under 25%         23-24 n   490 roi +0.031 | 24-25 n   488 roi -0.029
+   WxL3 reb under 30%         23-24 n   326 roi +0.084 | 24-25 n   291 roi -0.053
+   WxL5 reb under 10%         23-24 n  1621 roi +0.061 | 24-25 n  1594 roi +0.001
+   WxL5 reb under 15%         23-24 n  1117 roi +0.063 | 24-25 n  1112 roi -0.025
+   WxL5 reb under 20%         23-24 n   752 roi +0.071 | 24-25 n   703 roi -0.009
+   WxL5 reb under 25%         23-24 n   485 roi +0.070 | 24-25 n   442 roi +0.005
+   WxL5 reb under 30%         23-24 n   303 roi +0.061 | 24-25 n   276 roi -0.041
+ast over
+   WxE ast over 10%           23-24 n  1518 roi -0.049 | 24-25 n  1818 roi -0.032
+   WxE ast over 15%           23-24 n  1223 roi -0.066 | 24-25 n  1452 roi -0.013
+   WxE ast over 20%           23-24 n   964 roi -0.049 | 24-25 n  1157 roi -0.003
+   WxE ast over 25%           23-24 n   736 roi -0.032 | 24-25 n   911 roi -0.000
+   WxE ast over 30%           23-24 n   566 roi -0.032 | 24-25 n   708 roi +0.008
+   WxWO ast over 10%          23-24 n   921 roi -0.037 | 24-25 n  1107 roi -0.035
+   WxWO ast over 15%          23-24 n   707 roi -0.047 | 24-25 n   847 roi -0.028
+   WxWO ast over 20%          23-24 n   522 roi -0.056 | 24-25 n   648 roi +0.003
+   WxWO ast over 25%          23-24 n   394 roi -0.067 | 24-25 n   518 roi -0.002
+   WxWO ast over 30%          23-24 n   306 roi -0.055 | 24-25 n   419 roi +0.006
+   WxL3 ast over 10%          23-24 n  1113 roi -0.058 | 24-25 n  1349 roi -0.032
+   WxL3 ast over 15%          23-24 n   860 roi -0.051 | 24-25 n  1029 roi -0.025
+   WxL3 ast over 20%          23-24 n   637 roi -0.073 | 24-25 n   777 roi -0.010
+   WxL3 ast over 25%          23-24 n   459 roi -0.099 | 24-25 n   600 roi -0.006
+   WxL3 ast over 30%          23-24 n   329 roi -0.113 | 24-25 n   440 roi +0.029
+   WxL5 ast over 10%          23-24 n  1076 roi -0.064 | 24-25 n  1313 roi -0.037
+   WxL5 ast over 15%          23-24 n   807 roi -0.040 | 24-25 n   993 roi -0.049
+   WxL5 ast over 20%          23-24 n   605 roi -0.029 | 24-25 n   716 roi -0.012
+   WxL5 ast over 25%          23-24 n   423 roi -0.041 | 24-25 n   544 roi -0.008
+   WxL5 ast over 30%          23-24 n   301 roi -0.057 | 24-25 n   418 roi +0.007
+ast under
+   WxE ast under 10%          23-24 n   752 roi +0.020 | 24-25 n   847 roi -0.038
+   WxE ast under 15%          23-24 n   520 roi +0.035 | 24-25 n   569 roi -0.051
+   WxE ast under 20%          23-24 n   343 roi +0.055 | 24-25 n   380 roi -0.043
+   WxE ast under 25%          23-24 n   224 roi +0.080 | 24-25 n   229 roi -0.104
+   WxE ast under 30%          23-24 n   129 roi +0.183 | 24-25 n   148 roi -0.008
+   WxWO ast under 10%         23-24 n   878 roi +0.010 | 24-25 n  1024 roi -0.035
+   WxWO ast under 15%         23-24 n   677 roi +0.000 | 24-25 n   756 roi -0.062
+   WxWO ast under 20%         23-24 n   510 roi -0.006 | 24-25 n   545 roi -0.073
+   WxWO ast under 25%         23-24 n   362 roi +0.026 | 24-25 n   395 roi -0.034
+   WxWO ast under 30%         23-24 n   261 roi +0.062 | 24-25 n   274 roi -0.097
+   WxL3 ast under 10%         23-24 n  1126 roi -0.002 | 24-25 n  1255 roi -0.063
+   WxL3 ast under 15%         23-24 n   828 roi +0.005 | 24-25 n   917 roi -0.059
+   WxL3 ast under 20%         23-24 n   588 roi -0.015 | 24-25 n   631 roi -0.071
+   WxL3 ast under 25%         23-24 n   399 roi +0.011 | 24-25 n   425 roi -0.052
+   WxL3 ast under 30%         23-24 n   265 roi +0.110 | 24-25 n   287 roi -0.053
+   WxL5 ast under 10%         23-24 n  1132 roi +0.003 | 24-25 n  1253 roi -0.072
+   WxL5 ast under 15%         23-24 n   834 roi -0.012 | 24-25 n   904 roi -0.089
+   WxL5 ast under 20%         23-24 n   573 roi -0.031 | 24-25 n   601 roi -0.095
+   WxL5 ast under 25%         23-24 n   410 roi -0.012 | 24-25 n   403 roi -0.057
+   WxL5 ast under 30%         23-24 n   271 roi +0.099 | 24-25 n   278 roi -0.093
