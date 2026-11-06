@@ -1,0 +1,20 @@
+{'2024-25': 12763, '2025-26': 13683} events (all who played)
+name match rate 97.3%, 40575 main lines
+C1 trusted points split: M1 2024-25 n 128 sel 2.59 rest 2.13 diff 0.46 | 2025-26 n 116 sel 1.68 rest 1.82 diff -0.15 | pooled {'diff': 0.18, 'ci': [-1.13, 1.61]} no
+    M2 {'n': 121, 'hit': 0.504, 'roi': -0.04, 'ci': [-0.201, 0.127]} -> FAIL
+C2 shot volume: M1 2024-25 n 100 sel 2.94 rest 2.13 diff 0.81 | 2025-26 n 76 sel 0.27 rest 1.83 diff -1.57 | pooled {'diff': -0.19, 'ci': [-1.38, 1.22]} no
+    M2 {'n': 92, 'hit': 0.5, 'roi': -0.047, 'ci': [-0.235, 0.137]} -> FAIL
+C3 star out: M1 2024-25 n 172 sel 3.65 rest 2.12 diff 1.53 | 2025-26 n 259 sel 2.81 rest 1.8 diff 1.01 | pooled {'diff': 1.19, 'ci': [0.51, 1.94]} pass
+    M2 {'n': 166, 'hit': 0.518, 'roi': -0.007, 'ci': [-0.16, 0.141]} -> FAIL
+C4 next man up: M1 2024-25 n 113 sel 3.4 rest 2.13 diff 1.27 | 2025-26 n 122 sel 2.84 rest 1.81 diff 1.03 | pooled {'diff': 1.14, 'ci': [0.16, 2.14]} pass
+    M2 {'n': 106, 'hit': 0.528, 'roi': 0.003, 'ci': [-0.176, 0.186]} -> FAIL
+C5 assists: M1 2024-25 n 7 sel 0.07 rest 0.48 diff -0.41 | 2025-26 n 6 sel 1.32 rest 0.39 diff 0.94 | pooled {'diff': 0.22, 'ci': [-2.11, 2.63]} no
+    M2 {'n': 7, 'hit': 0.429, 'roi': -0.229, 'ci': [-0.746, 0.534]} -> FAIL
+C6 rebounds: M1 2024-25 n 2 sel -0.41 rest 0.59 diff -0.99 | 2025-26 n 1 sel -1.9 rest 0.53 diff -2.43 | pooled {'diff': -1.46, 'ci': [-2.48, 0.34]} no
+    M2 {'n': 2, 'hit': 0.5, 'roi': 0.0, 'ci': [-1.0, 1.0]} -> FAIL
+C7 mirror: M1 2024-25 n 12 sel -0.65 rest -2.14 diff 1.49 | 2025-26 n 8 sel 0.1 rest -1.82 diff 1.92 | pooled {'diff': 1.63, 'ci': [-1.6, 4.91]} no
+    M2 {'n': 12, 'hit': 0.333, 'roi': -0.377, 'ci': [-0.846, 0.101]} -> FAIL
+baseline over pts: {'n': 6446, 'hit': 0.497, 'roi': -0.055, 'ci': [-0.076, -0.034]}
+baseline over ast: {'n': 4193, 'hit': 0.494, 'roi': -0.053, 'ci': [-0.082, -0.023]}
+baseline over reb: {'n': 6041, 'hit': 0.483, 'roi': -0.075, 'ci': [-0.1, -0.05]}
+baseline under pts: {'n': 6446, 'hit': 0.503, 'roi': -0.051, 'ci': [-0.072, -0.03]}

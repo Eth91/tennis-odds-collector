@@ -90,3 +90,54 @@ test. That's a shadow on 2026-27 with nothing bet, under its own pre-registratio
 
 The thresholds, populations, line rule and pass rules above stay as written. Fixes to bugs are allowed: name
 matching, parsing, or a wrong join. Each one is listed in the result with its effect.
+
+## Result (2026-11-06; `audit/wowy_select/`)
+
+The data built cleanly:
+- 2024-25: all 1,230 games. The rebuilt minutes and points match the box score in 100% of player-games.
+- 2025-26: 1,229 of 1,230 games.
+- Lines: player names matched at 97.3%, giving 40,575 tip main lines.
+- No bug fixes were made after the pre-registration.
+
+| | M1 2024-25 (selected − rest, points/game) | M1 2025-26 | Pooled (95%) | M2 2024-25 at tip | Verdict |
+|---|---|---|---|---|---|
+| C1 trusted points split | +0.46 (n 128) | −0.15 (n 116) | +0.18 (−1.13, 1.61) | 50.4%, −4.0% (n 121) | FAIL |
+| C2 shot volume | +0.81 (100) | −1.57 (76) | −0.19 (−1.38, 1.22) | 50.0%, −4.7% (92) | FAIL |
+| C3 star out | +1.53 (172) | +1.01 (259) | **+1.19 (0.51, 1.94)** | 51.8%, −0.7% (−16%, +14%) (166) | FAIL |
+| C4 next man up | +1.27 (113) | +1.03 (122) | **+1.14 (0.16, 2.14)** | 52.8%, +0.3% (−18%, +19%) (106) | FAIL |
+| C5 assists | −0.41 (7) | +0.94 (6) | too few | 7 bets | FAIL |
+| C6 rebounds | −0.99 (2) | −2.43 (1) | too few | 2 bets | FAIL |
+| C7 mirror (under) | +1.49 (12) | +1.92 (8) | too few | 12 bets, −37.7% | FAIL |
+
+The baseline is every absence event at the tip line:
+
+| Bet | ROI | Hit rate |
+|---|---|---|
+| Points over | −5.5% | 49.7% |
+| Assists over | −5.3% | |
+| Rebounds over | −7.5% | |
+| Points under | −5.1% | |
+
+**Read:**
+- **Real but already priced:** two selections find players who really do score more when the teammate sits. They
+  are C3 (the star is out) and C4 (the next man up at his position).
+  - They score about +1.1 to +1.2 points a game more than the other teammates, in both seasons.
+  - But at the tip line they only recover the vig: −0.7% and +0.3% ROI against −5.5% for any over in those games.
+- **The pure WOWY splits:** C1 and C2 carry nothing beyond the rest.
+- **C5-C7:** under these thresholds there are too few cases to judge. The thresholds stay as written.
+- No criterion earns a forward test.
+
+**Exploratory, not part of the pass rules:** where the tip line sat against his prior average, and what he scored
+against that average.
+
+| | Tip line vs his average | What he scored |
+|---|---|---|
+| C3 picks | +2.68 | +3.36 |
+| C4 picks | +2.52 | +3.75 |
+| Everyone else in those games | +0.88 | +1.32 |
+
+The books had moved about 80% of the bump by tip. Points are right-skewed (the mean sits above the median), so the
+rest doesn't turn into a winning over rate.
+
+The opener can't be tested here: there are no historical openers, only tip lines. That window is covered by the live
+ROLE_OPEN shadow.
