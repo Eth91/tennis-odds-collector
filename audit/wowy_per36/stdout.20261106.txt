@@ -1,0 +1,64 @@
+{'2023-24': 7558, '2024-25': 8586, '2025-26': 9038} events; engine coverage {'2023-24': (7399, 7558), '2024-25': (8366, 8586), '2025-26': (8826, 9038)}
+minutes source present: {'2023-24': {'E': 7399, 'WO': 5918, 'L3': 7558, 'L5': 7558}, '2024-25': {'E': 8366, 'WO': 7016, 'L3': 8586, 'L5': 8586}, '2025-26': {'E': 8826, 'WO': 7512, 'L3': 9038, 'L5': 9038}}
+lines {'2023-24': {'lines': 41553, 'match_rate': 0.9838, 'games_with_lines': 1230}, '2024-25': {'lines': 40575, 'match_rate': 0.9732, 'games_with_lines': 1220}}
+{"events": {"2023-24": 7558, "2024-25": 8586, "2025-26": 9038}, "engine_cover": {"2023-24": [7399, 7558], "2024-25": [8366, 8586], "2025-26": [8826, 9038]}, "lines": {"2023-24": {"lines": 41553, "match_rate": 0.9838, "games_with_lines": 1230}, "2024-25": {"lines": 40575, "match_rate": 0.9732, "games_with_lines": 1220}}}
+minutes MAE (bias), all-four events: {"2023-24": {"n": 5805, "E": 5.04, "WO": 5.67, "L3": 5.26, "L5": 5.18, "bias": {"E": 1.24, "WO": -0.39, "L3": -0.88, "L5": -1.02}, "actual": 26.9}, "2024-25": {"n": 6851, "E": 5.16, "WO": 5.64, "L3": 5.35, "L5": 5.28, "bias": {"E": 1.33, "WO": -0.24, "L3": -0.83, "L5": -0.92}, "actual": 26.3}, "2025-26": {"n": 7342, "E": 5.0, "WO": 5.43, "L3": 5.05, "L5": 4.98, "bias": {"E": 1.31, "WO": 0.08, "L3": -0.75, "L5": -0.86}, "actual": 25.7}}
+pts 2023-24 n 4266 line 5.089 R 5.377 WxE 5.53 WxWO 5.49 WxL3 5.48 WxL5 5.42 OxE 5.34 OxWO 5.42 OxL3 5.39 OxL5 5.35 SxE 5.35 SxWO 5.41 SxL3 5.38 SxL5 5.34
+pts 2024-25 n 5133 line 5.084 R 5.271 WxE 5.37 WxWO 5.45 WxL3 5.38 WxL5 5.36 OxE 5.24 OxWO 5.38 OxL3 5.34 OxL5 5.32 SxE 5.24 SxWO 5.38 SxL3 5.33 SxL5 5.31
+pts 2025-26 n 7342 line None R 4.911 WxE 4.96 WxWO 5.09 WxL3 4.96 WxL5 4.94 OxE 4.86 OxWO 5.03 OxL3 4.93 OxL5 4.91 SxE 4.86 SxWO 5.03 SxL3 4.92 SxL5 4.91
+    pts W vs O, E {'by_season': {'2023-24': 0.187, '2024-25': 0.131, '2025-26': 0.099}, 'pooled': 0.131, 'ci': [0.111, 0.153], 'helps': False}
+    pts S vs O, E {'by_season': {'2023-24': 0.008, '2024-25': 0.003, '2025-26': 0.004}, 'pooled': 0.005, 'ci': [0.001, 0.009], 'helps': False}
+    pts W vs O, WO {'by_season': {'2023-24': 0.068, '2024-25': 0.066, '2025-26': 0.056}, 'pooled': 0.062, 'ci': [0.043, 0.082], 'helps': False}
+    pts S vs O, WO {'by_season': {'2023-24': -0.01, '2024-25': -0.006, '2025-26': -0.004}, 'pooled': -0.006, 'ci': [-0.01, -0.002], 'helps': True}
+    pts W vs O, L3 {'by_season': {'2023-24': 0.086, '2024-25': 0.041, '2025-26': 0.033}, 'pooled': 0.049, 'ci': [0.029, 0.068], 'helps': False}
+    pts S vs O, L3 {'by_season': {'2023-24': -0.007, '2024-25': -0.01, '2025-26': -0.007}, 'pooled': -0.008, 'ci': [-0.011, -0.004], 'helps': True}
+    pts W vs O, L5 {'by_season': {'2023-24': 0.072, '2024-25': 0.038, '2025-26': 0.031}, 'pooled': 0.043, 'ci': [0.024, 0.063], 'helps': False}
+    pts S vs O, L5 {'by_season': {'2023-24': -0.011, '2024-25': -0.012, '2025-26': -0.006}, 'pooled': -0.009, 'ci': [-0.013, -0.006], 'helps': True}
+reb 2023-24 n 4352 line 2.049 R 2.149 WxE 2.13 WxWO 2.12 WxL3 2.12 WxL5 2.09 OxE 2.11 OxWO 2.11 OxL3 2.10 OxL5 2.08 SxE 2.11 SxWO 2.10 SxL3 2.10 SxL5 2.08
+reb 2024-25 n 4805 line 2.074 R 2.193 WxE 2.20 WxWO 2.20 WxL3 2.17 WxL5 2.16 OxE 2.15 OxWO 2.17 OxL3 2.13 OxL5 2.12 SxE 2.15 SxWO 2.17 SxL3 2.13 SxL5 2.12
+reb 2025-26 n 7342 line None R 2.048 WxE 2.04 WxWO 2.06 WxL3 2.03 WxL5 2.01 OxE 2.02 OxWO 2.04 OxL3 2.01 OxL5 1.99 SxE 2.02 SxWO 2.04 SxL3 2.01 SxL5 1.99
+    reb W vs O, E {'by_season': {'2023-24': 0.023, '2024-25': 0.049, '2025-26': 0.023}, 'pooled': 0.03, 'ci': [0.023, 0.038], 'helps': False}
+    reb S vs O, E {'by_season': {'2023-24': -0.001, '2024-25': 0.003, '2025-26': 0.0}, 'pooled': 0.001, 'ci': [-0.001, 0.002], 'helps': False}
+    reb W vs O, WO {'by_season': {'2023-24': 0.013, '2024-25': 0.032, '2025-26': 0.014}, 'pooled': 0.019, 'ci': [0.012, 0.026], 'helps': False}
+    reb S vs O, WO {'by_season': {'2023-24': -0.003, '2024-25': 0.0, '2025-26': -0.001}, 'pooled': -0.001, 'ci': [-0.002, 0.0], 'helps': False}
+    reb W vs O, L3 {'by_season': {'2023-24': 0.012, '2024-25': 0.04, '2025-26': 0.017}, 'pooled': 0.022, 'ci': [0.015, 0.029], 'helps': False}
+    reb S vs O, L3 {'by_season': {'2023-24': -0.002, '2024-25': 0.002, '2025-26': 0.0}, 'pooled': -0.0, 'ci': [-0.001, 0.001], 'helps': False}
+    reb W vs O, L5 {'by_season': {'2023-24': 0.012, '2024-25': 0.039, '2025-26': 0.016}, 'pooled': 0.022, 'ci': [0.015, 0.029], 'helps': False}
+    reb S vs O, L5 {'by_season': {'2023-24': -0.002, '2024-25': 0.001, '2025-26': 0.0}, 'pooled': -0.0, 'ci': [-0.001, 0.001], 'helps': False}
+ast 2023-24 n 2834 line 1.843 R 1.908 WxE 1.91 WxWO 1.91 WxL3 1.91 WxL5 1.89 OxE 1.90 OxWO 1.91 OxL3 1.91 OxL5 1.90 SxE 1.89 SxWO 1.90 SxL3 1.90 SxL5 1.88
+ast 2024-25 n 3329 line 1.749 R 1.805 WxE 1.83 WxWO 1.82 WxL3 1.80 WxL5 1.80 OxE 1.80 OxWO 1.79 OxL3 1.78 OxL5 1.78 SxE 1.80 SxWO 1.79 SxL3 1.78 SxL5 1.78
+ast 2025-26 n 7342 line None R 1.514 WxE 1.50 WxWO 1.52 WxL3 1.49 WxL5 1.49 OxE 1.49 OxWO 1.52 OxL3 1.49 OxL5 1.49 SxE 1.49 SxWO 1.51 SxL3 1.48 SxL5 1.48
+    ast W vs O, E {'by_season': {'2023-24': 0.008, '2024-25': 0.029, '2025-26': 0.013}, 'pooled': 0.016, 'ci': [0.008, 0.023], 'helps': False}
+    ast S vs O, E {'by_season': {'2023-24': -0.008, '2024-25': 0.0, '2025-26': -0.001}, 'pooled': -0.003, 'ci': [-0.005, -0.0], 'helps': False}
+    ast W vs O, WO {'by_season': {'2023-24': -0.003, '2024-25': 0.023, '2025-26': 0.008}, 'pooled': 0.009, 'ci': [0.001, 0.016], 'helps': False}
+    ast S vs O, WO {'by_season': {'2023-24': -0.011, '2024-25': -0.001, '2025-26': -0.002}, 'pooled': -0.004, 'ci': [-0.006, -0.002], 'helps': True}
+    ast W vs O, L3 {'by_season': {'2023-24': 0.001, '2024-25': 0.02, '2025-26': 0.005}, 'pooled': 0.007, 'ci': [0.001, 0.014], 'helps': False}
+    ast S vs O, L3 {'by_season': {'2023-24': -0.01, '2024-25': -0.002, '2025-26': -0.004}, 'pooled': -0.005, 'ci': [-0.007, -0.003], 'helps': True}
+    ast W vs O, L5 {'by_season': {'2023-24': -0.005, '2024-25': 0.017, '2025-26': 0.002}, 'pooled': 0.004, 'ci': [-0.002, 0.011], 'helps': False}
+    ast S vs O, L5 {'by_season': {'2023-24': -0.012, '2024-25': -0.002, '2025-26': -0.005}, 'pooled': -0.006, 'ci': [-0.008, -0.003], 'helps': True}
+discovery qualifying 85
+  disc OxE reb under T1.5 {'n': 136, 'hit': 0.64, 'roi': 0.183}
+  disc SxE reb under T1.5 {'n': 130, 'hit': 0.638, 'roi': 0.183}
+  disc OxE reb under T1 {'n': 318, 'hit': 0.638, 'roi': 0.167}
+  disc OxE pts under T3 {'n': 278, 'hit': 0.619, 'roi': 0.161}
+  disc SxE reb under T1 {'n': 310, 'hit': 0.629, 'roi': 0.15}
+  disc SxE pts under T3 {'n': 240, 'hit': 0.613, 'roi': 0.148}
+  disc WxE reb under T1.5 {'n': 182, 'hit': 0.615, 'roi': 0.137}
+  disc WxWO reb under T1.5 {'n': 333, 'hit': 0.613, 'roi': 0.137}
+  disc WxE reb under T1 {'n': 427, 'hit': 0.616, 'roi': 0.133}
+  disc SxWO reb under T1.5 {'n': 316, 'hit': 0.611, 'roi': 0.132}
+CARRIED OxE reb under T1.5 {'2023-24': {'n': 136, 'hit': 0.64, 'roi': 0.183}, '2024-25': {'n': 96, 'hit': 0.583, 'roi': 0.058, 'ci': [-0.123, 0.242]}, 'verdict': 'PROMISING'}
+CARRIED SxE reb under T1.5 {'2023-24': {'n': 130, 'hit': 0.638, 'roi': 0.183}, '2024-25': {'n': 96, 'hit': 0.604, 'roi': 0.093, 'ci': [-0.098, 0.273]}, 'verdict': 'PROMISING'}
+CARRIED OxE reb under T1 {'2023-24': {'n': 318, 'hit': 0.638, 'roi': 0.167}, '2024-25': {'n': 254, 'hit': 0.594, 'roi': 0.06, 'ci': [-0.043, 0.171]}, 'verdict': 'PROMISING'}
+baseline 2023-24 pts over {'n': 5585, 'hit': 0.483, 'roi': -0.077}
+baseline 2023-24 pts under {'n': 5585, 'hit': 0.517, 'roi': -0.019}
+baseline 2023-24 reb over {'n': 5685, 'hit': 0.47, 'roi': -0.104}
+baseline 2023-24 reb under {'n': 5685, 'hit': 0.53, 'roi': 0.004}
+baseline 2023-24 ast over {'n': 3693, 'hit': 0.483, 'roi': -0.067}
+baseline 2023-24 ast under {'n': 3693, 'hit': 0.517, 'roi': -0.035}
+baseline 2024-25 pts over {'n': 6446, 'hit': 0.497, 'roi': -0.055}
+baseline 2024-25 pts under {'n': 6446, 'hit': 0.503, 'roi': -0.051}
+baseline 2024-25 reb over {'n': 6041, 'hit': 0.483, 'roi': -0.075}
+baseline 2024-25 reb under {'n': 6041, 'hit': 0.517, 'roi': -0.034}
+baseline 2024-25 ast over {'n': 4193, 'hit': 0.494, 'roi': -0.053}
+baseline 2024-25 ast under {'n': 4193, 'hit': 0.506, 'roi': -0.056}
