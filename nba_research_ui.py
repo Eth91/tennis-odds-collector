@@ -2983,7 +2983,8 @@ function renderMatchup() {
   if (SPORT === "nhl") return nhlMatchup();
   const p = MUP.p, c = p.ctx || {}, g = gameOf(p.gid), side = ST.side, gr = grade(p, side), mp = $("#mp");
   const rk = (r, n) => r ? `<span class="rk ${rankCls(r, n, side) === "good" ? "g" : rankCls(r, n, side) === "bad" ? "r" : "n"}">${ord(r)}</span>` : "—";
-  const dd = (k, opts, cur) => `<label class="dd"><span>${esc((opts.find(o => o[0] === cur) || opts[0])[1])}</span>${ICON.down}
+  // the position shows as its letters (PF) on the button, so the stat's button still fits a phone; the list has the names
+  const dd = (k, opts, cur, code) => `<label class="dd"><span>${esc(code ? (opts.find(o => o[0] === cur) || opts[0])[0] : (opts.find(o => o[0] === cur) || opts[0])[1])}</span>${ICON.down}
     <select data-dd="${k}" aria-label="${k === "grp" ? "Position" : "Stat"}">${opts.map(([v, t]) => `<option value="${v}"${v === cur ? " selected" : ""}>${esc(t)}</option>`).join("")}</select></label>`;
   mp.innerHTML = `<div class="ph"><button class="cb bk" aria-label="Back">${ICON.back}</button>
       <div class="ph-t"><b>${esc(p.player)} vs ${esc(p.opp || "")}</b><span>Matchup</span></div><span class="sp2"></span>
@@ -2998,7 +2999,7 @@ function renderMatchup() {
         <button class="cb" id="mpi" aria-label="How the ranks are built">${ICON.info}</button><button class="cb" id="mpsh" aria-label="Share">${ICON.share}</button></div>
     </div>
     <h2 class="mpt">${esc(p.opp || "")} Team Defense</h2>
-    <div class="mpf"><span>Recent Games vs</span>${dd("grp", VS_GRP, MUP.grp)}${dd("mkt", TAB_ORDER.map(m => [m, NAME[m]]), MUP.mkt)}</div>
+    <div class="mpf"><span>Recent Games vs</span>${dd("grp", VS_GRP, MUP.grp, true)}${dd("mkt", TAB_ORDER.map(m => [m, NAME[m]]), MUP.mkt)}</div>
     <div id="vst"></div>
     <div class="shc wg" id="wgd"></div>
     ${AST_M.has(p.market) ? '<div class="shc wg" id="asc"></div>' : ""}${REB_M.has(p.market) ? '<div class="shc wg" id="rbc"></div>' : ""}
@@ -3027,7 +3028,7 @@ function renderMatchup() {
   });
   $$("[data-dd]", mp).forEach(sel => sel.onchange = () => {
     MUP[sel.dataset.dd] = sel.value; MUP.more = false;
-    $("span", sel.parentNode).textContent = sel.options[sel.selectedIndex].text;
+    $("span", sel.parentNode).textContent = sel.dataset.dd === "grp" ? sel.value : sel.options[sel.selectedIndex].text;
     vsTable();
   });
   vsTable();
