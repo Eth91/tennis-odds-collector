@@ -253,3 +253,20 @@ Assists unders flip negative in 2024-25 at every threshold below 30%.
 - **Overs lose.** The x%-over rule loses at every threshold, every minutes source and every stat.
 - **Next step:** under the rules, a PASS earns only a forward shadow, with nothing bet and its own
   pre-registration. It needs the user's OK. Same hindsight note as above: who is out comes from who played.
+
+## Amendment 2: 40% and 50% thresholds (written 2026-11-06, before it was run)
+The user: "what about for the wowy over 40-50+% above or below the line"
+
+**The bet:** as amendment 1, with x = 40% and 50%.
+- Projections: W (the theory) and O (control), each × E, WO, L3 and L5.
+- Markets: points, rebounds and assists. Sides: over and under.
+- That is 2 × 4 × 3 × 2 × 2 = 96 combos.
+
+**No discovery step:** each combo is judged on both seasons together.
+- **PASS:** ROI above 0 in each season, and the pooled 95% interval (resampling whole games) above 0.
+- **PROMISING:** ROI above 0 in each season, but the interval includes 0.
+- **FAIL:** anything else.
+- With 96 combos, about 5 false PASSes are expected at the 5% level. A PASS again only earns a forward shadow.
+
+**Already seen:** amendment 1 up to 30%. There, overs lost at every threshold. Points and rebounds unders with engine
+minutes won in both seasons.
