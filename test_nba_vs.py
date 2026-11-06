@@ -72,3 +72,28 @@ def test_build_writes_each_team_and_caches_closings():
     assert json.loads(cache.read_text())["G1"]["5|points"] == [18.5, 1.98, "fd"]           # the final's closings, kept
     assert VS.build(m, None, bx, out, cache=cache, idx=idx) == 2                              # no lines store: the cache serves
     assert json.loads((out / "WAS.json").read_text())["rows"][1][11]["points"] == [18.5, 1.98, "fd"]
+
+
+def test_slots_are_his_starts_before_the_game():
+    d = pathlib.Path(tempfile.mkdtemp())
+    m = MU.connect(d / "m.sqlite")
+    games = [("A1", "2025-26", "2026-01-10"), ("A2", "2025-26", "2026-01-12"), ("A3", "2025-26", "2026-01-14"),
+             ("B1", "2026-27", "2026-10-25"), ("B2", "2026-27", "2026-10-27"), ("B3", "2026-27", "2026-10-29")]
+    for gid, season, date in games:
+        m.execute("INSERT INTO games (gid, season, date, home, away) VALUES (?, ?, ?, 'WAS', 'CHI')", (gid, season, date))
+    starts = [(1, "A1", "SG"), (1, "A2", "SG"), (1, "A3", "PG"),        # last season a shooting guard
+              (1, "B1", "PG"), (1, "B2", "PG"),                         # this season the point guard
+              (2, "B1", "PF"), (2, "B2", "C"), (2, "B3", "C"),
+              (3, "A1", "SF")]
+    for pid, gid, pos in starts:
+        m.execute("INSERT INTO player_games (gid, team, pid, pos, starter, min) VALUES (?, 'CHI', ?, ?, 1, 30)", (gid, pid, pos))
+    m.execute("INSERT INTO player_games (gid, team, pid, pos, starter, min) VALUES ('B1', 'CHI', 4, '', 0, 20)")
+    m.commit()
+    slot = VS.slots(m, {4: "G", 5: "C", 6: "F-C"})
+    assert slot(1, "2026-10-25") == "SG"           # no start yet this season: his latest earlier season's most frequent
+    assert slot(1, "2026-10-27") == "PG"           # this season's starts before the game, not the game itself
+    assert slot(2, "2026-10-27") == "PF" and slot(2, "2026-10-30") == "C"
+    assert slot(2, "2026-10-29") == "C"            # 1-1: the more recent wins
+    assert slot(3, "2026-10-29") == "SF"           # started only last season
+    assert slot(4, "2026-10-29") is None           # never started: a bench guard could be either guard
+    assert slot(5, "2026-10-29") == "C" and slot(6, "2026-10-29") is None
