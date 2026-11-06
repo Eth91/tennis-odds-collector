@@ -196,3 +196,24 @@ The three overlap: they are mostly the same bets.
 - **Hindsight:** the backtest takes who is out from who actually played, as the engine's own backtests do. At tip
   that comes from the injury report, so late scratches make the backtest a little optimistic.
 - **Next step:** a forward shadow, with nothing bet, under its own pre-registration. It needs the user's OK.
+
+## Amendment 1: percentage thresholds (written 2026-11-06, before it was run)
+The user's follow-up: "what if we put selection criteria where their adjusted minutes projection has to be x% over or
+under the line depending on if youre playing an over or under"
+
+**The bet:**
+- Over when the projection is at least (1 + x) × the line.
+- Under when the projection is at most (1 − x) × the line.
+- x is 10%, 15%, 20%, 25% or 30%.
+- Staking, pushes, DNPs, the line rule and the events are unchanged.
+
+**Projections:** W (the theory) and O (control), each × E, WO, L3 and L5.
+- S is dropped: it sat within 0.01 of O on every measure above.
+
+**Combos:** 2 rates × 4 minutes × 3 markets × 5 thresholds × 2 sides = 240.
+- Discovery (2023-24), confirmation (2024-25), PASS / PROMISING / FAIL and the baseline are as in B.
+- Every W combo is reported for both seasons, with no verdict.
+
+**Already seen:** the absolute-threshold results above, on both seasons. A percentage gap is close to an absolute one
+at a given line, so this test isn't blind. The best-looking absolute rules were rebounds and points unders with
+engine minutes.
