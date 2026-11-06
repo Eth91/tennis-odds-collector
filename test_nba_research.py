@@ -1496,6 +1496,10 @@ def test_recent_games_vs_the_five_positions():
     # NBA: the five positions (box-score starting slots, nba_vs); the list opens on his own, else the first in his group
     assert 'let VS_GRP = [["PG", "Point Guards"], ["SG", "Shooting Guards"], ["SF", "Small Forwards"], ["PF", "Power Forwards"], ["C", "Centers"]];' in html
     assert "MUP = {p: p, grp: vsOwn(p.ctx || {})," in html
+    # its button shows the letters (PF) so the stat's button still fits on a phone; the list has the names
+    assert '${dd("grp", VS_GRP, MUP.grp, true)}${dd("mkt", TAB_ORDER.map(m => [m, NAME[m]]), MUP.mkt)}' in html
+    assert "const dd = (k, opts, cur, code) =>" in html and html.count("const dd = (k, opts, cur) =>") == 2   # NFL, NHL as before
+    assert '$("span", sel.parentNode).textContent = sel.dataset.dd === "grp" ? sel.value : sel.options[sel.selectedIndex].text;' in html
     assert ("const vsOwn = c => VS_GRP.some(g => g[0] === c.pos) ? c.pos : VS_GRP.some(g => g[0] === c.group) ? c.group\n"
             "  : ((c.group && VS_GRP.find(g => MU_GROUP(g[0]) === c.group)) || VS_GRP[0])[0];") in html
     # the NFL and the NHL keep their groups
