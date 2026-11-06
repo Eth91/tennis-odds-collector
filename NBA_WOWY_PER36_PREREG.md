@@ -104,3 +104,95 @@ season judges. Even a PASS only earns a forward shadow on 2026-27 with nothing b
 ## Not changed after this point
 The events, rates, k values, minutes sources, thresholds, line rule and pass rules above stay as written. Fixes to
 bugs are allowed: name matching, parsing, or a wrong join. Each one is listed in the result with its effect.
+
+## Result (2026-11-06; `audit/wowy_per36/`)
+The pre-registration is commit e482219708, made at 21:01 UTC. Its text says about 21:10.
+
+**Data:**
+- 2023-24 built 1,228 of 1,230 games. The rebuilt minutes and points match the box score in 100% of player-games.
+- **Lines:** names matched at 98.4% in 2023-24 and 97.3% in 2024-25. That gave 41,553 and 40,575 tip main lines.
+- **Events:** 7,558, 8,586 and 9,038 player-games across the three seasons.
+  - The engine's minutes cover 98% of them.
+  - The without-him average covers 78-83%: it needs 2+ earlier games he missed.
+
+**Reading and fixes:**
+- "Y is the one with the most minutes" was read as: among the regulars out for whom X has 60+ minutes on and 60+ off.
+- No bug fixes were made after the pre-registration.
+
+### A, accuracy
+**Points.** Each cell is the miss against what he scored (MAE). The events have all four minutes sources and a tip
+line.
+
+| | 2023-24 (4,266) | 2024-25 (5,133) | 2025-26 (7,342, no lines) |
+|---|---|---|---|
+| Tip line | **5.09** | **5.08** | |
+| Engine's own projection | 5.38 | 5.27 | 4.91 |
+| WOWY × engine minutes | 5.53 | 5.37 | 4.96 |
+| WOWY × without-him minutes | 5.49 | 5.45 | 5.09 |
+| WOWY × last 3 | 5.48 | 5.38 | 4.96 |
+| WOWY × last 5 | 5.42 | 5.36 | 4.94 |
+| Plain per-36 × engine minutes | 5.34 | 5.24 | 4.86 |
+| Plain per-36 × last 5 | 5.35 | 5.32 | 4.91 |
+
+**Rebounds and assists** show the same order. The line has the smallest miss each time.
+
+| Market | Season | Line's miss | Best projection's miss |
+|---|---|---|---|
+| Rebounds | 2023-24 | 2.05 | 2.08 |
+| Rebounds | 2024-25 | 2.07 | 2.12 |
+| Assists | 2023-24 | 1.84 | 1.88 |
+| Assists | 2024-25 | 1.75 | 1.78 |
+
+**Minutes.** Each cell is the miss against the minutes he played (MAE), with the bias in brackets.
+
+| | 2023-24 | 2024-25 | 2025-26 |
+|---|---|---|---|
+| Engine (V3) | **5.04** (+1.2) | **5.16** (+1.3) | 5.00 (+1.3) |
+| Without-him average | 5.67 (−0.4) | 5.64 (−0.2) | 5.43 (+0.1) |
+| Last 3 | 5.26 (−0.9) | 5.35 (−0.8) | 5.05 (−0.8) |
+| Last 5 | 5.18 (−1.0) | 5.28 (−0.9) | **4.98** (−0.9) |
+
+**Does WOWY help (W − O at the same minutes, pooled):**
+- **Raw WOWY:** no, for every minutes source and market. It makes the projection worse, and every interval is above
+  0.
+  - Points: +0.04 to +0.13 worse.
+  - Rebounds: +0.02 to +0.03 worse.
+  - Assists: +0.00 to +0.02 worse.
+- **Shrunk WOWY (S):** it passes the rule for points and assists with the without-him, last-3 and last-5 minutes, but
+  the gain is under 0.01 a game.
+
+### B, the lines
+**Discovery (2023-24).** 85 combos qualified. The top 3 are all rebounds unders with the engine's minutes, and none
+uses the WOWY rate.
+
+| Carried combo | 2023-24 | 2024-25 (95%) | Verdict |
+|---|---|---|---|
+| plain per-36 × engine, rebounds under, 1.5+ below | 136, +18.3% | 96, +5.8% (−12.3%, +24.2%) | PROMISING |
+| shrunk × engine, rebounds under, 1.5+ below | 130, +18.3% | 96, +9.3% (−9.8%, +27.3%) | PROMISING |
+| plain per-36 × engine, rebounds under, 1+ below | 318, +16.7% | 254, +6.0% (−4.3%, +17.1%) | PROMISING |
+
+The three overlap: they are mostly the same bets.
+
+**The theory's own bets (all 72 WOWY-rate combos):**
+- **Overs:** 35 of 36 lost in 2023-24 and 30 of 36 lost in 2024-25. The 6 that won made +2.3% or less.
+- **Unders with the engine's minutes:** positive in both seasons.
+  - Points 2+ below: +5.7% and +8.5%.
+  - Points 3+ below: +10.9% and +6.2%.
+  - Rebounds 1.5+ below: +13.7% and +9.2%.
+  - The plain per-36 with the same minutes does as well or better, so these come from the minutes, not the WOWY
+    rate.
+- **Baseline (every bet in these games):** any over made −5.3% to −10.4%; any under made −5.6% to +0.4%.
+
+**Read:**
+- **WOWY per-36 doesn't improve a projection.** The raw split makes every version worse than his plain per-36.
+  Shrunk to the part that carries over, the gain is a rounding error.
+- **The tip line has the smallest miss of anything here.**
+- **Engine minutes vs last 5:** the engine is the best minutes source in 2023-24 and 2024-25 and ties last 5 in
+  2025-26. It runs about 1.3 minutes high.
+- **The without-him minutes average is the worst source.**
+- **The only thing that survives:** rebounds unders where the engine-minutes projection sits well below the line.
+  - That is PROMISING, not PASS. It's about 100-250 bets a season, and the 2024-25 interval includes 0.
+  - The WOWY rate isn't part of it.
+- **Hindsight:** the backtest takes who is out from who actually played, as the engine's own backtests do. At tip
+  that comes from the injury report, so late scratches make the backtest a little optimistic.
+- **Next step:** a forward shadow, with nothing bet, under its own pre-registration. It needs the user's OK.
