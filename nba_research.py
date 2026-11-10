@@ -678,12 +678,13 @@ def closing_boards(q, gids, cache=CLOSE_BOARDS, markets=None):
 
 
 def lineups(lcon, dates, boxes, official):
-    """{"date|TEAM": {status, at, starters: [[pid, name, pos]], usual: [pid], missing: [[pid, name, status]],
+    """{"date|TEAM": {status, at, starters: [[pid, name, pos, report status]], usual: [pid], missing: [[pid, name, status]],
     inactive: [[pid, name]]}} from the latest NBA.com lineups snapshot of each date (nba_lineups_poll.py). status:
     Confirmed once all five starters are, else Expected; at: the newest confirmation. usual: the five who started most
     of the team's last USUAL_GAMES games this season (team_boxes rows), empty until it has USUAL_MIN (last season's
     starters are not this team's after an offseason); missing: a usual starter on tonight's list not starting, with his
-    status on the official report. A date with no snapshot (lineups are posted on game day) is left out."""
+    status on the official report (a starter carries his too: Questionable in a posted five). A date with no snapshot
+    (lineups are posted on game day) is left out."""
     import zlib
     out = {}
     if lcon is None:
@@ -714,7 +715,8 @@ def lineups(lcon, dates, boxes, official):
                 out[f"{d}|{team}"] = {
                     "status": "Confirmed" if st and all(p.get("lineupStatus") == "Confirmed" for p in st) else "Expected",
                     "at": max((p.get("timestamp") or "" for p in st), default="") or None,
-                    "starters": [[int(p["personId"]), p.get("playerName") or "", p.get("position") or ""] for p in st],
+                    "starters": [[int(p["personId"]), p.get("playerName") or "", p.get("position") or "",
+                                  (official.get((d, int(p["personId"]))) or {}).get("status")] for p in st],
                     "usual": usual,
                     "missing": [[pid, name[pid], (official.get((d, pid)) or {}).get("status")] for pid in usual
                                 if pid not in on and pid in name],

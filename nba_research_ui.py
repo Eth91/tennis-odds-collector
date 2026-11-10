@@ -388,7 +388,7 @@ svg.shct{display:block;width:100%;height:auto;margin-top:6px}
 .lus .av{position:relative;left:auto;top:auto;width:40px;height:40px}
 .lus .av .hs{left:-8px;top:1px;width:56px}
 .lus b{max-width:100%;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lus i{font-style:normal;font-size:10.5px;color:#9a9a9a} .lus.new i{color:var(--org);font-weight:700} .lus .lq{font-style:normal;color:var(--yel);font-weight:700}
+.lus i{font-style:normal;font-size:10.5px;color:#9a9a9a;text-align:center} .lus.new i{color:var(--org);font-weight:700} .lus .tg{margin-left:2px}
 .lum{margin-top:9px;font-size:12.5px;color:#b0b0b0;line-height:1.7}
 .lum b{margin-right:6px;font-size:10.5px;letter-spacing:.3px;color:#8e8e8e;text-transform:uppercase}
 .lum button{padding:0;border:0;background:none;color:#e6e6e6;font-size:12.5px} .lum .tg{margin:0 0 0 4px}
@@ -1635,8 +1635,8 @@ function luTeam(t, e) {
   if (!e) return `<div class="lut"><div class="luth">${logo(t, "")}<b>${esc(t)}</b><span class="tg tn">NOT POSTED</span></div></div>`;
   const usual = new Set(e.usual), isNew = pid => usual.size > 0 && !usual.has(pid), proj = e.status === "Projected";
   const tag = st => st ? `<span class="tg ${INJ_C[st] || "tn"}">${INJ_S[st] || esc(String(st).toUpperCase())}</span>` : "";
-  // a projected five (nba_research.projected_lineups): a Questionable starter carries his Q; who comes in for whom below
-  const tiles = e.starters.map(([pid, name, pos, st]) => `<button class="lus${isNew(pid) ? " new" : ""}" data-vp="${pid}"><span class="av">${head(pid)}</span><b>${esc(lastName(name))}</b><i>${esc(pos)}${isNew(pid) ? " · NEW" : ""}${proj && INJ_S[st] ? ` · <em class="lq">${INJ_S[st]}</em>` : ""}</i></button>`).join("");
+  // every five carries each starter's report status (Q, DTD, DOUBT, OUT); a projected five: who comes in for whom below
+  const tiles = e.starters.map(([pid, name, pos, st]) => `<button class="lus${isNew(pid) ? " new" : ""}" data-vp="${pid}"><span class="av">${head(pid)}</span><b>${esc(lastName(name))}</b><i>${esc(pos)}${isNew(pid) ? " · NEW" : ""}${INJ_S[st] ? ` <span class="tg ${INJ_C[st]}">${INJ_S[st]}</span>` : ""}</i></button>`).join("");
   const nm = pid => (e.starters.find(x => x[0] === pid) || [, ""])[1];
   const subs = proj && (e.subs || []).length ? `<div class="lum"><b>In for</b>${e.subs.map(([pid, out, outName]) =>
     `${esc(lastName(nm(pid)))} for <button data-vp="${out}">${esc(nameOf(outName))}</button>${tag((e.missing.find(m => m[0] === out) || [])[2])}`).join(", ")}</div>` : "";

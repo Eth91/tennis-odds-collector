@@ -949,11 +949,14 @@ def test_lineups_flags_new_starters_and_missing_regulars():
                      for i in range(11)] + [("g99", GD, "2026-27", {7: (1, 30)})]}           # tonight's own: not before it
     boxes["SAC"] = [(f"s{i}", f"2026-10-2{i}", "2026-27", {21: (1, 30)}) for i in (1, 3)]      # 2 games this season
     boxes["SAC"] += [(f"o{i}", f"2026-03-{i + 1:02d}", "2025-26", {22: (1, 30)}) for i in range(10)]   # last season's
-    out = RS.lineups(lc, [GD, "2026-10-27"], boxes, {(GD, 5): {"status": "Questionable"}})
+    out = RS.lineups(lc, ["2026-10-25", GD, "2026-10-27"], boxes, {(GD, 5): {"status": "Questionable"}, (GD, 2): {"status": "Questionable"},
+                                                    ("2026-10-25", 3): {"status": "Out"}})              # another date's: not tonight's
     assert out[f"{GD}|SAC"]["usual"] == [] and out[f"{GD}|SAC"]["missing"] == []      # under 3 this season: nothing marked
     e = out[f"{GD}|PHX"]
     assert e["status"] == "Confirmed" and e["at"] == "2026-10-26T22:40:00"                     # the latest snapshot
-    assert [s[0] for s in e["starters"]] == [1, 2, 3, 4, 9] and e["starters"][4] == [9, "New Nine", "C"]
+    assert [s[0] for s in e["starters"]] == [1, 2, 3, 4, 9] and e["starters"][4] == [9, "New Nine", "C", None]
+    assert e["starters"][1] == [2, "B Two", "SG", "Questionable"]                            # a posted starter's report status
+    assert e["starters"][2] == [3, "C Three", "SF", None]                                    # tonight's report only
     assert sorted(e["usual"]) == [1, 2, 3, 4, 5] and e["missing"] == [[5, "E Five", "Questionable"]]
     assert e["inactive"] == [[6, "F Six"]] and out[f"{GD}|SAC"]["status"] == "Expected"
     assert not any(k.startswith("2026-10-27") for k in out)                                    # no snapshot yet
@@ -1212,7 +1215,10 @@ def test_projected_lineups_fill_in_for_who_is_out():
 def test_page_shows_projected_lineups():
     html = UI.page()
     assert 'proj = e.status === "Projected"' in html and '"PROJECTED"' in html and "<b>In for</b>" in html
-    assert 'proj && INJ_S[st] ? ` · <em class="lq">' in html and "const miss = !proj && e.missing.length" in html
+    assert "const miss = !proj && e.missing.length" in html
+    # every five (posted or projected) tags a starter on the report with the Injuries tab's tag: Q / DTD yellow, DOUBT / OUT red
+    assert '${INJ_S[st] ? ` <span class="tg ${INJ_C[st]}">${INJ_S[st]}</span>` : ""}' in html and "proj && INJ_S[st]" not in html
+    assert ".lus .tg{margin-left:2px}" in html
 
 
 def test_injury_beneficiaries_open_their_page():
