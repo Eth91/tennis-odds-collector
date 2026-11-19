@@ -4,6 +4,7 @@ and postponed games, stale books, engine flags), the page's JS against the Pytho
 import datetime as dt
 import inspect
 import json
+import types
 import math
 import pathlib
 import random
@@ -167,7 +168,7 @@ def built(now, sched=None, box_get=None, cup=None):
     rl.commit(); rl.close()
     return RS.build(now=now, sched=sched or SCHED, lines=d / "lines.sqlite", news=d / "news.sqlite", shadow=d / "shadow.sqlite",
                     matchup=d / "matchup.sqlite", index=d / "index.json", box_get=box_get or live_box, tracking=d / "tracking.sqlite",
-                    role_db=d / "role.sqlite", cup=cup)
+                    role_db=d / "role.sqlite", cup=cup, gamelogs=d / "none.sqlite")
 
 
 @pytest.fixture(scope="module")
@@ -555,7 +556,7 @@ def test_page_controls_work_on_iphone():
     # Movers (a line moved since open, or the books disagree: the move first), Lineups beside Injuries (NEW starters, the usual
     # five not starting), who guards him on the Matchup page (docs/matchups/{pid}.json, nba_defmatch)
     assert 'if (ST.market === "movers") return list.map(p => [p, mover(p)])' in html and "k: Math.abs(mv) * 100 + gap" in html
-    assert '(ST.iv === "lu" ? (SPORT === "nfl" ? depthView() : SPORT === "nhl" ? nhlLinesView() : lineupsView()) : ST.iv === "ro" ?' in html and "function luTeam(t, e)" in html and 'isNew(pid) ? " · NEW" : ""' in html
+    assert '(ST.iv === "lu" ? (SPORT === "nfl" ? depthView() : SPORT === "nhl" ? nhlLinesView() : lineupsView()) : ST.iv === "ro" ?' in html and "function luTeam(t, e, key)" in html and 'isNew(pid) ? " · NEW" : ""' in html
     # role changes (docs/player/roles.json), the Live tab (props under way from their closing boards: only there), game script
     assert 'fetch("player/roles.json")' in html and "function rolesView(" in html and 'data-iv="ro"' in html
     assert 'const ALL_TABS = ["live", "trends", "movers"];' in html and "list = list.filter(p => !p.closed);" in html
@@ -1210,6 +1211,68 @@ def test_projected_lineups_fill_in_for_who_is_out():
                                                     for i in (1, 2)]
     m2 = RS.projected_lineups(games, dict(boxes, MIN=ls + mins), official, roster, {})[f"{D}|MIN"]
     assert m2["subs"] == [[6, 5, "Eee F"], [7, 3, "Cee C"]]
+
+
+def _min_season():
+    """MIN's 10 games: A B C D E start (32), F G H J K L come off the bench; J (18) and L (20) sat the last 5 hurt, K (18)
+    was traded. In game 2 C, E and K all sat: tonight's absences once before (ROLE1 v3's WOWY game)."""
+    import nba_role as RL
+    rows = []
+    for i in range(10):
+        d = f"2026-10-{10 + i:02d}"
+        mins = {1: 32, 2: 32, 3: 32, 4: 32, 5: 32, 6: 20, 7: 16, 8: 12, 10: 18, **({9: 18, 12: 20} if i < 5 else {}),
+                **({13: 10} if i < 3 else {})}                                   # M: 3 games, then traded
+        if i == 2:
+            mins = {1: 38, 2: 38, 4: 38, 6: 30, 7: 26, 8: 20, 9: 30, 12: 20}
+        rows += [{"gid": f"m{i}", "date": d, "team": "MIN", "pid": p, "min": float(m), "fga": 8, "fta": 2, "fg3a": 3, "fg3m": 1,
+                  "reb": 4, "ast": 2, "pts": 10} for p, m in mins.items()]
+    rows += [{"gid": "w0", "date": "2026-10-12", "team": "WAS", "pid": 11, "min": 30.0, "fga": 8, "fta": 2, "fg3a": 3,
+              "fg3m": 1, "reb": 4, "ast": 2, "pts": 10}]
+    groups = {1: "G", 2: "G", 3: "C", 4: "F", 5: "F", 6: "F", 7: "G", 8: "C", 9: "G", 10: "F", 12: "C"}
+    return types.SimpleNamespace(season=RL.Season(rows), priors=RL.Priors([], groups), groups=groups), RL
+
+
+def test_projected_minutes_for_who_can_play_tonight():
+    rd, RL = _min_season()
+    D = "2026-10-21"
+    roster = {str(p): ["MIN", f"Player {p}", "G"] for p in (*range(1, 10), 12)} | {"10": ["WAS", "Player 10", "F"], "11": ["WAS", "W", "G"],
+                                                                                "13": ["WAS", "Player 13", "G"]}
+    official = {(D, 5): {"status": "Out"}, (D, 3): {"status": "Doubtful"}, (D, 4): {"status": "Questionable"},
+                (D, 9): {"status": "Available"}, ("2026-10-20", 7): {"status": "Out"},           # another date's: not tonight's
+                (D, 13): {"status": "Available"}}                                                # M: on WAS's report now
+    lu = {f"{D}|MIN": {"status": "Expected", "starters": [[1, "A", "PG"], [2, "B", "SG"], [4, "D", "SF"], [6, "F", "PF"], [7, "G", "C"]],
+                       "inactive": [[8, "H"], [12, "L"]]}}                  # L: out 5 games, already in everyone's last 5
+    games = [{"date_et": D, "home": "MIN", "away": "WAS"}, {"date_et": D, "home": "NEW", "away": "CHI"}]
+    out = RS.projected_minutes(rd, games, official, lu, roster)
+    assert set(out) == {f"{D}|MIN", f"{D}|WAS"}                    # NEW and CHI: no games yet
+    m = out[f"{D}|MIN"]
+    # in: the last 3 games' players and J (back: tonight's report, not Out); out: E (Out), C (Doubtful), H (inactive),
+    # K and M (the roster has them on WAS now). The absent regulars' minutes (C, E, K: absence game 1) are shared out
+    assert sorted(r[0] for r in m) == [1, 2, 4, 6, 7, 9]
+    ref = RL.project(rd.season, rd.priors, rd.groups, "MIN", D, {1, 2, 4, 6, 7, 9}, {3, 5, 10}, mode="v3")
+    assert {r[0]: (r[2], r[3]) for r in m} == {p: (round(v["min"], 1), round(v["base_min"], 1)) for p, v in ref.items()}
+    assert [r[2] for r in m] == sorted((r[2] for r in m), reverse=True)                     # the most minutes first
+    st = {r[0]: r[4] for r in m}
+    assert st[4] == "Questionable" and st[9] == "Available" and st[7] is None and {r[0]: r[1] for r in m}[1] == "Player 1"
+    assert all(r[2] > r[3] for r in m if r[0] in (1, 2, 4, 6, 7))    # three regulars out: everyone else plays more
+    assert abs(sum(r[2] for r in m) - 240) < 0.5
+
+
+def test_build_carries_projected_minutes(payload):
+    e = payload["lineups"][f"{GD}|PHX"]
+    assert [r[0] for r in e["min"]][:2] == [1, 2] and payload["sources"]["minutes"] == {"model": "ROLE1 v3", "teams": 2}
+
+
+def test_page_shows_projected_minutes():
+    html = UI.page()
+    assert "${subs}${miss}${ina}${luMins(e, key)}</div>" in html and 'luTeam(t, L[g.date + "|" + t], g.date + "|" + t)' in html
+    assert "if (!(e.min || []).length) return \"\";" in html
+    assert '<details class="lmn" data-k="${esc(key)}"${LMN.has(key) ? " open" : ""}><summary>Projected minutes</summary>' in html
+    # the open lists survive a refresh: a toggle (it does not bubble) is caught on the way down
+    assert 'document.addEventListener("toggle", ev => {' in html and "if (d.open) LMN.add(d.dataset.k); else LMN.delete(d.dataset.k); } }, true);" in html
+    assert '<tr data-vp="${pid}"><td>${esc(nameOf(name))}${INJ_S[st] ? `<span class="tg ${INJ_C[st]}">${INJ_S[st]}</span>` : ""}</td>' in html
+    assert '<td class="${dv >= 1 ? "up" : dv <= -1 ? "dn" : ""}">${dv >= .05 ? "+" : dv <= -.05 ? "−" : ""}${Math.abs(dv).toFixed(1)}</td>' in html
+    assert ".lmt td.up{color:var(--grn)} .lmt td.dn{color:var(--red)}" in html
 
 
 def test_page_shows_projected_lineups():
