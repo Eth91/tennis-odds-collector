@@ -394,10 +394,13 @@ svg.shct{display:block;width:100%;height:auto;margin-top:6px}
 .lum button{padding:0;border:0;background:none;color:#e6e6e6;font-size:12.5px} .lum .tg{margin:0 0 0 4px}
 /* Projected minutes under each team's five: a list that opens, the most minutes first */
 .lmn{margin-top:10px;padding-top:9px;border-top:1px solid #222}
-.lmn summary{display:flex;align-items:center;justify-content:space-between;list-style:none;cursor:pointer;font-size:10.5px;font-weight:700;letter-spacing:.3px;color:#8e8e8e;text-transform:uppercase}
+.lmn summary{display:flex;align-items:center;justify-content:space-between;list-style:none;cursor:pointer;font-size:10.5px;font-weight:700;letter-spacing:.3px;color:#8e8e8e;text-transform:uppercase;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 .lmn summary::-webkit-details-marker{display:none}
-.lmn summary::after{content:"";width:7px;height:7px;margin:-4px 4px 0 0;border-right:1.5px solid #8e8e8e;border-bottom:1.5px solid #8e8e8e;transform:rotate(45deg);transition:transform .2s}
-.lmn[open] summary::after{margin-top:4px;transform:rotate(-135deg)}
+.lmn summary::after{content:"";width:7px;height:7px;margin-right:4px;border-right:1.5px solid #8e8e8e;border-bottom:1.5px solid #8e8e8e;transform:rotate(45deg) translate(-1.5px,-1.5px);transition:transform .38s cubic-bezier(.32,.72,0,1)}
+.lmn[open]:not(.shut) summary::after{transform:rotate(-135deg) translate(-1.5px,-1.5px)}
+.lmw{overflow:hidden}
+.lmt tr.lsep td{border-top:2px solid #5c5c5c}
+@media (prefers-reduced-motion:reduce){.lmn summary::after{transition:none}}
 .lmt{width:100%;margin-top:6px;border-collapse:collapse;font-size:13px}
 .lmt th{padding:2px 0 4px 10px;font-size:10px;font-weight:700;color:#8e8e8e;text-align:right}
 .lmt td{padding:7px 0 7px 10px;border-top:1px solid #1f1f1f;color:#e6e6e6;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
@@ -1646,12 +1649,39 @@ function lineupsView() {
 // Projected minutes (nba_research.projected_minutes, ROLE1 v3): a team's list stays open through every refresh
 const LMN = new Set();
 document.addEventListener("toggle", ev => { const d = ev.target; if (d.classList && d.classList.contains("lmn")) { if (d.open) LMN.add(d.dataset.k); else LMN.delete(d.dataset.k); } }, true);
+// the five first, in the tiles' order (PG to C), a line, then the bench, the most minutes first
 function luMins(e, key) {
   if (!(e.min || []).length) return "";
-  const rows = e.min.map(([pid, name, m, b, st]) => { const dv = m - b;
-    return `<tr data-vp="${pid}"><td>${esc(nameOf(name))}${INJ_S[st] ? `<span class="tg ${INJ_C[st]}">${INJ_S[st]}</span>` : ""}</td><td>${m.toFixed(1)}</td><td>${b.toFixed(1)}</td><td class="${dv >= 1 ? "up" : dv <= -1 ? "dn" : ""}">${dv >= .05 ? "+" : dv <= -.05 ? "−" : ""}${Math.abs(dv).toFixed(1)}</td></tr>`; }).join("");
-  return `<details class="lmn" data-k="${esc(key)}"${LMN.has(key) ? " open" : ""}><summary>Projected minutes</summary><table class="lmt"><thead><tr><th></th><th>MIN</th><th>L5</th><th>+/−</th></tr></thead><tbody>${rows}</tbody></table></details>`;
+  const five = e.starters.map(s => s[0]), top = five.map(p => e.min.find(r => r[0] === p)).filter(Boolean),
+    bench = e.min.filter(r => !five.includes(r[0]));
+  const row = ([pid, name, m, b, st], sep) => { const dv = m - b;
+    return `<tr data-vp="${pid}"${sep ? ' class="lsep"' : ""}><td>${esc(nameOf(name))}${INJ_S[st] ? `<span class="tg ${INJ_C[st]}">${INJ_S[st]}</span>` : ""}</td><td>${m.toFixed(1)}</td><td>${b.toFixed(1)}</td><td class="${dv >= 1 ? "up" : dv <= -1 ? "dn" : ""}">${dv >= .05 ? "+" : dv <= -.05 ? "−" : ""}${Math.abs(dv).toFixed(1)}</td></tr>`; };
+  const rows = top.map(r => row(r, false)).join("") + bench.map((r, i) => row(r, i === 0 && top.length > 0)).join("");
+  return `<details class="lmn" data-k="${esc(key)}"${LMN.has(key) ? " open" : ""}><summary>Projected minutes</summary><div class="lmw"><table class="lmt"><thead><tr><th></th><th>MIN</th><th>L5</th><th>+/−</th></tr></thead><tbody>${rows}</tbody></table></div></details>`;
 }
+// opening and closing glide: the list's height and the table ease together on the sheets' curve, from wherever a
+// second tap catches them; reduced motion: instant
+document.addEventListener("click", ev => {
+  const s = ev.target.closest(".lmn > summary");
+  if (!s) return;
+  ev.preventDefault();
+  const d = s.parentNode, w = d.querySelector(".lmw"), t = w.firstElementChild, shut = d.open && !d.classList.contains("shut");
+  if (REDUCED) { d.open = !d.open; return; }
+  const h0 = d.open ? w.getBoundingClientRect().height : 0, o0 = d.open ? +getComputedStyle(t).opacity : 0;
+  (d._a || []).forEach(a => a.cancel());
+  const fade = o => ({opacity: o, transform: `translateY(${(-8 * (1 - o)).toFixed(2)}px)`});
+  if (shut) {
+    d.classList.add("shut"); LMN.delete(d.dataset.k);
+    d._a = [w.animate([{height: h0 + "px"}, {height: "0px"}], {duration: 300, easing: EASE}),
+            t.animate([fade(o0), fade(0)], {duration: 220, easing: "ease-out", fill: "forwards"})];
+    d._a[0].onfinish = () => { d.open = false; d.classList.remove("shut"); d._a[1].cancel(); d._a = null; };
+  } else {
+    d.classList.remove("shut"); d.open = true; LMN.add(d.dataset.k);
+    d._a = [w.animate([{height: h0 + "px"}, {height: w.scrollHeight + "px"}], {duration: 380, easing: EASE}),
+            t.animate([fade(o0), fade(1)], {duration: 380, easing: EASE})];
+    d._a[0].onfinish = () => { d._a = null; };
+  }
+});
 function luTeam(t, e, key) {
   if (!e) return `<div class="lut"><div class="luth">${logo(t, "")}<b>${esc(t)}</b><span class="tg tn">NOT POSTED</span></div></div>`;
   const usual = new Set(e.usual), isNew = pid => usual.size > 0 && !usual.has(pid), proj = e.status === "Projected";
