@@ -940,8 +940,8 @@ def test_lineups_flags_new_starters_and_missing_regulars():
         "personId": pid, "playerName": nm, "position": pos, "lineupStatus": st, "rosterStatus": ro, "timestamp": ts}
     early = {"games": [{"gameId": "G1", "homeTeam": {"teamAbbreviation": "PHX", "players": [P(1, "A One", "PG", "Expected")]}}]}
     late = {"games": [{"gameId": "G1", "homeTeam": {"teamAbbreviation": "PHX", "players": [
-        P(1, "A One", "PG"), P(2, "B Two", "SG"), P(3, "C Three", "SF"), P(4, "D Four", "PF", ts="2026-10-26T22:40:00"),
-        P(9, "New Nine", "C"), P(5, "E Five", ""), P(6, "F Six", "", ro="Inactive")]},
+        P(2, "B Two", "SG"), P(3, "C Three", "SF"), P(1, "A One", "PG"), P(4, "D Four", "PF", ts="2026-10-26T22:40:00"),
+        P(9, "New Nine", "C"), P(5, "E Five", ""), P(6, "F Six", "", ro="Inactive")]},              # NBA.com's order
         "awayTeam": {"teamAbbreviation": "SAC", "players": [P(20, "Exp Twenty", "PG", "Expected")]}}]}
     lc.execute("INSERT INTO snaps VALUES ('2026-10-26T20:00:00+00:00', ?, 'a', ?)", (GD, zlib.compress(json.dumps(early).encode())))
     lc.execute("INSERT INTO snaps VALUES ('2026-10-26T23:00:00+00:00', ?, 'b', ?)", (GD, zlib.compress(json.dumps(late).encode())))
@@ -955,7 +955,7 @@ def test_lineups_flags_new_starters_and_missing_regulars():
     assert out[f"{GD}|SAC"]["usual"] == [] and out[f"{GD}|SAC"]["missing"] == []      # under 3 this season: nothing marked
     e = out[f"{GD}|PHX"]
     assert e["status"] == "Confirmed" and e["at"] == "2026-10-26T22:40:00"                     # the latest snapshot
-    assert [s[0] for s in e["starters"]] == [1, 2, 3, 4, 9] and e["starters"][4] == [9, "New Nine", "C", None]
+    assert [s[0] for s in e["starters"]] == [1, 2, 3, 4, 9] and e["starters"][4] == [9, "New Nine", "C", None]   # PG to C
     assert e["starters"][1] == [2, "B Two", "SG", "Questionable"]                            # a posted starter's report status
     assert e["starters"][2] == [3, "C Three", "SF", None]                                    # tonight's report only
     assert sorted(e["usual"]) == [1, 2, 3, 4, 5] and e["missing"] == [[5, "E Five", "Questionable"]]
@@ -1202,7 +1202,8 @@ def test_projected_lineups_fill_in_for_who_is_out():
     five = [s[0] for s in m["starters"]]
     # E (Out) -> F, who started when E sat; C (Doubtful, never missed a start) -> H, the other center (over G's minutes)
     assert sorted(five) == [1, 2, 4, 6, 8] and m["subs"] == [[6, 5, "Eee F"], [8, 3, "Cee C"]]
-    assert [s[2][:1] for s in m["starters"]] == ["G", "G", "F", "F", "C"]          # guards, then forwards, then centers
+    # no starts by slot: their listed positions put the five PG to C (G: PG or SG, F: SF or PF), ties in the order found
+    assert [s[:3] for s in m["starters"]] == [[1, "Ay G", "PG"], [4, "Dee G", "SG"], [2, "Bee F", "SF"], [6, "Eff F", "PF"], [8, "Aitch C", "C"]]
     assert dict((s[0], s[3]) for s in m["starters"])[4] == "Questionable" and m["status"] == "Projected"
     assert sorted(x[0] for x in m["missing"]) == [3, 5]
     # last season C sat twice for MIN and G started both: that evidence beats position (and E's 3 makes his the surer pick)
@@ -1211,6 +1212,30 @@ def test_projected_lineups_fill_in_for_who_is_out():
                                                     for i in (1, 2)]
     m2 = RS.projected_lineups(games, dict(boxes, MIN=ls + mins), official, roster, {})[f"{D}|MIN"]
     assert m2["subs"] == [[6, 5, "Eee F"], [7, 3, "Cee C"]]
+    # the slots they start in: this season's starts (D at PG, though A started there last season), then last season's
+    # (F at SF over B), then the listed position; a guard who starts at SF this season goes there
+    slots = {4: {"PG": [6, 0]}, 1: {"PG": [0, 20], "SG": [0, 3]}, 6: {"SF": [0, 9]}}
+    m3 = RS.projected_lineups(games, boxes, official, roster, {f"{D}|WAS": {}}, slots)[f"{D}|MIN"]
+    assert [s[:3] for s in m3["starters"]] == [[4, "Dee G", "PG"], [1, "Ay G", "SG"], [6, "Eff F", "SF"], [2, "Bee F", "PF"], [8, "Aitch C", "C"]]
+    slots[1] = {"SF": [2, 0]}
+    m4 = RS.projected_lineups(games, boxes, official, roster, {f"{D}|WAS": {}}, slots)[f"{D}|MIN"]
+    assert [s[:3] for s in m4["starters"]] == [[4, "Dee G", "PG"], [2, "Bee F", "SG"], [1, "Ay G", "SF"], [6, "Eff F", "PF"], [8, "Aitch C", "C"]]
+
+
+def test_start_slots_count_box_score_starts():
+    m = sqlite3.connect(":memory:")
+    m.execute("CREATE TABLE games (gid TEXT, season TEXT, date TEXT)")
+    m.execute("CREATE TABLE player_games (gid TEXT, pid INTEGER, pos TEXT, starter INTEGER)")
+    m.executemany("INSERT INTO games VALUES (?, ?, ?)", [("a", "2026-27", "2026-10-30"), ("b", "2026-27", "2026-11-01"),
+                                                         ("c", "2025-26", "2026-03-01"), ("d", "2024-25", "2025-03-01")])
+    m.executemany("INSERT INTO player_games VALUES (?, ?, ?, ?)", [("a", 1, "PG", 1), ("b", 1, "PG", 1), ("c", 1, "SG", 1),
+                                                                   ("d", 1, "SF", 1), ("a", 2, "", 0), ("b", 3, "C", 1)])
+    s = RS.start_slots(m, ("2025-26", "2026-27"))
+    assert {p: dict(v) for p, v in s.items()} == {1: {"PG": [2, 0], "SG": [0, 1]}, 3: {"C": [1, 0]}}   # 2024-25: not counted
+    assert RS.slot_five([], {}, lambda p: "") == []
+    # no starts: the listed position's first group before its second (an F-G at a forward slot, a G-F at a guard slot)
+    gen = {10: "F-G", 11: "G-F", 12: "G", 13: "F", 14: "C"}.get
+    assert RS.slot_five([10, 11, 12, 13, 14], {}, gen) == [(11, "PG"), (12, "SG"), (10, "SF"), (13, "PF"), (14, "C")]
 
 
 def _min_season():
@@ -1261,18 +1286,54 @@ def test_projected_minutes_for_who_can_play_tonight():
 def test_build_carries_projected_minutes(payload):
     e = payload["lineups"][f"{GD}|PHX"]
     assert [r[0] for r in e["min"]][:2] == [1, 2] and payload["sources"]["minutes"] == {"model": "ROLE1 v3", "teams": 2}
+    # the projected five by box-score slot: Booker starts at SG every game, so Allen (a G, no starts) takes PG
+    assert [s[:3] for s in e["starters"]] == [[2, "Grayson Allen", "PG"], [1, "Devin Booker", "SG"]]
 
 
 def test_page_shows_projected_minutes():
     html = UI.page()
     assert "${subs}${miss}${ina}${luMins(e, key)}</div>" in html and 'luTeam(t, L[g.date + "|" + t], g.date + "|" + t)' in html
     assert "if (!(e.min || []).length) return \"\";" in html
-    assert '<details class="lmn" data-k="${esc(key)}"${LMN.has(key) ? " open" : ""}><summary>Projected minutes</summary>' in html
+    assert ('<details class="lmn" data-k="${esc(key)}"${LMN.has(key) ? " open" : ""}><summary>Projected minutes</summary>'
+            '<div class="lmw"><table class="lmt">') in html
     # the open lists survive a refresh: a toggle (it does not bubble) is caught on the way down
     assert 'document.addEventListener("toggle", ev => {' in html and "if (d.open) LMN.add(d.dataset.k); else LMN.delete(d.dataset.k); } }, true);" in html
-    assert '<tr data-vp="${pid}"><td>${esc(nameOf(name))}${INJ_S[st] ? `<span class="tg ${INJ_C[st]}">${INJ_S[st]}</span>` : ""}</td>' in html
+    assert '<tr data-vp="${pid}"${sep ? \' class="lsep"\' : ""}><td>${esc(nameOf(name))}${INJ_S[st] ? `<span class="tg ${INJ_C[st]}">${INJ_S[st]}</span>` : ""}</td>' in html
+    assert ".lmt tr.lsep td{border-top:2px solid #5c5c5c}" in html
     assert '<td class="${dv >= 1 ? "up" : dv <= -1 ? "dn" : ""}">${dv >= .05 ? "+" : dv <= -.05 ? "−" : ""}${Math.abs(dv).toFixed(1)}</td>' in html
     assert ".lmt td.up{color:var(--grn)} .lmt td.dn{color:var(--red)}" in html
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_minutes_list_puts_the_five_first():
+    html = UI.page()
+    upto = lambda pre, end: html[html.index(pre): html.index(end, html.index(pre))]
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "t.js").write_text("const esc = x => String(x), nameOf = x => x, INJ_S = {Questionable: \"Q\"}, INJ_C = {Questionable: \"tq\"}, LMN = new Set();\n"
+                            + upto("function luMins(e, key) {", "// opening and closing glide") + """
+const min = [[6, "F", 33, 30, null], [1, "A", 31, 30, null], [9, "J", 24, 20, "Questionable"], [2, "B", 22, 25, null],
+             [4, "D", 20, 20, null], [7, "G", 18, 18, null], [8, "H", 6, 8, null]];
+const ids = h => [...h.matchAll(/<tr data-vp="(\\d+)"( class="lsep")?/g)].map(m => m[2] ? m[1] + "|" : +m[1]);
+const five = [[1, "A", "PG"], [2, "B", "SG"], [4, "D", "SF"], [6, "F", "PF"], [3, "C", "C"]];   // C: out tonight
+console.log(JSON.stringify([ids(luMins({starters: five, min}, "k")), ids(luMins({starters: [], min}, "k")), luMins({starters: five, min: []}, "k")]));
+""")
+    with_five, none, empty = json.loads(subprocess.run([NODE, str(d / "t.js")], capture_output=True, text=True, check=True).stdout)
+    assert with_five == [1, 2, 4, 6, "9|", 7, 8]          # the five as the tiles (one out), a line, the bench by minutes
+    assert none == [6, 1, 9, 2, 4, 7, 8] and empty == ""   # no five yet: by minutes, no line
+
+
+def test_minutes_list_glides_open_and_shut():
+    html = UI.page()
+    assert 'const s = ev.target.closest(".lmn > summary");' in html and "ev.preventDefault();" in html
+    assert "if (REDUCED) { d.open = !d.open; return; }" in html
+    # from wherever a second tap catches it: the height now and the table's opacity now (shut: 0, though a browser
+    # that keeps a closed list's layout still measures it full)
+    assert "const h0 = d.open ? w.getBoundingClientRect().height : 0, o0 = d.open ? +getComputedStyle(t).opacity : 0;" in html
+    assert 'd._a = [w.animate([{height: h0 + "px"}, {height: "0px"}], {duration: 300, easing: EASE}),' in html
+    assert "d._a[0].onfinish = () => { d.open = false; d.classList.remove(\"shut\"); d._a[1].cancel(); d._a = null; };" in html
+    assert 'd._a = [w.animate([{height: h0 + "px"}, {height: w.scrollHeight + "px"}], {duration: 380, easing: EASE}),' in html
+    assert ".lmw{overflow:hidden}" in html and ".lmn[open]:not(.shut) summary::after{transform:rotate(-135deg) translate(-1.5px,-1.5px)}" in html
+    assert "margin-top:4px;transform:rotate(-135deg)" not in html
 
 
 def test_page_shows_projected_lineups():
