@@ -49,6 +49,7 @@ TRACKING = HERE / "nba_tracking.sqlite"
 PROJ_LOG = HERE / "nba_proj_log.sqlite"          # the projection engine's prospective record (prereg test C)
 ROLE = HERE / "nba_role.sqlite"                  # the engine's rules' log (nba_role_open.py, the VM cron); read-only
 LINEUPS = HERE / "nba_lineups.sqlite"            # NBA.com's daily lineups as seen (nba_lineups_poll.py, the VM cron)
+ROLE_GAMELOGS = HERE / "nba_gamelogs.sqlite"     # positions (and last season's logs) for ROLE1's minutes (nba_role.RoleData)
 CLOSE_BOARDS = HERE / "nba_close_boards.json"    # each started game's last board before tip (closing_boards), cached
 SLATE_ROLL_H = 6     # the slate moves on to the next day at 6 AM ET (4 AM MT), not midnight: late games stay on it
 USUAL_GAMES = 10                                 # a team's usual starters: its most frequent five over its last 10 games
@@ -790,6 +791,43 @@ def projected_lineups(games, boxes, official, roster, posted):
     return out
 
 
+MIN_OUT = ("Out", "Doubtful")                    # not in tonight's minutes, as not in a projected five
+
+
+def projected_minutes(rd, games, official, lu, roster):
+    """{"date|TEAM": [[pid, name, minutes, last 5, report status]]}, the most minutes first: ROLE1 v3 (nba_role.project,
+    the live ROLE_OPEN model) for everyone who can play tonight. Who can play: anyone from the team's last 3 games, a
+    player back from injury (he played for the team this season and tonight's report lists him, not Out or Doubtful)
+    and tonight's starters; less anyone Out or Doubtful, NBA.com's inactive list and a player the roster now puts on
+    another team. A rotation player out (or traded) in his absence games 1-3 has his minutes shared out as ROLE_OPEN
+    does (SPOT_MAX); a longer absence is already in everyone's last 5. Questionable players are in, their status shown.
+    last 5: his average over his last 5 games (base_min), what tonight's absences move."""
+    import nba_role as RL
+    out = {}
+    for g in games:
+        d = g["date_et"]
+        for team in (g["away"], g["home"]):
+            prior = rd.season.before(team, d)
+            if not prior:
+                continue
+            e = lu.get(f"{d}|{team}") or {}
+            st = lambda pid: (official.get((d, pid)) or {}).get("status")
+            other = lambda pid: str(pid) in roster and roster[str(pid)][0] != team
+            last3 = rd.season.roster(team, d)
+            seen = {p for _d, _g, b in prior for p, r in b.items() if r["min"]}
+            back = {p for p in seen - last3 if st(p) and st(p) not in MIN_OUT}
+            starters = {s[0] for s in e.get("starters", [])}
+            pool = {p for p in last3 | back | starters if not other(p)}
+            gone = {p for p in pool if st(p) in MIN_OUT} | {p for p, _n in e.get("inactive", [])} | {p for p in last3 if other(p)}
+            spots = {x for x, n in rd.season.absences(team, d, gone).items() if n <= RL.SPOT_MAX}
+            proj = RL.project(rd.season, rd.priors, rd.groups, team, d, pool - gone, spots, mode="v3")
+            nm = {s[0]: s[1] for s in e.get("starters", [])}
+            name = lambda p: (roster.get(str(p)) or [None, None])[1] or nm.get(p) or ""
+            out[f"{d}|{team}"] = sorted(([p, name(p), round(v["min"], 1), round(v["base_min"], 1), st(p)] for p, v in proj.items()),
+                                        key=lambda r: (-r[2], r[1]))
+    return out
+
+
 def team_mates(boxes, roster):
     """{team: {"gids": [its games, oldest first], "mates": [{pid, name, since, on, mpg, gp}]}} — everyone on each
     team's roster now who has played for it in the cached seasons, the most minutes a game first. on: "1" / "0" per
@@ -1057,7 +1095,7 @@ def correlations(props, logs):
 
 # ── the payload ──────────────────────────────────────────────────────────────────────────────────────────
 def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None, index=None, box_get=None, tracking=None,
-          lineups_db=None, role_db=None, cup=None):
+          lineups_db=None, role_db=None, cup=None, gamelogs=None):
     import nba_matchup as MU
     now = now or dt.datetime.now(dt.timezone.utc)
     if sched is None:
@@ -1241,6 +1279,16 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
     # NBA.com's posted lineups, and a projected five for every slate team still without one
     lu = lineups(lcon, dates, boxes, official)
     lu.update(projected_lineups(games, boxes, official, idx, lu))
+    # each slate team's minutes tonight (the Lineups tab's Projected minutes); on any failure the lineups carry none
+    try:
+        import nba_role as RL
+        mins = projected_minutes(RL.RoleData(mpath, gamelogs or ROLE_GAMELOGS, season), games, official, lu, idx)
+        for k, v in mins.items():
+            if k in lu:
+                lu[k]["min"] = v
+        min_meta = {"model": "ROLE1 v3", "teams": len(mins)}
+    except Exception as e:                                                   # noqa: BLE001
+        min_meta = {"error": f"minutes unavailable ({type(e).__name__})"}
     out = {
         "generated_at": stamp, "season": season, "dates": dates, "log_cols": list(LOG_COLS),
         "hist_t0": t0.isoformat() if t0 else None,
@@ -1248,7 +1296,7 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
         "sources": {"books": fresh, "report": report_meta,
                     "logs": {"through": max((r[0] for v in logs.values() for r in v), default=None),
                              "seasons": [prev_season(season), season]},
-                    "matchup": {"available": S is not None},
+                    "matchup": {"available": S is not None}, "minutes": min_meta,
                     "game_lines": {"games": len(glines)}},
         "games": [{"gid": g["gid"], "date": g["date_et"], "tip": g["utc"], "away": g["away"], "home": g["home"],
                    "lines": glines.get(g["gid"]), "spots": spots.get(g["gid"]),

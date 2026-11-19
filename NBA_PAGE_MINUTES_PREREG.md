@@ -69,3 +69,30 @@ Each gives a player's minutes if he plays. A DNP voids a prop.
 ## Not changed after this point
 The models, data, population and decision rule above stay as written. Fixes to bugs are allowed. Each one is listed in
 the result with its effect.
+
+## Result (2026-11-19; `audit/page_minutes/`)
+**Data:**
+- 179 games, with 3,890 player-games by available players who played.
+- 11.3% of the available didn't play (498 of 4,388).
+- No bug fixes were made after the pre-registration.
+
+Each cell is the minutes MAE, with the mean error in brackets.
+
+| | All (3,890) | Posted starters (1,790) | Bench (2,100) |
+|---|---|---|---|
+| V3 | **4.76** (−0.70) | 4.99 (−1.05) | **4.57** (−0.40) |
+| V3-P | 4.82 (+0.78) | 4.92 (+0.87) | 4.74 (+0.70) |
+| L5 | 4.85 (−0.45) | **4.81** (−0.96) | 4.88 (−0.01) |
+
+- **MAE(V3-P) − MAE(V3):** +0.058, with a 95% interval of −0.010 to +0.132.
+- **Decision: V3 stays.** V3-P isn't more accurate. It overshoots: V3 runs 0.7 minutes low on average, and V3-P runs
+  0.8 high.
+
+**Read:**
+- **The squeeze is smaller than the 11-19 slate suggested.** V3 runs 0.7 minutes low overall and 1.0 low for
+  starters.
+- **V3 is the most accurate of the three overall and for the bench.**
+- **For starters, his own last 5 does slightly better** (4.81 against 4.99).
+- **What could help later,** as a new pre-registration with fresh games:
+  - Starters' minutes from their own last 5.
+  - A scale between V3 and V3-P.
