@@ -829,16 +829,60 @@ def projected_lineups(games, boxes, official, roster, posted, slots=None):
 
 
 MIN_OUT = ("Out", "Doubtful")                    # not in tonight's minutes, as not in a projected five
+# the minutes by role (RM, NBA_PAGE_MINUTES_ROLE_PREREG.md; fitted on 2025-26): a first start's minutes, a starter
+# moved to the bench, the pull toward the role prior (games), and the bench's chance of playing by (share of the team's
+# last 10 games played: 0-.2, .3-.5, .6-.8, .9-1; last 5: under 10, 10-20, 20 and up)
+RM_UP, RM_DN, RM_K, RM_CAP = 9.0, 6.0, 4.0, 40.0
+RM_P = {(0, 0): .842, (0, 1): .861, (0, 2): .854, (1, 0): .738, (1, 1): .833, (1, 2): .757,
+        (2, 0): .753, (2, 1): .857, (2, 2): .743, (3, 0): .806, (3, 1): .931, (3, 2): .861}
+# RM2 (the same prereg, its RM2 section): the bench's chance of playing from 2026-27's real pool (10-26 to 11-18; a bucket
+# under 50 takes its last-5 column's rate); tested on games from 11-19 on
+RM2_P = {(0, 0): .473, (0, 1): .909, (0, 2): .99, (1, 0): .552, (1, 1): .77, (1, 2): .99,
+         (2, 0): .617, (2, 1): .878, (2, 2): .978, (3, 0): .773, (3, 1): .956, (3, 2): .992}
 
 
-def projected_minutes(rd, games, official, lu, roster):
+def season_starts(mpath, season):
+    """{(gid, pid)} this season's box-score starts (nba_matchup)."""
+    m = sqlite3.connect(f"file:{mpath}?mode=ro", uri=True)
+    try:
+        return {(g, p) for g, p in m.execute("SELECT p.gid, p.pid FROM player_games p JOIN games g ON g.gid = p.gid "
+                                             "WHERE g.season = ? AND p.starter = 1", (season,))}
+    finally:
+        m.close()
+
+
+def role_minutes(prior, starts, pool, five, chance_table=None):
+    """{pid: (minutes, last 5)} by role (RM): tonight's starters (five) from their own starts, the bench from its bench
+    games, each pulled toward his last 5 (+RM_UP x the share of it he came off the bench for a starter, -RM_DN x the
+    share he started for the bench) by RM_K games; then scaled so the minutes, each times his chance of playing
+    (a starter 1, the bench chance_table: RM_P, RM2_P), fill 240. prior: the team's games before tonight [(date, gid, {pid: row})];
+    starts: {(gid, pid)}. Minutes if he plays: 0 to 40."""
+    l10, base, chance, l5, table = prior[-10:], {}, {}, {}, chance_table or RM_P
+    for p in pool:
+        his = [(g, b[p]["min"]) for _d, g, b in prior if p in b and b[p]["min"]]
+        last = his[-5:]
+        l5[p] = sum(m for _g, m in last) / len(last) if last else 0.0
+        s = sum(1 for g, _m in last if (g, p) in starts) / len(last) if last else 0.0
+        st = p in five
+        xs = [m for g, m in his if ((g, p) in starts) == st][-5:]
+        pr = l5[p] + RM_UP * (1 - s) if st else l5[p] - RM_DN * s
+        base[p] = max(0.0, min(RM_CAP, (sum(xs) + RM_K * pr) / (len(xs) + RM_K)))
+        pl10 = sum(1 for _d, _g, b in l10 if p in b and b[p]["min"]) / len(l10) if l10 else 0.0
+        chance[p] = 1.0 if st else table.get((min(int(pl10 * 10) // 3, 3), 0 if l5[p] < 10 else 1 if l5[p] < 20 else 2), 0.9)
+    tot = sum(chance[p] * base[p] for p in pool)
+    c = 240.0 / tot if tot > 0 else 1.0
+    return {p: (min(RM_CAP, base[p] * c), l5[p]) for p in pool}
+
+
+def projected_minutes(rd, games, official, lu, roster, model="v3", starts=frozenset(), chance_table=None):
     """{"date|TEAM": [[pid, name, minutes, last 5, report status]]}, the most minutes first: ROLE1 v3 (nba_role.project,
     the live ROLE_OPEN model) for everyone who can play tonight. Who can play: anyone from the team's last 3 games, a
     player back from injury (he played for the team this season and tonight's report lists him, not Out or Doubtful)
     and tonight's starters; less anyone Out or Doubtful, NBA.com's inactive list and a player the roster now puts on
     another team. A rotation player out (or traded) in his absence games 1-3 has his minutes shared out as ROLE_OPEN
     does (SPOT_MAX); a longer absence is already in everyone's last 5. Questionable players are in, their status shown.
-    last 5: his average over his last 5 games (base_min), what tonight's absences move."""
+    last 5: his average over his last 5 games (base_min), what tonight's absences move. model "role": role_minutes (RM)
+    for the same players, tonight's five (posted, else projected) as the starters; starts: season_starts()."""
     import nba_role as RL
     out = {}
     for g in games:
@@ -856,11 +900,15 @@ def projected_minutes(rd, games, official, lu, roster):
             starters = {s[0] for s in e.get("starters", [])}
             pool = {p for p in last3 | back | starters if not other(p)}
             gone = {p for p in pool if st(p) in MIN_OUT} | {p for p, _n in e.get("inactive", [])} | {p for p in last3 if other(p)}
-            spots = {x for x, n in rd.season.absences(team, d, gone).items() if n <= RL.SPOT_MAX}
-            proj = RL.project(rd.season, rd.priors, rd.groups, team, d, pool - gone, spots, mode="v3")
+            if model == "role":
+                proj = role_minutes(prior, starts, pool - gone, starters, chance_table)
+            else:
+                spots = {x for x, n in rd.season.absences(team, d, gone).items() if n <= RL.SPOT_MAX}
+                proj = {p: (v["min"], v["base_min"]) for p, v in
+                        RL.project(rd.season, rd.priors, rd.groups, team, d, pool - gone, spots, mode="v3").items()}
             nm = {s[0]: s[1] for s in e.get("starters", [])}
             name = lambda p: (roster.get(str(p)) or [None, None])[1] or nm.get(p) or ""
-            out[f"{d}|{team}"] = sorted(([p, name(p), round(v["min"], 1), round(v["base_min"], 1), st(p)] for p, v in proj.items()),
+            out[f"{d}|{team}"] = sorted(([p, name(p), round(m, 1), round(b, 1), st(p)] for p, (m, b) in proj.items()),
                                         key=lambda r: (-r[2], r[1]))
     return out
 
