@@ -1283,6 +1283,50 @@ def test_projected_minutes_for_who_can_play_tonight():
     assert abs(sum(r[2] for r in m) - 240) < 0.5
 
 
+def test_role_minutes_by_role():
+    # T's 6 games: A starts (39), B off the bench (20), C a big bench player (30), D a regular starter (30), E off the bench
+    # (15) then starting twice (25), F deep bench (5, 2 games), G H the bench (20: the 20-and-up bucket), I J (15), L 2
+    # starts of 3 minutes
+    gs = [f"g{i}" for i in range(6)]
+    box = lambda i: {**{1: 39, 2: 20, 3: 24 if i == 1 else 30, 4: 30, 5: 25 if i >= 4 else 15}, **({6: 5} if i in (0, 3) else {}),
+                     **{7: 20, 8: 20, 9: 15, 10: 15}, **({12: 3} if i >= 4 else {})}
+    prior = [(f"2026-10-{10 + i}", g, {p: {"min": float(m)} for p, m in box(i).items()}) for i, g in enumerate(gs)]
+    starts = {(g, p) for g in gs for p in (1, 4)} | {("g4", 5), ("g5", 5), ("g4", 12), ("g5", 12)}
+    pool, five = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12}, {1, 2, 5}       # B promoted, D to the bench, E starts again
+    base = {1: (5 * 39 + 4 * 39) / 9,                       # his last 5 starts, his last 5 his prior
+            2: 20 + 9,                                      # a first start: last 5 + 9
+            3: (24 + 4 * 30 + 4 * 28.8) / 9,                # a big bench player keeps his bench minutes (his last 5: 28.8)
+            4: 30 - 6,                                      # a regular starter off the bench: last 5 - 6
+            5: (2 * 25 + 4 * (19 + 9 * 0.6)) / 6,           # 2 starts; last 5 19, started 2 of 5
+            6: (2 * 5 + 4 * 5) / 6, 12: 0.0,                # L: 3 - 6 below 0 counts as 0
+            7: 20.0, 8: 20.0, 9: 15.0, 10: 15.0}
+    for table, P in ((None, {3: .861, 4: .861, 6: .738, 7: .861, 9: .931}), (RS.RM2_P, {3: .992, 4: .992, 6: .552, 7: .992, 9: .956})):
+        P = {1: 1, 2: 1, 5: 1, 12: .738 if table is None else .552, 8: P[7], 10: P[9], **P}
+        c = 240 / sum(P[p] * base[p] for p in pool)
+        out = RS.role_minutes(prior, starts, pool, five, table)
+        assert set(out) == pool and abs(out[5][1] - 19) < 1e-9 and out[12] == (0.0, 3.0)
+        for p in pool:
+            assert abs(out[p][0] - min(40.0, base[p] * c)) < 1e-9, (table is None, p)
+    assert RS.role_minutes(prior, starts, pool, five)[1][0] == 40.0       # capped at 40
+
+
+def test_projected_minutes_by_role():
+    rd, RL = _min_season()
+    D = "2026-10-21"
+    roster = {str(p): ["MIN", f"Player {p}", "G"] for p in (*range(1, 10), 12)} | {"10": ["WAS", "Player 10", "F"], "13": ["WAS", "P13", "G"]}
+    official = {(D, 5): {"status": "Out"}, (D, 3): {"status": "Doubtful"}, (D, 9): {"status": "Available"}}
+    lu = {f"{D}|MIN": {"status": "Expected", "starters": [[1, "A", "PG"], [2, "B", "SG"], [4, "D", "SF"], [6, "F", "PF"], [7, "G", "C"]],
+                       "inactive": [[8, "H"], [12, "L"]]}}
+    starts = {(f"m{i}", p) for i in range(10) for p in (1, 2, 3, 4, 5)}
+    games = [{"date_et": D, "home": "MIN", "away": "WAS"}]
+    m = RS.projected_minutes(rd, games, official, lu, roster, model="role", starts=starts)[f"{D}|MIN"]
+    for table in (None, RS.RM2_P):
+        ref = RS.role_minutes(rd.season.before("MIN", D), starts, {1, 2, 4, 6, 7, 9}, {1, 2, 4, 6, 7}, table)
+        got = RS.projected_minutes(rd, games, official, lu, roster, model="role", starts=starts, chance_table=table)[f"{D}|MIN"]
+        assert {r[0]: (r[2], r[3]) for r in got} == {p: (round(v, 1), round(b, 1)) for p, (v, b) in ref.items()}
+    assert [r[2] for r in m] == sorted((r[2] for r in m), reverse=True)
+
+
 def test_build_carries_projected_minutes(payload):
     e = payload["lineups"][f"{GD}|PHX"]
     assert [r[0] for r in e["min"]][:2] == [1, 2] and payload["sources"]["minutes"] == {"model": "ROLE1 v3", "teams": 2}

@@ -108,3 +108,81 @@ tonight's five. Out, Doubtful, NBA.com's inactive list and traded players are re
 ## Not changed after this point
 The model, its constants, the data, the population and the decision rule above stay as written. Fixes to bugs are
 allowed. Each one is listed in the result with its effect.
+
+## Result (2026-11-19; `audit/page_minutes_role/`, `result.20261119.json`)
+**Data:**
+- 179 games, with 3,890 player-games by available players who played. 11.3% of the available didn't play (498 of 4,388).
+- **The one bug fix:** a base under 0 counts as 0.
+  - Without it, a bench player with a tiny last 5 who had started could come out below 0.
+  - In 2025-26, 189 player-games sit at 0, nearly all players with no games yet (V3 gives them 0 too).
+  - The fit stays 4.769. In this test 1 player-game sits at 0.
+
+Each cell is the minutes MAE, with the mean error in brackets.
+
+| | All (3,890) | Posted five (1,790) | Bench (2,100) |
+|---|---|---|---|
+| V3 | 4.76 (−0.70) | 4.99 (−1.05) | **4.57** (−0.40) |
+| RM | **4.69** (+0.58) | **4.76** (+1.30) | 4.64 (−0.04) |
+| L5 | 4.85 (−0.45) | 4.81 (−0.96) | 4.88 (−0.01) |
+
+- **MAE(RM) − MAE(V3):** −0.067, with a 95% interval of −0.155 to +0.025.
+- **Decision: V3 stays.** The interval reaches above 0.
+
+**Read:**
+- **RM is better for the five** (4.76 against 4.99) and slightly worse for the bench.
+- **The known risk happened.** RM runs high, +1.3 for the five.
+- **The cause:** the 2025-26 chance-of-playing table came from the approximated pool.
+- **This season's real pool** (reports and inactive lists, 10-26 to 11-18):
+  - A bench player under 10 minutes plays 47-77% of the time (2025-26's table: 74-84%).
+  - One at 20+ plays 98-100% (2025-26's: 74-86%).
+- **The user's examples:**
+
+  | Game | Player | Role | Actual | V3 | RM |
+  |---|---|---|---|---|---|
+  | 11-18 UTA | Hayes | bench | 25.4 | 23.5 | 18.3 |
+  | 11-18 UTA | Bamba | start | 22.6 | 17.9 | 29.4 |
+  | 11-17 POR | Kent | start | 27.2 | 13.2 | 22.1 |
+  | 11-17 POR | Holiday | bench | 30.9 | 27.5 | 29.2 |
+
+  - For Kent and Holiday, RM is closer.
+  - For Hayes and Bamba, RM is further off: the regular starter off the bench still played his minutes.
+
+## RM2: pre-registration (fresh games only)
+Written and committed on 2026-11-19, after RM's result above and before any game of RM2's test was played.
+
+**Model RM2:** RM with one change. The bench's chance of playing comes from 2026-27's real pool.
+- The pool is 10-26 to 11-18, built as the page builds it (`fit_2026_p.py`, `p_2026.json`).
+- A bucket with under 50 players takes its L5 column's rate.
+- Everything else is RM's, unchanged: 9, 6, 4 and the 0-to-40 range.
+
+**RM2's table:**
+
+| Share of last 10 played | L5 under 10 | L5 10-20 | L5 20+ |
+|---|---|---|---|
+| 0-0.2 | 0.473 | 0.909 | 0.990 |
+| 0.3-0.5 | 0.552 | 0.770 | 0.990 |
+| 0.6-0.8 | 0.617 | 0.878 | 0.978 |
+| 0.9-1 | 0.773 | 0.956 | 0.992 |
+
+**Already seen:**
+- RM2 on the same 179 games is in-sample, since its table was fitted on them.
+- 4.67 overall (+0.21); 4.76 for the five (+0.82); 4.59 for the bench. Against V3: −0.095.
+- It is information only, not a test.
+
+**The test:**
+- **Games:** the first 150 regular-season games from 2026-11-19 on (`nba_page_minutes_role_fwd.py`; the data from
+  `extract_vm_fwd.py` on the VM, read-only).
+- **Method:** point in time, with the same population and measures as above.
+
+**Decision:**
+- **RM2 replaces V3 in the Projected minutes list when all three hold:**
+  - Its overall MAE is lower.
+  - The 95% interval of MAE(RM2) − MAE(V3) is below 0 (2,000 resamples of whole games, seed 5).
+  - Its MAE for the posted five isn't higher.
+- **Otherwise V3 stays.**
+- **RM as registered** is scored on the same games and reported, not decided on.
+- **Until then the page shows V3.**
+
+## Not changed after this point (RM2)
+RM2, its table, the games, the population and the decision rule above stay as written. Fixes to bugs are allowed. Each
+one is listed in the result with its effect.
