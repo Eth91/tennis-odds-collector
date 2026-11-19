@@ -678,9 +678,44 @@ def closing_boards(q, gids, cache=CLOSE_BOARDS, markets=None):
     return out, names
 
 
+SLOTS = ("PG", "SG", "SF", "PF", "C")            # a five, left to right
+GEN_SLOTS = {"G": ("PG", "SG"), "F": ("SF", "PF"), "C": ("C",)}
+
+
+def start_slots(mcon, seasons):
+    """{pid: {slot: [starts this season, starts last season]}} from the box scores' starting positions (PG..C).
+    seasons: (last, this)."""
+    out = defaultdict(lambda: defaultdict(lambda: [0, 0]))
+    if mcon is None:
+        return out
+    for pid, s, pos, n in mcon.execute(
+            f"SELECT p.pid, g.season, p.pos, COUNT(*) FROM player_games p JOIN games g ON g.gid = p.gid WHERE p.starter = 1 "
+            f"AND p.pos != '' AND g.season IN (?, ?) GROUP BY p.pid, g.season, p.pos", tuple(seasons)):
+        out[pid][pos][0 if s == seasons[1] else 1] += n
+    return out
+
+
+def slot_five(five, slots, gen):
+    """[(pid, slot)] in SLOTS order: the five's slots, PG to C, with the most starts in them this season, then last
+    season, then the listed position's fit (G: PG or SG, F: SF or PF, C; "G-F": a guard first, a forward next). Ties go
+    to the order given."""
+    import itertools
+    slots = slots or {}
+
+    def fit(pid, slot):
+        c = (slots.get(pid) or {}).get(slot) or (0, 0)
+        parts = [x for x in (gen(pid) or "").split("-") if x]
+        f = 2 if parts and slot in GEN_SLOTS.get(parts[0], ()) else 1 if any(slot in GEN_SLOTS.get(x, ()) for x in parts[1:]) else 0
+        return (c[0], c[1], f)
+    best = max(itertools.permutations(SLOTS, len(five)),
+               key=lambda perm: tuple(sum(x) for x in zip(*(fit(p, s) for p, s in zip(five, perm)))))
+    return sorted(zip(five, best), key=lambda ps: SLOTS.index(ps[1]))
+
+
 def lineups(lcon, dates, boxes, official):
     """{"date|TEAM": {status, at, starters: [[pid, name, pos, report status]], usual: [pid], missing: [[pid, name, status]],
-    inactive: [[pid, name]]}} from the latest NBA.com lineups snapshot of each date (nba_lineups_poll.py). status:
+    inactive: [[pid, name]]}} from the latest NBA.com lineups snapshot of each date (nba_lineups_poll.py), the five in
+    PG, SG, SF, PF, C order (NBA.com posts SG, SF, PG, PF, C). status:
     Confirmed once all five starters are, else Expected; at: the newest confirmation. usual: the five who started most
     of the team's last USUAL_GAMES games this season (team_boxes rows), empty until it has USUAL_MIN (last season's
     starters are not this team's after an offseason); missing: a usual starter on tonight's list not starting, with his
@@ -704,7 +739,8 @@ def lineups(lcon, dates, boxes, official):
                 team, ps = t.get("teamAbbreviation"), t.get("players") or []
                 if not team or not ps:
                     continue
-                st = [p for p in ps if p.get("position")]
+                st = sorted((p for p in ps if p.get("position")),
+                            key=lambda p: SLOTS.index(p["position"]) if p["position"] in SLOTS else len(SLOTS))
                 recent = [b for b in boxes.get(team, []) if b[1] < d and b[2] == season_of(d)][-USUAL_GAMES:]
                 starts = defaultdict(int)
                 for b in recent:
@@ -729,14 +765,15 @@ def lineups(lcon, dates, boxes, official):
 LINEUP_OUT = ("Out", "Doubtful")                 # a projected lineup leaves these out; Questionable / Probable are in
 
 
-def projected_lineups(games, boxes, official, roster, posted):
-    """{"date|TEAM": {status: "Projected", starters: [[pid, name, pos, report status]], subs: [[pid, for pid, for name]],
+def projected_lineups(games, boxes, official, roster, posted, slots=None):
+    """{"date|TEAM": {status: "Projected", starters: [[pid, name, slot, report status]], subs: [[pid, for pid, for name]],
     usual: [pid], missing: [[pid, name, status]], inactive: []}} for each slate team with no posted lineup: its usual
     five (the most starts over its last USUAL_GAMES games this season, players on its roster now; USUAL_MIN games
     first) less anyone Out or Doubtful on the official report (Questionable and Probable players stay, their status
     shown). Each missing starter is replaced by whoever started most often in the team's games he did not start (this
     season and last, the seasons he was on the team), a player of his position first among equals, then the most starts
-    and minutes lately; the surest replacement is placed first. Guards first, then forwards, then centers."""
+    and minutes lately; the surest replacement is placed first. The five in PG, SG, SF, PF, C order (slot_five: the
+    slots they start in, from slots = start_slots(); else their listed positions)."""
     out = {}
     for g in games:
         d, season = g["date_et"], season_of(g["date_et"])
@@ -782,9 +819,9 @@ def projected_lineups(games, boxes, official, roster, posted):
                 if not cands:
                     break
                 five.append(max(cands, key=lambda pid: (starts[pid], mins[pid])))
-            five.sort(key=lambda pid: {"G": 0, "F": 1, "C": 2}.get(pos(pid)[:1], 1))
             out[f"{d}|{team}"] = {"status": "Projected", "at": None,
-                                  "starters": [[pid, (roster.get(str(pid)) or ["", ""])[1], pos(pid), status(pid)] for pid in five],
+                                  "starters": [[pid, (roster.get(str(pid)) or ["", ""])[1], slot, status(pid)]
+                                               for pid, slot in slot_five(five, slots, pos)],
                                   "subs": subs, "usual": usual,
                                   "missing": [[u, (roster.get(str(u)) or ["", ""])[1], status(u)] for u in usual if not ok(u)],
                                   "inactive": []}
@@ -1278,7 +1315,7 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
         fresh[b] = {"updated": at, "age_min": round(age, 1), "stale": age > BOOK_STALE_MIN}
     # NBA.com's posted lineups, and a projected five for every slate team still without one
     lu = lineups(lcon, dates, boxes, official)
-    lu.update(projected_lineups(games, boxes, official, idx, lu))
+    lu.update(projected_lineups(games, boxes, official, idx, lu, start_slots(mcon, both)))
     # each slate team's minutes tonight (the Lineups tab's Projected minutes); on any failure the lineups carry none
     try:
         import nba_role as RL
