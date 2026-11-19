@@ -392,6 +392,18 @@ svg.shct{display:block;width:100%;height:auto;margin-top:6px}
 .lum{margin-top:9px;font-size:12.5px;color:#b0b0b0;line-height:1.7}
 .lum b{margin-right:6px;font-size:10.5px;letter-spacing:.3px;color:#8e8e8e;text-transform:uppercase}
 .lum button{padding:0;border:0;background:none;color:#e6e6e6;font-size:12.5px} .lum .tg{margin:0 0 0 4px}
+/* Projected minutes under each team's five: a list that opens, the most minutes first */
+.lmn{margin-top:10px;padding-top:9px;border-top:1px solid #222}
+.lmn summary{display:flex;align-items:center;justify-content:space-between;list-style:none;cursor:pointer;font-size:10.5px;font-weight:700;letter-spacing:.3px;color:#8e8e8e;text-transform:uppercase}
+.lmn summary::-webkit-details-marker{display:none}
+.lmn summary::after{content:"";width:7px;height:7px;margin:-4px 4px 0 0;border-right:1.5px solid #8e8e8e;border-bottom:1.5px solid #8e8e8e;transform:rotate(45deg);transition:transform .2s}
+.lmn[open] summary::after{margin-top:4px;transform:rotate(-135deg)}
+.lmt{width:100%;margin-top:6px;border-collapse:collapse;font-size:13px}
+.lmt th{padding:2px 0 4px 10px;font-size:10px;font-weight:700;color:#8e8e8e;text-align:right}
+.lmt td{padding:7px 0 7px 10px;border-top:1px solid #1f1f1f;color:#e6e6e6;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.lmt td:first-child,.lmt th:first-child{width:100%;padding-left:0;text-align:left;white-space:normal}
+.lmt td:nth-child(3){color:#9a9a9a} .lmt td.up{color:var(--grn)} .lmt td.dn{color:var(--red)}
+.lmt tr[data-vp]{cursor:pointer} .lmt tr[data-vp]:active td{background:#1c1c1c}
 /* who guards him: the shot chart's card, the recent games' table */
 .wg table.vs{margin-top:6px} .wg .vs th:first-child,.wg .vs td:first-child{padding-left:0}
 .wg .vs td small{font-size:11px;color:#9a9a9a} .wg .vs tr:last-child td{border-bottom:0}
@@ -1629,9 +1641,18 @@ function lineupsView() {
   const gs = D.games.filter(g => g.date === ST.date && (ST.gid === "all" || g.gid === ST.gid)), L = D.lineups || {};
   if (!gs.length) return '<div class="empty"><b>No games</b></div>';
   if (!gs.some(g => L[g.date + "|" + g.home] || L[g.date + "|" + g.away])) return '<div class="empty"><b>Lineups not posted yet</b></div>';
-  return gs.map(g => `<div class="lug"><div class="lugh"><span>${esc(g.away)} @ ${esc(g.home)}</span><span>${when(g)}</span></div>${[g.away, g.home].map(t => luTeam(t, L[g.date + "|" + t])).join("")}</div>`).join("");
+  return gs.map(g => `<div class="lug"><div class="lugh"><span>${esc(g.away)} @ ${esc(g.home)}</span><span>${when(g)}</span></div>${[g.away, g.home].map(t => luTeam(t, L[g.date + "|" + t], g.date + "|" + t)).join("")}</div>`).join("");
 }
-function luTeam(t, e) {
+// Projected minutes (nba_research.projected_minutes, ROLE1 v3): a team's list stays open through every refresh
+const LMN = new Set();
+document.addEventListener("toggle", ev => { const d = ev.target; if (d.classList && d.classList.contains("lmn")) { if (d.open) LMN.add(d.dataset.k); else LMN.delete(d.dataset.k); } }, true);
+function luMins(e, key) {
+  if (!(e.min || []).length) return "";
+  const rows = e.min.map(([pid, name, m, b, st]) => { const dv = m - b;
+    return `<tr data-vp="${pid}"><td>${esc(nameOf(name))}${INJ_S[st] ? `<span class="tg ${INJ_C[st]}">${INJ_S[st]}</span>` : ""}</td><td>${m.toFixed(1)}</td><td>${b.toFixed(1)}</td><td class="${dv >= 1 ? "up" : dv <= -1 ? "dn" : ""}">${dv >= .05 ? "+" : dv <= -.05 ? "−" : ""}${Math.abs(dv).toFixed(1)}</td></tr>`; }).join("");
+  return `<details class="lmn" data-k="${esc(key)}"${LMN.has(key) ? " open" : ""}><summary>Projected minutes</summary><table class="lmt"><thead><tr><th></th><th>MIN</th><th>L5</th><th>+/−</th></tr></thead><tbody>${rows}</tbody></table></details>`;
+}
+function luTeam(t, e, key) {
   if (!e) return `<div class="lut"><div class="luth">${logo(t, "")}<b>${esc(t)}</b><span class="tg tn">NOT POSTED</span></div></div>`;
   const usual = new Set(e.usual), isNew = pid => usual.size > 0 && !usual.has(pid), proj = e.status === "Projected";
   const tag = st => st ? `<span class="tg ${INJ_C[st] || "tn"}">${INJ_S[st] || esc(String(st).toUpperCase())}</span>` : "";
@@ -1644,7 +1665,7 @@ function luTeam(t, e) {
   const ina = e.inactive.length ? `<div class="lum"><b>Inactive</b>${e.inactive.map(([, name]) => esc(nameOf(name))).join(", ")}</div>` : "";
   const ok = e.status === "Confirmed";
   return `<div class="lut"><div class="luth">${logo(t, "")}<b>${esc(t)}</b><span class="tg ${ok ? "tp" : proj ? "tn" : "tq"}">${ok ? "CONFIRMED" : proj ? "PROJECTED" : "EXPECTED"}</span>${ok && e.at ? `<em>${esc(mt(e.at))}</em>` : ""}</div>
-    <div class="lur">${tiles}</div>${subs}${miss}${ina}</div>`;
+    <div class="lur">${tiles}</div>${subs}${miss}${ina}${luMins(e, key)}</div>`;
 }
 function tabbar() {
   const tb = $("#tb"), fo = filtersOn();
