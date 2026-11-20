@@ -214,3 +214,29 @@ you cant even bet on more than like 7-8 guys on nba teams".
   - The full window (10-26 to 11-18; RM2 in-sample).
   - The top 7.
   - Each candidate minus V3, with a 95% interval (2,000 resamples of whole games, seed 5).
+
+### Result (2026-11-20; `nba_page_minutes_top8.py`, `result_top8.20261120.json`)
+RM2h's table (10-26 to 11-06) is in `p_2026_h1.json`.
+
+Each cell is the minutes MAE, with the mean error in brackets.
+
+| Top 8 | 11-07 to 11-18 (90 games, 1,424; decides) | 10-26 to 11-18 (2,833; RM2 in-sample) |
+|---|---|---|
+| V3 | 4.821 (−0.38) | 4.704 (−0.36) |
+| RM | 4.781 (+1.03) | 4.626 (+1.08) |
+| RM2 | 4.753 (+0.56) | 4.590 (+0.65) |
+| RM2h | **4.746** (+0.46) | 4.586 (+0.56) |
+| L5 | 4.865 (−0.19) | 4.737 (−0.22) |
+
+- **The top 7 ranks them the same way:** RM2h 4.763, RM2 4.769, RM 4.788, L5 4.803 and V3 4.814 on 11-07 to 11-18.
+- **Minus V3 on 11-07 to 11-18:**
+  - RM2h: −0.075 (−0.212 to +0.062).
+  - RM: −0.039 (−0.200 to +0.124).
+  - L5: +0.044.
+- **Minus V3 on the full window:**
+  - RM2: −0.114 (−0.209 to −0.010), in-sample.
+  - RM: −0.078 (−0.186 to +0.040).
+- **Decision: the page shows RM2.** It is the lowest on 11-07 to 11-18, by the user's rule.
+  - Its edge over V3 is about 0.08 minutes a player, and the interval reaches above 0.
+  - RM2 runs about 0.5 minutes high for the top 8.
+- **RM2's forward test** (the first 150 games from 11-19 on) is still scored and reported.
