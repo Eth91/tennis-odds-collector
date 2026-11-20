@@ -1329,9 +1329,20 @@ def test_projected_minutes_by_role():
 
 def test_build_carries_projected_minutes(payload):
     e = payload["lineups"][f"{GD}|PHX"]
-    assert [r[0] for r in e["min"]][:2] == [1, 2] and payload["sources"]["minutes"] == {"model": "ROLE1 v3", "teams": 2}
+    # RM2: both start (Allen's first start: his last 5 + 9), two players fill to their 40 cap
+    assert e["min"] == [[1, "Devin Booker", 40.0, 35.0, None], [2, "Grayson Allen", 40.0, 26.0, None]]
+    assert payload["sources"]["minutes"] == {"model": "RM2", "teams": 2}
     # the projected five by box-score slot: Booker starts at SG every game, so Allen (a G, no starts) takes PG
     assert [s[:3] for s in e["starters"]] == [[2, "Grayson Allen", "PG"], [1, "Devin Booker", "SG"]]
+
+
+def test_build_uses_rm2(monkeypatch):
+    seen = []
+    real = RS.projected_minutes
+    monkeypatch.setattr(RS, "projected_minutes", lambda *a, **k: seen.append(k) or real(*a, **k))
+    built(NOW)
+    assert len(seen) == 1 and seen[0]["model"] == "role" and seen[0]["chance_table"] is RS.RM2_P
+    assert seen[0]["starts"] and all(isinstance(g, str) and isinstance(p, int) for g, p in seen[0]["starts"])
 
 
 def test_page_shows_projected_minutes():

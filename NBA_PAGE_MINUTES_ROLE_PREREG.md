@@ -186,3 +186,57 @@ Written and committed on 2026-11-19, after RM's result above and before any game
 ## Not changed after this point (RM2)
 RM2, its table, the games, the population and the decision rule above stay as written. Fixes to bugs are allowed. Each
 one is listed in the result with its effect.
+
+## The user's choice (2026-11-20): the most accurate model for each team's top 8
+Written and committed before any of these numbers were computed.
+
+**The user:** "just use the most accurate starter model like what model predicts the top 7-8 minutes getters cause
+you cant even bet on more than like 7-8 guys on nba teams".
+- This replaces the decision rules above for what the page shows now.
+- RM2's forward test still runs and is reported.
+
+**Who counts:**
+- In each team-game, the 8 available players with the most season-average minutes. That's this season's games for
+  the team before the date; ties go by player id.
+- Only those who played are scored. The top 7 is reported too.
+- No model uses the season average, so the choice of players doesn't favor one.
+
+**Candidates:** V3, RM, RM2 and L5.
+- RM2's table was fitted on 10-26 to 11-18, so it is in-sample there.
+- **RM2h:** RM2 with its table fitted on 10-26 to 11-06 only, the same way (`fit_2026_p.py`, a bucket under 50 takes
+  its L5 column's rate).
+
+**Decision:**
+- On 11-07 to 11-18 every candidate is out of sample, with RM2h standing in for RM2.
+- **The page shows the candidate with the lowest top-8 MAE there.**
+- **If that's RM2h:** the page uses RM2, its table from all of 10-26 to 11-18, as registered.
+- **Reported, not decided on:**
+  - The full window (10-26 to 11-18; RM2 in-sample).
+  - The top 7.
+  - Each candidate minus V3, with a 95% interval (2,000 resamples of whole games, seed 5).
+
+### Result (2026-11-20; `nba_page_minutes_top8.py`, `result_top8.20261120.json`)
+RM2h's table (10-26 to 11-06) is in `p_2026_h1.json`.
+
+Each cell is the minutes MAE, with the mean error in brackets.
+
+| Top 8 | 11-07 to 11-18 (90 games, 1,424; decides) | 10-26 to 11-18 (2,833; RM2 in-sample) |
+|---|---|---|
+| V3 | 4.821 (−0.38) | 4.704 (−0.36) |
+| RM | 4.781 (+1.03) | 4.626 (+1.08) |
+| RM2 | 4.753 (+0.56) | 4.590 (+0.65) |
+| RM2h | **4.746** (+0.46) | 4.586 (+0.56) |
+| L5 | 4.865 (−0.19) | 4.737 (−0.22) |
+
+- **The top 7 ranks them the same way:** RM2h 4.763, RM2 4.769, RM 4.788, L5 4.803 and V3 4.814 on 11-07 to 11-18.
+- **Minus V3 on 11-07 to 11-18:**
+  - RM2h: −0.075 (−0.212 to +0.062).
+  - RM: −0.039 (−0.200 to +0.124).
+  - L5: +0.044.
+- **Minus V3 on the full window:**
+  - RM2: −0.114 (−0.209 to −0.010), in-sample.
+  - RM: −0.078 (−0.186 to +0.040).
+- **Decision: the page shows RM2.** It is the lowest on 11-07 to 11-18, by the user's rule.
+  - Its edge over V3 is about 0.08 minutes a player, and the interval reaches above 0.
+  - RM2 runs about 0.5 minutes high for the top 8.
+- **RM2's forward test** (the first 150 games from 11-19 on) is still scored and reported.
