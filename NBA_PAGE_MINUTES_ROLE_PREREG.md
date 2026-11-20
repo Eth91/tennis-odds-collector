@@ -186,3 +186,31 @@ Written and committed on 2026-11-19, after RM's result above and before any game
 ## Not changed after this point (RM2)
 RM2, its table, the games, the population and the decision rule above stay as written. Fixes to bugs are allowed. Each
 one is listed in the result with its effect.
+
+## The user's choice (2026-11-20): the most accurate model for each team's top 8
+Written and committed before any of these numbers were computed.
+
+**The user:** "just use the most accurate starter model like what model predicts the top 7-8 minutes getters cause
+you cant even bet on more than like 7-8 guys on nba teams".
+- This replaces the decision rules above for what the page shows now.
+- RM2's forward test still runs and is reported.
+
+**Who counts:**
+- In each team-game, the 8 available players with the most season-average minutes. That's this season's games for
+  the team before the date; ties go by player id.
+- Only those who played are scored. The top 7 is reported too.
+- No model uses the season average, so the choice of players doesn't favor one.
+
+**Candidates:** V3, RM, RM2 and L5.
+- RM2's table was fitted on 10-26 to 11-18, so it is in-sample there.
+- **RM2h:** RM2 with its table fitted on 10-26 to 11-06 only, the same way (`fit_2026_p.py`, a bucket under 50 takes
+  its L5 column's rate).
+
+**Decision:**
+- On 11-07 to 11-18 every candidate is out of sample, with RM2h standing in for RM2.
+- **The page shows the candidate with the lowest top-8 MAE there.**
+- **If that's RM2h:** the page uses RM2, its table from all of 10-26 to 11-18, as registered.
+- **Reported, not decided on:**
+  - The full window (10-26 to 11-18; RM2 in-sample).
+  - The top 7.
+  - Each candidate minus V3, with a 95% interval (2,000 resamples of whole games, seed 5).
