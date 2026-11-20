@@ -1646,7 +1646,7 @@ function lineupsView() {
   if (!gs.some(g => L[g.date + "|" + g.home] || L[g.date + "|" + g.away])) return '<div class="empty"><b>Lineups not posted yet</b></div>';
   return gs.map(g => `<div class="lug"><div class="lugh"><span>${esc(g.away)} @ ${esc(g.home)}</span><span>${when(g)}</span></div>${[g.away, g.home].map(t => luTeam(t, L[g.date + "|" + t], g.date + "|" + t)).join("")}</div>`).join("");
 }
-// Projected minutes (nba_research.projected_minutes, ROLE1 v3): a team's list stays open through every refresh
+// Projected minutes (nba_research.projected_minutes, RM2: minutes by role): a team's list stays open through every refresh
 const LMN = new Set();
 document.addEventListener("toggle", ev => { const d = ev.target; if (d.classList && d.classList.contains("lmn")) { if (d.open) LMN.add(d.dataset.k); else LMN.delete(d.dataset.k); } }, true);
 // the five first, in the tiles' order (PG to C), a line, then the bench, the most minutes first

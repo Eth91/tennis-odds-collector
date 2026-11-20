@@ -1367,11 +1367,13 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
     # each slate team's minutes tonight (the Lineups tab's Projected minutes); on any failure the lineups carry none
     try:
         import nba_role as RL
-        mins = projected_minutes(RL.RoleData(mpath, gamelogs or ROLE_GAMELOGS, season), games, official, lu, idx)
+        # RM2 (NBA_PAGE_MINUTES_ROLE_PREREG.md, the user's choice: the most accurate for each team's top 8)
+        mins = projected_minutes(RL.RoleData(mpath, gamelogs or ROLE_GAMELOGS, season), games, official, lu, idx,
+                                 model="role", starts=season_starts(mpath, season), chance_table=RM2_P)
         for k, v in mins.items():
             if k in lu:
                 lu[k]["min"] = v
-        min_meta = {"model": "ROLE1 v3", "teams": len(mins)}
+        min_meta = {"model": "RM2", "teams": len(mins)}
     except Exception as e:                                                   # noqa: BLE001
         min_meta = {"error": f"minutes unavailable ({type(e).__name__})"}
     out = {
