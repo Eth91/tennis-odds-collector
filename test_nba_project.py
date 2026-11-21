@@ -473,3 +473,24 @@ def test_prospective_moved_line_pulled_postponed_and_fd_filter():
     assert by[2]["pc"] is None and out["counts"]["pulled_before_tip"] == 1
     assert out["with_close"] == 2 and out["with_close_fd"] == 1                                    # DraftKings row left out
     assert by[1]["date"] == "2026-10-26"                                                           # ET date, not UTC
+
+
+def test_neighbors_in_small_blocks(monkeypatch):
+    # the forecast's neighbor search, in blocks under NB_BLOCK_BYTES: the same rows as 512-target blocks, a fraction
+    # of the memory (the 1 GB VM swapped at game time on a 139 MB table and its copies)
+    import tracemalloc
+    rng = np.random.default_rng(5)
+    pf, tf, sc = rng.normal(size=(50_000, 10)), rng.normal(size=(300, 10)), rng.uniform(.5, 2, 10)
+    tracemalloc.start()
+    small = NP.neighbors(tf, pf, 400, sc)
+    _, peak_small = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    monkeypatch.setattr(NP, "NB_BLOCK_BYTES", 10 ** 12)          # the old blocks: 512 targets at a time
+    tracemalloc.start()
+    big = NP.neighbors(tf, pf, 400, sc)
+    _, peak_big = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    assert np.array_equal(small, big)
+    assert peak_small < 40e6 < 200e6 < peak_big
+    assert NP.neighbors(tf[:1], pf[:3], 400, sc).shape == (1, 3)    # a pool smaller than K
+

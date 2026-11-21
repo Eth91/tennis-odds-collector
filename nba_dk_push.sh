@@ -40,5 +40,16 @@ if [ -f nfl_lines.py ]; then
   fi
   printf '%s nfl rc=%s %s\n' "$(date -u +%FT%TZ)" "$nrc" "$(echo "$nout" | tr '\n' ' ' | tail -c 300 | iconv -c -f UTF-8 -t UTF-8 2>/dev/null)" >>"$LOG"
 fi
+# NHL (nhl_lines.py): likewise, after the NFL one; the receiver writes an NHL-marked snapshot to nhl_dk_snapshot.json.
+if [ -f nhl_lines.py ]; then
+  HSNAP=/tmp/nhl_dk_snapshot.json
+  hout=$(/usr/bin/perl -e 'alarm shift; exec @ARGV' 90 "$PY" nhl_lines.py --snapshot dk "$HSNAP" 2>&1); hrc=$?
+  if [ $hrc -eq 0 ]; then
+    hrecv=$(/usr/bin/perl -e 'alarm shift; exec @ARGV' 45 ssh -i "$KEY" -o ConnectTimeout=15 -o BatchMode=yes "$VM" \
+      'python3 nba-engine/nba_dk_receive.py' < "$HSNAP" 2>&1); hrc=$?
+    hout="$hout · VM: $hrecv"
+  fi
+  printf '%s nhl rc=%s %s\n' "$(date -u +%FT%TZ)" "$hrc" "$(echo "$hout" | tr '\n' ' ' | tail -c 300 | iconv -c -f UTF-8 -t UTF-8 2>/dev/null)" >>"$LOG"
+fi
 [ -f "$LOG" ] && tail -n 4000 "$LOG" > "$LOG.tmp" && mv "$LOG.tmp" "$LOG"
 exit $rc

@@ -17,7 +17,8 @@ LIMITS (shown on the page where they apply):
             what those feeds carry. No steals / blocks / turnovers props are collected, so none are listed.
   freshness each book's board refreshes about every 10 min (every 2 near tip); older than BOOK_STALE_MIN = "stale".
             The page is rebuilt every 2 min on the VM (cron); live box scores are fetched at each rebuild.
-  logs      regular-season box scores, this season and last (nba_matchup.sqlite). No playoff games.
+  logs      regular-season box scores, this season and last (nba_matchup.sqlite). No playoff games. NBA Cup games are
+            marked by NBA.com's schedule (nba_cup); the Cup championship is not a regular-season game, so it is not in them.
   matchup   ranks blend this season with last (rank_tables_blend, BLEND_K games); pace is this season only; no
             defense-vs-position factor for threes.
   injuries  the official report as stored by nba_injury_report; news items are third-party, labeled as such.
@@ -35,6 +36,8 @@ import os
 import re
 import sqlite3
 import statistics as st
+import sys
+import time
 from collections import defaultdict
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -46,6 +49,7 @@ TRACKING = HERE / "nba_tracking.sqlite"
 PROJ_LOG = HERE / "nba_proj_log.sqlite"          # the projection engine's prospective record (prereg test C)
 ROLE = HERE / "nba_role.sqlite"                  # the engine's rules' log (nba_role_open.py, the VM cron); read-only
 LINEUPS = HERE / "nba_lineups.sqlite"            # NBA.com's daily lineups as seen (nba_lineups_poll.py, the VM cron)
+ROLE_GAMELOGS = HERE / "nba_gamelogs.sqlite"     # positions (and last season's logs) for ROLE1's minutes (nba_role.RoleData)
 CLOSE_BOARDS = HERE / "nba_close_boards.json"    # each started game's last board before tip (closing_boards), cached
 SLATE_ROLL_H = 6     # the slate moves on to the next day at 6 AM ET (4 AM MT), not midnight: late games stay on it
 USUAL_GAMES = 10                                 # a team's usual starters: its most frequent five over its last 10 games
@@ -248,9 +252,14 @@ def main_line(rungs):
 
 
 # ── sources ──────────────────────────────────────────────────────────────────────────────────────────────
+# how long a read waits out a writer's lock. The engine stores are in rollback-journal mode, so a writer's commit
+# shuts readers out; at game time on the loaded VM that runs past sqlite's 5 s, and a build that gave up wrote no page
+RO_WAIT_S = 60
+
+
 def _ro(path):
     path = Path(path)
-    return sqlite3.connect(f"file:{path}?mode=ro", uri=True) if path.exists() else None
+    return sqlite3.connect(f"file:{path}?mode=ro", uri=True, timeout=RO_WAIT_S) if path.exists() else None
 
 
 def book_quotes(q, gids, markets=None):
@@ -669,13 +678,49 @@ def closing_boards(q, gids, cache=CLOSE_BOARDS, markets=None):
     return out, names
 
 
+SLOTS = ("PG", "SG", "SF", "PF", "C")            # a five, left to right
+GEN_SLOTS = {"G": ("PG", "SG"), "F": ("SF", "PF"), "C": ("C",)}
+
+
+def start_slots(mcon, seasons):
+    """{pid: {slot: [starts this season, starts last season]}} from the box scores' starting positions (PG..C).
+    seasons: (last, this)."""
+    out = defaultdict(lambda: defaultdict(lambda: [0, 0]))
+    if mcon is None:
+        return out
+    for pid, s, pos, n in mcon.execute(
+            f"SELECT p.pid, g.season, p.pos, COUNT(*) FROM player_games p JOIN games g ON g.gid = p.gid WHERE p.starter = 1 "
+            f"AND p.pos != '' AND g.season IN (?, ?) GROUP BY p.pid, g.season, p.pos", tuple(seasons)):
+        out[pid][pos][0 if s == seasons[1] else 1] += n
+    return out
+
+
+def slot_five(five, slots, gen):
+    """[(pid, slot)] in SLOTS order: the five's slots, PG to C, with the most starts in them this season, then last
+    season, then the listed position's fit (G: PG or SG, F: SF or PF, C; "G-F": a guard first, a forward next). Ties go
+    to the order given."""
+    import itertools
+    slots = slots or {}
+
+    def fit(pid, slot):
+        c = (slots.get(pid) or {}).get(slot) or (0, 0)
+        parts = [x for x in (gen(pid) or "").split("-") if x]
+        f = 2 if parts and slot in GEN_SLOTS.get(parts[0], ()) else 1 if any(slot in GEN_SLOTS.get(x, ()) for x in parts[1:]) else 0
+        return (c[0], c[1], f)
+    best = max(itertools.permutations(SLOTS, len(five)),
+               key=lambda perm: tuple(sum(x) for x in zip(*(fit(p, s) for p, s in zip(five, perm)))))
+    return sorted(zip(five, best), key=lambda ps: SLOTS.index(ps[1]))
+
+
 def lineups(lcon, dates, boxes, official):
-    """{"date|TEAM": {status, at, starters: [[pid, name, pos]], usual: [pid], missing: [[pid, name, status]],
-    inactive: [[pid, name]]}} from the latest NBA.com lineups snapshot of each date (nba_lineups_poll.py). status:
+    """{"date|TEAM": {status, at, starters: [[pid, name, pos, report status]], usual: [pid], missing: [[pid, name, status]],
+    inactive: [[pid, name]]}} from the latest NBA.com lineups snapshot of each date (nba_lineups_poll.py), the five in
+    PG, SG, SF, PF, C order (NBA.com posts SG, SF, PG, PF, C). status:
     Confirmed once all five starters are, else Expected; at: the newest confirmation. usual: the five who started most
     of the team's last USUAL_GAMES games this season (team_boxes rows), empty until it has USUAL_MIN (last season's
     starters are not this team's after an offseason); missing: a usual starter on tonight's list not starting, with his
-    status on the official report. A date with no snapshot (lineups are posted on game day) is left out."""
+    status on the official report (a starter carries his too: Questionable in a posted five). A date with no snapshot
+    (lineups are posted on game day) is left out."""
     import zlib
     out = {}
     if lcon is None:
@@ -694,7 +739,8 @@ def lineups(lcon, dates, boxes, official):
                 team, ps = t.get("teamAbbreviation"), t.get("players") or []
                 if not team or not ps:
                     continue
-                st = [p for p in ps if p.get("position")]
+                st = sorted((p for p in ps if p.get("position")),
+                            key=lambda p: SLOTS.index(p["position"]) if p["position"] in SLOTS else len(SLOTS))
                 recent = [b for b in boxes.get(team, []) if b[1] < d and b[2] == season_of(d)][-USUAL_GAMES:]
                 starts = defaultdict(int)
                 for b in recent:
@@ -706,7 +752,8 @@ def lineups(lcon, dates, boxes, official):
                 out[f"{d}|{team}"] = {
                     "status": "Confirmed" if st and all(p.get("lineupStatus") == "Confirmed" for p in st) else "Expected",
                     "at": max((p.get("timestamp") or "" for p in st), default="") or None,
-                    "starters": [[int(p["personId"]), p.get("playerName") or "", p.get("position") or ""] for p in st],
+                    "starters": [[int(p["personId"]), p.get("playerName") or "", p.get("position") or "",
+                                  (official.get((d, int(p["personId"]))) or {}).get("status")] for p in st],
                     "usual": usual,
                     "missing": [[pid, name[pid], (official.get((d, pid)) or {}).get("status")] for pid in usual
                                 if pid not in on and pid in name],
@@ -718,14 +765,15 @@ def lineups(lcon, dates, boxes, official):
 LINEUP_OUT = ("Out", "Doubtful")                 # a projected lineup leaves these out; Questionable / Probable are in
 
 
-def projected_lineups(games, boxes, official, roster, posted):
-    """{"date|TEAM": {status: "Projected", starters: [[pid, name, pos, report status]], subs: [[pid, for pid, for name]],
+def projected_lineups(games, boxes, official, roster, posted, slots=None):
+    """{"date|TEAM": {status: "Projected", starters: [[pid, name, slot, report status]], subs: [[pid, for pid, for name]],
     usual: [pid], missing: [[pid, name, status]], inactive: []}} for each slate team with no posted lineup: its usual
     five (the most starts over its last USUAL_GAMES games this season, players on its roster now; USUAL_MIN games
     first) less anyone Out or Doubtful on the official report (Questionable and Probable players stay, their status
     shown). Each missing starter is replaced by whoever started most often in the team's games he did not start (this
     season and last, the seasons he was on the team), a player of his position first among equals, then the most starts
-    and minutes lately; the surest replacement is placed first. Guards first, then forwards, then centers."""
+    and minutes lately; the surest replacement is placed first. The five in PG, SG, SF, PF, C order (slot_five: the
+    slots they start in, from slots = start_slots(); else their listed positions)."""
     out = {}
     for g in games:
         d, season = g["date_et"], season_of(g["date_et"])
@@ -771,12 +819,97 @@ def projected_lineups(games, boxes, official, roster, posted):
                 if not cands:
                     break
                 five.append(max(cands, key=lambda pid: (starts[pid], mins[pid])))
-            five.sort(key=lambda pid: {"G": 0, "F": 1, "C": 2}.get(pos(pid)[:1], 1))
             out[f"{d}|{team}"] = {"status": "Projected", "at": None,
-                                  "starters": [[pid, (roster.get(str(pid)) or ["", ""])[1], pos(pid), status(pid)] for pid in five],
+                                  "starters": [[pid, (roster.get(str(pid)) or ["", ""])[1], slot, status(pid)]
+                                               for pid, slot in slot_five(five, slots, pos)],
                                   "subs": subs, "usual": usual,
                                   "missing": [[u, (roster.get(str(u)) or ["", ""])[1], status(u)] for u in usual if not ok(u)],
                                   "inactive": []}
+    return out
+
+
+MIN_OUT = ("Out", "Doubtful")                    # not in tonight's minutes, as not in a projected five
+# the minutes by role (RM, NBA_PAGE_MINUTES_ROLE_PREREG.md; fitted on 2025-26): a first start's minutes, a starter
+# moved to the bench, the pull toward the role prior (games), and the bench's chance of playing by (share of the team's
+# last 10 games played: 0-.2, .3-.5, .6-.8, .9-1; last 5: under 10, 10-20, 20 and up)
+RM_UP, RM_DN, RM_K, RM_CAP = 9.0, 6.0, 4.0, 40.0
+RM_P = {(0, 0): .842, (0, 1): .861, (0, 2): .854, (1, 0): .738, (1, 1): .833, (1, 2): .757,
+        (2, 0): .753, (2, 1): .857, (2, 2): .743, (3, 0): .806, (3, 1): .931, (3, 2): .861}
+# RM2 (the same prereg, its RM2 section): the bench's chance of playing from 2026-27's real pool (10-26 to 11-18; a bucket
+# under 50 takes its last-5 column's rate); tested on games from 11-19 on
+RM2_P = {(0, 0): .473, (0, 1): .909, (0, 2): .99, (1, 0): .552, (1, 1): .77, (1, 2): .99,
+         (2, 0): .617, (2, 1): .878, (2, 2): .978, (3, 0): .773, (3, 1): .956, (3, 2): .992}
+
+
+def season_starts(mpath, season):
+    """{(gid, pid)} this season's box-score starts (nba_matchup)."""
+    m = sqlite3.connect(f"file:{mpath}?mode=ro", uri=True)
+    try:
+        return {(g, p) for g, p in m.execute("SELECT p.gid, p.pid FROM player_games p JOIN games g ON g.gid = p.gid "
+                                             "WHERE g.season = ? AND p.starter = 1", (season,))}
+    finally:
+        m.close()
+
+
+def role_minutes(prior, starts, pool, five, chance_table=None):
+    """{pid: (minutes, last 5)} by role (RM): tonight's starters (five) from their own starts, the bench from its bench
+    games, each pulled toward his last 5 (+RM_UP x the share of it he came off the bench for a starter, -RM_DN x the
+    share he started for the bench) by RM_K games; then scaled so the minutes, each times his chance of playing
+    (a starter 1, the bench chance_table: RM_P, RM2_P), fill 240. prior: the team's games before tonight [(date, gid, {pid: row})];
+    starts: {(gid, pid)}. Minutes if he plays: 0 to 40."""
+    l10, base, chance, l5, table = prior[-10:], {}, {}, {}, chance_table or RM_P
+    for p in pool:
+        his = [(g, b[p]["min"]) for _d, g, b in prior if p in b and b[p]["min"]]
+        last = his[-5:]
+        l5[p] = sum(m for _g, m in last) / len(last) if last else 0.0
+        s = sum(1 for g, _m in last if (g, p) in starts) / len(last) if last else 0.0
+        st = p in five
+        xs = [m for g, m in his if ((g, p) in starts) == st][-5:]
+        pr = l5[p] + RM_UP * (1 - s) if st else l5[p] - RM_DN * s
+        base[p] = max(0.0, min(RM_CAP, (sum(xs) + RM_K * pr) / (len(xs) + RM_K)))
+        pl10 = sum(1 for _d, _g, b in l10 if p in b and b[p]["min"]) / len(l10) if l10 else 0.0
+        chance[p] = 1.0 if st else table.get((min(int(pl10 * 10) // 3, 3), 0 if l5[p] < 10 else 1 if l5[p] < 20 else 2), 0.9)
+    tot = sum(chance[p] * base[p] for p in pool)
+    c = 240.0 / tot if tot > 0 else 1.0
+    return {p: (min(RM_CAP, base[p] * c), l5[p]) for p in pool}
+
+
+def projected_minutes(rd, games, official, lu, roster, model="v3", starts=frozenset(), chance_table=None):
+    """{"date|TEAM": [[pid, name, minutes, last 5, report status]]}, the most minutes first: ROLE1 v3 (nba_role.project,
+    the live ROLE_OPEN model) for everyone who can play tonight. Who can play: anyone from the team's last 3 games, a
+    player back from injury (he played for the team this season and tonight's report lists him, not Out or Doubtful)
+    and tonight's starters; less anyone Out or Doubtful, NBA.com's inactive list and a player the roster now puts on
+    another team. A rotation player out (or traded) in his absence games 1-3 has his minutes shared out as ROLE_OPEN
+    does (SPOT_MAX); a longer absence is already in everyone's last 5. Questionable players are in, their status shown.
+    last 5: his average over his last 5 games (base_min), what tonight's absences move. model "role": role_minutes (RM)
+    for the same players, tonight's five (posted, else projected) as the starters; starts: season_starts()."""
+    import nba_role as RL
+    out = {}
+    for g in games:
+        d = g["date_et"]
+        for team in (g["away"], g["home"]):
+            prior = rd.season.before(team, d)
+            if not prior:
+                continue
+            e = lu.get(f"{d}|{team}") or {}
+            st = lambda pid: (official.get((d, pid)) or {}).get("status")
+            other = lambda pid: str(pid) in roster and roster[str(pid)][0] != team
+            last3 = rd.season.roster(team, d)
+            seen = {p for _d, _g, b in prior for p, r in b.items() if r["min"]}
+            back = {p for p in seen - last3 if st(p) and st(p) not in MIN_OUT}
+            starters = {s[0] for s in e.get("starters", [])}
+            pool = {p for p in last3 | back | starters if not other(p)}
+            gone = {p for p in pool if st(p) in MIN_OUT} | {p for p, _n in e.get("inactive", [])} | {p for p in last3 if other(p)}
+            if model == "role":
+                proj = role_minutes(prior, starts, pool - gone, starters, chance_table)
+            else:
+                spots = {x for x, n in rd.season.absences(team, d, gone).items() if n <= RL.SPOT_MAX}
+                proj = {p: (v["min"], v["base_min"]) for p, v in
+                        RL.project(rd.season, rd.priors, rd.groups, team, d, pool - gone, spots, mode="v3").items()}
+            nm = {s[0]: s[1] for s in e.get("starters", [])}
+            name = lambda p: (roster.get(str(p)) or [None, None])[1] or nm.get(p) or ""
+            out[f"{d}|{team}"] = sorted(([p, name(p), round(m, 1), round(b, 1), st(p)] for p, (m, b) in proj.items()),
+                                        key=lambda r: (-r[2], r[1]))
     return out
 
 
@@ -1047,7 +1180,7 @@ def correlations(props, logs):
 
 # ── the payload ──────────────────────────────────────────────────────────────────────────────────────────
 def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None, index=None, box_get=None, tracking=None,
-          lineups_db=None, role_db=None):
+          lineups_db=None, role_db=None, cup=None, gamelogs=None):
     import nba_matchup as MU
     now = now or dt.datetime.now(dt.timezone.utc)
     if sched is None:
@@ -1110,6 +1243,9 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
     trk = _ro(tracking or TRACKING)
     lcon = _ro(lineups_db or LINEUPS)
     logs = game_logs(mcon, pids, (prev_season(season), season), trk)
+    if cup is None:                                     # {gid: group or round} of the NBA Cup games (nba_cup's cache)
+        import nba_cup as NC
+        cup = NC.games((prev_season(season), season), now) if lines is None else {}
     for p in props:                                     # a player with no index entry: his latest box team
         if p["team"] is None and logs.get(p["pid"]):
             t = logs[p["pid"]][-1][2]
@@ -1227,7 +1363,19 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
         fresh[b] = {"updated": at, "age_min": round(age, 1), "stale": age > BOOK_STALE_MIN}
     # NBA.com's posted lineups, and a projected five for every slate team still without one
     lu = lineups(lcon, dates, boxes, official)
-    lu.update(projected_lineups(games, boxes, official, idx, lu))
+    lu.update(projected_lineups(games, boxes, official, idx, lu, start_slots(mcon, both)))
+    # each slate team's minutes tonight (the Lineups tab's Projected minutes); on any failure the lineups carry none
+    try:
+        import nba_role as RL
+        # RM2 (NBA_PAGE_MINUTES_ROLE_PREREG.md, the user's choice: the most accurate for each team's top 8)
+        mins = projected_minutes(RL.RoleData(mpath, gamelogs or ROLE_GAMELOGS, season), games, official, lu, idx,
+                                 model="role", starts=season_starts(mpath, season), chance_table=RM2_P)
+        for k, v in mins.items():
+            if k in lu:
+                lu[k]["min"] = v
+        min_meta = {"model": "RM2", "teams": len(mins)}
+    except Exception as e:                                                   # noqa: BLE001
+        min_meta = {"error": f"minutes unavailable ({type(e).__name__})"}
     out = {
         "generated_at": stamp, "season": season, "dates": dates, "log_cols": list(LOG_COLS),
         "hist_t0": t0.isoformat() if t0 else None,
@@ -1235,7 +1383,7 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
         "sources": {"books": fresh, "report": report_meta,
                     "logs": {"through": max((r[0] for v in logs.values() for r in v), default=None),
                              "seasons": [prev_season(season), season]},
-                    "matchup": {"available": S is not None},
+                    "matchup": {"available": S is not None}, "minutes": min_meta,
                     "game_lines": {"games": len(glines)}},
         "games": [{"gid": g["gid"], "date": g["date_et"], "tip": g["utc"], "away": g["away"], "home": g["home"],
                    "lines": glines.get(g["gid"]), "spots": spots.get(g["gid"]),
@@ -1254,6 +1402,7 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
         # as of the slate date, last season's as it finished
         "ranks": {k: v for k, v in ranks.items()},
         "proj_players": proj_players, "proj_meta": proj_meta,
+        "cup": cup,                                      # the page's NBA Cup filter: {gid: "West Group B" | "Quarterfinal" ...}
     }
     for c in (q, ncon, sh, mcon, trk, lcon):
         if c is not None:
@@ -1262,12 +1411,12 @@ def build(now=None, sched=None, lines=None, news=None, shadow=None, matchup=None
 
 
 def write(out_dir, payload):
-    """Atomic writes of nba_props.json and nba_props.html (the board server serves docs/ as is)."""
+    """Atomic writes of nba_props.json, nba_props.html and its worker (the board server serves docs/ as is)."""
     import nba_research_ui as UI
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     for name, body in (("nba_props.json", json.dumps(payload, separators=(",", ":"), default=str)),
-                       ("nba_props.html", UI.page())):
+                       ("nba_props.html", UI.page()), ("pickz-sw.js", UI.sw())):     # the worker after its page
         tmp = out_dir / f".{name}.tmp"
         tmp.write_text(body)
         os.replace(tmp, out_dir / name)
@@ -1277,6 +1426,12 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=os.environ.get("NBA_RESEARCH_OUT", str(HERE / "docs")))
     a = ap.parse_args()
+    t_ = time.time()
     pl = build()
     write(a.out, pl)
-    print(f"nba_research: {len(pl['props'])} props · {len(pl['games'])} games · {len(pl['players'])} players -> {a.out}")
+    print(f"nba_research: {len(pl['props'])} props · {len(pl['games'])} games · {len(pl['players'])} players · "
+          f"{time.time() - t_:.0f}s -> {a.out}")
+    # skip the interpreter's teardown: on the swapping VM, freeing every object read its pages back in and held the
+    # build's lock for minutes after the page was written (2026-11-02)
+    sys.stdout.flush()
+    os._exit(0)

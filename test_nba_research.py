@@ -4,6 +4,7 @@ and postponed games, stale books, engine flags), the page's JS against the Pytho
 import datetime as dt
 import inspect
 import json
+import types
 import math
 import pathlib
 import random
@@ -133,7 +134,7 @@ def live_box(gid):
             "awayTeam": {"score": 66, "players": []}}
 
 
-def built(now, sched=None, box_get=None):
+def built(now, sched=None, box_get=None, cup=None):
     d = pathlib.Path(tempfile.mkdtemp())
     stores(d)
     tr = sqlite3.connect(d / "tracking.sqlite")
@@ -167,7 +168,7 @@ def built(now, sched=None, box_get=None):
     rl.commit(); rl.close()
     return RS.build(now=now, sched=sched or SCHED, lines=d / "lines.sqlite", news=d / "news.sqlite", shadow=d / "shadow.sqlite",
                     matchup=d / "matchup.sqlite", index=d / "index.json", box_get=box_get or live_box, tracking=d / "tracking.sqlite",
-                    role_db=d / "role.sqlite")
+                    role_db=d / "role.sqlite", cup=cup, gamelogs=d / "none.sqlite")
 
 
 @pytest.fixture(scope="module")
@@ -503,10 +504,10 @@ def test_page_controls_work_on_iphone():
     # most every 8 s, and downloads it in the background only when the server wrote a new one; the same file again
     # (generated_at unchanged) is not redrawn
     assert 'document.addEventListener("click", freshen, true);' in html and "setInterval(freshen, 30000);" in html
-    # the file each sport reads (the league button switches: nba_props.json / nfl_props.json)
+    # the file each sport reads (the league button steps through them: nba_props.json / nfl_props.json / nhl_props.json)
     assert 'fetch(dataUrl() + "?t=" + Date.now(), {method: "HEAD", cache: "no-store"})' in html
-    assert 'const dataUrl = sp => (sp || SPORT) === "nfl" ? "nfl_props.json" : "nba_props.json";' in html
-    assert "return m && m !== LAST_MOD ? load() : null;" in html and 'LAST_MOD = r.headers.get("Last-Modified") || LAST_MOD;' in html
+    assert 'const dataUrl = sp => (sp || SPORT) + "_props.json";' in html and 'const SPORTS = ["nba", "nfl", "nhl"]' in html
+    assert "return sp === SPORT && m && m !== LAST_MOD ? load() : null;" in html and 'LAST_MOD = r.headers.get("Last-Modified") || LAST_MOD;' in html
     assert "Date.now() - CHECK_AT < 8000" in html and "if (D) { CHECK_AT = 0; freshen(); }" in html
     assert "if (D && FRESH && !AUTO_DAY && j.generated_at === D.generated_at) { LOADED_AT = Date.now(); return true; }" in html
     # iOS Safari can't drag the thumb of a range input stacked under another, so the dual sliders are pointer-event widgets
@@ -523,7 +524,9 @@ def test_page_controls_work_on_iphone():
     assert "data-ps=" in html
     # a tap on a bar opens that game's box score (docs/box/{gid}.json, nba_boxscore), his row and the prop's stats marked
     assert 'if (gb) boxSheet(gb.dataset.gid, gb.dataset.tm, p);' in html and 'data-gid="${esc(l.gid)}"' in html
-    assert 'fetch(`${SPORT === "nfl" ? "nflbox" : "box"}/${encodeURIComponent(gid)}.json`)' in html and "barTip(" not in html and ".tip{" not in html
+    # a box already loaded: the sheet is a box sheet (its team switch positioned) before the switch's pill is measured
+    assert 's => { s.dataset.kind = "box"; bind(s, b); }' in html
+    assert 'fetch(`${SPORT === "nfl" ? "nflbox" : SPORT === "nhl" ? "nhlbox" : "box"}/${encodeURIComponent(gid)}.json`)' in html and "barTip(" not in html and ".tip{" not in html
     # the gauge opens the Matchup page (a page of its own in the history), with the opponent's recent games vs a position
     # group from docs/vs/{TEAM}.json (nba_vs): 5 rows, More / Less to 10, a row opens that game's box score
     assert '$("#mub", pg).onclick = () => { if (p.opp) openMatchup(p); };' in html and "function matchupSheet(" not in html
@@ -549,19 +552,31 @@ def test_page_controls_work_on_iphone():
     # the shot dots (docs/shots/p/{pid}.json): every shot on a to-scale court (the corner line 22 ft out, so a dot lands
     # in its zone), made green over missed red rings, Shots by default for the player, Zones as before; defense: zones
     assert "const SH_R3 = 237.5, SH_CX = 220," in html and "fetch(`shots/p/${pid}.json`)" in html
-    assert 'shView: "player", shSeason: null, shMode: "shots"' in html and 'const dotsOn = MUP.shView !== "def" && MUP.shMode !== "zones";' in html
+    assert 'shView: "m", shSeason: null, shMode: "shots"' in html and 'const dotsOn = view === "player" && MUP.shMode !== "zones";' in html
     # Movers (a line moved since open, or the books disagree: the move first), Lineups beside Injuries (NEW starters, the usual
     # five not starting), who guards him on the Matchup page (docs/matchups/{pid}.json, nba_defmatch)
     assert 'if (ST.market === "movers") return list.map(p => [p, mover(p)])' in html and "k: Math.abs(mv) * 100 + gap" in html
-    assert '(ST.iv === "lu" ? (SPORT === "nfl" ? depthView() : lineupsView()) : ST.iv === "ro" ?' in html and "function luTeam(t, e)" in html and 'isNew(pid) ? " · NEW" : ""' in html
+    assert '(ST.iv === "lu" ? (SPORT === "nfl" ? depthView() : SPORT === "nhl" ? nhlLinesView() : lineupsView()) : ST.iv === "ro" ?' in html and "function luTeam(t, e, key)" in html and 'isNew(pid) ? " · NEW" : ""' in html
     # role changes (docs/player/roles.json), the Live tab (props under way from their closing boards: only there), game script
     assert 'fetch("player/roles.json")' in html and "function rolesView(" in html and 'data-iv="ro"' in html
     assert 'const ALL_TABS = ["live", "trends", "movers"];' in html and "list = list.filter(p => !p.closed);" in html
     # the flags (D.flags: the under plays that ping) are the bottom bar's Flags view, in place of Markets (a saved
     # Markets view opens Props), SHADOW · NOT A BET, each graded at its own line once final; a chip on the prop's row
-    # and a line on its page; a tap opens the prop or the player. The props section has no Flags tab
-    assert 'let VIEWS = [["props", "Props"], ["flags", "Flags"], ["injuries", "Injuries"]];' in html and "mrow" not in html
-    assert 'if (["props", "flags", "injuries"].indexOf(ST.view) < 0) ST.view = "props";' in html and '"markets"' not in html
+    # and a line on its page; a tap opens the prop or the player. The props section has no Flags tab. WOWY (nba_onoff's
+    # on/off splits) sits between Flags and Injuries, the bar four wide
+    assert 'let VIEWS = [["props", "Props"], ["flags", "Flags"], ["wowy", "WOWY"], ["injuries", "Injuries"]];' in html and "mrow" not in html
+    assert 'if (["props", "flags", "wowy", "injuries"].indexOf(ST.view) < 0) ST.view = "props";' in html and '"markets"' not in html
+    assert '.tbc[data-n="4"]{width:272px}' in html and 'fetch(`${SPORT === "nhl" ? "nhlonoff" : "onoff"}/${t}.json?t=${Date.now()}`' in html
+    # the With / Without sheet's shortcut: each teammate's On/off link opens WOWY on his team with that teammate off the
+    # court and the prop's stat, the prop's player marked; only where the sport has the WOWY view
+    assert '${no} w/o</small>${VIEWS.some(v => v[0] === "wowy") ? `<button class="lk wyk" data-wy="${m.key}">On/off ›</button>` : ""}' in html
+    assert ".mrn .wyk{display:block;" in html, "its own line: the stats line's ellipsis would hide it on a phone"
+    assert '$$("[data-wy]", s).forEach(b => b.onclick = () => toWowy(PX.p, +b.dataset.wy));' in html
+    assert 'Object.assign(ST, {wt: p.team, wo: String(off), q: ""}, wowyStats().some(x => x[0] === p.market) ? {ws: p.market} : {});' in html
+    # the NHL's WOWY: a skater's stat lists the skaters, saves the goalies; ice time a game is TOI
+    assert '(!hk || gk(p) === (ws === "saves"))' in html and '(hk ? " TOI" : " mpg")' in html
+    assert 'SPORT === "nhl" && r.pos === "G" ? `Started ${r.starts[0]} of the last ${r.starts[3]}, ${r.starts[1]} of ${r.starts[2]} before`' in html
+    assert '${r.p === WOWY_ME ? " wme" : ""}' in html and 'setTimeout(() => { ST.view = "wowy"; save(); render(); window.scrollTo(0, 0); }, 480);' in html
     assert '  if (ST.view === "flags") { lst.innerHTML = flagsView(); return; }' in html and 'flags: "Flags"' not in html
     assert 'if (ml) ml.style.display = ST.view === "props" ? "" : "none";' in html and 'if (ST.view === "props" && q.length >= 2)' in html
     assert "${flagChips(p)}</div>" in html and "const flagChips = p => flagsOf(p.id).length ?" in html
@@ -596,7 +611,7 @@ def test_page_controls_work_on_iphone():
     assert "function mateSheet(" in html and "data-mk2=" in html and "with: ms.filter(m => x.with[m.key]), without: ms.filter(m => x.without[m.key])" in html
     assert html.count("bindMates(s, dr, upd);") == 2
     # chart filters on one scrolling row, nothing behind a More toggle; the row keeps its place when a chip re-renders it
-    assert ".fcs{display:flex;flex-wrap:nowrap" in html and 'id="more"' not in html and '$$("#pcf .fcs").forEach((x, i) => x.scrollLeft = fl[i] || 0);' in html
+    assert ".fcs{display:flex;flex-wrap:nowrap" in html and 'id="more"' not in html and 'afterWrites(() => fx.forEach((x, i) => { x.scrollLeft = fl[i] || 0; }));' in html
     # the With / Without button heads a row of its own just below the stat chips, before any open range slider
     assert """<div class="fcs">${chips.join("")}</div>${mchips.length ? `<div class="fcs fcw">${mchips.join("")}</div>` : ""}${panels}""" in html
     assert """if (ms.length) mchips.push(chip('id="mts\"""" in html and html.count("""chip('id="mts\"""") == 1
@@ -619,7 +634,7 @@ def test_page_controls_work_on_iphone():
     assert ('let OVL = {min: "min", fga: "FGA", fg3a: "3PTA", fta: "FTA", usg: "usage %", pot_ast: "potential assists", '
             'reb_ch: "rebound chances"}') in html and "l[ov]" in html
     # the adjustable filters come first; potential assists / rebound chances only on the props they bear on
-    assert '(SPORT === "nfl" ? NFL_RCHIPS : ["min", "fga", "fg3a", "fta", "usg", "pot_ast", "reb_ch"]).forEach(rchip)' in html
+    assert '(SPORT === "nfl" ? NFL_RCHIPS : SPORT === "nhl" ? NHL_RCHIPS : ["min", "fga", "fg3a", "fta", "usg", "pot_ast", "reb_ch"]).forEach(rchip)' in html
     assert html.index('.forEach(rchip);') < html.index("if (c.dvp_rank) chips.push(") < html.index('rchip("margin");')
     assert 'pot_ast: ["assists", "pra", "pts_ast", "reb_ast"], reb_ch: ["rebounds", "pra", "pts_reb", "reb_ast"]' in html
     # no explanatory prose: notes are status only, empty states are titles only
@@ -665,6 +680,59 @@ def test_write_is_atomic(payload):
     RS.write(d, payload)
     assert json.loads((d / "nba_props.json").read_text())["props"] and (d / "nba_props.html").read_text().startswith("<!doctype")
     assert not list(d.glob(".*.tmp"))
+    # the page's worker beside it, the same version as the page (a launch opens from the phone's copy)
+    b = UI.build_id()
+    assert f'BUILD = "{b}"' in (d / "nba_props.html").read_text() and f'const BUILD = "{b}"' in (d / "pickz-sw.js").read_text()
+
+
+def test_page_launches_from_the_phones_copy():
+    html, b = UI.page(), UI.build_id()
+    # one version a code change: the page and its worker carry it, and it moves with any part of the page's code
+    assert html.count(f'BUILD = "{b}"') == 1 and "__BUILD__" not in html and "__BUILD__" not in UI.sw() and len(b) == 12
+    UI.CSS, css = UI.CSS + " ", UI.CSS
+    try:
+        assert UI.build_id() != b
+    finally:
+        UI.CSS = css
+    # registered for the page alone; a new version loads only when the page goes to the background, not under a finger,
+    # and never on the first install (no worker had the page before it)
+    assert 'navigator.serviceWorker.register("pickz-sw.js", {scope: "./nba_props.html"})' in html
+    assert 'addEventListener("controllerchange", () => { if (had) SW_NEW = true; });' in html
+    assert "if (document.hidden && SW_NEW) { location.reload(); return; }" in html and "r && r.update()" in html
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_service_worker_serves_only_the_page():
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "t.js").write_text("""const H = {}, store = {}, deleted = [];
+const self = {registration: {scope: "https://x.test/nba_props.html"}, addEventListener: (k, f) => { H[k] = f; },
+  skipWaiting: () => Promise.resolve(), clients: {claim: () => Promise.resolve()}};
+let PAGE_TEXT = "";
+const fetch = (u, o) => Promise.resolve({ok: true, status: 200, url: String(u.url || u), clone() { return {text: () => Promise.resolve(PAGE_TEXT)}; }, net: true});
+const caches = {open: k => Promise.resolve({put: (u, r) => { store[k] = r; return Promise.resolve(); }, match: u => Promise.resolve(store[k] || undefined)}),
+  keys: () => Promise.resolve(Object.keys(store).concat(["pickz-data", "pickz-shell-old"])), delete: k => { deleted.push(k); return Promise.resolve(true); }};
+""" + UI.SW.replace("__BUILD__", "b1") + """
+const ev = r => { const e = {request: r, waitUntil(p) { this.p = p; }, respondWith(p) { this.res = p; }}; return e; };
+(async () => {
+  const out = {};
+  PAGE_TEXT = 'const CACHE = "pickz-data", BUILD = "b0";';                     // the page isn't this version yet
+  let e = ev(); H.install(e); out.stale = await e.p.then(() => "installed", () => "refused");
+  PAGE_TEXT = 'const CACHE = "pickz-data", BUILD = "b1";';
+  e = ev(); H.install(e); out.fresh = await e.p.then(() => "installed", () => "refused");
+  e = ev(); H.activate(e); await e.p; out.deleted = deleted;
+  out.cached = !!store["pickz-shell-b1"]; store["pickz-shell-b1"] = {copy: true};
+  const nav = ev({mode: "navigate", url: "https://x.test/nba_props.html?t=1"}); H.fetch(nav);
+  out.nav = nav.res ? (await nav.res).copy ? "copy" : "network" : "untouched";
+  for (const [k, r] of [["data", {mode: "cors", url: "https://x.test/nba_props.json"}], ["other page", {mode: "navigate", url: "https://x.test/index.html"}]]) {
+    const x = ev(r); H.fetch(x); out[k] = x.res ? "intercepted" : "untouched"; }
+  console.log(JSON.stringify(out));
+})();
+""")
+    out = json.loads(subprocess.run([NODE, str(d / "t.js")], capture_output=True, text=True, check=True).stdout)
+    # a worker caches its own version of the page or none; old copies go, the data's cache stays
+    assert out["stale"] == "refused" and out["fresh"] == "installed" and out["deleted"] == ["pickz-shell-old"]
+    # the page opens from the copy; the data files and the other pages are left to the network
+    assert out["cached"] and out["nav"] == "copy" and out["data"] == "untouched" and out["other page"] == "untouched"
 
 
 # ── prices, the change log, blended ranks, fresh absences (research+ 2026-10-26) ──────────────────────────────
@@ -872,8 +940,8 @@ def test_lineups_flags_new_starters_and_missing_regulars():
         "personId": pid, "playerName": nm, "position": pos, "lineupStatus": st, "rosterStatus": ro, "timestamp": ts}
     early = {"games": [{"gameId": "G1", "homeTeam": {"teamAbbreviation": "PHX", "players": [P(1, "A One", "PG", "Expected")]}}]}
     late = {"games": [{"gameId": "G1", "homeTeam": {"teamAbbreviation": "PHX", "players": [
-        P(1, "A One", "PG"), P(2, "B Two", "SG"), P(3, "C Three", "SF"), P(4, "D Four", "PF", ts="2026-10-26T22:40:00"),
-        P(9, "New Nine", "C"), P(5, "E Five", ""), P(6, "F Six", "", ro="Inactive")]},
+        P(2, "B Two", "SG"), P(3, "C Three", "SF"), P(1, "A One", "PG"), P(4, "D Four", "PF", ts="2026-10-26T22:40:00"),
+        P(9, "New Nine", "C"), P(5, "E Five", ""), P(6, "F Six", "", ro="Inactive")]},              # NBA.com's order
         "awayTeam": {"teamAbbreviation": "SAC", "players": [P(20, "Exp Twenty", "PG", "Expected")]}}]}
     lc.execute("INSERT INTO snaps VALUES ('2026-10-26T20:00:00+00:00', ?, 'a', ?)", (GD, zlib.compress(json.dumps(early).encode())))
     lc.execute("INSERT INTO snaps VALUES ('2026-10-26T23:00:00+00:00', ?, 'b', ?)", (GD, zlib.compress(json.dumps(late).encode())))
@@ -882,11 +950,14 @@ def test_lineups_flags_new_starters_and_missing_regulars():
                      for i in range(11)] + [("g99", GD, "2026-27", {7: (1, 30)})]}           # tonight's own: not before it
     boxes["SAC"] = [(f"s{i}", f"2026-10-2{i}", "2026-27", {21: (1, 30)}) for i in (1, 3)]      # 2 games this season
     boxes["SAC"] += [(f"o{i}", f"2026-03-{i + 1:02d}", "2025-26", {22: (1, 30)}) for i in range(10)]   # last season's
-    out = RS.lineups(lc, [GD, "2026-10-27"], boxes, {(GD, 5): {"status": "Questionable"}})
+    out = RS.lineups(lc, ["2026-10-25", GD, "2026-10-27"], boxes, {(GD, 5): {"status": "Questionable"}, (GD, 2): {"status": "Questionable"},
+                                                    ("2026-10-25", 3): {"status": "Out"}})              # another date's: not tonight's
     assert out[f"{GD}|SAC"]["usual"] == [] and out[f"{GD}|SAC"]["missing"] == []      # under 3 this season: nothing marked
     e = out[f"{GD}|PHX"]
     assert e["status"] == "Confirmed" and e["at"] == "2026-10-26T22:40:00"                     # the latest snapshot
-    assert [s[0] for s in e["starters"]] == [1, 2, 3, 4, 9] and e["starters"][4] == [9, "New Nine", "C"]
+    assert [s[0] for s in e["starters"]] == [1, 2, 3, 4, 9] and e["starters"][4] == [9, "New Nine", "C", None]   # PG to C
+    assert e["starters"][1] == [2, "B Two", "SG", "Questionable"]                            # a posted starter's report status
+    assert e["starters"][2] == [3, "C Three", "SF", None]                                    # tonight's report only
     assert sorted(e["usual"]) == [1, 2, 3, 4, 5] and e["missing"] == [[5, "E Five", "Questionable"]]
     assert e["inactive"] == [[6, "F Six"]] and out[f"{GD}|SAC"]["status"] == "Expected"
     assert not any(k.startswith("2026-10-27") for k in out)                                    # no snapshot yet
@@ -995,6 +1066,78 @@ def test_page_boots_from_its_last_copy_and_animates_swaps():
     assert '<div class="seg cbw" role="group" aria-label="Games"><span class="pill2">' in html and ".lvin .lvbar i{" in html
 
 
+def test_league_switch_checks_before_it_downloads():
+    html = UI.page()
+    # the next sport's file, prefetched: its Last-Modified kept, parsed once the page is idle; a switch to a sport in
+    # hand asks with a HEAD and downloads only a newer file (no 2-5 MB parse on every tap of the league button)
+    assert 'const m = r.headers.get("Last-Modified"); return r.text().then(t => [t, m]);' in html
+    assert "DATA[other] = JSON.parse(x[0]); LASTMOD[other] = x[1] || LASTMOD[other];" in html and "x && idle(() =>" in html
+    assert "if (D && LAST_MOD) { CHECK_AT = 0; freshen(); } else load();" in html
+    assert "const sp = SPORT;\n  fetch(dataUrl() + \"?t=\" + Date.now(), {method: \"HEAD\"" in html   # a HEAD from before a switch: dropped
+    assert "CHECKING = false; if (sp !== SPORT) { CHECK_AT = 0; freshen(); }" in html     # ... and the new sport's asked for
+    # back to a sport: its rows as built, when its data is the same (not rebuilt and re-decoded every switch); the one
+    # after it prefetched
+    assert "KEPT[SPORT] = [D, ROWS, RATES];" in html and "const kept = KEPT[to] && KEPT[to][0] === DATA[to] ? KEPT[to] : null;" in html
+    assert "ROWS = kept ? kept[1] : new Map(); RATES = kept ? kept[2] : new Map();" in html
+    assert "else load();   // in hand: a HEAD for it, the download only when newer\n    prefetchOther();" in html
+
+
+def test_prop_page_lays_out_once_a_tap():
+    html = UI.page()
+    # the scroll positions read before any write, set after them; the charts read the width kept on a resize, not
+    # innerWidth (a forced layout after the writes before them)
+    assert "const cw = $(\"#chw\"), sl = first ? 0 : cw.scrollLeft, atEnd = first || sl + cw.clientWidth >= cw.scrollWidth - 4;" in html
+    assert 'renderProp(was ? undefined : "open"); afterWrites(() => { pg.scrollTop = 0; });' in html
+    assert "afterWrites(() => { cw.scrollLeft = atEnd ? cw.scrollWidth : sl; });" in html and "window.innerWidth, 520" not in html
+    assert html.count("Math.min(VW, 520)") == 3 and 'window.addEventListener("resize", () => { VW = window.innerWidth; });' in html
+    # an opening page draws what shows; the game script, the schedule and the rest once it has slid in, when idle
+    assert 'if (!opening) { $("#pgs").innerHTML = gameScript(' in html
+    assert 'PX.lazy = setTimeout(() => idle(() => { if (PX && PX.p === p) updateProp("rest"); }), 500);' in html
+    # headshots decode off the main thread; WOWY's minutes without toLocaleString (slow, a row at a time)
+    assert html.count('<img class="hs" alt="" loading="lazy" decoding="async" src=') == 3 and "Math.round(s / 60).toLocaleString()" not in html
+
+
+def test_page_fits_the_phone():
+    html = UI.page()
+    # the canvas is the page's colour: a view shorter than the screen (WOWY, a quiet NFL board) ends without a black band
+    assert "html,body{background:#0f0f0f}" in html and '<meta name="theme-color" content="#0f0f0f">' in html
+    # a scrolling chart keeps its labels: a strip over the screen's edge (sticky against the content edge, so -15.3)
+    assert "const pin = W > W0;" in html and "if (!pin) o.push(axis);" in html
+    assert '<div class="c2s"><svg class="c2 c2y" width="${AX + 15.3}"' in html
+    assert ".c2s svg.c2y{position:sticky;left:-15.3px;" in html and "margin:0 -35px 0 -15.3px" in html
+    # an NFL injury row with a practice line is taller, so the line isn't cut; two tabs, a narrower capsule
+    assert '${e.practice ? " irp" : ""}' in html and ".pr.irp{height:130px;" in html and '.tbc[data-n="2"]{width:168px}' in html
+    assert '<div class="kv nws"><span>News · ${esc(n.source)}' in html
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_pills_measure_after_the_writes():
+    html = UI.page()
+    cut = lambda pre, end: html[html.index(pre): html.index(end, html.index(pre)) + len(end)]
+    src = cut("const SLIDES = [], AFTER = [];", "AFTER.splice(0).forEach(f => f());\n}\n")
+    mm = cut("const mm = s =>", ";")
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "t.js").write_text("""const window = {innerWidth: 390, addEventListener() {}};
+const log = [];
+const btn = (n, x, w) => ({isConnected: true, get offsetWidth() { log.push("r"); return w; }, get offsetHeight() { log.push("r"); return 30; },
+  get offsetLeft() { log.push("r"); return x; }, get offsetTop() { log.push("r"); return 2; }});
+const box = (b, pw) => { const st = {}, pill = {style: new Proxy(st, {set(t, k, v) { log.push("w"); t[k] = v; return true; }}),
+  get offsetWidth() { log.push("f"); return 0; }}; return {dataset: pw ? {pw: pw} : {}, st: st, q: {".pill2": pill, '[aria-pressed="true"]': b}}; };
+const $ = (s, r) => r.q[s];
+""" + src + "\n" + mm + """
+const A = box(btn("a", 10, 40)), B = box(btn("b", 100, 60), 50);
+slide(A, true); slide(B); afterWrites(() => log.push("after")); log.push("sync");
+setTimeout(() => console.log(JSON.stringify({log: log, a: A.st, b: B.st, mm: [0, 999, 1234, 1234567].map(v => mm(v * 60))})), 0);
+""")
+    out = json.loads(subprocess.run([NODE, str(d / "t.js")], capture_output=True, text=True, check=True).stdout)
+    L = out["log"]
+    # nothing measured in the tap's own code; then every read before the first write (one layout), the after-work last
+    assert L[0] == "sync" and L.index("w") > max(i for i, x in enumerate(L) if x == "r") and L[-1] == "after"
+    assert out["a"]["transform"] == "translate(10px,2px)" and out["a"]["width"] == "40px" and out["a"]["transition"] == ""
+    assert out["b"]["transform"] == "translate(105px,2px)" and out["b"]["width"] == "50px" and "transition" not in out["b"]
+    assert out["mm"] == ["0", "999", "1,234", "1,234,567"]
+
+
 @pytest.mark.skipif(NODE is None, reason="node not installed")
 def test_slate_day_moves_on_once_the_night_is_over():
     d = pathlib.Path(tempfile.mkdtemp())
@@ -1059,7 +1202,8 @@ def test_projected_lineups_fill_in_for_who_is_out():
     five = [s[0] for s in m["starters"]]
     # E (Out) -> F, who started when E sat; C (Doubtful, never missed a start) -> H, the other center (over G's minutes)
     assert sorted(five) == [1, 2, 4, 6, 8] and m["subs"] == [[6, 5, "Eee F"], [8, 3, "Cee C"]]
-    assert [s[2][:1] for s in m["starters"]] == ["G", "G", "F", "F", "C"]          # guards, then forwards, then centers
+    # no starts by slot: their listed positions put the five PG to C (G: PG or SG, F: SF or PF), ties in the order found
+    assert [s[:3] for s in m["starters"]] == [[1, "Ay G", "PG"], [4, "Dee G", "SG"], [2, "Bee F", "SF"], [6, "Eff F", "PF"], [8, "Aitch C", "C"]]
     assert dict((s[0], s[3]) for s in m["starters"])[4] == "Questionable" and m["status"] == "Projected"
     assert sorted(x[0] for x in m["missing"]) == [3, 5]
     # last season C sat twice for MIN and G started both: that evidence beats position (and E's 3 makes his the surer pick)
@@ -1068,12 +1212,192 @@ def test_projected_lineups_fill_in_for_who_is_out():
                                                     for i in (1, 2)]
     m2 = RS.projected_lineups(games, dict(boxes, MIN=ls + mins), official, roster, {})[f"{D}|MIN"]
     assert m2["subs"] == [[6, 5, "Eee F"], [7, 3, "Cee C"]]
+    # the slots they start in: this season's starts (D at PG, though A started there last season), then last season's
+    # (F at SF over B), then the listed position; a guard who starts at SF this season goes there
+    slots = {4: {"PG": [6, 0]}, 1: {"PG": [0, 20], "SG": [0, 3]}, 6: {"SF": [0, 9]}}
+    m3 = RS.projected_lineups(games, boxes, official, roster, {f"{D}|WAS": {}}, slots)[f"{D}|MIN"]
+    assert [s[:3] for s in m3["starters"]] == [[4, "Dee G", "PG"], [1, "Ay G", "SG"], [6, "Eff F", "SF"], [2, "Bee F", "PF"], [8, "Aitch C", "C"]]
+    slots[1] = {"SF": [2, 0]}
+    m4 = RS.projected_lineups(games, boxes, official, roster, {f"{D}|WAS": {}}, slots)[f"{D}|MIN"]
+    assert [s[:3] for s in m4["starters"]] == [[4, "Dee G", "PG"], [2, "Bee F", "SG"], [1, "Ay G", "SF"], [6, "Eff F", "PF"], [8, "Aitch C", "C"]]
+
+
+def test_start_slots_count_box_score_starts():
+    m = sqlite3.connect(":memory:")
+    m.execute("CREATE TABLE games (gid TEXT, season TEXT, date TEXT)")
+    m.execute("CREATE TABLE player_games (gid TEXT, pid INTEGER, pos TEXT, starter INTEGER)")
+    m.executemany("INSERT INTO games VALUES (?, ?, ?)", [("a", "2026-27", "2026-10-30"), ("b", "2026-27", "2026-11-01"),
+                                                         ("c", "2025-26", "2026-03-01"), ("d", "2024-25", "2025-03-01")])
+    m.executemany("INSERT INTO player_games VALUES (?, ?, ?, ?)", [("a", 1, "PG", 1), ("b", 1, "PG", 1), ("c", 1, "SG", 1),
+                                                                   ("d", 1, "SF", 1), ("a", 2, "", 0), ("b", 3, "C", 1)])
+    s = RS.start_slots(m, ("2025-26", "2026-27"))
+    assert {p: dict(v) for p, v in s.items()} == {1: {"PG": [2, 0], "SG": [0, 1]}, 3: {"C": [1, 0]}}   # 2024-25: not counted
+    assert RS.slot_five([], {}, lambda p: "") == []
+    # no starts: the listed position's first group before its second (an F-G at a forward slot, a G-F at a guard slot)
+    gen = {10: "F-G", 11: "G-F", 12: "G", 13: "F", 14: "C"}.get
+    assert RS.slot_five([10, 11, 12, 13, 14], {}, gen) == [(11, "PG"), (12, "SG"), (10, "SF"), (13, "PF"), (14, "C")]
+
+
+def _min_season():
+    """MIN's 10 games: A B C D E start (32), F G H J K L come off the bench; J (18) and L (20) sat the last 5 hurt, K (18)
+    was traded. In game 2 C, E and K all sat: tonight's absences once before (ROLE1 v3's WOWY game)."""
+    import nba_role as RL
+    rows = []
+    for i in range(10):
+        d = f"2026-10-{10 + i:02d}"
+        mins = {1: 32, 2: 32, 3: 32, 4: 32, 5: 32, 6: 20, 7: 16, 8: 12, 10: 18, **({9: 18, 12: 20} if i < 5 else {}),
+                **({13: 10} if i < 3 else {})}                                   # M: 3 games, then traded
+        if i == 2:
+            mins = {1: 38, 2: 38, 4: 38, 6: 30, 7: 26, 8: 20, 9: 30, 12: 20}
+        rows += [{"gid": f"m{i}", "date": d, "team": "MIN", "pid": p, "min": float(m), "fga": 8, "fta": 2, "fg3a": 3, "fg3m": 1,
+                  "reb": 4, "ast": 2, "pts": 10} for p, m in mins.items()]
+    rows += [{"gid": "w0", "date": "2026-10-12", "team": "WAS", "pid": 11, "min": 30.0, "fga": 8, "fta": 2, "fg3a": 3,
+              "fg3m": 1, "reb": 4, "ast": 2, "pts": 10}]
+    groups = {1: "G", 2: "G", 3: "C", 4: "F", 5: "F", 6: "F", 7: "G", 8: "C", 9: "G", 10: "F", 12: "C"}
+    return types.SimpleNamespace(season=RL.Season(rows), priors=RL.Priors([], groups), groups=groups), RL
+
+
+def test_projected_minutes_for_who_can_play_tonight():
+    rd, RL = _min_season()
+    D = "2026-10-21"
+    roster = {str(p): ["MIN", f"Player {p}", "G"] for p in (*range(1, 10), 12)} | {"10": ["WAS", "Player 10", "F"], "11": ["WAS", "W", "G"],
+                                                                                "13": ["WAS", "Player 13", "G"]}
+    official = {(D, 5): {"status": "Out"}, (D, 3): {"status": "Doubtful"}, (D, 4): {"status": "Questionable"},
+                (D, 9): {"status": "Available"}, ("2026-10-20", 7): {"status": "Out"},           # another date's: not tonight's
+                (D, 13): {"status": "Available"}}                                                # M: on WAS's report now
+    lu = {f"{D}|MIN": {"status": "Expected", "starters": [[1, "A", "PG"], [2, "B", "SG"], [4, "D", "SF"], [6, "F", "PF"], [7, "G", "C"]],
+                       "inactive": [[8, "H"], [12, "L"]]}}                  # L: out 5 games, already in everyone's last 5
+    games = [{"date_et": D, "home": "MIN", "away": "WAS"}, {"date_et": D, "home": "NEW", "away": "CHI"}]
+    out = RS.projected_minutes(rd, games, official, lu, roster)
+    assert set(out) == {f"{D}|MIN", f"{D}|WAS"}                    # NEW and CHI: no games yet
+    m = out[f"{D}|MIN"]
+    # in: the last 3 games' players and J (back: tonight's report, not Out); out: E (Out), C (Doubtful), H (inactive),
+    # K and M (the roster has them on WAS now). The absent regulars' minutes (C, E, K: absence game 1) are shared out
+    assert sorted(r[0] for r in m) == [1, 2, 4, 6, 7, 9]
+    ref = RL.project(rd.season, rd.priors, rd.groups, "MIN", D, {1, 2, 4, 6, 7, 9}, {3, 5, 10}, mode="v3")
+    assert {r[0]: (r[2], r[3]) for r in m} == {p: (round(v["min"], 1), round(v["base_min"], 1)) for p, v in ref.items()}
+    assert [r[2] for r in m] == sorted((r[2] for r in m), reverse=True)                     # the most minutes first
+    st = {r[0]: r[4] for r in m}
+    assert st[4] == "Questionable" and st[9] == "Available" and st[7] is None and {r[0]: r[1] for r in m}[1] == "Player 1"
+    assert all(r[2] > r[3] for r in m if r[0] in (1, 2, 4, 6, 7))    # three regulars out: everyone else plays more
+    assert abs(sum(r[2] for r in m) - 240) < 0.5
+
+
+def test_role_minutes_by_role():
+    # T's 6 games: A starts (39), B off the bench (20), C a big bench player (30), D a regular starter (30), E off the bench
+    # (15) then starting twice (25), F deep bench (5, 2 games), G H the bench (20: the 20-and-up bucket), I J (15), L 2
+    # starts of 3 minutes
+    gs = [f"g{i}" for i in range(6)]
+    box = lambda i: {**{1: 39, 2: 20, 3: 24 if i == 1 else 30, 4: 30, 5: 25 if i >= 4 else 15}, **({6: 5} if i in (0, 3) else {}),
+                     **{7: 20, 8: 20, 9: 15, 10: 15}, **({12: 3} if i >= 4 else {})}
+    prior = [(f"2026-10-{10 + i}", g, {p: {"min": float(m)} for p, m in box(i).items()}) for i, g in enumerate(gs)]
+    starts = {(g, p) for g in gs for p in (1, 4)} | {("g4", 5), ("g5", 5), ("g4", 12), ("g5", 12)}
+    pool, five = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12}, {1, 2, 5}       # B promoted, D to the bench, E starts again
+    base = {1: (5 * 39 + 4 * 39) / 9,                       # his last 5 starts, his last 5 his prior
+            2: 20 + 9,                                      # a first start: last 5 + 9
+            3: (24 + 4 * 30 + 4 * 28.8) / 9,                # a big bench player keeps his bench minutes (his last 5: 28.8)
+            4: 30 - 6,                                      # a regular starter off the bench: last 5 - 6
+            5: (2 * 25 + 4 * (19 + 9 * 0.6)) / 6,           # 2 starts; last 5 19, started 2 of 5
+            6: (2 * 5 + 4 * 5) / 6, 12: 0.0,                # L: 3 - 6 below 0 counts as 0
+            7: 20.0, 8: 20.0, 9: 15.0, 10: 15.0}
+    for table, P in ((None, {3: .861, 4: .861, 6: .738, 7: .861, 9: .931}), (RS.RM2_P, {3: .992, 4: .992, 6: .552, 7: .992, 9: .956})):
+        P = {1: 1, 2: 1, 5: 1, 12: .738 if table is None else .552, 8: P[7], 10: P[9], **P}
+        c = 240 / sum(P[p] * base[p] for p in pool)
+        out = RS.role_minutes(prior, starts, pool, five, table)
+        assert set(out) == pool and abs(out[5][1] - 19) < 1e-9 and out[12] == (0.0, 3.0)
+        for p in pool:
+            assert abs(out[p][0] - min(40.0, base[p] * c)) < 1e-9, (table is None, p)
+    assert RS.role_minutes(prior, starts, pool, five)[1][0] == 40.0       # capped at 40
+
+
+def test_projected_minutes_by_role():
+    rd, RL = _min_season()
+    D = "2026-10-21"
+    roster = {str(p): ["MIN", f"Player {p}", "G"] for p in (*range(1, 10), 12)} | {"10": ["WAS", "Player 10", "F"], "13": ["WAS", "P13", "G"]}
+    official = {(D, 5): {"status": "Out"}, (D, 3): {"status": "Doubtful"}, (D, 9): {"status": "Available"}}
+    lu = {f"{D}|MIN": {"status": "Expected", "starters": [[1, "A", "PG"], [2, "B", "SG"], [4, "D", "SF"], [6, "F", "PF"], [7, "G", "C"]],
+                       "inactive": [[8, "H"], [12, "L"]]}}
+    starts = {(f"m{i}", p) for i in range(10) for p in (1, 2, 3, 4, 5)}
+    games = [{"date_et": D, "home": "MIN", "away": "WAS"}]
+    m = RS.projected_minutes(rd, games, official, lu, roster, model="role", starts=starts)[f"{D}|MIN"]
+    for table in (None, RS.RM2_P):
+        ref = RS.role_minutes(rd.season.before("MIN", D), starts, {1, 2, 4, 6, 7, 9}, {1, 2, 4, 6, 7}, table)
+        got = RS.projected_minutes(rd, games, official, lu, roster, model="role", starts=starts, chance_table=table)[f"{D}|MIN"]
+        assert {r[0]: (r[2], r[3]) for r in got} == {p: (round(v, 1), round(b, 1)) for p, (v, b) in ref.items()}
+    assert [r[2] for r in m] == sorted((r[2] for r in m), reverse=True)
+
+
+def test_build_carries_projected_minutes(payload):
+    e = payload["lineups"][f"{GD}|PHX"]
+    # RM2: both start (Allen's first start: his last 5 + 9), two players fill to their 40 cap
+    assert e["min"] == [[1, "Devin Booker", 40.0, 35.0, None], [2, "Grayson Allen", 40.0, 26.0, None]]
+    assert payload["sources"]["minutes"] == {"model": "RM2", "teams": 2}
+    # the projected five by box-score slot: Booker starts at SG every game, so Allen (a G, no starts) takes PG
+    assert [s[:3] for s in e["starters"]] == [[2, "Grayson Allen", "PG"], [1, "Devin Booker", "SG"]]
+
+
+def test_build_uses_rm2(monkeypatch):
+    seen = []
+    real = RS.projected_minutes
+    monkeypatch.setattr(RS, "projected_minutes", lambda *a, **k: seen.append(k) or real(*a, **k))
+    built(NOW)
+    assert len(seen) == 1 and seen[0]["model"] == "role" and seen[0]["chance_table"] is RS.RM2_P
+    assert seen[0]["starts"] and all(isinstance(g, str) and isinstance(p, int) for g, p in seen[0]["starts"])
+
+
+def test_page_shows_projected_minutes():
+    html = UI.page()
+    assert "${subs}${miss}${ina}${luMins(e, key)}</div>" in html and 'luTeam(t, L[g.date + "|" + t], g.date + "|" + t)' in html
+    assert "if (!(e.min || []).length) return \"\";" in html
+    assert ('<details class="lmn" data-k="${esc(key)}"${LMN.has(key) ? " open" : ""}><summary>Projected minutes</summary>'
+            '<div class="lmw"><table class="lmt">') in html
+    # the open lists survive a refresh: a toggle (it does not bubble) is caught on the way down
+    assert 'document.addEventListener("toggle", ev => {' in html and "if (d.open) LMN.add(d.dataset.k); else LMN.delete(d.dataset.k); } }, true);" in html
+    assert '<tr data-vp="${pid}"${sep ? \' class="lsep"\' : ""}><td>${esc(nameOf(name))}${INJ_S[st] ? `<span class="tg ${INJ_C[st]}">${INJ_S[st]}</span>` : ""}</td>' in html
+    assert ".lmt tr.lsep td{border-top:2px solid #5c5c5c}" in html
+    assert '<td class="${dv >= 1 ? "up" : dv <= -1 ? "dn" : ""}">${dv >= .05 ? "+" : dv <= -.05 ? "−" : ""}${Math.abs(dv).toFixed(1)}</td>' in html
+    assert ".lmt td.up{color:var(--grn)} .lmt td.dn{color:var(--red)}" in html
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_minutes_list_puts_the_five_first():
+    html = UI.page()
+    upto = lambda pre, end: html[html.index(pre): html.index(end, html.index(pre))]
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "t.js").write_text("const esc = x => String(x), nameOf = x => x, INJ_S = {Questionable: \"Q\"}, INJ_C = {Questionable: \"tq\"}, LMN = new Set();\n"
+                            + upto("function luMins(e, key) {", "// opening and closing glide") + """
+const min = [[6, "F", 33, 30, null], [1, "A", 31, 30, null], [9, "J", 24, 20, "Questionable"], [2, "B", 22, 25, null],
+             [4, "D", 20, 20, null], [7, "G", 18, 18, null], [8, "H", 6, 8, null]];
+const ids = h => [...h.matchAll(/<tr data-vp="(\\d+)"( class="lsep")?/g)].map(m => m[2] ? m[1] + "|" : +m[1]);
+const five = [[1, "A", "PG"], [2, "B", "SG"], [4, "D", "SF"], [6, "F", "PF"], [3, "C", "C"]];   // C: out tonight
+console.log(JSON.stringify([ids(luMins({starters: five, min}, "k")), ids(luMins({starters: [], min}, "k")), luMins({starters: five, min: []}, "k")]));
+""")
+    with_five, none, empty = json.loads(subprocess.run([NODE, str(d / "t.js")], capture_output=True, text=True, check=True).stdout)
+    assert with_five == [1, 2, 4, 6, "9|", 7, 8]          # the five as the tiles (one out), a line, the bench by minutes
+    assert none == [6, 1, 9, 2, 4, 7, 8] and empty == ""   # no five yet: by minutes, no line
+
+
+def test_minutes_list_glides_open_and_shut():
+    html = UI.page()
+    assert 'const s = ev.target.closest(".lmn > summary");' in html and "ev.preventDefault();" in html
+    assert "if (REDUCED) { d.open = !d.open; return; }" in html
+    # from wherever a second tap catches it: the height now and the table's opacity now (shut: 0, though a browser
+    # that keeps a closed list's layout still measures it full)
+    assert "const h0 = d.open ? w.getBoundingClientRect().height : 0, o0 = d.open ? +getComputedStyle(t).opacity : 0;" in html
+    assert 'd._a = [w.animate([{height: h0 + "px"}, {height: "0px"}], {duration: 300, easing: EASE}),' in html
+    assert "d._a[0].onfinish = () => { d.open = false; d.classList.remove(\"shut\"); d._a[1].cancel(); d._a = null; };" in html
+    assert 'd._a = [w.animate([{height: h0 + "px"}, {height: w.scrollHeight + "px"}], {duration: 380, easing: EASE}),' in html
+    assert ".lmw{overflow:hidden}" in html and ".lmn[open]:not(.shut) summary::after{transform:rotate(-135deg) translate(-1.5px,-1.5px)}" in html
+    assert "margin-top:4px;transform:rotate(-135deg)" not in html
 
 
 def test_page_shows_projected_lineups():
     html = UI.page()
     assert 'proj = e.status === "Projected"' in html and '"PROJECTED"' in html and "<b>In for</b>" in html
-    assert 'proj && INJ_S[st] ? ` · <em class="lq">' in html and "const miss = !proj && e.missing.length" in html
+    assert "const miss = !proj && e.missing.length" in html
+    # every five (posted or projected) tags a starter on the report with the Injuries tab's tag: Q / DTD yellow, DOUBT / OUT red
+    assert '${INJ_S[st] ? ` <span class="tg ${INJ_C[st]}">${INJ_S[st]}</span>` : ""}' in html and "proj && INJ_S[st]" not in html
+    assert ".lus .tg{margin-left:2px}" in html
 
 
 def test_injury_beneficiaries_open_their_page():
@@ -1102,11 +1426,11 @@ def test_matchup_shows_assist_and_rebound_zones_only_for_their_props():
     # the assists and rebounds courts: the shot chart's six zones (one shared drawing; a rebound by its miss's zone), his a
     # game shaded by his share against the league's, or the opponent's allowed a game shaded against the league and ranked;
     # a view switch redraws the court alone, each card keeping its own view
-    assert "const zoneMarks = zs =>" in html and html.count("zoneMarks(") == 2 and html.count('<g class="shl">') == 2
+    assert "const zoneMarks = zs =>" in html and html.count("zoneMarks(") == 4 and html.count('<g class="shl">') == 2
     assert "fill: shFill(lt ? (mine[k] / tot - Lk[k] / lt) * 100 : null)" in html and "fill: shFill(la ? (a / la - 1) * 50 : null)" in html
     assert "const a = t[off + k] / t[0], la = Lk[k] / L.gp;" in html and "off = ast ? 1 : 1 + nz, L = j.league, Lk = L[kind];" in html
     assert "sub: ord(1 + all.filter(x => x[off + k] / x[0] < a).length)" in html and "const k = j.zones.indexOf(nm);" in html
-    assert 'if (view) { const v = $(".zcv", el);' in html and 'astView: "player", rebView: "player"};' in html and 'vkey = kind + "View"' in html
+    assert 'if (view) { const v = $(".zcv", el);' in html and 'astView: "m", rebView: "m"};' in html and 'vkey = kind + "View"' in html
     # rebounds: free throws (no zone on the court) as a line; the player's rings, 0-3 / 3-6 / 6-10 / 10+ ft from the hoop
     # (docs/rebd), shaded against the players with rebound lines; the defense view's missed threes against the league
     assert "NBA.com tracking · ${r[1]} boards ·" in html                 # the sample: early in a season a ring is a board or two
@@ -1118,3 +1442,268 @@ def test_matchup_shows_assist_and_rebound_zones_only_for_their_props():
     assert "const m3 = x => (x[off + Z.length + 3] + x[off + Z.length + 4] + x[off + Z.length + 5]) / x[0], lg = (L.miss[3] + L.miss[4] + L.miss[5]) / L.gp;" in html
     # a rookie facing a team with few games this season still gets his own season, not last season's blank
     assert "MUP[key] = (t && t[0] >= 10) || (me(j) && !me(q)) ? D.season : prevSeason(D.season);" in html
+
+
+def test_nba_cup_games_reach_the_page(payload):
+    # a test build never fetches: no Cup map unless one is given, and the one given is passed through as is
+    assert payload["cup"] == {}
+    g0 = payload["players"]["1"]["logs"][0][RS.LOG_COLS.index("gid")]
+    assert built(NOW, cup={g0: "West Group B"})["cup"] == {g0: "West Group B"}
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_nba_cup_filter(payload):
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "core.js").write_text(UI.JS_CORE)
+    logs = [dict(zip(RS.LOG_COLS, r)) for r in payload["players"]["1"]["logs"]]
+    cup = {logs[0]["gid"]: "West Group B", logs[-1]["gid"]: "Quarterfinal", "0062600001": "Championship"}
+    (d / "t.js").write_text("""
+const C = require('./core.js'), inp = JSON.parse(require('fs').readFileSync(process.argv[2]));
+console.log(JSON.stringify([C.filterLogs(inp.logs, {cup: inp.cup}).map(l => l.gid), C.filterLogs(inp.logs, {cup: null}).length,
+  C.filterLogs(inp.logs, {cup: inp.cup, home: inp.logs[0].home === 1}).map(l => l.gid), C.filterLogs(inp.logs, {cup: {}}).length]));
+""")
+    (d / "in.json").write_text(json.dumps({"logs": logs, "cup": cup}))
+    only, off, both, none = json.loads(subprocess.run([NODE, str(d / "t.js"), str(d / "in.json")], capture_output=True,
+                                                      text=True, check=True, cwd=d).stdout)
+    assert only == [logs[0]["gid"], logs[-1]["gid"]]           # his Cup games, oldest first; the final is in no log
+    assert off == len(logs) and none == 0
+    assert both == [l["gid"] for l in (logs[0], logs[-1]) if l["home"] == logs[0]["home"]]   # with the other filters
+
+
+def test_nba_cup_toggle_on_the_page():
+    html = UI.page()
+    # a chip first in the Chart Filters row, for a player with a Cup game, and a Games row in his filter sheet (NBA only)
+    assert """if (hasCup(logs)) chips.push(chip('data-k="cup" data-v="true"', `${ICON.cup}NBA Cup`, on("cup", true)));""" in html
+    assert 'const hasCup = logs => !!D.cup && logs.some(l => D.cup[l.gid]);' in html
+    assert '["cup", "Games", [[null, "All"], [true, "NBA Cup"]]]];' in html
+    assert 'SEGS.filter(([k]) => k !== "cup" || hasCup(logs))' in html and "cup: DT.cup, ranges:" in html
+    assert "cup: x.cup && D.cup ? D.cup : null," in html and "|| !!DT.cup ||" in html
+    # each way it turns on or off (the chip, Clear All, the sheet's Reset and Show) goes through the window rule
+    assert html.count("const was = DT.cup;") == 3 and html.count("cupWindow(was);") == 4
+    assert '? {win: "l20", cupWin: DT.win} : w;' in html and '{win: DT.win === "l20" ? DT.cupWin : DT.win, cupWin: null}' in html
+    assert "const cupWindow = was => Object.assign(DT, cupWin(was, DT.cup));" in html
+    # the filter sheet's Show button counts the games in the window the chart will use
+    assert "without, dr)), cupWin(DT.cup, dr.cup).win, D.season, p.opp).length;" in html
+    # a new player starts with it off; the NFL and NHL keep their own sheet rows (no Cup)
+    assert "rest: null, cup: null, cupWin: null, ranges: {}" in html
+    for cfg in ("NFL_CFG", "NHL_CFG"):
+        i = html.index(f"const {cfg} = {{"); seg = html[html.index("SEGS:", i):html.index("]]]]", html.index("SEGS:", i))]
+        assert '"cup"' not in seg
+    # a Cup night on the game card
+    assert 'D.cup && D.cup[g.gid] ? "Cup" : ""' in html
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_nba_cup_sort():
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "core.js").write_text(UI.JS_CORE)
+    pts = {1: [30, 10, 25, 22, 18], 2: [25, 5, 5], 3: [15, 25, 30], 4: [40, 40], 5: [30]}
+    logs = {pid: [{"gid": f"{pid}-{i}", "pts": v} for i, v in enumerate(vs)] for pid, vs in pts.items()}
+    cup = {"1-0": "West Group B", "1-2": "West Group B", "1-3": "Quarterfinal", "2-0": "East Group A",
+           "3-0": "East Group C", "3-1": "East Group C", "5-0": "Semifinal"}
+    props = [{"id": f"p{pid}", "pid": pid, "player": f"P{pid}", "market": "points", "main": 20.5} for pid in (4, 5, 3, 2, 1)]
+    props[1]["main"] = None                                     # alt lines only
+    (d / "t.js").write_text("""
+const C = require('./core.js'), inp = JSON.parse(require('fs').readFileSync(process.argv[2]));
+const logsOf = p => inp.logs[p.pid], ids = xs => xs.map(p => p.id);
+console.log(JSON.stringify([ids(C.sortProps(inp.props, 'cup', 'desc', logsOf, 'over', '2026-27', 'all', inp.cup)),
+  ids(C.sortProps(inp.props, 'cup', 'asc', logsOf, 'over', '2026-27', 'all', inp.cup)),
+  ids(C.sortProps(inp.props, 'cup', 'desc', logsOf, 'under', '2026-27', 'all', inp.cup)),
+  ids(C.sortProps(inp.props, 'cup', 'desc', logsOf, 'over', '2026-27', 'all', null)),
+  inp.props.map(p => C.cupRate(p, logsOf(p), 'over', inp.cup))]));
+""")
+    (d / "in.json").write_text(json.dumps({"logs": logs, "cup": cup, "props": props}))
+    desc, asc, under, nocup, rates = json.loads(subprocess.run([NODE, str(d / "t.js"), str(d / "in.json")], capture_output=True,
+                                                               text=True, check=True, cwd=d).stdout)
+    # 3 of 3 and 1 of 1 tie at 100%: more Cup games first; 1 of 2 next; no Cup game, or no main line, last
+    assert desc == ["p1", "p2", "p3", "p4", "p5"]
+    assert asc == ["p3", "p1", "p2", "p4", "p5"]
+    assert under == ["p3", "p1", "p2", "p4", "p5"]
+    assert nocup == [p["id"] for p in props]                    # no Cup games on file: the order as it came
+    assert rates == [None, None, {"n": 2, "rate": 0.5, "avg": 20}, {"n": 1, "rate": 1, "avg": 25},
+                     {"n": 3, "rate": 1, "avg": 25.67}]
+
+
+
+
+def test_a_read_waits_out_a_writers_lock(tmp_path, monkeypatch):
+    import sqlite3, threading, time
+    db = tmp_path / "lines.sqlite"
+    w = sqlite3.connect(db, check_same_thread=False)
+    w.execute("CREATE TABLE quotes (x)"); w.execute("INSERT INTO quotes VALUES (1)"); w.commit()
+
+    def held(s):                                         # a writer holds the database for s seconds
+        w.execute("BEGIN EXCLUSIVE")
+        threading.Timer(s, w.commit).start()
+    assert RS.RO_WAIT_S >= 30                            # longer than a commit at game time
+    monkeypatch.setattr(RS, "RO_WAIT_S", 0.2)
+    held(1.0)
+    with pytest.raises(sqlite3.OperationalError, match="locked"):
+        RS._ro(db).execute("SELECT x FROM quotes").fetchall()
+    time.sleep(1.2)
+    monkeypatch.setattr(RS, "RO_WAIT_S", 5)
+    held(1.0)
+    t0 = time.time()
+    assert RS._ro(db).execute("SELECT x FROM quotes").fetchall() == [(1,)]
+    assert time.time() - t0 >= 0.8
+
+
+def test_builds_exit_once_the_page_is_written():
+    # no interpreter teardown after the write: on the swapping VM it held the build's lock for minutes
+    for f in ("nba_research.py", "nfl_research.py", "nhl_research.py"):
+        src = (pathlib.Path(__file__).resolve().parent / f).read_text()
+        main = src[src.index('if __name__ == "__main__":'):]
+        assert main.rstrip().endswith("sys.stdout.flush()\n    os._exit(0)"), f
+        assert main.index("write(a.out, pl)") < main.index("print(") < main.index("os._exit(0)"), f
+
+def test_times_on_the_phones_own_clock():
+    # tip times follow the phone's zone (Alberta stays on UTC-6 since Nov 2026); no zone is fixed on the page
+    html = UI.page()
+    assert 'const mt = (s, day) => s ? iso(s).toLocaleString("en-US", Object.assign({hour: "numeric", minute: "2-digit"}' in html
+    assert "America/Denver" not in html and "America/Edmonton" not in html
+
+def test_nba_cup_sort_on_the_page():
+    html = UI.page()
+    # a sort chip while the payload names Cup games; a Cup sort carried to a league without them sorts by L10
+    assert '["cup", "NBA Cup hit rate"]' in html
+    assert "const cupSort = () => !!D && !!D.cup && Object.keys(D.cup).length > 0;" in html
+    assert 'const sortKey = k => k === "cup" && !cupSort() ? "hit10" : k;' in html
+    assert 'SORTS.filter(([k]) => k !== "cup" || cupSort()).map(' in html
+    assert "sortProps(list, sortKey(ST.sort), ST.dir, logsOf, ST.side, D.season, ST.book, D.cup);" in html
+    assert "const dr = Object.assign({}, ST, {sort: sortKey(ST.sort)}), teams = {};" in html
+    assert "dr.sort, dr.dir, logsOf, dr.side, D.season, dr.book, D.cup).length;" in html
+    # sorted by the Cup, each row shows its Cup hit rate where DvP sits, and keeps that row apart from the DvP one
+    assert 'const cup = sortKey(ST.sort) === "cup" ? hbox(cupRate(p, logsOf(p), side, D.cup), cs) : null;' in html
+    assert '${cup ? `<div><i>CUP</i><b class="${cup.c}">${cup.t}</b></div>` : `<div><i>DvP</i>${dv}</div>`}' in html
+    assert '(sortKey(ST.sort) === "cup" ? "|cup" : "")' in html
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_court_read_stars_his_spots_where_he_does_well_and_the_defense_gives_up():
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "core.js").write_text(UI.JS_CORE)
+    Z = lambda sh, me, dd, z: {"sh": sh, "me": me, "d": dd, "z": z}
+    cases = {
+        # his busiest zone: he shoots over the league there and the defense allows 3 points more, 1.5 errors clear
+        "main": [Z(.40, .05, 3, 1.5), Z(.10, .10, 5, 3), Z(.20, -.02, 4, 2), Z(.15, 0, 2, 1), Z(.15, None, 4, 3), Z(0, None, None, None)],
+        # the under: his zone where he is under the league and the defense allows less
+        "under": [Z(.30, -.03, -3, -2), Z(.50, .02, -3, -2), Z(.20, -.01, 1, .5)],
+        # his busiest zone is one the defense locks down, nothing starred
+        "warn": [Z(.60, .02, -3, -2), Z(.40, .01, 1, 1)],
+        # a star off his busiest zone; the gap is big but inside its noise in the other
+        "one": [Z(.50, .02, 1, .5), Z(.30, .01, 2.5, 1.2), Z(.20, .03, 6, .99)],
+        "empty": [Z(0, None, 3, 2), Z(0, None, None, None)],
+        # his busiest zone looks locked down but the gap is inside its noise: no warning
+        "noisy": [Z(.60, .02, -3, -.5), Z(.40, .01, 1, 1)],
+    }
+    (d / "t.js").write_text("""
+const C = require('./core.js'), inp = JSON.parse(require('fs').readFileSync(process.argv[2]));
+const out = {}; for (const k in inp) out[k] = C.courtRead(inp[k], k === 'under' ? 'under' : 'over', 2, 1);
+out.under_as_over = C.courtRead(inp.under, 'over', 2, 1); out.main_as_under = C.courtRead(inp.main, 'under', 2, 1);
+console.log(JSON.stringify(out));
+""")
+    (d / "in.json").write_text(json.dumps(cases))
+    r = json.loads(subprocess.run([NODE, str(d / "t.js"), str(d / "in.json")], capture_output=True, text=True, check=True,
+                                  cwd=d).stdout)
+    m = r["main"]
+    assert m["his"] == [True, False, True, True, True, False]            # 15% of his or more
+    # starred: his spot, he's at or over the league, the gap 2+ and 1+ errors (both inclusive); not a zone he rarely
+    # uses (z1), not one he shoots under the league in (z2), not one with too few of his shots to judge (z4)
+    assert m["star"] == [True, False, False, True, False, False] and m["busiest"] == 0 and m["verdict"] == "main"
+    assert m["softest"] == 1                                              # the defense's biggest gap, his or not
+    u = r["under"]
+    assert u["star"] == [True, False, False] and u["busiest"] == 1 and u["verdict"] == "one"
+    assert r["under_as_over"]["star"] == [False, False, False] and r["main_as_under"]["star"] == [False] * 6
+    assert r["main_as_under"]["verdict"] == "warn"            # his busiest is soft: a warning for the under
+    assert r["warn"]["star"] == [False, False] and r["warn"]["verdict"] == "warn"
+    assert r["one"]["star"] == [False, True, False] and r["one"]["verdict"] == "one" and r["one"]["softest"] == 2
+    assert r["noisy"]["verdict"] == "none" and r["noisy"]["star"] == [False, False]
+    assert r["empty"]["verdict"] == "empty" and r["empty"]["busiest"] is None and r["empty"]["star"] == [False, False]
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_court_matchup_marks_his_spots_and_stars():
+    html = UI.page()
+    line = lambda pre: html[html.index(pre): html.index("\n", html.index(pre))]
+    upto = lambda pre, end: html[html.index(pre): html.index(end, html.index(pre))]
+    src = "\n".join([line("const esc = s =>"), line("const ord = n =>"), upto("const SH_Z = [", "// each player's shots")])
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "t.js").write_text(src + """
+const R = {his: [true, true, false, false, false, true], star: [true, false, false, false, false, false], busiest: 0, softest: 2, verdict: "main"};
+const zs = [0, 1, 2, 3, 4, 5].map(k => ({fill: "#111", t: k + "%", sub: "+" + k, subCls: k === 2 ? "up" : "", hi: R.his[k], star: R.star[k]}));
+const lines = {verb: "shoots most", soft: k => SH_PLACE[k] + " soft", busy: k => SH_PLACE[k] + " busy"};
+console.log(JSON.stringify({svg: zoneMarks(zs), plain: zoneMarks(zs.map(z => ({fill: z.fill, t: z.t, sub: z.sub}))),
+  over: courtBox(R, true, "BOS", "Brown", lines, "No shots"), under: courtBox(Object.assign({}, R, {verdict: "warn"}), false, "BOS", "Brown", lines, "x"),
+  underMain: courtBox(R, false, "BOS", "Brown", lines, "x"),
+  same: courtBox(Object.assign({}, R, {softest: 0}), true, "BOS", "Brown", lines, "x"),
+  empty: courtBox({busiest: null, softest: null, verdict: "empty"}, true, "BOS", "Brown", lines, "No shots for Brown in 2026"),
+  key: courtKey(false, "BOS", "shots", "small")}));
+""")
+    o = json.loads(subprocess.run([NODE, str(d / "t.js")], capture_output=True, text=True, check=True).stdout)
+    # his spots outlined (over the court's lines), one star by its zone's number, the coloured line under a number
+    assert o["svg"].count('class="shhi"') == 3 and o["svg"].index('class="shl"') < o["svg"].index('class="shhi"')
+    assert o["svg"].count('class="shst">★<') == 1 and '<text x="0" y="-17" class="shst">' in o["svg"]
+    assert 'class="shs up">+2<' in o["svg"] and 'class="shs">+1<' in o["svg"]
+    # the other views draw as before: no outlines, no stars
+    assert "shhi" not in o["plain"] and "shst" not in o["plain"] and o["plain"].count('class="shs">') == 6
+    assert '<div class="frd v-g"><b>★ His main spot is soft for BOS</b>' in o["over"]
+    assert "<p><em>BOS gives up the most:</em> mid-range soft</p><p><em>Brown shoots most:</em> the restricted area busy</p>" in o["over"]
+    assert '<div class="frd v-r"><b>⚠ His main spot is soft for BOS</b>' in o["under"]       # the under reads it the other way
+    assert '<div class="frd v-g"><b>★ BOS defends his main spot well</b>' in o["underMain"]
+    assert "shoots most" not in o["same"] and "restricted area soft" in o["same"]   # one line when they're the same zone
+    assert '<div class="frd v-n"><b>No shots for Brown in 2026</b></div>' == o["empty"]
+    assert "BOS gives up less than avg" in o["key"] and "15%+ of his shots" in o["key"] and "below avg there too" in o["key"]
+
+
+def test_zone_cards_open_on_the_matchup_view():
+    html = UI.page()
+    # the shot chart, assists and rebounds open on Matchup; the player and the defense a tap away
+    assert 'shView: "m", shSeason: null, shMode: "shots", astView: "m", rebView: "m"};' in html
+    assert '${[["m", "Matchup"], ["player", last], ["def", p.opp + " D"]].map(([k, l]) => `<button data-shv="${k}" aria-pressed="${view === k}">' in html
+    assert '${[["m", "Matchup"], ["player", esc(lastName(p.player))], ["def", esc(p.opp) + " D"]].map(([k, l]) =>' in html
+    assert 'const zv = MUP[vkey] || "m", def = zv === "def", mu = zv === "m", over = ST.side !== "under";' in html
+    # draw(fresh, view): its second argument is the redraw-the-court-alone flag, so nothing in it may shadow `view`
+    i = html.index("function zoneCard(kind) {"); body = html[i:html.index("\n}\n", i)]
+    assert "const draw = (fresh, view) =>" in body and not re.search(r"(const|let|var)\s+view\b", body)
+    # the shot chart's star: his FG% against the league's on SH_MIN+ shots, the FG% allowed against the league's over
+    # its standard error; the assists' and rebounds': his share against the league's, the allowed a game over a count's
+    assert "const SH_MIN = 15, SH_SOFT = 2;" in html and "const R = courtRead(rd, ST.side, SH_SOFT, 1)" in html
+    assert "z: ok ? (f - l) / Math.sqrt(l * (1 - l) / opp[k][1]) : null" in html and "me: m && m[1] >= SH_MIN && mf !== null && l !== null ? mf - l : null" in html
+    assert "const ZN_SOFT = .15, ZN_Z = 1.5;" in html and "const R = courtRead(rd, ST.side, ZN_SOFT, ZN_Z)" in html
+    assert "z: ok && la ? (t[off + k] - la * t[0]) / Math.sqrt(la * t[0]) : null" in html and "me: tot && lt ? sh - Lk[k] / lt : null" in html
+    # the shading follows the side shown (green: good for it), as the NFL field
+    assert "fill: shFill(z.d === null ? null : over ? z.d : -z.d)" in html and "fill: shFill(z.d === null ? null : (over ? z.d : -z.d) * 50)" in html
+    assert "var COURT_HOT = .15;" in html
+
+
+def test_recent_games_vs_the_five_positions():
+    html = UI.page()
+    # NBA: the five positions (box-score starting slots, nba_vs); the list opens on his own, else the first in his group
+    assert 'let VS_GRP = [["PG", "Point Guards"], ["SG", "Shooting Guards"], ["SF", "Small Forwards"], ["PF", "Power Forwards"], ["C", "Centers"]];' in html
+    assert "MUP = {p: p, grp: vsOwn(p.ctx || {})," in html
+    # its button shows the letters (PF) so the stat's button still fits on a phone; the list has the names
+    assert '${dd("grp", VS_GRP, MUP.grp, true)}${dd("mkt", TAB_ORDER.map(m => [m, NAME[m]]), MUP.mkt)}' in html
+    assert "const dd = (k, opts, cur, code) =>" in html and html.count("const dd = (k, opts, cur) =>") == 2   # NFL, NHL as before
+    assert '$("span", sel.parentNode).textContent = sel.dataset.dd === "grp" ? sel.value : sel.options[sel.selectedIndex].text;' in html
+    assert ("const vsOwn = c => VS_GRP.some(g => g[0] === c.pos) ? c.pos : VS_GRP.some(g => g[0] === c.group) ? c.group\n"
+            "  : ((c.group && VS_GRP.find(g => MU_GROUP(g[0]) === c.group)) || VS_GRP[0])[0];") in html
+    # the NFL and the NHL keep their groups
+    assert 'VS_GRP: [["QB", "QBs"], ["RB", "RBs"], ["WR", "WRs"], ["TE", "TEs"]],' in html
+    assert 'VS_GRP: [["C", "Centers"], ["W", "Wingers"], ["D", "Defensemen"], ["G", "Goalies"]],' in html
+
+
+@pytest.mark.skipif(NODE is None, reason="node not installed")
+def test_vs_own_position():
+    html = UI.page()
+    line = lambda pre: html[html.index(pre): html.index("\n", html.index(pre))]
+    upto = lambda pre, end: html[html.index(pre): html.index(end, html.index(pre))]
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "t.js").write_text("\n".join([line("let MU_GROUP = pos =>"), upto("let VS_GRP = [", "const initialName")]) + """
+const nhl = [["C", "Centers"], ["W", "Wingers"], ["D", "Defensemen"], ["G", "Goalies"]];
+const a = [{pos: "SG", group: "G"}, {pos: "G", group: "G"}, {group: "F"}, {group: "C"}, {}].map(vsOwn);
+VS_GRP = nhl; MU_GROUP = pos => ({C: "C", L: "W", R: "W", D: "D", G: "G"})[pos];
+console.log(JSON.stringify([a, [{pos: "L", group: "W"}, {pos: "D", group: "D"}, {}].map(vsOwn)]));
+""")
+    nba, nhl = json.loads(subprocess.run([NODE, str(d / "t.js")], capture_output=True, text=True, check=True).stdout)
+    assert nba == ["SG", "PG", "SF", "C", "PG"]            # his slot; a bare G or F: the first of his group
+    assert nhl == ["W", "D", "C"]                          # the NHL's groups as before
