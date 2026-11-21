@@ -2469,7 +2469,7 @@ function renderProp(mode) {
     ${live}
     <div class="c2w" id="chw"></div>
     <div class="wrow"><div class="wcap" id="wcap" role="group" aria-label="Games window"><span class="pill2"></span>${wins.map(([k, lab]) => `<button class="wc" data-win="${k}"><i>${lab}</i><b></b></button>`).join("")}</div><button class="cb fb" id="pf" aria-label="All filters">${ICON.menu}</button></div>
-    ${SPORT === "nba" ? `<div class="qrow"><div class="wcap qcap" id="qcap" role="group" aria-label="Quarter"><span class="pill2"></span>${QTRS.map(([q, lab]) => `<button class="wc" data-q="${q}" aria-pressed="${(DT.q || 0) === q}"><i>${lab}</i></button>`).join("")}</div></div>` : ""}
+    ${SPORT === "nba" ? `<div class="qrow"><div class="wcap qcap" id="qcap" role="group" aria-label="Quarter"><span class="pill2"></span>${QTRS.map(([q, lab]) => `<button class="wc" data-q="${q}" aria-label="${q ? ord(q) + " quarter" : "Full game"}" aria-pressed="${(DT.q || 0) === q}"><i>${lab}</i></button>`).join("")}</div></div>` : ""}
     <div class="sr" id="psr" role="status"></div>
     <div class="cf" id="pcf"></div>
     <div class="sec2" id="pgs"></div>

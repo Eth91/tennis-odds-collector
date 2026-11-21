@@ -143,6 +143,7 @@ def test_quarter_filter_on_the_player_page():
     html = UI.page()
     assert 'const QTRS = [[0, "Full"], [1, "1Q"], [2, "2Q"], [3, "3Q"], [4, "4Q"]];' in html
     assert '${SPORT === "nba" ? `<div class="qrow"><div class="wcap qcap" id="qcap" role="group" aria-label="Quarter">' in html
+    assert 'data-q="${q}" aria-label="${q ? ord(q) + " quarter" : "Full game"}"' in html
     assert "fetch(`quarters/${pid}.json?t=${t}`)" in html
     assert 'PX = {p: p, g: g, full: logs, logs: DT.q ? quarterLogs(logs, QD.get(p.pid), DT.q) : logs,' in html
     assert "if (!was && q) { DT.qFrom = DT.line; DT.line = quarterLine(DT.line); }" in html
