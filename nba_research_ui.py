@@ -575,6 +575,12 @@ background:#161616;overflow-x:auto;scrollbar-width:none}
 .wc b.up{color:var(--grn)} .wc b.dn{color:var(--red)}
 #mtl button[aria-pressed="true"],.wc[aria-pressed="true"],.tbc button[aria-pressed="true"]{background:none}
 .wc:disabled{opacity:.35}
+.qrow{display:flex;margin:9.6px 15.3px 0}
+.qcap{height:35px;padding:0 3px;border-radius:17.5px}
+.qcap .wc{height:28px;border-radius:14px}
+.qcap .wc i{font-size:12.4px;font-weight:600;color:#9a9a9a;transition:color .2s}
+.qcap .wc[aria-pressed="true"] i{color:#fff}
+.qnt{font-size:13px;line-height:1.4;color:var(--l2)} .qnt b{color:#fff;font-weight:600}
 .fb{width:42.8px;height:42.8px}
 .fb svg{width:19px;height:15px}
 .cf{margin:18px 15.3px 0}
@@ -790,6 +796,21 @@ function windowed(logs, win, season, opp) {
   if (win === "last") return logs.filter(function (l) { return seasonOf(l.date) !== season; });
   return logs.slice();
 }
+// a quarter's view of his game logs (docs/quarters/{pid}.json, nba_quarters; q = 1-4): each game the file has, with its
+// minutes and box score swapped for that quarter's; the stats no quarter has (usage, the tracking stats) blank. A game the
+// file lacks (its play-by-play off the box score, or not in yet) is left out
+function quarterLogs(logs, doc, q) {
+  var g = (doc && doc.games) || {}, cols = (doc && doc.cols) || [];
+  return logs.filter(function (l) { return !!g[l.gid]; }).map(function (l) {
+    var o = {}, r = g[l.gid][q - 1];
+    for (var k in l) o[k] = l[k];
+    cols.forEach(function (c, i) { o[c] = r[i]; });
+    o.usg = null; o.pot_ast = null; o.reb_ch = null; o.q = q;
+    return o;
+  });
+}
+// a quarter's starting line: about a quarter of the game's, on the half point (24.5 -> 6.5, 8.5 -> 2.5, 2.5 -> 0.5)
+function quarterLine(line) { return Math.max(0.5, Math.floor(line / 4) + 0.5); }
 // player-page filters: home / starter = true, false or null (any); result = "W" / "L"; rest = "b2b" / "1" / "2+";
 // oppSets = [{season: [teams]}] (the opponent must be in each);
 // ranges = {min|fga|fg3a|fta|margin: [lo, hi]} inclusive (a game missing that stat is out); without = [{played, since, team}]
@@ -1073,7 +1094,7 @@ function courtRead(zs, side, min, zmin) {
   return {his: his, star: star, busiest: busiest, softest: softest, verdict: verdict};
 }
 if (typeof module !== "undefined") module.exports = {wowySplit: wowySplit, flagGrade: flagGrade, statValue: statValue, hitSummary: hitSummary, seasonOf: seasonOf, courtRead: courtRead,
-  rowsToLogs: rowsToLogs, windowed: windowed, filterLogs: filterLogs, splitRows: splitRows, sideRate: sideRate,
+  rowsToLogs: rowsToLogs, windowed: windowed, filterLogs: filterLogs, quarterLogs: quarterLogs, quarterLine: quarterLine, splitRows: splitRows, sideRate: sideRate,
   american: american, decimalOf: decimalOf, bestOver: bestOver, bestPrice: bestPrice, propRates: propRates, cupRate: cupRate,
   noVig: noVig, fairAt: fairAt, valueAt: valueAt, zscore: zscore, pmfGe: pmfGe, projProbs: projProbs, blendP: blendP,
   filterProps: filterProps, sortProps: sortProps, liveStage: liveStage, liveStatus: liveStatus, slateDay: slateDay, comboStats: comboStats};
@@ -1098,7 +1119,7 @@ const TOUCH = matchMedia("(pointer: coarse)").matches;
 const ST = {date: null, gid: "all", market: "points", side: "over", q: "", sort: "hit10", dir: "desc", team: "all",
             book: "all", lmin: "", lmax: "", omin: "", omax: "", watch: "", view: "props", iv: "", rs: "", sp: "", wt: "", wo: "", ws: ""};
 const DT = {line: null, win: "l10", home: null, starter: null, blow: null, result: null, rest: null, cup: null, cupWin: null, ranges: {},
-            without: {}, with: {}, dvp: false, def: false, open: {}, fresh: null, ovs: []};
+            without: {}, with: {}, dvp: false, def: false, open: {}, fresh: null, ovs: [], q: null, qFrom: null};
 let RANGES = [["min", "Minutes", "Minutes"], ["fga", "Field goal attempts", "FGA"], ["fg3a", "3-point attempts", "3PTA"],
                 ["fta", "Free throw attempts", "FTA"], ["usg", "Usage %", "Usage%"], ["pot_ast", "Potential assists", "Potential Assists"],
                 ["reb_ch", "Rebound chances", "Rebound Chances"], ["margin", "Team margin", "Margin"]];
@@ -2062,7 +2083,8 @@ function openProp(id, push) {
   if (fresh) Object.assign(DT, {line: p.v ? vLine(p) : p.main !== null ? p.main : allLines(p)[0], fresh: null}, same ? {} : {
                                  win: windowed(logsOf(p), "season", D.season).length ? "season" : "l10", home: null, starter: null, blow: null,
                                  result: null, rest: null, cup: null, cupWin: null, ranges: {}, without: {}, with: {}, dvp: false, def: false,
-                                 open: {}, ovs: []});
+                                 open: {}, ovs: [], q: null, qFrom: null});
+  if (fresh && same && DT.q) { DT.qFrom = DT.line; DT.line = quarterLine(DT.line); }   // the quarter stays: its line too
   if (push !== false) history.pushState({p: id, d: navDepth() + 1}, "", hashState());
   const pg = $("#pg");
   pg.hidden = false;                        // (off-screen until it slides in; it must lay out for the pills to measure)
@@ -2447,6 +2469,7 @@ function renderProp(mode) {
     ${live}
     <div class="c2w" id="chw"></div>
     <div class="wrow"><div class="wcap" id="wcap" role="group" aria-label="Games window"><span class="pill2"></span>${wins.map(([k, lab]) => `<button class="wc" data-win="${k}"><i>${lab}</i><b></b></button>`).join("")}</div><button class="cb fb" id="pf" aria-label="All filters">${ICON.menu}</button></div>
+    ${SPORT === "nba" ? `<div class="qrow"><div class="wcap qcap" id="qcap" role="group" aria-label="Quarter"><span class="pill2"></span>${QTRS.map(([q, lab]) => `<button class="wc" data-q="${q}" aria-pressed="${(DT.q || 0) === q}"><i>${lab}</i></button>`).join("")}</div></div>` : ""}
     <div class="sr" id="psr" role="status"></div>
     <div class="cf" id="pcf"></div>
     <div class="sec2" id="pgs"></div>
@@ -2462,7 +2485,8 @@ function renderProp(mode) {
     ${flagsOf(p.id).length ? `<div class="sec2"><h3>Flags</h3><div class="box0"><span class="tg tf" style="margin:0 0 4px">SHADOW · NOT A BET</span>${flagsOf(p.id).map(f =>
       `<div class="kv shr"><span>🔵 UNDER<small>${esc(flagInfo(f))}${f.at ? " · " + esc(flagWhen(f.at)) : ""}</small></span><b>Under ${f.line} · ${f.price ? american(f.price) : "–"}</b></div>`).join("")}</div></div>` : ""}`;
   clearTimeout(PX && PX.lazy);
-  PX = {p: p, g: g, logs: logs, c: c, without: without, wins: wins, stat: stat, statDone: false};
+  if (DT.q && !QD.get(p.pid)) { DT.line = DT.qFrom === null ? DT.line : DT.qFrom; Object.assign(DT, {q: null, qFrom: null}); }
+  PX = {p: p, g: g, full: logs, logs: DT.q ? quarterLogs(logs, QD.get(p.pid), DT.q) : logs, c: c, without: without, wins: wins, stat: stat, statDone: false};
   $("#pg .bk").onclick = () => history.back();
   const ph = $(".ph", pg); pg.onscroll = () => ph.classList.toggle("tt", pg.scrollTop > 150);
   ph.onclick = e => { if (!e.target.closest("button")) pg.scrollTo({top: 0, behavior: REDUCED ? "auto" : "smooth"}); };
@@ -2476,11 +2500,47 @@ function renderProp(mode) {
   };
   $$("[data-mk]", pg).forEach(b => b.onclick = () => { const id = (p.v ? "v" : p.gid) + "|" + p.pid + "|" + b.dataset.mk; if (id !== p.id) { openProp(id, false); history.replaceState({p: id}, "", hashState()); } });
   $$("[data-win]", pg).forEach(b => b.onclick = () => { if (DT.win === b.dataset.win || b.disabled) return; DT.win = b.dataset.win; updateProp(); });
-  $("#pf", pg).onclick = () => playerFilters(p, logs, without);
+  $("#pf", pg).onclick = () => playerFilters(p, PX.logs, without);
+  $$("[data-q]", pg).forEach(b => b.onclick = () => quarterTo(+b.dataset.q || null));
+  const qc = $("#qcap", pg); if (qc) qc.onpointerdown = () => { quarterLoad(p.pid); };
   const cw = $("#chw");
   cw.onclick = e => { const gb = e.target.closest("g.br"); if (gb) boxSheet(gb.dataset.gid, gb.dataset.tm, p); };
   cw.onpointerdown = e => { const gb = e.target.closest("g.br"); if (gb) boxGet(gb.dataset.gid).catch(() => {}); };
   updateProp(mode || true);
+}
+// ── the quarter filter (Full · 1Q · 2Q · 3Q · 4Q): the page's logs become that quarter's (quarterLogs, docs/quarters,
+// nba_quarters): the chart, the hit rates, the cards and the game log. The line starts at about a quarter of the game's
+// (quarterLine) and goes back when Full is picked; the range filters are cleared both ways (their units change). The
+// books, alt lines and the projection are the full game's, so a quarter hides them ──
+const QTRS = [[0, "Full"], [1, "1Q"], [2, "2Q"], [3, "3Q"], [4, "4Q"]];
+const QD = new Map(), QP = new Map();                     // pid -> his quarter file; the fetches, every 10 minutes
+let Q_N = 0;
+function quarterLoad(pid) {
+  const t = Math.floor(Date.now() / 600000), k = pid + "|" + t;
+  if (!QP.has(k)) QP.set(k, fetch(`quarters/${pid}.json?t=${t}`).then(r => r.ok ? r.json() : null).catch(() => null)
+    .then(d => { if (d && d.games) QD.set(pid, d); return QD.get(pid) || null; }));
+  return QP.get(k);
+}
+function quarterTo(q) {
+  if (!PX || (DT.q || null) === q) return;
+  const p = PX.p, tok = ++Q_N;
+  if (q && !QD.get(p.pid)) {
+    busy(true);
+    quarterLoad(p.pid).then(d => {
+      busy(false);
+      if (tok !== Q_N || !PX || PX.p !== p) return;
+      if (d && quarterLogs(PX.full, d, q).length) quarterTo(q);
+      else toast("No quarter stats for him yet");
+    });
+    return;
+  }
+  const was = DT.q;
+  if (!was && q) { DT.qFrom = DT.line; DT.line = quarterLine(DT.line); }
+  if (was && !q) { if (DT.qFrom !== null) DT.line = DT.qFrom; DT.qFrom = null; }
+  if (!was !== !q) Object.assign(DT, {ranges: {}, open: {}, ovs: []});
+  DT.q = q;
+  PX.logs = q ? quarterLogs(PX.full, QD.get(p.pid), q) : PX.full;
+  updateProp();
 }
 // teammates on his team now, most minutes first: [{key, pid, name, since, played, mpg, gp, team}] (D.mates,
 // nba_research.team_mates), then any teammate out tonight the roster list lacks (D.absences)
@@ -2542,7 +2602,7 @@ function updateProp(mode) {
   const ov = DT.ovs.slice().reverse().find(ovOn) || Object.keys(OVL).find(ovOn) || null;
   // cells
   if (!rest) $("#pcells").innerHTML = `<div class="cells">
-      <div><i>${esc(winLab)} AVG</i><b>${s.avg === null ? "–" : tri(s.avg > line) + r1(s.avg)}</b></div>
+      <div><i>${esc(winLab)}${DT.q ? " " + DT.q + "Q" : ""} AVG</i><b>${s.avg === null ? "–" : tri(s.avg > line) + r1(s.avg)}</b></div>
       <button id="lnb"><i>LINE</i><b>${line}<span class="cv">›</span></b></button>
       <div><i>PROP</i><b>${esc(NAME[p.market])}</b></div>
       <div><i>HIT RATE</i><b class="${hr.c === "sm" ? "sm" : ""}">${hr.c === "up" ? tri(true) : hr.c === "dn" ? tri(false) : ""}${hr.t}</b></div>
@@ -2562,7 +2622,9 @@ function updateProp(mode) {
     v.textContent = h.t; v.className = h.c;
   });
   slide($("#wcap"), first);
-  $("#psr").textContent = `${side === "under" ? "Under" : "Over"} ${line}: ${rate === null ? "no games" : Math.round(rate * 100) + "% of " + s.n + (s.n === 1 ? " game" : " games")}.${ov ? " White boxes = " + OVL[ov] + "." : ""}`;
+  $$("[data-q]", pg).forEach(b => b.setAttribute("aria-pressed", (DT.q || 0) === +b.dataset.q));
+  slide($("#qcap"), first);
+  $("#psr").textContent = `${DT.q ? ord(DT.q) + " quarter · " : ""}${side === "under" ? "Under" : "Over"} ${line}: ${rate === null ? "no games" : Math.round(rate * 100) + "% of " + s.n + (s.n === 1 ? " game" : " games")}.${ov ? " White boxes = " + OVL[ov] + "." : ""}`;
   }
   // chart filter chips, one scrolling row: NBA Cup, the adjustable ranges, Starter, Blowouts, DvP, Def Rank, then Home … B2B;
   // the teammates on a row of their own just below: the With / Without button, then tonight's news and the ones set
@@ -2608,6 +2670,7 @@ function updateProp(mode) {
   if (opening) { PX.lazy = setTimeout(() => idle(() => { if (PX && PX.p === p) updateProp("rest"); }), 500); bindLive(p, logs, without); return; }
   if (!PX.statDone) { $("#pstat").innerHTML = PX.stat; PX.statDone = true; $$("[data-rel]", pg).forEach(b => b.onclick = () => openProp(b.dataset.rel)); }
   if (p.v) { $("#pproj").innerHTML = ""; $("#pbk").innerHTML = ""; }      // a player page: no line posted, no books
+  else if (DT.q) { $("#pproj").innerHTML = ""; $("#pbk").innerHTML = `<div class="sec2"><div class="box0 qnt">The books, alt lines and projection are for the full game. Tap <b>Full</b> to see them.</div></div>`; }
   else {
   // books
   const fair = fairAt(p, line);
@@ -2632,7 +2695,7 @@ function updateProp(mode) {
     return `<tr><td>${esc(l.date.slice(5).replace("-", "/"))}</td><td>${l.home ? "" : "@"}${esc(l.opp)}${l.team !== p.team ? " <span style='color:var(--l3)'>(" + esc(l.team) + ")</span>" : ""}</td><td class="r">${lc[0][1](l) ?? "–"}</td><td class="r">${lc[1][1](l) ?? "–"}</td><td class="r"><b>${v === null ? "–" : v}</b></td><td class="r">${r}</td></tr>`;
   }).join("");
   const lg = $("#plog"), wasOpen = !!$("details", lg) && $("details", lg).open;
-  lg.innerHTML = `<details class="log"${wasOpen ? " open" : ""}><summary>Game Log · ${win.length}</summary><table><thead><tr><th>Date</th><th>Opp</th><th class="r">${logCols(p)[0][0]}</th><th class="r">${logCols(p)[1][0]}</th><th class="r">${esc(short(p.market))}</th><th class="r">${line}</th></tr></thead><tbody>${logRows || '<tr><td colspan="6">No games.</td></tr>'}</tbody></table></details>`;
+  lg.innerHTML = `<details class="log"${wasOpen ? " open" : ""}><summary>Game Log${DT.q ? " · " + DT.q + "Q" : ""} · ${win.length}</summary><table><thead><tr><th>Date</th><th>Opp</th><th class="r">${logCols(p)[0][0]}</th><th class="r">${logCols(p)[1][0]}</th><th class="r">${esc(short(p.market))}</th><th class="r">${line}</th></tr></thead><tbody>${logRows || '<tr><td colspan="6">No games.</td></tr>'}</tbody></table></details>`;
   bindLive(p, logs, without);
 }
 // game script: tonight's spread (FanDuel) and how he does in lopsided games: a final margin of 15+ against 10 or less

@@ -106,3 +106,51 @@ def test_write_only_rewrites_files_that_changed():
     assert Q.write(d, docs) == 0
     docs[2]["games"]["g9"] = [[3.0], [0.0], [0.0], [0.0]]
     assert Q.write(d, docs) == 1 and not list(d.glob(".*.tmp"))
+
+
+NODE = __import__("shutil").which("node")
+
+
+@__import__("pytest").mark.skipif(NODE is None, reason="node not installed")
+def test_quarter_logs_swap_in_a_quarter():
+    import subprocess
+    import nba_research_ui as UI
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "core.js").write_text(UI.JS_CORE)
+    (d / "t.js").write_text("""const C = require('./core.js');
+const logs = [{date: '2026-11-01', gid: 'a', starter: 1, min: 34.2, pts: 30, reb: 8, ast: 5, fg3m: 4, fga: 20, fg3a: 9, fta: 6, margin: 7, usg: 31, pot_ast: 9, reb_ch: 14},
+              {date: '2026-11-03', gid: 'b', starter: 1, min: 30.0, pts: 20, reb: 4, ast: 2, fg3m: 1, fga: 15, fg3a: 4, fta: 2, margin: -3, usg: 25, pot_ast: 4, reb_ch: 8},
+              {date: '2026-11-05', gid: 'c', starter: 0, min: 20.0, pts: 9, reb: 2, ast: 1, fg3m: 0, fga: 8, fg3a: 1, fta: 1, margin: 20, usg: 18, pot_ast: 2, reb_ch: 4}];
+const doc = {cols: ['min', 'pts', 'reb', 'ast', 'fg3m', 'fga', 'fg3a', 'fta'],
+             games: {a: [[9.5, 10, 2, 1, 2, 6, 3, 1], [7.0, 5, 2, 2, 0, 4, 2, 2], [10.2, 11, 3, 1, 2, 6, 3, 3], [7.5, 4, 1, 1, 0, 4, 1, 0]],
+                     c: [[0.0, 0, 0, 0, 0, 0, 0, 0], [8.1, 5, 1, 0, 0, 4, 1, 1], [0.0, 0, 0, 0, 0, 0, 0, 0], [11.9, 4, 1, 1, 0, 4, 0, 0]]}};
+const q1 = C.quarterLogs(logs, doc, 1), q4 = C.quarterLogs(logs, doc, 4);
+console.log(JSON.stringify({q1: q1, q4: q4.map(l => [l.gid, l.min, l.pts]), pts1: q1.map(l => C.statValue(l, 'pra')), orig: logs[0].pts,
+  lines: [24.5, 8.5, 2.5, 1.5, 35.5, 0.5].map(C.quarterLine), none: C.quarterLogs(logs, null, 1).length}));""")
+    out = json.loads(subprocess.run([NODE, str(d / "t.js")], capture_output=True, text=True, check=True, cwd=d).stdout)
+    a = out["q1"][0]
+    assert [l["gid"] for l in out["q1"]] == ["a", "c"]                            # b has no quarter file row: left out
+    assert (a["min"], a["pts"], a["reb"], a["ast"], a["fg3m"], a["fga"], a["fg3a"], a["fta"]) == (9.5, 10, 2, 1, 2, 6, 3, 1)
+    assert (a["usg"], a["pot_ast"], a["reb_ch"], a["q"]) == (None, None, None, 1)
+    assert (a["date"], a["starter"], a["margin"]) == ("2026-11-01", 1, 7)        # the game's own facts kept
+    assert out["q1"][1]["min"] == 0.0 and out["q1"][1]["pts"] == 0                # sat the quarter: zeros, still a game
+    assert out["q4"] == [["a", 7.5, 4], ["c", 11.9, 4]] and out["pts1"] == [13, 0] and out["orig"] == 30
+    assert out["lines"] == [6.5, 2.5, 0.5, 0.5, 8.5, 0.5] and out["none"] == 0
+
+
+def test_quarter_filter_on_the_player_page():
+    import nba_research_ui as UI
+    html = UI.page()
+    assert 'const QTRS = [[0, "Full"], [1, "1Q"], [2, "2Q"], [3, "3Q"], [4, "4Q"]];' in html
+    assert '${SPORT === "nba" ? `<div class="qrow"><div class="wcap qcap" id="qcap" role="group" aria-label="Quarter">' in html
+    assert "fetch(`quarters/${pid}.json?t=${t}`)" in html
+    assert 'PX = {p: p, g: g, full: logs, logs: DT.q ? quarterLogs(logs, QD.get(p.pid), DT.q) : logs,' in html
+    assert "if (!was && q) { DT.qFrom = DT.line; DT.line = quarterLine(DT.line); }" in html
+    assert "if (was && !q) { if (DT.qFrom !== null) DT.line = DT.qFrom; DT.qFrom = null; }" in html
+    assert "if (!was !== !q) Object.assign(DT, {ranges: {}, open: {}, ovs: []});" in html
+    assert "PX.logs = q ? quarterLogs(PX.full, QD.get(p.pid), q) : PX.full;" in html
+    assert "if (fresh && same && DT.q) { DT.qFrom = DT.line; DT.line = quarterLine(DT.line); }" in html
+    assert "open: {}, ovs: [], q: null, qFrom: null});" in html                  # a new player starts on the full game
+    assert "else if (DT.q) { $(\"#pproj\").innerHTML = \"\"; $(\"#pbk\").innerHTML = " in html
+    assert '$("#pf", pg).onclick = () => playerFilters(p, PX.logs, without);' in html
+    assert ".qcap .wc[aria-pressed=\"true\"] i{color:#fff}" in html
