@@ -89,10 +89,11 @@ def period_fives(actions, team_of, starters):
     return out
 
 
-def parse(actions, team_of, starters):
+def parse(actions, team_of, starters, periods=None):
     """A game's play-by-play -> {(team, five pids sorted): [seconds, team points, opponent points, {pid: [stat x STATS]}]}
     and {pid: seconds on the court}. team_of: {pid: team} of everyone in the box score; starters: the box score's
-    starters. Raises Unreadable."""
+    starters. periods: a dict to fill with each player's seconds and stats by period, {(pid, period): [seconds,
+    stat x STATS]} (nba_quarters). Raises Unreadable."""
     acts = sorted((a for a in actions if a.get("period") and a.get("actionType") != "game"),
                   key=lambda a: (a["period"], clock(a["period"], a.get("clock"))[0], a.get("orderNumber") or 0))
     if not any(a.get("actionType") == "period" and a.get("subType") == "start" for a in acts):
@@ -113,12 +114,16 @@ def parse(actions, team_of, starters):
             unit(t)[0] += to - last
             for p in on[t]:
                 secs[p] = secs.get(p, 0.0) + to - last
+                if periods is not None:
+                    periods.setdefault((p, cur), [0.0] + [0] * len(STATS))[0] += to - last
 
     def add(pid, k, n=1):
         t = team_of.get(pid)
         if t:
             u = unit(t)
             u[3].setdefault(pid, [0] * len(STATS))[S[k]] += n
+            if periods is not None:
+                periods.setdefault((pid, cur), [0.0] + [0] * len(STATS))[1 + S[k]] += n
 
     for a in acts:
         per = a["period"]
